@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.state
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.gate.FakeLinkGate
@@ -28,8 +29,8 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
-import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
+import com.stripe.android.paymentsheet.CardFundingFilteringPrivatePreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
@@ -125,7 +126,7 @@ class DefaultAnalyticsMetadataFactoryTest {
         )
         val resultMap = createAnalyticsMetadata(
             initializationMode = InitializationMode.DeferredIntent(intentConfiguration),
-            integrationMetadata = IntegrationMetadata.DeferredIntentWithPaymentMethod(intentConfiguration),
+            integrationMetadata = IntegrationMetadata.DeferredIntent.WithPaymentMethod(intentConfiguration),
             elementsSession = createElementsSession(stripeIntent = intent)
         )
 
@@ -151,7 +152,7 @@ class DefaultAnalyticsMetadataFactoryTest {
         )
         val resultMap = createAnalyticsMetadata(
             initializationMode = InitializationMode.DeferredIntent(intentConfiguration),
-            integrationMetadata = IntegrationMetadata.DeferredIntentWithConfirmationToken(intentConfiguration),
+            integrationMetadata = IntegrationMetadata.DeferredIntent.WithConfirmationToken(intentConfiguration),
             elementsSession = createElementsSession(stripeIntent = intent)
         )
 
@@ -186,7 +187,7 @@ class DefaultAnalyticsMetadataFactoryTest {
         )
         val resultMap = createAnalyticsMetadata(
             initializationMode = InitializationMode.DeferredIntent(intentConfiguration),
-            integrationMetadata = IntegrationMetadata.DeferredIntentWithSharedPaymentToken(intentConfiguration),
+            integrationMetadata = IntegrationMetadata.DeferredIntent.WithSharedPaymentToken(intentConfiguration),
             elementsSession = createElementsSession(stripeIntent = intent)
         )
 
@@ -499,7 +500,6 @@ class DefaultAnalyticsMetadataFactoryTest {
         assertThat(mpeConfig?.get("external_payment_methods")).isEqualTo("external_pm1,external_pm2")
     }
 
-    @OptIn(ExperimentalCustomPaymentMethodsApi::class)
     @Test
     fun `create returns custom payment methods`() = runScenario {
         val customPaymentMethod = ElementsSession.CustomPaymentMethod.Available(
@@ -559,6 +559,37 @@ class DefaultAnalyticsMetadataFactoryTest {
         assertThat(resultMap).containsKey("mpe_config")
         val mpeConfig = resultMap["mpe_config"] as? Map<*, *>
         assertThat(mpeConfig?.get("preferred_networks")).isEqualTo("cartes_bancaires,visa")
+    }
+
+    @Test
+    fun `create returns false for card_funding_acceptance when using default all types`() = cardFundingAcceptanceTest(
+        expectedAnswer = false
+    )
+
+    @Test
+    fun `create returns true for card_funding_acceptance when customized`() = cardFundingAcceptanceTest(
+        cardFundingTypes = listOf(PaymentSheet.CardFundingType.Debit, PaymentSheet.CardFundingType.Credit),
+        expectedAnswer = true
+    )
+
+    @OptIn(CardFundingFilteringPrivatePreview::class)
+    private fun cardFundingAcceptanceTest(
+        cardFundingTypes: List<PaymentSheet.CardFundingType> = ConfigurationDefaults.allowedCardFundingTypes,
+        expectedAnswer: Boolean
+    ) = runScenario {
+        val configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Test Merchant")
+            .allowedCardFundingTypes(cardFundingTypes)
+            .build()
+        val resultMap = createAnalyticsMetadata(
+            configuration = PaymentElementLoader.Configuration.PaymentSheet(configuration = configuration)
+        )
+
+        assertThat(getMpeConfigValue(resultMap, "card_funding_acceptance")).isEqualTo(expectedAnswer)
+    }
+
+    private fun getMpeConfigValue(resultMap: Map<String, Any?>, key: String): Any? {
+        val mpeConfig = resultMap["mpe_config"] as? Map<*, *>
+        return mpeConfig?.get(key)
     }
 
     @Test

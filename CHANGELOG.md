@@ -2,6 +2,22 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### EmbeddedPaymentElement
+* [FIXED] Fixed an issue where `successBackground` and `onSuccessBackground` appearance customizations were not applied in EmbeddedPaymentElement.
+
+### Connect
+* [Changed] Added `EmbeddedErrorType` enum for type-safe error handling in Connect embedded components, falling back to `api_error` if the error type is `null`.
+
+## 22.6.1 - 2026-01-20
+
+### Payments
+* [FIXED][12232](https://github.com/stripe/stripe-android/pull/12232) Fixed an issue where Satispay was missing `mandate_data` when used with `setup_future_usage`.
+
+## 22.6.0 - 2026-01-12
+
+### PaymentSheet
+* [Added] Custom Payment Methods is now generally available, learn more by visiting the [docs](https://docs.stripe.com/payments/mobile/custom-payment-methods).
+
 ## 22.5.0 - 2025-12-15
 
 ### Payments

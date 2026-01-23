@@ -24,7 +24,7 @@ interface SectionFieldElement {
     val mandateText: ResolvableString?
 
     fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>>
-    fun sectionFieldErrorController(): SectionFieldErrorController
+    fun sectionFieldErrorController(): SectionFieldValidationController
     fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>)
     fun getTextFieldIdentifiers(): StateFlow<List<IdentifierSpec>>
     fun onValidationStateChanged(isValidating: Boolean) {}

@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
@@ -94,6 +95,8 @@ internal interface WalletButtonsInteractor {
             val billingAddressParameters: GooglePayJsonFactory.BillingAddressParameters,
             val allowCreditCards: Boolean,
             val cardBrandFilter: CardBrandFilter,
+            val cardFundingFilter: CardFundingFilter,
+            val additionalEnabledNetworks: List<String>
         ) : WalletButton {
             override val walletType = WalletType.GooglePay
 
@@ -102,11 +105,15 @@ internal interface WalletButtonsInteractor {
                 billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
                 allowCreditCards: Boolean,
                 cardBrandFilter: CardBrandFilter,
+                cardFundingFilter: CardFundingFilter,
+                additionalEnabledNetworks: List<String>
             ) : this(
                 googlePayButtonType = buttonType.asGooglePayButtonType,
                 billingAddressParameters = billingDetailsCollectionConfiguration.toBillingAddressParameters(),
                 allowCreditCards = allowCreditCards,
                 cardBrandFilter = cardBrandFilter,
+                cardFundingFilter = cardFundingFilter,
+                additionalEnabledNetworks = additionalEnabledNetworks
             )
 
             override fun createSelection(): PaymentSelection {
@@ -128,6 +135,7 @@ internal interface WalletButtonsInteractor {
             val button: WalletButton,
             val clickHandler: WalletButtonsViewClickHandler,
         ) : ViewAction
+
         data object OnShown : ViewAction
         data object OnHidden : ViewAction
         data object OnResendCode : ViewAction
@@ -171,8 +179,10 @@ internal class DefaultWalletButtonsInteractor constructor(
                         cardBrandFilter = PaymentSheetCardBrandFilter(
                             cardBrandAcceptance = configuration.cardBrandAcceptance,
                         ),
+                        cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
                         billingDetailsCollectionConfiguration = configuration
                             .billingDetailsCollectionConfiguration,
+                        additionalEnabledNetworks = configuration.googlePay?.additionalEnabledNetworks.orEmpty()
                     ).takeIf {
                         walletsAllowedByMerchant.contains(WalletType.GooglePay)
                     }
@@ -313,6 +323,7 @@ internal class DefaultWalletButtonsInteractor constructor(
         val confirmationOption = selection.toConfirmationOption(
             configuration = arguments.configuration,
             linkConfiguration = arguments.paymentMethodMetadata.linkState?.configuration,
+            cardFundingFilter = arguments.paymentMethodMetadata.cardFundingFilter,
         ) ?: return null
 
         return ConfirmationHandler.Args(

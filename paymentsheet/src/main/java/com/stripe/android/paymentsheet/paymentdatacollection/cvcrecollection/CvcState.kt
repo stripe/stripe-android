@@ -15,6 +15,7 @@ internal data class CvcState(
 
     val isValid: Boolean = cvcTextFieldConfig.determineState(
         brand = cardBrand,
+        accountRanges = emptyList(),
         number = cvc,
         numberAllowedDigits = cardBrand.maxCvcLength
     ).isValid()

@@ -14,7 +14,7 @@ class CheckboxFieldController constructor(
     val labelResource: LabelResource? = null,
     val debugTag: String = DEFAULT_CHECKBOX_TEST_TAG,
     initialValue: Boolean = false,
-) : SectionFieldErrorController, SectionFieldComposable {
+) : SectionFieldValidationController, SectionFieldComposable {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class LabelResource(
         @StringRes val labelId: Int,
@@ -28,9 +28,9 @@ class CheckboxFieldController constructor(
     val isChecked: StateFlow<Boolean>
         get() = _isChecked
 
-    override val error: StateFlow<FieldError?> = _isChecked.mapAsStateFlow { value ->
+    override val validationMessage: StateFlow<FieldValidationMessage?> = _isChecked.mapAsStateFlow { value ->
         when {
-            !value && hasBeenEdited -> FieldError(errorMessage = R.string.stripe_field_required)
+            !value && hasBeenEdited -> FieldValidationMessage.Error(message = R.string.stripe_field_required)
             else -> null
         }
     }

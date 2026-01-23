@@ -110,6 +110,18 @@
   <string name="stripe_card_declined">Η κάρτα σας απορρίφθηκε</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="stripe_card_ending_in">%1$s λήγει σε %2$s</string>
+  <!-- Warning shown when only credit cards are accepted -->
+  <string name="stripe_card_funding_only_credit">Γίνονται αποδεκτές μόνο πιστωτικές κάρτες</string>
+  <!-- Warning shown when only credit and prepaid cards are accepted -->
+  <string name="stripe_card_funding_only_credit_prepaid">Γίνονται αποδεκτές μόνο πιστωτικές και προπληρωμένες κάρτες</string>
+  <!-- Warning shown when only debit cards are accepted -->
+  <string name="stripe_card_funding_only_debit">Γίνονται αποδεκτές μόνο χρεωστικές κάρτες</string>
+  <!-- Warning shown when only debit and credit cards are accepted -->
+  <string name="stripe_card_funding_only_debit_credit">Γίνονται αποδεκτές μόνο χρεωστικές και πιστωτικές κάρτες</string>
+  <!-- Warning shown when only debit and prepaid cards are accepted -->
+  <string name="stripe_card_funding_only_debit_prepaid">Γίνονται αποδεκτές μόνο χρεωστικές και προπληρωμένες κάρτες</string>
+  <!-- Warning shown when only prepaid cards are accepted -->
+  <string name="stripe_card_funding_only_prepaid">Γίνονται αποδεκτές μόνο οι προπληρωμένες κάρτες</string>
   <!-- Concise details of a saved card. &apos;{card brand} ···· {last 4}&apos; e.g. &apos;VISA ···· 4242&apos; -->
   <string name="stripe_card_plus_last_4">%1$s ···· %2$s</string>
   <!-- Concise details of a saved card. &apos;{card brand} ····{last 4}&apos; e.g. &apos;VISA ····4242&apos; -->

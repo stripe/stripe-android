@@ -472,6 +472,7 @@ internal class PaymentOptionsActivityTest {
                 linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
                 linkPaymentLauncher = mock(),
                 tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
+                mode = EventReporter.Mode.Complete,
             )
         }
 

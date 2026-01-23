@@ -183,7 +183,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal var externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null
             private set
 
-        @OptIn(ExperimentalCustomPaymentMethodsApi::class)
         internal var confirmCustomPaymentMethodCallback: ConfirmCustomPaymentMethodCallback? = null
             private set
 
@@ -207,7 +206,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
         /**
          * Called when a user confirms payment for a custom payment method.
          */
-        @ExperimentalCustomPaymentMethodsApi
         fun confirmCustomPaymentMethodCallback(callback: ConfirmCustomPaymentMethodCallback) = apply {
             this.confirmCustomPaymentMethodCallback = callback
         }
@@ -497,7 +495,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
              *
              * If set, Embedded Payment Element will display the defined list of custom payment methods in the UI.
              */
-            @ExperimentalCustomPaymentMethodsApi
             fun customPaymentMethods(
                 customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
             ) = apply {

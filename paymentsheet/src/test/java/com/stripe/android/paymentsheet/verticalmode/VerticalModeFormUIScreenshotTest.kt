@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -381,7 +383,9 @@ internal class VerticalModeFormUIScreenshotTest {
             dividerTextResource = R.string.stripe_paymentsheet_or_pay_with_card,
             onGooglePayPressed = { throw AssertionError("Not expected.") },
             onLinkPressed = { throw AssertionError("Not expected.") },
-            walletsAllowedInHeader = WalletType.entries
+            walletsAllowedInHeader = WalletType.entries,
+            cardFundingFilter = DefaultCardFundingFilter,
+            cardBrandFilter = DefaultCardBrandFilter,
         )
 
         paparazziRule.snapshot {

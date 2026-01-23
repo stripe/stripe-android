@@ -15,7 +15,6 @@ import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -39,7 +38,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
-@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 @RunWith(RobolectricTestRunner::class)
 internal class CustomPaymentMethodConfirmationActivityTest {
     private val application = ApplicationProvider.getApplicationContext<Application>()

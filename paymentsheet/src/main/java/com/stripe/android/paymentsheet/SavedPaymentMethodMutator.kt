@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
@@ -69,12 +68,6 @@ internal class SavedPaymentMethodMutator(
         }
     }
 
-    val providePaymentMethodName: (code: String?) -> ResolvableString = { code ->
-        code?.let {
-            paymentMethodMetadataFlow.value?.supportedPaymentMethodForCode(code)
-        }?.displayName.orEmpty()
-    }
-
     private val paymentOptionsItemsMapper: PaymentOptionsItemsMapper by lazy {
         PaymentOptionsItemsMapper(
             customerMetadata = paymentMethodMetadataFlow.mapAsStateFlow { it?.customerMetadata },
@@ -82,7 +75,7 @@ internal class SavedPaymentMethodMutator(
             isGooglePayReady = paymentMethodMetadataFlow.mapAsStateFlow { it?.isGooglePayReady == true },
             isLinkEnabled = isLinkEnabled,
             isNotPaymentFlow = isNotPaymentFlow,
-            nameProvider = providePaymentMethodName,
+            nameProvider = { paymentMethodMetadataFlow.value?.displayNameForCode(it).orEmpty() },
             isCbcEligible = { paymentMethodMetadataFlow.value?.cbcEligibility is CardBrandChoiceEligibility.Eligible },
         )
     }

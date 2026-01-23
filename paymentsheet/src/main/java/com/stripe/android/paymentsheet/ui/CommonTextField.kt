@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.uicore.LocalTextFieldInsets
+import com.stripe.android.uicore.elements.FieldDisplayState
 import com.stripe.android.uicore.elements.TextFieldColors
 import com.stripe.android.uicore.elements.compat.CompatTextField
 import com.stripe.android.uicore.stripeColors
@@ -85,7 +86,10 @@ internal fun commonTextFieldColors(
     enabled: Boolean
 ): TextFieldColors {
     return TextFieldColors(
-        shouldShowError = shouldShowError,
+        fieldDisplayState = when (shouldShowError) {
+            true -> FieldDisplayState.ERROR
+            false -> FieldDisplayState.NORMAL
+        },
         backgroundColor = if (enabled) {
             MaterialTheme.stripeColors.component
         } else {

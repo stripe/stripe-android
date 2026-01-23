@@ -57,10 +57,10 @@ import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.rememberCustomerSheet
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
-import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
@@ -99,7 +99,6 @@ import kotlinx.coroutines.withContext
 import com.stripe.android.uicore.R as StripeUiCoreR
 
 @OptIn(
-    ExperimentalCustomPaymentMethodsApi::class,
     WalletButtonsPreview::class,
 )
 internal class PaymentSheetPlaygroundActivity :
@@ -728,6 +727,7 @@ internal class PaymentSheetPlaygroundActivity :
         }
     }
 
+    @OptIn(CheckoutSessionPreview::class)
     private fun presentPaymentSheet(paymentSheet: PaymentSheet, playgroundState: PlaygroundState.Payment) {
         if (playgroundState.initializationType == InitializationType.Normal) {
             if (playgroundState.checkoutMode == CheckoutMode.SETUP) {
@@ -741,6 +741,11 @@ internal class PaymentSheetPlaygroundActivity :
                     configuration = playgroundState.paymentSheetConfiguration(viewModel.settings)
                 )
             }
+        } else if (playgroundState.initializationType == InitializationType.CheckoutSession) {
+            paymentSheet.presentWithCheckoutSession(
+                checkoutSessionClientSecret = playgroundState.clientSecret,
+                configuration = playgroundState.paymentSheetConfiguration(viewModel.settings)
+            )
         } else {
             paymentSheet.presentWithIntentConfiguration(
                 intentConfiguration = playgroundState.intentConfiguration(),

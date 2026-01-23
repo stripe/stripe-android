@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.StateFlow
 class DropdownFieldController(
     private val config: DropdownConfig,
     initialValue: String? = null
-) : InputController, SectionFieldErrorController, SectionFieldComposable {
+) : InputController, SectionFieldValidationController, SectionFieldComposable {
     val displayItems: List<String> = config.displayItems
     val disableDropdownWithSingleElement = config.disableDropdownWithSingleElement
     private val dropdownMode = config.mode
@@ -33,12 +33,12 @@ class DropdownFieldController(
     override val label: StateFlow<ResolvableString> = MutableStateFlow(config.label)
     override val fieldValue = selectedIndex.mapAsStateFlow { it?.let { displayItems[it] } ?: "" }
     override val rawFieldValue = selectedIndex.mapAsStateFlow { it?.let { config.rawItems.getOrNull(it) } }
-    override val error: StateFlow<FieldError?> = combineAsStateFlow(
+    override val validationMessage: StateFlow<FieldValidationMessage?> = combineAsStateFlow(
         _validating,
         _selectedIndex,
     ) { validating, index ->
         if (validating && index == null) {
-            FieldError(R.string.stripe_blank_and_required)
+            FieldValidationMessage.Error(R.string.stripe_blank_and_required)
         } else {
             null
         }

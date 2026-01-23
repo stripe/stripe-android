@@ -38,7 +38,8 @@ class TestBackendRepository {
         sourceAmount: Double = 10.0,
         sourceCurrency: String = "usd",
         destinationCurrency: String = "eth",
-        customerIpAddress: String = "127.0.0.1"
+        customerIpAddress: String = "127.0.0.1",
+        settlementSpeed: SettlementSpeed,
     ): ApiResult<OnrampSessionResponse, FuelError> {
         return withContext(Dispatchers.IO) {
             val request = CreateOnrampSessionRequest(
@@ -49,7 +50,8 @@ class TestBackendRepository {
                 destinationCurrency = destinationCurrency,
                 destinationNetwork = destinationNetwork,
                 walletAddress = walletAddress,
-                customerIpAddress = customerIpAddress
+                customerIpAddress = customerIpAddress,
+                settlementSpeed = settlementSpeed
             )
 
             val requestBody = json.encodeToString(CreateOnrampSessionRequest.serializer(), request)

@@ -62,6 +62,7 @@ internal abstract class BaseSheetViewModel(
     val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     val isCompleteFlow: Boolean,
     val tapToAddCollectionHandler: TapToAddCollectionHandler,
+    val mode: EventReporter.Mode,
 ) : ViewModel() {
     private val autocompleteLauncher = DefaultAutocompleteLauncher(
         AutocompleteAppearanceContext.PaymentElement(config.appearance)
@@ -236,20 +237,48 @@ internal abstract class BaseSheetViewModel(
             return paymentMethodLayout
         }
 
+        logHorizontalModeExperimentExposures(
+            experimentsData = experimentsData,
+            paymentMethodMetadata = paymentMethodMetadata,
+        )
+
         experimentsData.experimentAssignments[
-            ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_ANDROID_AA
+            ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE
         ]?.let { variant ->
-            eventReporter.onExperimentExposure(
-                LoggableExperiment.OcsMobileHorizontalModeAndroidAA(
-                    experimentsData = experimentsData,
-                    group = variant,
-                    paymentMethodMetadata = paymentMethodMetadata,
-                    hasSavedPaymentMethod = customerStateHolder.paymentMethods.value.isNotEmpty(),
-                )
-            )
+            if (variant == "control") {
+                return PaymentSheet.PaymentMethodLayout.Vertical
+            } else if (variant == "treatment") {
+                return PaymentSheet.PaymentMethodLayout.Horizontal
+            }
         }
 
         return paymentMethodLayout
+    }
+
+    private fun logHorizontalModeExperimentExposures(
+        experimentsData: ElementsSession.ExperimentsData,
+        paymentMethodMetadata: PaymentMethodMetadata,
+    ) {
+        listOf(
+            ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_ANDROID_AA,
+            ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_AA,
+            ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE,
+        ).forEach { experimentAssignment ->
+            experimentsData.experimentAssignments[
+                experimentAssignment,
+            ]?.let { variant ->
+                eventReporter.onExperimentExposure(
+                    LoggableExperiment.OcsMobileHorizontalMode(
+                        experimentsData = experimentsData,
+                        experiment = experimentAssignment,
+                        group = variant,
+                        paymentMethodMetadata = paymentMethodMetadata,
+                        hasSavedPaymentMethod = customerStateHolder.paymentMethods.value.isNotEmpty(),
+                        mode = mode,
+                    )
+                )
+            }
+        }
     }
 
     abstract fun onUserCancel()

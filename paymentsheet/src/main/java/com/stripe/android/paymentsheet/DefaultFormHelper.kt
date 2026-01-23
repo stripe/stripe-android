@@ -26,6 +26,7 @@ import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormData
 import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -135,10 +136,12 @@ internal class DefaultFormHelper(
     private val paymentSelection: Flow<PaymentSelection?> = combine(
         lastFormValues,
         linkInlineHandler.linkInlineState,
-    ) { formValues, inlineSignupViewState ->
+        tapToAddHelper?.collectedPaymentMethod ?: stateFlowOf(null)
+    ) { formValues, inlineSignupViewState, collectedPaymentMethod ->
         formValues.first?.transformToPaymentSelection(
             paymentMethod = supportedPaymentMethodForCode(formValues.second),
             paymentMethodMetadata = paymentMethodMetadata,
+            collectedPaymentMethod = collectedPaymentMethod?.paymentMethod,
             inlineSignupViewState = inlineSignupViewState,
         )
     }

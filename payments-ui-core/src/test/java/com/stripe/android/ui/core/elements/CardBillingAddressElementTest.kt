@@ -160,7 +160,7 @@ internal class CardBillingAddressElementTest {
     fun `Verify that only errors from non-hidden fields are displayed`() = runTest {
         cardBillingElement.onValidationStateChanged(isValidating = true)
 
-        cardBillingElement.sectionFieldErrorController().error.test {
+        cardBillingElement.sectionFieldErrorController().validationMessage.test {
             assertThat(awaitItem()).isNotNull()
 
             val postalCodeField = cardBillingElement

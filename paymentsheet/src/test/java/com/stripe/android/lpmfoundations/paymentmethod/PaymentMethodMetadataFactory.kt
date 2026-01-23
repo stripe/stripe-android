@@ -1,7 +1,9 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.LinkMode
@@ -44,6 +46,7 @@ internal object PaymentMethodMetadataFactory {
         linkMode: LinkMode? = LinkMode.LinkPaymentMethod,
         linkState: LinkStateResult? = null,
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+        cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
         defaultBillingDetails: PaymentSheet.BillingDetails = PaymentSheet.BillingDetails(),
         paymentMethodIncentive: PaymentMethodIncentive? = null,
         isPaymentMethodSetAsDefaultEnabled: Boolean = IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE,
@@ -96,6 +99,7 @@ internal object PaymentMethodMetadataFactory {
             linkMode = linkMode,
             linkStateResult = linkState,
             cardBrandFilter = cardBrandFilter,
+            cardFundingFilter = cardFundingFilter,
             paymentMethodIncentive = paymentMethodIncentive,
             financialConnectionsAvailability = financialConnectionsAvailability,
             termsDisplay = termsDisplay,
@@ -124,7 +128,7 @@ internal object PaymentMethodMetadataFactory {
         clientSecret?.let { return IntegrationMetadata.IntentFirst(it) }
         return when (this) {
             is PaymentIntent -> {
-                IntegrationMetadata.DeferredIntentWithPaymentMethod(
+                IntegrationMetadata.DeferredIntent.WithPaymentMethod(
                     intentConfiguration = PaymentSheet.IntentConfiguration(
                         mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                             amount = amount ?: 5000,
@@ -134,7 +138,7 @@ internal object PaymentMethodMetadataFactory {
                 )
             }
             is SetupIntent -> {
-                IntegrationMetadata.DeferredIntentWithPaymentMethod(
+                IntegrationMetadata.DeferredIntent.WithPaymentMethod(
                     intentConfiguration = PaymentSheet.IntentConfiguration(
                         mode = PaymentSheet.IntentConfiguration.Mode.Setup(
                             currency = "usd"

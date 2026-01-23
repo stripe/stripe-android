@@ -27,7 +27,7 @@ internal object SatispayDefinition : PaymentMethodDefinition {
 }
 
 private object SatispayUiDefinitionFactory : UiDefinitionFactory.Simple() {
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         paymentMethodDefinition = SatispayDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_satispay,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_satispay_day,

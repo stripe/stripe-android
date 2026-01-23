@@ -35,7 +35,7 @@ internal object FpxDefinition : PaymentMethodDefinition {
 private object FpxUiDefinitionFactory : UiDefinitionFactory.Simple() {
     private val fpsIdentifier = IdentifierSpec.Generic("fpx[bank]")
 
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         paymentMethodDefinition = FpxDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_fpx,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_fpx,

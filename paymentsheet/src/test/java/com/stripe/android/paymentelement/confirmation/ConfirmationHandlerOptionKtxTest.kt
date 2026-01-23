@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
@@ -23,7 +24,6 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
-import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOption
 import com.stripe.android.paymentelement.confirmation.cpms.CustomPaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationOption
@@ -54,6 +54,7 @@ class ConfirmationHandlerOptionKtxTest {
             paymentSelection.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
+                cardFundingFilter = DefaultCardFundingFilter
             )
         ).isEqualTo(
             PaymentMethodConfirmationOption.New(
@@ -75,6 +76,7 @@ class ConfirmationHandlerOptionKtxTest {
             paymentSelection.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
+                cardFundingFilter = DefaultCardFundingFilter
             )
         ).isEqualTo(
             PaymentMethodConfirmationOption.New(
@@ -96,6 +98,7 @@ class ConfirmationHandlerOptionKtxTest {
             paymentSelection.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
+                cardFundingFilter = DefaultCardFundingFilter
             )
         ).isEqualTo(
             PaymentMethodConfirmationOption.New(
@@ -128,6 +131,7 @@ class ConfirmationHandlerOptionKtxTest {
             paymentSelection.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
+                cardFundingFilter = DefaultCardFundingFilter
             )
         ).isEqualTo(
             BacsConfirmationOption(
@@ -147,6 +151,7 @@ class ConfirmationHandlerOptionKtxTest {
             paymentSelection.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
+                cardFundingFilter = DefaultCardFundingFilter
             )
         ).isEqualTo(
             PaymentMethodConfirmationOption.New(
@@ -171,6 +176,7 @@ class ConfirmationHandlerOptionKtxTest {
             paymentSelection.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
+                cardFundingFilter = DefaultCardFundingFilter
             )
         ).isEqualTo(
             PaymentMethodConfirmationOption.Saved(
@@ -202,6 +208,7 @@ class ConfirmationHandlerOptionKtxTest {
             paymentSelection.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
+                cardFundingFilter = DefaultCardFundingFilter
             )
         ).isEqualTo(
             ExternalPaymentMethodConfirmationOption(
@@ -222,6 +229,7 @@ class ConfirmationHandlerOptionKtxTest {
             PaymentSelection.GooglePay.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
+                cardFundingFilter = DefaultCardFundingFilter
             )
         ).isNull()
     }
@@ -243,6 +251,7 @@ class ConfirmationHandlerOptionKtxTest {
                     .build()
                     .asCommonConfiguration(),
                 linkConfiguration = null,
+                cardFundingFilter = DefaultCardFundingFilter,
             )
         ).isEqualTo(
             GooglePayConfirmationOption(
@@ -256,10 +265,39 @@ class ConfirmationHandlerOptionKtxTest {
                     billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
                     cardBrandFilter = PaymentSheetCardBrandFilter(
                         cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.All
-                    )
+                    ),
+                    cardFundingFilter = DefaultCardFundingFilter,
+                    additionalEnabledNetworks = emptyList(),
                 ),
             )
         )
+    }
+
+    @Test
+    fun `On Google Pay selection with additionalEnabledNetworks, should return expected option with networks`() {
+        val additionalNetworks = listOf("INTERAC")
+
+        val confirmationOption = PaymentSelection.GooglePay.toConfirmationOption(
+            configuration = PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
+                .googlePay(
+                    PaymentSheet.GooglePayConfiguration(
+                        environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
+                        countryCode = "US",
+                        currencyCode = "USD",
+                        amount = 5000,
+                        label = "Merchant Payments",
+                        additionalEnabledNetworks = additionalNetworks
+                    )
+                )
+                .build()
+                .asCommonConfiguration(),
+            linkConfiguration = null,
+            cardFundingFilter = DefaultCardFundingFilter
+        )
+
+        assertThat(
+            confirmationOption?.asOption<GooglePayConfirmationOption>()?.config?.additionalEnabledNetworks
+        ).isEqualTo(additionalNetworks)
     }
 
     @Test
@@ -268,6 +306,7 @@ class ConfirmationHandlerOptionKtxTest {
             PaymentSelection.Link().toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
+                cardFundingFilter = DefaultCardFundingFilter
             )
         ).isNull()
     }
@@ -278,6 +317,7 @@ class ConfirmationHandlerOptionKtxTest {
             PaymentSelection.Link().toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = LINK_CONFIGURATION,
+                cardFundingFilter = DefaultCardFundingFilter
             )
         ).isEqualTo(
             LinkConfirmationOption(
@@ -295,6 +335,7 @@ class ConfirmationHandlerOptionKtxTest {
             ).toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = LINK_CONFIGURATION,
+                cardFundingFilter = DefaultCardFundingFilter
             )
         ).isEqualTo(
             LinkConfirmationOption(
@@ -312,6 +353,7 @@ class ConfirmationHandlerOptionKtxTest {
             linkInlineSelection.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
+                cardFundingFilter = DefaultCardFundingFilter,
             )
         ).isEqualTo(
             PaymentMethodConfirmationOption.New(
@@ -354,6 +396,7 @@ class ConfirmationHandlerOptionKtxTest {
             paymentSelection.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
+                cardFundingFilter = DefaultCardFundingFilter
             )
         ).isEqualTo(
             PaymentMethodConfirmationOption.Saved(
@@ -373,6 +416,7 @@ class ConfirmationHandlerOptionKtxTest {
             paymentSelection.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
+                cardFundingFilter = DefaultCardFundingFilter
             )
         ).isEqualTo(
             PaymentMethodConfirmationOption.Saved(
@@ -392,6 +436,7 @@ class ConfirmationHandlerOptionKtxTest {
         val confirmationOption = linkInlinePaymentSelection.toConfirmationOption(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
             linkConfiguration = LINK_CONFIGURATION,
+            cardFundingFilter = DefaultCardFundingFilter,
         )
 
         assertThat(confirmationOption).isInstanceOf<LinkInlineSignupConfirmationOption>()
@@ -399,7 +444,6 @@ class ConfirmationHandlerOptionKtxTest {
         assertThat(linkConfirmationOption.extraParams).isEqualTo(paymentMethodExtraParams)
     }
 
-    @OptIn(ExperimentalCustomPaymentMethodsApi::class)
     @Test
     fun `On Custom Payment Method selection with no custom payment method of expected ID, should return null`() {
         val customPaymentMethodSelection = PaymentSelection.CustomPaymentMethod(
@@ -416,12 +460,12 @@ class ConfirmationHandlerOptionKtxTest {
                 .build()
                 .asCommonConfiguration(),
             linkConfiguration = null,
+            cardFundingFilter = DefaultCardFundingFilter,
         )
 
         assertThat(confirmationOption).isNull()
     }
 
-    @OptIn(ExperimentalCustomPaymentMethodsApi::class)
     @Test
     fun `On Custom Payment Method selection with custom payment method of expected ID, should return option`() {
         val billingDetails = PaymentMethod.BillingDetails(name = "John Doe")
@@ -445,6 +489,7 @@ class ConfirmationHandlerOptionKtxTest {
                 .build()
                 .asCommonConfiguration(),
             linkConfiguration = null,
+            cardFundingFilter = DefaultCardFundingFilter,
         )
 
         assertThat(confirmationOption).isInstanceOf<CustomPaymentMethodConfirmationOption>()
@@ -460,6 +505,7 @@ class ConfirmationHandlerOptionKtxTest {
             PaymentSelection.ShopPay.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
+                cardFundingFilter = DefaultCardFundingFilter,
             )
         ).isNull()
     }
@@ -473,6 +519,7 @@ class ConfirmationHandlerOptionKtxTest {
                     customer = null
                 ),
                 linkConfiguration = null,
+                cardFundingFilter = DefaultCardFundingFilter,
             )
         ).isNull()
     }
@@ -491,6 +538,7 @@ class ConfirmationHandlerOptionKtxTest {
                         shopPayConfiguration = SHOP_PAY_CONFIGURATION
                     ),
                 linkConfiguration = null,
+                cardFundingFilter = DefaultCardFundingFilter,
             )
         ).isEqualTo(
             ShopPayConfirmationOption(
@@ -519,6 +567,7 @@ class ConfirmationHandlerOptionKtxTest {
                 .toConfirmationOption(
                     configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                     linkConfiguration = LINK_CONFIGURATION,
+                    cardFundingFilter = DefaultCardFundingFilter,
                 )
         ).isEqualTo(
             LinkInlineSignupConfirmationOption(

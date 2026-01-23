@@ -21,7 +21,7 @@ abstract class SectionSingleFieldElement(
     /**
      * This will return a controller that abides by the SectionFieldErrorController interface.
      */
-    override fun sectionFieldErrorController(): SectionFieldErrorController = controller
+    override fun sectionFieldErrorController(): SectionFieldValidationController = controller
 
     override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> {
         return controller.formFieldValue.mapAsStateFlow { formFieldEntry ->

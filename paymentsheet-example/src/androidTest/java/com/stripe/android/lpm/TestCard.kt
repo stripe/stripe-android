@@ -23,6 +23,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.CustomerSetti
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.GooglePayMode
 import com.stripe.android.paymentsheet.example.playground.settings.GooglePaySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationTypeSettingsDefinition
@@ -421,7 +422,7 @@ internal class TestCard : BasePlaygroundTest() {
     fun testCardWithOBO_UseCartesBancaires() {
         testDriver.confirmNewOrGuestComplete(
             testParameters = testParameters.copyPlaygroundSettings { settings ->
-                settings[GooglePaySettingsDefinition] = false
+                settings[GooglePaySettingsDefinition] = GooglePayMode.Off
                 settings[MerchantSettingsDefinition] = Merchant.US
                 settings[CustomerSessionOnBehalfOfSettingsDefinition] =
                     CustomerSessionOnBehalfOfSettingsDefinition.OnBehalfOf.FR_CONNECTED_ACCOUNT

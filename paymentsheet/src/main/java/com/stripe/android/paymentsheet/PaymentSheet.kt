@@ -33,11 +33,11 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.AddressAutocompletePreview
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
 import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
-import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.ShopPayPreview
@@ -312,7 +312,6 @@ class PaymentSheet internal constructor(
          * @param callback Called when a user confirms payment for a custom payment method. Use with
          * [Configuration.Builder.customPaymentMethods] to specify custom payment methods.
          */
-        @ExperimentalCustomPaymentMethodsApi
         fun confirmCustomPaymentMethodCallback(callback: ConfirmCustomPaymentMethodCallback) = apply {
             callbacksBuilder.confirmCustomPaymentMethodCallback(callback)
         }
@@ -469,6 +468,25 @@ class PaymentSheet internal constructor(
     ) {
         paymentSheetLauncher.present(
             mode = InitializationMode.DeferredIntent(intentConfiguration),
+            configuration = configuration,
+        )
+    }
+
+    /**
+     * Present [PaymentSheet] with a Checkout Session.
+     *
+     * @param checkoutSessionClientSecret The client secret of the Checkout Session (format: `cs_*_secret_*`).
+     * @param configuration An optional [PaymentSheet] configuration.
+     */
+    @CheckoutSessionPreview
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @JvmOverloads
+    fun presentWithCheckoutSession(
+        checkoutSessionClientSecret: String,
+        configuration: Configuration? = null,
+    ) {
+        paymentSheetLauncher.present(
+            mode = InitializationMode.CheckoutSession(checkoutSessionClientSecret),
             configuration = configuration,
         )
     }
@@ -1116,7 +1134,6 @@ class PaymentSheet internal constructor(
              *
              * If set, Payment Sheet will display the defined list of custom payment methods in the UI.
              */
-            @ExperimentalCustomPaymentMethodsApi
             fun customPaymentMethods(
                 customPaymentMethods: List<CustomPaymentMethod>,
             ) = apply {
@@ -1214,7 +1231,6 @@ class PaymentSheet internal constructor(
 
         @OptIn(
             ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class,
-            ExperimentalCustomPaymentMethodsApi::class,
             WalletButtonsPreview::class,
             ShopPayPreview::class,
             CardFundingFilteringPrivatePreview::class
@@ -2947,24 +2963,30 @@ class PaymentSheet internal constructor(
                 /**
                  * Creates a [Builder] prepopulated with default light mode values.
                  */
-                fun light(): Builder = Builder(
-                    background = null,
-                    onBackground = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
-                    border = StripeThemeDefaults.primaryButtonStyle.colorsLight.border.toArgb(),
-                    successBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
-                    onSuccessBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
-                )
+                fun light(): Builder {
+                    val colors = StripeThemeDefaults.primaryButtonStyle.colorsLight
+                    return Builder(
+                        background = null,
+                        onBackground = colors.onBackground.toArgb(),
+                        border = colors.border.toArgb(),
+                        successBackgroundColor = colors.successBackground.toArgb(),
+                        onSuccessBackgroundColor = colors.onSuccessBackground.toArgb(),
+                    )
+                }
 
                 /**
                  * Creates a [Builder] prepopulated with default dark mode values.
                  */
-                fun dark(): Builder = Builder(
-                    background = null,
-                    onBackground = StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
-                    border = StripeThemeDefaults.primaryButtonStyle.colorsDark.border.toArgb(),
-                    successBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
-                    onSuccessBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
-                )
+                fun dark(): Builder {
+                    val colors = StripeThemeDefaults.primaryButtonStyle.colorsDark
+                    return Builder(
+                        background = null,
+                        onBackground = colors.onBackground.toArgb(),
+                        border = colors.border.toArgb(),
+                        successBackgroundColor = colors.successBackground.toArgb(),
+                        onSuccessBackgroundColor = colors.onSuccessBackground.toArgb(),
+                    )
+                }
             }
         }
 
@@ -3512,7 +3534,6 @@ class PaymentSheet internal constructor(
         internal val subtitle: ResolvableString?,
         internal val disableBillingDetailCollection: Boolean,
     ) : Parcelable {
-        @ExperimentalCustomPaymentMethodsApi
         constructor(
             /**
              * The unique identifier for this custom payment method type in the format of "cmpt_...".
@@ -3540,7 +3561,6 @@ class PaymentSheet internal constructor(
             disableBillingDetailCollection = disableBillingDetailCollection,
         )
 
-        @ExperimentalCustomPaymentMethodsApi
         constructor(
             /**
              * The unique identifier for this custom payment method type in the format of "cmpt_...".
@@ -4110,7 +4130,6 @@ class PaymentSheet internal constructor(
             /**
              * @param callback Called when a user confirms payment for a custom payment method.
              */
-            @ExperimentalCustomPaymentMethodsApi
             fun confirmCustomPaymentMethodCallback(callback: ConfirmCustomPaymentMethodCallback) = apply {
                 callbacksBuilder.confirmCustomPaymentMethodCallback(callback)
             }

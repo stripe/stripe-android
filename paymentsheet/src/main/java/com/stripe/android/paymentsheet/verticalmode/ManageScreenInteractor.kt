@@ -4,7 +4,6 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
@@ -101,7 +100,6 @@ internal class DefaultManageScreenInteractor(
     private val editing: StateFlow<Boolean>,
     private val canEdit: StateFlow<Boolean>,
     private val toggleEdit: () -> Unit,
-    private val providePaymentMethodName: (PaymentMethodCode?) -> ResolvableString,
     private val onSelectPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val navigateBack: (withDelay: Boolean) -> Unit,
@@ -117,7 +115,6 @@ internal class DefaultManageScreenInteractor(
         combineAsStateFlow(paymentMethods, defaultPaymentMethodId) { paymentMethods, defaultPaymentMethodId ->
             paymentMethods.map {
                 it.toDisplayableSavedPaymentMethod(
-                    providePaymentMethodName,
                     paymentMethodMetadata,
                     defaultPaymentMethodId
                 )
@@ -202,7 +199,6 @@ internal class DefaultManageScreenInteractor(
                 editing = savedPaymentMethodMutator.editing,
                 canEdit = savedPaymentMethodMutator.canEdit,
                 toggleEdit = savedPaymentMethodMutator::toggleEditing,
-                providePaymentMethodName = savedPaymentMethodMutator.providePaymentMethodName,
                 onSelectPaymentMethod = {
                     val savedPmSelection = PaymentSelection.Saved(it.paymentMethod)
                     viewModel.updateSelection(savedPmSelection)

@@ -8,7 +8,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
  *
  * To learn more about custom payment methods, see "docs_url"
  */
-@ExperimentalCustomPaymentMethodsApi
 fun interface ConfirmCustomPaymentMethodCallback {
 
     /**

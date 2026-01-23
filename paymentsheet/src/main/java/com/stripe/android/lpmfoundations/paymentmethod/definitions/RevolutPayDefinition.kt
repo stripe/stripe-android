@@ -27,7 +27,7 @@ internal object RevolutPayDefinition : PaymentMethodDefinition {
 }
 
 private object RevolutPayUiDefinitionFactory : UiDefinitionFactory.Simple() {
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         paymentMethodDefinition = RevolutPayDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_revolut_pay,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_revolut_pay_day,

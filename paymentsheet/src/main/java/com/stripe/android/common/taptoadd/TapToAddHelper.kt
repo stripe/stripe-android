@@ -3,10 +3,17 @@ package com.stripe.android.common.taptoadd
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.verticalmode.toDisplayableSavedPaymentMethod
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 internal interface TapToAddHelper {
+    val collectedPaymentMethod: StateFlow<DisplayableSavedPaymentMethod?>
+
     /**
      * Begins collection of payment method from the Tap to Add flow. Calling this method should show a screen that
      * indicates where to tap your card on your device.
@@ -43,12 +50,20 @@ internal class DefaultTapToAddHelper(
     private val onCollectingUpdated: (collecting: Boolean) -> Unit,
     private val onError: (ResolvableString) -> Unit,
 ) : TapToAddHelper {
+    private val _collectedPaymentMethod = MutableStateFlow<DisplayableSavedPaymentMethod?>(null)
+    override val collectedPaymentMethod = _collectedPaymentMethod.asStateFlow()
+
     override fun startPaymentMethodCollection() {
         coroutineScope.launch {
             onCollectingUpdated(true)
 
             when (val collectionState = tapToAddCollectionHandler.collect(paymentMethodMetadata)) {
-                is TapToAddCollectionHandler.CollectionState.Collected -> Unit
+                is TapToAddCollectionHandler.CollectionState.Collected -> {
+                    _collectedPaymentMethod.value = collectionState.paymentMethod.toDisplayableSavedPaymentMethod(
+                        paymentMethodMetadata = paymentMethodMetadata,
+                        defaultPaymentMethodId = null,
+                    )
+                }
                 is TapToAddCollectionHandler.CollectionState.FailedCollection -> {
                     onError(
                         collectionState.displayMessage ?: collectionState.error.stripeErrorMessage()

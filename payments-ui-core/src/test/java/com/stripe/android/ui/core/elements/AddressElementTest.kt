@@ -9,7 +9,7 @@ import com.stripe.android.uicore.elements.AddressInputMode
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.DropdownFieldController
-import com.stripe.android.uicore.elements.FieldError
+import com.stripe.android.uicore.elements.FieldValidationMessage
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SameAsShippingController
@@ -60,9 +60,9 @@ class AddressElementTest {
             postalCodeController.onValueChange("9999")
             postalCodeController.onFocusChange(false)
 
-            assertThat(addressElement.addressController.value.error.first())
+            assertThat(addressElement.addressController.value.validationMessage.first())
                 .isNotNull()
-            assertThat(addressElement.addressController.value.error.first()?.errorMessage)
+            assertThat(addressElement.addressController.value.validationMessage.first()?.message)
                 .isEqualTo(UiCoreR.string.stripe_address_zip_incomplete)
 
             countryElement.controller.onValueChange(1)
@@ -74,7 +74,7 @@ class AddressElementTest {
             postalCodeController.onFocusChange(false)
             ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
-            assertThat(addressElement.addressController.value.error.first()?.errorMessage)
+            assertThat(addressElement.addressController.value.validationMessage.first()?.message)
                 .isEqualTo(UiCoreR.string.stripe_address_postal_code_incomplete)
         }
     }
@@ -587,25 +587,25 @@ class AddressElementTest {
         addressElement.fields.test {
             val fields = awaitItem()
 
-            fields.element(IdentifierSpec.Country).errorTest(fieldError = null)
-            fields.element(IdentifierSpec.Line1).errorTest(fieldError = null)
-            fields.element(IdentifierSpec.Line2).errorTest(fieldError = null)
-            fields.element(IdentifierSpec.State).errorTest(fieldError = null)
-            fields.element(IdentifierSpec.PostalCode).errorTest(fieldError = null)
-            fields.element(IdentifierSpec.City).errorTest(fieldError = null)
+            fields.element(IdentifierSpec.Country).errorTest(fieldValidationMessage = null)
+            fields.element(IdentifierSpec.Line1).errorTest(fieldValidationMessage = null)
+            fields.element(IdentifierSpec.Line2).errorTest(fieldValidationMessage = null)
+            fields.element(IdentifierSpec.State).errorTest(fieldValidationMessage = null)
+            fields.element(IdentifierSpec.PostalCode).errorTest(fieldValidationMessage = null)
+            fields.element(IdentifierSpec.City).errorTest(fieldValidationMessage = null)
 
             addressElement.onValidationStateChanged(true)
 
-            fields.element(IdentifierSpec.Country).errorTest(fieldError = null)
+            fields.element(IdentifierSpec.Country).errorTest(fieldValidationMessage = null)
             fields.element(IdentifierSpec.Line1)
-                .errorTest(fieldError = FieldError(R.string.stripe_blank_and_required))
-            fields.element(IdentifierSpec.Line2).errorTest(fieldError = null)
+                .errorTest(fieldValidationMessage = FieldValidationMessage.Error(R.string.stripe_blank_and_required))
+            fields.element(IdentifierSpec.Line2).errorTest(fieldValidationMessage = null)
             fields.element(IdentifierSpec.State)
-                .errorTest(fieldError = FieldError(R.string.stripe_blank_and_required))
+                .errorTest(fieldValidationMessage = FieldValidationMessage.Error(R.string.stripe_blank_and_required))
             fields.element(IdentifierSpec.PostalCode)
-                .errorTest(fieldError = FieldError(R.string.stripe_blank_and_required))
+                .errorTest(fieldValidationMessage = FieldValidationMessage.Error(R.string.stripe_blank_and_required))
             fields.element(IdentifierSpec.City)
-                .errorTest(fieldError = FieldError(R.string.stripe_blank_and_required))
+                .errorTest(fieldValidationMessage = FieldValidationMessage.Error(R.string.stripe_blank_and_required))
         }
     }
 

@@ -1307,6 +1307,7 @@ internal class PaymentOptionsViewModelTest {
             linkPaymentLauncher = linkPaymentLauncher,
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
+            mode = EventReporter.Mode.Complete,
         )
     }
 

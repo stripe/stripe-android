@@ -8,7 +8,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
@@ -26,19 +25,11 @@ fun SectionElementUI(
     if (!hiddenIdentifiers.contains(element.identifier)) {
         val controller = element.controller
 
-        val error by controller.error.collectAsState()
-        val sectionErrorString = error?.let {
-            it.formatArgs?.let { args ->
-                stringResource(
-                    it.errorMessage,
-                    *args
-                )
-            } ?: stringResource(it.errorMessage)
-        }
+        val validationMessage by controller.validationMessage.collectAsState()
 
         Section(
             controller.label,
-            sectionErrorString,
+            validationMessage,
             modifier = modifier,
         ) {
             element.fields.filterOutHiddenIdentifiers(hiddenIdentifiers).forEachIndexed { index, field ->

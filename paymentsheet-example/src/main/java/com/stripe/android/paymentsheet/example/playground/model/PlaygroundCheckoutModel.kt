@@ -15,6 +15,8 @@ class CheckoutRequest private constructor(
     val customerKeyType: CustomerKeyType?,
     @SerialName("currency")
     val currency: String?,
+    @SerialName("amount")
+    val amount: Long?,
     @SerialName("mode")
     val mode: String?,
     @SerialName("on_behalf_of")
@@ -55,6 +57,14 @@ class CheckoutRequest private constructor(
     val isConfirmationToken: Boolean?,
     @SerialName("allows_tap_to_add")
     val allowsTapToAdd: Boolean?,
+    @SerialName("custom_stripe_api")
+    val customStripeApi: String?,
+    @SerialName("custom_secret_key")
+    val customSecretKey: String?,
+    @SerialName("custom_publishable_key")
+    val customPublishableKey: String?,
+    @SerialName("use_checkout_session")
+    val useCheckoutSession: Boolean?,
 ) {
     @Serializable
     enum class CustomerKeyType {
@@ -70,6 +80,7 @@ class CheckoutRequest private constructor(
         private var customer: String? = null
         private var customerKeyType: CustomerKeyType? = null
         private var currency: String? = null
+        private var amount: Long? = null
         private var mode: String? = null
         private var onBehalfOf: String? = null
         private var setShippingAddress: Boolean? = null
@@ -94,6 +105,10 @@ class CheckoutRequest private constructor(
         private var overridePaymentMethodOptionsSetupFutureUsage: Map<String, String>? = null
         private var isConfirmationToken: Boolean? = null
         private var allowsTapToAdd: Boolean? = null
+        private var customStripeApi: String? = null
+        private var customSecretKey: String? = null
+        private var customPublishableKey: String? = null
+        private var useCheckoutSession: Boolean? = null
 
         fun initialization(initialization: String?) = apply {
             this.initialization = initialization
@@ -109,6 +124,10 @@ class CheckoutRequest private constructor(
 
         fun currency(currency: String?) = apply {
             this.currency = currency
+        }
+
+        fun amount(amount: Long?) = apply {
+            this.amount = amount
         }
 
         fun mode(mode: String?) = apply {
@@ -191,12 +210,29 @@ class CheckoutRequest private constructor(
             this.onBehalfOf = onBehalfOf
         }
 
+        fun customStripeApi(customStripeApi: String?) = apply {
+            this.customStripeApi = customStripeApi
+        }
+
+        fun customSecretKey(customSecretKey: String?) = apply {
+            this.customSecretKey = customSecretKey
+        }
+
+        fun customPublishableKey(customPublishableKey: String?) = apply {
+            this.customPublishableKey = customPublishableKey
+        }
+
+        fun useCheckoutSession(useCheckoutSession: Boolean?) = apply {
+            this.useCheckoutSession = useCheckoutSession
+        }
+
         fun build(): CheckoutRequest {
             return CheckoutRequest(
                 initialization = initialization,
                 customer = customer,
                 customerKeyType = customerKeyType,
                 currency = currency,
+                amount = amount,
                 mode = mode,
                 onBehalfOf = onBehalfOf,
                 setShippingAddress = setShippingAddress,
@@ -220,6 +256,10 @@ class CheckoutRequest private constructor(
                     ?: paymentMethodOptionsSetupFutureUsage,
                 isConfirmationToken = isConfirmationToken,
                 allowsTapToAdd = allowsTapToAdd,
+                customStripeApi = customStripeApi,
+                customSecretKey = customSecretKey,
+                customPublishableKey = customPublishableKey,
+                useCheckoutSession = useCheckoutSession,
             )
         }
     }
@@ -230,7 +270,9 @@ data class CheckoutResponse(
     @SerialName("publishableKey")
     val publishableKey: String,
     @SerialName("intentClientSecret")
-    val intentClientSecret: String,
+    val intentClientSecret: String? = null,
+    @SerialName("checkoutSessionClientSecret")
+    val checkoutSessionClientSecret: String? = null,
     @SerialName("customerId")
     val customerId: String? = null,
     @SerialName("customerEphemeralKeySecret")
@@ -244,6 +286,10 @@ data class CheckoutResponse(
     @SerialName("paymentMethodTypes")
     val paymentMethodTypes: String? = null,
 ) {
+
+    val clientSecret: String = intentClientSecret ?: checkoutSessionClientSecret
+        ?: error("Either intentClientSecret or checkoutSessionClientSecret must be non-null")
+
     fun makeCustomerConfig(
         customerKeyType: CheckoutRequest.CustomerKeyType?
     ) = customerId?.let { id ->
@@ -285,6 +331,12 @@ sealed interface ConfirmIntentRequestParams {
         val mode: String,
         @SerialName("return_url")
         val returnUrl: String,
+        @SerialName("custom_stripe_api")
+        val customStripeApi: String?,
+        @SerialName("custom_secret_key")
+        val customSecretKey: String?,
+        @SerialName("custom_publishable_key")
+        val customPublishableKey: String?,
     ) : ConfirmIntentRequestParams
 
     @Serializable
@@ -297,6 +349,12 @@ sealed interface ConfirmIntentRequestParams {
         val merchantCountryCode: String,
         @SerialName("mode")
         val mode: String,
+        @SerialName("custom_stripe_api")
+        val customStripeApi: String?,
+        @SerialName("custom_secret_key")
+        val customSecretKey: String?,
+        @SerialName("custom_publishable_key")
+        val customPublishableKey: String?,
     ) : ConfirmIntentRequestParams
 }
 

@@ -312,7 +312,7 @@ internal object TestFactory {
         paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
     )
 
-    val CARD_FORM_ELEMENTS = CardDefinition.formElements()
+    val CARD_FORM_ELEMENTS by lazy { CardDefinition.formElements() }
 
     const val VERIFICATION_TOKEN = "12356edtyf6esrte6r6dtd67"
     val INCENTIVE_ELIGIBILITY_SESSION = IncentiveEligibilitySession.PaymentIntent("pi_12345")

@@ -13,6 +13,7 @@ import app.cash.turbine.plusAssign
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.exception.APIConnectionException
@@ -47,7 +48,6 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -114,7 +114,6 @@ import kotlin.test.Test
 
 @Suppress("DEPRECATION")
 @RunWith(RobolectricTestRunner::class)
-@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 internal class DefaultFlowControllerTest {
 
     @get:Rule
@@ -348,6 +347,7 @@ internal class DefaultFlowControllerTest {
                     merchantName = config.merchantDisplayName,
                     billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
                     cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
+                    cardFundingFilter = DefaultCardFundingFilter,
                 ),
             )
         )
@@ -1324,6 +1324,7 @@ internal class DefaultFlowControllerTest {
                     merchantName = config.merchantDisplayName,
                     billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
                     cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
+                    cardFundingFilter = DefaultCardFundingFilter
                 ),
             )
         )
@@ -1631,7 +1632,7 @@ internal class DefaultFlowControllerTest {
             )
         )
         assertThat(arguments.paymentMethodMetadata.integrationMetadata)
-            .isEqualTo(IntegrationMetadata.DeferredIntentWithPaymentMethod(intentConfiguration))
+            .isEqualTo(IntegrationMetadata.DeferredIntent.WithPaymentMethod(intentConfiguration))
     }
 
     @Test
@@ -1981,6 +1982,7 @@ internal class DefaultFlowControllerTest {
                     merchantName = "My merchant",
                     billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
                     cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
+                    cardFundingFilter = DefaultCardFundingFilter,
                 ),
             )
         )
@@ -2414,7 +2416,7 @@ internal class DefaultFlowControllerTest {
             walletsButtonLinkLauncher = walletsButtonLinkPaymentLauncher,
             activityResultRegistryOwner = mock(),
             linkGateFactory = FakeLinkGate.Factory(linkGate),
-            confirmationHandler = confirmationHandler ?: FakeFlowControllerConfirmationHandler(),
+            confirmationHandler = confirmationHandler ?: FakeFlowControllerConfirmationHandler()
         )
     }
 

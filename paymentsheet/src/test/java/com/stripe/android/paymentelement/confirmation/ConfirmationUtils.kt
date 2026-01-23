@@ -24,6 +24,7 @@ import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationDefin
 import com.stripe.android.paymentelement.confirmation.cvc.CvcRecollectionConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationDefinition
+import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.intent.ConfirmationTokenConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationInterceptorFactory
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentCallbackRetriever
@@ -134,6 +135,20 @@ internal suspend fun createIntentConfirmationInterceptor(
                     handler = handler,
                     stripeRepository = stripeRepository,
                     errorReporter = errorReporter,
+                    requestOptions = requestOptions,
+                )
+            }
+        },
+        checkoutSessionConfirmationInterceptorFactory = object : CheckoutSessionConfirmationInterceptor.Factory {
+            override fun create(
+                checkoutSessionId: String,
+                clientAttributionMetadata: ClientAttributionMetadata,
+            ): CheckoutSessionConfirmationInterceptor {
+                return CheckoutSessionConfirmationInterceptor(
+                    checkoutSessionId = checkoutSessionId,
+                    clientAttributionMetadata = clientAttributionMetadata,
+                    context = ApplicationProvider.getApplicationContext(),
+                    stripeRepository = stripeRepository,
                     requestOptions = requestOptions,
                 )
             }

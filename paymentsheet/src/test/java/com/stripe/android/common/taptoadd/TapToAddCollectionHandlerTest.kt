@@ -5,17 +5,25 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
 import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.confirmation.intent.CallbackNotFoundException
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.stripeterminal.Terminal
 import com.stripe.stripeterminal.external.callable.Cancelable
 import com.stripe.stripeterminal.external.callable.SetupIntentCallback
 import com.stripe.stripeterminal.external.models.AllowRedisplay
+import com.stripe.stripeterminal.external.models.CardDetails
+import com.stripe.stripeterminal.external.models.SetupAttempt
 import com.stripe.stripeterminal.external.models.SetupIntent
+import com.stripe.stripeterminal.external.models.SetupIntentCardPresentDetails
 import com.stripe.stripeterminal.external.models.SetupIntentConfiguration
+import com.stripe.stripeterminal.external.models.SetupIntentPaymentMethodDetails
 import com.stripe.stripeterminal.external.models.TerminalErrorCode
 import com.stripe.stripeterminal.external.models.TerminalException
 import kotlinx.coroutines.async
@@ -26,6 +34,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.KStubbing
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.timeout
 import org.mockito.kotlin.verify
@@ -33,6 +42,7 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.test.fail
+import com.stripe.stripeterminal.external.models.PaymentMethod as TerminalPaymentMethod
 
 @OptIn(TapToAddPreview::class)
 @RunWith(RobolectricTestRunner::class)
@@ -43,6 +53,7 @@ class TapToAddCollectionHandlerTest {
             isStripeTerminalSdkAvailable = { false },
             terminalWrapper = TestTerminalWrapper.noOp(),
             connectionManager = FakeTapToAddConnectionManager.noOp(isSupported = true, isConnected = false),
+            errorReporter = FakeErrorReporter(),
             createCardPresentSetupIntentCallbackRetriever = FakeCreateCardPresentSetupIntentCallbackRetriever.noOp(
                 callbackResult = Result.success(DEFAULT_CALLBACK),
             ),
@@ -57,6 +68,7 @@ class TapToAddCollectionHandlerTest {
             isStripeTerminalSdkAvailable = { true },
             terminalWrapper = TestTerminalWrapper.noOp(),
             connectionManager = FakeTapToAddConnectionManager.noOp(isSupported = true, isConnected = false),
+            errorReporter = FakeErrorReporter(),
             createCardPresentSetupIntentCallbackRetriever = FakeCreateCardPresentSetupIntentCallbackRetriever.noOp(
                 callbackResult = Result.success(DEFAULT_CALLBACK),
             ),
@@ -138,26 +150,50 @@ class TapToAddCollectionHandlerTest {
     }
 
     @Test
-    fun `handler returns Collected when flow is successfully completed`() = runScenario(
-        isConnected = true,
-        callbackResult = Result.success(
-            CreateCardPresentSetupIntentCallback {
-                CreateIntentResult.Success("si_123_secret")
+    fun `handler returns Collected when flow is successfully completed with card`() = testSuccessfulFlow(
+        useInterac = false,
+    )
+
+    @Test
+    fun `handler returns Collected when flow is successfully completed with interac card`() = testSuccessfulFlow(
+        useInterac = true,
+    )
+
+    @Test
+    fun `handler returns FailedCollection and reports error when no payment method after confirmation`() =
+        runScenario(
+            isConnected = true,
+            callbackResult = Result.success(
+                CreateCardPresentSetupIntentCallback {
+                    CreateIntentResult.Success("si_123_secret")
+                }
+            ),
+        ) {
+            val result = testScope.backgroundScope.async {
+                handler.collect(DEFAULT_METADATA)
             }
-        ),
-    ) {
-        val result = testScope.backgroundScope.async {
-            handler.collect(DEFAULT_METADATA)
+
+            assertThat(retrieverScenario.waitForCallbackCalls.awaitItem()).isNotNull()
+
+            val retrievedSetupIntent = checkRetrieveSetupIntent("si_123_secret")
+            val collectedIntent = checkCollectCall(retrievedSetupIntent)
+            checkConfirmCall(useInterac = false, collectedSetupIntent = collectedIntent, paymentMethod = null)
+
+            val collectionResult = result.await()
+            assertThat(collectionResult)
+                .isInstanceOf(TapToAddCollectionHandler.CollectionState.FailedCollection::class.java)
+
+            val failed = collectionResult as TapToAddCollectionHandler.CollectionState.FailedCollection
+            assertThat(failed.error).isInstanceOf(IllegalStateException::class.java)
+            assertThat(failed.error.message).isEqualTo("No generated card payment method after collecting through tap!")
+
+            val errorCall = errorReporter.awaitCall()
+            assertThat(errorCall.errorEvent).isEqualTo(
+                ErrorReporter
+                    .UnexpectedErrorEvent
+                    .TAP_TO_ADD_NO_GENERATED_CARD_AFTER_SUCCESSFUL_INTENT_CONFIRMATION
+            )
         }
-
-        assertThat(retrieverScenario.waitForCallbackCalls.awaitItem()).isNotNull()
-
-        val retrievedSetupIntent = checkRetrieveSetupIntent("si_123_secret")
-        val collectedIntent = checkCollectCall(retrievedSetupIntent)
-        checkConfirmCall(collectedIntent)
-
-        assertThat(result.await()).isEqualTo(TapToAddCollectionHandler.CollectionState.Collected)
-    }
 
     @Test
     fun `handler returns FailedCollection when retrieveSetupIntent fails`() = runScenario(
@@ -310,6 +346,44 @@ class TapToAddCollectionHandlerTest {
         verify(confirmSetupIntentCall.cancelable, timeout(1000)).cancel(any())
     }
 
+    private fun testSuccessfulFlow(
+        useInterac: Boolean,
+    ) = runScenario(
+        isConnected = true,
+        callbackResult = Result.success(
+            CreateCardPresentSetupIntentCallback {
+                CreateIntentResult.Success("si_123_secret")
+            }
+        ),
+    ) {
+        val result = testScope.backgroundScope.async {
+            handler.collect(DEFAULT_METADATA)
+        }
+
+        assertThat(retrieverScenario.waitForCallbackCalls.awaitItem()).isNotNull()
+
+        val retrievedSetupIntent = checkRetrieveSetupIntent("si_123_secret")
+        val collectedIntent = checkCollectCall(retrievedSetupIntent)
+        val paymentMethod = createTerminalPaymentMethod(id = "pm_4563", last4 = "7294", brand = "mastercard")
+        checkConfirmCall(
+            useInterac = useInterac,
+            collectedSetupIntent = collectedIntent,
+            paymentMethod = paymentMethod,
+        )
+
+        val collectionResult = result.await()
+        assertThat(collectionResult)
+            .isInstanceOf(TapToAddCollectionHandler.CollectionState.Collected::class.java)
+
+        val collected = collectionResult as TapToAddCollectionHandler.CollectionState.Collected
+
+        assertThat(collected.paymentMethod).isNotNull()
+        assertThat(collected.paymentMethod.type).isEqualTo(PaymentMethod.Type.Card)
+        assertThat(collected.paymentMethod.id).isEqualTo("pm_4563")
+        assertThat(collected.paymentMethod.card?.last4).isEqualTo("7294")
+        assertThat(collected.paymentMethod.card?.brand).isEqualTo(CardBrand.MasterCard)
+    }
+
     private fun runScenario(
         isConnected: Boolean = true,
         awaitResult: Result<Boolean> = Result.success(true),
@@ -319,6 +393,7 @@ class TapToAddCollectionHandlerTest {
     ) = runTest(coroutineContext) {
         val terminalScenario = createTerminalScenario()
         val terminalWrapper = TestTerminalWrapper.noOp(terminalScenario.terminalInstance)
+        val errorReporter = FakeErrorReporter()
 
         FakeTapToAddConnectionManager.test(
             isSupported = true,
@@ -335,11 +410,13 @@ class TapToAddCollectionHandlerTest {
                         handler = DefaultTapToAddCollectionHandler(
                             terminalWrapper = terminalWrapper,
                             connectionManager = managerScenario.tapToAddConnectionManager,
+                            errorReporter = errorReporter,
                             createCardPresentSetupIntentCallbackRetriever = retrieverScenario.retriever,
                         ),
                         managerScenario = managerScenario,
                         retrieverScenario = retrieverScenario,
                         terminalScenario = terminalScenario,
+                        errorReporter = errorReporter,
                         testScope = this@runTest,
                     )
                 )
@@ -349,6 +426,7 @@ class TapToAddCollectionHandlerTest {
         terminalScenario.confirmSetupIntentCalls.ensureAllEventsConsumed()
         terminalScenario.retrieveSetupIntentCalls.ensureAllEventsConsumed()
         terminalScenario.collectPaymentMethodCalls.ensureAllEventsConsumed()
+        errorReporter.ensureAllEventsConsumed()
     }
 
     private fun createTerminalScenario(): TerminalScenario {
@@ -395,10 +473,61 @@ class TapToAddCollectionHandlerTest {
         return collectedIntent
     }
 
-    private suspend fun Scenario.checkConfirmCall(collectedSetupIntent: SetupIntent) {
+    private fun createTerminalPaymentMethod(
+        id: String = "pm_generated_123",
+        last4: String? = "4242",
+        brand: String? = "visa",
+    ): TerminalPaymentMethod {
+        val cardDetails: CardDetails? = if (last4 != null || brand != null) {
+            mock {
+                on { this.last4 } doReturn last4
+                on { this.brand } doReturn brand
+            }
+        } else {
+            null
+        }
+
+        return mock {
+            on { this.id } doReturn id
+            on { this.cardDetails } doReturn cardDetails
+        }
+    }
+
+    private suspend fun Scenario.checkConfirmCall(
+        useInterac: Boolean = false,
+        collectedSetupIntent: SetupIntent,
+        paymentMethod: TerminalPaymentMethod?,
+    ) {
         val confirmSetupIntentCall = terminalScenario.confirmSetupIntentCalls.awaitItem()
         assertThat(confirmSetupIntentCall.intent).isEqualTo(collectedSetupIntent)
-        confirmSetupIntentCall.callback.onSuccess(mock())
+
+        val cardPresentDetails: SetupIntentCardPresentDetails? = paymentMethod?.let { paymentMethod ->
+            mock {
+                on { this.generatedCardExpanded } doReturn paymentMethod
+            }
+        }
+
+        val paymentMethodDetails: SetupIntentPaymentMethodDetails? = cardPresentDetails?.let { cardPresentDetails ->
+            mock {
+                if (useInterac) {
+                    on { this.interacPresentDetails } doReturn cardPresentDetails
+                } else {
+                    on { this.cardPresentDetails } doReturn cardPresentDetails
+                }
+            }
+        }
+
+        val latestAttempt: SetupAttempt? = paymentMethodDetails?.let { paymentMethodDetails ->
+            mock {
+                on { this.paymentMethodDetails } doReturn paymentMethodDetails
+            }
+        }
+
+        val confirmedSetupIntent: SetupIntent = mock {
+            on { this.latestAttempt } doReturn latestAttempt
+        }
+
+        confirmSetupIntentCall.callback.onSuccess(confirmedSetupIntent)
     }
 
     private fun KStubbing<Terminal>.mockRetrieveSetupIntent(
@@ -499,6 +628,7 @@ class TapToAddCollectionHandlerTest {
         val managerScenario: FakeTapToAddConnectionManager.Scenario,
         val retrieverScenario: FakeCreateCardPresentSetupIntentCallbackRetriever.Scenario,
         val terminalScenario: TerminalScenario,
+        val errorReporter: FakeErrorReporter,
     )
 
     private class TerminalScenario(

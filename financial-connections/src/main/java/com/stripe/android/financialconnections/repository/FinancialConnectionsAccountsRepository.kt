@@ -239,22 +239,22 @@ private class FinancialConnectionsAccountsRepositoryImpl(
     companion object {
         private const val CachedPartnerAccountsKey = "CachedPartnerAccounts"
 
-        internal const val accountsSessionUrl: String =
-            "${ApiRequest.API_HOST}/v1/connections/auth_sessions/accounts"
+        internal val accountsSessionUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/connections/auth_sessions/accounts"
 
-        internal const val networkedAccountsUrl: String =
-            "${ApiRequest.API_HOST}/v1/link_account_sessions/networked_accounts"
+        internal val networkedAccountsUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/link_account_sessions/networked_accounts"
 
-        internal const val shareNetworkedAccountsUrl: String =
-            "${ApiRequest.API_HOST}/v1/link_account_sessions/share_networked_account"
+        internal val shareNetworkedAccountsUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/link_account_sessions/share_networked_account"
 
-        internal const val attachPaymentAccountUrl: String =
-            "${ApiRequest.API_HOST}/v1/link_account_sessions/attach_payment_account"
+        internal val attachPaymentAccountUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/link_account_sessions/attach_payment_account"
 
-        internal const val authorizationSessionSelectedAccountsUrl: String =
-            "${ApiRequest.API_HOST}/v1/connections/auth_sessions/selected_accounts"
+        internal val authorizationSessionSelectedAccountsUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/connections/auth_sessions/selected_accounts"
 
-        internal const val pollAccountsNumbersUrl: String =
-            "${ApiRequest.API_HOST}/v1/link_account_sessions/poll_account_numbers"
+        internal val pollAccountsNumbersUrl: String
+            get() = "${ApiRequest.API_HOST}/v1/link_account_sessions/poll_account_numbers"
     }
 }

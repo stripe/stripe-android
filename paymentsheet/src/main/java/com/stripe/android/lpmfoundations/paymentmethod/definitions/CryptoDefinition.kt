@@ -25,7 +25,7 @@ internal object CryptoDefinition : PaymentMethodDefinition {
 }
 
 private object CryptoUiDefinitionFactory : UiDefinitionFactory.Simple() {
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         paymentMethodDefinition = CryptoDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_crypto,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_crypto_day,

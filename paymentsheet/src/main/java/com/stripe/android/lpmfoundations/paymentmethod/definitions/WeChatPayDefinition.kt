@@ -25,7 +25,7 @@ internal object WeChatPayDefinition : PaymentMethodDefinition {
 }
 
 private object WeChatPayUiDefinitionFactory : UiDefinitionFactory.Simple() {
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         paymentMethodDefinition = WeChatPayDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_wechat,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_wechat_pay,

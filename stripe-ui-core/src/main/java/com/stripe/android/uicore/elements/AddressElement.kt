@@ -218,7 +218,7 @@ class AddressElement(
     /**
      * This will return a controller that abides by the SectionFieldErrorController interface.
      */
-    override fun sectionFieldErrorController(): SectionFieldErrorController =
+    override fun sectionFieldErrorController(): SectionFieldValidationController =
         controller
 
     override fun getFormFieldValueFlow() = fields.flatMapLatestAsStateFlow { fieldElements ->

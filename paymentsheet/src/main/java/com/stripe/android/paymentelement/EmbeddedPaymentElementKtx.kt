@@ -59,7 +59,6 @@ fun rememberEmbeddedPaymentElement(
 
     val callbacks = remember(builder) {
         @OptIn(
-            ExperimentalCustomPaymentMethodsApi::class,
             ExperimentalAnalyticEventCallbackApi::class,
             SharedPaymentTokenSessionPreview::class,
             TapToAddPreview::class

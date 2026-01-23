@@ -153,7 +153,6 @@ internal class StripeEndToEndTest {
                     expiryYear = 2045,
                     last4 = "4242",
                     funding = CardFunding.Credit,
-                    threeDSecureStatus = SourceTypeModel.Card.ThreeDSecureStatus.Optional
                 )
             )
     }

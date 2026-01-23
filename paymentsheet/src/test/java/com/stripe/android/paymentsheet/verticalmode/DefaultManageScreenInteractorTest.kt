@@ -354,7 +354,6 @@ class DefaultManageScreenInteractorTest {
             toggleEdit = {
                 toggleEditTurbine.add(Unit)
             },
-            providePaymentMethodName = { (it ?: "Missing name").resolvableString },
             onSelectPaymentMethod = {
                 onSelectPaymentMethodTurbine.add(it)
             },

@@ -2,8 +2,13 @@ package com.stripe.android.common.taptoadd
 
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
+import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
-internal class FakeTapToAddHelper private constructor() : TapToAddHelper {
+internal class FakeTapToAddHelper private constructor(
+    override val collectedPaymentMethod: StateFlow<DisplayableSavedPaymentMethod?> = MutableStateFlow(null)
+) : TapToAddHelper {
     private val collectCalls = Turbine<Unit>()
 
     override fun startPaymentMethodCollection() {
@@ -12,6 +17,7 @@ internal class FakeTapToAddHelper private constructor() : TapToAddHelper {
 
     class Scenario(
         val collectCalls: ReceiveTurbine<Unit>,
+        val mutableCollectedPaymentMethod: MutableStateFlow<DisplayableSavedPaymentMethod?>,
         val helper: TapToAddHelper,
     )
 
@@ -19,11 +25,13 @@ internal class FakeTapToAddHelper private constructor() : TapToAddHelper {
         suspend fun test(
             block: suspend Scenario.() -> Unit,
         ) {
-            val helper = FakeTapToAddHelper()
+            val collectedPaymentMethod = MutableStateFlow<DisplayableSavedPaymentMethod?>(null)
+            val helper = FakeTapToAddHelper(collectedPaymentMethod)
 
             block(
                 Scenario(
                     helper = helper,
+                    mutableCollectedPaymentMethod = collectedPaymentMethod,
                     collectCalls = helper.collectCalls,
                 )
             )
@@ -31,6 +39,8 @@ internal class FakeTapToAddHelper private constructor() : TapToAddHelper {
             helper.collectCalls.ensureAllEventsConsumed()
         }
 
-        fun noOp() = FakeTapToAddHelper()
+        fun noOp(
+            collectedPaymentMethod: StateFlow<DisplayableSavedPaymentMethod?> = MutableStateFlow(null),
+        ) = FakeTapToAddHelper(collectedPaymentMethod)
     }
 }

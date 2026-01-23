@@ -382,7 +382,7 @@ internal class WalletScreenTest {
 
         onWalletPayButton().assertIsNotEnabled()
 
-        viewModel.expiryDateController.onRawValueChange("1225")
+        viewModel.expiryDateController.onRawValueChange("12${getTwoDigitFutureYear()}")
         viewModel.cvcController.onRawValueChange("123")
 
         composeTestRule.waitForIdle()
@@ -415,7 +415,7 @@ internal class WalletScreenTest {
 
         onWalletPayButton().assertIsNotEnabled()
 
-        viewModel.expiryDateController.onRawValueChange("1225")
+        viewModel.expiryDateController.onRawValueChange("12${getTwoDigitFutureYear()}")
         viewModel.cvcController.onRawValueChange("123")
 
         composeTestRule.waitForIdle()

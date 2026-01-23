@@ -110,7 +110,7 @@ internal class IntentConfirmationFlowTest {
             confirmationOption = CONFIRMATION_OPTION,
             confirmationArgs = DEFERRED_CONFIRMATION_PARAMETERS.copy(
                 paymentMethodMetadata = DEFERRED_CONFIRMATION_PARAMETERS.paymentMethodMetadata.copy(
-                    integrationMetadata = IntegrationMetadata.DeferredIntentWithSharedPaymentToken(
+                    integrationMetadata = IntegrationMetadata.DeferredIntent.WithSharedPaymentToken(
                         intentConfiguration = PaymentSheet.IntentConfiguration(
                             sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Setup(
                                 currency = "USD",

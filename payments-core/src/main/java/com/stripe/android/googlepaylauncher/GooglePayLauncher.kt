@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.AcceptanceCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
@@ -92,6 +93,7 @@ class GooglePayLauncher internal constructor(
                 ),
                 additionalEnabledNetworks = config.additionalEnabledNetworks,
                 cardBrandFilter = AcceptanceCardBrandFilter(config.cardBrandAcceptance)
+                cardFundingFilter = DefaultCardFundingFilter
             )
         },
         PaymentAnalyticsRequestFactory(
@@ -135,6 +137,7 @@ class GooglePayLauncher internal constructor(
                     productUsage = setOf(PRODUCT_USAGE),
                 ),
                 cardBrandFilter = AcceptanceCardBrandFilter(config.cardBrandAcceptance)
+                cardFundingFilter = DefaultCardFundingFilter
             )
         },
         PaymentAnalyticsRequestFactory(
@@ -184,6 +187,7 @@ class GooglePayLauncher internal constructor(
                 ),
                 additionalEnabledNetworks = config.additionalEnabledNetworks,
                 cardBrandFilter = AcceptanceCardBrandFilter(config.cardBrandAcceptance)
+                cardFundingFilter = DefaultCardFundingFilter
             )
         },
         paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
@@ -436,6 +440,7 @@ fun rememberGooglePayLauncher(
                     ),
                     additionalEnabledNetworks = config.additionalEnabledNetworks,
                     cardBrandFilter = AcceptanceCardBrandFilter(config.cardBrandAcceptance)
+                    cardFundingFilter = DefaultCardFundingFilter
                 )
             },
             PaymentAnalyticsRequestFactory(

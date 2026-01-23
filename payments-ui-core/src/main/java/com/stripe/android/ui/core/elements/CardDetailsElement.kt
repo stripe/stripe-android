@@ -1,7 +1,9 @@
 package com.stripe.android.ui.core.elements
 
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.model.CardBrand
@@ -9,7 +11,7 @@ import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.CardDetailsUtil.getExpiryMonthFormFieldEntry
 import com.stripe.android.ui.core.elements.CardDetailsUtil.getExpiryYearFormFieldEntry
 import com.stripe.android.uicore.elements.IdentifierSpec
-import com.stripe.android.uicore.elements.SectionFieldErrorController
+import com.stripe.android.uicore.elements.SectionFieldValidationController
 import com.stripe.android.uicore.elements.SectionMultiFieldElement
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.combineAsStateFlow
@@ -28,19 +30,21 @@ internal class CardDetailsElement(
     collectName: Boolean = false,
     private val cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+    private val cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
     val controller: CardDetailsController = CardDetailsController(
         cardAccountRangeRepositoryFactory,
         initialValues,
         collectName,
         cbcEligibility,
         cardBrandFilter = cardBrandFilter,
+        cardFundingFilter = cardFundingFilter
     )
 ) : SectionMultiFieldElement(identifier) {
 
     override val allowsUserInteraction: Boolean = true
     override val mandateText: ResolvableString? = null
 
-    override fun sectionFieldErrorController(): SectionFieldErrorController =
+    override fun sectionFieldErrorController(): SectionFieldValidationController =
         controller
 
     override fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>) {

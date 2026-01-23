@@ -24,7 +24,7 @@ fun AddressTextFieldUI(
     }
 ) {
     val label by controller.label.collectAsState()
-    val error by controller.error.collectAsState()
+    val error by controller.validationMessage.collectAsState()
 
     val textFieldInsets = LocalTextFieldInsets.current
 
@@ -44,7 +44,10 @@ fun AddressTextFieldUI(
         singleLine = true,
         contentPadding = textFieldInsets.asPaddingValues(),
         colors = TextFieldColors(
-            shouldShowError = isError,
+            fieldDisplayState = when (isError) {
+                true -> FieldDisplayState.ERROR
+                false -> FieldDisplayState.NORMAL
+            },
             disabledIndicatorColor = if (isError) {
                 MaterialTheme.colors.error
             } else {

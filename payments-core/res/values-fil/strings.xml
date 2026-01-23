@@ -110,6 +110,18 @@
   <string name="stripe_card_declined">Tinanggihan ang iyong kard</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="stripe_card_ending_in">%1$s nagtatapos sa %2$s</string>
+  <!-- Warning shown when only credit cards are accepted -->
+  <string name="stripe_card_funding_only_credit">Mga credit card lamang ang tinatanggap</string>
+  <!-- Warning shown when only credit and prepaid cards are accepted -->
+  <string name="stripe_card_funding_only_credit_prepaid">Mga credit at prepaid card lamang ang tinatanggap</string>
+  <!-- Warning shown when only debit cards are accepted -->
+  <string name="stripe_card_funding_only_debit">Mga debit card lamang ang tinatanggap</string>
+  <!-- Warning shown when only debit and credit cards are accepted -->
+  <string name="stripe_card_funding_only_debit_credit">Mga debit at credit card lamang ang tinatanggap</string>
+  <!-- Warning shown when only debit and prepaid cards are accepted -->
+  <string name="stripe_card_funding_only_debit_prepaid">Mga debit at prepaid card lamang ang tinatanggap</string>
+  <!-- Warning shown when only prepaid cards are accepted -->
+  <string name="stripe_card_funding_only_prepaid">Mga prepaid card lamang ang tinatanggap</string>
   <!-- Concise details of a saved card. &apos;{card brand} ···· {last 4}&apos; e.g. &apos;VISA ···· 4242&apos; -->
   <string name="stripe_card_plus_last_4">%1$s ···· %2$s</string>
   <!-- Concise details of a saved card. &apos;{card brand} ····{last 4}&apos; e.g. &apos;VISA ····4242&apos; -->

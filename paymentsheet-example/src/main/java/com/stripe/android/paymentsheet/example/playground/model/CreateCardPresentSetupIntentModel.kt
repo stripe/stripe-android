@@ -11,6 +11,12 @@ data class CreateCardPresentSetupIntentRequest(
     val merchantCountryCode: String,
     @SerialName("payment_method_types")
     val paymentMethodTypes: List<String>,
+    @SerialName("custom_stripe_api")
+    val customStripeApi: String?,
+    @SerialName("custom_secret_key")
+    val customSecretKey: String?,
+    @SerialName("custom_publishable_key")
+    val customPublishableKey: String?,
 )
 
 @Serializable

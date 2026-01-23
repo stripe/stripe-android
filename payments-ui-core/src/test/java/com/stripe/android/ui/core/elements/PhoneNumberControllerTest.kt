@@ -139,7 +139,7 @@ internal class PhoneNumberControllerTest {
             initiallySelectedCountryCode = "US",
         )
 
-        phoneNumberController.error.test {
+        phoneNumberController.validationMessage.test {
             assertThat(awaitItem()).isNull()
 
             phoneNumberController.onValueChange("1")
@@ -214,17 +214,17 @@ internal class PhoneNumberControllerTest {
             initiallySelectedCountryCode = "US",
         )
 
-        phoneNumberController.error.test {
+        phoneNumberController.validationMessage.test {
             assertThat(awaitItem()).isNull()
 
             phoneNumberController.onValueChange("123")
-            assertThat(awaitItem()?.errorMessage).isEqualTo(R.string.stripe_incomplete_phone_number)
+            assertThat(awaitItem()?.message).isEqualTo(R.string.stripe_incomplete_phone_number)
 
             phoneNumberController.onFocusChange(true)
             assertThat(awaitItem()).isNull()
 
             phoneNumberController.onValidationStateChanged(true)
-            assertThat(awaitItem()?.errorMessage).isEqualTo(R.string.stripe_incomplete_phone_number)
+            assertThat(awaitItem()?.message).isEqualTo(R.string.stripe_incomplete_phone_number)
         }
     }
 
@@ -234,7 +234,7 @@ internal class PhoneNumberControllerTest {
             initiallySelectedCountryCode = "US",
         )
 
-        phoneNumberController.error.test {
+        phoneNumberController.validationMessage.test {
             assertThat(awaitItem()).isNull()
 
             phoneNumberController.onFocusChange(true)
@@ -250,7 +250,7 @@ internal class PhoneNumberControllerTest {
             initiallySelectedCountryCode = "US",
         )
 
-        phoneNumberController.error.test {
+        phoneNumberController.validationMessage.test {
             assertThat(awaitItem()).isNull()
 
             phoneNumberController.onFocusChange(true)
@@ -267,7 +267,7 @@ internal class PhoneNumberControllerTest {
             initiallySelectedCountryCode = "US",
         )
 
-        phoneNumberController.error.test {
+        phoneNumberController.validationMessage.test {
             assertThat(awaitItem()).isNull()
 
             // Set complete phone number
@@ -289,7 +289,7 @@ internal class PhoneNumberControllerTest {
             acceptAnyInput = true,
         )
 
-        phoneNumberController.error.test {
+        phoneNumberController.validationMessage.test {
             assertThat(awaitItem()).isNull()
 
             phoneNumberController.onValueChange("1")

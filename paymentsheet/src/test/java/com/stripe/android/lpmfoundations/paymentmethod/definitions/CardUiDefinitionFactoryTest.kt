@@ -17,6 +17,7 @@ import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.screenshottesting.LayoutDirection
 import com.stripe.android.screenshottesting.PaparazziConfigOption
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.FormUI
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
@@ -26,6 +27,10 @@ import org.junit.Rule
 import org.junit.Test
 
 class CardUiDefinitionFactoryTest {
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule()
+
     @get:Rule
     val paparazziRule = PaparazziRule()
 

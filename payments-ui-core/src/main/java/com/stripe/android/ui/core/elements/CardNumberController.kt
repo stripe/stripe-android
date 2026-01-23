@@ -1,6 +1,5 @@
 package com.stripe.android.ui.core.elements
 
-import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -14,10 +13,14 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.LayoutDirection
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.CardAccountRangeService
+import com.stripe.android.cards.CardAccountRangeService.AccountRangesState
 import com.stripe.android.cards.CardNumber
+import com.stripe.android.cards.DefaultCardAccountRangeService
 import com.stripe.android.cards.DefaultStaticCardAccountRanges
 import com.stripe.android.cards.StaticCardAccountRanges
 import com.stripe.android.core.strings.ResolvableString
@@ -29,7 +32,7 @@ import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.events.LocalAnalyticsEventReporter
 import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
-import com.stripe.android.uicore.elements.FieldError
+import com.stripe.android.uicore.elements.FieldValidationMessage
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionFieldElement
 import com.stripe.android.uicore.elements.TextFieldController
@@ -41,12 +44,18 @@ import com.stripe.android.uicore.utils.asIndividualDigits
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 import com.stripe.android.R as PaymentsCoreR
 
@@ -64,14 +73,25 @@ internal sealed class CardNumberController : TextFieldController {
  *  `CardBrand.getCardBrands`. Look into merging Account Service and Card Brand logic.
  */
 internal class DefaultCardNumberController(
-    private val cardTextFieldConfig: CardNumberConfig,
+    private val cardTextFieldConfig: CardNumberTextFieldConfig,
     cardAccountRangeRepository: CardAccountRangeRepository,
     uiContext: CoroutineContext,
     workContext: CoroutineContext,
     staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
     override val initialValue: String?,
-    private val cardBrandChoiceConfig: CardBrandChoiceConfig = CardBrandChoiceConfig.Ineligible,
+    cardBrandChoiceConfig: CardBrandChoiceConfig = CardBrandChoiceConfig.Ineligible,
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+    private val cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
+    private val coroutineScope: CoroutineScope = CoroutineScope(uiContext),
+    private val accountRangeService: CardAccountRangeService = DefaultCardAccountRangeService(
+        cardAccountRangeRepository,
+        uiContext,
+        workContext,
+        staticCardAccountRanges,
+        cardBrandFilter = cardBrandFilter,
+        cardFundingFilter = cardFundingFilter,
+        coroutineScope = coroutineScope
+    ),
 ) : CardNumberController() {
     override val capitalization: KeyboardCapitalization = cardTextFieldConfig.capitalization
     override val keyboardType: KeyboardType = cardTextFieldConfig.keyboard
@@ -142,11 +162,20 @@ internal class DefaultCardNumberController(
      * option  of not determining the card brand unless the user selects one. We use an implied
      * card brand (VISA, Mastercard) internally to pass state validation.
      */
-    private val impliedCardBrand = _fieldValue.mapAsStateFlow {
-        accountRangeService.accountRange?.brand
-            ?: CardBrand.getCardBrands(it).firstOrNull()
-            ?: CardBrand.Unknown
-    }
+    private val impliedCardBrand = combine(
+        flow = _fieldValue,
+        flow2 = accountRangeService.accountRangesStateFlow
+            .map { it.ranges }
+    ) { fieldValue, accountRanges ->
+        impliedBrandValue(
+            accountRange = accountRanges.firstOrNull(),
+            number = fieldValue
+        )
+    }.stateIn(
+        scope = coroutineScope,
+        initialValue = impliedBrandValue(),
+        started = SharingStarted.Eagerly
+    )
 
     override val cardBrandFlow = if (isEligibleForCardBrandChoice) {
         combineAsStateFlow(
@@ -159,114 +188,40 @@ internal class DefaultCardNumberController(
         impliedCardBrand
     }
 
-    @VisibleForTesting
-    val accountRangeService = CardAccountRangeService(
-        cardAccountRangeRepository,
-        uiContext,
-        workContext,
-        staticCardAccountRanges,
-        object : CardAccountRangeService.AccountRangeResultListener {
-            override fun onAccountRangesResult(
-                accountRanges: List<AccountRange>,
-                unfilteredAccountRanges: List<AccountRange>
-            ) {
-                val newAccountRange = accountRanges.firstOrNull()
-                newAccountRange?.panLength?.let { panLength ->
-                    latestBinBasedPanLength.value = panLength
-                }
-
-                val newBrandChoices = unfilteredAccountRanges.map { it.brand }.distinct()
-
-                brandChoices.value = newBrandChoices
-            }
-        },
-        isCbcEligible = { isEligibleForCardBrandChoice },
-        cardBrandFilter = cardBrandFilter
+    override val trailingIcon: StateFlow<TextFieldIcon?> = combine(
+        flow = _fieldValue,
+        flow2 = brandChoices,
+        flow3 = selectedCardBrandFlow,
+        flow4 = accountRangeService.accountRangesStateFlow
+    ) { number, brands, chosen, accountRangeState ->
+        trailingIconValue(
+            number = number,
+            brands = brands,
+            chosen = chosen,
+            accountRange = accountRangeState.ranges.firstOrNull()
+        )
+    }.stateIn(
+        scope = coroutineScope,
+        initialValue = trailingIconValue(),
+        started = SharingStarted.Eagerly
     )
 
-    override val trailingIcon: StateFlow<TextFieldIcon?> = combineAsStateFlow(
-        _fieldValue,
-        brandChoices,
-        selectedCardBrandFlow
-    ) { number, brands, chosen ->
-        if (isEligibleForCardBrandChoice && number.isNotEmpty()) {
-            val noSelection = TextFieldIcon.Dropdown.Item(
-                id = CardBrand.Unknown.code,
-                label = PaymentsCoreR.string.stripe_card_brand_choice_no_selection.resolvableString,
-                icon = CardBrand.Unknown.icon
-            )
-
-            val selected = if (brands.size == 1) {
-                val onlyAvailableBrand = brands[0]
-
-                TextFieldIcon.Dropdown.Item(
-                    id = onlyAvailableBrand.code,
-                    label = onlyAvailableBrand.displayName.resolvableString,
-                    icon = onlyAvailableBrand.icon
-                )
-            } else {
-                when (chosen) {
-                    CardBrand.Unknown -> null
-                    else -> TextFieldIcon.Dropdown.Item(
-                        id = chosen.code,
-                        label = chosen.displayName.resolvableString,
-                        icon = chosen.icon
-                    )
-                }
-            }
-
-            val items = brands.map { brand ->
-                val enabled = cardBrandFilter.isAccepted(brand)
-                TextFieldIcon.Dropdown.Item(
-                    id = brand.code,
-                    label = if (enabled) {
-                        brand.displayName.resolvableString
-                    } else {
-                        resolvableString(
-                            R.string.stripe_card_brand_not_accepted_with_brand,
-                            brand.displayName
-                        )
-                    },
-                    icon = brand.icon,
-                    enabled = enabled
-                )
-            }
-
-            TextFieldIcon.Dropdown(
-                title = PaymentsCoreR.string.stripe_card_brand_choice_selection_header.resolvableString,
-                currentItem = selected ?: noSelection,
-                items = items,
-                hide = brands.size < 2
-            )
-        } else if (accountRangeService.accountRange != null) {
-            TextFieldIcon.Trailing(accountRangeService.accountRange!!.brand.icon, isTintable = false)
-        } else {
-            val cardBrands = CardBrand.getCardBrands(number).filter { cardBrandFilter.isAccepted(it) }
-
-            val staticIcons = cardBrands.map { cardBrand ->
-                TextFieldIcon.Trailing(cardBrand.icon, isTintable = false)
-            }.take(STATIC_ICON_COUNT)
-
-            val animatedIcons = cardBrands.map { cardBrand ->
-                TextFieldIcon.Trailing(cardBrand.icon, isTintable = false)
-            }.drop(STATIC_ICON_COUNT)
-
-            TextFieldIcon.MultiTrailing(
-                staticIcons = staticIcons,
-                animatedIcons = animatedIcons
-            )
-        }
-    }
-
-    private val _fieldState = combineAsStateFlow(impliedCardBrand, _fieldValue) { brand, fieldValue ->
-        cardTextFieldConfig.determineState(
-            brand,
-            fieldValue,
-            accountRangeService.accountRange?.panLength ?: brand.getMaxLengthForCardNumber(
-                fieldValue
-            )
+    private val _fieldState = combine(
+        flow = impliedCardBrand,
+        flow2 = _fieldValue,
+        flow3 = accountRangeService.accountRangesStateFlow.filterIsInstance<AccountRangesState.Success>()
+    ) { brand, fieldValue, accountRanges ->
+        textFieldState(
+            brand = brand,
+            accountRanges = accountRanges.ranges,
+            number = fieldValue
         )
-    }
+    }.stateIn(
+        scope = coroutineScope,
+        initialValue = textFieldState(),
+        started = SharingStarted.Eagerly
+    )
+
     override val fieldState: StateFlow<TextFieldState> = _fieldState
 
     private val _isValidating = MutableStateFlow(false)
@@ -274,17 +229,17 @@ internal class DefaultCardNumberController(
 
     override val loading: StateFlow<Boolean> = accountRangeService.isLoading
 
-    override val visibleError: StateFlow<Boolean> =
+    override val visibleValidationMessage: StateFlow<Boolean> =
         combineAsStateFlow(_fieldState, _hasFocus, _isValidating) { fieldState, hasFocus, isValidating ->
-            fieldState.shouldShowError(hasFocus, isValidating)
+            fieldState.shouldShowValidationMessage(hasFocus, isValidating)
         }
 
     /**
      * An error must be emitted if it is visible or not visible.
      **/
-    override val error: StateFlow<FieldError?> =
-        combineAsStateFlow(visibleError, _fieldState) { visibleError, fieldState ->
-            fieldState.getError()?.takeIf { visibleError }
+    override val validationMessage: StateFlow<FieldValidationMessage?> =
+        combineAsStateFlow(visibleValidationMessage, _fieldState) { visibleError, fieldState ->
+            fieldState.getValidationMessage()?.takeIf { visibleError }
         }
 
     override val isComplete: StateFlow<Boolean> = _fieldState.mapAsStateFlow { it.isValid() }
@@ -296,6 +251,19 @@ internal class DefaultCardNumberController(
 
     init {
         onRawValueChange(initialValue ?: "")
+
+        coroutineScope.launch(uiContext) {
+            accountRangeService.accountRangeResultFlow
+                .collect { result ->
+                    val newAccountRange = result.accountRanges.firstOrNull()
+                    newAccountRange?.panLength?.let { panLength ->
+                        latestBinBasedPanLength.value = panLength
+                    }
+
+                    val newBrandChoices = result.unfilteredAccountRanges.map { it.brand }.distinct()
+                    brandChoices.value = newBrandChoices
+                }
+        }
     }
 
     /**
@@ -304,7 +272,7 @@ internal class DefaultCardNumberController(
     override fun onValueChange(displayFormatted: String): TextFieldState? {
         _fieldValue.value = cardTextFieldConfig.filter(displayFormatted)
         val cardNumber = CardNumber.Unvalidated(displayFormatted)
-        accountRangeService.onCardNumberChanged(cardNumber)
+        accountRangeService.onCardNumberChanged(cardNumber, isCbcEligible = isEligibleForCardBrandChoice)
 
         return null
     }
@@ -376,8 +344,8 @@ internal class DefaultCardNumberController(
                         lastLoggedCardBrand = null // Reset when valid
                     }
                     is TextFieldStateConstants.Error.Invalid -> {
-                        val error = state.getError()
-                        val isDisallowedError = error?.errorMessage == PaymentsCoreR.string.stripe_disallowed_card_brand
+                        val error = state.getValidationMessage()
+                        val isDisallowedError = error.message == PaymentsCoreR.string.stripe_disallowed_card_brand
                         if (isDisallowedError && lastLoggedCardBrand != impliedCardBrand.value) {
                             disallowedBrandReporter.onDisallowedCardBrandEntered(impliedCardBrand.value)
                             lastLoggedCardBrand = impliedCardBrand.value
@@ -417,6 +385,118 @@ internal class DefaultCardNumberController(
             modifier,
             hiddenIdentifiers,
             lastTextFieldIdentifier
+        )
+    }
+
+    private fun textFieldState(
+        brand: CardBrand = impliedCardBrand.value,
+        accountRanges: List<AccountRange> = emptyList(),
+        number: String = _fieldValue.value
+    ): TextFieldState {
+        return cardTextFieldConfig.determineState(
+            brand,
+            accountRanges,
+            number,
+            numberAllowedDigits = accountRangeService.accountRange?.panLength
+                ?: brand.getMaxLengthForCardNumber(number)
+        )
+    }
+
+    private fun impliedBrandValue(
+        accountRange: AccountRange? = accountRangeService.accountRangesStateFlow.value.ranges.firstOrNull(),
+        number: String = fieldValue.value
+    ): CardBrand {
+        return accountRange?.brand
+            ?: CardBrand.getCardBrands(number).firstOrNull()
+            ?: CardBrand.Unknown
+    }
+
+    private fun trailingIconValue(
+        number: String = _fieldValue.value,
+        brands: List<CardBrand> = brandChoices.value,
+        chosen: CardBrand = selectedCardBrandFlow.value,
+        accountRange: AccountRange? = accountRangeService.accountRangesStateFlow.value.ranges.firstOrNull()
+    ): TextFieldIcon? {
+        return when {
+            isEligibleForCardBrandChoice && number.isNotEmpty() -> {
+                createDropdownIcon(brands, chosen)
+            }
+            accountRange != null -> {
+                TextFieldIcon.Trailing(accountRange.brand.icon, isTintable = false)
+            }
+            else -> {
+                createMultiTrailingIcon(number)
+            }
+        }
+    }
+
+    private fun createDropdownIcon(
+        brands: List<CardBrand>,
+        chosen: CardBrand
+    ): TextFieldIcon.Dropdown {
+        val noSelection = TextFieldIcon.Dropdown.Item(
+            id = CardBrand.Unknown.code,
+            label = PaymentsCoreR.string.stripe_card_brand_choice_no_selection.resolvableString,
+            icon = CardBrand.Unknown.icon
+        )
+
+        val selected = if (brands.size == 1) {
+            val onlyAvailableBrand = brands[0]
+            TextFieldIcon.Dropdown.Item(
+                id = onlyAvailableBrand.code,
+                label = onlyAvailableBrand.displayName.resolvableString,
+                icon = onlyAvailableBrand.icon
+            )
+        } else {
+            when (chosen) {
+                CardBrand.Unknown -> null
+                else -> TextFieldIcon.Dropdown.Item(
+                    id = chosen.code,
+                    label = chosen.displayName.resolvableString,
+                    icon = chosen.icon
+                )
+            }
+        }
+
+        val items = brands.map { brand ->
+            val enabled = cardBrandFilter.isAccepted(brand)
+            TextFieldIcon.Dropdown.Item(
+                id = brand.code,
+                label = if (enabled) {
+                    brand.displayName.resolvableString
+                } else {
+                    resolvableString(
+                        R.string.stripe_card_brand_not_accepted_with_brand,
+                        brand.displayName
+                    )
+                },
+                icon = brand.icon,
+                enabled = enabled
+            )
+        }
+
+        return TextFieldIcon.Dropdown(
+            title = PaymentsCoreR.string.stripe_card_brand_choice_selection_header.resolvableString,
+            currentItem = selected ?: noSelection,
+            items = items,
+            hide = brands.size < 2
+        )
+    }
+
+    private fun createMultiTrailingIcon(number: String): TextFieldIcon.MultiTrailing {
+        val cardBrands = CardBrand.getCardBrands(number).filter { cardBrandFilter.isAccepted(it) }
+
+        val staticIcons = cardBrands.map { cardBrand ->
+            TextFieldIcon.Trailing(cardBrand.icon, isTintable = false)
+        }.take(STATIC_ICON_COUNT)
+
+        val animatedIcons = cardBrands.map { cardBrand ->
+            TextFieldIcon.Trailing(cardBrand.icon, isTintable = false)
+        }.drop(STATIC_ICON_COUNT)
+
+        return TextFieldIcon.MultiTrailing(
+            staticIcons = staticIcons,
+            animatedIcons = animatedIcons
         )
     }
 

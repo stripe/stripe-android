@@ -10,6 +10,7 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.common.taptoadd.FakeTapToAddCollectionHandler
 import com.stripe.android.core.Logger
@@ -53,7 +54,6 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -156,7 +156,6 @@ import com.stripe.android.R as PaymentsCoreR
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
-@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 internal class PaymentSheetViewModelTest {
     private val testDispatcher = UnconfinedTestDispatcher()
 
@@ -2558,6 +2557,7 @@ internal class PaymentSheetViewModelTest {
                     merchantCurrencyCode = googlePayConfig.currencyCode,
                     billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
                     cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
+                    cardFundingFilter = DefaultCardFundingFilter,
                 ),
             )
         )
@@ -2601,6 +2601,7 @@ internal class PaymentSheetViewModelTest {
                     merchantCurrencyCode = googlePayConfig.currencyCode,
                     billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
                     cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
+                    cardFundingFilter = DefaultCardFundingFilter,
                 ),
             )
         )
@@ -3290,7 +3291,7 @@ internal class PaymentSheetViewModelTest {
         )
 
         verify(eventReporter).onExperimentExposure(
-            any<LoggableExperiment.OcsMobileHorizontalModeAndroidAA>()
+            any<LoggableExperiment.OcsMobileHorizontalMode>()
         )
     }
 
@@ -3304,7 +3305,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.getPaymentMethodLayout()
 
         verify(eventReporter, never()).onExperimentExposure(
-            any<LoggableExperiment.OcsMobileHorizontalModeAndroidAA>()
+            any<LoggableExperiment.OcsMobileHorizontalMode>()
         )
     }
 
@@ -3323,7 +3324,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.getPaymentMethodLayout()
 
         verify(eventReporter, never()).onExperimentExposure(
-            any<LoggableExperiment.OcsMobileHorizontalModeAndroidAA>()
+            any<LoggableExperiment.OcsMobileHorizontalMode>()
         )
     }
 
@@ -3503,6 +3504,7 @@ internal class PaymentSheetViewModelTest {
                     }
                 },
                 tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
+                mode = EventReporter.Mode.Complete,
             )
         }
     }

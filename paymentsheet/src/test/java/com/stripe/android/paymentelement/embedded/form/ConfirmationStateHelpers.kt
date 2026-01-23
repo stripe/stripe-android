@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.embedded.form
 
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.PaymentIntentFixtures
@@ -12,6 +13,7 @@ internal fun confirmationStateConfirming(selection: PaymentSelection): Confirmat
     val confirmationOption = selection.toConfirmationOption(
         configuration = EmbeddedConfirmationStateFixtures.defaultState().configuration.asCommonConfiguration(),
         linkConfiguration = null,
+        cardFundingFilter = DefaultCardFundingFilter
     )
     return ConfirmationHandler.State.Confirming(requireNotNull(confirmationOption))
 }

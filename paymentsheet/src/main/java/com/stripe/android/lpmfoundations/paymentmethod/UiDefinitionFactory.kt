@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.link.LinkConfigurationCoordinator
@@ -42,6 +43,7 @@ internal sealed interface UiDefinitionFactory {
         val requiresMandate: Boolean,
         val onLinkInlineSignupStateChanged: (InlineSignupViewState) -> Unit,
         val cardBrandFilter: CardBrandFilter,
+        val cardFundingFilter: CardFundingFilter,
         val setAsDefaultMatchesSaveForFutureUse: Boolean,
         val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
         val linkInlineHandler: LinkInlineHandler?,
@@ -94,6 +96,7 @@ internal sealed interface UiDefinitionFactory {
                         requiresMandate = requiresMandate,
                         onLinkInlineSignupStateChanged = onLinkInlineSignupStateChanged,
                         cardBrandFilter = metadata.cardBrandFilter,
+                        cardFundingFilter = metadata.cardFundingFilter,
                         initialLinkUserInput = initialLinkUserInput,
                         setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
                         autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
@@ -155,13 +158,16 @@ internal sealed interface UiDefinitionFactory {
     }
 
     abstract class Simple : UiDefinitionFactory {
-        abstract fun createSupportedPaymentMethod(): SupportedPaymentMethod
+        abstract fun createSupportedPaymentMethod(
+            metadata: PaymentMethodMetadata,
+        ): SupportedPaymentMethod
 
         open fun createFormHeaderInformation(
+            metadata: PaymentMethodMetadata,
             customerHasSavedPaymentMethods: Boolean,
             incentive: PaymentMethodIncentive?,
         ): FormHeaderInformation {
-            return createSupportedPaymentMethod().asFormHeaderInformation(incentive)
+            return createSupportedPaymentMethod(metadata).asFormHeaderInformation(incentive)
         }
 
         fun createFormElements(metadata: PaymentMethodMetadata, arguments: Arguments): List<FormElement> {
@@ -213,7 +219,7 @@ internal sealed interface UiDefinitionFactory {
         sharedDataSpecs: List<SharedDataSpec>,
     ): SupportedPaymentMethod? = when (this) {
         is Simple -> {
-            createSupportedPaymentMethod()
+            createSupportedPaymentMethod(metadata)
         }
 
         is Custom -> {
@@ -238,6 +244,7 @@ internal sealed interface UiDefinitionFactory {
     ): FormHeaderInformation? = when (this) {
         is Simple -> {
             createFormHeaderInformation(
+                metadata = metadata,
                 customerHasSavedPaymentMethods = customerHasSavedPaymentMethods,
                 incentive = metadata.paymentMethodIncentive,
             )

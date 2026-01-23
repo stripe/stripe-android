@@ -333,8 +333,11 @@ class WalletViewModelTest {
         advanceUntilIdle()
         assertThat(viewModel.uiState.value.expiryDateInput).isEqualTo(FormFieldEntry("12", isComplete = false))
 
-        viewModel.expiryDateController.onRawValueChange("12/25")
-        assertThat(viewModel.uiState.value.expiryDateInput).isEqualTo(FormFieldEntry("1225", isComplete = true))
+        val futureYear = getTwoDigitFutureYear()
+
+        viewModel.expiryDateController.onRawValueChange("12/$futureYear")
+        assertThat(viewModel.uiState.value.expiryDateInput)
+            .isEqualTo(FormFieldEntry("12$futureYear", isComplete = true))
     }
 
     @Test
@@ -354,10 +357,13 @@ class WalletViewModelTest {
     fun `expiryDateController and cvcController reset when new item is selected`() = runTest(dispatcher) {
         val viewModel = createViewModel()
 
-        viewModel.expiryDateController.onRawValueChange("12/25")
+        val futureYear = getTwoDigitFutureYear()
+
+        viewModel.expiryDateController.onRawValueChange("12/$futureYear")
         viewModel.cvcController.onRawValueChange("123")
 
-        assertThat(viewModel.uiState.value.expiryDateInput).isEqualTo(FormFieldEntry("1225", isComplete = true))
+        assertThat(viewModel.uiState.value.expiryDateInput)
+            .isEqualTo(FormFieldEntry("12$futureYear", isComplete = true))
         assertThat(viewModel.uiState.value.cvcInput).isEqualTo(FormFieldEntry("123", isComplete = true))
 
         val newCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(id = "new_card_id")

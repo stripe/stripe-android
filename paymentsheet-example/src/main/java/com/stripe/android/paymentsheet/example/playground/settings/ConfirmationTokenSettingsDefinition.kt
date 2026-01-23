@@ -24,7 +24,8 @@ internal object ConfirmationTokenSettingsDefinition : BooleanSettingsDefinition(
             InitializationType.DeferredClientSideConfirmation,
             InitializationType.DeferredServerSideConfirmation,
             InitializationType.DeferredManualConfirmation,
-            InitializationType.DeferredMultiprocessor -> true
+            InitializationType.DeferredMultiprocessor,
+            InitializationType.CheckoutSession -> true
         }
     }
 

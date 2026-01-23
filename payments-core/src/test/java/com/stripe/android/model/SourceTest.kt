@@ -28,9 +28,6 @@ class SourceTest {
         assertEquals(DOGE_COIN, customSource.typeRaw)
         assertNull(customSource.sourceTypeModel)
         requireNotNull(customSource.sourceTypeData)
-
-        assertNotNull(customSource.receiver)
-        assertNotNull(customSource.codeVerification)
     }
 
     @Test
@@ -48,19 +45,6 @@ class SourceTest {
 
         val sourceCardData = source.sourceTypeModel as SourceTypeModel.Card?
         assertEquals(CardBrand.Visa, sourceCardData?.brand)
-    }
-
-    @Test
-    fun fromJsonString_withWeChatSourceJson() {
-        val source = SourceFixtures.WECHAT
-        assertNotNull(source)
-
-        assertEquals(Source.USD, source.currency)
-        assertTrue(source.isLiveMode == true)
-
-        val weChat = source.weChat
-        assertNotNull(weChat)
-        assertEquals("wxa0df8has9d78ce", weChat.appId)
     }
 
     @Test
