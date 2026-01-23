@@ -15,7 +15,7 @@ class CheckoutSessionResponseJsonParserTest {
 
     @Test
     fun `parse checkout session response`() {
-        val params = ElementsSessionParams.CheckoutSessionType(
+        val params = ElementsSessionParams.CheckoutSession.Initial(
             clientSecret = "cs_test_123_secret_abc",
         )
         val result = CheckoutSessionResponseJsonParser(
@@ -67,7 +67,7 @@ class CheckoutSessionResponseJsonParserTest {
             }
             """.trimIndent()
         )
-        val params = ElementsSessionParams.CheckoutSessionType(clientSecret = "cs_test_secret")
+        val params = ElementsSessionParams.CheckoutSession.Initial(clientSecret = "cs_test_secret")
         val result = CheckoutSessionResponseJsonParser(params, isLiveMode = false).parse(json)
 
         assertThat(result).isNull()
@@ -84,7 +84,7 @@ class CheckoutSessionResponseJsonParserTest {
             }
             """.trimIndent()
         )
-        val params = ElementsSessionParams.CheckoutSessionType(clientSecret = "cs_test_secret")
+        val params = ElementsSessionParams.CheckoutSession.Initial(clientSecret = "cs_test_secret")
         val result = CheckoutSessionResponseJsonParser(params, isLiveMode = false).parse(json)
 
         assertThat(result).isNull()
@@ -101,7 +101,7 @@ class CheckoutSessionResponseJsonParserTest {
             }
             """.trimIndent()
         )
-        val params = ElementsSessionParams.CheckoutSessionType(clientSecret = "cs_test_secret")
+        val params = ElementsSessionParams.CheckoutSession.Initial(clientSecret = "cs_test_secret")
         val result = CheckoutSessionResponseJsonParser(params, isLiveMode = false).parse(json)
 
         assertThat(result).isNull()
@@ -118,7 +118,7 @@ class CheckoutSessionResponseJsonParserTest {
             }
             """.trimIndent()
         )
-        val params = ElementsSessionParams.CheckoutSessionType(clientSecret = "cs_test_secret")
+        val params = ElementsSessionParams.CheckoutSession.Initial(clientSecret = "cs_test_secret")
         val result = CheckoutSessionResponseJsonParser(params, isLiveMode = false).parse(json)
 
         assertThat(result).isNotNull()
@@ -140,7 +140,7 @@ class CheckoutSessionResponseJsonParserTest {
             }
             """.trimIndent()
         )
-        val params = ElementsSessionParams.CheckoutSessionType(clientSecret = "cs_test_secret")
+        val params = ElementsSessionParams.CheckoutSession.Initial(clientSecret = "cs_test_secret")
         val result = CheckoutSessionResponseJsonParser(params, isLiveMode = false).parse(json)
 
         // Response is parsed successfully but elements_session is null due to invalid JSON
@@ -151,7 +151,7 @@ class CheckoutSessionResponseJsonParserTest {
 
     @Test
     fun `parse confirm response with succeeded payment intent`() {
-        val params = ElementsSessionParams.CheckoutSessionType(clientSecret = "cs_test_secret")
+        val params = ElementsSessionParams.CheckoutSession.Initial(clientSecret = "cs_test_secret")
         val result = CheckoutSessionResponseJsonParser(params, isLiveMode = false)
             .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_CONFIRM_SUCCEEDED_JSON)
 
@@ -173,7 +173,7 @@ class CheckoutSessionResponseJsonParserTest {
 
     @Test
     fun `parse confirm response with requires_action payment intent`() {
-        val params = ElementsSessionParams.CheckoutSessionType(clientSecret = "cs_test_secret")
+        val params = ElementsSessionParams.CheckoutSession.Initial(clientSecret = "cs_test_secret")
         val result = CheckoutSessionResponseJsonParser(params, isLiveMode = false)
             .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_CONFIRM_REQUIRES_ACTION_JSON)
 
