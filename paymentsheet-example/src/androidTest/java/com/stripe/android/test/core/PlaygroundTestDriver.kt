@@ -1589,7 +1589,7 @@ internal class PlaygroundTestDriver(
         // after web view verification.
         clickButton("Connect account", composeCanDetach = true)
 
-        clickButton("Not now")
+        clickButtonWithTag("skip_cta")
         clickButtonWithTag("done_button")
     }
 
