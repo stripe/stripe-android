@@ -3,6 +3,8 @@ package com.stripe.android.paymentsheet.navigation
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.ui.LinkButtonState
@@ -154,6 +156,8 @@ internal class PaymentSheetScreenVerticalModeScreenshotTest {
             onGooglePayPressed = { throw AssertionError("Not expected.") },
             onLinkPressed = { throw AssertionError("Not expected.") },
             walletsAllowedInHeader = WalletType.entries,
+            cardFundingFilter = DefaultCardFundingFilter,
+            cardBrandFilter = DefaultCardBrandFilter
         )
 
         paparazziRule.snapshot {

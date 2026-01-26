@@ -204,7 +204,7 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                     }
                 },
                 tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
-                mode = EventReporter.Mode.Complete,
+                mode = EventReporter.Mode.Complete
             )
         }
     }

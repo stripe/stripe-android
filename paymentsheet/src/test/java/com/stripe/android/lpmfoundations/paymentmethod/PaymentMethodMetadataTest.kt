@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
@@ -1084,6 +1085,7 @@ internal class PaymentMethodMetadataTest {
         val cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.allowed(
             listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Amex)
         )
+        val allowedCardFundingTypes = listOf(PaymentSheet.CardFundingType.Debit, PaymentSheet.CardFundingType.Prepaid)
         val customPaymentMethods = listOf(
             PaymentSheet.CustomPaymentMethod(
                 id = "cpmt_123",
@@ -1107,6 +1109,7 @@ internal class PaymentMethodMetadataTest {
             shippingDetails,
             customPaymentMethods,
             cardBrandAcceptance,
+            allowedCardFundingTypes
         )
         val elementsSession = createElementsSession(
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
@@ -1129,6 +1132,10 @@ internal class PaymentMethodMetadataTest {
                     type = "cpmt_789",
                     error = "not_found",
                 ),
+            ),
+            flags = mapOf(
+                ElementsSession.Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA to true,
+                ElementsSession.Flag.ELEMENTS_MOBILE_CARD_FUND_FILTERING to true
             )
         )
 
@@ -1151,7 +1158,7 @@ internal class PaymentMethodMetadataTest {
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
-            isTapToAddSupported = false,
+            isTapToAddSupported = false
         )
 
         val expectedMetadata = PaymentMethodMetadata(
@@ -1203,6 +1210,7 @@ internal class PaymentMethodMetadataTest {
                 loginState = LinkState.LoginState.LoggedOut,
             ),
             cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
+            cardFundingFilter = PaymentSheetCardFundingFilter(allowedCardFundingTypes),
             paymentMethodIncentive = null,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             termsDisplay = emptyMap(),
@@ -1220,6 +1228,69 @@ internal class PaymentMethodMetadataTest {
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
+    }
+
+    @Suppress("LongMethod")
+    @Test
+    fun `should use default funding types when ELEMENTS_MOBILE_CARD_FUND_FILTERING flag is false`() {
+        val billingDetailsCollectionConfiguration = createBillingDetailsCollectionConfiguration()
+        val defaultBillingDetails = PaymentSheet.BillingDetails(
+            address = PaymentSheet.Address(line1 = "123 Apple Street")
+        )
+        val shippingDetails = AddressDetails(address = PaymentSheet.Address(line1 = "123 Pear Street"))
+        val cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.allowed(
+            listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Amex)
+        )
+        // Configure restrictive funding types
+        val allowedCardFundingTypes = listOf(PaymentSheet.CardFundingType.Debit, PaymentSheet.CardFundingType.Prepaid)
+
+        val configuration = createPaymentSheetConfiguration(
+            billingDetailsCollectionConfiguration,
+            defaultBillingDetails,
+            shippingDetails,
+            emptyList(),
+            cardBrandAcceptance,
+            allowedCardFundingTypes
+        )
+
+        // Create ElementsSession with flag set to false
+        val elementsSession = createElementsSession(
+            intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            cardBrandChoice = ElementsSession.CardBrandChoice(
+                eligible = true,
+                preferredNetworks = listOf("cartes_bancaires"),
+            ),
+            flags = mapOf(
+                ElementsSession.Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA to true,
+                ElementsSession.Flag.ELEMENTS_MOBILE_CARD_FUND_FILTERING to false // Flag is false
+            )
+        )
+
+        val sharedDataSpecs = listOf(SharedDataSpec("card"))
+        val externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC)
+
+        val metadata = PaymentMethodMetadata.createForPaymentElement(
+            elementsSession = elementsSession,
+            configuration = configuration.asCommonConfiguration(),
+            sharedDataSpecs = sharedDataSpecs,
+            externalPaymentMethodSpecs = externalPaymentMethodSpecs,
+            isGooglePayReady = false,
+            linkStateResult = LinkState(
+                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+                configuration = createLinkConfiguration(),
+                loginState = LinkState.LoginState.LoggedOut,
+            ),
+            customerMetadata = DEFAULT_CUSTOMER_METADATA,
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
+            clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
+            analyticsMetadata = AnalyticsMetadata(emptyMap()),
+            isTapToAddSupported = false,
+        )
+
+        // When flag is false, should use default funding types, not the configured ones
+        assertThat(metadata.cardFundingFilter)
+            .isEqualTo(PaymentSheetCardFundingFilter(ConfigurationDefaults.allowedCardFundingTypes))
     }
 
     @Suppress("LongMethod")
@@ -1289,6 +1360,7 @@ internal class PaymentMethodMetadataTest {
             linkMode = null,
             linkStateResult = null,
             cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
+            cardFundingFilter = PaymentSheetCardFundingFilter(ConfigurationDefaults.allowedCardFundingTypes),
             paymentMethodIncentive = null,
             termsDisplay = emptyMap(),
             forceSetupFutureUseBehaviorAndNewMandate = false,
@@ -1399,6 +1471,9 @@ internal class PaymentMethodMetadataTest {
         mobilePaymentElementComponent: ElementsSession.Customer.Components.MobilePaymentElement? = null,
         passiveCaptchaParams: PassiveCaptchaParams? = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
         experimentsData: ElementsSession.ExperimentsData? = null,
+        flags: Map<ElementsSession.Flag, Boolean> = mapOf(
+            ElementsSession.Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA to true
+        ),
     ): ElementsSession {
         return ElementsSession(
             stripeIntent = intent,
@@ -1427,9 +1502,7 @@ internal class PaymentMethodMetadataTest {
             externalPaymentMethodData = null,
             paymentMethodSpecs = null,
             elementsSessionId = "session_1234",
-            flags = mapOf(
-                ElementsSession.Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA to true
-            ),
+            flags = flags,
             orderedPaymentMethodTypesAndWallets = orderedPaymentMethodTypesAndWallets,
             experimentsData = experimentsData,
             merchantLogoUrl = null,
@@ -2084,6 +2157,7 @@ internal class PaymentMethodMetadataTest {
             customPaymentMethods = listOf(),
             cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.all(),
             shopPayConfiguration = shopPayConfiguration,
+            allowedCardFundingTypes = ConfigurationDefaults.allowedCardFundingTypes
         )
 
         val metadata = PaymentMethodMetadata.createForPaymentElement(
@@ -2292,6 +2366,7 @@ internal class PaymentMethodMetadataTest {
         shippingDetails: AddressDetails,
         customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
+        allowedCardFundingTypes: List<PaymentSheet.CardFundingType>,
         shopPayConfiguration: PaymentSheet.ShopPayConfiguration? = null
     ) = PaymentSheet.Configuration(
         merchantDisplayName = "Merchant Inc.",
@@ -2305,7 +2380,8 @@ internal class PaymentMethodMetadataTest {
         preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa),
         customPaymentMethods = customPaymentMethods,
         cardBrandAcceptance = cardBrandAcceptance,
-        shopPayConfiguration = shopPayConfiguration
+        shopPayConfiguration = shopPayConfiguration,
+        allowedCardFundingTypes = allowedCardFundingTypes
     )
 
     @Test

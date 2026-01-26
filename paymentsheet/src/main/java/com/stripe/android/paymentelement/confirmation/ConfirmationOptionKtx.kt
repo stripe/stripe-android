@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.confirmation
 
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkLaunchMode
@@ -18,6 +19,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 internal fun PaymentSelection.toConfirmationOption(
     configuration: CommonConfiguration,
     linkConfiguration: LinkConfiguration?,
+    cardFundingFilter: CardFundingFilter
 ): ConfirmationHandler.Option? {
     return when (this) {
         is PaymentSelection.Saved -> toConfirmationOption()
@@ -28,6 +30,7 @@ internal fun PaymentSelection.toConfirmationOption(
         is PaymentSelection.New -> toConfirmationOption()
         is PaymentSelection.GooglePay -> toConfirmationOption(
             configuration,
+            cardFundingFilter
         )
         is PaymentSelection.Link -> toConfirmationOption(linkConfiguration)
         is PaymentSelection.ShopPay -> toConfirmationOption(configuration)
@@ -108,6 +111,7 @@ private fun PaymentSelection.New.toConfirmationOption(): ConfirmationHandler.Opt
 
 private fun PaymentSelection.GooglePay.toConfirmationOption(
     configuration: CommonConfiguration,
+    cardFundingFilter: CardFundingFilter
 ): GooglePayConfirmationOption? {
     return configuration.googlePay?.let { googlePay ->
         GooglePayConfirmationOption(
@@ -119,7 +123,9 @@ private fun PaymentSelection.GooglePay.toConfirmationOption(
                 customAmount = googlePay.amount,
                 customLabel = googlePay.label,
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
-                cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
+                additionalEnabledNetworks = googlePay.additionalEnabledNetworks,
+                cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
+                cardFundingFilter = cardFundingFilter
             ),
         )
     }

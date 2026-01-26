@@ -22,6 +22,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.connect.ComponentEvent
+import com.stripe.android.connect.EmbeddedComponentError
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.connect.analytics.ComponentAnalyticsService
@@ -203,8 +204,14 @@ internal class StripeConnectWebViewContainerViewModel(
 
             // don't send errors for requests that aren't for the main page load
             if (isMainPageLoad) {
-                // TODO - wrap error better
-                _eventFlow.tryEmit(ComponentEvent.LoadError(RuntimeException(errorString)))
+                _eventFlow.tryEmit(
+                    ComponentEvent.LoadError(
+                        EmbeddedComponentError(
+                            type = EmbeddedComponentError.ErrorType.API_CONNECTION_ERROR,
+                            message = errorString
+                        )
+                    )
+                )
                 analyticsService.track(
                     ConnectAnalyticsEvent.WebErrorPageLoad(
                         status = httpStatusCode,

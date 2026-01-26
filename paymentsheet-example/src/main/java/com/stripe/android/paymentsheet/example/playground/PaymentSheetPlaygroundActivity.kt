@@ -57,6 +57,7 @@ import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.rememberCustomerSheet
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
@@ -726,6 +727,7 @@ internal class PaymentSheetPlaygroundActivity :
         }
     }
 
+    @OptIn(CheckoutSessionPreview::class)
     private fun presentPaymentSheet(paymentSheet: PaymentSheet, playgroundState: PlaygroundState.Payment) {
         if (playgroundState.initializationType == InitializationType.Normal) {
             if (playgroundState.checkoutMode == CheckoutMode.SETUP) {
@@ -739,6 +741,11 @@ internal class PaymentSheetPlaygroundActivity :
                     configuration = playgroundState.paymentSheetConfiguration(viewModel.settings)
                 )
             }
+        } else if (playgroundState.initializationType == InitializationType.CheckoutSession) {
+            paymentSheet.presentWithCheckoutSession(
+                checkoutSessionClientSecret = playgroundState.clientSecret,
+                configuration = playgroundState.paymentSheetConfiguration(viewModel.settings)
+            )
         } else {
             paymentSheet.presentWithIntentConfiguration(
                 intentConfiguration = playgroundState.intentConfiguration(),

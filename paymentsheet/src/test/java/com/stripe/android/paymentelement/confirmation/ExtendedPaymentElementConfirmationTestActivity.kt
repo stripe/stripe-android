@@ -27,6 +27,7 @@ import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
+import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
@@ -123,6 +124,7 @@ internal class ExtendedPaymentElementConfirmationTestActivity : AppCompatActivit
     modules = [
         ExtendedPaymentElementConfirmationModule::class,
         ExtendedPaymentElementConfirmationTestModule::class,
+        GooglePayLauncherModule::class,
     ]
 )
 @Singleton

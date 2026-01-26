@@ -110,6 +110,18 @@
   <string name="stripe_card_declined">Kortelė buvo atmesta</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="stripe_card_ending_in">%1$s, kuri baigiasi %2$s</string>
+  <!-- Warning shown when only credit cards are accepted -->
+  <string name="stripe_card_funding_only_credit">Priimamos tik kredito kortelės</string>
+  <!-- Warning shown when only credit and prepaid cards are accepted -->
+  <string name="stripe_card_funding_only_credit_prepaid">Priimamos tik kredito ir išankstinio mokėjimo kortelės</string>
+  <!-- Warning shown when only debit cards are accepted -->
+  <string name="stripe_card_funding_only_debit">Priimamos tik debeto kortelės</string>
+  <!-- Warning shown when only debit and credit cards are accepted -->
+  <string name="stripe_card_funding_only_debit_credit">Priimamos tik debeto ir kredito kortelės</string>
+  <!-- Warning shown when only debit and prepaid cards are accepted -->
+  <string name="stripe_card_funding_only_debit_prepaid">Priimamos tik debeto ir išankstinio mokėjimo kortelės</string>
+  <!-- Warning shown when only prepaid cards are accepted -->
+  <string name="stripe_card_funding_only_prepaid">Priimamos tik išankstinio mokėjimo kortelės</string>
   <!-- Concise details of a saved card. &apos;{card brand} ···· {last 4}&apos; e.g. &apos;VISA ···· 4242&apos; -->
   <string name="stripe_card_plus_last_4">%1$s ···· %2$s</string>
   <!-- Concise details of a saved card. &apos;{card brand} ····{last 4}&apos; e.g. &apos;VISA ····4242&apos; -->

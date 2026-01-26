@@ -9,8 +9,8 @@ import com.stripe.android.CardUtils
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.CardFunding
 import com.stripe.android.uicore.elements.FieldValidationMessage
 import com.stripe.android.uicore.elements.TextFieldState
 import com.stripe.android.uicore.elements.TextFieldStateConstants
@@ -42,7 +42,7 @@ internal class CardNumberConfig(
 
     override fun determineState(
         brand: CardBrand,
-        funding: CardFunding?,
+        accountRanges: List<AccountRange>,
         number: String,
         numberAllowedDigits: Int
     ): TextFieldState {
@@ -63,7 +63,7 @@ internal class CardNumberConfig(
         }
 
         val isDigitLimit = brand.getMaxLengthForCardNumber(number) != -1
-        val fundingErrorMessageId = getFundingErrorMessage(funding, number)
+        val fundingErrorMessageId = getFundingErrorMessage(accountRanges, number)
 
         return when {
             isDigitLimit && number.length < numberAllowedDigits -> {
@@ -127,11 +127,14 @@ internal class CardNumberConfig(
     }
 
     private fun getFundingErrorMessage(
-        funding: CardFunding?,
+        accountRanges: List<AccountRange>,
         number: String,
     ): Int? {
-        val cardFundingAccepted = funding?.let(cardFundingFilter::isAccepted)
-        val hasError = number.length >= digitsRequiredToFetchFunding && cardFundingAccepted == false
+        val nonStaticRanges = accountRanges.filter { it.binRange.isStatic.not() }
+        val anyFundingAccepted = nonStaticRanges.any { cardFundingFilter.isAccepted(it.funding) }
+        val hasError = number.length >= digitsRequiredToFetchFunding &&
+            nonStaticRanges.isNotEmpty() &&
+            !anyFundingAccepted
         return cardFundingFilter.allowedFundingTypesDisplayMessage()?.takeIf { hasError }
     }
 

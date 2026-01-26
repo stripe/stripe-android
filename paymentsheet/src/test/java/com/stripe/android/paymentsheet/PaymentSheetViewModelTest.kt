@@ -10,6 +10,7 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.common.taptoadd.FakeTapToAddCollectionHandler
 import com.stripe.android.core.Logger
@@ -2556,6 +2557,7 @@ internal class PaymentSheetViewModelTest {
                     merchantCurrencyCode = googlePayConfig.currencyCode,
                     billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
                     cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
+                    cardFundingFilter = DefaultCardFundingFilter,
                 ),
             )
         )
@@ -2599,6 +2601,7 @@ internal class PaymentSheetViewModelTest {
                     merchantCurrencyCode = googlePayConfig.currencyCode,
                     billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
                     cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
+                    cardFundingFilter = DefaultCardFundingFilter,
                 ),
             )
         )
@@ -3288,7 +3291,7 @@ internal class PaymentSheetViewModelTest {
         )
 
         verify(eventReporter).onExperimentExposure(
-            any<LoggableExperiment.OcsMobileHorizontalModeAndroidAA>()
+            any<LoggableExperiment.OcsMobileHorizontalMode>()
         )
     }
 
@@ -3302,7 +3305,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.getPaymentMethodLayout()
 
         verify(eventReporter, never()).onExperimentExposure(
-            any<LoggableExperiment.OcsMobileHorizontalModeAndroidAA>()
+            any<LoggableExperiment.OcsMobileHorizontalMode>()
         )
     }
 
@@ -3321,7 +3324,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.getPaymentMethodLayout()
 
         verify(eventReporter, never()).onExperimentExposure(
-            any<LoggableExperiment.OcsMobileHorizontalModeAndroidAA>()
+            any<LoggableExperiment.OcsMobileHorizontalMode>()
         )
     }
 

@@ -20,6 +20,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
@@ -183,6 +184,10 @@ class UpdatePaymentMethodUITest {
         val cardBrandFilter = object : CardBrandFilter {
             override fun isAccepted(cardBrand: CardBrand): Boolean {
                 return cardBrand in listOf(CardBrand.CartesBancaires)
+            }
+
+            override fun isAccepted(paymentMethod: PaymentMethod): Boolean {
+                throw NotImplementedError()
             }
 
             override fun describeContents(): Int {

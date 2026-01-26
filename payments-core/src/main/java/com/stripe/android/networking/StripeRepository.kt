@@ -8,6 +8,8 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.CardMetadata
+import com.stripe.android.model.CheckoutSessionResponse
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmationToken
@@ -405,6 +407,37 @@ interface StripeRepository {
         params: ElementsSessionParams,
         options: ApiRequest.Options,
     ): Result<ElementsSession>
+
+    /**
+     * Initialize a checkout session by calling the `/v1/payment_pages/{cs_id}/init` endpoint.
+     *
+     * @param params The checkout session parameters including session ID.
+     * @param options API request options including the publishable key.
+     * @return A [CheckoutSessionResponse] containing checkout metadata and embedded [ElementsSession].
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun initCheckoutSession(
+        params: ElementsSessionParams.CheckoutSessionType,
+        options: ApiRequest.Options,
+    ): Result<CheckoutSessionResponse>
+
+    /**
+     * Confirms a checkout session by calling the `/v1/payment_pages/{checkoutSessionId}/confirm` endpoint.
+     *
+     * @param checkoutSessionId The checkout session ID (e.g., "cs_test_xxx").
+     * @param paymentMethodId The payment method ID to use for confirmation.
+     * @param returnUrl The URL to redirect to after confirmation (required for ui_mode=custom).
+     * @param options API request options including the publishable key.
+     * @return A [CheckoutSessionResponse] containing the confirmed [PaymentIntent].
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun confirmCheckoutSession(
+        checkoutSessionId: String,
+        paymentMethodId: String,
+        clientAttributionMetadata: ClientAttributionMetadata,
+        returnUrl: String,
+        options: ApiRequest.Options,
+    ): Result<CheckoutSessionResponse>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun retrieveCardMetadata(
