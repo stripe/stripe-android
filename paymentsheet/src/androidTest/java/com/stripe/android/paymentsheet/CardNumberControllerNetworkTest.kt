@@ -219,6 +219,9 @@ internal class CardNumberControllerNetworkTest {
 
         page.fillOutCardDetails()
 
+        // Assert that NO warning message is shown because the server flag is disabled
+        page.assertNoText("Only debit cards are accepted")
+
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm")
