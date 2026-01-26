@@ -5,7 +5,6 @@ package com.stripe.android.paymentmethodmessaging.element
 import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -147,7 +146,6 @@ private fun MultiPartner(
     val context = LocalContext.current
     val keyboardController = rememberKeyboardController()
     val scope = rememberCoroutineScope()
-    val images = getImages(message, appearance.theme)
 
     Column(
         modifier = Modifier.clickable {
@@ -157,11 +155,10 @@ private fun MultiPartner(
         },
         verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
-        if (images.isNotEmpty()) {
-            Box(Modifier.height(getIconHeight(appearance).dp)) {
-                Images(images)
-            }
-        }
+        Images(
+            imageList = getImages(message, appearance.theme),
+            appearance = appearance
+        )
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = message.promotion.buildAnnotatedStringWithInfoIcon(),
@@ -204,21 +201,24 @@ private fun launchLearnMore(
 @Composable
 private fun Images(
     imageList: List<PaymentMethodMessageImage>,
+    appearance: PaymentMethodMessagingElement.Appearance.State
 ) {
     val context = LocalContext.current
     val imageLoader = remember {
         StripeImageLoader(context.applicationContext)
     }
-    Row {
-        imageList.forEachIndexed { index, messagingImage ->
-            StripeImage(
-                url = messagingImage.url,
-                imageLoader = imageLoader,
-                contentDescription = messagingImage.text,
-                contentScale = ContentScale.Fit,
-                modifier = Modifier.align(Alignment.CenterVertically)
-            )
-            if (index != imageList.lastIndex) Spacer(Modifier.width(8.dp))
+    if (imageList.isNotEmpty()) {
+        Row(Modifier.height(getIconHeight(appearance).dp)) {
+            imageList.forEachIndexed { index, messagingImage ->
+                StripeImage(
+                    url = messagingImage.url,
+                    imageLoader = imageLoader,
+                    contentDescription = messagingImage.text,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.align(Alignment.CenterVertically)
+                )
+                if (index != imageList.lastIndex) Spacer(Modifier.width(8.dp))
+            }
         }
     }
 }
