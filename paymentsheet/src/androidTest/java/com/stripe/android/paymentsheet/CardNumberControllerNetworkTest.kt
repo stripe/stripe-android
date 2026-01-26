@@ -2,9 +2,11 @@ package com.stripe.android.paymentsheet
 
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.IntegrationTypeProvider
@@ -14,15 +16,19 @@ import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(CardFundingFilteringPrivatePreview::class)
 @RunWith(TestParameterInjector::class)
 internal class CardNumberControllerNetworkTest {
+    // The card-metadata request happens async during card number input. We want to make sure it happens,
+    // but it's okay if it takes a bit to happen.
+    private val networkRule = NetworkRule(validationTimeout = 5.seconds)
+
     @get:Rule
-    val testRules: TestRules = TestRules.create()
+    val testRules: TestRules = TestRules.create(networkRule = networkRule)
 
     private val composeTestRule = testRules.compose
-    private val networkRule = testRules.networkRule
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 
@@ -163,6 +169,55 @@ internal class CardNumberControllerNetworkTest {
 
         // Assert that NO warning message is shown because debit cards are allowed
         page.assertNoText("Only debit cards are accepted")
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm")
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        page.clickPrimaryButton()
+    }
+
+    @Test
+    fun testNoCardMetadataRequestWhenServerFlagDisabled() = runPaymentSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        // Use a response where elements_mobile_card_funding_filtering is false
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile(
+                "elements-sessions-requires_payment_method.json",
+                replacements = listOf(
+                    ResponseReplacement(
+                        original = "\"elements_mobile_card_funding_filtering\": true",
+                        new = "\"elements_mobile_card_funding_filtering\": false",
+                    )
+                )
+            )
+        }
+
+        // Configuration with only debit cards allowed - would normally trigger card-metadata requests,
+        // but since the server flag is disabled, no request should be made
+        val configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Card Funding Test")
+            .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+            .allowedCardFundingTypes(listOf(PaymentSheet.CardFundingType.Debit))
+            .build()
+
+        testContext.presentPaymentSheet {
+            presentWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = configuration,
+            )
+        }
+
+        page.fillOutCardDetails()
 
         networkRule.enqueue(
             method("POST"),
