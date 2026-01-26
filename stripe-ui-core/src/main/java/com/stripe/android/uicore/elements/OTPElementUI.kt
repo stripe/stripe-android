@@ -47,11 +47,9 @@ import androidx.compose.ui.semantics.contentType
 import androidx.compose.ui.semantics.onAutofillText
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -172,14 +170,15 @@ fun OTPElementUI(
                         false
                     }
                     .testTag("OTP-$index")
-                    .semantics { testTagsAsResourceId = true }
+                    .semantics {
+                        contentType = ContentType.SmsOtpCode
+                        testTagsAsResourceId = true
+                    }
 
                 if (index == 0) {
                     textFieldModifier = textFieldModifier
                         .focusRequester(focusRequester)
                         .semantics {
-                            contentType = ContentType.SmsOtpCode
-
                             onAutofillText {
                                 element.controller.onAutofillDigit(it.text)
                                 true
@@ -219,32 +218,22 @@ private fun OTPInputBox(
 ) {
     var lastTextValue by remember(value) { mutableStateOf(value) }
 
-    val textFieldValue = TextFieldValue(
-        text = value,
-        selection = if (isSelected) {
-            TextRange(value.length)
-        } else {
-            TextRange.Zero
-        }
-    )
-
     // Need to use BasicTextField instead of TextField to be able to customize the
     // internal contentPadding
     BasicTextField(
-        value = textFieldValue,
-        onValueChange = { newTextFieldValueState ->
-            val stringChangedSinceLastInvocation = lastTextValue != newTextFieldValueState.text
-            val newText = newTextFieldValueState.text
-            lastTextValue = newText
+        value = value,
+        onValueChange = { newValue ->
+            val stringChangedSinceLastInvocation = lastTextValue != newValue
+            lastTextValue = newValue
 
-            if (stringChangedSinceLastInvocation || newTextFieldValueState.text.length == 1) {
+            if (stringChangedSinceLastInvocation || newValue.length == 1) {
                 // If the OTPInputBox already has a value, it would be the first character of it.text
                 // remove it before passing it to the controller.
                 val newValue =
-                    if (value.isNotBlank() && newText.isNotBlank()) {
-                        newText.substring(1)
+                    if (value.isNotBlank() && newValue.isNotBlank()) {
+                        newValue.substring(1)
                     } else {
-                        newText
+                        newValue
                     }
                 val inputLength = element.controller.onValueChanged(index, newValue)
                 (0 until inputLength).forEach { _ -> focusManager.moveFocusSafely(FocusDirection.Next) }
