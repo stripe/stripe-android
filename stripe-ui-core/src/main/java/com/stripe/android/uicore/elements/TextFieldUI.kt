@@ -539,7 +539,9 @@ private fun Modifier.onAutofill(
             autofillReporter(type.toString())
         }
 
-        false
+        textFieldController.onValueChange(it.text)
+
+        true
     }
 }
 
