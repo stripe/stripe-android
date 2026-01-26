@@ -35,6 +35,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -377,6 +378,7 @@ private fun buildEmailSuggestionAnnotatedString(
 @Composable
 private fun detailSpanStyle(color: androidx.compose.ui.graphics.Color) = SpanStyle(
     color = color,
+    textDecoration = TextDecoration.None,
     fontSize = LinkTheme.typography.detail.fontSize,
     fontFamily = LinkTheme.typography.detail.fontFamily,
     fontWeight = LinkTheme.typography.detail.fontWeight

@@ -31,7 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.autofill.AutofillType
+import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -39,6 +39,8 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentType
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -54,7 +56,6 @@ import com.stripe.android.uicore.elements.TextFieldColors
 import com.stripe.android.uicore.elements.TrailingIcon
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.stripeColors
-import com.stripe.android.uicore.text.autofill
 import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
@@ -178,12 +179,9 @@ internal fun CvcRecollectionField(
             )
             TextField(
                 modifier = Modifier
-                    .autofill(
-                        types = listOf(AutofillType.CreditCardSecurityCode),
-                        onFill = {
-                            onValueChanged(it)
-                        }
-                    )
+                    .semantics {
+                        contentType = ContentType.CreditCardSecurityCode
+                    }
                     .fillMaxWidth()
                     .weight(.5f, true)
                     .focusRequester(focusRequester)
