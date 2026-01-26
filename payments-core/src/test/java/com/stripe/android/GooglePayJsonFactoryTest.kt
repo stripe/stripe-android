@@ -6,6 +6,7 @@ import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardFunding
+import com.stripe.android.model.PaymentMethod
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 import org.junit.runner.RunWith
@@ -398,6 +399,10 @@ class GooglePayJsonFactoryTest {
                 return cardBrand == CardBrand.Visa || cardBrand == CardBrand.MasterCard
             }
 
+            override fun isAccepted(paymentMethod: PaymentMethod): Boolean {
+                throw IllegalStateException("Should not be called!")
+            }
+
             override fun describeContents(): Int {
                 throw IllegalStateException("describeContents should not be called.")
             }
@@ -435,6 +440,10 @@ class GooglePayJsonFactoryTest {
                 return false
             }
 
+            override fun isAccepted(paymentMethod: PaymentMethod): Boolean {
+                throw IllegalStateException("Should not be called!")
+            }
+
             override fun describeContents(): Int {
                 throw IllegalStateException("describeContents should not be called.")
             }
@@ -470,6 +479,10 @@ class GooglePayJsonFactoryTest {
         val customCardBrandFilter = object : CardBrandFilter {
             override fun isAccepted(cardBrand: CardBrand): Boolean {
                 return true
+            }
+
+            override fun isAccepted(paymentMethod: PaymentMethod): Boolean {
+                throw IllegalStateException("Should not be called!")
             }
 
             override fun describeContents(): Int {
@@ -532,6 +545,10 @@ class GooglePayJsonFactoryTest {
                 return true
             }
 
+            override fun isAccepted(paymentMethod: PaymentMethod): Boolean {
+                throw IllegalStateException("Should not be called!")
+            }
+
             override fun describeContents(): Int {
                 throw IllegalStateException("describeContents should not be called.")
             }
@@ -570,6 +587,10 @@ class GooglePayJsonFactoryTest {
                 return cardBrand != CardBrand.JCB
             }
 
+            override fun isAccepted(paymentMethod: PaymentMethod): Boolean {
+                throw IllegalStateException("Should not be called!")
+            }
+
             override fun describeContents(): Int {
                 throw IllegalStateException("describeContents should not be called.")
             }
@@ -606,6 +627,10 @@ class GooglePayJsonFactoryTest {
         val customCardBrandFilter = object : CardBrandFilter {
             override fun isAccepted(cardBrand: CardBrand): Boolean {
                 return cardBrand == CardBrand.Visa || cardBrand == CardBrand.MasterCard
+            }
+
+            override fun isAccepted(paymentMethod: PaymentMethod): Boolean {
+                throw IllegalStateException("Should not be called!")
             }
 
             override fun describeContents(): Int {

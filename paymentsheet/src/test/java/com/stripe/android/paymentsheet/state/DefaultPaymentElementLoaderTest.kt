@@ -1710,7 +1710,7 @@ internal class DefaultPaymentElementLoaderTest {
                         error("Should not be called.")
                     }.build()
             )
-        ).isEqualTo(IntegrationMetadata.DeferredIntentWithSharedPaymentToken(intentConfiguration))
+        ).isEqualTo(IntegrationMetadata.DeferredIntent.WithSharedPaymentToken(intentConfiguration))
     }
 
     @Test
@@ -1731,7 +1731,7 @@ internal class DefaultPaymentElementLoaderTest {
                         error("Should not be called.")
                     }.build()
             )
-        ).isEqualTo(IntegrationMetadata.DeferredIntentWithConfirmationToken(intentConfiguration))
+        ).isEqualTo(IntegrationMetadata.DeferredIntent.WithConfirmationToken(intentConfiguration))
     }
 
     @Test
@@ -1752,7 +1752,7 @@ internal class DefaultPaymentElementLoaderTest {
                         error("Should not be called.")
                     }.build()
             )
-        ).isEqualTo(IntegrationMetadata.DeferredIntentWithPaymentMethod(intentConfiguration))
+        ).isEqualTo(IntegrationMetadata.DeferredIntent.WithPaymentMethod(intentConfiguration))
     }
 
     @Test
@@ -4113,7 +4113,7 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(createCall.isGooglePaySupported).isFalse()
         assertThat(createCall.customerMetadata).isNull()
         assertThat(createCall.integrationMetadata).isEqualTo(
-            IntegrationMetadata.DeferredIntentWithConfirmationToken(initializationMode.intentConfiguration)
+            IntegrationMetadata.DeferredIntent.WithConfirmationToken(initializationMode.intentConfiguration)
         )
         assertThat(createCall.elementsSession).isNotNull()
         assertThat(createCall.linkStateResult).isNotNull()

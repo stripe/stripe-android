@@ -15,6 +15,7 @@ import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLaun
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
@@ -609,6 +610,10 @@ class GooglePayConfirmationDefinitionTest {
     @Parcelize
     private object FakeCardBrandFilter : CardBrandFilter {
         override fun isAccepted(cardBrand: CardBrand): Boolean {
+            return false
+        }
+
+        override fun isAccepted(paymentMethod: PaymentMethod): Boolean {
             return false
         }
     }

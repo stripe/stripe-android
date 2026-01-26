@@ -11,11 +11,9 @@ internal fun ClientAttributionMetadata.Companion.create(
     automaticPaymentMethodsEnabled: Boolean,
 ): ClientAttributionMetadata {
     val paymentIntentCreationFlow = when (initializationMode) {
-        is PaymentElementLoader.InitializationMode.CheckoutSession -> {
-            TODO("CheckoutSession attribution not yet supported.")
-        }
         is PaymentElementLoader.InitializationMode.CryptoOnramp,
         is PaymentElementLoader.InitializationMode.DeferredIntent -> PaymentIntentCreationFlow.Deferred
+        is PaymentElementLoader.InitializationMode.CheckoutSession,
         is PaymentElementLoader.InitializationMode.PaymentIntent,
         is PaymentElementLoader.InitializationMode.SetupIntent -> PaymentIntentCreationFlow.Standard
     }

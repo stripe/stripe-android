@@ -77,10 +77,22 @@ internal class RealElementsSessionRepository @Inject constructor(
             linkDisallowedFundingSourceCreation = linkDisallowedFundingSourceCreation,
         )
 
-        val elementsSession = stripeRepository.retrieveElementsSession(
-            params = params,
-            options = requestOptions,
-        )
+        val elementsSession =
+            if (params is ElementsSessionParams.CheckoutSessionType) {
+                // CheckoutSession uses a different API endpoint that returns ElementsSession embedded
+                stripeRepository.initCheckoutSession(
+                    params = params,
+                    options = requestOptions,
+                ).mapCatching { response ->
+                    response.elementsSession
+                        ?: throw IllegalStateException("CheckoutSession init response missing elements_session")
+                }
+            } else {
+                stripeRepository.retrieveElementsSession(
+                    params = params,
+                    options = requestOptions,
+                )
+            }
 
         return elementsSession.getResultOrElse { elementsSessionFailure ->
             if (shouldFallback(elementsSession)) {
@@ -112,6 +124,10 @@ internal class RealElementsSessionRepository @Inject constructor(
             }
             is ElementsSessionParams.DeferredIntentType -> {
                 Result.success(params.toStripeIntent(requestOptions))
+            }
+            is ElementsSessionParams.CheckoutSessionType -> {
+                // CheckoutSession is handled earlier in get() and should never reach fallback
+                error("CheckoutSession does not support fallback")
             }
         }
         stripeIntent.map { intent ->
@@ -224,7 +240,19 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
         }
 
         is PaymentElementLoader.InitializationMode.CheckoutSession -> {
-            TODO("CheckoutSession elements session not yet supported.")
+            ElementsSessionParams.CheckoutSessionType(
+                clientSecret = clientSecret,
+                customPaymentMethods = customPaymentMethodIds,
+                externalPaymentMethods = externalPaymentMethods,
+                customerSessionClientSecret = customerSessionClientSecret,
+                legacyCustomerEphemeralKey = legacyCustomerEphemeralKey,
+                savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
+                mobileSessionId = mobileSessionId,
+                sellerDetails = null,
+                appId = appId,
+                countryOverride = countryOverride,
+                link = linkParams,
+            )
         }
     }
 }

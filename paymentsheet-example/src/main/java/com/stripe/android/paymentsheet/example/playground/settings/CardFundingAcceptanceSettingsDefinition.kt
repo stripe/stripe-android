@@ -21,6 +21,7 @@ internal object CardFundingAcceptanceSettingsDefinition :
             CardFundingAcceptanceType.All.value -> CardFundingAcceptanceType.All
             CardFundingAcceptanceType.CreditOnly.value -> CardFundingAcceptanceType.CreditOnly
             CardFundingAcceptanceType.DebitOnly.value -> CardFundingAcceptanceType.DebitOnly
+            CardFundingAcceptanceType.PrepaidOnly.value -> CardFundingAcceptanceType.PrepaidOnly
             else -> defaultValue
         }
     }

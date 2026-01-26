@@ -48,6 +48,7 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
     private val deferredIntentConfirmationInterceptorFactory: DeferredIntentConfirmationInterceptor.Factory,
     private val confirmationTokenConfirmationInterceptorFactory: ConfirmationTokenConfirmationInterceptor.Factory,
     private val sharedPaymentTokenConfirmationInterceptorFactory: SharedPaymentTokenConfirmationInterceptor.Factory,
+    private val checkoutSessionConfirmationInterceptorFactory: CheckoutSessionConfirmationInterceptor.Factory,
 ) : IntentConfirmationInterceptor.Factory {
     override suspend fun create(
         integrationMetadata: IntegrationMetadata,
@@ -65,7 +66,7 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
                 // CryptoOnRamp doesn't call confirm.
                 throw IllegalStateException("No intent confirmation interceptor for CryptoOnramp.")
             }
-            is IntegrationMetadata.DeferredIntentWithConfirmationToken -> {
+            is IntegrationMetadata.DeferredIntent.WithConfirmationToken -> {
                 confirmationTokenConfirmationInterceptorFactory.create(
                     intentConfiguration = integrationMetadata.intentConfiguration,
                     createIntentCallback = deferredIntentCallbackRetriever.waitForConfirmationTokenCallback(),
@@ -74,14 +75,14 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
                     clientAttributionMetadata = clientAttributionMetadata,
                 )
             }
-            is IntegrationMetadata.DeferredIntentWithPaymentMethod -> {
+            is IntegrationMetadata.DeferredIntent.WithPaymentMethod -> {
                 deferredIntentConfirmationInterceptorFactory.create(
                     intentConfiguration = integrationMetadata.intentConfiguration,
                     createIntentCallback = deferredIntentCallbackRetriever.waitForPaymentMethodCallback(),
                     clientAttributionMetadata = clientAttributionMetadata,
                 )
             }
-            is IntegrationMetadata.DeferredIntentWithSharedPaymentToken -> {
+            is IntegrationMetadata.DeferredIntent.WithSharedPaymentToken -> {
                 sharedPaymentTokenConfirmationInterceptorFactory.create(
                     intentConfiguration = integrationMetadata.intentConfiguration,
                     handler = deferredIntentCallbackRetriever.waitForSharedPaymentTokenCallback(),
@@ -94,7 +95,10 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
                 )
             }
             is IntegrationMetadata.CheckoutSession -> {
-                TODO("CheckoutSession confirmation not yet supported.")
+                checkoutSessionConfirmationInterceptorFactory.create(
+                    checkoutSessionId = integrationMetadata.id,
+                    clientAttributionMetadata = clientAttributionMetadata,
+                )
             }
         }
     }

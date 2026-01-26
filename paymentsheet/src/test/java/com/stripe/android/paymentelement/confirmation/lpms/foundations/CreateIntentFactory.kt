@@ -73,7 +73,7 @@ internal class CreateIntentFactory(
 
         return Result.success(
             CreateIntentData(
-                integrationMetadata = IntegrationMetadata.DeferredIntentWithPaymentMethod(
+                integrationMetadata = IntegrationMetadata.DeferredIntent.WithPaymentMethod(
                     intentConfiguration = PaymentSheet.IntentConfiguration(
                         mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                             amount = amount.toLong(),
@@ -133,7 +133,7 @@ internal class CreateIntentFactory(
 
         return Result.success(
             CreateIntentData(
-                integrationMetadata = IntegrationMetadata.DeferredIntentWithPaymentMethod(
+                integrationMetadata = IntegrationMetadata.DeferredIntent.WithPaymentMethod(
                     intentConfiguration = PaymentSheet.IntentConfiguration(
                         mode = PaymentSheet.IntentConfiguration.Mode.Setup(
                             setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,

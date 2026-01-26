@@ -56,7 +56,8 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         ViewCompat.setOnApplyWindowInsetsListener(viewBinding.root) { view, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            view.updatePaddingRelative(systemBars.bottom)
+            viewBinding.appBar.updatePaddingRelative(top = systemBars.top)
+            view.updatePaddingRelative(bottom = systemBars.bottom)
             WindowInsetsCompat.CONSUMED
         }
 
@@ -76,6 +77,7 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         setContentView(viewBinding.root)
 
         setSupportActionBar(viewBinding.toolbar)
+
         customizeToolbar()
 
         onBackPressedDispatcher.addCallback {
