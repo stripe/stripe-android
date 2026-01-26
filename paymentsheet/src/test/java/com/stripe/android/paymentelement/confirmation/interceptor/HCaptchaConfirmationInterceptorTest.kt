@@ -61,7 +61,7 @@ class HCaptchaConfirmationInterceptorTest {
     ): ConfirmSetupIntentParams? {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         val interceptor = createIntentConfirmationInterceptor(
-            integrationMetadata = IntegrationMetadata.DeferredIntentWithPaymentMethod(
+            integrationMetadata = IntegrationMetadata.DeferredIntent.WithPaymentMethod(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Setup(
                         currency = "usd",
@@ -104,7 +104,7 @@ class HCaptchaConfirmationInterceptorTest {
     ): ConfirmPaymentIntentParams? {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         val interceptor = createIntentConfirmationInterceptor(
-            integrationMetadata = IntegrationMetadata.DeferredIntentWithPaymentMethod(
+            integrationMetadata = IntegrationMetadata.DeferredIntent.WithPaymentMethod(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1099L,

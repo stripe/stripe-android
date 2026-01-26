@@ -13,6 +13,7 @@ internal fun ClientAttributionMetadata.Companion.create(
     val paymentIntentCreationFlow = when (initializationMode) {
         is PaymentElementLoader.InitializationMode.CryptoOnramp,
         is PaymentElementLoader.InitializationMode.DeferredIntent -> PaymentIntentCreationFlow.Deferred
+        is PaymentElementLoader.InitializationMode.CheckoutSession,
         is PaymentElementLoader.InitializationMode.PaymentIntent,
         is PaymentElementLoader.InitializationMode.SetupIntent -> PaymentIntentCreationFlow.Standard
     }

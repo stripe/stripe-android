@@ -6,13 +6,14 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.uicore.elements.TextFieldState
 import com.stripe.android.uicore.elements.TextFieldStateConstants
 import com.stripe.android.R as StripeR
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class CvcConfig : CardDetailsTextFieldConfig {
+class CvcConfig : CvcTextFieldConfig {
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
     override val debugLabel: String = "cvc"
     override val label: ResolvableString = resolvableString(StripeR.string.stripe_cvc_number_hint)
@@ -24,6 +25,7 @@ class CvcConfig : CardDetailsTextFieldConfig {
 
     override fun determineState(
         brand: CardBrand,
+        accountRanges: List<AccountRange>,
         number: String,
         numberAllowedDigits: Int
     ): TextFieldState {

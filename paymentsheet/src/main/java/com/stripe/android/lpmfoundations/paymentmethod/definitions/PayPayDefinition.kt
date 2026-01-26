@@ -24,7 +24,7 @@ internal object PayPayDefinition : PaymentMethodDefinition {
 }
 
 private object PayPayUiDefinitionFactory : UiDefinitionFactory.Simple() {
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         paymentMethodDefinition = PayPayDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_paypay,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_paypay,

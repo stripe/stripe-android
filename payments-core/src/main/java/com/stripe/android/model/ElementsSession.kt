@@ -257,6 +257,8 @@ data class ElementsSession(
         LINK_GLOBAL_HOLD_BACK_AA("link_global_holdback_aa"),
         LINK_AB_TEST("link_ab_test"),
         OCS_MOBILE_HORIZONTAL_MODE_ANDROID_AA("ocs_mobile_horizontal_mode_android_aa"),
+        OCS_MOBILE_HORIZONTAL_MODE_AA("ocs_mobile_horizontal_mode_aa"),
+        OCS_MOBILE_HORIZONTAL_MODE("ocs_mobile_horizontal_mode"),
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

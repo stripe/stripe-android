@@ -25,7 +25,7 @@ import com.stripe.android.R as StripeR
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CvcController constructor(
-    private val cvcTextFieldConfig: CvcConfig = CvcConfig(),
+    private val cvcTextFieldConfig: CvcTextFieldConfig = CvcConfig(),
     cardBrandFlow: StateFlow<CardBrand>,
     override val initialValue: String? = null,
 ) : TextFieldController {
@@ -68,7 +68,12 @@ class CvcController constructor(
     }
 
     private val _fieldState = combineAsStateFlow(cardBrandFlow, _fieldValue) { brand, fieldValue ->
-        cvcTextFieldConfig.determineState(brand, fieldValue, brand.maxCvcLength)
+        cvcTextFieldConfig.determineState(
+            brand = brand,
+            accountRanges = emptyList(),
+            number = fieldValue,
+            numberAllowedDigits = brand.maxCvcLength
+        )
     }
     override val fieldState: StateFlow<TextFieldState> = _fieldState
 

@@ -9,7 +9,10 @@ import kotlinx.parcelize.Parcelize
 /**
  * Configuration options required to initialize the Onramp flow.
  *
+ * @property merchantDisplayName The display name to use for the merchant.
+ * @property publishableKey The publishable key from the API dashboard to enable requests.
  * @property appearance Appearance settings for the PaymentSheet UI.
+ * @property cryptoCustomerId The unique customer ID for crypto onramp.
  */
 @Parcelize
 @Poko

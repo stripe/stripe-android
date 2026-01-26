@@ -267,7 +267,7 @@ object StripeThemeDefaults {
             onBackground = Color.White,
             border = Color.Transparent,
             successBackground = PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR,
-            onSuccessBackground = Color.White
+            onSuccessBackground = Color.Black
         ),
         shape = PrimaryButtonShape(
             cornerRadius = shapes.cornerRadius,

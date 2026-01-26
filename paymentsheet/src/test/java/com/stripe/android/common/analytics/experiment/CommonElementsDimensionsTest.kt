@@ -3,6 +3,7 @@ package com.stripe.android.common.analytics.experiment
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.LinkState.LoginState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils.createLinkConfiguration
@@ -15,7 +16,8 @@ class CommonElementsDimensionsTest {
         val dimensions = CommonElementsDimensions.getDimensions(
             PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION,
-            )
+            ),
+            EventReporter.Mode.Complete,
         )
 
         assertThat(dimensions).containsEntry("displayed_payment_method_types", "card")
@@ -27,7 +29,8 @@ class CommonElementsDimensionsTest {
             PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION,
                 isGooglePayReady = false,
-            )
+            ),
+            EventReporter.Mode.Complete,
         )
 
         assertThat(dimensions).containsEntry("displayed_payment_method_types_including_wallets", "card")
@@ -39,7 +42,8 @@ class CommonElementsDimensionsTest {
             PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION,
                 isGooglePayReady = true,
-            )
+            ),
+            EventReporter.Mode.Complete,
         )
 
         assertThat(dimensions).containsEntry("displayed_payment_method_types_including_wallets", "card,google_pay")
@@ -56,7 +60,8 @@ class CommonElementsDimensionsTest {
             PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION,
                 linkState = validLinkState,
-            )
+            ),
+            EventReporter.Mode.Complete,
         )
 
         assertThat(dimensions).containsEntry("displayed_payment_method_types_including_wallets", "card,link")
@@ -68,9 +73,22 @@ class CommonElementsDimensionsTest {
             PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION,
                 linkState = null,
-            )
+            ),
+            EventReporter.Mode.Complete,
         )
 
         assertThat(dimensions).containsEntry("displayed_payment_method_types_including_wallets", "card")
+    }
+
+    @Test
+    fun `dimensions includes in app elements correctly`() {
+        val dimensions = CommonElementsDimensions.getDimensions(
+            PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION,
+            ),
+            EventReporter.Mode.Complete,
+        )
+
+        assertThat(dimensions).containsEntry("in_app_elements_integration_type", "paymentsheet")
     }
 }

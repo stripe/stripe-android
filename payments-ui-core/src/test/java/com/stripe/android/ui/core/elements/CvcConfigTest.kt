@@ -18,20 +18,37 @@ class CvcConfigTest {
 
     @Test
     fun `blank Number returns blank state`() {
-        Truth.assertThat(cvcConfig.determineState(CardBrand.Visa, "", CardBrand.Visa.maxCvcLength))
+        Truth.assertThat(
+            cvcConfig.determineState(
+                brand = CardBrand.Visa,
+                accountRanges = emptyList(),
+                number = "",
+                numberAllowedDigits = CardBrand.Visa.maxCvcLength
+            )
+        )
             .isEqualTo(TextFieldStateConstants.Error.Blank)
     }
 
     @Test
     fun `card brand is invalid`() {
-        val state = cvcConfig.determineState(CardBrand.Unknown, "0", CardBrand.Unknown.maxCvcLength)
+        val state = cvcConfig.determineState(
+            brand = CardBrand.Unknown,
+            accountRanges = emptyList(),
+            number = "0",
+            numberAllowedDigits = CardBrand.Unknown.maxCvcLength
+        )
         Truth.assertThat(state)
             .isInstanceOf<TextFieldStateConstants.Valid.Limitless>()
     }
 
     @Test
     fun `incomplete number is in incomplete state`() {
-        val state = cvcConfig.determineState(CardBrand.Visa, "12", CardBrand.Visa.maxCvcLength)
+        val state = cvcConfig.determineState(
+            brand = CardBrand.Visa,
+            accountRanges = emptyList(),
+            number = "12",
+            numberAllowedDigits = CardBrand.Visa.maxCvcLength
+        )
         Truth.assertThat(state)
             .isInstanceOf<TextFieldStateConstants.Error.Incomplete>()
         Truth.assertThat(
@@ -41,7 +58,12 @@ class CvcConfigTest {
 
     @Test
     fun `cvc is too long`() {
-        val state = cvcConfig.determineState(CardBrand.Visa, "1234567890123456789", CardBrand.Visa.maxCvcLength)
+        val state = cvcConfig.determineState(
+            brand = CardBrand.Visa,
+            accountRanges = emptyList(),
+            number = "1234567890123456789",
+            numberAllowedDigits = CardBrand.Visa.maxCvcLength
+        )
         Truth.assertThat(state)
             .isInstanceOf<TextFieldStateConstants.Error.Invalid>()
         Truth.assertThat(
@@ -51,11 +73,21 @@ class CvcConfigTest {
 
     @Test
     fun `cvc is valid`() {
-        var state = cvcConfig.determineState(CardBrand.Visa, "123", CardBrand.Visa.maxCvcLength)
+        var state = cvcConfig.determineState(
+            brand = CardBrand.Visa,
+            accountRanges = emptyList(),
+            number = "123",
+            numberAllowedDigits = CardBrand.Visa.maxCvcLength
+        )
         Truth.assertThat(state)
             .isInstanceOf<TextFieldStateConstants.Valid.Full>()
 
-        state = cvcConfig.determineState(CardBrand.AmericanExpress, "1234", CardBrand.AmericanExpress.maxCvcLength)
+        state = cvcConfig.determineState(
+            brand = CardBrand.AmericanExpress,
+            accountRanges = emptyList(),
+            number = "1234",
+            numberAllowedDigits = CardBrand.AmericanExpress.maxCvcLength
+        )
         Truth.assertThat(state)
             .isInstanceOf<TextFieldStateConstants.Valid.Full>()
     }
@@ -64,6 +96,7 @@ class CvcConfigTest {
     fun `cvc is valid for lengths 3 and 4 for amex`() {
         var state = cvcConfig.determineState(
             brand = CardBrand.AmericanExpress,
+            accountRanges = emptyList(),
             number = "123",
             numberAllowedDigits = CardBrand.AmericanExpress.maxCvcLength
         )
@@ -72,6 +105,7 @@ class CvcConfigTest {
 
         state = cvcConfig.determineState(
             brand = CardBrand.AmericanExpress,
+            accountRanges = emptyList(),
             number = "1234",
             numberAllowedDigits = CardBrand.AmericanExpress.maxCvcLength
         )

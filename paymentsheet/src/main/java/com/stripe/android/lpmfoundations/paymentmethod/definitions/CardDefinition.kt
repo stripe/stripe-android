@@ -7,7 +7,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.stripe.android.common.taptoadd.TapToAddFormWrapperElement
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
@@ -86,21 +85,6 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
         metadata: PaymentMethodMetadata,
         arguments: UiDefinitionFactory.Arguments,
     ): List<FormElement> {
-        val elements = buildElements(metadata, arguments)
-
-        val tapToAddHelper = arguments.tapToAddHelper
-
-        return if (metadata.isTapToAddSupported && tapToAddHelper != null) {
-            listOf(TapToAddFormWrapperElement(tapToAddHelper, elements))
-        } else {
-            elements
-        }
-    }
-
-    private fun buildElements(
-        metadata: PaymentMethodMetadata,
-        arguments: UiDefinitionFactory.Arguments,
-    ): List<FormElement> {
         val billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration
 
         return buildList {
@@ -112,6 +96,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
                     collectName = billingDetailsCollectionConfiguration.collectsName,
                     cbcEligibility = arguments.cbcEligibility,
                     cardBrandFilter = arguments.cardBrandFilter,
+                    cardFundingFilter = arguments.cardFundingFilter,
                     automaticallyLaunchedCardScanFormDataHelper = arguments.automaticallyLaunchedCardScanFormDataHelper,
                 )
             )

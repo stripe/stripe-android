@@ -1,6 +1,5 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
-import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.getDefaultCustomerMetadata
@@ -17,6 +16,7 @@ import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.screenshottesting.LayoutDirection
 import com.stripe.android.screenshottesting.PaparazziConfigOption
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.FormUI
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
@@ -26,6 +26,10 @@ import org.junit.Rule
 import org.junit.Test
 
 class CardUiDefinitionFactoryTest {
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule()
+
     @get:Rule
     val paparazziRule = PaparazziRule()
 
@@ -485,117 +489,6 @@ class CardUiDefinitionFactoryTest {
 
         override fun reset() {
             DefaultAppearance.appearance.parseAppearance()
-        }
-    }
-
-    @Test
-    fun testCardWithTapToAdd() {
-        paparazziRule.snapshot {
-            CardDefinition.CreateFormUi(
-                metadata = metadata.copy(
-                    isTapToAddSupported = true,
-                ),
-                tapToAddHelper = FakeTapToAddHelper.noOp(),
-            )
-        }
-    }
-
-    @Test
-    fun testCardWithTapToAddAndValidation() {
-        paparazziRule.snapshot {
-            CardDefinition.CreateFormUi(
-                metadata = metadata.copy(
-                    isTapToAddSupported = true,
-                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                        name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
-                        phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
-                        email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
-                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
-                    )
-                ),
-                isValidating = true,
-                tapToAddHelper = FakeTapToAddHelper.noOp(),
-            )
-        }
-    }
-
-    @Test
-    fun testCardWithTapToAddAndBillingDetails() {
-        paparazziRule.snapshot {
-            CardDefinition.CreateFormUi(
-                metadata = metadata.copy(
-                    isTapToAddSupported = true,
-                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                        name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                        phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                        email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-                    )
-                ),
-                tapToAddHelper = FakeTapToAddHelper.noOp(),
-            )
-        }
-    }
-
-    @Test
-    fun testCardWithTapToAddAndSaveForLater() {
-        paparazziRule.snapshot {
-            CardDefinition.CreateFormUi(
-                metadata = metadata.copy(
-                    isTapToAddSupported = true,
-                    customerMetadata = getDefaultCustomerMetadata(
-                        isPaymentMethodSetAsDefaultEnabled = false
-                    ),
-                ),
-                tapToAddHelper = FakeTapToAddHelper.noOp(),
-            )
-        }
-    }
-
-    @Test
-    fun testCardWithTapToAddAndMandate() {
-        paparazziRule.snapshot {
-            CardDefinition.CreateFormUi(
-                metadata = metadata.copy(
-                    isTapToAddSupported = true,
-                    stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
-                        paymentMethodTypes = listOf("card"),
-                    ),
-                ),
-                tapToAddHelper = FakeTapToAddHelper.noOp(),
-            )
-        }
-    }
-
-    @Test
-    fun testCardWithTapToAddAndDefaultValues() {
-        paparazziRule.snapshot {
-            CardDefinition.CreateFormUi(
-                metadata = metadata.copy(
-                    isTapToAddSupported = true,
-                ),
-                tapToAddHelper = FakeTapToAddHelper.noOp(),
-                paymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
-                    code = "card",
-                    billingDetails = null,
-                    requiresMandate = false,
-                    overrideParamMap = mapOf(
-                        "type" to "card",
-                        "card" to mapOf(
-                            "number" to "4242424242424242",
-                            "exp_month" to "07",
-                            "exp_year" to "2050",
-                            "cvc" to "123",
-                        ),
-                        "billing_details" to mapOf(
-                            "country" to "US",
-                            "postal_code" to "94080",
-                        ),
-                    ),
-                    productUsage = emptySet(),
-                    clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
-                )
-            )
         }
     }
 }

@@ -36,7 +36,7 @@ internal object P24Definition : PaymentMethodDefinition {
 private object P24UiDefinitionFactory : UiDefinitionFactory.Simple() {
     private val p24BankIdentifier = IdentifierSpec.Generic("p24[bank]")
 
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         paymentMethodDefinition = P24Definition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_p24,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_p24,

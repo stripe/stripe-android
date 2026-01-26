@@ -48,7 +48,7 @@ import javax.inject.Provider
 @RunWith(RobolectricTestRunner::class)
 @OptIn(SharedPaymentTokenSessionPreview::class)
 class DeferredIntentConfirmationInterceptorTest {
-    private val defaultIntegrationMetadata = IntegrationMetadata.DeferredIntentWithPaymentMethod(
+    private val defaultIntegrationMetadata = IntegrationMetadata.DeferredIntent.WithPaymentMethod(
         intentConfiguration = PaymentSheet.IntentConfiguration(
             mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                 amount = 1099L,

@@ -30,7 +30,7 @@ internal object AffirmDefinition : PaymentMethodDefinition {
 }
 
 private object AffirmUiDefinitionFactory : UiDefinitionFactory.Simple() {
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         code = PaymentMethod.Type.Affirm.code,
         lightThemeIconUrl = null,
         darkThemeIconUrl = null,

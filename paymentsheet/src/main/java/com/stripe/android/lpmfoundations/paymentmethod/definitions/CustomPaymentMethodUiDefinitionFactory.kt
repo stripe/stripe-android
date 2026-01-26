@@ -12,7 +12,7 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 internal class CustomPaymentMethodUiDefinitionFactory(
     private val displayableCustomPaymentMethod: DisplayableCustomPaymentMethod
 ) : UiDefinitionFactory.Simple() {
-    override fun createSupportedPaymentMethod(): SupportedPaymentMethod {
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata): SupportedPaymentMethod {
         return SupportedPaymentMethod(
             code = displayableCustomPaymentMethod.id,
             displayName = displayableCustomPaymentMethod.displayName.resolvableString,

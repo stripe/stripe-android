@@ -25,8 +25,8 @@ internal class FakeTapToAddHelper private constructor(
         suspend fun test(
             block: suspend Scenario.() -> Unit,
         ) {
-            val helper = FakeTapToAddHelper()
             val collectedPaymentMethod = MutableStateFlow<DisplayableSavedPaymentMethod?>(null)
+            val helper = FakeTapToAddHelper(collectedPaymentMethod)
 
             block(
                 Scenario(
