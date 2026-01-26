@@ -22,7 +22,8 @@
     "elements_lpm_discoverability_downward_arrow": false,
     "elements_lpm_discoverability_rotating_cycle": false,
     "elements_web_lpm_server_driven_ui": true,
-    "financial_connections_enable_deferred_intent_flow": false
+    "financial_connections_enable_deferred_intent_flow": false,
+    "elements_mobile_card_funding_filtering": true
   },
   "google_pay_preference": "enabled",
   "link_consumer_info": null,
