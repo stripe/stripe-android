@@ -23,7 +23,9 @@ internal object RevolutPayDefinition : PaymentMethodDefinition {
         return metadata.hasIntentToSetup(type.code) && metadata.mandateAllowed(type)
     }
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = RevolutPayUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = RevolutPayUiDefinitionFactory
 }
 
 private object RevolutPayUiDefinitionFactory : UiDefinitionFactory.Simple() {

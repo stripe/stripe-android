@@ -36,7 +36,7 @@ internal object KlarnaDefinition : PaymentMethodDefinition {
         return metadata.hasIntentToSetup(type.code) && metadata.mandateAllowed(type)
     }
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory {
+    override fun uiDefinitionFactory(metadata: PaymentMethodMetadata): UiDefinitionFactory {
         return if (FeatureFlags.enableKlarnaFormRemoval.isEnabled) {
             KlarnaRemovedFormUiDefinitionFactory
         } else {

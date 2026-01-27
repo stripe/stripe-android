@@ -31,7 +31,9 @@ internal object BoletoDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = BoletoUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = BoletoUiDefinitionFactory
 }
 
 private object BoletoUiDefinitionFactory : UiDefinitionFactory.Simple() {

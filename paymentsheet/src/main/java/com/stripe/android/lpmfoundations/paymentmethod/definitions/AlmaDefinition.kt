@@ -21,7 +21,9 @@ internal object AlmaDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = AlmaUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = AlmaUiDefinitionFactory
 }
 
 private object AlmaUiDefinitionFactory : UiDefinitionFactory.Simple() {
