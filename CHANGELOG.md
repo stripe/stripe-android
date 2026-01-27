@@ -4,6 +4,9 @@
 
 ## 22.7.0 - 2026-01-26
 
+Dependencies updated in [11877](https://github.com/stripe/stripe-android/pull/11877):
+- Bumped Compose from 1.7.8 to 1.9.4.
+
 ### EmbeddedPaymentElement
 * [FIXED] Fixed an issue where `successBackground` and `onSuccessBackground` appearance customizations were not applied in EmbeddedPaymentElement.
 
