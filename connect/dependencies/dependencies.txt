@@ -97,7 +97,7 @@
 |    |    |    \--- androidx.core:core-ktx:1.15.0 (c)
 |    |    +--- androidx.interpolator:interpolator:1.0.0 (*)
 |    |    \--- com.google.guava:listenablefuture:1.0
-|    +--- com.google.dagger:dagger:2.55
+|    +--- com.google.dagger:dagger:2.58
 |    |    +--- jakarta.inject:jakarta.inject-api:2.0.1
 |    |    +--- javax.inject:javax.inject:1
 |    |    \--- org.jspecify:jspecify:1.0.0
@@ -756,7 +756,7 @@
 |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1 (*)
 |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.1 (*)
 |    |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0 (*)
-|    |    +--- com.google.dagger:dagger:2.55 (*)
+|    |    +--- com.google.dagger:dagger:2.58 (*)
 |    |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.1.10 (*)
 |    +--- project :payments-model (*)
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.1.10 (*)
@@ -789,7 +789,7 @@
 |    |         +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 2.1.10 (*)
 |    |         \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0
 |    |              \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 2.1.10 (*)
-|    +--- com.google.dagger:dagger:2.55 (*)
+|    +--- com.google.dagger:dagger:2.58 (*)
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1 (*)
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.1 (*)
 |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0 (*)
@@ -804,7 +804,7 @@
 +--- androidx.fragment:fragment-ktx:1.8.6 (*)
 +--- androidx.lifecycle:lifecycle-runtime-ktx:2.8.7 -> 2.9.4 (*)
 +--- androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7 -> 2.9.4 (*)
-+--- com.google.dagger:dagger:2.55 (*)
++--- com.google.dagger:dagger:2.58 (*)
 +--- androidx.compose.ui:ui:1.9.4 (*)
 +--- androidx.compose.foundation:foundation:1.9.4 (*)
 +--- androidx.compose.material:material:1.9.4 (*)
