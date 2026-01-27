@@ -3,6 +3,7 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.CountryUtils
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
@@ -38,6 +39,7 @@ import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
 @RunWith(RobolectricTestRunner::class)
 class CardDefinitionTest {
@@ -623,6 +625,47 @@ class CardDefinitionTest {
         assertThat(
             (formElements[0].controller as CardDetailsSectionController).shouldAutomaticallyLaunchCardScan()
         ).isFalse()
+    }
+
+    @Test
+    fun `createSupportedPaymentMethod returns expected supported PM when tap to add is not supported`() {
+        val metadata = PaymentMethodMetadataFactory.create(isTapToAddSupported = false)
+        val nullablePaymentMethod = CardDefinition.uiDefinitionFactory(metadata).supportedPaymentMethod(
+            metadata = metadata,
+            definition = CardDefinition,
+            sharedDataSpecs = emptyList()
+        )
+
+        assertThat(nullablePaymentMethod).isNotNull()
+
+        val supportedPaymentMethod = requireNotNull(nullablePaymentMethod)
+
+        assertThat(supportedPaymentMethod.iconResource)
+            .isEqualTo(PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_card)
+        assertThat(supportedPaymentMethod.outlinedIconResource)
+            .isEqualTo(PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_card_outlined)
+        assertThat(supportedPaymentMethod.subtitle).isNull()
+    }
+
+    @Test
+    fun `createSupportedPaymentMethod returns tap to add icon when tap to add is supported`() {
+        val metadata = PaymentMethodMetadataFactory.create(isTapToAddSupported = true)
+        val nullablePaymentMethod = CardDefinition.uiDefinitionFactory(metadata).supportedPaymentMethod(
+            metadata = metadata,
+            definition = CardDefinition,
+            sharedDataSpecs = emptyList()
+        )
+
+        assertThat(nullablePaymentMethod).isNotNull()
+
+        val supportedPaymentMethod = requireNotNull(nullablePaymentMethod)
+
+        assertThat(supportedPaymentMethod.iconResource)
+            .isEqualTo(PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_card_with_tap)
+        assertThat(supportedPaymentMethod.outlinedIconResource)
+            .isEqualTo(PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_card_with_tap)
+        assertThat(supportedPaymentMethod.subtitle)
+            .isEqualTo(PaymentsUiCoreR.string.stripe_card_with_tap_or_enter_manually.resolvableString)
     }
 
     private fun createLinkConfiguration(): LinkConfiguration {

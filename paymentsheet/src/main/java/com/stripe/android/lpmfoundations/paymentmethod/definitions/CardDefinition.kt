@@ -55,7 +55,13 @@ internal object CardDefinition : PaymentMethodDefinition {
 
     override fun uiDefinitionFactory(
         metadata: PaymentMethodMetadata
-    ): UiDefinitionFactory = CardUiDefinitionFactory
+    ): UiDefinitionFactory {
+        return if (metadata.isTapToAddSupported) {
+            CardWithTapUiDefinitionFactory
+        } else {
+            CardUiDefinitionFactory
+        }
+    }
 }
 
 private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
@@ -189,6 +195,25 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
                 )
             )
         }
+    }
+}
+
+private object CardWithTapUiDefinitionFactory : UiDefinitionFactory.Custom {
+    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+        paymentMethodDefinition = CardDefinition,
+        displayNameResource = PaymentsUiCoreR.string.stripe_paymentsheet_payment_method_card,
+        iconResource = PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_card_with_tap,
+        iconResourceNight = null,
+        outlinedIconResource = PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_card_with_tap,
+        subtitle = PaymentsUiCoreR.string.stripe_card_with_tap_or_enter_manually.resolvableString,
+        iconRequiresTinting = true,
+    )
+
+    override fun createFormElements(
+        metadata: PaymentMethodMetadata,
+        arguments: UiDefinitionFactory.Arguments
+    ): List<FormElement> {
+        return emptyList()
     }
 }
 
