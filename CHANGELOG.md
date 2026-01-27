@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 22.7.0 - 2026-01-26
+
 ### EmbeddedPaymentElement
 * [FIXED] Fixed an issue where `successBackground` and `onSuccessBackground` appearance customizations were not applied in EmbeddedPaymentElement.
 
