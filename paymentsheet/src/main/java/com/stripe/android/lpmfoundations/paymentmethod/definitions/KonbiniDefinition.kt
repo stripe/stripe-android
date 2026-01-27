@@ -32,7 +32,9 @@ internal object KonbiniDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = KonbiniUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = KonbiniUiDefinitionFactory
 }
 
 private object KonbiniUiDefinitionFactory : UiDefinitionFactory.Simple() {

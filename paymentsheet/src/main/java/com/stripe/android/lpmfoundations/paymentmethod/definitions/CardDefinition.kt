@@ -53,7 +53,9 @@ internal object CardDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = CardUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = CardUiDefinitionFactory
 }
 
 private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {

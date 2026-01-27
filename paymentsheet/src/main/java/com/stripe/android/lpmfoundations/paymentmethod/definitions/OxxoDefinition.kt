@@ -23,7 +23,9 @@ internal object OxxoDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = OxxoUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = OxxoUiDefinitionFactory
 }
 
 private object OxxoUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDataSpec {

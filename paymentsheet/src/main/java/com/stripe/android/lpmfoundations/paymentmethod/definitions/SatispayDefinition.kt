@@ -23,7 +23,9 @@ internal object SatispayDefinition : PaymentMethodDefinition {
         return metadata.hasIntentToSetup(type.code) && metadata.mandateAllowed(type)
     }
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = SatispayUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = SatispayUiDefinitionFactory
 }
 
 private object SatispayUiDefinitionFactory : UiDefinitionFactory.Simple() {

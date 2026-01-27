@@ -26,7 +26,9 @@ internal object AfterpayClearpayDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = AfterpayClearpayUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = AfterpayClearpayUiDefinitionFactory
 }
 
 private object AfterpayClearpayUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDataSpec {

@@ -25,7 +25,9 @@ internal object IdealDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = metadata.hasIntentToSetup(type.code)
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = IdealUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = IdealUiDefinitionFactory
 }
 
 private object IdealUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDataSpec {

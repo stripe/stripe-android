@@ -21,7 +21,9 @@ internal object WeChatPayDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = WeChatPayUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = WeChatPayUiDefinitionFactory
 }
 
 private object WeChatPayUiDefinitionFactory : UiDefinitionFactory.Simple() {

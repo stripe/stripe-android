@@ -21,7 +21,9 @@ internal object CryptoDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = CryptoUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = CryptoUiDefinitionFactory
 }
 
 private object CryptoUiDefinitionFactory : UiDefinitionFactory.Simple() {

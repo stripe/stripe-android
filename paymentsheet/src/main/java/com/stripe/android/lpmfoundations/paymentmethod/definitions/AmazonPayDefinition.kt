@@ -24,7 +24,9 @@ internal object AmazonPayDefinition : PaymentMethodDefinition {
         return metadata.hasIntentToSetup(type.code) && metadata.mandateAllowed(type)
     }
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = AmazonPayUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = AmazonPayUiDefinitionFactory
 }
 
 private object AmazonPayUiDefinitionFactory : UiDefinitionFactory.Simple() {

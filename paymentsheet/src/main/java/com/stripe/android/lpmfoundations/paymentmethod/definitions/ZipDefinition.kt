@@ -21,7 +21,9 @@ internal object ZipDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = ZipUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = ZipUiDefinitionFactory
 }
 
 private object ZipUiDefinitionFactory : UiDefinitionFactory.Simple() {

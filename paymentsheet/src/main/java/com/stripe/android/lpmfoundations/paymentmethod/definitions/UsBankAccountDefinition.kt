@@ -27,7 +27,9 @@ internal object UsBankAccountDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = true
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = UsBankAccountUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = UsBankAccountUiDefinitionFactory
 }
 
 private object UsBankAccountUiDefinitionFactory : UiDefinitionFactory.Custom {

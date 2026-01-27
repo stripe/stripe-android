@@ -21,7 +21,9 @@ internal object AlipayDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = AlipayUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = AlipayUiDefinitionFactory
 }
 
 private object AlipayUiDefinitionFactory : UiDefinitionFactory.Simple() {
