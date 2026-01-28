@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.confirmation.intent
 
+import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.common.exception.stripeErrorMessage
@@ -14,6 +15,7 @@ import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
+import kotlinx.parcelize.Parcelize
 
 internal class IntentConfirmationDefinition(
     private val intentConfirmationInterceptorFactory: IntentConfirmationInterceptor.Factory,
@@ -95,13 +97,13 @@ internal class IntentConfirmationDefinition(
     override fun toResult(
         confirmationOption: PaymentMethodConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
-        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        launcherArgs: Args,
         result: InternalPaymentResult
     ): ConfirmationDefinition.Result {
         return when (result) {
             is InternalPaymentResult.Completed -> ConfirmationDefinition.Result.Succeeded(
                 intent = result.intent,
-                deferredIntentConfirmationType = deferredIntentConfirmationType,
+                deferredIntentConfirmationType = launcherArgs.deferredIntentConfirmationType,
             )
             is InternalPaymentResult.Failed -> ConfirmationDefinition.Result.Failed(
                 cause = result.throwable,
@@ -128,11 +130,19 @@ internal class IntentConfirmationDefinition(
         }
     }
 
-    sealed interface Args {
+    sealed interface Args : Parcelable {
+        val deferredIntentConfirmationType: DeferredIntentConfirmationType?
+
+        @Parcelize
         data class NextAction(
             val intent: StripeIntent,
+            override val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         ) : Args
 
-        data class Confirm(val confirmNextParams: ConfirmStripeIntentParams) : Args
+        @Parcelize
+        data class Confirm(
+            val confirmNextParams: ConfirmStripeIntentParams,
+            override val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        ) : Args
     }
 }

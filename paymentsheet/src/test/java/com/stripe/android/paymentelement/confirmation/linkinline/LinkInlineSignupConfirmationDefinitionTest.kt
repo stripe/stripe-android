@@ -303,7 +303,6 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
         assertThat(paymentMethod.card?.wallet).isEqualTo(Wallet.LinkWallet(dynamicLast4 = "4242"))
 
         assertThat(launchAction.receivesResultInProcess).isTrue()
-        assertThat(launchAction.deferredIntentConfirmationType).isNull()
 
         assertThat(storeScenario.markAsUsedCalls.awaitItem()).isNotNull()
     }
@@ -348,7 +347,9 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = createLinkInlineSignupConfirmationOption(),
             confirmationArgs = CONFIRMATION_PARAMETERS,
-            deferredIntentConfirmationType = null,
+            launcherArgs = LinkInlineSignupConfirmationDefinition.LauncherArguments(
+                nextConfirmationOption = nextOption,
+            ),
             result = LinkInlineSignupConfirmationDefinition.Result(
                 nextConfirmationOption = nextOption,
             ),
@@ -482,7 +483,6 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                 assertThat(newConfirmationOption.shouldSave).isEqualTo(expectedShouldSave)
 
                 assertThat(launchAction.receivesResultInProcess).isTrue()
-                assertThat(launchAction.deferredIntentConfirmationType).isNull()
 
                 assertThat(storeScenario.markAsUsedCalls.awaitItem()).isNotNull()
             }
@@ -565,7 +565,6 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
             }
 
             assertThat(launchAction.receivesResultInProcess).isTrue()
-            assertThat(launchAction.deferredIntentConfirmationType).isNull()
 
             assertThat(storeScenario.markAsUsedCalls.awaitItem()).isNotNull()
         }
@@ -613,7 +612,6 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
         assertThat(nextNewConfirmationOption.optionsParams).isEqualTo(confirmationOption.optionsParams)
 
         assertThat(launchAction.receivesResultInProcess).isTrue()
-        assertThat(launchAction.deferredIntentConfirmationType).isNull()
     }
 
     private fun test(

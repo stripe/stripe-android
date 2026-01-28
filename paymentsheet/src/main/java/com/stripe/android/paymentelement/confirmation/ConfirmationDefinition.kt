@@ -13,7 +13,7 @@ import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfi
 internal interface ConfirmationDefinition<
     TConfirmationOption : ConfirmationHandler.Option,
     TLauncher,
-    TLauncherArgs,
+    TLauncherArgs : Parcelable,
     TLauncherResult : Parcelable
     > {
     /**
@@ -105,13 +105,13 @@ internal interface ConfirmationDefinition<
      *
      * @param confirmationOption the expected [ConfirmationHandler.Option] type used during confirmation
      * @param confirmationArgs a set of general confirmation parameters using during confirmation
-     * @param deferredIntentConfirmationType DO NOT USE OUTSIDE OF INTENT CONFIRMATION
+     * @param launcherArgs set of arguments used to launch the confirmation process.
      * @param result the launcher result received after the confirmation flow was closed.
      */
     fun toResult(
         confirmationOption: TConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
-        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        launcherArgs: TLauncherArgs,
         result: TLauncherResult,
     ): Result
 
@@ -142,7 +142,7 @@ internal interface ConfirmationDefinition<
             /**
              * DO NOT USE OUTSIDE OF INTENT CONFIRMATION
              */
-            val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+            val deferredIntentConfirmationType: DeferredIntentConfirmationType? = null,
             /**
              * Indicates if the full payment flow was completed by the handler. Can be used to decide if internal
              * product state needs to be reset. Useful for confirmation flows that are handed off to merchants to
@@ -252,10 +252,6 @@ internal interface ConfirmationDefinition<
              * covers the merchant's application (ie. the Google Pay or Bacs Mandate sheets).
              */
             val receivesResultInProcess: Boolean,
-            /**
-             * DO NOT USE OUTSIDE OF INTENT CONFIRMATION
-             */
-            val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         ) : Action<TLauncherArgs>
     }
 }

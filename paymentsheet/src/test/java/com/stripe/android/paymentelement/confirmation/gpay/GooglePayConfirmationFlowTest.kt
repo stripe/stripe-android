@@ -10,6 +10,7 @@ import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator.Parameters
+import com.stripe.android.paymentelement.confirmation.EmptyConfirmationLauncherArgs
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.runResultTest
@@ -61,11 +62,10 @@ class GooglePayConfirmationFlowTest {
                 assertThat(createGooglePayPaymentMethodLauncherCalls.awaitItem()).isNotNull()
 
                 val parameters = savedStateHandle
-                    .get<Parameters<GooglePayConfirmationOption>>("GooglePayParameters")
+                    .get<Parameters<GooglePayConfirmationOption, EmptyConfirmationLauncherArgs>>("GooglePayParameters")
 
                 assertThat(parameters?.confirmationOption).isEqualTo(GOOGLE_PAY_CONFIRMATION_OPTION)
                 assertThat(parameters?.confirmationArgs).isEqualTo(CONFIRMATION_PARAMETERS)
-                assertThat(parameters?.deferredIntentConfirmationType).isNull()
 
                 verify(googlePayPaymentMethodLauncher, times(1)).present(
                     currencyCode = "usd",
@@ -88,6 +88,7 @@ class GooglePayConfirmationFlowTest {
             userFacingLogger = null,
         ),
         launcherResult = GooglePayPaymentMethodLauncher.Result.Completed(PAYMENT_METHOD),
+        launcherArgs = EmptyConfirmationLauncherArgs,
         definitionResult = ConfirmationDefinition.Result.NextStep(
             confirmationOption = PaymentMethodConfirmationOption.Saved(
                 paymentMethod = PAYMENT_METHOD,

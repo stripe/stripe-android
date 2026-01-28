@@ -8,6 +8,7 @@ import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationO
 import com.stripe.android.paymentelement.confirmation.runLaunchTest
 import com.stripe.android.paymentelement.confirmation.runResultTest
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateData
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.DefaultBacsMandateConfirmationLauncherFactory
 import org.junit.Test
 
@@ -29,6 +30,12 @@ class BacsConfirmationFlowTest {
         ),
         launcherResult = BacsMandateConfirmationResult.Confirmed,
         parameters = CONFIRMATION_PARAMETERS,
+        launcherArgs = BacsMandateData(
+            name = "John",
+            email = "email@email.com",
+            sortCode = "000000",
+            accountNumber = "0001234"
+        ),
         definitionResult = ConfirmationDefinition.Result.NextStep(
             confirmationOption = PaymentMethodConfirmationOption.New(
                 createParams = BACS_CONFIRMATION_OPTION.createParams,

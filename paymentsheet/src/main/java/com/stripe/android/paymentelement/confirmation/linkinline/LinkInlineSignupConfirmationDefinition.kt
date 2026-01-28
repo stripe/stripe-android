@@ -15,7 +15,6 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
-import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import kotlinx.coroutines.flow.first
 import kotlinx.parcelize.Parcelize
 
@@ -44,7 +43,6 @@ internal class LinkInlineSignupConfirmationDefinition(
         return ConfirmationDefinition.Action.Launch(
             launcherArguments = LauncherArguments(nextConfirmationOption),
             receivesResultInProcess = true,
-            deferredIntentConfirmationType = null,
         )
     }
 
@@ -67,7 +65,7 @@ internal class LinkInlineSignupConfirmationDefinition(
     override fun toResult(
         confirmationOption: LinkInlineSignupConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
-        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        launcherArgs: LauncherArguments,
         result: Result,
     ): ConfirmationDefinition.Result {
         return ConfirmationDefinition.Result.NextStep(
@@ -193,9 +191,10 @@ internal class LinkInlineSignupConfirmationDefinition(
         val nextConfirmationOption: PaymentMethodConfirmationOption,
     ) : Parcelable
 
+    @Parcelize
     data class LauncherArguments(
         val nextConfirmationOption: PaymentMethodConfirmationOption,
-    )
+    ) : Parcelable
 
     class Launcher(
         val onResult: (Result) -> Unit,
