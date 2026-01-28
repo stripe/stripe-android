@@ -14,6 +14,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
@@ -75,6 +76,7 @@ import com.stripe.android.paymentsheet.utils.DismissKeyboardOnProcessing
 import com.stripe.android.paymentsheet.utils.EventReporterProvider
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.shoppay.ShopPayButton
 import com.stripe.android.ui.core.CircularProgressIndicator
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.ui.core.elements.Mandate
@@ -356,6 +358,7 @@ private fun PaymentSheetContent(
                 processingState = walletsProcessingState,
                 onGooglePayPressed = state.onGooglePayPressed,
                 onLinkPressed = state.onLinkPressed,
+                onShopPayPressed = state.onShopPayPressed,
                 dividerSpacing = currentScreen.walletsDividerSpacing,
                 modifier = Modifier.padding(bottom = bottomSpacing),
                 cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance),
@@ -413,39 +416,49 @@ internal fun Wallet(
     processingState: WalletsProcessingState?,
     onGooglePayPressed: () -> Unit,
     onLinkPressed: () -> Unit,
+    onShopPayPressed: () -> Unit,
     dividerSpacing: Dp,
     modifier: Modifier = Modifier,
     cardBrandFilter: CardBrandFilter,
     cardFundingFilter: CardFundingFilter
 ) {
     val padding = StripeTheme.getOuterFormInsets()
+    val walletItems = remember(state) {
+        // Only show wallet if allowed in header
+        state.wallets(WalletLocation.HEADER)
+    }
 
-    Column(modifier = modifier.padding(padding)) {
-        // Only show Google Pay if allowed in header
-        state.googlePay(WalletLocation.HEADER)?.let { googlePay ->
-            GooglePayButton(
-                state = PrimaryButton.State.Ready,
-                allowCreditCards = googlePay.allowCreditCards,
-                buttonType = googlePay.buttonType,
-                billingAddressParameters = googlePay.billingAddressParameters,
-                isEnabled = state.buttonsEnabled,
-                onPressed = onGooglePayPressed,
-                cardBrandFilter = cardBrandFilter,
-                cardFundingFilter = cardFundingFilter,
-                additionalEnabledNetworks = googlePay.additionalEnabledNetworks
-            )
-        }
-
-        // Only show Link if allowed in header
-        state.link(WalletLocation.HEADER)?.let {
-            if (state.googlePay(WalletLocation.HEADER) != null) {
-                Spacer(modifier = Modifier.requiredHeight(8.dp))
+    Column(
+        modifier = modifier
+            .padding(padding),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        for (wallet in walletItems) {
+            when (wallet) {
+                is WalletsState.GooglePay -> {
+                    GooglePayButton(
+                        state = PrimaryButton.State.Ready,
+                        allowCreditCards = wallet.allowCreditCards,
+                        buttonType = wallet.buttonType,
+                        billingAddressParameters = wallet.billingAddressParameters,
+                        isEnabled = state.buttonsEnabled,
+                        onPressed = onGooglePayPressed,
+                        cardBrandFilter = cardBrandFilter,
+                        cardFundingFilter = cardFundingFilter,
+                        additionalEnabledNetworks = wallet.additionalEnabledNetworks
+                    )
+                }
+                is WalletsState.Link -> {
+                    LinkButton(
+                        state = wallet.state,
+                        enabled = state.buttonsEnabled,
+                        onClick = onLinkPressed,
+                    )
+                }
+                WalletsState.ShopPay -> {
+                    ShopPayButton(onClick = onShopPayPressed)
+                }
             }
-            LinkButton(
-                state = it.state,
-                enabled = state.buttonsEnabled,
-                onClick = onLinkPressed,
-            )
         }
 
         when (processingState) {

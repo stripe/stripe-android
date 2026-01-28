@@ -117,10 +117,12 @@ internal class PaymentSheetScreenAddFirstPaymentMethodScreenshotTest {
                 state = LinkButtonState.Email("email@email.com"),
             ),
             googlePay = null,
+            shopPay = null,
             buttonsEnabled = true,
             dividerTextResource = com.stripe.android.paymentsheet.R.string.stripe_paymentsheet_or_pay_with_card,
             onLinkPressed = {},
             onGooglePayPressed = {},
+            onShopPayPressed = {},
             walletsAllowedInHeader = WalletType.entries,
             cardFundingFilter = DefaultCardFundingFilter,
             cardBrandFilter = DefaultCardBrandFilter
