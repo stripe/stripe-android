@@ -11,7 +11,7 @@ sealed interface OnrampUpdatePhoneNumberResult {
      * Phone number update was successful.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    class Completed internal constructor()  : OnrampUpdatePhoneNumberResult
+    class Completed internal constructor() : OnrampUpdatePhoneNumberResult
 
     /**
      * Phone number update failed.
