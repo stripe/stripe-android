@@ -6,7 +6,7 @@ import androidx.annotation.RestrictTo
  * The type of payment method to present for selection.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-enum class PaymentMethodType(val value: String) {
+enum class PaymentMethodType(internal val value: String) {
     Card("card"),
     BankAccount("bank_account")
 }
