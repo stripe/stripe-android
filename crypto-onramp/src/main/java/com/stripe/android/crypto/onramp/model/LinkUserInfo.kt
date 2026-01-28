@@ -19,8 +19,8 @@ import kotlinx.parcelize.Parcelize
 @Poko
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class LinkUserInfo(
-    val email: String,
-    val fullName: String?,
-    val phone: String,
-    val country: String,
+    internal val email: String,
+    internal val fullName: String?,
+    internal val phone: String,
+    internal val country: String,
 ) : Parcelable
