@@ -11,7 +11,7 @@ sealed interface OnrampAttachKycInfoResult {
      * KYC submission completed successfully.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data object Completed : OnrampAttachKycInfoResult
+    class Completed internal constructor() : OnrampAttachKycInfoResult
 
     /**
      * KYC submission failed due to an error.

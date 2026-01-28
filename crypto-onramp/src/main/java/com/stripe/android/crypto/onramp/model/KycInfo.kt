@@ -4,6 +4,7 @@ import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.model.DateOfBirth
 import com.stripe.android.paymentsheet.PaymentSheet
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -16,7 +17,8 @@ import kotlinx.parcelize.Parcelize
  * @property address The user’s billing address.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class KycInfo(
+@Poko
+class KycInfo(
     val firstName: String,
     val lastName: String,
     val idNumber: String?,
