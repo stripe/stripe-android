@@ -52,7 +52,7 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
     ): Boolean {
         return confirmationArgs.paymentMethodMetadata.passiveCaptchaParams != null &&
             isEligibleForConfirmationChallenge(confirmationOption) &&
-            !confirmationOption.passiveChallengeComplete
+            !confirmationOption.confirmationChallengeState.passiveChallengeComplete
     }
 
     override fun toResult(
@@ -140,13 +140,17 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
                     createParams = createParams.copy(
                         radarOptions = radarOptions
                     ),
-                    passiveChallengeComplete = true
+                    confirmationChallengeState = confirmationChallengeState.copy(
+                        passiveChallengeComplete = true
+                    )
                 )
             }
             is PaymentMethodConfirmationOption.Saved -> {
                 copy(
-                    hCaptchaToken = token,
-                    passiveChallengeComplete = true
+                    confirmationChallengeState = confirmationChallengeState.copy(
+                        hCaptchaToken = token,
+                        passiveChallengeComplete = true
+                    )
                 )
             }
         }

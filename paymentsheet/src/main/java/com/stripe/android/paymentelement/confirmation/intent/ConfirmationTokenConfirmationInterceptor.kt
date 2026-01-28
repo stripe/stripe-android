@@ -107,7 +107,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                     intent = intent,
                     confirmationToken = confirmationToken,
                     shippingValues = shippingValues,
-                    hCaptchaToken = confirmationOption.hCaptchaToken,
+                    hCaptchaToken = confirmationOption.confirmationChallengeState.hCaptchaToken,
                 )
             },
             onFailure = { error ->

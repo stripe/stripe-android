@@ -13,6 +13,7 @@ import com.stripe.android.model.AndroidVerificationObject
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.RadarOptions
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
+import com.stripe.android.paymentelement.confirmation.ConfirmationChallengeState
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
@@ -277,7 +278,7 @@ internal class AttestationConfirmationDefinitionTest {
                     )
                 )
             ),
-            attestationComplete = true
+            confirmationChallengeState = ConfirmationChallengeState(attestationComplete = true)
         )
 
         assertThat(nextStepResult.confirmationOption).isEqualTo(expectedOption)
@@ -302,7 +303,7 @@ internal class AttestationConfirmationDefinitionTest {
 
         // When attestation fails, continue without the token but mark attestation as complete
         val expectedOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.copy(
-            attestationComplete = true
+            confirmationChallengeState = ConfirmationChallengeState(attestationComplete = true)
         )
         assertThat(nextStepResult.confirmationOption).isEqualTo(expectedOption)
         assertThat(nextStepResult.arguments).isEqualTo(CONFIRMATION_PARAMETERS)
@@ -325,8 +326,10 @@ internal class AttestationConfirmationDefinitionTest {
         val nextStepResult = result.asNextStep()
 
         val expectedOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED.copy(
-            attestationToken = testToken,
-            attestationComplete = true
+            confirmationChallengeState = ConfirmationChallengeState(
+                attestationToken = testToken,
+                attestationComplete = true
+            )
         )
 
         assertThat(nextStepResult.confirmationOption).isEqualTo(expectedOption)
@@ -351,7 +354,7 @@ internal class AttestationConfirmationDefinitionTest {
 
         // When attestation fails, continue without the token but mark attestation as complete
         val expectedOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED.copy(
-            attestationComplete = true
+            confirmationChallengeState = ConfirmationChallengeState(attestationComplete = true)
         )
         assertThat(nextStepResult.confirmationOption).isEqualTo(expectedOption)
         assertThat(nextStepResult.arguments).isEqualTo(CONFIRMATION_PARAMETERS)
@@ -414,7 +417,7 @@ internal class AttestationConfirmationDefinitionTest {
         val definition = createAttestationConfirmationDefinition()
 
         val optionWithToken = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED.copy(
-            attestationToken = "existing_token"
+            confirmationChallengeState = ConfirmationChallengeState(attestationToken = "existing_token")
         )
 
         val result = definition.canConfirm(
@@ -430,7 +433,7 @@ internal class AttestationConfirmationDefinitionTest {
         val definition = createAttestationConfirmationDefinition()
 
         val optionWithAttestationComplete = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.copy(
-            attestationComplete = true
+            confirmationChallengeState = ConfirmationChallengeState(attestationComplete = true)
         )
 
         val result = definition.canConfirm(
@@ -633,7 +636,6 @@ internal class AttestationConfirmationDefinitionTest {
             paymentMethod = PAYMENT_INTENT.paymentMethod!!,
             optionsParams = null,
             originatedFromWallet = false,
-            hCaptchaToken = null,
         )
 
         private val launcherArgs = AttestationActivityContract.Args(

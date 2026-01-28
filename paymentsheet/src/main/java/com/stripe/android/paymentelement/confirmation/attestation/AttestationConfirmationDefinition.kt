@@ -69,7 +69,7 @@ internal class AttestationConfirmationDefinition @Inject constructor(
     ): Boolean {
         return isEligibleForConfirmationChallenge(confirmationOption) &&
             confirmationArgs.paymentMethodMetadata.attestOnIntentConfirmation &&
-            confirmationOption.attestationComplete.not() &&
+            confirmationOption.confirmationChallengeState.attestationComplete.not() &&
             confirmationOption.hasToken().not()
     }
 
@@ -160,13 +160,17 @@ internal class AttestationConfirmationDefinition @Inject constructor(
                     createParams = createParams.copy(
                         radarOptions = radarOptions
                     ),
-                    attestationComplete = true
+                    confirmationChallengeState = confirmationChallengeState.copy(
+                        attestationComplete = true
+                    )
                 )
             }
             is PaymentMethodConfirmationOption.Saved -> {
                 copy(
-                    attestationToken = token,
-                    attestationComplete = true
+                    confirmationChallengeState = confirmationChallengeState.copy(
+                        attestationToken = token,
+                        attestationComplete = true
+                    )
                 )
             }
         }
@@ -178,7 +182,7 @@ internal class AttestationConfirmationDefinition @Inject constructor(
                 createParams.radarOptions?.androidVerificationObject?.androidVerificationToken != null
             }
             is PaymentMethodConfirmationOption.Saved -> {
-                attestationToken != null
+                confirmationChallengeState.attestationToken != null
             }
         }
     }

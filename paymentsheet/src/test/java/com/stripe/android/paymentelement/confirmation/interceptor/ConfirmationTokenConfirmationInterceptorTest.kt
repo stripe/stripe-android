@@ -25,6 +25,7 @@ import com.stripe.android.model.parsers.ConfirmationTokenJsonParser
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
+import com.stripe.android.paymentelement.confirmation.ConfirmationChallengeState
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationTokenFixtures
@@ -490,7 +491,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
                 confirmationOption = PaymentMethodConfirmationOption.Saved(
                     paymentMethod = PaymentMethodFixtures.AU_BECS_DEBIT,
                     optionsParams = null,
-                    hCaptchaToken = null,
                 ),
                 shippingValues = null,
             )
@@ -766,7 +766,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
         val confirmationOption = PaymentMethodConfirmationOption.Saved(
             paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
             optionsParams = null,
-            hCaptchaToken = null,
         )
 
         interceptor.intercept(
@@ -813,7 +812,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
         val confirmationOption = PaymentMethodConfirmationOption.Saved(
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             optionsParams = null,
-            hCaptchaToken = null,
         )
 
         interceptor.intercept(
@@ -868,7 +866,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
         val confirmationOption = PaymentMethodConfirmationOption.Saved(
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             optionsParams = PaymentMethodOptionsParams.Card(cvc = "123"),
-            hCaptchaToken = null,
         )
 
         interceptor.intercept(
@@ -923,7 +920,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
         val confirmationOption = PaymentMethodConfirmationOption.Saved(
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             optionsParams = PaymentMethodOptionsParams.Card(cvc = "123"),
-            hCaptchaToken = null,
         )
 
         interceptor.intercept(
@@ -979,7 +975,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
         val confirmationOption = PaymentMethodConfirmationOption.Saved(
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             optionsParams = PaymentMethodOptionsParams.Card(cvc = "123"),
-            hCaptchaToken = null,
         )
 
         interceptor.intercept(
@@ -1090,7 +1085,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
             val confirmationOption = PaymentMethodConfirmationOption.Saved(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = null,
-                hCaptchaToken = "test_token",
+                confirmationChallengeState = ConfirmationChallengeState(hCaptchaToken = "test_token"),
             )
 
             val nextAction = interceptor.intercept(
@@ -1135,7 +1130,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
             val confirmationOption = PaymentMethodConfirmationOption.Saved(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = null,
-                hCaptchaToken = "test_token",
+                confirmationChallengeState = ConfirmationChallengeState(hCaptchaToken = "test_token"),
             )
 
             val nextAction = interceptor.intercept(
@@ -1157,7 +1152,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
             val confirmationOption = PaymentMethodConfirmationOption.Saved(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = null,
-                hCaptchaToken = null,
             )
 
             val nextAction = interceptor.intercept(

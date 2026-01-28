@@ -12,6 +12,7 @@ import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.RadarOptions
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
+import com.stripe.android.paymentelement.confirmation.ConfirmationChallengeState
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
@@ -331,7 +332,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
         val nextStepResult = result.asNextStep()
 
         val expectedOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.copy(
-            passiveChallengeComplete = true,
+            confirmationChallengeState = ConfirmationChallengeState(passiveChallengeComplete = true),
             createParams = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.createParams.copy(
                 radarOptions = RadarOptions(
                     hCaptchaToken = testToken,
@@ -361,7 +362,9 @@ internal class PassiveChallengeConfirmationDefinitionTest {
         val nextStepResult = result.asNextStep()
 
         assertThat(nextStepResult.confirmationOption).isEqualTo(
-            PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.copy(passiveChallengeComplete = true)
+            PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.copy(
+                confirmationChallengeState = ConfirmationChallengeState(passiveChallengeComplete = true)
+            )
         )
         assertThat(nextStepResult.arguments).isEqualTo(CONFIRMATION_PARAMETERS)
     }
@@ -383,8 +386,10 @@ internal class PassiveChallengeConfirmationDefinitionTest {
         val nextStepResult = result.asNextStep()
 
         val expectedOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED.copy(
-            passiveChallengeComplete = true,
-            hCaptchaToken = testToken
+            confirmationChallengeState = ConfirmationChallengeState(
+                passiveChallengeComplete = true,
+                hCaptchaToken = testToken
+            )
         )
 
         assertThat(nextStepResult.confirmationOption).isEqualTo(expectedOption)
@@ -409,8 +414,9 @@ internal class PassiveChallengeConfirmationDefinitionTest {
 
         assertThat(nextStepResult.confirmationOption).isEqualTo(
             PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED.copy(
-                passiveChallengeComplete = true,
-                hCaptchaToken = null
+                confirmationChallengeState = ConfirmationChallengeState(
+                    passiveChallengeComplete = true,
+                )
             )
         )
         assertThat(nextStepResult.arguments).isEqualTo(CONFIRMATION_PARAMETERS)
@@ -507,7 +513,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
 
         // Verify that radarOptions is not set by checking equality with expected option
         val expectedOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.copy(
-            passiveChallengeComplete = true,
+            confirmationChallengeState = ConfirmationChallengeState(passiveChallengeComplete = true),
             createParams = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.createParams.copy(
                 radarOptions = null
             )
@@ -595,7 +601,6 @@ internal class PassiveChallengeConfirmationDefinitionTest {
             paymentMethod = PAYMENT_INTENT.paymentMethod!!,
             optionsParams = null,
             originatedFromWallet = false,
-            hCaptchaToken = null,
         )
 
         private val launcherArgs = PassiveChallengeActivityContract.Args(
