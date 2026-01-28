@@ -40,7 +40,8 @@ class KycInfo(
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
-data class RefreshKycInfo(
+@Poko
+internal class RefreshKycInfo(
     val firstName: String,
     val lastName: String,
     val idNumberLastFour: String?,
