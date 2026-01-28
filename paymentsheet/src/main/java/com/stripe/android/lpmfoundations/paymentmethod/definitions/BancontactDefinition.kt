@@ -26,7 +26,9 @@ internal object BancontactDefinition : PaymentMethodDefinition {
         return metadata.hasIntentToSetup(type.code) && metadata.mandateAllowed(type)
     }
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = BancontactUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = BancontactUiDefinitionFactory
 }
 
 private object BancontactUiDefinitionFactory : UiDefinitionFactory.Simple() {

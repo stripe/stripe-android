@@ -21,7 +21,9 @@ internal object SwishDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = SwishUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = SwishUiDefinitionFactory
 }
 
 private object SwishUiDefinitionFactory : UiDefinitionFactory.Simple() {

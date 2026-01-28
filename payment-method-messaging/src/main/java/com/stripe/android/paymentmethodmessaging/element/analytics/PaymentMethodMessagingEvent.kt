@@ -6,6 +6,7 @@ import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.paymentmethodmessaging.element.PaymentMethodMessagingElement
 import com.stripe.android.paymentmethodmessaging.element.PaymentMethodMessagingElementPreview
 import kotlin.time.Duration
+import kotlin.time.DurationUnit
 
 internal sealed class PaymentMethodMessagingEvent : AnalyticsEvent {
     abstract val additionalParams: Map<String, Any?>
@@ -37,7 +38,7 @@ internal sealed class PaymentMethodMessagingEvent : AnalyticsEvent {
         override val additionalParams: Map<String, Any?> = buildMap {
             put(FIELD_PAYMENT_METHODS, paymentMethods.joinToString(","))
             put(FIELD_CONTENT_TYPE, contentType.type)
-            put(FIELD_DURATION, duration)
+            put(FIELD_DURATION, duration?.toDouble(DurationUnit.SECONDS)?.toFloat())
         }
     }
 
@@ -47,7 +48,7 @@ internal sealed class PaymentMethodMessagingEvent : AnalyticsEvent {
     ) : PaymentMethodMessagingEvent() {
         override val eventName: String = PMME_LOAD_FAILED
         override val additionalParams: Map<String, Any?> = buildMap {
-            put(FIELD_DURATION, duration)
+            put(FIELD_DURATION, duration?.toDouble(DurationUnit.SECONDS)?.toFloat())
             put(FIELD_ERROR_MESSAGE, error.message)
         }
     }

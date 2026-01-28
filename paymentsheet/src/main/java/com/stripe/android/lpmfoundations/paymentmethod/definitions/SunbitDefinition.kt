@@ -21,7 +21,9 @@ internal object SunbitDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = SunbitUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = SunbitUiDefinitionFactory
 }
 
 private object SunbitUiDefinitionFactory : UiDefinitionFactory.Simple() {

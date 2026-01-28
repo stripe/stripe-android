@@ -21,7 +21,9 @@ internal object GrabPayDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = GrabPayUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = GrabPayUiDefinitionFactory
 }
 
 private object GrabPayUiDefinitionFactory : UiDefinitionFactory.Simple() {

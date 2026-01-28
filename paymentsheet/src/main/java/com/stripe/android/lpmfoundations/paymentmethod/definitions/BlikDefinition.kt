@@ -24,7 +24,9 @@ internal object BlikDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = BlikUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = BlikUiDefinitionFactory
 }
 
 private object BlikUiDefinitionFactory : UiDefinitionFactory.Simple() {

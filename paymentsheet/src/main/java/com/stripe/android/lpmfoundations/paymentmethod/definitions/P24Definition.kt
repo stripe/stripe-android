@@ -30,7 +30,9 @@ internal object P24Definition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = P24UiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = P24UiDefinitionFactory
 }
 
 private object P24UiDefinitionFactory : UiDefinitionFactory.Simple() {

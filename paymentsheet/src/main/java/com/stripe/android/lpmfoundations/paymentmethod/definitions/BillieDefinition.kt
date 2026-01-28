@@ -21,7 +21,9 @@ internal object BillieDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = BillieUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = BillieUiDefinitionFactory
 }
 
 private object BillieUiDefinitionFactory : UiDefinitionFactory.Simple() {

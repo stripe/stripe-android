@@ -24,7 +24,9 @@ internal object MultibancoDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = MultibancoUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = MultibancoUiDefinitionFactory
 }
 
 private object MultibancoUiDefinitionFactory : UiDefinitionFactory.Simple() {
