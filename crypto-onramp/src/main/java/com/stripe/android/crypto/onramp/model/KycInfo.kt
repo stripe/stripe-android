@@ -19,11 +19,11 @@ import kotlinx.parcelize.Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Poko
 class KycInfo(
-    val firstName: String,
-    val lastName: String,
-    val idNumber: String?,
-    val dateOfBirth: DateOfBirth,
-    val address: PaymentSheet.Address
+    internal val firstName: String,
+    internal val lastName: String,
+    internal val idNumber: String?,
+    internal val dateOfBirth: DateOfBirth,
+    internal val address: PaymentSheet.Address
 )
 
 /**
