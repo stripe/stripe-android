@@ -30,7 +30,9 @@ internal object EpsDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = EpsUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = EpsUiDefinitionFactory
 }
 
 private object EpsUiDefinitionFactory : UiDefinitionFactory.Simple() {

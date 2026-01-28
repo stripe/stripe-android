@@ -23,7 +23,9 @@ internal object PayPalDefinition : PaymentMethodDefinition {
         return metadata.hasIntentToSetup(type.code) && metadata.mandateAllowed(type)
     }
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = PayPalUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = PayPalUiDefinitionFactory
 }
 
 private object PayPalUiDefinitionFactory : UiDefinitionFactory.Simple() {

@@ -13,7 +13,6 @@ import com.stripe.android.model.RadarOptions
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
-import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import javax.inject.Inject
@@ -57,7 +56,7 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
     override fun toResult(
         confirmationOption: PaymentMethodConfirmationOption.New,
         confirmationArgs: ConfirmationHandler.Args,
-        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        launcherArgs: PassiveChallengeActivityContract.Args,
         result: PassiveChallengeActivityResult
     ): ConfirmationDefinition.Result {
         return when (result) {
@@ -106,7 +105,6 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
                     productUsage = productUsage
                 ),
                 receivesResultInProcess = false,
-                deferredIntentConfirmationType = null,
             )
         }
 

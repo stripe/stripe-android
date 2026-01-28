@@ -23,7 +23,9 @@ internal object PromptPayDefinition : PaymentMethodDefinition {
         return setOf(AddPaymentMethodRequirement.UnsupportedForSetup)
     }
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = PromptPayUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = PromptPayUiDefinitionFactory
 }
 
 private object PromptPayUiDefinitionFactory : UiDefinitionFactory.Simple() {

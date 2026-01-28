@@ -15,7 +15,6 @@ import com.stripe.android.model.RadarOptions
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
-import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.attestation.IntegrityRequestManager
@@ -75,7 +74,7 @@ internal class AttestationConfirmationDefinition @Inject constructor(
     override fun toResult(
         confirmationOption: PaymentMethodConfirmationOption.New,
         confirmationArgs: ConfirmationHandler.Args,
-        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        launcherArgs: AttestationActivityContract.Args,
         result: AttestationActivityResult
     ): ConfirmationDefinition.Result {
         return when (result) {
@@ -121,7 +120,6 @@ internal class AttestationConfirmationDefinition @Inject constructor(
                     productUsage = productUsage
                 ),
                 receivesResultInProcess = false,
-                deferredIntentConfirmationType = null,
             )
         }
 

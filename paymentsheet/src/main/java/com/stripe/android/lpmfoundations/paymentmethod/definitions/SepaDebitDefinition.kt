@@ -27,7 +27,9 @@ internal object SepaDebitDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = true
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = SepaDebitUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = SepaDebitUiDefinitionFactory
 }
 
 private object SepaDebitUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDataSpec {

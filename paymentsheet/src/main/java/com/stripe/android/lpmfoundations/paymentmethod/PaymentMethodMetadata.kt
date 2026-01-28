@@ -162,7 +162,7 @@ internal data class PaymentMethodMetadata(
                 ?.createSupportedPaymentMethod(metadata = this)
         } else {
             val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
-            definition.uiDefinitionFactory().supportedPaymentMethod(this, definition, sharedDataSpecs)
+            definition.uiDefinitionFactory(this).supportedPaymentMethod(this, definition, sharedDataSpecs)
         }
     }
 
@@ -248,7 +248,8 @@ internal data class PaymentMethodMetadata(
             stripeIntent.isLiveMode &&
                 stripeIntent.unactivatedPaymentMethods.contains(it.type.code)
         }.filter { paymentMethodDefinition ->
-            paymentMethodDefinition.uiDefinitionFactory().canBeDisplayedInUi(paymentMethodDefinition, sharedDataSpecs)
+            paymentMethodDefinition.uiDefinitionFactory(this)
+                .canBeDisplayedInUi(paymentMethodDefinition, sharedDataSpecs)
         }
     }
 
@@ -281,7 +282,7 @@ internal data class PaymentMethodMetadata(
         } else {
             val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
 
-            definition.uiDefinitionFactory().formHeaderInformation(
+            definition.uiDefinitionFactory(this).formHeaderInformation(
                 metadata = this,
                 definition = definition,
                 sharedDataSpecs = sharedDataSpecs,
@@ -307,7 +308,7 @@ internal data class PaymentMethodMetadata(
         } else {
             val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
 
-            definition.uiDefinitionFactory().formElements(
+            definition.uiDefinitionFactory(this).formElements(
                 metadata = this,
                 definition = definition,
                 sharedDataSpecs = sharedDataSpecs,

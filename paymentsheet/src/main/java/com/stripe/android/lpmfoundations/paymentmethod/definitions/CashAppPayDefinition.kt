@@ -24,7 +24,9 @@ internal object CashAppPayDefinition : PaymentMethodDefinition {
         return metadata.hasIntentToSetup(type.code) && metadata.mandateAllowed(type)
     }
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = CashAppPayUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = CashAppPayUiDefinitionFactory
 }
 
 private object CashAppPayUiDefinitionFactory : UiDefinitionFactory.Simple() {

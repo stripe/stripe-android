@@ -39,6 +39,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.LocalAutofillHighlightColor
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.LocalContentColor
@@ -169,43 +170,45 @@ fun CompatTextField(
     }
     val mergedTextStyle = textStyle.merge(TextStyle(color = textColor))
 
-    @OptIn(ExperimentalMaterialApi::class)
-    BasicTextField(
-        value = value,
-        modifier = modifier
-            .indicatorLine(enabled, isError, interactionSource, colors)
-            .errorSemanticsWithDefault(isError, errorMessage),
-        onValueChange = onValueChange,
-        enabled = enabled,
-        readOnly = readOnly,
-        textStyle = mergedTextStyle,
-        cursorBrush = SolidColor(colors.cursorColor(isError).value),
-        visualTransformation = visualTransformation,
-        keyboardOptions = keyboardOptions,
-        keyboardActions = keyboardActions,
-        interactionSource = interactionSource,
-        singleLine = singleLine,
-        maxLines = maxLines,
-        minLines = minLines,
-        decorationBox = @Composable { innerTextField ->
-            InsetDecorationBox(
-                value = value,
-                visualTransformation = visualTransformation,
-                innerTextField = innerTextField,
-                placeholder = placeholder,
-                label = label,
-                leadingIcon = leadingIcon,
-                trailingIcon = trailingIcon,
-                singleLine = singleLine,
-                enabled = enabled,
-                isError = isError,
-                interactionSource = interactionSource,
-                colors = colors,
-                shape = shape,
-                contentPadding = contentPadding,
-            )
-        }
-    )
+    CompositionLocalProvider(LocalAutofillHighlightColor provides AutofillTransparentColor) {
+        @OptIn(ExperimentalMaterialApi::class)
+        BasicTextField(
+            value = value,
+            modifier = modifier
+                .indicatorLine(enabled, isError, interactionSource, colors)
+                .errorSemanticsWithDefault(isError, errorMessage),
+            onValueChange = onValueChange,
+            enabled = enabled,
+            readOnly = readOnly,
+            textStyle = mergedTextStyle,
+            cursorBrush = SolidColor(colors.cursorColor(isError).value),
+            visualTransformation = visualTransformation,
+            keyboardOptions = keyboardOptions,
+            keyboardActions = keyboardActions,
+            interactionSource = interactionSource,
+            singleLine = singleLine,
+            maxLines = maxLines,
+            minLines = minLines,
+            decorationBox = @Composable { innerTextField ->
+                InsetDecorationBox(
+                    value = value,
+                    visualTransformation = visualTransformation,
+                    innerTextField = innerTextField,
+                    placeholder = placeholder,
+                    label = label,
+                    leadingIcon = leadingIcon,
+                    trailingIcon = trailingIcon,
+                    singleLine = singleLine,
+                    enabled = enabled,
+                    isError = isError,
+                    interactionSource = interactionSource,
+                    colors = colors,
+                    shape = shape,
+                    contentPadding = contentPadding,
+                )
+            }
+        )
+    }
 }
 
 /**
@@ -299,43 +302,45 @@ fun CompatTextField(
     }
     val mergedTextStyle = textStyle.merge(TextStyle(color = textColor))
 
-    @OptIn(ExperimentalMaterialApi::class)
-    BasicTextField(
-        value = value,
-        modifier = modifier
-            .indicatorLine(enabled, isError, interactionSource, colors)
-            .errorSemanticsWithDefault(isError, errorMessage),
-        onValueChange = onValueChange,
-        enabled = enabled,
-        readOnly = readOnly,
-        textStyle = mergedTextStyle,
-        cursorBrush = SolidColor(colors.cursorColor(isError).value),
-        visualTransformation = visualTransformation,
-        keyboardOptions = keyboardOptions,
-        keyboardActions = keyboardActions,
-        interactionSource = interactionSource,
-        singleLine = singleLine,
-        maxLines = maxLines,
-        minLines = minLines,
-        decorationBox = @Composable { innerTextField ->
-            InsetDecorationBox(
-                value = value.text,
-                visualTransformation = visualTransformation,
-                innerTextField = innerTextField,
-                placeholder = placeholder,
-                label = label,
-                leadingIcon = leadingIcon,
-                trailingIcon = trailingIcon,
-                singleLine = singleLine,
-                enabled = enabled,
-                isError = isError,
-                interactionSource = interactionSource,
-                colors = colors,
-                shape = shape,
-                contentPadding = contentPadding,
-            )
-        }
-    )
+    CompositionLocalProvider(LocalAutofillHighlightColor provides AutofillTransparentColor) {
+        @OptIn(ExperimentalMaterialApi::class)
+        BasicTextField(
+            value = value,
+            modifier = modifier
+                .indicatorLine(enabled, isError, interactionSource, colors)
+                .errorSemanticsWithDefault(isError, errorMessage),
+            onValueChange = onValueChange,
+            enabled = enabled,
+            readOnly = readOnly,
+            textStyle = mergedTextStyle,
+            cursorBrush = SolidColor(colors.cursorColor(isError).value),
+            visualTransformation = visualTransformation,
+            keyboardOptions = keyboardOptions,
+            keyboardActions = keyboardActions,
+            interactionSource = interactionSource,
+            singleLine = singleLine,
+            maxLines = maxLines,
+            minLines = minLines,
+            decorationBox = @Composable { innerTextField ->
+                InsetDecorationBox(
+                    value = value.text,
+                    visualTransformation = visualTransformation,
+                    innerTextField = innerTextField,
+                    placeholder = placeholder,
+                    label = label,
+                    leadingIcon = leadingIcon,
+                    trailingIcon = trailingIcon,
+                    singleLine = singleLine,
+                    enabled = enabled,
+                    isError = isError,
+                    interactionSource = interactionSource,
+                    colors = colors,
+                    shape = shape,
+                    contentPadding = contentPadding,
+                )
+            }
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -667,5 +672,6 @@ fun Modifier.errorSemanticsWithDefault(
     }
 }
 
+private val AutofillTransparentColor = Color(0x00000000)
 private const val PlaceholderAnimationDuration = 83
 private const val PlaceholderAnimationDelayOrDuration = 67

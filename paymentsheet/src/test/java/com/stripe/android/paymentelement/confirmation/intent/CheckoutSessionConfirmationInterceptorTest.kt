@@ -115,7 +115,8 @@ class CheckoutSessionConfirmationInterceptorTest {
 
         val launchAction = result as ConfirmationDefinition.Action.Launch
         assertThat(launchAction.launcherArguments).isInstanceOf<IntentConfirmationDefinition.Args.NextAction>()
-        assertThat(launchAction.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Server)
+        assertThat(launchAction.launcherArguments.deferredIntentConfirmationType)
+            .isEqualTo(DeferredIntentConfirmationType.Server)
         assertThat(launchAction.receivesResultInProcess).isFalse()
     }
 

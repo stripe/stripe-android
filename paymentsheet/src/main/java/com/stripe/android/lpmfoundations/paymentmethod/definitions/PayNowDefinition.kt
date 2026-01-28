@@ -20,7 +20,9 @@ internal object PayNowDefinition : PaymentMethodDefinition {
         return setOf(AddPaymentMethodRequirement.UnsupportedForSetup)
     }
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = PayNowUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = PayNowUiDefinitionFactory
 }
 
 private object PayNowUiDefinitionFactory : UiDefinitionFactory.Simple() {

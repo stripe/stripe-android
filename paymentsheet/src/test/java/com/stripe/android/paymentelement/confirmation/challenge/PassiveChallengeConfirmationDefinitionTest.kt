@@ -152,7 +152,6 @@ internal class PassiveChallengeConfirmationDefinitionTest {
         assertThat(launchAction.launcherArguments.passiveCaptchaParams)
             .isEqualTo(CONFIRMATION_PARAMETERS.paymentMethodMetadata.passiveCaptchaParams)
         assertThat(launchAction.receivesResultInProcess).isFalse()
-        assertThat(launchAction.deferredIntentConfirmationType).isNull()
     }
 
     @Test
@@ -251,7 +250,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
             confirmationArgs = CONFIRMATION_PARAMETERS,
-            deferredIntentConfirmationType = null,
+            launcherArgs = launcherArgs,
             result = PassiveChallengeActivityResult.Success(testToken),
         )
 
@@ -281,7 +280,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
             confirmationArgs = CONFIRMATION_PARAMETERS,
-            deferredIntentConfirmationType = null,
+            launcherArgs = launcherArgs,
             result = PassiveChallengeActivityResult.Failed(exception),
         )
 
@@ -354,7 +353,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
             confirmationArgs = CONFIRMATION_PARAMETERS,
-            deferredIntentConfirmationType = null,
+            launcherArgs = launcherArgs,
             result = PassiveChallengeActivityResult.Success(testToken),
         )
 
@@ -377,7 +376,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
             confirmationArgs = CONFIRMATION_PARAMETERS,
-            deferredIntentConfirmationType = null,
+            launcherArgs = launcherArgs,
             result = PassiveChallengeActivityResult.Failed(RuntimeException("Failed")),
         )
 
@@ -410,7 +409,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
                 )
             ),
             confirmationArgs = CONFIRMATION_PARAMETERS,
-            deferredIntentConfirmationType = null,
+            launcherArgs = launcherArgs,
             result = PassiveChallengeActivityResult.Success(testToken),
         )
 

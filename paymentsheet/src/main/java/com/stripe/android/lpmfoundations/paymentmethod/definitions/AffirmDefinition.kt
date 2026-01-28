@@ -26,7 +26,9 @@ internal object AffirmDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = AffirmUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = AffirmUiDefinitionFactory
 }
 
 private object AffirmUiDefinitionFactory : UiDefinitionFactory.Simple() {

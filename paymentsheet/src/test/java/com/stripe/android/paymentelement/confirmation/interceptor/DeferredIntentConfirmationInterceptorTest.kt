@@ -272,9 +272,9 @@ class DeferredIntentConfirmationInterceptorTest {
                         intent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.copy(
                             paymentMethodId = PaymentMethodFixtures.CARD_PAYMENT_METHOD.id,
                             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                        )
+                        ),
+                        deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
                     ),
-                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
                     receivesResultInProcess = false,
                 )
             )

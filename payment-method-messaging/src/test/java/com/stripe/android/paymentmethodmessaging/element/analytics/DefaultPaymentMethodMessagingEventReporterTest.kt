@@ -67,6 +67,7 @@ class DefaultPaymentMethodMessagingEventReporterTest {
         assertThat(request.params["event"]).isEqualTo(PMME_LOAD_SUCCEEDED)
         assertThat(request.params["payment_methods"]).isEqualTo("affirm,klarna")
         assertThat(request.params["content_type"]).isEqualTo("multi_partner")
+        assertThat(request.params["duration"]).isEqualTo(1.0f)
         validateDurationEndCall()
     }
 
@@ -76,6 +77,7 @@ class DefaultPaymentMethodMessagingEventReporterTest {
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params["event"]).isEqualTo(PMME_LOAD_FAILED)
         assertThat(request.params["error_message"]).isEqualTo("something went wrong")
+        assertThat(request.params["duration"]).isEqualTo(1.0f)
         validateDurationEndCall()
     }
 

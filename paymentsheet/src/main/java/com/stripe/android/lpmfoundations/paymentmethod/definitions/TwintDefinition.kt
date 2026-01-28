@@ -21,7 +21,9 @@ internal object TwintDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = TwintUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = TwintUiDefinitionFactory
 }
 
 private object TwintUiDefinitionFactory : UiDefinitionFactory.Simple() {

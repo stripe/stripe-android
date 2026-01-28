@@ -86,12 +86,13 @@ internal class PaymentMethodLayoutUITest(
 
     @Test
     fun clickingOnNewPaymentMethod_callsOnClick() {
+        val metadata = PaymentMethodMetadataFactory.create()
         var onClickCalled = false
         runScenario(
             initialState = createState(
                 displayablePaymentMethods = listOf(
-                    CardDefinition.uiDefinitionFactory().supportedPaymentMethod(
-                        metadata = PaymentMethodMetadataFactory.create(),
+                    CardDefinition.uiDefinitionFactory(metadata).supportedPaymentMethod(
+                        metadata = metadata,
                         definition = CardDefinition,
                         sharedDataSpecs = emptyList()
                     )!!

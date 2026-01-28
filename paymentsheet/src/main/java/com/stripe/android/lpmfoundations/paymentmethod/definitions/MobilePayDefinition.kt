@@ -21,7 +21,9 @@ internal object MobilePayDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = MobilePayUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = MobilePayUiDefinitionFactory
 }
 
 private object MobilePayUiDefinitionFactory : UiDefinitionFactory.Simple() {

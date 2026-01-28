@@ -53,9 +53,13 @@ internal class PaymentSheetPage(
     }
 
     fun fillOutCardDetails(fillOutZipCode: Boolean = true) {
+        fillOutCardDetailsWithCardNumber("4242424242424242", fillOutZipCode)
+    }
+
+    fun fillOutCardDetailsWithCardNumber(cardNumber: String, fillOutZipCode: Boolean = true) {
         waitForCardForm()
 
-        replaceText("Card number", "4242424242424242")
+        replaceText("Card number", cardNumber)
         fillExpirationDate("12/34")
         replaceText("CVC", "123")
 

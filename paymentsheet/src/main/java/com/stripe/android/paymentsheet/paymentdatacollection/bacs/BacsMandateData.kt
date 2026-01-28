@@ -1,14 +1,17 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.bacs
 
+import android.os.Parcelable
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOption
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 internal data class BacsMandateData(
     val name: String,
     val email: String,
     val accountNumber: String,
     val sortCode: String
-) {
+) : Parcelable {
     companion object {
         fun fromConfirmationOption(
             confirmationOption: BacsConfirmationOption,

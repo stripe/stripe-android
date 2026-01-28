@@ -29,7 +29,9 @@ internal object FpxDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = FpxUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = FpxUiDefinitionFactory
 }
 
 private object FpxUiDefinitionFactory : UiDefinitionFactory.Simple() {

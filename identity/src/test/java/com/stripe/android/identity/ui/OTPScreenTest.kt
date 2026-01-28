@@ -5,6 +5,7 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
+import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onNodeWithTag
@@ -152,7 +153,7 @@ class OTPScreenTest {
         otpViewState.update { OTPViewState.InputtingOTP }
 
         setComposeTestRuleWith {
-            onNodeWithTag(OTP_ELEMENT_TAG).onChildAt(0).onChildAt(0).assertIsEnabled()
+            otpInputBox().assertIsEnabled()
             onNodeWithTag(OTP_ERROR_TAG).assertDoesNotExist()
             onNodeWithTag(OTP_RESEND_BUTTON_TAG).onChildAt(0).assertIsEnabled()
             onNodeWithTag(OTP_CANNOT_VERIFY_BUTTON_TAG).onChildAt(0).assertIsEnabled()
@@ -169,7 +170,7 @@ class OTPScreenTest {
                 navController = same(mockNavController),
                 onMissingOtp = any()
             )
-            onNodeWithTag(OTP_ELEMENT_TAG).onChildAt(0).onChildAt(0).assertIsNotEnabled()
+            otpInputBox().assertIsNotEnabled()
             onNodeWithTag(OTP_ERROR_TAG).assertDoesNotExist()
             onNodeWithTag(OTP_RESEND_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
             onNodeWithTag(OTP_CANNOT_VERIFY_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
@@ -180,7 +181,7 @@ class OTPScreenTest {
     fun verifyErrorOTPState() {
         otpViewState.update { OTPViewState.ErrorOTP }
         setComposeTestRuleWith {
-            onNodeWithTag(OTP_ELEMENT_TAG).onChildAt(0).onChildAt(0).assertIsEnabled()
+            otpInputBox().assertIsEnabled()
             onNodeWithTag(OTP_ERROR_TAG).assertExists()
             onNodeWithTag(OTP_RESEND_BUTTON_TAG).onChildAt(0).assertIsEnabled()
             onNodeWithTag(OTP_CANNOT_VERIFY_BUTTON_TAG).onChildAt(0).assertIsEnabled()
@@ -191,7 +192,7 @@ class OTPScreenTest {
     fun verifyRequestingOTPState() {
         otpViewState.update { OTPViewState.RequestingOTP }
         setComposeTestRuleWith {
-            onNodeWithTag(OTP_ELEMENT_TAG).onChildAt(0).onChildAt(0).assertIsNotEnabled()
+            otpInputBox().assertIsNotEnabled()
             onNodeWithTag(OTP_ERROR_TAG).assertDoesNotExist()
             onNodeWithTag(OTP_RESEND_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
             onNodeWithTag(OTP_CANNOT_VERIFY_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
@@ -202,7 +203,7 @@ class OTPScreenTest {
     fun verifyRequestingCannotVerifyState() {
         otpViewState.update { OTPViewState.RequestingCannotVerify }
         setComposeTestRuleWith {
-            onNodeWithTag(OTP_ELEMENT_TAG).onChildAt(0).onChildAt(0).assertIsNotEnabled()
+            otpInputBox().assertIsNotEnabled()
             onNodeWithTag(OTP_ERROR_TAG).assertDoesNotExist()
             onNodeWithTag(OTP_RESEND_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
             onNodeWithTag(OTP_CANNOT_VERIFY_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
@@ -220,7 +221,7 @@ class OTPScreenTest {
                 same(mockNavController),
                 any()
             )
-            onNodeWithTag(OTP_ELEMENT_TAG).onChildAt(0).onChildAt(0).assertIsEnabled()
+            otpInputBox().assertIsEnabled()
             onNodeWithTag(OTP_ERROR_TAG).assertDoesNotExist()
             onNodeWithTag(OTP_RESEND_BUTTON_TAG).onChildAt(0).assertIsEnabled()
             onNodeWithTag(OTP_CANNOT_VERIFY_BUTTON_TAG).onChildAt(0).assertIsEnabled()
@@ -241,6 +242,11 @@ class OTPScreenTest {
             )
         }
     }
+
+    private fun ComposeTestRule.otpInputBox() = onNodeWithTag(OTP_ELEMENT_TAG)
+        .onChildAt(0)
+        .onChildAt(0)
+        .onChildAt(0)
 
     private fun setComposeTestRuleWith(
         testBlock: suspend ComposeContentTestRule.() -> Unit = {}

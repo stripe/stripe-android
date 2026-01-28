@@ -19,6 +19,8 @@ import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessi
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
+import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
+import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedFormSheetActionSettingDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
@@ -103,6 +105,7 @@ internal class TestConfirmationToken : BasePlaygroundTest() {
             settings[DelayedPaymentMethodsSettingsDefinition] = true
             settings[CheckoutModeSettingsDefinition] = CheckoutMode.SETUP
             settings[InitializationTypeSettingsDefinition] = InitializationType.DeferredClientSideConfirmation
+            settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.OnWithRandomEmail
         }
 
         testDriver.confirmCustomUSBankAccountAndBuy(
