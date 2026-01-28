@@ -231,7 +231,6 @@ internal class AttestationConfirmationDefinitionTest {
             assertThat(launchAction.launcherArguments.publishableKey).isEqualTo(launcherArgs.publishableKey)
             assertThat(launchAction.launcherArguments.productUsage).isEqualTo(launcherArgs.productUsage)
             assertThat(launchAction.receivesResultInProcess).isFalse()
-            assertThat(launchAction.deferredIntentConfirmationType).isNull()
         }
 
     @Test
@@ -317,8 +316,8 @@ internal class AttestationConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED,
             confirmationArgs = CONFIRMATION_PARAMETERS,
-            deferredIntentConfirmationType = null,
             result = AttestationActivityResult.Success(testToken),
+            launcherArgs = launcherArgs,
         )
 
         assertThat(result).isInstanceOf<ConfirmationDefinition.Result.NextStep>()
@@ -344,8 +343,8 @@ internal class AttestationConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED,
             confirmationArgs = CONFIRMATION_PARAMETERS,
-            deferredIntentConfirmationType = null,
             result = AttestationActivityResult.Failed(exception),
+            launcherArgs = launcherArgs,
         )
 
         assertThat(result).isInstanceOf<ConfirmationDefinition.Result.NextStep>()
