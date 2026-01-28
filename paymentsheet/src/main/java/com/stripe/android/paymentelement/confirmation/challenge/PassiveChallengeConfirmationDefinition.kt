@@ -48,16 +48,16 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
 
     override fun canConfirm(
         confirmationOption: PaymentMethodConfirmationOption,
-        confirmationArgs: ConfirmationHandler.Args
+        confirmationArgs: ConfirmationDefinition.Args
     ): Boolean {
         return confirmationArgs.paymentMethodMetadata.passiveCaptchaParams != null &&
-            isEligibleForConfirmationChallenge(confirmationOption) &&
+            isEligibleForConfirmationChallenge(confirmationOption, confirmationArgs.metadata) &&
             !confirmationOption.confirmationChallengeState.passiveChallengeComplete
     }
 
     override fun toResult(
         confirmationOption: PaymentMethodConfirmationOption,
-        confirmationArgs: ConfirmationHandler.Args,
+        confirmationArgs: ConfirmationDefinition.Args,
         launcherArgs: PassiveChallengeActivityContract.Args,
         result: PassiveChallengeActivityResult
     ): ConfirmationDefinition.Result {
@@ -89,14 +89,14 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
         launcher: ActivityResultLauncher<PassiveChallengeActivityContract.Args>,
         arguments: PassiveChallengeActivityContract.Args,
         confirmationOption: PaymentMethodConfirmationOption,
-        confirmationArgs: ConfirmationHandler.Args
+        confirmationArgs: ConfirmationDefinition.Args
     ) {
         launcher.launch(arguments)
     }
 
     override suspend fun action(
         confirmationOption: PaymentMethodConfirmationOption,
-        confirmationArgs: ConfirmationHandler.Args
+        confirmationArgs: ConfirmationDefinition.Args
     ): ConfirmationDefinition.Action<PassiveChallengeActivityContract.Args> {
         val passiveCaptchaParams = confirmationArgs.paymentMethodMetadata.passiveCaptchaParams
         if (passiveCaptchaParams != null) {

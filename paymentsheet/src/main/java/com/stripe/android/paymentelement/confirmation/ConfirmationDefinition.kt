@@ -1,11 +1,15 @@
 package com.stripe.android.paymentelement.confirmation
 
+import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler.Option
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import kotlinx.parcelize.IgnoredOnParcel
+import kotlinx.parcelize.Parcelize
 
 /**
  * Defines a confirmation flow that a user might use during confirmation.
@@ -45,7 +49,7 @@ internal interface ConfirmationDefinition<
      */
     fun canConfirm(
         confirmationOption: TConfirmationOption,
-        confirmationArgs: ConfirmationHandler.Args,
+        confirmationArgs: Args,
     ): Boolean = true
 
     /**
@@ -59,7 +63,7 @@ internal interface ConfirmationDefinition<
      */
     suspend fun action(
         confirmationOption: TConfirmationOption,
-        confirmationArgs: ConfirmationHandler.Args,
+        confirmationArgs: Args,
     ): Action<TLauncherArgs>
 
     /**
@@ -75,7 +79,7 @@ internal interface ConfirmationDefinition<
         launcher: TLauncher,
         arguments: TLauncherArgs,
         confirmationOption: TConfirmationOption,
-        confirmationArgs: ConfirmationHandler.Args,
+        confirmationArgs: Args,
     )
 
     /**
@@ -110,7 +114,7 @@ internal interface ConfirmationDefinition<
      */
     fun toResult(
         confirmationOption: TConfirmationOption,
-        confirmationArgs: ConfirmationHandler.Args,
+        confirmationArgs: Args,
         launcherArgs: TLauncherArgs,
         result: TLauncherResult,
     ): Result
@@ -165,7 +169,7 @@ internal interface ConfirmationDefinition<
              * A set of general confirmation parameters. Should normally be the same as what was provided by the
              * user
              */
-            val arguments: ConfirmationHandler.Args,
+            val arguments: Args,
         ) : Result
 
         /**
@@ -253,5 +257,29 @@ internal interface ConfirmationDefinition<
              */
             val receivesResultInProcess: Boolean,
         ) : Action<TLauncherArgs>
+    }
+
+    /**
+     * Defines the set of arguments requires for beginning the confirmation process
+     */
+    @Parcelize
+    data class Args(
+        /**
+         * The confirmation option used to in order to potentially confirm the intent
+         */
+        val confirmationOption: Option,
+
+        /**
+         * The immutable data created during configuration.
+         */
+        val paymentMethodMetadata: PaymentMethodMetadata,
+
+        val metadata: Bundle = Bundle()
+    ) : Parcelable {
+        /**
+         * The [StripeIntent] that is being potentially confirmed by the handler
+         */
+        @IgnoredOnParcel
+        val intent: StripeIntent = paymentMethodMetadata.stripeIntent
     }
 }

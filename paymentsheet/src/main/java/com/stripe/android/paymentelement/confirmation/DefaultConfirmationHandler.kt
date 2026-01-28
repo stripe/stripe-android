@@ -134,11 +134,12 @@ internal class DefaultConfirmationHandler(
         arguments: ConfirmationHandler.Args,
     ) {
         val confirmationOption = arguments.confirmationOption
+        val definitionArgs = arguments.toDefinitionArgs()
 
         _state.value = ConfirmationHandler.State.Confirming(arguments.confirmationOption)
 
         val mediator = mediators.find { mediator ->
-            mediator.canConfirm(confirmationOption, arguments)
+            mediator.canConfirm(confirmationOption, definitionArgs)
         } ?: run {
             errorReporter.report(
                 errorEvent = ErrorReporter
@@ -164,12 +165,12 @@ internal class DefaultConfirmationHandler(
             return
         }
 
-        handleMediatorAction(confirmationOption, arguments, mediator)
+        handleMediatorAction(confirmationOption, definitionArgs, mediator)
     }
 
     private suspend fun handleMediatorAction(
         confirmationOption: ConfirmationHandler.Option,
-        arguments: ConfirmationHandler.Args,
+        arguments: ConfirmationDefinition.Args,
         mediator: ConfirmationMediator<*, *, *, *>,
     ) {
         val action = withContext(ioContext) {
@@ -213,7 +214,7 @@ internal class DefaultConfirmationHandler(
 
                 coroutineScope.launch {
                     confirm(
-                        arguments = result.arguments.copy(
+                        arguments = result.arguments.toHandlerArgs().copy(
                             confirmationOption = result.confirmationOption,
                         )
                     )
@@ -323,4 +324,18 @@ internal class DefaultConfirmationHandler(
         private const val AWAITING_CONFIRMATION_RESULT_KEY = "AwaitingConfirmationResult"
         private const val INITIAL_CONFIRMATION_ARGUMENTS_KEY = "INITIAL_CONFIRMATION_ARGUMENTS_KEY"
     }
+}
+
+private fun ConfirmationHandler.Args.toDefinitionArgs(): ConfirmationDefinition.Args {
+    return ConfirmationDefinition.Args(
+        confirmationOption = confirmationOption,
+        paymentMethodMetadata = paymentMethodMetadata,
+    )
+}
+
+private fun ConfirmationDefinition.Args.toHandlerArgs(): ConfirmationHandler.Args {
+    return ConfirmationHandler.Args(
+        confirmationOption = confirmationOption,
+        paymentMethodMetadata = paymentMethodMetadata,
+    )
 }

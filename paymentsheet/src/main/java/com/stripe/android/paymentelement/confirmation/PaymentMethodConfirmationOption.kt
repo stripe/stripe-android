@@ -24,7 +24,6 @@ internal sealed interface PaymentMethodConfirmationOption : ConfirmationHandler.
         override val optionsParams: PaymentMethodOptionsParams?,
         val originatedFromWallet: Boolean = false,
         override val confirmationChallengeState: ConfirmationChallengeState = ConfirmationChallengeState(),
-        val newPMTransformedForConfirmation: Boolean = false
     ) : PaymentMethodConfirmationOption {
         override fun updatedForDeferredIntent(
             intentConfiguration: PaymentSheet.IntentConfiguration,

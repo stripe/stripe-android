@@ -65,9 +65,9 @@ internal class AttestationConfirmationDefinition @Inject constructor(
 
     override fun canConfirm(
         confirmationOption: PaymentMethodConfirmationOption,
-        confirmationArgs: ConfirmationHandler.Args
+        confirmationArgs: ConfirmationDefinition.Args
     ): Boolean {
-        return isEligibleForConfirmationChallenge(confirmationOption) &&
+        return isEligibleForConfirmationChallenge(confirmationOption, confirmationArgs.metadata) &&
             confirmationArgs.paymentMethodMetadata.attestOnIntentConfirmation &&
             confirmationOption.confirmationChallengeState.attestationComplete.not() &&
             confirmationOption.hasToken().not()
@@ -75,7 +75,7 @@ internal class AttestationConfirmationDefinition @Inject constructor(
 
     override fun toResult(
         confirmationOption: PaymentMethodConfirmationOption,
-        confirmationArgs: ConfirmationHandler.Args,
+        confirmationArgs: ConfirmationDefinition.Args,
         launcherArgs: AttestationActivityContract.Args,
         result: AttestationActivityResult
     ): ConfirmationDefinition.Result {
@@ -106,14 +106,14 @@ internal class AttestationConfirmationDefinition @Inject constructor(
         launcher: ActivityResultLauncher<AttestationActivityContract.Args>,
         arguments: AttestationActivityContract.Args,
         confirmationOption: PaymentMethodConfirmationOption,
-        confirmationArgs: ConfirmationHandler.Args
+        confirmationArgs: ConfirmationDefinition.Args
     ) {
         launcher.launch(arguments)
     }
 
     override suspend fun action(
         confirmationOption: PaymentMethodConfirmationOption,
-        confirmationArgs: ConfirmationHandler.Args
+        confirmationArgs: ConfirmationDefinition.Args
     ): ConfirmationDefinition.Action<AttestationActivityContract.Args> {
         if (confirmationArgs.paymentMethodMetadata.attestOnIntentConfirmation) {
             return ConfirmationDefinition.Action.Launch(

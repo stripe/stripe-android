@@ -28,7 +28,7 @@ internal class BacsConfirmationDefinition @Inject constructor(
 
     override suspend fun action(
         confirmationOption: BacsConfirmationOption,
-        confirmationArgs: ConfirmationHandler.Args,
+        confirmationArgs: ConfirmationDefinition.Args,
     ): ConfirmationDefinition.Action<BacsMandateData> {
         return BacsMandateData.fromConfirmationOption(confirmationOption)?.let { data ->
             ConfirmationDefinition.Action.Launch(
@@ -62,7 +62,7 @@ internal class BacsConfirmationDefinition @Inject constructor(
         launcher: BacsMandateConfirmationLauncher,
         arguments: BacsMandateData,
         confirmationOption: BacsConfirmationOption,
-        confirmationArgs: ConfirmationHandler.Args,
+        confirmationArgs: ConfirmationDefinition.Args,
     ) {
         launcher.launch(
             data = arguments,
@@ -72,7 +72,7 @@ internal class BacsConfirmationDefinition @Inject constructor(
 
     override fun toResult(
         confirmationOption: BacsConfirmationOption,
-        confirmationArgs: ConfirmationHandler.Args,
+        confirmationArgs: ConfirmationDefinition.Args,
         launcherArgs: BacsMandateData,
         result: BacsMandateConfirmationResult,
     ): ConfirmationDefinition.Result {

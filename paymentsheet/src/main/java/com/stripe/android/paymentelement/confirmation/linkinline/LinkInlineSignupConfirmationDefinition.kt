@@ -36,9 +36,9 @@ internal class LinkInlineSignupConfirmationDefinition(
 
     override suspend fun action(
         confirmationOption: LinkInlineSignupConfirmationOption,
-        confirmationArgs: ConfirmationHandler.Args
+        confirmationArgs: ConfirmationDefinition.Args
     ): ConfirmationDefinition.Action<LauncherArguments> {
-        val nextConfirmationOption = createPaymentMethodConfirmationOption(confirmationOption)
+        val nextConfirmationOption = createPaymentMethodConfirmationOption(confirmationOption, confirmationArgs)
 
         return ConfirmationDefinition.Action.Launch(
             launcherArguments = LauncherArguments(nextConfirmationOption),
@@ -57,14 +57,14 @@ internal class LinkInlineSignupConfirmationDefinition(
         launcher: Launcher,
         arguments: LauncherArguments,
         confirmationOption: LinkInlineSignupConfirmationOption,
-        confirmationArgs: ConfirmationHandler.Args,
+        confirmationArgs: ConfirmationDefinition.Args,
     ) {
         launcher.onResult(Result(arguments.nextConfirmationOption))
     }
 
     override fun toResult(
         confirmationOption: LinkInlineSignupConfirmationOption,
-        confirmationArgs: ConfirmationHandler.Args,
+        confirmationArgs: ConfirmationDefinition.Args,
         launcherArgs: LauncherArguments,
         result: Result,
     ): ConfirmationDefinition.Result {
@@ -76,12 +76,13 @@ internal class LinkInlineSignupConfirmationDefinition(
 
     private suspend fun createPaymentMethodConfirmationOption(
         linkInlineSignupConfirmationOption: LinkInlineSignupConfirmationOption,
+        confirmationArgs: ConfirmationDefinition.Args
     ): PaymentMethodConfirmationOption {
         val configuration = linkInlineSignupConfirmationOption.linkConfiguration
         val userInput = linkInlineSignupConfirmationOption.sanitizedUserInput
 
         return when (linkConfigurationCoordinator.getAccountStatusFlow(configuration).first()) {
-            is AccountStatus.Verified -> createOptionAfterAttachingToLink(linkInlineSignupConfirmationOption, userInput)
+            is AccountStatus.Verified -> createOptionAfterAttachingToLink(linkInlineSignupConfirmationOption, userInput, confirmationArgs)
             AccountStatus.VerificationStarted,
             is AccountStatus.NeedsVerification -> {
                 linkAnalyticsHelper.onLinkPopupSkipped()
@@ -93,7 +94,7 @@ internal class LinkInlineSignupConfirmationDefinition(
                 linkConfigurationCoordinator.signInWithUserInput(configuration, userInput).fold(
                     onSuccess = {
                         // If successful, the account was fetched or created, so try again
-                        createPaymentMethodConfirmationOption(linkInlineSignupConfirmationOption)
+                        createPaymentMethodConfirmationOption(linkInlineSignupConfirmationOption, confirmationArgs)
                     },
                     onFailure = {
                         linkInlineSignupConfirmationOption.toNewOption()
@@ -106,6 +107,7 @@ internal class LinkInlineSignupConfirmationDefinition(
     private suspend fun createOptionAfterAttachingToLink(
         linkInlineSignupConfirmationOption: LinkInlineSignupConfirmationOption,
         userInput: UserInput,
+        confirmationArgs: ConfirmationDefinition.Args
     ): PaymentMethodConfirmationOption {
         if (userInput is UserInput.SignIn) {
             linkAnalyticsHelper.onLinkPopupSkipped()
@@ -132,6 +134,7 @@ internal class LinkInlineSignupConfirmationDefinition(
             is LinkPaymentDetails.Saved -> {
                 linkStore.markLinkAsUsed()
 
+                confirmationArgs.metadata.putBoolean("newPMTransformedForConfirmation", true)
                 linkPaymentDetails.toSavedOption(saveOption)
             }
             null -> linkInlineSignupConfirmationOption.toNewOption()
@@ -149,7 +152,6 @@ internal class LinkInlineSignupConfirmationDefinition(
                 } ?: ConfirmPaymentIntentParams.SetupFutureUsage.Blank
             ),
             originatedFromWallet = true,
-            newPMTransformedForConfirmation = true
         )
     }
 

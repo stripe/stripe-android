@@ -30,7 +30,7 @@ internal class CvcRecollectionConfirmationDefinition @Inject constructor(
 
     override fun canConfirm(
         confirmationOption: PaymentMethodConfirmationOption.Saved,
-        confirmationArgs: ConfirmationHandler.Args,
+        confirmationArgs: ConfirmationDefinition.Args,
     ): Boolean {
         return !confirmationOption.optionsParams.hasAlreadyRecollectedCvc() && handler.requiresCVCRecollection(
             stripeIntent = confirmationArgs.intent,
@@ -41,7 +41,7 @@ internal class CvcRecollectionConfirmationDefinition @Inject constructor(
 
     override suspend fun action(
         confirmationOption: PaymentMethodConfirmationOption.Saved,
-        confirmationArgs: ConfirmationHandler.Args
+        confirmationArgs: ConfirmationDefinition.Args
     ): ConfirmationDefinition.Action<EmptyConfirmationLauncherArgs> {
         return ConfirmationDefinition.Action.Launch(
             launcherArguments = EmptyConfirmationLauncherArgs,
@@ -65,7 +65,7 @@ internal class CvcRecollectionConfirmationDefinition @Inject constructor(
         launcher: CvcRecollectionLauncher,
         arguments: EmptyConfirmationLauncherArgs,
         confirmationOption: PaymentMethodConfirmationOption.Saved,
-        confirmationArgs: ConfirmationHandler.Args
+        confirmationArgs: ConfirmationDefinition.Args
     ) {
         handler.launch(confirmationOption.paymentMethod) { recollectionData ->
             launcher.launch(
@@ -78,7 +78,7 @@ internal class CvcRecollectionConfirmationDefinition @Inject constructor(
 
     override fun toResult(
         confirmationOption: PaymentMethodConfirmationOption.Saved,
-        confirmationArgs: ConfirmationHandler.Args,
+        confirmationArgs: ConfirmationDefinition.Args,
         launcherArgs: EmptyConfirmationLauncherArgs,
         result: CvcRecollectionResult
     ): ConfirmationDefinition.Result {

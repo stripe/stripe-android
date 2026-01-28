@@ -22,7 +22,7 @@ internal fun <
     > runLaunchTest(
     definition: ConfirmationDefinition<TConfirmationOption, TLauncher, TLauncherArgs, TLauncherResult>,
     confirmationOption: ConfirmationHandler.Option,
-    parameters: ConfirmationHandler.Args
+    parameters: ConfirmationDefinition.Args
 ) = runTest {
     val savedStateHandle = SavedStateHandle()
     val mediator = ConfirmationMediator(savedStateHandle, definition)
@@ -65,7 +65,7 @@ internal fun <
     > runResultTest(
     definition: ConfirmationDefinition<TConfirmationOption, TLauncher, TLauncherArgs, TLauncherResult>,
     confirmationOption: ConfirmationHandler.Option,
-    parameters: ConfirmationHandler.Args,
+    parameters: ConfirmationDefinition.Args,
     launcherArgs: TLauncherArgs,
     launcherResult: TLauncherResult,
     definitionResult: ConfirmationDefinition.Result,
@@ -193,7 +193,7 @@ internal fun ConfirmationHandler.Result?.assertCanceled(): ConfirmationHandler.R
 
 internal val PAYMENT_INTENT = PaymentIntentFactory.create(clientSecret = "pi_123_secret_123")
 
-internal val CONFIRMATION_PARAMETERS = ConfirmationHandler.Args(
+internal val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Args(
     confirmationOption = FakeConfirmationOption(),
     paymentMethodMetadata = PaymentMethodMetadataFactory.create(
         stripeIntent = PAYMENT_INTENT,

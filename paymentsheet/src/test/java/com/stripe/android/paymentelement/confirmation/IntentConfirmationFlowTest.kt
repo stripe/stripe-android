@@ -292,8 +292,8 @@ internal class IntentConfirmationFlowTest {
 
     private fun defaultConfirmationDefinitionParams(
         intent: StripeIntent,
-    ): ConfirmationHandler.Args {
-        return ConfirmationHandler.Args(
+    ): ConfirmationDefinition.Args {
+        return ConfirmationDefinition.Args(
             confirmationOption = FakeConfirmationOption(),
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = intent,
@@ -336,7 +336,7 @@ internal class IntentConfirmationFlowTest {
             extraParams = null,
         )
 
-        val DEFERRED_CONFIRMATION_PARAMETERS = ConfirmationHandler.Args(
+        val DEFERRED_CONFIRMATION_PARAMETERS = ConfirmationDefinition.Args(
             confirmationOption = FakeConfirmationOption(),
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(id = null, clientSecret = null),

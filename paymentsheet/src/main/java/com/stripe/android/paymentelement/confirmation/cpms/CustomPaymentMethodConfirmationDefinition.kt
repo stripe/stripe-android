@@ -32,7 +32,7 @@ internal class CustomPaymentMethodConfirmationDefinition @Inject constructor(
 
     override suspend fun action(
         confirmationOption: CustomPaymentMethodConfirmationOption,
-        confirmationArgs: ConfirmationHandler.Args,
+        confirmationArgs: ConfirmationDefinition.Args,
     ): ConfirmationDefinition.Action<EmptyConfirmationLauncherArgs> {
         val customPaymentMethodId = confirmationOption.customPaymentMethodType.id
         val confirmCustomPaymentMethodCallback = confirmCustomPaymentMethodCallbackProvider.get()
@@ -75,7 +75,7 @@ internal class CustomPaymentMethodConfirmationDefinition @Inject constructor(
         launcher: ActivityResultLauncher<CustomPaymentMethodInput>,
         arguments: EmptyConfirmationLauncherArgs,
         confirmationOption: CustomPaymentMethodConfirmationOption,
-        confirmationArgs: ConfirmationHandler.Args,
+        confirmationArgs: ConfirmationDefinition.Args,
     ) {
         errorReporter.report(
             ErrorReporter.SuccessEvent.CUSTOM_PAYMENT_METHODS_LAUNCH_SUCCESS,
@@ -95,7 +95,7 @@ internal class CustomPaymentMethodConfirmationDefinition @Inject constructor(
 
     override fun toResult(
         confirmationOption: CustomPaymentMethodConfirmationOption,
-        confirmationArgs: ConfirmationHandler.Args,
+        confirmationArgs: ConfirmationDefinition.Args,
         launcherArgs: EmptyConfirmationLauncherArgs,
         result: InternalCustomPaymentMethodResult
     ): ConfirmationDefinition.Result {

@@ -44,7 +44,7 @@ internal class LinkConfirmationDefinition @Inject constructor(
 
     override suspend fun action(
         confirmationOption: LinkConfirmationOption,
-        confirmationArgs: ConfirmationHandler.Args,
+        confirmationArgs: ConfirmationDefinition.Args,
     ): ConfirmationDefinition.Action<EmptyConfirmationLauncherArgs> {
         return ConfirmationDefinition.Action.Launch(
             launcherArguments = EmptyConfirmationLauncherArgs,
@@ -56,7 +56,7 @@ internal class LinkConfirmationDefinition @Inject constructor(
         launcher: LinkPaymentLauncher,
         arguments: EmptyConfirmationLauncherArgs,
         confirmationOption: LinkConfirmationOption,
-        confirmationArgs: ConfirmationHandler.Args,
+        confirmationArgs: ConfirmationDefinition.Args,
     ) {
         launcher.present(
             configuration = confirmationOption.configuration,
@@ -69,7 +69,7 @@ internal class LinkConfirmationDefinition @Inject constructor(
 
     override fun toResult(
         confirmationOption: LinkConfirmationOption,
-        confirmationArgs: ConfirmationHandler.Args,
+        confirmationArgs: ConfirmationDefinition.Args,
         launcherArgs: EmptyConfirmationLauncherArgs,
         result: LinkActivityResult
     ): ConfirmationDefinition.Result {

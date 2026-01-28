@@ -30,7 +30,7 @@ internal class LinkPassthroughConfirmationDefinition @Inject constructor(
 
     override suspend fun action(
         confirmationOption: LinkPassthroughConfirmationOption,
-        confirmationArgs: ConfirmationHandler.Args
+        confirmationArgs: ConfirmationDefinition.Args
     ): ConfirmationDefinition.Action<LauncherArguments> {
         return createPaymentMethodConfirmationOption(confirmationOption).fold(
             onSuccess = { nextConfirmationOption ->
@@ -60,14 +60,14 @@ internal class LinkPassthroughConfirmationDefinition @Inject constructor(
         launcher: Launcher,
         arguments: LauncherArguments,
         confirmationOption: LinkPassthroughConfirmationOption,
-        confirmationArgs: ConfirmationHandler.Args,
+        confirmationArgs: ConfirmationDefinition.Args,
     ) {
         launcher.onResult(Result(arguments.nextConfirmationOption))
     }
 
     override fun toResult(
         confirmationOption: LinkPassthroughConfirmationOption,
-        confirmationArgs: ConfirmationHandler.Args,
+        confirmationArgs: ConfirmationDefinition.Args,
         launcherArgs: LauncherArguments,
         result: Result,
     ): ConfirmationDefinition.Result {

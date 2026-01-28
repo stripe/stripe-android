@@ -606,7 +606,7 @@ class ConfirmationMediatorTest {
 
         override fun canConfirm(
             confirmationOption: Option,
-            confirmationArgs: ConfirmationHandler.Args
+            confirmationArgs: ConfirmationDefinition.Args
         ): Boolean {
             return isConfirmable
         }
@@ -633,7 +633,7 @@ class ConfirmationMediatorTest {
     private companion object {
         private val INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
 
-        private val CONFIRMATION_PARAMETERS = ConfirmationHandler.Args(
+        private val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Args(
             confirmationOption = FakeConfirmationOption(),
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         )

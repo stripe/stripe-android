@@ -829,8 +829,9 @@ class DefaultConfirmationHandlerTest {
     }
 
     private fun createArguments(option: ConfirmationHandler.Option): ConfirmationHandler.Args {
-        return CONFIRMATION_PARAMETERS.copy(
+        return ConfirmationHandler.Args(
             confirmationOption = option,
+            paymentMethodMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata,
         )
     }
 
@@ -1058,7 +1059,7 @@ class DefaultConfirmationHandlerTest {
 
         override fun canConfirm(
             confirmationOption: Option,
-            confirmationArgs: ConfirmationHandler.Args
+            confirmationArgs: ConfirmationDefinition.Args
         ): Boolean {
             return isConfirmable
         }

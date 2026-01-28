@@ -237,7 +237,7 @@ class CustomPaymentMethodConfirmationDefinitionTest {
     )
 
     companion object {
-        private val CONFIRMATION_PARAMETERS = ConfirmationHandler.Args(
+        private val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Args(
             confirmationOption = FakeConfirmationOption(),
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFactory.create(),
