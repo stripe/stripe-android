@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-enum class CryptoNetwork(internal val value: String) {
+enum class CryptoNetwork(val value: String) {
     @SerialName("bitcoin")
     Bitcoin("bitcoin"),
 
