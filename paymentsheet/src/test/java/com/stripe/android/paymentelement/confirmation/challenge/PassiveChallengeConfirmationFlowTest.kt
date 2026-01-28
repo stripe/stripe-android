@@ -1,7 +1,9 @@
 package com.stripe.android.paymentelement.confirmation.challenge
 
+import com.stripe.android.challenge.passive.PassiveChallengeActivityContract
 import com.stripe.android.challenge.passive.PassiveChallengeActivityResult
 import com.stripe.android.challenge.passive.warmer.PassiveChallengeWarmer
+import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
@@ -27,6 +29,7 @@ internal class PassiveChallengeConfirmationFlowTest {
         definition = confirmationDefinition(),
         launcherResult = PassiveChallengeActivityResult.Success("test_token"),
         parameters = CONFIRMATION_PARAMETERS,
+        launcherArgs = LAUNCHER_ARGS,
         definitionResult = ConfirmationDefinition.Result.NextStep(
             confirmationOption = PaymentMethodConfirmationOption.New(
                 createParams = NEW_CONFIRMATION_OPTION.createParams.copy(
@@ -49,6 +52,7 @@ internal class PassiveChallengeConfirmationFlowTest {
         definition = confirmationDefinition(),
         launcherResult = PassiveChallengeActivityResult.Failed(RuntimeException("Challenge failed")),
         parameters = CONFIRMATION_PARAMETERS,
+        launcherArgs = LAUNCHER_ARGS,
         definitionResult = ConfirmationDefinition.Result.NextStep(
             confirmationOption = PaymentMethodConfirmationOption.New(
                 createParams = NEW_CONFIRMATION_OPTION.createParams,
@@ -67,6 +71,15 @@ internal class PassiveChallengeConfirmationFlowTest {
             optionsParams = null,
             extraParams = null,
             shouldSave = false,
+        )
+
+        val LAUNCHER_ARGS = PassiveChallengeActivityContract.Args(
+            passiveCaptchaParams = PassiveCaptchaParams(
+                siteKey = "site_key",
+                rqData = null
+            ),
+            publishableKey = "pk_123",
+            productUsage = setOf("PaymentSheet")
         )
     }
 

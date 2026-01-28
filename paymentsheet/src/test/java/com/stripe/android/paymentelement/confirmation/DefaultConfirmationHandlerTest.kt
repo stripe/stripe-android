@@ -64,12 +64,10 @@ class DefaultConfirmationHandlerTest {
         someDefinitionAction = ConfirmationDefinition.Action.Launch(
             launcherArguments = SomeConfirmationDefinition.LauncherArgs,
             receivesResultInProcess = true,
-            deferredIntentConfirmationType = null,
         ),
         someOtherDefinitionAction = ConfirmationDefinition.Action.Launch(
             launcherArguments = SomeOtherConfirmationDefinition.LauncherArgs,
             receivesResultInProcess = true,
-            deferredIntentConfirmationType = null,
         ),
     ) {
         val activityResultCaller = mock<ActivityResultCaller>()
@@ -391,7 +389,6 @@ class DefaultConfirmationHandlerTest {
         someDefinitionAction = ConfirmationDefinition.Action.Launch(
             launcherArguments = SomeConfirmationDefinition.LauncherArgs,
             receivesResultInProcess = true,
-            deferredIntentConfirmationType = null,
         ),
         someDefinitionResult = ConfirmationDefinition.Result.NextStep(
             confirmationOption = SomeOtherConfirmationDefinition.Option,
@@ -400,11 +397,9 @@ class DefaultConfirmationHandlerTest {
         someOtherDefinitionAction = ConfirmationDefinition.Action.Launch(
             launcherArguments = SomeOtherConfirmationDefinition.LauncherArgs,
             receivesResultInProcess = true,
-            deferredIntentConfirmationType = null,
         ),
         someOtherDefinitionResult = ConfirmationDefinition.Result.Succeeded(
             intent = PAYMENT_INTENT,
-            deferredIntentConfirmationType = null,
         ),
     ) {
         confirmationHandler.state.test {
@@ -446,7 +441,6 @@ class DefaultConfirmationHandlerTest {
             savedStateHandle = createPrepopulatedSavedStateHandle(receivesResultInProcess = true),
             someDefinitionResult = ConfirmationDefinition.Result.Succeeded(
                 intent = PAYMENT_INTENT,
-                deferredIntentConfirmationType = null,
             ),
             dispatcher = dispatcher,
         ) {
@@ -509,7 +503,6 @@ class DefaultConfirmationHandlerTest {
             savedStateHandle = createPrepopulatedSavedStateHandle(receivesResultInProcess = false),
             someDefinitionResult = ConfirmationDefinition.Result.Succeeded(
                 intent = PAYMENT_INTENT,
-                deferredIntentConfirmationType = null,
             ),
             dispatcher = dispatcher,
         ) {
@@ -547,11 +540,9 @@ class DefaultConfirmationHandlerTest {
             someOtherDefinitionAction = ConfirmationDefinition.Action.Launch(
                 launcherArguments = SomeOtherConfirmationDefinition.LauncherArgs,
                 receivesResultInProcess = false,
-                deferredIntentConfirmationType = null,
             ),
             someOtherDefinitionResult = ConfirmationDefinition.Result.Succeeded(
                 intent = UPDATED_PAYMENT_INTENT,
-                deferredIntentConfirmationType = null,
             ),
             dispatcher = dispatcher,
         ) {
@@ -599,11 +590,9 @@ class DefaultConfirmationHandlerTest {
             someDefinitionAction = ConfirmationDefinition.Action.Launch(
                 launcherArguments = SomeConfirmationDefinition.LauncherArgs,
                 receivesResultInProcess = true,
-                deferredIntentConfirmationType = null,
             ),
             someDefinitionResult = ConfirmationDefinition.Result.Succeeded(
                 intent = PAYMENT_INTENT,
-                deferredIntentConfirmationType = null,
             ),
             dispatcher = dispatcher,
         ) {
@@ -663,7 +652,6 @@ class DefaultConfirmationHandlerTest {
         someDefinitionAction = ConfirmationDefinition.Action.Launch(
             launcherArguments = SomeConfirmationDefinition.LauncherArgs,
             receivesResultInProcess = true,
-            deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
         ),
         someDefinitionResult = result,
     ) {
@@ -690,7 +678,6 @@ class DefaultConfirmationHandlerTest {
         someDefinitionAction = ConfirmationDefinition.Action.Launch(
             launcherArguments = SomeConfirmationDefinition.LauncherArgs,
             receivesResultInProcess = receivesResultInProcess,
-            deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
         ),
     ) {
         confirmationHandler.state.test {
@@ -712,12 +699,16 @@ class DefaultConfirmationHandlerTest {
             assertThat(resultData?.confirmationOption).isEqualTo(SomeConfirmationDefinition.Option)
             assertThat(resultData?.receivesResultInProcess).isEqualTo(receivesResultInProcess)
 
-            val parameters = savedStateHandle.get<ConfirmationMediator.Parameters<SomeConfirmationDefinition.Option>>(
+            val parameters = savedStateHandle.get<
+                ConfirmationMediator.Parameters<
+                    SomeConfirmationDefinition.Option,
+                    SomeConfirmationDefinition.LauncherArgs
+                    >
+                >(
                 SOME_DEFINITION_PERSISTED_KEY
             )
 
             assertThat(parameters?.confirmationArgs).isEqualTo(CONFIRMATION_PARAMETERS)
-            assertThat(parameters?.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
         }
     }
 
@@ -859,7 +850,7 @@ class DefaultConfirmationHandlerTest {
             ConfirmationMediator.Parameters(
                 confirmationOption = SomeConfirmationDefinition.Option,
                 confirmationArgs = CONFIRMATION_PARAMETERS,
-                deferredIntentConfirmationType = null,
+                launcherArgs = SomeConfirmationDefinition.LauncherArgs,
             )
         )
     }
@@ -1077,7 +1068,8 @@ class DefaultConfirmationHandlerTest {
 
         object Launcher
 
-        data object LauncherArgs
+        @Parcelize
+        data object LauncherArgs : Parcelable
 
         @Parcelize
         data object LauncherResult : Parcelable
@@ -1114,7 +1106,8 @@ class DefaultConfirmationHandlerTest {
 
         object Launcher
 
-        data object LauncherArgs
+        @Parcelize
+        data object LauncherArgs : Parcelable
 
         @Parcelize
         data object LauncherResult : Parcelable

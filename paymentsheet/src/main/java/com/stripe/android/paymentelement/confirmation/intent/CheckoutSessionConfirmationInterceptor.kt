@@ -107,9 +107,8 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                     }
                     paymentIntent.requiresAction() -> {
                         ConfirmationDefinition.Action.Launch(
-                            launcherArguments = Args.NextAction(paymentIntent),
+                            launcherArguments = Args.NextAction(paymentIntent, DeferredIntentConfirmationType.Server),
                             receivesResultInProcess = false,
-                            deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
                         )
                     }
                     else -> {

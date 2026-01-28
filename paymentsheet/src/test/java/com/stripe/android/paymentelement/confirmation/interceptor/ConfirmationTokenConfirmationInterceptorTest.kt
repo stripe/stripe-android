@@ -312,8 +312,8 @@ class ConfirmationTokenConfirmationInterceptorTest {
                 ConfirmationDefinition.Action.Launch<IntentConfirmationDefinition.Args>(
                     launcherArguments = IntentConfirmationDefinition.Args.NextAction(
                         intent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
+                        deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
                     ),
-                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
                     receivesResultInProcess = false,
                 )
             )

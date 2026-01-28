@@ -151,7 +151,8 @@ internal class IntentConfirmationFlowTest {
         val setupIntentParams = confirmArguments.confirmNextParams.asSetup()
 
         assertThat(setupIntentParams.clientSecret).isEqualTo("seti_123_secret_123")
-        assertThat(launchAction.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
+        assertThat(confirmArguments.deferredIntentConfirmationType)
+            .isEqualTo(DeferredIntentConfirmationType.Client)
     }
 
     @Test

@@ -8,6 +8,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.EmptyConfirmationLauncherArgs
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
 import com.stripe.android.paymentelement.confirmation.asCallbackFor
 import com.stripe.android.paymentelement.confirmation.asCanceled
@@ -80,13 +81,12 @@ internal class ShopPayConfirmationDefinitionTest {
             confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
-        assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Launch<Unit>>()
+        assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Launch<EmptyConfirmationLauncherArgs>>()
 
         val launchAction = action.asLaunch()
 
-        assertThat(launchAction.launcherArguments).isEqualTo(Unit)
+        assertThat(launchAction.launcherArguments).isEqualTo(EmptyConfirmationLauncherArgs)
         assertThat(launchAction.receivesResultInProcess).isFalse()
-        assertThat(launchAction.deferredIntentConfirmationType).isNull()
     }
 
     @Test
@@ -99,7 +99,7 @@ internal class ShopPayConfirmationDefinitionTest {
             confirmationOption = SHOP_PAY_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             launcher = launcher,
-            arguments = Unit,
+            arguments = EmptyConfirmationLauncherArgs,
         )
 
         val launchCall = launcher.calls.awaitItem()
@@ -125,7 +125,7 @@ internal class ShopPayConfirmationDefinitionTest {
                 ),
             ),
             launcher = launcher,
-            arguments = Unit,
+            arguments = EmptyConfirmationLauncherArgs,
         )
 
         val launchCall = launcher.calls.awaitItem()
@@ -140,7 +140,7 @@ internal class ShopPayConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = SHOP_PAY_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
-            deferredIntentConfirmationType = null,
+            launcherArgs = EmptyConfirmationLauncherArgs,
             result = ShopPayActivityResult.Completed,
         )
 
@@ -161,7 +161,7 @@ internal class ShopPayConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = SHOP_PAY_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
-            deferredIntentConfirmationType = null,
+            launcherArgs = EmptyConfirmationLauncherArgs,
             result = ShopPayActivityResult.Failed(exception),
         )
 
@@ -181,7 +181,7 @@ internal class ShopPayConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = SHOP_PAY_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
-            deferredIntentConfirmationType = null,
+            launcherArgs = EmptyConfirmationLauncherArgs,
             result = ShopPayActivityResult.Canceled,
         )
 
@@ -200,7 +200,7 @@ internal class ShopPayConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = SHOP_PAY_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
-            deferredIntentConfirmationType = null,
+            launcherArgs = EmptyConfirmationLauncherArgs,
             result = ShopPayActivityResult.Failed(exception),
         )
 

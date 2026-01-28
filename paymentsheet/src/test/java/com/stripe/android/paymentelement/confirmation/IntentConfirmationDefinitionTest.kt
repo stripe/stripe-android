@@ -204,10 +204,10 @@ class IntentConfirmationDefinitionTest {
 
         assertThat(launchAction.launcherArguments).isEqualTo(
             IntentConfirmationDefinition.Args.NextAction(
-                intent = paymentIntent
+                intent = paymentIntent,
+                deferredIntentConfirmationType = DeferredIntentConfirmationType.Server
             )
         )
-        assertThat(launchAction.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Server)
     }
 
     @Test
@@ -234,9 +234,9 @@ class IntentConfirmationDefinitionTest {
         assertThat(launchAction.launcherArguments).isEqualTo(
             IntentConfirmationDefinition.Args.Confirm(
                 confirmNextParams = confirmParams,
+                deferredIntentConfirmationType = null,
             )
         )
-        assertThat(launchAction.deferredIntentConfirmationType).isNull()
     }
 
     @Test
@@ -254,7 +254,10 @@ class IntentConfirmationDefinitionTest {
 
         definition.launch(
             launcher = launcher,
-            arguments = IntentConfirmationDefinition.Args.Confirm(confirmParams),
+            arguments = IntentConfirmationDefinition.Args.Confirm(
+                confirmNextParams = confirmParams,
+                deferredIntentConfirmationType = null,
+            ),
             confirmationArgs = CONFIRMATION_PARAMETERS_WITH_SI,
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
         )
@@ -276,7 +279,8 @@ class IntentConfirmationDefinitionTest {
         definition.launch(
             launcher = launcher,
             arguments = IntentConfirmationDefinition.Args.NextAction(
-                intent = setupIntent
+                intent = setupIntent,
+                deferredIntentConfirmationType = null,
             ),
             confirmationArgs = CONFIRMATION_PARAMETERS_WITH_SI,
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
@@ -302,7 +306,10 @@ class IntentConfirmationDefinitionTest {
 
         definition.launch(
             launcher = launcher,
-            arguments = IntentConfirmationDefinition.Args.Confirm(confirmParams),
+            arguments = IntentConfirmationDefinition.Args.Confirm(
+                confirmNextParams = confirmParams,
+                deferredIntentConfirmationType = null,
+            ),
             confirmationArgs = CONFIRMATION_PARAMETERS_WITH_SI,
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
         )
@@ -324,7 +331,8 @@ class IntentConfirmationDefinitionTest {
         definition.launch(
             launcher = launcher,
             arguments = IntentConfirmationDefinition.Args.NextAction(
-                intent = paymentIntent
+                intent = paymentIntent,
+                deferredIntentConfirmationType = null,
             ),
             confirmationArgs = CONFIRMATION_PARAMETERS,
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
@@ -348,7 +356,8 @@ class IntentConfirmationDefinitionTest {
         definition.launch(
             launcher = launcher,
             arguments = IntentConfirmationDefinition.Args.NextAction(
-                intent = paymentIntent
+                intent = paymentIntent,
+                deferredIntentConfirmationType = null,
             ),
             confirmationArgs = CONFIRMATION_PARAMETERS,
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
@@ -372,7 +381,8 @@ class IntentConfirmationDefinitionTest {
         definition.launch(
             launcher = launcher,
             arguments = IntentConfirmationDefinition.Args.NextAction(
-                intent = setupIntent
+                intent = setupIntent,
+                deferredIntentConfirmationType = null,
             ),
             confirmationArgs = CONFIRMATION_PARAMETERS_WITH_SI,
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
@@ -394,7 +404,10 @@ class IntentConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
-            deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
+            launcherArgs = IntentConfirmationDefinition.Args.NextAction(
+                intent = PaymentIntentFixtures.PI_SUCCEEDED,
+                deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
+            ),
             result = InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED),
         )
 
@@ -418,7 +431,10 @@ class IntentConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
-            deferredIntentConfirmationType = null,
+            launcherArgs = IntentConfirmationDefinition.Args.NextAction(
+                intent = PaymentIntentFixtures.PI_SUCCEEDED,
+                deferredIntentConfirmationType = null,
+            ),
             result = InternalPaymentResult.Failed(exception),
         )
 
@@ -440,7 +456,10 @@ class IntentConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
-            deferredIntentConfirmationType = null,
+            launcherArgs = IntentConfirmationDefinition.Args.NextAction(
+                intent = PaymentIntentFixtures.PI_SUCCEEDED,
+                deferredIntentConfirmationType = null,
+            ),
             result = InternalPaymentResult.Canceled,
         )
 
