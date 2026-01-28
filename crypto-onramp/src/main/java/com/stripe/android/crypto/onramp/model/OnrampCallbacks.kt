@@ -19,30 +19,30 @@ class OnrampCallbacks(
     /**
      * Callback invoked to authenticate the user before starting the onramp flow.
      */
-    val authenticateUserCallback: OnrampAuthenticateUserCallback,
+    internal val authenticateUserCallback: OnrampAuthenticateUserCallback,
 
     /**
      * Callback invoked when signaling the result of verifying the user's identity.
      */
-    val verifyIdentityCallback: OnrampVerifyIdentityCallback,
+    internal val verifyIdentityCallback: OnrampVerifyIdentityCallback,
 
     /**
      * Callback invoked when KYC verification was attempted to be completed.
      */
-    val verifyKycCallback: OnrampVerifyKycCallback,
+    internal val verifyKycCallback: OnrampVerifyKycCallback,
 
     /**
      * Callback invoked when a payment method was attempted to be collected.
      */
-    val collectPaymentCallback: OnrampCollectPaymentMethodCallback,
+    internal val collectPaymentCallback: OnrampCollectPaymentMethodCallback,
 
     /**
      * Callback invoked when gaining user authorization was attempted.
      */
-    val authorizeCallback: OnrampAuthorizeCallback,
+    internal val authorizeCallback: OnrampAuthorizeCallback,
 
     /**
      * Callback invoked to when the checkout process has completed.
      */
-    val checkoutCallback: OnrampCheckoutCallback
+    internal val checkoutCallback: OnrampCheckoutCallback
 )
