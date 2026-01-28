@@ -240,6 +240,7 @@ internal class LinkApiRepository @Inject constructor(
                 extraParams = extraParams,
                 allowRedisplay = paymentMethodCreateParams.allowRedisplay,
                 clientAttributionMetadata = clientAttributionMetadata,
+                originalPaymentMethodCode = paymentMethodCreateParams.typeCode
             )
 
             LinkPaymentDetails.New(
@@ -320,6 +321,7 @@ internal class LinkApiRepository @Inject constructor(
                     consumerSessionClientSecret = consumerSessionClientSecret,
                     extraParams = extraConfirmationParams(paymentMethodCreateParams.toParamMap()),
                     clientAttributionMetadata = clientAttributionMetadata,
+                    originalPaymentMethodCode = paymentMethodCreateParams.typeCode
                 ),
                 paymentMethod = paymentMethod,
             )

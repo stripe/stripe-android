@@ -255,15 +255,16 @@ class PaymentMethodCreateParamsTest {
             )
         )
 
-        assertThat(
-            PaymentMethodCreateParams.createLink(
-                paymentDetailsId,
-                consumerSessionClientSecret,
-                clientAttributionMetadata,
-                billingDetails,
-                extraParams,
-            ).toParamMap()
-        ).isEqualTo(
+        val params = PaymentMethodCreateParams.createLink(
+            paymentDetailsId,
+            consumerSessionClientSecret,
+            clientAttributionMetadata,
+            billingDetails,
+            extraParams,
+            originalPaymentMethodCode = "card",
+        )
+
+        assertThat(params.toParamMap()).isEqualTo(
             mapOf(
                 "type" to "link",
                 "link" to mapOf(
@@ -290,6 +291,7 @@ class PaymentMethodCreateParamsTest {
                 "client_attribution_metadata" to clientAttributionMetadata.toParamMap(),
             )
         )
+        assertThat(params.link?.originalPaymentMethodCode).isEqualTo("card")
     }
 
     @Test

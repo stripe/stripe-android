@@ -80,7 +80,7 @@ internal class AttestationConfirmationActivityTest {
                         )
                     )
                 )
-            assertThat(optionWithToken.attestationComplete).isTrue()
+            assertThat(optionWithToken.confirmationChallengeState.attestationComplete).isTrue()
 
             intendedPaymentConfirmationToBeLaunched()
 
@@ -115,7 +115,7 @@ internal class AttestationConfirmationActivityTest {
             // Even on failure, attestation marks the option as complete
             val confirmingAfterAttestation = awaitItem().assertConfirming()
             val optionAfterAttestation = confirmingAfterAttestation.option as PaymentMethodConfirmationOption.New
-            assertThat(optionAfterAttestation.attestationComplete).isTrue()
+            assertThat(optionAfterAttestation.confirmationChallengeState.attestationComplete).isTrue()
 
             intendedPaymentConfirmationToBeLaunched()
 

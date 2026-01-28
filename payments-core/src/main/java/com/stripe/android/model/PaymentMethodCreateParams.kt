@@ -35,7 +35,7 @@ constructor(
     private val upi: Upi? = null,
     private val netbanking: Netbanking? = null,
     private val usBankAccount: USBankAccount? = null,
-    private val link: Link? = null,
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val link: Link? = null,
     private val cashAppPay: CashAppPay? = null,
     private val swish: Swish? = null,
     private val shopPay: ShopPay? = null,
@@ -732,11 +732,25 @@ constructor(
 
     @Parcelize
     @Poko
-    class Link(
+    class Link internal constructor(
         internal var paymentDetailsId: String,
         internal var consumerSessionClientSecret: String,
-        internal var extraParams: Map<String, @RawValue Any>? = null
+        internal var extraParams: Map<String, @RawValue Any>? = null,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val originalPaymentMethodCode: PaymentMethodCode? = null,
     ) : StripeParamsModel, Parcelable {
+
+        constructor(
+            paymentDetailsId: String,
+            consumerSessionClientSecret: String,
+            extraParams: Map<String, @RawValue Any>? = null
+        ) : this(
+            paymentDetailsId = paymentDetailsId,
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            extraParams = extraParams,
+            originalPaymentMethodCode = null
+        )
+
         override fun toParamMap(): Map<String, Any> {
             return mapOf(
                 PARAM_PAYMENT_DETAILS_ID to paymentDetailsId,
@@ -1422,13 +1436,15 @@ constructor(
             billingDetails: PaymentMethod.BillingDetails? = null,
             extraParams: Map<String, @RawValue Any>? = null,
             allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+            originalPaymentMethodCode: PaymentMethodCode? = null
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = PaymentMethod.Type.Link,
                 link = Link(
                     paymentDetailsId = paymentDetailsId,
                     consumerSessionClientSecret = consumerSessionClientSecret,
-                    extraParams = extraParams
+                    extraParams = extraParams,
+                    originalPaymentMethodCode = originalPaymentMethodCode
                 ),
                 allowRedisplay = allowRedisplay,
                 billingDetails = billingDetails,

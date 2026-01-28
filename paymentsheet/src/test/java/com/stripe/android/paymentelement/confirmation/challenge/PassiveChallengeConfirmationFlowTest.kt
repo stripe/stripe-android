@@ -6,7 +6,10 @@ import com.stripe.android.challenge.passive.warmer.PassiveChallengeWarmer
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
+import com.stripe.android.paymentelement.confirmation.ConfirmationChallengeState
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
+import com.stripe.android.paymentelement.confirmation.FakeIsEligibleForConfirmationChallenge
+import com.stripe.android.paymentelement.confirmation.IsEligibleForConfirmationChallenge
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.runLaunchTest
 import com.stripe.android.paymentelement.confirmation.runResultTest
@@ -40,7 +43,7 @@ internal class PassiveChallengeConfirmationFlowTest {
                 optionsParams = NEW_CONFIRMATION_OPTION.optionsParams,
                 shouldSave = false,
                 extraParams = null,
-                passiveChallengeComplete = true,
+                confirmationChallengeState = ConfirmationChallengeState(passiveChallengeComplete = true),
             ),
             arguments = CONFIRMATION_PARAMETERS,
         ),
@@ -59,7 +62,7 @@ internal class PassiveChallengeConfirmationFlowTest {
                 optionsParams = NEW_CONFIRMATION_OPTION.optionsParams,
                 shouldSave = false,
                 extraParams = null,
-                passiveChallengeComplete = true,
+                confirmationChallengeState = ConfirmationChallengeState(passiveChallengeComplete = true),
             ),
             arguments = CONFIRMATION_PARAMETERS,
         ),
@@ -85,11 +88,14 @@ internal class PassiveChallengeConfirmationFlowTest {
 
     private fun confirmationDefinition(
         errorReporter: FakeErrorReporter = FakeErrorReporter(),
-        passiveChallengeWarmer: PassiveChallengeWarmer = FakePassiveChallengeWarmer()
+        passiveChallengeWarmer: PassiveChallengeWarmer = FakePassiveChallengeWarmer(),
+        isEligibleForConfirmationChallenge: IsEligibleForConfirmationChallenge =
+            FakeIsEligibleForConfirmationChallenge()
     ) = PassiveChallengeConfirmationDefinition(
         errorReporter = errorReporter,
         passiveChallengeWarmer = passiveChallengeWarmer,
         publishableKeyProvider = { "pk_123" },
         productUsage = setOf("PaymentSheet"),
+        isEligibleForConfirmationChallenge = isEligibleForConfirmationChallenge,
     )
 }

@@ -108,7 +108,7 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
                 paymentMethod = confirmationOption.paymentMethod,
                 paymentMethodOptionsParams = confirmationOption.optionsParams,
                 shippingValues = shippingValues,
-                hCaptchaToken = confirmationOption.hCaptchaToken,
+                hCaptchaToken = confirmationOption.confirmationChallengeState.hCaptchaToken,
             )
         )
 
