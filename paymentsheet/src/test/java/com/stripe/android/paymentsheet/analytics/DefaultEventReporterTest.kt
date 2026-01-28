@@ -443,11 +443,13 @@ class DefaultEventReporterTest {
                     billingAddressParameters = null,
                     additionalEnabledNetworks = emptyList()
                 ),
+                shopPay = null,
                 walletsAllowedInHeader = listOf(WalletType.GooglePay, WalletType.Link),
                 buttonsEnabled = true,
                 dividerTextResource = 0,
                 onGooglePayPressed = {},
                 onLinkPressed = {},
+                onShopPayPressed = {},
                 cardFundingFilter = DefaultCardFundingFilter,
                 cardBrandFilter = DefaultCardBrandFilter
             )
@@ -500,11 +502,13 @@ class DefaultEventReporterTest {
                     billingAddressParameters = null,
                     additionalEnabledNetworks = emptyList()
                 ),
+                shopPay = null,
                 walletsAllowedInHeader = listOf(WalletType.GooglePay, WalletType.Link),
                 buttonsEnabled = false,
                 dividerTextResource = 0,
                 onGooglePayPressed = {},
                 onLinkPressed = {},
+                onShopPayPressed = {},
                 cardFundingFilter = DefaultCardFundingFilter,
                 cardBrandFilter = DefaultCardBrandFilter
             )

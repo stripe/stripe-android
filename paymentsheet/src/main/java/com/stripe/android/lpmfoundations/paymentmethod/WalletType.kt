@@ -26,7 +26,7 @@ internal enum class WalletType(val code: String) {
                         isShopPayAvailable && isInOrderedPaymentMethods
                     }
                 }
-            }
+            } + listOf(ShopPay)
 
             val walletByIndex = availableWallets.associateWith { wallet ->
                 val position = elementsSession.orderedPaymentMethodTypesAndWallets.indexOf(wallet.code)
