@@ -20,6 +20,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationTestScenario
+import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.PaymentElementConfirmationTestActivity
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.assertCanceled
@@ -88,7 +89,7 @@ internal class GooglePayConfirmationActivityTest {
             val successResult = awaitItem().assertComplete().result.assertSucceeded()
 
             assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT.copy(paymentMethod = paymentMethod))
-            assertThat(successResult.deferredIntentConfirmationType).isNull()
+            assertThat(successResult.metadata).isEqualTo(MutableConfirmationMetadata())
             assertThat(successResult.completedFullPaymentFlow).isTrue()
         }
     }

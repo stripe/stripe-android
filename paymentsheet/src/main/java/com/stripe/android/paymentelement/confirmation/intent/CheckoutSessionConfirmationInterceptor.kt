@@ -11,6 +11,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition.Args
 import com.stripe.android.payments.DefaultReturnUrl
@@ -101,7 +102,9 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                     paymentIntent.isConfirmed -> {
                         ConfirmationDefinition.Action.Complete(
                             intent = paymentIntent,
-                            deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                            metadata = MutableConfirmationMetadata().apply {
+                                set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Server)
+                            },
                             completedFullPaymentFlow = true,
                         )
                     }

@@ -15,6 +15,7 @@ import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition.Args
 import com.stripe.android.paymentelement.confirmation.utils.ConfirmActionHelper
@@ -150,7 +151,9 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
                 if (result.clientSecret == IntentConfirmationInterceptor.COMPLETE_WITHOUT_CONFIRMING_INTENT) {
                     ConfirmationDefinition.Action.Complete(
                         intent = intent,
-                        deferredIntentConfirmationType = DeferredIntentConfirmationType.None,
+                        metadata = MutableConfirmationMetadata().apply {
+                            set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.None)
+                        },
                         completedFullPaymentFlow = true,
                     )
                 } else {
@@ -221,7 +224,9 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
         failIfSetAsDefaultFeatureIsEnabled(confirmationOption)
         return ConfirmationDefinition.Action.Complete(
             intent = intent,
-            deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+            metadata = MutableConfirmationMetadata().apply {
+                set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Server)
+            },
             completedFullPaymentFlow = true,
         )
     }

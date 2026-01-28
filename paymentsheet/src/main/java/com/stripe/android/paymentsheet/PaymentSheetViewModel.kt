@@ -31,6 +31,7 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -261,7 +262,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             // If we just received a transaction result after process death, we don't error. Instead, we dismiss
             // PaymentSheet and return a `Completed` result to the caller.
             handlePaymentCompleted(
-                deferredIntentConfirmationType = pendingResult.deferredIntentConfirmationType,
+                deferredIntentConfirmationType = pendingResult.metadata[DeferredIntentConfirmationTypeKey],
                 finishImmediately = true,
                 intentId = pendingResult.intent.id,
             )
@@ -591,7 +592,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private fun processConfirmationResult(result: ConfirmationHandler.Result?) {
         when (result) {
             is ConfirmationHandler.Result.Succeeded -> handlePaymentCompleted(
-                deferredIntentConfirmationType = result.deferredIntentConfirmationType,
+                deferredIntentConfirmationType = result.metadata[DeferredIntentConfirmationTypeKey],
                 finishImmediately = false,
                 intentId = result.intent.id,
             )

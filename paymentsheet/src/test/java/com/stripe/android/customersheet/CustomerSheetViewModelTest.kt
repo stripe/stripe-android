@@ -784,7 +784,6 @@ class CustomerSheetViewModelTest {
                     intent = SetupIntentFactory.create(
                         paymentMethod = CARD_PAYMENT_METHOD
                     ),
-                    deferredIntentConfirmationType = null,
                 )
             )
             assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
@@ -813,7 +812,6 @@ class CustomerSheetViewModelTest {
             awaitResultTurbine.add(
                 ConfirmationHandler.Result.Succeeded(
                     intent = SetupIntentFactory.create(CARD_PAYMENT_METHOD),
-                    deferredIntentConfirmationType = null,
                 )
             )
 
@@ -852,7 +850,6 @@ class CustomerSheetViewModelTest {
                     intent = SetupIntentFactory.create(
                         paymentMethod = CARD_PAYMENT_METHOD,
                     ),
-                    deferredIntentConfirmationType = null,
                 )
             )
 
@@ -1003,7 +1000,6 @@ class CustomerSheetViewModelTest {
             awaitResultTurbine.add(
                 ConfirmationHandler.Result.Succeeded(
                     intent = SetupIntentFactory.create(CARD_PAYMENT_METHOD),
-                    deferredIntentConfirmationType = null,
                 )
             )
 
@@ -1550,7 +1546,6 @@ class CustomerSheetViewModelTest {
                 intent = SetupIntentFactory.create(
                     paymentMethod = PaymentMethodFactory.card(),
                 ),
-                deferredIntentConfirmationType = null,
             )
         )
 
@@ -1623,7 +1618,6 @@ class CustomerSheetViewModelTest {
                 intent = SetupIntentFactory.create(
                     paymentMethod = PaymentMethodFactory.card(),
                 ),
-                deferredIntentConfirmationType = null,
             )
         )
 
@@ -1985,7 +1979,6 @@ class CustomerSheetViewModelTest {
                     intent = SetupIntentFactory.create(
                         paymentMethod = US_BANK_ACCOUNT_VERIFIED,
                     ),
-                    deferredIntentConfirmationType = null,
                 )
             )
 
@@ -2437,7 +2430,6 @@ class CustomerSheetViewModelTest {
                     intent = SetupIntentFactory.create(
                         paymentMethod = CARD_PAYMENT_METHOD,
                     ),
-                    deferredIntentConfirmationType = null,
                 )
             )
 
@@ -2479,7 +2471,6 @@ class CustomerSheetViewModelTest {
                     intent = SetupIntentFactory.create(
                         paymentMethod = US_BANK_ACCOUNT,
                     ),
-                    deferredIntentConfirmationType = null,
                 )
             )
 
@@ -2657,7 +2648,6 @@ class CustomerSheetViewModelTest {
                         intent = SetupIntentFactory.create(
                             paymentMethod = CARD_WITH_NETWORKS_PAYMENT_METHOD,
                         ),
-                        deferredIntentConfirmationType = null,
                     )
                 )
 
@@ -2975,7 +2965,6 @@ class CustomerSheetViewModelTest {
             awaitResultTurbine.add(
                 ConfirmationHandler.Result.Succeeded(
                     intent = SetupIntentFactory.create(acceptedCardPaymentMethod),
-                    deferredIntentConfirmationType = null,
                 )
             )
 
@@ -3174,7 +3163,6 @@ class CustomerSheetViewModelTest {
                         intent = SetupIntentFactory.create(
                             paymentMethod = attachedPaymentMethod,
                         ),
-                        deferredIntentConfirmationType = null,
                     )
                 )
 
@@ -3215,7 +3203,6 @@ class CustomerSheetViewModelTest {
                         intent = SetupIntentFactory.create(
                             paymentMethod = attachedPaymentMethod,
                         ),
-                        deferredIntentConfirmationType = null,
                     )
                 )
 
@@ -3450,7 +3437,6 @@ class CustomerSheetViewModelTest {
                     intent = SetupIntentFactory.create(
                         paymentMethod = CARD_PAYMENT_METHOD,
                     ),
-                    deferredIntentConfirmationType = null,
                 )
             )
 

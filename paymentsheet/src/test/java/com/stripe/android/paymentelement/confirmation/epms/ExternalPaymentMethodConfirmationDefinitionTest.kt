@@ -12,6 +12,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.EmptyConfirmationLauncherArgs
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
+import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.PAYMENT_INTENT
 import com.stripe.android.paymentelement.confirmation.asCallbackFor
 import com.stripe.android.paymentelement.confirmation.asCanceled
@@ -103,7 +104,7 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
         val successResult = result.asSucceeded()
 
         assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT)
-        assertThat(successResult.deferredIntentConfirmationType).isNull()
+        assertThat(successResult.metadata).isEqualTo(MutableConfirmationMetadata())
         assertThat(successResult.completedFullPaymentFlow).isTrue()
     }
 

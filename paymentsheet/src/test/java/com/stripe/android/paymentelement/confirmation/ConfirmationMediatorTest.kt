@@ -8,7 +8,6 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.R
 import kotlinx.coroutines.test.runTest
 import kotlinx.parcelize.Parcelize
@@ -157,7 +156,6 @@ class ConfirmationMediatorTest {
     fun `On complete confirmation action, should return mediator complete action`() = test(
         action = ConfirmationDefinition.Action.Complete(
             intent = INTENT,
-            deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
             completedFullPaymentFlow = true,
         ),
     ) {
@@ -181,7 +179,6 @@ class ConfirmationMediatorTest {
         val completeAction = action.asComplete()
 
         assertThat(completeAction.intent).isEqualTo(INTENT)
-        assertThat(completeAction.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
         assertThat(completeAction.completedFullPaymentFlow).isTrue()
     }
 
@@ -189,7 +186,6 @@ class ConfirmationMediatorTest {
     fun `On complete confirmation action with uncompleted flow, should return expected action`() = test(
         action = ConfirmationDefinition.Action.Complete(
             intent = INTENT,
-            deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
             completedFullPaymentFlow = false,
         ),
     ) {
@@ -213,7 +209,6 @@ class ConfirmationMediatorTest {
         val completeAction = action.asComplete()
 
         assertThat(completeAction.intent).isEqualTo(INTENT)
-        assertThat(completeAction.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
         assertThat(completeAction.completedFullPaymentFlow).isFalse()
     }
 

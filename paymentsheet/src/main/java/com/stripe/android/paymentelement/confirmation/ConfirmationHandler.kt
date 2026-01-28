@@ -7,7 +7,6 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.parcelize.IgnoredOnParcel
@@ -153,7 +152,7 @@ internal interface ConfirmationHandler {
          */
         data class Succeeded(
             val intent: StripeIntent,
-            val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+            val metadata: ConfirmationMetadata = MutableConfirmationMetadata(),
             val completedFullPaymentFlow: Boolean = true,
         ) : Result {
             override fun log(logger: Logger) {

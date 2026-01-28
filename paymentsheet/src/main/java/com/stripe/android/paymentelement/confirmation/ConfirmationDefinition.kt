@@ -5,7 +5,6 @@ import androidx.activity.result.ActivityResultCaller
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 
 /**
  * Defines a confirmation flow that a user might use during confirmation.
@@ -140,9 +139,9 @@ internal interface ConfirmationDefinition<
              */
             val intent: StripeIntent,
             /**
-             * DO NOT USE OUTSIDE OF INTENT CONFIRMATION
+             * Metadata associated with final confirmation result
              */
-            val deferredIntentConfirmationType: DeferredIntentConfirmationType? = null,
+            val metadata: ConfirmationMetadata = MutableConfirmationMetadata(),
             /**
              * Indicates if the full payment flow was completed by the handler. Can be used to decide if internal
              * product state needs to be reset. Useful for confirmation flows that are handed off to merchants to
@@ -203,9 +202,9 @@ internal interface ConfirmationDefinition<
              */
             val intent: StripeIntent,
             /**
-             * DO NOT USE OUTSIDE OF INTENT CONFIRMATION
+             * Metadata associated with final confirmation result
              */
-            val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+            val metadata: ConfirmationMetadata = MutableConfirmationMetadata(),
             /**
              * Indicates if the full payment flow was completed by the handler. Can be used to decide if internal
              * product state needs to be reset. Useful for confirmation flows that are handed off to merchants to

@@ -10,6 +10,7 @@ import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
@@ -103,7 +104,11 @@ internal class IntentConfirmationDefinition(
         return when (result) {
             is InternalPaymentResult.Completed -> ConfirmationDefinition.Result.Succeeded(
                 intent = result.intent,
-                deferredIntentConfirmationType = launcherArgs.deferredIntentConfirmationType,
+                metadata = MutableConfirmationMetadata().apply {
+                    launcherArgs.deferredIntentConfirmationType?.let {
+                        set(DeferredIntentConfirmationTypeKey, it)
+                    }
+                }
             )
             is InternalPaymentResult.Failed -> ConfirmationDefinition.Result.Failed(
                 cause = result.throwable,

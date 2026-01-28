@@ -58,11 +58,13 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferen
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.asNew
 import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOption
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
 import com.stripe.android.paymentelement.confirmation.intent.InvalidDeferredIntentUsageException
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationOption
@@ -859,7 +861,6 @@ internal class PaymentSheetViewModelTest {
             confirmationState.value = ConfirmationHandler.State.Complete(
                 ConfirmationHandler.Result.Succeeded(
                     intent = PAYMENT_INTENT,
-                    deferredIntentConfirmationType = null,
                 )
             )
 
@@ -970,7 +971,6 @@ internal class PaymentSheetViewModelTest {
             confirmationState.value = ConfirmationHandler.State.Complete(
                 ConfirmationHandler.Result.Succeeded(
                     intent = PAYMENT_INTENT,
-                    deferredIntentConfirmationType = null,
                 )
             )
 
@@ -1005,7 +1005,6 @@ internal class PaymentSheetViewModelTest {
             confirmationState.value = ConfirmationHandler.State.Complete(
                 result = ConfirmationHandler.Result.Succeeded(
                     intent = PAYMENT_INTENT,
-                    deferredIntentConfirmationType = null,
                 )
             )
 
@@ -2017,7 +2016,6 @@ internal class PaymentSheetViewModelTest {
             confirmationState.value = ConfirmationHandler.State.Complete(
                 ConfirmationHandler.Result.Succeeded(
                     intent = PAYMENT_INTENT,
-                    deferredIntentConfirmationType = null,
                 )
             )
 
@@ -2135,7 +2133,6 @@ internal class PaymentSheetViewModelTest {
         confirmationState.value = ConfirmationHandler.State.Complete(
             result = ConfirmationHandler.Result.Succeeded(
                 intent = PAYMENT_INTENT,
-                deferredIntentConfirmationType = null,
             )
         )
 
@@ -2170,7 +2167,9 @@ internal class PaymentSheetViewModelTest {
             confirmationState.value = ConfirmationHandler.State.Complete(
                 ConfirmationHandler.Result.Succeeded(
                     intent = PAYMENT_INTENT,
-                    deferredIntentConfirmationType = DeferredIntentConfirmationType.None,
+                    metadata = MutableConfirmationMetadata().apply {
+                        set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.None)
+                    },
                 )
             )
 
@@ -2205,7 +2204,9 @@ internal class PaymentSheetViewModelTest {
             confirmationState.value = ConfirmationHandler.State.Complete(
                 ConfirmationHandler.Result.Succeeded(
                     intent = PAYMENT_INTENT,
-                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
+                    metadata = MutableConfirmationMetadata().apply {
+                        set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Client)
+                    }
                 )
             )
 
@@ -2240,7 +2241,9 @@ internal class PaymentSheetViewModelTest {
             confirmationState.value = ConfirmationHandler.State.Complete(
                 ConfirmationHandler.Result.Succeeded(
                     intent = PAYMENT_INTENT,
-                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                    metadata = MutableConfirmationMetadata().apply {
+                        set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Server)
+                    },
                 )
             )
 
@@ -2565,7 +2568,6 @@ internal class PaymentSheetViewModelTest {
         confirmationState.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Succeeded(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
-                deferredIntentConfirmationType = null,
             )
         )
 
@@ -2646,7 +2648,6 @@ internal class PaymentSheetViewModelTest {
         confirmationState.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Succeeded(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
-                deferredIntentConfirmationType = null,
             )
         )
 
@@ -2721,7 +2722,6 @@ internal class PaymentSheetViewModelTest {
         confirmationState.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Succeeded(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
-                deferredIntentConfirmationType = null,
             )
         )
 
@@ -3355,7 +3355,6 @@ internal class PaymentSheetViewModelTest {
             awaitResultTurbine.add(
                 ConfirmationHandler.Result.Succeeded(
                     intent = stripeIntent,
-                    deferredIntentConfirmationType = null,
                 )
             )
         }

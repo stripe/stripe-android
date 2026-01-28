@@ -6,7 +6,9 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -77,7 +79,9 @@ class ConfirmationReportingUtilsTest {
         val eventReporter = FakeEventReporter()
         val result = ConfirmationHandler.Result.Succeeded(
             intent = PaymentIntentFixtures.PI_SUCCEEDED,
-            deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
+            metadata = MutableConfirmationMetadata().apply {
+                set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Client)
+            },
         )
 
         eventReporter.reportPaymentResult(result, PaymentSelection.GooglePay)

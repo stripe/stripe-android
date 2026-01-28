@@ -60,7 +60,6 @@ internal class DefaultLinkConfirmationHandlerTest {
         confirmationHandler.awaitResultTurbine.add(
             item = ConfirmationHandler.Result.Succeeded(
                 intent = configuration.stripeIntent,
-                deferredIntentConfirmationType = null,
             )
         )
 
@@ -101,7 +100,6 @@ internal class DefaultLinkConfirmationHandlerTest {
         confirmationHandler.awaitResultTurbine.add(
             item = ConfirmationHandler.Result.Succeeded(
                 intent = configuration.stripeIntent,
-                deferredIntentConfirmationType = null,
             )
         )
 
@@ -216,7 +214,6 @@ internal class DefaultLinkConfirmationHandlerTest {
         confirmationHandler.awaitResultTurbine.add(
             item = ConfirmationHandler.Result.Succeeded(
                 intent = configuration.stripeIntent,
-                deferredIntentConfirmationType = null,
             )
         )
 
@@ -255,7 +252,6 @@ internal class DefaultLinkConfirmationHandlerTest {
         confirmationHandler.awaitResultTurbine.add(
             item = ConfirmationHandler.Result.Succeeded(
                 intent = configuration.stripeIntent,
-                deferredIntentConfirmationType = null,
             )
         )
 
@@ -287,7 +283,6 @@ internal class DefaultLinkConfirmationHandlerTest {
         confirmationHandler.awaitResultTurbine.add(
             item = ConfirmationHandler.Result.Succeeded(
                 intent = configuration.stripeIntent,
-                deferredIntentConfirmationType = null,
             )
         )
 
@@ -319,7 +314,6 @@ internal class DefaultLinkConfirmationHandlerTest {
         confirmationHandler.awaitResultTurbine.add(
             item = ConfirmationHandler.Result.Succeeded(
                 intent = configuration.stripeIntent,
-                deferredIntentConfirmationType = null,
             )
         )
 
@@ -351,7 +345,6 @@ internal class DefaultLinkConfirmationHandlerTest {
             confirmationHandler.awaitResultTurbine.add(
                 item = ConfirmationHandler.Result.Succeeded(
                     intent = configuration.stripeIntent,
-                    deferredIntentConfirmationType = null,
                 )
             )
 
@@ -387,7 +380,6 @@ internal class DefaultLinkConfirmationHandlerTest {
         confirmationHandler.awaitResultTurbine.add(
             item = ConfirmationHandler.Result.Succeeded(
                 intent = configuration.stripeIntent,
-                deferredIntentConfirmationType = null,
             )
         )
 
@@ -429,7 +421,6 @@ internal class DefaultLinkConfirmationHandlerTest {
             confirmationHandler.awaitResultTurbine.add(
                 item = ConfirmationHandler.Result.Succeeded(
                     intent = configuration.stripeIntent,
-                    deferredIntentConfirmationType = null,
                 )
             )
 
@@ -465,7 +456,6 @@ internal class DefaultLinkConfirmationHandlerTest {
             confirmationHandler.awaitResultTurbine.add(
                 item = ConfirmationHandler.Result.Succeeded(
                     intent = configuration.stripeIntent,
-                    deferredIntentConfirmationType = null,
                 )
             )
 
@@ -501,7 +491,6 @@ internal class DefaultLinkConfirmationHandlerTest {
             confirmationHandler.awaitResultTurbine.add(
                 item = ConfirmationHandler.Result.Succeeded(
                     intent = configuration.stripeIntent,
-                    deferredIntentConfirmationType = null,
                 )
             )
 
@@ -562,7 +551,6 @@ internal class DefaultLinkConfirmationHandlerTest {
             confirmationHandler.awaitResultTurbine.add(
                 item = ConfirmationHandler.Result.Succeeded(
                     intent = configuration.stripeIntent,
-                    deferredIntentConfirmationType = null,
                 )
             )
 
@@ -604,7 +592,6 @@ internal class DefaultLinkConfirmationHandlerTest {
             confirmationHandler.awaitResultTurbine.add(
                 item = ConfirmationHandler.Result.Succeeded(
                     intent = configuration.stripeIntent,
-                    deferredIntentConfirmationType = null,
                 )
             )
 
