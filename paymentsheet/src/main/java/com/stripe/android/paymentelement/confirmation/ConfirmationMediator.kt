@@ -8,7 +8,6 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.R
 import kotlinx.parcelize.Parcelize
 
@@ -134,7 +133,7 @@ internal class ConfirmationMediator<
             is ConfirmationDefinition.Action.Complete -> {
                 Action.Complete(
                     intent = action.intent,
-                    deferredIntentConfirmationType = action.deferredIntentConfirmationType,
+                    metadata = action.metadata,
                     completedFullPaymentFlow = action.completedFullPaymentFlow,
                 )
             }
@@ -162,7 +161,7 @@ internal class ConfirmationMediator<
 
         data class Complete(
             val intent: StripeIntent,
-            val deferredIntentConfirmationType: DeferredIntentConfirmationType? = null,
+            val metadata: ConfirmationMetadata,
             val completedFullPaymentFlow: Boolean,
         ) : Action
     }

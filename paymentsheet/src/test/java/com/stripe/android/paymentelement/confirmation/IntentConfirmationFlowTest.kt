@@ -19,6 +19,7 @@ import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.CreateIntentCallback
@@ -93,8 +94,11 @@ internal class IntentConfirmationFlowTest {
 
         assertThat(completeAction.intent)
             .isEqualTo(DEFERRED_CONFIRMATION_PARAMETERS.paymentMethodMetadata.stripeIntent)
-        assertThat(completeAction.deferredIntentConfirmationType)
-            .isEqualTo(DeferredIntentConfirmationType.None)
+        assertThat(completeAction.metadata).isEqualTo(
+            MutableConfirmationMetadata().apply {
+                set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.None)
+            }
+        )
         assertThat(completeAction.completedFullPaymentFlow).isTrue()
     }
 
@@ -126,8 +130,11 @@ internal class IntentConfirmationFlowTest {
 
         assertThat(completeAction.intent)
             .isEqualTo(DEFERRED_CONFIRMATION_PARAMETERS.paymentMethodMetadata.stripeIntent)
-        assertThat(completeAction.deferredIntentConfirmationType)
-            .isEqualTo(DeferredIntentConfirmationType.None)
+        assertThat(completeAction.metadata).isEqualTo(
+            MutableConfirmationMetadata().apply {
+                set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.None)
+            }
+        )
         assertThat(completeAction.completedFullPaymentFlow).isFalse()
     }
 

@@ -50,7 +50,6 @@ internal class CustomerSheetConfirmationInterceptor @AssistedInject constructor(
             if (paymentMethod.isUnverifiedUSBankAccount()) {
                 return ConfirmationDefinition.Action.Complete(
                     intent = intent.copy(paymentMethod = paymentMethod),
-                    deferredIntentConfirmationType = null,
                     completedFullPaymentFlow = true,
                 )
             }

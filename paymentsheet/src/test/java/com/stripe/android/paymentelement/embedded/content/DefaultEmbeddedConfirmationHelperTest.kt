@@ -55,7 +55,6 @@ internal class DefaultEmbeddedConfirmationHelperTest {
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Succeeded(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
-                deferredIntentConfirmationType = null,
             )
         )
         assertThat(callbackHelper.stateHelper.stateTurbine.awaitItem()).isNull()
