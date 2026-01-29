@@ -59,8 +59,8 @@ internal data class WalletsState(
      */
     fun shopPay(location: WalletLocation): ShopPay? {
         return when (location) {
-            WalletLocation.HEADER -> shopPay?.takeIf { walletsAllowedInHeader.contains(WalletType.ShopPay) }
-            WalletLocation.INLINE -> shopPay?.takeUnless { walletsAllowedInHeader.contains(WalletType.ShopPay) }
+            WalletLocation.HEADER -> null // shopPay?.takeIf { walletsAllowedInHeader.contains(WalletType.ShopPay) }
+            WalletLocation.INLINE -> shopPay //?.takeUnless { walletsAllowedInHeader.contains(WalletType.ShopPay) }
         }
     }
 
