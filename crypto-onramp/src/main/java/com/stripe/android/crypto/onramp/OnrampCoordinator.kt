@@ -41,7 +41,7 @@ class OnrampCoordinator @Inject internal constructor(
     /**
      * Initialize the coordinator with the provided configuration.
      *
-     * @param configuration The OnrampConfiguration to apply.
+     * @param configurationState The OnrampConfiguration to apply.
      */
     suspend fun configure(
         configurationState: OnrampConfiguration.State,
