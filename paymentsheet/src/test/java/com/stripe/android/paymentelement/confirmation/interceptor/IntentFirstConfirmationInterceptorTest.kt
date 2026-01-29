@@ -9,6 +9,7 @@ import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.paymentelement.confirmation.ConfirmationChallengeState
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.createIntentConfirmationInterceptor
 import com.stripe.android.testing.PaymentIntentFactory
@@ -33,7 +34,6 @@ class IntentFirstConfirmationInterceptorTest {
                 confirmationOption = PaymentMethodConfirmationOption.Saved(
                     paymentMethod = paymentMethod,
                     optionsParams = null,
-                    hCaptchaToken = null,
                 ),
                 shippingValues = null,
             )
@@ -167,7 +167,7 @@ class IntentFirstConfirmationInterceptorTest {
                 confirmationOption = PaymentMethodConfirmationOption.Saved(
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                     optionsParams = null,
-                    hCaptchaToken = hCaptchaToken,
+                    confirmationChallengeState = ConfirmationChallengeState(hCaptchaToken = hCaptchaToken),
                 ),
                 shippingValues = null,
             )
@@ -198,7 +198,7 @@ class IntentFirstConfirmationInterceptorTest {
             confirmationOption = PaymentMethodConfirmationOption.Saved(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = null,
-                hCaptchaToken = hCaptchaToken,
+                confirmationChallengeState = ConfirmationChallengeState(hCaptchaToken = hCaptchaToken),
             ),
             shippingValues = null,
         )
@@ -219,7 +219,7 @@ class IntentFirstConfirmationInterceptorTest {
             confirmationOption = PaymentMethodConfirmationOption.Saved(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = null,
-                hCaptchaToken = hCaptchaToken,
+                confirmationChallengeState = ConfirmationChallengeState(hCaptchaToken = hCaptchaToken),
             ),
             shippingValues = null,
         )

@@ -114,7 +114,7 @@ internal class OnrampInteractor @Inject constructor(
                                     OnrampAnalyticsEvent.LinkUserAuthenticationWithTokenCompleted
                                 )
 
-                                OnrampTokenAuthenticationResult.Completed
+                                OnrampTokenAuthenticationResult.Completed()
                             },
                             onFailure = { error ->
                                 analyticsService?.track(
@@ -234,7 +234,7 @@ internal class OnrampInteractor @Inject constructor(
         return when (val result = linkController.updatePhoneNumber(phoneNumber)) {
             is LinkController.UpdatePhoneNumberResult.Success -> {
                 analyticsService?.track(OnrampAnalyticsEvent.LinkPhoneNumberUpdated)
-                OnrampUpdatePhoneNumberResult.Completed
+                OnrampUpdatePhoneNumberResult.Completed()
             }
             is LinkController.UpdatePhoneNumberResult.Failed -> {
                 analyticsService?.track(
@@ -301,7 +301,7 @@ internal class OnrampInteractor @Inject constructor(
             .fold(
                 onSuccess = {
                     analyticsService?.track(OnrampAnalyticsEvent.KycInfoSubmitted)
-                    OnrampAttachKycInfoResult.Completed
+                    OnrampAttachKycInfoResult.Completed()
                 },
                 onFailure = { error ->
                     analyticsService?.track(
@@ -441,7 +441,7 @@ internal class OnrampInteractor @Inject constructor(
         return when (val result = linkController.logOut()) {
             is LinkController.LogOutResult.Success -> {
                 analyticsService?.track(OnrampAnalyticsEvent.LinkLogout)
-                OnrampLogOutResult.Completed
+                OnrampLogOutResult.Completed()
             }
             is LinkController.LogOutResult.Failed -> {
                 analyticsService?.track(
@@ -609,10 +609,10 @@ internal class OnrampInteractor @Inject constructor(
         result: VerifyKycActivityResult,
     ): OnrampVerifyKycInfoResult = when (val action = result.action) {
         is KycRefreshScreenAction.Cancelled -> {
-            OnrampVerifyKycInfoResult.Cancelled
+            OnrampVerifyKycInfoResult.Cancelled()
         }
         is KycRefreshScreenAction.Edit -> {
-            OnrampVerifyKycInfoResult.UpdateAddress
+            OnrampVerifyKycInfoResult.UpdateAddress()
         }
         is KycRefreshScreenAction.Confirm -> {
             val secret = consumerSessionClientSecret()
@@ -627,7 +627,7 @@ internal class OnrampInteractor @Inject constructor(
                     onSuccess = {
                         analyticsService?.track(OnrampAnalyticsEvent.KycVerificationCompleted)
 
-                        OnrampVerifyKycInfoResult.Confirmed
+                        OnrampVerifyKycInfoResult.Confirmed()
                     },
                     onFailure = {
                         OnrampVerifyKycInfoResult.Failed(

@@ -65,8 +65,8 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
             confirmationOption = confirmationOption.updatedForDeferredIntent(intentConfiguration),
             paymentMethod = confirmationOption.paymentMethod,
             shippingValues = shippingValues,
-            hCaptchaToken = confirmationOption.hCaptchaToken,
-            attestationToken = confirmationOption.attestationToken,
+            hCaptchaToken = confirmationOption.confirmationChallengeState.hCaptchaToken,
+            attestationToken = confirmationOption.confirmationChallengeState.attestationToken,
         )
     }
 

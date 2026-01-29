@@ -149,6 +149,7 @@ internal class LinkInlineSignupConfirmationDefinition(
                 } ?: ConfirmPaymentIntentParams.SetupFutureUsage.Blank
             ),
             originatedFromWallet = true,
+            newPMTransformedForConfirmation = true
         )
     }
 

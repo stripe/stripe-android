@@ -1,6 +1,5 @@
 package com.stripe.android.paymentelement.confirmation
 
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
@@ -10,6 +9,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.parcelize.Parcelize
 
 internal sealed interface PaymentMethodConfirmationOption : ConfirmationHandler.Option {
+    val confirmationChallengeState: ConfirmationChallengeState
     val optionsParams: PaymentMethodOptionsParams?
 
     fun updatedForDeferredIntent(
@@ -23,8 +23,8 @@ internal sealed interface PaymentMethodConfirmationOption : ConfirmationHandler.
         val paymentMethod: com.stripe.android.model.PaymentMethod,
         override val optionsParams: PaymentMethodOptionsParams?,
         val originatedFromWallet: Boolean = false,
-        val hCaptchaToken: String? = null,
-        val attestationToken: String? = null,
+        override val confirmationChallengeState: ConfirmationChallengeState = ConfirmationChallengeState(),
+        val newPMTransformedForConfirmation: Boolean = false
     ) : PaymentMethodConfirmationOption {
         override fun updatedForDeferredIntent(
             intentConfiguration: PaymentSheet.IntentConfiguration,
@@ -45,8 +45,7 @@ internal sealed interface PaymentMethodConfirmationOption : ConfirmationHandler.
         override val optionsParams: PaymentMethodOptionsParams?,
         val extraParams: PaymentMethodExtraParams?,
         val shouldSave: Boolean,
-        val passiveChallengeComplete: Boolean = false,
-        val attestationComplete: Boolean = false,
+        override val confirmationChallengeState: ConfirmationChallengeState = ConfirmationChallengeState(),
     ) : PaymentMethodConfirmationOption {
 
         override fun updatedForDeferredIntent(

@@ -10,6 +10,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.confirmation.ConfirmationChallengeState
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.createIntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.CreateIntentCallback
@@ -92,7 +93,7 @@ class HCaptchaConfirmationInterceptorTest {
             confirmationOption = PaymentMethodConfirmationOption.Saved(
                 paymentMethod = paymentMethod,
                 optionsParams = null,
-                hCaptchaToken = hCaptchaToken,
+                confirmationChallengeState = ConfirmationChallengeState(hCaptchaToken = hCaptchaToken),
             ),
             shippingValues = null,
         )
@@ -135,7 +136,7 @@ class HCaptchaConfirmationInterceptorTest {
             confirmationOption = PaymentMethodConfirmationOption.Saved(
                 paymentMethod = paymentMethod,
                 optionsParams = null,
-                hCaptchaToken = hCaptchaToken,
+                confirmationChallengeState = ConfirmationChallengeState(hCaptchaToken = hCaptchaToken),
             ),
             shippingValues = null,
         )

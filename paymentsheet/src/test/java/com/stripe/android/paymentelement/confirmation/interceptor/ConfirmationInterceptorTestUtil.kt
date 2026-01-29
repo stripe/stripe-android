@@ -84,7 +84,6 @@ internal suspend fun IntentConfirmationInterceptor.interceptDefaultSavedPaymentM
     confirmationOption = PaymentMethodConfirmationOption.Saved(
         paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
         optionsParams = null,
-        hCaptchaToken = null,
     ),
     shippingValues = null,
 )

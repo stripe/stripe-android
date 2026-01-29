@@ -448,7 +448,7 @@ class OnrampInteractorTest {
             )
         )
 
-        assertThat(result).isEqualTo(OnrampVerifyKycInfoResult.Confirmed)
+        assertThat(result).isInstanceOf(OnrampVerifyKycInfoResult.Confirmed::class.java)
         testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.KycVerificationCompleted)
     }
 

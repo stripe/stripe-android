@@ -18,6 +18,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentelement.confirmation.ConfirmationChallengeState
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
@@ -314,7 +315,6 @@ class DeferredIntentConfirmationInterceptorTest {
                     optionsParams = PaymentMethodOptionsParams.Card(
                         setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
                     ).takeIf { input },
-                    hCaptchaToken = null,
                 ),
                 shippingValues = null,
             )
@@ -408,8 +408,10 @@ class DeferredIntentConfirmationInterceptorTest {
             confirmationOption = PaymentMethodConfirmationOption.Saved(
                 paymentMethod = paymentMethod,
                 optionsParams = null,
-                hCaptchaToken = hCaptchaToken,
-                attestationToken = attestationToken,
+                confirmationChallengeState = ConfirmationChallengeState(
+                    hCaptchaToken = hCaptchaToken,
+                    attestationToken = attestationToken,
+                ),
             ),
             shippingValues = null,
         )
@@ -457,8 +459,9 @@ class DeferredIntentConfirmationInterceptorTest {
             confirmationOption = PaymentMethodConfirmationOption.Saved(
                 paymentMethod = paymentMethod,
                 optionsParams = null,
-                hCaptchaToken = hCaptchaToken,
-                attestationToken = null,
+                confirmationChallengeState = ConfirmationChallengeState(
+                    hCaptchaToken = hCaptchaToken,
+                ),
             ),
             shippingValues = null,
         )
@@ -503,8 +506,6 @@ class DeferredIntentConfirmationInterceptorTest {
             confirmationOption = PaymentMethodConfirmationOption.Saved(
                 paymentMethod = paymentMethod,
                 optionsParams = null,
-                hCaptchaToken = null,
-                attestationToken = null,
             ),
             shippingValues = null,
         )
@@ -553,8 +554,9 @@ class DeferredIntentConfirmationInterceptorTest {
             confirmationOption = PaymentMethodConfirmationOption.Saved(
                 paymentMethod = paymentMethod,
                 optionsParams = null,
-                hCaptchaToken = null,
-                attestationToken = attestationToken,
+                confirmationChallengeState = ConfirmationChallengeState(
+                    attestationToken = attestationToken,
+                ),
             ),
             shippingValues = null,
         )
