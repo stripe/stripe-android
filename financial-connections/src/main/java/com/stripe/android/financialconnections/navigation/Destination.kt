@@ -23,7 +23,6 @@ import com.stripe.android.financialconnections.features.error.ErrorScreen
 import com.stripe.android.financialconnections.features.exit.ExitModal
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerScreen
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerScreen
-import com.stripe.android.financialconnections.features.linkstepupverification.LinkStepUpVerificationScreen
 import com.stripe.android.financialconnections.features.manualentry.ManualEntryScreen
 import com.stripe.android.financialconnections.features.manualentrysuccess.ManualEntrySuccessScreen
 import com.stripe.android.financialconnections.features.networkinglinkloginwarmup.NetworkingLinkLoginWarmupScreen
@@ -184,12 +183,6 @@ internal sealed class Destination(
         route = Pane.LINK_ACCOUNT_PICKER.value,
         logPaneLaunched = true,
         composable = { LinkAccountPickerScreen() },
-    )
-
-    data object LinkStepUpVerification : Destination(
-        route = Pane.LINK_STEP_UP_VERIFICATION.value,
-        logPaneLaunched = true,
-        composable = { LinkStepUpVerificationScreen() }
     )
 
     data object Reset : Destination(
