@@ -8,15 +8,15 @@ internal class FakeIntentConfirmationChallengeAnalyticsEventReporter :
     private val _calls = mutableListOf<Call>()
     val calls: List<Call> get() = _calls
 
-    override fun start() {
+    override fun onStart() {
         _calls.add(Call.Start)
     }
 
-    override fun success() {
+    override fun onSuccess() {
         _calls.add(Call.Success)
     }
 
-    override fun error(
+    override fun onError(
         errorType: String?,
         errorCode: String?,
         fromBridge: Boolean
@@ -30,7 +30,7 @@ internal class FakeIntentConfirmationChallengeAnalyticsEventReporter :
         )
     }
 
-    override fun webViewLoaded() {
+    override fun onWebViewLoaded() {
         _calls.add(Call.WebViewLoaded)
     }
 

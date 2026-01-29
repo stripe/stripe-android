@@ -15,8 +15,8 @@ import java.util.concurrent.TimeUnit
 internal class DefaultIntentConfirmationChallengeAnalyticsEventsReporterTest {
 
     @Test
-    fun testStart() = runScenario { eventsReporter, fakeAnalyticsRequestExecutor ->
-        eventsReporter.start()
+    fun testOnStart() = runScenario { eventsReporter, fakeAnalyticsRequestExecutor ->
+        eventsReporter.onStart()
 
         val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
 
@@ -26,11 +26,11 @@ internal class DefaultIntentConfirmationChallengeAnalyticsEventsReporterTest {
     }
 
     @Test
-    fun testSuccess() = runScenario { eventsReporter, fakeAnalyticsRequestExecutor ->
-        eventsReporter.start()
+    fun testOnSuccess() = runScenario { eventsReporter, fakeAnalyticsRequestExecutor ->
+        eventsReporter.onStart()
         ShadowSystemClock.advanceBy(10, TimeUnit.MILLISECONDS)
 
-        eventsReporter.success()
+        eventsReporter.onSuccess()
 
         val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
 
@@ -41,11 +41,11 @@ internal class DefaultIntentConfirmationChallengeAnalyticsEventsReporterTest {
     }
 
     @Test
-    fun testError() = runScenario { eventsReporter, fakeAnalyticsRequestExecutor ->
-        eventsReporter.start()
+    fun testOnError() = runScenario { eventsReporter, fakeAnalyticsRequestExecutor ->
+        eventsReporter.onStart()
         ShadowSystemClock.advanceBy(15, TimeUnit.MILLISECONDS)
 
-        eventsReporter.error(
+        eventsReporter.onError(
             errorType = "runtime_error",
             errorCode = "test_code",
             fromBridge = true
@@ -63,11 +63,11 @@ internal class DefaultIntentConfirmationChallengeAnalyticsEventsReporterTest {
     }
 
     @Test
-    fun testErrorWithNullValues() = runScenario { eventsReporter, fakeAnalyticsRequestExecutor ->
-        eventsReporter.start()
+    fun testOnErrorWithNullValues() = runScenario { eventsReporter, fakeAnalyticsRequestExecutor ->
+        eventsReporter.onStart()
         ShadowSystemClock.advanceBy(20, TimeUnit.MILLISECONDS)
 
-        eventsReporter.error(
+        eventsReporter.onError(
             errorType = null,
             errorCode = null,
             fromBridge = false
@@ -85,11 +85,11 @@ internal class DefaultIntentConfirmationChallengeAnalyticsEventsReporterTest {
     }
 
     @Test
-    fun testWebViewLoaded() = runScenario { eventsReporter, fakeAnalyticsRequestExecutor ->
-        eventsReporter.start()
+    fun testOnWebViewLoaded() = runScenario { eventsReporter, fakeAnalyticsRequestExecutor ->
+        eventsReporter.onStart()
         ShadowSystemClock.advanceBy(8, TimeUnit.MILLISECONDS)
 
-        eventsReporter.webViewLoaded()
+        eventsReporter.onWebViewLoaded()
 
         val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
 

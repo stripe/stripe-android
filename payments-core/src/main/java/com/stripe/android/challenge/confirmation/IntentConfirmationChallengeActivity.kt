@@ -34,7 +34,7 @@ internal class IntentConfirmationChallengeActivity : AppCompatActivity() {
             finish()
             return
         }
-        
+
         listenForActivityResult()
         lifecycle.addObserver(viewModel)
 

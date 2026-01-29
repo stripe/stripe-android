@@ -1,15 +1,15 @@
 package com.stripe.android.challenge.confirmation.analytics
 
 internal interface IntentConfirmationChallengeAnalyticsEventReporter {
-    fun start()
+    fun onStart()
 
-    fun success()
+    fun onSuccess()
 
-    fun error(
+    fun onError(
         errorType: String?,
         errorCode: String?,
         fromBridge: Boolean
     )
 
-    fun webViewLoaded()
+    fun onWebViewLoaded()
 }

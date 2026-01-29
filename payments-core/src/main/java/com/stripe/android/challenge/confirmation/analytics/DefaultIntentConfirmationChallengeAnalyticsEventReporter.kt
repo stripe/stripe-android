@@ -13,18 +13,18 @@ internal class DefaultIntentConfirmationChallengeAnalyticsEventReporter @Inject 
     private val durationProvider: DurationProvider,
 ) : IntentConfirmationChallengeAnalyticsEventReporter {
 
-    override fun start() {
+    override fun onStart() {
         durationProvider.start(DurationProvider.Key.IntentConfirmationChallenge)
         durationProvider.start(DurationProvider.Key.IntentConfirmationChallengeWebViewLoaded)
         fireEvent(IntentConfirmationChallengeAnalyticsEvent.Start())
     }
 
-    override fun success() {
+    override fun onSuccess() {
         val duration = durationProvider.end(DurationProvider.Key.IntentConfirmationChallenge)
         fireEvent(IntentConfirmationChallengeAnalyticsEvent.Success(durationInMs(duration)))
     }
 
-    override fun error(
+    override fun onError(
         errorType: String?,
         errorCode: String?,
         fromBridge: Boolean
@@ -40,7 +40,7 @@ internal class DefaultIntentConfirmationChallengeAnalyticsEventReporter @Inject 
         )
     }
 
-    override fun webViewLoaded() {
+    override fun onWebViewLoaded() {
         val duration = durationProvider.end(DurationProvider.Key.IntentConfirmationChallengeWebViewLoaded)
         fireEvent(IntentConfirmationChallengeAnalyticsEvent.WebViewLoaded(durationInMs(duration)))
     }

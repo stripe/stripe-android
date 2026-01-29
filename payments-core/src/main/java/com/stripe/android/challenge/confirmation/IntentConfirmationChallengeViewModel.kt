@@ -41,12 +41,12 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
     }
 
     override fun onStart(owner: LifecycleOwner) {
-        analyticsEventReporter.start()
+        analyticsEventReporter.onStart()
         super.onStart(owner)
     }
 
     fun handleWebViewError(error: WebViewError) {
-        analyticsEventReporter.error(
+        analyticsEventReporter.onError(
             errorType = error.webViewErrorType,
             errorCode = error.errorCode.toString(),
             fromBridge = false,
@@ -60,11 +60,11 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
         bridgeHandler.event.collectLatest { event ->
             when (event) {
                 is ConfirmationChallengeBridgeEvent.Ready -> {
-                    analyticsEventReporter.webViewLoaded()
+                    analyticsEventReporter.onWebViewLoaded()
                     _bridgeReady.emit(Unit)
                 }
                 is ConfirmationChallengeBridgeEvent.Success -> {
-                    analyticsEventReporter.success()
+                    analyticsEventReporter.onSuccess()
                     _result.emit(
                         IntentConfirmationChallengeActivityResult.Success(
                             clientSecret = event.clientSecret
@@ -72,7 +72,7 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
                     )
                 }
                 is ConfirmationChallengeBridgeEvent.Error -> {
-                    analyticsEventReporter.error(
+                    analyticsEventReporter.onError(
                         errorType = event.error.type,
                         errorCode = event.error.code,
                         fromBridge = true
