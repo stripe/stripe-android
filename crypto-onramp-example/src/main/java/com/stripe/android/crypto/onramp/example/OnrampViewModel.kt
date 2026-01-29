@@ -104,10 +104,11 @@ internal class OnrampViewModel(
     init {
         viewModelScope.launch {
             @Suppress("MagicNumber", "MaxLineLength")
-            val configuration = OnrampConfiguration(
-                merchantDisplayName = "Onramp Example",
-                publishableKey = "pk_test_51K9W3OHMaDsveWq0oLP0ZjldetyfHIqyJcz27k2BpMGHxu9v9Cei2tofzoHncPyk3A49jMkFEgTOBQyAMTUffRLa00xzzARtZO",
-                appearance = LinkAppearance(
+
+            val configurationState = OnrampConfiguration()
+                .merchantDisplayName(merchantDisplayName = "Onramp Example")
+                .publishableKey(publishableKey = "pk_test_51K9W3OHMaDsveWq0oLP0ZjldetyfHIqyJcz27k2BpMGHxu9v9Cei2tofzoHncPyk3A49jMkFEgTOBQyAMTUffRLa00xzzARtZO")
+                .appearance(appearance = LinkAppearance(
                     lightColors = LinkAppearance.Colors(
                         primary = Color.Blue,
                         contentOnPrimary = Color.White,
@@ -120,10 +121,10 @@ internal class OnrampViewModel(
                     ),
                     style = LinkAppearance.Style.ALWAYS_DARK,
                     primaryButton = LinkAppearance.PrimaryButton()
-                )
-            )
+                ))
+                .build()
 
-            onrampCoordinator.configure(configuration = configuration)
+            onrampCoordinator.configure(configurationState = configurationState)
 
             loadUserData()?.let { data ->
                 _uiState.update { it.copy(email = data.email, authToken = data.token, screen = Screen.SeamlessSignIn) }

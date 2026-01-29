@@ -1,10 +1,7 @@
 package com.stripe.android.crypto.onramp.model
 
-import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.link.LinkAppearance
-import dev.drewhamilton.poko.Poko
-import kotlinx.parcelize.Parcelize
 
 /**
  * Configuration options required to initialize the Onramp flow.
@@ -14,12 +11,48 @@ import kotlinx.parcelize.Parcelize
  * @property appearance Appearance settings for the PaymentSheet UI.
  * @property cryptoCustomerId The unique customer ID for crypto onramp.
  */
-@Parcelize
-@Poko
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class OnrampConfiguration(
-    internal val merchantDisplayName: String,
-    internal val publishableKey: String,
-    internal val appearance: LinkAppearance,
-    internal val cryptoCustomerId: String? = null,
-) : Parcelable
+class OnrampConfiguration {
+    private var merchantDisplayName: String? = null
+    private var publishableKey: String? = null
+    private var appearance: LinkAppearance? = null
+    private var cryptoCustomerId: String? = null
+
+    fun merchantDisplayName(merchantDisplayName: String) = apply {
+        this.merchantDisplayName = merchantDisplayName
+    }
+
+    fun publishableKey(publishableKey: String) = apply {
+        this.publishableKey = publishableKey
+    }
+
+    fun appearance(appearance: LinkAppearance) = apply {
+        this.appearance = appearance
+    }
+
+    fun cryptoCustomerId(cryptoCustomerId: String?) = apply {
+        this.cryptoCustomerId = cryptoCustomerId
+    }
+
+    class State(
+        val merchantDisplayName: String,
+        val publishableKey: String,
+        val appearance: LinkAppearance,
+        val cryptoCustomerId: String? = null
+    )
+
+    fun build(): State {
+        return State(
+            merchantDisplayName = requireNotNull(merchantDisplayName) {
+                "merchantDisplayName must not be null"
+            },
+            publishableKey = requireNotNull(publishableKey) {
+                "publishableKey must not be null"
+            },
+            appearance = requireNotNull(appearance) {
+                "appearance must not be null"
+            },
+            cryptoCustomerId = cryptoCustomerId,
+        )
+    }
+}

@@ -44,9 +44,9 @@ class OnrampCoordinator @Inject internal constructor(
      * @param configuration The OnrampConfiguration to apply.
      */
     suspend fun configure(
-        configuration: OnrampConfiguration,
+        configurationState: OnrampConfiguration.State,
     ): OnrampConfigurationResult {
-        return interactor.configure(configuration)
+        return interactor.configure(configurationState)
     }
 
     /**
