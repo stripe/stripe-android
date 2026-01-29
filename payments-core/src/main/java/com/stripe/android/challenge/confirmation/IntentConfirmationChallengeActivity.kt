@@ -55,6 +55,10 @@ internal class IntentConfirmationChallengeActivity : AppCompatActivity() {
                         hostUrl = HOST_URL,
                         errorHandler = { error ->
                             viewModel.handleWebViewError(error)
+                        },
+                        openUri = { uri ->
+                            val browserIntent = Intent(Intent.ACTION_VIEW, uri)
+                            startActivity(browserIntent)
                         }
                     )
                 }
