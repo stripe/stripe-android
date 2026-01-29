@@ -9,7 +9,6 @@ import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
-import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.R
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
@@ -38,7 +37,6 @@ internal class LinkPassthroughConfirmationDefinition @Inject constructor(
                 ConfirmationDefinition.Action.Launch(
                     launcherArguments = LauncherArguments(nextConfirmationOption),
                     receivesResultInProcess = true,
-                    deferredIntentConfirmationType = null,
                 )
             },
             onFailure = { error ->
@@ -70,7 +68,7 @@ internal class LinkPassthroughConfirmationDefinition @Inject constructor(
     override fun toResult(
         confirmationOption: LinkPassthroughConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
-        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        launcherArgs: LauncherArguments,
         result: Result,
     ): ConfirmationDefinition.Result {
         return ConfirmationDefinition.Result.NextStep(
@@ -104,9 +102,10 @@ internal class LinkPassthroughConfirmationDefinition @Inject constructor(
         val nextConfirmationOption: PaymentMethodConfirmationOption,
     ) : Parcelable
 
+    @Parcelize
     data class LauncherArguments(
         val nextConfirmationOption: PaymentMethodConfirmationOption,
-    )
+    ) : Parcelable
 
     class Launcher(
         val onResult: (Result) -> Unit,

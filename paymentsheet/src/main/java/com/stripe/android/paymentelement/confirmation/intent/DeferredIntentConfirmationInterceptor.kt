@@ -65,8 +65,8 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
             confirmationOption = confirmationOption.updatedForDeferredIntent(intentConfiguration),
             paymentMethod = confirmationOption.paymentMethod,
             shippingValues = shippingValues,
-            hCaptchaToken = confirmationOption.hCaptchaToken,
-            attestationToken = confirmationOption.attestationToken,
+            hCaptchaToken = confirmationOption.confirmationChallengeState.hCaptchaToken,
+            attestationToken = confirmationOption.confirmationChallengeState.attestationToken,
         )
     }
 
@@ -233,9 +233,11 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
         return runCatching<ConfirmationDefinition.Action<Args>> {
             DeferredIntentValidator.validatePaymentMethod(intent, paymentMethod)
             ConfirmationDefinition.Action.Launch(
-                launcherArguments = Args.NextAction(intent),
+                launcherArguments = Args.NextAction(
+                    intent = intent,
+                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                ),
                 receivesResultInProcess = false,
-                deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
             )
         }.getOrElse {
             ConfirmationDefinition.Action.Fail(

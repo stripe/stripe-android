@@ -15,7 +15,7 @@ import kotlinx.parcelize.Parcelize
 internal class ConfirmationMediator<
     TConfirmationOption : ConfirmationHandler.Option,
     TLauncher,
-    TLauncherArgs,
+    TLauncherArgs : Parcelable,
     TLauncherResult : Parcelable
     >(
     private val savedStateHandle: SavedStateHandle,
@@ -25,7 +25,7 @@ internal class ConfirmationMediator<
     private var launcher: TLauncher? = null
 
     private val parametersKey = definition.key + PARAMETERS_POSTFIX_KEY
-    private var persistedParameters: Parameters<TConfirmationOption>?
+    private var persistedParameters: Parameters<TConfirmationOption, TLauncherArgs>?
         get() = savedStateHandle[parametersKey]
         set(value) {
             savedStateHandle[parametersKey] = value
@@ -54,7 +54,7 @@ internal class ConfirmationMediator<
                 definition.toResult(
                     confirmationOption = params.confirmationOption,
                     confirmationArgs = params.confirmationArgs,
-                    deferredIntentConfirmationType = params.deferredIntentConfirmationType,
+                    launcherArgs = params.launcherArgs,
                     result = result
                 )
             } ?: run {
@@ -107,7 +107,7 @@ internal class ConfirmationMediator<
                             persistedParameters = Parameters(
                                 confirmationOption = confirmationOption,
                                 confirmationArgs = arguments,
-                                deferredIntentConfirmationType = action.deferredIntentConfirmationType,
+                                launcherArgs = action.launcherArguments,
                             )
 
                             definition.launch(
@@ -168,10 +168,10 @@ internal class ConfirmationMediator<
     }
 
     @Parcelize
-    internal data class Parameters<TConfirmationOption : ConfirmationHandler.Option>(
+    internal data class Parameters<TConfirmationOption : ConfirmationHandler.Option, TLauncherArgs : Parcelable>(
         val confirmationOption: TConfirmationOption,
         val confirmationArgs: ConfirmationHandler.Args,
-        val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        val launcherArgs: TLauncherArgs,
     ) : Parcelable
 
     companion object {

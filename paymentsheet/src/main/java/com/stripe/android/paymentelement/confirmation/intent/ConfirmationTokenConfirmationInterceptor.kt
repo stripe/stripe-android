@@ -107,7 +107,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                     intent = intent,
                     confirmationToken = confirmationToken,
                     shippingValues = shippingValues,
-                    hCaptchaToken = confirmationOption.hCaptchaToken,
+                    hCaptchaToken = confirmationOption.confirmationChallengeState.hCaptchaToken,
                 )
             },
             onFailure = { error ->
@@ -176,9 +176,11 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                 )
             } else if (intent.requiresAction()) {
                 ConfirmationDefinition.Action.Launch<Args>(
-                    launcherArguments = Args.NextAction(intent),
+                    launcherArguments = Args.NextAction(
+                        intent = intent,
+                        deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                    ),
                     receivesResultInProcess = false,
-                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
                 )
             } else {
                 confirmActionHelper.createConfirmAction(

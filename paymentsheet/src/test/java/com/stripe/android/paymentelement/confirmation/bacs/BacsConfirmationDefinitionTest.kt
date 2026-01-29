@@ -95,7 +95,7 @@ class BacsConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = createBacsConfirmationOption(),
             confirmationArgs = CONFIRMATION_PARAMETERS,
-            deferredIntentConfirmationType = null,
+            launcherArgs = createBacsMandateData(),
             result = BacsMandateConfirmationResult.Confirmed,
         )
 
@@ -124,7 +124,7 @@ class BacsConfirmationDefinitionTest {
             val result = definition.toResult(
                 confirmationOption = createBacsConfirmationOption(),
                 confirmationArgs = CONFIRMATION_PARAMETERS,
-                deferredIntentConfirmationType = null,
+                launcherArgs = createBacsMandateData(),
                 result = BacsMandateConfirmationResult.Cancelled,
             )
 
@@ -143,7 +143,7 @@ class BacsConfirmationDefinitionTest {
             val result = definition.toResult(
                 confirmationOption = createBacsConfirmationOption(),
                 confirmationArgs = CONFIRMATION_PARAMETERS,
-                deferredIntentConfirmationType = null,
+                launcherArgs = createBacsMandateData(),
                 result = BacsMandateConfirmationResult.ModifyDetails,
             )
 
@@ -221,7 +221,6 @@ class BacsConfirmationDefinitionTest {
         assertThat(mandateData.sortCode).isEqualTo("108800")
         assertThat(mandateData.accountNumber).isEqualTo("00012345")
 
-        assertThat(launchAction.deferredIntentConfirmationType).isNull()
         assertThat(launchAction.receivesResultInProcess).isTrue()
     }
 
@@ -290,6 +289,13 @@ class BacsConfirmationDefinitionTest {
             optionsParams = null,
         )
     }
+
+    private fun createBacsMandateData() = BacsMandateData(
+        name = "John Doe",
+        email = "johndoe@email.com",
+        accountNumber = "00012345",
+        sortCode = "108800",
+    )
 
     private fun ConfirmationHandler.Option.asNewPaymentMethodOption(): PaymentMethodConfirmationOption.New {
         return this as PaymentMethodConfirmationOption.New

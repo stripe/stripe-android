@@ -467,6 +467,7 @@ class LinkApiRepositoryTest {
                     consumerSessionSecret,
                     extraParams = mapOf("card" to mapOf("cvc" to "123")),
                     clientAttributionMetadata = clientAttributionMetadata,
+                    originalPaymentMethodCode = "card",
                 )
             )
         val formValues = newLinkPaymentDetails.buildFormValues()
@@ -635,6 +636,7 @@ class LinkApiRepositoryTest {
                     consumerSessionSecret,
                     PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
                     extraParams = mapOf("card" to mapOf("cvc" to "123")),
+                    originalPaymentMethodCode = "card",
                 )
             )
     }

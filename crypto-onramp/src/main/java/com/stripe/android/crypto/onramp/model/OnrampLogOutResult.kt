@@ -11,7 +11,7 @@ sealed interface OnrampLogOutResult {
      * The user successfully logged out from Link.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data object Completed : OnrampLogOutResult
+    class Completed internal constructor() : OnrampLogOutResult
 
     /**
      * An error occurred while logging out from Link.

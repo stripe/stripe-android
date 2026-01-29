@@ -59,7 +59,6 @@ class SharedPaymentTokenConfirmationInterceptorTest {
                 confirmationOption = PaymentMethodConfirmationOption.Saved(
                     paymentMethod = providedPaymentMethod,
                     optionsParams = null,
-                    hCaptchaToken = null,
                 ),
                 shippingValues = providedShippingAddress,
             )

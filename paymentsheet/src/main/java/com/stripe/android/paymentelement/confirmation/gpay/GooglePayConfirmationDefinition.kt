@@ -13,8 +13,8 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.EmptyConfirmationLauncherArgs
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
-import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import kotlinx.coroutines.CoroutineScope
@@ -28,7 +28,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
 ) : ConfirmationDefinition<
     GooglePayConfirmationOption,
     ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
-    Unit,
+    EmptyConfirmationLauncherArgs,
     GooglePayPaymentMethodLauncher.Result,
     > {
     override val key: String = "GooglePay"
@@ -40,7 +40,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
     override suspend fun action(
         confirmationOption: GooglePayConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
-    ): ConfirmationDefinition.Action<Unit> {
+    ): ConfirmationDefinition.Action<EmptyConfirmationLauncherArgs> {
         if (
             confirmationOption.config.merchantCurrencyCode == null &&
             confirmationArgs.intent !is PaymentIntent
@@ -58,9 +58,8 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
         }
 
         return ConfirmationDefinition.Action.Launch(
-            launcherArguments = Unit,
+            launcherArguments = EmptyConfirmationLauncherArgs,
             receivesResultInProcess = true,
-            deferredIntentConfirmationType = null,
         )
     }
 
@@ -76,7 +75,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
 
     override fun launch(
         launcher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
-        arguments: Unit,
+        arguments: EmptyConfirmationLauncherArgs,
         confirmationOption: GooglePayConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
     ) {
@@ -106,7 +105,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
     override fun toResult(
         confirmationOption: GooglePayConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
-        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        launcherArgs: EmptyConfirmationLauncherArgs,
         result: GooglePayPaymentMethodLauncher.Result,
     ): ConfirmationDefinition.Result {
         return when (result) {

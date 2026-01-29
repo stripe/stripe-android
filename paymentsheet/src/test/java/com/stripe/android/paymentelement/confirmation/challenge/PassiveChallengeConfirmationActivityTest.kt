@@ -17,6 +17,7 @@ import com.stripe.android.challenge.passive.PassiveChallengeActivityResult
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
+import com.stripe.android.paymentelement.confirmation.ConfirmationChallengeState
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationTestScenario
 import com.stripe.android.paymentelement.confirmation.PaymentElementConfirmationTestActivity
@@ -80,7 +81,7 @@ internal class PassiveChallengeConfirmationActivityTest {
                         optionsParams = CONFIRMATION_OPTION.optionsParams,
                         shouldSave = false,
                         extraParams = null,
-                        passiveChallengeComplete = true,
+                        confirmationChallengeState = ConfirmationChallengeState(passiveChallengeComplete = true),
                     )
                 )
 
@@ -122,7 +123,7 @@ internal class PassiveChallengeConfirmationActivityTest {
                         optionsParams = CONFIRMATION_OPTION.optionsParams,
                         shouldSave = false,
                         extraParams = null,
-                        passiveChallengeComplete = true,
+                        confirmationChallengeState = ConfirmationChallengeState(passiveChallengeComplete = true),
                     )
                 )
 

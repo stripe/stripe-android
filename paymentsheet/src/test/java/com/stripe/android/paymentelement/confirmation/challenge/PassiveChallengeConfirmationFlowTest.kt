@@ -1,10 +1,15 @@
 package com.stripe.android.paymentelement.confirmation.challenge
 
+import com.stripe.android.challenge.passive.PassiveChallengeActivityContract
 import com.stripe.android.challenge.passive.PassiveChallengeActivityResult
 import com.stripe.android.challenge.passive.warmer.PassiveChallengeWarmer
+import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
+import com.stripe.android.paymentelement.confirmation.ConfirmationChallengeState
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
+import com.stripe.android.paymentelement.confirmation.FakeIsEligibleForConfirmationChallenge
+import com.stripe.android.paymentelement.confirmation.IsEligibleForConfirmationChallenge
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.runLaunchTest
 import com.stripe.android.paymentelement.confirmation.runResultTest
@@ -27,6 +32,7 @@ internal class PassiveChallengeConfirmationFlowTest {
         definition = confirmationDefinition(),
         launcherResult = PassiveChallengeActivityResult.Success("test_token"),
         parameters = CONFIRMATION_PARAMETERS,
+        launcherArgs = LAUNCHER_ARGS,
         definitionResult = ConfirmationDefinition.Result.NextStep(
             confirmationOption = PaymentMethodConfirmationOption.New(
                 createParams = NEW_CONFIRMATION_OPTION.createParams.copy(
@@ -37,7 +43,7 @@ internal class PassiveChallengeConfirmationFlowTest {
                 optionsParams = NEW_CONFIRMATION_OPTION.optionsParams,
                 shouldSave = false,
                 extraParams = null,
-                passiveChallengeComplete = true,
+                confirmationChallengeState = ConfirmationChallengeState(passiveChallengeComplete = true),
             ),
             arguments = CONFIRMATION_PARAMETERS,
         ),
@@ -49,13 +55,14 @@ internal class PassiveChallengeConfirmationFlowTest {
         definition = confirmationDefinition(),
         launcherResult = PassiveChallengeActivityResult.Failed(RuntimeException("Challenge failed")),
         parameters = CONFIRMATION_PARAMETERS,
+        launcherArgs = LAUNCHER_ARGS,
         definitionResult = ConfirmationDefinition.Result.NextStep(
             confirmationOption = PaymentMethodConfirmationOption.New(
                 createParams = NEW_CONFIRMATION_OPTION.createParams,
                 optionsParams = NEW_CONFIRMATION_OPTION.optionsParams,
                 shouldSave = false,
                 extraParams = null,
-                passiveChallengeComplete = true,
+                confirmationChallengeState = ConfirmationChallengeState(passiveChallengeComplete = true),
             ),
             arguments = CONFIRMATION_PARAMETERS,
         ),
@@ -68,15 +75,27 @@ internal class PassiveChallengeConfirmationFlowTest {
             extraParams = null,
             shouldSave = false,
         )
+
+        val LAUNCHER_ARGS = PassiveChallengeActivityContract.Args(
+            passiveCaptchaParams = PassiveCaptchaParams(
+                siteKey = "site_key",
+                rqData = null
+            ),
+            publishableKey = "pk_123",
+            productUsage = setOf("PaymentSheet")
+        )
     }
 
     private fun confirmationDefinition(
         errorReporter: FakeErrorReporter = FakeErrorReporter(),
-        passiveChallengeWarmer: PassiveChallengeWarmer = FakePassiveChallengeWarmer()
+        passiveChallengeWarmer: PassiveChallengeWarmer = FakePassiveChallengeWarmer(),
+        isEligibleForConfirmationChallenge: IsEligibleForConfirmationChallenge =
+            FakeIsEligibleForConfirmationChallenge()
     ) = PassiveChallengeConfirmationDefinition(
         errorReporter = errorReporter,
         passiveChallengeWarmer = passiveChallengeWarmer,
         publishableKeyProvider = { "pk_123" },
         productUsage = setOf("PaymentSheet"),
+        isEligibleForConfirmationChallenge = isEligibleForConfirmationChallenge,
     )
 }

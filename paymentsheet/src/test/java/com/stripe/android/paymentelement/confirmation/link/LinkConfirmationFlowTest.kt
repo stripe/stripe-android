@@ -11,6 +11,7 @@ import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator.Parameters
+import com.stripe.android.paymentelement.confirmation.EmptyConfirmationLauncherArgs
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.testing.DummyActivityResultCaller
@@ -61,11 +62,11 @@ class LinkConfirmationFlowTest {
 
         assertThat(presentCall.configuration).isEqualTo(LINK_CONFIRMATION_OPTION.configuration)
 
-        val parameters = savedStateHandle.get<Parameters<LinkConfirmationOption>>("LinkParameters")
+        val parameters = savedStateHandle
+            .get<Parameters<LinkConfirmationOption, EmptyConfirmationLauncherArgs>>("LinkParameters")
 
         assertThat(parameters?.confirmationOption).isEqualTo(LINK_CONFIRMATION_OPTION)
         assertThat(parameters?.confirmationArgs).isEqualTo(CONFIRMATION_PARAMETERS)
-        assertThat(parameters?.deferredIntentConfirmationType).isNull()
     }
 
     @Test
@@ -78,7 +79,7 @@ class LinkConfirmationFlowTest {
                 Parameters(
                     confirmationOption = LINK_CONFIRMATION_OPTION,
                     confirmationArgs = CONFIRMATION_PARAMETERS,
-                    deferredIntentConfirmationType = null,
+                    launcherArgs = EmptyConfirmationLauncherArgs,
                 )
             )
         }
