@@ -59,6 +59,7 @@ import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.link.ui.LinkButton
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
+import com.stripe.android.shoppay.ShopPayButton
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
@@ -356,6 +357,7 @@ private fun PaymentSheetContent(
                 processingState = walletsProcessingState,
                 onGooglePayPressed = state.onGooglePayPressed,
                 onLinkPressed = state.onLinkPressed,
+                onShopPayPressed = state.onShopPayPressed,
                 dividerSpacing = currentScreen.walletsDividerSpacing,
                 modifier = Modifier.padding(bottom = bottomSpacing),
                 cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance),
@@ -413,6 +415,7 @@ internal fun Wallet(
     processingState: WalletsProcessingState?,
     onGooglePayPressed: () -> Unit,
     onLinkPressed: () -> Unit,
+    onShopPayPressed: () -> Unit,
     dividerSpacing: Dp,
     modifier: Modifier = Modifier,
     cardBrandFilter: CardBrandFilter,
@@ -421,6 +424,8 @@ internal fun Wallet(
     val padding = StripeTheme.getOuterFormInsets()
 
     Column(modifier = modifier.padding(padding)) {
+        var hasWalletButton = false
+
         // Only show Google Pay if allowed in header
         state.googlePay(WalletLocation.HEADER)?.let { googlePay ->
             GooglePayButton(
@@ -434,11 +439,12 @@ internal fun Wallet(
                 cardFundingFilter = cardFundingFilter,
                 additionalEnabledNetworks = googlePay.additionalEnabledNetworks
             )
+            hasWalletButton = true
         }
 
         // Only show Link if allowed in header
         state.link(WalletLocation.HEADER)?.let {
-            if (state.googlePay(WalletLocation.HEADER) != null) {
+            if (hasWalletButton) {
                 Spacer(modifier = Modifier.requiredHeight(8.dp))
             }
             LinkButton(
@@ -446,6 +452,15 @@ internal fun Wallet(
                 enabled = state.buttonsEnabled,
                 onClick = onLinkPressed,
             )
+            hasWalletButton = true
+        }
+
+        // Only show Shop Pay if allowed in header
+        state.shopPay(WalletLocation.HEADER)?.let {
+            if (hasWalletButton) {
+                Spacer(modifier = Modifier.requiredHeight(8.dp))
+            }
+            ShopPayButton(onClick = onShopPayPressed)
         }
 
         when (processingState) {

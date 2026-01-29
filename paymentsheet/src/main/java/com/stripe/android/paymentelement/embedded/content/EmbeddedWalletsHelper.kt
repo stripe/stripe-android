@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.embedded.content
 
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
@@ -27,12 +28,14 @@ internal class DefaultEmbeddedWalletsHelper @Inject constructor(
                 isLinkAvailable = isLinkAvailable,
                 linkEmail = linkEmail,
                 isGooglePayReady = paymentMethodMetadata.isGooglePayReady == true,
+                isShopPayAvailable = paymentMethodMetadata.availableWallets.contains(WalletType.ShopPay),
                 buttonsEnabled = true,
                 paymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes(),
                 googlePayLauncherConfig = null, // This isn't used for embedded.
                 googlePayButtonType = GooglePayButtonType.Pay, // The actual google pay button isn't shown for embedded.
                 onGooglePayPressed = { throw IllegalStateException("Not possible.") },
                 onLinkPressed = { throw IllegalStateException("Not possible.") },
+                onShopPayPressed = { throw IllegalStateException("Not possible.") },
                 isSetupIntent = paymentMethodMetadata.stripeIntent is SetupIntent,
                 walletsAllowedInHeader = emptyList(), // Embedded: all wallets inline, none in header
                 cardBrandFilter = paymentMethodMetadata.cardBrandFilter,

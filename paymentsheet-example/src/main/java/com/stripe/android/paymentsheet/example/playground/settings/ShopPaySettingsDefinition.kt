@@ -18,8 +18,8 @@ internal object ShopPaySettingsDefinition : BooleanSettingsDefinition(
         return when (configurationData.integrationType) {
             PlaygroundConfigurationData.IntegrationType.Embedded,
             PlaygroundConfigurationData.IntegrationType.FlowController,
-            PlaygroundConfigurationData.IntegrationType.FlowControllerWithSpt -> true
-            PlaygroundConfigurationData.IntegrationType.PaymentSheet,
+            PlaygroundConfigurationData.IntegrationType.FlowControllerWithSpt,
+            PlaygroundConfigurationData.IntegrationType.PaymentSheet-> true
             PlaygroundConfigurationData.IntegrationType.CustomerSheet,
             PlaygroundConfigurationData.IntegrationType.LinkController -> false
         }
