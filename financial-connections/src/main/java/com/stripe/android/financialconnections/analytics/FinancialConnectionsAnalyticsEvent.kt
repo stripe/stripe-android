@@ -291,33 +291,6 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
         }
     }
 
-    class VerificationStepUpSuccess(
-        pane: Pane,
-    ) : FinancialConnectionsAnalyticsEvent(
-        name = "networking.verification.step_up.success",
-        mapOf(
-            "pane" to pane.analyticsValue,
-        ).filterNotNullValues()
-    )
-
-    class VerificationStepUpError(
-        pane: Pane,
-        error: Error
-    ) : FinancialConnectionsAnalyticsEvent(
-        name = "networking.verification.step_up.error",
-        mapOf(
-            "pane" to pane.analyticsValue,
-            "error" to error.value,
-        ).filterNotNullValues()
-    ) {
-        enum class Error(val value: String) {
-            ConsumerNotFoundError("ConsumerNotFoundError"),
-            LookupConsumerSession("LookupConsumerSession"),
-            StartVerificationError("StartVerificationSessionError"),
-            MarkLinkVerifiedError("MarkLinkStepUpAuthenticationVerifiedError"),
-        }
-    }
-
     class ClickDone(
         pane: Pane,
     ) : FinancialConnectionsAnalyticsEvent(

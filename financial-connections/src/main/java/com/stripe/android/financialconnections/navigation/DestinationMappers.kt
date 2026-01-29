@@ -18,7 +18,6 @@ private val paneToDestination = mapOf(
     Pane.NETWORKING_LINK_VERIFICATION to Destination.NetworkingLinkVerification,
     Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION to Destination.NetworkingSaveToLinkVerification,
     Pane.LINK_ACCOUNT_PICKER to Destination.LinkAccountPicker,
-    Pane.LINK_STEP_UP_VERIFICATION to Destination.LinkStepUpVerification,
     Pane.RESET to Destination.Reset,
     Pane.UNEXPECTED_ERROR to Destination.Error,
     Pane.EXIT to Destination.Exit,

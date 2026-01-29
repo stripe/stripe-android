@@ -357,7 +357,6 @@ public final class com/stripe/android/financialconnections/navigation/Composable
 	public final fun getLambda-20$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-21$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-22$financial_connections_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda-23$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-3$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-4$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-5$financial_connections_release ()Lkotlin/jvm/functions/Function3;

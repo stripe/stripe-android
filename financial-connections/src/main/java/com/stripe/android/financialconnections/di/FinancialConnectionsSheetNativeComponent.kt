@@ -11,7 +11,6 @@ import com.stripe.android.financialconnections.features.error.ErrorViewModel
 import com.stripe.android.financialconnections.features.exit.ExitViewModel
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerViewModel
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerViewModel
-import com.stripe.android.financialconnections.features.linkstepupverification.LinkStepUpVerificationViewModel
 import com.stripe.android.financialconnections.features.manualentry.ManualEntryViewModel
 import com.stripe.android.financialconnections.features.manualentrysuccess.ManualEntrySuccessViewModel
 import com.stripe.android.financialconnections.features.networkinglinkloginwarmup.NetworkingLinkLoginWarmupViewModel
@@ -62,7 +61,6 @@ internal interface FinancialConnectionsSheetNativeComponent {
     val networkingLinkVerificationViewModelFactory: NetworkingLinkVerificationViewModel.Factory
     val networkingSaveToLinkVerificationViewModelFactory: NetworkingSaveToLinkVerificationViewModel.Factory
     val linkAccountPickerViewModelFactory: LinkAccountPickerViewModel.Factory
-    val linkStepUpVerificationViewModelFactory: LinkStepUpVerificationViewModel.Factory
     val accountUpdateRequiredViewModelFactory: AccountUpdateRequiredViewModel.Factory
 
     @Component.Builder
