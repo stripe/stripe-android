@@ -117,10 +117,10 @@ internal class IntentConfirmationChallengeActivityTest {
 
     @Test
     fun `finishes with Failed result when bridge handler emits Error event`() = runTest {
-        val error = RuntimeException("Confirmation challenge failed")
+        val error = BridgeException(RuntimeException("Confirmation challenge failed"))
         val bridgeHandler = FakeConfirmationChallengeBridgeHandler()
             .apply {
-                emitEvent(ConfirmationChallengeBridgeEvent.Error(cause = error))
+                emitEvent(ConfirmationChallengeBridgeEvent.Error(error = error))
             }
 
         val scenario = launchActivityWithBridgeHandler(bridgeHandler)
@@ -133,7 +133,6 @@ internal class IntentConfirmationChallengeActivityTest {
         assertThat(result).isInstanceOf<IntentConfirmationChallengeActivityResult.Failed>()
         val failedResult = result as IntentConfirmationChallengeActivityResult.Failed
         assertThat(failedResult.error).isEqualTo(error)
-        assertThat(failedResult.error.message).isEqualTo("Confirmation challenge failed")
 
         scenario.close()
     }
@@ -178,6 +177,39 @@ internal class IntentConfirmationChallengeActivityTest {
         scenario.close()
     }
 
+    @Test
+    fun `analytics start event is fired when activity starts`() = runTest {
+        val bridgeHandler = FakeConfirmationChallengeBridgeHandler()
+        val analyticsReporter = FakeIntentConfirmationChallengeAnalyticsEventReporter()
+
+        val factory = object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return IntentConfirmationChallengeViewModel(
+                    bridgeHandler = bridgeHandler,
+                    workContext = testDispatcher,
+                    analyticsEventReporter = analyticsReporter
+                ) as T
+            }
+        }
+
+        val scenario = injectableActivityScenario<IntentConfirmationChallengeActivity> {
+            injectActivity {
+                viewModelFactory = factory
+            }
+        }.apply {
+            launchForResult(createIntent())
+        }
+
+        advanceUntilIdle()
+
+        assertThat(analyticsReporter.calls.first()).isEqualTo(
+            FakeIntentConfirmationChallengeAnalyticsEventReporter.Call.Start
+        )
+
+        scenario.close()
+    }
+
     private fun createTestArgs(): IntentConfirmationChallengeArgs {
         return IntentConfirmationChallengeArgs(
             publishableKey = "pk_test_123",
@@ -194,7 +226,8 @@ internal class IntentConfirmationChallengeActivityTest {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return IntentConfirmationChallengeViewModel(
                     bridgeHandler = bridgeHandler,
-                    workContext = testDispatcher
+                    workContext = testDispatcher,
+                    analyticsEventReporter = FakeIntentConfirmationChallengeAnalyticsEventReporter()
                 ) as T
             }
         }
