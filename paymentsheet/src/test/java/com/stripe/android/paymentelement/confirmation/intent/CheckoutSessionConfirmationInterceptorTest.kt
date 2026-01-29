@@ -16,6 +16,7 @@ import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.PaymentIntentFactory
@@ -74,7 +75,11 @@ class CheckoutSessionConfirmationInterceptorTest {
 
         val completeAction = result as ConfirmationDefinition.Action.Complete
         assertThat(completeAction.intent).isEqualTo(succeededPaymentIntent)
-        assertThat(completeAction.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Server)
+        assertThat(completeAction.metadata).isEqualTo(
+            MutableConfirmationMetadata().apply {
+                set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Server)
+            }
+        )
         assertThat(completeAction.completedFullPaymentFlow).isTrue()
     }
 

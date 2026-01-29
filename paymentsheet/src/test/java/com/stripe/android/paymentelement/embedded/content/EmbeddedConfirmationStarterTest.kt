@@ -88,7 +88,6 @@ class EmbeddedConfirmationStarterTest {
             confirmationState = ConfirmationHandler.State.Complete(
                 result = ConfirmationHandler.Result.Succeeded(
                     intent = intent,
-                    deferredIntentConfirmationType = null,
                 ),
             ),
         ) {
@@ -96,7 +95,6 @@ class EmbeddedConfirmationStarterTest {
                 val result = awaitItem().assertSucceeded()
 
                 assertThat(result.intent).isEqualTo(intent)
-                assertThat(result.deferredIntentConfirmationType).isNull()
             }
 
             confirmationStarter.result.test {

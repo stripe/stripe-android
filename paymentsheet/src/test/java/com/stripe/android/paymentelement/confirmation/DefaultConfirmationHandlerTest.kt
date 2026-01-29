@@ -14,7 +14,6 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.CoroutineTestRule
@@ -222,7 +221,6 @@ class DefaultConfirmationHandlerTest {
     fun `On complete action, should complete with success result`() = test(
         someDefinitionAction = ConfirmationDefinition.Action.Complete(
             intent = UPDATED_PAYMENT_INTENT,
-            deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
             completedFullPaymentFlow = true,
         ),
     ) {
@@ -238,8 +236,6 @@ class DefaultConfirmationHandlerTest {
             val successResult = completeState.result.assertSucceeded()
 
             assertThat(successResult.intent).isEqualTo(UPDATED_PAYMENT_INTENT)
-            assertThat(successResult.deferredIntentConfirmationType)
-                .isEqualTo(DeferredIntentConfirmationType.Client)
             assertThat(successResult.completedFullPaymentFlow).isTrue()
 
             confirmationHandler.assertAwaitResultCallReceivesSameResult(completeState)
@@ -252,7 +248,9 @@ class DefaultConfirmationHandlerTest {
     fun `On complete action with uncompleted flow, should complete with success result`() = test(
         someDefinitionAction = ConfirmationDefinition.Action.Complete(
             intent = UPDATED_PAYMENT_INTENT,
-            deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
+            metadata = MutableConfirmationMetadata().apply {
+                set(SomeStringMetadataKey, "something")
+            },
             completedFullPaymentFlow = false,
         ),
     ) {
@@ -268,8 +266,11 @@ class DefaultConfirmationHandlerTest {
             val successResult = completeState.result.assertSucceeded()
 
             assertThat(successResult.intent).isEqualTo(UPDATED_PAYMENT_INTENT)
-            assertThat(successResult.deferredIntentConfirmationType)
-                .isEqualTo(DeferredIntentConfirmationType.Client)
+            assertThat(successResult.metadata).isEqualTo(
+                MutableConfirmationMetadata().apply {
+                    set(SomeStringMetadataKey, "something")
+                }
+            )
             assertThat(successResult.completedFullPaymentFlow).isFalse()
 
             confirmationHandler.assertAwaitResultCallReceivesSameResult(completeState)
@@ -290,14 +291,12 @@ class DefaultConfirmationHandlerTest {
     fun `On success result from launched action, should complete with success result`() = launcherResultTest(
         result = ConfirmationDefinition.Result.Succeeded(
             intent = UPDATED_PAYMENT_INTENT,
-            deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
             completedFullPaymentFlow = true,
         ),
     ) { completeState ->
         val successResult = completeState.result.assertSucceeded()
 
         assertThat(successResult.intent).isEqualTo(UPDATED_PAYMENT_INTENT)
-        assertThat(successResult.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Server)
         assertThat(successResult.completedFullPaymentFlow).isTrue()
 
         assertThat(confirmationSaverTurbine.awaitItem()).isNotNull()
@@ -308,14 +307,20 @@ class DefaultConfirmationHandlerTest {
         launcherResultTest(
             result = ConfirmationDefinition.Result.Succeeded(
                 intent = UPDATED_PAYMENT_INTENT,
-                deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                metadata = MutableConfirmationMetadata().apply {
+                    set(SomeStringMetadataKey, "something")
+                },
                 completedFullPaymentFlow = false,
             ),
         ) { completeState ->
             val successResult = completeState.result.assertSucceeded()
 
             assertThat(successResult.intent).isEqualTo(UPDATED_PAYMENT_INTENT)
-            assertThat(successResult.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Server)
+            assertThat(successResult.metadata).isEqualTo(
+                MutableConfirmationMetadata().apply {
+                    set(SomeStringMetadataKey, "something")
+                }
+            )
             assertThat(successResult.completedFullPaymentFlow).isFalse()
 
             assertThat(confirmationSaverTurbine.awaitItem()).isNotNull()
@@ -423,7 +428,7 @@ class DefaultConfirmationHandlerTest {
             val successResult = completeState.result.assertSucceeded()
 
             assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT)
-            assertThat(successResult.deferredIntentConfirmationType).isNull()
+            assertThat(successResult.metadata).isEqualTo(MutableConfirmationMetadata())
 
             confirmationHandler.assertAwaitResultCallReceivesSameResult(completeState)
 
@@ -458,7 +463,7 @@ class DefaultConfirmationHandlerTest {
                 val successResult = completeState.result.assertSucceeded()
 
                 assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT)
-                assertThat(successResult.deferredIntentConfirmationType).isNull()
+                assertThat(successResult.metadata).isEqualTo(MutableConfirmationMetadata())
 
                 confirmationHandler.assertAwaitResultCallReceivesSameResult(completeState)
             }
@@ -520,7 +525,7 @@ class DefaultConfirmationHandlerTest {
                 val successResult = completeState.result.assertSucceeded()
 
                 assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT)
-                assertThat(successResult.deferredIntentConfirmationType).isNull()
+                assertThat(successResult.metadata).isEqualTo(MutableConfirmationMetadata())
 
                 confirmationHandler.assertAwaitResultCallReceivesSameResult(completeState)
             }
@@ -566,7 +571,7 @@ class DefaultConfirmationHandlerTest {
                 val successResult = completeState.result.assertSucceeded()
 
                 assertThat(successResult.intent).isEqualTo(UPDATED_PAYMENT_INTENT)
-                assertThat(successResult.deferredIntentConfirmationType).isNull()
+                assertThat(successResult.metadata).isEqualTo(MutableConfirmationMetadata())
 
                 confirmationHandler.assertAwaitResultCallReceivesSameResult(completeState)
             }
@@ -602,7 +607,7 @@ class DefaultConfirmationHandlerTest {
                 val result = confirmationHandler.awaitResult().assertSucceeded()
 
                 assertThat(result.intent).isEqualTo(PAYMENT_INTENT)
-                assertThat(result.deferredIntentConfirmationType).isNull()
+                assertThat(result.metadata).isEqualTo(MutableConfirmationMetadata())
             }
 
             dispatcher.scheduler.advanceUntilIdle()
@@ -1115,6 +1120,8 @@ class DefaultConfirmationHandlerTest {
 
     @Parcelize
     private data object InvalidConfirmationOption : ConfirmationHandler.Option
+
+    private data object SomeStringMetadataKey : ConfirmationMetadata.Key<String>
 
     private companion object {
         const val SOME_DEFINITION_PERSISTED_KEY = "SomeParameters"

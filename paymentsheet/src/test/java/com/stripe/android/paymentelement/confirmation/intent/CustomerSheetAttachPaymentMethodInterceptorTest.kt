@@ -10,6 +10,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.testing.SetupIntentFactory
 import kotlinx.coroutines.test.runTest
@@ -43,7 +44,7 @@ class CustomerSheetAttachPaymentMethodInterceptorTest {
         val completeAction = result as ConfirmationDefinition.Action.Complete
 
         assertThat(completeAction.intent).isEqualTo(setupIntent.copy(paymentMethod = paymentMethod))
-        assertThat(completeAction.deferredIntentConfirmationType).isNull()
+        assertThat(completeAction.metadata).isEqualTo(MutableConfirmationMetadata())
         assertThat(completeAction.completedFullPaymentFlow).isTrue()
     }
 
