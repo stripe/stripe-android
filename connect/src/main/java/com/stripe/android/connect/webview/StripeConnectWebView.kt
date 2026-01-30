@@ -6,9 +6,13 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.content.MutableContextWrapper
+import android.content.res.Configuration
 import android.graphics.Bitmap
+import android.graphics.Rect
 import android.net.Uri
 import android.os.Build
+import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.webkit.JavascriptInterface
 import android.webkit.JsResult
 import android.webkit.PermissionRequest
@@ -88,6 +92,11 @@ internal class StripeConnectWebView private constructor(
 
     private val webViewLifecycleScope get() = findViewTreeLifecycleOwner()?.lifecycleScope
 
+    private var globalLayoutListener: ViewTreeObserver.OnGlobalLayoutListener? = null
+    private var lastKeyboardHeight: Int = 0
+    private var originalHeight: Int = 0
+    private var baseBottomInset: Int = -1
+
     init {
         webViewClient = stripeWebViewClient
         webChromeClient = stripeWebChromeClient
@@ -150,12 +159,87 @@ internal class StripeConnectWebView private constructor(
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         // We need the Activity context for some UI to work, like web-triggered dialogs
-        mutableContext.baseContext = requireNotNull(findActivity())
+        val activity = requireNotNull(findActivity())
+        mutableContext.baseContext = activity
+
+        // Set up keyboard detection to resize the webview according to keyboard heights
+        // This fixes input fields being covered by keyboard on Samsung devices.
+        setupKeyboardHandling(activity)
     }
 
     override fun onDetachedFromWindow() {
+        // Clean up the global layout listener
+        globalLayoutListener?.let { listener ->
+            findActivity()?.window?.decorView?.viewTreeObserver?.removeOnGlobalLayoutListener(listener)
+        }
+        globalLayoutListener = null
+
         mutableContext.baseContext = mutableContext.applicationContext
         super.onDetachedFromWindow()
+    }
+
+    /**
+     * Sets up keyboard visibility detection to dynamically resize the WebView when the
+     * soft keyboard appears or disappears. This fixes an issue on Samsung devices where
+     * input fields in popovers get covered by the keyboard.
+     *
+     * How it works:
+     * 1. Monitors layout changes via [ViewTreeObserver.OnGlobalLayoutListener]
+     * 2. Uses [getWindowVisibleDisplayFrame] to detect keyboard height
+     * 3. Resizes the WebView height to account for keyboard, triggering the web layer's
+     *    ResizeObserver to reposition popovers appropriately
+     */
+    private fun setupKeyboardHandling(activity: Activity) {
+        val decorView = activity.window.decorView
+
+        globalLayoutListener = ViewTreeObserver.OnGlobalLayoutListener {
+            val currentOrientation = resources.configuration.orientation
+            if (currentOrientation != Configuration.ORIENTATION_PORTRAIT) {
+                return@OnGlobalLayoutListener
+            }
+
+            val displayMetrics = activity.resources.displayMetrics
+            val rect = Rect()
+            decorView.getWindowVisibleDisplayFrame(rect)
+            val bottomInset = displayMetrics.heightPixels - rect.bottom
+
+            // Capture the base bottom inset (nav bar)
+            if (baseBottomInset < 0) {
+                baseBottomInset = bottomInset
+            }
+
+            val keyboardHeight = (bottomInset - baseBottomInset).coerceAtLeast(0)
+
+            // Only resize when keyboard height changes
+            if (lastKeyboardHeight != keyboardHeight) {
+                lastKeyboardHeight = keyboardHeight
+
+                // Store original height on first layout
+                if (originalHeight == 0 && height > 0) {
+                    originalHeight = height
+                }
+
+                // If keyboard is showing, resize webview to trigger ResizeObserver in web layer
+                // This positions popovers correctly on screen
+                if (keyboardHeight > 0 && originalHeight > 0) {
+                    val newHeight = originalHeight - keyboardHeight
+                    if (newHeight > 0) {
+                        layoutParams = layoutParams.apply {
+                            height = newHeight
+                        }
+                        requestLayout()
+                    }
+                } else if (keyboardHeight == 0 && originalHeight > 0) {
+                    // Keyboard hidden - restore original height
+                    layoutParams = layoutParams.apply {
+                        height = originalHeight
+                    }
+                    requestLayout()
+                }
+            }
+        }
+
+        decorView.viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
     }
 
     interface Delegate {

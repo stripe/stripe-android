@@ -15,6 +15,7 @@ Dependencies updated in [11877](https://github.com/stripe/stripe-android/pull/11
 
 ### Connect
 * [Changed] Added `EmbeddedErrorType` enum for type-safe error handling in Connect embedded components, falling back to `api_error` if the error type is `null`.
+* [Fixed] Fixed keyboard covering input fields in embedded Payments and Payout components on Samsung devices.
 
 ## 22.6.1 - 2026-01-20
 
