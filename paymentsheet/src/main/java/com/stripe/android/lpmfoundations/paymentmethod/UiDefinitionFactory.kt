@@ -186,13 +186,16 @@ internal sealed interface UiDefinitionFactory {
     }
 
     interface Custom : UiDefinitionFactory {
-        fun createSupportedPaymentMethod(): SupportedPaymentMethod
+        fun createSupportedPaymentMethod(
+            metadata: PaymentMethodMetadata,
+        ): SupportedPaymentMethod
 
         fun createFormHeaderInformation(
+            metadata: PaymentMethodMetadata,
             customerHasSavedPaymentMethods: Boolean,
             incentive: PaymentMethodIncentive?,
         ): FormHeaderInformation {
-            return createSupportedPaymentMethod().asFormHeaderInformation(incentive)
+            return createSupportedPaymentMethod(metadata).asFormHeaderInformation(incentive)
         }
 
         fun createFormElements(metadata: PaymentMethodMetadata, arguments: Arguments): List<FormElement>
@@ -223,7 +226,7 @@ internal sealed interface UiDefinitionFactory {
         }
 
         is Custom -> {
-            createSupportedPaymentMethod()
+            createSupportedPaymentMethod(metadata)
         }
 
         is RequiresSharedDataSpec -> {
@@ -254,6 +257,7 @@ internal sealed interface UiDefinitionFactory {
             createFormHeaderInformation(
                 customerHasSavedPaymentMethods = customerHasSavedPaymentMethods,
                 incentive = metadata.paymentMethodIncentive,
+                metadata = metadata,
             )
         }
 

@@ -32,7 +32,9 @@ internal object InstantDebitsDefinition : PaymentMethodDefinition {
 
 private object InstantDebitsUiDefinitionFactory : UiDefinitionFactory.Custom {
 
-    override fun createSupportedPaymentMethod(): SupportedPaymentMethod {
+    override fun createSupportedPaymentMethod(
+        metadata: PaymentMethodMetadata
+    ): SupportedPaymentMethod {
         return SupportedPaymentMethod(
             code = InstantDebitsDefinition.type.code,
             syntheticCode = "link_instant_debits",

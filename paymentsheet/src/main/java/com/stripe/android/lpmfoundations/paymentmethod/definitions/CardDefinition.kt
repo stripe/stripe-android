@@ -56,25 +56,45 @@ internal object CardDefinition : PaymentMethodDefinition {
     override fun uiDefinitionFactory(
         metadata: PaymentMethodMetadata
     ): UiDefinitionFactory {
-        return if (metadata.isTapToAddSupported) {
-            CardWithTapUiDefinitionFactory
-        } else {
-            CardUiDefinitionFactory
-        }
+        return CardUiDefinitionFactory
     }
 }
 
 private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
-        paymentMethodDefinition = CardDefinition,
-        displayNameResource = PaymentsUiCoreR.string.stripe_paymentsheet_payment_method_card,
-        iconResource = PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_card,
-        iconResourceNight = null,
-        outlinedIconResource = PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_card_outlined,
-        iconRequiresTinting = true,
-    )
+    override fun createSupportedPaymentMethod(
+        metadata: PaymentMethodMetadata,
+    ): SupportedPaymentMethod {
+        val iconResource = if (metadata.isTapToAddSupported) {
+            PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_card_with_tap
+        } else {
+            PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_card
+        }
+
+        val outlinedIconResource = if (metadata.isTapToAddSupported) {
+            PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_card_with_tap
+        } else {
+            PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_card_outlined
+        }
+
+        val subtitle = if (metadata.isTapToAddSupported) {
+            PaymentsUiCoreR.string.stripe_card_with_tap_or_enter_manually
+        } else {
+            null
+        }
+
+        return SupportedPaymentMethod(
+            paymentMethodDefinition = CardDefinition,
+            displayNameResource = PaymentsUiCoreR.string.stripe_paymentsheet_payment_method_card,
+            iconResource = iconResource,
+            iconResourceNight = null,
+            subtitle = subtitle?.resolvableString,
+            outlinedIconResource = outlinedIconResource,
+            iconRequiresTinting = true,
+        )
+    }
 
     override fun createFormHeaderInformation(
+        metadata: PaymentMethodMetadata,
         customerHasSavedPaymentMethods: Boolean,
         incentive: PaymentMethodIncentive?,
     ): FormHeaderInformation {
@@ -83,7 +103,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
         } else {
             PaymentsUiCoreR.string.stripe_paymentsheet_add_card
         }
-        return createSupportedPaymentMethod().asFormHeaderInformation(incentive).copy(
+        return createSupportedPaymentMethod(metadata).asFormHeaderInformation(incentive).copy(
             displayName = displayName.resolvableString,
             shouldShowIcon = false,
         )
@@ -195,25 +215,6 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
                 )
             )
         }
-    }
-}
-
-private object CardWithTapUiDefinitionFactory : UiDefinitionFactory.Custom {
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
-        paymentMethodDefinition = CardDefinition,
-        displayNameResource = PaymentsUiCoreR.string.stripe_paymentsheet_payment_method_card,
-        iconResource = PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_card_with_tap,
-        iconResourceNight = null,
-        outlinedIconResource = PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_card_with_tap,
-        subtitle = PaymentsUiCoreR.string.stripe_card_with_tap_or_enter_manually.resolvableString,
-        iconRequiresTinting = true,
-    )
-
-    override fun createFormElements(
-        metadata: PaymentMethodMetadata,
-        arguments: UiDefinitionFactory.Arguments
-    ): List<FormElement> {
-        return emptyList()
     }
 }
 
