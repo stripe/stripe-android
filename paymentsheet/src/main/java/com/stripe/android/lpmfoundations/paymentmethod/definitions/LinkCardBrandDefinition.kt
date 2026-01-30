@@ -32,7 +32,9 @@ internal object LinkCardBrandDefinition : PaymentMethodDefinition {
 
 private object LinkCardBrandDefinitionFactory : UiDefinitionFactory.Custom {
 
-    override fun createSupportedPaymentMethod(): SupportedPaymentMethod {
+    override fun createSupportedPaymentMethod(
+        metadata: PaymentMethodMetadata,
+    ): SupportedPaymentMethod {
         return SupportedPaymentMethod(
             code = InstantDebitsDefinition.type.code,
             syntheticCode = "link_card_brand",
