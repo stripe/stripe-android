@@ -32,7 +32,6 @@ data class AppearanceSettings(
 }
 
 data class ColorsSettings(
-    val iconColor: ColorInfo = ColorInfo(null, "Default"),
     val textColor: ColorInfo = ColorInfo(null, "Default")
 )
 
