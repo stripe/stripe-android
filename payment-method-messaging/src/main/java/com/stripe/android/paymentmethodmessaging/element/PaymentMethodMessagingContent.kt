@@ -10,11 +10,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
-import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -26,15 +24,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -47,7 +47,6 @@ import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.navigation.rememberKeyboardController
 import kotlinx.coroutines.launch
-import com.stripe.android.uicore.R as StripeUiCoreR
 
 internal sealed class PaymentMethodMessagingContent {
 
@@ -161,23 +160,9 @@ private fun MultiPartner(
         )
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = message.promotion.buildAnnotatedStringWithInfoIcon(),
+                text = message.promotion.buildAnnotatedStringWithInfoIcon(message.learnMore.message),
                 style = style,
-                color = Color(getTextColor(appearance.colors.textColor, appearance.theme)),
-                inlineContent = mapOf(
-                    INLINE_ICON_KEY to InlineTextContent(
-                        placeholder = Placeholder(
-                            width = style.fontSize * INLINE_INFO_ICON_SCALE_FACTOR,
-                            height = style.fontSize * INLINE_INFO_ICON_SCALE_FACTOR,
-                            placeholderVerticalAlign = PlaceholderVerticalAlign.Center
-                        )
-                    ) {
-                        InfoIcon(
-                            appearance = appearance,
-                            learnMoreMessage = message.learnMore.message
-                        )
-                    }
-                )
+                color = Color(getTextColor(appearance.colors.textColor, appearance.theme))
             )
         }
         message.legalDisclosure?.let {
@@ -255,7 +240,7 @@ private fun TextWithLogo(
         ?: MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Normal)
 
     Text(
-        text = label.buildInlineLogoAnnotatedStringWithInfoIcon(),
+        text = label.buildInlineLogoAnnotatedStringWithInfoIcon(learnMoreMessage),
         style = style,
         color = Color(getTextColor(appearance.colors.textColor, appearance.theme)),
         inlineContent = mapOf(
@@ -272,44 +257,42 @@ private fun TextWithLogo(
                     contentDescription = image.text,
                     modifier = Modifier.fillMaxSize()
                 )
-            },
-            INLINE_ICON_KEY to InlineTextContent(
-                placeholder = Placeholder(
-                    width = style.fontSize * INLINE_INFO_ICON_SCALE_FACTOR,
-                    height = style.fontSize * INLINE_INFO_ICON_SCALE_FACTOR,
-                    placeholderVerticalAlign = PlaceholderVerticalAlign.Center
-                )
-            ) {
-                InfoIcon(
-                    appearance = appearance,
-                    learnMoreMessage = learnMoreMessage
-                )
             }
         )
     )
 }
 
 @Composable
-private fun String.buildInlineLogoAnnotatedStringWithInfoIcon(): AnnotatedString = buildAnnotatedString {
+private fun String.buildInlineLogoAnnotatedStringWithInfoIcon(
+    learnMoreString: String
+): AnnotatedString = buildAnnotatedString {
     val parts = split(INLINE_IMAGE_KEY)
     val preLogoString = parts.getOrNull(0)
     val postLogoString = parts.getOrNull(1)
     if (preLogoString == null || postLogoString == null) {
         // {partner} not found, just show label
         append(this@buildInlineLogoAnnotatedStringWithInfoIcon)
-        appendInlineContent(id = INLINE_ICON_KEY)
     } else {
         append(preLogoString)
         appendInlineContent(id = INLINE_IMAGE_KEY)
         append(postLogoString)
-        appendInlineContent(id = INLINE_ICON_KEY)
     }
+    appendUnderlinedLearnMoreMessage(learnMoreString)
 }
 
 @Composable
-private fun String.buildAnnotatedStringWithInfoIcon(): AnnotatedString = buildAnnotatedString {
+private fun String.buildAnnotatedStringWithInfoIcon(learnMoreString: String): AnnotatedString = buildAnnotatedString {
     append(this@buildAnnotatedStringWithInfoIcon)
-    appendInlineContent(id = INLINE_ICON_KEY)
+    if (!this@buildAnnotatedStringWithInfoIcon.endsWith(".")) append(".")
+    appendUnderlinedLearnMoreMessage(learnMoreString)
+}
+
+fun AnnotatedString.Builder.appendUnderlinedLearnMoreMessage(text: String): AnnotatedString.Builder {
+    append(" ")
+    withStyle(style = SpanStyle(textDecoration = TextDecoration.Underline)) {
+        append(text)
+    }
+    return this
 }
 
 private fun PaymentMethodMessagingElement.Appearance.Font.State.toTextStyle(): TextStyle {
@@ -318,19 +301,6 @@ private fun PaymentMethodMessagingElement.Appearance.Font.State.toTextStyle(): T
         fontWeight = fontWeight?.let { FontWeight(it) },
         fontFamily = fontFamily?.let { FontFamily(Font(it)) },
         letterSpacing = letterSpacingSp?.sp ?: TextUnit.Unspecified,
-    )
-}
-
-@Composable
-private fun InfoIcon(
-    appearance: PaymentMethodMessagingElement.Appearance.State,
-    learnMoreMessage: String
-) {
-    Icon(
-        painter = painterResource(StripeUiCoreR.drawable.stripe_ic_material_info),
-        contentDescription = learnMoreMessage,
-        tint = Color(getIconColor(appearance.colors.infoIconColor, appearance.theme)),
-        modifier = Modifier.fillMaxSize().padding(start = 4.dp)
     )
 }
 
@@ -352,15 +322,7 @@ private fun getTextColor(textColor: Int?, theme: PaymentMethodMessagingElement.A
     ).onComponent.toArgb()
 }
 
-private fun getIconColor(iconColor: Int?, theme: PaymentMethodMessagingElement.Appearance.Theme): Int {
-    return iconColor ?: StripeTheme.getColors(
-        theme == PaymentMethodMessagingElement.Appearance.Theme.DARK
-    ).subtitle.toArgb()
-}
-
 private const val DEFAULT_TEXT_SIZE = 16F
 private const val DEFAULT_ICON_SIZE = 20
 private const val INLINE_IMAGE_KEY = "{partner}"
-private const val INLINE_ICON_KEY = "{icon}"
 private const val INLINE_LOGO_SCALE_FACTOR = 2.5
-private const val INLINE_INFO_ICON_SCALE_FACTOR = 1.4

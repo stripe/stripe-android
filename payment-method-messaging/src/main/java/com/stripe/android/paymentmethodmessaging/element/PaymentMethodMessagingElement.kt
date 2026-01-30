@@ -250,7 +250,6 @@ class PaymentMethodMessagingElement @Inject internal constructor(
 
         class Colors {
             private var textColor: Int? = null
-            private var infoIconColor: Int? = null
 
             /**
              * The color used for the message text.
@@ -259,23 +258,13 @@ class PaymentMethodMessagingElement @Inject internal constructor(
                 this.textColor = textColor
             }
 
-            /**
-             * The color used for the "i" information icon.
-             */
-            fun infoIconColor(@ColorInt infoIconColor: Int) = apply {
-                this.infoIconColor = infoIconColor
-            }
-
             internal data class State(
                 @ColorInt
-                val textColor: Int?,
-                @ColorInt
-                val infoIconColor: Int?
+                val textColor: Int?
             )
 
             internal fun build() = State(
-                textColor = textColor,
-                infoIconColor = infoIconColor
+                textColor = textColor
             )
         }
     }
