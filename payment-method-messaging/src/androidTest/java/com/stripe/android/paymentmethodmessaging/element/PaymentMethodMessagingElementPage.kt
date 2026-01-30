@@ -13,7 +13,7 @@ class PaymentMethodMessagingElementPage(
     private val composeTestRule: ComposeTestRule
 ) {
     fun verifyNoContentDisplayed() {
-        composeTestRule.onNodeWithContentDescription("Learn more").assertDoesNotExist()
+        composeTestRule.onNodeWithText("Learn more", substring = true).assertDoesNotExist()
         composeTestRule.onNodeWithText(
             text = "multi partner promotion",
             substring = true
@@ -30,7 +30,7 @@ class PaymentMethodMessagingElementPage(
     fun verifySinglePartner() {
         composeTestRule.waitForIdle()
         composeTestRule.onNodeWithText("single partner inline_partner_promotion", substring = true).assertExists()
-        composeTestRule.onNodeWithContentDescription("Learn more").assertExists()
+        composeTestRule.onNodeWithText("Learn more", substring = true).assertExists()
         composeTestRule.waitUntilExactlyOneExists(
             matcher = hasContentDescription("Klarna"),
             timeoutMillis = (5000L)
@@ -40,7 +40,7 @@ class PaymentMethodMessagingElementPage(
 
     fun verifyMultiPartner() {
         composeTestRule.onNodeWithText("multi partner promotion", substring = true).assertExists()
-        composeTestRule.onNodeWithContentDescription("Learn more").assertExists()
+        composeTestRule.onNodeWithText("Learn more", substring = true).assertExists()
         composeTestRule.waitUntilExactlyOneExists(
             matcher = hasContentDescription("Klarna"),
             timeoutMillis = (5000L)
@@ -60,7 +60,7 @@ class PaymentMethodMessagingElementPage(
     }
 
     fun openAndCloseLearnMoreActivity() {
-        composeTestRule.onNodeWithContentDescription("Learn more").performClick()
+        composeTestRule.onNodeWithText("Learn more", substring = true).performClick()
         composeTestRule.waitForIdle()
         composeTestRule.onNodeWithTag("close_button").assertExists()
         composeTestRule.onNodeWithTag("close_button").performClick()
