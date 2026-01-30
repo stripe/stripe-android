@@ -174,19 +174,6 @@ internal class MessagingElementActivity : AppCompatActivity() {
         }
 
         SettingsDropDown(
-            items = colorList(),
-            selectedItem = appearanceSettings.colorsSettings.iconColor,
-            label = "Icon Color",
-            itemToString = { it.name }
-        ) {
-            viewModel.updateAppearance(
-                appearanceSettings.copy(
-                    colorsSettings = appearanceSettings.colorsSettings.copy(iconColor = it)
-                )
-            )
-        }
-
-        SettingsDropDown(
             items = listOf(
                 PaymentMethodMessagingElement.Appearance.Theme.LIGHT,
                 PaymentMethodMessagingElement.Appearance.Theme.DARK,
