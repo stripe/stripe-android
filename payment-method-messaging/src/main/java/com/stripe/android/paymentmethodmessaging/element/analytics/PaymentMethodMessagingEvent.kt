@@ -97,7 +97,6 @@ internal sealed class PaymentMethodMessagingEvent : AnalyticsEvent {
         const val FIELD_APPEARANCE = "appearance"
         const val FIELD_FONT = "font"
         const val FIELD_TEXT_COLOR = "text_color"
-        const val FIELD_ICON_COLOR = "info_icon_color"
         const val FIELD_STYLE = "style"
     }
 }
