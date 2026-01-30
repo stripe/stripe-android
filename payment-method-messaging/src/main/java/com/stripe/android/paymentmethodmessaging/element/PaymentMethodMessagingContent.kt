@@ -287,7 +287,7 @@ private fun String.buildAnnotatedStringWithInfoIcon(learnMoreString: String): An
     appendUnderlinedLearnMoreMessage(learnMoreString)
 }
 
-fun AnnotatedString.Builder.appendUnderlinedLearnMoreMessage(text: String): AnnotatedString.Builder {
+private fun AnnotatedString.Builder.appendUnderlinedLearnMoreMessage(text: String): AnnotatedString.Builder {
     append(" ")
     withStyle(style = SpanStyle(textDecoration = TextDecoration.Underline)) {
         append(text)
