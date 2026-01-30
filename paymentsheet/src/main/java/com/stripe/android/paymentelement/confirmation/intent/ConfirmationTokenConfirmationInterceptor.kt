@@ -7,6 +7,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.mandateDataForDeferredIntent
+import com.stripe.android.model.AndroidVerificationObject
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmationToken
@@ -69,6 +70,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                     // For new PM, radar options is attached in paymentMethodData.radarOptions if provided.
                     // hCaptchaToken = null here means we don't need to send a separate one when confirming the intent.
                     hCaptchaToken = null,
+                    attestationToken = null,
                 )
             },
             onFailure = { error ->
@@ -109,6 +111,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                     confirmationToken = confirmationToken,
                     shippingValues = shippingValues,
                     hCaptchaToken = confirmationOption.confirmationChallengeState.hCaptchaToken,
+                    attestationToken = confirmationOption.confirmationChallengeState.attestationToken,
                 )
             },
             onFailure = { error ->
@@ -126,6 +129,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
         confirmationToken: ConfirmationToken,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         hCaptchaToken: String?,
+        attestationToken: String?,
     ): ConfirmationDefinition.Action<Args> {
         val result = createIntentCallback.onCreateIntent(confirmationToken)
 
@@ -145,6 +149,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                         confirmationTokenId = confirmationToken.id,
                         shippingValues = shippingValues,
                         hCaptchaToken = hCaptchaToken,
+                        attestationToken = attestationToken,
                     )
                 }
             }
@@ -166,6 +171,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
         confirmationTokenId: String,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         hCaptchaToken: String?,
+        attestationToken: String?,
     ): ConfirmationDefinition.Action<Args> {
         return stripeRepository.retrieveStripeIntent(
             clientSecret = clientSecret,
@@ -196,12 +202,10 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                 ) {
                     create(
                         confirmationTokenId = confirmationTokenId,
-                        radarOptions = hCaptchaToken?.let {
-                            RadarOptions(
-                                hCaptchaToken = it,
-                                androidVerificationObject = null,
-                            )
-                        },
+                        radarOptions = RadarOptions(
+                            hCaptchaToken = hCaptchaToken,
+                            androidVerificationObject = AndroidVerificationObject(attestationToken),
+                        ),
                         clientAttributionMetadata = clientAttributionMetadata,
                     )
                 }
