@@ -172,7 +172,7 @@ class PaymentMethodMessagingContentScreenshotTest {
             flatImage = PaymentMethodMessageImage("", "", "", ""),
             learnMore = PaymentMethodMessageLearnMore(
                 url = "",
-                message = ""
+                message = "see plans"
             ),
             paymentMethods = listOf(),
             legalDisclosure = legalDisclosure
@@ -190,7 +190,7 @@ class PaymentMethodMessagingContentScreenshotTest {
             flatImages = listOf(),
             learnMore = PaymentMethodMessageLearnMore(
                 url = "",
-                message = ""
+                message = "see plans"
             ),
             paymentMethods = listOf(),
             legalDisclosure = legalDisclosure
@@ -203,7 +203,6 @@ class PaymentMethodMessagingContentScreenshotTest {
             .colors(
                 PaymentMethodMessagingElement.Appearance.Colors()
                     .textColor(Color.White.toArgb())
-                    .infoIconColor(Color.White.toArgb())
             )
 
         val flatAppearance = PaymentMethodMessagingElement.Appearance()
@@ -219,7 +218,6 @@ class PaymentMethodMessagingContentScreenshotTest {
             )
             .colors(
                 PaymentMethodMessagingElement.Appearance.Colors()
-                    .infoIconColor(Color.Cyan.toArgb())
                     .textColor(Color.Green.toArgb())
             )
     }
