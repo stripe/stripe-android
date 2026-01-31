@@ -220,7 +220,6 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
                         composable(Destination.NetworkingSaveToLinkVerification)
                         composable(Destination.LinkAccountPicker)
                         composable(Destination.BankAuthRepair)
-                        composable(Destination.LinkStepUpVerification)
                         composable(Destination.ManualEntrySuccess)
                         bottomSheet(Destination.Notice)
                         bottomSheet(Destination.AccountUpdateRequired)
