@@ -559,6 +559,10 @@ internal class PlaygroundSettings private constructor(
             PassiveCaptchaDefinition,
             AttestationOnIntentConfirmationDefinition,
             EnableTapToAddSettingsDefinition,
+            FeatureFlagSettingsDefinition(
+                FeatureFlags.nfcDirect,
+                PlaygroundConfigurationData.IntegrationType.paymentFlows().toList(),
+            ),
             CustomStripeApiDefinition,
         )
 

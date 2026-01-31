@@ -1,6 +1,9 @@
 package com.stripe.android.common.taptoadd
 
+import android.os.Build
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.common.taptoadd.nfcdirect.NfcDirectCollectionHandler
+import com.stripe.android.common.taptoadd.nfcdirect.NfcDirectConnectionManager
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -44,6 +47,13 @@ internal interface TapToAddCollectionHandler {
             errorReporter: ErrorReporter,
             createCardPresentSetupIntentCallbackRetriever: CreateCardPresentSetupIntentCallbackRetriever,
         ): TapToAddCollectionHandler {
+            // Check if using NFC Direct
+            if (connectionManager is NfcDirectConnectionManager &&
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT
+            ) {
+                return NfcDirectCollectionHandler(connectionManager)
+            }
+
             return if (isStripeTerminalSdkAvailable()) {
                 DefaultTapToAddCollectionHandler(
                     terminalWrapper = terminalWrapper,
