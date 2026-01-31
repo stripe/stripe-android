@@ -55,7 +55,7 @@ internal class DefaultConfirmationChallengeBridgeHandler @Inject constructor(
                 UnexpectedErrorEvent.INTENT_CONFIRMATION_CHALLENGE_FAILED_TO_PARSE_SUCCESS_CALLBACK_PARAMS,
                 stripeException = StripeException.create(error)
             )
-            _event.tryEmit(ConfirmationChallengeBridgeEvent.Error(error))
+            _event.tryEmit(ConfirmationChallengeBridgeEvent.Error(BridgeException(error)))
         }
     }
 
@@ -65,7 +65,7 @@ internal class DefaultConfirmationChallengeBridgeHandler @Inject constructor(
         runCatching {
             val jsonObject = JSONObject(errorMessage)
             val errorParams = errorParamsParser.parse(jsonObject)
-            val bridgeError = BridgeError(
+            val bridgeError = BridgeException(
                 message = errorParams?.message,
                 type = errorParams?.type,
                 code = errorParams?.code
@@ -77,7 +77,7 @@ internal class DefaultConfirmationChallengeBridgeHandler @Inject constructor(
                 stripeException = StripeException.create(error)
             )
             _event.tryEmit(
-                ConfirmationChallengeBridgeEvent.Error(error)
+                ConfirmationChallengeBridgeEvent.Error(BridgeException(error))
             )
         }
     }
