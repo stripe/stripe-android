@@ -1,6 +1,10 @@
 package com.stripe.android.common.taptoadd
 
 import android.content.Context
+import android.os.Build
+import com.stripe.android.common.taptoadd.nfcdirect.DefaultIsNfcDirectAvailable
+import com.stripe.android.common.taptoadd.nfcdirect.IsNfcDirectAvailable
+import com.stripe.android.common.taptoadd.nfcdirect.NfcDirectConnectionManager
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
 import com.stripe.android.paymentelement.TapToAddPreview
@@ -31,6 +35,11 @@ internal interface TapToAddModule {
         retriever: DefaultCreateCardPresentSetupIntentCallbackRetriever
     ): CreateCardPresentSetupIntentCallbackRetriever
 
+    @Binds
+    fun bindsIsNfcDirectAvailable(
+        isNfcDirectAvailable: DefaultIsNfcDirectAvailable
+    ): IsNfcDirectAvailable
+
     companion object {
         @Provides
         fun providesCreateCardPresentSetupIntentCallback(
@@ -42,12 +51,22 @@ internal interface TapToAddModule {
 
         @Provides
         fun providesTapToAddConnectionManager(
+            isNfcDirectAvailable: IsNfcDirectAvailable,
             isStripeTerminalSdkAvailable: IsStripeTerminalSdkAvailable,
             terminalWrapper: TerminalWrapper,
             errorReporter: ErrorReporter,
             applicationContext: Context,
             @IOContext workContext: CoroutineContext
         ): TapToAddConnectionManager {
+            // Prefer NFC Direct (lightweight) over Terminal SDK when available
+            if (isNfcDirectAvailable() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                return NfcDirectConnectionManager(
+                    context = applicationContext,
+                    workContext = workContext,
+                )
+            }
+
+            // Fall back to Terminal SDK
             return TapToAddConnectionManager.create(
                 applicationContext = applicationContext,
                 isStripeTerminalSdkAvailable = isStripeTerminalSdkAvailable,
