@@ -417,7 +417,7 @@ interface StripeRepository {
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun initCheckoutSession(
-        params: ElementsSessionParams.CheckoutSessionType,
+        params: ElementsSessionParams.CheckoutSession.Initial,
         options: ApiRequest.Options,
     ): Result<CheckoutSessionResponse>
 

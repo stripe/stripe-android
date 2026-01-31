@@ -4,6 +4,7 @@ import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArrayToList
 import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.model.DeferredIntentCapable
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.ExperimentAssignment
@@ -163,50 +164,42 @@ internal class ElementsSessionJsonParser(
             is ElementsSessionParams.SetupIntentType -> {
                 SetupIntentJsonParser().parse(json)
             }
-            is ElementsSessionParams.DeferredIntentType -> {
-                when (params.deferredIntentParams.mode) {
-                    is DeferredIntentParams.Mode.Payment -> {
-                        DeferredPaymentIntentJsonParser(
-                            elementsSessionId = elementsSessionId,
-                            paymentMode = params.deferredIntentParams.mode,
-                            isLiveMode = isLiveMode,
-                            timeProvider = timeProvider
-                        ).parse(json)
-                    }
-                    is DeferredIntentParams.Mode.Setup -> {
-                        DeferredSetupIntentJsonParser(
-                            elementsSessionId = elementsSessionId,
-                            setupMode = params.deferredIntentParams.mode,
-                            isLiveMode = isLiveMode,
-                            timeProvider = timeProvider
-                        ).parse(json)
-                    }
-                }
+            // Both DeferredIntentType and CheckoutSession.WithIntent implement DeferredIntentCapable
+            is DeferredIntentCapable -> {
+                parseDeferredIntent(
+                    elementsSessionId = elementsSessionId,
+                    deferredIntentParams = params.deferredIntentParams,
+                    json = json,
+                )
             }
-            is ElementsSessionParams.CheckoutSessionType -> {
-                val deferredIntentParams = params.deferredIntentParams
-                if (deferredIntentParams == null) {
-                    null
-                } else {
-                    when (deferredIntentParams.mode) {
-                        is DeferredIntentParams.Mode.Payment -> {
-                            DeferredPaymentIntentJsonParser(
-                                elementsSessionId = elementsSessionId,
-                                paymentMode = deferredIntentParams.mode,
-                                isLiveMode = isLiveMode,
-                                timeProvider = timeProvider
-                            ).parse(json)
-                        }
-                        is DeferredIntentParams.Mode.Setup -> {
-                            DeferredSetupIntentJsonParser(
-                                elementsSessionId = elementsSessionId,
-                                setupMode = deferredIntentParams.mode,
-                                isLiveMode = isLiveMode,
-                                timeProvider = timeProvider
-                            ).parse(json)
-                        }
-                    }
-                }
+            // CheckoutSession.Initial should never reach the parser directly
+            is ElementsSessionParams.CheckoutSession.Initial -> {
+                error("CheckoutSession.Initial must be upgraded to WithIntent before parsing")
+            }
+        }
+    }
+
+    private fun parseDeferredIntent(
+        elementsSessionId: String?,
+        deferredIntentParams: DeferredIntentParams,
+        json: JSONObject,
+    ): StripeIntent? {
+        return when (deferredIntentParams.mode) {
+            is DeferredIntentParams.Mode.Payment -> {
+                DeferredPaymentIntentJsonParser(
+                    elementsSessionId = elementsSessionId,
+                    paymentMode = deferredIntentParams.mode,
+                    isLiveMode = isLiveMode,
+                    timeProvider = timeProvider
+                ).parse(json)
+            }
+            is DeferredIntentParams.Mode.Setup -> {
+                DeferredSetupIntentJsonParser(
+                    elementsSessionId = elementsSessionId,
+                    setupMode = deferredIntentParams.mode,
+                    isLiveMode = isLiveMode,
+                    timeProvider = timeProvider
+                ).parse(json)
             }
         }
     }

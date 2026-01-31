@@ -78,7 +78,7 @@ internal class RealElementsSessionRepository @Inject constructor(
         )
 
         val elementsSession =
-            if (params is ElementsSessionParams.CheckoutSessionType) {
+            if (params is ElementsSessionParams.CheckoutSession.Initial) {
                 // CheckoutSession uses a different API endpoint that returns ElementsSession embedded
                 stripeRepository.initCheckoutSession(
                     params = params,
@@ -125,7 +125,7 @@ internal class RealElementsSessionRepository @Inject constructor(
             is ElementsSessionParams.DeferredIntentType -> {
                 Result.success(params.toStripeIntent(requestOptions))
             }
-            is ElementsSessionParams.CheckoutSessionType -> {
+            is ElementsSessionParams.CheckoutSession -> {
                 // CheckoutSession is handled earlier in get() and should never reach fallback
                 error("CheckoutSession does not support fallback")
             }
@@ -240,7 +240,7 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
         }
 
         is PaymentElementLoader.InitializationMode.CheckoutSession -> {
-            ElementsSessionParams.CheckoutSessionType(
+            ElementsSessionParams.CheckoutSession.Initial(
                 clientSecret = clientSecret,
                 customPaymentMethods = customPaymentMethodIds,
                 externalPaymentMethods = externalPaymentMethods,
