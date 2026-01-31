@@ -23,6 +23,7 @@ internal enum class WalletLocation {
 internal data class WalletsState(
     private val link: Link?,
     private val googlePay: GooglePay?,
+    private val shopPay: ShopPay?,
     private val walletsAllowedInHeader: List<WalletType>,
     val buttonsEnabled: Boolean,
     @StringRes val dividerTextResource: Int,
@@ -30,6 +31,7 @@ internal data class WalletsState(
     val cardBrandFilter: CardBrandFilter,
     val onGooglePayPressed: () -> Unit,
     val onLinkPressed: () -> Unit,
+    val onShopPayPressed: () -> Unit,
 ) {
 
     /**
@@ -52,8 +54,22 @@ internal data class WalletsState(
         }
     }
 
-    val walletsInHeader
-        get() = link(WalletLocation.HEADER) != null || googlePay(WalletLocation.HEADER) != null
+    /**
+     * Returns ShopPay data if it should be displayed in the specified location, null otherwise.
+     */
+    fun shopPay(location: WalletLocation): ShopPay? {
+        return when (location) {
+            WalletLocation.HEADER -> null // shopPay?.takeIf { walletsAllowedInHeader.contains(WalletType.ShopPay) }
+            WalletLocation.INLINE -> shopPay //?.takeUnless { walletsAllowedInHeader.contains(WalletType.ShopPay) }
+        }
+    }
+
+    val walletsInHeader: Boolean
+        get() {
+            return link(WalletLocation.HEADER) != null ||
+                googlePay(WalletLocation.HEADER) != null ||
+                shopPay(WalletLocation.HEADER) != null
+        }
 
     data class Link(
         val state: LinkButtonState,
@@ -67,18 +83,22 @@ internal data class WalletsState(
         val additionalEnabledNetworks: List<String>
     )
 
+    data object ShopPay
+
     companion object {
 
         fun create(
             isLinkAvailable: Boolean?,
             linkEmail: String?,
             isGooglePayReady: Boolean,
+            isShopPayAvailable: Boolean,
             googlePayButtonType: GooglePayButtonType,
             buttonsEnabled: Boolean,
             paymentMethodTypes: List<String>,
             googlePayLauncherConfig: GooglePayPaymentMethodLauncher.Config?,
             onGooglePayPressed: () -> Unit,
             onLinkPressed: () -> Unit,
+            onShopPayPressed: () -> Unit,
             isSetupIntent: Boolean,
             walletsAllowedInHeader: List<WalletType>,
             paymentDetails: DisplayablePaymentDetails? = null,
@@ -122,10 +142,13 @@ internal data class WalletsState(
                 },
             ).takeIf { isGooglePayReady }
 
-            return if (link != null || googlePay != null) {
+            val shopPay = ShopPay.takeIf { isShopPayAvailable }
+
+            return if (link != null || googlePay != null || shopPay != null) {
                 WalletsState(
                     link = link,
                     googlePay = googlePay,
+                    shopPay = shopPay,
                     buttonsEnabled = buttonsEnabled,
                     dividerTextResource = if (paymentMethodTypes.singleOrNull() == Card.code && !isSetupIntent) {
                         R.string.stripe_paymentsheet_or_pay_with_card
@@ -138,6 +161,7 @@ internal data class WalletsState(
                     },
                     onGooglePayPressed = onGooglePayPressed,
                     onLinkPressed = onLinkPressed,
+                    onShopPayPressed = onShopPayPressed,
                     walletsAllowedInHeader = walletsAllowedInHeader,
                     cardFundingFilter = cardFundingFilter,
                     cardBrandFilter = cardBrandFilter

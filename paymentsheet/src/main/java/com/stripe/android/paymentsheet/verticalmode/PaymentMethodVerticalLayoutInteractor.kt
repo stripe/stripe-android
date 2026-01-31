@@ -398,6 +398,24 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             )
         }
 
+        // Add Shop Pay inline if NOT allowed in header
+        walletsState?.getInlineShopPay()?.let {
+            wallets += DisplayablePaymentMethod(
+                code = "shop_pay",
+                displayName = PaymentsCoreR.string.stripe_shop_pay.resolvableString,
+                iconResource = R.drawable.stripe_shop_pay_logo,
+                iconResourceNight = R.drawable.stripe_shop_pay_logo_white,
+                lightThemeIconUrl = null,
+                darkThemeIconUrl = null,
+                iconRequiresTinting = false,
+                subtitle = null,
+                onClick = {
+                    updateSelection(PaymentSelection.ShopPay, false)
+                    invokeRowSelectionCallback?.invoke()
+                },
+            )
+        }
+
         return wallets + lpms
     }
 
@@ -407,6 +425,10 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
 
     private fun WalletsState.getInlineGPay(): WalletsState.GooglePay? {
         return this.googlePay(WalletLocation.INLINE)
+    }
+
+    private fun WalletsState.getInlineShopPay(): WalletsState.ShopPay? {
+        return this.shopPay(WalletLocation.INLINE)
     }
 
     private fun getDisplayedSavedPaymentMethod(
@@ -453,6 +475,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             }
             walletsState?.getInlineGPay()?.let {
                 add("google_pay")
+            }
+            walletsState?.getInlineShopPay()?.let {
+                add("shop_pay")
             }
             addAll(currentDisplayablePaymentMethodCodes)
         }

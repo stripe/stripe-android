@@ -374,7 +374,7 @@ internal val PaymentSelection.drawableResourceId: Int
         is PaymentSelection.New.GenericPaymentMethod -> iconResource
         is PaymentSelection.New.USBankAccount -> iconResource
         is PaymentSelection.Saved -> getSavedIcon(this)
-        is PaymentSelection.ShopPay -> R.drawable.stripe_shop_pay_logo_white
+        is PaymentSelection.ShopPay -> R.drawable.stripe_shop_pay_logo
     }
 
 internal val PaymentSelection.drawableResourceIdNight: Int
