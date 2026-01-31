@@ -19,6 +19,7 @@ internal object EmvApduCommands {
     private const val INS_SELECT = 0xA4.toByte()
     private const val INS_READ_RECORD = 0xB2.toByte()
     private const val INS_GPO = 0xA8.toByte()
+    private const val INS_INTERNAL_AUTH = 0x88.toByte()
 
     // SELECT command parameters
     private const val P1_SELECT_BY_NAME = 0x04.toByte()
@@ -109,6 +110,35 @@ internal object EmvApduCommands {
             p2,                    // P2: SFI reference
             0x00                   // Le: expect full record
         )
+    }
+
+    /**
+     * Build INTERNAL AUTHENTICATE command for DDA verification.
+     *
+     * The card signs the provided data using its ICC private key.
+     * Used for Dynamic Data Authentication (DDA).
+     *
+     * @param ddol DDOL data (Dynamic Data Authentication Data Object List)
+     *             If null, sends unpredictable number only (4 bytes)
+     * @return Complete APDU command bytes
+     */
+    fun internalAuthenticate(ddol: ByteArray? = null): ByteArray {
+        val data = ddol ?: generateUnpredictableNumber()
+
+        return byteArrayOf(
+            CLA_ISO,           // CLA
+            INS_INTERNAL_AUTH, // INS: INTERNAL AUTHENTICATE
+            0x00,              // P1
+            0x00,              // P2
+            data.size.toByte() // Lc
+        ) + data + byteArrayOf(0x00) // Data + Le
+    }
+
+    /**
+     * Generate 4-byte unpredictable number for DDA.
+     */
+    private fun generateUnpredictableNumber(): ByteArray {
+        return ByteArray(4).also { java.security.SecureRandom().nextBytes(it) }
     }
 
     /**

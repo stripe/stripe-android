@@ -2,9 +2,13 @@ package com.stripe.android.common.taptoadd.nfcdirect
 
 import android.nfc.tech.IsoDep
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import com.stripe.android.common.taptoadd.TapToAddCollectionHandler
 import com.stripe.android.common.taptoadd.TapToAddCollectionHandler.CollectionState
+import com.stripe.android.common.taptoadd.nfcdirect.TlvParser.toHexString
+import com.stripe.android.common.taptoadd.nfcdirect.oda.OdaFailedException
+import com.stripe.android.common.taptoadd.nfcdirect.oda.OdaVerifier
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
@@ -27,7 +31,15 @@ internal class NfcDirectCollectionHandler(
     private val connectionManager: NfcDirectConnectionManager,
     private val cardDataExtractor: CardDataExtractor = CardDataExtractor(),
     private val digitalWalletDetector: DigitalWalletDetector = DigitalWalletDetector(),
+    private val odaVerifier: OdaVerifier = OdaVerifier(),
 ) : TapToAddCollectionHandler {
+
+    companion object {
+        private const val TAG = "NfcDirectCollection"
+        // Status words for record not found conditions
+        private const val SW_RECORD_NOT_FOUND = 0x6A83
+        private const val SW_REFERENCED_DATA_NOT_FOUND = 0x6A88
+    }
 
     override suspend fun collect(metadata: PaymentMethodMetadata): CollectionState {
         return try {
@@ -61,6 +73,11 @@ internal class NfcDirectCollectionHandler(
             CollectionState.FailedCollection(
                 error = e,
                 displayMessage = e.userMessage.resolvableString
+            )
+        } catch (e: OdaFailedException) {
+            CollectionState.FailedCollection(
+                error = e,
+                displayMessage = "Card verification failed. This card may not be authentic.".resolvableString
             )
         } catch (e: IOException) {
             CollectionState.FailedCollection(
@@ -141,11 +158,19 @@ internal class NfcDirectCollectionHandler(
 
         // Extract AFL (Application File Locator)
         val afl = cardDataExtractor.extractAfl(gpoResponse)
+        Log.d(TAG, "AFL extracted: ${afl?.let { it.toHexString() } ?: "null"}")
 
         // Step 4: READ RECORD(s) if AFL is present
         if (afl != null) {
             readAllRecords(isoDep, afl, allTlvData)
+        } else {
+            Log.d(TAG, "No AFL - card may have returned all data in GPO (qVSDC mode)")
+            // Try reading standard SFI locations for ODA data even without AFL
+            tryReadStandardRecords(isoDep, allTlvData)
         }
+
+        // Step 5: Perform Offline Data Authentication (ODA) if supported
+        verifyOda(isoDep, allTlvData, aid)
 
         // Extract card data from accumulated TLV data (GPO + all records)
         return cardDataExtractor.extractFromTlvMap(allTlvData, aid)
@@ -162,6 +187,14 @@ internal class NfcDirectCollectionHandler(
         val aflEntries = EmvApduCommands.parseAfl(afl)
         val recordData = mutableListOf<Byte>()
 
+        Log.d(TAG, "AFL: ${afl.size} bytes, ${aflEntries.size} entries")
+        for ((index, entry) in aflEntries.withIndex()) {
+            val (sfi, firstRecord, lastRecord) = entry
+            // 4th byte of AFL entry is ODA record count
+            val odaCount = if (afl.size > index * 4 + 3) afl[index * 4 + 3].toInt() and 0xFF else 0
+            Log.d(TAG, "AFL entry: SFI=$sfi, records=$firstRecord-$lastRecord, odaRecords=$odaCount")
+        }
+
         for ((sfi, firstRecord, lastRecord) in aflEntries) {
             for (recordNum in firstRecord..lastRecord) {
                 try {
@@ -169,13 +202,18 @@ internal class NfcDirectCollectionHandler(
                     val response = transceive(isoDep, readRecordCmd, "READ RECORD $sfi:$recordNum")
                     val data = EmvApduCommands.getResponseData(response)
 
+                    // Parse and log tags found in this record
+                    val recordTlv = TlvParser.parse(data)
+                    Log.d(TAG, "Record $sfi:$recordNum tags: ${recordTlv.keys.joinToString()}")
+
                     // Add to all TLV data for any additional checks
-                    allTlvData.putAll(TlvParser.parse(data))
+                    allTlvData.putAll(recordTlv)
 
                     // Accumulate record data
                     recordData.addAll(data.toList())
                 } catch (e: EmvTransactionException) {
                     // Some records may not exist, continue to next
+                    Log.d(TAG, "Record $sfi:$recordNum failed: ${e.statusWord}")
                     if (e.statusWord != SW_RECORD_NOT_FOUND && e.statusWord != SW_REFERENCED_DATA_NOT_FOUND) {
                         throw e
                     }
@@ -184,6 +222,170 @@ internal class NfcDirectCollectionHandler(
         }
 
         return recordData.toByteArray()
+    }
+
+    /**
+     * Try reading standard record locations when AFL is not provided.
+     *
+     * Some cards in quick mode don't return AFL but still have ODA data
+     * stored in standard SFI locations. This attempts to read those records.
+     *
+     * Standard locations for ODA data:
+     * - SFI 1: Usually contains card data and sometimes ODA certs
+     * - SFI 2: Often contains issuer certificates
+     * - SFI 3: May contain additional certificates
+     */
+    private fun tryReadStandardRecords(
+        isoDep: IsoDep,
+        allTlvData: MutableMap<String, ByteArray>
+    ) {
+        val standardSfis = listOf(1, 2, 3)
+        val maxRecords = 4
+
+        for (sfi in standardSfis) {
+            for (recordNum in 1..maxRecords) {
+                try {
+                    val readRecordCmd = EmvApduCommands.readRecord(sfi, recordNum)
+                    val response = isoDep.transceive(readRecordCmd)
+
+                    if (EmvApduCommands.isSuccess(response)) {
+                        val data = EmvApduCommands.getResponseData(response)
+                        val recordTlv = TlvParser.parse(data)
+                        Log.d(TAG, "Standard record $sfi:$recordNum tags: ${recordTlv.keys.joinToString()}")
+                        allTlvData.putAll(recordTlv)
+                    }
+                } catch (e: Exception) {
+                    // Record doesn't exist or error reading, continue
+                }
+            }
+        }
+    }
+
+    /**
+     * Verify card authenticity using Offline Data Authentication (ODA).
+     *
+     * This performs either:
+     * - DDA (Dynamic Data Authentication) if card supports it (has 9F46)
+     * - SDA (Static Data Authentication) if card has 93 tag
+     *
+     * @throws OdaFailedException if verification fails
+     */
+    private fun verifyOda(isoDep: IsoDep, tlvData: Map<String, ByteArray>, aid: ByteArray) {
+        // Check if ODA data is present
+        if (!odaVerifier.hasOdaData(tlvData)) {
+            // Log what ODA tags we found (or didn't find)
+            val odaTags = listOf("8F", "90", "92", "93", "9F32", "9F46", "9F47", "9F48")
+            val presentOdaTags = odaTags.filter { tlvData.containsKey(it) }
+            Log.d(TAG, "ODA: Missing required data. Present ODA tags: $presentOdaTags, all tags: ${tlvData.keys.sorted()}")
+            return
+        }
+
+        // Try DDA first (more secure), then fall back to SDA
+        val result = if (odaVerifier.supportsDda(tlvData)) {
+            Log.d(TAG, "ODA: Card supports DDA, performing INTERNAL AUTHENTICATE")
+            performDda(isoDep, tlvData, aid)
+        } else {
+            Log.d(TAG, "ODA: Attempting SDA verification")
+            odaVerifier.verifySda(tlvData, aid)
+        }
+
+        when (result) {
+            is OdaVerifier.OdaResult.Success -> {
+                Log.i(TAG, "ODA: Verification successful - card is authentic")
+            }
+            is OdaVerifier.OdaResult.NotSupported -> {
+                Log.w(TAG, "ODA: Card does not support offline authentication")
+                // Not an error - some cards don't support offline auth
+            }
+            is OdaVerifier.OdaResult.Failed -> {
+                Log.e(TAG, "ODA: Verification failed - ${result.reason}")
+                throw OdaFailedException(result.reason)
+            }
+        }
+    }
+
+    /**
+     * Perform Dynamic Data Authentication (DDA).
+     *
+     * Tries multiple approaches:
+     * 1. fDDA - Check if signed data is already in GPO response (tag 9F4B)
+     * 2. Traditional DDA - Send INTERNAL AUTHENTICATE command
+     * 3. Certificate verification - Verify the certificate chain is valid
+     */
+    private fun performDda(
+        isoDep: IsoDep,
+        tlvData: Map<String, ByteArray>,
+        aid: ByteArray
+    ): OdaVerifier.OdaResult {
+        // Check for fDDA - signed data already in response (Visa qVSDC)
+        val fddaSignedData = tlvData["9F4B"]
+        if (fddaSignedData != null) {
+            Log.d(TAG, "DDA: Found fDDA signed data (9F4B), ${fddaSignedData.size} bytes")
+            // For fDDA, the auth data is derived from transaction data
+            val authData = buildFddaAuthData(tlvData)
+            return odaVerifier.verifyDda(tlvData, aid, fddaSignedData, authData)
+        }
+
+        // Try traditional INTERNAL AUTHENTICATE
+        val authData = ByteArray(4).also { java.security.SecureRandom().nextBytes(it) }
+
+        try {
+            val authCommand = EmvApduCommands.internalAuthenticate(authData)
+            val response = isoDep.transceive(authCommand)
+
+            if (EmvApduCommands.isSuccess(response)) {
+                val signedData = EmvApduCommands.getResponseData(response)
+                Log.d(TAG, "DDA: Got ${signedData.size} bytes from INTERNAL AUTHENTICATE")
+                return odaVerifier.verifyDda(tlvData, aid, signedData, authData)
+            }
+
+            val sw = EmvApduCommands.getStatusWord(response)
+            Log.d(TAG, "INTERNAL AUTHENTICATE not supported: ${String.format("%04X", sw)}")
+        } catch (e: Exception) {
+            Log.d(TAG, "INTERNAL AUTHENTICATE failed: ${e.message}")
+        }
+
+        // Contactless cards often don't support INTERNAL AUTHENTICATE
+        // but we can still verify the certificate chain is valid
+        Log.d(TAG, "DDA: Verifying certificate chain only (contactless mode)")
+        return verifyCertificateChain(tlvData, aid)
+    }
+
+    /**
+     * Build authentication data for fDDA verification.
+     * Includes unpredictable number and transaction data.
+     */
+    private fun buildFddaAuthData(tlvData: Map<String, ByteArray>): ByteArray {
+        val result = mutableListOf<Byte>()
+        // Include unpredictable number from terminal (9F37)
+        tlvData["9F37"]?.let { result.addAll(it.toList()) }
+        // Include amount (9F02)
+        tlvData["9F02"]?.let { result.addAll(it.toList()) }
+        // Include currency (5F2A)
+        tlvData["5F2A"]?.let { result.addAll(it.toList()) }
+        return if (result.isEmpty()) {
+            ByteArray(4).also { java.security.SecureRandom().nextBytes(it) }
+        } else {
+            result.toByteArray()
+        }
+    }
+
+    /**
+     * Verify the certificate chain without dynamic signature.
+     *
+     * This verifies:
+     * 1. CA Public Key is valid for this card's RID
+     * 2. Issuer certificate can be recovered and parsed
+     * 3. ICC certificate can be recovered and parsed
+     *
+     * This provides assurance the card has valid certificates from the
+     * payment network, even if we can't perform dynamic authentication.
+     */
+    private fun verifyCertificateChain(
+        tlvData: Map<String, ByteArray>,
+        aid: ByteArray
+    ): OdaVerifier.OdaResult {
+        return odaVerifier.verifyCertificateChain(tlvData, aid)
     }
 
     /**
@@ -426,12 +628,6 @@ internal class NfcDirectCollectionHandler(
             CardDataExtractor.CardScheme.UNIONPAY -> CardBrand.UnionPay
             CardDataExtractor.CardScheme.UNKNOWN -> CardBrand.Unknown
         }
-    }
-
-    companion object {
-        // Status words for record not found conditions
-        private const val SW_RECORD_NOT_FOUND = 0x6A83
-        private const val SW_REFERENCED_DATA_NOT_FOUND = 0x6A88
     }
 }
 
