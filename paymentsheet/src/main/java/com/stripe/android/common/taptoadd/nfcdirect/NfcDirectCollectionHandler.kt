@@ -106,11 +106,26 @@ internal class NfcDirectCollectionHandler(
         val pdolData = buildPdolData(pdol)
 
         // Step 3: GET PROCESSING OPTIONS
-        val gpoResponse = transceive(
-            isoDep,
-            EmvApduCommands.getProcessingOptions(pdolData),
-            "GET PROCESSING OPTIONS"
-        )
+        val gpoResponse = try {
+            transceive(
+                isoDep,
+                EmvApduCommands.getProcessingOptions(pdolData),
+                "GET PROCESSING OPTIONS"
+            )
+        } catch (e: EmvTransactionException) {
+            // Add PDOL context for debugging
+            val pdolInfo = if (pdol != null) {
+                val elements = parseDol(pdol)
+                "PDOL requested: ${elements.joinToString { "${it.first}(${it.second})" }}"
+            } else {
+                "No PDOL requested"
+            }
+            throw EmvTransactionException(
+                "${e.message}. $pdolInfo",
+                e.userMessage,
+                e.statusWord
+            )
+        }
         val gpoData = EmvApduCommands.getResponseData(gpoResponse)
         allTlvData.putAll(TlvParser.parse(gpoData))
 
@@ -205,6 +220,11 @@ internal class NfcDirectCollectionHandler(
      * - 9A: Transaction Date
      * - 9C: Transaction Type
      * - 9F37: Unpredictable Number
+     *
+     * Amex Expresspay specific:
+     * - 9F6C: Card Transaction Qualifiers (CTQ)
+     * - 9F7A: VLP Terminal Support Indicator
+     * - 9F6E: Enhanced Contactless Reader Capabilities
      */
     private fun getDefaultValueForTag(tag: String, length: Int): ByteArray {
         return when (tag.uppercase()) {
@@ -256,6 +276,37 @@ internal class NfcDirectCollectionHandler(
             // Additional Terminal Capabilities - 5 bytes
             "9F40" -> byteArrayOf(0x60, 0x00, 0x00, 0x00, 0x00).take(length).toByteArray()
 
+            // === Amex Expresspay specific tags ===
+
+            // Card Transaction Qualifiers (CTQ) - 2 bytes (Amex)
+            // Byte 1: Online PIN required = 0, Signature required = 0
+            // Byte 2: Go online = 1, Switch interface = 0
+            "9F6C" -> byteArrayOf(0x00, 0x80.toByte()).take(length).toByteArray()
+
+            // VLP Terminal Support Indicator - 1 byte (Amex)
+            // 01 = VLP (contactless) supported
+            "9F7A" -> byteArrayOf(0x01).take(length).toByteArray()
+
+            // Enhanced Contactless Reader Capabilities - 4 bytes (Amex)
+            // Indicates terminal supports contactless EMV
+            "9F6E" -> byteArrayOf(
+                0xD8.toByte(), // Contactless supported, online capable
+                0x40,          // Support for EMV mode
+                0x00,
+                0x00
+            ).take(length).toByteArray()
+
+            // Mobile Support Indicator - 1 byte (Amex)
+            // 01 = Mobile/NFC supported
+            "9F7E" -> byteArrayOf(0x01).take(length).toByteArray()
+
+            // Transaction Time - 3 bytes HHMMSS BCD
+            "9F21" -> getCurrentTimeBcd().take(length).toByteArray()
+
+            // Point of Service Entry Mode - 1 byte
+            // 07 = Contactless chip
+            "9F39" -> byteArrayOf(0x07).take(length).toByteArray()
+
             // Default: return zeros for unknown tags
             else -> ByteArray(length)
         }
@@ -270,6 +321,18 @@ internal class NfcDirectCollectionHandler(
             ((year / 10) shl 4 or (year % 10)).toByte(),
             ((month / 10) shl 4 or (month % 10)).toByte(),
             ((day / 10) shl 4 or (day % 10)).toByte()
+        )
+    }
+
+    private fun getCurrentTimeBcd(): ByteArray {
+        val calendar = java.util.Calendar.getInstance()
+        val hour = calendar.get(java.util.Calendar.HOUR_OF_DAY)
+        val minute = calendar.get(java.util.Calendar.MINUTE)
+        val second = calendar.get(java.util.Calendar.SECOND)
+        return byteArrayOf(
+            ((hour / 10) shl 4 or (hour % 10)).toByte(),
+            ((minute / 10) shl 4 or (minute % 10)).toByte(),
+            ((second / 10) shl 4 or (second % 10)).toByte()
         )
     }
 
