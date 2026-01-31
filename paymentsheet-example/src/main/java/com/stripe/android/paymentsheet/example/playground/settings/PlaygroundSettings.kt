@@ -594,6 +594,10 @@ internal class PlaygroundSettings private constructor(
                 listOf(PlaygroundConfigurationData.IntegrationType.LinkController)
             ),
             TermsDisplaySettingsDefinition,
+            FeatureFlagSettingsDefinition(
+                FeatureFlags.nfcDirect,
+                PlaygroundConfigurationData.IntegrationType.paymentFlows().toList(),
+            ),
             CustomStripeApiDefinition,
             CaptureMethodSettingsDefinition,
             FeatureFlagSettingsDefinition(FeatureFlags.paymentMethodMessagePromotions)

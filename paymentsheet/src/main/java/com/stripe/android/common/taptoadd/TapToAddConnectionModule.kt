@@ -1,7 +1,11 @@
 package com.stripe.android.common.taptoadd
 
 import android.content.Context
+import android.os.Build
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.taptoadd.nfcdirect.DefaultIsNfcDirectAvailable
+import com.stripe.android.common.taptoadd.nfcdirect.IsNfcDirectAvailable
+import com.stripe.android.common.taptoadd.nfcdirect.NfcDirectConnectionManager
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
@@ -43,6 +47,11 @@ internal interface TapToAddConnectionModule {
     ): TapToAddIsSimulatedProvider
 
     @Binds
+    fun bindsIsNfcDirectAvailable(
+        isNfcDirectAvailable: DefaultIsNfcDirectAvailable
+    ): IsNfcDirectAvailable
+
+    @Binds
     fun bindsCreateCardPresentSetupIntentCallbackRetriever(
         callbackRetriever: DefaultCreateCardPresentSetupIntentCallbackRetriever
     ): CreateCardPresentSetupIntentCallbackRetriever
@@ -64,6 +73,7 @@ internal interface TapToAddConnectionModule {
 
         @Provides
         fun providesTapToAddConnectionManager(
+            isNfcDirectAvailable: IsNfcDirectAvailable,
             isStripeTerminalSdkAvailable: IsStripeTerminalSdkAvailable,
             terminalWrapper: TerminalWrapper,
             errorReporter: ErrorReporter,
@@ -74,6 +84,14 @@ internal interface TapToAddConnectionModule {
             callbackRetriever: CreateCardPresentSetupIntentCallbackRetriever,
             isSimulatedProvider: TapToAddIsSimulatedProvider,
         ): TapToAddConnectionManager {
+            // Prefer NFC Direct (lightweight) over Terminal SDK when available
+            if (isNfcDirectAvailable()) {
+                return NfcDirectConnectionManager(
+                    context = applicationContext,
+                    workContext = workContext,
+                )
+            }
+
             return TapToAddConnectionManager.create(
                 applicationContext = applicationContext,
                 isStripeTerminalSdkAvailable = isStripeTerminalSdkAvailable,

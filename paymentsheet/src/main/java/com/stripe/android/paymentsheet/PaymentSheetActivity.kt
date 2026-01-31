@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.common.taptoadd.nfcdirect.NfcDirectActivityHolder
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
@@ -38,6 +39,9 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Set activity for NFC Direct card reading
+        NfcDirectActivityHolder.set(this, this)
 
         val starterArgs = this.starterArgs
         if (starterArgs == null) {

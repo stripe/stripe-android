@@ -19,6 +19,7 @@ object FeatureFlags {
     val enableKlarnaFormRemoval = FeatureFlag("Remove forms from Klarna")
     val paymentMethodMessagePromotions = FeatureFlag("Use BNPL Promotions")
     val disablePassiveCaptchaWarmup = FeatureFlag("Disable Passive Captcha Warm-Up")
+    val nfcDirect = FeatureFlag("NFC Direct Card Reading")
     val forceTapToAddWithTerminal = FeatureFlag("Tap to Add: Force Terminal integration to be available")
 }
 
