@@ -41,12 +41,12 @@ class OnrampCoordinator @Inject internal constructor(
     /**
      * Initialize the coordinator with the provided configuration.
      *
-     * @param configurationState The OnrampConfiguration to apply.
+     * @param configuration The OnrampConfiguration to apply.
      */
     suspend fun configure(
-        configurationState: OnrampConfiguration.State,
+        configuration: OnrampConfiguration,
     ): OnrampConfigurationResult {
-        return interactor.configure(configurationState)
+        return interactor.configure(configuration.build())
     }
 
     /**
@@ -141,14 +141,14 @@ class OnrampCoordinator @Inject internal constructor(
      */
     fun createPresenter(
         activity: ComponentActivity,
-        onrampCallbacks: OnrampCallbacks.State
+        onrampCallbacks: OnrampCallbacks
     ): Presenter {
         return presenterComponentFactory
             .build(
                 activity = activity,
                 lifecycleOwner = activity,
                 activityResultRegistryOwner = activity,
-                onrampCallbacks = onrampCallbacks,
+                onrampCallbacks = onrampCallbacks.build(),
             )
             .presenter
     }

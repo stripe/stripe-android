@@ -63,17 +63,16 @@ class OnrampCallbacks {
         this.checkoutCallback = callback
     }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    class State internal constructor(
-        internal val authenticateUserCallback: OnrampAuthenticateUserCallback,
-        internal val verifyIdentityCallback: OnrampVerifyIdentityCallback,
-        internal val verifyKycCallback: OnrampVerifyKycCallback,
-        internal val collectPaymentCallback: OnrampCollectPaymentMethodCallback,
-        internal val authorizeCallback: OnrampAuthorizeCallback,
-        internal val checkoutCallback: OnrampCheckoutCallback,
+    internal class State(
+        val authenticateUserCallback: OnrampAuthenticateUserCallback,
+        val verifyIdentityCallback: OnrampVerifyIdentityCallback,
+        val verifyKycCallback: OnrampVerifyKycCallback,
+        val collectPaymentCallback: OnrampCollectPaymentMethodCallback,
+        val authorizeCallback: OnrampAuthorizeCallback,
+        val checkoutCallback: OnrampCheckoutCallback,
     )
 
-    fun build(): State {
+    internal fun build(): State {
         return State(
             authenticateUserCallback = requireNotNull(authenticateUserCallback) {
                 "authenticateUserCallback must not be null"

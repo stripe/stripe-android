@@ -34,15 +34,14 @@ class OnrampConfiguration {
         this.cryptoCustomerId = cryptoCustomerId
     }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    class State internal constructor(
-        internal val merchantDisplayName: String,
-        internal val publishableKey: String,
-        internal val appearance: LinkAppearance,
-        internal val cryptoCustomerId: String? = null
+    internal class State(
+        val merchantDisplayName: String,
+        val publishableKey: String,
+        val appearance: LinkAppearance,
+        val cryptoCustomerId: String? = null
     )
 
-    fun build(): State {
+    internal fun build(): State {
         return State(
             merchantDisplayName = requireNotNull(merchantDisplayName) {
                 "merchantDisplayName must not be null"
@@ -50,9 +49,7 @@ class OnrampConfiguration {
             publishableKey = requireNotNull(publishableKey) {
                 "publishableKey must not be null"
             },
-            appearance = requireNotNull(appearance) {
-                "appearance must not be null"
-            },
+            appearance = appearance ?: LinkAppearance(),
             cryptoCustomerId = cryptoCustomerId,
         )
     }

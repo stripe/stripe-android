@@ -178,7 +178,7 @@ class LinkController @Inject internal constructor(
         internal val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
         internal val allowUserEmailEdits: Boolean,
         internal val allowLogOut: Boolean,
-        internal val linkAppearance: LinkAppearance? = null
+        internal val linkAppearance: LinkAppearance.State? = null
     ) : Parcelable {
 
         /**
@@ -285,7 +285,7 @@ class LinkController @Inject internal constructor(
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
                 allowUserEmailEdits = allowUserEmailEdits,
                 allowLogOut = allowLogOut,
-                linkAppearance = appearance
+                linkAppearance = appearance?.build()
             )
         }
 

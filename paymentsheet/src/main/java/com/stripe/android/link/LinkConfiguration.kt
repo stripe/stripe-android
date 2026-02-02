@@ -41,7 +41,7 @@ internal data class LinkConfiguration(
     val allowLogOut: Boolean,
     val enableDisplayableDefaultValuesInEce: Boolean,
     val skipWalletInFlowController: Boolean,
-    val linkAppearance: LinkAppearance?,
+    val linkAppearance: LinkAppearance.State?,
     val linkSignUpOptInFeatureEnabled: Boolean,
     val linkSignUpOptInInitialValue: Boolean,
     private val customerId: String?,
