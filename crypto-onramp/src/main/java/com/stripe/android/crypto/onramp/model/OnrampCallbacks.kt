@@ -63,6 +63,7 @@ class OnrampCallbacks {
         this.checkoutCallback = callback
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class State internal constructor(
         internal val authenticateUserCallback: OnrampAuthenticateUserCallback,
         internal val verifyIdentityCallback: OnrampVerifyIdentityCallback,

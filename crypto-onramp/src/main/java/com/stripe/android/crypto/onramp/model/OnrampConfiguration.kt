@@ -34,6 +34,7 @@ class OnrampConfiguration {
         this.cryptoCustomerId = cryptoCustomerId
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class State internal constructor(
         internal val merchantDisplayName: String,
         internal val publishableKey: String,
