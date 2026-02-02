@@ -24,3 +24,11 @@ public final class com/stripe/android/crypto/onramp/model/KycRetrieveResponse$Co
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
+public final class com/stripe/android/crypto/onramp/model/OnrampCallbacks$State {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampConfiguration$State {
+	public static final field $stable I
+}
+

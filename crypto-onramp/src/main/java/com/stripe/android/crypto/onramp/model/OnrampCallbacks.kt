@@ -63,7 +63,7 @@ class OnrampCallbacks {
         this.checkoutCallback = callback
     }
 
-    class State(
+    class State internal constructor(
         internal val authenticateUserCallback: OnrampAuthenticateUserCallback,
         internal val verifyIdentityCallback: OnrampVerifyIdentityCallback,
         internal val verifyKycCallback: OnrampVerifyKycCallback,

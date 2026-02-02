@@ -34,7 +34,7 @@ class OnrampConfiguration {
         this.cryptoCustomerId = cryptoCustomerId
     }
 
-    class State(
+    class State internal constructor(
         internal val merchantDisplayName: String,
         internal val publishableKey: String,
         internal val appearance: LinkAppearance,
