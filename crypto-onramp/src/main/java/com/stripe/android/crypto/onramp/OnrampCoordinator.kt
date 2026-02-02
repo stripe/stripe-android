@@ -141,7 +141,7 @@ class OnrampCoordinator @Inject internal constructor(
      */
     fun createPresenter(
         activity: ComponentActivity,
-        onrampCallbacks: OnrampCallbacks
+        onrampCallbacks: OnrampCallbacks.State
     ): Presenter {
         return presenterComponentFactory
             .build(

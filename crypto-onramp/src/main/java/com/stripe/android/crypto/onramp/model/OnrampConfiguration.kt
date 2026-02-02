@@ -35,10 +35,10 @@ class OnrampConfiguration {
     }
 
     class State(
-        val merchantDisplayName: String,
-        val publishableKey: String,
-        val appearance: LinkAppearance,
-        val cryptoCustomerId: String? = null
+        internal val merchantDisplayName: String,
+        internal val publishableKey: String,
+        internal val appearance: LinkAppearance,
+        internal val cryptoCustomerId: String? = null
     )
 
     fun build(): State {
