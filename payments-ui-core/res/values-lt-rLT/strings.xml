@@ -32,6 +32,8 @@
   <string name="stripe_card_brand_not_accepted">(nepriimama)</string>
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
   <string name="stripe_card_brand_not_accepted_with_brand">%1$s (nepriimama)</string>
+  <!-- Klarna pay later copy -->
+  <string name="stripe_card_with_tap_or_enter_manually">Bakstelėkite arba įveskite rankiniu būdu</string>
   <!-- Cash App mandate text -->
   <string name="stripe_cash_app_pay_mandate">Tęsdami įgaliojate \"%1$s\" nurašyti mokestį nuo jūsų \"Cash App\" sąskaitos už šį mokėjimą ir būsimuosius mokėjimus pagal \"%2$s\" sąlygas, kol šis įgaliojimas bus atšauktas. Galite bet kada tai pakeisti \"Cash App\" nuostatose.</string>
   <!-- Title for the contact information section -->

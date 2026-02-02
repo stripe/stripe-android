@@ -32,6 +32,8 @@
   <string name="stripe_card_brand_not_accepted">(hindi tinatanggap)</string>
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
   <string name="stripe_card_brand_not_accepted_with_brand">%1$s (hindi tinatanggap)</string>
+  <!-- Klarna pay later copy -->
+  <string name="stripe_card_with_tap_or_enter_manually">I-tap o ilagay nang manu-mano</string>
   <!-- Cash App mandate text -->
   <string name="stripe_cash_app_pay_mandate">Sa pagpapatuloy, binibigyan mo ng awtorisasyon ang %1$s na i-debit ang iyong Cash App account para sa pagbabayad na ito at sa mga pagbabayad sa hinaharap alinsunod sa mga tuntunin ng  %2$s, hanggang bawiin mo ang awtorisasyong ito. Maaari mong palitan ito sa anumang oras sa iyong Cash App Settings.</string>
   <!-- Title for the contact information section -->
