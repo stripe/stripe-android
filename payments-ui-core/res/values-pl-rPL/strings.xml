@@ -32,6 +32,8 @@
   <string name="stripe_card_brand_not_accepted">(nieakceptowane)</string>
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
   <string name="stripe_card_brand_not_accepted_with_brand">%1$s (nieakceptowane)</string>
+  <!-- Klarna pay later copy -->
+  <string name="stripe_card_with_tap_or_enter_manually">Dotknij lub wprowadź ręcznie</string>
   <!-- Cash App mandate text -->
   <string name="stripe_cash_app_pay_mandate">Kontynuując, wyrażasz zgodę na obciążenie przez %1$s Twojego konta Cash App kwotą tej płatności oraz przyszłych płatności zgodnie z warunkami %2$s do momentu wycofania zgody. To ustawienie można zmienić w dowolnym momencie w ustawieniach Cash App.</string>
   <!-- Title for the contact information section -->

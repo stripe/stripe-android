@@ -32,6 +32,8 @@
   <string name="stripe_card_brand_not_accepted">(netiek pieņemts)</string>
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
   <string name="stripe_card_brand_not_accepted_with_brand">%1$s (netiek pieņemts)</string>
+  <!-- Klarna pay later copy -->
+  <string name="stripe_card_with_tap_or_enter_manually">Pieskarieties vai ievadiet manuāli</string>
   <!-- Cash App mandate text -->
   <string name="stripe_cash_app_pay_mandate">Turpinot, jūs atļaujat %1$s iekasēt no jūsu Cash App konta par šo un turpmākiem maksājumiem saskaņā ar %2$s noteikumiem, līdz šī atļauja netiek atsaukta. To varat mainīt jebkurā laikā Cash App iestatījumos.</string>
   <!-- Title for the contact information section -->

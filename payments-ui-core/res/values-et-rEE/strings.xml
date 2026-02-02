@@ -32,6 +32,8 @@
   <string name="stripe_card_brand_not_accepted">(pole aktsepteeritud)</string>
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
   <string name="stripe_card_brand_not_accepted_with_brand">%1$s (pole aktsepteeritud)</string>
+  <!-- Klarna pay later copy -->
+  <string name="stripe_card_with_tap_or_enter_manually">Puudutage või sisestage käsitsi</string>
   <!-- Cash App mandate text -->
   <string name="stripe_cash_app_pay_mandate">Jätkamisel volitate %1$s debiteerima teie Cash Appi kontot selle makse ja tulevaste maksete eest vastavalt ettevõtte %2$s tingimustele, kuni see volitus tühistatakse. Saate seda igal ajal oma Cash rakenduse seadetes muuta.</string>
   <!-- Title for the contact information section -->
