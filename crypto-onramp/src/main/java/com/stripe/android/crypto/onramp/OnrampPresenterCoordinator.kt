@@ -43,6 +43,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     private val coroutineScope: CoroutineScope,
 ) {
     private val linkControllerState = linkController.state(activity)
+    private val pendingCheckoutMarker = PendingCheckoutMarker(activity)
 
     private val linkPresenter = linkController.createPresenter(
         activity = activity,
@@ -94,6 +95,13 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                 }
             }
         )
+
+        // If the previous process died mid-checkout, report a deterministic failure
+        if (pendingCheckoutMarker.consumeIfPending()) {
+            onrampCallbacks.checkoutCallback.onResult(
+                OnrampCheckoutResult.Failed(ProcessDeathException())
+            )
+        }
     }
 
     fun authenticateUser() {
@@ -193,6 +201,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                 handleNextAction(status.paymentIntent, status.platformKey)
             }
             is CheckoutState.Status.Completed -> {
+                pendingCheckoutMarker.clear()
                 // Checkout finished - notify callback
                 onrampCallbacks.checkoutCallback.onResult(status.result)
             }
@@ -213,6 +222,8 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             return
         }
 
+        pendingCheckoutMarker.markPending()
+
         // Launch the next action - result will be handled by handlePaymentLauncherResult
         paymentLauncherFactory.create(publishableKey = platformKey).handleNextActionForPaymentIntent(clientSecret)
     }
@@ -227,12 +238,16 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                 coroutineScope.launch { interactor.continueCheckout() }
             }
             is InternalPaymentResult.Canceled -> {
+                pendingCheckoutMarker.clear()
+
                 // User canceled the next action
                 onrampCallbacks.checkoutCallback.onResult(
                     OnrampCheckoutResult.Canceled()
                 )
             }
             is InternalPaymentResult.Failed -> {
+                pendingCheckoutMarker.clear()
+
                 // Next action failed
                 onrampCallbacks.checkoutCallback.onResult(
                     OnrampCheckoutResult.Failed(paymentResult.throwable)
@@ -306,3 +321,46 @@ private fun PaymentMethodType.toLinkType(): LinkController.PaymentMethodType =
         PaymentMethodType.Card -> LinkController.PaymentMethodType.Card
         PaymentMethodType.BankAccount -> LinkController.PaymentMethodType.BankAccount
     }
+
+/**
+ * Checkout could not complete because the app process was killed.
+ * The host app should restart checkout.
+ */
+internal class ProcessDeathException : Exception(
+    "Checkout was interrupted due to process death. Please restart checkout."
+)
+
+private class PendingCheckoutMarker(activity: ComponentActivity) {
+    private val registryKey = "Onramp_PendingCheckout"
+    private val bundleKey = "pending"
+
+    private var pending: Boolean =
+        activity.savedStateRegistry
+            .consumeRestoredStateForKey(registryKey)
+            ?.getBoolean(bundleKey) == true
+
+    init {
+        activity.savedStateRegistry.registerSavedStateProvider(registryKey) {
+            android.os.Bundle().apply {
+                putBoolean(bundleKey, pending)
+            }
+        }
+    }
+
+    fun markPending() {
+        pending = true
+    }
+
+    fun clear() {
+        pending = false
+    }
+
+    fun consumeIfPending(): Boolean {
+        return if (pending) {
+            pending = false
+            true
+        } else {
+            false
+        }
+    }
+}
