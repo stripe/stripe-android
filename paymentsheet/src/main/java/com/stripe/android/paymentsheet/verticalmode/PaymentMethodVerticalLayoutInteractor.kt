@@ -91,6 +91,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     temporarySelection: StateFlow<PaymentMethodCode?>,
     selection: StateFlow<PaymentSelection?>,
     paymentMethodIncentiveInteractor: PaymentMethodIncentiveInteractor,
+    private val runActionForCode: (code: String) -> Unit,
     private val formTypeForCode: (code: String) -> FormType,
     private val onFormFieldValuesChanged: (formValues: FormFieldValues, selectedPaymentMethodCode: String) -> Unit,
     private val transitionToManageScreen: () -> Unit,
@@ -132,6 +133,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 paymentMethodIncentiveInteractor = bankFormInteractor.paymentMethodIncentiveInteractor,
                 formTypeForCode = { code ->
                     formHelper.formTypeForCode(code)
+                },
+                runActionForCode = { code ->
+                    formHelper.runActionForCode(code)
                 },
                 onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
                 transitionToManageScreen = {
@@ -525,6 +529,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         when (viewAction) {
             is ViewAction.PaymentMethodSelected -> {
                 reportPaymentMethodTypeSelected(viewAction.selectedPaymentMethodCode)
+
+                runActionForCode(viewAction.selectedPaymentMethodCode)
 
                 val formType = formTypeForCode(viewAction.selectedPaymentMethodCode)
                 val displayFormForMandate = displaysMandatesInFormScreen && formType is FormType.MandateOnly

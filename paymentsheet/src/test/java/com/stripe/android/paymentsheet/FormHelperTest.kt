@@ -627,6 +627,69 @@ internal class FormHelperTest {
     }
 
     @Test
+    fun `runActionForCode calls startPaymentMethodCollection for actionable payment method`() = runTest {
+        FakeTapToAddHelper.test {
+            val formHelper = createFormHelper(
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                    stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                        paymentMethodTypes = listOf("card"),
+                    ),
+                    isTapToAddSupported = true,
+                ),
+                newPaymentSelectionProvider = { null },
+                tapToAddHelper = helper,
+            )
+
+            formHelper.runActionForCode("card")
+
+            collectCalls.awaitItem()
+        }
+    }
+
+    @Test
+    fun `runActionForCode does nothing when tap to add is not supported`() = runTest {
+        FakeTapToAddHelper.test {
+            val formHelper = createFormHelper(
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                    stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                        paymentMethodTypes = listOf("card"),
+                    ),
+                    isTapToAddSupported = false,
+                ),
+                newPaymentSelectionProvider = { null },
+                tapToAddHelper = helper,
+            )
+
+            formHelper.runActionForCode("card")
+
+            // Should not call startPaymentMethodCollection when tap to add is not supported
+            collectCalls.expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `runActionForCode does nothing for non-actionable payment method`() = runTest {
+        FakeTapToAddHelper.test {
+            val formHelper = createFormHelper(
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                    stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                        paymentMethodTypes = listOf("card", "cashapp"),
+                    ),
+                    isTapToAddSupported = true,
+                ),
+                newPaymentSelectionProvider = { null },
+                tapToAddHelper = helper,
+            )
+
+            // CashApp is not an actionable payment method
+            formHelper.runActionForCode("cashapp")
+
+            // Should not call startPaymentMethodCollection for non-actionable payment method
+            collectCalls.expectNoEvents()
+        }
+    }
+
+    @Test
     fun `onFormFieldValuesChanged returns Saved selection when collectedPaymentMethod is provided`() = runTest {
         val collectedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         val displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(

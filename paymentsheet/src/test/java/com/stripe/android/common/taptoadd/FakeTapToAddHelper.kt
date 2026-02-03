@@ -7,7 +7,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 internal class FakeTapToAddHelper private constructor(
-    override val collectedPaymentMethod: StateFlow<DisplayableSavedPaymentMethod?> = MutableStateFlow(null)
+    override val collectedPaymentMethod: StateFlow<DisplayableSavedPaymentMethod?> = MutableStateFlow(null),
+    override val hasPreviouslyAttemptedCollection: Boolean = false,
 ) : TapToAddHelper {
     private val collectCalls = Turbine<Unit>()
 
