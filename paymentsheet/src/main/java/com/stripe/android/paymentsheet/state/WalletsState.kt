@@ -73,7 +73,7 @@ internal data class WalletsState(
     }
 
     val walletsInHeader
-        get() = link(WalletLocation.HEADER) != null || googlePay(WalletLocation.HEADER) != null
+        get() = wallets(WalletLocation.HEADER).isNotEmpty()
 
     sealed interface Wallet
 

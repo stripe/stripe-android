@@ -423,14 +423,51 @@ internal fun Wallet(
     cardFundingFilter: CardFundingFilter
 ) {
     val padding = StripeTheme.getOuterFormInsets()
+
+    Column(modifier = modifier.padding(padding)) {
+        WalletHeader(
+            state = state,
+            onGooglePayPressed = onGooglePayPressed,
+            onLinkPressed = onLinkPressed,
+            onShopPayPressed = onShopPayPressed,
+            cardBrandFilter = cardBrandFilter,
+            cardFundingFilter = cardFundingFilter
+        )
+
+        when (processingState) {
+            is WalletsProcessingState.Idle -> processingState.error?.let { error ->
+                ErrorMessage(
+                    error = error.resolve(),
+                    modifier = Modifier.padding(vertical = 3.dp, horizontal = 1.dp),
+                )
+            }
+            else -> Unit
+        }
+
+        if (state.walletsInHeader) {
+            Spacer(modifier = Modifier.requiredHeight(dividerSpacing))
+
+            val text = stringResource(state.dividerTextResource)
+            WalletsDivider(text)
+        }
+    }
+}
+
+@Composable
+private fun WalletHeader(
+    state: WalletsState,
+    onGooglePayPressed: () -> Unit,
+    onLinkPressed: () -> Unit,
+    onShopPayPressed: () -> Unit,
+    cardBrandFilter: CardBrandFilter,
+    cardFundingFilter: CardFundingFilter
+) {
     val walletItems = remember(state) {
         // Only show wallet if allowed in header
         state.wallets(WalletLocation.HEADER)
     }
 
     Column(
-        modifier = modifier
-            .padding(padding),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         for (wallet in walletItems) {
@@ -459,23 +496,6 @@ internal fun Wallet(
                     ShopPayButton(onClick = onShopPayPressed)
                 }
             }
-        }
-
-        when (processingState) {
-            is WalletsProcessingState.Idle -> processingState.error?.let { error ->
-                ErrorMessage(
-                    error = error.resolve(),
-                    modifier = Modifier.padding(vertical = 3.dp, horizontal = 1.dp),
-                )
-            }
-            else -> Unit
-        }
-
-        if (state.walletsInHeader) {
-            Spacer(modifier = Modifier.requiredHeight(dividerSpacing))
-
-            val text = stringResource(state.dividerTextResource)
-            WalletsDivider(text)
         }
     }
 }
