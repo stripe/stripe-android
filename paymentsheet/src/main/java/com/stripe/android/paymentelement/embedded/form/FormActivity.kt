@@ -7,6 +7,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
@@ -15,6 +16,7 @@ import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.fadeOut
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class FormActivity : AppCompatActivity() {
@@ -56,6 +58,13 @@ internal class FormActivity : AppCompatActivity() {
             lifecycleOwner = this,
         ).inject(this)
 
+        lifecycleScope.launch {
+            confirmationHelper.result.collect {
+                setFormResult(it)
+                finish()
+            }
+        }
+
         setContent {
             StripeTheme {
                 val state by formActivityStateHelper.state.collectAsState()
@@ -71,10 +80,7 @@ internal class FormActivity : AppCompatActivity() {
                         eventReporter = eventReporter,
                         onDismissed = ::setCancelAndFinish,
                         onClick = {
-                            confirmationHelper.confirm()?.let {
-                                setFormResult(it)
-                                finish()
-                            }
+                            confirmationHelper.confirm()
                         },
                         onProcessingCompleted = ::setCompletedResultAndDismiss,
                         state = state

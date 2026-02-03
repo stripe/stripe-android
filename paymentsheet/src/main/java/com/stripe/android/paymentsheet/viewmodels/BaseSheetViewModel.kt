@@ -7,13 +7,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
-import com.stripe.android.common.taptoadd.TapToAddCollectionHandler
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.MandateHandler
@@ -61,7 +61,7 @@ internal abstract class BaseSheetViewModel(
     val linkHandler: LinkHandler,
     val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     val isCompleteFlow: Boolean,
-    val tapToAddCollectionHandler: TapToAddCollectionHandler,
+    val confirmationHandlerFactory: ConfirmationHandler.Factory,
     val mode: EventReporter.Mode,
 ) : ViewModel() {
     private val autocompleteLauncher = DefaultAutocompleteLauncher(
@@ -70,6 +70,8 @@ internal abstract class BaseSheetViewModel(
 
     private val _paymentMethodMetadata = MutableStateFlow<PaymentMethodMetadata?>(null)
     internal val paymentMethodMetadata: StateFlow<PaymentMethodMetadata?> = _paymentMethodMetadata
+
+    val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
 
     val navigationHandler: NavigationHandler<PaymentSheetScreen> = NavigationHandler(
         coroutineScope = viewModelScope,
@@ -163,6 +165,7 @@ internal abstract class BaseSheetViewModel(
         lifecycleOwner: LifecycleOwner,
     ) {
         autocompleteLauncher.register(activityResultCaller, lifecycleOwner)
+        confirmationHandler.register(activityResultCaller, lifecycleOwner)
         registerFromActivity(activityResultCaller, lifecycleOwner)
     }
 

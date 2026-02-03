@@ -12,7 +12,6 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.common.exception.stripeErrorMessage
-import com.stripe.android.common.taptoadd.TapToAddCollectionHandler
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.utils.requireApplication
@@ -28,6 +27,7 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
@@ -51,6 +51,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
@@ -67,7 +68,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     linkHandler: LinkHandler,
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
-    tapToAddCollectionHandler: TapToAddCollectionHandler,
+    confirmationHandlerFactory: ConfirmationHandler.Factory,
     mode: EventReporter.Mode,
 ) : BaseSheetViewModel(
     config = args.configuration,
@@ -78,7 +79,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     linkHandler = linkHandler,
     cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
     isCompleteFlow = false,
-    tapToAddCollectionHandler = tapToAddCollectionHandler,
+    confirmationHandlerFactory = confirmationHandlerFactory,
     mode = mode,
 ) {
 
@@ -210,6 +211,31 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 customerStateHolder = customerStateHolder,
             )
         )
+
+        viewModelScope.launch {
+            confirmationHandler.state.collectLatest {
+                when (it) {
+                    is ConfirmationHandler.State.Idle -> Unit
+                    is ConfirmationHandler.State.Confirming -> Unit
+                    is ConfirmationHandler.State.Complete -> {
+                        when (val result = it.result) {
+                            is ConfirmationHandler.Result.Succeeded -> {
+                                updateSelection(
+                                    selection = result.intent.paymentMethod?.let {
+                                        PaymentSelection.Saved(it)
+                                    }
+                                )
+                                onUserSelection()
+                            }
+                            is ConfirmationHandler.Result.Failed -> {
+                                onError(result.message)
+                            }
+                            is ConfirmationHandler.Result.Canceled -> Unit
+                        }
+                    }
+                }
+            }
+        }
     }
 
     override fun registerFromActivity(

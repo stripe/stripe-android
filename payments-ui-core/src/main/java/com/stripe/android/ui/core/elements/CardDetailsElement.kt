@@ -37,7 +37,7 @@ internal class CardDetailsElement(
         collectName,
         cbcEligibility,
         cardBrandFilter = cardBrandFilter,
-        cardFundingFilter = cardFundingFilter
+        cardFundingFilter = cardFundingFilter,
     )
 ) : SectionMultiFieldElement(identifier) {
 

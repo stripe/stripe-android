@@ -4,7 +4,9 @@ import android.app.Application
 import android.content.Context
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import dagger.Module
@@ -29,6 +31,16 @@ internal class PaymentOptionsViewModelModule {
     @Provides
     @Named(PRODUCT_USAGE)
     fun provideProductUsage(args: PaymentOptionContract.Args): Set<String> = args.productUsage
+
+    @Provides
+    @Singleton
+    @Named(ALLOWS_MANUAL_CONFIRMATION)
+    fun provideAllowsManualConfirmation() = true
+
+    @Provides
+    @Singleton
+    @Named(STATUS_BAR_COLOR)
+    fun providesStatusBarColor(): Int? = null
 
     @Provides
     fun providePaymentMethodMetadata(args: PaymentOptionContract.Args): PaymentMethodMetadata {

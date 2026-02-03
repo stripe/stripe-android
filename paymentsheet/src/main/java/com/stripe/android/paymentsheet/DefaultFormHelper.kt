@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.common.taptoadd.TapToAddHelper
+import com.stripe.android.common.taptoadd.TapToAddMode
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -59,14 +60,13 @@ internal class DefaultFormHelper(
         ): FormHelper {
             val tapToAddHelper = TapToAddHelper.create(
                 coroutineScope = viewModel.viewModelScope,
-                tapToAddCollectionHandler = viewModel.tapToAddCollectionHandler,
+                confirmationHandler = viewModel.confirmationHandler,
                 paymentMethodMetadata = paymentMethodMetadata,
-                onCollectingUpdated = { collecting ->
-                    viewModel.savedStateHandle[SAVE_PROCESSING] = collecting
-                },
-                onError = { error ->
-                    viewModel.onError(error)
-                },
+                tapToAddMode = if (viewModel.isCompleteFlow) {
+                    TapToAddMode.Complete
+                } else {
+                    TapToAddMode.Continue
+                }
             )
 
             return DefaultFormHelper(

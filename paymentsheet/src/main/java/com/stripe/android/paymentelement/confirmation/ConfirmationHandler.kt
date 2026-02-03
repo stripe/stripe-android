@@ -118,6 +118,10 @@ internal interface ConfirmationHandler {
          */
         data class Canceled(
             val action: Action,
+            /**
+             * Metadata associated with final confirmation result
+             */
+            val metadata: ConfirmationMetadata = MutableConfirmationMetadata(),
         ) : Result {
             /**
              * Action to perform if a user cancels a running confirmation process.

@@ -233,6 +233,7 @@ internal class DefaultConfirmationHandler(
             )
             is ConfirmationDefinition.Result.Canceled -> ConfirmationHandler.Result.Canceled(
                 action = result.action,
+                metadata = result.metadata,
             )
         }
 

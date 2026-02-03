@@ -332,4 +332,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_wallet_update_card">Update card</string>
   <!-- A text notice shown when the user selects an expired card. -->
   <string name="stripe_wallet_update_expired_card_error">This card has expired. Update your card info or choose a different payment method.</string>
+  <!-- Title shown in success screen shown after a user has added their card bu tapping -->
+  <string name="stripe_tta_card_added_title">Card added</string>
 </resources>

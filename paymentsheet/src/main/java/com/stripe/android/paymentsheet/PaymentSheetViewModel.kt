@@ -90,7 +90,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val errorReporter: ErrorReporter,
     internal val cvcRecollectionHandler: CvcRecollectionHandler,
     private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory,
-    tapToAddCollectionHandler: TapToAddCollectionHandler,
     mode: EventReporter.Mode
 ) : BaseSheetViewModel(
     config = args.config,
@@ -101,7 +100,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     linkHandler = linkHandler,
     cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
     isCompleteFlow = true,
-    tapToAddCollectionHandler = tapToAddCollectionHandler,
+    confirmationHandlerFactory = confirmationHandlerFactory,
     mode = mode,
 ) {
 
@@ -217,8 +216,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             is PaymentSheetViewState.FinishProcessing -> WalletsProcessingState.Completed(viewState.onComplete)
         }
     }
-
-    private val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
 
     internal val contentVisible: StateFlow<Boolean> = confirmationHandler.state.mapAsStateFlow { it.contentVisible }
 
@@ -457,16 +454,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    /**
-     * Used to set up any dependencies that require a reference to the current Activity.
-     * Must be called from the Activity's `onCreate`.
-     */
     override fun registerFromActivity(
         activityResultCaller: ActivityResultCaller,
         lifecycleOwner: LifecycleOwner,
-    ) {
-        confirmationHandler.register(activityResultCaller, lifecycleOwner)
-    }
+    ) {}
 
     @Suppress("ComplexCondition")
     private fun paymentSelectionWithCvcIfEnabled(paymentSelection: PaymentSelection?): PaymentSelection? {

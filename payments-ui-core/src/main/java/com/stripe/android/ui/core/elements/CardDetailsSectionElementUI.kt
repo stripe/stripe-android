@@ -42,7 +42,7 @@ fun CardDetailsSectionElementUI(
 
     // Only create launcher if ActivityResultRegistry is available (e.g., not in screenshot tests)
     val activityResultRegistryOwner = LocalActivityResultRegistryOwner.current
-    val cardScanLauncher = if (activityResultRegistryOwner != null) {
+    val cardScanLauncher = if (controller.onTapToAddPressed == null && activityResultRegistryOwner != null) {
         val eventsReporter = LocalCardScanEventsReporter.current
         rememberCardScanGoogleLauncher(
             context = context,
@@ -74,10 +74,17 @@ fun CardDetailsSectionElementUI(
                         heading()
                     }
             )
-            ScanCardButtonUI(
-                enabled = enabled,
-                cardScanGoogleLauncher = cardScanLauncher
-            )
+            controller.onTapToAddPressed?.let {
+                TapToAddButtonUI(
+                    enabled = enabled,
+                    onPress = it,
+                )
+            } ?: run {
+                ScanCardButtonUI(
+                    enabled = enabled,
+                    cardScanGoogleLauncher = cardScanLauncher
+                )
+            }
         }
         SectionElementUI(
             modifier = Modifier.padding(top = 8.dp),

@@ -20,6 +20,7 @@ class CardDetailsSectionElement(
     private val collectName: Boolean = false,
     private val cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+    private val onTapToAddPressed: (() -> Unit)? = null,
     private val cardFundingFilter: CardFundingFilter,
     override val identifier: IdentifierSpec,
     override val controller: CardDetailsSectionController = CardDetailsSectionController(
@@ -30,6 +31,7 @@ class CardDetailsSectionElement(
         cardBrandFilter = cardBrandFilter,
         cardFundingFilter = cardFundingFilter,
         automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
+        onTapToAddPressed = onTapToAddPressed,
     )
 ) : FormElement {
     override val allowsUserInteraction: Boolean = true

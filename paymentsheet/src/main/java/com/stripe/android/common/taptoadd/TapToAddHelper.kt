@@ -3,12 +3,15 @@ package com.stripe.android.common.taptoadd
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.taptoadd.TapToAddConfirmationOption
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.verticalmode.toDisplayableSavedPaymentMethod
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 internal interface TapToAddHelper {
@@ -23,18 +26,16 @@ internal interface TapToAddHelper {
     companion object {
         fun create(
             coroutineScope: CoroutineScope,
-            tapToAddCollectionHandler: TapToAddCollectionHandler,
+            confirmationHandler: ConfirmationHandler,
             paymentMethodMetadata: PaymentMethodMetadata,
-            onCollectingUpdated: (processing: Boolean) -> Unit,
-            onError: (ResolvableString) -> Unit,
+            tapToAddMode: TapToAddMode,
         ): TapToAddHelper? {
             return if (paymentMethodMetadata.isTapToAddSupported) {
                 DefaultTapToAddHelper(
                     coroutineScope = coroutineScope,
                     paymentMethodMetadata = paymentMethodMetadata,
-                    tapToAddCollectionHandler = tapToAddCollectionHandler,
-                    onCollectingUpdated = onCollectingUpdated,
-                    onError = onError,
+                    confirmationHandler = confirmationHandler,
+                    tapToAddMode = tapToAddMode,
                 )
             } else {
                 null
@@ -45,33 +46,35 @@ internal interface TapToAddHelper {
 
 internal class DefaultTapToAddHelper(
     private val coroutineScope: CoroutineScope,
-    private val tapToAddCollectionHandler: TapToAddCollectionHandler,
+    private val confirmationHandler: ConfirmationHandler,
     private val paymentMethodMetadata: PaymentMethodMetadata,
-    private val onCollectingUpdated: (collecting: Boolean) -> Unit,
-    private val onError: (ResolvableString) -> Unit,
+    private val tapToAddMode: TapToAddMode,
 ) : TapToAddHelper {
     private val _collectedPaymentMethod = MutableStateFlow<DisplayableSavedPaymentMethod?>(null)
     override val collectedPaymentMethod = _collectedPaymentMethod.asStateFlow()
 
-    override fun startPaymentMethodCollection() {
+    init {
         coroutineScope.launch {
-            onCollectingUpdated(true)
-
-            when (val collectionState = tapToAddCollectionHandler.collect(paymentMethodMetadata)) {
-                is TapToAddCollectionHandler.CollectionState.Collected -> {
-                    _collectedPaymentMethod.value = collectionState.paymentMethod.toDisplayableSavedPaymentMethod(
-                        paymentMethodMetadata = paymentMethodMetadata,
-                        defaultPaymentMethodId = null,
-                    )
-                }
-                is TapToAddCollectionHandler.CollectionState.FailedCollection -> {
-                    onError(
-                        collectionState.displayMessage ?: collectionState.error.stripeErrorMessage()
-                    )
+            confirmationHandler.state.collectLatest { state ->
+                if (
+                    state is ConfirmationHandler.State.Complete &&
+                    state.result is ConfirmationHandler.Result.Canceled
+                ) {
                 }
             }
+        }
+    }
 
-            onCollectingUpdated(false)
+    override fun startPaymentMethodCollection() {
+        coroutineScope.launch {
+            confirmationHandler.start(
+                arguments = ConfirmationHandler.Args(
+                    confirmationOption = TapToAddConfirmationOption(
+                        mode = tapToAddMode,
+                    ),
+                    paymentMethodMetadata = paymentMethodMetadata,
+                )
+            )
         }
     }
 }

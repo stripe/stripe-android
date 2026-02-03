@@ -56,11 +56,7 @@ internal object CardDefinition : PaymentMethodDefinition {
     override fun uiDefinitionFactory(
         metadata: PaymentMethodMetadata
     ): UiDefinitionFactory {
-        return if (metadata.isTapToAddSupported) {
-            CardWithTapUiDefinitionFactory
-        } else {
-            CardUiDefinitionFactory
-        }
+        return CardUiDefinitionFactory
     }
 }
 
@@ -106,6 +102,11 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
                     cardBrandFilter = arguments.cardBrandFilter,
                     cardFundingFilter = arguments.cardFundingFilter,
                     automaticallyLaunchedCardScanFormDataHelper = arguments.automaticallyLaunchedCardScanFormDataHelper,
+                    onTapToAddPressed = arguments.tapToAddHelper?.let { tapToAddHelper ->
+                        {
+                            tapToAddHelper.startPaymentMethodCollection()
+                        }
+                    }
                 )
             )
 

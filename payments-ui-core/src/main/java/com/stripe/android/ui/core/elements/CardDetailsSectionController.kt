@@ -20,6 +20,7 @@ class CardDetailsSectionController(
     cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
     cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
     private val automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper?,
+    val onTapToAddPressed: (() -> Unit)? = null,
 ) : SectionFieldValidationController {
 
     internal val cardDetailsElement = CardDetailsElement(
@@ -29,7 +30,7 @@ class CardDetailsSectionController(
         collectName,
         cbcEligibility,
         cardBrandFilter,
-        cardFundingFilter
+        cardFundingFilter,
     )
 
     fun shouldAutomaticallyLaunchCardScan(): Boolean {

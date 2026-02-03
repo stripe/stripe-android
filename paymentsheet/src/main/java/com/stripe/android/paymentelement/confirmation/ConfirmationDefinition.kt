@@ -128,6 +128,10 @@ internal interface ConfirmationDefinition<
              * The action that the consumer should take if the customer manually cancels.
              */
             val action: ConfirmationHandler.Result.Canceled.Action,
+            /**
+             * Metadata associated with final confirmation result
+             */
+            val metadata: ConfirmationMetadata = MutableConfirmationMetadata(),
         ) : Result
 
         /**

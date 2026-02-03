@@ -2,12 +2,12 @@ package com.stripe.android.paymentelement.embedded
 
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
-import com.stripe.android.common.taptoadd.TapToAddCollectionHandler
 import com.stripe.android.common.taptoadd.TapToAddHelper
-import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.common.taptoadd.TapToAddMode
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.LinkInlineHandler
@@ -24,15 +24,13 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
     private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     private val savedStateHandle: SavedStateHandle,
     private val selectedPaymentMethodCode: String,
-    private val tapToAddCollectionHandler: TapToAddCollectionHandler,
+    private val confirmationHandler: ConfirmationHandler,
 ) {
     fun create(
         coroutineScope: CoroutineScope,
         setAsDefaultMatchesSaveForFutureUse: Boolean,
         paymentMethodMetadata: PaymentMethodMetadata,
         eventReporter: EventReporter,
-        onError: (ResolvableString?) -> Unit = {},
-        updateEnabled: (Boolean) -> Unit = {},
         selectionUpdater: (PaymentSelection?) -> Unit,
     ): FormHelper {
         val automaticallyLaunchedCardScanFormDataHelper = if (selectedPaymentMethodCode.isNotBlank()) {
@@ -50,14 +48,9 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
         }
         val tapToAddHelper = TapToAddHelper.create(
             coroutineScope = coroutineScope,
-            tapToAddCollectionHandler = tapToAddCollectionHandler,
+            confirmationHandler = confirmationHandler,
             paymentMethodMetadata = paymentMethodMetadata,
-            onCollectingUpdated = { processing ->
-                updateEnabled(processing)
-            },
-            onError = { error ->
-                onError(error)
-            },
+            tapToAddMode = TapToAddMode.Complete,
         )
         return DefaultFormHelper(
             coroutineScope = coroutineScope,

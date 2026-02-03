@@ -35,8 +35,6 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             paymentMethodMetadata = paymentMethodMetadata,
             eventReporter = eventReporter,
             selectionUpdater = { embeddedSelectionHolder.set(it) },
-            updateEnabled = { formActivityStateHelper.updateEnabled(it) },
-            onError = { formActivityStateHelper.updateError(it) },
             // If no saved payment methods, then first saved payment method is automatically set as default
             setAsDefaultMatchesSaveForFutureUse = !hasSavedPaymentMethods,
         )

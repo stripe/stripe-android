@@ -1,5 +1,6 @@
 package com.stripe.android.common.taptoadd
 
+import android.graphics.Color
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
@@ -17,6 +18,7 @@ import com.stripe.stripeterminal.external.callable.SetupIntentCallback
 import com.stripe.stripeterminal.external.models.AllowRedisplay
 import com.stripe.stripeterminal.external.models.SetupIntent
 import com.stripe.stripeterminal.external.models.SetupIntentConfiguration
+import com.stripe.stripeterminal.external.models.TapToPayUxConfiguration
 import com.stripe.stripeterminal.external.models.TerminalException
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -65,6 +67,18 @@ internal class DefaultTapToAddCollectionHandler(
     private val errorReporter: ErrorReporter,
     private val createCardPresentSetupIntentCallbackRetriever: CreateCardPresentSetupIntentCallbackRetriever,
 ) : TapToAddCollectionHandler {
+    init {
+        terminal().setTapToPayUxConfiguration(
+            TapToPayUxConfiguration.Builder()
+                .colors(
+                    colors = TapToPayUxConfiguration.ColorScheme.Builder()
+                        .primary(TapToPayUxConfiguration.Color.Value(Color.BLACK))
+                        .build()
+                )
+                .build()
+        )
+    }
+
     override suspend fun collect(
         metadata: PaymentMethodMetadata
     ): TapToAddCollectionHandler.CollectionState = runCatching {
