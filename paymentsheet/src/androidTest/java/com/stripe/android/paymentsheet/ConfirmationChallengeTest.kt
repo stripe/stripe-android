@@ -10,11 +10,14 @@ import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
 import com.stripe.android.paymentsheet.utils.ConfirmationType
+import com.stripe.android.paymentsheet.utils.PaymentSheetTestRunnerContext
 import com.stripe.android.paymentsheet.utils.ProductIntegrationTestRunnerContext
 import com.stripe.android.paymentsheet.utils.ProductIntegrationType
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
+import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
 import com.stripe.android.paymentsheet.utils.runProductIntegrationTest
 import com.stripe.android.testing.FeatureFlagTestRule
 import org.junit.Rule
@@ -132,6 +135,60 @@ internal class ConfirmationChallengeTest {
         }
     }
 
+    @Test
+    fun confirmationToken_withBothChallengesEnabled_includesBothTokensInConfirmationTokenRequest() =
+        runPaymentSheetTest(
+            networkRule = networkRule,
+            builder = {
+                createIntentCallback(
+                    callback = CreateIntentWithConfirmationTokenCallback { _ ->
+                        CreateIntentResult.Success("pi_example_secret_example")
+                    }
+                )
+            },
+            resultCallback = ::assertCompleted,
+        ) { testContext ->
+            setupBothChallengesEnabledConfirmationTokenTest(testContext)
+        }
+
+    @Test
+    fun confirmationToken_withOnlyPassiveCaptchaEnabled_includesOnlyHCaptchaTokenInConfirmationTokenRequest() {
+        passiveCaptchaFeatureFlagRule.setEnabled(true)
+        attestationFeatureFlagRule.setEnabled(false)
+        runPaymentSheetTest(
+            networkRule = networkRule,
+            builder = {
+                createIntentCallback(
+                    callback = CreateIntentWithConfirmationTokenCallback { _ ->
+                        CreateIntentResult.Success("pi_example_secret_example")
+                    }
+                )
+            },
+            resultCallback = ::assertCompleted,
+        ) { testContext ->
+            setupOnlyPassiveCaptchaEnabledConfirmationTokenTest(testContext)
+        }
+    }
+
+    @Test
+    fun confirmationToken_withOnlyAttestationEnabled_includesOnlyAttestationTokenInConfirmationTokenRequest() {
+        attestationFeatureFlagRule.setEnabled(true)
+        passiveCaptchaFeatureFlagRule.setEnabled(false)
+        runPaymentSheetTest(
+            networkRule = networkRule,
+            builder = {
+                createIntentCallback(
+                    callback = CreateIntentWithConfirmationTokenCallback { _ ->
+                        CreateIntentResult.Success("pi_example_secret_example")
+                    }
+                )
+            },
+            resultCallback = ::assertCompleted,
+        ) { testContext ->
+            setupOnlyAttestationEnabledConfirmationTokenTest(testContext)
+        }
+    }
+
     private fun setupBothChallengesEnabledTest(testContext: ProductIntegrationTestRunnerContext) {
         enqueueElementsSessionWithBothChallengesEnabled(networkRule)
 
@@ -202,6 +259,59 @@ internal class ConfirmationChallengeTest {
         enqueueDeferredIntentRequests()
 
         createPaymentSheetPage().clickPrimaryButton()
+    }
+
+    private fun setupBothChallengesEnabledConfirmationTokenTest(testContext: PaymentSheetTestRunnerContext) {
+        enqueueElementsSessionWithBothChallengesEnabled(networkRule, isDeferredIntent = true)
+        presentPaymentSheetWithIntentConfiguration(testContext)
+
+        navigateToFormForLpm()
+
+        enqueueConfirmationTokenCreateWithBothTokens()
+        enqueueConfirmationTokenIntentRequests()
+
+        createPaymentSheetPage().clickPrimaryButton()
+    }
+
+    private fun setupOnlyPassiveCaptchaEnabledConfirmationTokenTest(testContext: PaymentSheetTestRunnerContext) {
+        enqueueElementsSessionWithOnlyPassiveCaptchaEnabled(networkRule, isDeferredIntent = true)
+        presentPaymentSheetWithIntentConfiguration(testContext)
+
+        navigateToFormForLpm()
+
+        enqueueConfirmationTokenCreateWithOnlyHCaptchaToken()
+        enqueueConfirmationTokenIntentRequests()
+
+        createPaymentSheetPage().clickPrimaryButton()
+    }
+
+    private fun setupOnlyAttestationEnabledConfirmationTokenTest(testContext: PaymentSheetTestRunnerContext) {
+        enqueueElementsSessionWithOnlyAttestationEnabled(networkRule, isDeferredIntent = true)
+        presentPaymentSheetWithIntentConfiguration(testContext)
+
+        navigateToFormForLpm()
+
+        enqueueConfirmationTokenCreateWithOnlyAttestationToken()
+        enqueueConfirmationTokenIntentRequests()
+
+        createPaymentSheetPage().clickPrimaryButton()
+    }
+
+    private fun presentPaymentSheetWithIntentConfiguration(testContext: PaymentSheetTestRunnerContext) {
+        testContext.presentPaymentSheet {
+            presentWithIntentConfiguration(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 5099,
+                        currency = "usd"
+                    )
+                ),
+                configuration = PaymentSheet.Configuration(
+                    merchantDisplayName = "Merchant, Inc.",
+                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                )
+            )
+        }
     }
 
     private fun navigateToFormForLpm() {
@@ -372,6 +482,59 @@ internal class ConfirmationChallengeTest {
         }
     }
 
+    private fun enqueueConfirmationTokenCreateWithBothTokens() {
+        // For new payment methods, radar_options are in payment_method_data
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/confirmation_tokens"),
+            bodyPart(urlEncode(NEW_PM_HCAPTCHA_TOKEN_PATH), HCAPTCHA_TOKEN),
+            bodyPart(urlEncode(NEW_PM_ATTESTATION_TOKEN_PATH), Regex(".+")),
+        ) { response ->
+            response.testBodyFromFile(CONFIRMATION_TOKEN_CREATE_FILE)
+        }
+    }
+
+    private fun enqueueConfirmationTokenCreateWithOnlyHCaptchaToken() {
+        // For new payment methods, radar_options are in payment_method_data
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/confirmation_tokens"),
+            bodyPart(urlEncode(NEW_PM_HCAPTCHA_TOKEN_PATH), HCAPTCHA_TOKEN),
+            not(bodyPart(urlEncode(NEW_PM_ATTESTATION_TOKEN_PATH), Regex(".+"))),
+        ) { response ->
+            response.testBodyFromFile(CONFIRMATION_TOKEN_CREATE_FILE)
+        }
+    }
+
+    private fun enqueueConfirmationTokenCreateWithOnlyAttestationToken() {
+        // For new payment methods, radar_options are in payment_method_data
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/confirmation_tokens"),
+            not(bodyPart(urlEncode(NEW_PM_HCAPTCHA_TOKEN_PATH), HCAPTCHA_TOKEN)),
+            bodyPart(urlEncode(NEW_PM_ATTESTATION_TOKEN_PATH), Regex(".+")),
+        ) { response ->
+            response.testBodyFromFile(CONFIRMATION_TOKEN_CREATE_FILE)
+        }
+    }
+
+    private fun enqueueConfirmationTokenIntentRequests() {
+        networkRule.enqueue(
+            method("GET"),
+            path(PAYMENT_INTENT_GET_PATH),
+        ) { response ->
+            response.testBodyFromFile(PAYMENT_INTENT_GET_FILE)
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path(PAYMENT_INTENT_CONFIRM_PATH),
+            bodyPart("confirmation_token", "ctoken_example"),
+        ) { response ->
+            response.testBodyFromFile(PAYMENT_INTENT_CONFIRM_FILE)
+        }
+    }
+
     companion object {
         private const val HCAPTCHA_TOKEN = "20000000-aaaa-bbbb-cccc-000000000002"
         private const val HCAPTCHA_SITE_KEY = "20000000-ffff-ffff-ffff-000000000002"
@@ -392,6 +555,7 @@ internal class ConfirmationChallengeTest {
         private const val PAYMENT_INTENT_CONFIRM_FILE = "payment-intent-confirm.json"
         private const val PAYMENT_METHOD_CREATE_FILE = "payment-methods-create.json"
         private const val PAYMENT_INTENT_GET_FILE = "payment-intent-get-requires_payment_method.json"
+        private const val CONFIRMATION_TOKEN_CREATE_FILE = "confirmation-token-create-with-new-card.json"
 
         private const val PAYMENT_INTENT_CONFIRM_PATH = "/v1/payment_intents/pi_example/confirm"
         private const val PAYMENT_INTENT_GET_PATH = "/v1/payment_intents/pi_example"
