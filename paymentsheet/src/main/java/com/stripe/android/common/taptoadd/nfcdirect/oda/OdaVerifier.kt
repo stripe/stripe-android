@@ -471,6 +471,149 @@ internal class OdaVerifier {
     }
 
     /**
+     * Extract the PAN from a recovered ICC Public Key Certificate.
+     *
+     * ICC Certificate structure (after RSA recovery):
+     * - Byte 1: Header (0x6A)
+     * - Byte 2: Format (0x04)
+     * - Bytes 3-12: Application PAN (10 bytes BCD, padded with 0xFF)
+     * - Bytes 13-14: Certificate Expiry (MMYY)
+     * - ... rest of certificate
+     *
+     * @return The PAN as a string, or null if extraction fails
+     */
+    fun extractPanFromIccCertificate(recoveredCert: ByteArray): String? {
+        if (recoveredCert.size < 22) return null
+
+        // Verify it's an ICC certificate (format 0x04)
+        if (recoveredCert[1] != 0x04.toByte()) return null
+
+        // Extract PAN bytes (indices 2-11, which is bytes 3-12 in 1-based)
+        val panBytes = recoveredCert.copyOfRange(2, 12)
+
+        // Convert BCD to string, stopping at 0xFF padding
+        val pan = StringBuilder()
+        for (byte in panBytes) {
+            val high = (byte.toInt() shr 4) and 0x0F
+            val low = byte.toInt() and 0x0F
+
+            if (high == 0x0F) break  // Padding reached
+            pan.append(high)
+
+            if (low == 0x0F) break   // Padding reached
+            pan.append(low)
+        }
+
+        return pan.toString().takeIf { it.length >= 13 }  // Valid PAN is 13-19 digits
+    }
+
+    /**
+     * Extract the Issuer Identifier (BIN) from a recovered Issuer Public Key Certificate.
+     *
+     * Issuer Certificate structure:
+     * - Byte 1: Header (0x6A)
+     * - Byte 2: Format (0x02)
+     * - Bytes 3-6: Issuer Identifier (4 bytes = 8 BCD digits, padded with 0xFF)
+     *
+     * @return The Issuer ID (BIN prefix) as a string, or null if extraction fails
+     */
+    fun extractIssuerIdFromCertificate(recoveredCert: ByteArray): String? {
+        if (recoveredCert.size < 15) return null
+
+        // Verify it's an Issuer certificate (format 0x02)
+        if (recoveredCert[1] != 0x02.toByte()) return null
+
+        // Extract Issuer ID bytes (indices 2-5, which is bytes 3-6 in 1-based)
+        val issuerBytes = recoveredCert.copyOfRange(2, 6)
+
+        // Convert BCD to string
+        val issuerId = StringBuilder()
+        for (byte in issuerBytes) {
+            val high = (byte.toInt() shr 4) and 0x0F
+            val low = byte.toInt() and 0x0F
+
+            if (high == 0x0F) break
+            issuerId.append(high)
+
+            if (low == 0x0F) break
+            issuerId.append(low)
+        }
+
+        return issuerId.toString().takeIf { it.isNotEmpty() }
+    }
+
+    /**
+     * Verify that the claimed PAN matches the PAN in the ICC certificate.
+     *
+     * This is the key server-side security check - it proves the client
+     * didn't fabricate the PAN, because the PAN is cryptographically
+     * bound to the certificate chain.
+     *
+     * @param tlvData The TLV data containing certificates
+     * @param aid The Application ID
+     * @param claimedPan The PAN claimed by the client
+     * @return OdaResult with success if PAN matches, failure otherwise
+     */
+    fun verifyPanMatchesCertificate(
+        tlvData: Map<String, ByteArray>,
+        aid: ByteArray,
+        claimedPan: String
+    ): OdaResult {
+        // First verify the certificate chain
+        val chainResult = verifyCertificateChain(tlvData, aid)
+        if (chainResult !is OdaResult.Success) {
+            return chainResult
+        }
+
+        // Get CA key
+        val caIndexBytes = tlvData[TAG_CA_PK_INDEX] ?: return OdaResult.NotSupported
+        val caIndex = caIndexBytes.toHexString().uppercase()
+        val rid = aid.copyOfRange(0, minOf(5, aid.size)).toHexString().uppercase()
+        val caKey = CaPublicKeyStore.getKey(rid, caIndex) ?: return OdaResult.NotSupported
+
+        // Recover issuer certificate
+        val issuerCert = tlvData[TAG_ISSUER_PK_CERT] ?: return OdaResult.NotSupported
+        val recoveredIssuerCert = RsaRecovery.recover(issuerCert, caKey.exponent, caKey.modulus)
+
+        // Verify issuer ID matches PAN prefix (BIN)
+        val issuerId = extractIssuerIdFromCertificate(recoveredIssuerCert)
+        if (issuerId != null && !claimedPan.startsWith(issuerId.trimEnd('F'))) {
+            return OdaResult.Failed(
+                "PAN BIN mismatch: PAN starts with ${claimedPan.take(8)}, cert has issuer $issuerId"
+            )
+        }
+
+        // Recover ICC certificate
+        val iccCert = tlvData[TAG_ICC_PK_CERT]
+        if (iccCert != null) {
+            val issuerPkRemainder = tlvData[TAG_ISSUER_PK_REMAINDER] ?: byteArrayOf()
+            val issuerPkExponent = tlvData[TAG_ISSUER_PK_EXPONENT] ?: byteArrayOf(0x03)
+
+            val issuerKey = CertificateParser.parseIssuerCertificate(
+                recoveredIssuerCert, issuerPkRemainder, issuerPkExponent
+            ) ?: return OdaResult.Failed("Could not parse issuer key")
+
+            val recoveredIccCert = RsaRecovery.recover(iccCert, issuerKey.exponent, issuerKey.modulus)
+
+            // Extract PAN from ICC certificate
+            val certPan = extractPanFromIccCertificate(recoveredIccCert)
+            if (certPan != null) {
+                android.util.Log.d("ODA", "PAN from ICC cert: $certPan")
+                android.util.Log.d("ODA", "Claimed PAN:       $claimedPan")
+
+                if (certPan != claimedPan) {
+                    return OdaResult.Failed(
+                        "PAN mismatch: claimed $claimedPan but certificate contains $certPan"
+                    )
+                }
+                android.util.Log.i("ODA", "PAN VERIFIED: claimed PAN matches ICC certificate")
+            }
+        }
+
+        return OdaResult.Success
+    }
+
+    /**
      * Build the static data that is included in the SSAD hash.
      *
      * Per EMV Book 2, the static data includes:

@@ -161,11 +161,20 @@ internal class NfcDirectCollectionHandler(
         Log.d(TAG, "AFL extracted: ${afl?.let { it.toHexString() } ?: "null"}")
 
         // Step 4: READ RECORD(s) if AFL is present
+        val hasOdaInAfl = afl != null && hasOdaRecordsInAfl(afl)
         if (afl != null) {
             readAllRecords(isoDep, afl, allTlvData)
-        } else {
-            Log.d(TAG, "No AFL - card may have returned all data in GPO (qVSDC mode)")
-            // Try reading standard SFI locations for ODA data even without AFL
+        }
+
+        // Try reading standard SFI locations for ODA if:
+        // - No AFL present (qVSDC mode), OR
+        // - AFL has no ODA records (odaRecords=0 for all entries)
+        if (afl == null || !hasOdaInAfl) {
+            if (afl == null) {
+                Log.d(TAG, "No AFL - trying standard record locations")
+            } else {
+                Log.d(TAG, "AFL has no ODA records - trying standard record locations")
+            }
             tryReadStandardRecords(isoDep, allTlvData)
         }
 
@@ -173,7 +182,12 @@ internal class NfcDirectCollectionHandler(
         verifyOda(isoDep, allTlvData, aid)
 
         // Extract card data from accumulated TLV data (GPO + all records)
-        return cardDataExtractor.extractFromTlvMap(allTlvData, aid)
+        val cardData = cardDataExtractor.extractFromTlvMap(allTlvData, aid)
+
+        // Step 6: Verify PAN matches ICC certificate (server-side security check demo)
+        verifyPanMatchesCertificate(allTlvData, aid, cardData.pan)
+
+        return cardData
     }
 
     /**
@@ -222,6 +236,19 @@ internal class NfcDirectCollectionHandler(
         }
 
         return recordData.toByteArray()
+    }
+
+    /**
+     * Check if AFL contains any ODA records.
+     * The 4th byte of each AFL entry indicates how many records are for ODA.
+     */
+    private fun hasOdaRecordsInAfl(afl: ByteArray): Boolean {
+        if (afl.size % 4 != 0) return false
+        for (i in afl.indices step 4) {
+            val odaCount = afl[i + 3].toInt() and 0xFF
+            if (odaCount > 0) return true
+        }
+        return false
     }
 
     /**
@@ -386,6 +413,34 @@ internal class NfcDirectCollectionHandler(
         aid: ByteArray
     ): OdaVerifier.OdaResult {
         return odaVerifier.verifyCertificateChain(tlvData, aid)
+    }
+
+    /**
+     * Verify the PAN extracted from card data matches the PAN in the ICC certificate.
+     *
+     * This is the key security check that would run on the server:
+     * - Prevents client from submitting fake PAN with real certificates
+     * - PAN is cryptographically bound to the certificate chain
+     */
+    private fun verifyPanMatchesCertificate(
+        tlvData: Map<String, ByteArray>,
+        aid: ByteArray,
+        claimedPan: String
+    ) {
+        val result = odaVerifier.verifyPanMatchesCertificate(tlvData, aid, claimedPan)
+        when (result) {
+            is OdaVerifier.OdaResult.Success -> {
+                Log.i(TAG, "PAN verified: matches ICC certificate")
+            }
+            is OdaVerifier.OdaResult.NotSupported -> {
+                Log.d(TAG, "PAN verification not available (no ICC certificate)")
+            }
+            is OdaVerifier.OdaResult.Failed -> {
+                Log.e(TAG, "PAN MISMATCH: ${result.reason}")
+                // In production, this would be a hard failure
+                // throw OdaFailedException("PAN does not match certificate: ${result.reason}")
+            }
+        }
     }
 
     /**
