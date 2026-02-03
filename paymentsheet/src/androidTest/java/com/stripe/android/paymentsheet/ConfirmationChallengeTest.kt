@@ -20,13 +20,15 @@ import com.stripe.android.testing.FeatureFlagTestRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Tests for confirmation challenge, which includes both passive captcha (hcaptcha_token) and
  * attestation (android_verification_object.android_verification_token) in radar_options.
  */
 internal class ConfirmationChallengeTest {
-    private val testRules: TestRules = TestRules.create()
+    private val networkRule = NetworkRule(validationTimeout = 5.seconds)
+    private val testRules: TestRules = TestRules.create(networkRule = networkRule)
     private val passiveCaptchaFeatureFlagRule = FeatureFlagTestRule(
         featureFlag = FeatureFlags.enablePassiveCaptcha,
         isEnabled = true
@@ -42,8 +44,6 @@ internal class ConfirmationChallengeTest {
         .around(passiveCaptchaFeatureFlagRule)
         .around(attestationFeatureFlagRule)
         .around(testRules)
-
-    private val networkRule = testRules.networkRule
 
     @Test
     fun newPaymentMethod_withBothChallengesEnabled_includesBothTokensInConfirmRequest() =
