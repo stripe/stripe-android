@@ -21,7 +21,8 @@ internal class PassiveChallengeActivityContractTest {
     fun `createIntent creates intent correctly with PassiveChallengeArgs`() {
         val passiveCaptchaParams = PassiveCaptchaParams(
             siteKey = "test_site_key",
-            rqData = "test_rq_data"
+            rqData = "test_rq_data",
+            tokenTimeoutSeconds = null
         )
         val args = PassiveChallengeActivityContract.Args(
             passiveCaptchaParams,

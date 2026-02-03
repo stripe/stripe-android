@@ -16,7 +16,8 @@ class PassiveCaptchaJsonParserTest {
         assertThat(result).isEqualTo(
             PassiveCaptchaParams(
                 siteKey = "test_site_key",
-                rqData = "test_rq_data"
+                rqData = "test_rq_data",
+                tokenTimeoutSeconds = 30
             )
         )
     }
@@ -28,7 +29,8 @@ class PassiveCaptchaJsonParserTest {
         assertThat(result).isEqualTo(
             PassiveCaptchaParams(
                 siteKey = "test_site_key",
-                rqData = null
+                rqData = null,
+                tokenTimeoutSeconds = null
             )
         )
     }
@@ -40,7 +42,8 @@ class PassiveCaptchaJsonParserTest {
         assertThat(result).isEqualTo(
             PassiveCaptchaParams(
                 siteKey = "test_site_key",
-                rqData = null
+                rqData = null,
+                tokenTimeoutSeconds = null
             )
         )
     }
@@ -59,7 +62,8 @@ class PassiveCaptchaJsonParserTest {
         assertThat(result).isEqualTo(
             PassiveCaptchaParams(
                 siteKey = "test_site_key",
-                rqData = null
+                rqData = null,
+                tokenTimeoutSeconds = null
             )
         )
     }
@@ -69,5 +73,18 @@ class PassiveCaptchaJsonParserTest {
         val result = parser.parse(JSONObject("{}"))
 
         assertThat(result).isNull()
+    }
+
+    @Test
+    fun `parse returns PassiveCaptchaParams with tokenTimeoutSeconds when present`() {
+        val result = parser.parse(ElementsSessionFixtures.PASSIVE_CAPTCHA_JSON_WITH_TOKEN_TIMEOUT)
+
+        assertThat(result).isEqualTo(
+            PassiveCaptchaParams(
+                siteKey = "test_site_key",
+                rqData = null,
+                tokenTimeoutSeconds = 60
+            )
+        )
     }
 }
