@@ -1,5 +1,6 @@
 package com.stripe.android.hcaptcha
 
+import android.os.SystemClock
 import androidx.fragment.app.FragmentActivity
 import com.stripe.android.hcaptcha.analytics.CaptchaEventsReporter
 import com.stripe.hcaptcha.HCaptcha
@@ -36,7 +37,7 @@ internal class DefaultHCaptchaService(
                 CachedResult.Failure(result.error)
             }
             is HCaptchaService.Result.Success -> {
-                CachedResult.Success(result.token, createdAt = System.currentTimeMillis())
+                CachedResult.Success(result.token, createdAt = SystemClock.elapsedRealtime())
             }
         }
         cachedResult.emit(update)
@@ -149,7 +150,7 @@ internal class DefaultHCaptchaService(
                     null
                 }
                 is CachedResult.Success -> {
-                    val elapsedSeconds = (System.currentTimeMillis() - cachedResult.createdAt) / 1000
+                    val elapsedSeconds = (SystemClock.elapsedRealtime() - cachedResult.createdAt) / 1000
                     val isExpired = elapsedSeconds >= tokenTimeoutSeconds
                     if (isExpired) {
                         performPassiveHCaptchaHelper(activity, siteKey, rqData)
