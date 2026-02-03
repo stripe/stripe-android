@@ -18,18 +18,31 @@ class OnrampConfiguration {
     private var appearance: LinkAppearance? = null
     private var cryptoCustomerId: String? = null
 
+    /**
+     * Sets the display name of the merchant.
+     */
     fun merchantDisplayName(merchantDisplayName: String) = apply {
         this.merchantDisplayName = merchantDisplayName
     }
 
+    /**
+     * Sets the publishable key of the merchant.
+     */
     fun publishableKey(publishableKey: String) = apply {
         this.publishableKey = publishableKey
     }
 
+    /**
+     * Sets appearance settings for the payment sheet user interface presented by Stripe.
+     * This does have a default appearance.
+     */
     fun appearance(appearance: LinkAppearance) = apply {
         this.appearance = appearance
     }
 
+    /**
+     * Sets the unique crypto customer ID to use.
+     */
     fun cryptoCustomerId(cryptoCustomerId: String?) = apply {
         this.cryptoCustomerId = cryptoCustomerId
     }
