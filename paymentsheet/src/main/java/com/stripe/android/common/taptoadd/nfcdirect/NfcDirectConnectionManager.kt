@@ -47,9 +47,6 @@ internal class NfcDirectConnectionManager(
         get() = nfcAdapter?.isEnabled == true &&
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT
 
-    override val isConnected: Boolean
-        get() = currentIsoDep?.isConnected == true
-
     /**
      * Start listening for NFC card taps.
      *
@@ -58,7 +55,7 @@ internal class NfcDirectConnectionManager(
      *
      * Note: [NfcDirectActivityHolder.set] must be called before this method.
      */
-    override fun connect() {
+    override suspend fun connect(config: TapToAddConnectionManager.ConnectionConfig) {
         // Initialize deferred objects synchronously to avoid race conditions
         // where awaitConnection() or awaitTag() is called before the coroutine runs
         synchronized(this) {
@@ -87,12 +84,6 @@ internal class NfcDirectConnectionManager(
             } catch (e: Exception) {
                 connectionTask?.completeExceptionally(e)
             }
-        }
-    }
-
-    override suspend fun awaitConnection(): Result<Boolean> {
-        return runCatching {
-            isConnected || connectionTask?.await() ?: false
         }
     }
 

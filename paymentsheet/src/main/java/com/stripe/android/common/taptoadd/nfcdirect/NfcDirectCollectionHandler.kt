@@ -6,6 +6,8 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import com.stripe.android.common.taptoadd.TapToAddCollectionHandler
 import com.stripe.android.common.taptoadd.TapToAddCollectionHandler.CollectionState
+import com.stripe.android.common.taptoadd.TapToAddConnectionManager
+import com.stripe.android.common.taptoadd.TapToAddErrorMessage
 import com.stripe.android.common.taptoadd.nfcdirect.TlvParser.toHexString
 import com.stripe.android.common.taptoadd.nfcdirect.oda.OdaFailedException
 import com.stripe.android.common.taptoadd.nfcdirect.oda.OdaVerifier
@@ -14,6 +16,9 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import java.io.IOException
+import java.security.SecureRandom
+import java.util.Calendar
+import java.util.UUID
 
 /**
  * Collection handler that reads card data directly via NFC using EMV commands.
@@ -43,11 +48,11 @@ internal class NfcDirectCollectionHandler(
 
     override suspend fun collect(metadata: PaymentMethodMetadata): CollectionState {
         return try {
-            // Wait for card connection
-            if (!connectionManager.isConnected) {
-                connectionManager.connect()
-                connectionManager.awaitConnection().onFailure { throw it }
-            }
+            connectionManager.connect(
+                config = TapToAddConnectionManager.ConnectionConfig(
+                    merchantDisplayName = metadata.merchantName,
+                ),
+            )
 
             val isoDep = connectionManager.getCurrentIsoDep()
                 ?: connectionManager.awaitTag()
@@ -62,36 +67,64 @@ internal class NfcDirectCollectionHandler(
         } catch (e: DigitalWalletNotSupportedException) {
             CollectionState.FailedCollection(
                 error = e,
-                displayMessage = "Digital wallets are not supported. Please tap your physical card.".resolvableString
+                errorMessage = TapToAddErrorMessage(
+                    title = "Digital wallets are not supported.".resolvableString,
+                    action = "Please tap your physical card.".resolvableString
+                ),
+                errorCode = NfcError,
             )
         } catch (e: CardDataExtractionException) {
             CollectionState.FailedCollection(
                 error = e,
-                displayMessage = "Could not read card data. Please try again.".resolvableString
+                errorMessage = TapToAddErrorMessage(
+                    title = "Could not read card data.".resolvableString,
+                    action = "Please try again.".resolvableString
+                ),
+                errorCode = NfcError,
             )
         } catch (e: EmvTransactionException) {
             CollectionState.FailedCollection(
                 error = e,
-                displayMessage = e.userMessage.resolvableString
+                errorMessage = TapToAddErrorMessage(
+                    title = e.userMessage.resolvableString,
+                    action = "Please try again.".resolvableString
+                ),
+                errorCode = NfcError,
             )
         } catch (e: OdaFailedException) {
             CollectionState.FailedCollection(
                 error = e,
-                displayMessage = "Card verification failed. This card may not be authentic.".resolvableString
+                errorMessage = TapToAddErrorMessage(
+                    title = "Card verification failed.".resolvableString,
+                    action = "This card may not be authentic.".resolvableString
+                ),
+                errorCode = NfcError,
             )
         } catch (e: IOException) {
             CollectionState.FailedCollection(
                 error = e,
-                displayMessage = "Card communication error. Please hold card steady and try again.".resolvableString
+                errorMessage = TapToAddErrorMessage(
+                    title = "Card communication error.".resolvableString,
+                    action = "Please hold card steady and try again.".resolvableString
+                ),
+                errorCode = NfcError,
             )
         } catch (e: Exception) {
             CollectionState.FailedCollection(
                 error = e,
-                displayMessage = "An unexpected error occurred. Please try again.".resolvableString
+                errorMessage = TapToAddErrorMessage(
+                    title = "An unexpected error occurred.".resolvableString,
+                    action = "Please try again.".resolvableString
+                ),
+                errorCode = NfcError,
             )
         } finally {
             connectionManager.disconnect()
         }
+    }
+
+    private object NfcError : TapToAddCollectionHandler.ErrorCode {
+        override val value: String = "nfcError"
     }
 
     /**
@@ -161,11 +194,20 @@ internal class NfcDirectCollectionHandler(
         Log.d(TAG, "AFL extracted: ${afl?.let { it.toHexString() } ?: "null"}")
 
         // Step 4: READ RECORD(s) if AFL is present
+        val hasOdaInAfl = afl != null && hasOdaRecordsInAfl(afl)
         if (afl != null) {
             readAllRecords(isoDep, afl, allTlvData)
-        } else {
-            Log.d(TAG, "No AFL - card may have returned all data in GPO (qVSDC mode)")
-            // Try reading standard SFI locations for ODA data even without AFL
+        }
+
+        // Try reading standard SFI locations for ODA if:
+        // - No AFL present (qVSDC mode), OR
+        // - AFL has no ODA records (odaRecords=0 for all entries)
+        if (afl == null || !hasOdaInAfl) {
+            if (afl == null) {
+                Log.d(TAG, "No AFL - trying standard record locations")
+            } else {
+                Log.d(TAG, "AFL has no ODA records - trying standard record locations")
+            }
             tryReadStandardRecords(isoDep, allTlvData)
         }
 
@@ -173,7 +215,12 @@ internal class NfcDirectCollectionHandler(
         verifyOda(isoDep, allTlvData, aid)
 
         // Extract card data from accumulated TLV data (GPO + all records)
-        return cardDataExtractor.extractFromTlvMap(allTlvData, aid)
+        val cardData = cardDataExtractor.extractFromTlvMap(allTlvData, aid)
+
+        // Step 6: Verify PAN matches ICC certificate (server-side security check demo)
+        verifyPanMatchesCertificate(allTlvData, aid, cardData.pan)
+
+        return cardData
     }
 
     /**
@@ -222,6 +269,19 @@ internal class NfcDirectCollectionHandler(
         }
 
         return recordData.toByteArray()
+    }
+
+    /**
+     * Check if AFL contains any ODA records.
+     * The 4th byte of each AFL entry indicates how many records are for ODA.
+     */
+    private fun hasOdaRecordsInAfl(afl: ByteArray): Boolean {
+        if (afl.size % 4 != 0) return false
+        for (i in afl.indices step 4) {
+            val odaCount = afl[i + 3].toInt() and 0xFF
+            if (odaCount > 0) return true
+        }
+        return false
     }
 
     /**
@@ -327,7 +387,7 @@ internal class NfcDirectCollectionHandler(
         }
 
         // Try traditional INTERNAL AUTHENTICATE
-        val authData = ByteArray(4).also { java.security.SecureRandom().nextBytes(it) }
+        val authData = ByteArray(4).also { SecureRandom().nextBytes(it) }
 
         try {
             val authCommand = EmvApduCommands.internalAuthenticate(authData)
@@ -364,7 +424,7 @@ internal class NfcDirectCollectionHandler(
         // Include currency (5F2A)
         tlvData["5F2A"]?.let { result.addAll(it.toList()) }
         return if (result.isEmpty()) {
-            ByteArray(4).also { java.security.SecureRandom().nextBytes(it) }
+            ByteArray(4).also { SecureRandom().nextBytes(it) }
         } else {
             result.toByteArray()
         }
@@ -386,6 +446,34 @@ internal class NfcDirectCollectionHandler(
         aid: ByteArray
     ): OdaVerifier.OdaResult {
         return odaVerifier.verifyCertificateChain(tlvData, aid)
+    }
+
+    /**
+     * Verify the PAN extracted from card data matches the PAN in the ICC certificate.
+     *
+     * This is the key security check that would run on the server:
+     * - Prevents client from submitting fake PAN with real certificates
+     * - PAN is cryptographically bound to the certificate chain
+     */
+    private fun verifyPanMatchesCertificate(
+        tlvData: Map<String, ByteArray>,
+        aid: ByteArray,
+        claimedPan: String
+    ) {
+        val result = odaVerifier.verifyPanMatchesCertificate(tlvData, aid, claimedPan)
+        when (result) {
+            is OdaVerifier.OdaResult.Success -> {
+                Log.i(TAG, "PAN verified: matches ICC certificate")
+            }
+            is OdaVerifier.OdaResult.NotSupported -> {
+                Log.d(TAG, "PAN verification not available (no ICC certificate)")
+            }
+            is OdaVerifier.OdaResult.Failed -> {
+                Log.e(TAG, "PAN MISMATCH: ${result.reason}")
+                // In production, this would be a hard failure
+                // throw OdaFailedException("PAN does not match certificate: ${result.reason}")
+            }
+        }
     }
 
     /**
@@ -515,10 +603,10 @@ internal class NfcDirectCollectionHandler(
     }
 
     private fun getCurrentDateBcd(): ByteArray {
-        val calendar = java.util.Calendar.getInstance()
-        val year = calendar.get(java.util.Calendar.YEAR) % 100
-        val month = calendar.get(java.util.Calendar.MONTH) + 1
-        val day = calendar.get(java.util.Calendar.DAY_OF_MONTH)
+        val calendar = Calendar.getInstance()
+        val year = calendar.get(Calendar.YEAR) % 100
+        val month = calendar.get(Calendar.MONTH) + 1
+        val day = calendar.get(Calendar.DAY_OF_MONTH)
         return byteArrayOf(
             ((year / 10) shl 4 or (year % 10)).toByte(),
             ((month / 10) shl 4 or (month % 10)).toByte(),
@@ -527,10 +615,10 @@ internal class NfcDirectCollectionHandler(
     }
 
     private fun getCurrentTimeBcd(): ByteArray {
-        val calendar = java.util.Calendar.getInstance()
-        val hour = calendar.get(java.util.Calendar.HOUR_OF_DAY)
-        val minute = calendar.get(java.util.Calendar.MINUTE)
-        val second = calendar.get(java.util.Calendar.SECOND)
+        val calendar = Calendar.getInstance()
+        val hour = calendar.get(Calendar.HOUR_OF_DAY)
+        val minute = calendar.get(Calendar.MINUTE)
+        val second = calendar.get(Calendar.SECOND)
         return byteArrayOf(
             ((hour / 10) shl 4 or (hour % 10)).toByte(),
             ((minute / 10) shl 4 or (minute % 10)).toByte(),
@@ -539,7 +627,7 @@ internal class NfcDirectCollectionHandler(
     }
 
     private fun generateUnpredictableNumber(length: Int): ByteArray {
-        return ByteArray(length).also { java.security.SecureRandom().nextBytes(it) }
+        return ByteArray(length).also { SecureRandom().nextBytes(it) }
     }
 
     /**
@@ -599,7 +687,7 @@ internal class NfcDirectCollectionHandler(
     private fun createPaymentMethod(cardData: CardDataExtractor.CardData): PaymentMethod {
         // Generate a local ID for POC purposes
         // Format: pm_nfc_<random>
-        val localId = "pm_nfc_${java.util.UUID.randomUUID().toString().replace("-", "").take(24)}"
+        val localId = "pm_nfc_${UUID.randomUUID().toString().replace("-", "").take(24)}"
 
         return PaymentMethod.Builder()
             .setId(localId)

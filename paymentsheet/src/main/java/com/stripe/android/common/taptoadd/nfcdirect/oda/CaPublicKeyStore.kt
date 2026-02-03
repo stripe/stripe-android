@@ -127,58 +127,64 @@ internal object CaPublicKeyStore {
     }
 
     private fun addVisaKeys(keys: MutableList<CaPublicKey>) {
-        // Visa RID: A000000003
-        // Index 09 - 1984-bit key
-        keys.add(
-            CaPublicKey(
-                rid = "A000000003",
-                index = "09",
-                modulus = hexToBytes(
-                    "9D912248DE0A4E39C1A7DDE3F6D2588992C1A4095AFBD1824D1BA74847F2BC49" +
-                    "26D2EFD904B4B54954CD189A54C5D1179654F8F9B0D2AB5F0357EB642FEDA95D" +
-                    "3912C6576945FAB897E7062CAA44A4AA06B8FE6E3DBA18AF6AE3738E30429EE9" +
-                    "BE03427C9D64F695FA8CAB4BFE376853EA34AD1D76BFCAD15908C077FFE6DC55" +
-                    "21ECEF5D278A96E26F57359FFAEDA19434B937F1AD999DC5C41EB11935B44C18" +
-                    "100E857F431A4A5A6BB65114F174C2D7B59FDF237D6BB1DD0916E644D709DED5" +
-                    "6481477C75D95CDD68254615F7740EC07F330AC5D67BCD75BF23D28A140826C0" +
-                    "26DBDE971A37CD3EF9B8DF644AC385010501EFC6509D7A41"
-                ),
-                exponent = hexToBytes("03")
-            )
-        )
+        // Visa RID: A000000003 (credit)
+        // Visa US Debit RID: A000000098 (uses same CA keys)
 
-        // Index 08 - 1408-bit key
-        keys.add(
-            CaPublicKey(
-                rid = "A000000003",
-                index = "08",
-                modulus = hexToBytes(
-                    "D9FD6ED75D51D0E30664BD157023EAA1FFA871E4DA65672B863D255E81E137A5" +
-                    "1DE4F72BCC9E44ACE12127F87E263D3AF9DD9CF35CA4A7B01E907000BA85D24954" +
-                    "C2FCA3074825DDD4C0C8F186CB020F683E02F2DEAD3969133F06F7845166ACEB" +
-                    "57CA0FC2603445469811D293BFEFBAFAB57631B3DD91E796BF850A25012F1AE3" +
-                    "8F05AA5C4D6D03B1DC2E568612785938BBC9B3CD3A910C1DA55A5A9218ACE0F7" +
-                    "A21287752682F15832A678D6E1ED0B"
-                ),
-                exponent = hexToBytes("03")
-            )
-        )
+        val visaRids = listOf("A000000003", "A000000098")
 
-        // Index 07 - 1152-bit key
-        keys.add(
-            CaPublicKey(
-                rid = "A000000003",
-                index = "07",
-                modulus = hexToBytes(
-                    "A89F25A56FA6DA258C8CA8B40427D927B4A1EB4D7EA326BBB12F97DED70AE5E4" +
-                    "480FC9C5E8A972177110A1CC318D06D2F8F5C4844AC5FA79A4DC470BB11ED635" +
-                    "699C17081B90F1B984F12E92C1C529276D8AF8EC7F28492097D8CD5BECEA16FE" +
-                    "4088F6CFAB4A1B42328A1B996F9278B0B7E3311CA5EF856C2F888474B83612A8" +
-                    "2E4E00D0CD4069A6783140433D50725F"
-                ),
-                exponent = hexToBytes("03")
+        for (rid in visaRids) {
+            // Index 09 - 1984-bit key
+            keys.add(
+                CaPublicKey(
+                    rid = rid,
+                    index = "09",
+                    modulus = hexToBytes(
+                        "9D912248DE0A4E39C1A7DDE3F6D2588992C1A4095AFBD1824D1BA74847F2BC49" +
+                        "26D2EFD904B4B54954CD189A54C5D1179654F8F9B0D2AB5F0357EB642FEDA95D" +
+                        "3912C6576945FAB897E7062CAA44A4AA06B8FE6E3DBA18AF6AE3738E30429EE9" +
+                        "BE03427C9D64F695FA8CAB4BFE376853EA34AD1D76BFCAD15908C077FFE6DC55" +
+                        "21ECEF5D278A96E26F57359FFAEDA19434B937F1AD999DC5C41EB11935B44C18" +
+                        "100E857F431A4A5A6BB65114F174C2D7B59FDF237D6BB1DD0916E644D709DED5" +
+                        "6481477C75D95CDD68254615F7740EC07F330AC5D67BCD75BF23D28A140826C0" +
+                        "26DBDE971A37CD3EF9B8DF644AC385010501EFC6509D7A41"
+                    ),
+                    exponent = hexToBytes("03")
+                )
             )
-        )
+
+            // Index 08 - 1408-bit key
+            keys.add(
+                CaPublicKey(
+                    rid = rid,
+                    index = "08",
+                    modulus = hexToBytes(
+                        "D9FD6ED75D51D0E30664BD157023EAA1FFA871E4DA65672B863D255E81E137A5" +
+                        "1DE4F72BCC9E44ACE12127F87E263D3AF9DD9CF35CA4A7B01E907000BA85D24954" +
+                        "C2FCA3074825DDD4C0C8F186CB020F683E02F2DEAD3969133F06F7845166ACEB" +
+                        "57CA0FC2603445469811D293BFEFBAFAB57631B3DD91E796BF850A25012F1AE3" +
+                        "8F05AA5C4D6D03B1DC2E568612785938BBC9B3CD3A910C1DA55A5A9218ACE0F7" +
+                        "A21287752682F15832A678D6E1ED0B"
+                    ),
+                    exponent = hexToBytes("03")
+                )
+            )
+
+            // Index 07 - 1152-bit key
+            keys.add(
+                CaPublicKey(
+                    rid = rid,
+                    index = "07",
+                    modulus = hexToBytes(
+                        "A89F25A56FA6DA258C8CA8B40427D927B4A1EB4D7EA326BBB12F97DED70AE5E4" +
+                        "480FC9C5E8A972177110A1CC318D06D2F8F5C4844AC5FA79A4DC470BB11ED635" +
+                        "699C17081B90F1B984F12E92C1C529276D8AF8EC7F28492097D8CD5BECEA16FE" +
+                        "4088F6CFAB4A1B42328A1B996F9278B0B7E3311CA5EF856C2F888474B83612A8" +
+                        "2E4E00D0CD4069A6783140433D50725F"
+                    ),
+                    exponent = hexToBytes("03")
+                )
+            )
+        }
     }
 
     private fun addAmexKeys(keys: MutableList<CaPublicKey>) {
