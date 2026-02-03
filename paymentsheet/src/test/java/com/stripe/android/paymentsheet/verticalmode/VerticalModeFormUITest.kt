@@ -180,6 +180,7 @@ internal class VerticalModeFormUITest {
             metadata = PaymentMethodMetadataFactory.create()
         ) as UiDefinitionFactory.Custom
         val headerInformation = customUiDefinitionFactory.createFormHeaderInformation(
+            metadata = PaymentMethodMetadataFactory.create(),
             customerHasSavedPaymentMethods = customerHasSavedPaymentMethods,
             incentive = null,
         )
