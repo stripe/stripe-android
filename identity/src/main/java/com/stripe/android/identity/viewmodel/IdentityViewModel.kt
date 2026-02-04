@@ -946,8 +946,7 @@ internal class IdentityViewModel(
                 onFailure = {
                     "Failed to retrieve verification page with " +
                         (
-                            "sessionID: ${verificationArgs.verificationSessionId} and ephemeralKey: " +
-                                verificationArgs.ephemeralKeySecret
+                            "sessionID: ${verificationArgs.verificationSessionId}"
                             )
                             .let { msg ->
                                 _verificationPage.postValue(Resource.error(msg, IllegalStateException(msg, it)))
