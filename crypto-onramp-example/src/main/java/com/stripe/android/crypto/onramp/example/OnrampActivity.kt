@@ -79,7 +79,6 @@ import com.stripe.android.crypto.onramp.example.network.SettlementSpeed
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
-import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.model.DateOfBirth

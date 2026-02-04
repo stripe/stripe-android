@@ -31,6 +31,6 @@ internal interface OnrampComponent {
             @BindsInstance application: Application,
             @BindsInstance savedStateHandle: SavedStateHandle,
             @BindsInstance onrampCallbacks: OnrampCallbacks
-            ): OnrampComponent
+        ): OnrampComponent
     }
 }
