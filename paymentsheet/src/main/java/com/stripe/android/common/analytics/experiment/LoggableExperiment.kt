@@ -61,7 +61,7 @@ internal sealed class LoggableExperiment(
             "mobile_sdk_version" to mobileSdkVersion,
             "elements_session_id" to elementsSessionId,
             "mobile_session_id" to mobileSessionId
-        ).filterNotNullValues()
+        ).filterNotNullValues().mapKeys { "dimensions-${it.key}" }
     ) {
         enum class EmailRecognitionSource(val dimension: String) {
             EMAIL("email"),

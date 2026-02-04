@@ -352,7 +352,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             "experiment_retrieved" to experiment.experiment.experimentValue,
             "arb_id" to experiment.arbId,
             "assignment_group" to experiment.group
-        ) + experiment.dimensions.mapKeys { "dimensions-${it.key}" }
+        ) + experiment.dimensions
     }
 
     class ShopPayWebviewLoadAttempt : PaymentSheetEvent() {
