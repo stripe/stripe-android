@@ -12,12 +12,14 @@ internal class PassiveCaptchaJsonParser : ModelJsonParser<PassiveCaptchaParams> 
         }
         return PassiveCaptchaParams(
             siteKey = json.getString(FIELD_SITE_KEY),
-            rqData = StripeJsonUtils.optString(json, FIELD_RQ_DATA)
+            rqData = StripeJsonUtils.optString(json, FIELD_RQ_DATA),
+            tokenTimeoutSeconds = StripeJsonUtils.optInteger(json, FIELD_TOKEN_TIMEOUT_SECONDS)
         )
     }
 
     internal companion object {
         private const val FIELD_SITE_KEY = "site_key"
         private const val FIELD_RQ_DATA = "rqdata"
+        private const val FIELD_TOKEN_TIMEOUT_SECONDS = "token_timeout_seconds"
     }
 }

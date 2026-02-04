@@ -2369,7 +2369,8 @@ internal object ElementsSessionFixtures {
         """
         {
           "site_key": "test_site_key",
-          "rqdata": "test_rq_data"
+          "rqdata": "test_rq_data",
+          "token_timeout_seconds": 30
         }
         """.trimIndent()
     )
@@ -2378,6 +2379,15 @@ internal object ElementsSessionFixtures {
         """
         {
           "site_key": "test_site_key"
+        }
+        """.trimIndent()
+    )
+
+    val PASSIVE_CAPTCHA_JSON_WITH_TOKEN_TIMEOUT = JSONObject(
+        """
+        {
+          "site_key": "test_site_key",
+          "token_timeout_seconds": 60
         }
         """.trimIndent()
     )
@@ -2435,7 +2445,8 @@ internal object ElementsSessionFixtures {
           },
           "passive_captcha": {
             "site_key": "test_site_key",
-            "rqdata": "test_rq_data"
+            "rqdata": "test_rq_data",
+            "token_timeout_seconds": 30
           },
           "flags": {
             "elements_enable_passive_captcha": true

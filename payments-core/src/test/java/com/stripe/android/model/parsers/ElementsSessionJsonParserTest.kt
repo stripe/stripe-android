@@ -1525,7 +1525,8 @@ class ElementsSessionJsonParserTest {
         assertThat(session?.passiveCaptchaParams).isEqualTo(
             PassiveCaptchaParams(
                 siteKey = "test_site_key",
-                rqData = "test_rq_data"
+                rqData = "test_rq_data",
+                tokenTimeoutSeconds = 30
             )
         )
     }

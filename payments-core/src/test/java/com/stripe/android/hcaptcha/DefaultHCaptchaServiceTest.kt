@@ -26,6 +26,8 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.shadows.ShadowSystemClock
+import java.util.concurrent.TimeUnit
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
@@ -39,7 +41,8 @@ internal class DefaultHCaptchaServiceTest {
             service.performPassiveHCaptcha(
                 activity,
                 siteKey = TEST_SITE_KEY,
-                rqData = null
+                rqData = null,
+                tokenTimeoutSeconds = null
             )
 
             hCaptchaProvider.awaitCall()
@@ -54,7 +57,8 @@ internal class DefaultHCaptchaServiceTest {
             service.performPassiveHCaptcha(
                 activity,
                 siteKey = TEST_SITE_KEY,
-                rqData = TEST_RQ_DATA
+                rqData = TEST_RQ_DATA,
+                tokenTimeoutSeconds = null
             )
 
             val configCaptor = argumentCaptor<HCaptchaConfig>()
@@ -79,7 +83,8 @@ internal class DefaultHCaptchaServiceTest {
             val result = service.performPassiveHCaptcha(
                 activity,
                 siteKey = TEST_SITE_KEY,
-                rqData = null
+                rqData = null,
+                tokenTimeoutSeconds = null
             )
 
             assertThat(captchaEventsReporter.awaitCall())
@@ -109,7 +114,8 @@ internal class DefaultHCaptchaServiceTest {
             val result = service.performPassiveHCaptcha(
                 activity,
                 siteKey = TEST_SITE_KEY,
-                rqData = null
+                rqData = null,
+                tokenTimeoutSeconds = null
             )
 
             assertThat(captchaEventsReporter.awaitCall())
@@ -138,7 +144,8 @@ internal class DefaultHCaptchaServiceTest {
             service.performPassiveHCaptcha(
                 activity,
                 siteKey = TEST_SITE_KEY,
-                rqData = null
+                rqData = null,
+                tokenTimeoutSeconds = null
             )
             verify(hCaptchaProvider.awaitCall()).reset()
         }
@@ -153,7 +160,8 @@ internal class DefaultHCaptchaServiceTest {
             service.performPassiveHCaptcha(
                 activity,
                 siteKey = TEST_SITE_KEY,
-                rqData = null
+                rqData = null,
+                tokenTimeoutSeconds = null
             )
 
             verify(hCaptchaProvider.awaitCall()).reset()
@@ -169,7 +177,8 @@ internal class DefaultHCaptchaServiceTest {
                 service.performPassiveHCaptcha(
                     activity,
                     siteKey = TEST_SITE_KEY,
-                    rqData = null
+                    rqData = null,
+                    tokenTimeoutSeconds = null
                 )
             }
 
@@ -190,7 +199,8 @@ internal class DefaultHCaptchaServiceTest {
             val result = service.performPassiveHCaptcha(
                 activity,
                 siteKey = TEST_SITE_KEY,
-                rqData = null
+                rqData = null,
+                tokenTimeoutSeconds = null
             )
 
             assertThat(captchaEventsReporter.awaitCall())
@@ -227,7 +237,8 @@ internal class DefaultHCaptchaServiceTest {
             service.performPassiveHCaptcha(
                 activity,
                 siteKey = TEST_SITE_KEY,
-                rqData = null
+                rqData = null,
+                tokenTimeoutSeconds = null
             )
 
             // Verify a subsequent warmUp call goes through (would be skipped if cache wasn't cleared)
@@ -261,7 +272,8 @@ internal class DefaultHCaptchaServiceTest {
             service.performPassiveHCaptcha(
                 activity,
                 siteKey = TEST_SITE_KEY,
-                rqData = null
+                rqData = null,
+                tokenTimeoutSeconds = null
             )
 
             // Verify a subsequent warmUp call goes through (would be skipped if cache wasn't cleared)
@@ -287,7 +299,8 @@ internal class DefaultHCaptchaServiceTest {
             val result = service.performPassiveHCaptcha(
                 activity,
                 siteKey = TEST_SITE_KEY,
-                rqData = null
+                rqData = null,
+                tokenTimeoutSeconds = null
             )
 
             assertThat(result).isInstanceOf(HCaptchaService.Result.Failure::class.java)
@@ -327,7 +340,8 @@ internal class DefaultHCaptchaServiceTest {
             val result = service.performPassiveHCaptcha(
                 activity,
                 siteKey = TEST_SITE_KEY,
-                rqData = TEST_RQ_DATA
+                rqData = TEST_RQ_DATA,
+                tokenTimeoutSeconds = null
             )
 
             assertThat(captchaEventsReporter.awaitCall())
@@ -366,7 +380,8 @@ internal class DefaultHCaptchaServiceTest {
             val result = service.performPassiveHCaptcha(
                 activity,
                 siteKey = TEST_SITE_KEY,
-                rqData = null
+                rqData = null,
+                tokenTimeoutSeconds = null
             )
 
             assertThat(captchaEventsReporter.awaitCall())
@@ -377,6 +392,60 @@ internal class DefaultHCaptchaServiceTest {
             assertThat(result).isInstanceOf(HCaptchaService.Result.Failure::class.java)
             assertThat((result as HCaptchaService.Result.Failure).error).isEqualTo(expectedException)
             captchaEventsReporter.ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun `performPassiveHCaptcha fetches new token when cached token is expired`() = runTest {
+        testTokenExpiration(
+            elapsedSeconds = 31,
+            tokenTimeoutSeconds = 30,
+            shouldFetchNewToken = true
+        )
+    }
+
+    @Test
+    fun `performPassiveHCaptcha uses cached token when not expired`() = runTest {
+        testTokenExpiration(
+            elapsedSeconds = 29,
+            tokenTimeoutSeconds = 30,
+            shouldFetchNewToken = false
+        )
+    }
+
+    private suspend fun testTokenExpiration(
+        elapsedSeconds: Long,
+        tokenTimeoutSeconds: Int,
+        shouldFetchNewToken: Boolean
+    ) {
+        val warmUpToken = "warm-up-token"
+        val freshToken = "fresh-token"
+
+        TestContext.test {
+            hCaptchaProvider.hCaptchaHandler = SetupSuccessfulHCaptcha(warmUpToken)
+
+            service.warmUp(activity, siteKey = TEST_SITE_KEY, rqData = null)
+            hCaptchaProvider.awaitCall()
+
+            hCaptchaProvider.hCaptchaHandler = SetupSuccessfulHCaptcha(freshToken)
+            ShadowSystemClock.advanceBy(elapsedSeconds, TimeUnit.SECONDS)
+
+            val result = service.performPassiveHCaptcha(
+                activity,
+                siteKey = TEST_SITE_KEY,
+                rqData = null,
+                tokenTimeoutSeconds = tokenTimeoutSeconds
+            )
+
+            if (shouldFetchNewToken) {
+                hCaptchaProvider.awaitCall()
+            }
+
+            val expectedToken = if (shouldFetchNewToken) freshToken else warmUpToken
+            assertThat(result).isInstanceOf(HCaptchaService.Result.Success::class.java)
+            assertThat((result as HCaptchaService.Result.Success).token).isEqualTo(expectedToken)
+
+            hCaptchaProvider.ensureAllEventsConsumed()
         }
     }
 

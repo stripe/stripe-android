@@ -8,13 +8,14 @@ interface HCaptchaService {
     suspend fun warmUp(
         activity: FragmentActivity,
         siteKey: String,
-        rqData: String?
+        rqData: String?,
     )
 
     suspend fun performPassiveHCaptcha(
         activity: FragmentActivity,
         siteKey: String,
-        rqData: String?
+        rqData: String?,
+        tokenTimeoutSeconds: Int?
     ): Result
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
