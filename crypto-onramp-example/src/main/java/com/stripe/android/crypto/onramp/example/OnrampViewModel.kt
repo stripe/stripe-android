@@ -55,18 +55,17 @@ internal class OnrampViewModel(
     savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) {
 
-    private val callbacks = OnrampCallbacks(
-        authenticateUserCallback = ::onAuthenticateUserResult,
-        verifyIdentityCallback = ::onVerifyIdentityResult,
-        verifyKycCallback = ::onVerifyKycResult,
-        checkoutCallback = ::onCheckoutResult,
-        collectPaymentCallback = ::onCollectPaymentResult,
-        authorizeCallback = ::onAuthorizeResult,
-        onrampSessionClientSecretProvider = {
+    private val callbacks = OnrampCallbacks()
+        .authenticateUserCallback(callback = ::onAuthenticateUserResult)
+        .verifyIdentityCallback(callback = ::onVerifyIdentityResult)
+        .verifyKycCallback(callback = ::onVerifyKycResult)
+        .checkoutCallback(callback = ::onCheckoutResult)
+        .collectPaymentCallback(callback = ::onCollectPaymentResult)
+        .authorizeCallback(callback = ::onAuthorizeResult)
+        .onrampSessionClientSecretProvider {
             val sessionId = checkoutEvent.value?.sessionId ?: ""
             checkoutWithBackend(sessionId)
         }
-    )
 
     val onrampCoordinator: OnrampCoordinator =
         OnrampCoordinator
