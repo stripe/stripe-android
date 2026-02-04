@@ -35,6 +35,7 @@ import javax.inject.Inject
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class OnrampCoordinator @Inject internal constructor(
     private val interactor: OnrampInteractor,
+    private val onrampCallbacks: OnrampCallbacks,
     private val presenterComponentFactory: OnrampPresenterComponent.Factory,
 ) {
 
@@ -140,15 +141,13 @@ class OnrampCoordinator @Inject internal constructor(
      * @return A presenter instance for handling Link UI operations.
      */
     fun createPresenter(
-        activity: ComponentActivity,
-        onrampCallbacks: OnrampCallbacks
+        activity: ComponentActivity
     ): Presenter {
         return presenterComponentFactory
             .build(
                 activity = activity,
                 lifecycleOwner = activity,
                 activityResultRegistryOwner = activity,
-                onrampCallbacks = onrampCallbacks.build(),
             )
             .presenter
     }
@@ -212,20 +211,11 @@ class OnrampCoordinator @Inject internal constructor(
          * The result will be delivered through the checkoutCallback provided in OnrampCallbacks.
          *
          * @param onrampSessionId The onramp session identifier.
-         * @param checkoutHandler An async closure that calls your backend to perform a checkout.
-         *     Your backend should call Stripe's `/v1/crypto/onramp_sessions/:id/checkout`
-         *     endpoint with the onramp session ID. The closure should return the onramp session client secret
-         *     on success, or throw an Error on failure. This closure may be called twice: once initially,
-         *     and once more after handling any required authentication.
          */
         fun performCheckout(
             onrampSessionId: String,
-            checkoutHandler: suspend () -> String
         ) {
-            coordinator.performCheckout(
-                onrampSessionId = onrampSessionId,
-                checkoutHandler = checkoutHandler
-            )
+            coordinator.performCheckout(onrampSessionId = onrampSessionId)
         }
     }
 
@@ -242,13 +232,15 @@ class OnrampCoordinator @Inject internal constructor(
          */
         fun build(
             application: Application,
-            savedStateHandle: SavedStateHandle
+            savedStateHandle: SavedStateHandle,
+            onrampCallbacks: OnrampCallbacks
         ): OnrampCoordinator {
             val onrampComponent: OnrampComponent =
                 DaggerOnrampComponent.factory()
                     .build(
                         application = application,
-                        savedStateHandle = savedStateHandle
+                        savedStateHandle = savedStateHandle,
+                        onrampCallbacks = onrampCallbacks
                     )
             return onrampComponent.onrampCoordinator
         }
