@@ -8,5 +8,6 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class PassiveCaptchaParams(
     val siteKey: String,
-    val rqData: String?
+    val rqData: String?,
+    val tokenTimeoutSeconds: Int?
 ) : StripeModel
