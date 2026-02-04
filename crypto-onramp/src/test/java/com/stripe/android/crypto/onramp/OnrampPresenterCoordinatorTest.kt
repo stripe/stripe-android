@@ -92,7 +92,6 @@ class OnrampPresenterCoordinatorTest {
             .authorizeCallback {}
             .verifyKycCallback {}
             .onrampSessionClientSecretProvider(onrampSessionClientSecretProvider)
-            .build()
 
         return OnrampPresenterCoordinator(
             linkController = linkController,
