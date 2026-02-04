@@ -40,6 +40,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
 @OptIn(TapToAddPreview::class)
@@ -448,6 +449,66 @@ class DefaultTapToAddConnectionManagerTest {
     }
 
     @Test
+    fun `connect completes successfully on discovery if already connected to reader`() {
+        val connectedReader = Reader()
+        val exception = TerminalException(
+            errorCode = TerminalErrorCode.ALREADY_CONNECTED_TO_READER,
+            errorMessage = "Already connected!"
+        )
+
+        test(
+            terminalInstance = mock {
+                mockSupportedReaderResult(ReaderSupportResult.Supported)
+                mockReaderCall()
+                mockDiscoverCall()
+            }
+        ) {
+            manager.connect()
+
+            whenever(terminalInstance.connectedReader).thenReturn(connectedReader)
+
+            captureDiscoveryCallback().onFailure(exception)
+
+            val result = manager.awaitConnection()
+            assertThat(result.isSuccess).isTrue()
+            assertThat(result.getOrNull()).isTrue()
+        }
+    }
+
+    @Test
+    fun `connect completes successfully on connect if already connected to reader`() {
+        TerminalLocationHolder.locationId = "tml_123"
+        val connectedReader = Reader()
+        val exception = TerminalException(
+            errorCode = TerminalErrorCode.ALREADY_CONNECTED_TO_READER,
+            errorMessage = "Already connected!"
+        )
+
+        test(
+            terminalInstance = mock {
+                mockSupportedReaderResult(ReaderSupportResult.Supported)
+                mockReaderCall()
+                mockDiscoverCall(
+                    mock<Cancelable> {
+                        on { isCompleted } doReturn false
+                    }
+                )
+            }
+        ) {
+            manager.connect()
+
+            whenever(terminalInstance.connectedReader).thenReturn(connectedReader)
+
+            captureDiscoveryListener().onUpdateDiscoveredReaders(listOf(connectedReader))
+            captureReaderCallback().onFailure(exception)
+
+            val result = manager.awaitConnection()
+            assertThat(result.isSuccess).isTrue()
+            assertThat(result.getOrNull()).isTrue()
+        }
+    }
+
+    @Test
     fun `await returns true when if connected`() = test(
         terminalInstance = mock {
             mockReaderCall(Reader())
@@ -578,6 +639,18 @@ class DefaultTapToAddConnectionManagerTest {
                 any<Callback>(),
             )
         } doThrow exception
+    }
+
+    private fun Scenario.captureDiscoveryCallback(): Callback {
+        val discoveryCallbackCaptor = argumentCaptor<Callback>()
+
+        verify(terminalInstance).discoverReaders(
+            any<DiscoveryConfiguration.TapToPayDiscoveryConfiguration>(),
+            any<DiscoveryListener>(),
+            discoveryCallbackCaptor.capture(),
+        )
+
+        return discoveryCallbackCaptor.firstValue
     }
 
     private fun KStubbing<Terminal>.mockReaderCall(
