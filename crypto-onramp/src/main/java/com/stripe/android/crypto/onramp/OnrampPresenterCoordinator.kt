@@ -166,17 +166,12 @@ internal class OnrampPresenterCoordinator @Inject constructor(
      * Performs the checkout flow for a crypto onramp session, handling any required authentication steps.
      *
      * @param onrampSessionId The onramp session identifier.
-     * @param checkoutHandler An async closure that calls your backend to perform a checkout.
-     *     Your backend should call Stripe's `/v1/crypto/onramp_sessions/:id/checkout` endpoint with the session ID.
-     *     The closure should return the onramp session client secret on success, or throw an Error on failure.
-     *     This closure may be called twice: once initially, and once more after handling any required authentication.
      */
     fun performCheckout(
-        onrampSessionId: String,
-        checkoutHandler: suspend () -> String
+        onrampSessionId: String
     ) {
         coroutineScope.launch {
-            interactor.startCheckout(onrampSessionId, checkoutHandler)
+            interactor.startCheckout(onrampSessionId, onrampCallbacks.onrampSessionClientSecretProvider)
         }
     }
 

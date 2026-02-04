@@ -24,6 +24,7 @@ import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthenticateResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
+import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
@@ -54,10 +55,23 @@ internal class OnrampViewModel(
     savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) {
 
+    private val callbacks = OnrampCallbacks(
+        authenticateUserCallback = ::onAuthenticateUserResult,
+        verifyIdentityCallback = ::onVerifyIdentityResult,
+        verifyKycCallback = ::onVerifyKycResult,
+        checkoutCallback = ::onCheckoutResult,
+        collectPaymentCallback = ::onCollectPaymentResult,
+        authorizeCallback = ::onAuthorizeResult,
+        onrampSessionClientSecretProvider = {
+            val sessionId = checkoutEvent.value?.sessionId ?: ""
+            checkoutWithBackend(sessionId)
+        }
+    )
+
     val onrampCoordinator: OnrampCoordinator =
         OnrampCoordinator
             .Builder()
-            .build(application, savedStateHandle)
+            .build(application, savedStateHandle, callbacks)
 
     private val testBackendRepository = TestBackendRepository()
 

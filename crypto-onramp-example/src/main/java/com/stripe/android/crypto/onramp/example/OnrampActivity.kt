@@ -101,17 +101,8 @@ internal class OnrampActivity : ComponentActivity() {
 
         FeatureFlags.nativeLinkEnabled.setEnabled(true)
 
-        val callbacks = OnrampCallbacks(
-            authenticateUserCallback = viewModel::onAuthenticateUserResult,
-            verifyIdentityCallback = viewModel::onVerifyIdentityResult,
-            verifyKycCallback = viewModel::onVerifyKycResult,
-            checkoutCallback = viewModel::onCheckoutResult,
-            collectPaymentCallback = viewModel::onCollectPaymentResult,
-            authorizeCallback = viewModel::onAuthorizeResult
-        )
-
         onrampPresenter = viewModel.onrampCoordinator
-            .createPresenter(this, callbacks)
+            .createPresenter(this)
 
         // ViewModel notifies UI to launch checkout flow.
         // Note checkout requires an Activity context since it might launch UI to handle next actions (e.g. 3DS2).
@@ -120,7 +111,6 @@ internal class OnrampActivity : ComponentActivity() {
                 event?.let {
                     onrampPresenter.performCheckout(
                         onrampSessionId = event.sessionId,
-                        checkoutHandler = { viewModel.checkoutWithBackend(event.sessionId) }
                     )
                     viewModel.clearCheckoutEvent()
                 }

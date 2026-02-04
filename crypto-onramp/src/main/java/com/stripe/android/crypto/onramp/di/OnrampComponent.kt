@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.crypto.onramp.OnrampCoordinator
+import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
 import dagger.BindsInstance
@@ -28,7 +29,8 @@ internal interface OnrampComponent {
     interface Factory {
         fun build(
             @BindsInstance application: Application,
-            @BindsInstance savedStateHandle: SavedStateHandle
-        ): OnrampComponent
+            @BindsInstance savedStateHandle: SavedStateHandle,
+            @BindsInstance onrampCallbacks: OnrampCallbacks
+            ): OnrampComponent
     }
 }

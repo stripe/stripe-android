@@ -31,19 +31,17 @@ class OnrampPresenterCoordinatorTest {
     private val activity = Robolectric.buildActivity(ComponentActivity::class.java).create().get()
     private val testScope = TestScope()
     private val checkoutCallback = mock<OnrampCheckoutCallback>()
+    private val onrampSessionClientSecretProvider: suspend () -> String = { "cos_test_secret" }
 
     @Test
     fun performCheckout_successfulPayment_callsCallbackWithCompleted() = runTest {
         // Given
         val onrampSessionId = "cos_test_session_id"
-        val sessionClientSecret = "cos_test_secret"
-        val onrampSessionClientSecretProvider: suspend () -> String = { sessionClientSecret }
 
         val onrampStateFlow = MutableStateFlow(OnrampState())
         val coordinator = createCoordinator(onrampStateFlow)
 
-        // When
-        coordinator.performCheckout(onrampSessionId, onrampSessionClientSecretProvider)
+        coordinator.performCheckout(onrampSessionId)
         testScope.testScheduler.advanceUntilIdle()
 
         // Verify startCheckout was called
@@ -97,7 +95,8 @@ class OnrampPresenterCoordinatorTest {
                 authenticateUserCallback = {},
                 collectPaymentCallback = {},
                 authorizeCallback = {},
-                verifyKycCallback = {}
+                verifyKycCallback = {},
+                onrampSessionClientSecretProvider = onrampSessionClientSecretProvider
             ),
             coroutineScope = testScope
         )
