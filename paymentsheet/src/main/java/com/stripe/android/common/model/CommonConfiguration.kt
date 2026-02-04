@@ -35,7 +35,7 @@ internal data class CommonConfiguration(
     val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
     val shopPayConfiguration: PaymentSheet.ShopPayConfiguration?,
     val googlePlacesApiKey: String?,
-    val linkAppearance: LinkAppearance? = null,
+    val linkAppearance: LinkAppearance.State? = null,
     val termsDisplay: Map<PaymentMethod.Type, TermsDisplay>,
     val walletButtons: PaymentSheet.WalletButtonsConfiguration?,
     val opensCardScannerAutomatically: Boolean,

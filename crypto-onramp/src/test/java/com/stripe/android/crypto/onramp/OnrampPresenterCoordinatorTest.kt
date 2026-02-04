@@ -86,19 +86,21 @@ class OnrampPresenterCoordinatorTest {
 
         whenever(interactor.state).thenReturn(onrampStateFlow)
 
+        val callbacks = OnrampCallbacks()
+            .checkoutCallback(checkoutCallback)
+            .verifyIdentityCallback {}
+            .authenticateUserCallback {}
+            .collectPaymentCallback {}
+            .authorizeCallback {}
+            .verifyKycCallback {}
+            .build()
+
         return OnrampPresenterCoordinator(
             linkController = linkController,
             interactor = interactor,
             lifecycleOwner = lifecycleOwner,
             activity = activity,
-            onrampCallbacks = OnrampCallbacks(
-                checkoutCallback = checkoutCallback,
-                verifyIdentityCallback = {},
-                authenticateUserCallback = {},
-                collectPaymentCallback = {},
-                authorizeCallback = {},
-                verifyKycCallback = {}
-            ),
+            onrampCallbacks = callbacks,
             coroutineScope = testScope
         )
     }

@@ -101,14 +101,13 @@ internal class OnrampActivity : ComponentActivity() {
 
         FeatureFlags.nativeLinkEnabled.setEnabled(true)
 
-        val callbacks = OnrampCallbacks(
-            authenticateUserCallback = viewModel::onAuthenticateUserResult,
-            verifyIdentityCallback = viewModel::onVerifyIdentityResult,
-            verifyKycCallback = viewModel::onVerifyKycResult,
-            checkoutCallback = viewModel::onCheckoutResult,
-            collectPaymentCallback = viewModel::onCollectPaymentResult,
-            authorizeCallback = viewModel::onAuthorizeResult
-        )
+        val callbacks = OnrampCallbacks()
+            .authenticateUserCallback(callback = viewModel::onAuthenticateUserResult)
+            .verifyIdentityCallback(callback = viewModel::onVerifyIdentityResult)
+            .verifyKycCallback(callback = viewModel::onVerifyKycResult)
+            .checkoutCallback(callback = viewModel::onCheckoutResult)
+            .collectPaymentCallback(callback = viewModel::onCollectPaymentResult)
+            .authorizeCallback(callback = viewModel::onAuthorizeResult)
 
         onrampPresenter = viewModel.onrampCoordinator
             .createPresenter(this, callbacks)

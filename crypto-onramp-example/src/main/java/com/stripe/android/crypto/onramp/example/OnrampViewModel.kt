@@ -104,24 +104,26 @@ internal class OnrampViewModel(
     init {
         viewModelScope.launch {
             @Suppress("MagicNumber", "MaxLineLength")
-            val configuration = OnrampConfiguration(
-                merchantDisplayName = "Onramp Example",
-                publishableKey = "pk_test_51K9W3OHMaDsveWq0oLP0ZjldetyfHIqyJcz27k2BpMGHxu9v9Cei2tofzoHncPyk3A49jMkFEgTOBQyAMTUffRLa00xzzARtZO",
-                appearance = LinkAppearance(
-                    lightColors = LinkAppearance.Colors(
-                        primary = Color.Blue,
-                        contentOnPrimary = Color.White,
-                        borderSelected = Color.Red
-                    ),
-                    darkColors = LinkAppearance.Colors(
-                        primary = Color(0xFF9886E6),
-                        contentOnPrimary = Color(0xFF222222),
-                        borderSelected = Color.White
-                    ),
-                    style = LinkAppearance.Style.ALWAYS_DARK,
-                    primaryButton = LinkAppearance.PrimaryButton()
+            val configuration = OnrampConfiguration()
+                .merchantDisplayName(merchantDisplayName = "Onramp Example")
+                .publishableKey(publishableKey = "pk_test_51K9W3OHMaDsveWq0oLP0ZjldetyfHIqyJcz27k2BpMGHxu9v9Cei2tofzoHncPyk3A49jMkFEgTOBQyAMTUffRLa00xzzARtZO")
+                .appearance(
+                    appearance = LinkAppearance()
+                        .lightColors(
+                            LinkAppearance.Colors()
+                                .primary(Color(0xFF635BFF))
+                                .contentOnPrimary(Color.White)
+                                .borderSelected(Color.Black)
+                        )
+                        .darkColors(
+                            LinkAppearance.Colors()
+                                .primary(Color(0xFF9886E6))
+                                .contentOnPrimary(Color(0xFF222222))
+                                .borderSelected(Color.White)
+                        )
+                        .style(LinkAppearance.Style.ALWAYS_DARK)
+                        .primaryButton(LinkAppearance.PrimaryButton())
                 )
-            )
 
             onrampCoordinator.configure(configuration = configuration)
 

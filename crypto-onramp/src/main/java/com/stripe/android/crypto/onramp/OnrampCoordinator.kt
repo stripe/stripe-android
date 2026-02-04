@@ -46,7 +46,7 @@ class OnrampCoordinator @Inject internal constructor(
     suspend fun configure(
         configuration: OnrampConfiguration,
     ): OnrampConfigurationResult {
-        return interactor.configure(configuration)
+        return interactor.configure(configuration.build())
     }
 
     /**
@@ -148,7 +148,7 @@ class OnrampCoordinator @Inject internal constructor(
                 activity = activity,
                 lifecycleOwner = activity,
                 activityResultRegistryOwner = activity,
-                onrampCallbacks = onrampCallbacks,
+                onrampCallbacks = onrampCallbacks.build(),
             )
             .presenter
     }
