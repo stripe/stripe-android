@@ -1,9 +1,13 @@
 package com.stripe.android.paymentsheet
 
 import androidx.test.espresso.intent.rule.IntentsRule
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
@@ -11,7 +15,6 @@ import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
-import com.stripe.android.paymentsheet.utils.ConfirmationType
 import com.stripe.android.paymentsheet.utils.PaymentSheetTestRunnerContext
 import com.stripe.android.paymentsheet.utils.ProductIntegrationTestRunnerContext
 import com.stripe.android.paymentsheet.utils.ProductIntegrationType
@@ -23,12 +26,14 @@ import com.stripe.android.testing.FeatureFlagTestRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
+import org.junit.runner.RunWith
 import kotlin.time.Duration.Companion.seconds
 
 /**
  * Tests for confirmation challenge, which includes both passive captcha (hcaptcha_token) and
  * attestation (android_verification_object.android_verification_token) in radar_options.
  */
+@RunWith(TestParameterInjector::class)
 internal class ConfirmationChallengeTest {
     private val networkRule = NetworkRule(validationTimeout = 5.seconds)
     private val testRules: TestRules = TestRules.create(networkRule = networkRule)
@@ -48,95 +53,53 @@ internal class ConfirmationChallengeTest {
         .around(attestationFeatureFlagRule)
         .around(testRules)
 
-    @Test
-    fun newPaymentMethod_withBothChallengesEnabled_includesBothTokensInConfirmRequest() =
-        runProductIntegrationTest(
-            networkRule = networkRule,
-            integrationType = ProductIntegrationType.PaymentSheet,
-            resultCallback = ::assertCompleted,
-        ) { testContext ->
-            setupBothChallengesEnabledTest(testContext)
-        }
+    @TestParameter(valuesProvider = ChallengeConfigProvider::class)
+    lateinit var challengeConfig: ChallengeConfig
 
+    /**
+     * Tests that the correct challenge tokens are included in the payment intent confirm request
+     * when using a new payment method with intent-first flow.
+     */
     @Test
-    fun newPaymentMethod_withOnlyPassiveCaptchaEnabled_includesOnlyHCaptchaTokenInConfirmRequest() {
-        passiveCaptchaFeatureFlagRule.setEnabled(true)
-        attestationFeatureFlagRule.setEnabled(false)
+    fun newPaymentMethod_includesCorrectTokensInConfirmRequest() {
+        challengeConfig.configureFeatureFlags(passiveCaptchaFeatureFlagRule, attestationFeatureFlagRule)
         runProductIntegrationTest(
             networkRule = networkRule,
             integrationType = ProductIntegrationType.PaymentSheet,
             resultCallback = ::assertCompleted,
         ) { testContext ->
-            setupOnlyPassiveCaptchaEnabledTest(testContext)
+            setupIntentFirstTest(testContext)
         }
     }
 
+    /**
+     * Tests that the correct challenge tokens are included in the payment method create request
+     * when using deferred client-side confirmation with CreateIntentCallback.
+     */
     @Test
-    fun newPaymentMethod_withOnlyAttestationEnabled_includesOnlyAttestationTokenInConfirmRequest() {
-        attestationFeatureFlagRule.setEnabled(true)
-        passiveCaptchaFeatureFlagRule.setEnabled(false)
-        runProductIntegrationTest(
-            networkRule = networkRule,
-            integrationType = ProductIntegrationType.PaymentSheet,
-            resultCallback = ::assertCompleted,
-        ) { testContext ->
-            setupOnlyAttestationEnabledTest(testContext)
-        }
-    }
-
-    @Test
-    fun paymentMethodCreation_withBothChallengesEnabled_includesBothTokensInCreateRequest() =
+    fun paymentMethodCreation_includesCorrectTokensInCreateRequest() {
+        challengeConfig.configureFeatureFlags(passiveCaptchaFeatureFlagRule, attestationFeatureFlagRule)
         runProductIntegrationTest(
             networkRule = networkRule,
             integrationType = ProductIntegrationType.PaymentSheet,
             resultCallback = ::assertCompleted,
             builder = {
-                ConfirmationType.DeferredClientSideConfirmation().createIntentCallback?.let {
-                    createIntentCallback(it)
+                createIntentCallback { _, _ ->
+                    CreateIntentResult.Success(clientSecret = "pi_example_secret_example")
                 }
             }
         ) { testContext ->
-            setupBothChallengesEnabledDeferredTest(testContext)
-        }
-
-    @Test
-    fun paymentMethodCreation_withOnlyPassiveCaptchaEnabled_includesOnlyHCaptchaTokenInCreateRequest() {
-        passiveCaptchaFeatureFlagRule.setEnabled(true)
-        attestationFeatureFlagRule.setEnabled(false)
-        runProductIntegrationTest(
-            networkRule = networkRule,
-            integrationType = ProductIntegrationType.PaymentSheet,
-            resultCallback = ::assertCompleted,
-            builder = {
-                ConfirmationType.DeferredClientSideConfirmation().createIntentCallback?.let {
-                    createIntentCallback(it)
-                }
-            }
-        ) { testContext ->
-            setupOnlyPassiveCaptchaEnabledDeferredTest(testContext)
+            setupDeferredTest(testContext)
         }
     }
 
+    /**
+     * Tests that the correct challenge tokens are included in the confirmation token create request
+     * when using deferred confirmation with CreateIntentWithConfirmationTokenCallback.
+     */
     @Test
-    fun paymentMethodCreation_withOnlyAttestationEnabled_includesOnlyAttestationTokenInCreateRequest() {
-        attestationFeatureFlagRule.setEnabled(true)
-        passiveCaptchaFeatureFlagRule.setEnabled(false)
-        runProductIntegrationTest(
-            networkRule = networkRule,
-            integrationType = ProductIntegrationType.PaymentSheet,
-            resultCallback = ::assertCompleted,
-            builder = {
-                ConfirmationType.DeferredClientSideConfirmation().createIntentCallback?.let {
-                    createIntentCallback(it)
-                }
-            }
-        ) { testContext ->
-            setupOnlyAttestationEnabledDeferredTest(testContext)
-        }
-    }
-
-    @Test
-    fun confirmationToken_withBothChallengesEnabled_includesBothTokensInConfirmationTokenRequest() =
+    fun confirmationToken_includesCorrectTokensInConfirmationTokenRequest() {
+        challengeConfig.configureFeatureFlags(passiveCaptchaFeatureFlagRule, attestationFeatureFlagRule)
         runPaymentSheetTest(
             networkRule = networkRule,
             builder = {
@@ -148,150 +111,41 @@ internal class ConfirmationChallengeTest {
             },
             resultCallback = ::assertCompleted,
         ) { testContext ->
-            setupBothChallengesEnabledConfirmationTokenTest(testContext)
-        }
-
-    @Test
-    fun confirmationToken_withOnlyPassiveCaptchaEnabled_includesOnlyHCaptchaTokenInConfirmationTokenRequest() {
-        passiveCaptchaFeatureFlagRule.setEnabled(true)
-        attestationFeatureFlagRule.setEnabled(false)
-        runPaymentSheetTest(
-            networkRule = networkRule,
-            builder = {
-                createIntentCallback(
-                    callback = CreateIntentWithConfirmationTokenCallback { _ ->
-                        CreateIntentResult.Success("pi_example_secret_example")
-                    }
-                )
-            },
-            resultCallback = ::assertCompleted,
-        ) { testContext ->
-            setupOnlyPassiveCaptchaEnabledConfirmationTokenTest(testContext)
+            setupConfirmationTokenTest(testContext)
         }
     }
 
-    @Test
-    fun confirmationToken_withOnlyAttestationEnabled_includesOnlyAttestationTokenInConfirmationTokenRequest() {
-        attestationFeatureFlagRule.setEnabled(true)
-        passiveCaptchaFeatureFlagRule.setEnabled(false)
-        runPaymentSheetTest(
-            networkRule = networkRule,
-            builder = {
-                createIntentCallback(
-                    callback = CreateIntentWithConfirmationTokenCallback { _ ->
-                        CreateIntentResult.Success("pi_example_secret_example")
-                    }
-                )
-            },
-            resultCallback = ::assertCompleted,
-        ) { testContext ->
-            setupOnlyAttestationEnabledConfirmationTokenTest(testContext)
-        }
-    }
-
-    private fun setupBothChallengesEnabledTest(testContext: ProductIntegrationTestRunnerContext) {
-        enqueueElementsSessionWithBothChallengesEnabled(networkRule)
+    private fun setupIntentFirstTest(testContext: ProductIntegrationTestRunnerContext) {
+        challengeConfig.enqueueElementsSession(networkRule, isDeferredIntent = false)
 
         testContext.launch()
 
         val paymentSheetPage = createPaymentSheetPage()
         paymentSheetPage.fillOutCardDetails()
 
-        enqueuePaymentIntentConfirmWithBothTokens()
+        challengeConfig.enqueuePaymentIntentConfirm(networkRule)
         paymentSheetPage.clickPrimaryButton()
     }
 
-    private fun setupOnlyPassiveCaptchaEnabledTest(testContext: ProductIntegrationTestRunnerContext) {
-        enqueueElementsSessionWithOnlyPassiveCaptchaEnabled(networkRule)
-
-        testContext.launch()
-
-        val paymentSheetPage = createPaymentSheetPage()
-        paymentSheetPage.fillOutCardDetails()
-
-        enqueuePaymentIntentConfirmWithOnlyHCaptchaToken()
-        paymentSheetPage.clickPrimaryButton()
-    }
-
-    private fun setupOnlyAttestationEnabledTest(testContext: ProductIntegrationTestRunnerContext) {
-        enqueueElementsSessionWithOnlyAttestationEnabled(networkRule)
-
-        testContext.launch()
-
-        val paymentSheetPage = createPaymentSheetPage()
-        paymentSheetPage.fillOutCardDetails()
-
-        enqueuePaymentIntentConfirmWithOnlyAttestationToken()
-        paymentSheetPage.clickPrimaryButton()
-    }
-
-    private fun setupBothChallengesEnabledDeferredTest(testContext: ProductIntegrationTestRunnerContext) {
-        enqueueElementsSessionWithBothChallengesEnabled(networkRule, isDeferredIntent = true)
+    private fun setupDeferredTest(testContext: ProductIntegrationTestRunnerContext) {
+        challengeConfig.enqueueElementsSession(networkRule, isDeferredIntent = true)
         testContext.launch(isDeferredIntent = true)
 
         navigateToFormForLpm()
 
-        enqueuePaymentMethodCreateWithBothTokens()
+        challengeConfig.enqueuePaymentMethodCreate(networkRule)
         enqueueDeferredIntentRequests()
 
         createPaymentSheetPage().clickPrimaryButton()
     }
 
-    private fun setupOnlyPassiveCaptchaEnabledDeferredTest(testContext: ProductIntegrationTestRunnerContext) {
-        enqueueElementsSessionWithOnlyPassiveCaptchaEnabled(networkRule, isDeferredIntent = true)
-        testContext.launch(isDeferredIntent = true)
-
-        navigateToFormForLpm()
-
-        enqueuePaymentMethodCreateWithOnlyHCaptchaToken()
-        enqueueDeferredIntentRequests()
-
-        createPaymentSheetPage().clickPrimaryButton()
-    }
-
-    private fun setupOnlyAttestationEnabledDeferredTest(testContext: ProductIntegrationTestRunnerContext) {
-        enqueueElementsSessionWithOnlyAttestationEnabled(networkRule, isDeferredIntent = true)
-        testContext.launch(isDeferredIntent = true)
-
-        navigateToFormForLpm()
-
-        enqueuePaymentMethodCreateWithOnlyAttestationToken()
-        enqueueDeferredIntentRequests()
-
-        createPaymentSheetPage().clickPrimaryButton()
-    }
-
-    private fun setupBothChallengesEnabledConfirmationTokenTest(testContext: PaymentSheetTestRunnerContext) {
-        enqueueElementsSessionWithBothChallengesEnabled(networkRule, isDeferredIntent = true)
+    private fun setupConfirmationTokenTest(testContext: PaymentSheetTestRunnerContext) {
+        challengeConfig.enqueueElementsSession(networkRule, isDeferredIntent = true)
         presentPaymentSheetWithIntentConfiguration(testContext)
 
         navigateToFormForLpm()
 
-        enqueueConfirmationTokenCreateWithBothTokens()
-        enqueueConfirmationTokenIntentRequests()
-
-        createPaymentSheetPage().clickPrimaryButton()
-    }
-
-    private fun setupOnlyPassiveCaptchaEnabledConfirmationTokenTest(testContext: PaymentSheetTestRunnerContext) {
-        enqueueElementsSessionWithOnlyPassiveCaptchaEnabled(networkRule, isDeferredIntent = true)
-        presentPaymentSheetWithIntentConfiguration(testContext)
-
-        navigateToFormForLpm()
-
-        enqueueConfirmationTokenCreateWithOnlyHCaptchaToken()
-        enqueueConfirmationTokenIntentRequests()
-
-        createPaymentSheetPage().clickPrimaryButton()
-    }
-
-    private fun setupOnlyAttestationEnabledConfirmationTokenTest(testContext: PaymentSheetTestRunnerContext) {
-        enqueueElementsSessionWithOnlyAttestationEnabled(networkRule, isDeferredIntent = true)
-        presentPaymentSheetWithIntentConfiguration(testContext)
-
-        navigateToFormForLpm()
-
-        enqueueConfirmationTokenCreateWithOnlyAttestationToken()
+        challengeConfig.enqueueConfirmationTokenCreate(networkRule)
         enqueueConfirmationTokenIntentRequests()
 
         createPaymentSheetPage().clickPrimaryButton()
@@ -322,150 +176,6 @@ internal class ConfirmationChallengeTest {
 
     private fun createPaymentSheetPage() = PaymentSheetPage(testRules.compose)
 
-    private fun enqueueElementsSessionWithBothChallengesEnabled(
-        networkRule: NetworkRule,
-        isDeferredIntent: Boolean = false
-    ) {
-        val replacement = ResponseReplacement(
-            "\"unactivated_payment_method_types\": []",
-            "\"unactivated_payment_method_types\": [],\n" +
-                "  \"flags\": {\n" +
-                "    \"elements_enable_passive_captcha\": true,\n" +
-                "    \"elements_mobile_attest_on_intent_confirmation\": true\n" +
-                "  },\n" +
-                "  \"passive_captcha\": {\n" +
-                "    \"site_key\": \"$HCAPTCHA_SITE_KEY\",\n" +
-                "    \"rqdata\": null\n" +
-                "  }"
-        )
-
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
-            response.testBodyFromFile(
-                if (isDeferredIntent) DEFERRED_INTENT_ELEMENTS_SESSION_FILE else STANDARD_ELEMENTS_SESSION_FILE,
-                replacements = EMPTY_PAYMENT_METHODS_REPLACEMENTS + replacement
-            )
-        }
-    }
-
-    private fun enqueueElementsSessionWithOnlyPassiveCaptchaEnabled(
-        networkRule: NetworkRule,
-        isDeferredIntent: Boolean = false
-    ) {
-        val replacement = ResponseReplacement(
-            "\"unactivated_payment_method_types\": []",
-            "\"unactivated_payment_method_types\": [],\n" +
-                "  \"flags\": {\n" +
-                "    \"elements_enable_passive_captcha\": true\n" +
-                "  },\n" +
-                "  \"passive_captcha\": {\n" +
-                "    \"site_key\": \"$HCAPTCHA_SITE_KEY\",\n" +
-                "    \"rqdata\": null\n" +
-                "  }"
-        )
-
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
-            response.testBodyFromFile(
-                if (isDeferredIntent) DEFERRED_INTENT_ELEMENTS_SESSION_FILE else STANDARD_ELEMENTS_SESSION_FILE,
-                replacements = EMPTY_PAYMENT_METHODS_REPLACEMENTS + replacement
-            )
-        }
-    }
-
-    private fun enqueueElementsSessionWithOnlyAttestationEnabled(
-        networkRule: NetworkRule,
-        isDeferredIntent: Boolean = false
-    ) {
-        val replacement = ResponseReplacement(
-            "\"unactivated_payment_method_types\": []",
-            "\"unactivated_payment_method_types\": [],\n" +
-                "  \"flags\": {\n" +
-                "    \"elements_mobile_attest_on_intent_confirmation\": true\n" +
-                "  }"
-        )
-
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
-            response.testBodyFromFile(
-                if (isDeferredIntent) DEFERRED_INTENT_ELEMENTS_SESSION_FILE else STANDARD_ELEMENTS_SESSION_FILE,
-                replacements = EMPTY_PAYMENT_METHODS_REPLACEMENTS + replacement
-            )
-        }
-    }
-
-    private fun enqueuePaymentIntentConfirmWithBothTokens() {
-        networkRule.enqueue(
-            method("POST"),
-            path(PAYMENT_INTENT_CONFIRM_PATH),
-            bodyPart(urlEncode(NEW_PM_HCAPTCHA_TOKEN_PATH), HCAPTCHA_TOKEN),
-            bodyPart(urlEncode(NEW_PM_ATTESTATION_TOKEN_PATH), Regex(".+")),
-        ) { response ->
-            response.testBodyFromFile(PAYMENT_INTENT_CONFIRM_FILE)
-        }
-    }
-
-    private fun enqueuePaymentIntentConfirmWithOnlyHCaptchaToken() {
-        networkRule.enqueue(
-            method("POST"),
-            path(PAYMENT_INTENT_CONFIRM_PATH),
-            bodyPart(urlEncode(NEW_PM_HCAPTCHA_TOKEN_PATH), HCAPTCHA_TOKEN),
-            not(bodyPart(urlEncode(NEW_PM_ATTESTATION_TOKEN_PATH), Regex(".+"))),
-        ) { response ->
-            response.testBodyFromFile(PAYMENT_INTENT_CONFIRM_FILE)
-        }
-    }
-
-    private fun enqueuePaymentIntentConfirmWithOnlyAttestationToken() {
-        networkRule.enqueue(
-            method("POST"),
-            path(PAYMENT_INTENT_CONFIRM_PATH),
-            not(bodyPart(urlEncode(NEW_PM_HCAPTCHA_TOKEN_PATH), HCAPTCHA_TOKEN)),
-            bodyPart(urlEncode(NEW_PM_ATTESTATION_TOKEN_PATH), Regex(".+")),
-        ) { response ->
-            response.testBodyFromFile(PAYMENT_INTENT_CONFIRM_FILE)
-        }
-    }
-
-    private fun enqueuePaymentMethodCreateWithBothTokens() {
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/payment_methods"),
-            bodyPart(urlEncode(SAVED_PM_HCAPTCHA_TOKEN_PATH), HCAPTCHA_TOKEN),
-            bodyPart(urlEncode(SAVED_PM_ATTESTATION_TOKEN_PATH), Regex(".+")),
-        ) { response ->
-            response.testBodyFromFile(PAYMENT_METHOD_CREATE_FILE)
-        }
-    }
-
-    private fun enqueuePaymentMethodCreateWithOnlyHCaptchaToken() {
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/payment_methods"),
-            bodyPart(urlEncode(SAVED_PM_HCAPTCHA_TOKEN_PATH), HCAPTCHA_TOKEN),
-            not(bodyPart(urlEncode(SAVED_PM_ATTESTATION_TOKEN_PATH), Regex(".+"))),
-        ) { response ->
-            response.testBodyFromFile(PAYMENT_METHOD_CREATE_FILE)
-        }
-    }
-
-    private fun enqueuePaymentMethodCreateWithOnlyAttestationToken() {
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/payment_methods"),
-            not(bodyPart(urlEncode(SAVED_PM_HCAPTCHA_TOKEN_PATH), HCAPTCHA_TOKEN)),
-            bodyPart(urlEncode(SAVED_PM_ATTESTATION_TOKEN_PATH), Regex(".+")),
-        ) { response ->
-            response.testBodyFromFile(PAYMENT_METHOD_CREATE_FILE)
-        }
-    }
-
     private fun enqueueDeferredIntentRequests() {
         networkRule.enqueue(
             method("GET"),
@@ -479,42 +189,6 @@ internal class ConfirmationChallengeTest {
             path(PAYMENT_INTENT_CONFIRM_PATH),
         ) { response ->
             response.testBodyFromFile(PAYMENT_INTENT_CONFIRM_FILE)
-        }
-    }
-
-    private fun enqueueConfirmationTokenCreateWithBothTokens() {
-        // For new payment methods, radar_options are in payment_method_data
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/confirmation_tokens"),
-            bodyPart(urlEncode(NEW_PM_HCAPTCHA_TOKEN_PATH), HCAPTCHA_TOKEN),
-            bodyPart(urlEncode(NEW_PM_ATTESTATION_TOKEN_PATH), Regex(".+")),
-        ) { response ->
-            response.testBodyFromFile(CONFIRMATION_TOKEN_CREATE_FILE)
-        }
-    }
-
-    private fun enqueueConfirmationTokenCreateWithOnlyHCaptchaToken() {
-        // For new payment methods, radar_options are in payment_method_data
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/confirmation_tokens"),
-            bodyPart(urlEncode(NEW_PM_HCAPTCHA_TOKEN_PATH), HCAPTCHA_TOKEN),
-            not(bodyPart(urlEncode(NEW_PM_ATTESTATION_TOKEN_PATH), Regex(".+"))),
-        ) { response ->
-            response.testBodyFromFile(CONFIRMATION_TOKEN_CREATE_FILE)
-        }
-    }
-
-    private fun enqueueConfirmationTokenCreateWithOnlyAttestationToken() {
-        // For new payment methods, radar_options are in payment_method_data
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/confirmation_tokens"),
-            not(bodyPart(urlEncode(NEW_PM_HCAPTCHA_TOKEN_PATH), HCAPTCHA_TOKEN)),
-            bodyPart(urlEncode(NEW_PM_ATTESTATION_TOKEN_PATH), Regex(".+")),
-        ) { response ->
-            response.testBodyFromFile(CONFIRMATION_TOKEN_CREATE_FILE)
         }
     }
 
@@ -532,6 +206,174 @@ internal class ConfirmationChallengeTest {
             bodyPart("confirmation_token", "ctoken_example"),
         ) { response ->
             response.testBodyFromFile(PAYMENT_INTENT_CONFIRM_FILE)
+        }
+    }
+
+    /**
+     * Represents different challenge configurations for testing.
+     */
+    internal sealed class ChallengeConfig(
+        private val passiveCaptchaEnabled: Boolean,
+        private val attestationEnabled: Boolean,
+    ) {
+        fun configureFeatureFlags(
+            passiveCaptchaRule: FeatureFlagTestRule,
+            attestationRule: FeatureFlagTestRule
+        ) {
+            passiveCaptchaRule.setEnabled(passiveCaptchaEnabled)
+            attestationRule.setEnabled(attestationEnabled)
+        }
+
+        fun enqueueElementsSession(networkRule: NetworkRule, isDeferredIntent: Boolean) {
+            networkRule.enqueue(
+                method("GET"),
+                path("/v1/elements/sessions"),
+            ) { response ->
+                response.testBodyFromFile(
+                    if (isDeferredIntent) DEFERRED_INTENT_ELEMENTS_SESSION_FILE else STANDARD_ELEMENTS_SESSION_FILE,
+                    replacements = EMPTY_PAYMENT_METHODS_REPLACEMENTS + getElementsSessionReplacement()
+                )
+            }
+        }
+
+        abstract fun getElementsSessionReplacement(): ResponseReplacement
+
+        fun enqueuePaymentIntentConfirm(networkRule: NetworkRule) {
+            networkRule.enqueue(
+                method("POST"),
+                path(PAYMENT_INTENT_CONFIRM_PATH),
+                hCaptchaTokenMatcher(NEW_PM_HCAPTCHA_TOKEN_PATH),
+                attestationTokenMatcher(NEW_PM_ATTESTATION_TOKEN_PATH),
+            ) { response ->
+                response.testBodyFromFile(PAYMENT_INTENT_CONFIRM_FILE)
+            }
+        }
+
+        fun enqueuePaymentMethodCreate(networkRule: NetworkRule) {
+            networkRule.enqueue(
+                method("POST"),
+                path("/v1/payment_methods"),
+                hCaptchaTokenMatcher(SAVED_PM_HCAPTCHA_TOKEN_PATH),
+                attestationTokenMatcher(SAVED_PM_ATTESTATION_TOKEN_PATH),
+            ) { response ->
+                response.testBodyFromFile(PAYMENT_METHOD_CREATE_FILE)
+            }
+        }
+
+        fun enqueueConfirmationTokenCreate(networkRule: NetworkRule) {
+            // For new payment methods, radar_options are in payment_method_data
+            networkRule.enqueue(
+                method("POST"),
+                path("/v1/confirmation_tokens"),
+                hCaptchaTokenMatcher(NEW_PM_HCAPTCHA_TOKEN_PATH),
+                attestationTokenMatcher(NEW_PM_ATTESTATION_TOKEN_PATH),
+            ) { response ->
+                response.testBodyFromFile(CONFIRMATION_TOKEN_CREATE_FILE)
+            }
+        }
+
+        protected abstract fun hCaptchaTokenMatcher(path: String): RequestMatcher
+        protected abstract fun attestationTokenMatcher(path: String): RequestMatcher
+
+        class None : ChallengeConfig(
+            passiveCaptchaEnabled = false,
+            attestationEnabled = false,
+        ) {
+            override fun getElementsSessionReplacement() = ResponseReplacement(
+                "\"unactivated_payment_method_types\": []",
+                "\"unactivated_payment_method_types\": []"
+            )
+
+            override fun hCaptchaTokenMatcher(path: String): RequestMatcher =
+                not(bodyPart(urlEncode(path), Regex(".+")))
+
+            override fun attestationTokenMatcher(path: String): RequestMatcher =
+                not(bodyPart(urlEncode(path), Regex(".+")))
+
+            override fun toString() = "NoChallengesEnabled"
+        }
+
+        class BothEnabled : ChallengeConfig(
+            passiveCaptchaEnabled = true,
+            attestationEnabled = true,
+        ) {
+            override fun getElementsSessionReplacement() = ResponseReplacement(
+                "\"unactivated_payment_method_types\": []",
+                "\"unactivated_payment_method_types\": [],\n" +
+                    "  \"flags\": {\n" +
+                    "    \"elements_enable_passive_captcha\": true,\n" +
+                    "    \"elements_mobile_attest_on_intent_confirmation\": true\n" +
+                    "  },\n" +
+                    "  \"passive_captcha\": {\n" +
+                    "    \"site_key\": \"$HCAPTCHA_SITE_KEY\",\n" +
+                    "    \"rqdata\": null\n" +
+                    "  }"
+            )
+
+            override fun hCaptchaTokenMatcher(path: String): RequestMatcher =
+                bodyPart(urlEncode(path), HCAPTCHA_TOKEN)
+
+            override fun attestationTokenMatcher(path: String): RequestMatcher =
+                bodyPart(urlEncode(path), Regex(".+"))
+
+            override fun toString() = "BothChallengesEnabled"
+        }
+
+        class OnlyPassiveCaptcha : ChallengeConfig(
+            passiveCaptchaEnabled = true,
+            attestationEnabled = false,
+        ) {
+            override fun getElementsSessionReplacement() = ResponseReplacement(
+                "\"unactivated_payment_method_types\": []",
+                "\"unactivated_payment_method_types\": [],\n" +
+                    "  \"flags\": {\n" +
+                    "    \"elements_enable_passive_captcha\": true\n" +
+                    "  },\n" +
+                    "  \"passive_captcha\": {\n" +
+                    "    \"site_key\": \"$HCAPTCHA_SITE_KEY\",\n" +
+                    "    \"rqdata\": null\n" +
+                    "  }"
+            )
+
+            override fun hCaptchaTokenMatcher(path: String): RequestMatcher =
+                bodyPart(urlEncode(path), HCAPTCHA_TOKEN)
+
+            override fun attestationTokenMatcher(path: String): RequestMatcher =
+                not(bodyPart(urlEncode(path), Regex(".+")))
+
+            override fun toString() = "OnlyPassiveCaptchaEnabled"
+        }
+
+        class OnlyAttestation : ChallengeConfig(
+            passiveCaptchaEnabled = false,
+            attestationEnabled = true,
+        ) {
+            override fun getElementsSessionReplacement() = ResponseReplacement(
+                "\"unactivated_payment_method_types\": []",
+                "\"unactivated_payment_method_types\": [],\n" +
+                    "  \"flags\": {\n" +
+                    "    \"elements_mobile_attest_on_intent_confirmation\": true\n" +
+                    "  }"
+            )
+
+            override fun hCaptchaTokenMatcher(path: String): RequestMatcher =
+                not(bodyPart(urlEncode(path), HCAPTCHA_TOKEN))
+
+            override fun attestationTokenMatcher(path: String): RequestMatcher =
+                bodyPart(urlEncode(path), Regex(".+"))
+
+            override fun toString() = "OnlyAttestationEnabled"
+        }
+    }
+
+    internal object ChallengeConfigProvider : TestParameterValuesProvider() {
+        override fun provideValues(context: Context?): List<ChallengeConfig> {
+            return listOf(
+                ChallengeConfig.None(),
+                ChallengeConfig.BothEnabled(),
+                ChallengeConfig.OnlyPassiveCaptcha(),
+                ChallengeConfig.OnlyAttestation(),
+            )
         }
     }
 
