@@ -21,6 +21,7 @@ class OnrampCallbacks {
     private var authorizeCallback: OnrampAuthorizeCallback? = null
     private var checkoutCallback: OnrampCheckoutCallback? = null
     private var onrampSessionClientSecretProvider: (suspend () -> String)? = null
+    
     /**
      * Callback invoked to authenticate the user before starting the onramp flow.
      */
