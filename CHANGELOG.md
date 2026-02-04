@@ -7,7 +7,6 @@ Dependencies updated in [12276](https://github.com/stripe/stripe-android/pull/12
 
 ### Identity
 * [CHANGED] Fail out of verification flow on analyzer failure.
-* [CHANGED] Removed ephemeral key from error log messages for security.
 
 ## 22.7.0 - 2026-01-26
 
