@@ -20,6 +20,9 @@ Dependencies updated in [11877](https://github.com/stripe/stripe-android/pull/11
 ### Connect
 * [Changed] Added `EmbeddedErrorType` enum for type-safe error handling in Connect embedded components, falling back to `api_error` if the error type is `null`.
 
+### Payments
+* [Added][12253](https://github.com/stripe/stripe-android/pull/12253) Added support for Twint API bindings.
+
 ## 22.6.1 - 2026-01-20
 
 ### Payments
