@@ -14,6 +14,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.interceptor.FakeIntentConfirmationInterceptorFactory
@@ -130,7 +131,11 @@ class IntentConfirmationDefinitionTest {
         val completeAction = action.asComplete()
 
         assertThat(completeAction.intent).isEqualTo(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
-        assertThat(completeAction.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Server)
+        assertThat(completeAction.metadata).isEqualTo(
+            MutableConfirmationMetadata().apply {
+                set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Server)
+            }
+        )
     }
 
     @Test
@@ -154,7 +159,11 @@ class IntentConfirmationDefinitionTest {
             val completeAction = action.asComplete()
 
             assertThat(completeAction.intent).isEqualTo(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
-            assertThat(completeAction.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Server)
+            assertThat(completeAction.metadata).isEqualTo(
+                MutableConfirmationMetadata().apply {
+                    set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Server)
+                }
+            )
             assertThat(completeAction.completedFullPaymentFlow).isFalse()
         }
 
@@ -414,7 +423,11 @@ class IntentConfirmationDefinitionTest {
         val succeededResult = result.asSucceeded()
 
         assertThat(succeededResult.intent).isEqualTo(PaymentIntentFixtures.PI_SUCCEEDED)
-        assertThat(succeededResult.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
+        assertThat(succeededResult.metadata).isEqualTo(
+            MutableConfirmationMetadata().apply {
+                set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Client)
+            }
+        )
         assertThat(succeededResult.completedFullPaymentFlow).isTrue()
     }
 

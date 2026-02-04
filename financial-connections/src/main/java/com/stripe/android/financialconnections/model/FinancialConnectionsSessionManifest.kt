@@ -177,9 +177,6 @@ internal data class FinancialConnectionsSessionManifest(
     @SerialName(value = "payment_method_type")
     val paymentMethodType: SupportedPaymentMethodTypes? = null,
 
-    @SerialName(value = "step_up_authentication_required")
-    val stepUpAuthenticationRequired: Boolean? = null,
-
     @SerialName(value = "success_url")
     val successUrl: String? = null,
 
@@ -243,9 +240,6 @@ internal data class FinancialConnectionsSessionManifest(
 
         @SerialName(value = "networking_link_verification")
         NETWORKING_LINK_VERIFICATION("networking_link_verification"),
-
-        @SerialName(value = "networking_link_step_up_verification")
-        LINK_STEP_UP_VERIFICATION("networking_link_step_up_verification"),
 
         @SerialName(value = "partner_auth")
         PARTNER_AUTH("partner_auth"),

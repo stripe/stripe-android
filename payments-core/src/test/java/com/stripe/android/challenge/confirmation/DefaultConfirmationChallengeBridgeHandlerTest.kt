@@ -18,7 +18,7 @@ internal class DefaultConfirmationChallengeBridgeHandlerTest {
     private val testArgs = IntentConfirmationChallengeArgs(
         publishableKey = "pk_test_123",
         intent = PaymentIntentFixtures.PI_SUCCEEDED,
-        productUsage = listOf("PaymentSheet")
+        productUsage = listOf("PaymentSheet"),
     )
 
     @Test
@@ -115,8 +115,8 @@ internal class DefaultConfirmationChallengeBridgeHandlerTest {
             val event = awaitItem()
             assertThat(event).isInstanceOf(ConfirmationChallengeBridgeEvent.Error::class.java)
             val errorEvent = event as ConfirmationChallengeBridgeEvent.Error
-            assertThat(errorEvent.cause).isInstanceOf(IllegalArgumentException::class.java)
-            assertThat(errorEvent.cause.message).isEqualTo("Missing client secret")
+            assertThat(errorEvent.error.cause).isInstanceOf(IllegalArgumentException::class.java)
+            assertThat(errorEvent.error.message).isEqualTo("Missing client secret")
         }
     }
 
@@ -146,8 +146,8 @@ internal class DefaultConfirmationChallengeBridgeHandlerTest {
             val event = awaitItem()
             assertThat(event).isInstanceOf(ConfirmationChallengeBridgeEvent.Error::class.java)
             val errorEvent = event as ConfirmationChallengeBridgeEvent.Error
-            assertThat(errorEvent.cause).isInstanceOf(BridgeError::class.java)
-            assertThat(errorEvent.cause.message).isEqualTo("Payment declined")
+            assertThat(errorEvent.error).isInstanceOf(BridgeException::class.java)
+            assertThat(errorEvent.error.message).isEqualTo("Payment declined")
         }
     }
 
@@ -165,7 +165,7 @@ internal class DefaultConfirmationChallengeBridgeHandlerTest {
             val event = awaitItem()
             assertThat(event).isInstanceOf(ConfirmationChallengeBridgeEvent.Error::class.java)
             val errorEvent = event as ConfirmationChallengeBridgeEvent.Error
-            assertThat(errorEvent.cause).isEqualTo(parsingException)
+            assertThat(errorEvent.error.cause).isEqualTo(parsingException)
         }
     }
 
@@ -183,7 +183,7 @@ internal class DefaultConfirmationChallengeBridgeHandlerTest {
             val event = awaitItem()
             assertThat(event).isInstanceOf(ConfirmationChallengeBridgeEvent.Error::class.java)
             val errorEvent = event as ConfirmationChallengeBridgeEvent.Error
-            assertThat(errorEvent.cause).isEqualTo(parsingException)
+            assertThat(errorEvent.error.cause).isEqualTo(parsingException)
         }
     }
 

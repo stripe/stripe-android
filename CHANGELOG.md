@@ -7,6 +7,7 @@ Dependencies updated in [12276](https://github.com/stripe/stripe-android/pull/12
 
 ### Identity
 * [Added] More live feedback during document capture.
+* [CHANGED] Fail out of verification flow on analyzer failure.
 
 ## 22.7.0 - 2026-01-26
 

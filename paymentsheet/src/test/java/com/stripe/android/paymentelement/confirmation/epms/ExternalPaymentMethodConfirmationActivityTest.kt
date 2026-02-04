@@ -20,6 +20,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferen
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationTestScenario
+import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.PaymentElementConfirmationTestActivity
 import com.stripe.android.paymentelement.confirmation.assertCanceled
 import com.stripe.android.paymentelement.confirmation.assertComplete
@@ -84,7 +85,7 @@ internal class ExternalPaymentMethodConfirmationActivityTest {
             val successResult = awaitItem().assertComplete().result.assertSucceeded()
 
             assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT)
-            assertThat(successResult.deferredIntentConfirmationType).isNull()
+            assertThat(successResult.metadata).isEqualTo(MutableConfirmationMetadata())
             assertThat(successResult.completedFullPaymentFlow).isTrue()
         }
     }

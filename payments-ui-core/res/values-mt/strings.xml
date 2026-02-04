@@ -32,6 +32,8 @@
   <string name="stripe_card_brand_not_accepted">(ma tistax tintuża)</string>
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
   <string name="stripe_card_brand_not_accepted_with_brand">%1$s (ma tistax tintuża)</string>
+  <!-- Klarna pay later copy -->
+  <string name="stripe_card_with_tap_or_enter_manually">Agħfas jew daħħal manwalment</string>
   <!-- Cash App mandate text -->
   <string name="stripe_cash_app_pay_mandate">Meta tkompli tkun qed tagħti permess lil %1$s biex, sakemm dal-permess jitneħħa, tkun tista\' tiġbor il-flus mill-kont Cash App tiegħek għal dal-pagament u għall-pagamenti tal-ġejjieni skont ir-regoli ta\' %2$s. Tista\' tibdel dil-ħaġa meta trid mill-Għażliet ta\' Cash App.</string>
   <!-- Title for the contact information section -->

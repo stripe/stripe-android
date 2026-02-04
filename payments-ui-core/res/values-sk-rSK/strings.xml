@@ -32,6 +32,8 @@
   <string name="stripe_card_brand_not_accepted">(neprijaté)</string>
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
   <string name="stripe_card_brand_not_accepted_with_brand">%1$s (neprijaté)</string>
+  <!-- Klarna pay later copy -->
+  <string name="stripe_card_with_tap_or_enter_manually">Ťuknite alebo zadajte manuálne</string>
   <!-- Cash App mandate text -->
   <string name="stripe_cash_app_pay_mandate">Pokračovaním oprávňujete spoločnosť %1$s, aby zaúčtovala túto platbu a budúce platby na debet vášho účtu Cash App v súlade s podmienkami spoločnosti %2$s, až do odvolania tohto oprávnenia. Toto oprávnenie môžete kedykoľvek zmeniť v nastaveniach aplikácie Cash App.</string>
   <!-- Title for the contact information section -->

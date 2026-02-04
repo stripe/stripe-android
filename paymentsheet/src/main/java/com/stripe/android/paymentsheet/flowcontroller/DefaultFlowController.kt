@@ -40,6 +40,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentif
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -607,14 +608,14 @@ internal class DefaultFlowController @Inject internal constructor(
                 viewModel.paymentSelection?.let { paymentSelection ->
                     eventReporter.onPaymentSuccess(
                         paymentSelection = paymentSelection,
-                        deferredIntentConfirmationType = result.deferredIntentConfirmationType,
+                        deferredIntentConfirmationType = result.metadata[DeferredIntentConfirmationTypeKey],
                         intentId = result.intent.id,
                     )
                 }
 
                 onPaymentResult(
                     paymentResult = PaymentResult.Completed,
-                    deferredIntentConfirmationType = result.deferredIntentConfirmationType,
+                    deferredIntentConfirmationType = result.metadata[DeferredIntentConfirmationTypeKey],
                     shouldLog = false,
                     shouldResetOnCompleted = result.completedFullPaymentFlow,
                     intentId = result.intent.id,

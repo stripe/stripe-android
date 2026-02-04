@@ -10,6 +10,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
+import com.stripe.android.model.AndroidVerificationObject
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmationToken
 import com.stripe.android.model.ConfirmationTokenParams
@@ -29,10 +30,12 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationChallengeState
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationTokenFixtures
+import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.createIntentConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.intent.CreateIntentWithConfirmationTokenCallbackFailureException
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.CreateIntentResult
@@ -52,7 +55,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import javax.inject.Provider
-import kotlin.test.assertNull
 
 @Suppress("LargeClass")
 @RunWith(RobolectricTestRunner::class)
@@ -271,7 +273,9 @@ class ConfirmationTokenConfirmationInterceptorTest {
         assertThat(nextStep).isEqualTo(
             ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
-                deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                metadata = MutableConfirmationMetadata().apply {
+                    set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Server)
+                },
                 completedFullPaymentFlow = true,
             )
         )
@@ -345,7 +349,9 @@ class ConfirmationTokenConfirmationInterceptorTest {
         assertThat(nextStep).isEqualTo(
             ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
                 intent = intent,
-                deferredIntentConfirmationType = DeferredIntentConfirmationType.None,
+                metadata = MutableConfirmationMetadata().apply {
+                    set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.None)
+                },
                 completedFullPaymentFlow = true,
             )
         )
@@ -498,7 +504,9 @@ class ConfirmationTokenConfirmationInterceptorTest {
             assertThat(nextStep).isEqualTo(
                 ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
                     intent = PaymentIntentFixtures.PI_SUCCEEDED,
-                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                    metadata = MutableConfirmationMetadata().apply {
+                        set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Server)
+                    },
                     completedFullPaymentFlow = true,
                 )
             )
@@ -539,7 +547,9 @@ class ConfirmationTokenConfirmationInterceptorTest {
             assertThat(nextStep).isEqualTo(
                 ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
                     intent = PaymentIntentFixtures.PI_SUCCEEDED,
-                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                    metadata = MutableConfirmationMetadata().apply {
+                        set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Server)
+                    },
                     completedFullPaymentFlow = true,
                 )
             )
@@ -1124,34 +1134,50 @@ class ConfirmationTokenConfirmationInterceptorTest {
 
     @Test
     fun `Saved PM - includes radarOptions when hCaptchaToken is provided for CSC flow`() {
-        runConfirmationTokenInterceptorScenario(
-            retrievedIntentStatus = StripeIntent.Status.RequiresConfirmation,
-        ) { interceptor ->
-            val confirmationOption = PaymentMethodConfirmationOption.Saved(
-                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                optionsParams = null,
-                confirmationChallengeState = ConfirmationChallengeState(hCaptchaToken = "test_token"),
-            )
-
-            val nextAction = interceptor.intercept(
-                intent = PaymentIntentFactory.create(),
-                confirmationOption = confirmationOption,
-                shippingValues = null,
-            )
-
-            assertThat(nextAction.asConfirmParams<ConfirmPaymentIntentParams>()?.radarOptions)
-                .isEqualTo(RadarOptionsFactory.create(verificationObject = null))
-        }
+        runRadarOptionsTest(
+            hCaptchaToken = "test_hcaptcha_token",
+            attestationToken = null,
+        )
     }
 
     @Test
-    fun `Saved PM - excludes radarOptions when hCaptchaToken is null for CSC flow`() {
+    fun `Saved PM - includes radarOptions when attestationToken is provided for CSC flow`() {
+        runRadarOptionsTest(
+            hCaptchaToken = null,
+            attestationToken = "test_attestation_token",
+        )
+    }
+
+    @Test
+    fun `Saved PM - includes radarOptions when both tokens are provided for CSC flow`() {
+        runRadarOptionsTest(
+            hCaptchaToken = "test_hcaptcha_token",
+            attestationToken = "test_attestation_token",
+        )
+    }
+
+    @Test
+    fun `Saved PM - includes radarOptions with empty values when no challenge tokens for CSC flow`() {
+        runRadarOptionsTest(
+            hCaptchaToken = null,
+            attestationToken = null,
+        )
+    }
+
+    private fun runRadarOptionsTest(
+        hCaptchaToken: String?,
+        attestationToken: String?,
+    ) {
         runConfirmationTokenInterceptorScenario(
             retrievedIntentStatus = StripeIntent.Status.RequiresConfirmation,
         ) { interceptor ->
             val confirmationOption = PaymentMethodConfirmationOption.Saved(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = null,
+                confirmationChallengeState = ConfirmationChallengeState(
+                    hCaptchaToken = hCaptchaToken,
+                    attestationToken = attestationToken,
+                ),
             )
 
             val nextAction = interceptor.intercept(
@@ -1162,7 +1188,13 @@ class ConfirmationTokenConfirmationInterceptorTest {
 
             assertThat(nextAction)
                 .isInstanceOf<ConfirmationDefinition.Action.Launch<IntentConfirmationDefinition.Args>>()
-            assertNull(nextAction.asConfirmParams<ConfirmPaymentIntentParams>()?.radarOptions)
+            assertThat(nextAction.asConfirmParams<ConfirmPaymentIntentParams>()?.radarOptions)
+                .isEqualTo(
+                    RadarOptionsFactory.create(
+                        hCaptchaToken = hCaptchaToken,
+                        verificationObject = AndroidVerificationObject(androidVerificationToken = attestationToken),
+                    )
+                )
         }
     }
 

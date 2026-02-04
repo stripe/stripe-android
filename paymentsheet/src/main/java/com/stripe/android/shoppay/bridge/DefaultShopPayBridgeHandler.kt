@@ -21,9 +21,10 @@ internal class DefaultShopPayBridgeHandler @Inject constructor(
     private val shippingRateChangeRequestJsonParser: ModelJsonParser<ShippingRateChangeRequest>,
     private val confirmationRequestJsonParser: ModelJsonParser<ConfirmationRequest>,
     private val shopPayArgs: ShopPayArgs,
-    private val shopPayHandlers: ShopPayHandlers,
+    private val shopPayHandlers: ShopPayHandlers?,
 ) : ShopPayBridgeHandler {
     private val logger = Logger.getInstance(BuildConfig.DEBUG)
+    private val currentShippingRates = MutableStateFlow(shopPayArgs.shopPayConfiguration.shippingRates)
 
     private val _confirmationState = MutableStateFlow<ShopPayConfirmationState>(ShopPayConfirmationState.Pending)
     override val confirmationState: StateFlow<ShopPayConfirmationState> = _confirmationState
@@ -101,12 +102,22 @@ internal class DefaultShopPayBridgeHandler @Inject constructor(
             country = partialAddress.country.orEmpty()
         )
 
-        val update = shopPayHandlers.shippingContactHandler.onAddressSelected(address)
-            ?: return@handleRequest null
+        val shippingContactUpdate = if (shopPayHandlers != null) {
+            val result = shopPayHandlers.shippingContactHandler.onAddressSelected(address)
+                ?: return@handleRequest null
+            currentShippingRates.value = result.shippingRates
+            result
+        } else {
+            ShopPayHandlers.ShippingContactUpdate(
+                lineItems = shopPayArgs.shopPayConfiguration.lineItems,
+                shippingRates = currentShippingRates.value
+            )
+        }
+
         ShippingResponse(
-            lineItems = update.lineItems.map { it.toECELineItem() },
-            shippingRates = update.shippingRates.map { it.toECEShippingRate() },
-            totalAmount = update.lineItems.sumOf { it.amount }
+            lineItems = shippingContactUpdate.lineItems.map { it.toECELineItem() },
+            shippingRates = shippingContactUpdate.shippingRates.map { it.toECEShippingRate() },
+            totalAmount = shippingContactUpdate.lineItems.sumOf { it.amount }
         )
     }
 
@@ -126,12 +137,23 @@ internal class DefaultShopPayBridgeHandler @Inject constructor(
                 deliveryEstimate = null
             )
         )
-        val update = shopPayHandlers.shippingMethodUpdateHandler.onRateSelected(selectedShippingRate)
-            ?: return@handleRequest null
+
+        val shippingRateUpdate = if (shopPayHandlers != null) {
+            val result = shopPayHandlers.shippingMethodUpdateHandler.onRateSelected(selectedShippingRate)
+                ?: return@handleRequest null
+            currentShippingRates.value = result.shippingRates
+            result
+        } else {
+            ShopPayHandlers.ShippingRateUpdate(
+                lineItems = shopPayArgs.shopPayConfiguration.lineItems,
+                shippingRates = currentShippingRates.value
+            )
+        }
+
         ShippingResponse(
-            lineItems = update.lineItems.map { it.toECELineItem() },
-            shippingRates = update.shippingRates.map { it.toECEShippingRate() },
-            totalAmount = update.lineItems.sumOf { it.amount }
+            lineItems = shippingRateUpdate.lineItems.map { it.toECELineItem() },
+            shippingRates = shippingRateUpdate.shippingRates.map { it.toECEShippingRate() },
+            totalAmount = shippingRateUpdate.lineItems.sumOf { it.amount }
         )
     }
 

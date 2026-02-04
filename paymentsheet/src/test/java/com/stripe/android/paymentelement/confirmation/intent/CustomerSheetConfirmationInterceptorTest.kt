@@ -19,6 +19,7 @@ import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.testing.PaymentIntentFactory
@@ -139,7 +140,7 @@ class CustomerSheetConfirmationInterceptorTest {
         val completeAction = result as ConfirmationDefinition.Action.Complete
 
         assertThat(completeAction.intent).isEqualTo(setupIntent.copy(paymentMethod = paymentMethod))
-        assertThat(completeAction.deferredIntentConfirmationType).isNull()
+        assertThat(completeAction.metadata).isEqualTo(MutableConfirmationMetadata())
         assertThat(completeAction.completedFullPaymentFlow).isTrue()
     }
 
@@ -151,7 +152,6 @@ class CustomerSheetConfirmationInterceptorTest {
         ),
         setupInterceptAction = ConfirmationDefinition.Action.Complete(
             intent = SetupIntentFactory.create().copy(paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD),
-            deferredIntentConfirmationType = null,
             completedFullPaymentFlow = true,
         ),
     ) {
@@ -187,7 +187,6 @@ class CustomerSheetConfirmationInterceptorTest {
         ),
         attachInterceptAction = ConfirmationDefinition.Action.Complete(
             intent = SetupIntentFactory.create().copy(paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD),
-            deferredIntentConfirmationType = null,
             completedFullPaymentFlow = true,
         ),
     ) {
@@ -210,7 +209,7 @@ class CustomerSheetConfirmationInterceptorTest {
         val completeAction = result as ConfirmationDefinition.Action.Complete
 
         assertThat(completeAction.intent).isEqualTo(setupIntent.copy(paymentMethod = paymentMethod))
-        assertThat(completeAction.deferredIntentConfirmationType).isNull()
+        assertThat(completeAction.metadata).isEqualTo(MutableConfirmationMetadata())
         assertThat(completeAction.completedFullPaymentFlow).isTrue()
 
         createAttachPaymentMethodInterceptorFactoryCalls.awaitItem()

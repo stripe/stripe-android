@@ -14,8 +14,15 @@ import androidx.annotation.RequiresApi
 
 internal class IntentConfirmationWebViewClient(
     private val hostUrl: String,
-    private val errorHandler: WebViewErrorHandler
+    private val errorHandler: WebViewErrorHandler,
+    private val openUri: (Uri) -> Unit
 ) : WebViewClient() {
+
+    override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+        val host = request?.url ?: return super.shouldOverrideUrlLoading(view, request)
+        openUri(host)
+        return true
+    }
 
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {

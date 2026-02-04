@@ -496,10 +496,12 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 billingAddressParameters = null,
                 additionalEnabledNetworks = emptyList()
             ),
+            shopPay = null,
             buttonsEnabled = true,
             dividerTextResource = 0,
             onGooglePayPressed = {},
             onLinkPressed = {},
+            onShopPayPressed = {},
             walletsAllowedInHeader = WalletType.entries, // PaymentSheet: wallets in header
             cardFundingFilter = DefaultCardFundingFilter,
             cardBrandFilter = DefaultCardBrandFilter,
@@ -530,10 +532,12 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 billingAddressParameters = null,
                 additionalEnabledNetworks = emptyList()
             ),
+            shopPay = null,
             buttonsEnabled = true,
             dividerTextResource = 0,
             onGooglePayPressed = {},
             onLinkPressed = {},
+            onShopPayPressed = {},
             walletsAllowedInHeader = listOf(WalletType.Link), // FlowController: Link in header, Google Pay inline
             cardFundingFilter = DefaultCardFundingFilter,
             cardBrandFilter = DefaultCardBrandFilter,
@@ -567,10 +571,12 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                     billingAddressParameters = null,
                     additionalEnabledNetworks = emptyList()
                 ),
+                shopPay = null,
                 buttonsEnabled = true,
                 dividerTextResource = 0,
                 onGooglePayPressed = {},
                 onLinkPressed = {},
+                onShopPayPressed = {},
                 walletsAllowedInHeader = emptyList(), // Test expects both wallets inline
                 cardFundingFilter = DefaultCardFundingFilter,
                 cardBrandFilter = DefaultCardBrandFilter,
@@ -626,6 +632,45 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
+    fun walletDisplayablePaymentMethodsShopPay_updatesSelection() {
+        runScenario(
+            paymentMethodMetadata = metadataWithOnlyPaymentMethodTypes
+        ) {
+            walletsState.value = linkAndGooglePayWalletState.copy(
+                shopPay = WalletsState.ShopPay,
+                walletsAllowedInHeader = emptyList()
+            )
+            assertThat(selection.value).isNull()
+
+            val displayablePaymentMethods = interactor.state.value.displayablePaymentMethods
+            displayablePaymentMethods.first { it.code == "shop_pay" }.onClick()
+
+            assertThat(selection.value).isEqualTo(PaymentSelection.ShopPay)
+            assertThat(updateSelectionTurbine.awaitItem()).isFalse()
+        }
+    }
+
+    @Test
+    fun walletDisplayablePaymentMethodsShopPay_invokesRowSelectionCallback() {
+        var rowSelectionCallbackInvoked = false
+        runScenario(
+            invokeRowSelectionCallback = { rowSelectionCallbackInvoked = true },
+            paymentMethodMetadata = metadataWithOnlyPaymentMethodTypes
+        ) {
+            walletsState.value = linkAndGooglePayWalletState.copy(
+                shopPay = WalletsState.ShopPay,
+                walletsAllowedInHeader = emptyList()
+            )
+
+            val displayablePaymentMethods = interactor.state.value.displayablePaymentMethods
+            displayablePaymentMethods.first { it.code == "shop_pay" }.onClick()
+
+            assertThat(rowSelectionCallbackInvoked).isTrue()
+            assertThat(updateSelectionTurbine.awaitItem()).isFalse()
+        }
+    }
+
+    @Test
     fun stateDoesNotReturnWalletPaymentMethodsWhenInFlowControllerAndGooglePayIsNotAvailable() = runScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -636,10 +681,12 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         walletsState.value = WalletsState(
             link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
             googlePay = null,
+            shopPay = null,
             buttonsEnabled = true,
             dividerTextResource = 0,
             onGooglePayPressed = {},
             onLinkPressed = {},
+            onShopPayPressed = {},
             walletsAllowedInHeader = WalletType.entries,
             cardFundingFilter = DefaultCardFundingFilter,
             cardBrandFilter = DefaultCardBrandFilter,
@@ -672,10 +719,12 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 billingAddressParameters = null,
                 additionalEnabledNetworks = emptyList()
             ),
+            shopPay = null,
             buttonsEnabled = true,
             dividerTextResource = 0,
             onGooglePayPressed = {},
             onLinkPressed = {},
+            onShopPayPressed = {},
             walletsAllowedInHeader = emptyList(),
             cardFundingFilter = DefaultCardFundingFilter,
             cardBrandFilter = DefaultCardBrandFilter,
@@ -702,10 +751,12 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         walletsState.value = WalletsState(
             link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
             googlePay = null,
+            shopPay = null,
             buttonsEnabled = true,
             dividerTextResource = 0,
             onGooglePayPressed = {},
             onLinkPressed = {},
+            onShopPayPressed = {},
             walletsAllowedInHeader = emptyList(),
             cardFundingFilter = DefaultCardFundingFilter,
             cardBrandFilter = DefaultCardBrandFilter,
@@ -1438,6 +1489,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             isLinkAvailable = true,
             linkEmail = "foo@bar.com",
             isGooglePayReady = true,
+            isShopPayAvailable = false,
             googlePayButtonType = GooglePayButtonType.Pay,
             buttonsEnabled = true,
             paymentMethodTypes = listOf("card"),
@@ -1445,6 +1497,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             googlePayLauncherConfig = null,
             onGooglePayPressed = {},
             onLinkPressed = {},
+            onShopPayPressed = {},
             walletsAllowedInHeader = emptyList(), // Link inline to test row subtitle
             cardFundingFilter = DefaultCardFundingFilter,
             cardBrandFilter = DefaultCardBrandFilter,
@@ -1466,6 +1519,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             isLinkAvailable = true,
             linkEmail = null,
             isGooglePayReady = true,
+            isShopPayAvailable = false,
             googlePayButtonType = GooglePayButtonType.Pay,
             buttonsEnabled = true,
             paymentMethodTypes = listOf("card"),
@@ -1473,6 +1527,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             googlePayLauncherConfig = null,
             onGooglePayPressed = {},
             onLinkPressed = {},
+            onShopPayPressed = {},
             walletsAllowedInHeader = emptyList(), // Link inline to test row subtitle
             cardFundingFilter = DefaultCardFundingFilter,
             cardBrandFilter = DefaultCardBrandFilter,
@@ -1612,10 +1667,12 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             billingAddressParameters = null,
             additionalEnabledNetworks = emptyList()
         ),
+        shopPay = null,
         buttonsEnabled = true,
         dividerTextResource = 0,
         onGooglePayPressed = {},
         onLinkPressed = {},
+        onShopPayPressed = {},
         walletsAllowedInHeader = WalletType.entries,
         cardFundingFilter = DefaultCardFundingFilter,
         cardBrandFilter = DefaultCardBrandFilter,

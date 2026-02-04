@@ -12,8 +12,10 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import kotlinx.coroutines.channels.Channel
@@ -48,10 +50,15 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
         channel.trySend(
             ConfirmationDefinition.Action.Complete(
                 intent = intent,
-                deferredIntentConfirmationType = if (isForceSuccess) {
-                    DeferredIntentConfirmationType.None
-                } else {
-                    DeferredIntentConfirmationType.Server
+                metadata = MutableConfirmationMetadata().apply {
+                    set(
+                        DeferredIntentConfirmationTypeKey,
+                        if (isForceSuccess) {
+                            DeferredIntentConfirmationType.None
+                        } else {
+                            DeferredIntentConfirmationType.Server
+                        }
+                    )
                 },
                 completedFullPaymentFlow = completedFullPaymentFlow,
             )

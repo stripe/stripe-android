@@ -6,6 +6,7 @@ import androidx.annotation.RestrictTo
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.stripeterminal.external.callable.Callback
@@ -89,7 +90,7 @@ internal class DefaultTapToAddConnectionManager(
 
     override val isSupported: Boolean
         get() {
-            return terminal().supportsReadersOfType(
+            return FeatureFlags.enableTapToAdd.isEnabled && terminal().supportsReadersOfType(
                 deviceType = DeviceType.TAP_TO_PAY_DEVICE,
                 discoveryConfiguration = discoveryConfiguration,
             ).isSupported
