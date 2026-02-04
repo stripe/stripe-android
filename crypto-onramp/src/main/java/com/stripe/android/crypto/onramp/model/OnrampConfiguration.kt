@@ -9,14 +9,12 @@ import com.stripe.android.link.LinkAppearance
  * @property merchantDisplayName The display name to use for the merchant.
  * @property publishableKey The publishable key from the API dashboard to enable requests.
  * @property appearance Appearance settings for the PaymentSheet UI.
- * @property cryptoCustomerId The unique customer ID for crypto onramp.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class OnrampConfiguration {
     private var merchantDisplayName: String? = null
     private var publishableKey: String? = null
     private var appearance: LinkAppearance? = null
-    private var cryptoCustomerId: String? = null
 
     /**
      * Sets the display name of the merchant.
@@ -40,18 +38,10 @@ class OnrampConfiguration {
         this.appearance = appearance
     }
 
-    /**
-     * Sets the unique crypto customer ID to use.
-     */
-    fun cryptoCustomerId(cryptoCustomerId: String?) = apply {
-        this.cryptoCustomerId = cryptoCustomerId
-    }
-
     internal class State(
         val merchantDisplayName: String,
         val publishableKey: String,
         val appearance: LinkAppearance,
-        val cryptoCustomerId: String? = null
     )
 
     internal fun build(): State {
@@ -63,7 +53,6 @@ class OnrampConfiguration {
                 "publishableKey must not be null"
             },
             appearance = appearance ?: LinkAppearance(),
-            cryptoCustomerId = cryptoCustomerId,
         )
     }
 }

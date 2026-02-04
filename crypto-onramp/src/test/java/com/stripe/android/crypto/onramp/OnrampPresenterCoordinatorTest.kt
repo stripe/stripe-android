@@ -77,7 +77,6 @@ class OnrampPresenterCoordinatorTest {
             linkController.createPresenter(
                 activity = any(),
                 presentPaymentMethodsCallback = any(),
-                authenticationCallback = any(),
                 authorizeCallback = any()
             )
         ).thenReturn(linkPresenter)
@@ -87,7 +86,6 @@ class OnrampPresenterCoordinatorTest {
         val callbacks = OnrampCallbacks()
             .checkoutCallback(checkoutCallback)
             .verifyIdentityCallback {}
-            .authenticateUserCallback {}
             .collectPaymentCallback {}
             .authorizeCallback {}
             .verifyKycCallback {}

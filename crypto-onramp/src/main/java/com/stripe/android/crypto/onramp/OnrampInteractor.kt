@@ -16,7 +16,6 @@ import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
-import com.stripe.android.crypto.onramp.model.OnrampAuthenticateResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
@@ -68,7 +67,6 @@ internal class OnrampInteractor @Inject constructor(
     suspend fun configure(configurationState: OnrampConfiguration.State): OnrampConfigurationResult {
         _state.value = OnrampState(
             configurationState = configurationState,
-            cryptoCustomerId = configurationState.cryptoCustomerId,
         )
 
         // We are *not* calling `PaymentConfiguration.init()` here because we're relying on
@@ -455,51 +453,6 @@ internal class OnrampInteractor @Inject constructor(
         }
     }
 
-    suspend fun handleAuthenticationResult(
-        result: LinkController.AuthenticationResult
-    ): OnrampAuthenticateResult = when (result) {
-        is LinkController.AuthenticationResult.Success -> {
-            val secret = consumerSessionClientSecret()
-            if (secret != null) {
-                cryptoApiRepository.createCryptoCustomer(secret).fold(
-                    onSuccess = { customerResponse ->
-                        _state.update { it.copy(cryptoCustomerId = customerResponse.id) }
-                        analyticsService?.track(OnrampAnalyticsEvent.LinkUserAuthenticationCompleted)
-                        OnrampAuthenticateResult.Completed(customerResponse.id)
-                    },
-                    onFailure = { error ->
-                        analyticsService?.track(
-                            OnrampAnalyticsEvent.ErrorOccurred(
-                                operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.AuthenticateUser,
-                                error = error,
-                            )
-                        )
-                        OnrampAuthenticateResult.Failed(error)
-                    }
-                )
-            } else {
-                val error = MissingConsumerSecretException()
-                analyticsService?.track(
-                    OnrampAnalyticsEvent.ErrorOccurred(
-                        operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.AuthenticateUser,
-                        error = error,
-                    )
-                )
-                OnrampAuthenticateResult.Failed(error)
-            }
-        }
-        is LinkController.AuthenticationResult.Failed -> {
-            analyticsService?.track(
-                OnrampAnalyticsEvent.ErrorOccurred(
-                    operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.AuthenticateUser,
-                    error = result.error,
-                )
-            )
-            OnrampAuthenticateResult.Failed(result.error)
-        }
-        is LinkController.AuthenticationResult.Canceled -> OnrampAuthenticateResult.Cancelled()
-    }
-
     suspend fun handleAuthorizeResult(
         result: LinkController.AuthorizeResult
     ): OnrampAuthorizeResult = when (result) {
@@ -666,10 +619,6 @@ internal class OnrampInteractor @Inject constructor(
         analyticsService?.track(OnrampAnalyticsEvent.LinkAuthorizationStarted)
     }
 
-    fun onAuthenticateUser() {
-        analyticsService?.track(OnrampAnalyticsEvent.LinkUserAuthenticationStarted)
-    }
-
     fun onCollectPaymentMethod(type: PaymentMethodType) {
         _state.update { it.copy(collectingPaymentMethodType = type) }
         analyticsService?.track(
@@ -684,6 +633,11 @@ internal class OnrampInteractor @Inject constructor(
                 error = error,
             )
         )
+    }
+
+    // Used to manually update the crypto customer ID for testing.
+    fun updateCryptoCustomerId(cryptoCustomerId: String?) {
+        _state.update { it.copy(cryptoCustomerId = cryptoCustomerId) }
     }
 
     /**

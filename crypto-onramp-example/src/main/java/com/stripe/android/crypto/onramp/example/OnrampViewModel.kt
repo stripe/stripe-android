@@ -22,7 +22,6 @@ import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
-import com.stripe.android.crypto.onramp.model.OnrampAuthenticateResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
@@ -56,7 +55,6 @@ internal class OnrampViewModel(
 ) : AndroidViewModel(application) {
 
     private val callbacks = OnrampCallbacks()
-        .authenticateUserCallback(callback = ::onAuthenticateUserResult)
         .verifyIdentityCallback(callback = ::onVerifyIdentityResult)
         .verifyKycCallback(callback = ::onVerifyKycResult)
         .checkoutCallback(callback = ::onCheckoutResult)
@@ -290,26 +288,6 @@ internal class OnrampViewModel(
 
     fun clearMessage() {
         _message.value = null
-    }
-
-    fun onAuthenticateUserResult(result: OnrampAuthenticateResult) {
-        when (result) {
-            is OnrampAuthenticateResult.Completed -> {
-                _message.value = "Authentication successful! You can now perform authenticated operations."
-                _uiState.update {
-                    it.copy(
-                        screen = Screen.AuthenticatedOperations
-                    )
-                }
-            }
-            is OnrampAuthenticateResult.Cancelled -> {
-                _message.value = "Authentication cancelled, please try again"
-            }
-            is OnrampAuthenticateResult.Failed -> {
-                _message.value = "Authentication failed: ${result.error.message}"
-                _uiState.update { it.copy(screen = Screen.LoginSignup) }
-            }
-        }
     }
 
     fun onVerifyIdentityResult(result: OnrampVerifyIdentityResult) {
