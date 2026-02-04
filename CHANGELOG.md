@@ -5,6 +5,9 @@
 Dependencies updated in [12276](https://github.com/stripe/stripe-android/pull/12276):
 - Bumped Dagger from 2.55 to 2.58.
 
+### Identity
+* [CHANGED] Fail out of verification flow on analyzer failure.
+
 ## 22.7.0 - 2026-01-26
 
 Dependencies updated in [11877](https://github.com/stripe/stripe-android/pull/11877):
