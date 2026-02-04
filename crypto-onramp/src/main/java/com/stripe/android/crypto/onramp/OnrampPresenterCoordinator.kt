@@ -39,7 +39,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     linkController: LinkController,
     lifecycleOwner: LifecycleOwner,
     private val activity: ComponentActivity,
-    private val onrampCallbacks: OnrampCallbacks,
+    private val onrampCallbacks: OnrampCallbacks.State,
     private val coroutineScope: CoroutineScope,
 ) {
     private val linkControllerState = linkController.state(activity)

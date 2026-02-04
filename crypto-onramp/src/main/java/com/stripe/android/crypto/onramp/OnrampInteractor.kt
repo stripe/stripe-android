@@ -65,22 +65,22 @@ internal class OnrampInteractor @Inject constructor(
 
     private var analyticsService: OnrampAnalyticsService? = null
 
-    suspend fun configure(configuration: OnrampConfiguration): OnrampConfigurationResult {
+    suspend fun configure(configurationState: OnrampConfiguration.State): OnrampConfigurationResult {
         _state.value = OnrampState(
-            configuration = configuration,
-            cryptoCustomerId = configuration.cryptoCustomerId,
+            configurationState = configurationState,
+            cryptoCustomerId = configurationState.cryptoCustomerId,
         )
 
         // We are *not* calling `PaymentConfiguration.init()` here because we're relying on
         // `LinkController.configure()` to do it.
         val linkResult: ConfigureResult = linkController.configure(
             LinkController.Configuration.Builder(
-                merchantDisplayName = configuration.merchantDisplayName,
-                publishableKey = configuration.publishableKey,
+                merchantDisplayName = configurationState.merchantDisplayName,
+                publishableKey = configurationState.publishableKey,
             )
                 .allowLogOut(false)
                 .allowUserEmailEdits(false)
-                .appearance(configuration.appearance)
+                .appearance(configurationState.appearance)
                 .build()
         )
 
@@ -371,7 +371,7 @@ internal class OnrampInteractor @Inject constructor(
 
                     OnrampStartKycVerificationResult.Completed(
                         response = kycInfo,
-                        appearance = state.value.configuration?.appearance
+                        appearance = state.value.configurationState?.appearance
                     )
                 },
                 onFailure = { error ->
@@ -900,7 +900,7 @@ internal class OnrampInteractor @Inject constructor(
 }
 
 internal data class OnrampState(
-    val configuration: OnrampConfiguration? = null,
+    val configurationState: OnrampConfiguration.State? = null,
     val linkControllerState: LinkController.State? = null,
     val cryptoCustomerId: String? = null,
     val collectingPaymentMethodType: PaymentMethodType? = null,

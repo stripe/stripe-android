@@ -50,7 +50,7 @@ import java.util.Calendar
 @Suppress("LongMethod")
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun OnrampKycRefreshScreen(
-    appearance: LinkAppearance?,
+    appearance: LinkAppearance.State?,
     kycInfo: VerifyKYCInfo,
     onClose: () -> Unit,
     onEdit: () -> Unit,
