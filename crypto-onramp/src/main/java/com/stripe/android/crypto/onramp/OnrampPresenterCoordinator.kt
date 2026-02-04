@@ -46,6 +46,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     private val linkPresenter = linkController.createPresenter(
         activity = activity,
         presentPaymentMethodsCallback = ::handlePresentPaymentResult,
+        authenticationCallback = { /* No-op: Authentication is not used for Onramp */ },
         authorizeCallback = ::handleAuthorizeResult
     )
 

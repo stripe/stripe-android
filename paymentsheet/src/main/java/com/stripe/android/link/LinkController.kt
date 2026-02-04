@@ -115,6 +115,7 @@ class LinkController @Inject internal constructor(
     fun createPresenter(
         activity: ComponentActivity,
         presentPaymentMethodsCallback: PresentPaymentMethodsCallback,
+        authenticationCallback: AuthenticationCallback,
         authorizeCallback: AuthorizeCallback,
     ): Presenter {
         return presenterComponentFactory
@@ -123,7 +124,7 @@ class LinkController @Inject internal constructor(
                 lifecycleOwner = activity,
                 activityResultRegistryOwner = activity,
                 presentPaymentMethodsCallback = presentPaymentMethodsCallback,
-                authenticationCallback = { },
+                authenticationCallback = authenticationCallback,
                 authorizeCallback = authorizeCallback,
             )
             .presenter
