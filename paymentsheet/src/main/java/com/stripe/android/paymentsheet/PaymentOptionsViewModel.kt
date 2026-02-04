@@ -144,6 +144,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
             isLinkAvailable = isLinkAvailable == true && visibleWallets.contains(WalletType.Link),
             linkEmail = linkEmail,
             isGooglePayReady = paymentMethodMetadata.isGooglePayReady && visibleWallets.contains(WalletType.GooglePay),
+            isShopPayAvailable = paymentMethodMetadata.availableWallets.contains(WalletType.ShopPay) &&
+                visibleWallets.contains(WalletType.ShopPay),
             buttonsEnabled = buttonsEnabled,
             paymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes(),
             googlePayLauncherConfig = null,
@@ -154,6 +156,10 @@ internal class PaymentOptionsViewModel @Inject constructor(
             },
             onLinkPressed = {
                 updateSelection(Link())
+                onUserSelection()
+            },
+            onShopPayPressed = {
+                updateSelection(PaymentSelection.ShopPay)
                 onUserSelection()
             },
             isSetupIntent = paymentMethodMetadata.stripeIntent is SetupIntent,

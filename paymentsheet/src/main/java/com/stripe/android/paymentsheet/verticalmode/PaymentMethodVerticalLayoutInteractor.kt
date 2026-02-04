@@ -353,60 +353,79 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             }
         }
 
-        val wallets = mutableListOf<DisplayablePaymentMethod>()
-
-        // Add Link inline if NOT allowed in header
-        walletsState?.getInlineLink()?.let { linkData ->
-            val subtitle = when (val state = linkData.state) {
-                is LinkButtonState.Email -> state.email.resolvableString
-                is LinkButtonState.DefaultPayment,
-                is LinkButtonState.Default ->
-                    PaymentsCoreR.string.stripe_link_simple_secure_payments.resolvableString
-            }
-
-            wallets += DisplayablePaymentMethod(
-                code = PaymentMethod.Type.Link.code,
-                displayName = PaymentsCoreR.string.stripe_link.resolvableString,
-                iconResource = R.drawable.stripe_ic_paymentsheet_link_arrow,
-                iconResourceNight = null,
-                lightThemeIconUrl = null,
-                darkThemeIconUrl = null,
-                iconRequiresTinting = false,
-                subtitle = subtitle,
-                onClick = {
-                    updateSelection(PaymentSelection.Link(), false)
-                    invokeRowSelectionCallback?.invoke()
-                },
-            )
-        }
-
-        // Add Google Pay inline if NOT allowed in header
-        walletsState?.getInlineGPay()?.let { it ->
-            wallets += DisplayablePaymentMethod(
-                code = "google_pay",
-                displayName = PaymentsCoreR.string.stripe_google_pay.resolvableString,
-                iconResource = PaymentsCoreR.drawable.stripe_google_pay_mark,
-                iconResourceNight = null,
-                lightThemeIconUrl = null,
-                darkThemeIconUrl = null,
-                iconRequiresTinting = false,
-                subtitle = null,
-                onClick = {
-                    updateSelection(PaymentSelection.GooglePay, false)
-                    invokeRowSelectionCallback?.invoke()
-                },
-            )
-        }
+        val wallets = getInlineWalletDisplayablePaymentMethods(walletsState)
 
         return wallets + lpms
     }
 
-    private fun WalletsState.getInlineLink(): WalletsState.Link? {
-        return this.link(WalletLocation.INLINE)
+    private fun getInlineWalletDisplayablePaymentMethods(
+        walletsState: WalletsState?,
+    ): List<DisplayablePaymentMethod> {
+        return walletsState?.wallets(WalletLocation.INLINE)
+            ?.map { wallet ->
+                when (wallet) {
+                    is WalletsState.GooglePay -> createGooglePayDisplayablePaymentMethod()
+                    is WalletsState.Link -> createLinkDisplayablePaymentMethod(wallet)
+                    WalletsState.ShopPay -> createShopPayDisplayablePaymentMethod()
+                }
+            } ?: emptyList()
     }
 
-    private fun WalletsState.getInlineGPay(): WalletsState.GooglePay? {
-        return this.googlePay(WalletLocation.INLINE)
+    private fun createGooglePayDisplayablePaymentMethod(): DisplayablePaymentMethod {
+        return DisplayablePaymentMethod(
+            code = "google_pay",
+            displayName = PaymentsCoreR.string.stripe_google_pay.resolvableString,
+            iconResource = PaymentsCoreR.drawable.stripe_google_pay_mark,
+            iconResourceNight = null,
+            lightThemeIconUrl = null,
+            darkThemeIconUrl = null,
+            iconRequiresTinting = false,
+            subtitle = null,
+            onClick = {
+                updateSelection(PaymentSelection.GooglePay, false)
+                invokeRowSelectionCallback?.invoke()
+            },
+        )
+    }
+
+    private fun createLinkDisplayablePaymentMethod(link: WalletsState.Link): DisplayablePaymentMethod {
+        val subtitle = when (val state = link.state) {
+            is LinkButtonState.Email -> state.email.resolvableString
+            is LinkButtonState.DefaultPayment,
+            is LinkButtonState.Default ->
+                PaymentsCoreR.string.stripe_link_simple_secure_payments.resolvableString
+        }
+        return DisplayablePaymentMethod(
+            code = PaymentMethod.Type.Link.code,
+            displayName = PaymentsCoreR.string.stripe_link.resolvableString,
+            iconResource = R.drawable.stripe_ic_paymentsheet_link_arrow,
+            iconResourceNight = null,
+            lightThemeIconUrl = null,
+            darkThemeIconUrl = null,
+            iconRequiresTinting = false,
+            subtitle = subtitle,
+            onClick = {
+                updateSelection(PaymentSelection.Link(), false)
+                invokeRowSelectionCallback?.invoke()
+            },
+        )
+    }
+
+    private fun createShopPayDisplayablePaymentMethod(): DisplayablePaymentMethod {
+        return DisplayablePaymentMethod(
+            code = "shop_pay",
+            displayName = PaymentsCoreR.string.stripe_shop_pay.resolvableString,
+            iconResource = R.drawable.stripe_shop_pay_logo,
+            iconResourceNight = R.drawable.stripe_shop_pay_logo_white,
+            lightThemeIconUrl = null,
+            darkThemeIconUrl = null,
+            iconRequiresTinting = false,
+            subtitle = null,
+            onClick = {
+                updateSelection(PaymentSelection.ShopPay, false)
+                invokeRowSelectionCallback?.invoke()
+            },
+        )
     }
 
     private fun getDisplayedSavedPaymentMethod(
@@ -448,11 +467,19 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             if (currentSavedPaymentMethodCode != null) {
                 add("saved")
             }
-            walletsState?.getInlineLink()?.let {
-                add(PaymentMethod.Type.Link.code)
-            }
-            walletsState?.getInlineGPay()?.let {
-                add("google_pay")
+            val inlineWallets = walletsState?.wallets(WalletLocation.INLINE)
+            inlineWallets?.forEach { wallet ->
+                when (wallet) {
+                    is WalletsState.GooglePay -> {
+                        add("google_pay")
+                    }
+                    is WalletsState.Link -> {
+                        add(PaymentMethod.Type.Link.code)
+                    }
+                    WalletsState.ShopPay -> {
+                        add("shop_pay")
+                    }
+                }
             }
             addAll(currentDisplayablePaymentMethodCodes)
         }

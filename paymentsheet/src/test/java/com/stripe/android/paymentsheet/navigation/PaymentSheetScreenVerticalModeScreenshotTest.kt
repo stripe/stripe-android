@@ -139,6 +139,7 @@ internal class PaymentSheetScreenVerticalModeScreenshotTest {
         }
     }
 
+    @Suppress("ThrowsCount")
     @Test
     fun displaysVerticalModeListWithLink() {
         val metadata = createMetadata()
@@ -151,10 +152,12 @@ internal class PaymentSheetScreenVerticalModeScreenshotTest {
         viewModel.walletsStateSource.value = WalletsState(
             link = WalletsState.Link(state = LinkButtonState.Default),
             googlePay = null,
+            shopPay = null,
             buttonsEnabled = true,
             dividerTextResource = R.string.stripe_paymentsheet_or_pay_using,
             onGooglePayPressed = { throw AssertionError("Not expected.") },
             onLinkPressed = { throw AssertionError("Not expected.") },
+            onShopPayPressed = { throw AssertionError("Not expected.") },
             walletsAllowedInHeader = WalletType.entries,
             cardFundingFilter = DefaultCardFundingFilter,
             cardBrandFilter = DefaultCardBrandFilter

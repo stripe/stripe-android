@@ -363,6 +363,7 @@ internal class VerticalModeFormUIScreenshotTest {
         }
     }
 
+    @Suppress("ThrowsCount")
     @Test
     fun fullCardFormWithLink() {
         val metadata = PaymentMethodMetadataFactory.create()
@@ -379,10 +380,12 @@ internal class VerticalModeFormUIScreenshotTest {
                 state = LinkButtonState.Default,
             ),
             googlePay = null,
+            shopPay = null,
             buttonsEnabled = true,
             dividerTextResource = R.string.stripe_paymentsheet_or_pay_with_card,
             onGooglePayPressed = { throw AssertionError("Not expected.") },
             onLinkPressed = { throw AssertionError("Not expected.") },
+            onShopPayPressed = { throw AssertionError("Not expected.") },
             walletsAllowedInHeader = WalletType.entries,
             cardFundingFilter = DefaultCardFundingFilter,
             cardBrandFilter = DefaultCardBrandFilter,
