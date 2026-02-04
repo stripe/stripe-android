@@ -21,6 +21,7 @@ import com.stripe.stripeterminal.external.models.ConnectionTokenException
 import com.stripe.stripeterminal.external.models.DeviceType
 import com.stripe.stripeterminal.external.models.DiscoveryConfiguration
 import com.stripe.stripeterminal.external.models.Reader
+import com.stripe.stripeterminal.external.models.TerminalErrorCode
 import com.stripe.stripeterminal.external.models.TerminalException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -186,12 +187,10 @@ internal class DefaultTapToAddConnectionManager(
             },
             callback = object : Callback {
                 override fun onFailure(e: TerminalException) {
-                    errorReporter.report(
-                        ErrorReporter.ExpectedErrorEvent.TAP_TO_ADD_DISCOVER_READERS_CALL_FAILURE,
-                        StripeException.create(e),
+                    handleConnectError(
+                        error = e,
+                        errorEvent = ErrorReporter.ExpectedErrorEvent.TAP_TO_ADD_DISCOVER_READERS_CALL_FAILURE,
                     )
-
-                    connectionTask?.completeExceptionally(e)
                 }
 
                 override fun onSuccess() {
@@ -230,12 +229,10 @@ internal class DefaultTapToAddConnectionManager(
             ),
             connectionCallback = object : ReaderCallback {
                 override fun onFailure(e: TerminalException) {
-                    errorReporter.report(
-                        ErrorReporter.ExpectedErrorEvent.TAP_TO_ADD_CONNECT_READER_CALL_FAILURE,
-                        StripeException.create(e),
+                    handleConnectError(
+                        error = e,
+                        errorEvent = ErrorReporter.ExpectedErrorEvent.TAP_TO_ADD_CONNECT_READER_CALL_FAILURE,
                     )
-
-                    connectionTask?.completeExceptionally(e)
                 }
 
                 override fun onSuccess(reader: Reader) {
@@ -250,6 +247,23 @@ internal class DefaultTapToAddConnectionManager(
     }
 
     private fun terminal() = terminalWrapper.getInstance()
+
+    private fun handleConnectError(
+        error: TerminalException,
+        errorEvent: ErrorReporter.ErrorEvent,
+    ) {
+        when (error.errorCode) {
+            TerminalErrorCode.ALREADY_CONNECTED_TO_READER -> connectionTask?.complete(isConnected)
+            else -> {
+                errorReporter.report(
+                    errorEvent,
+                    StripeException.create(error),
+                )
+
+                connectionTask?.completeExceptionally(error)
+            }
+        }
+    }
 }
 
 internal class UnsupportedTapToAddConnectionManager : TapToAddConnectionManager {
