@@ -14,11 +14,14 @@ import com.stripe.android.paymentsheet.example.playground.model.SharedPaymentTok
 import com.stripe.android.paymentsheet.example.playground.model.SharedPaymentTokenCreateSessionResponse
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
+import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
+import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
+import java.util.UUID
 
 internal class SharedPaymentTokenPlaygroundRequester(
     private val playgroundSnapshot: PlaygroundSettings.Snapshot,
@@ -37,8 +40,17 @@ internal class SharedPaymentTokenPlaygroundRequester(
             }
         }
 
+        val email = playgroundSnapshot[DefaultBillingAddressSettingsDefinition].run {
+            when (this) {
+                DefaultBillingAddress.On -> "email@email.com"
+                DefaultBillingAddress.OnWithRandomEmail,
+                DefaultBillingAddress.Off -> "test-${UUID.randomUUID()}@stripe.com"
+            }
+        }
+
         val request = SharedPaymentTokenCreateSessionRequest(
             customerId = customerId,
+            customerEmail = email,
             isMobile = true,
         )
 

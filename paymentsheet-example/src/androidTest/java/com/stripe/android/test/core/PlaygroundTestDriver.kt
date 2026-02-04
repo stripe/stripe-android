@@ -5,11 +5,13 @@ import android.app.Application
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.webkit.WebView
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -30,8 +32,10 @@ import androidx.test.espresso.matcher.RootMatchers.isDialog
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.espresso.web.sugar.Web.onWebView
 import androidx.test.espresso.web.webdriver.DriverAtoms.webClick
+import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiSelector
+import androidx.test.uiautomator.Until
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG
@@ -70,6 +74,7 @@ import org.junit.Assume.assumeFalse
 import org.junit.Assume.assumeTrue
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import java.util.regex.Pattern
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -475,6 +480,47 @@ internal class PlaygroundTestDriver(
         teardown()
 
         return result
+    }
+
+    fun confirmNewOrGuestCompleteWithSpt(
+        testParameters: TestParameters,
+        buttonTag: String
+    ): PlaygroundState? {
+        setup(
+            testParameters = testParameters.copyPlaygroundSettings { settings ->
+                settings.updateConfigurationData { configurationData ->
+                    configurationData.copy(
+                        integrationType = PlaygroundConfigurationData.IntegrationType.FlowControllerWithSpt
+                    )
+                }
+            },
+        )
+
+        selectors.reload.click()
+        selectors.complete.waitForEnabled()
+        selectors.complete.click()
+
+        waitForSptActivity()
+
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+            composeTestRule
+                .onNodeWithTag(buttonTag)
+                .isDisplayed()
+        }
+
+        composeTestRule
+            .onNodeWithTag(buttonTag)
+            .performClick()
+
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        doAuthorization()
+
+        return playgroundState
     }
 
     fun confirmEmbedded(
@@ -1193,6 +1239,19 @@ internal class PlaygroundTestDriver(
     }
 
     /**
+     * Here we wait for an activity different from the playground to be in view.  We
+     * don't specifically look for PaymentSheetActivity or PaymentOptionsActivity because
+     * that would require exposing the activities publicly.
+     */
+    private fun waitForSptActivity() {
+        while (currentActivity is PaymentSheetPlaygroundActivity) {
+            TimeUnit.MILLISECONDS.sleep(250)
+        }
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+    }
+
+    /**
      * Here we wait for the Playground to come back into view.
      */
     private fun waitForPlaygroundActivity() {
@@ -1489,6 +1548,22 @@ internal class PlaygroundTestDriver(
                         waitForPollingToFinish()
                     }
                     null -> {}
+                    is AuthorizeAction.ShopPay -> {
+                        device.wait(
+                            Until.findObject(By.clazz(WebView::class.java)),
+                            DEFAULT_UI_TIMEOUT.inWholeMilliseconds
+                        )
+
+                        Espresso.onIdle()
+                        composeTestRule.waitForIdle()
+
+                        val pattern = Pattern.compile("(?i).*(sign (in|up)|pay now|code).*")
+                        val condition = device.wait(
+                            Until.findObject(By.text(pattern)),
+                            DEFAULT_UI_TIMEOUT.inWholeMilliseconds
+                        )
+                        assertThat(condition.text).matches(pattern)
+                    }
                 }
             } else {
                 // Make sure there is no prompt and no browser window open

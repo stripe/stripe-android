@@ -193,4 +193,11 @@ internal sealed interface AuthorizeAction {
             override val isConsideredDone: Boolean = true
         }
     }
+
+    data object ShopPay : AuthorizeAction {
+        override fun text(isSetup: Boolean) = ""
+
+        override val requiresBrowser = false
+        override val isConsideredDone = false
+    }
 }
