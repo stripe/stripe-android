@@ -20,7 +20,7 @@ class OnrampCallbacks {
     private var collectPaymentCallback: OnrampCollectPaymentMethodCallback? = null
     private var authorizeCallback: OnrampAuthorizeCallback? = null
     private var checkoutCallback: OnrampCheckoutCallback? = null
-    private var onrampSessionClientSecretProvider: (suspend () -> String)? = null
+    private var onrampSessionClientSecretProvider: (suspend (String) -> String)? = null
 
     /**
      * Callback invoked to authenticate the user before starting the onramp flow.
@@ -69,8 +69,9 @@ class OnrampCallbacks {
      *     Your backend should call Stripe's `/v1/crypto/onramp_sessions/:id/checkout` endpoint with the session ID.
      *     The closure should return the onramp session client secret on success, or throw an Error on failure.
      *     This closure may be called twice: once initially, and once more after handling any required authentication.
+     *     @param The session ID of the current checkout.
      */
-    fun onrampSessionClientSecretProvider(callback: suspend () -> String) = apply {
+    fun onrampSessionClientSecretProvider(callback: suspend (String) -> String) = apply {
         this.onrampSessionClientSecretProvider = callback
     }
 
@@ -81,7 +82,7 @@ class OnrampCallbacks {
         val collectPaymentCallback: OnrampCollectPaymentMethodCallback,
         val authorizeCallback: OnrampAuthorizeCallback,
         val checkoutCallback: OnrampCheckoutCallback,
-        val onrampSessionClientSecretProvider: suspend () -> String
+        val onrampSessionClientSecretProvider: suspend (String) -> String
     )
 
     internal fun build(): State {

@@ -31,7 +31,7 @@ class OnrampPresenterCoordinatorTest {
     private val activity = Robolectric.buildActivity(ComponentActivity::class.java).create().get()
     private val testScope = TestScope()
     private val checkoutCallback = mock<OnrampCheckoutCallback>()
-    private val onrampSessionClientSecretProvider: suspend () -> String = { "cos_test_secret" }
+    private val onrampSessionClientSecretProvider: suspend (String) -> String = { "cos_test_secret" }
 
     @Test
     fun performCheckout_successfulPayment_callsCallbackWithCompleted() = runTest {
