@@ -649,7 +649,7 @@ internal class OnrampInteractor @Inject constructor(
      */
     suspend fun startCheckout(
         onrampSessionId: String,
-        checkoutHandler: suspend () -> String
+        checkoutHandler: suspend (String) -> String
     ) {
         if (_state.value.checkoutState?.status?.inProgress == true) {
             // Checkout is already in progress - ignore duplicate calls
@@ -722,14 +722,14 @@ internal class OnrampInteractor @Inject constructor(
     @Suppress("LongMethod")
     private suspend fun performCheckoutInternal(
         onrampSessionId: String,
-        checkoutHandler: suspend () -> String,
+        checkoutHandler: suspend (String) -> String,
         isContinuation: Boolean,
     ) {
         val checkoutStatus = getOrFetchPlatformKey()
             .flatMapCatching { platformApiKey ->
                 retrievePaymentIntent(
                     onrampSessionId = onrampSessionId,
-                    onrampSessionClientSecret = checkoutHandler(),
+                    onrampSessionClientSecret = checkoutHandler(onrampSessionId),
                     platformApiKey = platformApiKey
                 ).map { platformApiKey to it }
             }

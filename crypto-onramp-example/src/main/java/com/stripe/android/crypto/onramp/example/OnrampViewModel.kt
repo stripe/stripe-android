@@ -60,10 +60,7 @@ internal class OnrampViewModel(
         .checkoutCallback(callback = ::onCheckoutResult)
         .collectPaymentCallback(callback = ::onCollectPaymentResult)
         .authorizeCallback(callback = ::onAuthorizeResult)
-        .onrampSessionClientSecretProvider {
-            val sessionId = checkoutEvent.value?.sessionId ?: ""
-            checkoutWithBackend(sessionId)
-        }
+        .onrampSessionClientSecretProvider(callback = ::checkoutWithBackend)
 
     val onrampCoordinator: OnrampCoordinator =
         OnrampCoordinator
