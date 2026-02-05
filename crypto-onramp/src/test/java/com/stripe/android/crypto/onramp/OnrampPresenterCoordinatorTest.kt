@@ -77,6 +77,7 @@ class OnrampPresenterCoordinatorTest {
             linkController.createPresenter(
                 activity = any(),
                 presentPaymentMethodsCallback = any(),
+                authenticationCallback = any(),
                 authorizeCallback = any()
             )
         ).thenReturn(linkPresenter)

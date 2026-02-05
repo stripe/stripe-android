@@ -67,6 +67,7 @@ internal class OnrampInteractor @Inject constructor(
     suspend fun configure(configurationState: OnrampConfiguration.State): OnrampConfigurationResult {
         _state.value = OnrampState(
             configurationState = configurationState,
+            cryptoCustomerId = configurationState.cryptoCustomerId
         )
 
         // We are *not* calling `PaymentConfiguration.init()` here because we're relying on
@@ -633,11 +634,6 @@ internal class OnrampInteractor @Inject constructor(
                 error = error,
             )
         )
-    }
-
-    // Used to manually update the crypto customer ID for testing.
-    fun updateCryptoCustomerId(cryptoCustomerId: String?) {
-        _state.update { it.copy(cryptoCustomerId = cryptoCustomerId) }
     }
 
     /**

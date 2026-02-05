@@ -205,8 +205,7 @@ class OnrampInteractorTest {
         interactor.onLinkControllerState(mockLinkStateWithAccount())
 
         whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
-        interactor.configure(createConfigurationState())
-        interactor.updateCryptoCustomerId("cpt_123")
+        interactor.configure(createConfigurationState(cryptoCustomerId = "cpt_123"))
 
         val mockPlatformSettings = mock<GetPlatformSettingsResponse>()
         doReturn("pk_platform_123").whenever(mockPlatformSettings).publishableKey
@@ -521,10 +520,11 @@ class OnrampInteractorTest {
         consumerSessionClientSecret = null
     )
 
-    private fun createConfigurationState(): OnrampConfiguration.State =
+    private fun createConfigurationState(cryptoCustomerId: String? = null): OnrampConfiguration.State =
         OnrampConfiguration()
             .merchantDisplayName("merchant-display-name")
             .publishableKey("pk_test_12345")
             .appearance(mock())
+            .cryptoCustomerId(cryptoCustomerId)
             .build()
 }
