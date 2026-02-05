@@ -117,9 +117,10 @@ internal fun PaymentSheetScreen(
 internal fun PaymentSheetScreen(
     viewModel: BaseSheetViewModel,
     type: PaymentSheetFlowType,
+    contentVisible: Boolean = true,
 ) {
     val scrollState = rememberScrollState()
-    PaymentSheetScreen(viewModel, scrollState) {
+    PaymentSheetScreen(viewModel = viewModel, scrollState = scrollState, contentVisible = contentVisible) {
         PaymentSheetScreenContent(viewModel, type = type, scrollState = scrollState)
     }
 }
@@ -185,10 +186,11 @@ private fun PaymentSheetScreen(
                 .fillMaxWidth()
                 .background(MaterialTheme.colors.surface.copy(alpha = 0.9f)),
         ) {
-            ProgressOverlay(
-                contentVisible = contentVisible,
-                walletsProcessingState = walletsProcessingState
-            )
+            if (contentVisible) {
+                ProgressOverlay(
+                    walletsProcessingState = walletsProcessingState
+                )
+            }
         }
     }
 }
@@ -250,17 +252,12 @@ private fun ResetScroll(scrollState: ScrollState, currentScreen: PaymentSheetScr
 @Suppress("UnusedReceiverParameter")
 @Composable
 private fun BoxScope.ProgressOverlay(
-    contentVisible: Boolean,
     walletsProcessingState: WalletsProcessingState?
 ) {
     AnimatedContent(
         targetState = walletsProcessingState,
         label = "AnimatedProcessingState"
     ) { processingState ->
-        if (!contentVisible) {
-            ProgressOverlayProcessing()
-            return@AnimatedContent
-        }
         when (processingState) {
             is WalletsProcessingState.Processing -> {
                 ProgressOverlayProcessing()
