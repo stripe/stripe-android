@@ -30,6 +30,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
 import com.stripe.android.lpmfoundations.paymentmethod.create
+import com.stripe.android.model.CheckoutSessionResponse
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
@@ -353,6 +354,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val customer = async {
             createCustomerState(
                 customerInfo = customerInfo,
+                checkoutSessionCustomer = elementsSession.checkoutSessionCustomer,
                 metadata = paymentMethodMetadata.await(),
                 savedSelection = savedSelection,
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
@@ -570,6 +572,12 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         configuration: CommonConfiguration,
         elementsSession: ElementsSession,
     ): CustomerInfo? {
+        // For checkout sessions, customer data comes from the init response (checkoutSessionCustomer),
+        // not from elements_session.customer. Skip CustomerInfo creation in this case.
+        if (elementsSession.checkoutSessionCustomer != null) {
+            return null
+        }
+
         val customer = configuration.customer
 
         return when (val accessType = customer?.accessType) {
@@ -605,24 +613,32 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
     private suspend fun createCustomerState(
         customerInfo: CustomerInfo?,
+        checkoutSessionCustomer: CheckoutSessionResponse.Customer?,
         metadata: PaymentMethodMetadata,
         savedSelection: Deferred<SavedSelection>,
         cardBrandFilter: PaymentSheetCardBrandFilter,
         cardFundingFilter: CardFundingFilter
     ): CustomerState? {
-        val customerState = when (customerInfo) {
-            is CustomerInfo.CustomerSession -> {
+        val customerState = when {
+            customerInfo is CustomerInfo.CustomerSession -> {
                 CustomerState.createForCustomerSession(
                     customer = customerInfo.elementsSessionCustomer,
                     supportedSavedPaymentMethodTypes = metadata.supportedSavedPaymentMethodTypes(),
                 )
             }
-            is CustomerInfo.Legacy -> {
+            customerInfo is CustomerInfo.Legacy -> {
                 CustomerState.createForLegacyEphemeralKey(
                     paymentMethods = retrieveCustomerPaymentMethods(
                         metadata = metadata,
                         customerConfig = customerInfo.customerConfig,
                     )
+                )
+            }
+            // Checkout session customer comes from the init response (not customer session)
+            checkoutSessionCustomer != null -> {
+                CustomerState.createForCheckoutSession(
+                    customer = checkoutSessionCustomer,
+                    supportedSavedPaymentMethodTypes = metadata.supportedSavedPaymentMethodTypes(),
                 )
             }
             else -> null

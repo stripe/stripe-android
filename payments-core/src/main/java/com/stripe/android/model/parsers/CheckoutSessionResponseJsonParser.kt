@@ -6,6 +6,7 @@ import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
 import org.json.JSONObject
 
 /**
@@ -15,6 +16,9 @@ import org.json.JSONObject
  *
  * The init response contains checkout session metadata (`id`, `amount`, `currency`) and an
  * embedded `elements_session` object. The confirm response contains a `payment_intent` object.
+ *
+ * For init responses, customer data comes from the top-level `customer` field (NOT inside
+ * elements_session), since checkout sessions associate customers server-side.
  *
  * For confirm responses, this parser extracts the `payment_intent` and creates a minimal
  * response with the payment intent data.
@@ -32,6 +36,7 @@ internal class CheckoutSessionResponseJsonParser(
             PaymentIntentJsonParser().parse(it)
         }
         val elementsSession = parseElementsSession(json, amount, currency)
+        val customer = parseCustomer(json.optJSONObject(FIELD_CUSTOMER))
 
         return CheckoutSessionResponse(
             id = sessionId,
@@ -39,6 +44,7 @@ internal class CheckoutSessionResponseJsonParser(
             currency = currency,
             elementsSession = elementsSession,
             paymentIntent = paymentIntent,
+            customer = customer,
         )
     }
 
@@ -79,6 +85,43 @@ internal class CheckoutSessionResponseJsonParser(
         return if (due >= 0) due else null
     }
 
+    /**
+     * Parses the top-level customer object from checkout session init response.
+     * Customer is associated server-side when the checkout session is created,
+     * so we get customer data directly in the init response.
+     *
+     * Expected JSON structure:
+     * ```json
+     * {
+     *   "customer": {
+     *     "id": "cus_xxx",
+     *     "payment_methods": [...],
+     *     "default_payment_method": "pm_xxx" // optional
+     *   }
+     * }
+     * ```
+     */
+    private fun parseCustomer(json: JSONObject?): CheckoutSessionResponse.Customer? {
+        if (json == null) {
+            return null
+        }
+
+        val customerId = json.optString(FIELD_CUSTOMER_ID).takeIf { it.isNotEmpty() } ?: return null
+        val paymentMethodsJson = json.optJSONArray(FIELD_PAYMENT_METHODS)
+        val paymentMethods = paymentMethodsJson?.let { pmsJson ->
+            (0 until pmsJson.length()).mapNotNull { index ->
+                PaymentMethodJsonParser().parse(pmsJson.optJSONObject(index))
+            }
+        } ?: emptyList()
+        val defaultPaymentMethodId = json.optString(FIELD_DEFAULT_PAYMENT_METHOD).takeIf { it.isNotEmpty() }
+
+        return CheckoutSessionResponse.Customer(
+            id = customerId,
+            paymentMethods = paymentMethods,
+            defaultPaymentMethodId = defaultPaymentMethodId,
+        )
+    }
+
     private companion object {
         private const val FIELD_SESSION_ID = "session_id"
         private const val FIELD_CURRENCY = "currency"
@@ -86,5 +129,9 @@ internal class CheckoutSessionResponseJsonParser(
         private const val FIELD_TOTAL_SUMMARY = "total_summary"
         private const val FIELD_DUE = "due"
         private const val FIELD_PAYMENT_INTENT = "payment_intent"
+        private const val FIELD_CUSTOMER = "customer"
+        private const val FIELD_CUSTOMER_ID = "id"
+        private const val FIELD_PAYMENT_METHODS = "payment_methods"
+        private const val FIELD_DEFAULT_PAYMENT_METHOD = "default_payment_method"
     }
 }

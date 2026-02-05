@@ -1,9 +1,11 @@
 package com.stripe.android.model.parsers
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CheckoutSessionFixtures
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import org.json.JSONObject
 import org.junit.Test
@@ -189,5 +191,58 @@ class CheckoutSessionResponseJsonParserTest {
 
         // Verify next_action is parsed
         assertThat(paymentIntent?.nextActionType).isEqualTo(StripeIntent.NextActionType.RedirectToUrl)
+    }
+
+    @Test
+    fun `parse init response with customer and saved payment methods`() {
+        val params = ElementsSessionParams.CheckoutSessionType(clientSecret = "cs_test_secret")
+        val result = CheckoutSessionResponseJsonParser(params, isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_CUSTOMER_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.id).isEqualTo("cs_test_abc123")
+        assertThat(result?.amount).isEqualTo(1000L)
+
+        // Verify customer is parsed from top-level
+        val customer = result?.customer
+        assertThat(customer).isNotNull()
+        assertThat(customer?.id).isEqualTo("cus_test_customer")
+        assertThat(customer?.defaultPaymentMethodId).isEqualTo("pm_card_visa")
+
+        // Verify payment methods are parsed
+        val paymentMethods = customer?.paymentMethods
+        assertThat(paymentMethods).hasSize(2)
+        assertThat(paymentMethods?.get(0)?.id).isEqualTo("pm_card_visa")
+        assertThat(paymentMethods?.get(0)?.type).isEqualTo(PaymentMethod.Type.Card)
+        assertThat(paymentMethods?.get(0)?.card?.last4).isEqualTo("4242")
+        assertThat(paymentMethods?.get(0)?.card?.brand).isEqualTo(CardBrand.Visa)
+
+        assertThat(paymentMethods?.get(1)?.id).isEqualTo("pm_card_mastercard")
+        assertThat(paymentMethods?.get(1)?.card?.last4).isEqualTo("5555")
+        assertThat(paymentMethods?.get(1)?.card?.brand).isEqualTo(CardBrand.MasterCard)
+    }
+
+    @Test
+    fun `parse init response with customer but empty payment methods`() {
+        val params = ElementsSessionParams.CheckoutSessionType(clientSecret = "cs_test_secret")
+        val result = CheckoutSessionResponseJsonParser(params, isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_EMPTY_CUSTOMER_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.customer).isNotNull()
+        assertThat(result?.customer?.id).isEqualTo("cus_test_empty_customer")
+        assertThat(result?.customer?.paymentMethods).isEmpty()
+        assertThat(result?.customer?.defaultPaymentMethodId).isNull()
+    }
+
+    @Test
+    fun `parse init response without customer returns null customer`() {
+        val params = ElementsSessionParams.CheckoutSessionType(clientSecret = "cs_test_secret")
+        val result = CheckoutSessionResponseJsonParser(params, isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITHOUT_CUSTOMER_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.id).isEqualTo("cs_test_abc123")
+        assertThat(result?.customer).isNull()
     }
 }

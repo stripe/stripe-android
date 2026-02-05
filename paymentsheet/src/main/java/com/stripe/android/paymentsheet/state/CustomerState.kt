@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
+import com.stripe.android.model.CheckoutSessionResponse
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import kotlinx.parcelize.Parcelize
@@ -54,6 +55,30 @@ internal data class CustomerState(
                 paymentMethods = paymentMethods,
                 // This is a customer sessions only feature, so will always be null when using a legacy ephemeral key.
                 defaultPaymentMethodId = null
+            )
+        }
+
+        /**
+         * Creates a [CustomerState] instance from checkout session customer data.
+         *
+         * For checkout sessions, customer is associated server-side when the session is created,
+         * so customer data comes directly from the init response rather than through
+         * customer session authentication.
+         *
+         * @param customer checkout session customer data
+         * @param supportedSavedPaymentMethodTypes list of payment method types to include
+         *
+         * @return [CustomerState] instance using checkout session customer data
+         */
+        internal fun createForCheckoutSession(
+            customer: CheckoutSessionResponse.Customer,
+            supportedSavedPaymentMethodTypes: List<PaymentMethod.Type>,
+        ): CustomerState {
+            return CustomerState(
+                paymentMethods = customer.paymentMethods.filter {
+                    supportedSavedPaymentMethodTypes.contains(it.type)
+                },
+                defaultPaymentMethodId = customer.defaultPaymentMethodId
             )
         }
     }

@@ -84,8 +84,11 @@ internal class RealElementsSessionRepository @Inject constructor(
                     params = params,
                     options = requestOptions,
                 ).mapCatching { response ->
-                    response.elementsSession
+                    val baseElementsSession = response.elementsSession
                         ?: throw IllegalStateException("CheckoutSession init response missing elements_session")
+                    // Inject checkout session customer into ElementsSession
+                    // Customer data comes from top-level "customer" in init response (not from elements_session)
+                    baseElementsSession.copy(checkoutSessionCustomer = response.customer)
                 }
             } else {
                 stripeRepository.retrieveElementsSession(

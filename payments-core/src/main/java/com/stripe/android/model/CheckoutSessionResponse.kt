@@ -43,4 +43,36 @@ data class CheckoutSessionResponse(
      * Only populated in responses from the confirm API.
      */
     val paymentIntent: PaymentIntent? = null,
-) : StripeModel
+
+    /**
+     * Customer data from the checkout session init response.
+     * This is parsed from the top-level "customer" field in the init response.
+     * For checkout sessions, customer is associated server-side when the session is created,
+     * so we get customer data directly in the init response rather than through customer session auth.
+     */
+    val customer: Customer? = null,
+) : StripeModel {
+
+    /**
+     * Customer data from checkout session.
+     * Simpler than [ElementsSession.Customer] because checkout sessions don't have
+     * customer session authentication - customer is associated server-side.
+     */
+    @Parcelize
+    data class Customer(
+        /**
+         * The customer ID (e.g., "cus_xxx").
+         */
+        val id: String,
+
+        /**
+         * The customer's saved payment methods.
+         */
+        val paymentMethods: List<PaymentMethod>,
+
+        /**
+         * The ID of the customer's default payment method, if set.
+         */
+        val defaultPaymentMethodId: String? = null,
+    ) : StripeModel
+}

@@ -31,6 +31,13 @@ data class ElementsSession(
     val elementsSessionConfigId: String?,
     val accountId: String?,
     val merchantId: String?,
+    /**
+     * Customer data from checkout session init response.
+     * For checkout sessions, customer is associated server-side, so customer data comes
+     * directly from the init response rather than through customer session authentication.
+     * This is only populated for checkout session flows.
+     */
+    val checkoutSessionCustomer: CheckoutSessionResponse.Customer? = null,
 ) : StripeModel {
 
     val linkPassthroughModeEnabled: Boolean
