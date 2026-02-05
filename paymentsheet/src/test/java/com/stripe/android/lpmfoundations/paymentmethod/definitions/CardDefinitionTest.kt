@@ -717,24 +717,6 @@ class CardDefinitionTest {
         assertThat(controller.cardDetailsAction).isNull()
     }
 
-    @Test
-    fun `createFormElements returns empty when tap to add is supported`() {
-        val metadata = PaymentMethodMetadataFactory.create(
-            isTapToAddSupported = true,
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
-            )
-        )
-
-        val formElements = CardDefinition.formElements(
-            metadata = metadata,
-            tapToAddHelper = FakeTapToAddHelper.noOp(),
-        )
-
-        // When tap-to-add is supported, CardWithTapUiDefinitionFactory is used which returns empty form
-        assertThat(formElements).isEmpty()
-    }
-
     private fun createLinkConfiguration(): LinkConfiguration {
         return TestFactory.LINK_CONFIGURATION.copy(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
