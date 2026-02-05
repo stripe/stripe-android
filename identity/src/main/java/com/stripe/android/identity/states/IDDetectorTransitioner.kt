@@ -182,7 +182,7 @@ internal class IDDetectorTransitioner(
             val feedbackThreshold = if (blurThreshold > 0f) blurThreshold * BLUR_FEEDBACK_RATIO else 0f
             if (analyzerOutput.blurScore <= feedbackThreshold) {
                 foundState.withFeedback(
-                    com.stripe.android.identity.R.string.stripe_reduce_blur
+                    com.stripe.android.identity.R.string.stripe_reduce_blur_2
                 )
             } else {
                 // Clear blur feedback when it's only mildly blurry
