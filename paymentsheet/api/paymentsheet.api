@@ -218,6 +218,14 @@ public abstract interface class com/stripe/android/customersheet/SetupIntentClie
 	public abstract fun provideSetupIntentClientSecret (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
+public final class com/stripe/android/link/ComposableSingletons$LinkScreenContentKt {
+	public static final field INSTANCE Lcom/stripe/android/link/ComposableSingletons$LinkScreenContentKt;
+	public fun <init> ()V
+	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-3$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+}
+
 public final class com/stripe/android/link/onramp/ui/ComposableSingletons$OnrampKYCRefreshScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/link/onramp/ui/ComposableSingletons$OnrampKYCRefreshScreenKt;
 	public fun <init> ()V

@@ -282,7 +282,7 @@ private fun BoxScope.ProgressOverlay(
 }
 
 @Composable
-private fun ProgressOverlayProcessing() {
+internal fun ProgressOverlayProcessing() {
     CircularProgressIndicator(
         color = MaterialTheme.colors.onSurface,
         strokeWidth = dimensionResource(R.dimen.stripe_paymentsheet_loading_indicator_stroke_width),
