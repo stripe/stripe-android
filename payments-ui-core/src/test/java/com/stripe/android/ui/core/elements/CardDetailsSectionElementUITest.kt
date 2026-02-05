@@ -7,6 +7,7 @@ import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
@@ -124,6 +125,43 @@ internal class CardDetailsSectionElementUITest {
         }
     }
 
+    @Test
+    fun `CardDetailsSectionElement shows custom action and not card scan when cardDetailsAction is provided`() {
+        runScenario(
+            cardDetailsAction = FakeCardDetailsAction(contentText = "Tap to add card")
+        ) {
+            composeTestRule.onNodeWithText("Tap to add card").assertExists()
+            composeTestRule.onNodeWithText("Scan card").assertDoesNotExist()
+        }
+    }
+
+    @Test
+    fun `CardDetailsSectionElement does not auto open card scan if custom action provided`() {
+        runScenario(
+            automaticallyLaunchedCardScanFormDataHelper = AutomaticallyLaunchedCardScanFormDataHelper(
+                openCardScanAutomaticallyConfig = true,
+                hasAutomaticallyLaunchedCardScanInitialValue = false,
+                savedStateHandle = SavedStateHandle()
+            ),
+            cardDetailsAction = FakeCardDetailsAction(contentText = "Tap to add card")
+        ) {
+            assertThat(controller.shouldAutomaticallyLaunchCardScan()).isFalse()
+            verify(controller, times(0))
+                .onCardScanResult(any())
+            verify(controller, times(0))
+                .setHasAutomaticallyLaunchedCardScan()
+        }
+    }
+
+    private class FakeCardDetailsAction(
+        private val contentText: String,
+    ) : CardDetailsAction {
+        @Composable
+        override fun Content(enabled: Boolean) {
+            androidx.compose.material.Text(contentText)
+        }
+    }
+
     private class Scenario(
         val controller: CardDetailsSectionController,
     )
@@ -131,6 +169,7 @@ internal class CardDetailsSectionElementUITest {
     private fun getController(
         context: Context,
         automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper?,
+        cardDetailsAction: CardDetailsAction? = null,
     ): CardDetailsSectionController {
         val cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context)
 
@@ -140,13 +179,15 @@ internal class CardDetailsSectionElementUITest {
             collectName = false,
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
             cardBrandFilter = DefaultCardBrandFilter,
-            automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper
+            automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
+            cardDetailsAction = cardDetailsAction,
         )
         return output
     }
 
     private fun runScenario(
-        automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper?,
+        automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper? = null,
+        cardDetailsAction: CardDetailsAction? = null,
         block: suspend Scenario.() -> Unit
     ) = runTest {
         val mockResult = mock<PaymentCardRecognitionResult>()
@@ -178,6 +219,7 @@ internal class CardDetailsSectionElementUITest {
         }
         val controller = getController(
             context = context,
+            cardDetailsAction = cardDetailsAction,
             automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper
         )
 
