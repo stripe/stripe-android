@@ -2,6 +2,8 @@ package com.stripe.android.financialconnections.domain
 
 import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.launcher.InstantDebitsResult
+import com.stripe.android.financialconnections.model.PaymentAccount
+import com.stripe.android.financialconnections.model.PaymentDetailsPaymentAccount
 import com.stripe.android.financialconnections.repository.ConsumerSessionProvider
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
@@ -11,7 +13,7 @@ import javax.inject.Inject
 
 internal fun interface CreateInstantDebitsResult {
     suspend operator fun invoke(
-        bankAccountId: String,
+        paymentAccount: PaymentAccount,
     ): InstantDebitsResult
 }
 
@@ -23,7 +25,7 @@ internal class RealCreateInstantDebitsResult @Inject constructor(
 ) : CreateInstantDebitsResult {
 
     override suspend fun invoke(
-        bankAccountId: String,
+        paymentAccount: PaymentAccount,
     ): InstantDebitsResult {
         val consumerSession = consumerSessionProvider.provideConsumerSession()
 
@@ -33,13 +35,25 @@ internal class RealCreateInstantDebitsResult @Inject constructor(
 
         val billingDetails = elementsSessionContext?.billingDetails
 
-        val response = consumerRepository.createPaymentDetails(
-            consumerSessionClientSecret = clientSecret,
-            bankAccountId = bankAccountId,
-            billingDetails = billingDetails,
-        )
-
-        val paymentDetails = response.paymentDetails.filterIsInstance<BankAccount>().first()
+        val paymentDetails: BankAccount = when (paymentAccount) {
+            is PaymentDetailsPaymentAccount -> {
+                // Retrieve existing payment details instead of creating new ones
+                val response = consumerRepository.listPaymentDetails(clientSecret)
+                response.paymentDetails
+                    .filterIsInstance<BankAccount>()
+                    .firstOrNull { it.id == paymentAccount.id }
+                    ?: error("Payment details not found for id: ${paymentAccount.id}")
+            }
+            else -> {
+                // Create new payment details (existing behavior)
+                val response = consumerRepository.createPaymentDetails(
+                    consumerSessionClientSecret = clientSecret,
+                    bankAccountId = paymentAccount.id,
+                    billingDetails = billingDetails,
+                )
+                response.paymentDetails.filterIsInstance<BankAccount>().first()
+            }
+        }
 
         val linkMode = elementsSessionContext?.linkMode
         val paymentMethod = if (linkMode == LinkMode.LinkCardBrand) {

@@ -31,5 +31,6 @@ private fun PaymentAccount.setUsesMicrodepositsIfNeeded(
     return when (this) {
         is BankAccount -> copy(usesMicrodeposits = usesMicrodeposits)
         is FinancialConnectionsAccount -> this
+        is PaymentDetailsPaymentAccount -> this
     }
 }

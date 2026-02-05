@@ -3,6 +3,7 @@ package com.stripe.android.financialconnections.domain
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.ElementsSessionContext.BillingDetails
+import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.repository.CachedConsumerSession
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
@@ -40,7 +41,7 @@ class RealCreateInstantDebitsResultTest {
             ),
         )
 
-        createInstantDebitResult("bank_account_id_001")
+        createInstantDebitResult(makeBankAccountPaymentAccount())
 
         verify(consumerRepository).sharePaymentDetails(
             paymentDetailsId = "ba_1234",
@@ -66,7 +67,7 @@ class RealCreateInstantDebitsResultTest {
             ),
         )
 
-        createInstantDebitResult("bank_account_id_001")
+        createInstantDebitResult(makeBankAccountPaymentAccount())
 
         verify(repository).createPaymentMethod(
             paymentDetailsId = "ba_1234",
@@ -89,7 +90,7 @@ class RealCreateInstantDebitsResultTest {
             ),
         )
 
-        createInstantDebitResult("bank_account_id_001")
+        createInstantDebitResult(makeBankAccountPaymentAccount())
 
         verify(repository).createPaymentMethod(
             paymentDetailsId = "ba_1234",
@@ -127,7 +128,7 @@ class RealCreateInstantDebitsResultTest {
             ),
         )
 
-        createInstantDebitResult("bank_account_id_001")
+        createInstantDebitResult(makeBankAccountPaymentAccount())
 
         verify(repository).createPaymentMethod(
             paymentDetailsId = "ba_1234",
@@ -164,7 +165,7 @@ class RealCreateInstantDebitsResultTest {
             ),
         )
 
-        createInstantDebitResult("bank_account_id_001")
+        createInstantDebitResult(makeBankAccountPaymentAccount())
 
         verify(consumerRepository).sharePaymentDetails(
             paymentDetailsId = "ba_1234",
@@ -189,7 +190,7 @@ class RealCreateInstantDebitsResultTest {
             ),
         )
 
-        val result = createInstantDebitResult("bank_account_id_001")
+        val result = createInstantDebitResult(makeBankAccountPaymentAccount())
 
         verify(consumerRepository, never()).updateAvailableIncentives(
             sessionId = any(),
@@ -237,7 +238,7 @@ class RealCreateInstantDebitsResultTest {
             )
         )
 
-        val result = createInstantDebitResult("bank_account_id_001")
+        val result = createInstantDebitResult(makeBankAccountPaymentAccount())
         assertThat(result.eligibleForIncentive).isTrue()
     }
 
@@ -303,6 +304,13 @@ class RealCreateInstantDebitsResultTest {
             ),
             incentiveEligibilitySession = incentiveEligibilitySession,
             allowRedisplay = null,
+        )
+    }
+
+    private fun makeBankAccountPaymentAccount(): BankAccount {
+        return BankAccount(
+            id = "bank_account_id_001",
+            last4 = "4242",
         )
     }
 }

@@ -3,6 +3,7 @@ package com.stripe.android.financialconnections.model.serializer
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.PaymentAccount
+import com.stripe.android.financialconnections.model.PaymentDetailsPaymentAccount
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.JsonContentPolymorphicSerializer
 import kotlinx.serialization.json.JsonElement
@@ -16,6 +17,7 @@ internal object PaymentAccountSerializer :
         return when (element.objectValue) {
             FinancialConnectionsAccount.OBJECT_OLD,
             FinancialConnectionsAccount.OBJECT_NEW -> FinancialConnectionsAccount.serializer()
+            PaymentDetailsPaymentAccount.OBJECT -> PaymentDetailsPaymentAccount.serializer()
             else -> BankAccount.serializer()
         }
     }

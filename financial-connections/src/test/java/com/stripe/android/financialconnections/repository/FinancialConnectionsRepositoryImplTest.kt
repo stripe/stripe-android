@@ -9,6 +9,7 @@ import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
+import com.stripe.android.financialconnections.model.PaymentDetailsPaymentAccount
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.test.readResourceAsString
 import com.stripe.android.financialconnections.utils.testJson
@@ -147,6 +148,22 @@ class FinancialConnectionsRepositoryImplTest {
                 financialConnectionsRepositoryImpl.getFinancialConnectionsSession("client_secret")
 
             assertThat(result.paymentAccount).isInstanceOf(BankAccount::class.java)
+        }
+
+    @Test
+    fun `getFinancialConnectionsSession - paymentAccount is PaymentDetailsPaymentAccount`() =
+        runTest {
+            givenGetRequestReturns(
+                readResourceAsString(
+                    "json/linked_account_session_payment_account_as_payment_details.json"
+                )
+            )
+
+            val result =
+                financialConnectionsRepositoryImpl.getFinancialConnectionsSession("client_secret")
+
+            assertThat(result.paymentAccount).isInstanceOf(PaymentDetailsPaymentAccount::class.java)
+            assertThat(result.paymentAccount?.id).isEqualTo("csmrpd_PaymentDetails123")
         }
 
     private suspend fun givenGetRequestReturns(successBody: String) {

@@ -395,7 +395,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 
     private suspend fun handleInstantDebitsCompletion(session: FinancialConnectionsSession) {
         val instantDebits = session.paymentAccount?.let { account ->
-            createInstantDebitsResult(account.id)
+            createInstantDebitsResult(account)
         }
 
         val result = if (instantDebits != null) {

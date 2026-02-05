@@ -95,6 +95,10 @@ internal interface FinancialConnectionsConsumerSessionRepository {
         consumerSessionClientSecret: String,
     ): Result<UpdateAvailableIncentives>
 
+    suspend fun listPaymentDetails(
+        consumerSessionClientSecret: String,
+    ): ConsumerPaymentDetails
+
     companion object {
         operator fun invoke(
             consumersApiService: ConsumersApiService,
@@ -336,6 +340,15 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         linkAuthTokenClientSecret = null,
     ).also {
         updateCachedConsumerSessionFromLookup(it)
+    }
+
+    override suspend fun listPaymentDetails(
+        consumerSessionClientSecret: String,
+    ): ConsumerPaymentDetails {
+        return financialConnectionsConsumersApiService.listPaymentDetails(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            requestSurface = requestSurface,
+        )
     }
 
     private fun updateCachedConsumerSession(
