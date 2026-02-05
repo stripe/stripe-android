@@ -5,11 +5,9 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
-import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.ui.DelegateDrawable
@@ -776,7 +774,8 @@ class LinkController @Inject internal constructor(
     class PaymentMethodPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
-        private val imageLoader: suspend () -> Drawable,
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val imageLoader: suspend () -> Drawable,
         val label: String,
         val sublabel: String?,
     ) {
