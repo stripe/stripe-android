@@ -194,8 +194,8 @@ internal class IDDetectorTransitioner(
         !run {
             val centerX = analyzerOutput.boundingBox.left + analyzerOutput.boundingBox.width / 2f
             val centerY = analyzerOutput.boundingBox.top + analyzerOutput.boundingBox.height / 2f
-            val tol = 0.05f
-            centerX in (0.5f - tol)..(0.5f + tol) && centerY in (0.5f - tol)..(0.5f + tol)
+            centerX in (0.5f - CENTER_TOLERANCE)..(0.5f + CENTER_TOLERANCE) &&
+                centerY in (0.5f - CENTER_TOLERANCE)..(0.5f + CENTER_TOLERANCE)
         } -> {
             foundState.reachedStateAt = TimeSource.Monotonic.markNow()
             foundState.withFeedback(
@@ -371,6 +371,9 @@ internal class IDDetectorTransitioner(
         // Distance feedback thresholds based on area coverage of the frame
         const val MIN_BOX_COVERAGE_FEEDBACK = 0.18f
         const val MAX_BOX_COVERAGE_FEEDBACK = 0.78f
+
+        // Center tolerance for checking if document is centered
+        const val CENTER_TOLERANCE = 0.05f
 
         val TAG: String = IDDetectorTransitioner::class.java.simpleName
     }
