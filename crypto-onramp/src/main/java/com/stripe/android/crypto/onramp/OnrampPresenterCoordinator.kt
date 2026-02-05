@@ -59,9 +59,6 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         callback = ::handlePaymentLauncherResult
     )
 
-    private val currentLinkAccount: LinkController.LinkAccount?
-        get() = interactor.state.value.linkControllerState?.internalLinkAccount
-
     private val verifyKycResultLauncher: ActivityResultLauncher<VerifyKycActivityArgs> =
         activity.activityResultRegistry.register(
             key = "OnrampPresenterCoordinator_VerifyKycResultLauncher",
