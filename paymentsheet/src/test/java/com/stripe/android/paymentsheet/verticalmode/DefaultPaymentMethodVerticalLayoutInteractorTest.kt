@@ -457,7 +457,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         ) {
             val paymentMethod = interactor.state.value.displayablePaymentMethods.first { it.code == "cashapp" }
             paymentMethod.onClick()
-            runActionForCodeTurbine.awaitItem()
             assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("cashapp")
             onFormFieldValuesChangedTurbine.awaitItem().apply {
                 first.run {
@@ -776,7 +775,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             formTypeForCode = { FormHelper.FormType.UserInteractionRequired },
         ) {
             interactor.handleViewAction(ViewAction.PaymentMethodSelected("card"))
-            runActionForCodeTurbine.awaitItem()
             assertThat(transitionToFormScreenTurbine.awaitItem()).isEqualTo("card")
             assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("card")
             assertThat(reportFormShownTurbine.awaitItem()).isEqualTo("card")
@@ -785,11 +783,14 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     @Test
     fun handleViewAction_PaymentMethodSelected_callsRunActionForCode() {
+        val actionForCode = Turbine<PaymentMethodCode>()
+
         runScenario(
             formTypeForCode = { FormHelper.FormType.UserInteractionRequired },
+            actionForCode = { actionForCode.add(it) }
         ) {
             interactor.handleViewAction(ViewAction.PaymentMethodSelected("card"))
-            assertThat(runActionForCodeTurbine.awaitItem()).isEqualTo("card")
+            assertThat(actionForCode.awaitItem()).isEqualTo("card")
             assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("card")
             assertThat(transitionToFormScreenTurbine.awaitItem()).isEqualTo("card")
             assertThat(reportFormShownTurbine.awaitItem()).isEqualTo("card")
@@ -802,7 +803,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             formTypeForCode = { FormHelper.FormType.UserInteractionRequired },
         ) {
             interactor.handleViewAction(ViewAction.PaymentMethodSelected("us_bank_account"))
-            runActionForCodeTurbine.awaitItem()
             assertThat(transitionToFormScreenTurbine.awaitItem()).isEqualTo("us_bank_account")
             assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("us_bank_account")
             assertThat(reportFormShownTurbine.awaitItem()).isEqualTo("us_bank_account")
@@ -815,7 +815,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             formTypeForCode = { FormHelper.FormType.UserInteractionRequired },
         ) {
             interactor.handleViewAction(ViewAction.PaymentMethodSelected("link"))
-            runActionForCodeTurbine.awaitItem()
             assertThat(transitionToFormScreenTurbine.awaitItem()).isEqualTo("link")
             assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("link")
             assertThat(reportFormShownTurbine.awaitItem()).isEqualTo("link")
@@ -828,7 +827,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             formTypeForCode = { FormHelper.FormType.Empty },
         ) {
             interactor.handleViewAction(ViewAction.PaymentMethodSelected("cashapp"))
-            runActionForCodeTurbine.awaitItem()
             assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("cashapp")
             onFormFieldValuesChangedTurbine.awaitItem().apply {
                 first.run {
@@ -850,7 +848,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             interactor.state.test {
                 assertThat(awaitItem().mandate).isNull()
                 interactor.handleViewAction(ViewAction.PaymentMethodSelected("cashapp"))
-                runActionForCodeTurbine.awaitItem()
                 assertThat(transitionToFormScreenTurbine.awaitItem()).isEqualTo("cashapp")
                 assertThat(reportFormShownTurbine.awaitItem()).isEqualTo("cashapp")
                 assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("cashapp")
@@ -868,7 +865,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             interactor.state.test {
                 assertThat(awaitItem().selection).isNull()
                 interactor.handleViewAction(ViewAction.PaymentMethodSelected("cashapp"))
-                runActionForCodeTurbine.awaitItem()
                 assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("cashapp")
                 onFormFieldValuesChangedTurbine.awaitItem().apply {
                     first.run {
@@ -896,7 +892,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             interactor.state.test {
                 assertThat(awaitItem().mandate).isNull()
                 interactor.handleViewAction(ViewAction.PaymentMethodSelected("cashapp"))
-                runActionForCodeTurbine.awaitItem()
                 assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("cashapp")
                 onFormFieldValuesChangedTurbine.awaitItem().apply {
                     first.run {
@@ -940,7 +935,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             interactor.state.test {
                 assertThat(awaitItem().mandate).isNull()
                 interactor.handleViewAction(ViewAction.PaymentMethodSelected("cashapp"))
-                runActionForCodeTurbine.awaitItem()
                 assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("cashapp")
                 onFormFieldValuesChangedTurbine.awaitItem().apply {
                     first.run {
@@ -981,7 +975,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             initialMostRecentlySelectedSavedPaymentMethod = displayedPaymentMethod,
         ) {
             interactor.handleViewAction(ViewAction.PaymentMethodSelected("cashapp"))
-            runActionForCodeTurbine.awaitItem()
             interactor.state.test {
                 awaitItem().run {
                     assertThat(displayedSavedPaymentMethod).isNotNull()
@@ -1736,6 +1729,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         invokeRowSelectionCallback: (() -> Unit)? = null,
         initialWalletsState: WalletsState? = null,
         displaysMandatesInFormScreen: Boolean = false,
+        actionForCode: (PaymentMethodCode) -> Unit = {},
         testBlock: suspend TestParams.() -> Unit
     ) {
         val processing: MutableStateFlow<Boolean> = MutableStateFlow(initialProcessing)
@@ -1757,7 +1751,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         val reportFormShownTurbine = Turbine<PaymentMethodCode>()
         val onFormFieldValuesChangedTurbine = Turbine<Pair<FormFieldValues, String>>()
         val visibilitySnapshotTurbine = Turbine<Pair<List<String>, List<String>>>()
-        val runActionForCodeTurbine = Turbine<PaymentMethodCode>()
 
         val interactor = DefaultPaymentMethodVerticalLayoutInteractor(
             paymentMethodMetadata = paymentMethodMetadata,
@@ -1766,7 +1759,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             selection = selection,
             paymentMethodIncentiveInteractor = paymentMethodIncentiveInteractor,
             runActionForCode = { code ->
-                runActionForCodeTurbine.add(code)
+                actionForCode(code)
             },
             formTypeForCode = formTypeForCode,
             onFormFieldValuesChanged = { formValues: FormFieldValues, selectedPaymentMethodCode: String ->
@@ -1828,7 +1821,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             reportFormShownTurbine = reportFormShownTurbine,
             onFormFieldValuesChangedTurbine = onFormFieldValuesChangedTurbine,
             visibilitySnapshotTurbine = visibilitySnapshotTurbine,
-            runActionForCodeTurbine = runActionForCodeTurbine,
         ).apply {
             testScope.runTest {
                 testBlock()
@@ -1856,7 +1848,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         val reportFormShownTurbine: ReceiveTurbine<PaymentMethodCode>,
         val onFormFieldValuesChangedTurbine: ReceiveTurbine<Pair<FormFieldValues, String>>,
         val visibilitySnapshotTurbine: ReceiveTurbine<Pair<List<String>, List<String>>>,
-        val runActionForCodeTurbine: ReceiveTurbine<PaymentMethodCode>,
     ) {
         fun ensureAllEventsConsumed() {
             updateSelectionTurbine.ensureAllEventsConsumed()
@@ -1867,7 +1858,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             reportFormShownTurbine.ensureAllEventsConsumed()
             onFormFieldValuesChangedTurbine.ensureAllEventsConsumed()
             visibilitySnapshotTurbine.ensureAllEventsConsumed()
-            runActionForCodeTurbine.ensureAllEventsConsumed()
         }
     }
 }

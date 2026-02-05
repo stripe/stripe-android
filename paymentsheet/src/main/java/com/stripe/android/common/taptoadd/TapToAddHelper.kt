@@ -58,9 +58,9 @@ internal class DefaultTapToAddHelper(
     override val collectedPaymentMethod = _collectedPaymentMethod.asStateFlow()
 
     private var _hasPreviouslyAttemptedCollection
-        get() = savedStateHandle.get<Boolean>(PREVIOUSLY_COLLECTED_WITH_TAP_TO_AD_KEY) == true
+        get() = savedStateHandle.get<Boolean>(PREVIOUSLY_COLLECTED_WITH_TAP_TO_ADD_KEY) == true
         set(value) {
-            savedStateHandle[PREVIOUSLY_COLLECTED_WITH_TAP_TO_AD_KEY] = value
+            savedStateHandle[PREVIOUSLY_COLLECTED_WITH_TAP_TO_ADD_KEY] = value
         }
 
     override val hasPreviouslyAttemptedCollection: Boolean
@@ -91,6 +91,6 @@ internal class DefaultTapToAddHelper(
     }
 
     private companion object {
-        const val PREVIOUSLY_COLLECTED_WITH_TAP_TO_AD_KEY = "PREVIOUSLY_COLLECTED_WITH_TAP_TO_ADD"
+        const val PREVIOUSLY_COLLECTED_WITH_TAP_TO_ADD_KEY = "PREVIOUSLY_COLLECTED_WITH_TAP_TO_ADD"
     }
 }
