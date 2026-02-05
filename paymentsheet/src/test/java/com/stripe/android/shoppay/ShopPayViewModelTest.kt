@@ -529,7 +529,7 @@ internal class ShopPayViewModelTest {
             preparePaymentMethodHandlerProvider = { preparePaymentMethodHandler },
             eventReporter = eventReporter,
             errorReporter = errorReporter,
-            workContext = dispatcher
+            uiContext = dispatcher
         )
     }
 

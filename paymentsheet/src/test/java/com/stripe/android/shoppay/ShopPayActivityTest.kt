@@ -350,7 +350,7 @@ internal class ShopPayActivityTest {
                     preparePaymentMethodHandlerProvider = {
                         preparePaymentMethodHandler
                     },
-                    workContext = dispatcher,
+                    uiContext = dispatcher,
                     errorReporter = FakeErrorReporter(),
                     eventReporter = FakeEventReporter(),
                 ) as T
