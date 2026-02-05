@@ -72,6 +72,17 @@ internal class ShopPayViewModelTest {
     }
 
     @Test
+    fun `onBackPressed emits canceled result`() = runTest(dispatcher) {
+        val viewModel = createViewModel()
+
+        viewModel.paymentResult.test {
+            viewModel.onBackPressed()
+
+            assertThat(awaitItem()).isEqualTo(ShopPayActivityResult.Canceled)
+        }
+    }
+
+    @Test
     fun `loadUrl loads correct URL`() {
         val viewModel = createViewModel()
         val mockWebView = mock<WebView>()
