@@ -74,10 +74,12 @@ fun CardDetailsSectionElementUI(
                         heading()
                     }
             )
-            ScanCardButtonUI(
-                enabled = enabled,
-                cardScanGoogleLauncher = cardScanLauncher
-            )
+            controller.cardDetailsAction?.Content(enabled) ?: run {
+                ScanCardButtonUI(
+                    enabled = enabled,
+                    cardScanGoogleLauncher = cardScanLauncher
+                )
+            }
         }
         SectionElementUI(
             modifier = Modifier.padding(top = 8.dp),

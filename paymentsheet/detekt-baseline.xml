@@ -16,6 +16,7 @@
     <ID>FunctionNaming:PaymentSheetTopBar.kt$@Preview @Composable internal fun TestModeBadge_Preview()</ID>
     <ID>FunctionOnlyReturningConstant:FlowControllerModule.kt$FlowControllerModule$@Provides @Singleton @Named(ALLOWS_MANUAL_CONFIRMATION) fun provideAllowsManualConfirmation()</ID>
     <ID>FunctionOnlyReturningConstant:PaymentSheetLauncherModule.kt$PaymentSheetLauncherModule.Companion$@Provides @Singleton @Named(ALLOWS_MANUAL_CONFIRMATION) fun provideAllowsManualConfirmation()</ID>
+    <ID>LargeClass:CardDefinitionTest.kt$CardDefinitionTest</ID>
     <ID>LargeClass:CustomerAdapterTest.kt$CustomerAdapterTest</ID>
     <ID>LargeClass:CustomerSheetViewModel.kt$CustomerSheetViewModel : ViewModel</ID>
     <ID>LargeClass:CustomerSheetViewModelTest.kt$CustomerSheetViewModelTest</ID>
@@ -57,7 +58,6 @@
     <ID>LongMethod:InputAddressViewModelTest.kt$InputAddressViewModelTest$@OptIn(AddressElementSameAsBillingPreview::class) @Test fun `'Shipping same as billing' should work as expected with both billing &amp; shipping`()</ID>
     <ID>LongMethod:InputAddressViewModelTest.kt$InputAddressViewModelTest$@OptIn(AddressElementSameAsBillingPreview::class) @Test fun `'Shipping same as billing' should work as expected with same billing &amp; shipping &amp; empty values`()</ID>
     <ID>LongMethod:InputAddressViewModelTest.kt$InputAddressViewModelTest$@OptIn(AddressElementSameAsBillingPreview::class) @Test fun `'Shipping same as billing' should work as expected with same billing &amp; shipping`()</ID>
-    <ID>LongMethod:LinkInlineSignupConfirmationDefinitionTest.kt$LinkInlineSignupConfirmationDefinitionTest$@Test fun `'action' should return 'Launch' after successful sign-in &amp; attach`()</ID>
     <ID>LongMethod:LinkInlineSignupConfirmationDefinitionTest.kt$LinkInlineSignupConfirmationDefinitionTest$private fun testSuccessfulSignupWithNewCard( saveOption: LinkInlineSignupConfirmationOption.PaymentMethodSaveOption, expectedSetupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?, expectedShouldSave: Boolean, )</ID>
     <ID>LongMethod:LinkInlineSignupConfirmationDefinitionTest.kt$LinkInlineSignupConfirmationDefinitionTest$private fun testSuccessfulSignupWithSavedLinkCard( saveOption: LinkInlineSignupConfirmationOption.PaymentMethodSaveOption, expectedSetupForFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage, verifyBillingDetails: Boolean = false, includePaymentMethod: Boolean = false, )</ID>
     <ID>LongMethod:PaymentDetails.kt$@Preview(showBackground = true) @Composable private fun PaymentDetailsListItemPreview()</ID>
