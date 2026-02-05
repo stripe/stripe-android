@@ -74,8 +74,13 @@ class DefaultAddPaymentMethodInteractorTest {
 
     @Test
     fun handleViewAction_OnPaymentMethodSelected_selectsPaymentMethod() {
+        val actionForCodeTurbine = Turbine<PaymentMethodCode>()
+
         runScenario(
             initiallySelectedPaymentMethodType = PaymentMethod.Type.Card.code,
+            actionForCode = {
+                actionForCodeTurbine.add(it)
+            }
         ) {
             val expectedCode = PaymentMethod.Type.CashAppPay.code
             interactor.handleViewAction(
@@ -84,6 +89,7 @@ class DefaultAddPaymentMethodInteractorTest {
 
             dispatcher.scheduler.advanceUntilIdle()
 
+            assertThat(actionForCodeTurbine.awaitItem()).isEqualTo(expectedCode)
             assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo(expectedCode)
             assertThat(clearErrorMessagesTurbine.awaitItem()).isNotNull()
             interactor.state.test {
@@ -323,6 +329,22 @@ class DefaultAddPaymentMethodInteractorTest {
         assertThat(visibilityItem.second).isEqualTo(MANY_ITEMS_ONE_PARTIALLY_VISIBLE_EXPECTED_HIDDEN)
     }
 
+    @Test
+    fun init_shouldPerform_actionForCode() {
+        val actionForCodeTurbine = Turbine<PaymentMethodCode>()
+
+        runScenario(
+            dispatcher = UnconfinedTestDispatcher(),
+            initiallySelectedPaymentMethodType = PaymentMethod.Type.Card.code,
+            actionForCode = {
+                actionForCodeTurbine.add(it)
+            }
+        ) {
+            assertThat(actionForCodeTurbine.awaitItem()).isEqualTo(PaymentMethod.Type.Card.code)
+            assertThat(clearErrorMessagesTurbine.awaitItem()).isNotNull()
+        }
+    }
+
     private fun runScenario(
         initiallySelectedPaymentMethodType: PaymentMethodCode = PaymentMethod.Type.Card.code,
         selection: StateFlow<PaymentSelection?> = MutableStateFlow(null),
@@ -342,6 +364,7 @@ class DefaultAddPaymentMethodInteractorTest {
             )
         },
         formElementsForCode: (PaymentMethodCode) -> List<FormElement> = { emptyList() },
+        actionForCode: (PaymentMethodCode) -> Unit = {},
         createUSBankAccountFormArguments: (PaymentMethodCode) -> USBankAccountFormArguments = { mock() },
         dispatcher: TestDispatcher = StandardTestDispatcher(TestCoroutineScheduler()),
         testBlock: suspend TestParams.() -> Unit
@@ -374,6 +397,9 @@ class DefaultAddPaymentMethodInteractorTest {
                 reportPaymentMethodTypeSelectedTurbine.add(it)
             },
             createUSBankAccountFormArguments = createUSBankAccountFormArguments,
+            actionForCode = { code ->
+                actionForCode(code)
+            },
             coroutineScope = CoroutineScope(dispatcher),
             validationRequested = validationRequestedSource,
             isLiveMode = true,
@@ -408,7 +434,7 @@ class DefaultAddPaymentMethodInteractorTest {
         val onFormFieldValuesChangedTurbine: ReceiveTurbine<Pair<FormFieldValues?, String>>,
         val clearErrorMessagesTurbine: ReceiveTurbine<Unit>,
         val reportPaymentMethodTypeSelectedTurbine: ReceiveTurbine<PaymentMethodCode>,
-        val initialVisibilityTrackerTurbine: ReceiveTurbine<Pair<List<String>, List<String>>>
+        val initialVisibilityTrackerTurbine: ReceiveTurbine<Pair<List<String>, List<String>>>,
     ) {
         fun ensureAllEventsConsumed() {
             reportFieldInteractionTurbine.ensureAllEventsConsumed()

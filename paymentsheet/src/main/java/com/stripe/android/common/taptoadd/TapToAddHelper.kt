@@ -1,5 +1,6 @@
 package com.stripe.android.common.taptoadd
 
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -13,6 +14,7 @@ import kotlinx.coroutines.launch
 
 internal interface TapToAddHelper {
     val collectedPaymentMethod: StateFlow<DisplayableSavedPaymentMethod?>
+    val hasPreviouslyAttemptedCollection: Boolean
 
     /**
      * Begins collection of payment method from the Tap to Add flow. Calling this method should show a screen that
@@ -34,6 +36,7 @@ internal interface TapToAddHelper {
                     paymentMethodMetadata = paymentMethodMetadata,
                     tapToAddCollectionHandler = tapToAddCollectionHandler,
                     onCollectingUpdated = onCollectingUpdated,
+                    savedStateHandle = SavedStateHandle(),
                     onError = onError,
                 )
             } else {
@@ -46,6 +49,7 @@ internal interface TapToAddHelper {
 internal class DefaultTapToAddHelper(
     private val coroutineScope: CoroutineScope,
     private val tapToAddCollectionHandler: TapToAddCollectionHandler,
+    private val savedStateHandle: SavedStateHandle,
     private val paymentMethodMetadata: PaymentMethodMetadata,
     private val onCollectingUpdated: (collecting: Boolean) -> Unit,
     private val onError: (ResolvableString) -> Unit,
@@ -53,7 +57,18 @@ internal class DefaultTapToAddHelper(
     private val _collectedPaymentMethod = MutableStateFlow<DisplayableSavedPaymentMethod?>(null)
     override val collectedPaymentMethod = _collectedPaymentMethod.asStateFlow()
 
+    private var _hasPreviouslyAttemptedCollection
+        get() = savedStateHandle.get<Boolean>(PREVIOUSLY_COLLECTED_WITH_TAP_TO_ADD_KEY) == true
+        set(value) {
+            savedStateHandle[PREVIOUSLY_COLLECTED_WITH_TAP_TO_ADD_KEY] = value
+        }
+
+    override val hasPreviouslyAttemptedCollection: Boolean
+        get() = _hasPreviouslyAttemptedCollection
+
     override fun startPaymentMethodCollection() {
+        _hasPreviouslyAttemptedCollection = true
+
         coroutineScope.launch {
             onCollectingUpdated(true)
 
@@ -73,5 +88,9 @@ internal class DefaultTapToAddHelper(
 
             onCollectingUpdated(false)
         }
+    }
+
+    private companion object {
+        const val PREVIOUSLY_COLLECTED_WITH_TAP_TO_ADD_KEY = "PREVIOUSLY_COLLECTED_WITH_TAP_TO_ADD"
     }
 }

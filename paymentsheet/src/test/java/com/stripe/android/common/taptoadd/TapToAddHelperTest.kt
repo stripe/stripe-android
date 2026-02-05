@@ -1,5 +1,6 @@
 package com.stripe.android.common.taptoadd
 
+import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import app.cash.turbine.test
@@ -144,6 +145,7 @@ class TapToAddHelperTest {
             TapToAddCollectionHandler.CollectionState.Collected(
                 PaymentMethodFactory.card(last4 = "4242")
             ),
+        savedStateHandle: SavedStateHandle = SavedStateHandle(),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val updateProcessingCalls = Turbine<Boolean>()
@@ -155,6 +157,7 @@ class TapToAddHelperTest {
                     helper = createTapToAddHelper(
                         collectionHandler = handler,
                         metadata = metadata,
+                        savedStateHandle = savedStateHandle,
                         updateProcessing = {
                             updateProcessingCalls.add(it)
                         },
@@ -176,6 +179,7 @@ class TapToAddHelperTest {
     private suspend fun createTapToAddHelper(
         collectionHandler: TapToAddCollectionHandler,
         metadata: PaymentMethodMetadata,
+        savedStateHandle: SavedStateHandle,
         updateProcessing: (Boolean) -> Unit,
         updateError: (ResolvableString?) -> Unit,
     ): TapToAddHelper {
@@ -183,6 +187,7 @@ class TapToAddHelperTest {
             coroutineScope = CoroutineScope(currentCoroutineContext()),
             tapToAddCollectionHandler = collectionHandler,
             paymentMethodMetadata = metadata,
+            savedStateHandle = savedStateHandle,
             onCollectingUpdated = updateProcessing,
             onError = updateError,
         )

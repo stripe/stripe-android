@@ -162,33 +162,9 @@ internal class DefaultFormHelper(
     }
 
     override fun formElementsForCode(code: String): List<FormElement> {
-        val currentSelection = newPaymentSelectionProvider()?.takeIf { it.getType() == code }
-
         return paymentMethodMetadata.formElementsForCode(
             code = code,
-            uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
-                cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
-                linkConfigurationCoordinator = linkConfigurationCoordinator,
-                linkInlineHandler = linkInlineHandler,
-                onLinkInlineSignupStateChanged = linkInlineHandler::onStateUpdated,
-                paymentMethodCreateParams = currentSelection?.getPaymentMethodCreateParams(),
-                paymentMethodOptionsParams = currentSelection?.getPaymentMethodOptionParams(),
-                paymentMethodExtraParams = currentSelection?.getPaymentMethodExtraParams(),
-                initialLinkUserInput = when (val selection = currentSelection?.paymentSelection) {
-                    is PaymentSelection.New.Card -> selection.linkInput
-                    else -> null
-                },
-                previousLinkSignupCheckboxSelection = when (val selection = currentSelection?.paymentSelection) {
-                    // User entered a card and may have link input
-                    is PaymentSelection.New.Card -> selection.linkInput != null
-                    else -> null // Not a card, so no previous choice
-                },
-                setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
-                autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
-                isLinkUI = isLinkUI,
-                automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
-                tapToAddHelper = tapToAddHelper,
-            ),
+            uiDefinitionFactoryArgumentsFactory = createArgumentsFactory(code),
         ) ?: emptyList()
     }
 
@@ -238,6 +214,13 @@ internal class DefaultFormHelper(
         }
     }
 
+    override fun runActionForCode(paymentMethodCode: PaymentMethodCode) {
+        paymentMethodMetadata.actionForCode(
+            code = paymentMethodCode,
+            uiDefinitionFactoryArgumentsFactory = createArgumentsFactory(paymentMethodCode),
+        )
+    }
+
     private fun supportedPaymentMethodForCode(code: String): SupportedPaymentMethod {
         return requireNotNull(paymentMethodMetadata.supportedPaymentMethodForCode(code = code))
     }
@@ -255,5 +238,33 @@ internal class DefaultFormHelper(
             eventReporter.onPaymentMethodFormCompleted(code)
             previouslyCompletedForm = code
         }
+    }
+
+    private fun createArgumentsFactory(code: String): UiDefinitionFactory.Arguments.Factory {
+        val currentSelection = newPaymentSelectionProvider()?.takeIf { it.getType() == code }
+
+        return UiDefinitionFactory.Arguments.Factory.Default(
+            cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
+            linkConfigurationCoordinator = linkConfigurationCoordinator,
+            linkInlineHandler = linkInlineHandler,
+            onLinkInlineSignupStateChanged = linkInlineHandler::onStateUpdated,
+            paymentMethodCreateParams = currentSelection?.getPaymentMethodCreateParams(),
+            paymentMethodOptionsParams = currentSelection?.getPaymentMethodOptionParams(),
+            paymentMethodExtraParams = currentSelection?.getPaymentMethodExtraParams(),
+            initialLinkUserInput = when (val selection = currentSelection?.paymentSelection) {
+                is PaymentSelection.New.Card -> selection.linkInput
+                else -> null
+            },
+            previousLinkSignupCheckboxSelection = when (val selection = currentSelection?.paymentSelection) {
+                // User entered a card and may have link input
+                is PaymentSelection.New.Card -> selection.linkInput != null
+                else -> null // Not a card, so no previous choice
+            },
+            setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
+            autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+            isLinkUI = isLinkUI,
+            automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
+            tapToAddHelper = tapToAddHelper,
+        )
     }
 }

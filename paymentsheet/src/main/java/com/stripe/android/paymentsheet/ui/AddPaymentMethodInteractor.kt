@@ -78,6 +78,7 @@ internal class DefaultAddPaymentMethodInteractor(
     private val onFormFieldValuesChanged: (FormFieldValues?, String) -> Unit,
     private val reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit,
     private val createUSBankAccountFormArguments: (PaymentMethodCode) -> USBankAccountFormArguments,
+    private val actionForCode: (PaymentMethodCode) -> Unit,
     private val coroutineScope: CoroutineScope,
     private val uiContext: CoroutineContext,
     private val onInitiallyDisplayedPaymentMethodVisibilitySnapshot: (List<String>, List<String>) -> Unit,
@@ -108,6 +109,7 @@ internal class DefaultAddPaymentMethodInteractor(
                 clearErrorMessages = viewModel::clearErrorMessages,
                 reportFieldInteraction = viewModel.analyticsListener::reportFieldInteraction,
                 onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
+                actionForCode = formHelper::runActionForCode,
                 reportPaymentMethodTypeSelected = viewModel.eventReporter::onSelectPaymentMethod,
                 createUSBankAccountFormArguments = {
                     USBankAccountFormArguments.create(
@@ -169,6 +171,8 @@ internal class DefaultAddPaymentMethodInteractor(
 
         coroutineScope.launch {
             selectedPaymentMethodCode.collect { newSelectedPaymentMethodCode ->
+                actionForCode(newSelectedPaymentMethodCode)
+
                 val newFormArguments = createFormArguments(newSelectedPaymentMethodCode)
                 val newFormElements = formElementsForCode(newSelectedPaymentMethodCode)
                 val newUsBankAccountFormArguments = createUSBankAccountFormArguments(newSelectedPaymentMethodCode)
