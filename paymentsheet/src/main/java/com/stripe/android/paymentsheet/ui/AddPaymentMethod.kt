@@ -107,7 +107,6 @@ internal fun FormFieldValues.transformToExtraParams(
 internal fun FormFieldValues.transformToPaymentSelection(
     paymentMethod: SupportedPaymentMethod,
     paymentMethodMetadata: PaymentMethodMetadata,
-    collectedPaymentMethod: PaymentMethod? = null,
     inlineSignupViewState: InlineSignupViewState? = null,
 ): PaymentSelection? {
     val setupFutureUsage = userRequestedReuse.getSetupFutureUseValue(
@@ -123,10 +122,6 @@ internal fun FormFieldValues.transformToPaymentSelection(
             inlineSignupViewState.userInput == null
         ) {
             return null
-        }
-
-        if (collectedPaymentMethod != null) {
-            return PaymentSelection.Saved(collectedPaymentMethod)
         }
 
         PaymentSelection.New.Card(

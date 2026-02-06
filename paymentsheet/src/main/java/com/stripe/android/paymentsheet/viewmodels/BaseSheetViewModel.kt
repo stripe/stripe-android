@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
+import com.stripe.android.common.taptoadd.DefaultTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddCollectionHandler
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -113,6 +114,8 @@ internal abstract class BaseSheetViewModel(
 
     private val _cvcRecollectionCompleteFlow = MutableStateFlow(true)
     internal val cvcRecollectionCompleteFlow: StateFlow<Boolean> = _cvcRecollectionCompleteFlow
+
+    val tapToAddHelper = DefaultTapToAddHelper(this)
 
     val analyticsListener: PaymentSheetAnalyticsListener = PaymentSheetAnalyticsListener(
         savedStateHandle = savedStateHandle,
