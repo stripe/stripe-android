@@ -4,6 +4,7 @@ import android.content.Context
 import com.stripe.stripeterminal.Terminal
 import com.stripe.stripeterminal.external.callable.ConnectionTokenProvider
 import com.stripe.stripeterminal.external.callable.TerminalListener
+import com.stripe.stripeterminal.log.LogLevel
 import javax.inject.Inject
 
 internal interface TerminalWrapper {
@@ -28,10 +29,12 @@ internal class DefaultTerminalWrapper @Inject constructor() : TerminalWrapper {
         tokenProvider: ConnectionTokenProvider,
         listener: TerminalListener,
     ) {
-        Terminal.initTerminal(
+        Terminal.init(
             context = context,
             tokenProvider = tokenProvider,
             listener = listener,
+            logLevel = LogLevel.VERBOSE,
+            offlineListener = null,
         )
     }
 

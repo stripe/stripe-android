@@ -125,6 +125,7 @@ internal class EmbeddedPlaygroundActivity :
                 .confirmCustomPaymentMethodCallback(this)
                 .externalPaymentMethodConfirmHandler(this)
                 .analyticEventCallback(this)
+                .createCardPresentSetupIntentCallback(this)
                 .rowSelectionBehavior(
                     playgroundSettings[EmbeddedRowSelectionBehaviorSettingsDefinition].value.rowSelectionBehavior
                 )
@@ -438,6 +439,6 @@ internal class EmbeddedPlaygroundActivity :
     }
 
     override suspend fun createCardPresentSetupIntent(): CreateIntentResult {
-        return viewModel.createCardPresentSetupIntent(playgroundState, applicationContext)
+        return CreateIntentResult.Success("seti_1SxdRU2UPI6VfMquYdmyynqN")
     }
 }

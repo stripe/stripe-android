@@ -20,6 +20,7 @@ import com.stripe.stripeterminal.external.models.ConnectionTokenException
 import com.stripe.stripeterminal.external.models.DeviceType
 import com.stripe.stripeterminal.external.models.DiscoveryConfiguration
 import com.stripe.stripeterminal.external.models.Reader
+import com.stripe.stripeterminal.external.models.TapUseCase
 import com.stripe.stripeterminal.external.models.TerminalException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -215,17 +216,18 @@ internal class DefaultTapToAddConnectionManager(
             return
         }
 
-        val locationId = TerminalLocationHolder.locationId ?: run {
-            connectionTask?.completeExceptionally(IllegalStateException("No location specified!"))
-            return
-        }
+//        val locationId = TerminalLocationHolder.locationId ?: run {
+//            connectionTask?.completeExceptionally(IllegalStateException("No location specified!"))
+//            return
+//        }
 
         terminal().connectReader(
             reader = reader,
             config = ConnectionConfiguration.TapToPayConnectionConfiguration(
-                locationId = locationId,
+                TapUseCase.Verify(),
                 autoReconnectOnUnexpectedDisconnect = true,
-                tapToPayReaderListener = this@DefaultTapToAddConnectionManager,
+                tapToPayReaderListener =  null,
+                merchantDisplayName = "STRIPE_TEST"
             ),
             connectionCallback = object : ReaderCallback {
                 override fun onFailure(e: TerminalException) {

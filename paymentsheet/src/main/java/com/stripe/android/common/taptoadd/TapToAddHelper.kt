@@ -56,8 +56,9 @@ internal class DefaultTapToAddHelper(
     override fun startPaymentMethodCollection() {
         coroutineScope.launch {
             onCollectingUpdated(true)
+            val collectionState = tapToAddCollectionHandler.collect(paymentMethodMetadata)
 
-            when (val collectionState = tapToAddCollectionHandler.collect(paymentMethodMetadata)) {
+            when (collectionState) {
                 is TapToAddCollectionHandler.CollectionState.Collected -> {
                     _collectedPaymentMethod.value = collectionState.paymentMethod.toDisplayableSavedPaymentMethod(
                         paymentMethodMetadata = paymentMethodMetadata,

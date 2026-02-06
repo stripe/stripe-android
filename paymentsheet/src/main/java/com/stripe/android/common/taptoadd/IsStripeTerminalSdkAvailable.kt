@@ -9,18 +9,6 @@ internal fun interface IsStripeTerminalSdkAvailable {
 
 internal class DefaultIsStripeTerminalSdkAvailable @Inject constructor() : IsStripeTerminalSdkAvailable {
     override fun invoke(): Boolean {
-        if (!FeatureFlags.enableTapToAdd.isEnabled) {
-            return false
-        }
-
-        return try {
-            // If found, 'core' library was imported
-            Class.forName("com.stripe.stripeterminal.TerminalApplicationDelegate")
-            // If found, 'taptopay' library was imported
-            Class.forName("com.stripe.stripeterminal.taptopay.TapToPay")
-            true
-        } catch (_: Exception) {
-            false
-        }
+        return true
     }
 }

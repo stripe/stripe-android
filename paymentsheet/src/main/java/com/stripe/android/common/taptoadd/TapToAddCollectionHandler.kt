@@ -1,5 +1,6 @@
 package com.stripe.android.common.taptoadd
 
+import android.util.Log
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
@@ -15,8 +16,8 @@ import com.stripe.stripeterminal.external.callable.Callback
 import com.stripe.stripeterminal.external.callable.Cancelable
 import com.stripe.stripeterminal.external.callable.SetupIntentCallback
 import com.stripe.stripeterminal.external.models.AllowRedisplay
+import com.stripe.stripeterminal.external.models.CollectSetupIntentConfiguration
 import com.stripe.stripeterminal.external.models.SetupIntent
-import com.stripe.stripeterminal.external.models.SetupIntentConfiguration
 import com.stripe.stripeterminal.external.models.TerminalException
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -74,13 +75,14 @@ internal class DefaultTapToAddCollectionHandler(
             connectionManager
                 .awaitConnection()
                 .onFailure { exception ->
+                    exception.printStackTrace()
                     throw exception
                 }
         }
-
         val callback = try {
             createCardPresentSetupIntentCallbackRetriever.waitForCallback()
         } catch (error: CallbackNotFoundException) {
+            error.printStackTrace()
             return@runCatching TapToAddCollectionHandler.CollectionState.FailedCollection(
                 error = error,
                 displayMessage = error.resolvableError,
@@ -88,7 +90,9 @@ internal class DefaultTapToAddCollectionHandler(
         }
 
         when (val result = callback.createCardPresentSetupIntent()) {
-            is CreateIntentResult.Success -> collectWithIntent(result.clientSecret, metadata)
+            is CreateIntentResult.Success -> {
+                collectWithIntent(result.clientSecret, metadata)
+            }
             is CreateIntentResult.Failure -> {
                 TapToAddCollectionHandler.CollectionState.FailedCollection(
                     error = result.cause,
@@ -99,6 +103,7 @@ internal class DefaultTapToAddCollectionHandler(
     }.fold(
         onSuccess = { it },
         onFailure = { error ->
+            error.printStackTrace()
             TapToAddCollectionHandler.CollectionState.FailedCollection(
                 error = error,
                 displayMessage = error.stripeErrorMessage()
@@ -136,8 +141,10 @@ internal class DefaultTapToAddCollectionHandler(
 
         val cancellable = terminal().collectSetupIntentPaymentMethod(
             intent = intent,
-            allowRedisplay = allowRedisplay.toTerminalAllowRedisplay(),
-            config = SetupIntentConfiguration.Builder().build(),
+            allowRedisplay = AllowRedisplay.ALWAYS,
+            config = CollectSetupIntentConfiguration.Builder()
+                .setCollectionReason(CollectSetupIntentConfiguration.CollectionReason.SAVE_CARD)
+                .build(),
             callback = continuation.createSetupIntentCallback(),
         )
 

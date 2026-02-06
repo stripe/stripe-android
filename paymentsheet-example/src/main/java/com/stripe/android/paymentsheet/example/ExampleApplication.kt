@@ -2,6 +2,9 @@ package com.stripe.android.paymentsheet.example
 
 import android.app.Application
 import android.os.StrictMode
+import android.util.Log
+import com.stripe.stripeterminal.TerminalApplicationDelegate
+import com.stripe.stripeterminal.taptopay.TapToPay
 
 class ExampleApplication : Application() {
 

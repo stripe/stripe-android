@@ -45,11 +45,7 @@ internal class EmbeddedPlaygroundViewModel(
         playgroundState: PlaygroundState,
         applicationContext: Context,
     ): CreateIntentResult {
-        val customerId = playgroundState.customerId()
-            ?: return CreateIntentResult.Failure(
-                cause = IllegalStateException("No customer found!"),
-                displayMessage = "No customer found!"
-            )
+        val customerId = "cus_TvUJEHA31DGPCK"
 
         return CreateCardPresentSetupIntentRequester(
             playgroundSettings = playgroundState.snapshot,

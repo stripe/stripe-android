@@ -45,8 +45,8 @@ dependencies {
     implementation libs.accompanist.systemUiController
 
     // Terminal
-    compileOnly libs.terminal.core
-    compileOnly libs.terminal.tapToPay
+    implementation libs.terminal.core
+    implementation libs.terminal.tapToPay
 
     // Other
     implementation libs.playServicesWallet
