@@ -7,6 +7,8 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.common.taptoadd.DefaultTapToAddHelper
+import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
@@ -89,6 +91,9 @@ internal interface FormActivityViewModelModule {
 
     @Binds
     fun bindsPrefsRepositoryFactory(factory: DefaultPrefsRepository.Factory): PrefsRepository.Factory
+
+    @Binds
+    fun bindsTapToAddHelper(helper: DefaultTapToAddHelper): TapToAddHelper
 
     companion object {
         @Provides

@@ -101,7 +101,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom, UiDefinitio
         val tapToAddHelper = arguments.tapToAddHelper
 
         if (metadata.isTapToAddSupported && tapToAddHelper?.hasPreviouslyAttemptedCollection == false) {
-            tapToAddHelper.startPaymentMethodCollection()
+            tapToAddHelper.startPaymentMethodCollection(metadata)
         }
     }
 
@@ -140,7 +140,10 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom, UiDefinitio
                     cardDetailsAction = arguments.tapToAddHelper?.takeIf {
                         metadata.isTapToAddSupported
                     }?.let {
-                        TapToAddCardDetailsAction(tapToAddHelper = it)
+                        TapToAddCardDetailsAction(
+                            tapToAddHelper = it,
+                            paymentMethodMetadata = metadata,
+                        )
                     },
                     automaticallyLaunchedCardScanFormDataHelper = arguments.automaticallyLaunchedCardScanFormDataHelper,
                 )
