@@ -105,38 +105,12 @@ internal class DefaultTapToAddConnectionManager(
                 context = applicationContext,
                 tokenProvider = object : ConnectionTokenProvider {
                     override fun fetchConnectionToken(callback: ConnectionTokenCallback) {
-                        workScope.launch {
-                            val createConnectionTokenCallback = TerminalConnectionTokenCallbackHolder.get()
-                                ?: run {
-                                    val message = "No connection token callback was initialized!"
-
-                                    callback.onFailure(
-                                        ConnectionTokenException(
-                                            message = message,
-                                            cause = IllegalStateException(message)
-                                        )
-                                    )
-
-                                    return@launch
-                                }
-
-                            when (val result = createConnectionTokenCallback.createConnectionToken()) {
-                                is CreateConnectionTokenResult.Success -> {
-                                    callback.onSuccess(result.connectionToken)
-                                }
-                                is CreateConnectionTokenResult.Failure -> {
-                                    callback.onFailure(
-                                        ConnectionTokenException(
-                                            message = result.message,
-                                            cause = result.cause,
-                                        )
-                                    )
-                                }
-                            }
-                        }
+                        callback.onSuccess("pk_test_51RjR7U2UPI6VfMquIAKAAH7owBteT4TyOIpeMZBTu0B9ksXxqRjcRkfO2kgLcqzSlaU0s3Th00gVhen1GME8hmzZ00vIGU4J26")
                     }
                 },
-                listener = this,
+                listener = object : TerminalListener {
+
+                },
             )
         }
     }
