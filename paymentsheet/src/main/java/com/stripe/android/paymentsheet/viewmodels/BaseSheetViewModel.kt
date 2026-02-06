@@ -260,7 +260,6 @@ internal abstract class BaseSheetViewModel(
         paymentMethodMetadata: PaymentMethodMetadata,
     ) {
         listOf(
-            ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_ANDROID_AA,
             ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_AA,
             ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE,
         ).forEach { experimentAssignment ->
