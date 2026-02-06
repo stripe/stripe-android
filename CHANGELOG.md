@@ -9,6 +9,9 @@ Dependencies updated in [12276](https://github.com/stripe/stripe-android/pull/12
 * [CHANGED] Fail out of verification flow on analyzer failure.
 * [CHANGED] Removed ephemeral key from error log messages for security.
 
+### PaymentSheet
+* [FIXED][12315](https://github.com/stripe/stripe-android/pull/12315) Fixed extra loading spinner showing up under Google Pay.
+
 ## 22.7.0 - 2026-01-26
 
 Dependencies updated in [11877](https://github.com/stripe/stripe-android/pull/11877):
