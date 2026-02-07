@@ -6,6 +6,7 @@ Dependencies updated in [12276](https://github.com/stripe/stripe-android/pull/12
 - Bumped Dagger from 2.55 to 2.58.
 
 ### Identity
+* [Added] More live feedback during document capture.
 * [CHANGED] Fail out of verification flow on analyzer failure.
 * [CHANGED] Removed ephemeral key from error log messages for security.
 

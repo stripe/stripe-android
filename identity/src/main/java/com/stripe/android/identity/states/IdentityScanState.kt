@@ -38,7 +38,8 @@ internal sealed class IdentityScanState(
      */
     internal class Initial(
         type: ScanType,
-        transitioner: IdentityScanStateTransitioner
+        transitioner: IdentityScanStateTransitioner,
+        @IntegerRes val feedbackRes: Int? = null
     ) : IdentityScanState(type, transitioner, false) {
         /**
          * Only transitions to [Found] when ML output type matches scan type
@@ -48,6 +49,12 @@ internal sealed class IdentityScanState(
             analyzerOutput: AnalyzerOutput
         ) =
             transitioner.transitionFromInitial(this, analyzerInput, analyzerOutput)
+
+        fun withFeedback(@IntegerRes feedbackRes: Int?) = Initial(
+            type,
+            transitioner,
+            feedbackRes
+        )
     }
 
     /**

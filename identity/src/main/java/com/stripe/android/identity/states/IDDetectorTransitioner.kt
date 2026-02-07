@@ -58,6 +58,7 @@ internal class IDDetectorTransitioner(
         return this
     }
 
+    @Suppress("NestedBlockDepth", "LongMethod")
     override suspend fun transitionFromInitial(
         initialState: Initial,
         analyzerInput: AnalyzerInput,
@@ -90,7 +91,42 @@ internal class IDDetectorTransitioner(
                     "Model outputs ${analyzerOutput.category}, which doesn't match with " +
                         "scanType ${initialState.type}, stay in Initial"
                 )
-                initialState
+                return if (analyzerOutput.category == Category.INVALID) {
+                    // No document detected now: clear any prior wrong-side feedback
+                    if (initialState.feedbackRes != null) initialState.withFeedback(null) else initialState
+                } else {
+                    // Detected a document but wrong side: show side-specific guidance while staying in Initial
+                    val feedbackRes =
+                        when (initialState.type) {
+                            ScanType.DOC_FRONT -> {
+                                if (analyzerOutput.category == Category.ID_BACK) {
+                                    com.stripe.android.identity.R.string.stripe_front_of_id_not_detected
+                                } else {
+                                    null
+                                }
+                            }
+
+                            ScanType.DOC_BACK -> {
+                                if (analyzerOutput.category == Category.ID_FRONT ||
+                                    analyzerOutput.category == Category.PASSPORT
+                                ) {
+                                    com.stripe.android.identity.R.string.stripe_back_of_id_not_detected
+                                } else {
+                                    null
+                                }
+                            }
+
+                            ScanType.SELFIE -> {
+                                null
+                            }
+                        }
+
+                    if (feedbackRes != null) {
+                        initialState.withFeedback(feedbackRes)
+                    } else {
+                        initialState
+                    }
+                }
             }
         }
     }
@@ -113,6 +149,7 @@ internal class IDDetectorTransitioner(
         }
     }
 
+    @Suppress("CyclomaticComplexMethod", "MagicNumber")
     private fun transitionFromFoundLegacy(
         foundState: Found,
         analyzerOutput: IDDetectorOutput.Legacy
@@ -140,9 +177,44 @@ internal class IDDetectorTransitioner(
         }
 
         isBlurry(analyzerOutput.blurScore) -> {
-            // reset timer of the foundState
+            // reset timer of the foundState and show blur feedback
             foundState.reachedStateAt = TimeSource.Monotonic.markNow()
-            foundState
+            val feedbackThreshold = if (blurThreshold > 0f) blurThreshold * BLUR_FEEDBACK_RATIO else 0f
+            if (analyzerOutput.blurScore <= feedbackThreshold) {
+                foundState.withFeedback(
+                    com.stripe.android.identity.R.string.stripe_reduce_blur_2
+                )
+            } else {
+                // Clear blur feedback when it's only mildly blurry
+                foundState.withFeedback(null)
+            }
+        }
+
+        // Center gating: if the detected document is not centered, keep in Found and reset timer
+        !run {
+            val centerX = analyzerOutput.boundingBox.left + analyzerOutput.boundingBox.width / 2f
+            val centerY = analyzerOutput.boundingBox.top + analyzerOutput.boundingBox.height / 2f
+            centerX in (0.5f - CENTER_TOLERANCE)..(0.5f + CENTER_TOLERANCE) &&
+                centerY in (0.5f - CENTER_TOLERANCE)..(0.5f + CENTER_TOLERANCE)
+        } -> {
+            foundState.reachedStateAt = TimeSource.Monotonic.markNow()
+            foundState.withFeedback(
+                com.stripe.android.identity.R.string.stripe_move_id_to_center
+            )
+        }
+
+        // Distance gating: if the detected document is too small or too large, keep in Found and reset timer
+        tooSmall(analyzerOutput.boundingBox) -> {
+            foundState.reachedStateAt = TimeSource.Monotonic.markNow()
+            foundState.withFeedback(
+                com.stripe.android.identity.R.string.stripe_move_closer
+            )
+        }
+        tooLarge(analyzerOutput.boundingBox) -> {
+            foundState.reachedStateAt = TimeSource.Monotonic.markNow()
+            foundState.withFeedback(
+                com.stripe.android.identity.R.string.stripe_move_farther
+            )
         }
 
         moreResultsRequired(foundState) -> foundState
@@ -241,6 +313,16 @@ internal class IDDetectorTransitioner(
         return foundState.reachedStateAt.elapsedNow() < timeRequired.milliseconds
     }
 
+    private fun coverage(box: BoundingBox): Float {
+        // area fraction relative to the frame
+        val w = box.width.coerceIn(0f, 1f)
+        val h = box.height.coerceIn(0f, 1f)
+        return w * h
+    }
+
+    private fun tooSmall(box: BoundingBox): Boolean = coverage(box) < MIN_BOX_COVERAGE_FEEDBACK
+    private fun tooLarge(box: BoundingBox): Boolean = coverage(box) > MAX_BOX_COVERAGE_FEEDBACK
+
     /**
      * Calculate IoU of two boxes, see https://stackoverflow.com/a/41660682/802372
      */
@@ -282,6 +364,17 @@ internal class IDDetectorTransitioner(
         const val DEFAULT_DISPLAY_SATISFIED_DURATION = 0
         const val DEFAULT_DISPLAY_UNSATISFIED_DURATION = 0
         const val DEFAULT_BLUR_THRESHOLD = 0f
+
+        // Only show blur feedback when blur is worse than this fraction of the gating threshold
+        const val BLUR_FEEDBACK_RATIO = 0.85f
+
+        // Distance feedback thresholds based on area coverage of the frame
+        const val MIN_BOX_COVERAGE_FEEDBACK = 0.18f
+        const val MAX_BOX_COVERAGE_FEEDBACK = 0.78f
+
+        // Center tolerance for checking if document is centered
+        const val CENTER_TOLERANCE = 0.05f
+
         val TAG: String = IDDetectorTransitioner::class.java.simpleName
     }
 
