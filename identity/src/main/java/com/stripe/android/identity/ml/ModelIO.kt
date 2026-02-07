@@ -40,15 +40,17 @@ internal sealed class IDDetectorOutput(
     open val category: Category,
     open val resultScore: Float,
     open val allScores: List<Float>,
-    open val blurScore: Float
+    open val blurScore: Float,
+    open val croppedImage: Bitmap
 ) : AnalyzerOutput {
     data class Legacy(
         override val boundingBox: BoundingBox,
         override val category: Category,
         override val resultScore: Float,
         override val allScores: List<Float>,
-        override val blurScore: Float
-    ) : IDDetectorOutput(boundingBox, category, resultScore, allScores, blurScore)
+        override val blurScore: Float,
+        override val croppedImage: Bitmap
+    ) : IDDetectorOutput(boundingBox, category, resultScore, allScores, blurScore, croppedImage)
 
     fun blurScore(): Float =
         when (this) {

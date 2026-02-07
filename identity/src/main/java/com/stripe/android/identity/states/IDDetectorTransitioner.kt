@@ -1,5 +1,6 @@
 package com.stripe.android.identity.states
 
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.identity.ml.AnalyzerInput
@@ -42,6 +43,7 @@ internal class IDDetectorTransitioner(
 ) : IdentityScanStateTransitioner {
     private var previousBoundingBox: BoundingBox? = null
     private var unmatchedFrame = 0
+    private val bestFrameDetector = BestFrameDetector()
 
     @VisibleForTesting
     var timeoutAt: ComparableTimeMark = TimeSource.Monotonic.markNow() + timeout
@@ -54,6 +56,7 @@ internal class IDDetectorTransitioner(
         previousBoundingBox = null
         unmatchedFrame = 0
         timeoutAt = TimeSource.Monotonic.markNow() + timeout
+        bestFrameDetector.reset()
         Log.d(TAG, "Reset! timeoutAt: $timeoutAt")
         return this
     }
@@ -145,8 +148,22 @@ internal class IDDetectorTransitioner(
             foundState
         }
 
-        moreResultsRequired(foundState) -> foundState
+        moreResultsRequired(foundState) -> {
+            // Frame passed all checks, add it to best frame detector
+            bestFrameDetector.addFrame(
+                bitmap = analyzerOutput.croppedImage,
+                blurScore = analyzerOutput.blurScore,
+                confidenceScore = analyzerOutput.resultScore
+            )
+            foundState
+        }
         else -> {
+            // Final frame before satisfaction - add it too
+            bestFrameDetector.addFrame(
+                bitmap = analyzerOutput.croppedImage,
+                blurScore = analyzerOutput.blurScore,
+                confidenceScore = analyzerOutput.resultScore
+            )
             Satisfied(foundState.type, foundState.transitioner)
         }
     }
@@ -239,6 +256,13 @@ internal class IDDetectorTransitioner(
 
     private fun moreResultsRequired(foundState: Found): Boolean {
         return foundState.reachedStateAt.elapsedNow() < timeRequired.milliseconds
+    }
+
+    /**
+     * Returns the best frame's bitmap, or null if no frames were captured.
+     */
+    fun getBestFrameBitmap(): Bitmap? {
+        return bestFrameDetector.getBestFrameBitmap()
     }
 
     /**
