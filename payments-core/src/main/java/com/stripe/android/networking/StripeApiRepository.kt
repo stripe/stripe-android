@@ -1549,7 +1549,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     override suspend fun initCheckoutSession(
-        params: ElementsSessionParams.CheckoutSessionType,
+        params: ElementsSessionParams.CheckoutSession.Initial,
         options: ApiRequest.Options,
     ): Result<CheckoutSessionResponse> {
         return fetchStripeModelResult(
@@ -1589,7 +1589,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 ),
             ),
             jsonParser = CheckoutSessionResponseJsonParser(
-                elementsSessionParams = ElementsSessionParams.CheckoutSessionType(
+                elementsSessionParams = ElementsSessionParams.CheckoutSession.Initial(
                     clientSecret = "", // Not needed for confirm parsing
                 ),
                 isLiveMode = options.apiKeyIsLiveMode,

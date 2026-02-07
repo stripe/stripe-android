@@ -5,6 +5,15 @@ import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
 import java.util.Locale
 
+/**
+ * Interface for [ElementsSessionParams] types that have deferred intent params available.
+ * This is used to ensure type safety when parsing deferred intents.
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed interface DeferredIntentCapable {
+    val deferredIntentParams: DeferredIntentParams
+}
+
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
 sealed interface ElementsSessionParams : Parcelable {
@@ -80,7 +89,7 @@ sealed interface ElementsSessionParams : Parcelable {
     @Parcelize
     data class DeferredIntentType(
         override val locale: String? = Locale.getDefault().toLanguageTag(),
-        val deferredIntentParams: DeferredIntentParams,
+        override val deferredIntentParams: DeferredIntentParams,
         override val customPaymentMethods: List<String>,
         override val externalPaymentMethods: List<String>,
         override val savedPaymentMethodSelectionId: String? = null,
@@ -91,7 +100,7 @@ sealed interface ElementsSessionParams : Parcelable {
         override val sellerDetails: SellerDetails? = null,
         override val link: Link = Link(),
         override val countryOverride: String? = null,
-    ) : ElementsSessionParams {
+    ) : ElementsSessionParams, DeferredIntentCapable {
 
         override val clientSecret: String?
             get() = null
@@ -104,35 +113,71 @@ sealed interface ElementsSessionParams : Parcelable {
     }
 
     /**
-     * Parameters for checkout session initialization via `/v1/payment_pages/{id}/init`.
-     * Minimal for now - additional params will be added as the API evolves.
+     * Sealed class for checkout session parameters.
+     *
+     * The checkout session flow has two phases:
+     * 1. [Initial] - Used for the API call to `/v1/payment_pages/{id}/init`. Does not contain
+     *    [DeferredIntentParams] because the amount/currency are not yet known.
+     * 2. [WithIntent] - Created after the init response is received, containing the
+     *    [DeferredIntentParams] extracted from the response. Used for parsing the elements session.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    @Parcelize
-    data class CheckoutSessionType(
-        override val clientSecret: String,
-        val deferredIntentParams: DeferredIntentParams? = null,
-        override val locale: String? = Locale.getDefault().toLanguageTag(),
-        override val customerSessionClientSecret: String? = null,
-        override val legacyCustomerEphemeralKey: String? = null,
-        override val mobileSessionId: String? = null,
-        override val savedPaymentMethodSelectionId: String? = null,
-        override val customPaymentMethods: List<String> = emptyList(),
-        override val externalPaymentMethods: List<String> = emptyList(),
-        override val appId: String = "",
-        override val sellerDetails: SellerDetails? = null,
-        override val link: Link = Link(),
-        override val countryOverride: String? = null,
-    ) : ElementsSessionParams {
-
-        val checkoutSessionId: String
-            get() = clientSecret.substringBefore("_secret_")
+    sealed class CheckoutSession : ElementsSessionParams {
+        abstract override val clientSecret: String
+        abstract val checkoutSessionId: String
 
         override val type: String
             get() = "checkout_session"
 
         override val expandFields: List<String>
             get() = emptyList()
+
+        /**
+         * Initial checkout session params used for the API call.
+         * Does not contain [DeferredIntentParams] - that data comes from the API response.
+         */
+        @Parcelize
+        data class Initial(
+            override val clientSecret: String,
+            override val locale: String? = Locale.getDefault().toLanguageTag(),
+            override val customerSessionClientSecret: String? = null,
+            override val legacyCustomerEphemeralKey: String? = null,
+            override val mobileSessionId: String? = null,
+            override val savedPaymentMethodSelectionId: String? = null,
+            override val customPaymentMethods: List<String> = emptyList(),
+            override val externalPaymentMethods: List<String> = emptyList(),
+            override val appId: String = "",
+            override val sellerDetails: SellerDetails? = null,
+            override val link: Link = Link(),
+            override val countryOverride: String? = null,
+        ) : CheckoutSession() {
+            override val checkoutSessionId: String
+                get() = clientSecret.substringBefore("_secret_")
+        }
+
+        /**
+         * Checkout session params with deferred intent data from the API response.
+         * Used for parsing the elements session after the init call completes.
+         */
+        @Parcelize
+        data class WithIntent(
+            override val clientSecret: String,
+            override val deferredIntentParams: DeferredIntentParams,
+            override val locale: String? = Locale.getDefault().toLanguageTag(),
+            override val customerSessionClientSecret: String? = null,
+            override val legacyCustomerEphemeralKey: String? = null,
+            override val mobileSessionId: String? = null,
+            override val savedPaymentMethodSelectionId: String? = null,
+            override val customPaymentMethods: List<String> = emptyList(),
+            override val externalPaymentMethods: List<String> = emptyList(),
+            override val appId: String = "",
+            override val sellerDetails: SellerDetails? = null,
+            override val link: Link = Link(),
+            override val countryOverride: String? = null,
+        ) : CheckoutSession(), DeferredIntentCapable {
+            override val checkoutSessionId: String
+                get() = clientSecret.substringBefore("_secret_")
+        }
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
