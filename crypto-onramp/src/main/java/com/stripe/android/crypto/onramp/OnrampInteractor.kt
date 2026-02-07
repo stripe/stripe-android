@@ -583,7 +583,7 @@ internal class OnrampInteractor @Inject constructor(
             linkController.state(context).value.selectedPaymentMethodPreview?.let {
                 OnrampCollectPaymentMethodResult.Completed(
                     displayData = PaymentMethodDisplayData(
-                        iconRes = it.iconRes,
+                        imageLoader = it.imageLoader,
                         label = it.label,
                         sublabel = it.sublabel
                     )
