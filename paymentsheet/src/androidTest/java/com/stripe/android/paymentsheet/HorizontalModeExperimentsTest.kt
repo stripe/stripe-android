@@ -108,10 +108,10 @@ internal class HorizontalModeExperimentsTest {
             method("POST"),
             bodyPart("event_name", "elements.experiment_exposure"),
             bodyPart("experiment_retrieved", experimentAssignment.experimentValue),
-            bodyPart("dimensions-in_app_elements_integration_type", expectedIntegrationType),
-            bodyPart("dimensions-has_saved_payment_method", "false"),
-            bodyPart("dimensions-displayed_payment_method_types", urlEncode("card,afterpay_clearpay,klarna")),
-            bodyPart("dimensions-displayed_payment_method_types_including_wallets", urlEncode("card,afterpay_clearpay,klarna,link")),
+            bodyPart("in_app_elements_integration_type", expectedIntegrationType),
+            bodyPart("has_saved_payment_method", "false"),
+            bodyPart("displayed_payment_method_types", urlEncode("card,afterpay_clearpay,klarna")),
+            bodyPart("displayed_payment_method_types_including_wallets", urlEncode("card,afterpay_clearpay,klarna,link")),
         ) { }
 
         enqueueLogLinkHoldbackExperiments()
