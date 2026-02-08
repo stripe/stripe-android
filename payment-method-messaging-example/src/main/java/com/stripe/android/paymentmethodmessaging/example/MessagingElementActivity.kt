@@ -174,6 +174,19 @@ internal class MessagingElementActivity : AppCompatActivity() {
         }
 
         SettingsDropDown(
+            items = colorList(),
+            selectedItem = appearanceSettings.colorsSettings.linkTextColor,
+            label = "Link Text Color",
+            itemToString = { it.name }
+        ) {
+            viewModel.updateAppearance(
+                appearanceSettings.copy(
+                    colorsSettings = appearanceSettings.colorsSettings.copy(linkTextColor = it)
+                )
+            )
+        }
+
+        SettingsDropDown(
             items = listOf(
                 PaymentMethodMessagingElement.Appearance.Theme.LIGHT,
                 PaymentMethodMessagingElement.Appearance.Theme.DARK,

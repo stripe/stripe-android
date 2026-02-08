@@ -88,6 +88,7 @@ class DefaultPaymentMethodMessagingEventReporterTest {
                 .colors(
                     PaymentMethodMessagingElement.Appearance.Colors()
                         .textColor(Color.Blue.toArgb())
+                        .linkTextColor(Color.Blue.toArgb())
                 )
                 .font(
                     PaymentMethodMessagingElement.Appearance.Font()
@@ -103,6 +104,7 @@ class DefaultPaymentMethodMessagingEventReporterTest {
                 "font" to true,
                 "style" to true,
                 "text_color" to true,
+                "link_text_color" to true
             )
         )
     }
@@ -116,6 +118,7 @@ class DefaultPaymentMethodMessagingEventReporterTest {
                 "font" to false,
                 "style" to false,
                 "text_color" to false,
+                "link_text_color" to false
             )
         )
         eventReporter.onElementDisplayed(PaymentMethodMessagingElement.Appearance().build())
@@ -132,6 +135,7 @@ class DefaultPaymentMethodMessagingEventReporterTest {
                 "font" to false,
                 "style" to true,
                 "text_color" to false,
+                "link_text_color" to false
             )
         )
     }

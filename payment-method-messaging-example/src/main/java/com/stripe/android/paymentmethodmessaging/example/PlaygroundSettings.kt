@@ -24,6 +24,9 @@ data class AppearanceSettings(
         colorsSettings.textColor.color?.let {
             colors.textColor(it.toArgb())
         }
+        colorsSettings.linkTextColor.color?.let {
+            colors.linkTextColor(it.toArgb())
+        }
         return PaymentMethodMessagingElement.Appearance()
             .font(font)
             .colors(colors)
@@ -32,7 +35,8 @@ data class AppearanceSettings(
 }
 
 data class ColorsSettings(
-    val textColor: ColorInfo = ColorInfo(null, "Default")
+    val textColor: ColorInfo = ColorInfo(null, "Default"),
+    val linkTextColor: ColorInfo = ColorInfo(null, "Default")
 )
 
 data class ColorInfo(
