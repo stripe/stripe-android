@@ -87,7 +87,6 @@ class OnrampPresenterCoordinatorTest {
         val callbacks = OnrampCallbacks()
             .checkoutCallback(checkoutCallback)
             .verifyIdentityCallback {}
-            .authenticateUserCallback {}
             .collectPaymentCallback {}
             .authorizeCallback {}
             .verifyKycCallback {}

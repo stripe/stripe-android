@@ -160,14 +160,6 @@ class OnrampCoordinator @Inject internal constructor(
         private val coordinator: OnrampPresenterCoordinator,
     ) {
         /**
-         * Presents Link UI to authenticate an existing Link user.
-         * Requires successful lookup or registration of the user first.
-         */
-        fun authenticateUser() {
-            coordinator.authenticateUser()
-        }
-
-        /**
          * Creates an identity verification session and launches the document verification flow.
          * Requires an authenticated Link user.
          */

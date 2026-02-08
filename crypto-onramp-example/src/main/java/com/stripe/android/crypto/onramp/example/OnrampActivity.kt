@@ -191,16 +191,12 @@ internal class OnrampActivity : ComponentActivity() {
                             modifier = Modifier.padding(innerPadding),
                             viewModel = viewModel,
                             onAuthenticateUser = { oauthScopes ->
-                                if (oauthScopes.isNullOrBlank()) {
-                                    onrampPresenter.authenticateUser()
-                                } else {
-                                    // Not the cleanest approach, but good enough for an example.
-                                    lifecycleScope.launch {
-                                        val linkAuthIntentId = viewModel.createLinkAuthIntent(oauthScopes)
-                                            ?: return@launch
-                                        viewModel.onAuthorize(linkAuthIntentId)
-                                        onrampPresenter.authorize(linkAuthIntentId)
-                                    }
+                                // Not the cleanest approach, but good enough for an example.
+                                lifecycleScope.launch {
+                                    val linkAuthIntentId = viewModel.createLinkAuthIntent(oauthScopes)
+                                        ?: return@launch
+                                    viewModel.onAuthorize(linkAuthIntentId)
+                                    onrampPresenter.authorize(linkAuthIntentId)
                                 }
                             },
                             onRegisterWalletAddress = { address, network ->
@@ -423,7 +419,7 @@ internal fun LoginSignupScreen(
 internal fun OnrampScreen(
     viewModel: OnrampViewModel,
     modifier: Modifier = Modifier,
-    onAuthenticateUser: (oauthScopes: String?) -> Unit,
+    onAuthenticateUser: (oauthScopes: String) -> Unit,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onStartVerification: () -> Unit,
     onCollectPayment: (type: PaymentMethodType) -> Unit,
@@ -647,7 +643,7 @@ private fun RegistrationButtons(
 @Composable
 private fun AuthenticationScreen(
     email: String,
-    onAuthenticate: (oauthScopes: String?) -> Unit,
+    onAuthenticate: (oauthScopes: String) -> Unit,
     onUpdatePhoneNumber: (String) -> Unit,
     onBack: () -> Unit
 ) {
@@ -687,7 +683,7 @@ private fun AuthenticationScreen(
 
 @Composable
 fun AuthenticateSection(
-    onAuthenticate: (oauthScopes: String?) -> Unit,
+    onAuthenticate: (oauthScopes: String) -> Unit,
 ) {
     var oauthScopes by remember { mutableStateOf("kyc.status:read,crypto:ramp,auth.persist_login:read") }
     OutlinedTextField(
@@ -720,7 +716,7 @@ private fun AuthenticatedOperationsScreen(
     selectedPaymentData: PaymentMethodDisplayData?,
     selectedPaymentType: PaymentMethodType?,
     selectedSettlementSpeed: SettlementSpeed?,
-    onAuthenticate: (oauthScopes: String?) -> Unit,
+    onAuthenticate: (oauthScopes: String) -> Unit,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onCollectKYC: (KycInfo) -> Unit,
     onVerifyKyc: () -> Unit,
