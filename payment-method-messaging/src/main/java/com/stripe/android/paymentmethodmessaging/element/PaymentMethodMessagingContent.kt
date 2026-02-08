@@ -299,12 +299,6 @@ private fun AnnotatedString.Builder.addLearnMoreMessage(
     linkText: String,
     appearance: PaymentMethodMessagingElement.Appearance.State
 ) {
-//    val lastChar = this.toString().lastOrNull()
-//    // '}' indicates where the partner icon will be place, if the promotional message ends with the image we do
-//    // not need to append a period.
-//    if (lastChar != '.' && lastChar != '}') {
-//        append(".")
-//    }
     withStyle(SpanStyle(color = Color(getLinkTextColor(appearance)))) {
         append(" $linkText")
     }
