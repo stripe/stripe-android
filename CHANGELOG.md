@@ -3,7 +3,7 @@
 ## XX.XX.XX - 20XX-XX-XX
 
 ## PaymentMethodMessagingElement
-[BREAKING][12291](https://github.com/stripe/stripe-android/pull/12291) `infoIconColor` has been removed from `PaymentMethodMessagingElement.Appearance.Colors`.
+[BREAKING][12291](https://github.com/stripe/stripe-android/pull/12291) `infoIconColor` has been removed from `PaymentMethodMessagingElement.Appearance.Colors`. The info icon has been removed and replaced with a CTA to see available plans. The link text color is customizable through `linkTextColor`.
 
 Dependencies updated in [12276](https://github.com/stripe/stripe-android/pull/12276):
 - Bumped Dagger from 2.55 to 2.58.
