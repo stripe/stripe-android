@@ -35,7 +35,6 @@ internal object LinkTestUtils {
                 postalCode = "42424"
             )
         ),
-        paymentMethodCreateParams = mock(),
         paymentMethod = PaymentMethod.Builder()
             .setId("pm_123")
             .setType(PaymentMethod.Type.Card)
@@ -70,7 +69,7 @@ internal object LinkTestUtils {
                 postalCode = "42424"
             )
         ),
-        paymentMethodCreateParams = mock(),
+        confirmParams = mock(),
         originalParams = mock()
     )
 

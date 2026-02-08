@@ -167,7 +167,7 @@ internal class LinkInlineSignupConfirmationDefinition(
         }
 
         return PaymentMethodConfirmationOption.New(
-            createParams = paymentMethodCreateParams,
+            createParams = confirmParams,
             optionsParams = optionsParams,
             extraParams = extraParams,
             shouldSave = saveOption.shouldSave(),

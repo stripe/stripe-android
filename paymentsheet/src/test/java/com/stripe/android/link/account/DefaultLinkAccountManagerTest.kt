@@ -474,7 +474,7 @@ class DefaultLinkAccountManagerTest {
     fun `shareCardPaymentDetails makes correct calls`() = runSuspendTest {
         val newPaymentDetails = LinkPaymentDetails.New(
             paymentDetails = TestFactory.LINK_NEW_PAYMENT_DETAILS.paymentDetails,
-            paymentMethodCreateParams = TestFactory.LINK_NEW_PAYMENT_DETAILS.paymentMethodCreateParams,
+            confirmParams = TestFactory.LINK_NEW_PAYMENT_DETAILS.confirmParams,
             originalParams = PaymentMethodCreateParams.create(
                 card = PaymentMethodCreateParamsFixtures.CARD,
             )
