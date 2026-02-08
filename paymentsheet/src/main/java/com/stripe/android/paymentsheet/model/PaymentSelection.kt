@@ -34,9 +34,10 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.BankFormScreenS
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountTextBuilder
 import com.stripe.android.paymentsheet.ui.MIN_LUMINANCE_FOR_LIGHT_ICON
 import com.stripe.android.paymentsheet.ui.createCardLabel
-import com.stripe.android.paymentsheet.ui.getCardBrandIcon
+import com.stripe.android.paymentsheet.ui.getCardBrandIconRef
 import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.paymentsheet.ui.getLinkIcon
+import com.stripe.android.paymentsheet.ui.getNightIcon
 import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -292,17 +293,14 @@ internal sealed class PaymentSelection : Parcelable {
         private val resources: Resources,
         private val imageLoader: StripeImageLoader,
     ) {
-        private fun isDarkTheme(): Boolean {
-            return resources.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK) ==
-                Configuration.UI_MODE_NIGHT_YES ||
-                isCustomDarkTheme()
-        }
-
         /**
          * Some users implement a custom dark mode and will pass dark colors into colors light.
          */
-        private fun isCustomDarkTheme(): Boolean {
-            return StripeTheme.colorsLightMutable.component.luminance() < MIN_LUMINANCE_FOR_LIGHT_ICON
+        private fun isDarkBackground(): Boolean {
+            val isSystemInDarkTheme = resources.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK) ==
+                Configuration.UI_MODE_NIGHT_YES
+            return StripeTheme.getColors(isSystemInDarkTheme).component.luminance() <
+                MIN_LUMINANCE_FOR_LIGHT_ICON
         }
 
         suspend fun load(
@@ -316,7 +314,7 @@ internal sealed class PaymentSelection : Parcelable {
                 return runCatching {
                     ResourcesCompat.getDrawable(
                         resources,
-                        if (!isDarkTheme()) drawableResourceId else drawableResourceIdNight ?: drawableResourceId,
+                        if (!isDarkBackground()) drawableResourceId else drawableResourceIdNight ?: drawableResourceId,
                         null
                     )
                 }.getOrNull() ?: emptyDrawable
@@ -330,7 +328,7 @@ internal sealed class PaymentSelection : Parcelable {
 
             // If the payment option has an icon URL, we prefer it.
             // Some payment options don't have an icon URL, and are loaded locally via resource.
-            return if (isDarkTheme() && darkThemeIconUrl != null) {
+            return if (isDarkBackground() && darkThemeIconUrl != null) {
                 loadIcon(darkThemeIconUrl)
             } else if (lightThemeIconUrl != null) {
                 loadIcon(lightThemeIconUrl)
@@ -370,7 +368,7 @@ internal val PaymentSelection.drawableResourceId: Int
         is PaymentSelection.CustomPaymentMethod -> 0
         PaymentSelection.GooglePay -> R.drawable.stripe_google_pay_mark
         is PaymentSelection.Link -> getLinkIcon(iconOnly = true)
-        is PaymentSelection.New.Card -> brand.getCardBrandIcon()
+        is PaymentSelection.New.Card -> brand.getCardBrandIconRef()
         is PaymentSelection.New.GenericPaymentMethod -> iconResource
         is PaymentSelection.New.USBankAccount -> iconResource
         is PaymentSelection.Saved -> getSavedIcon(this)
@@ -383,7 +381,7 @@ internal val PaymentSelection.drawableResourceIdNight: Int
         is PaymentSelection.CustomPaymentMethod -> 0
         PaymentSelection.GooglePay -> R.drawable.stripe_google_pay_mark
         is PaymentSelection.Link -> getLinkIcon(iconOnly = true)
-        is PaymentSelection.New.Card -> brand.getCardBrandIcon()
+        is PaymentSelection.New.Card -> brand.getNightIcon()
         is PaymentSelection.New.GenericPaymentMethod -> iconResourceNight ?: iconResource
         is PaymentSelection.New.USBankAccount -> iconResource
         is PaymentSelection.Saved -> getSavedIcon(this)
