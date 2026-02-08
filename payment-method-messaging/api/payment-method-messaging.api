@@ -16,6 +16,7 @@ public final class com/stripe/android/paymentmethodmessaging/element/PaymentMeth
 public final class com/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$Appearance$Colors {
 	public static final field $stable I
 	public fun <init> ()V
+	public final fun linkTextColor (I)Lcom/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$Appearance$Colors;
 	public final fun textColor (I)Lcom/stripe/android/paymentmethodmessaging/element/PaymentMethodMessagingElement$Appearance$Colors;
 }
 
