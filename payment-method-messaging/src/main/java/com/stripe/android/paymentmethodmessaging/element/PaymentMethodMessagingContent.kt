@@ -33,7 +33,6 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -160,9 +159,12 @@ private fun MultiPartner(
         )
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = message.promotion.buildAnnotatedStringWithInfoIcon(message.learnMore.message),
+                text = message.promotion.maybeAddPeriod().buildAnnotatedStringWithLearnMoreText(
+                    message.learnMore.message,
+                    appearance
+                ),
                 style = style,
-                color = Color(getTextColor(appearance.colors.textColor, appearance.theme))
+                color = Color(getTextColor(appearance))
             )
         }
         message.legalDisclosure?.let {
@@ -240,9 +242,12 @@ private fun TextWithLogo(
         ?: MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Normal)
 
     Text(
-        text = label.buildInlineLogoAnnotatedStringWithInfoIcon(learnMoreMessage),
+        text = label.maybeAddPeriod().buildInlineLogoAnnotatedString(
+            learnMoreMessage,
+            appearance
+        ),
         style = style,
-        color = Color(getTextColor(appearance.colors.textColor, appearance.theme)),
+        color = Color(getTextColor(appearance)),
         inlineContent = mapOf(
             INLINE_IMAGE_KEY to InlineTextContent(
                 placeholder = Placeholder(
@@ -263,36 +268,52 @@ private fun TextWithLogo(
 }
 
 @Composable
-private fun String.buildInlineLogoAnnotatedStringWithInfoIcon(
-    learnMoreString: String
+private fun String.buildInlineLogoAnnotatedString(
+    learnMoreString: String,
+    appearance: PaymentMethodMessagingElement.Appearance.State
 ): AnnotatedString = buildAnnotatedString {
     val parts = split(INLINE_IMAGE_KEY)
     val preLogoString = parts.getOrNull(0)
     val postLogoString = parts.getOrNull(1)
     if (preLogoString == null || postLogoString == null) {
         // {partner} not found, just show label
-        append(this@buildInlineLogoAnnotatedStringWithInfoIcon)
+        append(this@buildInlineLogoAnnotatedString)
     } else {
         append(preLogoString)
         appendInlineContent(id = INLINE_IMAGE_KEY)
         append(postLogoString)
     }
-    appendUnderlinedLearnMoreMessage(learnMoreString)
+    addLearnMoreMessage(learnMoreString, appearance)
 }
 
 @Composable
-private fun String.buildAnnotatedStringWithInfoIcon(learnMoreString: String): AnnotatedString = buildAnnotatedString {
-    append(this@buildAnnotatedStringWithInfoIcon)
-    if (!this@buildAnnotatedStringWithInfoIcon.endsWith(".")) append(".")
-    appendUnderlinedLearnMoreMessage(learnMoreString)
+private fun String.buildAnnotatedStringWithLearnMoreText(
+    learnMoreString: String,
+    appearance: PaymentMethodMessagingElement.Appearance.State
+): AnnotatedString = buildAnnotatedString {
+    append(this@buildAnnotatedStringWithLearnMoreText)
+    addLearnMoreMessage(learnMoreString, appearance)
 }
 
-private fun AnnotatedString.Builder.appendUnderlinedLearnMoreMessage(text: String): AnnotatedString.Builder {
-    append(" ")
-    withStyle(style = SpanStyle(textDecoration = TextDecoration.Underline)) {
-        append(text)
+private fun AnnotatedString.Builder.addLearnMoreMessage(
+    linkText: String,
+    appearance: PaymentMethodMessagingElement.Appearance.State
+) {
+//    val lastChar = this.toString().lastOrNull()
+//    // '}' indicates where the partner icon will be place, if the promotional message ends with the image we do
+//    // not need to append a period.
+//    if (lastChar != '.' && lastChar != '}') {
+//        append(".")
+//    }
+    withStyle(SpanStyle(color = Color(getLinkTextColor(appearance)))) {
+        append(" $linkText")
     }
-    return this
+}
+
+private fun String.maybeAddPeriod(): String {
+    // '}' indicates where the partner icon will be place, if the promotional message ends with the image we do
+    // not need to append a period.
+    return if (endsWith('.') || endsWith('}')) this else "$this."
 }
 
 private fun PaymentMethodMessagingElement.Appearance.Font.State.toTextStyle(): TextStyle {
@@ -316,10 +337,16 @@ private fun LegalDisclosure(
     )
 }
 
-private fun getTextColor(textColor: Int?, theme: PaymentMethodMessagingElement.Appearance.Theme): Int {
-    return textColor ?: StripeTheme.getColors(
-        theme == PaymentMethodMessagingElement.Appearance.Theme.DARK
+private fun getTextColor(appearance: PaymentMethodMessagingElement.Appearance.State): Int {
+    return appearance.colors.textColor ?: StripeTheme.getColors(
+        appearance.theme == PaymentMethodMessagingElement.Appearance.Theme.DARK
     ).onComponent.toArgb()
+}
+
+private fun getLinkTextColor(appearance: PaymentMethodMessagingElement.Appearance.State): Int {
+    return appearance.colors.linkTextColor ?: StripeTheme.getColors(
+        appearance.theme == PaymentMethodMessagingElement.Appearance.Theme.DARK
+    ).materialColors.primary.toArgb()
 }
 
 private const val DEFAULT_TEXT_SIZE = 16F

@@ -97,6 +97,18 @@ class PaymentMethodMessagingContentScreenshotTest {
     }
 
     @Test
+    fun singlePartnerAppendsPeriodIfInlineIconIsNotEndOfString() {
+        paparazziRule.snapshot {
+            val content = PaymentMethodMessagingContent.get(
+                getSinglePartner(
+                    message = "Buy stuff with {partner} in increments",
+                )
+            ) {}
+            content.Content(PaymentMethodMessagingElement.Appearance().build())
+        }
+    }
+
+    @Test
     fun multiPartnerLight() {
         paparazziRule.snapshot {
             val content = PaymentMethodMessagingContent.get(
@@ -161,6 +173,16 @@ class PaymentMethodMessagingContentScreenshotTest {
         }
     }
 
+    @Test
+    fun multiPartnerDoesNotAddedPeriodIfPresent() {
+        paparazziRule.snapshot {
+            val content = PaymentMethodMessagingContent.get(
+                getMultiPartner("Buy stuff in increments of money.")
+            ) {}
+            content.Content(PaymentMethodMessagingElement.Appearance().build())
+        }
+    }
+
     private fun getSinglePartner(
         message: String,
         legalDisclosure: PaymentMethodMessageLegalDisclosure? = null
@@ -203,6 +225,7 @@ class PaymentMethodMessagingContentScreenshotTest {
             .colors(
                 PaymentMethodMessagingElement.Appearance.Colors()
                     .textColor(Color.White.toArgb())
+                    .linkTextColor(Color.Blue.toArgb())
             )
 
         val flatAppearance = PaymentMethodMessagingElement.Appearance()
@@ -219,6 +242,7 @@ class PaymentMethodMessagingContentScreenshotTest {
             .colors(
                 PaymentMethodMessagingElement.Appearance.Colors()
                     .textColor(Color.Green.toArgb())
+                    .linkTextColor(Color.Magenta.toArgb())
             )
     }
 }
