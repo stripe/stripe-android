@@ -5,6 +5,8 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.common.taptoadd.DefaultTapToAddHelper
+import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
@@ -157,6 +159,9 @@ internal abstract class PaymentSheetCommonModule {
     abstract fun bindsPrefsRepositoryFactory(
         factory: DefaultPrefsRepository.Factory
     ): PrefsRepository.Factory
+
+    @Binds
+    abstract fun bindsTapToAddHelperFactory(factory: DefaultTapToAddHelper.Factory): TapToAddHelper.Factory
 
     @Suppress("TooManyFunctions")
     companion object {

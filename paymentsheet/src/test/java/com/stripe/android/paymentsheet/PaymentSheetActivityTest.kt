@@ -36,7 +36,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.common.taptoadd.FakeTapToAddCollectionHandler
+import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.strings.resolvableString
@@ -1291,7 +1291,7 @@ internal class PaymentSheetActivityTest {
                         return FakeCvcRecollectionInteractor()
                     }
                 },
-                tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
+                tapToAddHelperFactory = FakeTapToAddHelper.Factory.noOp(),
                 mode = EventReporter.Mode.Complete,
             )
         }
