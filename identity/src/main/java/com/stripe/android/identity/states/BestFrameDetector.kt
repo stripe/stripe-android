@@ -19,13 +19,22 @@ internal class BestFrameDetector(
     private var lastFrameTimestampMs: Long = 0
     private var frameCount = 0
 
+    fun hasBestFrame(): Boolean = bestBitmap != null
+
+    fun hasWindowStarted(): Boolean = windowStartTimestampMs != 0L
+
+    fun isWindowExpired(nowTimestampMs: Long): Boolean {
+        // Window is inclusive of the end timestamp; treat it as expired only after it has passed.
+        return hasWindowStarted() && nowTimestampMs > (windowStartTimestampMs + windowDurationMs)
+    }
+
     /**
      * Evaluates a frame and keeps it if it's better than the current best within the time window.
      * 
      * @param bitmap The cropped image bitmap
      * @param blurScore Blur quality score (higher = less blurry)
      * @param confidenceScore ML model confidence score
-     * @param timestamp Timestamp in milliseconds
+     * @param timestamp Monotonic timestamp in milliseconds (e.g. from SystemClock.elapsedRealtime())
      */
     fun addFrame(
         bitmap: Bitmap,

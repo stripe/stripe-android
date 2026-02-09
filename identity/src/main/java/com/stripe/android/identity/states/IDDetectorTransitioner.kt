@@ -120,55 +120,69 @@ internal class IDDetectorTransitioner(
     private fun transitionFromFoundLegacy(
         foundState: Found,
         analyzerOutput: IDDetectorOutput.Legacy
-    ) = when {
-        foundState.isFromLegacyDetector != true -> Unsatisfied(
-            "Expecting Legacy IDDetectorOutput but received a Modern IDDetectorOutput",
-            foundState.type,
-            foundState.transitioner
-        )
+    ): IdentityScanState {
+        val nowTimestampMs = SystemClock.elapsedRealtime()
 
-        timeoutAt.hasPassedNow() -> {
-            IdentityScanState.TimeOut(foundState.type, foundState.transitioner)
-        }
-
-        !outputMatchesTargetType(analyzerOutput.category, foundState.type) -> Unsatisfied(
-            "Type ${analyzerOutput.category} doesn't match ${foundState.type}",
-            foundState.type,
-            foundState.transitioner
-        )
-
-        !iOUCheckPass(analyzerOutput.boundingBox) -> {
-            // reset timer of the foundState
-            foundState.reachedStateAt = TimeSource.Monotonic.markNow()
-            foundState
-        }
-
-        isBlurry(analyzerOutput.blurScore) -> {
-            bestFrameDetector.reset()
-            // reset timer of the foundState
-            foundState.reachedStateAt = TimeSource.Monotonic.markNow()
-            foundState
-        }
-
-        moreResultsRequired(foundState) -> {
-            // Frame passed all checks, add it to best frame detector
-            bestFrameDetector.addFrame(
-                bitmap = analyzerOutput.croppedImage,
-                blurScore = analyzerOutput.blurScore,
-                confidenceScore = analyzerOutput.resultScore,
-                timestamp = SystemClock.elapsedRealtime()
+        return when {
+            foundState.isFromLegacyDetector != true -> Unsatisfied(
+                "Expecting Legacy IDDetectorOutput but received a Modern IDDetectorOutput",
+                foundState.type,
+                foundState.transitioner
             )
-            foundState
-        }
-        else -> {
-            // Final frame before satisfaction - add it too
-            bestFrameDetector.addFrame(
-                bitmap = analyzerOutput.croppedImage,
-                blurScore = analyzerOutput.blurScore,
-                confidenceScore = analyzerOutput.resultScore,
-                timestamp = System.currentTimeMillis()
-            )
-            Satisfied(foundState.type, foundState.transitioner)
+
+            timeoutAt.hasPassedNow() -> {
+                Log.d(TAG, "Timeout reached during scanning")
+                IdentityScanState.TimeOut(foundState.type, foundState.transitioner)
+            }
+
+            // Once we have a good frame, wait for the 1s best-frame window to complete and then finish,
+            // even if subsequent frames are bad.
+            bestFrameDetector.hasBestFrame() && bestFrameDetector.isWindowExpired(nowTimestampMs) -> {
+                Log.i(TAG, "Best-frame window completed; transitioning to Satisfied")
+                Satisfied(foundState.type, foundState.transitioner)
+            }
+
+            !outputMatchesTargetType(analyzerOutput.category, foundState.type) -> {
+                if (bestFrameDetector.hasBestFrame()) {
+                    // We already have a good candidate; keep waiting for window completion.
+                    foundState
+                } else {
+                    Unsatisfied(
+                        "Type ${analyzerOutput.category} doesn't match ${foundState.type}",
+                        foundState.type,
+                        foundState.transitioner
+                    )
+                }
+            }
+
+            !iOUCheckPass(analyzerOutput.boundingBox) -> {
+                Log.d(TAG, "IoU check failed, resetting timer")
+                // reset timer of the foundState
+                foundState.reachedStateAt = TimeSource.Monotonic.markNow()
+                foundState
+            }
+
+            isBlurry(analyzerOutput.blurScore) -> {
+                Log.d(
+                    TAG,
+                    "Frame is blurry (score=${"%.3f".format(analyzerOutput.blurScore)}), resetting timer"
+                )
+                // reset timer of the foundState
+                foundState.reachedStateAt = TimeSource.Monotonic.markNow()
+                foundState
+            }
+
+            else -> {
+                // Frame passed all checks, add it to best frame detector.
+                // The detector will start a fixed 1s window from the first accepted frame.
+                bestFrameDetector.addFrame(
+                    bitmap = analyzerOutput.croppedImage,
+                    blurScore = analyzerOutput.blurScore,
+                    confidenceScore = analyzerOutput.resultScore,
+                    timestamp = nowTimestampMs
+                )
+                foundState
+            }
         }
     }
 
