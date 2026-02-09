@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 22.8.0 - 2026-02-09
+
 Dependencies updated in [12276](https://github.com/stripe/stripe-android/pull/12276):
 - Bumped Dagger from 2.55 to 2.58.
 
