@@ -153,7 +153,8 @@ internal class IDDetectorTransitioner(
             bestFrameDetector.addFrame(
                 bitmap = analyzerOutput.croppedImage,
                 blurScore = analyzerOutput.blurScore,
-                confidenceScore = analyzerOutput.resultScore
+                confidenceScore = analyzerOutput.resultScore,
+                timestamp = System.currentTimeMillis()
             )
             foundState
         }
@@ -162,7 +163,8 @@ internal class IDDetectorTransitioner(
             bestFrameDetector.addFrame(
                 bitmap = analyzerOutput.croppedImage,
                 blurScore = analyzerOutput.blurScore,
-                confidenceScore = analyzerOutput.resultScore
+                confidenceScore = analyzerOutput.resultScore,
+                timestamp = System.currentTimeMillis()
             )
             Satisfied(foundState.type, foundState.transitioner)
         }
