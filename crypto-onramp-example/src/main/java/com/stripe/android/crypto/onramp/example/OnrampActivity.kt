@@ -832,7 +832,7 @@ private fun AuthenticatedOperationsScreen(
             }
 
             Image(
-                painter = painterResource(selectedPaymentData.iconRes),
+                painter = selectedPaymentData.iconPainter,
                 contentDescription = selectedPaymentData.label,
                 modifier = Modifier
                     .height(24.dp)
