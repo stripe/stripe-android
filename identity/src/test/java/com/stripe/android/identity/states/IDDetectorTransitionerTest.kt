@@ -540,7 +540,8 @@ internal class IDDetectorTransitionerTest {
             newCategory ?: previousAnalyzerOutput.category,
             previousAnalyzerOutput.resultScore,
             previousAnalyzerOutput.allScores,
-            previousAnalyzerOutput.blurScore
+            previousAnalyzerOutput.blurScore,
+            DUMMYBITMAP
         )
 
     private fun createLegacyAnalyzerOutputWithLowIOU(previousAnalyzerOutput: IDDetectorOutput.Legacy) =
@@ -554,7 +555,8 @@ internal class IDDetectorTransitionerTest {
             previousAnalyzerOutput.category,
             previousAnalyzerOutput.resultScore,
             previousAnalyzerOutput.allScores,
-            previousAnalyzerOutput.blurScore
+            previousAnalyzerOutput.blurScore,
+            DUMMYBITMAP
         )
 
     private companion object {
@@ -563,13 +565,15 @@ internal class IDDetectorTransitionerTest {
         const val TEST_UNBLURRY_SCORE = 1.0f
         const val DEFAULT_DISPLAY_SATISFIED_DURATION = 1000
         const val DEFAULT_DISPLAY_UNSATISFIED_DURATION = 1000
+        val DUMMYBITMAP = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
         val INITIAL_BOUNDING_BOX = BoundingBox(0f, 0f, 500f, 500f)
         val INITIAL_LEGACY_ID_FRONT_OUTPUT = IDDetectorOutput.Legacy(
             INITIAL_BOUNDING_BOX,
             Category.ID_FRONT,
             0f,
             listOf(),
-            1.0f
+            1.0f,
+            DUMMYBITMAP
         )
 
         val INITIAL_LEGACY_ID_BACK_OUTPUT = IDDetectorOutput.Legacy(
@@ -577,17 +581,17 @@ internal class IDDetectorTransitionerTest {
             Category.ID_BACK,
             0f,
             listOf(),
-            1.0f
+            1.0f,
+            DUMMYBITMAP
         )
-
-        val DUMMYBITMAP = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
 
         val BLURRY_ID_FRONT_OUTPUT = IDDetectorOutput.Legacy(
             INITIAL_BOUNDING_BOX,
             Category.ID_FRONT,
             0f,
             listOf(),
-            TEST_BLURRY_SCORE
+            TEST_BLURRY_SCORE,
+            DUMMYBITMAP
         )
 
         val TIMEOUT_DURATION = 8000.milliseconds
