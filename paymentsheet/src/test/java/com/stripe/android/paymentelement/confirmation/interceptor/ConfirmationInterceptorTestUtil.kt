@@ -163,7 +163,10 @@ internal fun assertRadarOptionsEquals(confirmParams: ConfirmStripeIntentParams?,
         .isEqualTo(
             RadarOptionsFactory.create(
                 hCaptchaToken = expectedToken,
-                verificationObject = AndroidVerificationObject(null)
+                verificationObject = AndroidVerificationObject(
+                    androidVerificationToken = null,
+                    appId = null
+                )
             )
         )
 }
@@ -172,7 +175,10 @@ internal fun assertRadarOptionsIsNull(confirmParams: ConfirmStripeIntentParams?)
     assertThat(confirmParams?.radarOptions()).isEqualTo(
         RadarOptionsFactory.create(
             hCaptchaToken = null,
-            verificationObject = AndroidVerificationObject(null)
+            verificationObject = AndroidVerificationObject(
+                androidVerificationToken = null,
+                appId = null
+            )
         )
     )
 }

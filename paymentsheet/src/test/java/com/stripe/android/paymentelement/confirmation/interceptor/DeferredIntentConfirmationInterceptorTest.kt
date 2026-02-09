@@ -429,7 +429,8 @@ class DeferredIntentConfirmationInterceptorTest {
                 RadarOptionsFactory.create(
                     hCaptchaToken = hCaptchaToken,
                     verificationObject = AndroidVerificationObject(
-                        androidVerificationToken = attestationToken
+                        androidVerificationToken = attestationToken,
+                        appId = null
                     )
                 )
             )
@@ -478,7 +479,10 @@ class DeferredIntentConfirmationInterceptorTest {
             .isEqualTo(
                 RadarOptionsFactory.create(
                     hCaptchaToken = hCaptchaToken,
-                    verificationObject = AndroidVerificationObject(null)
+                    verificationObject = AndroidVerificationObject(
+                        androidVerificationToken = null,
+                        appId = null
+                    )
                 )
             )
     }
@@ -522,7 +526,10 @@ class DeferredIntentConfirmationInterceptorTest {
             .isEqualTo(
                 RadarOptionsFactory.create(
                     hCaptchaToken = null,
-                    verificationObject = AndroidVerificationObject(null)
+                    verificationObject = AndroidVerificationObject(
+                        androidVerificationToken = null,
+                        appId = null
+                    )
                 )
             )
     }
@@ -574,7 +581,8 @@ class DeferredIntentConfirmationInterceptorTest {
                 RadarOptionsFactory.create(
                     hCaptchaToken = null,
                     verificationObject = AndroidVerificationObject(
-                        androidVerificationToken = attestationToken
+                        androidVerificationToken = attestationToken,
+                        appId = null
                     )
                 )
             )

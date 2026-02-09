@@ -179,7 +179,8 @@ class IntentFirstConfirmationInterceptorTest {
                     RadarOptionsFactory.create(
                         hCaptchaToken = hCaptchaToken,
                         verificationObject = AndroidVerificationObject(
-                            androidVerificationToken = null
+                            androidVerificationToken = null,
+                            appId = null
                         )
                     )
                 )
