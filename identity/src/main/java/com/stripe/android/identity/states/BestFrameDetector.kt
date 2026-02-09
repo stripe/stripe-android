@@ -5,16 +5,19 @@ import android.util.Log
 
 /**
  * Tracks and selects the best quality frame during document scanning based on blur and confidence scores.
- * Uses a time-based sliding window to ensure consistent behavior across devices with different frame rates.
+ *
+ * The time window is anchored to when the first best frame is found (i.e., the first accepted frame).
+ * This avoids behavior differences across devices with different frame rates.
  */
 internal class BestFrameDetector(
     private val windowDurationMs: Long = DEFAULT_WINDOW_DURATION_MS
 ) {
     private var bestBitmap: Bitmap? = null
     private var bestScore: Float = Float.MIN_VALUE
-    private var bestFrameTimestamp: Long = 0
+    private var bestFrameTimestampMs: Long = 0
+    private var windowStartTimestampMs: Long = 0
+    private var lastFrameTimestampMs: Long = 0
     private var frameCount = 0
-    private var startTime: Long = System.currentTimeMillis()
 
     /**
      * Evaluates a frame and keeps it if it's better than the current best within the time window.
@@ -31,22 +34,30 @@ internal class BestFrameDetector(
         timestamp: Long
     ) {
         frameCount++
-        
+        lastFrameTimestampMs = timestamp
+
+        // Window starts when the first best frame is found (first accepted frame).
+        if (windowStartTimestampMs == 0L) {
+            windowStartTimestampMs = timestamp
+        }
+
+        val elapsedMs = timestamp - windowStartTimestampMs
+        val windowEndTimestampMs = windowStartTimestampMs + windowDurationMs
+        val withinWindow = timestamp <= windowEndTimestampMs
+
         // Calculate composite quality score (blur weighted more heavily)
         val score = (BLUR_WEIGHT * blurScore) + (CONFIDENCE_WEIGHT * confidenceScore)
-        val elapsed = timestamp - startTime
 
 
-        // Only consider frames within the time window
-        if (timestamp - bestFrameTimestamp <= windowDurationMs && score > bestScore) {
+        if (!withinWindow) {
+            // Outside the fixed window - keep the best frame we already found.
+            return
+        }
+
+        if (bestBitmap == null || score > bestScore) {
             bestBitmap = bitmap
             bestScore = score
-            bestFrameTimestamp = timestamp
-        } else if (timestamp - bestFrameTimestamp > windowDurationMs) {
-            // Window expired, this becomes the new best by default
-            bestBitmap = bitmap
-            bestScore = score
-            bestFrameTimestamp = timestamp
+            bestFrameTimestampMs = timestamp
         }
     }
 
@@ -55,6 +66,17 @@ internal class BestFrameDetector(
      */
     fun getBestFrameBitmap(): Bitmap? {
         if (bestBitmap != null) {
+            val durationMs = if (windowStartTimestampMs > 0L) {
+                lastFrameTimestampMs - windowStartTimestampMs
+            } else {
+                0L
+            }
+            val bestAtMs = if (bestFrameTimestampMs > 0L && windowStartTimestampMs > 0L) {
+                bestFrameTimestampMs - windowStartTimestampMs
+            } else {
+                0L
+            }
+            )
         return bestBitmap
     }
 
@@ -62,20 +84,33 @@ internal class BestFrameDetector(
      * Resets the detector state.
      */
     fun reset() {
+        val durationMs = if (windowStartTimestampMs > 0L) {
+            lastFrameTimestampMs - windowStartTimestampMs
+        } else {
+            0L
+        }
+        val bestAtMs = if (bestFrameTimestampMs > 0L && windowStartTimestampMs > 0L) {
+            bestFrameTimestampMs - windowStartTimestampMs
+        } else {
+            0L
+        }
         bestBitmap = null
         bestScore = Float.MIN_VALUE
-        bestFrameTimestamp = 0
+        bestFrameTimestampMs = 0
+        windowStartTimestampMs = 0
+        lastFrameTimestampMs = 0
         frameCount = 0
-        startTime = System.currentTimeMillis()
     }
 
     companion object {
+        private const val TAG = "BestFrameDetector"
+        
         // Weights for quality score (must sum to 1.0)
         private const val BLUR_WEIGHT = 0.6f
         private const val CONFIDENCE_WEIGHT = 0.4f
         
-        // Time window to keep looking for better frames (in milliseconds)
-        // After this duration from the current best frame, any new frame becomes the new best
+        // Fixed time window (in milliseconds) starting at the first accepted frame.
+        // Frames outside this window won't replace the best frame.
         private const val DEFAULT_WINDOW_DURATION_MS = 1000L // 1 second
     }
 }
