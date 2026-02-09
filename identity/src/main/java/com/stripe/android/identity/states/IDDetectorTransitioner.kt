@@ -2,7 +2,6 @@ package com.stripe.android.identity.states
 
 import android.graphics.Bitmap
 import android.os.SystemClock
-import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.AnalyzerOutput
@@ -60,7 +59,6 @@ internal class IDDetectorTransitioner(
         timeoutAt = TimeSource.Monotonic.markNow() + timeout
         bestFrameDetector.reset()
         bestLegacyOutput = null
-        Log.d(TAG, "Reset! timeoutAt: $timeoutAt")
         return this
     }
 
@@ -78,11 +76,6 @@ internal class IDDetectorTransitioner(
             }
 
             analyzerOutput.category.matchesScanType(initialState.type) -> {
-                Log.d(
-                    TAG,
-                    "Matching model output detected with score ${analyzerOutput.resultScore}, " +
-                        "transition to Found."
-                )
                 Found(
                     initialState.type,
                     this,
@@ -91,11 +84,6 @@ internal class IDDetectorTransitioner(
             }
 
             else -> {
-                Log.d(
-                    TAG,
-                    "Model outputs ${analyzerOutput.category}, which doesn't match with " +
-                        "scanType ${initialState.type}, stay in Initial"
-                )
                 initialState
             }
         }
@@ -135,14 +123,12 @@ internal class IDDetectorTransitioner(
             )
 
             timeoutAt.hasPassedNow() -> {
-                Log.d(TAG, "Timeout reached during scanning")
                 IdentityScanState.TimeOut(foundState.type, foundState.transitioner)
             }
 
             // Once we have a good frame, wait for the 1s best-frame window to complete and then finish,
             // even if subsequent frames are bad.
             bestFrameDetector.hasBestFrame() && bestFrameDetector.isWindowExpired(nowTimestampMs) -> {
-                Log.i(TAG, "Best-frame window completed; transitioning to Satisfied")
                 Satisfied(foundState.type, foundState.transitioner)
             }
 
@@ -160,17 +146,12 @@ internal class IDDetectorTransitioner(
             }
 
             !iOUCheckPass(analyzerOutput.boundingBox) -> {
-                Log.d(TAG, "IoU check failed, resetting timer")
                 // reset timer of the foundState
                 foundState.reachedStateAt = TimeSource.Monotonic.markNow()
                 foundState
             }
 
             isBlurry(analyzerOutput.blurScore) -> {
-                Log.d(
-                    TAG,
-                    "Frame is blurry (score=${"%.3f".format(analyzerOutput.blurScore)}), resetting timer"
-                )
                 // reset timer of the foundState
                 foundState.reachedStateAt = TimeSource.Monotonic.markNow()
                 foundState
@@ -210,7 +191,6 @@ internal class IDDetectorTransitioner(
         analyzerOutput: AnalyzerOutput
     ): IdentityScanState {
         return if (satisfiedState.reachedStateAt.elapsedNow() > displaySatisfiedDuration.milliseconds) {
-            Log.d(TAG, "Scan for ${satisfiedState.type} Satisfied, transition to Finished.")
             IdentityScanState.Finished(satisfiedState.type, this)
         } else {
             satisfiedState
@@ -228,11 +208,6 @@ internal class IDDetectorTransitioner(
             }
 
             unsatisfiedState.reachedStateAt.elapsedNow() > displayUnsatisfiedDuration.milliseconds -> {
-                Log.d(
-                    TAG,
-                    "Scan for ${unsatisfiedState.type} Unsatisfied with reason " +
-                        "${unsatisfiedState.reason}, transition to Initial."
-                )
                 Initial(unsatisfiedState.type, this.resetAndReturn())
             }
 
@@ -346,7 +321,6 @@ internal class IDDetectorTransitioner(
         const val DEFAULT_DISPLAY_SATISFIED_DURATION = 0
         const val DEFAULT_DISPLAY_UNSATISFIED_DURATION = 0
         const val DEFAULT_BLUR_THRESHOLD = 0f
-        val TAG: String = IDDetectorTransitioner::class.java.simpleName
     }
 
     /**
