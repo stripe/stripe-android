@@ -160,7 +160,7 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
 
             val subComponentFactory = DaggerGooglePayPaymentMethodLauncherViewModelFactoryComponent.factory()
                 .create(
-                    context = application,
+                    application = application,
                     enableLogging = BuildConfig.DEBUG,
                     publishableKeyProvider = {
                         PaymentConfiguration.getInstance(application).publishableKey

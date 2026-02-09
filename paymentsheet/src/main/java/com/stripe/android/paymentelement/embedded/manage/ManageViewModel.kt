@@ -31,7 +31,7 @@ internal class ManageViewModel @Inject constructor(
                 savedStateHandle = savedStateHandle,
                 paymentElementCallbackIdentifier = args.paymentElementCallbackIdentifier,
                 paymentMethodMetadata = args.paymentMethodMetadata,
-                context = extras.requireApplication(),
+                application = extras.requireApplication(),
             )
 
             component.customerStateHolder.setCustomerState(args.customerState)

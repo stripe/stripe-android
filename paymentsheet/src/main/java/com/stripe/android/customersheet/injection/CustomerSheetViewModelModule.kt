@@ -7,6 +7,7 @@ import androidx.core.os.LocaleListCompat
 import com.stripe.android.BuildConfig
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
+import com.stripe.android.core.injection.ApplicationContext
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
@@ -127,6 +128,7 @@ internal interface CustomerSheetViewModelModule {
         }
 
         @Provides
+        @ApplicationContext
         fun context(application: Application): Context {
             return application
         }

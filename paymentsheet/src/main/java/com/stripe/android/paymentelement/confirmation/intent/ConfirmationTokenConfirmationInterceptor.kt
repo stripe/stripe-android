@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation.intent
 import android.content.Context
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.injection.ApplicationContext
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.UserFacingLogger
@@ -42,7 +43,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
     @Assisted(CUSTOMER_ID) private val customerId: String?,
     @Assisted(EPHEMERAL_KEY_SECRET) private val ephemeralKeySecret: String?,
     @Assisted private val clientAttributionMetadata: ClientAttributionMetadata,
-    private val context: Context,
+    @ApplicationContext private val context: Context,
     private val stripeRepository: StripeRepository,
     private val requestOptions: ApiRequest.Options,
     private val userFacingLogger: UserFacingLogger,

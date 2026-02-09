@@ -20,6 +20,7 @@ import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.injection.ApplicationContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.reactnative.ReactNativeSdkInternal
@@ -55,7 +56,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
     @Assisted private val readyCallback: ReadyCallback,
     @Assisted private val activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
     @Assisted private val skipReadyCheck: Boolean,
-    context: Context,
+    @ApplicationContext context: Context,
     private val googlePayRepositoryFactory: GooglePayRepositoryFactory,
     @Assisted private val cardBrandFilter: CardBrandFilter,
     @Assisted private val cardFundingFilter: CardFundingFilter,

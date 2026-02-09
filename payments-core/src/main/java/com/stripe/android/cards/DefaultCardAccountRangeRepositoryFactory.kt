@@ -3,6 +3,7 @@ package com.stripe.android.cards
 import android.content.Context
 import androidx.annotation.RestrictTo
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.injection.ApplicationContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
@@ -25,7 +26,7 @@ import javax.inject.Named
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
-    context: Context,
+    @ApplicationContext context: Context,
     @Named(PRODUCT_USAGE) private val productUsageTokens: Set<String>,
     private val requestSurface: RequestSurface,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,

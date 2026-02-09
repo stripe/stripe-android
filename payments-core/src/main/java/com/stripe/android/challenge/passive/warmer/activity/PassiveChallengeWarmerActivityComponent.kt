@@ -1,7 +1,8 @@
 package com.stripe.android.challenge.passive.warmer.activity
 
-import android.content.Context
+import android.app.Application
 import com.stripe.android.challenge.passive.PassiveChallengeModule
+import com.stripe.android.core.injection.ApplicationContextModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
@@ -20,6 +21,7 @@ import javax.inject.Singleton
         HCaptchaModule::class,
         PassiveChallengeModule::class,
         StripeRepositoryModule::class,
+        ApplicationContextModule::class,
         CoreCommonModule::class,
         CoroutineContextModule::class
     ]
@@ -31,7 +33,7 @@ internal interface PassiveChallengeWarmerActivityComponent {
     interface Factory {
         fun create(
             @BindsInstance
-            context: Context,
+            application: Application,
             @BindsInstance
             @Named(PUBLISHABLE_KEY)
             publishableKeyProvider: () -> String,

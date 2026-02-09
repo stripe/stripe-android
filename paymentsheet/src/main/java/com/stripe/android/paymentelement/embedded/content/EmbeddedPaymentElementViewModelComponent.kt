@@ -8,6 +8,8 @@ import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.common.di.MobileSessionIdModule
+import com.stripe.android.core.injection.ApplicationContext
+import com.stripe.android.core.injection.ApplicationContextModule
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
@@ -62,6 +64,7 @@ import javax.inject.Singleton
         ExtendedPaymentElementConfirmationModule::class,
         EmbeddedCommonModule::class,
         ApplicationIdModule::class,
+        ApplicationContextModule::class,
         MobileSessionIdModule::class,
         EmbeddedLinkExtrasModule::class,
         PaymentsIntegrityModule::class,
@@ -173,11 +176,6 @@ internal interface EmbeddedPaymentElementViewModelModule {
     @Suppress("TooManyFunctions")
     companion object {
         @Provides
-        fun providesContext(application: Application): Context {
-            return application
-        }
-
-        @Provides
         fun providePaymentMethodMetadataValue(
             confirmationStateHolder: EmbeddedConfirmationStateHolder,
         ): PaymentMethodMetadata? {
@@ -191,13 +189,17 @@ internal interface EmbeddedPaymentElementViewModelModule {
         }
 
         @Provides
-        fun provideResources(context: Context): Resources {
+        fun provideResources(
+            @ApplicationContext context: Context
+        ): Resources {
             return context.resources
         }
 
         @Provides
         @Singleton
-        fun provideStripeImageLoader(context: Context): StripeImageLoader {
+        fun provideStripeImageLoader(
+            @ApplicationContext context: Context
+        ): StripeImageLoader {
             return StripeImageLoader(context)
         }
 

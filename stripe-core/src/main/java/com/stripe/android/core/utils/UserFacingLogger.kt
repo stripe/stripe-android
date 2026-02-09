@@ -5,6 +5,7 @@ import android.content.pm.ApplicationInfo
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.Logger
+import com.stripe.android.core.injection.ApplicationContext
 import javax.inject.Inject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -13,7 +14,7 @@ interface UserFacingLogger {
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class RealUserFacingLogger @Inject constructor(context: Context) : UserFacingLogger {
+class RealUserFacingLogger @Inject constructor(@ApplicationContext context: Context) : UserFacingLogger {
 
     private val isDebuggable = 0 != context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE
     private val isDebugBuild = BuildConfig.DEBUG

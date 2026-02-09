@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.injection
 
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.core.injection.ApplicationContextModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
@@ -20,6 +21,7 @@ import javax.inject.Singleton
         PaymentSheetCommonModule::class,
         PaymentElementRequestSurfaceModule::class,
         PaymentOptionsViewModelModule::class,
+        ApplicationContextModule::class,
         CoroutineContextModule::class,
         CoreCommonModule::class,
         ResourceRepositoryModule::class,

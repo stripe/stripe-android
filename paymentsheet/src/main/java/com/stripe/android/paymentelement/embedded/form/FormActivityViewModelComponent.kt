@@ -1,7 +1,6 @@
 package com.stripe.android.paymentelement.embedded.form
 
 import android.app.Application
-import android.content.Context
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
@@ -10,6 +9,7 @@ import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.common.taptoadd.DefaultTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddMode
+import com.stripe.android.core.injection.ApplicationContextModule
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
@@ -44,6 +44,7 @@ import javax.inject.Singleton
         EmbeddedCommonModule::class,
         FormActivityViewModelModule::class,
         ExtendedPaymentElementConfirmationModule::class,
+        ApplicationContextModule::class,
         GooglePayLauncherModule::class,
         EmbeddedLinkExtrasModule::class
     ]
@@ -97,11 +98,6 @@ internal interface FormActivityViewModelModule {
     fun bindsTapToAddHelperFactory(factory: DefaultTapToAddHelper.Factory): TapToAddHelper.Factory
 
     companion object {
-        @Provides
-        fun providesContext(application: Application): Context {
-            return application
-        }
-
         @Provides
         @Singleton
         fun providesLinkAccountHolder(savedStateHandle: SavedStateHandle): LinkAccountHolder {

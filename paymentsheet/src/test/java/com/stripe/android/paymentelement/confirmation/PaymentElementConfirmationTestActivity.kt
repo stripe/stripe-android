@@ -15,6 +15,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.test.core.app.ActivityScenario
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
+import com.stripe.android.core.injection.ApplicationContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
@@ -147,7 +148,12 @@ internal interface PaymentElementConfirmationTestComponent {
     }
 }
 
-@Module(includes = [PaymentElementRequestSurfaceModule::class])
+@Module(
+    includes = [
+        ApplicationContextModule::class,
+        PaymentElementRequestSurfaceModule::class
+    ]
+)
 internal interface PaymentElementConfirmationTestModule {
     @Binds
     fun bindLinkGateFactory(linkGateFactory: DefaultLinkGate.Factory): LinkGate.Factory

@@ -1,7 +1,5 @@
 package com.stripe.android.attestation
 
-import android.app.Application
-import android.content.Context
 import com.stripe.android.BuildConfig
 import com.stripe.android.attestation.analytics.AttestationAnalyticsModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -33,8 +31,5 @@ internal abstract class AttestationModule {
         @Provides
         @Named(ENABLE_LOGGING)
         fun providesEnableLogging(): Boolean = BuildConfig.DEBUG
-
-        @Provides
-        fun providesContext(application: Application): Context = application
     }
 }

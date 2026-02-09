@@ -40,7 +40,7 @@ internal class PassiveChallengeWarmerViewModel @Inject constructor(
                 val app = this[APPLICATION_KEY] as Application
                 DaggerPassiveChallengeWarmerActivityComponent.factory()
                     .create(
-                        context = app,
+                        application = app,
                         publishableKeyProvider = { args.publishableKey },
                         productUsage = args.productUsage.toSet(),
                         passiveCaptchaParams = args.passiveCaptchaParams,

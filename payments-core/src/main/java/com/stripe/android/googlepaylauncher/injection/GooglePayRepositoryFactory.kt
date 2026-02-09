@@ -6,6 +6,7 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.core.Logger
+import com.stripe.android.core.injection.ApplicationContext
 import com.stripe.android.googlepaylauncher.DefaultGooglePayRepository
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
@@ -23,7 +24,7 @@ interface GooglePayRepositoryFactory {
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class DefaultGooglePayRepositoryFactory @Inject constructor(
-    private val appContext: Context,
+    @ApplicationContext private val appContext: Context,
     private val logger: Logger,
     private val errorReporter: ErrorReporter,
 ) : GooglePayRepositoryFactory {

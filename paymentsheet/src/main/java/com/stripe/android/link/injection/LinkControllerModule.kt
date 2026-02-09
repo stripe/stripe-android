@@ -1,9 +1,8 @@
 package com.stripe.android.link.injection
 
-import android.app.Application
-import android.content.Context
 import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.common.di.MobileSessionIdModule
+import com.stripe.android.core.injection.ApplicationContextModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
@@ -26,6 +25,7 @@ import javax.inject.Singleton
 
 @Module(
     includes = [
+        ApplicationContextModule::class,
         StripeRepositoryModule::class,
         ExtendedPaymentElementConfirmationModule::class,
         PaymentSheetCommonModule::class,
@@ -49,10 +49,6 @@ internal interface LinkControllerModule {
     fun bindLinkConfigurationLoader(impl: DefaultLinkConfigurationLoader): LinkConfigurationLoader
 
     companion object {
-        @Provides
-        @Singleton
-        fun provideAppContext(application: Application): Context = application.applicationContext
-
         @Provides
         @Singleton
         fun providePaymentMethodMetadata(interactor: LinkControllerInteractor): PaymentMethodMetadata? {

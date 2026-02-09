@@ -98,7 +98,7 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
                 DaggerIntentConfirmationChallengeComponent
                     .factory()
                     .create(
-                        context = app,
+                        application = app,
                         args = args,
                     )
                     .viewModel

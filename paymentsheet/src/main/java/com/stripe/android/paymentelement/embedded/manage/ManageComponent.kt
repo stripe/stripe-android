@@ -1,6 +1,6 @@
 package com.stripe.android.paymentelement.embedded.manage
 
-import android.content.Context
+import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.RealUserFacingLogger
@@ -41,7 +41,7 @@ internal interface ManageComponent {
         fun build(
             @BindsInstance savedStateHandle: SavedStateHandle,
             @BindsInstance paymentMethodMetadata: PaymentMethodMetadata,
-            @BindsInstance context: Context,
+            @BindsInstance application: Application,
             @BindsInstance @PaymentElementCallbackIdentifier
             paymentElementCallbackIdentifier: String,
         ): ManageComponent

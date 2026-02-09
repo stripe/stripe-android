@@ -1,6 +1,7 @@
 package com.stripe.android.attestation
 
 import android.app.Application
+import com.stripe.android.core.injection.ApplicationContextModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
@@ -17,6 +18,7 @@ import javax.inject.Singleton
     modules = [
         AttestationModule::class,
         StripeRepositoryModule::class,
+        ApplicationContextModule::class,
         CoreCommonModule::class,
         CoroutineContextModule::class,
         PaymentsIntegrityModule::class,

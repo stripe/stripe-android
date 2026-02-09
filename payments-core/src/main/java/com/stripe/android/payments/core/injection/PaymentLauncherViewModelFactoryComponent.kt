@@ -1,6 +1,7 @@
 package com.stripe.android.payments.core.injection
 
-import android.content.Context
+import android.app.Application
+import com.stripe.android.core.injection.ApplicationContextModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -19,6 +20,7 @@ import javax.inject.Singleton
         StripeRepositoryModule::class,
         PaymentElementRequestSurfaceModule::class,
         CoroutineContextModule::class,
+        ApplicationContextModule::class,
         CoreCommonModule::class
     ]
 )
@@ -30,7 +32,7 @@ internal interface PaymentLauncherViewModelFactoryComponent {
     interface Factory {
         fun create(
             @BindsInstance
-            context: Context,
+            application: Application,
             @BindsInstance
             @Named(ENABLE_LOGGING)
             enableLogging: Boolean,

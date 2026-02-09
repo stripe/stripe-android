@@ -2,6 +2,7 @@ package com.stripe.android.payments.core.injection
 
 import android.content.Context
 import com.google.android.instantapps.InstantApps
+import com.stripe.android.core.injection.ApplicationContext
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
@@ -28,12 +29,12 @@ internal class PaymentLauncherModule {
 
     @Provides
     @Singleton
-    fun provideDefaultReturnUrl(context: Context) = DefaultReturnUrl.create(context)
+    fun provideDefaultReturnUrl(@ApplicationContext context: Context) = DefaultReturnUrl.create(context)
 
     @Provides
     @Singleton
     fun providePaymentNextActionHandlerRegistry(
-        context: Context,
+        @ApplicationContext context: Context,
         @Named(ENABLE_LOGGING) enableLogging: Boolean,
         @IOContext workContext: CoroutineContext,
         @UIContext uiContext: CoroutineContext,
@@ -56,7 +57,7 @@ internal class PaymentLauncherModule {
 
     @Provides
     @Named(IS_INSTANT_APP)
-    fun provideIsInstantApp(context: Context): Boolean {
+    fun provideIsInstantApp(@ApplicationContext context: Context): Boolean {
         return InstantApps.isInstantApp(context)
     }
 

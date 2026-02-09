@@ -2,6 +2,7 @@ package com.stripe.android.payments.bankaccount.di
 
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.core.injection.ApplicationContextModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
@@ -21,6 +22,7 @@ import javax.inject.Singleton
         CollectBankAccountModule::class,
         StripeRepositoryModule::class,
         PaymentElementRequestSurfaceModule::class,
+        ApplicationContextModule::class,
         CoreCommonModule::class
     ]
 )

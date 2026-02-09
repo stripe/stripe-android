@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.stripe.android.core.injection.ApplicationContext
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.paymentsheet.model.SavedSelection
 import kotlinx.coroutines.withContext
@@ -64,7 +65,7 @@ internal class DefaultPrefsRepository(
     }
 
     class Factory @Inject constructor(
-        private val context: Context,
+        @ApplicationContext private val context: Context,
         @IOContext private val workContext: CoroutineContext,
     ) : PrefsRepository.Factory {
         override fun create(customerId: String?): PrefsRepository {

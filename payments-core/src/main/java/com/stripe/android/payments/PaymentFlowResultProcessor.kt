@@ -8,6 +8,7 @@ import com.stripe.android.StripeIntentResult
 import com.stripe.android.StripeIntentResult.Outcome.Companion.CANCELED
 import com.stripe.android.StripeIntentResult.Outcome.Companion.SUCCEEDED
 import com.stripe.android.core.Logger
+import com.stripe.android.core.injection.ApplicationContext
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.ApiRequest
@@ -282,7 +283,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
  */
 @Singleton
 internal class PaymentIntentFlowResultProcessor @Inject constructor(
-    context: Context,
+    @ApplicationContext context: Context,
     @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
     stripeRepository: StripeRepository,
     logger: Logger,
@@ -346,7 +347,7 @@ internal class PaymentIntentFlowResultProcessor @Inject constructor(
  */
 @Singleton
 internal class SetupIntentFlowResultProcessor @Inject constructor(
-    context: Context,
+    @ApplicationContext context: Context,
     @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
     stripeRepository: StripeRepository,
     logger: Logger,

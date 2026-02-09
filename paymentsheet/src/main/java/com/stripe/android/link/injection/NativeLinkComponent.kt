@@ -1,7 +1,6 @@
 package com.stripe.android.link.injection
 
 import android.app.Application
-import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.common.di.ApplicationIdModule
@@ -90,8 +89,6 @@ internal interface NativeLinkComponent {
             @BindsInstance
             @PaymentElementCallbackIdentifier
             paymentElementCallbackIdentifier: String,
-            @BindsInstance
-            context: Context,
             @BindsInstance
             savedStateHandle: SavedStateHandle,
             @BindsInstance

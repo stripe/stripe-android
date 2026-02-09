@@ -1,6 +1,7 @@
 package com.stripe.android.common.taptoadd
 
 import android.content.Context
+import com.stripe.android.core.injection.ApplicationContext
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
 import com.stripe.android.paymentelement.TapToAddPreview
@@ -45,7 +46,7 @@ internal interface TapToAddModule {
             isStripeTerminalSdkAvailable: IsStripeTerminalSdkAvailable,
             terminalWrapper: TerminalWrapper,
             errorReporter: ErrorReporter,
-            applicationContext: Context,
+            @ApplicationContext applicationContext: Context,
             @IOContext workContext: CoroutineContext
         ): TapToAddConnectionManager {
             return TapToAddConnectionManager.create(

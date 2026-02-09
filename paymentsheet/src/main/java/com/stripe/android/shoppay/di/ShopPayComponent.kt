@@ -1,6 +1,7 @@
 package com.stripe.android.shoppay.di
 
-import android.content.Context
+import android.app.Application
+import com.stripe.android.core.injection.ApplicationContextModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.shoppay.ShopPayArgs
@@ -13,6 +14,7 @@ import javax.inject.Singleton
 @Component(
     modules = [
         ShopPayModule::class,
+        ApplicationContextModule::class,
         CoreCommonModule::class,
         CoroutineContextModule::class,
     ]
@@ -23,7 +25,7 @@ internal interface ShopPayComponent {
     @Component.Factory
     interface Factory {
         fun build(
-            @BindsInstance context: Context,
+            @BindsInstance application: Application,
             @BindsInstance shopPayArgs: ShopPayArgs,
         ): ShopPayComponent
     }

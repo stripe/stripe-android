@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.polling.di
 
 import android.app.Application
+import com.stripe.android.core.injection.ApplicationContextModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
@@ -18,6 +19,7 @@ import javax.inject.Singleton
         PollingViewModelModule::class,
         StripeRepositoryModule::class,
         PaymentElementRequestSurfaceModule::class,
+        ApplicationContextModule::class,
         CoreCommonModule::class
     ]
 )

@@ -1,5 +1,6 @@
 package com.stripe.android.link.injection
 
+import android.app.Application
 import android.content.Context
 import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.SavedStateHandle
@@ -9,6 +10,7 @@ import com.stripe.android.Stripe
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.Logger
+import com.stripe.android.core.injection.ApplicationContext
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestFactory
@@ -150,6 +152,13 @@ internal interface NativeLinkModule {
     companion object {
         @Provides
         @NativeLinkScope
+        @ApplicationContext
+        fun providesApplicationContext(
+            application: Application,
+        ): Context = application.applicationContext
+
+        @Provides
+        @NativeLinkScope
         fun providesLinkAccountHolder(
             savedStateHandle: SavedStateHandle,
             linkAccountInfo: LinkAccountUpdate.Value,
@@ -205,7 +214,7 @@ internal interface NativeLinkModule {
 
         @Provides
         @NativeLinkScope
-        fun providePaymentConfiguration(appContext: Context): PaymentConfiguration {
+        fun providePaymentConfiguration(@ApplicationContext appContext: Context): PaymentConfiguration {
             return PaymentConfiguration.getInstance(appContext)
         }
 

@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.intent
 
 import android.content.Context
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.injection.ApplicationContext
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.ClientAttributionMetadata
@@ -34,7 +35,7 @@ import dagger.assisted.AssistedInject
 internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructor(
     @Assisted private val checkoutSessionId: String,
     @Assisted private val clientAttributionMetadata: ClientAttributionMetadata,
-    context: Context,
+    @ApplicationContext context: Context,
     private val stripeRepository: StripeRepository,
     private val requestOptions: ApiRequest.Options,
 ) : IntentConfirmationInterceptor {

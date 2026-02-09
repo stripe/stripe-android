@@ -12,6 +12,7 @@ import com.stripe.android.R
 import com.stripe.android.StripePaymentController
 import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.injection.ApplicationContext
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
@@ -41,7 +42,7 @@ import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 
 internal class Stripe3ds2TransactionViewModel @Inject constructor(
-    private val context: Context,
+    @ApplicationContext private val context: Context,
     private val args: Stripe3ds2TransactionContract.Args,
     private val stripeRepository: StripeRepository,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
@@ -316,7 +317,7 @@ internal class Stripe3ds2TransactionViewModelFactory(
 
         val subcomponentFactory = DaggerStripe3ds2TransactionViewModelFactoryComponent.factory()
             .create(
-                context = application,
+                application = application,
                 enableLogging = args.enableLogging,
                 publishableKeyProvider = { args.publishableKey },
                 productUsage = args.productUsage,
@@ -328,7 +329,6 @@ internal class Stripe3ds2TransactionViewModelFactory(
             .create(
                 args = args,
                 handle = savedStateHandle,
-                application = application,
             ).viewModel as T
     }
 }
