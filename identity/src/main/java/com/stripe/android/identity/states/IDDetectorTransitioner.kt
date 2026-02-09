@@ -1,6 +1,7 @@
 package com.stripe.android.identity.states
 
 import android.graphics.Bitmap
+import android.os.SystemClock
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.identity.ml.AnalyzerInput
@@ -143,6 +144,7 @@ internal class IDDetectorTransitioner(
         }
 
         isBlurry(analyzerOutput.blurScore) -> {
+            bestFrameDetector.reset()
             // reset timer of the foundState
             foundState.reachedStateAt = TimeSource.Monotonic.markNow()
             foundState
@@ -154,7 +156,7 @@ internal class IDDetectorTransitioner(
                 bitmap = analyzerOutput.croppedImage,
                 blurScore = analyzerOutput.blurScore,
                 confidenceScore = analyzerOutput.resultScore,
-                timestamp = System.currentTimeMillis()
+                timestamp = SystemClock.elapsedRealtime()
             )
             foundState
         }
