@@ -60,7 +60,8 @@ internal class IntentFirstConfirmationInterceptor @AssistedInject constructor(
                 radarOptions = RadarOptions(
                     hCaptchaToken = confirmationOption.confirmationChallengeState.hCaptchaToken,
                     androidVerificationObject = AndroidVerificationObject(
-                        androidVerificationToken = confirmationOption.confirmationChallengeState.attestationToken
+                        androidVerificationToken = confirmationOption.confirmationChallengeState.attestationToken,
+                        appId = confirmationOption.confirmationChallengeState.appId
                     )
                 ),
                 clientAttributionMetadata = clientAttributionMetadata,
