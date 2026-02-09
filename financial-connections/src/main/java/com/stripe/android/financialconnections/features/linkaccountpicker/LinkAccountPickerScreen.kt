@@ -32,8 +32,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -184,6 +187,8 @@ private fun LinkAccountPickerLoaded(
                         loading = selectNetworkedAccountAsync is Loading,
                         onClick = onSelectAccountClick,
                         modifier = Modifier
+                            .semantics { testTagsAsResourceId = true }
+                            .testTag("link_account_picker_cta")
                             .fillMaxWidth()
                     ) {
                         Text(text = cta.toText().toString())
