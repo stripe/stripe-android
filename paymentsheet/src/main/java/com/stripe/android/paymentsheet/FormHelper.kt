@@ -24,6 +24,8 @@ internal interface FormHelper {
 
     fun formTypeForCode(paymentMethodCode: PaymentMethodCode): FormType
 
+    fun runActionForCode(paymentMethodCode: PaymentMethodCode)
+
     sealed interface FormType {
         object Empty : FormType
         data class MandateOnly(val mandate: ResolvableString) : FormType

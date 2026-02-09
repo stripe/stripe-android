@@ -19,6 +19,7 @@ class CardDetailsSectionController(
     cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
     cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
     cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
+    val cardDetailsAction: CardDetailsAction? = null,
     private val automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper?,
 ) : SectionFieldValidationController {
 
@@ -29,11 +30,12 @@ class CardDetailsSectionController(
         collectName,
         cbcEligibility,
         cardBrandFilter,
-        cardFundingFilter
+        cardFundingFilter,
     )
 
     fun shouldAutomaticallyLaunchCardScan(): Boolean {
-        return automaticallyLaunchedCardScanFormDataHelper?.shouldLaunchCardScanAutomatically == true
+        return cardDetailsAction == null &&
+            automaticallyLaunchedCardScanFormDataHelper?.shouldLaunchCardScanAutomatically == true
     }
 
     fun setHasAutomaticallyLaunchedCardScan() {

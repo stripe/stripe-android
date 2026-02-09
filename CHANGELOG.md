@@ -5,9 +5,15 @@
 Dependencies updated in [12276](https://github.com/stripe/stripe-android/pull/12276):
 - Bumped Dagger from 2.55 to 2.58.
 
+### PaymentMethodMessagingElement
+[BREAKING][12291](https://github.com/stripe/stripe-android/pull/12291) `PaymentMethodMessagingElement` is in public preview. `infoIconColor` has been removed from `PaymentMethodMessagingElement.Appearance.Colors`. The info icon has been removed and replaced with a CTA to see available plans. The link text color is customizable through `linkTextColor`.
+
 ### Identity
 * [CHANGED] Fail out of verification flow on analyzer failure.
 * [CHANGED] Removed ephemeral key from error log messages for security.
+
+### PaymentSheet
+* [FIXED][12315](https://github.com/stripe/stripe-android/pull/12315) Fixed extra loading spinner showing up under Google Pay.
 
 ## 22.7.0 - 2026-01-26
 
@@ -19,6 +25,7 @@ Dependencies updated in [11877](https://github.com/stripe/stripe-android/pull/11
 
 ### Connect
 * [Changed] Added `EmbeddedErrorType` enum for type-safe error handling in Connect embedded components, falling back to `api_error` if the error type is `null`.
+* [Fixed] Fixed keyboard covering input fields in embedded Payments and Payout components on Samsung devices.
 
 ### Payments
 * [Added][12253](https://github.com/stripe/stripe-android/pull/12253) Added support for Twint API bindings.
