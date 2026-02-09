@@ -45,6 +45,7 @@ internal class IDDetectorTransitioner(
     private var previousBoundingBox: BoundingBox? = null
     private var unmatchedFrame = 0
     private val bestFrameDetector = BestFrameDetector()
+    private var bestLegacyOutput: IDDetectorOutput.Legacy? = null
 
     @VisibleForTesting
     var timeoutAt: ComparableTimeMark = TimeSource.Monotonic.markNow() + timeout
@@ -58,6 +59,7 @@ internal class IDDetectorTransitioner(
         unmatchedFrame = 0
         timeoutAt = TimeSource.Monotonic.markNow() + timeout
         bestFrameDetector.reset()
+        bestLegacyOutput = null
         Log.d(TAG, "Reset! timeoutAt: $timeoutAt")
         return this
     }
@@ -111,6 +113,7 @@ internal class IDDetectorTransitioner(
             is IDDetectorOutput.Legacy -> {
                 transitionFromFoundLegacy(
                     foundState,
+                    analyzerInput,
                     analyzerOutput
                 )
             }
@@ -119,6 +122,7 @@ internal class IDDetectorTransitioner(
 
     private fun transitionFromFoundLegacy(
         foundState: Found,
+        analyzerInput: AnalyzerInput,
         analyzerOutput: IDDetectorOutput.Legacy
     ): IdentityScanState {
         val nowTimestampMs = SystemClock.elapsedRealtime()
@@ -173,14 +177,28 @@ internal class IDDetectorTransitioner(
             }
 
             else -> {
+                // Only record frames whose category strictly matches the target.
+                // (outputMatchesTargetType can tolerate brief mismatches, but those should not become "best".)
+                if (!analyzerOutput.category.matchesScanType(foundState.type)) {
+                    return foundState
+                }
+
                 // Frame passed all checks, add it to best frame detector.
                 // The detector will start a fixed 1s window from the first accepted frame.
-                bestFrameDetector.addFrame(
-                    bitmap = analyzerOutput.croppedImage,
+                val frameBitmap = runCatching {
+                    analyzerInput.cameraPreviewImage.image
+                }.getOrNull() ?: analyzerOutput.croppedImage
+
+                val updatedBest = bestFrameDetector.addFrame(
+                    bitmap = frameBitmap,
                     blurScore = analyzerOutput.blurScore,
                     confidenceScore = analyzerOutput.resultScore,
                     timestamp = nowTimestampMs
                 )
+                if (updatedBest) {
+                    bestLegacyOutput = analyzerOutput
+                }
+
                 foundState
             }
         }
@@ -281,6 +299,10 @@ internal class IDDetectorTransitioner(
      */
     fun getBestFrameBitmap(): Bitmap? {
         return bestFrameDetector.getBestFrameBitmap()
+    }
+
+    fun getBestLegacyOutput(): IDDetectorOutput.Legacy? {
+        return bestLegacyOutput
     }
 
     /**

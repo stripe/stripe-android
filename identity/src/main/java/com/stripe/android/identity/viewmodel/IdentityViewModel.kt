@@ -473,14 +473,17 @@ internal class IdentityViewModel(
     ) {
         when (result.result) {
             is IDDetectorOutput.Legacy -> {
-                // Get the best frame from the transitioner, fall back to current frame
-                val bitmap = (result.identityState.transitioner as? IDDetectorTransitioner)
-                    ?.getBestFrameBitmap()
+                val transitioner = result.identityState.transitioner as? IDDetectorTransitioner
+
+                val bitmap = transitioner?.getBestFrameBitmap()
                     ?: result.frame.cameraPreviewImage.image
-                
+
+                val output = transitioner?.getBestLegacyOutput()
+                    ?: result.result
+
                 uploadLegacyIDDetectorOutput(
                     bitmap,
-                    result.result,
+                    output,
                     verificationPage
                 )
             }

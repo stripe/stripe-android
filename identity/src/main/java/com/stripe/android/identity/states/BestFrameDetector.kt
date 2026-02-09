@@ -41,11 +41,11 @@ internal class BestFrameDetector(
         blurScore: Float,
         confidenceScore: Float,
         timestamp: Long
-    ) {
+    ): Boolean {
         frameCount++
         lastFrameTimestampMs = timestamp
 
-        // Window starts when the first best frame is found (first accepted frame).
+        // Window starts when the first accepted frame is added.
         if (windowStartTimestampMs == 0L) {
             windowStartTimestampMs = timestamp
         }
@@ -60,14 +60,17 @@ internal class BestFrameDetector(
 
         if (!withinWindow) {
             // Outside the fixed window - keep the best frame we already found.
-            return
+            return false
         }
 
         if (bestBitmap == null || score > bestScore) {
             bestBitmap = bitmap
             bestScore = score
             bestFrameTimestampMs = timestamp
+            return true
         }
+
+        return false
     }
 
     /**
