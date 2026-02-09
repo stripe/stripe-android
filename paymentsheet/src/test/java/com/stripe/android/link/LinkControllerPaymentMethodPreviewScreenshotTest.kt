@@ -15,10 +15,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.stripe.android.model.CardBrand
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
+import com.stripe.android.uicore.image.StripeImageLoader
 import org.junit.Rule
 import org.junit.Test
+import androidx.compose.ui.platform.LocalResources
 
 class LinkControllerPaymentMethodPreviewScreenshotTest {
     @get:Rule
@@ -47,7 +50,10 @@ class LinkControllerPaymentMethodPreviewScreenshotTest {
             MaterialTheme {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     cases.forEach { details ->
-                        PaymentMethodPreview(details.toPreview(context))
+                        PaymentMethodPreview(details.toPreview(context, iconLoader = PaymentSelection.IconLoader(
+                            resources = LocalResources.current,
+                            imageLoader = StripeImageLoader(context),
+                        )))
                     }
                 }
             }
