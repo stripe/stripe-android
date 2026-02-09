@@ -774,7 +774,7 @@ class LinkController @Inject internal constructor(
     class PaymentMethodPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         val imageLoader: suspend () -> Drawable,
         val label: String,
         val sublabel: String?,
