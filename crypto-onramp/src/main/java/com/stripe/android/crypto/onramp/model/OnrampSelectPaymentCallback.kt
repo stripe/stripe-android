@@ -41,6 +41,7 @@ sealed class OnrampCollectPaymentMethodResult {
 @Poko
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class PaymentMethodDisplayData internal constructor(
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     val imageLoader: suspend () -> Drawable,
 
     /**
