@@ -5,6 +5,7 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.LinkAuthResult
+import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.account.toLinkAuthResult
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.LinkAccount
@@ -20,11 +21,15 @@ internal class DefaultLinkAttestationCheck @Inject constructor(
     private val integrityRequestManager: IntegrityRequestManager,
     private val linkAccountManager: LinkAccountManager,
     private val linkConfiguration: LinkConfiguration,
+    private val linkStore: LinkStore,
     private val errorReporter: ErrorReporter,
     @IOContext private val workContext: CoroutineContext
 ) : LinkAttestationCheck {
     override suspend fun invoke(): LinkAttestationCheck.Result {
+        val shouldSkipAttestation = linkStore.hasPassedAttestationChecksRecently()
         if (linkGate.useAttestationEndpoints.not()) return LinkAttestationCheck.Result.Successful
+        if (shouldSkipAttestation) return LinkAttestationCheck.Result.Successful
+
         return withContext(workContext) {
             val result = integrityRequestManager.prepare()
             result.fold(
@@ -38,7 +43,11 @@ internal class DefaultLinkAttestationCheck @Inject constructor(
                         startSession = false,
                         customerId = linkConfiguration.customerIdForEceDefaultValues
                     )
-                    handleLookupResult(lookupResult)
+                    val attestationResult = handleLookupResult(lookupResult)
+                    if (attestationResult is LinkAttestationCheck.Result.Successful) {
+                        linkStore.markAttestationCheckAsPassed()
+                    }
+                    attestationResult
                 },
                 onFailure = { error ->
                     errorReporter.report(
