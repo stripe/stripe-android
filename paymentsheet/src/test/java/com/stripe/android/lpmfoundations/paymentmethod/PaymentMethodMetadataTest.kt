@@ -147,7 +147,7 @@ internal class PaymentMethodMetadataTest {
     fun `filterSupportedPaymentMethods filters payment methods without shared data specs`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("card", "afterpay_clearpay")
+                paymentMethodTypes = listOf("card", "ideal")
             ),
             sharedDataSpecs = listOf(SharedDataSpec("card")),
         )
@@ -216,11 +216,11 @@ internal class PaymentMethodMetadataTest {
     fun `supportedPaymentMethodForCode returns null when sharedDataSpecs are missing`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("afterpay_clearpay")
+                paymentMethodTypes = listOf("ideal")
             ),
             sharedDataSpecs = emptyList(),
         )
-        assertThat(metadata.supportedPaymentMethodForCode("afterpay_clearpay")).isNull()
+        assertThat(metadata.supportedPaymentMethodForCode("ideal")).isNull()
     }
 
     @Test
@@ -312,7 +312,7 @@ internal class PaymentMethodMetadataTest {
     fun `sortedSupportedPaymentMethods filters payment methods without a sharedDataSpec`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("affirm", "afterpay_clearpay", "card"),
+                paymentMethodTypes = listOf("affirm", "ideal", "card"),
             ),
             allowsPaymentMethodsRequiringShippingAddress = true,
             sharedDataSpecs = listOf(
