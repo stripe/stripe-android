@@ -1576,17 +1576,26 @@ class StripeApiRepository @JvmOverloads internal constructor(
         paymentMethodId: String,
         clientAttributionMetadata: ClientAttributionMetadata,
         returnUrl: String,
+        savePaymentMethod: Boolean?,
         options: ApiRequest.Options,
     ): Result<CheckoutSessionResponse> {
+        val params = buildMap {
+            put("payment_method", paymentMethodId)
+            put("client_attribution_metadata", clientAttributionMetadata.toParamMap())
+            put("return_url", returnUrl)
+            // Only send save_payment_method when explicitly true.
+            // The backend requires saved_payment_method_options.payment_method_save: "enabled"
+            // to accept this parameter. Sending false or null is not necessary.
+            if (savePaymentMethod == true) {
+                put("save_payment_method", true)
+            }
+        }
+
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createPost(
                 url = getApiUrl("payment_pages/$checkoutSessionId/confirm"),
                 options = options,
-                params = mapOf(
-                    "payment_method" to paymentMethodId,
-                    "client_attribution_metadata" to clientAttributionMetadata.toParamMap(),
-                    "return_url" to returnUrl,
-                ),
+                params = params,
             ),
             jsonParser = CheckoutSessionResponseJsonParser(
                 elementsSessionParams = ElementsSessionParams.CheckoutSessionType(

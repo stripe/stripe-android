@@ -436,6 +436,7 @@ interface StripeRepository {
         paymentMethodId: String,
         clientAttributionMetadata: ClientAttributionMetadata,
         returnUrl: String,
+        savePaymentMethod: Boolean?,
         options: ApiRequest.Options,
     ): Result<CheckoutSessionResponse>
 

@@ -346,6 +346,112 @@ class CheckoutSessionConfirmationInterceptorTest {
         assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
     }
 
+    @Test
+    fun `intercept with new payment method passes shouldSave true when save checkbox checked`() = runTest {
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val succeededPaymentIntent = PaymentIntentFactory.create(
+            status = StripeIntent.Status.Succeeded,
+        )
+
+        val repository = FakeCheckoutSessionStripeRepository(
+            createPaymentMethodResult = Result.success(paymentMethod),
+            confirmCheckoutSessionResult = Result.success(
+                createCheckoutSessionResponse(succeededPaymentIntent)
+            ),
+        )
+
+        val interceptor = CheckoutSessionConfirmationInterceptor(
+            checkoutSessionId = "cs_test_123",
+            clientAttributionMetadata = clientAttributionMetadata,
+            context = ApplicationProvider.getApplicationContext(),
+            stripeRepository = repository,
+            requestOptions = requestOptions,
+        )
+
+        interceptor.intercept(
+            intent = PaymentIntentFactory.create(),
+            confirmationOption = PaymentMethodConfirmationOption.New(
+                createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                optionsParams = null,
+                extraParams = null,
+                shouldSave = true,
+            ),
+            shippingValues = null,
+        )
+
+        assertThat(repository.lastConfirmSavePaymentMethod).isTrue()
+    }
+
+    @Test
+    fun `intercept with new payment method passes shouldSave false when save checkbox unchecked`() = runTest {
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val succeededPaymentIntent = PaymentIntentFactory.create(
+            status = StripeIntent.Status.Succeeded,
+        )
+
+        val repository = FakeCheckoutSessionStripeRepository(
+            createPaymentMethodResult = Result.success(paymentMethod),
+            confirmCheckoutSessionResult = Result.success(
+                createCheckoutSessionResponse(succeededPaymentIntent)
+            ),
+        )
+
+        val interceptor = CheckoutSessionConfirmationInterceptor(
+            checkoutSessionId = "cs_test_123",
+            clientAttributionMetadata = clientAttributionMetadata,
+            context = ApplicationProvider.getApplicationContext(),
+            stripeRepository = repository,
+            requestOptions = requestOptions,
+        )
+
+        interceptor.intercept(
+            intent = PaymentIntentFactory.create(),
+            confirmationOption = PaymentMethodConfirmationOption.New(
+                createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                optionsParams = null,
+                extraParams = null,
+                shouldSave = false,
+            ),
+            shippingValues = null,
+        )
+
+        // When shouldSave is false, we pass false to the repository (which then doesn't send the param)
+        assertThat(repository.lastConfirmSavePaymentMethod).isFalse()
+    }
+
+    @Test
+    fun `intercept with saved payment method passes null for savePaymentMethod`() = runTest {
+        val savedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val succeededPaymentIntent = PaymentIntentFactory.create(
+            status = StripeIntent.Status.Succeeded,
+        )
+
+        val repository = FakeCheckoutSessionStripeRepository(
+            confirmCheckoutSessionResult = Result.success(
+                createCheckoutSessionResponse(succeededPaymentIntent)
+            ),
+        )
+
+        val interceptor = CheckoutSessionConfirmationInterceptor(
+            checkoutSessionId = "cs_test_123",
+            clientAttributionMetadata = clientAttributionMetadata,
+            context = ApplicationProvider.getApplicationContext(),
+            stripeRepository = repository,
+            requestOptions = requestOptions,
+        )
+
+        interceptor.intercept(
+            intent = PaymentIntentFactory.create(),
+            confirmationOption = PaymentMethodConfirmationOption.Saved(
+                paymentMethod = savedPaymentMethod,
+                optionsParams = null,
+            ),
+            shippingValues = null,
+        )
+
+        assertThat(repository.lastConfirmSavePaymentMethod).isNull()
+    }
+
     private fun createCheckoutSessionResponse(paymentIntent: PaymentIntent?): CheckoutSessionResponse {
         return CheckoutSessionResponse(
             id = "cs_test_123",
@@ -364,6 +470,9 @@ class CheckoutSessionConfirmationInterceptorTest {
             Result.failure(NotImplementedError()),
     ) : AbsFakeStripeRepository() {
 
+        var lastConfirmSavePaymentMethod: Boolean? = null
+            private set
+
         override suspend fun createPaymentMethod(
             paymentMethodCreateParams: PaymentMethodCreateParams,
             options: ApiRequest.Options
@@ -376,8 +485,10 @@ class CheckoutSessionConfirmationInterceptorTest {
             paymentMethodId: String,
             clientAttributionMetadata: ClientAttributionMetadata,
             returnUrl: String,
+            savePaymentMethod: Boolean?,
             options: ApiRequest.Options,
         ): Result<CheckoutSessionResponse> {
+            lastConfirmSavePaymentMethod = savePaymentMethod
             return confirmCheckoutSessionResult
         }
     }

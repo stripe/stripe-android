@@ -453,6 +453,7 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         paymentMethodId: String,
         clientAttributionMetadata: ClientAttributionMetadata,
         returnUrl: String,
+        savePaymentMethod: Boolean?,
         options: ApiRequest.Options,
     ): Result<CheckoutSessionResponse> {
         TODO("Not yet implemented")
