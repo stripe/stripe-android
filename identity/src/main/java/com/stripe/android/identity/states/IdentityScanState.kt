@@ -1,6 +1,6 @@
 package com.stripe.android.identity.states
 
-import androidx.annotation.IntegerRes
+import androidx.annotation.StringRes
 import com.stripe.android.camera.scanui.ScanState
 import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.AnalyzerOutput
@@ -39,7 +39,7 @@ internal sealed class IdentityScanState(
     internal class Initial(
         type: ScanType,
         transitioner: IdentityScanStateTransitioner,
-        @IntegerRes val feedbackRes: Int? = null
+        @androidx.annotation.StringRes val feedbackRes: Int? = null
     ) : IdentityScanState(type, transitioner, false) {
         /**
          * Only transitions to [Found] when ML output type matches scan type
@@ -50,7 +50,7 @@ internal sealed class IdentityScanState(
         ) =
             transitioner.transitionFromInitial(this, analyzerInput, analyzerOutput)
 
-        fun withFeedback(@IntegerRes feedbackRes: Int?) = Initial(
+        fun withFeedback(@androidx.annotation.StringRes feedbackRes: Int?) = Initial(
             type,
             transitioner,
             feedbackRes
@@ -65,7 +65,7 @@ internal sealed class IdentityScanState(
         type: ScanType,
         transitioner: IdentityScanStateTransitioner,
         internal var reachedStateAt: ComparableTimeMark = TimeSource.Monotonic.markNow(),
-        @IntegerRes val feedbackRes: Int? = null,
+        @androidx.annotation.StringRes val feedbackRes: Int? = null,
         val isFromLegacyDetector: Boolean? = null
     ) : IdentityScanState(type, transitioner, false) {
         override suspend fun consumeTransition(
@@ -74,7 +74,7 @@ internal sealed class IdentityScanState(
         ) =
             transitioner.transitionFromFound(this, analyzerInput, analyzerOutput)
 
-        fun withFeedback(@IntegerRes feedbackRes: Int?) = Found(
+        fun withFeedback(@androidx.annotation.StringRes feedbackRes: Int?) = Found(
             type,
             transitioner,
             reachedStateAt,
