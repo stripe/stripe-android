@@ -17,6 +17,7 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddMode
+import com.stripe.android.common.taptoadd.TapToAddResult
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
@@ -127,6 +128,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         tapToAddMode = TapToAddMode.Complete,
     )
 
+    private val tapToAddResult = tapToAddHelper.result
+
     private val _paymentSheetResult = MutableSharedFlow<PaymentSheetResult>(replay = 1)
     internal val paymentSheetResult: SharedFlow<PaymentSheetResult> = _paymentSheetResult
 
@@ -236,6 +239,24 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
         viewModelScope.launch(workContext) {
             loadPaymentSheetState()
+        }
+
+        viewModelScope.launch {
+            tapToAddHelper.result.collect { result ->
+                when (result) {
+                    is TapToAddResult.Continue -> {
+                        // This should never happen.
+                    }
+                    is TapToAddResult.Canceled -> {
+                        // This is handled elsewhere.
+                    }
+                    TapToAddResult.Complete -> handlePaymentCompleted(
+                        deferredIntentConfirmationType = null,
+                        finishImmediately = true,
+                        intentId = null,
+                    )
+                }
+            }
         }
     }
 
