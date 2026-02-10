@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### Identity
+* [Added] More live feedback during document capture.
+
 ## 22.8.0 - 2026-02-09
 
 Dependencies updated in [12276](https://github.com/stripe/stripe-android/pull/12276):
@@ -11,7 +14,6 @@ Dependencies updated in [12276](https://github.com/stripe/stripe-android/pull/12
 [BREAKING][12291](https://github.com/stripe/stripe-android/pull/12291) `PaymentMethodMessagingElement` is in public preview. `infoIconColor` has been removed from `PaymentMethodMessagingElement.Appearance.Colors`. The info icon has been removed and replaced with a CTA to see available plans. The link text color is customizable through `linkTextColor`.
 
 ### Identity
-* [Added] More live feedback during document capture.
 * [CHANGED] Fail out of verification flow on analyzer failure.
 * [CHANGED] Removed ephemeral key from error log messages for security.
 
