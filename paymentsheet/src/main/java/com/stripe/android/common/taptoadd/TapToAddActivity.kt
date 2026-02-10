@@ -1,6 +1,8 @@
 package com.stripe.android.common.taptoadd
 
+import android.content.Intent
 import android.os.Bundle
+import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
 
@@ -20,5 +22,19 @@ internal class TapToAddActivity : AppCompatActivity() {
         }
 
         renderEdgeToEdge()
+        setContent {
+            TestResultButtons(::finishWithResult)
+        }
+    }
+
+    private fun finishWithResult(
+        tapToAddResult: TapToAddResult
+    ) {
+        val resultIntent = Intent().putExtra(
+            TapToAddResult.EXTRA_RESULT,
+            tapToAddResult,
+        )
+        setResult(RESULT_OK, resultIntent)
+        finish()
     }
 }
