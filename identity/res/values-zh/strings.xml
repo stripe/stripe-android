@@ -203,7 +203,6 @@
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">将脸放在画面正中间。</string>
   <!-- Instructional text when the document is too blurry -->
-  <string name="stripe_reduce_blur">证件未对焦</string>
   <string name="stripe_reduce_blur_2">画面模糊。请稳住手机并重新尝试。</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">细节不可见</string>

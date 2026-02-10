@@ -203,7 +203,6 @@
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Yüzünüzü çerçevenin ortasına yerleştirin.</string>
   <!-- Instructional text when the document is too blurry -->
-  <string name="stripe_reduce_blur">Kimlik odakta değil</string>
   <string name="stripe_reduce_blur_2">Görüntü bulanık. Telefonunuzu sabit tutun ve tekrar deneyin.</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Ayrıntılar görünmüyor</string>

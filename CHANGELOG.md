@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### Identity
+* [Added] More live feedback during document capture.
+
 ### PaymentSheet
 * [Changed] Afterpay/Clearpay no longer requires billing address by default. Set `billingDetailsCollectionConfiguration.address` to `AddressCollectionMode.Full` if you need to collect billing address for Afterpay.
 
