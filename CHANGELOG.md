@@ -5,6 +5,9 @@
 ### Identity
 * [Added] More live feedback during document capture.
 
+### PaymentSheet
+* [Changed] Afterpay/Clearpay no longer requires billing address by default. Set `billingDetailsCollectionConfiguration.address` to `AddressCollectionMode.Full` if you need to collect billing address for Afterpay.
+
 ## 22.8.0 - 2026-02-09
 
 Dependencies updated in [12276](https://github.com/stripe/stripe-android/pull/12276):
