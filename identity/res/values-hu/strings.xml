@@ -18,6 +18,8 @@
   <string name="stripe_back_of_id">Személyazonosító igazolvány hátlapja</string>
   <!-- Title of ID document scanning screen when scanning the back of an identity card -->
   <string name="stripe_back_of_id_document">Személyazonosító okmány hátulja</string>
+  <!-- Instructional text when the back of the ID is not detected while scanning back -->
+  <string name="stripe_back_of_id_not_detected">Az igazolvány hátlapja nem észlelhető</string>
   <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
   <string name="stripe_back_of_id_selected">Személyazonosító igazolvány hátlapja ki van választva</string>
   <!-- Title displayed when requesting camera permissions -->
@@ -122,6 +124,8 @@
   <string name="stripe_front_of_id">Személyazonosító igazolvány előlapja</string>
   <!-- Title of ID document scanning screen when scanning the front of an identity card -->
   <string name="stripe_front_of_id_document">Személyazonosító okmány eleje</string>
+  <!-- Instructional text when the front of the ID is not detected while scanning front -->
+  <string name="stripe_front_of_id_not_detected">Az igazolvány előlapja nem észlelhető</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">Személyazonosító igazolvány előlapja ki van választva</string>
   <!-- Description of front of passport image -->
@@ -164,6 +168,8 @@
   <string name="stripe_move_closer">Helyezze közelebb az igazolványt</string>
   <!-- Instructional text when camera is too close to a document -->
   <string name="stripe_move_farther">Helyezze távolabb az igazolványt</string>
+  <!-- Instructional text when the document is not centered in the frame -->
+  <string name="stripe_move_id_to_center">Igazítsa középre az igazolványt</string>
   <!-- Label for the ID field to collect NRIC or FIN for Singaporean ID -->
   <string name="stripe_nric_or_fin">NRIC vagy FIN</string>
   <!-- No comment provided by engineer. -->
@@ -197,6 +203,8 @@
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Igazítsa az arcát a kép közepére.</string>
   <!-- Instructional text when the document is too blurry -->
+  <string name="stripe_reduce_blur_2">A kép elmosódott. Tartsa stabilan a telefonját, és próbálja újra.</string>
+  <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">A részletek nem láthatók</string>
   <string name="stripe_reduce_glare_2">Próbálja csökkenteni a csillogást, hogy jól látható legyen az igazolvány</string>
   <!-- Button text displayed to the user to retake photo -->

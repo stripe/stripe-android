@@ -201,6 +201,10 @@ internal sealed interface UiDefinitionFactory {
         fun createFormElements(metadata: PaymentMethodMetadata, arguments: Arguments): List<FormElement>
     }
 
+    interface Actionable {
+        fun action(metadata: PaymentMethodMetadata, arguments: Arguments)
+    }
+
     fun canBeDisplayedInUi(
         definition: PaymentMethodDefinition,
         sharedDataSpecs: List<SharedDataSpec>,
@@ -261,6 +265,10 @@ internal sealed interface UiDefinitionFactory {
             )
         }
 
+        is Actionable -> {
+            null
+        }
+
         is RequiresSharedDataSpec -> {
             val sharedDataSpec = sharedDataSpecs.firstOrNull { it.type == definition.type.code }
             if (sharedDataSpec != null) {
@@ -293,6 +301,10 @@ internal sealed interface UiDefinitionFactory {
                 metadata = metadata,
                 arguments = arguments,
             )
+        }
+
+        is Actionable -> {
+            null
         }
 
         is RequiresSharedDataSpec -> {

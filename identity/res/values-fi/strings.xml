@@ -18,6 +18,8 @@
   <string name="stripe_back_of_id">Henkilökortin takapuoli</string>
   <!-- Title of ID document scanning screen when scanning the back of an identity card -->
   <string name="stripe_back_of_id_document">Henkilötodistuksen takapuoli</string>
+  <!-- Instructional text when the back of the ID is not detected while scanning back -->
+  <string name="stripe_back_of_id_not_detected">Henkilökortin takapuolta ei havaittu</string>
   <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
   <string name="stripe_back_of_id_selected">Henkilökortin takapuoli valittu</string>
   <!-- Title displayed when requesting camera permissions -->
@@ -122,6 +124,8 @@
   <string name="stripe_front_of_id">Henkilökortin etupuoli</string>
   <!-- Title of ID document scanning screen when scanning the front of an identity card -->
   <string name="stripe_front_of_id_document">Henkilötodistuksen etupuoli</string>
+  <!-- Instructional text when the front of the ID is not detected while scanning front -->
+  <string name="stripe_front_of_id_not_detected">Henkilökortin etupuolta ei havaittu</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">Henkilökortin etupuoli valittu</string>
   <!-- Description of front of passport image -->
@@ -164,6 +168,8 @@
   <string name="stripe_move_closer">Siirrä henkilöllisyystodistusta lähemmäs</string>
   <!-- Instructional text when camera is too close to a document -->
   <string name="stripe_move_farther">Siirrä henkilöllisyystodistusta kauemmas</string>
+  <!-- Instructional text when the document is not centered in the frame -->
+  <string name="stripe_move_id_to_center">Keskuksen tunnus näkyvillä</string>
   <!-- Label for the ID field to collect NRIC or FIN for Singaporean ID -->
   <string name="stripe_nric_or_fin">NRIC tai FIN</string>
   <!-- No comment provided by engineer. -->
@@ -197,6 +203,8 @@
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Aseta kasvosi kuvan keskelle.</string>
   <!-- Instructional text when the document is too blurry -->
+  <string name="stripe_reduce_blur_2">Kuva on sumea. Pidä puhelimesi paikoillaan ja yritä uudelleen.</string>
+  <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Tiedot eivät ole näkyvillä</string>
   <string name="stripe_reduce_glare_2">Yritä vähentää häikäisyä niin että henkilöllisyystodistus näkyy</string>
   <!-- Button text displayed to the user to retake photo -->

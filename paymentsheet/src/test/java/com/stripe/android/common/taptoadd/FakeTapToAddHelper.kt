@@ -2,36 +2,32 @@ package com.stripe.android.common.taptoadd
 
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
-import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 
 internal class FakeTapToAddHelper private constructor(
-    override val collectedPaymentMethod: StateFlow<DisplayableSavedPaymentMethod?> = MutableStateFlow(null)
+    override val hasPreviouslyAttemptedCollection: Boolean = false,
 ) : TapToAddHelper {
-    private val collectCalls = Turbine<Unit>()
+    private val collectCalls = Turbine<PaymentMethodMetadata>()
 
-    override fun startPaymentMethodCollection() {
-        collectCalls.add(Unit)
+    override fun startPaymentMethodCollection(paymentMethodMetadata: PaymentMethodMetadata) {
+        collectCalls.add(paymentMethodMetadata)
     }
 
     class Scenario(
-        val collectCalls: ReceiveTurbine<Unit>,
-        val mutableCollectedPaymentMethod: MutableStateFlow<DisplayableSavedPaymentMethod?>,
+        val collectCalls: ReceiveTurbine<PaymentMethodMetadata>,
         val helper: TapToAddHelper,
     )
 
     companion object {
         suspend fun test(
+            hasPreviouslyAttemptedCollection: Boolean = false,
             block: suspend Scenario.() -> Unit,
         ) {
-            val collectedPaymentMethod = MutableStateFlow<DisplayableSavedPaymentMethod?>(null)
-            val helper = FakeTapToAddHelper(collectedPaymentMethod)
+            val helper = FakeTapToAddHelper(hasPreviouslyAttemptedCollection)
 
             block(
                 Scenario(
                     helper = helper,
-                    mutableCollectedPaymentMethod = collectedPaymentMethod,
                     collectCalls = helper.collectCalls,
                 )
             )
@@ -39,8 +35,6 @@ internal class FakeTapToAddHelper private constructor(
             helper.collectCalls.ensureAllEventsConsumed()
         }
 
-        fun noOp(
-            collectedPaymentMethod: StateFlow<DisplayableSavedPaymentMethod?> = MutableStateFlow(null),
-        ) = FakeTapToAddHelper(collectedPaymentMethod)
+        fun noOp() = FakeTapToAddHelper()
     }
 }

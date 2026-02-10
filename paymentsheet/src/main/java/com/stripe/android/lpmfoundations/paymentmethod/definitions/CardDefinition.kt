@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.stripe.android.common.taptoadd.TapToAddCardDetailsAction
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
@@ -60,7 +61,7 @@ internal object CardDefinition : PaymentMethodDefinition {
     }
 }
 
-private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
+private object CardUiDefinitionFactory : UiDefinitionFactory.Custom, UiDefinitionFactory.Actionable {
     override fun createSupportedPaymentMethod(
         metadata: PaymentMethodMetadata,
     ): SupportedPaymentMethod {
@@ -91,6 +92,17 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
             outlinedIconResource = outlinedIconResource,
             iconRequiresTinting = true,
         )
+    }
+
+    override fun action(
+        metadata: PaymentMethodMetadata,
+        arguments: UiDefinitionFactory.Arguments
+    ) {
+        val tapToAddHelper = arguments.tapToAddHelper
+
+        if (metadata.isTapToAddSupported && tapToAddHelper?.hasPreviouslyAttemptedCollection == false) {
+            tapToAddHelper.startPaymentMethodCollection(metadata)
+        }
     }
 
     override fun createFormHeaderInformation(
@@ -125,6 +137,14 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
                     cbcEligibility = arguments.cbcEligibility,
                     cardBrandFilter = arguments.cardBrandFilter,
                     cardFundingFilter = arguments.cardFundingFilter,
+                    cardDetailsAction = arguments.tapToAddHelper?.takeIf {
+                        metadata.isTapToAddSupported
+                    }?.let {
+                        TapToAddCardDetailsAction(
+                            tapToAddHelper = it,
+                            paymentMethodMetadata = metadata,
+                        )
+                    },
                     automaticallyLaunchedCardScanFormDataHelper = arguments.automaticallyLaunchedCardScanFormDataHelper,
                 )
             )

@@ -4,7 +4,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.crypto.onramp.OnrampCoordinator
-import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import dagger.BindsInstance
 import dagger.Module
 import dagger.Provides
@@ -25,8 +24,7 @@ internal interface OnrampPresenterComponent {
         fun build(
             @BindsInstance activity: ComponentActivity,
             @BindsInstance lifecycleOwner: LifecycleOwner,
-            @BindsInstance activityResultRegistryOwner: ActivityResultRegistryOwner,
-            @BindsInstance onrampCallbacks: OnrampCallbacks,
+            @BindsInstance activityResultRegistryOwner: ActivityResultRegistryOwner
         ): OnrampPresenterComponent
     }
 }

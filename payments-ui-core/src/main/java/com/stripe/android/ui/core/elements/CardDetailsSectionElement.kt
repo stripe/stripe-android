@@ -22,6 +22,7 @@ class CardDetailsSectionElement(
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
     private val cardFundingFilter: CardFundingFilter,
     override val identifier: IdentifierSpec,
+    private val cardDetailsAction: CardDetailsAction? = null,
     override val controller: CardDetailsSectionController = CardDetailsSectionController(
         cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
         initialValues = initialValues,
@@ -29,6 +30,7 @@ class CardDetailsSectionElement(
         cbcEligibility = cbcEligibility,
         cardBrandFilter = cardBrandFilter,
         cardFundingFilter = cardFundingFilter,
+        cardDetailsAction = cardDetailsAction,
         automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
     )
 ) : FormElement {

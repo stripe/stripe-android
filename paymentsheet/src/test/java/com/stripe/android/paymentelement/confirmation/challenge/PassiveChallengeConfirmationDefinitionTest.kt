@@ -586,7 +586,8 @@ internal class PassiveChallengeConfirmationDefinitionTest {
     private companion object {
         private val PASSIVE_CAPTCHA_PARAMS = PassiveCaptchaParams(
             siteKey = "site_key",
-            rqData = null
+            rqData = null,
+            tokenTimeoutSeconds = null
         )
 
         private val PAYMENT_METHOD_CONFIRMATION_OPTION_NEW = PaymentMethodConfirmationOption.New(

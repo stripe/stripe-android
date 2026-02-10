@@ -612,29 +612,6 @@ internal class AddPaymentMethodTest {
     }
 
     @Test
-    fun `transformToPaymentSelection returns Saved selection when collectedPaymentMethod is provided for card`() {
-        val collectedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        val formFieldValues = FormFieldValues(
-            fieldValuePairs = mapOf(
-                IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
-            ),
-            userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
-        )
-
-        val paymentSelection = formFieldValues.transformToPaymentSelection(
-            paymentMethod = requireNotNull(metadata.supportedPaymentMethodForCode("card")),
-            paymentMethodMetadata = metadata,
-            collectedPaymentMethod = collectedPaymentMethod,
-        )
-
-        assertThat(paymentSelection).isInstanceOf<PaymentSelection.Saved>()
-
-        val savedSelection = paymentSelection as PaymentSelection.Saved
-
-        assertThat(savedSelection.paymentMethod).isEqualTo(collectedPaymentMethod)
-    }
-
-    @Test
     fun `transformToExtraParams returns correct params for SepaDebit with setAsDefault`() {
         val formFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(

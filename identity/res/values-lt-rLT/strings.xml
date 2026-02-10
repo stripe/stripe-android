@@ -18,6 +18,8 @@
   <string name="stripe_back_of_id">Asmens tapatybės kortelės galinė pusė</string>
   <!-- Title of ID document scanning screen when scanning the back of an identity card -->
   <string name="stripe_back_of_id_document">Tapatybės dokumento galinė pusė</string>
+  <!-- Instructional text when the back of the ID is not detected while scanning back -->
+  <string name="stripe_back_of_id_not_detected">Galinė ID dalis neaptikta</string>
   <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
   <string name="stripe_back_of_id_selected">Pasirinkta asmens tapatybės dokumento galinė pusė</string>
   <!-- Title displayed when requesting camera permissions -->
@@ -122,6 +124,8 @@
   <string name="stripe_front_of_id">Asmens tapatybės kortelės priekinė pusė</string>
   <!-- Title of ID document scanning screen when scanning the front of an identity card -->
   <string name="stripe_front_of_id_document">Tapatybės dokumento priekinė pusė</string>
+  <!-- Instructional text when the front of the ID is not detected while scanning front -->
+  <string name="stripe_front_of_id_not_detected">Priekinė ID dalis neaptikta</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">Pasirinkta asmens tapatybės dokumento priekinė pusė</string>
   <!-- Description of front of passport image -->
@@ -164,6 +168,8 @@
   <string name="stripe_move_closer">Priartinkite tapatybės dokumentą</string>
   <!-- Instructional text when camera is too close to a document -->
   <string name="stripe_move_farther">Nutolinkite tapatybės dokumentą</string>
+  <!-- Instructional text when the document is not centered in the frame -->
+  <string name="stripe_move_id_to_center">Matoma centrinė ID dalis</string>
   <!-- Label for the ID field to collect NRIC or FIN for Singaporean ID -->
   <string name="stripe_nric_or_fin">NRIC arba FIN</string>
   <!-- No comment provided by engineer. -->
@@ -197,6 +203,8 @@
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Veidas turi būti rėmelio centre.</string>
   <!-- Instructional text when the document is too blurry -->
+  <string name="stripe_reduce_blur_2">Vaizdas neryškus. Stabiliai laikykite telefoną ir pabandykite dar kartą.</string>
+  <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Nematyti detalių</string>
   <string name="stripe_reduce_glare_2">Pabandykite sumažinti atsispindėjimą ir padarykite tapatybės dokumentą matomą</string>
   <!-- Button text displayed to the user to retake photo -->

@@ -24,6 +24,7 @@ import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthenticateResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
+import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
@@ -54,10 +55,19 @@ internal class OnrampViewModel(
     savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) {
 
+    private val callbacks = OnrampCallbacks()
+        .authenticateUserCallback(callback = ::onAuthenticateUserResult)
+        .verifyIdentityCallback(callback = ::onVerifyIdentityResult)
+        .verifyKycCallback(callback = ::onVerifyKycResult)
+        .checkoutCallback(callback = ::onCheckoutResult)
+        .collectPaymentCallback(callback = ::onCollectPaymentResult)
+        .authorizeCallback(callback = ::onAuthorizeResult)
+        .onrampSessionClientSecretProvider(callback = ::checkoutWithBackend)
+
     val onrampCoordinator: OnrampCoordinator =
         OnrampCoordinator
             .Builder()
-            .build(application, savedStateHandle)
+            .build(application, savedStateHandle, callbacks)
 
     private val testBackendRepository = TestBackendRepository()
 
@@ -104,24 +114,26 @@ internal class OnrampViewModel(
     init {
         viewModelScope.launch {
             @Suppress("MagicNumber", "MaxLineLength")
-            val configuration = OnrampConfiguration(
-                merchantDisplayName = "Onramp Example",
-                publishableKey = "pk_test_51K9W3OHMaDsveWq0oLP0ZjldetyfHIqyJcz27k2BpMGHxu9v9Cei2tofzoHncPyk3A49jMkFEgTOBQyAMTUffRLa00xzzARtZO",
-                appearance = LinkAppearance(
-                    lightColors = LinkAppearance.Colors(
-                        primary = Color.Blue,
-                        contentOnPrimary = Color.White,
-                        borderSelected = Color.Red
-                    ),
-                    darkColors = LinkAppearance.Colors(
-                        primary = Color(0xFF9886E6),
-                        contentOnPrimary = Color(0xFF222222),
-                        borderSelected = Color.White
-                    ),
-                    style = LinkAppearance.Style.ALWAYS_DARK,
-                    primaryButton = LinkAppearance.PrimaryButton()
+            val configuration = OnrampConfiguration()
+                .merchantDisplayName(merchantDisplayName = "Onramp Example")
+                .publishableKey(publishableKey = "pk_test_51K9W3OHMaDsveWq0oLP0ZjldetyfHIqyJcz27k2BpMGHxu9v9Cei2tofzoHncPyk3A49jMkFEgTOBQyAMTUffRLa00xzzARtZO")
+                .appearance(
+                    appearance = LinkAppearance()
+                        .lightColors(
+                            LinkAppearance.Colors()
+                                .primary(Color(0xFF635BFF))
+                                .contentOnPrimary(Color.White)
+                                .borderSelected(Color.Black)
+                        )
+                        .darkColors(
+                            LinkAppearance.Colors()
+                                .primary(Color(0xFF9886E6))
+                                .contentOnPrimary(Color(0xFF222222))
+                                .borderSelected(Color.White)
+                        )
+                        .style(LinkAppearance.Style.ALWAYS_DARK)
+                        .primaryButton(LinkAppearance.PrimaryButton())
                 )
-            )
 
             onrampCoordinator.configure(configuration = configuration)
 

@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.embedded.form
 
+import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
@@ -27,6 +28,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
     private val embeddedFormHelperFactory: EmbeddedFormHelperFactory,
     @ViewModelScope private val viewModelScope: CoroutineScope,
     private val formActivityStateHelper: FormActivityStateHelper,
+    private val tapToAddHelper: TapToAddHelper,
     private val eventReporter: EventReporter,
 ) {
     fun create(): DefaultVerticalModeFormInteractor {
@@ -35,8 +37,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             paymentMethodMetadata = paymentMethodMetadata,
             eventReporter = eventReporter,
             selectionUpdater = { embeddedSelectionHolder.set(it) },
-            updateEnabled = { formActivityStateHelper.updateEnabled(it) },
-            onError = { formActivityStateHelper.updateError(it) },
+            tapToAddHelper = tapToAddHelper,
             // If no saved payment methods, then first saved payment method is automatically set as default
             setAsDefaultMatchesSaveForFutureUse = !hasSavedPaymentMethods,
         )

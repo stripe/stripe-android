@@ -24,7 +24,8 @@ class ElementsSessionTest {
     fun `passiveCaptchaParams returns passiveCaptcha when flag is enabled`() {
         val passiveCaptcha = PassiveCaptchaParams(
             siteKey = "test_site_key",
-            rqData = "test_rq_data"
+            rqData = "test_rq_data",
+            tokenTimeoutSeconds = 30
         )
 
         val session = createElementsSession(
@@ -39,7 +40,8 @@ class ElementsSessionTest {
     fun `passiveCaptchaParams returns null when elements flag is disabled`() {
         val passiveCaptcha = PassiveCaptchaParams(
             siteKey = "test_site_key",
-            rqData = "test_rq_data"
+            rqData = "test_rq_data",
+            tokenTimeoutSeconds = 30
         )
 
         val session = createElementsSession(
@@ -54,7 +56,8 @@ class ElementsSessionTest {
     fun `passiveCaptchaParams returns null when elements flag is missing`() {
         val passiveCaptcha = PassiveCaptchaParams(
             siteKey = "test_site_key",
-            rqData = "test_rq_data"
+            rqData = "test_rq_data",
+            tokenTimeoutSeconds = 30
         )
 
         val session = createElementsSession(
@@ -70,7 +73,8 @@ class ElementsSessionTest {
         enablePassiveCaptchaRule.setEnabled(false)
         val passiveCaptcha = PassiveCaptchaParams(
             siteKey = "test_site_key",
-            rqData = "test_rq_data"
+            rqData = "test_rq_data",
+            tokenTimeoutSeconds = 30
         )
 
         val session = createElementsSession(

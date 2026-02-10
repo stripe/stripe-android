@@ -18,6 +18,8 @@
   <string name="stripe_back_of_id">Hrbtna stran osebne izkaznice</string>
   <!-- Title of ID document scanning screen when scanning the back of an identity card -->
   <string name="stripe_back_of_id_document">Hrbtna stran osebnega dokumenta</string>
+  <!-- Instructional text when the back of the ID is not detected while scanning back -->
+  <string name="stripe_back_of_id_not_detected">Zadnji del identifikacije ni zaznan</string>
   <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
   <string name="stripe_back_of_id_selected">Izbrana je zadnja stran osebnega dokumenta</string>
   <!-- Title displayed when requesting camera permissions -->
@@ -122,6 +124,8 @@
   <string name="stripe_front_of_id">Sprednja stran osebne izkaznice</string>
   <!-- Title of ID document scanning screen when scanning the front of an identity card -->
   <string name="stripe_front_of_id_document">Sprednja stran osebnega dokumenta</string>
+  <!-- Instructional text when the front of the ID is not detected while scanning front -->
+  <string name="stripe_front_of_id_not_detected">Sprednji del identifikacije ni zaznan</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">Izbrana je sprednja stran osebnega dokumenta</string>
   <!-- Description of front of passport image -->
@@ -164,6 +168,8 @@
   <string name="stripe_move_closer">Približajte osebni dokument</string>
   <!-- Instructional text when camera is too close to a document -->
   <string name="stripe_move_farther">Še bolj oddaljite osebni dokument</string>
+  <!-- Instructional text when the document is not centered in the frame -->
+  <string name="stripe_move_id_to_center">Sredinski ID v vidnem polju</string>
   <!-- Label for the ID field to collect NRIC or FIN for Singaporean ID -->
   <string name="stripe_nric_or_fin">NRIC ali FIN</string>
   <!-- No comment provided by engineer. -->
@@ -197,6 +203,8 @@
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Zagotovite, da je vaš obraz na sredini okvira.</string>
   <!-- Instructional text when the document is too blurry -->
+  <string name="stripe_reduce_blur_2">Slika je zamegljena. Telefon držite pri miru in poskusite znova.</string>
+  <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Podrobnosti niso vidne</string>
   <string name="stripe_reduce_glare_2">Poskusite zmanjšati bleščanje in se prepričajte, da je osebni dokument viden</string>
   <!-- Button text displayed to the user to retake photo -->

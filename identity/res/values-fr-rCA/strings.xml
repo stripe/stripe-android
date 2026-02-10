@@ -18,6 +18,8 @@
   <string name="stripe_back_of_id">Verso de la carte d\'identité</string>
   <!-- Title of ID document scanning screen when scanning the back of an identity card -->
   <string name="stripe_back_of_id_document">Verso de la pièce d\'identité</string>
+  <!-- Instructional text when the back of the ID is not detected while scanning back -->
+  <string name="stripe_back_of_id_not_detected">Verso de la pièce d’identité non détecté</string>
   <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
   <string name="stripe_back_of_id_selected">Le verso de la pièce d\'identité est sélectionné</string>
   <!-- Title displayed when requesting camera permissions -->
@@ -122,6 +124,8 @@
   <string name="stripe_front_of_id">Recto de la carte d\'identité</string>
   <!-- Title of ID document scanning screen when scanning the front of an identity card -->
   <string name="stripe_front_of_id_document">Recto de la pièce d\'identité</string>
+  <!-- Instructional text when the front of the ID is not detected while scanning front -->
+  <string name="stripe_front_of_id_not_detected">Recto de la pièce d’identité non détecté</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">Le recto de la pièce d\'identité est sélectionné</string>
   <!-- Description of front of passport image -->
@@ -164,6 +168,8 @@
   <string name="stripe_move_closer">Rapprochez la pièce d\'identité</string>
   <!-- Instructional text when camera is too close to a document -->
   <string name="stripe_move_farther">Éloignez la pièce d\'identité</string>
+  <!-- Instructional text when the document is not centered in the frame -->
+  <string name="stripe_move_id_to_center">Placez la pièce d’identité au centre du champ</string>
   <!-- Label for the ID field to collect NRIC or FIN for Singaporean ID -->
   <string name="stripe_nric_or_fin">Numéro NRIC ou FIN</string>
   <!-- No comment provided by engineer. -->
@@ -197,6 +203,8 @@
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Placez votre visage au centre du cadre.</string>
   <!-- Instructional text when the document is too blurry -->
+  <string name="stripe_reduce_blur_2">L’image est floue. Stabilisez votre téléphone puis réessayez.</string>
+  <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Détails non visibles</string>
   <string name="stripe_reduce_glare_2">Essayez de réduire la luminosité et assurez-vous que la pièce d\'identité est visible</string>
   <!-- Button text displayed to the user to retake photo -->

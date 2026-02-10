@@ -18,6 +18,8 @@
   <string name="stripe_back_of_id">Bahagian belakang kad pengenalan</string>
   <!-- Title of ID document scanning screen when scanning the back of an identity card -->
   <string name="stripe_back_of_id_document">Bahagian belakang dokumen pengenalan</string>
+  <!-- Instructional text when the back of the ID is not detected while scanning back -->
+  <string name="stripe_back_of_id_not_detected">Belakang ID tidak dikesan</string>
   <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
   <string name="stripe_back_of_id_selected">Bahagian belakang ID dipilih</string>
   <!-- Title displayed when requesting camera permissions -->
@@ -122,6 +124,8 @@
   <string name="stripe_front_of_id">Bahagian hadapan kad pengenalan</string>
   <!-- Title of ID document scanning screen when scanning the front of an identity card -->
   <string name="stripe_front_of_id_document">Bahagian hadapan dokumen pengenalan</string>
+  <!-- Instructional text when the front of the ID is not detected while scanning front -->
+  <string name="stripe_front_of_id_not_detected">Bahagian hadapan ID tidak dikesan</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">Bahagian hadapan ID dipilih</string>
   <!-- Description of front of passport image -->
@@ -164,6 +168,8 @@
   <string name="stripe_move_closer">Gerakkan ID lebih dekat</string>
   <!-- Instructional text when camera is too close to a document -->
   <string name="stripe_move_farther">Gerakkan ID lebih jauh ke belakang</string>
+  <!-- Instructional text when the document is not centered in the frame -->
+  <string name="stripe_move_id_to_center">ID pusat dalam pandangan</string>
   <!-- Label for the ID field to collect NRIC or FIN for Singaporean ID -->
   <string name="stripe_nric_or_fin">NRIC atau FIN</string>
   <!-- No comment provided by engineer. -->
@@ -197,6 +203,8 @@
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Letakkan muka anda di tengah bingkai</string>
   <!-- Instructional text when the document is too blurry -->
+  <string name="stripe_reduce_blur_2">Imej kabur. Pegang telefon anda dengan stabil dan cuba lagi.</string>
+  <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Butiran tidak kelihatan</string>
   <string name="stripe_reduce_glare_2">Cuba kurangkan silau dan pastikan ID dapat dilihat</string>
   <!-- Button text displayed to the user to retake photo -->

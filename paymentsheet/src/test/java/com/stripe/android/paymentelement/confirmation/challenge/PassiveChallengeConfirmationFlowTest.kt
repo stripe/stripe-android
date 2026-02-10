@@ -79,7 +79,8 @@ internal class PassiveChallengeConfirmationFlowTest {
         val LAUNCHER_ARGS = PassiveChallengeActivityContract.Args(
             passiveCaptchaParams = PassiveCaptchaParams(
                 siteKey = "site_key",
-                rqData = null
+                rqData = null,
+                tokenTimeoutSeconds = null
             ),
             publishableKey = "pk_123",
             productUsage = setOf("PaymentSheet")

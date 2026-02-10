@@ -264,6 +264,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             },
             invokeRowSelectionCallback = ::invokeRowSelectionCallback,
             displaysMandatesInFormScreen = isImmediateAction && embeddedViewDisplaysMandateText,
+            runActionForCode = formHelper::runActionForCode,
             onInitiallyDisplayedPaymentMethodVisibilitySnapshot = { visiblePaymentMethods, hiddenPaymentMethods ->
                 eventReporter.onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
                     visiblePaymentMethods = visiblePaymentMethods,

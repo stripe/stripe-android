@@ -39,9 +39,10 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     linkController: LinkController,
     lifecycleOwner: LifecycleOwner,
     private val activity: ComponentActivity,
-    private val onrampCallbacks: OnrampCallbacks,
+    onrampCallbacks: OnrampCallbacks,
     private val coroutineScope: CoroutineScope,
 ) {
+    private val onrampCallbacksState = onrampCallbacks.build()
     private val linkControllerState = linkController.state(activity)
 
     private val linkPresenter = linkController.createPresenter(
@@ -99,7 +100,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     fun authenticateUser() {
         val email = currentLinkAccount?.email
         if (email == null) {
-            onrampCallbacks.authenticateUserCallback.onResult(
+            onrampCallbacksState.authenticateUserCallback.onResult(
                 OnrampAuthenticateResult.Failed(NoLinkAccountFoundException())
             )
             return
@@ -118,13 +119,13 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                             ephemeralKeySecret = verification.response.ephemeralKey
                         )
                     } ?: run {
-                        onrampCallbacks.verifyIdentityCallback.onResult(
+                        onrampCallbacksState.verifyIdentityCallback.onResult(
                             OnrampVerifyIdentityResult.Failed(APIException(message = "No ephemeral key found."))
                         )
                     }
                 }
                 is OnrampStartVerificationResult.Failed -> {
-                    onrampCallbacks.verifyIdentityCallback.onResult(
+                    onrampCallbacksState.verifyIdentityCallback.onResult(
                         OnrampVerifyIdentityResult.Failed(verification.error)
                     )
                 }
@@ -141,7 +142,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                     )
                 }
                 is OnrampStartKycVerificationResult.Failed -> {
-                    onrampCallbacks.verifyKycCallback.onResult(
+                    onrampCallbacksState.verifyKycCallback.onResult(
                         OnrampVerifyKycInfoResult.Failed(verification.error)
                     )
                 }
@@ -166,17 +167,12 @@ internal class OnrampPresenterCoordinator @Inject constructor(
      * Performs the checkout flow for a crypto onramp session, handling any required authentication steps.
      *
      * @param onrampSessionId The onramp session identifier.
-     * @param checkoutHandler An async closure that calls your backend to perform a checkout.
-     *     Your backend should call Stripe's `/v1/crypto/onramp_sessions/:id/checkout` endpoint with the session ID.
-     *     The closure should return the onramp session client secret on success, or throw an Error on failure.
-     *     This closure may be called twice: once initially, and once more after handling any required authentication.
      */
     fun performCheckout(
-        onrampSessionId: String,
-        checkoutHandler: suspend () -> String
+        onrampSessionId: String
     ) {
         coroutineScope.launch {
-            interactor.startCheckout(onrampSessionId, checkoutHandler)
+            interactor.startCheckout(onrampSessionId, onrampCallbacksState.onrampSessionClientSecretProvider)
         }
     }
 
@@ -194,7 +190,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             }
             is CheckoutState.Status.Completed -> {
                 // Checkout finished - notify callback
-                onrampCallbacks.checkoutCallback.onResult(status.result)
+                onrampCallbacksState.checkoutCallback.onResult(status.result)
             }
         }
     }
@@ -209,7 +205,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             // No client secret - notify failure immediately
             val error = PaymentFailedException()
             interactor.onHandleNextActionError(error)
-            onrampCallbacks.checkoutCallback.onResult(OnrampCheckoutResult.Failed(error))
+            onrampCallbacksState.checkoutCallback.onResult(OnrampCheckoutResult.Failed(error))
             return
         }
 
@@ -228,13 +224,13 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             }
             is InternalPaymentResult.Canceled -> {
                 // User canceled the next action
-                onrampCallbacks.checkoutCallback.onResult(
+                onrampCallbacksState.checkoutCallback.onResult(
                     OnrampCheckoutResult.Canceled()
                 )
             }
             is InternalPaymentResult.Failed -> {
                 // Next action failed
-                onrampCallbacks.checkoutCallback.onResult(
+                onrampCallbacksState.checkoutCallback.onResult(
                     OnrampCheckoutResult.Failed(paymentResult.throwable)
                 )
             }
@@ -243,7 +239,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
     private fun handleVerifyKycResult(result: VerifyKycActivityResult) {
         coroutineScope.launch {
-            onrampCallbacks.verifyKycCallback.onResult(
+            onrampCallbacksState.verifyKycCallback.onResult(
                 interactor.handleVerifyKycResult(result)
             )
         }
@@ -254,7 +250,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
     private fun handleAuthenticationResult(result: LinkController.AuthenticationResult) {
         coroutineScope.launch {
-            onrampCallbacks.authenticateUserCallback.onResult(
+            onrampCallbacksState.authenticateUserCallback.onResult(
                 interactor.handleAuthenticationResult(result)
             )
         }
@@ -262,7 +258,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
     private fun handleAuthorizeResult(result: LinkController.AuthorizeResult) {
         coroutineScope.launch {
-            onrampCallbacks.authorizeCallback.onResult(
+            onrampCallbacksState.authorizeCallback.onResult(
                 interactor.handleAuthorizeResult(result)
             )
         }
@@ -270,7 +266,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
     private fun handleIdentityVerificationResult(result: IdentityVerificationSheet.VerificationFlowResult) {
         coroutineScope.launch {
-            onrampCallbacks.verifyIdentityCallback.onResult(
+            onrampCallbacksState.verifyIdentityCallback.onResult(
                 interactor.handleIdentityVerificationResult(result)
             )
         }
@@ -278,7 +274,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
     private fun handlePresentPaymentResult(result: LinkController.PresentPaymentMethodsResult) {
         coroutineScope.launch {
-            onrampCallbacks.collectPaymentCallback.onResult(
+            onrampCallbacksState.collectPaymentCallback.onResult(
                 interactor.handlePresentPaymentMethodsResult(result, activity)
             )
         }

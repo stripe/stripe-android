@@ -2,22 +2,26 @@ package com.stripe.android.link
 
 import android.app.Application
 import android.content.Context
+import android.graphics.drawable.Drawable
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
-import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.configuration.ConfigurationDefaults
+import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.link.injection.DaggerLinkControllerComponent
 import com.stripe.android.link.injection.LinkControllerPresenterComponent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.uicore.image.rememberDrawablePainter
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -178,7 +182,7 @@ class LinkController @Inject internal constructor(
         internal val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
         internal val allowUserEmailEdits: Boolean,
         internal val allowLogOut: Boolean,
-        internal val linkAppearance: LinkAppearance? = null
+        internal val linkAppearance: LinkAppearance.State? = null
     ) : Parcelable {
 
         /**
@@ -285,7 +289,7 @@ class LinkController @Inject internal constructor(
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
                 allowUserEmailEdits = allowUserEmailEdits,
                 allowLogOut = allowLogOut,
-                linkAppearance = appearance
+                linkAppearance = appearance?.build()
             )
         }
 
@@ -770,16 +774,26 @@ class LinkController @Inject internal constructor(
     class PaymentMethodPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
-        @DrawableRes val iconRes: Int,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val imageLoader: suspend () -> Drawable,
         val label: String,
         val sublabel: String?,
     ) {
+
+        /**
+         * An image representing a payment method; e.g. the VISA logo.
+         */
+        @IgnoredOnParcel
+        val icon: Drawable by lazy {
+            DelegateDrawable(imageLoader)
+        }
+
         /**
          * An image representing a payment method; e.g. the VISA logo.
          */
         val iconPainter: Painter
             @Composable
-            get() = painterResource(iconRes)
+            get() = rememberDrawablePainter(icon)
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         companion object {
@@ -789,7 +803,10 @@ class LinkController @Inject internal constructor(
                 context: Context,
                 details: PaymentMethodPreviewDetails
             ): PaymentMethodPreview {
-                return details.toPreview(context)
+                val imageLoader = StripeImageLoader(context)
+                val iconLoader = PaymentSelection.IconLoader(context.resources, imageLoader)
+
+                return details.toPreview(context = context, iconLoader = iconLoader)
             }
         }
     }

@@ -79,7 +79,6 @@ import com.stripe.android.crypto.onramp.example.network.SettlementSpeed
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
-import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.model.DateOfBirth
@@ -101,17 +100,8 @@ internal class OnrampActivity : ComponentActivity() {
 
         FeatureFlags.nativeLinkEnabled.setEnabled(true)
 
-        val callbacks = OnrampCallbacks(
-            authenticateUserCallback = viewModel::onAuthenticateUserResult,
-            verifyIdentityCallback = viewModel::onVerifyIdentityResult,
-            verifyKycCallback = viewModel::onVerifyKycResult,
-            checkoutCallback = viewModel::onCheckoutResult,
-            collectPaymentCallback = viewModel::onCollectPaymentResult,
-            authorizeCallback = viewModel::onAuthorizeResult
-        )
-
         onrampPresenter = viewModel.onrampCoordinator
-            .createPresenter(this, callbacks)
+            .createPresenter(this)
 
         // ViewModel notifies UI to launch checkout flow.
         // Note checkout requires an Activity context since it might launch UI to handle next actions (e.g. 3DS2).
@@ -120,7 +110,6 @@ internal class OnrampActivity : ComponentActivity() {
                 event?.let {
                     onrampPresenter.performCheckout(
                         onrampSessionId = event.sessionId,
-                        checkoutHandler = { viewModel.checkoutWithBackend(event.sessionId) }
                     )
                     viewModel.clearCheckoutEvent()
                 }
@@ -843,7 +832,7 @@ private fun AuthenticatedOperationsScreen(
             }
 
             Image(
-                painter = painterResource(selectedPaymentData.iconRes),
+                painter = selectedPaymentData.iconPainter,
                 contentDescription = selectedPaymentData.label,
                 modifier = Modifier
                     .height(24.dp)

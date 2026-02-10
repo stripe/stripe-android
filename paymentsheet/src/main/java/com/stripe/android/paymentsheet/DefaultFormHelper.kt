@@ -21,12 +21,10 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
 import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
 import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -57,18 +55,6 @@ internal class DefaultFormHelper(
             linkInlineHandler: LinkInlineHandler = LinkInlineHandler.create(),
             shouldCreateAutomaticallyLaunchedCardScanFormDataHelper: Boolean = false,
         ): FormHelper {
-            val tapToAddHelper = TapToAddHelper.create(
-                coroutineScope = viewModel.viewModelScope,
-                tapToAddCollectionHandler = viewModel.tapToAddCollectionHandler,
-                paymentMethodMetadata = paymentMethodMetadata,
-                onCollectingUpdated = { collecting ->
-                    viewModel.savedStateHandle[SAVE_PROCESSING] = collecting
-                },
-                onError = { error ->
-                    viewModel.onError(error)
-                },
-            )
-
             return DefaultFormHelper(
                 coroutineScope = viewModel.viewModelScope,
                 linkInlineHandler = linkInlineHandler,
@@ -99,7 +85,7 @@ internal class DefaultFormHelper(
                 } else {
                     null
                 },
-                tapToAddHelper = tapToAddHelper,
+                tapToAddHelper = viewModel.tapToAddHelper,
             )
         }
 
@@ -136,12 +122,10 @@ internal class DefaultFormHelper(
     private val paymentSelection: Flow<PaymentSelection?> = combine(
         lastFormValues,
         linkInlineHandler.linkInlineState,
-        tapToAddHelper?.collectedPaymentMethod ?: stateFlowOf(null)
-    ) { formValues, inlineSignupViewState, collectedPaymentMethod ->
+    ) { formValues, inlineSignupViewState ->
         formValues.first?.transformToPaymentSelection(
             paymentMethod = supportedPaymentMethodForCode(formValues.second),
             paymentMethodMetadata = paymentMethodMetadata,
-            collectedPaymentMethod = collectedPaymentMethod?.paymentMethod,
             inlineSignupViewState = inlineSignupViewState,
         )
     }
@@ -162,33 +146,9 @@ internal class DefaultFormHelper(
     }
 
     override fun formElementsForCode(code: String): List<FormElement> {
-        val currentSelection = newPaymentSelectionProvider()?.takeIf { it.getType() == code }
-
         return paymentMethodMetadata.formElementsForCode(
             code = code,
-            uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
-                cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
-                linkConfigurationCoordinator = linkConfigurationCoordinator,
-                linkInlineHandler = linkInlineHandler,
-                onLinkInlineSignupStateChanged = linkInlineHandler::onStateUpdated,
-                paymentMethodCreateParams = currentSelection?.getPaymentMethodCreateParams(),
-                paymentMethodOptionsParams = currentSelection?.getPaymentMethodOptionParams(),
-                paymentMethodExtraParams = currentSelection?.getPaymentMethodExtraParams(),
-                initialLinkUserInput = when (val selection = currentSelection?.paymentSelection) {
-                    is PaymentSelection.New.Card -> selection.linkInput
-                    else -> null
-                },
-                previousLinkSignupCheckboxSelection = when (val selection = currentSelection?.paymentSelection) {
-                    // User entered a card and may have link input
-                    is PaymentSelection.New.Card -> selection.linkInput != null
-                    else -> null // Not a card, so no previous choice
-                },
-                setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
-                autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
-                isLinkUI = isLinkUI,
-                automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
-                tapToAddHelper = tapToAddHelper,
-            ),
+            uiDefinitionFactoryArgumentsFactory = createArgumentsFactory(code),
         ) ?: emptyList()
     }
 
@@ -238,6 +198,13 @@ internal class DefaultFormHelper(
         }
     }
 
+    override fun runActionForCode(paymentMethodCode: PaymentMethodCode) {
+        paymentMethodMetadata.actionForCode(
+            code = paymentMethodCode,
+            uiDefinitionFactoryArgumentsFactory = createArgumentsFactory(paymentMethodCode),
+        )
+    }
+
     private fun supportedPaymentMethodForCode(code: String): SupportedPaymentMethod {
         return requireNotNull(paymentMethodMetadata.supportedPaymentMethodForCode(code = code))
     }
@@ -255,5 +222,33 @@ internal class DefaultFormHelper(
             eventReporter.onPaymentMethodFormCompleted(code)
             previouslyCompletedForm = code
         }
+    }
+
+    private fun createArgumentsFactory(code: String): UiDefinitionFactory.Arguments.Factory {
+        val currentSelection = newPaymentSelectionProvider()?.takeIf { it.getType() == code }
+
+        return UiDefinitionFactory.Arguments.Factory.Default(
+            cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
+            linkConfigurationCoordinator = linkConfigurationCoordinator,
+            linkInlineHandler = linkInlineHandler,
+            onLinkInlineSignupStateChanged = linkInlineHandler::onStateUpdated,
+            paymentMethodCreateParams = currentSelection?.getPaymentMethodCreateParams(),
+            paymentMethodOptionsParams = currentSelection?.getPaymentMethodOptionParams(),
+            paymentMethodExtraParams = currentSelection?.getPaymentMethodExtraParams(),
+            initialLinkUserInput = when (val selection = currentSelection?.paymentSelection) {
+                is PaymentSelection.New.Card -> selection.linkInput
+                else -> null
+            },
+            previousLinkSignupCheckboxSelection = when (val selection = currentSelection?.paymentSelection) {
+                // User entered a card and may have link input
+                is PaymentSelection.New.Card -> selection.linkInput != null
+                else -> null // Not a card, so no previous choice
+            },
+            setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
+            autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+            isLinkUI = isLinkUI,
+            automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
+            tapToAddHelper = tapToAddHelper,
+        )
     }
 }

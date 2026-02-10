@@ -24,6 +24,7 @@ internal class EceWebView(
         settings.javaScriptCanOpenWindowsAutomatically = true
         settings.setSupportMultipleWindows(true)
         settings.userAgentString = FakeUserAgent
+        settings.domStorageEnabled = true
     }
 }
 
