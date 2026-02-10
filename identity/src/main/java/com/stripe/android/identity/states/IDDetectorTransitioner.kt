@@ -30,13 +30,10 @@ import kotlin.time.TimeSource
  * see [outputMatchesTargetType] for details.
  * * Then it checks the IoU score, if the score is below threshold, then stays at Found state and
  * reset the [Found.reachedStateAt] timer.
- * * Finally it checks since the time elapsed since [Found] is reached, if it passed
- * [timeRequired], then transitions to [Satisfied], otherwise stays in [Found].
  */
 internal class IDDetectorTransitioner(
     private val timeout: Duration,
     private val iouThreshold: Float = DEFAULT_IOU_THRESHOLD,
-    private val timeRequired: Int = DEFAULT_TIME_REQUIRED,
     private val blurThreshold: Float = DEFAULT_BLUR_THRESHOLD,
     private val allowedUnmatchedFrames: Int = DEFAULT_ALLOWED_UNMATCHED_FRAME,
     private val displaySatisfiedDuration: Int = DEFAULT_DISPLAY_SATISFIED_DURATION,
@@ -330,7 +327,6 @@ internal class IDDetectorTransitioner(
     }
 
     internal companion object {
-        const val DEFAULT_TIME_REQUIRED = 500
         const val DEFAULT_IOU_THRESHOLD = 0.95f
         const val DEFAULT_ALLOWED_UNMATCHED_FRAME = 1
         const val DEFAULT_DISPLAY_SATISFIED_DURATION = 0
