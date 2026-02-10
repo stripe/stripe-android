@@ -284,10 +284,6 @@ internal class IDDetectorTransitioner(
         return blurScore <= blurThreshold
     }
 
-    private fun moreResultsRequired(foundState: Found): Boolean {
-        return foundState.reachedStateAt.elapsedNow() < timeRequired.milliseconds
-    }
-
     /**
      * Returns the best frame's bitmap, or null if no frames were captured.
      */
