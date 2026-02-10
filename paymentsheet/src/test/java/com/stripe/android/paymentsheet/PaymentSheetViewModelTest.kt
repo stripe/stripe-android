@@ -3297,7 +3297,7 @@ internal class PaymentSheetViewModelTest {
             experimentsData = ElementsSession.ExperimentsData(
                 arbId = "232dd033-0b45-4456-b834-ecdcb02ab1fb",
                 experimentAssignments = mapOf(
-                    ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_ANDROID_AA to "control"
+                    ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_AA to "control"
                 )
             ),
             args = ARGS_WITH_AUTOMATIC_LAYOUT,
@@ -3328,7 +3328,7 @@ internal class PaymentSheetViewModelTest {
             experimentsData = ElementsSession.ExperimentsData(
                 arbId = "232dd033-0b45-4456-b834-ecdcb02ab1fb",
                 experimentAssignments = mapOf(
-                    ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_ANDROID_AA to "control"
+                    ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_AA to "control"
                 )
             ),
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
