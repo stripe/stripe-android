@@ -41,6 +41,7 @@ import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.complete_
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.custom_flow.CustomFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.complete_flow.ServerSideConfirmationCompleteFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.custom_flow.ServerSideConfirmationCustomFlowActivity
+import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.twostepcheckout.TwoStepCheckoutActivity
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 import com.stripe.android.uicore.R as StripeUiCoreR
 
@@ -70,6 +71,12 @@ class MainActivity : AppCompatActivity() {
                 titleResId = R.string.paymentsheet_custom_title,
                 subtitleResId = R.string.paymentsheet_custom_subtitle,
                 klass = CustomFlowActivity::class.java,
+                section = MenuItem.Section.CustomFlow,
+            ),
+            MenuItem(
+                titleResId = R.string.merchant_checkout_title,
+                subtitleResId = R.string.merchant_checkout_subtitle,
+                klass = TwoStepCheckoutActivity::class.java,
                 section = MenuItem.Section.CustomFlow,
             ),
             MenuItem(
