@@ -47,7 +47,6 @@ internal class FakeBaseSheetViewModel private constructor(
     cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
     isCompleteFlow = true,
     mode = EventReporter.Mode.Complete,
-    tapToAddHelperFactory = FakeTapToAddHelper.Factory.noOp(),
 ) {
     companion object {
         fun create(
@@ -83,6 +82,8 @@ internal class FakeBaseSheetViewModel private constructor(
     init {
         setPaymentMethodMetadata(paymentMethodMetadata)
     }
+
+    override val tapToAddHelper = FakeTapToAddHelper.noOp()
 
     val walletsStateSource = MutableStateFlow<WalletsState?>(null)
     override val walletsState: StateFlow<WalletsState?> = walletsStateSource.asStateFlow()

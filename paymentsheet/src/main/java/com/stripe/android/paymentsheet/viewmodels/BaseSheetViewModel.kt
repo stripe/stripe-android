@@ -8,7 +8,6 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.common.taptoadd.TapToAddHelper
-import com.stripe.android.common.taptoadd.TapToAddMode
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
@@ -63,7 +62,6 @@ internal abstract class BaseSheetViewModel(
     val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     val isCompleteFlow: Boolean,
     val mode: EventReporter.Mode,
-    tapToAddHelperFactory: TapToAddHelper.Factory,
 ) : ViewModel() {
     private val autocompleteLauncher = DefaultAutocompleteLauncher(
         AutocompleteAppearanceContext.PaymentElement(config.appearance)
@@ -115,14 +113,7 @@ internal abstract class BaseSheetViewModel(
     private val _cvcRecollectionCompleteFlow = MutableStateFlow(true)
     internal val cvcRecollectionCompleteFlow: StateFlow<Boolean> = _cvcRecollectionCompleteFlow
 
-    val tapToAddHelper = tapToAddHelperFactory.create(
-        coroutineScope = viewModelScope,
-        tapToAddMode = if (isCompleteFlow) {
-            TapToAddMode.Complete
-        } else {
-            TapToAddMode.Continue
-        }
-    )
+    abstract val tapToAddHelper: TapToAddHelper
 
     val analyticsListener: PaymentSheetAnalyticsListener = PaymentSheetAnalyticsListener(
         savedStateHandle = savedStateHandle,
