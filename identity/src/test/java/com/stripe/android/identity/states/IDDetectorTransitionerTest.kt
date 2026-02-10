@@ -81,7 +81,7 @@ internal class IDDetectorTransitionerTest {
         assertThat(resultState).isInstanceOf(IdentityScanState.Found::class.java)
         assertThat(resultState).isNotSameInstanceAs(foundState)
         assertThat((resultState as IdentityScanState.Found).feedbackRes)
-            .isEqualTo(com.stripe.android.identity.R.string.stripe_reduce_blur)
+            .isEqualTo(com.stripe.android.identity.R.string.stripe_reduce_blur_2)
 
         // verify timer is reset
         assertThat(foundState.reachedStateAt).isNotSameInstanceAs(mockReachedStateAt)
