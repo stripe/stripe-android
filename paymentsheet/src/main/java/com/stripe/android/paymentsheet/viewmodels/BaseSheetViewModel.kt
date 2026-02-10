@@ -7,8 +7,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
-import com.stripe.android.common.taptoadd.DefaultTapToAddHelper
-import com.stripe.android.common.taptoadd.TapToAddCollectionHandler
+import com.stripe.android.common.taptoadd.TapToAddHelper
+import com.stripe.android.common.taptoadd.TapToAddMode
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
@@ -62,8 +62,8 @@ internal abstract class BaseSheetViewModel(
     val linkHandler: LinkHandler,
     val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     val isCompleteFlow: Boolean,
-    val tapToAddCollectionHandler: TapToAddCollectionHandler,
     val mode: EventReporter.Mode,
+    tapToAddHelperFactory: TapToAddHelper.Factory,
 ) : ViewModel() {
     private val autocompleteLauncher = DefaultAutocompleteLauncher(
         AutocompleteAppearanceContext.PaymentElement(config.appearance)
@@ -115,7 +115,14 @@ internal abstract class BaseSheetViewModel(
     private val _cvcRecollectionCompleteFlow = MutableStateFlow(true)
     internal val cvcRecollectionCompleteFlow: StateFlow<Boolean> = _cvcRecollectionCompleteFlow
 
-    val tapToAddHelper = DefaultTapToAddHelper(this)
+    val tapToAddHelper = tapToAddHelperFactory.create(
+        coroutineScope = viewModelScope,
+        tapToAddMode = if (isCompleteFlow) {
+            TapToAddMode.Complete
+        } else {
+            TapToAddMode.Continue
+        }
+    )
 
     val analyticsListener: PaymentSheetAnalyticsListener = PaymentSheetAnalyticsListener(
         savedStateHandle = savedStateHandle,
@@ -166,6 +173,7 @@ internal abstract class BaseSheetViewModel(
         lifecycleOwner: LifecycleOwner,
     ) {
         autocompleteLauncher.register(activityResultCaller, lifecycleOwner)
+        tapToAddHelper.register(activityResultCaller, lifecycleOwner)
         registerFromActivity(activityResultCaller, lifecycleOwner)
     }
 
@@ -263,7 +271,6 @@ internal abstract class BaseSheetViewModel(
         paymentMethodMetadata: PaymentMethodMetadata,
     ) {
         listOf(
-            ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_ANDROID_AA,
             ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_AA,
             ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE,
         ).forEach { experimentAssignment ->
