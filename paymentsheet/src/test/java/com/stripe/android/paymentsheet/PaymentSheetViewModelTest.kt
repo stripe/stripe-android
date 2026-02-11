@@ -16,6 +16,7 @@ import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddMode
+import com.stripe.android.common.taptoadd.TapToAddResult
 import com.stripe.android.core.Logger
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
@@ -3339,6 +3340,62 @@ internal class PaymentSheetViewModelTest {
         verify(eventReporter, never()).onExperimentExposure(
             any<LoggableExperiment.OcsMobileHorizontalMode>()
         )
+    }
+
+    @Test
+    fun `Tap to add helper is created with mode complete`() = runTest {
+        FakeTapToAddHelper.Factory.test {
+            createViewModel(
+                tapToAddHelperFactory = tapToAddHelperFactory,
+            )
+
+            val createCall = createCalls.awaitItem()
+            assertThat(createCall.tapToAddMode).isEqualTo(TapToAddMode.Complete)
+        }
+    }
+
+    @Test
+    fun `When tap to add result is Complete, activity completes with completed status`() = runTest {
+        FakeTapToAddHelper.Factory.test {
+            val viewModel = createViewModel(
+                tapToAddHelperFactory = tapToAddHelperFactory,
+            )
+
+            createCalls.awaitItem()
+
+            viewModel.paymentSheetResult.test {
+                tapToAddHelperFactory.getCreatedHelper()?.emitResult(
+                    TapToAddResult.Complete
+                )
+
+                val result = awaitItem()
+                assertThat(result).isInstanceOf<PaymentSheetResult.Completed>()
+            }
+        }
+    }
+
+    @Test
+    fun `When tap to add result is Continue, error is reported`() = runTest {
+        val errorReporter = FakeErrorReporter()
+
+        FakeTapToAddHelper.Factory.test {
+            createViewModel(
+                tapToAddHelperFactory = tapToAddHelperFactory,
+                errorReporter = errorReporter,
+            )
+
+            createCalls.awaitItem()
+
+            tapToAddHelperFactory.getCreatedHelper()?.emitResult(
+                TapToAddResult.Continue(
+                    PaymentSelection.Saved(CARD_PAYMENT_METHOD)
+                )
+            )
+
+            assertThat(errorReporter.getLoggedErrors()).containsExactly(
+                ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_PAYMENT_SHEET_RECEIVED_CONTINUE_RESULT.eventName
+            )
+        }
     }
 
     private fun testConfirmationStateRestorationAfterPaymentSuccess(
