@@ -163,7 +163,7 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
                     context = application,
                     enableLogging = BuildConfig.DEBUG,
                     publishableKeyProvider = {
-                        PaymentConfiguration.getInstance(application).publishableKey
+                        args.apiKeyOverride ?: PaymentConfiguration.getInstance(application).publishableKey
                     },
                     stripeAccountIdProvider = {
                         PaymentConfiguration.getInstance(application).stripeAccountId

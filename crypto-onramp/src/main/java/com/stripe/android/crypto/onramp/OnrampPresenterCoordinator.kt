@@ -9,6 +9,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.utils.StatusBarCompat
+import com.stripe.android.core.utils.flatMapCatching
 import com.stripe.android.crypto.onramp.di.OnrampPresenterScope
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
@@ -157,12 +158,26 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                 )
             }
             is PaymentMethodSelection.GooglePay -> {
-                googlePayPaymentMethodLauncher?.present(
-                    currencyCode = selection.currencyCode,
-                    amount = selection.amount,
-                    transactionId = selection.transactionId,
-                    label = selection.label
-                )
+                coroutineScope.launch {
+                    interactor.getOrFetchPlatformKey().fold(
+                        onSuccess = { it
+                            googlePayPaymentMethodLauncher?.present(
+                                currencyCode = selection.currencyCode,
+                                amount = selection.amount,
+                                clientAttributionMetadata = null,
+                                transactionId = selection.transactionId,
+                                label = selection.label,
+                                apiKeyOverride = it
+                            )
+                                    },
+                        onFailure = {
+//                            onrampCallbacksState.collectPaymentCallback.onResult(
+//                                OnrampCollectPaymentMethodResult.Failed(it)
+//                            )
+//                            return@launch
+                        }
+                    )
+                }
             }
         }
     }
