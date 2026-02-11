@@ -387,7 +387,7 @@ class LinkApiRepositoryTest {
                 clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             ).getOrThrow()
 
-            assertThat(linkDetails.paymentMethodCreateParams.allowRedisplay).isEqualTo(allowRedisplay)
+            assertThat(linkDetails.confirmParams.allowRedisplay).isEqualTo(allowRedisplay)
         }
     }
 
@@ -460,7 +460,7 @@ class LinkApiRepositoryTest {
 
         assertThat(newLinkPaymentDetails.paymentDetails)
             .isEqualTo(paymentDetails.paymentDetails.first())
-        assertThat(newLinkPaymentDetails.paymentMethodCreateParams)
+        assertThat(newLinkPaymentDetails.confirmParams)
             .isEqualTo(
                 PaymentMethodCreateParams.createLink(
                     paymentDetails.paymentDetails.first().id,
@@ -627,16 +627,6 @@ class LinkApiRepositoryTest {
                         postalCode = "94111",
                         countryCode = CountryCode.create("US")
                     )
-                )
-            )
-        assertThat(savedLinkPaymentDetails.paymentMethodCreateParams)
-            .isEqualTo(
-                PaymentMethodCreateParams.createLink(
-                    PaymentMethodFixtures.CARD_PAYMENT_METHOD.id,
-                    consumerSessionSecret,
-                    PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
-                    extraParams = mapOf("card" to mapOf("cvc" to "123")),
-                    originalPaymentMethodCode = "card",
                 )
             )
     }

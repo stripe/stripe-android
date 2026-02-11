@@ -1,6 +1,8 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.luxe.ContactInformationCollectionMode
+import com.stripe.android.lpmfoundations.luxe.FormElementsBuilder
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
@@ -10,7 +12,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement
-import com.stripe.android.ui.core.elements.SharedDataSpec
+import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.ui.core.R as UiCoreR
 
 internal object AfterpayClearpayDefinition : PaymentMethodDefinition {
@@ -31,13 +33,9 @@ internal object AfterpayClearpayDefinition : PaymentMethodDefinition {
     ): UiDefinitionFactory = AfterpayClearpayUiDefinitionFactory
 }
 
-private object AfterpayClearpayUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDataSpec {
-    override fun createSupportedPaymentMethod(
-        metadata: PaymentMethodMetadata,
-        sharedDataSpec: SharedDataSpec,
-    ) = SupportedPaymentMethod(
+private object AfterpayClearpayUiDefinitionFactory : UiDefinitionFactory.Simple() {
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         paymentMethodDefinition = AfterpayClearpayDefinition,
-        sharedDataSpec = sharedDataSpec,
         displayNameResource = if (AfterpayClearpayHeaderElement.isClearpay(metadata.stripeIntent.currency)) {
             UiCoreR.string.stripe_paymentsheet_payment_method_clearpay
         } else {
@@ -57,4 +55,20 @@ private object AfterpayClearpayUiDefinitionFactory : UiDefinitionFactory.Require
             R.string.stripe_afterpay_subtitle.resolvableString
         },
     )
+
+    override fun buildFormElements(
+        metadata: PaymentMethodMetadata,
+        arguments: UiDefinitionFactory.Arguments,
+        builder: FormElementsBuilder,
+    ) {
+        builder
+            .header(
+                AfterpayClearpayHeaderElement(
+                    identifier = IdentifierSpec.Generic("afterpay_header"),
+                    currency = metadata.stripeIntent.currency
+                )
+            )
+            .requireContactInformationIfAllowed(ContactInformationCollectionMode.Name)
+            .requireContactInformationIfAllowed(ContactInformationCollectionMode.Email)
+    }
 }

@@ -18,6 +18,8 @@
   <string name="stripe_back_of_id">Back of identity card</string>
   <!-- Title of ID document scanning screen when scanning the back of an identity card -->
   <string name="stripe_back_of_id_document">Back of identity document</string>
+  <!-- Instructional text when the back of the ID is not detected while scanning back -->
+  <string name="stripe_back_of_id_not_detected">Back of ID not detected</string>
   <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
   <string name="stripe_back_of_id_selected">Back of ID is selected</string>
   <!-- Title displayed when requesting camera permissions -->
@@ -122,6 +124,8 @@
   <string name="stripe_front_of_id">Front of identity card</string>
   <!-- Title of ID document scanning screen when scanning the front of an identity card -->
   <string name="stripe_front_of_id_document">Front of identity document</string>
+  <!-- Instructional text when the front of the ID is not detected while scanning front -->
+  <string name="stripe_front_of_id_not_detected">Front of ID not detected</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">Front of ID is selected</string>
   <!-- Description of front of passport image -->
@@ -164,6 +168,8 @@
   <string name="stripe_move_closer">Move ID closer</string>
   <!-- Instructional text when camera is too close to a document -->
   <string name="stripe_move_farther">Move ID farther back</string>
+  <!-- Instructional text when the document is not centered in the frame -->
+  <string name="stripe_move_id_to_center">Center ID in view</string>
   <!-- Label for the ID field to collect NRIC or FIN for Singaporean ID -->
   <string name="stripe_nric_or_fin">NRIC or FIN</string>
   <!-- No comment provided by engineer. -->
@@ -197,7 +203,7 @@
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Position your face in the center of the frame.</string>
   <!-- Instructional text when the document is too blurry -->
-  <string name="stripe_reduce_blur">ID not in focus</string>
+  <string name="stripe_reduce_blur_2">Image is blurry. Hold your phone steady and try again.</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Details not visible</string>
   <string name="stripe_reduce_glare_2">Try reduce glare and make ID visible</string>

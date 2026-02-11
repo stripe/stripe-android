@@ -297,8 +297,9 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     }
 }
 
-private fun PaymentMethodType.toLinkType(): LinkController.PaymentMethodType =
+private fun PaymentMethodType.toLinkType(): LinkController.PaymentMethodType? =
     when (this) {
         PaymentMethodType.Card -> LinkController.PaymentMethodType.Card
         PaymentMethodType.BankAccount -> LinkController.PaymentMethodType.BankAccount
+        PaymentMethodType.CardAndBankAccount -> null
     }

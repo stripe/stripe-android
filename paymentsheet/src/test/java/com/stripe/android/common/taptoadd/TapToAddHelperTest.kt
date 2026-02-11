@@ -1,15 +1,13 @@
 package com.stripe.android.common.taptoadd
 
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
-import app.cash.turbine.ReceiveTurbine
-import app.cash.turbine.Turbine
+import androidx.lifecycle.testing.TestLifecycleOwner
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.testing.DummyActivityResultCaller
+import com.stripe.android.testing.asCallbackFor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.test.runTest
@@ -19,185 +17,153 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class TapToAddHelperTest {
-    @Test
-    fun `create returns null when isTapToAddSupported is false`() = runTest {
-        val helper = TapToAddHelper.create(
-            coroutineScope = CoroutineScope(coroutineContext),
-            tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                isTapToAddSupported = false,
-            ),
-            onCollectingUpdated = {},
-            onError = {},
-        )
 
-        assertThat(helper).isNull()
+    @Test
+    fun `hasPreviouslyAttemptedCollection is initially false`() = runScenario {
+        assertThat(helper.hasPreviouslyAttemptedCollection).isFalse()
     }
 
     @Test
-    fun `create returns TapToAddHelper when isTapToAddSupported is true`() = runTest {
-        val helper = TapToAddHelper.create(
-            coroutineScope = CoroutineScope(coroutineContext),
-            tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
-            paymentMethodMetadata = DEFAULT_METADATA,
-            onCollectingUpdated = {},
-            onError = {},
-        )
+    fun `hasPreviouslyAttemptedCollection is true after startPaymentMethodCollection`() = runScenario {
+        helper.startPaymentMethodCollection(DEFAULT_METADATA)
 
-        assertThat(helper).isNotNull()
+        assertThat(helper.hasPreviouslyAttemptedCollection).isTrue()
     }
 
     @Test
-    fun `collectedPaymentMethod is initially null`() = runScenario {
-        helper.collectedPaymentMethod.test {
-            assertThat(awaitItem()).isNull()
+    fun `hasPreviouslyAttemptedCollection remains true after multiple start calls`() = runScenario {
+        helper.startPaymentMethodCollection(DEFAULT_METADATA)
+        helper.startPaymentMethodCollection(DEFAULT_METADATA)
+        helper.startPaymentMethodCollection(DEFAULT_METADATA)
+
+        assertThat(helper.hasPreviouslyAttemptedCollection).isTrue()
+    }
+
+    @Test
+    fun `register uses activity result caller to register callback which updates result state`() = runScenario {
+        helper.register(
+            activityResultCaller = activityResultCallerScenario.activityResultCaller,
+            lifecycleOwner = TestLifecycleOwner(),
+        )
+
+        helper.result.test {
+            assertThat(activityResultCallerScenario.awaitNextRegisteredLauncher()).isNotNull()
+
+            val registerCall = activityResultCallerScenario.awaitRegisterCall()
+
+            assertThat(registerCall.contract).isEqualTo(TapToAddContract)
+
+            val tapToAddCallback = registerCall.callback.asCallbackFor<TapToAddResult>()
+
+            tapToAddCallback.onActivityResult(TapToAddResult.Complete)
+
+            assertThat(awaitItem()).isEqualTo(TapToAddResult.Complete)
         }
     }
 
     @Test
-    fun `collect sets processing to true at start and false at end on success`() = runScenario(
-        metadata = DEFAULT_METADATA,
-        collectResult = TapToAddCollectionHandler.CollectionState.Collected(PaymentMethodFactory.card(last4 = "4242")),
+    fun `launcher is unregistered & removed when lifecycle is destroyed`() = runScenario {
+        val lifecycleOwner = TestLifecycleOwner()
+
+        helper.register(
+            activityResultCaller = activityResultCallerScenario.activityResultCaller,
+            lifecycleOwner = lifecycleOwner,
+        )
+
+        val launcher = activityResultCallerScenario.awaitNextRegisteredLauncher()
+
+        assertThat(activityResultCallerScenario.awaitRegisterCall()).isNotNull()
+
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+
+        assertThat(activityResultCallerScenario.awaitNextUnregisteredLauncher()).isEqualTo(launcher)
+    }
+
+    @Test
+    fun `startPaymentMethodCollection calls launch with expected params`() = runScenario(
+        tapToAddMode = TapToAddMode.Continue,
+        paymentElementCallbackIdentifier = "mpe_callback_id",
+        productUsage = setOf("PaymentSheet", "FlowController")
     ) {
-        helper.startPaymentMethodCollection()
+        helper.register(
+            activityResultCaller = activityResultCallerScenario.activityResultCaller,
+            lifecycleOwner = TestLifecycleOwner()
+        )
 
-        assertThat(updateProcessingCalls.awaitItem()).isTrue()
-        assertThat(handlerScenario.collectCalls.awaitItem()).isEqualTo(DEFAULT_METADATA)
-        assertThat(updateProcessingCalls.awaitItem()).isFalse()
+        assertThat(activityResultCallerScenario.awaitRegisterCall()).isNotNull()
+        assertThat(activityResultCallerScenario.awaitNextRegisteredLauncher()).isNotNull()
+
+        helper.startPaymentMethodCollection(DEFAULT_METADATA)
+
+        val launchCall = activityResultCallerScenario.awaitLaunchCall()
+
+        assertThat(launchCall).isInstanceOf(TapToAddContract.Args::class.java)
+
+        val tapToAddArgs = launchCall as TapToAddContract.Args
+
+        assertThat(tapToAddArgs.paymentMethodMetadata).isEqualTo(DEFAULT_METADATA)
+        assertThat(tapToAddArgs.paymentElementCallbackIdentifier).isEqualTo("mpe_callback_id")
+        assertThat(tapToAddArgs.productUsage).containsExactly("PaymentSheet", "FlowController")
+        assertThat(tapToAddArgs.mode).isEqualTo(TapToAddMode.Continue)
     }
 
     @Test
-    fun `collect updates collectedPaymentMethod on success`() {
-        val card = PaymentMethodFactory.card(last4 = "4242")
+    fun `hasPreviouslyAttemptedCollection persists across instances via SavedStateHandle`() = runTest {
+        val savedStateHandle = SavedStateHandle()
 
-        runScenario(
-            metadata = DEFAULT_METADATA,
-            collectResult = TapToAddCollectionHandler.CollectionState.Collected(card),
-        ) {
-            helper.collectedPaymentMethod.test {
-                assertThat(awaitItem()).isNull()
+        FakeTapToAddCollectionHandler.test {
+            val helper1 = createTapToAddHelper(savedStateHandle = savedStateHandle)
 
-                helper.startPaymentMethodCollection()
+            assertThat(helper1.hasPreviouslyAttemptedCollection).isFalse()
+            helper1.startPaymentMethodCollection(DEFAULT_METADATA)
+            assertThat(helper1.hasPreviouslyAttemptedCollection).isTrue()
 
-                assertThat(updateProcessingCalls.awaitItem()).isTrue()
-                assertThat(handlerScenario.collectCalls.awaitItem()).isEqualTo(DEFAULT_METADATA)
-                assertThat(updateProcessingCalls.awaitItem()).isFalse()
+            val helper2 = createTapToAddHelper(savedStateHandle = savedStateHandle)
 
-                val collectedPaymentMethod = awaitItem()
-
-                assertThat(collectedPaymentMethod).isNotNull()
-                assertThat(collectedPaymentMethod?.paymentMethod).isEqualTo(card)
-            }
-        }
-    }
-
-    @Test
-    fun `collect does not update collectedPaymentMethod on failure`() {
-        val error = IllegalStateException()
-        val message = "Failed".resolvableString
-
-        runScenario(
-            metadata = DEFAULT_METADATA,
-            collectResult = TapToAddCollectionHandler.CollectionState.FailedCollection(
-                error = error,
-                displayMessage = message,
-            ),
-        ) {
-            helper.collectedPaymentMethod.test {
-                assertThat(awaitItem()).isNull()
-
-                helper.startPaymentMethodCollection()
-
-                assertThat(updateProcessingCalls.awaitItem()).isTrue()
-                assertThat(handlerScenario.collectCalls.awaitItem()).isEqualTo(DEFAULT_METADATA)
-                assertThat(updateProcessingCalls.awaitItem()).isFalse()
-                assertThat(updateErrorCalls.awaitItem()).isEqualTo(message)
-
-                expectNoEvents()
-            }
-        }
-    }
-
-    @Test
-    fun `collect sets processing to true at start and false at end on failure and updates error`() {
-        val error = IllegalStateException()
-        val message = "Failed".resolvableString
-
-        runScenario(
-            metadata = DEFAULT_METADATA,
-            collectResult = TapToAddCollectionHandler.CollectionState.FailedCollection(
-                error = error,
-                displayMessage = message,
-            ),
-        ) {
-            helper.startPaymentMethodCollection()
-
-            assertThat(updateProcessingCalls.awaitItem()).isTrue()
-            assertThat(handlerScenario.collectCalls.awaitItem()).isEqualTo(DEFAULT_METADATA)
-            assertThat(updateProcessingCalls.awaitItem()).isFalse()
-            assertThat(updateErrorCalls.awaitItem()).isEqualTo(message)
+            assertThat(helper2.hasPreviouslyAttemptedCollection).isTrue()
         }
     }
 
     private fun runScenario(
-        metadata: PaymentMethodMetadata = DEFAULT_METADATA,
-        collectResult: TapToAddCollectionHandler.CollectionState =
-            TapToAddCollectionHandler.CollectionState.Collected(
-                PaymentMethodFactory.card(last4 = "4242")
-            ),
+        tapToAddMode: TapToAddMode = TapToAddMode.Complete,
+        paymentElementCallbackIdentifier: String = "callback_id",
+        productUsage: Set<String> = emptySet(),
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
-        val updateProcessingCalls = Turbine<Boolean>()
-        val updateErrorCalls = Turbine<ResolvableString?>()
-
-        FakeTapToAddCollectionHandler.test(collectResult) {
+        DummyActivityResultCaller.test {
             block(
                 Scenario(
                     helper = createTapToAddHelper(
-                        collectionHandler = handler,
-                        metadata = metadata,
+                        productUsage = productUsage,
+                        paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
+                        tapToAddMode = tapToAddMode,
                         savedStateHandle = savedStateHandle,
-                        updateProcessing = {
-                            updateProcessingCalls.add(it)
-                        },
-                        updateError = {
-                            updateErrorCalls.add(it)
-                        },
                     ),
-                    handlerScenario = this,
-                    updateProcessingCalls = updateProcessingCalls,
-                    updateErrorCalls = updateErrorCalls,
+                    activityResultCallerScenario = this,
                 )
             )
         }
-
-        updateProcessingCalls.ensureAllEventsConsumed()
-        updateErrorCalls.ensureAllEventsConsumed()
     }
 
     private suspend fun createTapToAddHelper(
-        collectionHandler: TapToAddCollectionHandler,
-        metadata: PaymentMethodMetadata,
-        savedStateHandle: SavedStateHandle,
-        updateProcessing: (Boolean) -> Unit,
-        updateError: (ResolvableString?) -> Unit,
+        tapToAddMode: TapToAddMode = TapToAddMode.Complete,
+        paymentElementCallbackIdentifier: String = "callback_id",
+        productUsage: Set<String> = emptySet(),
+        savedStateHandle: SavedStateHandle = SavedStateHandle(),
     ): TapToAddHelper {
         return DefaultTapToAddHelper(
             coroutineScope = CoroutineScope(currentCoroutineContext()),
-            tapToAddCollectionHandler = collectionHandler,
-            paymentMethodMetadata = metadata,
             savedStateHandle = savedStateHandle,
-            onCollectingUpdated = updateProcessing,
-            onError = updateError,
+            productUsage = productUsage,
+            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
+            tapToAddMode = tapToAddMode,
         )
     }
 
     private class Scenario(
         val helper: TapToAddHelper,
-        val handlerScenario: FakeTapToAddCollectionHandler.Scenario,
-        val updateProcessingCalls: ReceiveTurbine<Boolean>,
-        val updateErrorCalls: ReceiveTurbine<ResolvableString?>
+        val activityResultCallerScenario: DummyActivityResultCaller.Scenario,
     )
 
     private companion object {
