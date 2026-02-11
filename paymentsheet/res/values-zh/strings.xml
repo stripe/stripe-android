@@ -259,8 +259,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_something_went_wrong">出错了</string>
   <!-- Accessibility description when payment button shows a successful transaction animation. -->
   <string name="stripe_successful_transaction_description">交易完成</string>
-  <!-- Button label for a button that launches a flow for tapping a card on the device -->
-  <string name="stripe_tap_to_add_card_button_label">轻触以添加银行卡</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">取消并用另一方式支付</string>
   <!-- Text on a screen asking the user to approve a payment -->

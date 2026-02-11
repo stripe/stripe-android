@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.embedded.content
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.taptoadd.FakeTapToAddCollectionHandler
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -146,6 +147,7 @@ internal class DefaultEmbeddedContentHelperTest {
             embeddedSelectionHolder = selectionHolder,
             savedStateHandle = savedStateHandle,
             selectedPaymentMethodCode = "",
+            tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
         )
         val confirmationHandler = FakeConfirmationHandler()
         val eventReporter = FakeEventReporter()

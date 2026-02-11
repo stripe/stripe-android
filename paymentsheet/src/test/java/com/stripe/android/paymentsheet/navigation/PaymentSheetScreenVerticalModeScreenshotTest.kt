@@ -169,17 +169,6 @@ internal class PaymentSheetScreenVerticalModeScreenshotTest {
     }
 
     @Test
-    fun displaysBlankPageWhenContentNotVisible() {
-        val metadata = createMetadata()
-        val initialScreen = VerticalMode(FakePaymentMethodVerticalLayoutInteractor.create(metadata))
-        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = false)
-
-        paparazziRule.snapshot {
-            PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete, contentVisible = false)
-        }
-    }
-
-    @Test
     fun displaysVerticalModeWithOutlinedIcons() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFactory.create(

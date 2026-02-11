@@ -217,7 +217,7 @@ class ElementsSessionJsonParserTest {
 
         assertThat(elementsSession.experimentsData).isNotNull()
         assertThat(elementsSession.experimentsData?.experimentAssignments).containsEntry(
-            ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_AA,
+            ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_ANDROID_AA,
             "control"
         )
     }

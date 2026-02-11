@@ -46,7 +46,7 @@ internal class FakeLinkConfigurationCoordinator(
                     postalCode = "42424"
                 )
             ),
-            confirmParams = mock(),
+            paymentMethodCreateParams = mock(),
             originalParams = mock(),
         )
     ),

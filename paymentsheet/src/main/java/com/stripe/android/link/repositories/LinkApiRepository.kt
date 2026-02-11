@@ -245,7 +245,7 @@ internal class LinkApiRepository @Inject constructor(
 
             LinkPaymentDetails.New(
                 paymentDetails = paymentDetails,
-                confirmParams = createParams,
+                paymentMethodCreateParams = createParams,
                 originalParams = paymentMethodCreateParams,
             )
         }.onFailure {
@@ -307,13 +307,21 @@ internal class LinkApiRepository @Inject constructor(
         ).onFailure {
             errorReporter.report(ErrorReporter.ExpectedErrorEvent.LINK_SHARE_CARD_FAILURE, StripeException.create(it))
         }.map { paymentMethod ->
+            val paymentMethodId = paymentMethod.id
             LinkPaymentDetails.Saved(
                 paymentDetails = ConsumerPaymentDetails.Passthrough(
                     id = id,
                     last4 = paymentMethodCreateParams.cardLast4().orEmpty(),
-                    paymentMethodId = paymentMethod.id,
+                    paymentMethodId = paymentMethodId,
                     billingEmailAddress = paymentMethod.billingDetails?.email,
                     billingAddress = paymentMethod.billingDetails?.toConsumerBillingAddress(),
+                ),
+                paymentMethodCreateParams = PaymentMethodCreateParams.createLink(
+                    paymentDetailsId = paymentMethodId,
+                    consumerSessionClientSecret = consumerSessionClientSecret,
+                    extraParams = extraConfirmationParams(paymentMethodCreateParams.toParamMap()),
+                    clientAttributionMetadata = clientAttributionMetadata,
+                    originalPaymentMethodCode = paymentMethodCreateParams.typeCode
                 ),
                 paymentMethod = paymentMethod,
             )

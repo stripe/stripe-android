@@ -196,6 +196,8 @@
   <string name="stripe_position_passport_or_id">パスポート、または政府発行の写真付き身分証明書をフレームの中央に配置してください</string>
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">フレームの中央に顔を置いてください。</string>
+  <!-- Instructional text when the document is too blurry -->
+  <string name="stripe_reduce_blur">身分証明書に焦点が合っていません</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">詳細が見えません</string>
   <string name="stripe_reduce_glare_2">光の反射を抑えて、身分証明書が見えるようにしてください</string>

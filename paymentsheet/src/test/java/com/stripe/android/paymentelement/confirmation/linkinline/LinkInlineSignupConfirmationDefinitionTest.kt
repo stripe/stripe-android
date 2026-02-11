@@ -236,6 +236,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                     last4 = "4242",
                     paymentMethodId = "pm_1",
                 ),
+                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 paymentMethod = PaymentMethod.Builder()
                     .setId("pm_1")
                     .setType(PaymentMethod.Type.Card)
@@ -457,7 +458,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                             nickname = null,
                             billingAddress = null,
                         ),
-                        confirmParams = expectedCreateParams,
+                        paymentMethodCreateParams = expectedCreateParams,
                         originalParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                     )
                 ),
@@ -522,6 +523,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                         last4 = "4242",
                         paymentMethodId = "pm_1",
                     ),
+                    paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                     paymentMethod = paymentMethod,
                 )
             ),
@@ -636,7 +638,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                         postalCode = "42424"
                     )
                 ),
-                confirmParams = mock(),
+                paymentMethodCreateParams = mock(),
                 originalParams = mock(),
             )
         ),

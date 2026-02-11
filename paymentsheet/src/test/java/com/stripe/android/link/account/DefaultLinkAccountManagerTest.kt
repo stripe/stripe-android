@@ -179,27 +179,6 @@ class DefaultLinkAccountManagerTest {
     }
 
     @Test
-    fun `lookupConsumer sends analytics event when call succeeds`() = runSuspendTest {
-        val linkEventsReporter = object : AccountManagerEventsReporter() {
-            var callCount = 0
-            override fun onAccountLookupComplete() {
-                callCount += 1
-            }
-        }
-        val fakeLinkAuth = fakeLinkAuth()
-
-        accountManager(linkAuth = fakeLinkAuth, linkEventsReporter = linkEventsReporter)
-            .lookupByEmail(
-                email = TestFactory.EMAIL,
-                emailSource = EmailSource.USER_ACTION,
-                startSession = false,
-                customerId = null
-            )
-
-        assertThat(linkEventsReporter.callCount).isEqualTo(1)
-    }
-
-    @Test
     fun `signInWithUserInput sends correct parameters and starts session for existing user`() = runSuspendTest {
         val fakeLinkAuth = fakeLinkAuth()
         val accountManager = accountManager(linkAuth = fakeLinkAuth)
@@ -474,7 +453,7 @@ class DefaultLinkAccountManagerTest {
     fun `shareCardPaymentDetails makes correct calls`() = runSuspendTest {
         val newPaymentDetails = LinkPaymentDetails.New(
             paymentDetails = TestFactory.LINK_NEW_PAYMENT_DETAILS.paymentDetails,
-            confirmParams = TestFactory.LINK_NEW_PAYMENT_DETAILS.confirmParams,
+            paymentMethodCreateParams = TestFactory.LINK_NEW_PAYMENT_DETAILS.paymentMethodCreateParams,
             originalParams = PaymentMethodCreateParams.create(
                 card = PaymentMethodCreateParamsFixtures.CARD,
             )
@@ -1113,8 +1092,6 @@ private open class AccountManagerEventsReporter : FakeLinkEventsReporter() {
     override fun onAccountLookupFailure(error: Throwable) {
         lookupFailureTurbine.add(error)
     }
-
-    override fun onAccountLookupComplete() = Unit
 
     override fun on2FAStartFailure() = Unit
     override fun on2FAStart() = Unit

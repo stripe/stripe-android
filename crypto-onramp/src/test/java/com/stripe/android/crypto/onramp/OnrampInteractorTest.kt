@@ -1,7 +1,5 @@
 package com.stripe.android.crypto.onramp
 
-import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsEvent
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsService
@@ -301,12 +299,7 @@ class OnrampInteractorTest {
     fun testHandlePresentPaymentMethodsResultSuccess() {
         val context = RuntimeEnvironment.getApplication()
         val paymentMethodPreview = LinkController.PaymentMethodPreview(
-            imageLoader = {
-                BitmapDrawable(
-                    null,
-                    Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
-                )
-            },
+            iconRes = 1,
             label = "Visa",
             sublabel = "•••• 4242"
         )

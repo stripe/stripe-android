@@ -7,7 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.common.taptoadd.FakeTapToAddHelper
+import com.stripe.android.common.taptoadd.FakeTapToAddCollectionHandler
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -113,6 +113,7 @@ internal class FormActivityScreenShotTest {
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             savedStateHandle = SavedStateHandle(),
             selectedPaymentMethodCode = "",
+            tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
         )
         val eventReporter = FakeEventReporter()
         val interactor = EmbeddedFormInteractorFactory(
@@ -123,7 +124,6 @@ internal class FormActivityScreenShotTest {
             embeddedFormHelperFactory = formHelperFactory,
             viewModelScope = TestScope(UnconfinedTestDispatcher()),
             formActivityStateHelper = stateHolder,
-            tapToAddHelper = FakeTapToAddHelper.noOp(),
             eventReporter = eventReporter
         ).create()
 

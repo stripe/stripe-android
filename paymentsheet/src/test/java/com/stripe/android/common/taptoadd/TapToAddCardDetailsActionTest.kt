@@ -4,7 +4,6 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -19,11 +18,7 @@ internal class TapToAddCardDetailsActionTest {
     @Test
     fun `clicking button calls startPaymentMethodCollection`() = runTest {
         FakeTapToAddHelper.test {
-            val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
-            val action = TapToAddCardDetailsAction(
-                tapToAddHelper = helper,
-                paymentMethodMetadata = paymentMethodMetadata,
-            )
+            val action = TapToAddCardDetailsAction(tapToAddHelper = helper)
 
             composeTestRule.setContent {
                 action.Content(enabled = true)
@@ -31,18 +26,14 @@ internal class TapToAddCardDetailsActionTest {
 
             composeTestRule.onNodeWithText("Tap to add card").performClick()
 
-            assertThat(collectCalls.awaitItem()).isEqualTo(paymentMethodMetadata)
+            assertThat(collectCalls.awaitItem()).isEqualTo(Unit)
         }
     }
 
     @Test
     fun `clicking disabled button does not call startPaymentMethodCollection`() = runTest {
         FakeTapToAddHelper.test {
-            val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
-            val action = TapToAddCardDetailsAction(
-                tapToAddHelper = helper,
-                paymentMethodMetadata = paymentMethodMetadata,
-            )
+            val action = TapToAddCardDetailsAction(tapToAddHelper = helper)
 
             composeTestRule.setContent {
                 action.Content(enabled = false)

@@ -2,26 +2,12 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
-### Identity
-* [Added] More live feedback during document capture.
-
-### PaymentSheet
-* [Changed] Afterpay/Clearpay no longer requires billing address by default. Set `billingDetailsCollectionConfiguration.address` to `AddressCollectionMode.Full` if you need to collect billing address for Afterpay.
-
-## 22.8.0 - 2026-02-09
-
 Dependencies updated in [12276](https://github.com/stripe/stripe-android/pull/12276):
 - Bumped Dagger from 2.55 to 2.58.
-
-### PaymentMethodMessagingElement
-[BREAKING][12291](https://github.com/stripe/stripe-android/pull/12291) `PaymentMethodMessagingElement` is in public preview. `infoIconColor` has been removed from `PaymentMethodMessagingElement.Appearance.Colors`. The info icon has been removed and replaced with a CTA to see available plans. The link text color is customizable through `linkTextColor`.
 
 ### Identity
 * [CHANGED] Fail out of verification flow on analyzer failure.
 * [CHANGED] Removed ephemeral key from error log messages for security.
-
-### PaymentSheet
-* [FIXED][12315](https://github.com/stripe/stripe-android/pull/12315) Fixed extra loading spinner showing up under Google Pay.
 
 ## 22.7.0 - 2026-01-26
 

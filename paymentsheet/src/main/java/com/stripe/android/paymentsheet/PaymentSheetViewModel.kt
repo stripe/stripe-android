@@ -15,7 +15,7 @@ import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.model.asCommonConfiguration
-import com.stripe.android.common.taptoadd.TapToAddHelper
+import com.stripe.android.common.taptoadd.TapToAddCollectionHandler
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
@@ -90,7 +90,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val errorReporter: ErrorReporter,
     internal val cvcRecollectionHandler: CvcRecollectionHandler,
     private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory,
-    tapToAddHelperFactory: TapToAddHelper.Factory,
+    tapToAddCollectionHandler: TapToAddCollectionHandler,
     mode: EventReporter.Mode
 ) : BaseSheetViewModel(
     config = args.config,
@@ -101,7 +101,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     linkHandler = linkHandler,
     cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
     isCompleteFlow = true,
-    tapToAddHelperFactory = tapToAddHelperFactory,
+    tapToAddCollectionHandler = tapToAddCollectionHandler,
     mode = mode,
 ) {
 

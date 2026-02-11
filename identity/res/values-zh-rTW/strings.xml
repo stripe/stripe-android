@@ -173,6 +173,8 @@
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">將臉放在畫面正中間。</string>
   <!-- Instructional text when the document is too blurry -->
+  <string name="stripe_reduce_blur">證件未對焦</string>
+  <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">細節不可見</string>
   <string name="stripe_reduce_glare_2">嘗試減少眩光並使身分證件可見</string>
   <!-- Button text displayed to the user to retake photo -->

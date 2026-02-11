@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet.viewmodels
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.common.taptoadd.FakeTapToAddHelper
+import com.stripe.android.common.taptoadd.FakeTapToAddCollectionHandler
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -46,8 +46,8 @@ internal class FakeBaseSheetViewModel private constructor(
     linkHandler = linkHandler,
     cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
     isCompleteFlow = true,
+    tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
     mode = EventReporter.Mode.Complete,
-    tapToAddHelperFactory = FakeTapToAddHelper.Factory.noOp(),
 ) {
     companion object {
         fun create(

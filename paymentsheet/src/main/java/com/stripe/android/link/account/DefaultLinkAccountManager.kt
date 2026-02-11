@@ -544,8 +544,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
             linkAuthTokenClientSecret = null,
         ).onFailure { error ->
             linkEventsReporter.onAccountLookupFailure(error)
-        }.onSuccess {
-            linkEventsReporter.onAccountLookupComplete()
         }.map { consumerSessionLookup ->
             setLinkAccountFromLookupResult(
                 lookup = consumerSessionLookup,
@@ -569,8 +567,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
             linkAuthTokenClientSecret = null,
         ).onFailure { error ->
             linkEventsReporter.onAccountLookupFailure(error)
-        }.onSuccess {
-            linkEventsReporter.onAccountLookupComplete()
         }.map { consumerSessionLookup ->
             setLinkAccountFromLookupResult(
                 lookup = consumerSessionLookup,
@@ -591,8 +587,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
             customerId = null
         ).onFailure { error ->
             linkEventsReporter.onAccountLookupFailure(error)
-        }.onSuccess {
-            linkEventsReporter.onAccountLookupComplete()
         }.map { consumerSessionLookup ->
             setLinkAccountFromLookupResult(
                 lookup = consumerSessionLookup,

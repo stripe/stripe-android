@@ -5,14 +5,11 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
-import androidx.lifecycle.viewModelScope
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.asCommonConfiguration
-import com.stripe.android.common.taptoadd.FakeTapToAddHelper
-import com.stripe.android.common.taptoadd.TapToAddHelper
-import com.stripe.android.common.taptoadd.TapToAddMode
+import com.stripe.android.common.taptoadd.FakeTapToAddCollectionHandler
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
@@ -1091,45 +1088,36 @@ internal class PaymentOptionsViewModelTest {
         }
 
     @Test
-    fun `On register for activity result, should register various launchers`() = runTest {
+    fun `On register for activity result, should register link launcher & autocomplete launcher`() = runTest {
         DummyActivityResultCaller.test {
-            FakeTapToAddHelper.Factory.test {
-                val lifecycleOwner = TestLifecycleOwner()
+            val lifecycleOwner = TestLifecycleOwner()
 
-                val viewModel = createViewModel(
-                    args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
-                        linkState = LinkState(
-                            configuration = mock(),
-                            signupMode = null,
-                            loginState = LinkState.LoginState.NeedsVerification,
-                        ),
-                        isGooglePayReady = true,
+            val viewModel = createViewModel(
+                args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                    linkState = LinkState(
+                        configuration = mock(),
+                        signupMode = null,
+                        loginState = LinkState.LoginState.NeedsVerification,
                     ),
-                    tapToAddHelperFactory = tapToAddHelperFactory,
+                    isGooglePayReady = true,
                 )
+            )
 
-                viewModel.registerForActivityResult(
-                    activityResultCaller = activityResultCaller,
-                    lifecycleOwner = lifecycleOwner,
-                )
+            viewModel.registerForActivityResult(
+                activityResultCaller = activityResultCaller,
+                lifecycleOwner = lifecycleOwner,
+            )
 
-                assertThat(awaitRegisterCall().contract).isInstanceOf<AutocompleteContract>()
+            assertThat(awaitRegisterCall().contract).isInstanceOf<AutocompleteContract>()
 
-                val autocompleteLauncher = awaitNextRegisteredLauncher()
+            val autocompleteLauncher = awaitNextRegisteredLauncher()
 
-                verify(linkPaymentLauncher)
-                    .register(eq(activityResultCaller), any())
+            verify(linkPaymentLauncher).register(eq(activityResultCaller), any())
 
-                lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+            lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 
-                assertThat(awaitNextUnregisteredLauncher()).isEqualTo(autocompleteLauncher)
-                verify(linkPaymentLauncher).unregister()
-
-                val createCall = createCalls.awaitItem()
-
-                assertThat(createCall.tapToAddMode).isEqualTo(TapToAddMode.Continue)
-                assertThat(createCall.coroutineScope).isEqualTo(viewModel.viewModelScope)
-            }
+            assertThat(awaitNextUnregisteredLauncher()).isEqualTo(autocompleteLauncher)
+            verify(linkPaymentLauncher).unregister()
         }
     }
 
@@ -1298,8 +1286,7 @@ internal class PaymentOptionsViewModelTest {
         args: PaymentOptionContract.Args = PAYMENT_OPTION_CONTRACT_ARGS,
         linkState: LinkState? = args.state.paymentMethodMetadata.linkState,
         linkConfigurationCoordinator: LinkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-        workContext: CoroutineContext = testDispatcher,
-        tapToAddHelperFactory: TapToAddHelper.Factory = FakeTapToAddHelper.Factory.noOp(),
+        workContext: CoroutineContext = testDispatcher
     ) = TestViewModelFactory.create(linkConfigurationCoordinator) { linkHandler, savedStateHandle ->
         PaymentOptionsViewModel(
             args = args.copy(
@@ -1319,7 +1306,7 @@ internal class PaymentOptionsViewModelTest {
             linkGateFactory = FakeLinkGate.Factory(linkGate),
             linkPaymentLauncher = linkPaymentLauncher,
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
-            tapToAddHelperFactory = tapToAddHelperFactory,
+            tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
             mode = EventReporter.Mode.Complete,
         )
     }

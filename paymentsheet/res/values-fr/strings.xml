@@ -257,8 +257,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_something_went_wrong">Un problème est survenu</string>
   <!-- Accessibility description when payment button shows a successful transaction animation. -->
   <string name="stripe_successful_transaction_description">Transaction terminée</string>
-  <!-- Button label for a button that launches a flow for tapping a card on the device -->
-  <string name="stripe_tap_to_add_card_button_label">Appuyez pour ajouter une carte bancaire</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">Annuler et utiliser un autre moyen de paiement</string>
   <!-- Text on a screen asking the user to approve a payment -->

@@ -24,6 +24,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParams.Companion.getNameFromParams
 import com.stripe.android.model.PaymentMethodExtraParams
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
@@ -628,22 +629,20 @@ internal class FormHelperTest {
     @Test
     fun `runActionForCode calls startPaymentMethodCollection for actionable payment method`() = runTest {
         FakeTapToAddHelper.test {
-            val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                    paymentMethodTypes = listOf("card"),
-                ),
-                isTapToAddSupported = true,
-            )
-
             val formHelper = createFormHelper(
-                paymentMethodMetadata = paymentMethodMetadata,
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                    stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                        paymentMethodTypes = listOf("card"),
+                    ),
+                    isTapToAddSupported = true,
+                ),
                 newPaymentSelectionProvider = { null },
                 tapToAddHelper = helper,
             )
 
             formHelper.runActionForCode("card")
 
-            assertThat(collectCalls.awaitItem()).isEqualTo(paymentMethodMetadata)
+            collectCalls.awaitItem()
         }
     }
 
@@ -687,6 +686,45 @@ internal class FormHelperTest {
 
             // Should not call startPaymentMethodCollection for non-actionable payment method
             collectCalls.expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `onFormFieldValuesChanged returns Saved selection when collectedPaymentMethod is provided`() = runTest {
+        val collectedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
+            displayName = "Visa •••• 4242".resolvableString,
+            paymentMethod = collectedPaymentMethod,
+        )
+
+        FakeTapToAddHelper.test {
+            val formFieldValues = FormFieldValues(
+                fieldValuePairs = mapOf(
+                    IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
+                ),
+                userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
+            )
+
+            val selection = MutableStateFlow<PaymentSelection?>(null)
+
+            selection.test {
+                assertThat(awaitItem()).isNull()
+
+                val formHelper = createFormHelper(
+                    selectionUpdater = { selection.value = it },
+                    newPaymentSelectionProvider = { null },
+                    tapToAddHelper = helper,
+                )
+
+                mutableCollectedPaymentMethod.value = displayableSavedPaymentMethod
+                formHelper.onFormFieldValuesChanged(formFieldValues, "card")
+
+                val paymentSelection = awaitItem()
+                assertThat(paymentSelection).isInstanceOf<PaymentSelection.Saved>()
+
+                val savedSelection = paymentSelection as PaymentSelection.Saved
+                assertThat(savedSelection.paymentMethod).isEqualTo(collectedPaymentMethod)
+            }
         }
     }
 

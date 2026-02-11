@@ -18,8 +18,6 @@
   <string name="stripe_back_of_id">Baksiden av identitetskortet</string>
   <!-- Title of ID document scanning screen when scanning the back of an identity card -->
   <string name="stripe_back_of_id_document">Baksiden av identitetsdokumentet</string>
-  <!-- Instructional text when the back of the ID is not detected while scanning back -->
-  <string name="stripe_back_of_id_not_detected">Baksiden av ID-en ble ikke registrert</string>
   <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
   <string name="stripe_back_of_id_selected">Baksiden av ID-en er valgt</string>
   <!-- Title displayed when requesting camera permissions -->
@@ -124,8 +122,6 @@
   <string name="stripe_front_of_id">Forsiden av identitetskortet</string>
   <!-- Title of ID document scanning screen when scanning the front of an identity card -->
   <string name="stripe_front_of_id_document">Forsiden av identitetsdokumentet</string>
-  <!-- Instructional text when the front of the ID is not detected while scanning front -->
-  <string name="stripe_front_of_id_not_detected">Forsiden av ID-en ble ikke registrert</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">Forsiden av ID-en er valgt</string>
   <!-- Description of front of passport image -->
@@ -168,8 +164,6 @@
   <string name="stripe_move_closer">Flytt ID-en nærmere</string>
   <!-- Instructional text when camera is too close to a document -->
   <string name="stripe_move_farther">Flytt ID-en lenger tilbake</string>
-  <!-- Instructional text when the document is not centered in the frame -->
-  <string name="stripe_move_id_to_center">Midten av ID-en vises</string>
   <!-- Label for the ID field to collect NRIC or FIN for Singaporean ID -->
   <string name="stripe_nric_or_fin">NRIC eller FIN</string>
   <!-- No comment provided by engineer. -->
@@ -203,7 +197,7 @@
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Plasser ansiktet midt i bildet.</string>
   <!-- Instructional text when the document is too blurry -->
-  <string name="stripe_reduce_blur_2">Bildet er uklart. Hold telefonen din stødig og prøv på nytt.</string>
+  <string name="stripe_reduce_blur">ID-en er ikke i fokus</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Detaljer er ikke synlige</string>
   <string name="stripe_reduce_glare_2">Prøv å redusere gjenskinn og gjør ID-en synlig</string>

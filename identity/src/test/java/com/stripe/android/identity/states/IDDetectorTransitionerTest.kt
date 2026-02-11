@@ -74,16 +74,14 @@ internal class IDDetectorTransitionerTest {
             isFromLegacyDetector = true
         )
 
-        // send a low IOU result with blur
-        val resultState = transitioner.transitionFromFound(
-            foundState,
-            mock(),
-            createLegacyAnalyzerOutputWithLowIOU(BLURRY_ID_FRONT_OUTPUT)
-        )
-        assertThat(resultState).isInstanceOf(IdentityScanState.Found::class.java)
-        assertThat(resultState).isNotSameInstanceAs(foundState)
-        assertThat((resultState as IdentityScanState.Found).feedbackRes)
-            .isEqualTo(com.stripe.android.identity.R.string.stripe_reduce_blur_2)
+        // send a low IOU result
+        assertThat(
+            transitioner.transitionFromFound(
+                foundState,
+                mock(),
+                createLegacyAnalyzerOutputWithLowIOU(BLURRY_ID_FRONT_OUTPUT)
+            )
+        ).isSameInstanceAs(foundState)
 
         // verify timer is reset
         assertThat(foundState.reachedStateAt).isNotSameInstanceAs(mockReachedStateAt)
@@ -333,17 +331,13 @@ internal class IDDetectorTransitionerTest {
             transitioner
         )
 
-        val resultState = transitioner.transitionFromInitial(
-            initialState,
-            mock(),
-            createLegacyAnalyzerOutputWithLowIOU(INITIAL_LEGACY_ID_BACK_OUTPUT)
-        )
-
-        assertThat(resultState).isInstanceOf(IdentityScanState.Initial::class.java)
-        assertThat((resultState as IdentityScanState.Initial).type)
-            .isEqualTo(ScanType.DOC_FRONT)
-        assertThat(resultState.feedbackRes)
-            .isEqualTo(com.stripe.android.identity.R.string.stripe_front_of_id_not_detected)
+        assertThat(
+            transitioner.transitionFromInitial(
+                initialState,
+                mock(),
+                createLegacyAnalyzerOutputWithLowIOU(INITIAL_LEGACY_ID_BACK_OUTPUT)
+            )
+        ).isSameInstanceAs(initialState)
     }
 
     @Test
@@ -516,10 +510,10 @@ internal class IDDetectorTransitionerTest {
     ) =
         IDDetectorOutput.Legacy(
             boundingBox = BoundingBox(
-                previousAnalyzerOutput.boundingBox.left + 0.005f,
-                previousAnalyzerOutput.boundingBox.top + 0.005f,
-                previousAnalyzerOutput.boundingBox.width,
-                previousAnalyzerOutput.boundingBox.height
+                previousAnalyzerOutput.boundingBox.left + 1,
+                previousAnalyzerOutput.boundingBox.top + 1,
+                previousAnalyzerOutput.boundingBox.width + 1,
+                previousAnalyzerOutput.boundingBox.height + 1
             ),
             newCategory ?: previousAnalyzerOutput.category,
             previousAnalyzerOutput.resultScore,
@@ -531,10 +525,10 @@ internal class IDDetectorTransitionerTest {
     private fun createLegacyAnalyzerOutputWithLowIOU(previousAnalyzerOutput: IDDetectorOutput.Legacy) =
         IDDetectorOutput.Legacy(
             boundingBox = BoundingBox(
-                previousAnalyzerOutput.boundingBox.left + 0.5f,
-                previousAnalyzerOutput.boundingBox.top + 0.5f,
-                previousAnalyzerOutput.boundingBox.width,
-                previousAnalyzerOutput.boundingBox.height
+                previousAnalyzerOutput.boundingBox.left + 500f,
+                previousAnalyzerOutput.boundingBox.top + 500f,
+                previousAnalyzerOutput.boundingBox.width + 500f,
+                previousAnalyzerOutput.boundingBox.height + 500f
             ),
             previousAnalyzerOutput.category,
             previousAnalyzerOutput.resultScore,
@@ -550,7 +544,7 @@ internal class IDDetectorTransitionerTest {
         const val DEFAULT_DISPLAY_SATISFIED_DURATION = 1000
         const val DEFAULT_DISPLAY_UNSATISFIED_DURATION = 1000
         val DUMMYBITMAP = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
-        val INITIAL_BOUNDING_BOX = BoundingBox(0.25f, 0.25f, 0.5f, 0.5f)
+        val INITIAL_BOUNDING_BOX = BoundingBox(0f, 0f, 500f, 500f)
         val INITIAL_LEGACY_ID_FRONT_OUTPUT = IDDetectorOutput.Legacy(
             INITIAL_BOUNDING_BOX,
             Category.ID_FRONT,

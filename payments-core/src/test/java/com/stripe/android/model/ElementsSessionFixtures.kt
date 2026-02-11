@@ -351,7 +351,7 @@ internal object ElementsSessionFixtures {
           "experiments_data": {
               "arb_id": "232dd033-0b45-4456-b834-ecdcb02ab1fb",
               "experiment_assignments": {
-                "ocs_mobile_horizontal_mode_aa": "control"
+                "ocs_mobile_horizontal_mode_android_aa": "control"
               }
             },
           "payment_method_preference": {

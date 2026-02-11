@@ -8,6 +8,5 @@ import androidx.annotation.RestrictTo
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 enum class PaymentMethodType(internal val value: String) {
     Card("card"),
-    BankAccount("bank_account"),
-    CardAndBankAccount("card_and_bank_account")
+    BankAccount("bank_account")
 }

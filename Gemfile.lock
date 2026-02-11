@@ -4,17 +4,17 @@ GEM
     addressable (2.8.7)
       public_suffix (>= 2.0.2, < 7.0)
     colorize (1.1.0)
-    faraday (2.14.1)
-      faraday-net_http (>= 2.0, < 3.5)
+    faraday (2.12.0)
+      faraday-net_http (>= 2.0, < 3.4)
       json
       logger
-    faraday-net_http (3.4.2)
-      net-http (~> 0.5)
-    json (2.18.1)
-    logger (1.7.0)
+    faraday-net_http (3.3.0)
+      net-http
+    json (2.7.2)
+    logger (1.6.1)
     mini_portile2 (2.8.9)
-    net-http (0.9.1)
-      uri (>= 0.11.1)
+    net-http (0.4.1)
+      uri
     nokogiri (1.18.9)
       mini_portile2 (~> 2.8.2)
       racc (~> 1.4)
@@ -27,7 +27,7 @@ GEM
       addressable (>= 2.3.5)
       faraday (>= 0.17.3, < 3)
     subprocess (1.5.6)
-    uri (1.1.1)
+    uri (0.13.3)
 
 PLATFORMS
   ruby

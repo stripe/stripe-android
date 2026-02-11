@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.ViewGroup
 import android.webkit.WebView
 import androidx.activity.ComponentActivity
-import androidx.activity.addCallback
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
@@ -85,13 +84,8 @@ internal class ShopPayActivity : ComponentActivity() {
             Logger.getInstance(BuildConfig.DEBUG).error("Failed to create ShopPayViewModel", e)
             dismissWithResult(ShopPayActivityResult.Failed(Throwable("Failed to create ShopPayViewModel")))
         }
-
         setContent {
             Content()
-        }
-
-        onBackPressedDispatcher.addCallback {
-            viewModel.onBackPressed()
         }
     }
 

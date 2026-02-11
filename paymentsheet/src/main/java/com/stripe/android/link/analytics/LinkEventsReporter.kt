@@ -10,7 +10,6 @@ internal interface LinkEventsReporter {
     fun onSignupFailure(isInline: Boolean = false, error: Throwable)
     fun onEmailSuggestionAccepted()
     fun onAccountLookupFailure(error: Throwable)
-    fun onAccountLookupComplete()
     fun onAccountRefreshFailure(error: Throwable)
 
     fun on2FAStart()

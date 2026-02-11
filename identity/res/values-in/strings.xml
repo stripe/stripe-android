@@ -18,8 +18,6 @@
   <string name="stripe_back_of_id">Bagian belakang kartu identitas</string>
   <!-- Title of ID document scanning screen when scanning the back of an identity card -->
   <string name="stripe_back_of_id_document">Bagian belakang dokumen identitas</string>
-  <!-- Instructional text when the back of the ID is not detected while scanning back -->
-  <string name="stripe_back_of_id_not_detected">Bagian belakang ID tidak terdeteksi</string>
   <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
   <string name="stripe_back_of_id_selected">Bagian belakang identitas dipilih</string>
   <!-- Title displayed when requesting camera permissions -->
@@ -124,8 +122,6 @@
   <string name="stripe_front_of_id">Bagian depan kartu identitas</string>
   <!-- Title of ID document scanning screen when scanning the front of an identity card -->
   <string name="stripe_front_of_id_document">Bagian depan dokumen identitas</string>
-  <!-- Instructional text when the front of the ID is not detected while scanning front -->
-  <string name="stripe_front_of_id_not_detected">Bagian depan ID tidak terdeteksi</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">Bagian depan identitas dipilih</string>
   <!-- Description of front of passport image -->
@@ -168,8 +164,6 @@
   <string name="stripe_move_closer">Dekatkan identitas</string>
   <!-- Instructional text when camera is too close to a document -->
   <string name="stripe_move_farther">Jauhkan identitas</string>
-  <!-- Instructional text when the document is not centered in the frame -->
-  <string name="stripe_move_id_to_center">Pusatkan ID sampai terlihat</string>
   <!-- Label for the ID field to collect NRIC or FIN for Singaporean ID -->
   <string name="stripe_nric_or_fin">NRIC atau FIN</string>
   <!-- No comment provided by engineer. -->
@@ -203,7 +197,7 @@
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Posisikan wajah Anda di tengah bingkai.</string>
   <!-- Instructional text when the document is too blurry -->
-  <string name="stripe_reduce_blur_2">Gambar buram. Stabilkan ponsel Anda dan coba lagi.</string>
+  <string name="stripe_reduce_blur">Identitas tidak terfokus</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Detail tidak terlihat</string>
   <string name="stripe_reduce_glare_2">Coba kurangi silau cahaya dan pastikan identitas terlihat</string>

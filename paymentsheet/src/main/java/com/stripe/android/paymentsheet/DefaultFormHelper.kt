@@ -21,10 +21,12 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
 import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
 import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -55,6 +57,18 @@ internal class DefaultFormHelper(
             linkInlineHandler: LinkInlineHandler = LinkInlineHandler.create(),
             shouldCreateAutomaticallyLaunchedCardScanFormDataHelper: Boolean = false,
         ): FormHelper {
+            val tapToAddHelper = TapToAddHelper.create(
+                coroutineScope = viewModel.viewModelScope,
+                tapToAddCollectionHandler = viewModel.tapToAddCollectionHandler,
+                paymentMethodMetadata = paymentMethodMetadata,
+                onCollectingUpdated = { collecting ->
+                    viewModel.savedStateHandle[SAVE_PROCESSING] = collecting
+                },
+                onError = { error ->
+                    viewModel.onError(error)
+                },
+            )
+
             return DefaultFormHelper(
                 coroutineScope = viewModel.viewModelScope,
                 linkInlineHandler = linkInlineHandler,
@@ -85,7 +99,7 @@ internal class DefaultFormHelper(
                 } else {
                     null
                 },
-                tapToAddHelper = viewModel.tapToAddHelper,
+                tapToAddHelper = tapToAddHelper,
             )
         }
 
@@ -122,10 +136,12 @@ internal class DefaultFormHelper(
     private val paymentSelection: Flow<PaymentSelection?> = combine(
         lastFormValues,
         linkInlineHandler.linkInlineState,
-    ) { formValues, inlineSignupViewState ->
+        tapToAddHelper?.collectedPaymentMethod ?: stateFlowOf(null)
+    ) { formValues, inlineSignupViewState, collectedPaymentMethod ->
         formValues.first?.transformToPaymentSelection(
             paymentMethod = supportedPaymentMethodForCode(formValues.second),
             paymentMethodMetadata = paymentMethodMetadata,
+            collectedPaymentMethod = collectedPaymentMethod?.paymentMethod,
             inlineSignupViewState = inlineSignupViewState,
         )
     }

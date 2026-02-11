@@ -34,10 +34,6 @@ internal open class FakeLinkEventsReporter : LinkEventsReporter {
         throw NotImplementedError()
     }
 
-    override fun onAccountLookupComplete() {
-        throw NotImplementedError()
-    }
-
     override fun onAccountRefreshFailure(error: Throwable) {
         throw NotImplementedError()
     }

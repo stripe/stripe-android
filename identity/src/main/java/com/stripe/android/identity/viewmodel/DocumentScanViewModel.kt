@@ -67,7 +67,7 @@ internal class DocumentScanViewModel(
                     is IdentityScanState.Found -> {
                         scannerState.scanState.feedbackRes ?: R.string.stripe_hold_still
                     }
-                    is IdentityScanState.Initial -> scannerState.scanState.feedbackRes ?: idleFeedback(targetScanType)
+                    is IdentityScanState.Initial -> idleFeedback(targetScanType)
                     is IdentityScanState.Satisfied -> R.string.stripe_scanned
                     is IdentityScanState.TimeOut -> idleFeedback(targetScanType)
                     is IdentityScanState.Unsatisfied -> idleFeedback(targetScanType)

@@ -7,9 +7,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
-import com.stripe.android.common.taptoadd.DefaultTapToAddHelper
-import com.stripe.android.common.taptoadd.TapToAddHelper
-import com.stripe.android.common.taptoadd.TapToAddMode
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
@@ -93,9 +90,6 @@ internal interface FormActivityViewModelModule {
     @Binds
     fun bindsPrefsRepositoryFactory(factory: DefaultPrefsRepository.Factory): PrefsRepository.Factory
 
-    @Binds
-    fun bindsTapToAddHelperFactory(factory: DefaultTapToAddHelper.Factory): TapToAddHelper.Factory
-
     companion object {
         @Provides
         fun providesContext(application: Application): Context {
@@ -128,22 +122,6 @@ internal interface FormActivityViewModelModule {
             @ViewModelScope coroutineScope: CoroutineScope,
         ): ConfirmationHandler {
             return confirmationHandlerFactory.create(coroutineScope)
-        }
-
-        @Provides
-        @Singleton
-        fun providesTapToAddHelper(
-            @ViewModelScope coroutineScope: CoroutineScope,
-            configuration: EmbeddedPaymentElement.Configuration,
-            tapToAddHelperFactory: TapToAddHelper.Factory,
-        ): TapToAddHelper {
-            return tapToAddHelperFactory.create(
-                coroutineScope = coroutineScope,
-                tapToAddMode = when (configuration.formSheetAction) {
-                    EmbeddedPaymentElement.FormSheetAction.Continue -> TapToAddMode.Continue
-                    EmbeddedPaymentElement.FormSheetAction.Confirm -> TapToAddMode.Complete
-                }
-            )
         }
 
         @Provides

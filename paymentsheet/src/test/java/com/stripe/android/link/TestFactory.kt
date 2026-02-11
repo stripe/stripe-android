@@ -164,7 +164,7 @@ internal object TestFactory {
 
     val LINK_NEW_PAYMENT_DETAILS = LinkPaymentDetails.New(
         paymentDetails = CONSUMER_PAYMENT_DETAILS_CARD,
-        confirmParams = PAYMENT_METHOD_CREATE_PARAMS,
+        paymentMethodCreateParams = PAYMENT_METHOD_CREATE_PARAMS,
         originalParams = mock()
     )
 
@@ -175,6 +175,7 @@ internal object TestFactory {
 
     val LINK_SAVED_PAYMENT_DETAILS = LinkPaymentDetails.Saved(
         paymentDetails = CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
+        paymentMethodCreateParams = PAYMENT_METHOD_CREATE_PARAMS,
         paymentMethod = PaymentMethod.Builder()
             .setId(CONSUMER_PAYMENT_DETAILS_PASSTHROUGH.paymentMethodId)
             .setType(PaymentMethod.Type.Card)
@@ -189,6 +190,7 @@ internal object TestFactory {
 
     val LINK_SAVED_PAYMENT_DETAILS_WITH_BILLING = LinkPaymentDetails.Saved(
         paymentDetails = CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
+        paymentMethodCreateParams = PAYMENT_METHOD_CREATE_PARAMS,
         paymentMethod = PaymentMethod.Builder()
             .setId(CONSUMER_PAYMENT_DETAILS_PASSTHROUGH.paymentMethodId)
             .setType(PaymentMethod.Type.Card)

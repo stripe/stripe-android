@@ -309,25 +309,6 @@ internal class ShopPayActivityTest {
         }
     }
 
-    @Test
-    fun `finishes with Canceled result when back is pressed`() = runTest(dispatcher) {
-        val confirmationState = MutableStateFlow<ShopPayConfirmationState>(ShopPayConfirmationState.Pending)
-        val bridgeHandler = createTestBridgeHandler(confirmationState)
-        val stripeRepository = createTestStripeRepository(Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
-
-        val activity = setupActivityController(bridgeHandler, stripeRepository)
-
-        activity.onBackPressedDispatcher.onBackPressed()
-
-        advanceUntilIdle()
-
-        val shadowActivity = shadowOf(activity)
-        assertThat(shadowActivity.resultCode).isEqualTo(ShopPayActivity.RESULT_COMPLETE)
-        val result = getResultFromIntent(shadowActivity.resultIntent)
-        assertThat(result).isInstanceOf<ShopPayActivityResult.Canceled>()
-        assertNoUnverifiedIntents()
-    }
-
     private fun createTestBridgeHandler(
         confirmationState: MutableStateFlow<ShopPayConfirmationState>
     ): ShopPayBridgeHandler {
@@ -369,7 +350,7 @@ internal class ShopPayActivityTest {
                     preparePaymentMethodHandlerProvider = {
                         preparePaymentMethodHandler
                     },
-                    uiContext = dispatcher,
+                    workContext = dispatcher,
                     errorReporter = FakeErrorReporter(),
                     eventReporter = FakeEventReporter(),
                 ) as T

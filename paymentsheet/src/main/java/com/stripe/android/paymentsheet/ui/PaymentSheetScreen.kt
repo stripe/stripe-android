@@ -117,10 +117,9 @@ internal fun PaymentSheetScreen(
 internal fun PaymentSheetScreen(
     viewModel: BaseSheetViewModel,
     type: PaymentSheetFlowType,
-    contentVisible: Boolean = true,
 ) {
     val scrollState = rememberScrollState()
-    PaymentSheetScreen(viewModel = viewModel, scrollState = scrollState, contentVisible = contentVisible) {
+    PaymentSheetScreen(viewModel, scrollState) {
         PaymentSheetScreenContent(viewModel, type = type, scrollState = scrollState)
     }
 }
@@ -186,11 +185,10 @@ private fun PaymentSheetScreen(
                 .fillMaxWidth()
                 .background(MaterialTheme.colors.surface.copy(alpha = 0.9f)),
         ) {
-            if (contentVisible) {
-                ProgressOverlay(
-                    walletsProcessingState = walletsProcessingState
-                )
-            }
+            ProgressOverlay(
+                contentVisible = contentVisible,
+                walletsProcessingState = walletsProcessingState
+            )
         }
     }
 }
@@ -252,12 +250,17 @@ private fun ResetScroll(scrollState: ScrollState, currentScreen: PaymentSheetScr
 @Suppress("UnusedReceiverParameter")
 @Composable
 private fun BoxScope.ProgressOverlay(
+    contentVisible: Boolean,
     walletsProcessingState: WalletsProcessingState?
 ) {
     AnimatedContent(
         targetState = walletsProcessingState,
         label = "AnimatedProcessingState"
     ) { processingState ->
+        if (!contentVisible) {
+            ProgressOverlayProcessing()
+            return@AnimatedContent
+        }
         when (processingState) {
             is WalletsProcessingState.Processing -> {
                 ProgressOverlayProcessing()
@@ -282,7 +285,7 @@ private fun BoxScope.ProgressOverlay(
 }
 
 @Composable
-internal fun ProgressOverlayProcessing() {
+private fun ProgressOverlayProcessing() {
     CircularProgressIndicator(
         color = MaterialTheme.colors.onSurface,
         strokeWidth = dimensionResource(R.dimen.stripe_paymentsheet_loading_indicator_stroke_width),

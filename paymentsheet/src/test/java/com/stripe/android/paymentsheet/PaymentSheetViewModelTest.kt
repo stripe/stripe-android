@@ -6,16 +6,13 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
-import androidx.lifecycle.viewModelScope
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
-import com.stripe.android.common.taptoadd.FakeTapToAddHelper
-import com.stripe.android.common.taptoadd.TapToAddHelper
-import com.stripe.android.common.taptoadd.TapToAddMode
+import com.stripe.android.common.taptoadd.FakeTapToAddCollectionHandler
 import com.stripe.android.core.Logger
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
@@ -3242,36 +3239,26 @@ internal class PaymentSheetViewModelTest {
     fun `On register for activity result, should register confirmation handler & autocomplete launcher`() =
         confirmationTest {
             DummyActivityResultCaller.test {
-                FakeTapToAddHelper.Factory.test {
-                    val lifecycleOwner = TestLifecycleOwner()
-                    val viewModel = createViewModel(
-                        tapToAddHelperFactory = tapToAddHelperFactory,
-                    )
+                val lifecycleOwner = TestLifecycleOwner()
+                val viewModel = createViewModel()
 
-                    viewModel.registerForActivityResult(
-                        activityResultCaller = activityResultCaller,
-                        lifecycleOwner = lifecycleOwner,
-                    )
+                viewModel.registerForActivityResult(
+                    activityResultCaller = activityResultCaller,
+                    lifecycleOwner = lifecycleOwner,
+                )
 
-                    assertThat(awaitRegisterCall().contract).isEqualTo(AutocompleteContract)
+                assertThat(awaitRegisterCall().contract).isEqualTo(AutocompleteContract)
 
-                    val autocompleteLauncher = awaitNextRegisteredLauncher()
+                val autocompleteLauncher = awaitNextRegisteredLauncher()
 
-                    val confirmationRegisterCall = registerTurbine.awaitItem()
+                val confirmationRegisterCall = registerTurbine.awaitItem()
 
-                    assertThat(confirmationRegisterCall.activityResultCaller)
-                        .isEqualTo(activityResultCaller)
-                    assertThat(confirmationRegisterCall.lifecycleOwner).isEqualTo(lifecycleOwner)
+                assertThat(confirmationRegisterCall.activityResultCaller).isEqualTo(activityResultCaller)
+                assertThat(confirmationRegisterCall.lifecycleOwner).isEqualTo(lifecycleOwner)
 
-                    lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+                lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 
-                    assertThat(awaitNextUnregisteredLauncher()).isEqualTo(autocompleteLauncher)
-
-                    val createCall = createCalls.awaitItem()
-
-                    assertThat(createCall.tapToAddMode).isEqualTo(TapToAddMode.Complete)
-                    assertThat(createCall.coroutineScope).isEqualTo(viewModel.viewModelScope)
-                }
+                assertThat(awaitNextUnregisteredLauncher()).isEqualTo(autocompleteLauncher)
             }
         }
 
@@ -3297,7 +3284,7 @@ internal class PaymentSheetViewModelTest {
             experimentsData = ElementsSession.ExperimentsData(
                 arbId = "232dd033-0b45-4456-b834-ecdcb02ab1fb",
                 experimentAssignments = mapOf(
-                    ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_AA to "control"
+                    ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_ANDROID_AA to "control"
                 )
             ),
             args = ARGS_WITH_AUTOMATIC_LAYOUT,
@@ -3328,7 +3315,7 @@ internal class PaymentSheetViewModelTest {
             experimentsData = ElementsSession.ExperimentsData(
                 arbId = "232dd033-0b45-4456-b834-ecdcb02ab1fb",
                 experimentAssignments = mapOf(
-                    ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_AA to "control"
+                    ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_ANDROID_AA to "control"
                 )
             ),
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
@@ -3429,7 +3416,6 @@ internal class PaymentSheetViewModelTest {
         eventReporter: EventReporter = this@PaymentSheetViewModelTest.eventReporter,
         cvcRecollectionHandler: CvcRecollectionHandler = this@PaymentSheetViewModelTest.cvcRecollectionHandler,
         cvcRecollectionInteractor: FakeCvcRecollectionInteractor = FakeCvcRecollectionInteractor(),
-        tapToAddHelperFactory: TapToAddHelper.Factory = FakeTapToAddHelper.Factory.noOp(),
     ): PaymentSheetViewModel {
         return createViewModel(
             args = args,
@@ -3449,8 +3435,7 @@ internal class PaymentSheetViewModelTest {
             eventReporter = eventReporter,
             cvcRecollectionHandler = cvcRecollectionHandler,
             cvcRecollectionInteractor = cvcRecollectionInteractor,
-            confirmationHandlerFactory = { handler },
-            tapToAddHelperFactory = tapToAddHelperFactory,
+            confirmationHandlerFactory = { handler }
         )
     }
 
@@ -3484,8 +3469,7 @@ internal class PaymentSheetViewModelTest {
         eventReporter: EventReporter = this.eventReporter,
         cvcRecollectionHandler: CvcRecollectionHandler = this.cvcRecollectionHandler,
         cvcRecollectionInteractor: FakeCvcRecollectionInteractor = FakeCvcRecollectionInteractor(),
-        confirmationHandlerFactory: ConfirmationHandler.Factory? = null,
-        tapToAddHelperFactory: TapToAddHelper.Factory = FakeTapToAddHelper.Factory.noOp(),
+        confirmationHandlerFactory: ConfirmationHandler.Factory? = null
     ): PaymentSheetViewModel {
         return TestViewModelFactory.create(
             linkConfigurationCoordinator = linkConfigurationCoordinator,
@@ -3518,7 +3502,7 @@ internal class PaymentSheetViewModelTest {
                         return cvcRecollectionInteractor
                     }
                 },
-                tapToAddHelperFactory = tapToAddHelperFactory,
+                tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
                 mode = EventReporter.Mode.Complete,
             )
         }
