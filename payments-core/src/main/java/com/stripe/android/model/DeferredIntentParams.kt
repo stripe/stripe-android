@@ -64,7 +64,7 @@ data class DeferredIntentParams(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
-        fun parseModeFromJson(deferredIntentParamsJson: JSONObject): Mode {
+        fun parseModeFromJson(deferredIntentParamsJson: JSONObject): Mode? {
             return when (deferredIntentParamsJson.optString("mode")) {
                 "payment" -> {
                     Mode.Payment(
@@ -85,10 +85,10 @@ data class DeferredIntentParams(
                         currency = deferredIntentParamsJson.optString("currency"),
                         setupFutureUsage = StripeIntent.Usage.fromCode(
                             deferredIntentParamsJson.optString("setup_future_usage")
-                        ) ?: throw IllegalStateException("Missing setup_future_usage for deferred setup mode"),
+                        ) ?: return null
                     )
                 }
-                else -> throw IllegalStateException("DeferredIntentParams should have either payment or setup mode")
+                else -> return null
             }
         }
     }

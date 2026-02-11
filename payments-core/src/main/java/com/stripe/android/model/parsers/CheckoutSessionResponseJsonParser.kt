@@ -55,7 +55,8 @@ internal class CheckoutSessionResponseJsonParser(
                 ElementsSessionParams.DeferredIntentType(
                     locale = serverBuiltElementsSessionParams.optString("locale"),
                     deferredIntentParams = DeferredIntentParams(
-                        mode = DeferredIntentParams.parseModeFromJson(deferredIntentJson),
+                        mode = DeferredIntentParams.parseModeFromJson(deferredIntentJson)
+                            ?: return null,
                         paymentMethodTypes = jsonArrayToList(
                             deferredIntentJson.optJSONArray("payment_method_types")
                         ),
