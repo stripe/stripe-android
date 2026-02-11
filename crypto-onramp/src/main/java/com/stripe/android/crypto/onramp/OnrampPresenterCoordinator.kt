@@ -160,22 +160,22 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     }
 
     fun collectPaymentMethod(selection: PaymentMethodSelection) {
-        when (selection.type) {
-            PaymentMethodType.Card,
-            PaymentMethodType.BankAccount,
-            PaymentMethodType.CardAndBankAccount -> {
+        when (selection) {
+            is PaymentMethodSelection.Card,
+            is PaymentMethodSelection.BankAccount,
+            is PaymentMethodSelection.CardAndBankAccount -> {
                 interactor.onCollectPaymentMethod(selection.type)
                 linkPresenter.presentPaymentMethodsForOnramp(
                     email = clientEmail(),
                     paymentMethodType = selection.type.toLinkType()
                 )
             }
-            PaymentMethodType.GooglePay -> {
+            is PaymentMethodSelection.GooglePay -> {
                 googlePayPaymentMethodLauncher.present(
-                    currencyCode = "USD",
-                    amount = /* Long minor units */ 0L,
-                    transactionId = null,
-                    label = null
+                    currencyCode = selection.currencyCode,
+                    amount = selection.amount,
+                    transactionId = selection.transactionId,
+                    label = selection.label
                 )
             }
         }

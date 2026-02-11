@@ -31,6 +31,8 @@ sealed interface PaymentMethodSelection {
     class GooglePay(
         val currencyCode: String,
         val amount: Long,
+        val transactionId: String? = null,
+        val label: String? = null
     ) : PaymentMethodSelection {
         override val type = PaymentMethodType.GooglePay
     }
