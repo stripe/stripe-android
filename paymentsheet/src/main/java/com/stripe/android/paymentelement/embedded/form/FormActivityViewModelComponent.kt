@@ -153,9 +153,10 @@ internal interface FormActivityViewModelModule {
         @Provides
         @Singleton
         fun providesFormActivityConfirmationHandlerRegistrar(
-            confirmationHandler: ConfirmationHandler
-        ): FormActivityConfirmationHandlerRegistrar {
-            return DefaultFormActivityConfirmationHandlerRegistrar(confirmationHandler)
+            confirmationHandler: ConfirmationHandler,
+            tapToAddHelper: TapToAddHelper,
+        ): FormActivityRegistrar {
+            return DefaultFormActivityRegistrar(confirmationHandler, tapToAddHelper)
         }
     }
 }
