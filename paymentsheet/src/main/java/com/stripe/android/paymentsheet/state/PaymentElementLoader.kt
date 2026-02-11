@@ -284,28 +284,11 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         }
 
         val savedPaymentMethodSelection = retrieveSavedPaymentMethodSelection(configuration)
-        val elementsSession = if (initializationMode is PaymentElementLoader.InitializationMode.CheckoutSession) {
-            stripeRepository.initCheckoutSession(
-                sessionId = initializationMode.id,
-                options = ApiRequest.Options(
-                    paymentConfiguration.get().publishableKey,
-                    paymentConfiguration.get().stripeAccountId,
-                ),
-            ).map { response ->
-                response.elementsSession
-                    ?: throw IllegalStateException("CheckoutSession init response missing elements_session")
-            }
-        } else {
-            elementsSessionRepository.get(
-                initializationMode = initializationMode,
-                customer = configuration.customer,
-                externalPaymentMethods = configuration.externalPaymentMethods,
-                customPaymentMethods = configuration.customPaymentMethods,
-                savedPaymentMethodSelectionId = savedPaymentMethodSelection?.id,
-                countryOverride = configuration.userOverrideCountry,
-                linkDisallowedFundingSourceCreation = configuration.link.disallowFundingSourceCreation,
-            )
-        }.getOrThrow()
+        val elementsSession = retrieveElementsSession(
+            initializationMode = initializationMode,
+            configuration = configuration,
+            savedPaymentMethodSelection = savedPaymentMethodSelection,
+        )
 
         // Preemptively prepare Integrity asynchronously if needed, as warm up can take
         // a few seconds.
@@ -417,6 +400,34 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         )
 
         return@runCatching state
+    }
+
+    private suspend fun retrieveElementsSession(
+        initializationMode: PaymentElementLoader.InitializationMode,
+        configuration: CommonConfiguration,
+        savedPaymentMethodSelection: SavedSelection.PaymentMethod?,
+    ): ElementsSession {
+        return if (initializationMode is PaymentElementLoader.InitializationMode.CheckoutSession) {
+            val checkoutSession = stripeRepository.initCheckoutSession(
+                sessionId = initializationMode.id,
+                options = ApiRequest.Options(
+                    paymentConfiguration.get().publishableKey,
+                    paymentConfiguration.get().stripeAccountId,
+                ),
+            ).getOrThrow()
+            checkoutSession.elementsSession
+                ?: throw IllegalStateException("CheckoutSession init response missing elements_session")
+        } else {
+            elementsSessionRepository.get(
+                initializationMode = initializationMode,
+                customer = configuration.customer,
+                externalPaymentMethods = configuration.externalPaymentMethods,
+                customPaymentMethods = configuration.customPaymentMethods,
+                savedPaymentMethodSelectionId = savedPaymentMethodSelection?.id,
+                countryOverride = configuration.userOverrideCountry,
+                linkDisallowedFundingSourceCreation = configuration.link.disallowFundingSourceCreation,
+            ).getOrThrow()
+        }
     }
 
     private fun ElementsSession.shouldWarmUpIntegrity(): Boolean = when {
