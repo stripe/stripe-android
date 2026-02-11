@@ -20,7 +20,7 @@ import org.json.JSONObject
  * response with the payment intent data.
  */
 internal class CheckoutSessionResponseJsonParser(
-    private val elementsSessionParams: ElementsSessionParams.CheckoutSessionType,
+    private val elementsSessionParams: ElementsSessionParams.CheckoutSession.Initial,
     private val isLiveMode: Boolean,
 ) : ModelJsonParser<CheckoutSessionResponse> {
 
@@ -44,6 +44,8 @@ internal class CheckoutSessionResponseJsonParser(
 
     /**
      * Parses the elements_session object if present.
+     * Creates a [ElementsSessionParams.CheckoutSession.WithIntent] from the initial params
+     * enriched with the [DeferredIntentParams] from the response.
      */
     private fun parseElementsSession(
         json: JSONObject,
@@ -51,21 +53,37 @@ internal class CheckoutSessionResponseJsonParser(
         currency: String,
     ): ElementsSession? {
         val elementsSessionJson = json.optJSONObject(FIELD_ELEMENTS_SESSION) ?: return null
-        return ElementsSessionJsonParser(
-            params = elementsSessionParams.copy(
-                deferredIntentParams = DeferredIntentParams(
-                    mode = DeferredIntentParams.Mode.Payment(
-                        amount = amount,
-                        currency = currency,
-                        captureMethod = PaymentIntent.CaptureMethod.Automatic,
-                        setupFutureUsage = null,
-                        paymentMethodOptionsJsonString = null,
-                    ),
-                    paymentMethodTypes = emptyList(), // Populated from elements_session
-                    paymentMethodConfigurationId = null,
-                    onBehalfOf = null,
-                )
+
+        // Create WithIntent params from Initial params + response data
+        val withIntentParams = ElementsSessionParams.CheckoutSession.WithIntent(
+            clientSecret = elementsSessionParams.clientSecret,
+            deferredIntentParams = DeferredIntentParams(
+                mode = DeferredIntentParams.Mode.Payment(
+                    amount = amount,
+                    currency = currency,
+                    captureMethod = PaymentIntent.CaptureMethod.Automatic,
+                    setupFutureUsage = null,
+                    paymentMethodOptionsJsonString = null,
+                ),
+                paymentMethodTypes = emptyList(), // Populated from elements_session
+                paymentMethodConfigurationId = null,
+                onBehalfOf = null,
             ),
+            locale = elementsSessionParams.locale,
+            customerSessionClientSecret = elementsSessionParams.customerSessionClientSecret,
+            legacyCustomerEphemeralKey = elementsSessionParams.legacyCustomerEphemeralKey,
+            mobileSessionId = elementsSessionParams.mobileSessionId,
+            savedPaymentMethodSelectionId = elementsSessionParams.savedPaymentMethodSelectionId,
+            customPaymentMethods = elementsSessionParams.customPaymentMethods,
+            externalPaymentMethods = elementsSessionParams.externalPaymentMethods,
+            appId = elementsSessionParams.appId,
+            sellerDetails = elementsSessionParams.sellerDetails,
+            link = elementsSessionParams.link,
+            countryOverride = elementsSessionParams.countryOverride,
+        )
+
+        return ElementsSessionJsonParser(
+            params = withIntentParams,
             isLiveMode = isLiveMode,
         ).parse(elementsSessionJson)
     }
