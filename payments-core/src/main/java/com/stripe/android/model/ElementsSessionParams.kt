@@ -103,38 +103,6 @@ sealed interface ElementsSessionParams : Parcelable {
             get() = emptyList()
     }
 
-    /**
-     * Parameters for checkout session initialization via `/v1/payment_pages/{id}/init`.
-     * Minimal for now - additional params will be added as the API evolves.
-     */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    @Parcelize
-    data class CheckoutSessionType(
-        override val clientSecret: String,
-        val deferredIntentParams: DeferredIntentParams? = null,
-        override val locale: String? = Locale.getDefault().toLanguageTag(),
-        override val customerSessionClientSecret: String? = null,
-        override val legacyCustomerEphemeralKey: String? = null,
-        override val mobileSessionId: String? = null,
-        override val savedPaymentMethodSelectionId: String? = null,
-        override val customPaymentMethods: List<String> = emptyList(),
-        override val externalPaymentMethods: List<String> = emptyList(),
-        override val appId: String = "",
-        override val sellerDetails: SellerDetails? = null,
-        override val link: Link = Link(),
-        override val countryOverride: String? = null,
-    ) : ElementsSessionParams {
-
-        val checkoutSessionId: String
-            get() = clientSecret.substringBefore("_secret_")
-
-        override val type: String
-            get() = "checkout_session"
-
-        override val expandFields: List<String>
-            get() = emptyList()
-    }
-
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class SellerDetails(

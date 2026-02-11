@@ -2,7 +2,6 @@ package com.stripe.android.model.parsers
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CheckoutSessionFixtures
-import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
 import org.json.JSONObject
@@ -15,11 +14,7 @@ class CheckoutSessionResponseJsonParserTest {
 
     @Test
     fun `parse checkout session response`() {
-        val params = ElementsSessionParams.CheckoutSessionType(
-            clientSecret = "cs_test_123_secret_abc",
-        )
         val result = CheckoutSessionResponseJsonParser(
-            elementsSessionParams = params,
             isLiveMode = false,
         ).parse(CheckoutSessionFixtures.CHECKOUT_SESSION_RESPONSE_JSON)
 
@@ -67,8 +62,7 @@ class CheckoutSessionResponseJsonParserTest {
             }
             """.trimIndent()
         )
-        val params = ElementsSessionParams.CheckoutSessionType(clientSecret = "cs_test_secret")
-        val result = CheckoutSessionResponseJsonParser(params, isLiveMode = false).parse(json)
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
 
         assertThat(result).isNull()
     }
@@ -84,8 +78,7 @@ class CheckoutSessionResponseJsonParserTest {
             }
             """.trimIndent()
         )
-        val params = ElementsSessionParams.CheckoutSessionType(clientSecret = "cs_test_secret")
-        val result = CheckoutSessionResponseJsonParser(params, isLiveMode = false).parse(json)
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
 
         assertThat(result).isNull()
     }
@@ -101,8 +94,7 @@ class CheckoutSessionResponseJsonParserTest {
             }
             """.trimIndent()
         )
-        val params = ElementsSessionParams.CheckoutSessionType(clientSecret = "cs_test_secret")
-        val result = CheckoutSessionResponseJsonParser(params, isLiveMode = false).parse(json)
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
 
         assertThat(result).isNull()
     }
@@ -118,8 +110,7 @@ class CheckoutSessionResponseJsonParserTest {
             }
             """.trimIndent()
         )
-        val params = ElementsSessionParams.CheckoutSessionType(clientSecret = "cs_test_secret")
-        val result = CheckoutSessionResponseJsonParser(params, isLiveMode = false).parse(json)
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
 
         assertThat(result).isNotNull()
         assertThat(result?.id).isEqualTo("cs_test_123")
@@ -140,8 +131,7 @@ class CheckoutSessionResponseJsonParserTest {
             }
             """.trimIndent()
         )
-        val params = ElementsSessionParams.CheckoutSessionType(clientSecret = "cs_test_secret")
-        val result = CheckoutSessionResponseJsonParser(params, isLiveMode = false).parse(json)
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
 
         // Response is parsed successfully but elements_session is null due to invalid JSON
         assertThat(result).isNotNull()
@@ -151,8 +141,7 @@ class CheckoutSessionResponseJsonParserTest {
 
     @Test
     fun `parse confirm response with succeeded payment intent`() {
-        val params = ElementsSessionParams.CheckoutSessionType(clientSecret = "cs_test_secret")
-        val result = CheckoutSessionResponseJsonParser(params, isLiveMode = false)
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
             .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_CONFIRM_SUCCEEDED_JSON)
 
         assertThat(result).isNotNull()
@@ -173,8 +162,7 @@ class CheckoutSessionResponseJsonParserTest {
 
     @Test
     fun `parse confirm response with requires_action payment intent`() {
-        val params = ElementsSessionParams.CheckoutSessionType(clientSecret = "cs_test_secret")
-        val result = CheckoutSessionResponseJsonParser(params, isLiveMode = false)
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
             .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_CONFIRM_REQUIRES_ACTION_JSON)
 
         assertThat(result).isNotNull()

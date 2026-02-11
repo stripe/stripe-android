@@ -1,11 +1,11 @@
 package com.stripe.android.model.parsers
 
 import com.stripe.android.core.model.parsers.ModelJsonParser
+import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArrayToList
 import com.stripe.android.model.CheckoutSessionResponse
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
-import com.stripe.android.model.PaymentIntent
 import org.json.JSONObject
 
 /**
@@ -20,7 +20,6 @@ import org.json.JSONObject
  * response with the payment intent data.
  */
 internal class CheckoutSessionResponseJsonParser(
-    private val elementsSessionParams: ElementsSessionParams.CheckoutSessionType,
     private val isLiveMode: Boolean,
 ) : ModelJsonParser<CheckoutSessionResponse> {
 
@@ -31,7 +30,11 @@ internal class CheckoutSessionResponseJsonParser(
         val paymentIntent = json.optJSONObject(FIELD_PAYMENT_INTENT)?.let {
             PaymentIntentJsonParser().parse(it)
         }
-        val elementsSession = parseElementsSession(json, amount, currency)
+
+        val elementsSession = parseElementsSession(
+            json.optJSONObject(FIELD_SERVER_BUILT_ELEMENTS_SESSION_PARAMS),
+            json.optJSONObject(FIELD_ELEMENTS_SESSION),
+        )
 
         return CheckoutSessionResponse(
             id = sessionId,
@@ -42,30 +45,59 @@ internal class CheckoutSessionResponseJsonParser(
         )
     }
 
+    private fun parseElementsSessionParams(
+        serverBuiltElementsSessionParams: JSONObject,
+    ): ElementsSessionParams? {
+        return when (serverBuiltElementsSessionParams.optString("type")) {
+            "deferred_intent" -> {
+                val deferredIntentJson = serverBuiltElementsSessionParams.optJSONObject("deferred_intent")
+                    ?: return null
+                ElementsSessionParams.DeferredIntentType(
+                    locale = serverBuiltElementsSessionParams.optString("locale"),
+                    deferredIntentParams = DeferredIntentParams(
+                        mode = DeferredIntentParams.parseModeFromJson(deferredIntentJson),
+                        paymentMethodTypes = jsonArrayToList(
+                            deferredIntentJson.optJSONArray("payment_method_types")
+                        ),
+                        paymentMethodConfigurationId = deferredIntentJson
+                            .optString("payment_method_configuration"),
+                        onBehalfOf = deferredIntentJson.optString("on_behalf_of")
+                    ),
+                    customPaymentMethods = jsonArrayToList(
+                        serverBuiltElementsSessionParams.optJSONArray("custom_payment_methods")
+                    ),
+                    externalPaymentMethods = jsonArrayToList(
+                        serverBuiltElementsSessionParams.optJSONArray("external_payment_methods")
+                    ),
+                    savedPaymentMethodSelectionId = serverBuiltElementsSessionParams
+                        .optString("client_default_payment_method"),
+                    mobileSessionId = serverBuiltElementsSessionParams.optString("mobile_session_id"),
+                    appId = serverBuiltElementsSessionParams.optString("mobile_app_id"),
+                    countryOverride = serverBuiltElementsSessionParams.optString("country_override")
+                )
+            }
+            else -> {
+                // This function is only used for parsing elements session params when init payment_pages
+                // The params is always deferred intent type.
+                null
+            }
+        }
+    }
+
     /**
      * Parses the elements_session object if present.
      */
     private fun parseElementsSession(
-        json: JSONObject,
-        amount: Long,
-        currency: String,
+        serverBuiltElementsSessionParams: JSONObject?,
+        elementsSessionJson: JSONObject?,
     ): ElementsSession? {
-        val elementsSessionJson = json.optJSONObject(FIELD_ELEMENTS_SESSION) ?: return null
+        val serverBuiltElementsSessionParams = serverBuiltElementsSessionParams?.let {
+                parseElementsSessionParams(it)
+            } ?: return null
+        val elementsSessionJson = elementsSessionJson ?: return null
+
         return ElementsSessionJsonParser(
-            params = elementsSessionParams.copy(
-                deferredIntentParams = DeferredIntentParams(
-                    mode = DeferredIntentParams.Mode.Payment(
-                        amount = amount,
-                        currency = currency,
-                        captureMethod = PaymentIntent.CaptureMethod.Automatic,
-                        setupFutureUsage = null,
-                        paymentMethodOptionsJsonString = null,
-                    ),
-                    paymentMethodTypes = emptyList(), // Populated from elements_session
-                    paymentMethodConfigurationId = null,
-                    onBehalfOf = null,
-                )
-            ),
+            serverBuiltElementsSessionParams,
             isLiveMode = isLiveMode,
         ).parse(elementsSessionJson)
     }
@@ -86,5 +118,6 @@ internal class CheckoutSessionResponseJsonParser(
         private const val FIELD_TOTAL_SUMMARY = "total_summary"
         private const val FIELD_DUE = "due"
         private const val FIELD_PAYMENT_INTENT = "payment_intent"
+        private const val FIELD_SERVER_BUILT_ELEMENTS_SESSION_PARAMS = "server_built_elements_session_params"
     }
 }
