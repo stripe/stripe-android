@@ -153,7 +153,7 @@ internal class IDDetectorTransitioner(
         }
     }
 
-    @Suppress("CyclomaticComplexMethod", "MagicNumber")
+    @Suppress("CyclomaticComplexMethod", "LongMethod", "MagicNumber")
     private fun transitionFromFoundLegacy(
         foundState: Found,
         analyzerInput: AnalyzerInput,
