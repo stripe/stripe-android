@@ -14,7 +14,6 @@ import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddMode
 import com.stripe.android.common.taptoadd.TapToAddResult
-import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
@@ -45,6 +44,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_SELECTION
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentelement.WalletButtonsPreview
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.addresselement.AutocompleteContract
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -1169,7 +1169,6 @@ internal class PaymentOptionsViewModelTest {
             val createCall = createCalls.awaitItem()
             assertThat(createCall.tapToAddMode).isEqualTo(TapToAddMode.Continue)
         }
-
     }
 
     @Test
