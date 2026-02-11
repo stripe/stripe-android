@@ -16,8 +16,12 @@ internal class FakeTapToAddHelper(
     val registerCalls = Turbine<RegisterCall>()
     val collectCalls = Turbine<PaymentMethodMetadata>()
 
-    override val result: SharedFlow<TapToAddResult> =
-        MutableSharedFlow<TapToAddResult>().asSharedFlow()
+    private val _result = MutableSharedFlow<TapToAddResult>()
+    override val result: SharedFlow<TapToAddResult> = _result.asSharedFlow()
+
+    suspend fun emitResult(result: TapToAddResult) {
+        _result.emit(result)
+    }
 
     override fun register(
         activityResultCaller: ActivityResultCaller,
@@ -47,15 +51,20 @@ internal class FakeTapToAddHelper(
 
     class Factory private constructor() : TapToAddHelper.Factory {
         private val createCalls = Turbine<CreateCall>()
+        private var createdHelper: FakeTapToAddHelper? = null
 
         override fun create(
             coroutineScope: CoroutineScope,
             tapToAddMode: TapToAddMode
         ): TapToAddHelper {
+            val helper = FakeTapToAddHelper()
             createCalls.add(CreateCall(coroutineScope, tapToAddMode))
 
-            return FakeTapToAddHelper.noOp()
+            createdHelper = helper
+            return helper
         }
+
+        fun getCreatedHelper(): FakeTapToAddHelper? = createdHelper
 
         class CreateCall(
             val coroutineScope: CoroutineScope,
@@ -64,7 +73,7 @@ internal class FakeTapToAddHelper(
 
         class Scenario(
             val createCalls: ReceiveTurbine<CreateCall>,
-            val tapToAddHelperFactory: TapToAddHelper.Factory,
+            val tapToAddHelperFactory: Factory,
         )
 
         companion object {
