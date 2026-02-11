@@ -35,7 +35,7 @@ import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.networking.StripeApiRepository
+import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
@@ -227,7 +227,7 @@ internal interface PaymentElementLoader {
 @Singleton
 @SuppressWarnings("LargeClass")
 internal class DefaultPaymentElementLoader @Inject constructor(
-    private val stripeApiRepository: StripeApiRepository,
+    private val stripeRepository: StripeRepository,
     private val prefsRepositoryFactory: PrefsRepository.Factory,
     private val googlePayRepositoryFactory: GooglePayRepositoryFactory,
     private val elementsSessionRepository: ElementsSessionRepository,
@@ -285,7 +285,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
         val savedPaymentMethodSelection = retrieveSavedPaymentMethodSelection(configuration)
         val elementsSession = if (initializationMode is PaymentElementLoader.InitializationMode.CheckoutSession) {
-            stripeApiRepository.initCheckoutSession(
+            stripeRepository.initCheckoutSession(
                 sessionId = initializationMode.id,
                 options = ApiRequest.Options(
                     paymentConfiguration.get().publishableKey,

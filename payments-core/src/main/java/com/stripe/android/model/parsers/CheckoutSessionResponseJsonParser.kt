@@ -92,8 +92,8 @@ internal class CheckoutSessionResponseJsonParser(
         elementsSessionJson: JSONObject?,
     ): ElementsSession? {
         val serverBuiltElementsSessionParams = serverBuiltElementsSessionParams?.let {
-                parseElementsSessionParams(it)
-            } ?: return null
+            parseElementsSessionParams(it)
+        } ?: return null
         val elementsSessionJson = elementsSessionJson ?: return null
 
         return ElementsSessionJsonParser(
