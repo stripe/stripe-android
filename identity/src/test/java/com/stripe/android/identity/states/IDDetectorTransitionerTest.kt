@@ -531,8 +531,9 @@ internal class IDDetectorTransitionerTest {
     private fun createLegacyAnalyzerOutputWithLowIOU(previousAnalyzerOutput: IDDetectorOutput.Legacy) =
         IDDetectorOutput.Legacy(
             boundingBox = BoundingBox(
-                previousAnalyzerOutput.boundingBox.left + 0.5f,
-                previousAnalyzerOutput.boundingBox.top + 0.5f,
+                // Shift by small amount to fail IOU but keep it centered
+                previousAnalyzerOutput.boundingBox.left + 0.02f,
+                previousAnalyzerOutput.boundingBox.top + 0.02f,
                 previousAnalyzerOutput.boundingBox.width,
                 previousAnalyzerOutput.boundingBox.height
             ),
