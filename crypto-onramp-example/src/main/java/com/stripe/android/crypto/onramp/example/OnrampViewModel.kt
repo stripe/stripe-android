@@ -38,6 +38,8 @@ import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
+import com.stripe.android.googlepaylauncher.GooglePayEnvironment
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.utils.isLinkAuthorizationError
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -131,6 +133,19 @@ internal class OnrampViewModel(
                         )
                         .style(LinkAppearance.Style.ALWAYS_DARK)
                         .primaryButton(LinkAppearance.PrimaryButton())
+                )
+                .googlePayConfig(
+                    GooglePayPaymentMethodLauncher.Config(
+                        environment = GooglePayEnvironment.Test,
+                        merchantCountryCode = "US",
+                        merchantName = "Onramp Example",
+                        billingAddressConfig = GooglePayPaymentMethodLauncher.BillingAddressConfig(
+                            isRequired = true,
+                            format = GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Full,
+                            isPhoneNumberRequired = false
+                        ),
+                        existingPaymentMethodRequired = false
+                    )
                 )
 
             onrampCoordinator.configure(configuration = configuration)

@@ -21,7 +21,6 @@ import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityArgs
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
 import com.stripe.android.crypto.onramp.ui.VerifyKycInfoActivityContract
-import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
@@ -53,28 +52,15 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         authorizeCallback = ::handleAuthorizeResult
     )
 
-    private var googlePayIsReady = false
-
-    private val googlePayPaymentMethodLauncher = GooglePayPaymentMethodLauncher(
-        activity = activity,
-        config = GooglePayPaymentMethodLauncher.Config(
-            environment = GooglePayEnvironment.Test, // or Production
-            merchantCountryCode = "US",
-            merchantName = "Stripe",
-            isEmailRequired = false,
-            existingPaymentMethodRequired = false,
-            allowCreditCards = true,
-        ),
-        readyCallback = { isReady ->
-            googlePayIsReady = isReady
-        },
-        resultCallback = { result ->
-            coroutineScope.launch {
-                print(result)
-                // interactor.onGooglePayResult(result)
-            }
-        }
-    )
+    private val googlePayPaymentMethodLauncher: GooglePayPaymentMethodLauncher? = googlePayConfig()?.let {
+        GooglePayPaymentMethodLauncher(
+            activity = activity,
+            config = it,
+            readyCallback = { isReady ->
+            },
+            resultCallback = ::handleGooglePayPaymentSelection
+        )
+    }
 
     private var identityVerificationSheet: IdentityVerificationSheet? = null
 
@@ -171,7 +157,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                 )
             }
             is PaymentMethodSelection.GooglePay -> {
-                googlePayPaymentMethodLauncher.present(
+                googlePayPaymentMethodLauncher?.present(
                     currencyCode = selection.currencyCode,
                     amount = selection.amount,
                     transactionId = selection.transactionId,
@@ -268,6 +254,9 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         }
     }
 
+    private fun googlePayConfig(): GooglePayPaymentMethodLauncher.Config? =
+        interactor.state.value.configurationState?.googlePayConfig
+
     private fun clientEmail(): String? =
         interactor.state.value.linkControllerState?.internalLinkAccount?.email
 
@@ -309,6 +298,14 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             configuration = IdentityVerificationSheet.Configuration(brandLogo = linkLogoUri),
             identityVerificationCallback = ::handleIdentityVerificationResult
         )
+    }
+
+    private fun handleGooglePayPaymentSelection(result: GooglePayPaymentMethodLauncher.Result) {
+        coroutineScope.launch {
+            onrampCallbacksState.collectPaymentCallback.onResult(
+                interactor.handleGooglePayPaymentResult(result)
+            )
+        }
     }
 }
 

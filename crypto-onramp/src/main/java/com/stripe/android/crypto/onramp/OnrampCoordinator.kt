@@ -35,7 +35,6 @@ import javax.inject.Inject
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class OnrampCoordinator @Inject internal constructor(
     private val interactor: OnrampInteractor,
-    private val onrampCallbacks: OnrampCallbacks,
     private val presenterComponentFactory: OnrampPresenterComponent.Factory,
 ) {
 
@@ -137,7 +136,6 @@ class OnrampCoordinator @Inject internal constructor(
      * Create a presenter for handling Link UI interactions.
      *
      * @param activity The activity that will host the Link flows.
-     * @param onrampCallbacks Callbacks for handling asynchronous responses from UI operations.
      * @return A presenter instance for handling Link UI operations.
      */
     fun createPresenter(

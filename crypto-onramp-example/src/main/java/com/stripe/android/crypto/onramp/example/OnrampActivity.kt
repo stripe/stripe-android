@@ -990,7 +990,7 @@ private fun AuthenticatedOperationsScreen(
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
         ) {
-            Text("Collect Card or Bank Account")
+            Text("Google Pay")
         }
 
         Button(
