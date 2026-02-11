@@ -34,6 +34,7 @@ import kotlin.time.TimeSource
 internal class IDDetectorTransitioner(
     private val timeout: Duration,
     private val iouThreshold: Float = DEFAULT_IOU_THRESHOLD,
+    private val timeRequired: Int = DEFAULT_TIME_REQUIRED,
     private val blurThreshold: Float = DEFAULT_BLUR_THRESHOLD,
     private val allowedUnmatchedFrames: Int = DEFAULT_ALLOWED_UNMATCHED_FRAME,
     private val displaySatisfiedDuration: Int = DEFAULT_DISPLAY_SATISFIED_DURATION,
@@ -41,7 +42,9 @@ internal class IDDetectorTransitioner(
 ) : IdentityScanStateTransitioner {
     private var previousBoundingBox: BoundingBox? = null
     private var unmatchedFrame = 0
-    private val bestFrameDetector = BestFrameDetector()
+    private val bestFrameDetector = BestFrameDetector(
+        windowDurationMs = maxOf(timeRequired.toLong(), MIN_BEST_FRAME_WINDOW_MS)
+    )
     private var bestLegacyOutput: IDDetectorOutput.Legacy? = null
 
     @VisibleForTesting
