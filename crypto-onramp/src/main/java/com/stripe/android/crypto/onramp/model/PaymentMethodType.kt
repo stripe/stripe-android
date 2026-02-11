@@ -9,5 +9,6 @@ import androidx.annotation.RestrictTo
 enum class PaymentMethodType(internal val value: String) {
     Card("card"),
     BankAccount("bank_account"),
+    CardAndBankAccount("card_and_bank_account"),
     GooglePay("google_pay")
 }

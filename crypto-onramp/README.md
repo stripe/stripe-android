@@ -23,7 +23,6 @@ The crypto-onramp helps you build a headless crypto onramp flow in your Android 
 **Link authentication**:
 - Check if an email has a Link account with `hasLinkAccount(email:)`
 - Register new users with `registerLinkUser(info:)`
-- Authenticate existing users with `authenticateUser()`
 - Authorize a Link auth intent with `authorize(linkAuthIntentId:)`
 - Support seamless sign-in for returning users with `authenticateUserWithToken(linkAuthTokenClientSecret:)`
 

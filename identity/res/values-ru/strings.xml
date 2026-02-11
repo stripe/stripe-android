@@ -203,7 +203,6 @@
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Расположите лицо по центру рамки</string>
   <!-- Instructional text when the document is too blurry -->
-  <string name="stripe_reduce_blur">Документ не в фокусе</string>
   <string name="stripe_reduce_blur_2">Изображение размыто. Попробуйте еще раз, удерживая телефон неподвижно.</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Детали не видны</string>
