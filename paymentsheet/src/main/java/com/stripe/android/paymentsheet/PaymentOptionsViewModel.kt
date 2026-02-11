@@ -14,6 +14,7 @@ import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddMode
+import com.stripe.android.common.taptoadd.TapToAddResult
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.utils.requireApplication
@@ -221,6 +222,23 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 customerStateHolder = customerStateHolder,
             )
         )
+
+        viewModelScope.launch {
+            tapToAddHelper.result.collect { result ->
+                when (result) {
+                    is TapToAddResult.Canceled -> {
+                        // Do nothing.
+                    }
+                    TapToAddResult.Complete -> {
+                        // this should never happen.
+                    }
+                    is TapToAddResult.Continue -> {
+                        updateSelection(result.paymentSelection)
+                        onUserSelection()
+                    }
+                }
+            }
+        }
     }
 
     override fun registerFromActivity(
