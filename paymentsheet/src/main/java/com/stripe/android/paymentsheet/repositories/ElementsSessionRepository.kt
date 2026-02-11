@@ -77,22 +77,10 @@ internal class RealElementsSessionRepository @Inject constructor(
             linkDisallowedFundingSourceCreation = linkDisallowedFundingSourceCreation,
         )
 
-        val elementsSession =
-            if (initializationMode is PaymentElementLoader.InitializationMode.CheckoutSession) {
-                // CheckoutSession uses a different API endpoint that returns ElementsSession embedded
-                stripeRepository.initCheckoutSession(
-                    sessionId = initializationMode.id,
-                    options = requestOptions,
-                ).mapCatching { response ->
-                    response.elementsSession
-                        ?: throw IllegalStateException("CheckoutSession init response missing elements_session")
-                }
-            } else {
-                stripeRepository.retrieveElementsSession(
-                    params = params,
-                    options = requestOptions,
-                )
-            }
+        val elementsSession = stripeRepository.retrieveElementsSession(
+            params = params,
+            options = requestOptions,
+        )
 
         return elementsSession.getResultOrElse { elementsSessionFailure ->
             if (shouldFallback(elementsSession)) {

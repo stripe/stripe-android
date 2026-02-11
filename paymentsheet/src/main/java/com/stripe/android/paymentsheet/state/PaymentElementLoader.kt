@@ -14,6 +14,7 @@ import com.stripe.android.common.taptoadd.TapToAddConnectionManager
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.utils.FeatureFlag
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.UserFacingLogger
@@ -34,6 +35,7 @@ import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
@@ -225,6 +227,7 @@ internal interface PaymentElementLoader {
 @Singleton
 @SuppressWarnings("LargeClass")
 internal class DefaultPaymentElementLoader @Inject constructor(
+    private val stripeApiRepository: StripeApiRepository,
     private val prefsRepositoryFactory: PrefsRepository.Factory,
     private val googlePayRepositoryFactory: GooglePayRepositoryFactory,
     private val elementsSessionRepository: ElementsSessionRepository,
@@ -281,15 +284,28 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         }
 
         val savedPaymentMethodSelection = retrieveSavedPaymentMethodSelection(configuration)
-        val elementsSession = retrieveElementsSession(
-            initializationMode = initializationMode,
-            customer = configuration.customer,
-            customPaymentMethods = configuration.customPaymentMethods,
-            externalPaymentMethods = configuration.externalPaymentMethods,
-            savedPaymentMethodSelectionId = savedPaymentMethodSelection?.id,
-            link = configuration.link,
-            countryOverride = configuration.userOverrideCountry,
-        ).getOrThrow()
+        val elementsSession = if (initializationMode is PaymentElementLoader.InitializationMode.CheckoutSession) {
+            stripeApiRepository.initCheckoutSession(
+                sessionId = initializationMode.id,
+                options = ApiRequest.Options(
+                    paymentConfiguration.get().publishableKey,
+                    paymentConfiguration.get().stripeAccountId,
+                ),
+            ).map { response ->
+                response.elementsSession
+                    ?: throw IllegalStateException("CheckoutSession init response missing elements_session")
+            }
+        } else {
+            elementsSessionRepository.get(
+                initializationMode = initializationMode,
+                customer = configuration.customer,
+                externalPaymentMethods = configuration.externalPaymentMethods,
+                customPaymentMethods = configuration.customPaymentMethods,
+                savedPaymentMethodSelectionId = savedPaymentMethodSelection?.id,
+                countryOverride = configuration.userOverrideCountry,
+                linkDisallowedFundingSourceCreation = configuration.link.disallowFundingSourceCreation,
+            )
+        }.getOrThrow()
 
         // Preemptively prepare Integrity asynchronously if needed, as warm up can take
         // a few seconds.
@@ -424,26 +440,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             ),
             elementsSession = elementsSession,
             state = state
-        )
-    }
-
-    private suspend fun retrieveElementsSession(
-        initializationMode: PaymentElementLoader.InitializationMode,
-        customer: PaymentSheet.CustomerConfiguration?,
-        customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
-        externalPaymentMethods: List<String>,
-        savedPaymentMethodSelectionId: String?,
-        link: PaymentSheet.LinkConfiguration,
-        countryOverride: String?,
-    ): Result<ElementsSession> {
-        return elementsSessionRepository.get(
-            initializationMode = initializationMode,
-            customer = customer,
-            externalPaymentMethods = externalPaymentMethods,
-            customPaymentMethods = customPaymentMethods,
-            savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
-            countryOverride = countryOverride,
-            linkDisallowedFundingSourceCreation = link.disallowFundingSourceCreation,
         )
     }
 
