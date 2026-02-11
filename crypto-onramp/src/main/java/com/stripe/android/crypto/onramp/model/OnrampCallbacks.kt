@@ -14,20 +14,12 @@ import androidx.annotation.RestrictTo
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class OnrampCallbacks {
 
-    private var authenticateUserCallback: OnrampAuthenticateUserCallback? = null
     private var verifyIdentityCallback: OnrampVerifyIdentityCallback? = null
     private var verifyKycCallback: OnrampVerifyKycCallback? = null
     private var collectPaymentCallback: OnrampCollectPaymentMethodCallback? = null
     private var authorizeCallback: OnrampAuthorizeCallback? = null
     private var checkoutCallback: OnrampCheckoutCallback? = null
     private var onrampSessionClientSecretProvider: (suspend (String) -> String)? = null
-
-    /**
-     * Callback invoked to authenticate the user before starting the onramp flow.
-     */
-    fun authenticateUserCallback(callback: OnrampAuthenticateUserCallback) = apply {
-        this.authenticateUserCallback = callback
-    }
 
     /**
      * Callback invoked when signaling the result of verifying the user's identity.
@@ -76,7 +68,6 @@ class OnrampCallbacks {
     }
 
     internal class State(
-        val authenticateUserCallback: OnrampAuthenticateUserCallback,
         val verifyIdentityCallback: OnrampVerifyIdentityCallback,
         val verifyKycCallback: OnrampVerifyKycCallback,
         val collectPaymentCallback: OnrampCollectPaymentMethodCallback,
@@ -87,9 +78,6 @@ class OnrampCallbacks {
 
     internal fun build(): State {
         return State(
-            authenticateUserCallback = requireNotNull(authenticateUserCallback) {
-                "authenticateUserCallback must not be null"
-            },
             verifyIdentityCallback = requireNotNull(verifyIdentityCallback) {
                 "verifyIdentityCallback must not be null"
             },
