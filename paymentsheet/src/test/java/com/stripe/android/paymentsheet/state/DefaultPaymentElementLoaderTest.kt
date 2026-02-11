@@ -16,6 +16,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.customersheet.FakeStripeRepository
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.googlepaylauncher.injection.GooglePayRepositoryFactory
@@ -4321,6 +4322,7 @@ internal class DefaultPaymentElementLoaderTest {
         val testDispatcher = UnconfinedTestDispatcher()
         val eventReporter = FakeLoadingEventReporter()
         val prefsRepository = FakePrefsRepository()
+        val stripeRepository = FakeStripeRepository()
 
         @Suppress("UNCHECKED_CAST")
         val paymentMethodTypeCaptor = ArgumentCaptor.forClass(List::class.java)
@@ -4330,6 +4332,7 @@ internal class DefaultPaymentElementLoaderTest {
             testDispatcher = testDispatcher,
             eventReporter = eventReporter,
             prefsRepository = prefsRepository,
+            stripeRepository = stripeRepository,
             paymentMethodTypeCaptor = paymentMethodTypeCaptor,
         ).apply {
             runTest {
@@ -4348,6 +4351,7 @@ internal class DefaultPaymentElementLoaderTest {
         val testDispatcher: TestDispatcher,
         val eventReporter: FakeLoadingEventReporter,
         val prefsRepository: FakePrefsRepository,
+        val stripeRepository: FakeStripeRepository,
         val paymentMethodTypeCaptor: ArgumentCaptor<List<PaymentMethod.Type>>,
     )
 
@@ -4402,6 +4406,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         return DefaultPaymentElementLoader(
+            stripeRepository = stripeRepository,
             prefsRepositoryFactory = { prefsRepository },
             googlePayRepositoryFactory = object : GooglePayRepositoryFactory {
                 override fun invoke(
