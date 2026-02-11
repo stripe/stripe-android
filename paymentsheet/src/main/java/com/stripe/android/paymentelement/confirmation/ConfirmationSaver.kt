@@ -14,7 +14,7 @@ internal class ConfirmationSaver @Inject constructor(
     private val prefsRepositoryFactory: PrefsRepository.Factory,
 ) : ConfirmationHandler.Saver {
     override fun save(
-        stripeIntent: StripeIntent,
+        stripeIntent: StripeIntent?,
         confirmationOption: ConfirmationHandler.Option,
         alwaysSave: Boolean,
     ) {
@@ -37,21 +37,22 @@ internal class ConfirmationSaver @Inject constructor(
         }
 
         savedSelection?.let {
-            prefsRepositoryFactory.create(stripeIntent.paymentMethod?.customerId).setSavedSelection(savedSelection)
+            prefsRepositoryFactory.create(stripeIntent?.paymentMethod?.customerId).setSavedSelection(savedSelection)
         }
     }
 
     private fun savedSelectionForNew(
-        stripeIntent: StripeIntent,
+        stripeIntent: StripeIntent?,
         confirmationOption: PaymentMethodConfirmationOption.New,
         alwaysSave: Boolean,
     ): SavedSelection? {
-        return stripeIntent.paymentMethod.takeIf {
+        return stripeIntent?.paymentMethod.takeIf {
             val setupFutureUsageSet = when (stripeIntent) {
                 is PaymentIntent -> {
                     stripeIntent.isSetupFutureUsageSet(confirmationOption.createParams.typeCode)
                 }
                 is SetupIntent -> true
+                null -> false
             }
             alwaysSave || confirmationOption.shouldSave || setupFutureUsageSet
         }?.let { method ->

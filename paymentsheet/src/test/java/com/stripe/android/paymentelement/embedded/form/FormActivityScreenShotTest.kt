@@ -124,7 +124,7 @@ internal class FormActivityScreenShotTest {
             viewModelScope = TestScope(UnconfinedTestDispatcher()),
             formActivityStateHelper = stateHolder,
             tapToAddHelper = FakeTapToAddHelper.noOp(),
-            eventReporter = eventReporter
+            eventReporter = eventReporter,
         ).create()
 
         stateHolder.updateConfirmationState(confirmationState)

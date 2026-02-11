@@ -292,7 +292,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             handlePaymentCompleted(
                 deferredIntentConfirmationType = pendingResult.metadata[DeferredIntentConfirmationTypeKey],
                 finishImmediately = true,
-                intentId = pendingResult.intent.id,
+                intentId = pendingResult.intent?.id,
             )
         } else if (state.validationError != null) {
             handlePaymentSheetStateLoadFailure(state.validationError)
@@ -626,7 +626,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             is ConfirmationHandler.Result.Succeeded -> handlePaymentCompleted(
                 deferredIntentConfirmationType = result.metadata[DeferredIntentConfirmationTypeKey],
                 finishImmediately = false,
-                intentId = result.intent.id,
+                intentId = result.intent?.id,
             )
             is ConfirmationHandler.Result.Failed -> processConfirmationFailure(result)
             is ConfirmationHandler.Result.Canceled,

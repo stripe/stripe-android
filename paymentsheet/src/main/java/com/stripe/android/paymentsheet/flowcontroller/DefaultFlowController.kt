@@ -609,7 +609,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     eventReporter.onPaymentSuccess(
                         paymentSelection = paymentSelection,
                         deferredIntentConfirmationType = result.metadata[DeferredIntentConfirmationTypeKey],
-                        intentId = result.intent.id,
+                        intentId = result.intent?.id,
                     )
                 }
 
@@ -618,7 +618,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     deferredIntentConfirmationType = result.metadata[DeferredIntentConfirmationTypeKey],
                     shouldLog = false,
                     shouldResetOnCompleted = result.completedFullPaymentFlow,
-                    intentId = result.intent.id,
+                    intentId = result.intent?.id,
                 )
             }
             is ConfirmationHandler.Result.Failed -> {

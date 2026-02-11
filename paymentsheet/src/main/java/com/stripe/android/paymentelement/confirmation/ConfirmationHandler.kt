@@ -151,7 +151,7 @@ internal interface ConfirmationHandler {
          * state is returned as part of the result as well.
          */
         data class Succeeded(
-            val intent: StripeIntent,
+            val intent: StripeIntent?,
             val metadata: ConfirmationMetadata = MutableConfirmationMetadata(),
             val completedFullPaymentFlow: Boolean = true,
         ) : Result {
@@ -214,7 +214,7 @@ internal interface ConfirmationHandler {
 
     fun interface Saver {
         fun save(
-            stripeIntent: StripeIntent,
+            stripeIntent: StripeIntent?,
             confirmationOption: Option,
             alwaysSave: Boolean,
         )

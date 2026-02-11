@@ -7,6 +7,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.getValue
+import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
@@ -40,6 +41,9 @@ internal class FormActivity : AppCompatActivity() {
     @Inject
     lateinit var confirmationHelper: FormActivityConfirmationHelper
 
+    @Inject
+    lateinit var tapToAddHelper: TapToAddHelper
+
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,6 +59,11 @@ internal class FormActivity : AppCompatActivity() {
             activityResultCaller = this,
             lifecycleOwner = this,
         ).inject(this)
+
+            tapToAddHelper.register(
+                this,
+                this,
+            )
 
         setContent {
             StripeTheme {

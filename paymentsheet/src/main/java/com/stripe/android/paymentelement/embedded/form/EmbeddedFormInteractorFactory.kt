@@ -1,11 +1,15 @@
 package com.stripe.android.paymentelement.embedded.form
 
 import com.stripe.android.common.taptoadd.TapToAddHelper
+import com.stripe.android.common.taptoadd.TapToAddResult
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
+import com.stripe.android.paymentelement.embedded.EmbeddedResultCallbackHelper
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher.Companion.HOSTED_SURFACE_PAYMENT_ELEMENT
 import com.stripe.android.paymentsheet.FormHelper
@@ -18,6 +22,7 @@ import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class EmbeddedFormInteractorFactory @Inject constructor(
@@ -30,7 +35,33 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
     private val formActivityStateHelper: FormActivityStateHelper,
     private val tapToAddHelper: TapToAddHelper,
     private val eventReporter: EventReporter,
+//    embeddedResultCallbackHelper: EmbeddedResultCallbackHelper,
 ) {
+    init {
+        viewModelScope.launch {
+            tapToAddHelper.result.collect { result ->
+                when (result) {
+                    is TapToAddResult.Canceled -> {
+                        // This is handled elsewhere.
+                    }
+                    TapToAddResult.Complete -> {
+                        formActivityStateHelper.updateConfirmationState(
+                            ConfirmationHandler.State.Complete(
+                                ConfirmationHandler.Result.Succeeded(
+                                    intent = null,
+                                )
+                            )
+                        )
+                    }
+                    is TapToAddResult.Continue -> {
+                        embeddedSelectionHolder.set(result.paymentSelection)
+//                        embeddedResultCallbackHelper.setResult(EmbeddedPaymentElement.Result.Completed())
+                    }
+                }
+            }
+        }
+    }
+
     fun create(): DefaultVerticalModeFormInteractor {
         val formHelper = embeddedFormHelperFactory.create(
             coroutineScope = viewModelScope,

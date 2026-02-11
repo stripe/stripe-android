@@ -93,7 +93,7 @@ internal interface FormActivityViewModelModule {
     @Binds
     fun bindsPrefsRepositoryFactory(factory: DefaultPrefsRepository.Factory): PrefsRepository.Factory
 
-    @Binds
+    @Binds @Singleton
     fun bindsTapToAddHelperFactory(factory: DefaultTapToAddHelper.Factory): TapToAddHelper.Factory
 
     companion object {

@@ -1005,12 +1005,12 @@ internal class CustomerSheetViewModel(
     }
 
     private suspend fun onSavePaymentMethodSuccess(
-        intent: StripeIntent,
+        intent: StripeIntent?,
         integrationMetadata: IntegrationMetadata.CustomerSheet,
     ) {
         val analyticsAttachmentStyle = integrationMetadata.attachmentStyle.toAnalyticsStyle()
 
-        intent.paymentMethod?.let { paymentMethod ->
+        intent?.paymentMethod?.let { paymentMethod ->
             if (paymentMethod.isUnverifiedUSBankAccount()) {
                 _result.tryEmit(
                     InternalCustomerSheetResult.Selected(
