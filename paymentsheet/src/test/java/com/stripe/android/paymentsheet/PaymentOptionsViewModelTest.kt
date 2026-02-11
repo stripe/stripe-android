@@ -60,6 +60,7 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.DummyActivityResultCaller
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -1321,6 +1322,7 @@ internal class PaymentOptionsViewModelTest {
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             tapToAddHelperFactory = tapToAddHelperFactory,
             mode = EventReporter.Mode.Complete,
+            errorReporter = FakeErrorReporter(),
         )
     }
 
