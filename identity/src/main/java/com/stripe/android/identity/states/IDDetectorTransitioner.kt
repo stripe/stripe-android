@@ -413,10 +413,12 @@ internal class IDDetectorTransitioner(
 
     internal companion object {
         const val DEFAULT_IOU_THRESHOLD = 0.95f
+        const val DEFAULT_TIME_REQUIRED = 1000
         const val DEFAULT_ALLOWED_UNMATCHED_FRAME = 1
         const val DEFAULT_DISPLAY_SATISFIED_DURATION = 0
         const val DEFAULT_DISPLAY_UNSATISFIED_DURATION = 0
         const val DEFAULT_BLUR_THRESHOLD = 0f
+        const val MIN_BEST_FRAME_WINDOW_MS = 1000L
 
         // Only show blur feedback when blur is worse than this fraction of the gating threshold
         const val BLUR_FEEDBACK_RATIO = 0.85f
