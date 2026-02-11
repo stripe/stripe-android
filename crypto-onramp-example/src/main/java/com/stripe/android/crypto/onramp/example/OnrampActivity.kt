@@ -832,7 +832,7 @@ private fun AuthenticatedOperationsScreen(
             }
 
             Image(
-                painter = painterResource(selectedPaymentData.iconRes),
+                painter = selectedPaymentData.iconPainter,
                 contentDescription = selectedPaymentData.label,
                 modifier = Modifier
                     .height(24.dp)
@@ -970,6 +970,15 @@ private fun AuthenticatedOperationsScreen(
                 .padding(bottom = 8.dp)
         ) {
             Text("Collect Bank Account")
+        }
+
+        Button(
+            onClick = { onCollectPayment(PaymentMethodType.CardAndBankAccount) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp)
+        ) {
+            Text("Collect Card or Bank Account")
         }
 
         Button(

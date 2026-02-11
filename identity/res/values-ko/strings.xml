@@ -18,6 +18,8 @@
   <string name="stripe_back_of_id">신분증 뒷면</string>
   <!-- Title of ID document scanning screen when scanning the back of an identity card -->
   <string name="stripe_back_of_id_document">신분증 뒷면</string>
+  <!-- Instructional text when the back of the ID is not detected while scanning back -->
+  <string name="stripe_back_of_id_not_detected">신분증 뒷면이 감지되지 않음</string>
   <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
   <string name="stripe_back_of_id_selected">신분증 뒷면 선택됨</string>
   <!-- Title displayed when requesting camera permissions -->
@@ -122,6 +124,8 @@
   <string name="stripe_front_of_id">신분증 앞면</string>
   <!-- Title of ID document scanning screen when scanning the front of an identity card -->
   <string name="stripe_front_of_id_document">신분증 앞면</string>
+  <!-- Instructional text when the front of the ID is not detected while scanning front -->
+  <string name="stripe_front_of_id_not_detected">신분증 앞면이 감지되지 않음</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">신분증 앞면 선택됨</string>
   <!-- Description of front of passport image -->
@@ -164,6 +168,8 @@
   <string name="stripe_move_closer">신분증을 더 가까이 이동</string>
   <!-- Instructional text when camera is too close to a document -->
   <string name="stripe_move_farther">신분증을 더 뒤로 이동</string>
+  <!-- Instructional text when the document is not centered in the frame -->
+  <string name="stripe_move_id_to_center">신분증을 화면 중앙에 맞춤</string>
   <!-- Label for the ID field to collect NRIC or FIN for Singaporean ID -->
   <string name="stripe_nric_or_fin">NRIC 또는 FIN</string>
   <!-- No comment provided by engineer. -->
@@ -197,7 +203,7 @@
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">프레임 중앙에 얼굴을 놓으십시오.</string>
   <!-- Instructional text when the document is too blurry -->
-  <string name="stripe_reduce_blur">신분증의 초점이 맞지 않음</string>
+  <string name="stripe_reduce_blur_2">이미지가 흐릿합니다. 휴대폰을 안정적으로 잡고 다시 시도해 보십시오.</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">세부사항이 보이지 않음</string>
   <string name="stripe_reduce_glare_2">반사광을 줄이고 신분증이 보이도록 해 주십시오</string>

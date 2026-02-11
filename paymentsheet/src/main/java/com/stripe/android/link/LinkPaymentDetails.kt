@@ -12,12 +12,9 @@ import kotlinx.parcelize.Parcelize
  * needed to confirm the Stripe Intent.
  *
  * @param paymentDetails The [ConsumerPaymentDetails.PaymentDetails] selected by the user
- * @param paymentMethodCreateParams The [PaymentMethodCreateParams] to be used to confirm
- *                                  the Stripe Intent.
  */
 internal sealed class LinkPaymentDetails(
-    open val paymentDetails: ConsumerPaymentDetails.PaymentDetails,
-    open val paymentMethodCreateParams: PaymentMethodCreateParams
+    open val paymentDetails: ConsumerPaymentDetails.PaymentDetails
 ) : Parcelable {
 
     /**
@@ -26,21 +23,23 @@ internal sealed class LinkPaymentDetails(
     @Parcelize
     class Saved(
         override val paymentDetails: ConsumerPaymentDetails.Passthrough,
-        override val paymentMethodCreateParams: PaymentMethodCreateParams,
         val paymentMethod: PaymentMethod,
-    ) : LinkPaymentDetails(paymentDetails, paymentMethodCreateParams)
+    ) : LinkPaymentDetails(paymentDetails)
 
     /**
      * A new [ConsumerPaymentDetails.PaymentDetails], whose data was just collected from the user.
      * Must hold the original [PaymentMethodCreateParams] too in case we need to populate the form
      * fields with the user-entered values.
+     *
+     * @param confirmParams The [PaymentMethodCreateParams] to be used to confirm the Stripe Intent.
+     * @param originalParams The original [PaymentMethodCreateParams] created from the customer's input.
      */
     @Parcelize
     class New(
         override val paymentDetails: ConsumerPaymentDetails.PaymentDetails,
-        override val paymentMethodCreateParams: PaymentMethodCreateParams,
-        val originalParams: PaymentMethodCreateParams
-    ) : LinkPaymentDetails(paymentDetails, paymentMethodCreateParams) {
+        val confirmParams: PaymentMethodCreateParams,
+        val originalParams: PaymentMethodCreateParams,
+    ) : LinkPaymentDetails(paymentDetails) {
 
         /**
          * Build a flat map of the values entered by the user when creating this payment method,
