@@ -1133,51 +1133,72 @@ class ConfirmationTokenConfirmationInterceptorTest {
     }
 
     @Test
-    fun `Saved PM - includes radarOptions when hCaptchaToken is provided for CSC flow`() {
-        runRadarOptionsTest(
-            hCaptchaToken = "test_hcaptcha_token",
-            attestationToken = null,
-        )
-    }
-
-    @Test
-    fun `Saved PM - includes radarOptions when attestationToken is provided for CSC flow`() {
-        runRadarOptionsTest(
-            hCaptchaToken = null,
-            attestationToken = "test_attestation_token",
-        )
-    }
-
-    @Test
-    fun `Saved PM - includes radarOptions when both tokens are provided for CSC flow`() {
-        runRadarOptionsTest(
+    fun `Saved PM - Returns confirm params with all challenge state fields`() {
+        val challengeState = ConfirmationChallengeState(
             hCaptchaToken = "test_hcaptcha_token",
             attestationToken = "test_attestation_token",
+            appId = "com.stripe.test",
+        )
+
+        val confirmParams = interceptWithSavedPaymentMethodForCSC(challengeState)
+
+        assertRadarOptionsEquals(
+            confirmParams = confirmParams,
+            expectedRadarOptions = challengeState.toExpectedRadarOptions()
         )
     }
 
     @Test
-    fun `Saved PM - includes radarOptions with empty values when no challenge tokens for CSC flow`() {
-        runRadarOptionsTest(
-            hCaptchaToken = null,
-            attestationToken = null,
+    fun `Saved PM - Returns confirm params with null attestationToken when not provided`() {
+        val challengeState = ConfirmationChallengeState(hCaptchaToken = "test_hcaptcha_token")
+
+        val confirmParams = interceptWithSavedPaymentMethodForCSC(challengeState)
+
+        assertRadarOptionsEquals(
+            confirmParams = confirmParams,
+            expectedRadarOptions = challengeState.toExpectedRadarOptions()
         )
     }
 
-    private fun runRadarOptionsTest(
-        hCaptchaToken: String?,
-        attestationToken: String?,
-    ) {
+    @Test
+    fun `Saved PM - Returns confirm with RadarOptions when both tokens are null`() {
+        val challengeState = ConfirmationChallengeState()
+
+        val confirmParams = interceptWithSavedPaymentMethodForCSC(challengeState)
+
+        assertRadarOptionsEquals(
+            confirmParams = confirmParams,
+            expectedRadarOptions = challengeState.toExpectedRadarOptions()
+        )
+    }
+
+    @Test
+    fun `Saved PM - Returns confirm params with only attestationToken`() {
+        val challengeState = ConfirmationChallengeState(
+            attestationToken = "attestation_token_123",
+            appId = "com.stripe.test.app",
+        )
+
+        val confirmParams = interceptWithSavedPaymentMethodForCSC(challengeState)
+
+        assertRadarOptionsEquals(
+            confirmParams = confirmParams,
+            expectedRadarOptions = challengeState.toExpectedRadarOptions()
+        )
+    }
+
+    private fun interceptWithSavedPaymentMethodForCSC(
+        challengeState: ConfirmationChallengeState
+    ): ConfirmPaymentIntentParams? {
+        var confirmParams: ConfirmPaymentIntentParams? = null
+
         runConfirmationTokenInterceptorScenario(
             retrievedIntentStatus = StripeIntent.Status.RequiresConfirmation,
         ) { interceptor ->
             val confirmationOption = PaymentMethodConfirmationOption.Saved(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = null,
-                confirmationChallengeState = ConfirmationChallengeState(
-                    hCaptchaToken = hCaptchaToken,
-                    attestationToken = attestationToken,
-                ),
+                confirmationChallengeState = challengeState,
             )
 
             val nextAction = interceptor.intercept(
@@ -1188,15 +1209,19 @@ class ConfirmationTokenConfirmationInterceptorTest {
 
             assertThat(nextAction)
                 .isInstanceOf<ConfirmationDefinition.Action.Launch<IntentConfirmationDefinition.Args>>()
-            assertThat(nextAction.asConfirmParams<ConfirmPaymentIntentParams>()?.radarOptions)
-                .isEqualTo(
-                    RadarOptionsFactory.create(
-                        hCaptchaToken = hCaptchaToken,
-                        verificationObject = AndroidVerificationObject(androidVerificationToken = attestationToken),
-                    )
-                )
+            confirmParams = nextAction.asConfirmParams()
         }
+
+        return confirmParams
     }
+
+    private fun ConfirmationChallengeState.toExpectedRadarOptions() = RadarOptionsFactory.create(
+        hCaptchaToken = hCaptchaToken,
+        verificationObject = AndroidVerificationObject(
+            androidVerificationToken = attestationToken,
+            appId = appId
+        )
+    )
 
     private fun runConfirmationTokenInterceptorScenario(
         observedParams: Turbine<ConfirmationTokenParams> = Turbine(),

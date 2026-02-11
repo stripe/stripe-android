@@ -531,9 +531,9 @@ internal class PassiveChallengeConfirmationDefinitionTest {
                 createParams = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.createParams.copy(
                     radarOptions = RadarOptions(
                         androidVerificationObject = AndroidVerificationObject(
-                        androidVerificationToken = attestationToken,
-                        appId = null
-                    ),
+                            androidVerificationToken = attestationToken,
+                            appId = null
+                        ),
                         hCaptchaToken = null
                     )
                 )
@@ -550,9 +550,9 @@ internal class PassiveChallengeConfirmationDefinitionTest {
             radarOptions = RadarOptions(
                 hCaptchaToken = testToken,
                 androidVerificationObject = AndroidVerificationObject(
-                        androidVerificationToken = attestationToken,
-                        appId = null
-                    )
+                    androidVerificationToken = attestationToken,
+                    appId = null
+                )
             )
         )
         assertThat(option.createParams).isEqualTo(expectedCreateParams)

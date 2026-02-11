@@ -279,8 +279,6 @@ internal class AttestationConfirmationDefinitionTest {
                 )
             ),
             confirmationChallengeState = ConfirmationChallengeState(
-                attestationToken = testToken,
-                appId = APP_ID,
                 attestationComplete = true
             )
         )
@@ -359,7 +357,10 @@ internal class AttestationConfirmationDefinitionTest {
 
         // When attestation fails, continue without the token but mark attestation as complete
         val expectedOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED.copy(
-            confirmationChallengeState = ConfirmationChallengeState(attestationComplete = true)
+            confirmationChallengeState = ConfirmationChallengeState(
+                attestationComplete = true,
+                appId = APP_ID
+            )
         )
         assertThat(nextStepResult.confirmationOption).isEqualTo(expectedOption)
         assertThat(nextStepResult.arguments).isEqualTo(CONFIRMATION_PARAMETERS)

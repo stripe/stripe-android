@@ -384,182 +384,69 @@ class DeferredIntentConfirmationInterceptorTest {
         }
 
     @Test
-    fun `Returns confirm params with attestationToken for Saved payment method`() = runTest {
-        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        val attestationToken = "test_attestation_token"
-        val hCaptchaToken = "test_hcaptcha_token"
-
-        val interceptor = createIntentConfirmationInterceptor(
-            integrationMetadata = defaultIntegrationMetadata,
-            stripeRepository = object : AbsFakeStripeRepository() {
-                override suspend fun retrieveStripeIntent(
-                    clientSecret: String,
-                    options: ApiRequest.Options,
-                    expandFields: List<String>
-                ): Result<StripeIntent> {
-                    return Result.success(
-                        PaymentIntentFixtures.PI_SUCCEEDED.copy(
-                            status = StripeIntent.Status.RequiresConfirmation,
-                        )
-                    )
-                }
-            },
-            intentCreationCallbackProvider = {
-                succeedingCreateIntentCallback(paymentMethod)
-            },
+    fun `Returns confirm params with all challenge state fields for Saved payment method`() = runTest {
+        val challengeState = ConfirmationChallengeState(
+            hCaptchaToken = "test_hcaptcha_token",
+            attestationToken = "test_attestation_token",
+            appId = "com.stripe.test",
         )
 
-        val nextStep = interceptor.intercept(
-            intent = PaymentIntentFactory.create(),
-            confirmationOption = PaymentMethodConfirmationOption.Saved(
-                paymentMethod = paymentMethod,
-                optionsParams = null,
-                confirmationChallengeState = ConfirmationChallengeState(
-                    hCaptchaToken = hCaptchaToken,
-                    attestationToken = attestationToken,
-                ),
-            ),
-            shippingValues = null,
+        val confirmParams = interceptWithSavedPaymentMethod(challengeState)
+
+        assertRadarOptionsEquals(
+            confirmParams = confirmParams,
+            expectedRadarOptions = challengeState.toExpectedRadarOptions()
         )
-
-        val confirmParams = nextStep.asConfirmParams<ConfirmPaymentIntentParams>()
-
-        assertThat(confirmParams?.radarOptions)
-            .isEqualTo(
-                RadarOptionsFactory.create(
-                    hCaptchaToken = hCaptchaToken,
-                    verificationObject = AndroidVerificationObject(
-                        androidVerificationToken = attestationToken,
-                        appId = null
-                    )
-                )
-            )
     }
 
     @Test
     fun `Returns confirm params with null attestationToken when not provided for Saved payment method`() = runTest {
-        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        val hCaptchaToken = "test_hcaptcha_token"
+        val challengeState = ConfirmationChallengeState(hCaptchaToken = "test_hcaptcha_token")
 
-        val interceptor = createIntentConfirmationInterceptor(
-            integrationMetadata = defaultIntegrationMetadata,
-            stripeRepository = object : AbsFakeStripeRepository() {
-                override suspend fun retrieveStripeIntent(
-                    clientSecret: String,
-                    options: ApiRequest.Options,
-                    expandFields: List<String>
-                ): Result<StripeIntent> {
-                    return Result.success(
-                        PaymentIntentFixtures.PI_SUCCEEDED.copy(
-                            status = StripeIntent.Status.RequiresConfirmation,
-                        )
-                    )
-                }
-            },
-            intentCreationCallbackProvider = {
-                succeedingCreateIntentCallback(paymentMethod)
-            },
+        val confirmParams = interceptWithSavedPaymentMethod(challengeState)
+
+        assertRadarOptionsEquals(
+            confirmParams = confirmParams,
+            expectedRadarOptions = challengeState.toExpectedRadarOptions()
         )
-
-        val nextStep = interceptor.intercept(
-            intent = PaymentIntentFactory.create(),
-            confirmationOption = PaymentMethodConfirmationOption.Saved(
-                paymentMethod = paymentMethod,
-                optionsParams = null,
-                confirmationChallengeState = ConfirmationChallengeState(
-                    hCaptchaToken = hCaptchaToken,
-                ),
-            ),
-            shippingValues = null,
-        )
-
-        val confirmParams = nextStep.asConfirmParams<ConfirmPaymentIntentParams>()
-
-        assertThat(confirmParams?.radarOptions)
-            .isEqualTo(
-                RadarOptionsFactory.create(
-                    hCaptchaToken = hCaptchaToken,
-                    verificationObject = AndroidVerificationObject(
-                        androidVerificationToken = null,
-                        appId = null
-                    )
-                )
-            )
     }
 
     @Test
     fun `Returns confirm with RadarOptions when both tokens are null for Saved payment method`() = runTest {
-        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val challengeState = ConfirmationChallengeState()
 
-        val interceptor = createIntentConfirmationInterceptor(
-            integrationMetadata = defaultIntegrationMetadata,
-            stripeRepository = object : AbsFakeStripeRepository() {
-                override suspend fun retrieveStripeIntent(
-                    clientSecret: String,
-                    options: ApiRequest.Options,
-                    expandFields: List<String>
-                ): Result<StripeIntent> {
-                    return Result.success(
-                        PaymentIntentFixtures.PI_SUCCEEDED.copy(
-                            status = StripeIntent.Status.RequiresConfirmation,
-                        )
-                    )
-                }
-            },
-            intentCreationCallbackProvider = {
-                succeedingCreateIntentCallback(paymentMethod)
-            },
+        val confirmParams = interceptWithSavedPaymentMethod(challengeState)
+
+        assertRadarOptionsEquals(
+            confirmParams = confirmParams,
+            expectedRadarOptions = challengeState.toExpectedRadarOptions()
         )
-
-        val nextStep = interceptor.intercept(
-            intent = PaymentIntentFactory.create(),
-            confirmationOption = PaymentMethodConfirmationOption.Saved(
-                paymentMethod = paymentMethod,
-                optionsParams = null,
-            ),
-            shippingValues = null,
-        )
-
-        val confirmParams = nextStep.asConfirmParams<ConfirmPaymentIntentParams>()
-
-        assertThat(confirmParams?.radarOptions)
-            .isEqualTo(
-                RadarOptionsFactory.create(
-                    hCaptchaToken = null,
-                    verificationObject = AndroidVerificationObject(
-                        androidVerificationToken = null,
-                        appId = null
-                    )
-                )
-            )
     }
 
     @Test
-    fun `attestationToken flows correctly from Saved option to confirm params through creation flow`() = runTest {
+    fun `Returns confirm params with only attestationToken for Saved payment method`() = runTest {
+        val challengeState = ConfirmationChallengeState(
+            attestationToken = "attestation_token_123",
+            appId = "com.stripe.test.app",
+        )
+
+        val confirmParams = interceptWithSavedPaymentMethod(challengeState)
+
+        assertRadarOptionsEquals(
+            confirmParams = confirmParams,
+            expectedRadarOptions = challengeState.toExpectedRadarOptions()
+        )
+    }
+
+    private suspend fun interceptWithSavedPaymentMethod(
+        challengeState: ConfirmationChallengeState = ConfirmationChallengeState()
+    ): ConfirmPaymentIntentParams? {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        val attestationToken = "attestation_token_123"
 
         val interceptor = createIntentConfirmationInterceptor(
             integrationMetadata = defaultIntegrationMetadata,
-            stripeRepository = object : AbsFakeStripeRepository() {
-                override suspend fun retrieveStripeIntent(
-                    clientSecret: String,
-                    options: ApiRequest.Options,
-                    expandFields: List<String>
-                ): Result<StripeIntent> {
-                    return Result.success(
-                        PaymentIntentFixtures.PI_SUCCEEDED.copy(
-                            status = StripeIntent.Status.RequiresConfirmation,
-                        )
-                    )
-                }
-            },
-            intentCreationCallbackProvider = {
-                CreateIntentCallback { pm, _ ->
-                    assertThat(pm).isEqualTo(paymentMethod)
-                    CreateIntentResult.Success("pi_123_secret_456")
-                }
-            },
+            stripeRepository = createDeferredIntentStripeRepository(),
+            intentCreationCallbackProvider = { succeedingCreateIntentCallback(paymentMethod) },
         )
 
         val nextStep = interceptor.intercept(
@@ -567,26 +454,37 @@ class DeferredIntentConfirmationInterceptorTest {
             confirmationOption = PaymentMethodConfirmationOption.Saved(
                 paymentMethod = paymentMethod,
                 optionsParams = null,
-                confirmationChallengeState = ConfirmationChallengeState(
-                    attestationToken = attestationToken,
-                ),
+                confirmationChallengeState = challengeState,
             ),
             shippingValues = null,
         )
 
-        val confirmParams = nextStep.asConfirmParams<ConfirmPaymentIntentParams>()
+        return nextStep.asConfirmParams()
+    }
 
-        assertThat(confirmParams?.radarOptions)
-            .isEqualTo(
-                RadarOptionsFactory.create(
-                    hCaptchaToken = null,
-                    verificationObject = AndroidVerificationObject(
-                        androidVerificationToken = attestationToken,
-                        appId = null
+    private fun createDeferredIntentStripeRepository(): StripeRepository {
+        return object : AbsFakeStripeRepository() {
+            override suspend fun retrieveStripeIntent(
+                clientSecret: String,
+                options: ApiRequest.Options,
+                expandFields: List<String>
+            ): Result<StripeIntent> {
+                return Result.success(
+                    PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                        status = StripeIntent.Status.RequiresConfirmation,
                     )
                 )
-            )
+            }
+        }
     }
+
+    private fun ConfirmationChallengeState.toExpectedRadarOptions() = RadarOptionsFactory.create(
+        hCaptchaToken = hCaptchaToken,
+        verificationObject = AndroidVerificationObject(
+            androidVerificationToken = attestationToken,
+            appId = appId
+        )
+    )
 }
 
 internal class TestException(message: String? = null) : Exception(message) {

@@ -77,7 +77,8 @@ internal class AttestationConfirmationActivityTest {
                     RadarOptionsFactory.create(
                         hCaptchaToken = null,
                         verificationObject = AndroidVerificationObject(
-                            androidVerificationToken = testToken
+                            androidVerificationToken = testToken,
+                            appId = "com.stripe.android.paymentsheet.test"
                         )
                     )
                 )

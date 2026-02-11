@@ -6,6 +6,7 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.common.taptoadd.ui.DefaultTapToAddCollectingInteractor
 import com.stripe.android.common.taptoadd.ui.TapToAddCollectingInteractor
 import com.stripe.android.core.injection.CoreCommonModule
@@ -43,6 +44,7 @@ import javax.inject.Singleton
 
 @Component(
     modules = [
+        ApplicationIdModule::class,
         CoreCommonModule::class,
         CoroutineContextModule::class,
         ConfirmationHandlerModule::class,

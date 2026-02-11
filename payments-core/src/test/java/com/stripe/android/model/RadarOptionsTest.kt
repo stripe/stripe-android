@@ -36,7 +36,8 @@ internal class RadarOptionsTest {
         assertThat(radarOptions.toParamMap()).isEqualTo(
             mapOf(
                 "android_verification_object" to mapOf(
-                    "android_verification_token" to "test_verification_token"
+                    "android_verification_token" to "test_verification_token",
+                    "app_id" to "com.stripe.app"
                 )
             )
         )
@@ -50,7 +51,8 @@ internal class RadarOptionsTest {
             mapOf(
                 "hcaptcha_token" to "test_token",
                 "android_verification_object" to mapOf(
-                    "android_verification_token" to "test_verification_token"
+                    "android_verification_token" to "test_verification_token",
+                    "app_id" to "com.stripe.app"
                 )
             )
         )

@@ -158,17 +158,24 @@ internal fun stripeRepositoryReturning(
     }
 }
 
+internal fun assertRadarOptionsEquals(
+    confirmParams: ConfirmStripeIntentParams?,
+    expectedRadarOptions: RadarOptions
+) {
+    assertThat(confirmParams?.radarOptions()).isEqualTo(expectedRadarOptions)
+}
+
 internal fun assertRadarOptionsEquals(confirmParams: ConfirmStripeIntentParams?, expectedToken: String) {
-    assertThat(confirmParams?.radarOptions())
-        .isEqualTo(
-            RadarOptionsFactory.create(
-                hCaptchaToken = expectedToken,
-                verificationObject = AndroidVerificationObject(
-                    androidVerificationToken = null,
-                    appId = null
-                )
+    assertRadarOptionsEquals(
+        confirmParams = confirmParams,
+        expectedRadarOptions = RadarOptionsFactory.create(
+            hCaptchaToken = expectedToken,
+            verificationObject = AndroidVerificationObject(
+                androidVerificationToken = null,
+                appId = null
             )
         )
+    )
 }
 
 internal fun assertRadarOptionsIsNull(confirmParams: ConfirmStripeIntentParams?) {
