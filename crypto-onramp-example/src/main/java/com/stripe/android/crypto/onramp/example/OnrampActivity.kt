@@ -973,6 +973,15 @@ private fun AuthenticatedOperationsScreen(
         }
 
         Button(
+            onClick = { onCollectPayment(PaymentMethodType.GooglePay) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp)
+        ) {
+            Text("Google Pay")
+        }
+
+        Button(
             onClick = onCreatePaymentToken,
             modifier = Modifier
                 .testTag(CREATE_CRYPTO_TOKEN_BUTTON_TAG)

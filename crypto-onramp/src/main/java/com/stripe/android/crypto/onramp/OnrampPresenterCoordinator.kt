@@ -32,6 +32,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.stripe.android.googlepaylauncher.GooglePayEnvironment
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 
 @OnrampPresenterScope
 internal class OnrampPresenterCoordinator @Inject constructor(
@@ -50,6 +52,29 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         presentPaymentMethodsCallback = ::handlePresentPaymentResult,
         authenticationCallback = ::handleAuthenticationResult,
         authorizeCallback = ::handleAuthorizeResult
+    )
+
+    private var googlePayIsReady = false
+
+    private val googlePayPaymentMethodLauncher = GooglePayPaymentMethodLauncher(
+        activity = activity,
+        config = GooglePayPaymentMethodLauncher.Config(
+            environment = GooglePayEnvironment.Test, // or Production
+            merchantCountryCode = "US",
+            merchantName = "Stripe",
+            isEmailRequired = false,
+            existingPaymentMethodRequired = false,
+            allowCreditCards = true,
+        ),
+        readyCallback = { isReady ->
+            googlePayIsReady = isReady
+        },
+        resultCallback = { result ->
+            coroutineScope.launch {
+                print(result)
+                //interactor.onGooglePayResult(result)
+            }
+        }
     )
 
     private var identityVerificationSheet: IdentityVerificationSheet? = null
@@ -151,11 +176,23 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     }
 
     fun collectPaymentMethod(type: PaymentMethodType) {
-        interactor.onCollectPaymentMethod(type)
-        linkPresenter.presentPaymentMethodsForOnramp(
-            email = clientEmail(),
-            paymentMethodType = type.toLinkType()
-        )
+        when (type) {
+            PaymentMethodType.Card, PaymentMethodType.BankAccount -> {
+                interactor.onCollectPaymentMethod(type)
+                linkPresenter.presentPaymentMethodsForOnramp(
+                    email = clientEmail(),
+                    paymentMethodType = type.toLinkType()
+                )
+            }
+            PaymentMethodType.GooglePay -> {
+                googlePayPaymentMethodLauncher.present(
+                    currencyCode = "USD",
+                    amount = /* Long minor units */ 0L,
+                    transactionId = null,
+                    label = null
+                )
+            }
+        }
     }
 
     fun authorize(linkAuthIntentId: String) {
@@ -301,4 +338,5 @@ private fun PaymentMethodType.toLinkType(): LinkController.PaymentMethodType =
     when (this) {
         PaymentMethodType.Card -> LinkController.PaymentMethodType.Card
         PaymentMethodType.BankAccount -> LinkController.PaymentMethodType.BankAccount
+        PaymentMethodType.GooglePay -> error("Google Pay is not supported in LinkController")
     }
