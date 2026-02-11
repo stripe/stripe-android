@@ -77,7 +77,7 @@ data class DeferredIntentParams(
                             deferredIntentParamsJson.optString("capture_method")
                         ),
                         paymentMethodOptionsJsonString = deferredIntentParamsJson
-                            .optString("payment_method_options")
+                            .optJSONObject("payment_method_options")?.toString()
                     )
                 }
                 "setup" -> {
