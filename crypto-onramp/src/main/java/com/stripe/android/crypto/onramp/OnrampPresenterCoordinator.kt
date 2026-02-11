@@ -16,10 +16,13 @@ import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
+import com.stripe.android.crypto.onramp.model.PaymentMethodSelection
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityArgs
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
 import com.stripe.android.crypto.onramp.ui.VerifyKycInfoActivityContract
+import com.stripe.android.googlepaylauncher.GooglePayEnvironment
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
 import com.stripe.android.model.PaymentIntent
@@ -30,8 +33,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import com.stripe.android.googlepaylauncher.GooglePayEnvironment
-import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 
 @OnrampPresenterScope
 internal class OnrampPresenterCoordinator @Inject constructor(
@@ -70,7 +71,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         resultCallback = { result ->
             coroutineScope.launch {
                 print(result)
-                //interactor.onGooglePayResult(result)
+                // interactor.onGooglePayResult(result)
             }
         }
     )
@@ -158,13 +159,15 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         }
     }
 
-    fun collectPaymentMethod(type: PaymentMethodType) {
-        when (type) {
-            PaymentMethodType.Card, PaymentMethodType.BankAccount -> {
-                interactor.onCollectPaymentMethod(type)
+    fun collectPaymentMethod(selection: PaymentMethodSelection) {
+        when (selection.type) {
+            PaymentMethodType.Card,
+            PaymentMethodType.BankAccount,
+            PaymentMethodType.CardAndBankAccount -> {
+                interactor.onCollectPaymentMethod(selection.type)
                 linkPresenter.presentPaymentMethodsForOnramp(
                     email = clientEmail(),
-                    paymentMethodType = type.toLinkType()
+                    paymentMethodType = selection.type.toLinkType()
                 )
             }
             PaymentMethodType.GooglePay -> {

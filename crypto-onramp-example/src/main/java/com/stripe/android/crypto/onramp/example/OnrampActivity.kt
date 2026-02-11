@@ -80,6 +80,7 @@ import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
+import com.stripe.android.crypto.onramp.model.PaymentMethodSelection
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.model.DateOfBirth
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -205,9 +206,9 @@ internal class OnrampActivity : ComponentActivity() {
                             onStartVerification = {
                                 onrampPresenter.verifyIdentity()
                             },
-                            onCollectPayment = { type ->
-                                viewModel.updateSelectedPaymentMethod(type)
-                                onrampPresenter.collectPaymentMethod(type)
+                            onCollectPayment = { selection ->
+                                viewModel.updateSelectedPaymentMethod(selection.type)
+                                onrampPresenter.collectPaymentMethod(selection)
                             },
                             onCreatePaymentToken = {
                                 viewModel.createCryptoPaymentToken()
@@ -422,7 +423,7 @@ internal fun OnrampScreen(
     onAuthenticateUser: (oauthScopes: String) -> Unit,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onStartVerification: () -> Unit,
-    onCollectPayment: (type: PaymentMethodType) -> Unit,
+    onCollectPayment: (type: PaymentMethodSelection) -> Unit,
     onCreatePaymentToken: () -> Unit,
     onVerifyKyc: () -> Unit,
 ) {
@@ -721,7 +722,7 @@ private fun AuthenticatedOperationsScreen(
     onCollectKYC: (KycInfo) -> Unit,
     onVerifyKyc: () -> Unit,
     onStartVerification: () -> Unit,
-    onCollectPayment: (type: PaymentMethodType) -> Unit,
+    onCollectPayment: (type: PaymentMethodSelection) -> Unit,
     onCreatePaymentToken: () -> Unit,
     onCreateSession: () -> Unit,
     onPerformCheckout: () -> Unit,
@@ -950,7 +951,7 @@ private fun AuthenticatedOperationsScreen(
         )
 
         Button(
-            onClick = { onCollectPayment(PaymentMethodType.Card) },
+            onClick = { onCollectPayment(PaymentMethodSelection.Card()) },
             modifier = Modifier
                 .testTag(COLLECT_CARD_BUTTON_TAG)
                 .fillMaxWidth()
@@ -960,7 +961,7 @@ private fun AuthenticatedOperationsScreen(
         }
 
         Button(
-            onClick = { onCollectPayment(PaymentMethodType.BankAccount) },
+            onClick = { onCollectPayment(PaymentMethodSelection.BankAccount()) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
@@ -969,7 +970,7 @@ private fun AuthenticatedOperationsScreen(
         }
 
         Button(
-            onClick = { onCollectPayment(PaymentMethodType.CardAndBankAccount) },
+            onClick = { onCollectPayment(PaymentMethodSelection.CardAndBankAccount()) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
@@ -978,7 +979,13 @@ private fun AuthenticatedOperationsScreen(
         }
 
         Button(
-            onClick = { onCollectPayment(PaymentMethodType.GooglePay) },
+            onClick = {
+                val selection = PaymentMethodSelection.GooglePay(
+                    currencyCode = "USD",
+                    amount = 0L
+                )
+                onCollectPayment(selection)
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
