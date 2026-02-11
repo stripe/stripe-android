@@ -32,11 +32,11 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
     lifecycleOwner: LifecycleOwner,
     activityResultCaller: ActivityResultCaller,
     @ViewModelScope private val coroutineScope: CoroutineScope,
-    formActivityConfirmationHandlerRegistrar: FormActivityConfirmationHandlerRegistrar
+    formActivityRegistrar: FormActivityRegistrar
 ) : FormActivityConfirmationHelper {
 
     init {
-        formActivityConfirmationHandlerRegistrar.registerAndBootstrap(
+        formActivityRegistrar.registerAndBootstrap(
             activityResultCaller,
             lifecycleOwner,
             paymentMethodMetadata

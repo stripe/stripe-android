@@ -411,13 +411,13 @@ interface StripeRepository {
     /**
      * Initialize a checkout session by calling the `/v1/payment_pages/{cs_id}/init` endpoint.
      *
-     * @param params The checkout session parameters including session ID.
+     * @param sessionId The checkout session parameters including session ID.
      * @param options API request options including the publishable key.
      * @return A [CheckoutSessionResponse] containing checkout metadata and embedded [ElementsSession].
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun initCheckoutSession(
-        params: ElementsSessionParams.CheckoutSessionType,
+        sessionId: String,
         options: ApiRequest.Options,
     ): Result<CheckoutSessionResponse>
 

@@ -61,4 +61,35 @@ data class DeferredIntentParams(
             "deferred_intent[payment_method_types][$index]" to paymentMethodType
         }
     }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    companion object {
+        fun parseModeFromJson(deferredIntentParamsJson: JSONObject): Mode? {
+            return when (deferredIntentParamsJson.optString("mode")) {
+                "payment" -> {
+                    Mode.Payment(
+                        amount = deferredIntentParamsJson.optLong("amount"),
+                        currency = deferredIntentParamsJson.optString("currency"),
+                        setupFutureUsage = StripeIntent.Usage.fromCode(
+                            deferredIntentParamsJson.optString("setup_future_usage")
+                        ),
+                        captureMethod = PaymentIntent.CaptureMethod.fromCode(
+                            deferredIntentParamsJson.optString("capture_method")
+                        ),
+                        paymentMethodOptionsJsonString = deferredIntentParamsJson
+                            .optJSONObject("payment_method_options")?.toString()
+                    )
+                }
+                "setup" -> {
+                    Mode.Setup(
+                        currency = deferredIntentParamsJson.optString("currency"),
+                        setupFutureUsage = StripeIntent.Usage.fromCode(
+                            deferredIntentParamsJson.optString("setup_future_usage")
+                        ) ?: return null
+                    )
+                }
+                else -> return null
+            }
+        }
+    }
 }

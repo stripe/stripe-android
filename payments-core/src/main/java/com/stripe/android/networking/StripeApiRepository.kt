@@ -1549,12 +1549,12 @@ class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     override suspend fun initCheckoutSession(
-        params: ElementsSessionParams.CheckoutSessionType,
+        sessionId: String,
         options: ApiRequest.Options,
     ): Result<CheckoutSessionResponse> {
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createPost(
-                url = getApiUrl("payment_pages/${params.checkoutSessionId}/init"),
+                url = getApiUrl("payment_pages/$sessionId/init"),
                 options = options,
                 params = mapOf(
                     "browser_locale" to Locale.getDefault().toLanguageTag(),
@@ -1565,7 +1565,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 ),
             ),
             jsonParser = CheckoutSessionResponseJsonParser(
-                elementsSessionParams = params,
                 isLiveMode = options.apiKeyIsLiveMode,
             ),
         )
@@ -1598,9 +1597,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 params = params,
             ),
             jsonParser = CheckoutSessionResponseJsonParser(
-                elementsSessionParams = ElementsSessionParams.CheckoutSessionType(
-                    clientSecret = "", // Not needed for confirm parsing
-                ),
                 isLiveMode = options.apiKeyIsLiveMode,
             ),
         )

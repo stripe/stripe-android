@@ -15,7 +15,6 @@ import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
-import com.stripe.android.crypto.onramp.model.OnrampAuthenticateResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
@@ -251,23 +250,6 @@ class OnrampInteractorTest {
     }
 
     @Test
-    fun testHandleAuthenticationResultSuccess() = runTest {
-        whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
-        val permissionsResult = CryptoCustomerResponse(id = "customer_123")
-        whenever(cryptoApiRepository.createCryptoCustomer(any()))
-            .thenReturn(Result.success(permissionsResult))
-
-        interactor.onLinkControllerState(mockLinkStateWithAccount())
-
-        val result = interactor.handleAuthenticationResult(LinkController.AuthenticationResult.Success)
-        assert(result is OnrampAuthenticateResult.Completed)
-
-        testAnalyticsService.assertContainsEvent(
-            OnrampAnalyticsEvent.LinkUserAuthenticationCompleted
-        )
-    }
-
-    @Test
     fun testHandleAuthorizeResultConsented() = runTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
         val permissionsResult = CryptoCustomerResponse(id = "customer_123")
@@ -336,15 +318,6 @@ class OnrampInteractorTest {
         interactor.onAuthorize()
 
         testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.LinkAuthorizationStarted)
-    }
-
-    @Test
-    fun testOnAuthenticateUser() {
-        interactor.onLinkControllerState(mockLinkStateWithAccount())
-
-        interactor.onAuthenticateUser()
-
-        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.LinkUserAuthenticationStarted)
     }
 
     @Test
@@ -554,9 +527,7 @@ class OnrampInteractorTest {
         consumerSessionClientSecret = null
     )
 
-    private fun createConfigurationState(
-        cryptoCustomerId: String? = null
-    ): OnrampConfiguration.State =
+    private fun createConfigurationState(cryptoCustomerId: String? = null): OnrampConfiguration.State =
         OnrampConfiguration()
             .merchantDisplayName("merchant-display-name")
             .publishableKey("pk_test_12345")

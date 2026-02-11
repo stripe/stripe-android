@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
@@ -14,13 +15,13 @@ import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.mock
 
-internal class DefaultFormActivityConfirmationHandlerRegistrarTest {
+internal class DefaultFormActivityRegistrarTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
 
     @Test
-    fun `registerAndBootstrap registers and bootstraps confirmation handler`() = testScenario {
+    fun `registerAndBootstrap registers and bootstraps handlers`() = testScenario {
         registrar.registerAndBootstrap(
             activityResultCaller = activityResultCaller,
             lifecycleOwner = lifecycleOwner,
@@ -28,6 +29,10 @@ internal class DefaultFormActivityConfirmationHandlerRegistrarTest {
         )
 
         with(confirmationHandler.registerTurbine.awaitItem()) {
+            assertThat(activityResultCaller).isEqualTo(activityResultCaller)
+            assertThat(lifecycleOwner).isEqualTo(lifecycleOwner)
+        }
+        with(tapToAddHelper.registerCalls.awaitItem()) {
             assertThat(activityResultCaller).isEqualTo(activityResultCaller)
             assertThat(lifecycleOwner).isEqualTo(lifecycleOwner)
         }
@@ -48,8 +53,10 @@ internal class DefaultFormActivityConfirmationHandlerRegistrarTest {
             paymentMethodMetadata = paymentMethodMetadata
         )
 
-        confirmationHandler.registerTurbine.awaitItem()
-        confirmationHandler.registerTurbine.awaitItem()
+        assertThat(confirmationHandler.registerTurbine.awaitItem()).isNotNull()
+        assertThat(confirmationHandler.registerTurbine.awaitItem()).isNotNull()
+        assertThat(tapToAddHelper.registerCalls.awaitItem()).isNotNull()
+        assertThat(tapToAddHelper.registerCalls.awaitItem()).isNotNull()
 
         confirmationHandler.bootstrapTurbine.awaitItem()
     }
@@ -59,16 +66,19 @@ internal class DefaultFormActivityConfirmationHandlerRegistrarTest {
         block: suspend Scenario.() -> Unit
     ) = runTest {
         val confirmationHandler = FakeConfirmationHandler()
+        val tapToAddHelper = FakeTapToAddHelper()
         val activityResultCaller = mock<ActivityResultCaller>()
         val lifecycleOwner = TestLifecycleOwner(coroutineDispatcher = Dispatchers.Unconfined)
 
-        val registrar = DefaultFormActivityConfirmationHandlerRegistrar(
-            confirmationHandler = confirmationHandler
+        val registrar = DefaultFormActivityRegistrar(
+            confirmationHandler = confirmationHandler,
+            tapToAddHelper = tapToAddHelper,
         )
 
         val scenario = Scenario(
             registrar = registrar,
             confirmationHandler = confirmationHandler,
+            tapToAddHelper = tapToAddHelper,
             activityResultCaller = activityResultCaller,
             lifecycleOwner = lifecycleOwner,
             paymentMethodMetadata = paymentMethodMetadata
@@ -76,11 +86,13 @@ internal class DefaultFormActivityConfirmationHandlerRegistrarTest {
 
         block(scenario)
         confirmationHandler.validate()
+        tapToAddHelper.validate()
     }
 
     private class Scenario(
-        val registrar: DefaultFormActivityConfirmationHandlerRegistrar,
+        val registrar: DefaultFormActivityRegistrar,
         val confirmationHandler: FakeConfirmationHandler,
+        val tapToAddHelper: FakeTapToAddHelper,
         val activityResultCaller: ActivityResultCaller,
         val lifecycleOwner: LifecycleOwner,
         val paymentMethodMetadata: PaymentMethodMetadata,

@@ -142,14 +142,28 @@ internal object CheckoutSessionFixtures {
             "unactivated_payment_method_types": [],
             "unverified_payment_methods_on_domain": [
               "apple_pay"
-            ],
-            "server_built_elements_session_params": {
-              "deferred_intent": {
-                "mode": "payment",
-                "amount": 999,
-                "currency": "usd",
-                "capture_method": "automatic_async"
-              }
+            ]
+          },
+          "server_built_elements_session_params": {
+            "type": "deferred_intent",
+            "locale": "en-US",
+            "deferred_intent": {
+              "mode": "payment",
+              "amount": 999,
+              "currency": "usd",
+              "capture_method": "automatic_async",
+              "payment_method_types": [
+                "card",
+                "afterpay_clearpay",
+                "alipay",
+                "klarna",
+                "link",
+                "us_bank_account",
+                "wechat_pay",
+                "cashapp",
+                "amazon_pay",
+                "crypto"
+              ]
             }
           },
           "payment_method_types": [

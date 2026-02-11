@@ -11,7 +11,6 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.crypto.onramp.di.OnrampPresenterScope
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
-import com.stripe.android.crypto.onramp.model.OnrampAuthenticateResult
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
@@ -23,7 +22,6 @@ import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
 import com.stripe.android.crypto.onramp.ui.VerifyKycInfoActivityContract
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
-import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherFactory
@@ -48,7 +46,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     private val linkPresenter = linkController.createPresenter(
         activity = activity,
         presentPaymentMethodsCallback = ::handlePresentPaymentResult,
-        authenticationCallback = ::handleAuthenticationResult,
+        authenticationCallback = { /* No-op: Authentication is not used for Onramp */ },
         authorizeCallback = ::handleAuthorizeResult
     )
 
@@ -60,9 +58,6 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         statusBarColor = StatusBarCompat.color(activity),
         callback = ::handlePaymentLauncherResult
     )
-
-    private val currentLinkAccount: LinkController.LinkAccount?
-        get() = interactor.state.value.linkControllerState?.internalLinkAccount
 
     private val verifyKycResultLauncher: ActivityResultLauncher<VerifyKycActivityArgs> =
         activity.activityResultRegistry.register(
@@ -95,18 +90,6 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                 }
             }
         )
-    }
-
-    fun authenticateUser() {
-        val email = currentLinkAccount?.email
-        if (email == null) {
-            onrampCallbacksState.authenticateUserCallback.onResult(
-                OnrampAuthenticateResult.Failed(NoLinkAccountFoundException())
-            )
-            return
-        }
-        interactor.onAuthenticateUser()
-        linkPresenter.authenticateExistingConsumer(email)
     }
 
     fun verifyIdentity() {
@@ -247,14 +230,6 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
     private fun clientEmail(): String? =
         interactor.state.value.linkControllerState?.internalLinkAccount?.email
-
-    private fun handleAuthenticationResult(result: LinkController.AuthenticationResult) {
-        coroutineScope.launch {
-            onrampCallbacksState.authenticateUserCallback.onResult(
-                interactor.handleAuthenticationResult(result)
-            )
-        }
-    }
 
     private fun handleAuthorizeResult(result: LinkController.AuthorizeResult) {
         coroutineScope.launch {

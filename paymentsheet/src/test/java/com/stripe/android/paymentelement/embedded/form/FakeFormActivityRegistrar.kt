@@ -5,7 +5,7 @@ import androidx.lifecycle.LifecycleOwner
 import app.cash.turbine.Turbine
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 
-internal class FakeFormActivityConfirmationHandlerRegistrar : FormActivityConfirmationHandlerRegistrar {
+internal class FakeFormActivityRegistrar : FormActivityRegistrar {
     val registerAndBootstrapTurbine = Turbine<RegisterCall>()
 
     override fun registerAndBootstrap(

@@ -56,14 +56,21 @@
     },
     "unactivated_payment_method_types": [],
     "session_id": "elements_session_cs_123",
-    "config_id": "cs_config_123",
-    "server_built_elements_session_params": {
-      "deferred_intent": {
-        "mode": "payment",
-        "amount": 5099,
-        "currency": "usd",
-        "capture_method": "automatic"
-      }
+    "config_id": "cs_config_123"
+  },
+  "server_built_elements_session_params": {
+    "type": "deferred_intent",
+    "locale": "en-US",
+    "deferred_intent": {
+      "mode": "payment",
+      "amount": 5099,
+      "currency": "usd",
+      "capture_method": "automatic",
+      "payment_method_types": [
+        "card",
+        "link",
+        "cashapp"
+      ]
     }
   }
 }

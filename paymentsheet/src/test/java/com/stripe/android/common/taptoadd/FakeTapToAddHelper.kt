@@ -10,11 +10,11 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 
-internal class FakeTapToAddHelper private constructor(
+internal class FakeTapToAddHelper(
     override val hasPreviouslyAttemptedCollection: Boolean = false,
 ) : TapToAddHelper {
-    private val registerCalls = Turbine<RegisterCall>()
-    private val collectCalls = Turbine<PaymentMethodMetadata>()
+    val registerCalls = Turbine<RegisterCall>()
+    val collectCalls = Turbine<PaymentMethodMetadata>()
 
     override val result: SharedFlow<TapToAddResult> =
         MutableSharedFlow<TapToAddResult>().asSharedFlow()
@@ -28,6 +28,11 @@ internal class FakeTapToAddHelper private constructor(
 
     override fun startPaymentMethodCollection(paymentMethodMetadata: PaymentMethodMetadata) {
         collectCalls.add(paymentMethodMetadata)
+    }
+
+    fun validate() {
+        registerCalls.ensureAllEventsConsumed()
+        collectCalls.ensureAllEventsConsumed()
     }
 
     class RegisterCall(
@@ -94,8 +99,7 @@ internal class FakeTapToAddHelper private constructor(
                 )
             )
 
-            helper.collectCalls.ensureAllEventsConsumed()
-            helper.registerCalls.ensureAllEventsConsumed()
+            helper.validate()
         }
 
         fun noOp() = FakeTapToAddHelper()

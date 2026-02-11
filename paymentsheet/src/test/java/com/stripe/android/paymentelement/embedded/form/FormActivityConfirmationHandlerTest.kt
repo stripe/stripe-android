@@ -72,7 +72,7 @@ internal class FormActivityConfirmationHandlerTest {
     private fun testScenario(
         block: suspend Scenario.() -> Unit
     ) = runTest {
-        val formActivityConfirmationHandlerRegistrar = FakeFormActivityConfirmationHandlerRegistrar()
+        val formActivityConfirmationHandlerRegistrar = FakeFormActivityRegistrar()
         val confirmationHandler = FakeConfirmationHandler()
         val selectionHolder = EmbeddedSelectionHolder(SavedStateHandle())
         val embeddedState = EmbeddedConfirmationStateFixtures.defaultState()
@@ -91,7 +91,7 @@ internal class FormActivityConfirmationHandlerTest {
             onClickDelegate = onClickOverrideDelegate,
             eventReporter = FakeEventReporter(),
             coroutineScope = this,
-            formActivityConfirmationHandlerRegistrar = formActivityConfirmationHandlerRegistrar,
+            formActivityRegistrar = formActivityConfirmationHandlerRegistrar,
         )
 
         assertThat(formActivityConfirmationHandlerRegistrar.registerAndBootstrapTurbine.awaitItem()).isNotNull()
