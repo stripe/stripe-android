@@ -38,6 +38,7 @@ internal class TestCheckoutSession : BasePlaygroundTest() {
         settings[CheckoutModeSettingsDefinition] = CheckoutMode.PAYMENT
         settings[MerchantSettingsDefinition] = Merchant.US
         settings[CurrencySettingsDefinition] = Currency.USD
+        settings[CheckoutSessionSaveSettingsDefinition] = false
     }
 
     /**
