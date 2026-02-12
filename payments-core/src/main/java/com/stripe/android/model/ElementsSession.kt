@@ -31,12 +31,6 @@ data class ElementsSession(
     val elementsSessionConfigId: String?,
     val accountId: String?,
     val merchantId: String?,
-    /**
-     * Save payment method offer configuration from the checkout session init response.
-     * Controls whether the "Save for future use" checkbox is shown and its initial state.
-     * This is only populated for checkout session flows.
-     */
-    val checkoutSessionOfferSave: CheckoutSessionResponse.SavedPaymentMethodsOfferSave? = null,
 ) : StripeModel {
 
     val linkPassthroughModeEnabled: Boolean

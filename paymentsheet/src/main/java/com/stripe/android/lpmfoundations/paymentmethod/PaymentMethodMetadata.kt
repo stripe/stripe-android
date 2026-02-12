@@ -369,6 +369,7 @@ internal data class PaymentMethodMetadata(
             integrationMetadata: IntegrationMetadata,
             analyticsMetadata: AnalyticsMetadata,
             isTapToAddSupported: Boolean,
+            checkoutOfferSave: CheckoutSessionResponse.SavedPaymentMethodsOfferSave? = null,
         ): PaymentMethodMetadata {
             val linkSettings = elementsSession.linkSettings
             return PaymentMethodMetadata(
@@ -396,7 +397,9 @@ internal data class PaymentMethodMetadata(
                 customerMetadata = customerMetadata,
                 sharedDataSpecs = sharedDataSpecs,
                 externalPaymentMethodSpecs = externalPaymentMethodSpecs,
-                paymentMethodSaveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),
+                paymentMethodSaveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(
+                    checkoutOfferSave = checkoutOfferSave,
+                ),
                 linkConfiguration = configuration.link,
                 linkMode = linkSettings?.linkMode,
                 linkStateResult = linkStateResult,
@@ -423,7 +426,7 @@ internal data class PaymentMethodMetadata(
                 analyticsMetadata = analyticsMetadata,
                 experimentsData = elementsSession.experimentsData,
                 isTapToAddSupported = isTapToAddSupported,
-                checkoutSessionSaveAccepted = elementsSession.checkoutSessionOfferSave?.status ==
+                checkoutSessionSaveAccepted = checkoutOfferSave?.status ==
                     CheckoutSessionResponse.SavedPaymentMethodsOfferSave.Status.ACCEPTED,
             )
         }

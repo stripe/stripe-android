@@ -1,11 +1,14 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.model.CheckoutSessionResponse
 import com.stripe.android.model.ElementsSession
 
-internal fun ElementsSession.toPaymentSheetSaveConsentBehavior(): PaymentMethodSaveConsentBehavior {
+internal fun ElementsSession.toPaymentSheetSaveConsentBehavior(
+    checkoutOfferSave: CheckoutSessionResponse.SavedPaymentMethodsOfferSave? = null,
+): PaymentMethodSaveConsentBehavior {
     // Checkout session explicit save behavior takes priority
-    checkoutSessionOfferSave?.let { offerSave ->
+    checkoutOfferSave?.let { offerSave ->
         return if (offerSave.enabled) {
             PaymentMethodSaveConsentBehavior.Enabled
         } else {

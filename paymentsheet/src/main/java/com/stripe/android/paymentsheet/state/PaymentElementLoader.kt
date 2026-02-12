@@ -285,11 +285,14 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         }
 
         val savedPaymentMethodSelection = retrieveSavedPaymentMethodSelection(configuration)
-        val (elementsSession, checkoutSessionCustomer) = retrieveElementsSession(
+        val checkoutSession = retrieveCheckoutSession(initializationMode)
+        val elementsSession = retrieveElementsSession(
             initializationMode = initializationMode,
+            checkoutSession = checkoutSession,
             configuration = configuration,
             savedPaymentMethodSelection = savedPaymentMethodSelection,
         )
+        val checkoutOfferSave = checkoutSession?.savedPaymentMethodsOfferSave
 
         // Preemptively prepare Integrity asynchronously if needed, as warm up can take
         // a few seconds.
@@ -300,7 +303,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val customerInfo = createCustomerInfo(
             configuration = configuration,
             elementsSession = elementsSession,
-            checkoutSessionCustomer = checkoutSessionCustomer,
+            checkoutSessionCustomer = checkoutSession?.customer,
         )
 
         val isGooglePayReady = isGooglePayReady(configuration, elementsSession, isGooglePaySupportedByConfiguration)
@@ -330,6 +333,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 customer = customerInfo?.toCustomerInfo(),
                 initializationMode = initializationMode,
                 clientAttributionMetadata = clientAttributionMetadata,
+                checkoutOfferSave = checkoutOfferSave,
             )
         }
 
@@ -348,6 +352,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 isGooglePaySupported = isGooglePaySupported,
                 initializationMode = initializationMode,
                 clientAttributionMetadata = clientAttributionMetadata,
+                checkoutOfferSave = checkoutOfferSave,
             )
         }
 
@@ -405,38 +410,47 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     }
 
     /**
-     * Returns the [ElementsSession] and an optional [CheckoutSessionResponse.Customer]
-     * (only present for checkout session flows where customer data comes from the init response).
+     * Fetches the [CheckoutSessionResponse] if the initialization mode is a checkout session.
+     * Returns null for all other flows.
+     */
+    private suspend fun retrieveCheckoutSession(
+        initializationMode: PaymentElementLoader.InitializationMode,
+    ): CheckoutSessionResponse? {
+        if (initializationMode !is PaymentElementLoader.InitializationMode.CheckoutSession) {
+            return null
+        }
+        return stripeRepository.initCheckoutSession(
+            sessionId = initializationMode.id,
+            options = ApiRequest.Options(
+                paymentConfiguration.get().publishableKey,
+                paymentConfiguration.get().stripeAccountId,
+            ),
+        ).getOrThrow()
+    }
+
+    /**
+     * Returns the [ElementsSession] — extracted from the checkout session response if present,
+     * or fetched via the standard elements session repository otherwise.
      */
     private suspend fun retrieveElementsSession(
         initializationMode: PaymentElementLoader.InitializationMode,
+        checkoutSession: CheckoutSessionResponse?,
         configuration: CommonConfiguration,
         savedPaymentMethodSelection: SavedSelection.PaymentMethod?,
-    ): Pair<ElementsSession, CheckoutSessionResponse.Customer?> {
-        return if (initializationMode is PaymentElementLoader.InitializationMode.CheckoutSession) {
-            val checkoutSession = stripeRepository.initCheckoutSession(
-                sessionId = initializationMode.id,
-                options = ApiRequest.Options(
-                    paymentConfiguration.get().publishableKey,
-                    paymentConfiguration.get().stripeAccountId,
-                ),
-            ).getOrThrow()
-            val elementsSession = checkoutSession.elementsSession?.copy(
-                checkoutSessionOfferSave = checkoutSession.savedPaymentMethodsOfferSave,
-            ) ?: throw IllegalStateException("CheckoutSession init response missing elements_session")
-            elementsSession to checkoutSession.customer
-        } else {
-            val elementsSession = elementsSessionRepository.get(
-                initializationMode = initializationMode,
-                customer = configuration.customer,
-                externalPaymentMethods = configuration.externalPaymentMethods,
-                customPaymentMethods = configuration.customPaymentMethods,
-                savedPaymentMethodSelectionId = savedPaymentMethodSelection?.id,
-                countryOverride = configuration.userOverrideCountry,
-                linkDisallowedFundingSourceCreation = configuration.link.disallowFundingSourceCreation,
-            ).getOrThrow()
-            elementsSession to null
+    ): ElementsSession {
+        if (checkoutSession != null) {
+            return checkoutSession.elementsSession
+                ?: throw IllegalStateException("CheckoutSession init response missing elements_session")
         }
+        return elementsSessionRepository.get(
+            initializationMode = initializationMode,
+            customer = configuration.customer,
+            externalPaymentMethods = configuration.externalPaymentMethods,
+            customPaymentMethods = configuration.customPaymentMethods,
+            savedPaymentMethodSelectionId = savedPaymentMethodSelection?.id,
+            countryOverride = configuration.userOverrideCountry,
+            linkDisallowedFundingSourceCreation = configuration.link.disallowFundingSourceCreation,
+        ).getOrThrow()
     }
 
     private fun ElementsSession.shouldWarmUpIntegrity(): Boolean = when {
@@ -472,6 +486,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         isGooglePaySupported: Boolean,
         initializationMode: PaymentElementLoader.InitializationMode,
         clientAttributionMetadata: ClientAttributionMetadata,
+        checkoutOfferSave: CheckoutSessionResponse.SavedPaymentMethodsOfferSave? = null,
     ): PaymentMethodMetadata {
         val configuration = integrationConfiguration.commonConfiguration
         val sharedDataSpecsResult = lpmRepository.getSharedDataSpecs(
@@ -526,6 +541,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             integrationMetadata = integrationMetadata,
             analyticsMetadata = analyticsMetadata,
             isTapToAddSupported = tapToAddConnectionManager.isSupported,
+            checkoutOfferSave = checkoutOfferSave,
         )
     }
 
