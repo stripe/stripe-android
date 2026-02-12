@@ -13,6 +13,8 @@ import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.taptoadd.TapToAddHelper
+import com.stripe.android.common.taptoadd.TapToAddMode
+import com.stripe.android.common.taptoadd.TapToAddResult
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.utils.requireApplication
@@ -28,6 +30,7 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
@@ -60,6 +63,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     private val args: PaymentOptionContract.Args,
     private val linkAccountHolder: LinkAccountHolder,
     private val linkGateFactory: LinkGate.Factory,
+    private val errorReporter: ErrorReporter,
     val linkPaymentLauncher: LinkPaymentLauncher,
     eventReporter: EventReporter,
     customerRepository: CustomerRepository,
@@ -78,7 +82,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
     linkHandler = linkHandler,
     cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
     isCompleteFlow = false,
-    tapToAddHelperFactory = tapToAddHelperFactory,
     mode = mode,
 ) {
 
@@ -97,6 +100,11 @@ internal class PaymentOptionsViewModel @Inject constructor(
             onUserSelection()
         },
         onDisabledClick = ::onDisabledClick,
+    )
+
+    override val tapToAddHelper = tapToAddHelperFactory.create(
+        coroutineScope = viewModelScope,
+        tapToAddMode = TapToAddMode.Continue,
     )
 
     private val _paymentOptionsActivityResult = MutableSharedFlow<PaymentOptionsActivityResult>(replay = 1)
@@ -216,6 +224,25 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 customerStateHolder = customerStateHolder,
             )
         )
+
+        viewModelScope.launch {
+            tapToAddHelper.result.collect { result ->
+                when (result) {
+                    is TapToAddResult.Canceled -> {
+                        // Do nothing.
+                    }
+                    TapToAddResult.Complete -> {
+                        errorReporter.report(
+                            ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_FLOW_CONTROLLER_RECEIVED_COMPLETE_RESULT,
+                        )
+                    }
+                    is TapToAddResult.Continue -> {
+                        updateSelection(result.paymentSelection)
+                        onUserSelection()
+                    }
+                }
+            }
+        }
     }
 
     override fun registerFromActivity(
