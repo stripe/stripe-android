@@ -8,9 +8,10 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
+import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -171,14 +172,16 @@ private fun OptionalEmbeddedDivider(rowStyle: Embedded.RowStyle) {
     if (rowStyle.hasSeparators()) {
         val color = Color(rowStyle.separatorColor(isSystemInDarkTheme()))
         val thickness = rowStyle.separatorThickness()
-        Divider(
-            color = color,
-            thickness = thickness,
+        HorizontalDivider(
             modifier = Modifier.padding(
-                start = rowStyle.startSeparatorInset(),
+                start = run {
+                    val extraInset = if (rowStyle.startSeparatorHasDefaultInset()) 32.dp else 0.dp
+                    rowStyle.startSeparatorInset() + extraInset
+                },
                 end = rowStyle.endSeparatorInset()
             ),
-            startIndent = if (rowStyle.startSeparatorHasDefaultInset()) 32.dp else 0.dp
+            thickness = thickness,
+            color = color,
         )
     }
 }

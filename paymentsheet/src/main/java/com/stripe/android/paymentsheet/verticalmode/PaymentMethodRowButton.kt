@@ -17,11 +17,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.RadioButton
-import androidx.compose.material.RadioButtonDefaults
-import androidx.compose.material.Text
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material3.Text
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -195,9 +196,11 @@ private fun RowButtonFloatingOuterContent(
                 modifier.alpha(alpha = if (isEnabled) 1.0F else 0.6F)
             ),
         shape = MaterialTheme.shapes.medium,
-        backgroundColor = MaterialTheme.stripeColorScheme.component,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.stripeColorScheme.component
+        ),
         border = MaterialTheme.getBorderStroke(isSelected),
-        elevation = if (isSelected) 1.5.dp else 0.dp
+        elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 1.5.dp else 0.dp),
     ) {
         Column(
             modifier = Modifier.padding(contentPaddingValues),

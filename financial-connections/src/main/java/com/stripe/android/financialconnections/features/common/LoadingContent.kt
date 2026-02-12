@@ -26,8 +26,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ProgressIndicatorDefaults
-import androidx.compose.material.Text
+import androidx.compose.material3.ProgressIndicatorDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -118,7 +118,7 @@ internal fun FullScreenGenericLoading() {
 @Composable
 internal fun LoadingSpinner(
     modifier: Modifier = Modifier,
-    strokeWidth: Dp = ProgressIndicatorDefaults.StrokeWidth,
+    strokeWidth: Dp = ProgressIndicatorDefaults.CircularStrokeWidth,
     gradient: Brush = Brush.sweepGradient(listOf(colors.background, colors.border)),
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "loading_transition")

@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
 import android.graphics.Typeface
-import androidx.compose.material.Text
+import androidx.compose.material3.Text
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember

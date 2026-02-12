@@ -10,8 +10,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -157,6 +156,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
         }
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun NavHost(
         initialPane: Pane,
@@ -168,8 +168,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
         val topAppBarState by viewModel.topAppBarState.collectAsState()
 
         val sheetState = rememberModalBottomSheetState(
-            ModalBottomSheetValue.Hidden,
-            skipHalfExpanded = true
+            skipPartiallyExpanded = true
         )
 
         val bottomSheetNavigator = remember { BottomSheetNavigator(sheetState) }

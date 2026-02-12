@@ -17,8 +17,8 @@
 package com.stripe.android.financialconnections.navigation.bottomsheet
 
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetState
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -42,11 +42,11 @@ import kotlinx.coroutines.flow.drop
  * @param onSheetDismissed Callback when the sheet has been dismissed. Typically, you'll want to
  * pop the back stack here.
  */
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ColumnScope.SheetContentHost(
     backStackEntry: NavBackStackEntry?,
-    sheetState: ModalBottomSheetState,
+    sheetState: SheetState,
     saveableStateHolder: SaveableStateHolder,
     onSheetShown: (entry: NavBackStackEntry) -> Unit,
     onSheetDismissed: (entry: NavBackStackEntry) -> Unit,
