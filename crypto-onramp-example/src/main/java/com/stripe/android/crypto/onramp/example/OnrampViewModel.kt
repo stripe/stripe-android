@@ -333,8 +333,6 @@ internal class OnrampViewModel(
                     it.copy(
                         screen = Screen.AuthenticatedOperations,
                         selectedPaymentData = result.displayData,
-                        selectedPaymentType = it.temporaryPaymentType,
-                        temporaryPaymentType = null
                     )
                 }
             }
@@ -551,7 +549,7 @@ internal class OnrampViewModel(
         val walletAddress = currentState.walletAddress
         val network = currentState.network
         val authToken = currentState.authToken
-        val settlementSpeed = if (currentState.selectedPaymentType == PaymentMethodType.BankAccount) {
+        val settlementSpeed = if (currentState.selectedPaymentData?.type == PaymentMethodDisplayData.Type.BankAccount) {
             currentState.settlementSpeed
         } else {
             SettlementSpeed.INSTANT
@@ -644,10 +642,6 @@ internal class OnrampViewModel(
             return false
         }
         return true
-    }
-
-    fun updateSelectedPaymentMethod(paymentMethodType: PaymentMethodType) {
-        _uiState.update { it.copy(temporaryPaymentType = paymentMethodType) }
     }
 
     fun updateSettlementSpeed(settlementSpeed: SettlementSpeed) {
@@ -757,8 +751,6 @@ data class OnrampUiState(
     val authToken: String? = null,
     val onrampSession: OnrampSessionResponse? = null,
     val loadingMessage: String? = null,
-    val temporaryPaymentType: PaymentMethodType? = null,
-    val selectedPaymentType: PaymentMethodType? = null,
     val settlementSpeed: SettlementSpeed = SettlementSpeed.INSTANT,
 )
 

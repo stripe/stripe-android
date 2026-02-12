@@ -539,7 +539,8 @@ internal class OnrampInteractor @Inject constructor(
                     displayData = PaymentMethodDisplayData(
                         imageLoader = it.imageLoader,
                         label = it.label,
-                        sublabel = it.sublabel
+                        sublabel = it.sublabel,
+                        type = it.type.toDisplayType()
                     )
                 )
             } ?: run {
@@ -885,4 +886,15 @@ internal sealed interface OnrampStartKycVerificationResult {
     class Failed internal constructor(
         val error: Throwable
     ) : OnrampStartKycVerificationResult
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+internal fun LinkController.PaymentMethodType.toDisplayType(): PaymentMethodDisplayData.Type {
+    return when (this) {
+        LinkController.PaymentMethodType.Card ->
+            PaymentMethodDisplayData.Type.Card
+
+        LinkController.PaymentMethodType.BankAccount ->
+            PaymentMethodDisplayData.Type.BankAccount
+    }
 }
