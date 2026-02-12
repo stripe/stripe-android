@@ -4,6 +4,15 @@ import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.model.ElementsSession
 
 internal fun ElementsSession.toPaymentSheetSaveConsentBehavior(): PaymentMethodSaveConsentBehavior {
+    // Checkout session explicit save behavior takes priority
+    checkoutSessionOfferSave?.let { offerSave ->
+        return if (offerSave.enabled) {
+            PaymentMethodSaveConsentBehavior.Enabled
+        } else {
+            PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null)
+        }
+    }
+
     return when (val mobilePaymentElementComponent = customer?.session?.components?.mobilePaymentElement) {
         is ElementsSession.Customer.Components.MobilePaymentElement.Enabled -> {
             if (mobilePaymentElementComponent.isPaymentMethodSaveEnabled) {

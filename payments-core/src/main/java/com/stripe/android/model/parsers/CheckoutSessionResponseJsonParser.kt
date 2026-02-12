@@ -39,6 +39,9 @@ internal class CheckoutSessionResponseJsonParser(
             json.optJSONObject(FIELD_ELEMENTS_SESSION),
         )
         val customer = parseCustomer(json.optJSONObject(FIELD_CUSTOMER))
+        val savedPaymentMethodsOfferSave = parseSavedPaymentMethodsOfferSave(
+            json.optJSONObject(FIELD_SAVED_PAYMENT_METHODS_OFFER_SAVE)
+        )
 
         return CheckoutSessionResponse(
             id = sessionId,
@@ -47,6 +50,7 @@ internal class CheckoutSessionResponseJsonParser(
             elementsSession = elementsSession,
             paymentIntent = paymentIntent,
             customer = customer,
+            savedPaymentMethodsOfferSave = savedPaymentMethodsOfferSave,
         )
     }
 
@@ -154,6 +158,37 @@ internal class CheckoutSessionResponseJsonParser(
         )
     }
 
+    /**
+     * Parses `customer_managed_saved_payment_methods_offer_save` from the init response.
+     *
+     * Expected JSON structure:
+     * ```json
+     * {
+     *   "customer_managed_saved_payment_methods_offer_save": {
+     *     "enabled": true,
+     *     "status": "not_accepted"
+     *   }
+     * }
+     * ```
+     */
+    private fun parseSavedPaymentMethodsOfferSave(
+        json: JSONObject?,
+    ): CheckoutSessionResponse.SavedPaymentMethodsOfferSave? {
+        if (json == null) return null
+
+        val enabled = json.optBoolean(FIELD_OFFER_SAVE_ENABLED, false)
+        val statusString = json.optString(FIELD_OFFER_SAVE_STATUS)
+        val status = when (statusString) {
+            "accepted" -> CheckoutSessionResponse.SavedPaymentMethodsOfferSave.Status.ACCEPTED
+            else -> CheckoutSessionResponse.SavedPaymentMethodsOfferSave.Status.NOT_ACCEPTED
+        }
+
+        return CheckoutSessionResponse.SavedPaymentMethodsOfferSave(
+            enabled = enabled,
+            status = status,
+        )
+    }
+
     private companion object {
         private const val FIELD_SESSION_ID = "session_id"
         private const val FIELD_CURRENCY = "currency"
@@ -162,5 +197,13 @@ internal class CheckoutSessionResponseJsonParser(
         private const val FIELD_DUE = "due"
         private const val FIELD_PAYMENT_INTENT = "payment_intent"
         private const val FIELD_SERVER_BUILT_ELEMENTS_SESSION_PARAMS = "server_built_elements_session_params"
+        private const val FIELD_CUSTOMER = "customer"
+        private const val FIELD_CUSTOMER_ID = "id"
+        private const val FIELD_PAYMENT_METHODS = "payment_methods"
+        private const val FIELD_DEFAULT_PAYMENT_METHOD = "default_payment_method"
+        private const val FIELD_SAVED_PAYMENT_METHODS_OFFER_SAVE =
+            "customer_managed_saved_payment_methods_offer_save"
+        private const val FIELD_OFFER_SAVE_ENABLED = "enabled"
+        private const val FIELD_OFFER_SAVE_STATUS = "status"
     }
 }

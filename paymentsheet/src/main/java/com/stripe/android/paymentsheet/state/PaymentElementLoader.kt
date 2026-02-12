@@ -417,8 +417,10 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     paymentConfiguration.get().stripeAccountId,
                 ),
             ).getOrThrow()
-            checkoutSession.elementsSession
-                ?: throw IllegalStateException("CheckoutSession init response missing elements_session")
+            checkoutSession.elementsSession?.copy(
+                checkoutSessionCustomer = checkoutSession.customer,
+                checkoutSessionOfferSave = checkoutSession.savedPaymentMethodsOfferSave,
+            ) ?: throw IllegalStateException("CheckoutSession init response missing elements_session")
         } else {
             elementsSessionRepository.get(
                 initializationMode = initializationMode,

@@ -183,8 +183,7 @@ class CheckoutSessionResponseJsonParserTest {
 
     @Test
     fun `parse init response with customer and saved payment methods`() {
-        val params = ElementsSessionParams.CheckoutSessionType(clientSecret = "cs_test_secret")
-        val result = CheckoutSessionResponseJsonParser(params, isLiveMode = false)
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
             .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_CUSTOMER_JSON)
 
         assertThat(result).isNotNull()
@@ -212,8 +211,7 @@ class CheckoutSessionResponseJsonParserTest {
 
     @Test
     fun `parse init response with customer but empty payment methods`() {
-        val params = ElementsSessionParams.CheckoutSessionType(clientSecret = "cs_test_secret")
-        val result = CheckoutSessionResponseJsonParser(params, isLiveMode = false)
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
             .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_EMPTY_CUSTOMER_JSON)
 
         assertThat(result).isNotNull()
@@ -225,8 +223,7 @@ class CheckoutSessionResponseJsonParserTest {
 
     @Test
     fun `parse init response without customer returns null customer`() {
-        val params = ElementsSessionParams.CheckoutSessionType(clientSecret = "cs_test_secret")
-        val result = CheckoutSessionResponseJsonParser(params, isLiveMode = false)
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
             .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITHOUT_CUSTOMER_JSON)
 
         assertThat(result).isNotNull()

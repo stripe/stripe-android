@@ -33,7 +33,7 @@ internal fun isSaveForFutureUseValueChangeable(
 ): Boolean {
     return when (paymentMethodSaveConsentBehavior) {
         is PaymentMethodSaveConsentBehavior.Disabled -> false
-        is PaymentMethodSaveConsentBehavior.Enabled -> hasCustomerConfiguration
+        is PaymentMethodSaveConsentBehavior.Enabled -> true
         is PaymentMethodSaveConsentBehavior.Legacy -> {
             when (intent) {
                 is PaymentIntent -> {
