@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
+import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -47,7 +48,6 @@ internal class FakeBaseSheetViewModel private constructor(
     cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
     isCompleteFlow = true,
     mode = EventReporter.Mode.Complete,
-    tapToAddHelperFactory = FakeTapToAddHelper.Factory.noOp(),
 ) {
     companion object {
         fun create(
@@ -79,6 +79,8 @@ internal class FakeBaseSheetViewModel private constructor(
             }
         }
     }
+
+    override val tapToAddHelper: TapToAddHelper = FakeTapToAddHelper.noOp()
 
     init {
         setPaymentMethodMetadata(paymentMethodMetadata)

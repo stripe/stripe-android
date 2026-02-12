@@ -158,6 +158,7 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                 linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
                 tapToAddHelperFactory = FakeTapToAddHelper.Factory.noOp(),
                 mode = EventReporter.Mode.Complete,
+                errorReporter = FakeErrorReporter(),
             )
         }
     }
