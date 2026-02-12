@@ -33,6 +33,41 @@ class LinkAccountTest {
         assertThat(linkAccount.unredactedPhoneNumber).isNull()
     }
 
+    @Test
+    fun `isVerified returns true when meetsMinimumAuthenticationLevel is true and no SMS sessions`() {
+        val consumerSession = ConsumerSession(
+            clientSecret = "consumer_session_007",
+            emailAddress = "John Doe",
+            redactedPhoneNumber = "+1********07",
+            redactedFormattedPhoneNumber = "(***) *** **07",
+            verificationSessions = emptyList(),
+            currentAuthenticationLevel = ConsumerSession.AuthenticationLevel.OneFactorAuthentication,
+            minimumAuthenticationLevel = ConsumerSession.AuthenticationLevel.OneFactorAuthentication,
+        )
+        val linkAccount = LinkAccount(consumerSession)
+        assertThat(linkAccount.isVerified).isTrue()
+    }
+
+    @Test
+    fun `isVerified falls back to SMS check when auth levels are null`() {
+        val consumerSession = ConsumerSession(
+            clientSecret = "consumer_session_007",
+            emailAddress = "John Doe",
+            redactedPhoneNumber = "+1********07",
+            redactedFormattedPhoneNumber = "(***) *** **07",
+            verificationSessions = listOf(
+                ConsumerSession.VerificationSession(
+                    type = ConsumerSession.VerificationSession.SessionType.Sms,
+                    state = ConsumerSession.VerificationSession.SessionState.Verified,
+                )
+            ),
+            currentAuthenticationLevel = null,
+            minimumAuthenticationLevel = null,
+        )
+        val linkAccount = LinkAccount(consumerSession)
+        assertThat(linkAccount.isVerified).isTrue()
+    }
+
     private fun makeLinkAccount(
         unredactedPhoneNumber: String?,
         phoneNumberCountry: String?,

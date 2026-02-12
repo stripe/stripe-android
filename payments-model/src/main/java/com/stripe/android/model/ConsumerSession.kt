@@ -27,7 +27,18 @@ data class ConsumerSession(
     val verificationSessions: List<VerificationSession> = emptyList(),
     @SerialName("mobile_fallback_webview_params")
     val mobileFallbackWebviewParams: MobileFallbackWebviewParams? = null,
+    @SerialName("current_authentication_level")
+    val currentAuthenticationLevel: AuthenticationLevel? = null,
+    @SerialName("minimum_authentication_level")
+    val minimumAuthenticationLevel: AuthenticationLevel? = null,
 ) : StripeModel {
+
+    val meetsMinimumAuthenticationLevel: Boolean
+        get() {
+            val current = currentAuthenticationLevel ?: return false
+            val minimum = minimumAuthenticationLevel ?: return false
+            return current >= minimum
+        }
 
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -68,6 +79,22 @@ data class ConsumerSession(
                 fun fromValue(value: String): SessionState =
                     entries.firstOrNull { it.value.equals(value, ignoreCase = true) } ?: Unknown
             }
+        }
+    }
+
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Serializable
+    enum class AuthenticationLevel(val value: String) : Parcelable {
+        Unknown(""),
+        NotAuthenticated("not_authenticated"),
+        OneFactorAuthentication("1fa"),
+        TwoFactorAuthentication("2fa");
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        companion object {
+            fun fromValue(value: String): AuthenticationLevel =
+                entries.firstOrNull { it.value.equals(value, ignoreCase = true) } ?: Unknown
         }
     }
 }
