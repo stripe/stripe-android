@@ -1,8 +1,8 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
@@ -14,8 +14,8 @@ fun H4Text(
 ) {
     Text(
         text = text,
-        color = MaterialTheme.colors.onSurface,
-        style = MaterialTheme.typography.h4,
+        color = MaterialTheme.colorScheme.onSurface,
+        style = MaterialTheme.typography.headlineMedium,
         modifier = modifier
     )
 }

@@ -31,7 +31,7 @@ import androidx.core.content.res.ResourcesCompat
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.uicore.stripeTypography
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
@@ -68,7 +68,7 @@ internal fun PaymentSheetTopBar(
     onNavigationIconPressed: () -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    val tintColor = MaterialTheme.stripeColors.appBarIcon
+    val tintColor = MaterialTheme.stripeColorScheme.appBarIcon
 
     TopAppBar(
         title = {

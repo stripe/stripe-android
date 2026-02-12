@@ -188,7 +188,7 @@ internal fun StripeThemeForLink(
             placeholderText = LinkTheme.colors.textTertiary,
             componentDivider = LinkTheme.colors.borderDefault,
             componentBorder = LinkTheme.colors.surfaceSecondary,
-            materialColors = stripeDefaultColors.materialColors.copy(
+            materialColorScheme = stripeDefaultColors.materialColorScheme.copy(
                 primary = LinkTheme.colors.borderSelected,
                 error = LinkTheme.colors.textCritical,
             )

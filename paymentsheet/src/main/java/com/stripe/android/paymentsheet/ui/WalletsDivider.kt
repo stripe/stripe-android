@@ -15,7 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.uicore.stripeShapes
 
 @Composable
@@ -31,7 +31,7 @@ internal fun WalletsDivider(text: String) {
         Text(
             text = text,
             style = MaterialTheme.typography.caption,
-            color = MaterialTheme.stripeColors.subtitle,
+            color = MaterialTheme.stripeColorScheme.subtitle,
             fontWeight = FontWeight.Normal,
             modifier = Modifier.padding(horizontal = 8.dp),
         )

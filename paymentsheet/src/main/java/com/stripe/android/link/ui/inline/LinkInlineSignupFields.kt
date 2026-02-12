@@ -36,7 +36,7 @@ import com.stripe.android.uicore.elements.PhoneNumberElementUI
 import com.stripe.android.uicore.elements.Section
 import com.stripe.android.uicore.elements.TextField
 import com.stripe.android.uicore.elements.TextFieldController
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.uicore.stripeShapes
 
 private val LinkLogoModifier = Modifier.padding(end = 16.dp)
@@ -131,7 +131,7 @@ internal fun LinkInlineSignupFields(
                     .testTag(LINK_INLINE_SIGNUP_REMAINING_FIELDS_TEST_TAG)
             ) {
                 Divider(
-                    color = MaterialTheme.stripeColors.componentDivider,
+                    color = MaterialTheme.stripeColorScheme.componentDivider,
                     thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
                 )
 
@@ -164,7 +164,7 @@ internal fun LinkInlineSignupFields(
                 }
 
                 Divider(
-                    color = MaterialTheme.stripeColors.componentDivider,
+                    color = MaterialTheme.stripeColorScheme.componentDivider,
                     thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
                 )
 

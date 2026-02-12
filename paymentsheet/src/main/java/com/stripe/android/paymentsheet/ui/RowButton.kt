@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
 import com.stripe.android.uicore.getBorderStroke
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 
 @Composable
 internal fun RowButton(
@@ -30,7 +30,7 @@ internal fun RowButton(
         modifier = modifier
             .alpha(alpha = if (isEnabled) 1.0F else 0.6F),
         shape = MaterialTheme.shapes.medium,
-        backgroundColor = MaterialTheme.stripeColors.component,
+        backgroundColor = MaterialTheme.stripeColorScheme.component,
         border = MaterialTheme.getBorderStroke(isSelected),
         elevation = if (isSelected) 1.5.dp else 0.dp
     ) {

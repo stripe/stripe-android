@@ -1,10 +1,10 @@
 package com.stripe.android.uicore.elements
 
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 
 @Composable
 internal fun FormLabel(
@@ -14,7 +14,7 @@ internal fun FormLabel(
     Text(
         text = text,
         modifier = modifier,
-        color = MaterialTheme.stripeColors.placeholderText,
-        style = MaterialTheme.typography.subtitle1
+        color = MaterialTheme.stripeColorScheme.placeholderText,
+        style = MaterialTheme.typography.titleMedium
     )
 }

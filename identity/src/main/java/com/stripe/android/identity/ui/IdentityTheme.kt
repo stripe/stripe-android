@@ -94,7 +94,7 @@ internal fun AdoptForStripeTheme(
             onComponent = hostingAppColors.onBackground,
             subtitle = hostingAppColors.onBackground.copy(alpha = ContentAlpha.medium),
             placeholderText = hostingAppColors.onBackground.copy(alpha = ContentAlpha.medium),
-            materialColors = hostingAppColors,
+            materialColorScheme = hostingAppColors,
         ),
         LocalShapes provides StripeThemeDefaults.shapes,
         LocalTypography provides stripeTypography,

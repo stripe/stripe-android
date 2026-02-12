@@ -29,7 +29,7 @@ internal fun PaymentSheet.Appearance.parseAppearance() {
         subtitle = Color(colorsLight.subtitle),
         placeholderText = Color(colorsLight.placeholderText),
         appBarIcon = Color(colorsLight.appBarIcon),
-        materialColors = lightColors(
+        materialColorScheme = lightColors(
             primary = Color(colorsLight.primary),
             surface = Color(colorsLight.surface),
             onSurface = Color(colorsLight.onSurface),
@@ -45,7 +45,7 @@ internal fun PaymentSheet.Appearance.parseAppearance() {
         subtitle = Color(colorsDark.subtitle),
         placeholderText = Color(colorsDark.placeholderText),
         appBarIcon = Color(colorsDark.appBarIcon),
-        materialColors = darkColors(
+        materialColorScheme = darkColors(
             primary = Color(colorsDark.primary),
             surface = Color(colorsDark.surface),
             onSurface = Color(colorsDark.onSurface),

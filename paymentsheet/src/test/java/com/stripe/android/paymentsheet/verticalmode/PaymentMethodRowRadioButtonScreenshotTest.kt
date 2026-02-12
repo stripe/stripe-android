@@ -99,15 +99,15 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
             .colorsLight(
                 FlatWithRadio.Colors(
                     separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
-                    selectedColor = StripeThemeDefaults.colorsLight.materialColors.error.toArgb(),
-                    unselectedColor = StripeThemeDefaults.colorsLight.materialColors.primary.toArgb()
+                    selectedColor = StripeThemeDefaults.colorsLight.materialColorScheme.error.toArgb(),
+                    unselectedColor = StripeThemeDefaults.colorsLight.materialColorScheme.primary.toArgb()
                 )
             )
             .colorsDark(
                 FlatWithRadio.Colors(
                     separatorColor = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
-                    selectedColor = StripeThemeDefaults.colorsDark.materialColors.error.toArgb(),
-                    unselectedColor = StripeThemeDefaults.colorsDark.materialColors.primary.toArgb()
+                    selectedColor = StripeThemeDefaults.colorsDark.materialColorScheme.error.toArgb(),
+                    unselectedColor = StripeThemeDefaults.colorsDark.materialColorScheme.primary.toArgb()
                 )
             )
             .build()

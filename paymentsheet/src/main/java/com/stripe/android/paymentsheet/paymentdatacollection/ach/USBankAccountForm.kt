@@ -60,7 +60,7 @@ import com.stripe.android.uicore.elements.TextField
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldSection
 import com.stripe.android.uicore.strings.resolve
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.R as StripeR
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
@@ -475,7 +475,7 @@ private fun BankAccountDetails(
 
                 Text(
                     text = "$bankName •••• $last4",
-                    color = MaterialTheme.stripeColors.onComponent,
+                    color = MaterialTheme.stripeColorScheme.onComponent,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier
                         .alpha(if (!enabled) 0.5f else 1f)

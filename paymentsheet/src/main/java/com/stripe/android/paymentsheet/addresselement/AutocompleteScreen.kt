@@ -46,7 +46,7 @@ import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldSection
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.uicore.text.annotatedStringResource
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.flow.collectLatest
@@ -211,7 +211,7 @@ internal fun AutocompleteScreenUI(
             appBar(isRootScreen, onBackPressed)
         },
         bottomBar = {
-            val background = if (MaterialTheme.stripeColors.materialColors.surface.shouldUseDarkDynamicColor()) {
+            val background = if (MaterialTheme.stripeColorScheme.materialColorScheme.surface.shouldUseDarkDynamicColor()) {
                 Color.Black.copy(alpha = 0.07f)
             } else {
                 Color.White.copy(alpha = 0.07f)
@@ -310,12 +310,12 @@ internal fun AutocompleteScreenUI(
                                         }
                                         Text(
                                             text = annotatedStringResource(text = text),
-                                            color = MaterialTheme.stripeColors.onComponent,
+                                            color = MaterialTheme.stripeColorScheme.onComponent,
                                             style = MaterialTheme.typography.body1
                                         )
                                         Text(
                                             text = secondaryText.toString(),
-                                            color = MaterialTheme.stripeColors.onComponent,
+                                            color = MaterialTheme.stripeColorScheme.onComponent,
                                             style = MaterialTheme.typography.body1
                                         )
                                     }

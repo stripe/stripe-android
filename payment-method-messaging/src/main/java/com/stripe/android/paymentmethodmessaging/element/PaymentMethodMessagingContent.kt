@@ -340,7 +340,7 @@ private fun getTextColor(appearance: PaymentMethodMessagingElement.Appearance.St
 private fun getLinkTextColor(appearance: PaymentMethodMessagingElement.Appearance.State): Int {
     return appearance.colors.linkTextColor ?: StripeTheme.getColors(
         appearance.theme == PaymentMethodMessagingElement.Appearance.Theme.DARK
-    ).materialColors.primary.toArgb()
+    ).materialColorScheme.primary.toArgb()
 }
 
 private const val DEFAULT_TEXT_SIZE = 16F

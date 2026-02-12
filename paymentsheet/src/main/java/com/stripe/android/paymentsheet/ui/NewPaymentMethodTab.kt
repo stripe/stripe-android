@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.uicore.image.StripeImageLoader
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 
 private object PaymentMethodUISpacing {
     val cardPadding = 12.dp
@@ -72,7 +72,7 @@ internal fun NewPaymentMethodTab(
         LpmSelectorText(
             text = title,
             isEnabled = isEnabled,
-            textColor = MaterialTheme.stripeColors.onComponent,
+            textColor = MaterialTheme.stripeColorScheme.onComponent,
             modifier = Modifier.padding(vertical = 6.dp),
         )
     }

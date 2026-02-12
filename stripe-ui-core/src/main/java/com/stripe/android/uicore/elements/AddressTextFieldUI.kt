@@ -3,7 +3,7 @@ package com.stripe.android.uicore.elements
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -49,7 +49,7 @@ fun AddressTextFieldUI(
                 false -> FieldDisplayState.NORMAL
             },
             disabledIndicatorColor = if (isError) {
-                MaterialTheme.colors.error
+                MaterialTheme.colorScheme.error
             } else {
                 Color.Transparent
             },

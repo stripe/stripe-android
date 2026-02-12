@@ -27,7 +27,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -94,7 +94,7 @@ internal fun SepaMandateScreen(
             Icon(
                 painter = painterResource(R.drawable.stripe_ic_paymentsheet_close),
                 contentDescription = stringResource(R.string.stripe_paymentsheet_close),
-                tint = MaterialTheme.stripeColors.appBarIcon,
+                tint = MaterialTheme.stripeColorScheme.appBarIcon,
             )
         }
         Column(
@@ -110,7 +110,7 @@ internal fun SepaMandateScreen(
                     id = StripeUiCoreR.string.stripe_sepa_mandate,
                     merchantName
                 ),
-                color = MaterialTheme.stripeColors.subtitle,
+                color = MaterialTheme.stripeColorScheme.subtitle,
                 style = MaterialTheme.typography.body1,
                 modifier = Modifier.padding(vertical = 16.dp)
             )

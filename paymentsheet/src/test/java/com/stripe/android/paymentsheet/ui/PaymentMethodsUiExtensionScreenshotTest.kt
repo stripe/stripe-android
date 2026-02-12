@@ -26,7 +26,7 @@ import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.uicore.DefaultStripeTheme
 import com.stripe.android.uicore.elements.SectionCard
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import org.junit.Rule
 import org.junit.Test
 
@@ -60,7 +60,7 @@ class PaymentMethodsUiExtensionScreenshotTest {
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
-                    .background(backgroundColorOverride ?: MaterialTheme.stripeColors.component)
+                    .background(backgroundColorOverride ?: MaterialTheme.stripeColorScheme.component)
             ) {
                 Image(
                     painter = painterResource(iconRes),

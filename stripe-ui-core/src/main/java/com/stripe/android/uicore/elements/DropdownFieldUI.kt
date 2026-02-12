@@ -17,11 +17,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -46,7 +45,7 @@ import com.stripe.android.uicore.LocalTextFieldInsets
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.elements.compat.CompatTextField
 import com.stripe.android.uicore.strings.resolve
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.uicore.utils.collectAsState
 
 @Preview
@@ -106,15 +105,15 @@ fun DropDown(
     }
 
     val currentTextColor = if (shouldEnable) {
-        MaterialTheme.stripeColors.onComponent
+        MaterialTheme.stripeColorScheme.onComponent
     } else {
-        MaterialTheme.stripeColors.onComponent.copy(alpha = ContentAlpha.disabled)
+        MaterialTheme.stripeColorScheme.onComponent.copy(alpha = 0.38f)
     }
 
     Box(
         modifier = Modifier
             .wrapContentSize(Alignment.TopStart)
-            .background(MaterialTheme.stripeColors.component)
+            .background(MaterialTheme.stripeColorScheme.component)
             .then(modifier)
     ) {
         // Click handling happens on the box, so that it is a single accessible item
@@ -164,7 +163,7 @@ fun DropDown(
             expanded = expanded,
             onDismissRequest = { expanded = false },
             modifier = Modifier
-                .background(color = MaterialTheme.stripeColors.component)
+                .background(color = MaterialTheme.stripeColorScheme.component)
                 .width(DropdownMenuItemDefaultMaxWidth)
                 .requiredSizeIn(maxHeight = DropdownMenuItemDefaultMinHeight * 8.9f),
             scrollState = scrollState,
@@ -236,7 +235,7 @@ private fun LargeDropdownLabel(
                 false -> FieldDisplayState.NORMAL
             },
             disabledIndicatorColor = if (isError) {
-                MaterialTheme.colors.error
+                MaterialTheme.colorScheme.error
             } else {
                 Color.Transparent
             },
@@ -264,7 +263,7 @@ private fun TinyDropdownLabel(
                 painter = painterResource(id = R.drawable.stripe_ic_chevron_down),
                 contentDescription = null,
                 modifier = Modifier.height(24.dp),
-                tint = MaterialTheme.stripeColors.placeholderText
+                tint = MaterialTheme.stripeColorScheme.placeholderText
             )
         }
     }
@@ -299,7 +298,7 @@ internal fun DropdownMenuItem(
                 )
                 .fillMaxWidth(.8f),
             color = if (isSelected) {
-                MaterialTheme.colors.primary
+                MaterialTheme.colorScheme.primary
             } else {
                 currentTextColor
             },
@@ -316,7 +315,7 @@ internal fun DropdownMenuItem(
                 contentDescription = null,
                 modifier = Modifier
                     .height(24.dp),
-                tint = MaterialTheme.colors.primary
+                tint = MaterialTheme.colorScheme.primary
             )
         }
     }

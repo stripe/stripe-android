@@ -37,7 +37,7 @@ import com.stripe.android.uicore.elements.CheckboxElementUI
 import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.strings.resolve
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.paymentsheet.R as PaymentSheetR
@@ -135,7 +135,7 @@ private fun DetailsCannotBeChangedText(
         Text(
             text = it.resolve(context),
             style = MaterialTheme.typography.subtitle2,
-            color = MaterialTheme.stripeColors.subtitle,
+            color = MaterialTheme.stripeColorScheme.subtitle,
             fontWeight = FontWeight.Normal,
             modifier = Modifier
                 .padding(top = 8.dp)

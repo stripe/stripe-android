@@ -72,7 +72,7 @@ import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.menu.Checkbox
 import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.strings.resolve
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.uicore.stripeShapes
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.launch
@@ -220,7 +220,7 @@ private fun Modifier.applyBorders(
         shape = shape,
     )
         .background(
-            color = MaterialTheme.stripeColors.component,
+            color = MaterialTheme.stripeColorScheme.component,
             shape = shape,
         )
 }
@@ -283,7 +283,7 @@ private fun LinkCheckbox(
                         .fillMaxWidth()
                         .padding(top = 4.dp),
                     style = MaterialTheme.typography.body1,
-                    color = MaterialTheme.stripeColors.subtitle
+                    color = MaterialTheme.stripeColorScheme.subtitle
                 )
             }
         }
@@ -364,7 +364,7 @@ internal fun LinkDefaultOptIn(
                 Text(
                     text = phoneNumber,
                     overflow = TextOverflow.Ellipsis,
-                    color = MaterialTheme.stripeColors.subtitle,
+                    color = MaterialTheme.stripeColorScheme.subtitle,
                     maxLines = 1,
                 )
             }

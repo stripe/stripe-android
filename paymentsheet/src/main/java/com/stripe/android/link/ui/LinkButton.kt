@@ -68,7 +68,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.ButtonThemes.LinkButtonTheme
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.PrimaryButtonTheme
 import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 
 private val LinkButtonTheme.textColor: Color
     @Composable
@@ -80,14 +80,14 @@ private val LinkButtonTheme.textColor: Color
 private val LinkButtonTheme.dividerColor: Color
     @Composable
     get() = when (this) {
-        LinkButtonTheme.WHITE -> MaterialTheme.stripeColors.componentBorder
+        LinkButtonTheme.WHITE -> MaterialTheme.stripeColorScheme.componentBorder
         LinkButtonTheme.DEFAULT -> LinkTheme.colors.separatorOnPrimaryButton
     }
 
 private val LinkButtonTheme.borderColor: Color?
     @Composable
     get() = when (this) {
-        LinkButtonTheme.WHITE -> MaterialTheme.stripeColors.componentBorder
+        LinkButtonTheme.WHITE -> MaterialTheme.stripeColorScheme.componentBorder
         LinkButtonTheme.DEFAULT -> null
     }
 

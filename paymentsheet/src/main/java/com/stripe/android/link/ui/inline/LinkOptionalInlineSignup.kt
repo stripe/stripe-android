@@ -50,7 +50,7 @@ import com.stripe.android.uicore.elements.TextField
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.strings.resolve
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.job
 
@@ -220,7 +220,7 @@ internal fun LinkLogo(
 ) {
     Icon(
         painter = painterResource(
-            id = if (MaterialTheme.stripeColors.component.shouldUseDarkDynamicColor()) {
+            id = if (MaterialTheme.stripeColorScheme.component.shouldUseDarkDynamicColor()) {
                 R.drawable.stripe_link_logo_knockout_black
             } else {
                 R.drawable.stripe_link_logo_knockout_white

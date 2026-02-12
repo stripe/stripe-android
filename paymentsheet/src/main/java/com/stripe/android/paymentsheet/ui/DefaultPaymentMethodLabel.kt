@@ -14,7 +14,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.DefaultStripeTheme
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 
 @Composable
 internal fun DefaultPaymentMethodLabel(
@@ -27,7 +27,7 @@ internal fun DefaultPaymentMethodLabel(
             ),
         text = stringResource(id = R.string.stripe_wallet_default),
         style = MaterialTheme.typography.caption.copy(fontWeight = FontWeight.Medium),
-        color = MaterialTheme.stripeColors.placeholderText,
+        color = MaterialTheme.stripeColorScheme.placeholderText,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
     )
@@ -39,7 +39,7 @@ internal fun DefaultPaymentMethodLabel(
 private fun DefaultPaymentMethodLabelPreview() {
     DefaultStripeTheme {
         Row(
-            modifier = Modifier.background(color = MaterialTheme.stripeColors.component)
+            modifier = Modifier.background(color = MaterialTheme.stripeColorScheme.component)
         ) {
             DefaultPaymentMethodLabel(
                 modifier = Modifier

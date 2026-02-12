@@ -1,13 +1,13 @@
 package com.stripe.android.ui.core.elements
 
-import androidx.compose.material.Divider
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionFieldElementUI
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.uicore.stripeShapes
 
 @Composable
@@ -28,7 +28,7 @@ internal fun CardDetailsElementUI(
         )
         if (index != controller.fields.lastIndex) {
             Divider(
-                color = MaterialTheme.stripeColors.componentDivider,
+                color = MaterialTheme.stripeColorScheme.componentDivider,
                 thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
             )
         }

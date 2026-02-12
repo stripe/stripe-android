@@ -33,7 +33,7 @@ import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.strings.resolve
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
@@ -132,7 +132,7 @@ internal fun FormActivityTopBar(
     isLiveMode: Boolean,
     onDismissed: () -> Unit
 ) {
-    val tintColor = MaterialTheme.stripeColors.appBarIcon
+    val tintColor = MaterialTheme.stripeColorScheme.appBarIcon
     Box(
         modifier = Modifier
             .fillMaxWidth()

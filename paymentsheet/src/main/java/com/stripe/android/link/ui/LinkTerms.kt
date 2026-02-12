@@ -12,7 +12,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.uicore.text.EmbeddableImage
 
 internal enum class LinkTermsType {
@@ -52,7 +52,7 @@ internal fun LinkTerms(
             put(
                 "link_logo",
                 EmbeddableImage.Drawable(
-                    id = if (MaterialTheme.stripeColors.component.shouldUseDarkDynamicColor()) {
+                    id = if (MaterialTheme.stripeColorScheme.component.shouldUseDarkDynamicColor()) {
                         R.drawable.stripe_link_logo_knockout_black
                     } else {
                         R.drawable.stripe_link_logo_knockout_white

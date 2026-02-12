@@ -1,12 +1,11 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Composable
@@ -15,11 +14,11 @@ fun Placeholder(
     modifier: Modifier = Modifier,
     enabled: Boolean = true
 ) {
-    val color = MaterialTheme.stripeColors.placeholderText
+    val color = MaterialTheme.stripeColorScheme.placeholderText
     Text(
         text = text,
         modifier = modifier,
-        color = if (enabled) color else color.copy(alpha = ContentAlpha.disabled),
-        style = MaterialTheme.typography.subtitle1
+        color = if (enabled) color else color.copy(alpha = .38f),
+        style = MaterialTheme.typography.titleMedium
     )
 }

@@ -30,7 +30,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.image.StripeImageLoader
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.uicore.utils.collectAsState
 import org.jetbrains.annotations.VisibleForTesting
 
@@ -124,7 +124,7 @@ internal fun PaymentMethodVerticalLayoutUI(
 
     Column(modifier = modifier) {
         val textStyle = MaterialTheme.typography.subtitle1
-        val textColor = MaterialTheme.stripeColors.onComponent
+        val textColor = MaterialTheme.stripeColorScheme.onComponent
 
         val rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.default.run {
             PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.Builder()

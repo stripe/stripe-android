@@ -17,12 +17,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.progressSemantics
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.Icon
-import androidx.compose.material.LocalContentColor
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -73,9 +71,11 @@ import com.stripe.android.uicore.LocalInstrumentationTest
 import com.stripe.android.uicore.LocalTextFieldInsets
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.elements.compat.CompatTextField
+import com.stripe.android.uicore.elements.compat.StripeTextFieldColors
+import com.stripe.android.uicore.elements.compat.StripeTextFieldDefaults
 import com.stripe.android.uicore.moveFocusSafely
 import com.stripe.android.uicore.strings.resolve
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -383,33 +383,51 @@ fun AnimatedIcons(
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun TextFieldColors(
     fieldDisplayState: FieldDisplayState = FieldDisplayState.NORMAL,
-    textColor: Color = MaterialTheme.stripeColors.onComponent,
-    disabledTextColor: Color = textColor.copy(ContentAlpha.disabled),
-    backgroundColor: Color = MaterialTheme.stripeColors.component,
+    textColor: Color = MaterialTheme.stripeColorScheme.onComponent,
+    disabledTextColor: Color = textColor.copy(.38f),
+    containerColor: Color = MaterialTheme.stripeColorScheme.component,
     disabledIndicatorColor: Color = Color.Transparent,
-) = TextFieldDefaults.textFieldColors(
-    textColor = when (fieldDisplayState) {
-        FieldDisplayState.ERROR -> MaterialTheme.colors.error
+): StripeTextFieldColors {
+    val resolvedTextColor = when (fieldDisplayState) {
+        FieldDisplayState.ERROR -> MaterialTheme.colorScheme.error
         FieldDisplayState.NORMAL, FieldDisplayState.WARNING -> textColor
-    },
-    disabledTextColor = disabledTextColor,
-    unfocusedLabelColor = MaterialTheme.stripeColors.placeholderText,
-    focusedLabelColor = MaterialTheme.stripeColors.placeholderText,
-    placeholderColor = MaterialTheme.stripeColors.placeholderText,
-    backgroundColor = backgroundColor,
-    focusedIndicatorColor = Color.Transparent,
-    disabledIndicatorColor = disabledIndicatorColor,
-    unfocusedIndicatorColor = Color.Transparent,
-    cursorColor = MaterialTheme.stripeColors.textCursor,
-    errorCursorColor = when (fieldDisplayState) {
-        FieldDisplayState.ERROR -> MaterialTheme.colors.error
-        FieldDisplayState.NORMAL, FieldDisplayState.WARNING -> MaterialTheme.stripeColors.textCursor
-    },
-    errorIndicatorColor = when (fieldDisplayState) {
-        FieldDisplayState.ERROR -> MaterialTheme.colors.error
+    }
+    val cursorColor = MaterialTheme.stripeColorScheme.textCursor
+    val errorCursorColor = when (fieldDisplayState) {
+        FieldDisplayState.ERROR -> MaterialTheme.colorScheme.error
+        FieldDisplayState.NORMAL, FieldDisplayState.WARNING -> MaterialTheme.stripeColorScheme.textCursor
+    }
+    val errorIndicatorColor = when (fieldDisplayState) {
+        FieldDisplayState.ERROR -> MaterialTheme.colorScheme.error
         FieldDisplayState.NORMAL, FieldDisplayState.WARNING -> Color.Transparent
-    },
-)
+    }
+    val placeholderColor = MaterialTheme.stripeColorScheme.placeholderText
+
+    return StripeTextFieldDefaults.colors(
+        focusedTextColor = resolvedTextColor,
+        unfocusedTextColor = resolvedTextColor,
+        disabledTextColor = disabledTextColor,
+        errorTextColor = resolvedTextColor,
+        focusedContainerColor = containerColor,
+        unfocusedContainerColor = containerColor,
+        disabledContainerColor = containerColor,
+        errorContainerColor = containerColor,
+        cursorColor = cursorColor,
+        errorCursorColor = errorCursorColor,
+        focusedIndicatorColor = Color.Transparent,
+        unfocusedIndicatorColor = Color.Transparent,
+        disabledIndicatorColor = disabledIndicatorColor,
+        errorIndicatorColor = errorIndicatorColor,
+        focusedLabelColor = placeholderColor,
+        unfocusedLabelColor = placeholderColor,
+        disabledLabelColor = placeholderColor,
+        errorLabelColor = placeholderColor,
+        focusedPlaceholderColor = placeholderColor,
+        unfocusedPlaceholderColor = placeholderColor,
+        disabledPlaceholderColor = placeholderColor,
+        errorPlaceholderColor = placeholderColor,
+    )
+}
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Composable
@@ -476,7 +494,7 @@ private fun TrailingDropdown(
 
             if (show) {
                 CompositionLocalProvider(
-                    LocalContentColor provides MaterialTheme.stripeColors.placeholderText
+                    LocalContentColor provides MaterialTheme.stripeColorScheme.placeholderText
                 ) {
                     TrailingIcon(
                         trailingIcon = TextFieldIcon.Trailing(
@@ -495,8 +513,8 @@ private fun TrailingDropdown(
             title = icon.title,
             currentChoice = icon.currentItem,
             choices = icon.items,
-            headerTextColor = MaterialTheme.stripeColors.subtitle,
-            optionTextColor = MaterialTheme.stripeColors.onComponent,
+            headerTextColor = MaterialTheme.stripeColorScheme.subtitle,
+            optionTextColor = MaterialTheme.stripeColorScheme.onComponent,
             onChoiceSelected = { item ->
                 onDropdownItemClicked(item)
 

@@ -12,11 +12,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSizeIn
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -84,7 +83,7 @@ private fun Choice(
             .requiredSizeIn(minHeight = 48.dp)
             .clickable(enabled = enabled) { onClick() }
             .testTag("${TEST_TAG_DROP_DOWN_CHOICE}_$label")
-            .alpha(if (enabled) 1f else ContentAlpha.disabled)
+            .alpha(if (enabled) 1f else .38f)
     ) {
         icon?.let { icon ->
             Image(
@@ -97,7 +96,7 @@ private fun Choice(
             text = label,
             modifier = Modifier.padding(start = 16.dp),
             color = if (isSelected) {
-                MaterialTheme.colors.primary
+                MaterialTheme.colorScheme.primary
             } else {
                 currentTextColor
             },
@@ -118,7 +117,7 @@ private fun Choice(
                 .height(20.dp)
                 .padding(start = 8.dp, end = 16.dp)
                 .alpha(if (isSelected) 1f else 0f),
-            tint = MaterialTheme.colors.primary,
+            tint = MaterialTheme.colorScheme.primary,
         )
     }
 }

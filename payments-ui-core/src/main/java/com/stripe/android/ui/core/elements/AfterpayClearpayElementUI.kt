@@ -3,7 +3,7 @@ package com.stripe.android.ui.core.elements
 import android.content.Intent
 import android.net.Uri
 import androidx.annotation.RestrictTo
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -14,7 +14,7 @@ import androidx.compose.ui.text.SpanStyle
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement.Companion.isClearpay
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.uicore.text.EmbeddableImage
 import com.stripe.android.uicore.text.Html
 
@@ -44,7 +44,7 @@ fun AfterpayClearpayElementUI(
                 } else {
                     R.string.stripe_paymentsheet_payment_method_afterpay
                 },
-                colorFilter = if (MaterialTheme.colors.surface.shouldUseDarkDynamicColor()) {
+                colorFilter = if (MaterialTheme.colorScheme.surface.shouldUseDarkDynamicColor()) {
                     null
                 } else {
                     ColorFilter.tint(Color.White)
@@ -52,8 +52,8 @@ fun AfterpayClearpayElementUI(
             )
         ),
         modifier = modifier,
-        color = MaterialTheme.stripeColors.subtitle,
-        style = MaterialTheme.typography.h6,
+        color = MaterialTheme.stripeColorScheme.subtitle,
+        style = MaterialTheme.typography.titleLarge,
         urlSpanStyle = SpanStyle(),
         imageAlign = PlaceholderVerticalAlign.Bottom,
         onClick = {

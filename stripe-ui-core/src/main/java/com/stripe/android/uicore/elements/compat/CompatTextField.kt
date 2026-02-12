@@ -40,14 +40,12 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.LocalAutofillHighlightColor
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TextFieldDefaults.indicatorLine
 import androidx.compose.material3.Typography
@@ -94,10 +92,10 @@ import androidx.compose.ui.R as ComposeUiR
  * @param textStyle the style to be applied to the input text. The default [textStyle] uses the
  * [LocalTextStyle] defined by the theme
  * @param label the optional label to be displayed inside the text field container. The default
- * text style for internal [Text] is [Typography.caption] when the text field is in focus and
- * [Typography.subtitle1] when the text field is not in focus
+ * text style for internal [Text] is [Typography.bodySmall] when the text field is in focus and
+ * [Typography.titleMedium] when the text field is not in focus
  * @param placeholder the optional placeholder to be displayed when the text field is in focus and
- * the input text is empty. The default text style for internal [Text] is [Typography.subtitle1]
+ * the input text is empty. The default text style for internal [Text] is [Typography.titleMedium]
  * @param leadingIcon the optional leading icon to be displayed at the beginning of the text field
  * container
  * @param trailingIcon the optional trailing icon to be displayed at the end of the text field
@@ -128,11 +126,10 @@ import androidx.compose.ui.R as ComposeUiR
  * [MutableInteractionSource] if you want to observe [Interaction]s and customize the
  * appearance / behavior of this TextField in different [Interaction]s.
  * @param shape the shape of the text field's container
- * @param colors [TextFieldColors] that will be used to resolve color of the text, content
+ * @param colors [StripeTextFieldColors] that will be used to resolve color of the text, content
  * (including label, placeholder, leading and trailing icons, indicator line) and background for
- * this text field in different states. See [TextFieldDefaults.textFieldColors]
+ * this text field in different states. See [StripeTextFieldDefaults.colors]
  */
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun CompatTextField(
@@ -156,7 +153,7 @@ fun CompatTextField(
     minLines: Int = 1,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     shape: Shape = TextFieldDefaults.shape,
-    colors: TextFieldColors = TextFieldDefaults.colors(),
+    colors: StripeTextFieldColors = StripeTextFieldDefaults.colors(),
     contentPadding: PaddingValues = if (label != null) {
         TextFieldDefaults.contentPaddingWithLabel()
     } else {
@@ -165,16 +162,15 @@ fun CompatTextField(
 ) {
     // If color is not provided via the text style, use content color as a default
     val textColor = textStyle.color.takeOrElse {
-        colors.textColor(enabled).value
+        colors.textColor(enabled, isError, interactionSource).value
     }
     val mergedTextStyle = textStyle.merge(TextStyle(color = textColor))
 
     CompositionLocalProvider(LocalAutofillHighlightColor provides AutofillTransparentColor) {
-//        @OptIn(ExperimentalMaterialApi::class)
         BasicTextField(
             value = value,
             modifier = modifier
-                .indicatorLine(enabled, isError, interactionSource, colors)
+                .indicatorLine(enabled, isError, interactionSource, colors.m3Colors)
                 .errorSemanticsWithDefault(isError, errorMessage),
             onValueChange = onValueChange,
             enabled = enabled,
@@ -226,10 +222,10 @@ fun CompatTextField(
  * @param textStyle the style to be applied to the input text. The default [textStyle] uses the
  * [LocalTextStyle] defined by the theme
  * @param label the optional label to be displayed inside the text field container. The default
- * text style for internal [Text] is [Typography.caption] when the text field is in focus and
- * [Typography.subtitle1] when the text field is not in focus
+ * text style for internal [Text] is [Typography.bodySmall] when the text field is in focus and
+ * [Typography.titleMedium] when the text field is not in focus
  * @param placeholder the optional placeholder to be displayed when the text field is in focus and
- * the input text is empty. The default text style for internal [Text] is [Typography.subtitle1]
+ * the input text is empty. The default text style for internal [Text] is [Typography.titleMedium]
  * @param leadingIcon the optional leading icon to be displayed at the beginning of the text field
  * container
  * @param trailingIcon the optional trailing icon to be displayed at the end of the text field
@@ -260,11 +256,10 @@ fun CompatTextField(
  * [MutableInteractionSource] if you want to observe [Interaction]s and customize the
  * appearance / behavior of this TextField in different [Interaction]s.
  * @param shape the shape of the text field's container
- * @param colors [TextFieldColors] that will be used to resolve color of the text, content
+ * @param colors [StripeTextFieldColors] that will be used to resolve color of the text, content
  * (including label, placeholder, leading and trailing icons, indicator line) and background for
- * this text field in different states. See [TextFieldDefaults.textFieldColors]
+ * this text field in different states. See [StripeTextFieldDefaults.colors]
  */
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun CompatTextField(
@@ -288,25 +283,24 @@ fun CompatTextField(
     minLines: Int = 1,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     shape: Shape = TextFieldDefaults.shape,
-    colors: TextFieldColors = TextFieldDefaults.colors(),
+    colors: StripeTextFieldColors = StripeTextFieldDefaults.colors(),
     contentPadding: PaddingValues = if (label != null) {
-        TextFieldDefaults.textFieldWithLabelPadding()
+        TextFieldDefaults.contentPaddingWithLabel()
     } else {
-        TextFieldDefaults.textFieldWithoutLabelPadding()
+        TextFieldDefaults.contentPaddingWithoutLabel()
     },
 ) {
     // If color is not provided via the text style, use content color as a default
     val textColor = textStyle.color.takeOrElse {
-        colors.textColor(enabled)
+        colors.textColor(enabled, isError, interactionSource).value
     }
     val mergedTextStyle = textStyle.merge(TextStyle(color = textColor))
 
     CompositionLocalProvider(LocalAutofillHighlightColor provides AutofillTransparentColor) {
-        @OptIn(ExperimentalMaterialApi::class)
         BasicTextField(
             value = value,
             modifier = modifier
-                .indicatorLine(enabled, isError, interactionSource, colors)
+                .indicatorLine(enabled, isError, interactionSource, colors.m3Colors)
                 .errorSemanticsWithDefault(isError, errorMessage),
             onValueChange = onValueChange,
             enabled = enabled,
@@ -342,7 +336,6 @@ fun CompatTextField(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun InsetDecorationBox(
     value: String,
@@ -357,11 +350,11 @@ private fun InsetDecorationBox(
     singleLine: Boolean = false,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     shape: Shape = TextFieldDefaults.shape,
-    colors: TextFieldColors = TextFieldDefaults.colors(),
+    colors: StripeTextFieldColors = StripeTextFieldDefaults.colors(),
     contentPadding: PaddingValues = if (label != null) {
-        TextFieldDefaults.textFieldWithLabelPadding()
+        TextFieldDefaults.contentPaddingWithLabel()
     } else {
-        TextFieldDefaults.textFieldWithoutLabelPadding()
+        TextFieldDefaults.contentPaddingWithoutLabel()
     },
 ) {
     val layoutDirection = LocalLayoutDirection.current
@@ -431,7 +424,7 @@ internal fun CommonDecorationBox(
     interactionSource: InteractionSource,
     contentPadding: PaddingValues,
     shape: Shape,
-    colors: TextFieldColors,
+    colors: StripeTextFieldColors,
 ) {
     val transformedText = remember(value, visualTransformation) {
         visualTransformation.filter(AnnotatedString(value))
@@ -517,8 +510,8 @@ internal fun CommonDecorationBox(
             }
         }
 
-        val backgroundModifier =
-            Modifier.background(colors.backgroundColor(enabled).value, shape)
+        val containerColor by colors.containerColor(enabled, isError, interactionSource)
+        val backgroundModifier = Modifier.background(containerColor, shape)
 
         TextFieldLayout(
             modifier = backgroundModifier,
@@ -548,7 +541,11 @@ internal fun Decoration(
     () -> Unit
 ) {
     val colorAndEmphasis: @Composable () -> Unit = @Composable {
-        CompositionLocalProvider(LocalContentColor provides contentColor.copy(alpha = contentAlpha ?: contentColor.alpha)) {
+        CompositionLocalProvider(
+            LocalContentColor provides contentColor.copy(
+                alpha = contentAlpha ?: contentColor.alpha
+            )
+        ) {
             content()
         }
     }

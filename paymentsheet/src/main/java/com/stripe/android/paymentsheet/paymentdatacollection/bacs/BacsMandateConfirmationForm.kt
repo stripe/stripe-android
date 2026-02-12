@@ -35,7 +35,7 @@ import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.strings.resolve
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.uicore.stripeTypography
 import com.stripe.android.uicore.text.Html
 import com.stripe.android.uicore.utils.collectAsState
@@ -130,11 +130,11 @@ internal fun BacsMandateDetails(
             .border(
                 border = BorderStroke(
                     width = 1.dp,
-                    color = MaterialTheme.stripeColors.componentBorder,
+                    color = MaterialTheme.stripeColorScheme.componentBorder,
                 ),
                 shape = MaterialTheme.shapes.small
             )
-            .background(MaterialTheme.stripeColors.component)
+            .background(MaterialTheme.stripeColorScheme.component)
             .padding(12.dp)
             .fillMaxWidth()
     ) {
@@ -172,13 +172,13 @@ internal fun BacsMandateDetailsRow(
         Text(
             modifier = Modifier.weight(WEIGHT_40_PERCENT),
             fontWeight = FontWeight(MaterialTheme.stripeTypography.fontWeightMedium),
-            color = MaterialTheme.stripeColors.onComponent,
+            color = MaterialTheme.stripeColorScheme.onComponent,
             text = label
         )
         Text(
             modifier = Modifier.weight(WEIGHT_60_PERCENT),
             fontWeight = FontWeight(MaterialTheme.stripeTypography.fontWeightNormal),
-            color = MaterialTheme.stripeColors.onComponent,
+            color = MaterialTheme.stripeColorScheme.onComponent,
             text = value
         )
     }
@@ -196,7 +196,7 @@ internal fun BacsMandateItem(
             modifier = modifier,
             html = text,
             style = MaterialTheme.typography.caption.copy(fontWeight = FontWeight.Normal),
-            color = MaterialTheme.stripeColors.subtitle,
+            color = MaterialTheme.stripeColorScheme.subtitle,
             urlSpanStyle = SpanStyle(
                 color = MaterialTheme.colors.primary
             )
@@ -205,7 +205,7 @@ internal fun BacsMandateItem(
             modifier = modifier,
             text = text,
             style = MaterialTheme.typography.caption.copy(fontWeight = FontWeight.Normal),
-            color = MaterialTheme.stripeColors.subtitle
+            color = MaterialTheme.stripeColorScheme.subtitle
         )
     }
 }

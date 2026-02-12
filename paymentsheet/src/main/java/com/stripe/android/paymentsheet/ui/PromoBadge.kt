@@ -21,7 +21,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.getOnSuccessBackgroundColor
 import com.stripe.android.uicore.getSuccessBackgroundColor
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import java.util.Locale
 
 @Composable
@@ -38,7 +38,7 @@ internal fun PromoBadge(
                 color = StripeThemeDefaults.primaryButtonStyle.getSuccessBackgroundColor(LocalContext.current),
             )
         } else {
-            MaterialTheme.stripeColors.componentBorder
+            MaterialTheme.stripeColorScheme.componentBorder
         }
 
         val foregroundColor = if (eligible) {
@@ -46,7 +46,7 @@ internal fun PromoBadge(
                 color = StripeThemeDefaults.primaryButtonStyle.getOnSuccessBackgroundColor(LocalContext.current),
             )
         } else {
-            MaterialTheme.stripeColors.onComponent
+            MaterialTheme.stripeColorScheme.onComponent
         }
 
         val shape = MaterialTheme.shapes.medium

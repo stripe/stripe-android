@@ -49,7 +49,7 @@ import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconWidth
 import com.stripe.android.uicore.DefaultStripeTheme
 import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.image.StripeImageLoader
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.uicore.R as StripeUiCoreR
 
 @Composable
@@ -195,7 +195,7 @@ private fun RowButtonFloatingOuterContent(
                 modifier.alpha(alpha = if (isEnabled) 1.0F else 0.6F)
             ),
         shape = MaterialTheme.shapes.medium,
-        backgroundColor = MaterialTheme.stripeColors.component,
+        backgroundColor = MaterialTheme.stripeColorScheme.component,
         border = MaterialTheme.getBorderStroke(isSelected),
         elevation = if (isSelected) 1.5.dp else 0.dp
     ) {
@@ -468,14 +468,14 @@ private fun ButtonPreview() {
 
 @Composable
 private fun RowStyle.getTitleTextColor() = when (this) {
-    is RowStyle.FloatingButton -> MaterialTheme.stripeColors.onComponent
+    is RowStyle.FloatingButton -> MaterialTheme.stripeColorScheme.onComponent
     else -> MaterialTheme.colors.onSurface
 }
 
 @Composable
 private fun RowStyle.getSubtitleTextColor() = when (this) {
-    is RowStyle.FloatingButton -> MaterialTheme.stripeColors.placeholderText
-    else -> MaterialTheme.stripeColors.subtitle
+    is RowStyle.FloatingButton -> MaterialTheme.stripeColorScheme.placeholderText
+    else -> MaterialTheme.stripeColorScheme.subtitle
 }
 
 private fun RowStyle.shouldAddModifierWeight(): Boolean {
