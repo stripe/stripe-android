@@ -6,8 +6,8 @@ import android.os.Build.VERSION_CODES.N
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
@@ -62,7 +62,7 @@ internal fun PromoBadge(
             Text(
                 text = formatPromoText(text, eligible),
                 color = foregroundColor,
-                style = MaterialTheme.typography.caption.copy(
+                style = MaterialTheme.typography.labelSmall.copy(
                     fontSize = StripeThemeDefaults.typography.xSmallFontSize,
                 ),
             )

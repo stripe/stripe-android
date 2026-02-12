@@ -6,8 +6,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,7 +30,7 @@ internal fun WalletsDivider(text: String) {
 
         Text(
             text = text,
-            style = MaterialTheme.typography.caption,
+            style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.stripeColorScheme.subtitle,
             fontWeight = FontWeight.Normal,
             modifier = Modifier.padding(horizontal = 8.dp),
@@ -46,7 +46,7 @@ internal fun WalletsDivider(text: String) {
 private fun WalletsDividerLine(
     modifier: Modifier = Modifier,
 ) {
-    val color = if (MaterialTheme.colors.surface.shouldUseDarkDynamicColor()) {
+    val color = if (MaterialTheme.colorScheme.surface.shouldUseDarkDynamicColor()) {
         Color.Black.copy(alpha = .20f)
     } else {
         Color.White.copy(alpha = .20f)

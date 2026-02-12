@@ -11,12 +11,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.TopAppBar
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -120,7 +120,7 @@ private fun ActivePolling(
 
         Text(
             text = stringResource(R.string.stripe_upi_polling_header),
-            style = MaterialTheme.typography.h4,
+            style = MaterialTheme.typography.headlineLarge,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(bottom = Spacing.normal),
         )
@@ -128,7 +128,7 @@ private fun ActivePolling(
         Text(
             text = rememberActivePollingMessage(remainingDuration, ctaText),
             textAlign = TextAlign.Center,
-            lineHeight = MaterialTheme.typography.body1.fontSize * Spacing.lineHeightMultiplier,
+            lineHeight = MaterialTheme.typography.bodyLarge.fontSize * Spacing.lineHeightMultiplier,
             modifier = Modifier.padding(bottom = Spacing.normal),
         )
 
@@ -148,7 +148,7 @@ private fun FailedPolling(
             TopAppBar(
                 title = {},
                 elevation = 0.dp,
-                backgroundColor = MaterialTheme.colors.surface,
+                backgroundColor = MaterialTheme.colorScheme.surface,
                 navigationIcon = {
                     IconButton(onClick = onCancel) {
                         Icon(
@@ -183,7 +183,7 @@ private fun FailedPolling(
 
                 Text(
                     text = stringResource(R.string.stripe_upi_polling_payment_failed_title),
-                    style = MaterialTheme.typography.h4,
+                    style = MaterialTheme.typography.headlineLarge,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(bottom = Spacing.normal),
                 )
@@ -191,7 +191,7 @@ private fun FailedPolling(
                 Text(
                     text = stringResource(R.string.stripe_upi_polling_payment_failed_message),
                     textAlign = TextAlign.Center,
-                    lineHeight = MaterialTheme.typography.body1.fontSize * Spacing.lineHeightMultiplier,
+                    lineHeight = MaterialTheme.typography.bodyLarge.fontSize * Spacing.lineHeightMultiplier,
                 )
             }
 

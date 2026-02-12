@@ -21,9 +21,9 @@ import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.ContentAlpha
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -266,14 +266,14 @@ private fun LinkCheckbox(
         Column {
             if (useLinkLogoInCheckboxText) {
                 TextWithLinkLogo(
-                    style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Medium),
-                    color = MaterialTheme.colors.onSurface.copy(alpha = contentAlpha),
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = contentAlpha),
                 )
             } else {
                 Text(
                     text = label,
-                    style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colors.onSurface.copy(alpha = contentAlpha)
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = contentAlpha)
                 )
             }
             if (sublabel != null) {
@@ -282,7 +282,7 @@ private fun LinkCheckbox(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 4.dp),
-                    style = MaterialTheme.typography.body1,
+                    style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.stripeColorScheme.subtitle
                 )
             }
@@ -358,7 +358,7 @@ internal fun LinkDefaultOptIn(
                 Text(
                     text = email,
                     overflow = TextOverflow.Ellipsis,
-                    color = MaterialTheme.colors.onSurface,
+                    color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                 )
                 Text(
@@ -371,8 +371,8 @@ internal fun LinkDefaultOptIn(
 
             Text(
                 text = stringResource(id = StripeUiCoreR.string.stripe_change),
-                color = MaterialTheme.colors.primary,
-                style = MaterialTheme.typography.subtitle1,
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.clickable(enabled = enabled, onClick = onChange),
             )

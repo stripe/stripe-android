@@ -8,9 +8,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -103,7 +103,7 @@ internal fun PaymentSheetTopBar(
                 )
             }
         },
-        backgroundColor = MaterialTheme.colors.surface,
+        backgroundColor = MaterialTheme.colorScheme.surface,
         elevation = elevation,
         actions = {
             if (state.showEditMenu) {

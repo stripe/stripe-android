@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,11 +14,11 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.LocalMinimumInteractiveComponentEnforcement
 import androidx.compose.material.LocalRippleConfiguration
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.RippleConfiguration
 import androidx.compose.material.RippleDefaults
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
@@ -71,7 +72,7 @@ internal fun RemoveButton(
                 ) {
                     Text(
                         text = title.resolve(LocalContext.current),
-                        color = MaterialTheme.colors.error.copy(
+                        color = MaterialTheme.colorScheme.error.copy(
                             LocalContentAlpha.current
                         ),
                         style = StripeTheme.primaryButtonStyle.getComposeTextStyle(),
@@ -87,7 +88,7 @@ internal fun RemoveButton(
                             end = 8.dp
                         )
                         .testTag(REMOVE_BUTTON_LOADING),
-                    color = MaterialTheme.colors.error,
+                    color = MaterialTheme.colorScheme.error,
                 )
             }
         }
@@ -99,11 +100,11 @@ private val ErrorRippleConfiguration: RippleConfiguration
     @Composable
     get() = RippleConfiguration(
         color = RippleDefaults.rippleColor(
-            contentColor = MaterialTheme.colors.error,
-            lightTheme = MaterialTheme.colors.isLight,
+            contentColor = MaterialTheme.colorScheme.error,
+            lightTheme = !isSystemInDarkTheme(),
         ),
         rippleAlpha = RippleDefaults.rippleAlpha(
-            contentColor = MaterialTheme.colors.error.copy(alpha = 0.25f),
-            lightTheme = MaterialTheme.colors.isLight,
+            contentColor = MaterialTheme.colorScheme.error.copy(alpha = 0.25f),
+            lightTheme = !isSystemInDarkTheme(),
         )
     )

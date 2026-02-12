@@ -19,10 +19,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.RadioButton
 import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -381,7 +381,7 @@ private fun TitleContent(
         Text(
             text = title,
             style = appearance.titleFont?.toTextStyle()
-                ?: MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Medium),
+                ?: MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
             color = if (isEnabled) titleColor else titleColor.copy(alpha = 0.6f),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -397,7 +397,7 @@ private fun TitleContent(
             Text(
                 text = subtitle,
                 style = appearance.subtitleFont?.toTextStyle()
-                    ?: MaterialTheme.typography.caption.copy(fontWeight = FontWeight.Normal),
+                    ?: MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Normal),
                 color = if (isEnabled) subtitleTextColor else subtitleTextColor.copy(alpha = 0.6f),
             )
         }
@@ -469,7 +469,7 @@ private fun ButtonPreview() {
 @Composable
 private fun RowStyle.getTitleTextColor() = when (this) {
     is RowStyle.FloatingButton -> MaterialTheme.stripeColorScheme.onComponent
-    else -> MaterialTheme.colors.onSurface
+    else -> MaterialTheme.colorScheme.onSurface
 }
 
 @Composable

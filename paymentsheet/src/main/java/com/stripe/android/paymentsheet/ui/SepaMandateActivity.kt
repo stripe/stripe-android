@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.stripe.android.paymentsheet.ui
 
 import android.content.Intent
@@ -13,8 +15,9 @@ import androidx.compose.material.Button
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -84,7 +87,7 @@ internal fun SepaMandateScreen(
 ) {
     Column(
         modifier = Modifier
-            .background(MaterialTheme.colors.surface)
+            .background(MaterialTheme.colorScheme.surface)
     ) {
         IconButton(
             onClick = closeCallback,
@@ -111,7 +114,7 @@ internal fun SepaMandateScreen(
                     merchantName
                 ),
                 color = MaterialTheme.stripeColorScheme.subtitle,
-                style = MaterialTheme.typography.body1,
+                style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(vertical = 16.dp)
             )
             Button(

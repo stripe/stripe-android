@@ -7,8 +7,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.material.Card
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -134,7 +134,7 @@ private fun DetailsCannotBeChangedText(
     )?.let {
         Text(
             text = it.resolve(context),
-            style = MaterialTheme.typography.subtitle2,
+            style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.stripeColorScheme.subtitle,
             fontWeight = FontWeight.Normal,
             modifier = Modifier
@@ -300,7 +300,7 @@ private fun DeletePaymentMethodUi(interactor: UpdatePaymentMethodInteractor) {
 
     RemoveButton(
         title = R.string.stripe_remove.resolvableString,
-        borderColor = MaterialTheme.colors.error,
+        borderColor = MaterialTheme.colorScheme.error,
         idle = status == UpdatePaymentMethodInteractor.Status.Idle,
         removing = status == UpdatePaymentMethodInteractor.Status.Removing,
         onRemove = { openDialogValue.value = true },

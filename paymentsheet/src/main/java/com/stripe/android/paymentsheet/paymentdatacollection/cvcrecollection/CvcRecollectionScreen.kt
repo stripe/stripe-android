@@ -166,7 +166,7 @@ internal fun CvcRecollectionField(
                             R.string.stripe_paymentsheet_payment_method_item_card_number,
                             lastFour
                         ),
-                        style = MaterialTheme.typography.body1,
+                        style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.testTag(TEST_TAG_CVC_LAST_FOUR)
                     )
                 }

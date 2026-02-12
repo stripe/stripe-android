@@ -57,6 +57,7 @@ fun StripeBottomSheetLayout(
         sheetGesturesEnabled = false,
         shape = layoutInfo.sheetShape,
         sheetState = state.modalBottomSheetState,
+        dragHandle = null,
         onDismissRequest = {}
     ) {
         Box(modifier = Modifier.testTag(BottomSheetContentTestTag)) {

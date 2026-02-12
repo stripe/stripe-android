@@ -18,9 +18,9 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.Divider
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -106,7 +106,7 @@ internal fun AutocompleteScreenUI(
         viewModel = viewModel,
         attributionDrawable = attributionDrawable,
         isRootScreen = false,
-        backgroundColor = MaterialTheme.colors.surface,
+        backgroundColor = MaterialTheme.colorScheme.surface,
         appBar = { isRoot, onBack ->
             AddressOptionsAppBar(isRootScreen = isRoot) {
                 onBack()
@@ -211,7 +211,8 @@ internal fun AutocompleteScreenUI(
             appBar(isRootScreen, onBackPressed)
         },
         bottomBar = {
-            val background = if (MaterialTheme.stripeColorScheme.materialColorScheme.surface.shouldUseDarkDynamicColor()) {
+            val surface = MaterialTheme.stripeColorScheme.materialColorScheme.surface
+            val background = if (surface.shouldUseDarkDynamicColor()) {
                 Color.Black.copy(alpha = 0.07f)
             } else {
                 Color.White.copy(alpha = 0.07f)
@@ -311,12 +312,12 @@ internal fun AutocompleteScreenUI(
                                         Text(
                                             text = annotatedStringResource(text = text),
                                             color = MaterialTheme.stripeColorScheme.onComponent,
-                                            style = MaterialTheme.typography.body1
+                                            style = MaterialTheme.typography.bodyLarge
                                         )
                                         Text(
                                             text = secondaryText.toString(),
                                             color = MaterialTheme.stripeColorScheme.onComponent,
-                                            style = MaterialTheme.typography.body1
+                                            style = MaterialTheme.typography.bodyLarge
                                         )
                                     }
                                     Divider()

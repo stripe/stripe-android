@@ -10,8 +10,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -372,15 +372,15 @@ internal fun EmbeddedNewPaymentMethodTrailingContent(
     ) {
         Text(
             stringResource(id = com.stripe.android.uicore.R.string.stripe_change),
-            color = MaterialTheme.colors.primary,
-            style = MaterialTheme.typography.subtitle1,
+            color = MaterialTheme.colorScheme.primary,
+            style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Medium,
         )
         if (showChevron) {
             Icon(
                 painter = painterResource(R.drawable.stripe_ic_chevron_right),
                 contentDescription = null,
-                tint = MaterialTheme.colors.primary,
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(start = 4.dp, top = 2.dp)
             )
         }

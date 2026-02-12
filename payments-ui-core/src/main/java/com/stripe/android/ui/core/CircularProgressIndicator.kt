@@ -1,8 +1,8 @@
 package com.stripe.android.ui.core
 
 import androidx.annotation.RestrictTo
-import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color

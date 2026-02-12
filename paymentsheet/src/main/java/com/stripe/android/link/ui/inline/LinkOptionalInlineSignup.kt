@@ -12,8 +12,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -197,7 +197,7 @@ internal fun EmailCollection(
                     .semantics {
                         testTag = ProgressIndicatorTestTag
                     },
-                color = MaterialTheme.colors.primary,
+                color = MaterialTheme.colorScheme.primary,
                 strokeWidth = 2.dp
             )
         }

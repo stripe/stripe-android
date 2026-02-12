@@ -19,8 +19,8 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -490,7 +490,7 @@ internal fun CvcRecollectionField(
         ) {
             Text(
                 text = stringResource(R.string.stripe_paymentsheet_confirm_your_cvc),
-                style = MaterialTheme.typography.body1,
+                style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.stripeColorScheme.subtitle
             )
             SectionCard(

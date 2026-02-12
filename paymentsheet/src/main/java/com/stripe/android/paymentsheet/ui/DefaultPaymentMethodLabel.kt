@@ -3,8 +3,8 @@ package com.stripe.android.paymentsheet.ui
 import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -26,7 +26,7 @@ internal fun DefaultPaymentMethodLabel(
                 TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL
             ),
         text = stringResource(id = R.string.stripe_wallet_default),
-        style = MaterialTheme.typography.caption.copy(fontWeight = FontWeight.Medium),
+        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
         color = MaterialTheme.stripeColorScheme.placeholderText,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,

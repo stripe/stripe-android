@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -203,13 +203,13 @@ private fun LinkInlineErrorText(
                 .size(20.dp),
             painter = painterResource(id = R.drawable.stripe_ic_sail_warning_circle),
             contentDescription = null,
-            tint = MaterialTheme.colors.error
+            tint = MaterialTheme.colorScheme.error
         )
         HyperlinkedText(
             text = text,
             modifier = Modifier
                 .padding(vertical = 12.dp),
-            color = MaterialTheme.colors.error,
+            color = MaterialTheme.colorScheme.error,
             style = TextStyle(
                 fontFamily = FontFamily.Default,
                 fontWeight = FontWeight.Normal,
