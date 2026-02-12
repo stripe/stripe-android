@@ -43,4 +43,75 @@ data class CheckoutSessionResponse(
      * Only populated in responses from the confirm API.
      */
     val paymentIntent: PaymentIntent? = null,
-) : StripeModel
+
+    /**
+     * Customer data from the checkout session init response.
+     * This is parsed from the top-level "customer" field in the init response.
+     * For checkout sessions, customer is associated server-side when the session is created,
+     * so we get customer data directly in the init response rather than through customer session auth.
+     */
+    val customer: Customer? = null,
+
+    /**
+     * Server-side flag controlling the "Save for future use" checkbox.
+     * Parsed from `customer_managed_saved_payment_methods_offer_save` in the init response.
+     */
+    val savedPaymentMethodsOfferSave: SavedPaymentMethodsOfferSave? = null,
+) : StripeModel {
+
+    /**
+     * Controls whether the "Save for future use" checkbox is shown and its initial state.
+     *
+     * This data comes from the checkout session's `customer_managed_saved_payment_methods_offer_save`
+     * configuration, which is set when creating the checkout session.
+     */
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class SavedPaymentMethodsOfferSave(
+        /**
+         * Whether the save checkbox should be shown to the user.
+         */
+        val enabled: Boolean,
+        /**
+         * The initial state of the checkbox.
+         */
+        val status: Status,
+    ) : StripeModel {
+        /**
+         * Represents the initial checked state of the save checkbox.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        enum class Status {
+            /**
+             * Checkbox should be pre-checked (user has previously agreed to save).
+             */
+            ACCEPTED,
+
+            /**
+             * Checkbox should be unchecked by default.
+             */
+            NOT_ACCEPTED,
+        }
+    }
+
+    /**
+     * Customer data from checkout session.
+     *
+     * This is simpler than [ElementsSession.Customer] because checkout sessions don't use
+     * customer session authentication - the customer is associated server-side when the
+     * checkout session is created.
+     */
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class Customer(
+        /**
+         * The customer ID (e.g., "cus_xxx").
+         */
+        val id: String,
+
+        /**
+         * The customer's saved payment methods.
+         */
+        val paymentMethods: List<PaymentMethod>,
+    ) : StripeModel
+}

@@ -35,6 +35,10 @@ internal class CheckoutSessionResponseJsonParser(
             json.optJSONObject(FIELD_SERVER_BUILT_ELEMENTS_SESSION_PARAMS),
             json.optJSONObject(FIELD_ELEMENTS_SESSION),
         )
+        val customer = parseCustomer(json.optJSONObject(FIELD_CUSTOMER))
+        val savedPaymentMethodsOfferSave = parseSavedPaymentMethodsOfferSave(
+            json.optJSONObject(FIELD_SAVED_PAYMENT_METHODS_OFFER_SAVE)
+        )
 
         return CheckoutSessionResponse(
             id = sessionId,
@@ -42,6 +46,8 @@ internal class CheckoutSessionResponseJsonParser(
             currency = currency,
             elementsSession = elementsSession,
             paymentIntent = paymentIntent,
+            customer = customer,
+            savedPaymentMethodsOfferSave = savedPaymentMethodsOfferSave,
         )
     }
 
@@ -112,6 +118,71 @@ internal class CheckoutSessionResponseJsonParser(
         return if (due >= 0) due else null
     }
 
+    /**
+     * Parses the top-level customer object from checkout session init response.
+     * Customer is associated server-side when the checkout session is created,
+     * so we get customer data directly in the init response.
+     *
+     * Expected JSON structure:
+     * ```json
+     * {
+     *   "customer": {
+     *     "id": "cus_xxx",
+     *     "payment_methods": [...]
+     *   }
+     * }
+     * ```
+     */
+    private fun parseCustomer(json: JSONObject?): CheckoutSessionResponse.Customer? {
+        if (json == null) {
+            return null
+        }
+
+        val customerId = json.optString(FIELD_CUSTOMER_ID).takeIf { it.isNotEmpty() } ?: return null
+        val paymentMethodsJson = json.optJSONArray(FIELD_PAYMENT_METHODS)
+        val paymentMethods = paymentMethodsJson?.let { pmsJson ->
+            (0 until pmsJson.length()).mapNotNull { index ->
+                PaymentMethodJsonParser().parse(pmsJson.optJSONObject(index))
+            }
+        } ?: emptyList()
+
+        return CheckoutSessionResponse.Customer(
+            id = customerId,
+            paymentMethods = paymentMethods,
+        )
+    }
+
+    /**
+     * Parses `customer_managed_saved_payment_methods_offer_save` from the init response.
+     *
+     * Expected JSON structure:
+     * ```json
+     * {
+     *   "customer_managed_saved_payment_methods_offer_save": {
+     *     "enabled": true,
+     *     "status": "not_accepted"
+     *   }
+     * }
+     * ```
+     */
+    private fun parseSavedPaymentMethodsOfferSave(
+        json: JSONObject?,
+    ): CheckoutSessionResponse.SavedPaymentMethodsOfferSave? {
+        if (json == null) return null
+
+        val enabled = json.optBoolean(FIELD_OFFER_SAVE_ENABLED, false)
+        val statusString = json.optString(FIELD_OFFER_SAVE_STATUS)
+        val status = when (statusString) {
+            "accepted" -> CheckoutSessionResponse.SavedPaymentMethodsOfferSave.Status.ACCEPTED
+            else -> CheckoutSessionResponse.SavedPaymentMethodsOfferSave.Status.NOT_ACCEPTED
+        }
+
+        return CheckoutSessionResponse.SavedPaymentMethodsOfferSave(
+            enabled = enabled,
+            status = status,
+        )
+    }
+
     private companion object {
         private const val FIELD_SESSION_ID = "session_id"
         private const val FIELD_CURRENCY = "currency"
@@ -120,5 +191,12 @@ internal class CheckoutSessionResponseJsonParser(
         private const val FIELD_DUE = "due"
         private const val FIELD_PAYMENT_INTENT = "payment_intent"
         private const val FIELD_SERVER_BUILT_ELEMENTS_SESSION_PARAMS = "server_built_elements_session_params"
+        private const val FIELD_CUSTOMER = "customer"
+        private const val FIELD_CUSTOMER_ID = "id"
+        private const val FIELD_PAYMENT_METHODS = "payment_methods"
+        private const val FIELD_SAVED_PAYMENT_METHODS_OFFER_SAVE =
+            "customer_managed_saved_payment_methods_offer_save"
+        private const val FIELD_OFFER_SAVE_ENABLED = "enabled"
+        private const val FIELD_OFFER_SAVE_STATUS = "status"
     }
 }
