@@ -43,4 +43,59 @@ data class CheckoutSessionResponse(
      * Only populated in responses from the confirm API.
      */
     val paymentIntent: PaymentIntent? = null,
-) : StripeModel
+
+    /**
+     * Customer data from the checkout session init response.
+     * This is parsed from the top-level "customer" field in the init response.
+     * For checkout sessions, customer is associated server-side when the session is created,
+     * so we get customer data directly in the init response rather than through customer session auth.
+     */
+    val customer: Customer? = null,
+
+    /**
+     * Server-side flag controlling the "Save for future use" checkbox.
+     * Parsed from `customer_managed_saved_payment_methods_offer_save` in the init response.
+     */
+    val savedPaymentMethodsOfferSave: SavedPaymentMethodsOfferSave? = null,
+) : StripeModel {
+
+    /**
+     * Controls whether the "Save for future use" checkbox is shown and its initial state.
+     */
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class SavedPaymentMethodsOfferSave(
+        /** Whether to show the save checkbox. */
+        val enabled: Boolean,
+        /** Initial state of the checkbox. */
+        val status: Status,
+    ) : StripeModel {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        enum class Status {
+            /** Checkbox should be pre-checked. */
+            ACCEPTED,
+
+            /** Checkbox should be unchecked. */
+            NOT_ACCEPTED,
+        }
+    }
+
+    /**
+     * Customer data from checkout session.
+     * Simpler than [ElementsSession.Customer] because checkout sessions don't have
+     * customer session authentication - customer is associated server-side.
+     */
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class Customer(
+        /**
+         * The customer ID (e.g., "cus_xxx").
+         */
+        val id: String,
+
+        /**
+         * The customer's saved payment methods.
+         */
+        val paymentMethods: List<PaymentMethod>,
+    ) : StripeModel
+}

@@ -14,6 +14,7 @@ import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
 import com.stripe.android.lpmfoundations.paymentmethod.toPaymentSheetSaveConsentBehavior
+import com.stripe.android.model.CheckoutSessionResponse
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT
@@ -35,6 +36,7 @@ internal interface CreateLinkState {
         customer: CustomerRepository.CustomerInfo?,
         initializationMode: PaymentElementLoader.InitializationMode,
         clientAttributionMetadata: ClientAttributionMetadata,
+        checkoutOfferSave: CheckoutSessionResponse.SavedPaymentMethodsOfferSave? = null,
     ): LinkStateResult
 }
 
@@ -73,6 +75,7 @@ internal class DefaultCreateLinkState @Inject constructor(
         customer: CustomerRepository.CustomerInfo?,
         initializationMode: PaymentElementLoader.InitializationMode,
         clientAttributionMetadata: ClientAttributionMetadata,
+        checkoutOfferSave: CheckoutSessionResponse.SavedPaymentMethodsOfferSave?,
     ): LinkStateResult {
         val linkDisabledReasons = getLinkDisabledReasons(
             elementsSession = elementsSession,
@@ -90,6 +93,7 @@ internal class DefaultCreateLinkState @Inject constructor(
             elementsSession = elementsSession,
             initializationMode = initializationMode,
             clientAttributionMetadata = clientAttributionMetadata,
+            checkoutOfferSave = checkoutOfferSave,
         )
         val accountStatus = accountStatusProvider(linkConfiguration)
         val loginState = accountStatus.toLoginState()
@@ -101,6 +105,7 @@ internal class DefaultCreateLinkState @Inject constructor(
                 elementsSession = elementsSession,
                 configuration = configuration,
                 linkConfiguration = linkConfiguration,
+                checkoutOfferSave = checkoutOfferSave,
             )
         )
     }
@@ -162,6 +167,7 @@ internal class DefaultCreateLinkState @Inject constructor(
         elementsSession: ElementsSession,
         configuration: CommonConfiguration,
         linkConfiguration: LinkConfiguration,
+        checkoutOfferSave: CheckoutSessionResponse.SavedPaymentMethodsOfferSave?,
     ): LinkSignupModeResult {
         if (accountStatus != AccountStatus.SignedOut) {
             return LinkSignupModeResult.AlreadyRegistered
@@ -179,7 +185,9 @@ internal class DefaultCreateLinkState @Inject constructor(
         val isSaveForFutureUseValueChangeable = isSaveForFutureUseValueChangeable(
             code = PaymentMethod.Type.Card.code,
             intent = elementsSession.stripeIntent,
-            paymentMethodSaveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),
+            paymentMethodSaveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(
+                checkoutOfferSave = checkoutOfferSave,
+            ),
             hasCustomerConfiguration = configuration.customer != null,
         )
         val signupMode = when {
@@ -205,6 +213,7 @@ internal class DefaultCreateLinkState @Inject constructor(
         elementsSession: ElementsSession,
         initializationMode: PaymentElementLoader.InitializationMode,
         clientAttributionMetadata: ClientAttributionMetadata,
+        checkoutOfferSave: CheckoutSessionResponse.SavedPaymentMethodsOfferSave?,
     ): LinkConfiguration {
         val cardBrandFilter = getCardBrandFilter(
             elementsSession = elementsSession,
@@ -233,6 +242,7 @@ internal class DefaultCreateLinkState @Inject constructor(
             cardBrandChoice = cardBrandChoice,
             shippingDetails = shippingDetails,
             clientAttributionMetadata = clientAttributionMetadata,
+            checkoutOfferSave = checkoutOfferSave,
         )
     }
 
@@ -245,6 +255,7 @@ internal class DefaultCreateLinkState @Inject constructor(
         cardBrandChoice: LinkConfiguration.CardBrandChoice?,
         shippingDetails: AddressDetails?,
         clientAttributionMetadata: ClientAttributionMetadata,
+        checkoutOfferSave: CheckoutSessionResponse.SavedPaymentMethodsOfferSave?,
     ) = LinkConfiguration(
         stripeIntent = elementsSession.stripeIntent,
         merchantName = configuration.merchantDisplayName,
@@ -282,7 +293,9 @@ internal class DefaultCreateLinkState @Inject constructor(
         skipWalletInFlowController = elementsSession.linkMobileSkipWalletInFlowController,
         customerId = elementsSession.customer?.session?.customerId,
         linkAppearance = configuration.linkAppearance,
-        saveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),
+        saveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(
+            checkoutOfferSave = checkoutOfferSave,
+        ),
         forceSetupFutureUseBehaviorAndNewMandate = elementsSession
             .flags[ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT] == true,
         linkSupportedPaymentMethodsOnboardingEnabled =
