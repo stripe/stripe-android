@@ -45,7 +45,9 @@ internal data class LinkAccount(
     val hasVerifiedSMSSession: Boolean = consumerSession.containsVerifiedSMSSession()
 
     @IgnoredOnParcel
-    val isVerified: Boolean = consumerSession.meetsMinimumAuthenticationLevel
+    val isVerified: Boolean = consumerSession.meetsMinimumAuthenticationLevel ||
+        consumerSession.isVerifiedForSignup() ||
+        consumerSession.isVerifiedWithLinkAuthToken()
 
     @IgnoredOnParcel
     val completedSignup: Boolean = consumerSession.isVerifiedForSignup()
@@ -95,4 +97,8 @@ internal data class LinkAccount(
             it.state == ConsumerSession.VerificationSession.SessionState.Started
     } != null
 
+    private fun ConsumerSession.isVerifiedWithLinkAuthToken() = verificationSessions.find {
+        it.type == ConsumerSession.VerificationSession.SessionType.LinkAuthToken &&
+            it.state == ConsumerSession.VerificationSession.SessionState.Verified
+    } != null
 }
