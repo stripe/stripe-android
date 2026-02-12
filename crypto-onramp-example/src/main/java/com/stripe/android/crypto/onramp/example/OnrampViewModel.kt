@@ -37,7 +37,6 @@ import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
-import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.utils.isLinkAuthorizationError
 import kotlinx.coroutines.flow.MutableStateFlow
