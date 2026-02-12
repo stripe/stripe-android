@@ -31,8 +31,9 @@ private object TapToAddThemeDefaults {
         appBarIcon = Color.White,
         materialColors = darkColors(
             primary = Color(0xFF272729),
+            primaryVariant =  Color(0xFF7A7A7A),
             background = Color.Black,
-            onBackground = Color.White,
+            onBackground = Color(0xFFE3E3E3),
             surface = Color.Black,
             onSurface = Color.White,
             error = Color.Red,

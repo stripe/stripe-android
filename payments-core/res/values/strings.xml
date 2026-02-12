@@ -182,6 +182,8 @@
   <string name="stripe_remove">Remove</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="stripe_removed">Removed %s</string>
+  <!-- Text for error labels -->
+  <string name="stripe_error">Error</string>
   <string name="stripe_secure_checkout">Secure Checkout</string>
   <string name="stripe_title_add_a_card">Add a card</string>
   <!-- Screen title telling users they should add an address -->

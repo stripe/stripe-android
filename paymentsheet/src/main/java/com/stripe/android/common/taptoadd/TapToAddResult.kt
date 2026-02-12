@@ -22,6 +22,10 @@ internal sealed interface TapToAddResult : Parcelable {
     companion object {
         internal const val EXTRA_RESULT = ActivityStarter.Result.EXTRA
 
+        fun toIntent(intent: Intent, result: TapToAddResult): Intent {
+            return intent.putExtra(EXTRA_RESULT, result)
+        }
+
         fun fromIntent(intent: Intent?): TapToAddResult {
             val result = intent?.extras?.let { bundle ->
                 BundleCompat.getParcelable(bundle, EXTRA_RESULT, TapToAddResult::class.java)
