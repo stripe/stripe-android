@@ -41,17 +41,16 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.LocalAutofillHighlightColor
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.LocalContentAlpha
-import androidx.compose.material.LocalContentColor
-import androidx.compose.material.LocalTextStyle
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.ProvideTextStyle
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
-import androidx.compose.material.TextFieldColors
-import androidx.compose.material.TextFieldDefaults
-import androidx.compose.material.TextFieldDefaults.indicatorLine
-import androidx.compose.material.Typography
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProvideTextStyle
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TextFieldDefaults.indicatorLine
+import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ComposableOpenTarget
 import androidx.compose.runtime.CompositionLocalProvider
@@ -156,12 +155,12 @@ fun CompatTextField(
     maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
     minLines: Int = 1,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    shape: Shape = TextFieldDefaults.TextFieldShape,
-    colors: TextFieldColors = TextFieldDefaults.textFieldColors(),
+    shape: Shape = TextFieldDefaults.shape,
+    colors: TextFieldColors = TextFieldDefaults.colors(),
     contentPadding: PaddingValues = if (label != null) {
-        TextFieldDefaults.textFieldWithLabelPadding()
+        TextFieldDefaults.contentPaddingWithLabel()
     } else {
-        TextFieldDefaults.textFieldWithoutLabelPadding()
+        TextFieldDefaults.contentPaddingWithoutLabel()
     },
 ) {
     // If color is not provided via the text style, use content color as a default
@@ -171,7 +170,7 @@ fun CompatTextField(
     val mergedTextStyle = textStyle.merge(TextStyle(color = textColor))
 
     CompositionLocalProvider(LocalAutofillHighlightColor provides AutofillTransparentColor) {
-        @OptIn(ExperimentalMaterialApi::class)
+//        @OptIn(ExperimentalMaterialApi::class)
         BasicTextField(
             value = value,
             modifier = modifier
@@ -181,7 +180,7 @@ fun CompatTextField(
             enabled = enabled,
             readOnly = readOnly,
             textStyle = mergedTextStyle,
-            cursorBrush = SolidColor(colors.cursorColor(isError).value),
+            cursorBrush = SolidColor(colors.cursorColor(isError)),
             visualTransformation = visualTransformation,
             keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions,
@@ -288,8 +287,8 @@ fun CompatTextField(
     maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
     minLines: Int = 1,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    shape: Shape = TextFieldDefaults.TextFieldShape,
-    colors: TextFieldColors = TextFieldDefaults.textFieldColors(),
+    shape: Shape = TextFieldDefaults.shape,
+    colors: TextFieldColors = TextFieldDefaults.colors(),
     contentPadding: PaddingValues = if (label != null) {
         TextFieldDefaults.textFieldWithLabelPadding()
     } else {
@@ -298,7 +297,7 @@ fun CompatTextField(
 ) {
     // If color is not provided via the text style, use content color as a default
     val textColor = textStyle.color.takeOrElse {
-        colors.textColor(enabled).value
+        colors.textColor(enabled)
     }
     val mergedTextStyle = textStyle.merge(TextStyle(color = textColor))
 
@@ -313,7 +312,7 @@ fun CompatTextField(
             enabled = enabled,
             readOnly = readOnly,
             textStyle = mergedTextStyle,
-            cursorBrush = SolidColor(colors.cursorColor(isError).value),
+            cursorBrush = SolidColor(colors.cursorColor(isError)),
             visualTransformation = visualTransformation,
             keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions,
@@ -357,8 +356,8 @@ private fun InsetDecorationBox(
     visualTransformation: VisualTransformation = VisualTransformation.None,
     singleLine: Boolean = false,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    shape: Shape = TextFieldDefaults.TextFieldShape,
-    colors: TextFieldColors = TextFieldDefaults.textFieldColors(),
+    shape: Shape = TextFieldDefaults.shape,
+    colors: TextFieldColors = TextFieldDefaults.colors(),
     contentPadding: PaddingValues = if (label != null) {
         TextFieldDefaults.textFieldWithLabelPadding()
     } else {
@@ -452,22 +451,22 @@ internal fun CommonDecorationBox(
             // at the top), we don't use an error color
             if (it == InputPhase.UnfocusedEmpty) false else isError,
             interactionSource
-        ).value
+        )
     }
 
     val typography = MaterialTheme.typography
-    val subtitle1 = typography.subtitle1
-    val caption = typography.caption
+    val subtitle1 = typography.titleMedium
+    val caption = typography.bodySmall
     val shouldOverrideTextStyleColor =
         (subtitle1.color == Color.Unspecified && caption.color != Color.Unspecified) ||
             (subtitle1.color != Color.Unspecified && caption.color == Color.Unspecified)
 
     TextFieldTransitionScope.Transition(
         inputState = inputState,
-        focusedTextStyleColor = with(MaterialTheme.typography.caption.color) {
+        focusedTextStyleColor = with(MaterialTheme.typography.bodySmall.color) {
             if (shouldOverrideTextStyleColor) this.takeOrElse { labelColor(inputState) } else this
         },
-        unfocusedTextStyleColor = with(MaterialTheme.typography.subtitle1.color) {
+        unfocusedTextStyleColor = with(MaterialTheme.typography.titleMedium.color) {
             if (shouldOverrideTextStyleColor) this.takeOrElse { labelColor(inputState) } else this
         },
         contentColor = labelColor,
@@ -477,8 +476,8 @@ internal fun CommonDecorationBox(
         val decoratedLabel: @Composable (() -> Unit)? = label?.let {
             @Composable {
                 val labelTextStyle = lerp(
-                    MaterialTheme.typography.subtitle1,
-                    MaterialTheme.typography.caption,
+                    MaterialTheme.typography.titleMedium,
+                    MaterialTheme.typography.bodySmall,
                     labelProgress
                 ).let {
                     if (shouldOverrideTextStyleColor) it.copy(color = labelTextStyleColor) else it
@@ -494,8 +493,8 @@ internal fun CommonDecorationBox(
                 @Composable { modifier ->
                     Box(modifier.alpha(placeholderAlphaProgress)) {
                         Decoration(
-                            contentColor = colors.placeholderColor(enabled).value,
-                            typography = MaterialTheme.typography.subtitle1,
+                            contentColor = colors.placeholderColor(enabled),
+                            typography = MaterialTheme.typography.titleMedium,
                             content = placeholder
                         )
                     }
@@ -504,14 +503,14 @@ internal fun CommonDecorationBox(
                 null
             }
 
-        val leadingIconColor = colors.leadingIconColor(enabled, isError, interactionSource).value
+        val leadingIconColor = colors.leadingIconColor(enabled, isError, interactionSource)
         val decoratedLeading: @Composable (() -> Unit)? = leadingIcon?.let {
             @Composable {
                 Decoration(contentColor = leadingIconColor, content = it)
             }
         }
 
-        val trailingIconColor = colors.trailingIconColor(enabled, isError, interactionSource).value
+        val trailingIconColor = colors.trailingIconColor(enabled, isError, interactionSource)
         val decoratedTrailing: @Composable (() -> Unit)? = trailingIcon?.let {
             @Composable {
                 Decoration(contentColor = trailingIconColor, content = it)
@@ -549,18 +548,8 @@ internal fun Decoration(
     () -> Unit
 ) {
     val colorAndEmphasis: @Composable () -> Unit = @Composable {
-        CompositionLocalProvider(LocalContentColor provides contentColor) {
-            if (contentAlpha != null) {
-                CompositionLocalProvider(
-                    LocalContentAlpha provides contentAlpha,
-                    content = content
-                )
-            } else {
-                CompositionLocalProvider(
-                    LocalContentAlpha provides contentColor.alpha,
-                    content = content
-                )
-            }
+        CompositionLocalProvider(LocalContentColor provides contentColor.copy(alpha = contentAlpha ?: contentColor.alpha)) {
+            content()
         }
     }
     if (typography != null) ProvideTextStyle(typography, colorAndEmphasis) else colorAndEmphasis()
