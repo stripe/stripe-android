@@ -4,6 +4,7 @@ import android.content.res.Resources
 import androidx.annotation.RestrictTo
 import androidx.compose.ui.text.intl.Locale
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.Controller
 import com.stripe.android.uicore.elements.FormElement
@@ -16,7 +17,8 @@ import kotlinx.coroutines.flow.StateFlow
 data class AfterpayClearpayHeaderElement(
     override val identifier: IdentifierSpec,
     override val controller: Controller? = null,
-    val currency: String?
+    val currency: String?,
+    val promotion: PaymentMethodMessagePromotion?
 ) : FormElement {
     override val allowsUserInteraction: Boolean = false
     override val mandateText: ResolvableString? = null

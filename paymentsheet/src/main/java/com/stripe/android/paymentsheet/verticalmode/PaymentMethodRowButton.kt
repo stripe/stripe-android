@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import android.content.res.Configuration
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -33,11 +34,18 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withLink
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle
@@ -67,6 +75,7 @@ internal fun PaymentMethodRowButton(
     modifier: Modifier = Modifier,
     appearance: Appearance.Embedded = Appearance.Embedded(RowStyle.FloatingButton.default),
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
+    promotion: PaymentMethodMessagePromotion? = null
 ) {
     val defaultPadding = if (subtitle != null) {
         8.dp
@@ -108,7 +117,9 @@ internal fun PaymentMethodRowButton(
                     Modifier.weight(1f, fill = true)
                 } else {
                     Modifier
-                }
+                },
+                promotion = promotion,
+                isSelected = isSelected
             )
 
             if (promoText != null) {
@@ -340,7 +351,9 @@ private fun RowButtonInnerContent(
     subtitle: String?,
     contentDescription: String? = null,
     appearance: Appearance.Embedded,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isSelected: Boolean,
+    promotion: PaymentMethodMessagePromotion?
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -355,7 +368,9 @@ private fun RowButtonInnerContent(
             subtitle = subtitle,
             isEnabled = isEnabled,
             contentDescription = contentDescription,
-            appearance = appearance
+            appearance = appearance,
+            promotion = promotion,
+            isSelected = isSelected
         )
 
         if (shouldShowDefaultBadge) {
@@ -375,9 +390,11 @@ private fun TitleContent(
     isEnabled: Boolean,
     contentDescription: String?,
     appearance: Appearance.Embedded,
+    isSelected: Boolean,
+    promotion: PaymentMethodMessagePromotion?
 ) {
     val titleColor = appearance.style.getTitleTextColor()
-    Column {
+    Column(Modifier.animateContentSize()) {
         Text(
             text = title,
             style = appearance.titleFont?.toTextStyle()
@@ -392,14 +409,31 @@ private fun TitleContent(
             }
         )
 
-        if (subtitle != null) {
-            val subtitleTextColor = appearance.style.getSubtitleTextColor()
+        if (promotion != null && isSelected) {
             Text(
-                text = subtitle,
-                style = appearance.subtitleFont?.toTextStyle()
-                    ?: MaterialTheme.typography.caption.copy(fontWeight = FontWeight.Normal),
-                color = if (isEnabled) subtitleTextColor else subtitleTextColor.copy(alpha = 0.6f),
+                text = buildPaymentMethodMessage(promotion)
             )
+        }
+//        else if (subtitle != null) {
+//            val subtitleTextColor = appearance.style.getSubtitleTextColor()
+//            Text(
+//                text = subtitle,
+//                style = appearance.subtitleFont?.toTextStyle()
+//                    ?: MaterialTheme.typography.caption.copy(fontWeight = FontWeight.Normal),
+//                color = if (isEnabled) subtitleTextColor else subtitleTextColor.copy(alpha = 0.6f),
+//            )
+//        }
+    }
+}
+
+private fun buildPaymentMethodMessage(promotion: PaymentMethodMessagePromotion): AnnotatedString {
+    return buildAnnotatedString {
+        append(promotion.message)
+        append(". ")
+        withLink(LinkAnnotation.Url(
+            url = promotion.learnMore.url
+        )) {
+            append(promotion.learnMore.message)
         }
     }
 }

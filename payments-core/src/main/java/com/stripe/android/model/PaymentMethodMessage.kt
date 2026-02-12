@@ -76,3 +76,21 @@ data class PaymentMethodMessageLegalDisclosure
 constructor(
     val message: String
 ) : Parcelable
+
+@Parcelize
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class PaymentMethodMessagePromotion
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+constructor(
+    val paymentMethodType: String,
+    val message: String,
+    val learnMore: PaymentMethodMessageLearnMore
+) : Parcelable
+
+@Parcelize
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class PaymentMethodMessagePromotionList
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+constructor(
+    val promotions: List<PaymentMethodMessagePromotion>
+) : StripeModel

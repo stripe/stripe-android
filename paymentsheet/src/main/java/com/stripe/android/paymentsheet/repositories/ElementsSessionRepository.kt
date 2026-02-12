@@ -17,10 +17,13 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.model.amount
+import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.toDeferredIntentParams
 import kotlinx.coroutines.withContext
 import java.util.Calendar
+import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider

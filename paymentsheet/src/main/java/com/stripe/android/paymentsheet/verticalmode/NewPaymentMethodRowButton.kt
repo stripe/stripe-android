@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconHeight
@@ -26,7 +27,7 @@ internal fun NewPaymentMethodRowButton(
     imageLoader: StripeImageLoader,
     modifier: Modifier = Modifier,
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
-    appearance: Embedded = Embedded(Embedded.RowStyle.FloatingButton.default)
+    appearance: Embedded = Embedded(Embedded.RowStyle.FloatingButton.default),
 ) {
     NewPaymentMethodRowButton(
         isEnabled = isEnabled,
@@ -44,6 +45,7 @@ internal fun NewPaymentMethodRowButton(
         modifier = modifier.testTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_${displayablePaymentMethod.code}"),
         appearance = appearance,
         trailingContent = trailingContent,
+        promotion = displayablePaymentMethod.paymentMethodPromotion
     )
 }
 
@@ -61,7 +63,8 @@ internal fun NewPaymentMethodRowButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
-    appearance: Embedded = Embedded(Embedded.RowStyle.FloatingButton.default)
+    appearance: Embedded = Embedded(Embedded.RowStyle.FloatingButton.default),
+    promotion: PaymentMethodMessagePromotion?
 ) {
     PaymentMethodRowButton(
         isEnabled = isEnabled,
@@ -84,5 +87,6 @@ internal fun NewPaymentMethodRowButton(
         modifier = modifier,
         appearance = appearance,
         trailingContent = trailingContent,
+        promotion = promotion
     )
 }

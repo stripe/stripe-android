@@ -9,6 +9,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.model.PaymentMethodMessagePromotionList
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
@@ -56,6 +57,8 @@ internal interface PaymentMethodVerticalLayoutInteractor {
         val availableSavedPaymentMethodAction: SavedPaymentMethodAction,
         val mandate: ResolvableString?,
     )
+
+    fun getPromotions(): PaymentMethodMessagePromotionList?
 
     sealed interface Selection {
         val isSaved: Boolean
@@ -113,6 +116,10 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     dispatcher: CoroutineContext = Dispatchers.Default,
     mainDispatcher: CoroutineContext = Dispatchers.Main.immediate,
 ) : PaymentMethodVerticalLayoutInteractor {
+
+    override fun getPromotions(): PaymentMethodMessagePromotionList? {
+        return paymentMethodMetadata.paymentMethodMessagingHelper.promotions
+    }
 
     companion object {
         fun create(
@@ -352,7 +359,13 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     ): List<DisplayablePaymentMethod> {
         val lpms = supportedPaymentMethods.map { supportedPaymentMethod ->
             val paymentMethodIncentive = incentive?.takeIfMatches(supportedPaymentMethod.code)
-            supportedPaymentMethod.asDisplayablePaymentMethod(paymentMethods, paymentMethodIncentive) {
+            val paymentMethodMessage =
+                paymentMethodMetadata.paymentMethodMessagingHelper.getPromotion(supportedPaymentMethod.code)
+            supportedPaymentMethod.asDisplayablePaymentMethod(
+                paymentMethods,
+                paymentMethodIncentive,
+                paymentMethodMessage
+            ) {
                 handleViewAction(ViewAction.PaymentMethodSelected(supportedPaymentMethod.code))
             }
         }

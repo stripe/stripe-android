@@ -30,6 +30,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodMessage
+import com.stripe.android.model.PaymentMethodMessagePromotionList
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.RadarSessionWithHCaptcha
 import com.stripe.android.model.SetupIntent
@@ -401,6 +402,15 @@ interface StripeRepository {
         locale: String,
         requestOptions: ApiRequest.Options
     ): Result<PaymentMethodMessage>
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun retrievePaymentMethodMessageForPaymentSheet(
+        amount: Int,
+        currency: String,
+        country: String?,
+        locale: String,
+        requestOptions: ApiRequest.Options
+    ): Result<PaymentMethodMessagePromotionList>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun retrieveElementsSession(

@@ -15,6 +15,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.MandateTextElement
+import com.stripe.android.ui.core.elements.PaymentMethodMessageHeader
 import com.stripe.android.ui.core.elements.StaticTextElement
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.CountryElement
@@ -59,12 +60,21 @@ private object KlarnaUiDefinitionFactory : UiDefinitionFactory.Simple() {
         arguments: UiDefinitionFactory.Arguments,
         builder: FormElementsBuilder,
     ) {
+        val message = metadata.paymentMethodMessagingHelper.getPromotion(PaymentMethod.Type.Klarna.code)
+        val header = if (message != null) {
+            PaymentMethodMessageHeader(
+                identifier = IdentifierSpec.Generic("klarna_header_text"),
+                messagePromotion = message
+            )
+        } else {
+            StaticTextElement(
+                identifier = IdentifierSpec.Generic("klarna_header_text"),
+                stringResId = R.string.stripe_klarna_buy_now_pay_later
+            )
+        }
         builder
             .header(
-                formElement = StaticTextElement(
-                    identifier = IdentifierSpec.Generic("klarna_header_text"),
-                    stringResId = R.string.stripe_klarna_buy_now_pay_later
-                )
+                formElement = header
             )
             .overrideContactInformationPosition(ContactInformationCollectionMode.Name)
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Email)

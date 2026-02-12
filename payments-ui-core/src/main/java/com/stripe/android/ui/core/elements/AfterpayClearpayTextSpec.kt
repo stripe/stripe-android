@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.parcelize.Parcelize
@@ -17,5 +18,5 @@ data class AfterpayClearpayTextSpec(
     @SerialName("api_path")
     override val apiPath: IdentifierSpec = IdentifierSpec.Generic("afterpay_text")
 ) : FormItemSpec() {
-    fun transform(currency: String?): FormElement = AfterpayClearpayHeaderElement(apiPath, currency = currency)
+    fun transform(currency: String?, promotion: PaymentMethodMessagePromotion?): FormElement = AfterpayClearpayHeaderElement(apiPath, currency = currency, promotion = promotion)
 }

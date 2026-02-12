@@ -72,6 +72,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodMessage
+import com.stripe.android.model.PaymentMethodMessagePromotionList
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.RadarSessionWithHCaptcha
 import com.stripe.android.model.SetupIntent
@@ -99,6 +100,7 @@ import com.stripe.android.model.parsers.MobileCardElementConfigParser
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.model.parsers.PaymentMethodMessageJsonParser
+import com.stripe.android.model.parsers.PaymentMethodMessagePromotionJsonParser
 import com.stripe.android.model.parsers.PaymentMethodsListJsonParser
 import com.stripe.android.model.parsers.RadarSessionWithHCaptchaJsonParser
 import com.stripe.android.model.parsers.SetupIntentJsonParser
@@ -1516,6 +1518,32 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 }
             ),
             PaymentMethodMessageJsonParser()
+        ) {
+            // no-op
+        }
+    }
+
+    override suspend fun retrievePaymentMethodMessageForPaymentSheet(
+        amount: Int,
+        currency: String,
+        country: String?,
+        locale: String,
+        requestOptions: ApiRequest.Options
+    ): Result<PaymentMethodMessagePromotionList> {
+        return fetchStripeModelResult(
+            apiRequestFactory.createGet(
+                url = "https://ppm.stripe.com/config",
+                options = requestOptions,
+                params = mapOf<String, Any?>(
+                    "amount" to amount,
+                    "country" to country,
+                    "currency" to currency,
+                    "locale" to locale,
+                    "key" to requestOptions.apiKey,
+                    "_stripe_account" to requestOptions.stripeAccount
+                )
+            ),
+            PaymentMethodMessagePromotionJsonParser()
         ) {
             // no-op
         }

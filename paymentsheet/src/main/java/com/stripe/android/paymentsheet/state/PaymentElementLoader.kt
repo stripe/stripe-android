@@ -14,6 +14,7 @@ import com.stripe.android.common.taptoadd.TapToAddConnectionManager
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.utils.FeatureFlag
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.UserFacingLogger
@@ -33,7 +34,9 @@ import com.stripe.android.lpmfoundations.paymentmethod.create
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodMessagePromotionList
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
@@ -47,6 +50,8 @@ import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
+import com.stripe.android.paymentsheet.model.amount
+import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.model.validate
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
@@ -58,6 +63,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
+import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
@@ -244,7 +250,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val analyticsMetadataFactory: AnalyticsMetadataFactory,
     private val paymentMethodFilter: PaymentMethodFilter,
-    private val cardFundingFilterFactory: PaymentSheetCardFundingFilterFactory
+    private val cardFundingFilterFactory: PaymentSheetCardFundingFilterFactory,
+    private val stripeRepository: StripeRepository
 ) : PaymentElementLoader {
 
     fun interface AnalyticsMetadataFactory {
@@ -332,11 +339,25 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             )
         }
 
+        val promotions = async {
+            stripeRepository.retrievePaymentMethodMessageForPaymentSheet(
+                amount = elementsSession.stripeIntent.amount?.toInt() ?: 0,
+                currency = elementsSession.stripeIntent.currency ?: "usd",
+                country = elementsSession.stripeIntent.countryCode,
+                locale = Locale.getDefault().language,
+                requestOptions = ApiRequest.Options(
+                    apiKey = paymentConfiguration.get().publishableKey,
+                    stripeAccount = paymentConfiguration.get().stripeAccountId
+                )
+            )
+        }
+
         val paymentMethodMetadata = async {
             val linkStateResult = linkState.await()
             val isGooglePaySupported = isGooglePaySupportedOnDevice.completeResultOrNull {
                 errorReporter.report(ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_SKIPPED_DURING_LOAD)
             } ?: false
+            val proms = promotions.await()
 
             createPaymentMethodMetadata(
                 integrationConfiguration = integrationConfiguration,
@@ -347,6 +368,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 isGooglePaySupported = isGooglePaySupported,
                 initializationMode = initializationMode,
                 clientAttributionMetadata = clientAttributionMetadata,
+                promotions = proms.getOrNull()
             )
         }
 
@@ -456,6 +478,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         isGooglePaySupported: Boolean,
         initializationMode: PaymentElementLoader.InitializationMode,
         clientAttributionMetadata: ClientAttributionMetadata,
+        promotions: PaymentMethodMessagePromotionList?
     ): PaymentMethodMetadata {
         val configuration = integrationConfiguration.commonConfiguration
         val sharedDataSpecsResult = lpmRepository.getSharedDataSpecs(
@@ -510,6 +533,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             integrationMetadata = integrationMetadata,
             analyticsMetadata = analyticsMetadata,
             isTapToAddSupported = tapToAddConnectionManager.isSupported,
+            promotions = promotions
         )
     }
 
