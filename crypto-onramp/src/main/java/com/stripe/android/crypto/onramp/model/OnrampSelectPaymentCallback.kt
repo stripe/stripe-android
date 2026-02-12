@@ -51,6 +51,9 @@ class PaymentMethodDisplayData internal constructor(
 
     val sublabel: String?,
 
+    /**
+     * The type of payment being displayed.
+     */
     val type: Type
 ) {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
