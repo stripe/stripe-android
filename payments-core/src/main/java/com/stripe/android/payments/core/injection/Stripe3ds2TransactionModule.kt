@@ -1,6 +1,7 @@
 package com.stripe.android.payments.core.injection
 
 import android.content.Context
+import com.stripe.android.core.injection.ApplicationContext
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.payments.core.authentication.threeds2.DefaultStripe3ds2ChallengeResultProcessor
@@ -37,7 +38,7 @@ internal abstract class Stripe3ds2TransactionModule {
         @Provides
         @Singleton
         fun provideStripeThreeDs2Service(
-            context: Context,
+            @ApplicationContext context: Context,
             @Named(ENABLE_LOGGING) enableLogging: Boolean,
             @IOContext workContext: CoroutineContext
         ): StripeThreeDs2Service {

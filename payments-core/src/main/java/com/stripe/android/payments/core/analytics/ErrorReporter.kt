@@ -7,6 +7,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.frauddetection.FraudDetectionErrorReporter
+import com.stripe.android.core.injection.ApplicationContext
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.AnalyticsEvent
@@ -384,6 +385,7 @@ internal interface DefaultErrorReporterComponent {
     interface Factory {
         fun create(
             @BindsInstance
+            @ApplicationContext
             context: Context,
             @BindsInstance
             @Named(PRODUCT_USAGE)
@@ -423,7 +425,7 @@ internal interface DefaultErrorReporterModule {
 
         @Provides
         @Named(PUBLISHABLE_KEY)
-        fun providePublishableKey(context: Context): () -> String {
+        fun providePublishableKey(@ApplicationContext context: Context): () -> String {
             return { PaymentConfiguration.getInstance(context).publishableKey }
         }
     }

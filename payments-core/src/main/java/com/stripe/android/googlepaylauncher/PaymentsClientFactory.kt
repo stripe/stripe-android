@@ -3,6 +3,7 @@ package com.stripe.android.googlepaylauncher
 import android.content.Context
 import com.google.android.gms.wallet.PaymentsClient
 import com.google.android.gms.wallet.Wallet
+import com.stripe.android.core.injection.ApplicationContext
 import javax.inject.Inject
 
 internal fun interface PaymentsClientFactory {
@@ -12,7 +13,7 @@ internal fun interface PaymentsClientFactory {
 }
 
 internal class DefaultPaymentsClientFactory @Inject constructor(
-    private val context: Context
+    @ApplicationContext private val context: Context
 ) : PaymentsClientFactory {
     override fun create(
         environment: GooglePayEnvironment

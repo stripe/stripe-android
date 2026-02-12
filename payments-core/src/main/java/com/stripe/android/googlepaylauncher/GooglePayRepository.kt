@@ -11,6 +11,7 @@ import com.stripe.android.GooglePayConfig
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.injection.ApplicationContext
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -61,7 +62,7 @@ internal class DefaultGooglePayRepository(
 
     @Inject
     internal constructor(
-        context: Context,
+        @ApplicationContext context: Context,
         googlePayConfig: GooglePayPaymentMethodLauncher.Config,
         logger: Logger,
         errorReporter: ErrorReporter,

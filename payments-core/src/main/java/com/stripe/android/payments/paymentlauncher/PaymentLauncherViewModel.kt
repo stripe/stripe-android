@@ -413,7 +413,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
 
             val subcomponentFactory = DaggerPaymentLauncherViewModelFactoryComponent.factory()
                 .create(
-                    context = application,
+                    application = application,
                     enableLogging = arg.enableLogging,
                     publishableKeyProvider = { arg.publishableKey },
                     stripeAccountIdProvider = { arg.stripeAccountId },

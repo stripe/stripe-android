@@ -224,10 +224,7 @@ internal class AutocompleteViewModel @Inject constructor(
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
                     return autoCompleteViewModelSubcomponentFactoryProvider.get()
-                        .create(
-                            application = extras.requireApplication(),
-                            configuration = args,
-                        ).autoCompleteViewModel as T
+                        .create(configuration = args).autoCompleteViewModel as T
                 }
             }
 

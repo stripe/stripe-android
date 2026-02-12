@@ -2,6 +2,7 @@ package com.stripe.android.crypto.onramp.di
 
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.core.injection.ApplicationContextModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.crypto.onramp.OnrampCoordinator
@@ -18,6 +19,7 @@ import javax.inject.Singleton
         OnrampModule::class,
         StripeRepositoryModule::class,
         ResourceRepositoryModule::class,
+        ApplicationContextModule::class,
         CoreCommonModule::class,
         CoroutineContextModule::class,
     ]

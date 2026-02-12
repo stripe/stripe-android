@@ -3,6 +3,7 @@ package com.stripe.android.payments.core.injection
 import android.content.Context
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.Logger
+import com.stripe.android.core.injection.ApplicationContext
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestV2Executor
@@ -38,7 +39,7 @@ abstract class StripeRepositoryModule {
     internal companion object {
         @Provides
         fun providesAnalyticsRequestV2Executor(
-            application: Context,
+            @ApplicationContext application: Context,
             @IOContext coroutineContext: CoroutineContext,
             logger: Logger
         ): AnalyticsRequestV2Executor = DefaultAnalyticsRequestV2Executor(

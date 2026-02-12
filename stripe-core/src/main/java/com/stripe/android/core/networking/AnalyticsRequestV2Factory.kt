@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Build
 import android.provider.Settings
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.injection.ApplicationContext
 import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.core.utils.PluginDetector
 import com.stripe.android.core.version.StripeSdkVersion
@@ -23,7 +24,7 @@ import com.stripe.android.core.version.StripeSdkVersion
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AnalyticsRequestV2Factory(
-    context: Context,
+    @ApplicationContext context: Context,
     private val clientId: String,
     private val origin: String,
     private val pluginType: String = PluginDetector.pluginType ?: PLUGIN_NATIVE

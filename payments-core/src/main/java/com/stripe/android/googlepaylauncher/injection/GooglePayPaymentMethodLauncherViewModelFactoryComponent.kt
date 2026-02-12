@@ -1,8 +1,9 @@
 package com.stripe.android.googlepaylauncher.injection
 
-import android.content.Context
+import android.app.Application
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
+import com.stripe.android.core.injection.ApplicationContextModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -30,6 +31,7 @@ import javax.inject.Singleton
         GooglePayPaymentMethodLauncherModule::class,
         StripeRepositoryModule::class,
         PaymentElementRequestSurfaceModule::class,
+        ApplicationContextModule::class,
         CoroutineContextModule::class,
         CoreCommonModule::class
     ]
@@ -41,7 +43,7 @@ internal interface GooglePayPaymentMethodLauncherViewModelFactoryComponent {
     interface Factory {
         fun create(
             @BindsInstance
-            context: Context,
+            application: Application,
             @BindsInstance
             @Named(ENABLE_LOGGING)
             enableLogging: Boolean,

@@ -1,9 +1,9 @@
 package com.stripe.android.paymentsheet.injection
 
-import android.app.Application
 import android.content.Context
 import com.stripe.android.BuildConfig
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.injection.ApplicationContext
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.AnalyticsRequestFactory
@@ -32,10 +32,6 @@ internal interface AutocompleteViewModelModule {
     companion object {
         @Provides
         @Singleton
-        fun providesContext(application: Application): Context = application.applicationContext
-
-        @Provides
-        @Singleton
         fun provideEventReporterMode(): EventReporter.Mode = EventReporter.Mode.Custom
 
         @Provides
@@ -57,13 +53,13 @@ internal interface AutocompleteViewModelModule {
         @Named(PUBLISHABLE_KEY)
         @Singleton
         fun providesPublishableKey(
-            context: Context
+            @ApplicationContext context: Context
         ): () -> String = { PaymentConfiguration.getInstance(context).publishableKey }
 
         @Provides
         @Singleton
         internal fun provideGooglePlacesClient(
-            context: Context,
+            @ApplicationContext context: Context,
             args: AutocompleteContract.Args
         ): PlacesClientProxy = PlacesClientProxy.create(
             context = context,

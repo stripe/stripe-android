@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import androidx.annotation.Keep
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.core.injection.ApplicationContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequest
@@ -62,7 +63,7 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
 
     @Inject
     internal constructor(
-        context: Context,
+        @ApplicationContext context: Context,
         @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
         @Named(PRODUCT_USAGE) defaultProductUsageTokens: Set<String>
     ) : this(

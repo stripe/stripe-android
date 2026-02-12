@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.app.Application
+import com.stripe.android.core.injection.ApplicationContextModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
@@ -13,6 +14,7 @@ import javax.inject.Singleton
 @Singleton
 @Component(
     modules = [
+        ApplicationContextModule::class,
         CoreCommonModule::class,
         CoroutineContextModule::class,
         StripeRepositoryModule::class,

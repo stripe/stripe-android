@@ -6,6 +6,8 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.injection.ApplicationContext
+import com.stripe.android.core.injection.ApplicationContextModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -43,6 +45,7 @@ import javax.inject.Singleton
     modules = [
         CoreCommonModule::class,
         CoroutineContextModule::class,
+        ApplicationContextModule::class,
         ConfirmationHandlerModule::class,
         DefaultConfirmationModule::class,
         TapToAddViewModelModule::class,
@@ -95,11 +98,6 @@ internal interface TapToAddViewModelModule {
         fun provideEnabledLogging(): Boolean = BuildConfig.DEBUG
 
         @Provides
-        fun providesContext(application: Application): Context {
-            return application
-        }
-
-        @Provides
         @Singleton
         fun provideConfirmationHandler(
             confirmationHandlerFactory: ConfirmationHandler.Factory,
@@ -122,7 +120,9 @@ internal interface TapToAddViewModelModule {
         }
 
         @Provides
-        fun providePaymentConfiguration(appContext: Context): PaymentConfiguration {
+        fun providePaymentConfiguration(
+            @ApplicationContext appContext: Context
+        ): PaymentConfiguration {
             return PaymentConfiguration.getInstance(appContext)
         }
 

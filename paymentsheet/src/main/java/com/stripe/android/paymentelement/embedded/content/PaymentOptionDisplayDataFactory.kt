@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.embedded.content
 
 import android.content.Context
 import androidx.compose.ui.text.AnnotatedString
+import com.stripe.android.core.injection.ApplicationContext
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -19,7 +20,7 @@ import javax.inject.Inject
 
 internal class PaymentOptionDisplayDataFactory @Inject constructor(
     private val iconLoader: PaymentSelection.IconLoader,
-    private val context: Context,
+    @ApplicationContext private val context: Context,
 ) {
     fun create(
         selection: PaymentSelection?,

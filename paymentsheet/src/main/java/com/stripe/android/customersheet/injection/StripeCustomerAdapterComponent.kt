@@ -1,6 +1,7 @@
 package com.stripe.android.customersheet.injection
 
 import android.content.Context
+import com.stripe.android.core.injection.ApplicationContext
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.IOContext
@@ -36,7 +37,9 @@ internal interface StripeCustomerAdapterComponent {
     @Component.Factory
     interface Factory {
         fun create(
-            @BindsInstance context: Context,
+            @BindsInstance
+            @ApplicationContext
+            context: Context,
             @BindsInstance customerEphemeralKeyProvider: CustomerEphemeralKeyProvider,
             @BindsInstance setupIntentClientSecretProvider: SetupIntentClientSecretProvider?,
             @BindsInstance paymentMethodTypes: List<String>?,
@@ -49,7 +52,7 @@ internal interface StripeCustomerAdapterModule {
     companion object {
         @Provides
         fun providePrefsRepositoryFactory(
-            appContext: Context,
+            @ApplicationContext appContext: Context,
             @IOContext workContext: CoroutineContext
         ): (CustomerEphemeralKey) -> PrefsRepository = { customer ->
             DefaultPrefsRepository(

@@ -25,6 +25,7 @@ import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.core.frauddetection.FraudDetectionData
 import com.stripe.android.core.frauddetection.FraudDetectionDataParamsUtils
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
+import com.stripe.android.core.injection.ApplicationContext
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.model.StripeFile
@@ -154,7 +155,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
 
     @Inject
     constructor(
-        appContext: Context,
+        @ApplicationContext appContext: Context,
         @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
         requestSurface: RequestSurface,
         @IOContext workContext: CoroutineContext,

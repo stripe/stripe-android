@@ -8,6 +8,7 @@ import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.common.taptoadd.DefaultTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddModule
+import com.stripe.android.core.injection.ApplicationContext
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
@@ -181,7 +182,9 @@ internal abstract class PaymentSheetCommonModule {
          * Should always be injected with [Lazy] or [Provider].
          */
         @Provides
-        fun providePaymentConfiguration(appContext: Context): PaymentConfiguration {
+        fun providePaymentConfiguration(
+            @ApplicationContext appContext: Context
+        ): PaymentConfiguration {
             return PaymentConfiguration.getInstance(appContext)
         }
 

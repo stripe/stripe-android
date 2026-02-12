@@ -209,7 +209,7 @@ internal class ShopPayViewModel @Inject constructor(
                 val args: ShopPayArgs = getArgs(handle) ?: throw NoArgsException()
                 DaggerShopPayComponent.factory()
                     .build(
-                        context = app,
+                        application = app,
                         shopPayArgs = args,
                     )
                     .viewModel

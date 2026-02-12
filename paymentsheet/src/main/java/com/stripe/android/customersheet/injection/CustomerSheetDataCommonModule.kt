@@ -3,6 +3,7 @@ package com.stripe.android.customersheet.injection
 import android.content.Context
 import com.stripe.android.BuildConfig
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.injection.ApplicationContext
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
@@ -43,7 +44,7 @@ internal interface CustomerSheetDataCommonModule {
          * Should always be injected with [Lazy] or [Provider].
          */
         @Provides
-        fun providePaymentConfiguration(appContext: Context): PaymentConfiguration {
+        fun providePaymentConfiguration(@ApplicationContext appContext: Context): PaymentConfiguration {
             return PaymentConfiguration.getInstance(appContext)
         }
 

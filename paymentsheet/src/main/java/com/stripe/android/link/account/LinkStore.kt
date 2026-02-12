@@ -3,12 +3,13 @@ package com.stripe.android.link.account
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import com.stripe.android.core.injection.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 internal class LinkStore @Inject constructor(
-    context: Context,
+    @ApplicationContext context: Context,
 ) {
 
     private val sharedPrefs: SharedPreferences by lazy {

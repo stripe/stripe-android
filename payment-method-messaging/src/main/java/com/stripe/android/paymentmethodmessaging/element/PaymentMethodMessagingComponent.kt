@@ -1,6 +1,7 @@
 package com.stripe.android.paymentmethodmessaging.element
 
 import android.app.Application
+import com.stripe.android.core.injection.ApplicationContextModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
@@ -13,6 +14,7 @@ import javax.inject.Singleton
 @Component(
     modules = [
         CoroutineContextModule::class,
+        ApplicationContextModule::class,
         PaymentMethodMessagingModule::class,
         StripeRepositoryModule::class,
         PaymentElementRequestSurfaceModule::class,

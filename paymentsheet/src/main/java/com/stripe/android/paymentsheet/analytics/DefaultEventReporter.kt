@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.analytics
 
 import android.content.Context
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
+import com.stripe.android.core.injection.ApplicationContext
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -34,7 +35,7 @@ import kotlin.coroutines.CoroutineContext
 @Suppress("LargeClass", "TooManyFunctions")
 @OptIn(ExperimentalAnalyticEventCallbackApi::class)
 internal class DefaultEventReporter @Inject internal constructor(
-    context: Context,
+    @ApplicationContext context: Context,
     private val mode: EventReporter.Mode,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestV2Executor: AnalyticsRequestV2Executor,
