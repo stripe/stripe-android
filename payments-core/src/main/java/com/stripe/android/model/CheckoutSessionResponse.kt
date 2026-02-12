@@ -63,15 +63,18 @@ data class CheckoutSessionResponse(
      * Controls whether the "Save for future use" checkbox is shown and its initial state.
      */
     @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class SavedPaymentMethodsOfferSave(
         /** Whether to show the save checkbox. */
         val enabled: Boolean,
         /** Initial state of the checkbox. */
         val status: Status,
     ) : StripeModel {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         enum class Status {
             /** Checkbox should be pre-checked. */
             ACCEPTED,
+
             /** Checkbox should be unchecked. */
             NOT_ACCEPTED,
         }
@@ -83,6 +86,7 @@ data class CheckoutSessionResponse(
      * customer session authentication - customer is associated server-side.
      */
     @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Customer(
         /**
          * The customer ID (e.g., "cus_xxx").

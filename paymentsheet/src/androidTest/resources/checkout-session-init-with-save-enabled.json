@@ -1,0 +1,80 @@
+{
+  "session_id": "cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh",
+  "currency": "usd",
+  "total_summary": {
+    "due": 5099
+  },
+  "customer_managed_saved_payment_methods_offer_save": {
+    "enabled": true,
+    "status": "not_accepted"
+  },
+  "elements_session": {
+    "apple_pay_preference": "enabled",
+    "business_name": "Mobile Example Account",
+    "google_pay_preference": "enabled",
+    "link_settings": {
+      "link_authenticated_change_event_enabled": false,
+      "link_bank_onboarding_enabled": false,
+      "link_funding_sources": ["CARD"],
+      "link_mobile_disable_default_opt_in": true,
+      "link_passthrough_mode_enabled": false
+    },
+    "merchant_country": "US",
+    "merchant_currency": "usd",
+    "merchant_id": "acct_1HvTI7Lu5o3P18Zp",
+    "ordered_payment_method_types_and_wallets": [
+      "card",
+      "link",
+      "apple_pay",
+      "google_pay",
+      "cashapp"
+    ],
+    "payment_method_preference": {
+      "object": "payment_method_preference",
+      "country_code": "US",
+      "ordered_payment_method_types": [
+        "card",
+        "link",
+        "cashapp"
+      ],
+      "type": "deferred_intent"
+    },
+    "payment_method_specs": [
+      {
+        "async": false,
+        "fields": [],
+        "type": "card"
+      },
+      {
+        "async": false,
+        "fields": [],
+        "selector_icon": {
+          "light_theme_png": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-cashapp@3x-a89c5d8d0651cae2a511bb49a6be1cfc.png",
+          "light_theme_svg": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-cashapp-981164a833e417d28a8ac2684fda2324.svg"
+        },
+        "type": "cashapp"
+      }
+    ],
+    "shipping_address_settings": {
+      "autocomplete_allowed": true
+    },
+    "unactivated_payment_method_types": [],
+    "session_id": "elements_session_cs_123",
+    "config_id": "cs_config_123"
+  },
+  "server_built_elements_session_params": {
+    "type": "deferred_intent",
+    "locale": "en-US",
+    "deferred_intent": {
+      "mode": "payment",
+      "amount": 5099,
+      "currency": "usd",
+      "capture_method": "automatic",
+      "payment_method_types": [
+        "card",
+        "link",
+        "cashapp"
+      ]
+    }
+  }
+}
