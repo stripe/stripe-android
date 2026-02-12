@@ -259,4 +259,148 @@ internal object CheckoutSessionFixtures {
         }
         """.trimIndent()
     )
+
+    /**
+     * Init response with customer data (for SPM support).
+     * Customer is at the top level, not inside elements_session.
+     */
+    val CHECKOUT_SESSION_WITH_CUSTOMER_JSON = JSONObject(
+        """
+        {
+            "session_id": "cs_test_abc123",
+            "currency": "usd",
+            "total_summary": {
+                "due": 1000
+            },
+            "customer": {
+                "id": "cus_test_customer",
+                "payment_methods": [
+                    {
+                        "id": "pm_card_visa",
+                        "object": "payment_method",
+                        "type": "card",
+                        "card": {
+                            "brand": "visa",
+                            "last4": "4242",
+                            "exp_month": 12,
+                            "exp_year": 2030
+                        },
+                        "livemode": false,
+                        "created": 1734000000
+                    },
+                    {
+                        "id": "pm_card_mastercard",
+                        "object": "payment_method",
+                        "type": "card",
+                        "card": {
+                            "brand": "mastercard",
+                            "last4": "5555",
+                            "exp_month": 6,
+                            "exp_year": 2028
+                        },
+                        "livemode": false,
+                        "created": 1734000000
+                    }
+                ]
+            },
+            "elements_session": $MINIMAL_ELEMENTS_SESSION_JSON
+        }
+        """.trimIndent()
+    )
+
+    /**
+     * Init response with customer but no saved payment methods.
+     */
+    val CHECKOUT_SESSION_WITH_EMPTY_CUSTOMER_JSON = JSONObject(
+        """
+        {
+            "session_id": "cs_test_abc123",
+            "currency": "usd",
+            "total_summary": {
+                "due": 1000
+            },
+            "customer": {
+                "id": "cus_test_empty_customer",
+                "payment_methods": []
+            },
+            "elements_session": $MINIMAL_ELEMENTS_SESSION_JSON
+        }
+        """.trimIndent()
+    )
+
+    /**
+     * Init response without customer (guest checkout).
+     */
+    val CHECKOUT_SESSION_WITHOUT_CUSTOMER_JSON = JSONObject(
+        """
+        {
+            "session_id": "cs_test_abc123",
+            "currency": "usd",
+            "total_summary": {
+                "due": 1000
+            },
+            "elements_session": $MINIMAL_ELEMENTS_SESSION_JSON
+        }
+        """.trimIndent()
+    )
+
+    /**
+     * Init response with save offer enabled and status not_accepted.
+     */
+    val CHECKOUT_SESSION_WITH_SAVE_ENABLED_JSON = JSONObject(
+        """
+        {
+            "session_id": "cs_test_abc123",
+            "currency": "usd",
+            "total_summary": {
+                "due": 1000
+            },
+            "customer_managed_saved_payment_methods_offer_save": {
+                "enabled": true,
+                "status": "not_accepted"
+            },
+            "elements_session": $MINIMAL_ELEMENTS_SESSION_JSON
+        }
+        """.trimIndent()
+    )
+
+    /**
+     * Init response with save offer enabled and status accepted.
+     */
+    val CHECKOUT_SESSION_WITH_SAVE_ACCEPTED_JSON = JSONObject(
+        """
+        {
+            "session_id": "cs_test_abc123",
+            "currency": "usd",
+            "total_summary": {
+                "due": 1000
+            },
+            "customer_managed_saved_payment_methods_offer_save": {
+                "enabled": true,
+                "status": "accepted"
+            },
+            "elements_session": $MINIMAL_ELEMENTS_SESSION_JSON
+        }
+        """.trimIndent()
+    )
+
+    /**
+     * Init response with save offer disabled.
+     */
+    val CHECKOUT_SESSION_WITH_SAVE_DISABLED_JSON = JSONObject(
+        """
+        {
+            "session_id": "cs_test_abc123",
+            "currency": "usd",
+            "total_summary": {
+                "due": 1000
+            },
+            "customer_managed_saved_payment_methods_offer_save": {
+                "enabled": false,
+                "status": "not_accepted"
+            },
+            "elements_session": $MINIMAL_ELEMENTS_SESSION_JSON
+        }
+        """.trimIndent()
+    )
 }
