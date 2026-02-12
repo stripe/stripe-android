@@ -228,7 +228,7 @@ internal class LinkControllerInteractor @Inject constructor(
                     val customerInfo = config.customerInfo
                         .copy(email = email ?: config.customerInfo.email)
                     val nameCollectionConfig =
-                        if (paymentMethodType == LinkController.PaymentMethodType.BankAccount) {
+                        if (paymentMethodType == LinkController.PaymentMethodType.BankAccount || paymentMethodType == null) {
                             PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
                         } else {
                             config.billingDetailsCollectionConfiguration.name
