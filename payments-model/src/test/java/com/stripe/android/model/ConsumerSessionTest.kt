@@ -52,10 +52,13 @@ class ConsumerSessionTest {
     }
 
     @Test
-    fun `AuthenticationLevel ordering is Unknown less than NotAuthenticated less than 1FA less than 2FA`() {
-        assertThat(AuthenticationLevel.Unknown < AuthenticationLevel.NotAuthenticated).isTrue()
-        assertThat(AuthenticationLevel.NotAuthenticated < AuthenticationLevel.OneFactorAuthentication).isTrue()
-        assertThat(AuthenticationLevel.OneFactorAuthentication < AuthenticationLevel.TwoFactorAuthentication).isTrue()
+    fun `AuthenticationLevel sortOrder is Unknown less than NotAuthenticated less than 1FA less than 2FA`() {
+        assertThat(AuthenticationLevel.Unknown.sortOrder)
+            .isLessThan(AuthenticationLevel.NotAuthenticated.sortOrder)
+        assertThat(AuthenticationLevel.NotAuthenticated.sortOrder)
+            .isLessThan(AuthenticationLevel.OneFactorAuthentication.sortOrder)
+        assertThat(AuthenticationLevel.OneFactorAuthentication.sortOrder)
+            .isLessThan(AuthenticationLevel.TwoFactorAuthentication.sortOrder)
     }
 
     private fun makeSession(

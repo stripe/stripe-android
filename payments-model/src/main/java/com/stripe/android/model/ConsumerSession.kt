@@ -37,7 +37,7 @@ data class ConsumerSession(
         get() {
             val current = currentAuthenticationLevel ?: return false
             val minimum = minimumAuthenticationLevel ?: return false
-            return current >= minimum
+            return current.sortOrder >= minimum.sortOrder
         }
 
     @Parcelize
@@ -85,11 +85,11 @@ data class ConsumerSession(
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Serializable
-    enum class AuthenticationLevel(val value: String) : Parcelable {
-        Unknown(""),
-        NotAuthenticated("not_authenticated"),
-        OneFactorAuthentication("1fa"),
-        TwoFactorAuthentication("2fa");
+    enum class AuthenticationLevel(val value: String, val sortOrder: Int) : Parcelable {
+        Unknown("", -1),
+        NotAuthenticated("not_authenticated", 0),
+        OneFactorAuthentication("1fa", 1),
+        TwoFactorAuthentication("2fa", 2);
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         companion object {

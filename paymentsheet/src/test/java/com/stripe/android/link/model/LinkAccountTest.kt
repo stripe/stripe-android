@@ -49,7 +49,7 @@ class LinkAccountTest {
     }
 
     @Test
-    fun `isVerified falls back to SMS check when auth levels are null`() {
+    fun `isVerified returns false when auth levels are null even with verified SMS session`() {
         val consumerSession = ConsumerSession(
             clientSecret = "consumer_session_007",
             emailAddress = "John Doe",
@@ -65,7 +65,7 @@ class LinkAccountTest {
             minimumAuthenticationLevel = null,
         )
         val linkAccount = LinkAccount(consumerSession)
-        assertThat(linkAccount.isVerified).isTrue()
+        assertThat(linkAccount.isVerified).isFalse()
     }
 
     private fun makeLinkAccount(
