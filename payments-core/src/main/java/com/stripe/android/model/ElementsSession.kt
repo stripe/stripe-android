@@ -32,13 +32,6 @@ data class ElementsSession(
     val accountId: String?,
     val merchantId: String?,
     /**
-     * Customer data from checkout session init response.
-     * For checkout sessions, customer is associated server-side, so customer data comes
-     * directly from the init response rather than through customer session authentication.
-     * This is only populated for checkout session flows.
-     */
-    val checkoutSessionCustomer: CheckoutSessionResponse.Customer? = null,
-    /**
      * Save payment method offer configuration from the checkout session init response.
      * Controls whether the "Save for future use" checkbox is shown and its initial state.
      * This is only populated for checkout session flows.

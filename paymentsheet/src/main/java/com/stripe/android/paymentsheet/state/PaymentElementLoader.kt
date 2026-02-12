@@ -285,7 +285,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         }
 
         val savedPaymentMethodSelection = retrieveSavedPaymentMethodSelection(configuration)
-        val elementsSession = retrieveElementsSession(
+        val (elementsSession, checkoutSessionCustomer) = retrieveElementsSession(
             initializationMode = initializationMode,
             configuration = configuration,
             savedPaymentMethodSelection = savedPaymentMethodSelection,
@@ -300,6 +300,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val customerInfo = createCustomerInfo(
             configuration = configuration,
             elementsSession = elementsSession,
+            checkoutSessionCustomer = checkoutSessionCustomer,
         )
 
         val isGooglePayReady = isGooglePayReady(configuration, elementsSession, isGooglePaySupportedByConfiguration)
@@ -353,7 +354,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val customer = async {
             createCustomerState(
                 customerInfo = customerInfo,
-                checkoutSessionCustomer = elementsSession.checkoutSessionCustomer,
                 metadata = paymentMethodMetadata.await(),
                 savedSelection = savedSelection,
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
@@ -404,11 +404,15 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         return@runCatching state
     }
 
+    /**
+     * Returns the [ElementsSession] and an optional [CheckoutSessionResponse.Customer]
+     * (only present for checkout session flows where customer data comes from the init response).
+     */
     private suspend fun retrieveElementsSession(
         initializationMode: PaymentElementLoader.InitializationMode,
         configuration: CommonConfiguration,
         savedPaymentMethodSelection: SavedSelection.PaymentMethod?,
-    ): ElementsSession {
+    ): Pair<ElementsSession, CheckoutSessionResponse.Customer?> {
         return if (initializationMode is PaymentElementLoader.InitializationMode.CheckoutSession) {
             val checkoutSession = stripeRepository.initCheckoutSession(
                 sessionId = initializationMode.id,
@@ -417,12 +421,12 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     paymentConfiguration.get().stripeAccountId,
                 ),
             ).getOrThrow()
-            checkoutSession.elementsSession?.copy(
-                checkoutSessionCustomer = checkoutSession.customer,
+            val elementsSession = checkoutSession.elementsSession?.copy(
                 checkoutSessionOfferSave = checkoutSession.savedPaymentMethodsOfferSave,
             ) ?: throw IllegalStateException("CheckoutSession init response missing elements_session")
+            elementsSession to checkoutSession.customer
         } else {
-            elementsSessionRepository.get(
+            val elementsSession = elementsSessionRepository.get(
                 initializationMode = initializationMode,
                 customer = configuration.customer,
                 externalPaymentMethods = configuration.externalPaymentMethods,
@@ -431,6 +435,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 countryOverride = configuration.userOverrideCountry,
                 linkDisallowedFundingSourceCreation = configuration.link.disallowFundingSourceCreation,
             ).getOrThrow()
+            elementsSession to null
         }
     }
 
@@ -549,6 +554,19 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 ephemeralKeySecret = customerInfo.ephemeralKeySecret
                 customerSessionClientSecret = null
             }
+            is CustomerInfo.CheckoutSession -> {
+                // Checkout sessions don't use ephemeral keys or customer sessions.
+                // We create a minimal CustomerMetadata so that hasCustomerConfiguration is true.
+                return CustomerMetadata(
+                    id = customerInfo.customer.id,
+                    ephemeralKeySecret = "",
+                    customerSessionClientSecret = null,
+                    isPaymentMethodSetAsDefaultEnabled = false,
+                    permissions = createForPaymentSheetLegacyEphemeralKey(
+                        configuration = configuration,
+                    )
+                )
+            }
             null -> return null
         }
 
@@ -580,11 +598,11 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private fun createCustomerInfo(
         configuration: CommonConfiguration,
         elementsSession: ElementsSession,
+        checkoutSessionCustomer: CheckoutSessionResponse.Customer? = null,
     ): CustomerInfo? {
-        // For checkout sessions, customer data comes from the init response (checkoutSessionCustomer),
-        // not from elements_session.customer. Skip CustomerInfo creation in this case.
-        if (elementsSession.checkoutSessionCustomer != null) {
-            return null
+        // Checkout session customer data comes from the init response, not from customer sessions.
+        if (checkoutSessionCustomer != null) {
+            return CustomerInfo.CheckoutSession(customer = checkoutSessionCustomer)
         }
 
         val customer = configuration.customer
@@ -622,20 +640,19 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
     private suspend fun createCustomerState(
         customerInfo: CustomerInfo?,
-        checkoutSessionCustomer: CheckoutSessionResponse.Customer?,
         metadata: PaymentMethodMetadata,
         savedSelection: Deferred<SavedSelection>,
         cardBrandFilter: PaymentSheetCardBrandFilter,
         cardFundingFilter: CardFundingFilter
     ): CustomerState? {
-        val customerState = when {
-            customerInfo is CustomerInfo.CustomerSession -> {
+        val customerState = when (customerInfo) {
+            is CustomerInfo.CustomerSession -> {
                 CustomerState.createForCustomerSession(
                     customer = customerInfo.elementsSessionCustomer,
                     supportedSavedPaymentMethodTypes = metadata.supportedSavedPaymentMethodTypes(),
                 )
             }
-            customerInfo is CustomerInfo.Legacy -> {
+            is CustomerInfo.Legacy -> {
                 CustomerState.createForLegacyEphemeralKey(
                     paymentMethods = retrieveCustomerPaymentMethods(
                         metadata = metadata,
@@ -643,14 +660,13 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     )
                 )
             }
-            // Checkout session customer comes from the init response (not customer session)
-            checkoutSessionCustomer != null -> {
+            is CustomerInfo.CheckoutSession -> {
                 CustomerState.createForCheckoutSession(
-                    customer = checkoutSessionCustomer,
+                    customer = customerInfo.customer,
                     supportedSavedPaymentMethodTypes = metadata.supportedSavedPaymentMethodTypes(),
                 )
             }
-            else -> null
+            null -> null
         }
 
         return customerState?.let { state ->
@@ -936,31 +952,45 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     }
 
     internal sealed interface CustomerInfo {
-        val id: String
-        val ephemeralKeySecret: String
-
         data class CustomerSession(
             val elementsSessionCustomer: ElementsSession.Customer,
             val customerSessionClientSecret: String,
         ) : CustomerInfo {
-            override val id: String = elementsSessionCustomer.session.customerId
-            override val ephemeralKeySecret: String = elementsSessionCustomer.session.apiKey
+            val id: String = elementsSessionCustomer.session.customerId
+            val ephemeralKeySecret: String = elementsSessionCustomer.session.apiKey
         }
 
         data class Legacy(
             val customerConfig: PaymentSheet.CustomerConfiguration,
             val accessType: PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey
         ) : CustomerInfo {
-            override val id: String = customerConfig.id
-            override val ephemeralKeySecret: String = accessType.ephemeralKeySecret
+            val id: String = customerConfig.id
+            val ephemeralKeySecret: String = accessType.ephemeralKeySecret
         }
+
+        /**
+         * Customer data from checkout session init response.
+         * Checkout sessions don't use ephemeral keys — customer is associated server-side.
+         */
+        data class CheckoutSession(
+            val customer: CheckoutSessionResponse.Customer,
+        ) : CustomerInfo
     }
 
-    private fun CustomerInfo.toCustomerInfo() = CustomerRepository.CustomerInfo(
-        id = id,
-        ephemeralKeySecret = ephemeralKeySecret,
-        customerSessionClientSecret = (this as? CustomerInfo.CustomerSession)?.customerSessionClientSecret,
-    )
+    private fun CustomerInfo.toCustomerInfo(): CustomerRepository.CustomerInfo? = when (this) {
+        is CustomerInfo.CustomerSession -> CustomerRepository.CustomerInfo(
+            id = id,
+            ephemeralKeySecret = ephemeralKeySecret,
+            customerSessionClientSecret = customerSessionClientSecret,
+        )
+        is CustomerInfo.Legacy -> CustomerRepository.CustomerInfo(
+            id = id,
+            ephemeralKeySecret = ephemeralKeySecret,
+            customerSessionClientSecret = null,
+        )
+        // Checkout sessions don't use ephemeral keys for customer API calls.
+        is CustomerInfo.CheckoutSession -> null
+    }
 }
 
 private fun PaymentMethod.toPaymentSelection(): PaymentSelection.Saved {

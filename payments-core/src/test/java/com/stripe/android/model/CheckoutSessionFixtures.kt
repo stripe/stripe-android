@@ -301,8 +301,7 @@ internal object CheckoutSessionFixtures {
                         "livemode": false,
                         "created": 1734000000
                     }
-                ],
-                "default_payment_method": "pm_card_visa"
+                ]
             },
             "elements_session": $MINIMAL_ELEMENTS_SESSION_JSON
         }

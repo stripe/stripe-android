@@ -97,10 +97,5 @@ data class CheckoutSessionResponse(
          * The customer's saved payment methods.
          */
         val paymentMethods: List<PaymentMethod>,
-
-        /**
-         * The ID of the customer's default payment method, if set.
-         */
-        val defaultPaymentMethodId: String? = null,
     ) : StripeModel
 }

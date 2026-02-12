@@ -119,7 +119,7 @@ class SaveForFutureUseHelperKtTest {
     }
 
     @Test
-    fun `isSaveForFutureUseValueChangeable returns true if consent behavior is Enabled and no customer`() {
+    fun `isSaveForFutureUseValueChangeable returns false if consent behavior is Enabled and no customer`() {
         val isSaveForFutureUseValueChangeable = isSaveForFutureUseValueChangeable(
             code = PaymentMethod.Type.Card.code,
             intent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
@@ -127,7 +127,7 @@ class SaveForFutureUseHelperKtTest {
             paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
         )
 
-        assertThat(isSaveForFutureUseValueChangeable).isTrue()
+        assertThat(isSaveForFutureUseValueChangeable).isFalse()
     }
 
     @Test

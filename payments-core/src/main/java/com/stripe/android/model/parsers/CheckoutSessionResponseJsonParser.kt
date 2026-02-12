@@ -131,8 +131,7 @@ internal class CheckoutSessionResponseJsonParser(
      * {
      *   "customer": {
      *     "id": "cus_xxx",
-     *     "payment_methods": [...],
-     *     "default_payment_method": "pm_xxx" // optional
+     *     "payment_methods": [...]
      *   }
      * }
      * ```
@@ -149,12 +148,10 @@ internal class CheckoutSessionResponseJsonParser(
                 PaymentMethodJsonParser().parse(pmsJson.optJSONObject(index))
             }
         } ?: emptyList()
-        val defaultPaymentMethodId = json.optString(FIELD_DEFAULT_PAYMENT_METHOD).takeIf { it.isNotEmpty() }
 
         return CheckoutSessionResponse.Customer(
             id = customerId,
             paymentMethods = paymentMethods,
-            defaultPaymentMethodId = defaultPaymentMethodId,
         )
     }
 
@@ -200,7 +197,6 @@ internal class CheckoutSessionResponseJsonParser(
         private const val FIELD_CUSTOMER = "customer"
         private const val FIELD_CUSTOMER_ID = "id"
         private const val FIELD_PAYMENT_METHODS = "payment_methods"
-        private const val FIELD_DEFAULT_PAYMENT_METHOD = "default_payment_method"
         private const val FIELD_SAVED_PAYMENT_METHODS_OFFER_SAVE =
             "customer_managed_saved_payment_methods_offer_save"
         private const val FIELD_OFFER_SAVE_ENABLED = "enabled"

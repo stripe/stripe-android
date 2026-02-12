@@ -78,7 +78,7 @@ internal data class CustomerState(
                 paymentMethods = customer.paymentMethods.filter {
                     supportedSavedPaymentMethodTypes.contains(it.type)
                 },
-                defaultPaymentMethodId = customer.defaultPaymentMethodId
+                defaultPaymentMethodId = null
             )
         }
     }

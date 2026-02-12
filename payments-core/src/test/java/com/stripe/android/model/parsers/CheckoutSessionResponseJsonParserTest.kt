@@ -194,7 +194,6 @@ class CheckoutSessionResponseJsonParserTest {
         val customer = result?.customer
         assertThat(customer).isNotNull()
         assertThat(customer?.id).isEqualTo("cus_test_customer")
-        assertThat(customer?.defaultPaymentMethodId).isEqualTo("pm_card_visa")
 
         // Verify payment methods are parsed
         val paymentMethods = customer?.paymentMethods
@@ -218,7 +217,6 @@ class CheckoutSessionResponseJsonParserTest {
         assertThat(result?.customer).isNotNull()
         assertThat(result?.customer?.id).isEqualTo("cus_test_empty_customer")
         assertThat(result?.customer?.paymentMethods).isEmpty()
-        assertThat(result?.customer?.defaultPaymentMethodId).isNull()
     }
 
     @Test
