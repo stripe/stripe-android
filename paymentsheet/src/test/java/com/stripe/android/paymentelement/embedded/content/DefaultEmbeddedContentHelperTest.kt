@@ -13,7 +13,7 @@ import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImm
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedContentHelper.Companion.STATE_KEY_EMBEDDED_CONTENT
-import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
@@ -167,7 +167,7 @@ internal class DefaultEmbeddedContentHelperTest {
                 override val linkEmail: StateFlow<String?> = stateFlowOf(null)
             },
             embeddedWalletsHelper = { stateFlowOf(null) },
-            customerStateHolder = CustomerStateHolder(
+            customerStateHolder = DefaultCustomerStateHolder(
                 savedStateHandle = savedStateHandle,
                 selection = selectionHolder.selection,
                 customerMetadataPermissions = stateFlowOf(

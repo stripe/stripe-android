@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 
-internal class CustomerStateHolderTest {
+internal class DefaultCustomerStateHolderTest {
     @Test
     fun `customer is initialized as null`() = runScenario {
         customerStateHolder.customer.test {
@@ -369,7 +369,7 @@ internal class CustomerStateHolderTest {
             )
         )
 
-        val customerStateHolder = CustomerStateHolder(
+        val customerStateHolder = DefaultCustomerStateHolder(
             customerMetadataPermissions = customerMetadata.mapAsStateFlow { it.permissions },
             savedStateHandle = savedStateHandle,
             selection = selection,
