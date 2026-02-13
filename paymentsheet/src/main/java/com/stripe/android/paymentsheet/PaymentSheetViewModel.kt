@@ -243,7 +243,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             tapToAddHelper.result.collect { result ->
                 when (result) {
                     is TapToAddResult.Canceled -> {
-                        // Do nothing.
+                        result.paymentSelection?.let { paymentSelection ->
+                            customerStateHolder.addPaymentMethod(paymentSelection.paymentMethod)
+                            updateSelection(paymentSelection)
+                        }
                     }
                     TapToAddResult.Complete -> {
                         _paymentSheetResult.tryEmit(PaymentSheetResult.Completed())

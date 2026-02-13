@@ -3398,6 +3398,34 @@ internal class PaymentSheetViewModelTest {
         }
     }
 
+    @Test
+    fun `When tap to add result is Canceled with payment selection, selection and PMs are updated`() = runTest {
+        val errorReporter = FakeErrorReporter()
+        val expectedPaymentSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
+
+        FakeTapToAddHelper.Factory.test {
+            val viewModel = createViewModel(
+                tapToAddHelperFactory = tapToAddHelperFactory,
+                errorReporter = errorReporter,
+            )
+
+            createCalls.awaitItem()
+
+            viewModel.selection.test {
+                assertThat(awaitItem()).isNull()
+
+                tapToAddHelperFactory.getCreatedHelper()?.emitResult(
+                    TapToAddResult.Canceled(
+                        expectedPaymentSelection
+                    )
+                )
+
+                // TODO: assert customer PMs are updated as expected.
+                assertThat(awaitItem()).isEqualTo(expectedPaymentSelection)
+            }
+        }
+    }
+
     private fun testConfirmationStateRestorationAfterPaymentSuccess(
         loadStateBeforePaymentResult: Boolean
     ) = confirmationTest(

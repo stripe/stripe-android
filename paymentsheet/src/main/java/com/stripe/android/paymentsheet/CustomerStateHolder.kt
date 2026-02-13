@@ -72,6 +72,13 @@ internal class CustomerStateHolder(
         savedStateHandle[SAVED_CUSTOMER] = newCustomer
     }
 
+    fun addPaymentMethod(paymentMethod: PaymentMethod) {
+        val currentCustomer = customer.value ?: return
+        val newCustomer = currentCustomer.copy(paymentMethods = currentCustomer.paymentMethods + paymentMethod)
+
+        savedStateHandle[SAVED_CUSTOMER] = newCustomer
+    }
+
     fun updateMostRecentlySelectedSavedPaymentMethod(paymentMethod: PaymentMethod?) {
         savedStateHandle[SAVED_PM_SELECTION] = paymentMethod
     }

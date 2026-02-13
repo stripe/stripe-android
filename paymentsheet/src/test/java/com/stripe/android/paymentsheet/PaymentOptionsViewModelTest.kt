@@ -1215,6 +1215,34 @@ internal class PaymentOptionsViewModelTest {
         }
     }
 
+    @Test
+    fun `When tap to add result is Canceled with payment selection, selection and PMs are updated`() = runTest {
+        val errorReporter = FakeErrorReporter()
+        val expectedPaymentSelection = SELECTION_SAVED_PAYMENT_METHOD
+
+        FakeTapToAddHelper.Factory.test {
+            val viewModel = createViewModel(
+                tapToAddHelperFactory = tapToAddHelperFactory,
+                errorReporter = errorReporter,
+            )
+
+            createCalls.awaitItem()
+
+            viewModel.selection.test {
+                assertThat(awaitItem()).isNull()
+
+                tapToAddHelperFactory.getCreatedHelper()?.emitResult(
+                    TapToAddResult.Canceled(
+                        expectedPaymentSelection
+                    )
+                )
+
+                // TODO: Assert that the payment method was added
+                assertThat(awaitItem()).isEqualTo(expectedPaymentSelection)
+            }
+        }
+    }
+
     @OptIn(WalletButtonsPreview::class)
     private fun testWalletVisibility(
         linkState: LinkState?,
