@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.CustomerStateHolder.Companion.SAVED_CUSTOMER
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -59,7 +60,7 @@ internal class DefaultCustomerStateHolder(
     }
 
     override fun setCustomerState(customerState: CustomerState?) {
-        savedStateHandle[CustomerStateHolder.SAVED_CUSTOMER] = customerState
+        savedStateHandle[SAVED_CUSTOMER] = customerState
 
         val currentSelection = mostRecentlySelectedSavedPaymentMethod.value
         val newSelection = customerState?.paymentMethods?.firstOrNull { it.id == currentSelection?.id }
@@ -69,11 +70,18 @@ internal class DefaultCustomerStateHolder(
     override fun setDefaultPaymentMethod(paymentMethod: PaymentMethod?) {
         val newCustomer = customer.value?.copy(defaultPaymentMethodId = paymentMethod?.id)
 
-        savedStateHandle[CustomerStateHolder.SAVED_CUSTOMER] = newCustomer
+        savedStateHandle[SAVED_CUSTOMER] = newCustomer
     }
 
     override fun updateMostRecentlySelectedSavedPaymentMethod(paymentMethod: PaymentMethod?) {
         savedStateHandle[CustomerStateHolder.SAVED_PM_SELECTION] = paymentMethod
+    }
+
+    override fun addPaymentMethod(paymentMethod: PaymentMethod) {
+        val currentCustomer = customer.value ?: return
+        val newCustomer = currentCustomer.copy(paymentMethods = currentCustomer.paymentMethods + paymentMethod)
+
+        savedStateHandle[SAVED_CUSTOMER] = newCustomer
     }
 
     companion object {

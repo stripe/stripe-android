@@ -25,11 +25,13 @@ internal class FakeCustomerStateHolder : CustomerStateHolder {
     override val canUpdateFullPaymentMethodDetails: StateFlow<Boolean>
         get() = stateFlowOf(false)
 
-    private val setCustomerStateCalls = Turbine<CustomerState?>()
+    val setCustomerStateCalls = Turbine<CustomerState?>()
 
-    private val setDefaultPaymentMethodCalls = Turbine<PaymentMethod?>()
+    val setDefaultPaymentMethodCalls = Turbine<PaymentMethod?>()
 
-    private val updateMostRecentlySelectedSavedPaymentMethodCalls = Turbine<PaymentMethod?>()
+    val updateMostRecentlySelectedSavedPaymentMethodCalls = Turbine<PaymentMethod?>()
+
+    val addPaymentMethodTurbine = Turbine<PaymentMethod>()
 
     override fun setCustomerState(customerState: CustomerState?) {
         setCustomerStateCalls.add(customerState)
@@ -41,6 +43,10 @@ internal class FakeCustomerStateHolder : CustomerStateHolder {
 
     override fun updateMostRecentlySelectedSavedPaymentMethod(paymentMethod: PaymentMethod?) {
         updateMostRecentlySelectedSavedPaymentMethodCalls.add(paymentMethod)
+    }
+
+    override fun addPaymentMethod(paymentMethod: PaymentMethod) {
+        addPaymentMethodTurbine.add(paymentMethod)
     }
 
     fun validate() {

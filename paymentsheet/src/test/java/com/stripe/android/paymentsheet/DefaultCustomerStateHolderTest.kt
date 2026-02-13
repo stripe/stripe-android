@@ -62,6 +62,27 @@ internal class DefaultCustomerStateHolderTest {
     }
 
     @Test
+    fun `addPaymentMethod adds payment method to customer`() {
+        val savedStateHandle = SavedStateHandle()
+        val newPaymentMethod = PaymentMethodFixtures.LINK_PAYMENT_METHOD
+        val originalPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val customerState = CustomerState.createForLegacyEphemeralKey(
+            paymentMethods = listOf(originalPaymentMethod)
+        )
+        savedStateHandle[CustomerStateHolder.SAVED_CUSTOMER] = customerState
+
+        runScenario(savedStateHandle = savedStateHandle) {
+            customerStateHolder.addPaymentMethod(newPaymentMethod)
+
+            val updatedCustomer = savedStateHandle[CustomerStateHolder.SAVED_CUSTOMER] as CustomerState?
+            val updatedCustomerPaymentMethods = updatedCustomer!!.paymentMethods
+            assertThat(updatedCustomerPaymentMethods).hasSize(2)
+            assertThat(updatedCustomerPaymentMethods).contains(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            assertThat(updatedCustomerPaymentMethods).contains(newPaymentMethod)
+        }
+    }
+
+    @Test
     fun `MostRecentlySelectedSavedPaymentMethod is restored from savedStateHandle`() {
         val savedStateHandle = SavedStateHandle()
         val customerState = CustomerState.createForLegacyEphemeralKey(

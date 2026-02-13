@@ -30,6 +30,8 @@ internal interface CustomerStateHolder {
 
     fun updateMostRecentlySelectedSavedPaymentMethod(paymentMethod: PaymentMethod?)
 
+    fun addPaymentMethod(paymentMethod: PaymentMethod)
+
     companion object {
         const val SAVED_CUSTOMER = "customer_info"
         const val SAVED_PM_SELECTION = "saved_selection"
