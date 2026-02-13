@@ -92,8 +92,6 @@
   <string name="stripe_doc_front_warmup_title">Preparati a scansionare il tuo documento di identità con foto</string>
   <!-- Label of the driver's license option for document type selection -->
   <string name="stripe_driver_license">Patente di guida</string>
-  <!-- Text for error labels -->
-  <string name="stripe_error">Errore</string>
   <!-- Button that opens file upload screen -->
   <string name="stripe_file_upload">Caricamento file</string>
   <!-- Instructions for uploading images of drivers license -->

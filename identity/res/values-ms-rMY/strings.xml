@@ -92,8 +92,6 @@
   <string name="stripe_doc_front_warmup_title">Bersedia untuk mengimbas ID berfoto anda</string>
   <!-- Label of the driver's license option for document type selection -->
   <string name="stripe_driver_license">Lesen memandu</string>
-  <!-- Text for error labels -->
-  <string name="stripe_error">Ralat</string>
   <!-- Button that opens file upload screen -->
   <string name="stripe_file_upload">Muat Naik Fail</string>
   <!-- Instructions for uploading images of drivers license -->

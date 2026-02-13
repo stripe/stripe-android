@@ -13,11 +13,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.strings.resolve
+import com.stripe.android.R as StripeCoreR
 
 @Composable
 internal fun TapToAddErrorScreen(
@@ -41,7 +43,7 @@ internal fun TapToAddErrorScreen(
             Spacer(Modifier.size(50.dp))
 
             Text(
-                text = "Error",
+                text = stringResource(StripeCoreR.string.stripe_error),
                 color = MaterialTheme.colors.onBackground,
                 style = MaterialTheme.typography.h4,
                 fontWeight = FontWeight.W800,

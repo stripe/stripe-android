@@ -92,8 +92,6 @@
   <string name="stripe_doc_front_warmup_title">Przygotuj się na skanowanie dokumentu tożsamości ze zdjęciem</string>
   <!-- Label of the driver's license option for document type selection -->
   <string name="stripe_driver_license">Prawo jazdy</string>
-  <!-- Text for error labels -->
-  <string name="stripe_error">Błąd</string>
   <!-- Button that opens file upload screen -->
   <string name="stripe_file_upload">Przesyłanie pliku</string>
   <!-- Instructions for uploading images of drivers license -->
