@@ -8,6 +8,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 
 internal class FakeTapToAddHelper(
     override val hasPreviouslyAttemptedCollection: Boolean = false,
@@ -36,10 +37,6 @@ internal class FakeTapToAddHelper(
     fun validate() {
         registerCalls.ensureAllEventsConsumed()
         collectCalls.ensureAllEventsConsumed()
-    }
-
-    fun setResult(result: TapToAddResult) {
-        _result.tryEmit(result)
     }
 
     class RegisterCall(

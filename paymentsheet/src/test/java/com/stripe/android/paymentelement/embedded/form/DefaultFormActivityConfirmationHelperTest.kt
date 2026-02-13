@@ -102,7 +102,7 @@ class DefaultFormActivityConfirmationHelperTest {
         testScenario(
             tapToAddHelper = tapToAddHelper,
         ) {
-            tapToAddHelper.setResult(TapToAddResult.Complete)
+            tapToAddHelper.emitResult(TapToAddResult.Complete)
 
             assertThat(stateHelper.resultTurbine.awaitItem()).isEqualTo(
                 FormResult.Complete(
@@ -120,7 +120,7 @@ class DefaultFormActivityConfirmationHelperTest {
             tapToAddHelper = tapToAddHelper,
         ) {
             val expectedSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
-            tapToAddHelper.setResult(
+            tapToAddHelper.emitResult(
                 TapToAddResult.Continue(
                     paymentSelection = expectedSelection,
                 )
@@ -141,7 +141,7 @@ class DefaultFormActivityConfirmationHelperTest {
         testScenario(
             tapToAddHelper = tapToAddHelper,
         ) {
-            tapToAddHelper.setResult(
+            tapToAddHelper.emitResult(
                 TapToAddResult.Canceled(
                     paymentSelection = null,
                 )
