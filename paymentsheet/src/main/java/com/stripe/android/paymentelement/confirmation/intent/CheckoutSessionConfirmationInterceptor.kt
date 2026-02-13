@@ -3,7 +3,6 @@ package com.stripe.android.paymentelement.confirmation.intent
 import android.content.Context
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmCheckoutSessionParams
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -16,7 +15,6 @@ import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadat
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition.Args
 import com.stripe.android.payments.DefaultReturnUrl
-import com.stripe.android.paymentsheet.R
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -25,12 +23,12 @@ import dagger.assisted.AssistedInject
  * Confirmation interceptor for checkout sessions.
  *
  * This interceptor handles the confirmation flow for checkout sessions by:
- * 1. Creating a new payment method from the user's input
- * 2. Calling the `/v1/payment_pages/{checkoutSessionId}/confirm` API
+ * 1. For new PMs: Creating a payment method, then calling confirm
+ * 2. For saved PMs: Directly calling confirm with the existing PM ID
  * 3. Handling the response (complete, requires action, or error)
  *
- * Currently only supports new payment methods. Saved payment method support
- * will be added in a follow-up PR.
+ * The `/v1/payment_pages/{checkoutSessionId}/confirm` API accepts both newly created
+ * and existing payment method IDs.
  */
 internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructor(
     @Assisted private val checkoutSessionId: String,
@@ -52,7 +50,10 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             options = requestOptions,
         ).fold(
             onSuccess = { paymentMethod ->
-                confirmCheckoutSession(paymentMethod)
+                confirmCheckoutSession(
+                    paymentMethod = paymentMethod,
+                    savePaymentMethod = confirmationOption.shouldSave,
+                )
             },
             onFailure = { error ->
                 ConfirmationDefinition.Action.Fail(
@@ -69,19 +70,24 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         confirmationOption: PaymentMethodConfirmationOption.Saved,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
     ): ConfirmationDefinition.Action<Args> {
-        // Saved payment method support will be implemented in a follow-up PR
-        return ConfirmationDefinition.Action.Fail(
-            cause = NotImplementedError("Saved payment methods not yet supported for checkout sessions"),
-            message = resolvableString(R.string.stripe_something_went_wrong),
-            errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+        // For saved payment methods, we don't need to create a new PM or save it again.
+        return confirmCheckoutSession(
+            paymentMethod = confirmationOption.paymentMethod,
+            savePaymentMethod = null,
         )
     }
 
     /**
-     * Confirms the checkout session with the created payment method.
+     * Confirms the checkout session with the payment method.
+     *
+     * @param paymentMethod The payment method to confirm with.
+     * @param savePaymentMethod Whether to save the payment method for future use.
+     *        Pass `true` if user checked "Save for future use", `false` otherwise.
+     *        Pass `null` for saved payment methods (already saved).
      */
     private suspend fun confirmCheckoutSession(
         paymentMethod: PaymentMethod,
+        savePaymentMethod: Boolean?,
     ): ConfirmationDefinition.Action<Args> {
         return stripeRepository.confirmCheckoutSession(
             confirmCheckoutSessionParams = ConfirmCheckoutSessionParams(
@@ -89,7 +95,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                 paymentMethodId = paymentMethod.id,
                 clientAttributionMetadata = clientAttributionMetadata,
                 returnUrl = returnUrl,
-                savePaymentMethod = null,
+                savePaymentMethod = savePaymentMethod,
             ),
             options = requestOptions,
         ).fold(
