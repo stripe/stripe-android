@@ -95,32 +95,62 @@ class IntentFirstConfirmationInterceptorTest {
         }
 
     @Test
-    fun `Returns confirm params with hCaptchaToken set as RadarOptions when hCaptchaToken provided`() = runTest {
-        val hCaptchaToken = "test-hcaptcha-token"
+    fun `Returns confirm params with all challenge state fields for Saved payment method`() = runTest {
+        val challengeState = ConfirmationChallengeState(
+            hCaptchaToken = "test_hcaptcha_token",
+            attestationToken = "test_attestation_token",
+            appId = "com.stripe.test",
+        )
 
-        val confirmParams = interceptWithSavedPaymentMethod(hCaptchaToken = hCaptchaToken)
+        val confirmParams = interceptWithSavedPaymentMethod(challengeState)
 
-        assertRadarOptionsEquals(confirmParams, hCaptchaToken)
+        assertRadarOptionsEquals(
+            confirmParams = confirmParams,
+            expectedRadarOptions = challengeState.toExpectedRadarOptions()
+        )
     }
 
     @Test
-    fun `Returns confirm params with null RadarOptions when hCaptchaToken is null`() = runTest {
-        val confirmParams = interceptWithSavedPaymentMethod(hCaptchaToken = null)
+    fun `Returns confirm params with null attestationToken when not provided for Saved payment method`() = runTest {
+        val challengeState = ConfirmationChallengeState(hCaptchaToken = "test_hcaptcha_token")
 
-        assertRadarOptionsIsNull(confirmParams)
+        val confirmParams = interceptWithSavedPaymentMethod(challengeState)
+
+        assertRadarOptionsEquals(
+            confirmParams = confirmParams,
+            expectedRadarOptions = challengeState.toExpectedRadarOptions()
+        )
     }
 
     @Test
-    fun `hCaptchaToken is properly passed through extension function for saved payment method`() = runTest {
-        val hCaptchaToken = "extension-hcaptcha-token"
+    fun `Returns confirm with RadarOptions when both tokens are null for Saved payment method`() = runTest {
+        val challengeState = ConfirmationChallengeState()
 
-        val confirmParams = interceptWithSavedPaymentMethod(hCaptchaToken = hCaptchaToken)
+        val confirmParams = interceptWithSavedPaymentMethod(challengeState)
 
-        assertRadarOptionsEquals(confirmParams, hCaptchaToken)
+        assertRadarOptionsEquals(
+            confirmParams = confirmParams,
+            expectedRadarOptions = challengeState.toExpectedRadarOptions()
+        )
     }
 
     @Test
-    fun `hCaptchaToken is not set for new payment method confirmation option`() =
+    fun `Returns confirm params with only attestationToken for Saved payment method`() = runTest {
+        val challengeState = ConfirmationChallengeState(
+            attestationToken = "attestation_token_123",
+            appId = "com.stripe.test.app",
+        )
+
+        val confirmParams = interceptWithSavedPaymentMethod(challengeState)
+
+        assertRadarOptionsEquals(
+            confirmParams = confirmParams,
+            expectedRadarOptions = challengeState.toExpectedRadarOptions()
+        )
+    }
+
+    @Test
+    fun `radarOptions is null for new payment method confirmation option`() =
         runInterceptorScenario(
             integrationMetadata = IntegrationMetadata.IntentFirst("pi_1234_secret_4321"),
         ) { interceptor ->
@@ -140,54 +170,63 @@ class IntentFirstConfirmationInterceptorTest {
         }
 
     @Test
-    fun `Returns confirm params with hCaptchaToken set as RadarOptions for setup intent with client secret`() =
-        runTest {
-            val hCaptchaToken = "setup-hcaptcha-token"
+    fun `Returns confirm params with all challenge state fields for SetupIntent`() = runTest {
+        val challengeState = ConfirmationChallengeState(
+            hCaptchaToken = "test_hcaptcha_token",
+            attestationToken = "test_attestation_token",
+            appId = "com.stripe.test",
+        )
 
-            val confirmParams = interceptWithSetupIntentClientSecret(hCaptchaToken = hCaptchaToken)
+        val confirmParams = interceptWithSetupIntent(challengeState)
 
-            assertRadarOptionsEquals(confirmParams, hCaptchaToken)
-        }
-
-    @Test
-    fun `Returns confirm params with null RadarOptions for setup intent when hCaptchaToken is null`() = runTest {
-        val confirmParams = interceptWithSetupIntentClientSecret(hCaptchaToken = null)
-
-        assertRadarOptionsIsNull(confirmParams)
+        assertRadarOptionsEquals(
+            confirmParams = confirmParams,
+            expectedRadarOptions = challengeState.toExpectedRadarOptions()
+        )
     }
 
     @Test
-    fun `Returns confirm params with androidVerificationToken set to null for Saved pm with no attestation token`() =
-        runInterceptorScenario(
-            integrationMetadata = IntegrationMetadata.IntentFirst("pi_1234_secret_4321"),
-        ) { interceptor ->
-            val hCaptchaToken = "test-hcaptcha-token"
-            val nextStep = interceptor.intercept(
-                intent = PaymentIntentFactory.create(),
-                confirmationOption = PaymentMethodConfirmationOption.Saved(
-                    paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                    optionsParams = null,
-                    confirmationChallengeState = ConfirmationChallengeState(hCaptchaToken = hCaptchaToken),
-                ),
-                shippingValues = null,
-            )
+    fun `Returns confirm params with null attestationToken when not provided for SetupIntent`() = runTest {
+        val challengeState = ConfirmationChallengeState(hCaptchaToken = "test_hcaptcha_token")
 
-            val confirmParams = nextStep.asConfirmParams<ConfirmPaymentIntentParams>()
+        val confirmParams = interceptWithSetupIntent(challengeState)
 
-            assertThat(confirmParams?.radarOptions)
-                .isEqualTo(
-                    RadarOptionsFactory.create(
-                        hCaptchaToken = hCaptchaToken,
-                        verificationObject = AndroidVerificationObject(
-                            androidVerificationToken = null
-                        )
-                    )
-                )
-        }
+        assertRadarOptionsEquals(
+            confirmParams = confirmParams,
+            expectedRadarOptions = challengeState.toExpectedRadarOptions()
+        )
+    }
+
+    @Test
+    fun `Returns confirm with RadarOptions when both tokens are null for SetupIntent`() = runTest {
+        val challengeState = ConfirmationChallengeState()
+
+        val confirmParams = interceptWithSetupIntent(challengeState)
+
+        assertRadarOptionsEquals(
+            confirmParams = confirmParams,
+            expectedRadarOptions = challengeState.toExpectedRadarOptions()
+        )
+    }
+
+    @Test
+    fun `Returns confirm params with only attestationToken for SetupIntent`() = runTest {
+        val challengeState = ConfirmationChallengeState(
+            attestationToken = "attestation_token_123",
+            appId = "com.stripe.test.app",
+        )
+
+        val confirmParams = interceptWithSetupIntent(challengeState)
+
+        assertRadarOptionsEquals(
+            confirmParams = confirmParams,
+            expectedRadarOptions = challengeState.toExpectedRadarOptions()
+        )
+    }
 
     @OptIn(SharedPaymentTokenSessionPreview::class)
     private suspend fun interceptWithSavedPaymentMethod(
-        hCaptchaToken: String?
+        challengeState: ConfirmationChallengeState = ConfirmationChallengeState()
     ): ConfirmPaymentIntentParams? {
         val interceptor = createIntentConfirmationInterceptor(
             integrationMetadata = IntegrationMetadata.IntentFirst("pi_1234_secret_4321"),
@@ -198,7 +237,7 @@ class IntentFirstConfirmationInterceptorTest {
             confirmationOption = PaymentMethodConfirmationOption.Saved(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = null,
-                confirmationChallengeState = ConfirmationChallengeState(hCaptchaToken = hCaptchaToken),
+                confirmationChallengeState = challengeState,
             ),
             shippingValues = null,
         )
@@ -207,8 +246,8 @@ class IntentFirstConfirmationInterceptorTest {
     }
 
     @OptIn(SharedPaymentTokenSessionPreview::class)
-    private suspend fun interceptWithSetupIntentClientSecret(
-        hCaptchaToken: String?
+    private suspend fun interceptWithSetupIntent(
+        challengeState: ConfirmationChallengeState = ConfirmationChallengeState()
     ): ConfirmSetupIntentParams? {
         val interceptor = createIntentConfirmationInterceptor(
             integrationMetadata = IntegrationMetadata.IntentFirst("seti_1234_secret_4321"),
@@ -219,11 +258,19 @@ class IntentFirstConfirmationInterceptorTest {
             confirmationOption = PaymentMethodConfirmationOption.Saved(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = null,
-                confirmationChallengeState = ConfirmationChallengeState(hCaptchaToken = hCaptchaToken),
+                confirmationChallengeState = challengeState,
             ),
             shippingValues = null,
         )
 
         return nextStep.asConfirmParams()
     }
+
+    private fun ConfirmationChallengeState.toExpectedRadarOptions() = RadarOptionsFactory.create(
+        hCaptchaToken = hCaptchaToken,
+        verificationObject = AndroidVerificationObject(
+            androidVerificationToken = attestationToken,
+            appId = appId
+        )
+    )
 }

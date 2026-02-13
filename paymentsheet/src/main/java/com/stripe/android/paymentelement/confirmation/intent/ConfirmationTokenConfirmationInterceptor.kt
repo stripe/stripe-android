@@ -71,6 +71,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                     // hCaptchaToken = null here means we don't need to send a separate one when confirming the intent.
                     hCaptchaToken = null,
                     attestationToken = null,
+                    appId = null
                 )
             },
             onFailure = { error ->
@@ -112,6 +113,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                     shippingValues = shippingValues,
                     hCaptchaToken = confirmationOption.confirmationChallengeState.hCaptchaToken,
                     attestationToken = confirmationOption.confirmationChallengeState.attestationToken,
+                    appId = confirmationOption.confirmationChallengeState.appId
                 )
             },
             onFailure = { error ->
@@ -130,6 +132,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         hCaptchaToken: String?,
         attestationToken: String?,
+        appId: String?,
     ): ConfirmationDefinition.Action<Args> {
         val result = createIntentCallback.onCreateIntent(confirmationToken)
 
@@ -150,6 +153,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                         shippingValues = shippingValues,
                         hCaptchaToken = hCaptchaToken,
                         attestationToken = attestationToken,
+                        appId = appId
                     )
                 }
             }
@@ -172,6 +176,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         hCaptchaToken: String?,
         attestationToken: String?,
+        appId: String?
     ): ConfirmationDefinition.Action<Args> {
         return stripeRepository.retrieveStripeIntent(
             clientSecret = clientSecret,
@@ -204,7 +209,10 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                         confirmationTokenId = confirmationTokenId,
                         radarOptions = RadarOptions(
                             hCaptchaToken = hCaptchaToken,
-                            androidVerificationObject = AndroidVerificationObject(attestationToken),
+                            androidVerificationObject = AndroidVerificationObject(
+                                androidVerificationToken = attestationToken,
+                                appId = appId
+                            ),
                         ),
                         clientAttributionMetadata = clientAttributionMetadata,
                     )

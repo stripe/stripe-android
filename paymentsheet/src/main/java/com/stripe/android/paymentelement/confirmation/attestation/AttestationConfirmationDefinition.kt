@@ -5,6 +5,7 @@ import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.attestation.AttestationActivityContract
 import com.stripe.android.attestation.AttestationActivityResult
 import com.stripe.android.attestation.analytics.AttestationAnalyticsEventsReporter
+import com.stripe.android.common.di.APPLICATION_ID
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
@@ -33,6 +34,7 @@ internal class AttestationConfirmationDefinition @Inject constructor(
     private val attestationAnalyticsEventsReporter: AttestationAnalyticsEventsReporter,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
+    @Named(APPLICATION_ID) private val appId: String,
     private val isEligibleForConfirmationChallenge: IsEligibleForConfirmationChallenge
 ) : ConfirmationDefinition<
     PaymentMethodConfirmationOption,
@@ -144,12 +146,14 @@ internal class AttestationConfirmationDefinition @Inject constructor(
                 val radarOptions = if (token != null) {
                     createParams.radarOptions?.copy(
                         androidVerificationObject = AndroidVerificationObject(
-                            androidVerificationToken = token
+                            androidVerificationToken = token,
+                            appId = appId
                         )
                     ) ?: RadarOptions(
                         hCaptchaToken = null,
                         androidVerificationObject = AndroidVerificationObject(
-                            androidVerificationToken = token
+                            androidVerificationToken = token,
+                            appId = appId
                         )
                     )
                 } else {
@@ -169,6 +173,7 @@ internal class AttestationConfirmationDefinition @Inject constructor(
                 copy(
                     confirmationChallengeState = confirmationChallengeState.copy(
                         attestationToken = token,
+                        appId = appId,
                         attestationComplete = true
                     )
                 )
@@ -179,10 +184,11 @@ internal class AttestationConfirmationDefinition @Inject constructor(
     private fun PaymentMethodConfirmationOption.hasToken(): Boolean {
         return when (this) {
             is PaymentMethodConfirmationOption.New -> {
-                createParams.radarOptions?.androidVerificationObject?.androidVerificationToken != null
+                val verificationObject = createParams.radarOptions?.androidVerificationObject
+                verificationObject?.androidVerificationToken != null && verificationObject.appId != null
             }
             is PaymentMethodConfirmationOption.Saved -> {
-                confirmationChallengeState.attestationToken != null
+                confirmationChallengeState.attestationToken != null && confirmationChallengeState.appId != null
             }
         }
     }
