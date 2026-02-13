@@ -1,12 +1,6 @@
 package com.stripe.android.common.taptoadd.ui
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import com.stripe.android.common.taptoadd.TapToAddResult
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.strings.ResolvableString
@@ -75,20 +69,18 @@ internal class TapToAddNavigator(
             }
         }
 
-        data object CardAdded : Screen {
+        data class CardAdded(
+            val interactor: TapToAddCardAddedInteractor,
+        ) : Screen {
             override val cancelButton: CancelButton = CancelButton.None
 
             @Composable
             override fun Content() {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = "Under Construction",
-                        color = MaterialTheme.colors.onSurface,
-                    )
-                }
+                TapToAddCardAddedScreen(
+                    cardBrand = interactor.cardBrand,
+                    last4 = interactor.last4,
+                    onComplete = interactor::onShown,
+                )
             }
         }
 

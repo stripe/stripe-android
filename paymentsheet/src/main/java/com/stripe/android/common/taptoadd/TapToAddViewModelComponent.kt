@@ -7,7 +7,9 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.di.ApplicationIdModule
+import com.stripe.android.common.taptoadd.ui.DefaultTapToAddCardAddedInteractor
 import com.stripe.android.common.taptoadd.ui.DefaultTapToAddCollectingInteractor
+import com.stripe.android.common.taptoadd.ui.TapToAddCardAddedInteractor
 import com.stripe.android.common.taptoadd.ui.TapToAddCollectingInteractor
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
@@ -97,6 +99,11 @@ internal interface TapToAddViewModelModule {
     fun bindsTapToAddCollectingInteractorFactory(
         tapToAddCollectingInteractorFactory: DefaultTapToAddCollectingInteractor.Factory
     ): TapToAddCollectingInteractor.Factory
+
+    @Binds
+    fun bindsTapToAddCardAddedInteractorFactory(
+        tapToAddCardAddedInteractorFactory: DefaultTapToAddCardAddedInteractor.Factory
+    ): TapToAddCardAddedInteractor.Factory
 
     companion object {
         @Provides
