@@ -46,7 +46,7 @@ internal class FakeTapToAddHelper(
 
     class Scenario(
         val collectCalls: ReceiveTurbine<PaymentMethodMetadata>,
-        val helper: TapToAddHelper,
+        val helper: FakeTapToAddHelper,
     )
 
     class Factory private constructor() : TapToAddHelper.Factory {

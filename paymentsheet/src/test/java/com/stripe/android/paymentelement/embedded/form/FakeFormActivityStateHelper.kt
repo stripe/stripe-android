@@ -7,6 +7,8 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 
 internal class FakeFormActivityStateHelper : FormActivityStateHelper {
@@ -23,6 +25,10 @@ internal class FakeFormActivityStateHelper : FormActivityStateHelper {
                 shouldDisplayLockIcon = true,
             )
         )
+
+    val resultTurbine = Turbine<FormResult>()
+
+    override val result: SharedFlow<FormResult> = MutableSharedFlow<FormResult>()
 
     override fun updateEnabled(enabled: Boolean) {
         updateEnabledTurbine.add(enabled)
@@ -44,8 +50,13 @@ internal class FakeFormActivityStateHelper : FormActivityStateHelper {
         error("This should never be called!")
     }
 
+    override fun setResult(result: FormResult) {
+        resultTurbine.add(result)
+    }
+
     fun validate() {
         updateEnabledTurbine.ensureAllEventsConsumed()
         updateTurbine.ensureAllEventsConsumed()
+        resultTurbine.ensureAllEventsConsumed()
     }
 }
