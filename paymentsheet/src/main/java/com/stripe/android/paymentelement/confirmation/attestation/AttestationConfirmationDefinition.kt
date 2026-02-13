@@ -172,8 +172,12 @@ internal class AttestationConfirmationDefinition @Inject constructor(
             is PaymentMethodConfirmationOption.Saved -> {
                 copy(
                     confirmationChallengeState = confirmationChallengeState.copy(
-                        attestationToken = token,
-                        appId = appId,
+                        attestationResult = token?.let {
+                            AndroidVerificationObject(
+                                appId = appId,
+                                androidVerificationToken = token
+                            )
+                        },
                         attestationComplete = true
                     )
                 )
@@ -184,11 +188,10 @@ internal class AttestationConfirmationDefinition @Inject constructor(
     private fun PaymentMethodConfirmationOption.hasToken(): Boolean {
         return when (this) {
             is PaymentMethodConfirmationOption.New -> {
-                val verificationObject = createParams.radarOptions?.androidVerificationObject
-                verificationObject?.androidVerificationToken != null && verificationObject.appId != null
+                createParams.radarOptions?.androidVerificationObject != null
             }
             is PaymentMethodConfirmationOption.Saved -> {
-                confirmationChallengeState.attestationToken != null && confirmationChallengeState.appId != null
+                confirmationChallengeState.attestationResult != null
             }
         }
     }

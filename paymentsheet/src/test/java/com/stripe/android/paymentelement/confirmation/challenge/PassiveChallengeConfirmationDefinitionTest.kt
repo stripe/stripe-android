@@ -525,6 +525,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
         val definition = createPassiveChallengeConfirmationDefinition()
         val testToken = "test_token"
         val attestationToken = "attestation_token"
+        val appId = "com.stripe.test"
 
         val result = definition.toResult(
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.copy(
@@ -532,7 +533,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
                     radarOptions = RadarOptions(
                         androidVerificationObject = AndroidVerificationObject(
                             androidVerificationToken = attestationToken,
-                            appId = null
+                            appId = appId
                         ),
                         hCaptchaToken = null
                     )
@@ -551,7 +552,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
                 hCaptchaToken = testToken,
                 androidVerificationObject = AndroidVerificationObject(
                     androidVerificationToken = attestationToken,
-                    appId = null
+                    appId = appId
                 )
             )
         )

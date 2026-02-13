@@ -6,18 +6,14 @@ import kotlinx.parcelize.Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
 data class AndroidVerificationObject(
-    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val appId: String?,
-    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val androidVerificationToken: String?
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val appId: String,
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val androidVerificationToken: String
 ) : StripeParamsModel {
     override fun toParamMap(): Map<String, Any> {
-        return buildMap {
-            androidVerificationToken?.let {
-                put(PARAM_ANDROID_VERIFICATION_TOKEN, it)
-            }
-            appId?.let {
-                put(PARAM_APP_ID, it)
-            }
-        }
+        return mapOf(
+            PARAM_ANDROID_VERIFICATION_TOKEN to androidVerificationToken,
+            PARAM_APP_ID to appId
+        )
     }
 
     private companion object {

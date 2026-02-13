@@ -5,7 +5,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
-import com.stripe.android.model.AndroidVerificationObject
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -170,10 +169,7 @@ internal fun assertRadarOptionsEquals(confirmParams: ConfirmStripeIntentParams?,
         confirmParams = confirmParams,
         expectedRadarOptions = RadarOptionsFactory.create(
             hCaptchaToken = expectedToken,
-            verificationObject = AndroidVerificationObject(
-                androidVerificationToken = null,
-                appId = null
-            )
+            verificationObject = null
         )
     )
 }
@@ -182,10 +178,7 @@ internal fun assertRadarOptionsIsNull(confirmParams: ConfirmStripeIntentParams?)
     assertThat(confirmParams?.radarOptions()).isEqualTo(
         RadarOptionsFactory.create(
             hCaptchaToken = null,
-            verificationObject = AndroidVerificationObject(
-                androidVerificationToken = null,
-                appId = null
-            )
+            verificationObject = null
         )
     )
 }
