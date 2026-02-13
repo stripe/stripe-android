@@ -1,6 +1,5 @@
 package com.stripe.android.common.taptoadd.ui
 
-import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.fadeIn
@@ -22,7 +21,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.Placeholder
@@ -41,33 +39,25 @@ internal fun TapToAddCardAddedScreen(
     last4: String?,
     onComplete: () -> Unit,
 ) {
-    val isRobolectricTest = rememberIsRobolectric()
-
-    val inspectionMode = LocalInspectionMode.current || isRobolectricTest
-
     val onCompleteRef = remember { mutableStateOf(onComplete) }
 
     onCompleteRef.value = onComplete
 
-    val cardVisible = remember { MutableTransitionState(inspectionMode) }
-    val titleVisible = remember { MutableTransitionState(inspectionMode) }
+    val cardVisible = remember { MutableTransitionState(false) }
+    val titleVisible = remember { MutableTransitionState(false) }
 
-    if (!inspectionMode) {
-        LaunchedEffect(Unit) {
-            delay(1.seconds)
-            cardVisible.targetState = true
-        }
+    LaunchedEffect(Unit) {
+        delay(1.seconds)
+        cardVisible.targetState = true
     }
 
-    if (!inspectionMode) {
-        LaunchedEffect(Unit) {
-            snapshotFlow {
-                cardVisible.isIdle && cardVisible.currentState
-            }.collect { isComplete ->
-                if (isComplete) {
-                    delay(1.seconds)
-                    titleVisible.targetState = true
-                }
+    LaunchedEffect(Unit) {
+        snapshotFlow {
+            cardVisible.isIdle && cardVisible.currentState
+        }.collect { isComplete ->
+            if (isComplete) {
+                delay(1.seconds)
+                titleVisible.targetState = true
             }
         }
     }
@@ -104,15 +94,6 @@ internal fun TapToAddCardAddedScreen(
                 Title()
             }
         }
-    }
-}
-
-@Composable
-private fun rememberIsRobolectric(): Boolean {
-    return remember {
-        runCatching {
-            Build.FINGERPRINT.lowercase() == "robolectric"
-        }.getOrDefault(false)
     }
 }
 
