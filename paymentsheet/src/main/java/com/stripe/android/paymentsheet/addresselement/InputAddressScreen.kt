@@ -46,7 +46,7 @@ internal fun InputAddressScreen(
         modifier = Modifier
             .fillMaxHeight()
             .imePadding(),
-        backgroundColor = MaterialTheme.colorScheme.surface,
+        containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
             AddressOptionsAppBar(
                 isRootScreen = true,

@@ -12,9 +12,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Divider
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,7 +27,7 @@ fun MultiToggleButton(
     toggleStates: List<String>,
     onToggleChange: (String) -> Unit
 ) {
-    val selectedTint = MaterialTheme.colors.primary
+    val selectedTint = MaterialTheme.colorScheme.primary
     val unselectedTint = Color.Unspecified
 
     Row(
@@ -41,7 +41,7 @@ fun MultiToggleButton(
         toggleStates.forEachIndexed { index, toggleState ->
             val isSelected = currentSelection.lowercase() == toggleState.lowercase()
             val backgroundTint = if (isSelected) selectedTint else unselectedTint
-            val textColor = if (isSelected) Color.White else MaterialTheme.colors.onBackground
+            val textColor = if (isSelected) Color.White else MaterialTheme.colorScheme.onBackground
             val shape = RoundedCornerShape(
                 topStart = if (index == 0) 4.dp else 0.dp,
                 bottomStart = if (index == 0) 4.dp else 0.dp,
@@ -50,7 +50,7 @@ fun MultiToggleButton(
             )
 
             if (index != 0) {
-                Divider(
+                VerticalDivider(
                     color = Color.LightGray,
                     modifier = Modifier
                         .fillMaxHeight()

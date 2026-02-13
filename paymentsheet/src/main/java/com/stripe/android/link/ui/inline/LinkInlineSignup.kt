@@ -20,7 +20,6 @@ import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
-import androidx.compose.material3.ContentAlpha
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.MaterialTheme
@@ -156,7 +155,7 @@ internal fun LinkInlineSignup(
         }
     }
 
-    val contentAlpha = if (enabled) ContentAlpha.high else ContentAlpha.disabled
+    val contentAlpha = if (enabled) 1f else 0.38f
     val shape = boxShape(simplifiedCheckbox)
     val boxModifier = modifier.applyBorders(simplifiedCheckbox, shape)
 

@@ -853,7 +853,7 @@ private fun AlertMessage(
                 color = LinkTheme.colors.textPrimary,
             )
         },
-        backgroundColor = LinkTheme.colors.surfacePrimary,
+        containerColor = LinkTheme.colors.surfacePrimary,
         onDismissRequest = onDismissAlert,
         confirmButton = {
             TextButton(

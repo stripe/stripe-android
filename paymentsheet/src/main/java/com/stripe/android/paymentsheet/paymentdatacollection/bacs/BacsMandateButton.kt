@@ -30,7 +30,7 @@ internal fun BacsMandateButton(type: BacsMandateButtonType, label: String, onCli
                 modifier = Modifier.fillMaxWidth(),
                 shape = MaterialTheme.shapes.small,
                 colors = ButtonDefaults.buttonColors(
-                    backgroundColor = Color.Transparent,
+                    containerColor = Color.Transparent,
                     contentColor = MaterialTheme.colorScheme.primary
                 ),
                 onClick = onClick

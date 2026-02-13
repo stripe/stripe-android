@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalMinimumInteractiveComponentEnforcement
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.RippleConfiguration
@@ -46,7 +47,11 @@ internal fun RemoveButton(
 ) {
     val shape = PrimaryButtonTheme.shape
     CompositionLocalProvider(
-        LocalContentAlpha provides if (removing) ContentAlpha.disabled else ContentAlpha.high,
+        LocalContentColor provides if (removing) {
+            MaterialTheme.colorScheme.error.copy(alpha = 0.38f)
+        } else {
+            MaterialTheme.colorScheme.error
+        },
         LocalRippleConfiguration provides ErrorRippleConfiguration,
     ) {
         Box(
@@ -70,9 +75,7 @@ internal fun RemoveButton(
                 ) {
                     Text(
                         text = title.resolve(LocalContext.current),
-                        color = MaterialTheme.colorScheme.error.copy(
-                            LocalContentAlpha.current
-                        ),
+                        color = LocalContentColor.current,
                         style = StripeTheme.primaryButtonStyle.getComposeTextStyle(),
                     )
                 }
@@ -93,16 +96,9 @@ internal fun RemoveButton(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 private val ErrorRippleConfiguration: RippleConfiguration
     @Composable
     get() = RippleConfiguration(
-        color = RippleDefaults.rippleColor(
-            contentColor = MaterialTheme.colorScheme.error,
-            lightTheme = !isSystemInDarkTheme(),
-        ),
-        rippleAlpha = RippleDefaults.rippleAlpha(
-            contentColor = MaterialTheme.colorScheme.error.copy(alpha = 0.25f),
-            lightTheme = !isSystemInDarkTheme(),
-        )
+        color = MaterialTheme.colorScheme.error,
+        rippleAlpha = RippleDefaults.RippleAlpha
     )

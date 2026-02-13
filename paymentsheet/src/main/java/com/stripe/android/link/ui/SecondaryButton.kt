@@ -3,7 +3,6 @@ package com.stripe.android.link.ui
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ContentAlpha
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -13,6 +12,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
+
+private const val DisabledAlpha = 0.38f
 
 @Composable
 internal fun SecondaryButton(
@@ -29,14 +30,14 @@ internal fun SecondaryButton(
         enabled = enabled,
         shape = LinkTheme.shapes.default,
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = Color.Transparent,
-            disabledBackgroundColor = Color.Transparent,
+            containerColor = Color.Transparent,
+            disabledContainerColor = Color.Transparent,
         )
     ) {
         Text(
             text = label,
             color = LinkTheme.colors.textBrand
-                .copy(alpha = if (enabled) ContentAlpha.high else ContentAlpha.disabled),
+                .copy(alpha = if (enabled) 1f else DisabledAlpha),
             style = LinkTheme.typography.bodyEmphasized,
         )
     }
