@@ -92,8 +92,6 @@
   <string name="stripe_doc_front_warmup_title">准备好扫描您带照片的身份证件</string>
   <!-- Label of the driver's license option for document type selection -->
   <string name="stripe_driver_license">驾驶证</string>
-  <!-- Text for error labels -->
-  <string name="stripe_error">错误</string>
   <!-- Button that opens file upload screen -->
   <string name="stripe_file_upload">文件上传</string>
   <!-- Instructions for uploading images of drivers license -->

@@ -90,8 +90,6 @@
   <string name="stripe_doc_front_warmup_title">写真付き身分証明書の直接撮影を準備する</string>
   <!-- Label of the driver's license option for document type selection -->
   <string name="stripe_driver_license">運転免許証</string>
-  <!-- Text for error labels -->
-  <string name="stripe_error">エラー</string>
   <!-- Button that opens file upload screen -->
   <string name="stripe_file_upload">ファイルをアップロード</string>
   <!-- Instructions for uploading images of drivers license -->
