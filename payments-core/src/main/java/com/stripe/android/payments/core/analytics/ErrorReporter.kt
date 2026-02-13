@@ -304,6 +304,12 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         TAP_TO_ADD_NO_READER_FOUND(
             partialEventName = "elements.tap_to_add.no_reader_found"
         ),
+        TAP_TO_ADD_FLOW_CONTROLLER_RECEIVED_COMPLETE_RESULT(
+            "elements.tap_to_add.flow_controller_received_complete_result"
+        ),
+        TAP_TO_ADD_PAYMENT_SHEET_RECEIVED_CONTINUE_RESULT(
+            "elements.tap_to_add.payment_sheet_received_continue_result"
+        ),
         TAP_TO_ADD_NO_GENERATED_CARD_AFTER_SUCCESSFUL_INTENT_CONFIRMATION(
             partialEventName = "elements.tap_to_add.no_generated_card_after_successful_intent_confirmation"
         );

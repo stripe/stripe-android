@@ -6,6 +6,8 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.taptoadd.ui.DefaultTapToAddCollectingInteractor
+import com.stripe.android.common.taptoadd.ui.TapToAddCollectingInteractor
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -88,6 +90,11 @@ internal interface TapToAddViewModelModule {
     fun bindsAnalyticsRequestFactory(
         paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory
     ): AnalyticsRequestFactory
+
+    @Binds
+    fun bindsTapToAddCollectingInteractorFactory(
+        tapToAddCollectingInteractorFactory: DefaultTapToAddCollectingInteractor.Factory
+    ): TapToAddCollectingInteractor.Factory
 
     companion object {
         @Provides
