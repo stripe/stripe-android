@@ -30,12 +30,12 @@ private object TapToAddThemeDefaults {
         placeholderText = Color.White,
         appBarIcon = Color.White,
         materialColors = darkColors(
-            primary = Color(0xFF272729),
+            primary = Color.White,
             primaryVariant = Color(0xFF7A7A7A),
             background = Color.Black,
             onBackground = Color(0xFFE3E3E3),
             surface = Color.Black,
-            onSurface = Color.White,
+            onSurface = Color(0xFFE3E3E3),
             error = Color.Red,
         ),
     )
