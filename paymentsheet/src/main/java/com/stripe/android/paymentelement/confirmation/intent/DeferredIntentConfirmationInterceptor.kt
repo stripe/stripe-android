@@ -67,8 +67,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
             paymentMethod = confirmationOption.paymentMethod,
             shippingValues = shippingValues,
             hCaptchaToken = confirmationOption.confirmationChallengeState.hCaptchaToken,
-            attestationToken = confirmationOption.confirmationChallengeState.attestationToken,
-            appId = confirmationOption.confirmationChallengeState.appId
+            androidVerificationObject = confirmationOption.confirmationChallengeState.attestationResult
         )
     }
 
@@ -95,8 +94,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
                         intentConfiguration = intentConfiguration
                     ),
                     hCaptchaToken = null,
-                    attestationToken = null,
-                    appId = null
+                    androidVerificationObject = null
                 )
             },
             onFailure = { error ->
@@ -116,8 +114,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
         confirmationOption: PaymentMethodConfirmationOption.Saved,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         hCaptchaToken: String?,
-        attestationToken: String?,
-        appId: String?,
+        androidVerificationObject: AndroidVerificationObject?,
     ): ConfirmationDefinition.Action<Args> {
         return handleDeferredIntentCreationFromPaymentMethod(
             intent = intent,
@@ -130,8 +127,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
                 intentConfiguration = intentConfiguration
             ),
             hCaptchaToken = hCaptchaToken,
-            attestationToken = attestationToken,
-            appId = appId
+            androidVerificationObject = androidVerificationObject
         )
     }
 
@@ -143,8 +139,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
         shouldSavePaymentMethod: Boolean,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         hCaptchaToken: String?,
-        attestationToken: String?,
-        appId: String?,
+        androidVerificationObject: AndroidVerificationObject?,
     ): ConfirmationDefinition.Action<Args> {
         val result = createIntentCallback.onCreateIntent(
             paymentMethod = paymentMethod,
@@ -169,8 +164,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
                         paymentMethod = paymentMethod,
                         shippingValues = shippingValues,
                         hCaptchaToken = hCaptchaToken,
-                        attestationToken = attestationToken,
-                        appId = appId
+                        androidVerificationObject = androidVerificationObject
                     )
                 }
             }
@@ -194,8 +188,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
         paymentMethod: PaymentMethod,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         hCaptchaToken: String?,
-        attestationToken: String?,
-        appId: String?,
+        androidVerificationObject: AndroidVerificationObject?,
     ): ConfirmationDefinition.Action<Args> {
         return stripeRepository.retrieveStripeIntent(
             clientSecret = clientSecret,
@@ -212,8 +205,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
                     paymentMethod = paymentMethod,
                     shippingValues = shippingValues,
                     hCaptchaToken = hCaptchaToken,
-                    attestationToken = attestationToken,
-                    appId = appId
+                    androidVerificationObject = androidVerificationObject
                 )
             }
         }.getOrElse { error ->
@@ -269,8 +261,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
         paymentMethod: PaymentMethod,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         hCaptchaToken: String?,
-        attestationToken: String?,
-        appId: String?,
+        androidVerificationObject: AndroidVerificationObject?,
     ): ConfirmationDefinition.Action<Args> {
         DeferredIntentValidator.validate(intent, intentConfiguration, allowsManualConfirmation, paymentMethod)
         return confirmActionHelper.createConfirmAction(
@@ -287,10 +278,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
                     .mode.setupFutureUse?.toConfirmParamsSetupFutureUsage(),
                 radarOptions = RadarOptions(
                     hCaptchaToken = hCaptchaToken,
-                    androidVerificationObject = AndroidVerificationObject(
-                        androidVerificationToken = attestationToken,
-                        appId = appId
-                    )
+                    androidVerificationObject = androidVerificationObject
                 ),
                 clientAttributionMetadata = clientAttributionMetadata,
             )
