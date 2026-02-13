@@ -98,8 +98,10 @@ class IntentFirstConfirmationInterceptorTest {
     fun `Returns confirm params with all challenge state fields for Saved payment method`() = runTest {
         val challengeState = ConfirmationChallengeState(
             hCaptchaToken = "test_hcaptcha_token",
-            attestationToken = "test_attestation_token",
-            appId = "com.stripe.test",
+            attestationResult = AndroidVerificationObject(
+                androidVerificationToken = "test_attestation_token",
+                appId = "com.stripe.test"
+            ),
         )
 
         val confirmParams = interceptWithSavedPaymentMethod(challengeState)
@@ -135,10 +137,12 @@ class IntentFirstConfirmationInterceptorTest {
     }
 
     @Test
-    fun `Returns confirm params with only attestationToken for Saved payment method`() = runTest {
+    fun `Returns confirm params with only attestationResult for Saved payment method`() = runTest {
         val challengeState = ConfirmationChallengeState(
-            attestationToken = "attestation_token_123",
-            appId = "com.stripe.test.app",
+            attestationResult = AndroidVerificationObject(
+                androidVerificationToken = "attestation_token_123",
+                appId = "com.stripe.test.app"
+            ),
         )
 
         val confirmParams = interceptWithSavedPaymentMethod(challengeState)
@@ -173,8 +177,10 @@ class IntentFirstConfirmationInterceptorTest {
     fun `Returns confirm params with all challenge state fields for SetupIntent`() = runTest {
         val challengeState = ConfirmationChallengeState(
             hCaptchaToken = "test_hcaptcha_token",
-            attestationToken = "test_attestation_token",
-            appId = "com.stripe.test",
+            attestationResult = AndroidVerificationObject(
+                androidVerificationToken = "test_attestation_token",
+                appId = "com.stripe.test"
+            ),
         )
 
         val confirmParams = interceptWithSetupIntent(challengeState)
@@ -210,10 +216,12 @@ class IntentFirstConfirmationInterceptorTest {
     }
 
     @Test
-    fun `Returns confirm params with only attestationToken for SetupIntent`() = runTest {
+    fun `Returns confirm params with only attestationResult for SetupIntent`() = runTest {
         val challengeState = ConfirmationChallengeState(
-            attestationToken = "attestation_token_123",
-            appId = "com.stripe.test.app",
+            attestationResult = AndroidVerificationObject(
+                androidVerificationToken = "attestation_token_123",
+                appId = "com.stripe.test.app"
+            ),
         )
 
         val confirmParams = interceptWithSetupIntent(challengeState)
@@ -268,9 +276,6 @@ class IntentFirstConfirmationInterceptorTest {
 
     private fun ConfirmationChallengeState.toExpectedRadarOptions() = RadarOptionsFactory.create(
         hCaptchaToken = hCaptchaToken,
-        verificationObject = AndroidVerificationObject(
-            androidVerificationToken = attestationToken,
-            appId = appId
-        )
+        verificationObject = attestationResult
     )
 }

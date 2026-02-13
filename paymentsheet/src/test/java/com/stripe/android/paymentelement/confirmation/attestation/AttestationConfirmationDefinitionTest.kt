@@ -312,7 +312,7 @@ internal class AttestationConfirmationDefinitionTest {
     }
 
     @Test
-    fun `'toResult' should return 'NextStep' with attestationToken for Success result with Saved option`() {
+    fun `'toResult' should return 'NextStep' with attestationResult for Success result with Saved option`() {
         val definition = createAttestationConfirmationDefinition()
         val testToken = "test_token"
 
@@ -329,8 +329,10 @@ internal class AttestationConfirmationDefinitionTest {
 
         val expectedOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED.copy(
             confirmationChallengeState = ConfirmationChallengeState(
-                attestationToken = testToken,
-                appId = APP_ID,
+                attestationResult = AndroidVerificationObject(
+                    appId = APP_ID,
+                    androidVerificationToken = testToken
+                ),
                 attestationComplete = true
             )
         )
@@ -358,8 +360,7 @@ internal class AttestationConfirmationDefinitionTest {
         // When attestation fails, continue without the token but mark attestation as complete
         val expectedOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED.copy(
             confirmationChallengeState = ConfirmationChallengeState(
-                attestationComplete = true,
-                appId = APP_ID
+                attestationComplete = true
             )
         )
         assertThat(nextStepResult.confirmationOption).isEqualTo(expectedOption)
@@ -427,8 +428,10 @@ internal class AttestationConfirmationDefinitionTest {
 
         val optionWithToken = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED.copy(
             confirmationChallengeState = ConfirmationChallengeState(
-                attestationToken = "existing_token",
-                appId = APP_ID
+                attestationResult = AndroidVerificationObject(
+                    androidVerificationToken = "existing_token",
+                    appId = APP_ID
+                )
             )
         )
 

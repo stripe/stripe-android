@@ -1136,8 +1136,10 @@ class ConfirmationTokenConfirmationInterceptorTest {
     fun `Saved PM - Returns confirm params with all challenge state fields`() {
         val challengeState = ConfirmationChallengeState(
             hCaptchaToken = "test_hcaptcha_token",
-            attestationToken = "test_attestation_token",
-            appId = "com.stripe.test",
+            attestationResult = AndroidVerificationObject(
+                androidVerificationToken = "test_attestation_token",
+                appId = "com.stripe.test"
+            ),
         )
 
         val confirmParams = interceptWithSavedPaymentMethodForCSC(challengeState)
@@ -1173,10 +1175,12 @@ class ConfirmationTokenConfirmationInterceptorTest {
     }
 
     @Test
-    fun `Saved PM - Returns confirm params with only attestationToken`() {
+    fun `Saved PM - Returns confirm params with only attestationResult`() {
         val challengeState = ConfirmationChallengeState(
-            attestationToken = "attestation_token_123",
-            appId = "com.stripe.test.app",
+            attestationResult = AndroidVerificationObject(
+                androidVerificationToken = "attestation_token_123",
+                appId = "com.stripe.test.app"
+            ),
         )
 
         val confirmParams = interceptWithSavedPaymentMethodForCSC(challengeState)
@@ -1217,10 +1221,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
 
     private fun ConfirmationChallengeState.toExpectedRadarOptions() = RadarOptionsFactory.create(
         hCaptchaToken = hCaptchaToken,
-        verificationObject = AndroidVerificationObject(
-            androidVerificationToken = attestationToken,
-            appId = appId
-        )
+        verificationObject = attestationResult
     )
 
     private fun runConfirmationTokenInterceptorScenario(
