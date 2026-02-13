@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.CheckoutSessionResponse
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -140,5 +141,58 @@ class CustomerStateTest {
                 )
             ),
         )
+    }
+
+    @Test
+    fun `Should create 'CustomerState' for checkout session with payment methods`() {
+        val paymentMethods = PaymentMethodFactory.cards(3)
+        val customer = CheckoutSessionResponse.Customer(
+            id = "cus_checkout_123",
+            paymentMethods = paymentMethods,
+        )
+
+        val customerState = CustomerState.createForCheckoutSession(
+            customer = customer,
+            supportedSavedPaymentMethodTypes = listOf(PaymentMethod.Type.Card),
+        )
+
+        assertThat(customerState.paymentMethods).isEqualTo(paymentMethods)
+        assertThat(customerState.defaultPaymentMethodId).isNull()
+    }
+
+    @Test
+    fun `Should create 'CustomerState' for checkout session with empty payment methods`() {
+        val customer = CheckoutSessionResponse.Customer(
+            id = "cus_checkout_empty",
+            paymentMethods = emptyList(),
+        )
+
+        val customerState = CustomerState.createForCheckoutSession(
+            customer = customer,
+            supportedSavedPaymentMethodTypes = listOf(PaymentMethod.Type.Card),
+        )
+
+        assertThat(customerState.paymentMethods).isEmpty()
+        assertThat(customerState.defaultPaymentMethodId).isNull()
+    }
+
+    @Test
+    fun `Should create 'CustomerState' for checkout session with filtered payment methods`() {
+        val cards = PaymentMethodFixtures.createCards(2)
+        val customer = CheckoutSessionResponse.Customer(
+            id = "cus_checkout_mixed",
+            paymentMethods = cards + listOf(
+                PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
+                PaymentMethodFixtures.LINK_PAYMENT_METHOD,
+            ),
+        )
+
+        val customerState = CustomerState.createForCheckoutSession(
+            customer = customer,
+            supportedSavedPaymentMethodTypes = listOf(PaymentMethod.Type.Card),
+        )
+
+        assertThat(customerState.paymentMethods).containsExactlyElementsIn(cards)
+        assertThat(customerState.defaultPaymentMethodId).isNull()
     }
 }
