@@ -9,6 +9,7 @@ import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.common.coroutines.runCatching
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.common.taptoadd.TapToAddConnectionManager
 import com.stripe.android.core.Logger
@@ -573,8 +574,12 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     ephemeralKeySecret = "",
                     customerSessionClientSecret = null,
                     isPaymentMethodSetAsDefaultEnabled = false,
-                    permissions = createForPaymentSheetLegacyEphemeralKey(
-                        configuration = configuration,
+                    // TODO: revisit the permissions when working on the payment method management
+                    permissions = CustomerMetadata.Permissions(
+                        removePaymentMethod = PaymentMethodRemovePermission.None,
+                        canRemoveLastPaymentMethod = false,
+                        canRemoveDuplicates = false,
+                        canUpdateFullPaymentMethodDetails = false,
                     )
                 )
             }
