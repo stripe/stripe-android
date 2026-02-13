@@ -5,6 +5,7 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.ClientAttributionMetadata
+import com.stripe.android.model.ConfirmCheckoutSessionParams
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -83,10 +84,13 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         paymentMethod: PaymentMethod,
     ): ConfirmationDefinition.Action<Args> {
         return stripeRepository.confirmCheckoutSession(
-            checkoutSessionId = checkoutSessionId,
-            paymentMethodId = paymentMethod.id,
-            clientAttributionMetadata = clientAttributionMetadata,
-            returnUrl = returnUrl,
+            confirmCheckoutSessionParams = ConfirmCheckoutSessionParams(
+                checkoutSessionId = checkoutSessionId,
+                paymentMethodId = paymentMethod.id,
+                clientAttributionMetadata = clientAttributionMetadata,
+                returnUrl = returnUrl,
+                savePaymentMethod = null,
+            ),
             options = requestOptions,
         ).fold(
             onSuccess = { response ->

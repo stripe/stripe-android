@@ -6,6 +6,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.CheckoutSessionResponse
 import com.stripe.android.model.ClientAttributionMetadata
+import com.stripe.android.model.ConfirmCheckoutSessionParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentCreationFlow
 import com.stripe.android.model.PaymentMethod
@@ -285,10 +286,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         }
 
         override suspend fun confirmCheckoutSession(
-            checkoutSessionId: String,
-            paymentMethodId: String,
-            clientAttributionMetadata: ClientAttributionMetadata,
-            returnUrl: String,
+            confirmCheckoutSessionParams: ConfirmCheckoutSessionParams,
             options: ApiRequest.Options,
         ): Result<CheckoutSessionResponse> {
             return confirmCheckoutSessionResult
