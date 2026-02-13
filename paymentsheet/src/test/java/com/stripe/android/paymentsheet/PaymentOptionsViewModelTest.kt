@@ -1217,13 +1217,13 @@ internal class PaymentOptionsViewModelTest {
 
     @Test
     fun `When tap to add result is Canceled with payment selection, selection and PMs are updated`() = runTest {
-        val errorReporter = FakeErrorReporter()
         val expectedPaymentSelection = SELECTION_SAVED_PAYMENT_METHOD
+        val customerStateHolder = FakeCustomerStateHolder()
 
         FakeTapToAddHelper.Factory.test {
             val viewModel = createViewModel(
                 tapToAddHelperFactory = tapToAddHelperFactory,
-                errorReporter = errorReporter,
+                customerStateHolder = customerStateHolder,
             )
 
             createCalls.awaitItem()
@@ -1237,7 +1237,7 @@ internal class PaymentOptionsViewModelTest {
                     )
                 )
 
-                // TODO: Assert that the payment method was added
+                assertThat(customerStateHolder.addPaymentMethodTurbine.awaitItem()).isEqualTo(expectedPaymentSelection.paymentMethod)
                 assertThat(awaitItem()).isEqualTo(expectedPaymentSelection)
             }
         }
@@ -1388,6 +1388,7 @@ internal class PaymentOptionsViewModelTest {
         workContext: CoroutineContext = testDispatcher,
         tapToAddHelperFactory: TapToAddHelper.Factory = FakeTapToAddHelper.Factory.noOp(),
         errorReporter: ErrorReporter = FakeErrorReporter(),
+        customerStateHolder: CustomerStateHolder? = null,
     ) = TestViewModelFactory.create(linkConfigurationCoordinator) { linkHandler, savedStateHandle ->
         PaymentOptionsViewModel(
             args = args.copy(
@@ -1410,6 +1411,7 @@ internal class PaymentOptionsViewModelTest {
             tapToAddHelperFactory = tapToAddHelperFactory,
             mode = EventReporter.Mode.Complete,
             errorReporter = errorReporter,
+            createCustomerStateHolder = { customerStateHolder ?: DefaultCustomerStateHolder.create(it) }
         )
     }
 

@@ -73,6 +73,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     tapToAddHelperFactory: TapToAddHelper.Factory,
     mode: EventReporter.Mode,
+    createCustomerStateHolder: @JvmSuppressWildcards (
+        BaseSheetViewModel
+    ) -> CustomerStateHolder = { DefaultCustomerStateHolder.create(it) },
 ) : BaseSheetViewModel(
     config = args.configuration,
     eventReporter = eventReporter,
@@ -83,6 +86,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
     isCompleteFlow = false,
     mode = mode,
+    createCustomerStateHolder = createCustomerStateHolder,
 ) {
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(

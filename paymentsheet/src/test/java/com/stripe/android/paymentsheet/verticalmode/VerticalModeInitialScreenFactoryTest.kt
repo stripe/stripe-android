@@ -9,7 +9,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.state.CustomerState
@@ -104,7 +104,7 @@ class VerticalModeInitialScreenFactoryTest {
             canGoBack = false,
         )
 
-        val customerStateHolder = CustomerStateHolder(
+        val customerStateHolder = DefaultCustomerStateHolder(
             savedStateHandle = SavedStateHandle(),
             selection = fakeViewModel.selection,
             customerMetadataPermissions = stateFlowOf(

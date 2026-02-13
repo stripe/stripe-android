@@ -35,6 +35,8 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferen
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.paymentsheet.BuildConfig
+import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
@@ -218,6 +220,14 @@ internal abstract class PaymentSheetCommonModule {
             @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
         ): AnalyticEventCallback? {
             return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.analyticEventCallback
+        }
+
+        @Provides
+        @JvmSuppressWildcards
+        fun provideCreateCustomerStateHolder(): (
+            com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+        ) -> CustomerStateHolder {
+            return { DefaultCustomerStateHolder.create(it) }
         }
     }
 }

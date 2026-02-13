@@ -93,7 +93,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     internal val cvcRecollectionHandler: CvcRecollectionHandler,
     private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory,
     tapToAddHelperFactory: TapToAddHelper.Factory,
-    mode: EventReporter.Mode
+    mode: EventReporter.Mode,
+    createCustomerStateHolder: @JvmSuppressWildcards (BaseSheetViewModel) -> CustomerStateHolder = {
+        DefaultCustomerStateHolder.create(it)
+    },
 ) : BaseSheetViewModel(
     config = args.config,
     eventReporter = eventReporter,
@@ -104,6 +107,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
     isCompleteFlow = true,
     mode = mode,
+    createCustomerStateHolder = createCustomerStateHolder,
 ) {
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(

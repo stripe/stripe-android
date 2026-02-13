@@ -3400,27 +3400,25 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `When tap to add result is Canceled with payment selection, selection and PMs are updated`() = runTest {
-        val errorReporter = FakeErrorReporter()
         val expectedPaymentSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
+        val customerStateHolder = FakeCustomerStateHolder()
 
         FakeTapToAddHelper.Factory.test {
             val viewModel = createViewModel(
                 tapToAddHelperFactory = tapToAddHelperFactory,
-                errorReporter = errorReporter,
+                customerStateHolder = customerStateHolder,
             )
 
             createCalls.awaitItem()
 
             viewModel.selection.test {
-                assertThat(awaitItem()).isNull()
-
                 tapToAddHelperFactory.getCreatedHelper()?.emitResult(
                     TapToAddResult.Canceled(
                         expectedPaymentSelection
                     )
                 )
 
-                // TODO: assert customer PMs are updated as expected.
+                assertThat(customerStateHolder.addPaymentMethodTurbine.awaitItem()).isEqualTo(expectedPaymentSelection.paymentMethod)
                 assertThat(awaitItem()).isEqualTo(expectedPaymentSelection)
             }
         }
@@ -3571,6 +3569,7 @@ internal class PaymentSheetViewModelTest {
         cvcRecollectionInteractor: FakeCvcRecollectionInteractor = FakeCvcRecollectionInteractor(),
         confirmationHandlerFactory: ConfirmationHandler.Factory? = null,
         tapToAddHelperFactory: TapToAddHelper.Factory = FakeTapToAddHelper.Factory.noOp(),
+        customerStateHolder: CustomerStateHolder? = null
     ): PaymentSheetViewModel {
         return TestViewModelFactory.create(
             linkConfigurationCoordinator = linkConfigurationCoordinator,
@@ -3605,6 +3604,7 @@ internal class PaymentSheetViewModelTest {
                 },
                 tapToAddHelperFactory = tapToAddHelperFactory,
                 mode = EventReporter.Mode.Complete,
+                createCustomerStateHolder = { customerStateHolder ?: DefaultCustomerStateHolder.create(it) },
             )
         }
     }
