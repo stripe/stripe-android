@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.strings.resolve
-import com.stripe.android.R as StripeCoreR
+import com.stripe.android.core.R as StripeCoreR
 
 @Composable
 internal fun TapToAddErrorScreen(
