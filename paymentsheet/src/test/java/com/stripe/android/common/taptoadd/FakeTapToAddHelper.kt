@@ -8,7 +8,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 
 internal class FakeTapToAddHelper(
     override val hasPreviouslyAttemptedCollection: Boolean = false,
@@ -16,8 +15,8 @@ internal class FakeTapToAddHelper(
     val registerCalls = Turbine<RegisterCall>()
     val collectCalls = Turbine<PaymentMethodMetadata>()
 
-    override val result: SharedFlow<TapToAddResult> =
-        MutableSharedFlow<TapToAddResult>().asSharedFlow()
+    private val _result = MutableSharedFlow<TapToAddResult>(replay = 1)
+    override val result: SharedFlow<TapToAddResult> = _result
 
     override fun register(
         activityResultCaller: ActivityResultCaller,
@@ -35,6 +34,10 @@ internal class FakeTapToAddHelper(
         collectCalls.ensureAllEventsConsumed()
     }
 
+    fun setResult(result: TapToAddResult) {
+        _result.tryEmit(result)
+    }
+
     class RegisterCall(
         val activityResultCaller: ActivityResultCaller,
         val lifecycleOwner: LifecycleOwner,
@@ -42,7 +45,7 @@ internal class FakeTapToAddHelper(
 
     class Scenario(
         val collectCalls: ReceiveTurbine<PaymentMethodMetadata>,
-        val helper: TapToAddHelper,
+        val helper: FakeTapToAddHelper,
     )
 
     class Factory private constructor() : TapToAddHelper.Factory {
