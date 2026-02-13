@@ -3418,7 +3418,9 @@ internal class PaymentSheetViewModelTest {
                     )
                 )
 
-                assertThat(customerStateHolder.addPaymentMethodTurbine.awaitItem()).isEqualTo(expectedPaymentSelection.paymentMethod)
+                assertThat(customerStateHolder.addPaymentMethodTurbine.awaitItem()).isEqualTo(
+                    expectedPaymentSelection.paymentMethod
+                )
                 assertThat(awaitItem()).isEqualTo(expectedPaymentSelection)
             }
         }
@@ -3572,7 +3574,7 @@ internal class PaymentSheetViewModelTest {
         confirmationHandlerFactory: ConfirmationHandler.Factory? = null,
         tapToAddHelperFactory: TapToAddHelper.Factory = FakeTapToAddHelper.Factory.noOp(),
         customerStateHolder: CustomerStateHolder? = null,
-        ): PaymentSheetViewModel {
+    ): PaymentSheetViewModel {
         return TestViewModelFactory.create(
             linkConfigurationCoordinator = linkConfigurationCoordinator,
             savedStateHandle = savedStateHandle,
