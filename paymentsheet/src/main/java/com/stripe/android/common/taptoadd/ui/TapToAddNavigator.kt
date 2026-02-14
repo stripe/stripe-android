@@ -1,10 +1,12 @@
 package com.stripe.android.common.taptoadd.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import com.stripe.android.common.taptoadd.TapToAddResult
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.paymentsheet.navigation.NavigationHandler
+import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -72,7 +74,7 @@ internal class TapToAddNavigator(
         data class CardAdded(
             val interactor: TapToAddCardAddedInteractor,
         ) : Screen {
-            override val cancelButton: CancelButton = CancelButton.None
+            override val cancelButton: CancelButton = CancelButton.Invisible
 
             @Composable
             override fun Content() {
@@ -81,6 +83,19 @@ internal class TapToAddNavigator(
                     last4 = interactor.last4,
                     onComplete = interactor::onShown,
                 )
+            }
+        }
+
+        data class Confirmation(
+            val interactor: TapToAddConfirmationInteractor,
+        ) : Screen {
+            override val cancelButton: CancelButton = CancelButton.Visible
+
+            @Composable
+            override fun Content() {
+                val state by interactor.state.collectAsState()
+
+                TapToAddConfirmationScreen(state = state)
             }
         }
 
