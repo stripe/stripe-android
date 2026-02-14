@@ -147,6 +147,21 @@ class CardScanGoogleLauncherTest {
         assertThat(scanFailedCall.error).isInstanceOf(Exception::class.java)
     }
 
+    @Test
+    fun `card scan launcher should not launch when activityLauncher is null`() = runScenario(
+        setActivityLauncher = false
+    ) {
+        assertThat(launcher.isAvailable.value).isTrue()
+
+        // Launch should return early without doing anything when activityLauncher is null
+        launcher.launch(ApplicationProvider.getApplicationContext())
+
+        // Only the init apiCheck should be called, no scan events
+        assertThat(fakeEventsReporter.apiCheckSucceededCalls.awaitItem()).isNotNull()
+        // No scan started events should be emitted
+        fakeEventsReporter.scanStartedCalls.expectNoEvents()
+    }
+
     private class Scenario(
         val launcher: CardScanGoogleLauncher,
         val fakeEventsReporter: FakeCardScanEventsReporter,
@@ -155,6 +170,7 @@ class CardScanGoogleLauncherTest {
 
     private fun runScenario(
         isFetchClientSucceed: Boolean = true,
+        setActivityLauncher: Boolean = true,
         block: suspend Scenario.() -> Unit
     ) = runTest {
         val activityLauncher = FakeActivityLauncher<IntentSenderRequest>()
@@ -165,7 +181,9 @@ class CardScanGoogleLauncherTest {
             options = null,
             paymentCardRecognitionClient = FakePaymentCardRecognitionClient(isFetchClientSucceed)
         ).apply {
-            this.activityLauncher = activityLauncher
+            if (setActivityLauncher) {
+                this.activityLauncher = activityLauncher
+            }
         }
 
         val scenario = Scenario(
@@ -176,7 +194,9 @@ class CardScanGoogleLauncherTest {
 
         scenario.block()
 
-        activityLauncher.validate()
+        if (setActivityLauncher) {
+            activityLauncher.validate()
+        }
         fakeEventsReporter.validate()
     }
 }
