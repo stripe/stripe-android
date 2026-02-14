@@ -20,10 +20,9 @@ import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -72,7 +71,7 @@ import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.menu.Checkbox
 import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.strings.resolve
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.uicore.stripeShapes
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.launch
@@ -156,7 +155,7 @@ internal fun LinkInlineSignup(
         }
     }
 
-    val contentAlpha = if (enabled) ContentAlpha.high else ContentAlpha.disabled
+    val contentAlpha = if (enabled) 1f else 0.38f
     val shape = boxShape(simplifiedCheckbox)
     val boxModifier = modifier.applyBorders(simplifiedCheckbox, shape)
 
@@ -220,7 +219,7 @@ private fun Modifier.applyBorders(
         shape = shape,
     )
         .background(
-            color = MaterialTheme.stripeColors.component,
+            color = MaterialTheme.stripeColorScheme.component,
             shape = shape,
         )
 }
@@ -266,14 +265,14 @@ private fun LinkCheckbox(
         Column {
             if (useLinkLogoInCheckboxText) {
                 TextWithLinkLogo(
-                    style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Medium),
-                    color = MaterialTheme.colors.onSurface.copy(alpha = contentAlpha),
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = contentAlpha),
                 )
             } else {
                 Text(
                     text = label,
-                    style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colors.onSurface.copy(alpha = contentAlpha)
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = contentAlpha)
                 )
             }
             if (sublabel != null) {
@@ -282,8 +281,8 @@ private fun LinkCheckbox(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 4.dp),
-                    style = MaterialTheme.typography.body1,
-                    color = MaterialTheme.stripeColors.subtitle
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.stripeColorScheme.subtitle
                 )
             }
         }
@@ -358,21 +357,21 @@ internal fun LinkDefaultOptIn(
                 Text(
                     text = email,
                     overflow = TextOverflow.Ellipsis,
-                    color = MaterialTheme.colors.onSurface,
+                    color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                 )
                 Text(
                     text = phoneNumber,
                     overflow = TextOverflow.Ellipsis,
-                    color = MaterialTheme.stripeColors.subtitle,
+                    color = MaterialTheme.stripeColorScheme.subtitle,
                     maxLines = 1,
                 )
             }
 
             Text(
                 text = stringResource(id = StripeUiCoreR.string.stripe_change),
-                color = MaterialTheme.colors.primary,
-                style = MaterialTheme.typography.subtitle1,
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.clickable(enabled = enabled, onClick = onChange),
             )

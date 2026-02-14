@@ -6,9 +6,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -36,7 +36,7 @@ import com.stripe.android.uicore.elements.PhoneNumberElementUI
 import com.stripe.android.uicore.elements.Section
 import com.stripe.android.uicore.elements.TextField
 import com.stripe.android.uicore.elements.TextFieldController
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.uicore.stripeShapes
 
 private val LinkLogoModifier = Modifier.padding(end = 16.dp)
@@ -131,7 +131,7 @@ internal fun LinkInlineSignupFields(
                     .testTag(LINK_INLINE_SIGNUP_REMAINING_FIELDS_TEST_TAG)
             ) {
                 Divider(
-                    color = MaterialTheme.stripeColors.componentDivider,
+                    color = MaterialTheme.stripeColorScheme.componentDivider,
                     thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
                 )
 
@@ -164,7 +164,7 @@ internal fun LinkInlineSignupFields(
                 }
 
                 Divider(
-                    color = MaterialTheme.stripeColors.componentDivider,
+                    color = MaterialTheme.stripeColorScheme.componentDivider,
                     thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
                 )
 
@@ -203,13 +203,13 @@ private fun LinkInlineErrorText(
                 .size(20.dp),
             painter = painterResource(id = R.drawable.stripe_ic_sail_warning_circle),
             contentDescription = null,
-            tint = MaterialTheme.colors.error
+            tint = MaterialTheme.colorScheme.error
         )
         HyperlinkedText(
             text = text,
             modifier = Modifier
                 .padding(vertical = 12.dp),
-            color = MaterialTheme.colors.error,
+            color = MaterialTheme.colorScheme.error,
             style = TextStyle(
                 fontFamily = FontFamily.Default,
                 fontWeight = FontWeight.Normal,

@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.stripe.android.paymentsheet.paymentdatacollection.polling
 
 import android.app.Activity
@@ -7,8 +9,8 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SheetValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.core.view.WindowCompat
@@ -40,7 +42,6 @@ internal class PollingActivity : AppCompatActivity() {
 
     private val viewModel by viewModels<PollingViewModel> { viewModelFactory }
 
-    @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -58,7 +59,7 @@ internal class PollingActivity : AppCompatActivity() {
 
                 val state = rememberStripeBottomSheetState(
                     confirmValueChange = { proposedValue ->
-                        if (proposedValue == ModalBottomSheetValue.Hidden) {
+                        if (proposedValue == SheetValue.Hidden) {
                             uiState.pollingState != PollingState.Active
                         } else {
                             true

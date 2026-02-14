@@ -3,8 +3,9 @@ package com.stripe.android.common.ui
 import android.os.Build
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.ModalBottomSheetValue.Expanded
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SheetValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -19,6 +20,7 @@ import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetState
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetLayoutInfo
 import com.stripe.android.uicore.stripeShapes
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ElementsBottomSheetLayout(
     state: StripeBottomSheetState,
@@ -38,7 +40,7 @@ internal fun ElementsBottomSheetLayout(
         state.skipHideAnimation = skipHideAnimation
     }
 
-    val isExpanded = state.modalBottomSheetState.targetValue == Expanded
+    val isExpanded = state.modalBottomSheetState.targetValue == SheetValue.Expanded
 
     val statusBarColorAlpha by animateFloatAsState(
         targetValue = if (isExpanded) layoutInfo.scrimColor.alpha else 0f,

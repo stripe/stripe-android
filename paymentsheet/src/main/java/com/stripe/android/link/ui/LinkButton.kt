@@ -21,15 +21,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.appendInlineContent
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonColors
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.LocalContentAlpha
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
@@ -68,7 +66,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.ButtonThemes.LinkButtonTheme
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.PrimaryButtonTheme
 import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 
 private val LinkButtonTheme.textColor: Color
     @Composable
@@ -80,14 +78,14 @@ private val LinkButtonTheme.textColor: Color
 private val LinkButtonTheme.dividerColor: Color
     @Composable
     get() = when (this) {
-        LinkButtonTheme.WHITE -> MaterialTheme.stripeColors.componentBorder
+        LinkButtonTheme.WHITE -> MaterialTheme.stripeColorScheme.componentBorder
         LinkButtonTheme.DEFAULT -> LinkTheme.colors.separatorOnPrimaryButton
     }
 
 private val LinkButtonTheme.borderColor: Color?
     @Composable
     get() = when (this) {
-        LinkButtonTheme.WHITE -> MaterialTheme.stripeColors.componentBorder
+        LinkButtonTheme.WHITE -> MaterialTheme.stripeColorScheme.componentBorder
         LinkButtonTheme.DEFAULT -> null
     }
 
@@ -106,17 +104,19 @@ private fun Modifier.themeBorder(theme: LinkButtonTheme): Modifier {
     } ?: this
 }
 
+private const val DisabledAlpha = 0.38f
+
 @Composable
 private fun LinkButtonTheme.buttonColors(): ButtonColors = when (this) {
     LinkButtonTheme.WHITE -> ButtonDefaults.buttonColors(
-        backgroundColor = EceLinkWhiteBackground,
-        disabledBackgroundColor = EceLinkWhiteBackground,
+        containerColor = EceLinkWhiteBackground,
+        disabledContainerColor = EceLinkWhiteBackground,
     )
     LinkButtonTheme.DEFAULT -> ButtonDefaults.buttonColors(
-        backgroundColor = LinkTheme.colors.buttonLinkBrand,
+        containerColor = LinkTheme.colors.buttonLinkBrand,
         contentColor = LinkTheme.colors.onButtonLinkBrand,
-        disabledBackgroundColor = LinkTheme.colors.buttonLinkBrand,
-        disabledContentColor = LinkTheme.colors.onButtonLinkBrand.copy(alpha = ContentAlpha.disabled)
+        disabledContainerColor = LinkTheme.colors.buttonLinkBrand,
+        disabledContentColor = LinkTheme.colors.onButtonLinkBrand.copy(alpha = DisabledAlpha)
     )
 }
 
@@ -180,45 +180,39 @@ internal fun LinkButton(
     modifier: Modifier = Modifier,
     theme: LinkButtonTheme = LinkButtonTheme.DEFAULT,
 ) {
-    val alpha = if (enabled) {
-        1f
-    } else {
-        ContentAlpha.disabled
-    }
-    CompositionLocalProvider(
-        LocalContentAlpha provides alpha
-    ) {
-        DefaultLinkTheme {
-            Button(
-                onClick = onClick,
-                modifier = modifier
-                    .fillMaxWidth()
-                    .defaultMinSize(minHeight = PrimaryButtonTheme.shape.height)
-                    .themeBorder(theme)
-                    .testTag(LinkButtonTestTag),
-                enabled = enabled,
-                shape = LinkButtonShape,
-                elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
-                colors = theme.buttonColors(),
-                contentPadding = PaddingValues(
-                    start = LinkButtonHorizontalPadding,
-                    top = LinkButtonVerticalPadding,
-                    end = LinkButtonHorizontalPadding,
-                    bottom = LinkButtonVerticalPadding
+    val contentAlpha = if (enabled) 1f else DisabledAlpha
+    DefaultLinkTheme {
+        Button(
+            onClick = onClick,
+            modifier = modifier
+                .fillMaxWidth()
+                .defaultMinSize(minHeight = PrimaryButtonTheme.shape.height)
+                .themeBorder(theme)
+                .testTag(LinkButtonTestTag),
+            enabled = enabled,
+            shape = LinkButtonShape,
+            elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
+            colors = theme.buttonColors(),
+            contentPadding = PaddingValues(
+                start = LinkButtonHorizontalPadding,
+                top = LinkButtonVerticalPadding,
+                end = LinkButtonHorizontalPadding,
+                bottom = LinkButtonVerticalPadding
+            )
+        ) {
+            when (state) {
+                is LinkButtonState.DefaultPayment -> PaymentDetailsButtonContent(
+                    paymentUI = state.paymentUI,
+                    theme = theme,
+                    contentAlpha = contentAlpha
                 )
-            ) {
-                when (state) {
-                    is LinkButtonState.DefaultPayment -> PaymentDetailsButtonContent(
-                        paymentUI = state.paymentUI,
-                        theme = theme
-                    )
 
-                    is LinkButtonState.Email -> SignedInButtonContent(
-                        email = state.email,
-                        theme = theme
-                    )
-                    LinkButtonState.Default -> SignedOutButtonContent(theme = theme)
-                }
+                is LinkButtonState.Email -> SignedInButtonContent(
+                    email = state.email,
+                    theme = theme,
+                    contentAlpha = contentAlpha
+                )
+                LinkButtonState.Default -> SignedOutButtonContent(theme = theme, contentAlpha = contentAlpha)
             }
         }
     }
@@ -227,9 +221,10 @@ internal fun LinkButton(
 @Composable
 private fun PaymentDetailsButtonContent(
     paymentUI: DefaultPaymentUI,
-    theme: LinkButtonTheme
+    theme: LinkButtonTheme,
+    contentAlpha: Float
 ) {
-    val color = theme.textColor.copy(alpha = LocalContentAlpha.current)
+    val color = theme.textColor.copy(alpha = contentAlpha)
     Row(
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -273,7 +268,8 @@ private fun PaymentDetailsDisplay(
 @Composable
 private fun SignedInButtonContent(
     email: String,
-    theme: LinkButtonTheme
+    theme: LinkButtonTheme,
+    contentAlpha: Float
 ) {
     val annotatedEmail = remember(email) {
         buildAnnotatedString {
@@ -281,7 +277,7 @@ private fun SignedInButtonContent(
         }
     }
 
-    val color = theme.textColor.copy(alpha = LocalContentAlpha.current)
+    val color = theme.textColor.copy(alpha = contentAlpha)
     val payWithLinkText = resolvableString(R.string.stripe_pay_with_link).resolve(LocalContext.current)
 
     Row(
@@ -306,7 +302,7 @@ private fun SignedInButtonContent(
 
 @Suppress("UnusedReceiverParameter")
 @Composable
-private fun RowScope.SignedOutButtonContent(theme: LinkButtonTheme) {
+private fun RowScope.SignedOutButtonContent(theme: LinkButtonTheme, contentAlpha: Float) {
     val text = stringResource(id = R.string.stripe_pay_with_link)
 
     val iconizedText = buildAnnotatedString {
@@ -322,7 +318,7 @@ private fun RowScope.SignedOutButtonContent(theme: LinkButtonTheme) {
         text = iconizedText,
         textAlign = TextAlign.Center,
         inlineContent = InlineContentTemplateBuilder().apply {
-            add(id = LINK_ICON_ID, width = 2.6.em, height = 0.9.em) { LinkButtonIcon(theme.logoRes) }
+            add(id = LINK_ICON_ID, width = 2.6.em, height = 0.9.em) { LinkButtonIcon(theme.logoRes, contentAlpha) }
         }.build(),
         modifier = Modifier
             .padding(start = 6.dp)
@@ -330,7 +326,7 @@ private fun RowScope.SignedOutButtonContent(theme: LinkButtonTheme) {
             .semantics {
                 this.contentDescription = text
             },
-        color = theme.textColor.copy(alpha = LocalContentAlpha.current),
+        color = theme.textColor.copy(alpha = contentAlpha),
         style = LinkTheme.typography.bodyEmphasized,
         fontSize = LINK_PAY_WITH_FONT_SIZE.sp,
         overflow = TextOverflow.Ellipsis,
@@ -381,7 +377,7 @@ private fun LinkIconAndDivider(
 
 @Composable
 private fun LinkDivider(color: Color) {
-    Divider(
+    HorizontalDivider(
         modifier = Modifier
             .width(1.dp)
             .fillMaxHeight(),
@@ -391,12 +387,13 @@ private fun LinkDivider(color: Color) {
 
 @Composable
 private fun LinkButtonIcon(
-    @DrawableRes logoRes: Int
+    @DrawableRes logoRes: Int,
+    contentAlpha: Float = 1f
 ) {
     Icon(
         modifier = Modifier
             .aspectRatio(LINK_ICON_ASPECT_RATIO)
-            .alpha(LocalContentAlpha.current),
+            .alpha(contentAlpha),
         painter = painterResource(logoRes),
         contentDescription = stringResource(com.stripe.android.R.string.stripe_link),
         tint = Color.Unspecified

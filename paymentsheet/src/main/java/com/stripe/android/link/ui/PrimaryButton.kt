@@ -11,14 +11,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.Icon
-import androidx.compose.material.LocalContentAlpha
-import androidx.compose.material.Text
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,6 +41,8 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R as uiCoreR
 
+private const val DisabledAlpha = 0.38f
+
 @Composable
 internal fun PrimaryButton(
     modifier: Modifier = Modifier,
@@ -55,41 +54,38 @@ internal fun PrimaryButton(
     @DrawableRes iconStart: Int? = null,
     @DrawableRes iconEnd: Int? = null
 ) {
-    CompositionLocalProvider(
-        LocalContentAlpha provides
-            if (state == PrimaryButtonState.Disabled) ContentAlpha.disabled else ContentAlpha.high
-    ) {
-        Box(modifier) {
-            Button(
-                onClick = onButtonClick,
-                modifier = Modifier
-                    .height(LinkTheme.shapes.primaryButtonHeight)
-                    .fillMaxWidth()
-                    .testTag(PrimaryButtonTag),
-                enabled = state == PrimaryButtonState.Enabled,
-                elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
-                shape = LinkTheme.shapes.primaryButton,
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = LinkTheme.colors.buttonBrand,
-                    contentColor = LinkTheme.colors.onButtonBrand,
-                    disabledBackgroundColor = LinkTheme.colors.buttonBrand,
-                    disabledContentColor = LinkTheme.colors.onButtonBrand.copy(alpha = ContentAlpha.disabled),
-                )
-            ) {
-                PrimaryContent(
-                    state = state,
-                    label = label,
-                    iconStart = iconStart,
-                    iconEnd = iconEnd,
-                )
-            }
-
-            DisabledButton(
+    val contentAlpha = if (state == PrimaryButtonState.Disabled) DisabledAlpha else 1f
+    Box(modifier) {
+        Button(
+            onClick = onButtonClick,
+            modifier = Modifier
+                .height(LinkTheme.shapes.primaryButtonHeight)
+                .fillMaxWidth()
+                .testTag(PrimaryButtonTag),
+            enabled = state == PrimaryButtonState.Enabled,
+            elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
+            shape = LinkTheme.shapes.primaryButton,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = LinkTheme.colors.buttonBrand,
+                contentColor = LinkTheme.colors.onButtonBrand,
+                disabledContainerColor = LinkTheme.colors.buttonBrand,
+                disabledContentColor = LinkTheme.colors.onButtonBrand.copy(alpha = DisabledAlpha),
+            )
+        ) {
+            PrimaryContent(
                 state = state,
-                allowedDisabledClicks = allowedDisabledClicks,
-                onDisabledButtonClick = onDisabledButtonClick,
+                label = label,
+                iconStart = iconStart,
+                iconEnd = iconEnd,
+                contentAlpha = contentAlpha,
             )
         }
+
+        DisabledButton(
+            state = state,
+            allowedDisabledClicks = allowedDisabledClicks,
+            onDisabledButtonClick = onDisabledButtonClick,
+        )
     }
 }
 
@@ -98,7 +94,8 @@ private fun PrimaryContent(
     state: PrimaryButtonState,
     label: String,
     @DrawableRes iconStart: Int? = null,
-    @DrawableRes iconEnd: Int? = null
+    @DrawableRes iconEnd: Int? = null,
+    contentAlpha: Float = 1f
 ) {
     when (state) {
         PrimaryButtonState.Processing -> LinkSpinner(
@@ -120,16 +117,16 @@ private fun PrimaryContent(
             tint = LinkTheme.colors.onButtonBrand
         )
         else -> Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            PrimaryButtonIcon(iconStart)
+            PrimaryButtonIcon(iconStart, contentAlpha)
             Text(
                 text = label,
                 modifier = Modifier.weight(1f),
                 color = LinkTheme.colors.onButtonBrand
-                    .copy(alpha = LocalContentAlpha.current),
+                    .copy(alpha = contentAlpha),
                 textAlign = TextAlign.Center,
                 style = LinkTheme.typography.bodyEmphasized,
             )
-            PrimaryButtonIcon(iconEnd)
+            PrimaryButtonIcon(iconEnd, contentAlpha)
         }
     }
 }
@@ -153,7 +150,8 @@ private fun BoxScope.DisabledButton(
 
 @Composable
 private fun PrimaryButtonIcon(
-    @DrawableRes icon: Int?
+    @DrawableRes icon: Int?,
+    contentAlpha: Float = 1f
 ) {
     Box(
         modifier = Modifier
@@ -168,7 +166,7 @@ private fun PrimaryButtonIcon(
                 modifier = Modifier
                     .width(PrimaryButtonIconWidth)
                     .height(PrimaryButtonIconHeight),
-                tint = LinkTheme.colors.contentOnPrimaryButton.copy(alpha = LocalContentAlpha.current)
+                tint = LinkTheme.colors.contentOnPrimaryButton.copy(alpha = contentAlpha)
             )
         }
     }

@@ -6,11 +6,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.toggleable
-import androidx.compose.material.Checkbox
-import androidx.compose.material.CheckboxDefaults
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.strings.resolve
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.uicore.utils.collectAsState
 import androidx.compose.ui.R as ComposeR
 
@@ -80,7 +80,7 @@ internal fun CheckboxFieldUIView(
     )
 
     val errorMessage = error?.invoke()
-    val errorColor = MaterialTheme.stripeColors.materialColors.error
+    val errorColor = MaterialTheme.stripeColorScheme.materialColorScheme.error
 
     val checkboxColors = error?.run {
         CheckboxDefaults.colors(
@@ -90,9 +90,9 @@ internal fun CheckboxFieldUIView(
         )
     } ?: run {
         CheckboxDefaults.colors(
-            checkedColor = MaterialTheme.colors.primary,
-            uncheckedColor = MaterialTheme.stripeColors.subtitle,
-            checkmarkColor = MaterialTheme.colors.surface
+            checkedColor = MaterialTheme.colorScheme.primary,
+            uncheckedColor = MaterialTheme.stripeColorScheme.subtitle,
+            checkmarkColor = MaterialTheme.colorScheme.surface
         )
     }
 
@@ -122,8 +122,8 @@ internal fun CheckboxFieldUIView(
             )
             Text(
                 text = label(),
-                style = MaterialTheme.typography.subtitle1,
-                color = MaterialTheme.stripeColors.placeholderText
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.stripeColorScheme.placeholderText
             )
         }
         errorMessage?.let { error ->

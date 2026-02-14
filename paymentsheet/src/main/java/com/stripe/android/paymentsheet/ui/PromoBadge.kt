@@ -6,8 +6,8 @@ import android.os.Build.VERSION_CODES.N
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
@@ -21,7 +21,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.getOnSuccessBackgroundColor
 import com.stripe.android.uicore.getSuccessBackgroundColor
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import java.util.Locale
 
 @Composable
@@ -38,7 +38,7 @@ internal fun PromoBadge(
                 color = StripeThemeDefaults.primaryButtonStyle.getSuccessBackgroundColor(LocalContext.current),
             )
         } else {
-            MaterialTheme.stripeColors.componentBorder
+            MaterialTheme.stripeColorScheme.componentBorder
         }
 
         val foregroundColor = if (eligible) {
@@ -46,7 +46,7 @@ internal fun PromoBadge(
                 color = StripeThemeDefaults.primaryButtonStyle.getOnSuccessBackgroundColor(LocalContext.current),
             )
         } else {
-            MaterialTheme.stripeColors.onComponent
+            MaterialTheme.stripeColorScheme.onComponent
         }
 
         val shape = MaterialTheme.shapes.medium
@@ -62,7 +62,7 @@ internal fun PromoBadge(
             Text(
                 text = formatPromoText(text, eligible),
                 color = foregroundColor,
-                style = MaterialTheme.typography.caption.copy(
+                style = MaterialTheme.typography.labelSmall.copy(
                     fontSize = StripeThemeDefaults.typography.xSmallFontSize,
                 ),
             )

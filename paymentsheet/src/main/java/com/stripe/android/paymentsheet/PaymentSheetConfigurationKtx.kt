@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet
 
-import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -29,7 +29,7 @@ internal fun PaymentSheet.Appearance.parseAppearance() {
         subtitle = Color(colorsLight.subtitle),
         placeholderText = Color(colorsLight.placeholderText),
         appBarIcon = Color(colorsLight.appBarIcon),
-        materialColors = lightColors(
+        materialColorScheme = lightColorScheme(
             primary = Color(colorsLight.primary),
             surface = Color(colorsLight.surface),
             onSurface = Color(colorsLight.onSurface),
@@ -45,7 +45,7 @@ internal fun PaymentSheet.Appearance.parseAppearance() {
         subtitle = Color(colorsDark.subtitle),
         placeholderText = Color(colorsDark.placeholderText),
         appBarIcon = Color(colorsDark.appBarIcon),
-        materialColors = darkColors(
+        materialColorScheme = darkColorScheme(
             primary = Color(colorsDark.primary),
             surface = Color(colorsDark.surface),
             onSurface = Color(colorsDark.onSurface),

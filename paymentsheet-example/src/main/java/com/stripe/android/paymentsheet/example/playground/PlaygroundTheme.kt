@@ -16,12 +16,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Divider
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -34,19 +34,16 @@ internal fun PlaygroundTheme(
     bottomBarContent: @Composable ColumnScope.() -> Unit,
     topBarContent: @Composable (() -> Unit)? = null
 ) {
-    val colors = if (isSystemInDarkTheme() || AppearanceStore.forceDarkMode) {
-        darkColors()
+    val colorScheme = if (isSystemInDarkTheme() || AppearanceStore.forceDarkMode) {
+        darkColorScheme()
     } else {
-        lightColors()
+        lightColorScheme()
     }
     MaterialTheme(
-        typography = MaterialTheme.typography.copy(
-            body1 = MaterialTheme.typography.body1.copy(fontSize = 14.sp)
-        ),
-        colors = colors,
+        colorScheme = colorScheme,
     ) {
         Surface(
-            color = MaterialTheme.colors.background,
+            color = MaterialTheme.colorScheme.background,
         ) {
             Scaffold(
                 topBar = {
@@ -56,7 +53,7 @@ internal fun PlaygroundTheme(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(MaterialTheme.colors.surface)
+                            .background(MaterialTheme.colorScheme.surface)
                             .animateContentSize()
                             .padding(
                                 paddingValues = WindowInsets.systemBars.only(
@@ -64,7 +61,7 @@ internal fun PlaygroundTheme(
                                 ).asPaddingValues()
                             )
                     ) {
-                        Divider()
+                        HorizontalDivider()
                         Column(
                             content = bottomBarContent,
                             modifier = Modifier

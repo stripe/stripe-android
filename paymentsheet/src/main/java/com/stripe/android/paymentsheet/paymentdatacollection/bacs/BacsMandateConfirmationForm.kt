@@ -11,9 +11,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -35,7 +35,7 @@ import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.strings.resolve
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.uicore.stripeTypography
 import com.stripe.android.uicore.text.Html
 import com.stripe.android.uicore.utils.collectAsState
@@ -63,7 +63,7 @@ internal fun BacsMandateConfirmationFormView(
 
     return Column(
         modifier = modifier
-            .background(MaterialTheme.colors.surface)
+            .background(MaterialTheme.colorScheme.surface)
             .padding(horizontalPadding),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
@@ -94,7 +94,7 @@ internal fun BacsMandateConfirmationFormView(
                 isHtml = true
             )
             Box(modifier = Modifier.weight(WEIGHT_40_PERCENT), contentAlignment = Alignment.CenterEnd) {
-                val tint = if (MaterialTheme.colors.surface.shouldUseDarkDynamicColor()) {
+                val tint = if (MaterialTheme.colorScheme.surface.shouldUseDarkDynamicColor()) {
                     Color.Black
                 } else {
                     Color.White
@@ -130,11 +130,11 @@ internal fun BacsMandateDetails(
             .border(
                 border = BorderStroke(
                     width = 1.dp,
-                    color = MaterialTheme.stripeColors.componentBorder,
+                    color = MaterialTheme.stripeColorScheme.componentBorder,
                 ),
                 shape = MaterialTheme.shapes.small
             )
-            .background(MaterialTheme.stripeColors.component)
+            .background(MaterialTheme.stripeColorScheme.component)
             .padding(12.dp)
             .fillMaxWidth()
     ) {
@@ -172,13 +172,13 @@ internal fun BacsMandateDetailsRow(
         Text(
             modifier = Modifier.weight(WEIGHT_40_PERCENT),
             fontWeight = FontWeight(MaterialTheme.stripeTypography.fontWeightMedium),
-            color = MaterialTheme.stripeColors.onComponent,
+            color = MaterialTheme.stripeColorScheme.onComponent,
             text = label
         )
         Text(
             modifier = Modifier.weight(WEIGHT_60_PERCENT),
             fontWeight = FontWeight(MaterialTheme.stripeTypography.fontWeightNormal),
-            color = MaterialTheme.stripeColors.onComponent,
+            color = MaterialTheme.stripeColorScheme.onComponent,
             text = value
         )
     }
@@ -195,17 +195,17 @@ internal fun BacsMandateItem(
         true -> Html(
             modifier = modifier,
             html = text,
-            style = MaterialTheme.typography.caption.copy(fontWeight = FontWeight.Normal),
-            color = MaterialTheme.stripeColors.subtitle,
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Normal),
+            color = MaterialTheme.stripeColorScheme.subtitle,
             urlSpanStyle = SpanStyle(
-                color = MaterialTheme.colors.primary
+                color = MaterialTheme.colorScheme.primary
             )
         )
         false -> Text(
             modifier = modifier,
             text = text,
-            style = MaterialTheme.typography.caption.copy(fontWeight = FontWeight.Normal),
-            color = MaterialTheme.stripeColors.subtitle
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Normal),
+            color = MaterialTheme.stripeColorScheme.subtitle
         )
     }
 }

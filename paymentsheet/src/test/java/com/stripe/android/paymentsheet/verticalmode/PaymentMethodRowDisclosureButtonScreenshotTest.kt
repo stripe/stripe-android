@@ -87,13 +87,13 @@ internal class PaymentMethodRowDisclosureButtonScreenshotTest {
             .colorsLight(
                 FlatWithDisclosure.Colors(
                     separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
-                    disclosureColor = StripeThemeDefaults.colorsLight.materialColors.error.toArgb()
+                    disclosureColor = StripeThemeDefaults.colorsLight.materialColorScheme.error.toArgb()
                 )
             )
             .colorsDark(
                 FlatWithDisclosure.Colors(
                     separatorColor = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
-                    disclosureColor = StripeThemeDefaults.colorsDark.materialColors.error.toArgb()
+                    disclosureColor = StripeThemeDefaults.colorsDark.materialColorScheme.error.toArgb()
                 )
             )
             .build()

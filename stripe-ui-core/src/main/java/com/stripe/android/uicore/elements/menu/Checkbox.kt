@@ -1,11 +1,11 @@
 package com.stripe.android.uicore.elements.menu
 
 import androidx.annotation.RestrictTo
-import androidx.compose.material.CheckboxDefaults
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -16,12 +16,12 @@ fun Checkbox(
     enabled: Boolean = true
 ) {
     val checkboxColors = CheckboxDefaults.colors(
-        checkedColor = MaterialTheme.colors.primary,
-        uncheckedColor = MaterialTheme.stripeColors.subtitle,
-        checkmarkColor = MaterialTheme.colors.surface
+        checkedColor = MaterialTheme.colorScheme.primary,
+        uncheckedColor = MaterialTheme.stripeColorScheme.subtitle,
+        checkmarkColor = MaterialTheme.colorScheme.surface
     )
 
-    androidx.compose.material.Checkbox(
+    androidx.compose.material3.Checkbox(
         checked = checked,
         onCheckedChange = onCheckedChange,
         modifier = modifier,

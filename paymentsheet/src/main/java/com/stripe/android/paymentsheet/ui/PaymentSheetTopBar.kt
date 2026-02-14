@@ -6,11 +6,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -31,7 +33,7 @@ import androidx.core.content.res.ResourcesCompat
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.uicore.stripeTypography
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
@@ -59,6 +61,7 @@ internal fun PaymentSheetTopBar(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun PaymentSheetTopBar(
     state: PaymentSheetTopBarState,
@@ -68,7 +71,7 @@ internal fun PaymentSheetTopBar(
     onNavigationIconPressed: () -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    val tintColor = MaterialTheme.stripeColors.appBarIcon
+    val tintColor = MaterialTheme.stripeColorScheme.appBarIcon
 
     TopAppBar(
         title = {
@@ -103,8 +106,9 @@ internal fun PaymentSheetTopBar(
                 )
             }
         },
-        backgroundColor = MaterialTheme.colors.surface,
-        elevation = elevation,
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
         actions = {
             if (state.showEditMenu) {
                 EditButton(

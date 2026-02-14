@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.stripe.android.paymentsheet.ui
 
 import android.content.Intent
@@ -9,12 +11,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Button
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -27,10 +29,9 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
-@OptIn(ExperimentalMaterialApi::class)
 internal class SepaMandateActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -84,7 +85,7 @@ internal fun SepaMandateScreen(
 ) {
     Column(
         modifier = Modifier
-            .background(MaterialTheme.colors.surface)
+            .background(MaterialTheme.colorScheme.surface)
     ) {
         IconButton(
             onClick = closeCallback,
@@ -94,7 +95,7 @@ internal fun SepaMandateScreen(
             Icon(
                 painter = painterResource(R.drawable.stripe_ic_paymentsheet_close),
                 contentDescription = stringResource(R.string.stripe_paymentsheet_close),
-                tint = MaterialTheme.stripeColors.appBarIcon,
+                tint = MaterialTheme.stripeColorScheme.appBarIcon,
             )
         }
         Column(
@@ -110,8 +111,8 @@ internal fun SepaMandateScreen(
                     id = StripeUiCoreR.string.stripe_sepa_mandate,
                     merchantName
                 ),
-                color = MaterialTheme.stripeColors.subtitle,
-                style = MaterialTheme.typography.body1,
+                color = MaterialTheme.stripeColorScheme.subtitle,
+                style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(vertical = 16.dp)
             )
             Button(

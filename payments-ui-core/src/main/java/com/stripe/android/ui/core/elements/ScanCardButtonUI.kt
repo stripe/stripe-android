@@ -7,8 +7,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -61,7 +61,7 @@ internal fun ScanCardButtonUI(
                 contentDescription = stringResource(
                     R.string.stripe_scan_card
                 ),
-                colorFilter = ColorFilter.tint(MaterialTheme.colors.primary),
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
                 modifier = Modifier
                     .width(18.dp)
                     .height(18.dp)
@@ -70,8 +70,8 @@ internal fun ScanCardButtonUI(
                 stringResource(R.string.stripe_scan_card),
                 Modifier
                     .padding(start = 4.dp),
-                color = MaterialTheme.colors.primary,
-                style = MaterialTheme.typography.h6
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.titleLarge
             )
         }
     }

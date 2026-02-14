@@ -2,13 +2,13 @@ package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material.Divider
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.uicore.stripeShapes
 import com.stripe.android.uicore.utils.collectAsState
 
@@ -40,7 +40,7 @@ fun AddressElementUI(
                     )
                     if (index != fieldList.lastIndex) {
                         Divider(
-                            color = MaterialTheme.stripeColors.componentDivider,
+                            color = MaterialTheme.stripeColorScheme.componentDivider,
                             thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
                         )
                     }

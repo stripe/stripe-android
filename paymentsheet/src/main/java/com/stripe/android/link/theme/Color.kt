@@ -1,8 +1,7 @@
 package com.stripe.android.link.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.RadioButtonDefaults
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import com.stripe.android.uicore.SectionStyle
@@ -169,7 +168,8 @@ internal object LinkThemeConfig {
             RadioButtonDefaults.colors(
                 selectedColor = LinkTheme.colors.buttonBrand,
                 unselectedColor = unselectedColor,
-                disabledColor = unselectedColor.copy(alpha = ContentAlpha.disabled)
+                disabledSelectedColor = unselectedColor.copy(alpha = 0.38f),
+                disabledUnselectedColor = unselectedColor.copy(alpha = 0.38f)
             )
         }
 }
@@ -188,7 +188,7 @@ internal fun StripeThemeForLink(
             placeholderText = LinkTheme.colors.textTertiary,
             componentDivider = LinkTheme.colors.borderDefault,
             componentBorder = LinkTheme.colors.surfaceSecondary,
-            materialColors = stripeDefaultColors.materialColors.copy(
+            materialColorScheme = stripeDefaultColors.materialColorScheme.copy(
                 primary = LinkTheme.colors.borderSelected,
                 error = LinkTheme.colors.textCritical,
             )

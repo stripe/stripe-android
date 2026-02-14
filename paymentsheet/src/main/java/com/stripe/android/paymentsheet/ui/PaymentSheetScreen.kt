@@ -28,8 +28,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -184,7 +184,7 @@ private fun PaymentSheetScreen(
             modifier = Modifier
                 .requiredHeight(contentHeight)
                 .fillMaxWidth()
-                .background(MaterialTheme.colors.surface.copy(alpha = 0.9f)),
+                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)),
         ) {
             if (contentVisible) {
                 ProgressOverlay(
@@ -270,7 +270,7 @@ private fun BoxScope.ProgressOverlay(
 
                 Icon(
                     painter = painterResource(R.drawable.stripe_ic_paymentsheet_googlepay_primary_button_checkmark),
-                    tint = MaterialTheme.colors.onSurface,
+                    tint = MaterialTheme.colorScheme.onSurface,
                     contentDescription = null,
                     modifier = Modifier.requiredSize(48.dp)
                 )
@@ -284,7 +284,7 @@ private fun BoxScope.ProgressOverlay(
 @Composable
 internal fun ProgressOverlayProcessing() {
     CircularProgressIndicator(
-        color = MaterialTheme.colors.onSurface,
+        color = MaterialTheme.colorScheme.onSurface,
         strokeWidth = dimensionResource(R.dimen.stripe_paymentsheet_loading_indicator_stroke_width),
         modifier = Modifier.requiredSize(48.dp),
     )

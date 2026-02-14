@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet.addresselement
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -110,7 +110,7 @@ internal sealed interface AutocompleteAppearanceContext : Parcelable {
     ) : AutocompleteAppearanceContext {
         override val backgroundColor: Color
             @Composable
-            get() = MaterialTheme.colors.surface
+            get() = MaterialTheme.colorScheme.surface
 
         override fun applyAppearance() {
             appearance.parseAppearance()

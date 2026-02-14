@@ -9,8 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.ZeroCornerSize
-import androidx.compose.material.Divider
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -34,7 +34,7 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.Section
 import com.stripe.android.uicore.elements.SectionFieldElement
 import com.stripe.android.uicore.elements.SectionFieldElementUI
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.uicore.stripeShapes
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -117,7 +117,7 @@ private fun CardDetailsFormUI(
                     lastTextFieldIdentifier = null
                 )
                 Divider(
-                    color = MaterialTheme.stripeColors.componentDivider,
+                    color = MaterialTheme.stripeColorScheme.componentDivider,
                     thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
                 )
             }
@@ -131,7 +131,7 @@ private fun CardDetailsFormUI(
                 isFirstField = nameElementForCardSection == null,
             )
             Divider(
-                color = MaterialTheme.stripeColors.componentDivider,
+                color = MaterialTheme.stripeColorScheme.componentDivider,
                 thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
             )
             Row(modifier = Modifier.fillMaxWidth()) {
@@ -151,7 +151,7 @@ private fun CardDetailsFormUI(
                     modifier = Modifier
                         .height(dividerHeight.value)
                         .width(MaterialTheme.stripeShapes.borderStrokeWidth.dp),
-                    color = MaterialTheme.stripeColors.componentDivider,
+                    color = MaterialTheme.stripeColorScheme.componentDivider,
                 )
                 CvcField(cardBrand = payload.brand, modifier = Modifier.weight(1F))
             }

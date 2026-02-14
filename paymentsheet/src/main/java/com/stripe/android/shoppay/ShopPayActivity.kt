@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.stripe.android.shoppay
 
 import android.content.Context
@@ -14,7 +16,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -158,7 +161,7 @@ internal class ShopPayActivity : ComponentActivity() {
 
     @Composable
     private fun PopupWebViewDialog(webView: WebView) {
-        val backgroundColor = MaterialTheme.colors.background.toArgb()
+        val backgroundColor = MaterialTheme.colorScheme.background.toArgb()
 
         AndroidView(
             factory = {

@@ -2,8 +2,9 @@ package com.stripe.android.uicore.elements.bottomsheet
 
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.ModalBottomSheetDefaults
+import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
@@ -19,11 +20,12 @@ data class StripeBottomSheetLayoutInfo(
     val scrimColor: Color,
 )
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun rememberStripeBottomSheetLayoutInfo(
     cornerRadius: Dp = MaterialTheme.stripeShapes.bottomSheetCornerRadius.dp,
-    sheetBackgroundColor: Color = MaterialTheme.colors.surface,
-    scrimColor: Color = ModalBottomSheetDefaults.scrimColor,
+    sheetBackgroundColor: Color = MaterialTheme.colorScheme.surface,
+    scrimColor: Color = BottomSheetDefaults.ScrimColor,
 ): StripeBottomSheetLayoutInfo {
     return remember {
         StripeBottomSheetLayoutInfo(

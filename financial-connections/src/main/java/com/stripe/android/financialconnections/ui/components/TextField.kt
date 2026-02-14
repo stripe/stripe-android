@@ -8,9 +8,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.ExposedDropdownMenuDefaults.outlinedTextFieldColors
-import androidx.compose.material.OutlinedTextField
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuDefaults.outlinedTextFieldColors
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
@@ -23,6 +23,7 @@ import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.TextSelectionColors
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun FinancialConnectionsOutlinedTextField(
     value: String,
@@ -39,7 +40,7 @@ internal fun FinancialConnectionsOutlinedTextField(
     leadingIcon: @Composable (() -> Unit)? = null,
     label: @Composable (() -> Unit)? = null
 ) {
-    val contentAlpha = if (enabled) ContentAlpha.high else ContentAlpha.disabled
+    val contentAlpha = if (enabled) 1f else .38f
     val shape = RoundedCornerShape(12.dp)
 
     CompositionLocalProvider(
@@ -63,7 +64,8 @@ internal fun FinancialConnectionsOutlinedTextField(
             isError = isError,
             value = value,
             colors = outlinedTextFieldColors(
-                backgroundColor = FinancialConnectionsTheme.colors.background,
+                focusedContainerColor = FinancialConnectionsTheme.colors.background,
+                unfocusedContainerColor = FinancialConnectionsTheme.colors.background,
                 focusedBorderColor = FinancialConnectionsTheme.colors.border,
                 unfocusedBorderColor = FinancialConnectionsTheme.colors.borderNeutral,
                 disabledBorderColor = FinancialConnectionsTheme.colors.borderNeutral,
@@ -74,8 +76,8 @@ internal fun FinancialConnectionsOutlinedTextField(
                 errorCursorColor = FinancialConnectionsTheme.colors.textCritical,
                 errorLabelColor = FinancialConnectionsTheme.colors.textCritical,
                 errorTrailingIconColor = FinancialConnectionsTheme.colors.textCritical,
-                trailingIconColor = FinancialConnectionsTheme.colors.icon,
                 focusedTrailingIconColor = FinancialConnectionsTheme.colors.icon,
+                unfocusedTrailingIconColor = FinancialConnectionsTheme.colors.icon,
             ),
             onValueChange = onValueChange,
             label = label
