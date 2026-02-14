@@ -1,6 +1,12 @@
 package com.stripe.android.common.taptoadd.ui
 
-import androidx.compose.animation.Crossfade
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -16,6 +22,8 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -24,6 +32,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.R
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun TapToAddLayout(
     screen: TapToAddNavigator.Screen,
@@ -35,16 +44,36 @@ internal fun TapToAddLayout(
             .background(MaterialTheme.colors.background)
             .windowInsetsPadding(WindowInsets.systemBars)
     ) {
-        Crossfade(screen) { screen ->
-            Column(Modifier.fillMaxSize()) {
-                Box(Modifier.padding(20.dp).weight(1f)) {
-                    screen.Content()
+        SharedTransitionLayout {
+            AnimatedContent(
+                targetState = screen,
+                transitionSpec = {
+                    fadeIn(animationSpec = tween(ANIMATION_DURATION))
+                        .togetherWith(fadeOut(animationSpec = tween(ANIMATION_DURATION)))
+                },
+            ) { screen ->
+                val sharedTransitionScope = this@SharedTransitionLayout
+                val animatedVisibilityScope = this
+
+                val scope = remember(sharedTransitionScope, animatedVisibilityScope) {
+                    SharedElementScope(
+                        sharedTransitionScope = sharedTransitionScope,
+                        animatedVisibilityScope = animatedVisibilityScope,
+                    )
                 }
 
-                CancelButton(
-                    button = screen.cancelButton,
-                    onClick = onCancel,
-                )
+                CompositionLocalProvider(LocalSharedElementScope provides scope) {
+                    Column(Modifier.fillMaxSize()) {
+                        Box(Modifier.padding(20.dp).weight(1f)) {
+                            screen.Content()
+                        }
+
+                        CancelButton(
+                            button = screen.cancelButton,
+                            onClick = onCancel,
+                        )
+                    }
+                }
             }
         }
     }
@@ -84,3 +113,5 @@ private fun ColumnScope.CancelButton(
         }
     }
 }
+
+private const val ANIMATION_DURATION = 300

@@ -27,6 +27,7 @@ internal class TapToAddViewModel @Inject constructor(
             val args = argSupplier()
             val component = DaggerTapToAddViewModelComponent.factory().build(
                 paymentMethodMetadata = args.paymentMethodMetadata,
+                tapToAddMode = args.mode,
                 savedStateHandle = extras.createSavedStateHandle(),
                 application = extras.requireApplication(),
                 paymentElementCallbackIdentifier = args.paymentElementCallbackIdentifier,
