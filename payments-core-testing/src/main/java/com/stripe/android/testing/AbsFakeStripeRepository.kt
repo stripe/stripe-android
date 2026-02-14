@@ -8,7 +8,7 @@ import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.CheckoutSessionResponse
-import com.stripe.android.model.ClientAttributionMetadata
+import com.stripe.android.model.ConfirmCheckoutSessionParams
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmationToken
@@ -449,10 +449,7 @@ abstract class AbsFakeStripeRepository : StripeRepository {
     }
 
     override suspend fun confirmCheckoutSession(
-        checkoutSessionId: String,
-        paymentMethodId: String,
-        clientAttributionMetadata: ClientAttributionMetadata,
-        returnUrl: String,
+        confirmCheckoutSessionParams: ConfirmCheckoutSessionParams,
         options: ApiRequest.Options,
     ): Result<CheckoutSessionResponse> {
         TODO("Not yet implemented")
