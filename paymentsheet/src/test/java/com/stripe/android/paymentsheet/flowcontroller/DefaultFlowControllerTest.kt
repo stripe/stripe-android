@@ -39,6 +39,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilt
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.ClientAttributionMetadata
+import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -534,8 +535,11 @@ internal class DefaultFlowControllerTest {
         linkGate.setShowRuxInFlowController(true)
 
         // Create a verificationStartedAccount with VerificationStarted status
+        // Use auth levels that don't meet minimum so account is VerificationStarted, not Verified
         val session = CONSUMER_SESSION.copy(
-            verificationSessions = listOf(VERIFICATION_STARTED_SESSION)
+            verificationSessions = listOf(VERIFICATION_STARTED_SESSION),
+            currentAuthenticationLevel = ConsumerSession.AuthenticationLevel.NotAuthenticated,
+            minimumAuthenticationLevel = ConsumerSession.AuthenticationLevel.OneFactorAuthentication,
         )
         val verificationStartedAccount = LinkAccount(consumerSession = session)
 

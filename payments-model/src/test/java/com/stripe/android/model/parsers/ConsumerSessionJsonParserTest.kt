@@ -52,6 +52,25 @@ class ConsumerSessionJsonParserTest {
     }
 
     @Test
+    fun `Parse consumer with authentication levels`() {
+        assertThat(
+            ConsumerSessionJsonParser().parse(ConsumerFixtures.CONSUMER_VERIFIED_WITH_AUTH_LEVEL_JSON)
+        ).isEqualTo(
+            ConsumerSession(
+                clientSecret = "12oBEhVjc21yKkFYNnhMVTlXbXdBQUFJRmEaJDUzNTFkNjNhLTZkNGMtND",
+                emailAddress = "test@stripe.com",
+                redactedPhoneNumber = "+1********56",
+                redactedFormattedPhoneNumber = "(***) *** **56",
+                unredactedPhoneNumber = null,
+                phoneNumberCountry = null,
+                verificationSessions = emptyList(),
+                currentAuthenticationLevel = ConsumerSession.AuthenticationLevel.OneFactorAuthentication,
+                minimumAuthenticationLevel = ConsumerSession.AuthenticationLevel.OneFactorAuthentication,
+            )
+        )
+    }
+
+    @Test
     fun `Parse consumer when signup started`() {
         assertThat(
             ConsumerSessionJsonParser().parse(ConsumerFixtures.CONSUMER_SIGNUP_STARTED_JSON)

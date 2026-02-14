@@ -68,7 +68,7 @@ class DefaultLinkAccountManagerTest {
                 TestFactory.EMAIL,
                 linkAuth = fakeLinkAuth
             ).accountStatus.first()
-        ).isEqualTo(AccountStatus.Verified(true, null))
+        ).isEqualTo(AccountStatus.Verified(consentPresentation = null, meetsMinimumAuthenticationLevel = true))
 
         assertThat(fakeLinkAuth.lookupCalls).hasSize(1)
         assertThat(fakeLinkAuth.lookupCalls[0].email).isEqualTo(TestFactory.EMAIL)
@@ -355,7 +355,10 @@ class DefaultLinkAccountManagerTest {
         assertThat(result.exceptionOrNull()).isEqualTo(
             AlreadyLoggedInLinkException(
                 email = TestFactory.EMAIL,
-                accountStatus = AccountStatus.Verified(true, null)
+                accountStatus = AccountStatus.Verified(
+                    consentPresentation = null,
+                    meetsMinimumAuthenticationLevel = true,
+                )
             )
         )
     }
@@ -963,7 +966,7 @@ class DefaultLinkAccountManagerTest {
         accountStatusFlowTest(
             customerEmail = TestFactory.CUSTOMER_EMAIL,
             allowUserEmailEdits = true,
-            expectedStatus = AccountStatus.Verified(true, null),
+            expectedStatus = AccountStatus.Verified(consentPresentation = null, meetsMinimumAuthenticationLevel = true),
             expectedLookupEmail = TestFactory.CUSTOMER_EMAIL
         )
 
@@ -972,7 +975,7 @@ class DefaultLinkAccountManagerTest {
         accountStatusFlowTest(
             customerEmail = TestFactory.CUSTOMER_EMAIL,
             allowUserEmailEdits = false,
-            expectedStatus = AccountStatus.Verified(true, null),
+            expectedStatus = AccountStatus.Verified(consentPresentation = null, meetsMinimumAuthenticationLevel = true),
             expectedLookupEmail = TestFactory.CUSTOMER_EMAIL
         )
 

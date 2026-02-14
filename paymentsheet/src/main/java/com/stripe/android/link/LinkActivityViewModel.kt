@@ -412,7 +412,7 @@ internal class LinkActivityViewModel @Inject constructor(
     ): ScreenState? {
         return when (linkLaunchMode) {
             is LinkLaunchMode.Authentication -> {
-                if (accountStatus.hasVerifiedSMSSession) {
+                if (accountStatus.meetsMinimumAuthenticationLevel) {
                     dismissWithResult(LinkActivityResult.Completed(linkAccountManager.linkAccountUpdate))
                     return null
                 }

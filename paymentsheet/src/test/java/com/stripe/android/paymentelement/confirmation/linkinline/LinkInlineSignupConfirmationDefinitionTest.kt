@@ -174,7 +174,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
 
     @Test
     fun `'action' should skip & return 'Launch' if input is sign in`() = test(
-        initialAccountStatus = AccountStatus.Verified(true, null),
+        initialAccountStatus = AccountStatus.Verified(consentPresentation = null),
     ) {
         val confirmationOption = createLinkInlineSignupConfirmationOption()
 
@@ -201,7 +201,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
     @Test
     fun `'action' should skip & return 'Launch' if failed to attach card`() = test(
         attachNewCardToAccountResult = Result.failure(IllegalStateException("Failed!")),
-        initialAccountStatus = AccountStatus.Verified(true, null),
+        initialAccountStatus = AccountStatus.Verified(consentPresentation = null),
     ) {
         val confirmationOption = createLinkInlineSignupConfirmationOption()
 
@@ -250,7 +250,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
         ),
         signInResult = Result.success(true),
         initialAccountStatus = AccountStatus.SignedOut,
-        accountStatusOnSignIn = AccountStatus.Verified(true, null),
+        accountStatusOnSignIn = AccountStatus.Verified(consentPresentation = null),
     ) {
         val confirmationOption = createLinkInlineSignupConfirmationOption()
 
@@ -461,7 +461,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                         originalParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                     )
                 ),
-                accountStatus = AccountStatus.Verified(true, null),
+                accountStatus = AccountStatus.Verified(consentPresentation = null),
                 signInResult = Result.success(true),
                 confirmationOption = confirmationOption,
             ) { launchAction ->
@@ -526,7 +526,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                 )
             ),
             signInResult = Result.success(true),
-            accountStatus = AccountStatus.Verified(true, null),
+            accountStatus = AccountStatus.Verified(consentPresentation = null),
             confirmationOption = confirmationOption,
         ) { launchAction ->
             val attachNewCardToAccountCall = coordinatorScenario.attachNewCardToAccountCalls.awaitItem()
@@ -580,7 +580,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
         attachNewCardToAccountResult = attachNewCardToAccountResult,
         signInResult = signInResult,
         initialAccountStatus = accountStatus,
-        accountStatusOnSignIn = AccountStatus.Verified(true, null),
+        accountStatusOnSignIn = AccountStatus.Verified(consentPresentation = null),
     ) {
         val action = definition.action(
             confirmationOption = confirmationOption,
@@ -641,8 +641,8 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
             )
         ),
         signInResult: Result<Boolean> = Result.success(true),
-        initialAccountStatus: AccountStatus = AccountStatus.Verified(true, null),
-        accountStatusOnSignIn: AccountStatus = AccountStatus.Verified(true, null),
+        initialAccountStatus: AccountStatus = AccountStatus.Verified(consentPresentation = null),
+        accountStatusOnSignIn: AccountStatus = AccountStatus.Verified(consentPresentation = null),
         hasUsedLink: Boolean = false,
         test: suspend Scenario.() -> Unit
     ) = runTest {
