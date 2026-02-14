@@ -84,6 +84,7 @@ import com.stripe.android.identity.networking.models.VerificationPageRequirement
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieCapturePage
 import com.stripe.android.identity.states.FaceDetectorTransitioner
+import com.stripe.android.identity.states.IDDetectorTransitioner
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.ui.IndividualCollectedStates
 import com.stripe.android.identity.utils.IdentityIO
@@ -472,9 +473,17 @@ internal class IdentityViewModel(
     ) {
         when (result.result) {
             is IDDetectorOutput.Legacy -> {
+                val transitioner = result.identityState.transitioner as? IDDetectorTransitioner
+
+                val bitmap = transitioner?.getBestFrameBitmap()
+                    ?: result.frame.cameraPreviewImage.image
+
+                val output = transitioner?.getBestLegacyOutput()
+                    ?: result.result
+
                 uploadLegacyIDDetectorOutput(
-                    result.frame.cameraPreviewImage.image,
-                    result.result,
+                    bitmap,
+                    output,
                     verificationPage
                 )
             }

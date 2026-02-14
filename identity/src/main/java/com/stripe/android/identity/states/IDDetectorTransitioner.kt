@@ -1,5 +1,7 @@
 package com.stripe.android.identity.states
 
+import android.graphics.Bitmap
+import android.os.SystemClock
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.identity.ml.AnalyzerInput
@@ -28,8 +30,6 @@ import kotlin.time.TimeSource
  * see [outputMatchesTargetType] for details.
  * * Then it checks the IoU score, if the score is below threshold, then stays at Found state and
  * reset the [Found.reachedStateAt] timer.
- * * Finally it checks since the time elapsed since [Found] is reached, if it passed
- * [timeRequired], then transitions to [Satisfied], otherwise stays in [Found].
  */
 internal class IDDetectorTransitioner(
     private val timeout: Duration,
@@ -42,6 +42,10 @@ internal class IDDetectorTransitioner(
 ) : IdentityScanStateTransitioner {
     private var previousBoundingBox: BoundingBox? = null
     private var unmatchedFrame = 0
+    private val bestFrameDetector = BestFrameDetector(
+        windowDurationMs = maxOf(timeRequired.toLong(), MIN_BEST_FRAME_WINDOW_MS)
+    )
+    private var bestLegacyOutput: IDDetectorOutput.Legacy? = null
 
     @VisibleForTesting
     var timeoutAt: ComparableTimeMark = TimeSource.Monotonic.markNow() + timeout
@@ -54,6 +58,8 @@ internal class IDDetectorTransitioner(
         previousBoundingBox = null
         unmatchedFrame = 0
         timeoutAt = TimeSource.Monotonic.markNow() + timeout
+        bestFrameDetector.reset()
+        bestLegacyOutput = null
         Log.d(TAG, "Reset! timeoutAt: $timeoutAt")
         return this
     }
@@ -143,83 +149,124 @@ internal class IDDetectorTransitioner(
             is IDDetectorOutput.Legacy -> {
                 transitionFromFoundLegacy(
                     foundState,
+                    analyzerInput,
                     analyzerOutput
                 )
             }
         }
     }
 
-    @Suppress("CyclomaticComplexMethod", "MagicNumber")
+    @Suppress("CyclomaticComplexMethod", "LongMethod", "MagicNumber")
     private fun transitionFromFoundLegacy(
         foundState: Found,
+        analyzerInput: AnalyzerInput,
         analyzerOutput: IDDetectorOutput.Legacy
-    ) = when {
-        foundState.isFromLegacyDetector != true -> Unsatisfied(
-            "Expecting Legacy IDDetectorOutput but received a Modern IDDetectorOutput",
-            foundState.type,
-            foundState.transitioner
-        )
+    ): IdentityScanState {
+        val nowTimestampMs = SystemClock.elapsedRealtime()
 
-        timeoutAt.hasPassedNow() -> {
-            IdentityScanState.TimeOut(foundState.type, foundState.transitioner)
-        }
+        return when {
+            foundState.isFromLegacyDetector != true -> Unsatisfied(
+                "Expecting Legacy IDDetectorOutput but received a Modern IDDetectorOutput",
+                foundState.type,
+                foundState.transitioner
+            )
 
-        !outputMatchesTargetType(analyzerOutput.category, foundState.type) -> Unsatisfied(
-            "Type ${analyzerOutput.category} doesn't match ${foundState.type}",
-            foundState.type,
-            foundState.transitioner
-        )
-
-        !iOUCheckPass(analyzerOutput.boundingBox) -> {
-            // reset timer of the foundState
-            foundState.reachedStateAt = TimeSource.Monotonic.markNow()
-            foundState
-        }
-
-        isBlurry(analyzerOutput.blurScore) -> {
-            // reset timer of the foundState and show blur feedback
-            foundState.reachedStateAt = TimeSource.Monotonic.markNow()
-            val feedbackThreshold = if (blurThreshold > 0f) blurThreshold * BLUR_FEEDBACK_RATIO else 0f
-            if (analyzerOutput.blurScore <= feedbackThreshold) {
-                foundState.withFeedback(
-                    com.stripe.android.identity.R.string.stripe_reduce_blur_2
-                )
-            } else {
-                // Clear blur feedback when it's only mildly blurry
-                foundState.withFeedback(null)
+            timeoutAt.hasPassedNow() -> {
+                Log.d(TAG, "Timeout reached during scanning")
+                IdentityScanState.TimeOut(foundState.type, foundState.transitioner)
             }
-        }
 
-        // Center gating: if the detected document is not centered, keep in Found and reset timer
-        !run {
-            val centerX = analyzerOutput.boundingBox.left + analyzerOutput.boundingBox.width / 2f
-            val centerY = analyzerOutput.boundingBox.top + analyzerOutput.boundingBox.height / 2f
-            centerX in (0.5f - CENTER_TOLERANCE)..(0.5f + CENTER_TOLERANCE) &&
-                centerY in (0.5f - CENTER_TOLERANCE)..(0.5f + CENTER_TOLERANCE)
-        } -> {
-            foundState.reachedStateAt = TimeSource.Monotonic.markNow()
-            foundState.withFeedback(
-                com.stripe.android.identity.R.string.stripe_move_id_to_center
-            )
-        }
+            // Once we have a good frame, wait for the 1s best-frame window to complete and then finish,
+            // even if subsequent frames are bad.
+            bestFrameDetector.hasBestFrame() && bestFrameDetector.isWindowExpired(nowTimestampMs) -> {
+                Satisfied(foundState.type, foundState.transitioner)
+            }
 
-        // Distance gating: if the detected document is too small or too large, keep in Found and reset timer
-        tooSmall(analyzerOutput.boundingBox) -> {
-            foundState.reachedStateAt = TimeSource.Monotonic.markNow()
-            foundState.withFeedback(
-                com.stripe.android.identity.R.string.stripe_move_closer
-            )
-        }
-        tooLarge(analyzerOutput.boundingBox) -> {
-            foundState.reachedStateAt = TimeSource.Monotonic.markNow()
-            foundState.withFeedback(
-                com.stripe.android.identity.R.string.stripe_move_farther
-            )
-        }
+            !outputMatchesTargetType(analyzerOutput.category, foundState.type) -> {
+                if (bestFrameDetector.hasBestFrame()) {
+                    // We already have a good candidate; keep waiting for window completion.
+                    foundState
+                } else {
+                    Unsatisfied(
+                        "Type ${analyzerOutput.category} doesn't match ${foundState.type}",
+                        foundState.type,
+                        foundState.transitioner
+                    )
+                }
+            }
 
-        moreResultsRequired(foundState) -> foundState
-        else -> {
-            Satisfied(foundState.type, foundState.transitioner)
+            isBlurry(analyzerOutput.blurScore) -> {
+                // reset timer of the foundState and show blur feedback
+                foundState.reachedStateAt = TimeSource.Monotonic.markNow()
+                val feedbackThreshold = if (blurThreshold > 0f) blurThreshold * BLUR_FEEDBACK_RATIO else 0f
+                if (analyzerOutput.blurScore <= feedbackThreshold) {
+                    foundState.withFeedback(
+                        com.stripe.android.identity.R.string.stripe_reduce_blur_2
+                    )
+                } else {
+                    // Clear blur feedback when it's only mildly blurry
+                    foundState.withFeedback(null)
+                }
+            }
+
+            // Center gating: if the detected document is not centered, keep in Found and reset timer
+            !run {
+                val centerX = analyzerOutput.boundingBox.left + analyzerOutput.boundingBox.width / 2f
+                val centerY = analyzerOutput.boundingBox.top + analyzerOutput.boundingBox.height / 2f
+                centerX in (0.5f - CENTER_TOLERANCE)..(0.5f + CENTER_TOLERANCE) &&
+                    centerY in (0.5f - CENTER_TOLERANCE)..(0.5f + CENTER_TOLERANCE)
+            } -> {
+                foundState.reachedStateAt = TimeSource.Monotonic.markNow()
+                foundState.withFeedback(
+                    com.stripe.android.identity.R.string.stripe_move_id_to_center
+                )
+            }
+
+            // Distance gating: if the detected document is too small or too large, keep in Found and reset timer
+            tooSmall(analyzerOutput.boundingBox) -> {
+                foundState.reachedStateAt = TimeSource.Monotonic.markNow()
+                foundState.withFeedback(
+                    com.stripe.android.identity.R.string.stripe_move_closer
+                )
+            }
+            tooLarge(analyzerOutput.boundingBox) -> {
+                foundState.reachedStateAt = TimeSource.Monotonic.markNow()
+                foundState.withFeedback(
+                    com.stripe.android.identity.R.string.stripe_move_farther
+                )
+            }
+
+            !iOUCheckPass(analyzerOutput.boundingBox) -> {
+                // reset timer of the foundState
+                foundState.reachedStateAt = TimeSource.Monotonic.markNow()
+                foundState
+            }
+
+            else -> {
+                // Only record frames whose category strictly matches the target.
+                // (outputMatchesTargetType can tolerate brief mismatches, but those should not become "best".)
+                if (!analyzerOutput.category.matchesScanType(foundState.type)) {
+                    return foundState
+                }
+
+                // Frame passed all checks, add it to best frame detector.
+                // The detector will start a fixed 1s window from the first accepted frame.
+                val frameBitmap = runCatching {
+                    analyzerInput.cameraPreviewImage.image
+                }.getOrNull() ?: analyzerOutput.croppedImage
+
+                val updatedBest = bestFrameDetector.addFrame(
+                    bitmap = frameBitmap,
+                    blurScore = analyzerOutput.blurScore,
+                    confidenceScore = analyzerOutput.resultScore,
+                    timestamp = nowTimestampMs
+                )
+                if (updatedBest) {
+                    bestLegacyOutput = analyzerOutput
+                }
+
+                foundState
+            }
         }
     }
 
@@ -309,8 +356,15 @@ internal class IDDetectorTransitioner(
         return blurScore <= blurThreshold
     }
 
-    private fun moreResultsRequired(foundState: Found): Boolean {
-        return foundState.reachedStateAt.elapsedNow() < timeRequired.milliseconds
+    /**
+     * Returns the best frame's bitmap, or null if no frames were captured.
+     */
+    fun getBestFrameBitmap(): Bitmap? {
+        return bestFrameDetector.getBestFrameBitmap()
+    }
+
+    fun getBestLegacyOutput(): IDDetectorOutput.Legacy? {
+        return bestLegacyOutput
     }
 
     private fun coverage(box: BoundingBox): Float {
@@ -358,12 +412,13 @@ internal class IDDetectorTransitioner(
     }
 
     internal companion object {
-        const val DEFAULT_TIME_REQUIRED = 500
         const val DEFAULT_IOU_THRESHOLD = 0.95f
+        const val DEFAULT_TIME_REQUIRED = 1000
         const val DEFAULT_ALLOWED_UNMATCHED_FRAME = 1
         const val DEFAULT_DISPLAY_SATISFIED_DURATION = 0
         const val DEFAULT_DISPLAY_UNSATISFIED_DURATION = 0
         const val DEFAULT_BLUR_THRESHOLD = 0f
+        const val MIN_BEST_FRAME_WINDOW_MS = 1000L
 
         // Only show blur feedback when blur is worse than this fraction of the gating threshold
         const val BLUR_FEEDBACK_RATIO = 0.85f
