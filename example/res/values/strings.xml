@@ -42,6 +42,7 @@
     <string name="swish_example">Swish</string>
     <string name="twint_example">Twint</string>
     <string name="mobilepay_example">MobilePay</string>
+    <string name="allow_only_visa">Allow only visa</string>
     <string name="card_brands">Card Brands</string>
     <string name="card_brands_hint">Card number</string>
     <string name="possible_card_brands">Possible Card Brands</string>
