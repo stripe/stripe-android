@@ -3,6 +3,8 @@ package com.stripe.android.common.taptoadd.ui
 import androidx.compose.material.darkColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import com.stripe.android.paymentsheet.ui.PrimaryButtonColors
+import com.stripe.android.paymentsheet.ui.PrimaryButtonTheme
 import com.stripe.android.uicore.StripeColors
 import com.stripe.android.uicore.StripeTheme
 
@@ -13,12 +15,21 @@ internal fun TapToAddTheme(
     StripeTheme(
         colors = TapToAddThemeDefaults.colors,
     ) {
-        content()
+        PrimaryButtonTheme(
+            colors = TapToAddThemeDefaults.primaryButtonColors,
+        ) {
+            content()
+        }
     }
 }
 
 private object TapToAddThemeDefaults {
     private val componentBorderColor = Color(0xFF48484A)
+
+    val primaryButtonColors = PrimaryButtonColors(
+        background = Color.White,
+        onBackground = Color.Black,
+    )
 
     val colors = StripeColors(
         component = Color.Black,

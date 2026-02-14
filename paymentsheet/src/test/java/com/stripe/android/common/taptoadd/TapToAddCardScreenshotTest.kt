@@ -3,13 +3,13 @@ package com.stripe.android.common.taptoadd
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.stripe.android.common.taptoadd.ui.TapToAddCardLayout
+import com.stripe.android.common.taptoadd.ui.TapToAddCard
 import com.stripe.android.model.CardBrand
 import com.stripe.android.screenshottesting.PaparazziRule
 import org.junit.Rule
 import org.junit.Test
 
-class TapToAddCardLayoutScreenshotTest {
+class TapToAddCardScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(
         boxModifier = Modifier.padding(10.dp),
@@ -18,7 +18,7 @@ class TapToAddCardLayoutScreenshotTest {
     @Test
     fun visa() {
         paparazziRule.snapshot {
-            TapToAddCardLayout(
+            TapToAddCard(
                 cardBrand = CardBrand.Visa,
                 last4 = "4242"
             )
@@ -28,7 +28,7 @@ class TapToAddCardLayoutScreenshotTest {
     @Test
     fun mastercard() {
         paparazziRule.snapshot {
-            TapToAddCardLayout(
+            TapToAddCard(
                 cardBrand = CardBrand.MasterCard,
                 last4 = "4242"
             )
@@ -38,7 +38,7 @@ class TapToAddCardLayoutScreenshotTest {
     @Test
     fun discover() {
         paparazziRule.snapshot {
-            TapToAddCardLayout(
+            TapToAddCard(
                 cardBrand = CardBrand.Discover,
                 last4 = "4242"
             )
@@ -48,7 +48,7 @@ class TapToAddCardLayoutScreenshotTest {
     @Test
     fun amex() {
         paparazziRule.snapshot {
-            TapToAddCardLayout(
+            TapToAddCard(
                 cardBrand = CardBrand.AmericanExpress,
                 last4 = "4242"
             )
@@ -58,7 +58,7 @@ class TapToAddCardLayoutScreenshotTest {
     @Test
     fun jcb() {
         paparazziRule.snapshot {
-            TapToAddCardLayout(
+            TapToAddCard(
                 cardBrand = CardBrand.JCB,
                 last4 = "4242"
             )

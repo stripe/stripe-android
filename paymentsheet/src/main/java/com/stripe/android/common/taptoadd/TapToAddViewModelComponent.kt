@@ -9,8 +9,10 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.common.taptoadd.ui.DefaultTapToAddCardAddedInteractor
 import com.stripe.android.common.taptoadd.ui.DefaultTapToAddCollectingInteractor
+import com.stripe.android.common.taptoadd.ui.DefaultTapToAddConfirmationInteractor
 import com.stripe.android.common.taptoadd.ui.TapToAddCardAddedInteractor
 import com.stripe.android.common.taptoadd.ui.TapToAddCollectingInteractor
+import com.stripe.android.common.taptoadd.ui.TapToAddConfirmationInteractor
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -64,6 +66,7 @@ internal interface TapToAddViewModelComponent {
     interface Factory {
         fun build(
             @BindsInstance paymentMethodMetadata: PaymentMethodMetadata,
+            @BindsInstance tapToAddMode: TapToAddMode,
             @BindsInstance
             @PaymentElementCallbackIdentifier
             paymentElementCallbackIdentifier: String,
@@ -104,6 +107,11 @@ internal interface TapToAddViewModelModule {
     fun bindsTapToAddCardAddedInteractorFactory(
         tapToAddCardAddedInteractorFactory: DefaultTapToAddCardAddedInteractor.Factory
     ): TapToAddCardAddedInteractor.Factory
+
+    @Binds
+    fun bindsTapToAddConfirmationInteractorFactory(
+        tapToAddConfirmationInteractorFactory: DefaultTapToAddConfirmationInteractor.Factory
+    ): TapToAddConfirmationInteractor.Factory
 
     companion object {
         @Provides
