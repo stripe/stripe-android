@@ -290,7 +290,8 @@ class OnrampInteractorTest {
                 )
             },
             label = "Visa",
-            sublabel = "•••• 4242"
+            sublabel = "•••• 4242",
+            type = LinkController.PaymentMethodType.Card
         )
         val mockState = LinkController.State(
             internalLinkAccount = null,

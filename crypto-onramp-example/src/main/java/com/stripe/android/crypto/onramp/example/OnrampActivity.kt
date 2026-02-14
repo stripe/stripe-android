@@ -206,7 +206,6 @@ internal class OnrampActivity : ComponentActivity() {
                                 onrampPresenter.verifyIdentity()
                             },
                             onCollectPayment = { type ->
-                                viewModel.updateSelectedPaymentMethod(type)
                                 onrampPresenter.collectPaymentMethod(type)
                             },
                             onCreatePaymentToken = {
@@ -488,7 +487,6 @@ internal fun OnrampScreen(
                     email = uiState.email,
                     consentedLinkAuthIntentIds = uiState.consentedLinkAuthIntentIds,
                     onrampSessionResponse = uiState.onrampSession,
-                    selectedPaymentType = uiState.selectedPaymentType,
                     selectedSettlementSpeed = uiState.settlementSpeed,
                     selectedPaymentData = uiState.selectedPaymentData,
                     onAuthenticate = onAuthenticateUser,
@@ -714,7 +712,6 @@ private fun AuthenticatedOperationsScreen(
     consentedLinkAuthIntentIds: List<String>,
     onrampSessionResponse: OnrampSessionResponse?,
     selectedPaymentData: PaymentMethodDisplayData?,
-    selectedPaymentType: PaymentMethodType?,
     selectedSettlementSpeed: SettlementSpeed?,
     onAuthenticate: (oauthScopes: String) -> Unit,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
@@ -799,7 +796,7 @@ private fun AuthenticatedOperationsScreen(
         }
 
         selectedPaymentData?.let {
-            if (selectedPaymentType == PaymentMethodType.BankAccount) {
+            if (it.type == PaymentMethodDisplayData.Type.BankAccount) {
                 Text(
                     text = "Settlement Speed",
                     fontWeight = FontWeight.SemiBold,
