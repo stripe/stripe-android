@@ -201,6 +201,7 @@
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Col·loqueu la cara al centre del marc.</string>
   <!-- Instructional text when the document is too blurry -->
+  <string name="stripe_reduce_blur">El document d\'identitat no està enfocat</string>
   <string name="stripe_reduce_blur_2">La imatge és borrosa. Mantingueu el telèfon ferm i torneu-ho a provar.</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Els detalls no es veuen bé</string>

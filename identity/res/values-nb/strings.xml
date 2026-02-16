@@ -201,6 +201,7 @@
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Plasser ansiktet midt i bildet.</string>
   <!-- Instructional text when the document is too blurry -->
+  <string name="stripe_reduce_blur">ID-en er ikke i fokus</string>
   <string name="stripe_reduce_blur_2">Bildet er uklart. Hold telefonen din stødig og prøv på nytt.</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Detaljer er ikke synlige</string>

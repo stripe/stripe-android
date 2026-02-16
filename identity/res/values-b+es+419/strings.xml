@@ -201,6 +201,7 @@
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Coloca la cara en el centro del recuadro.</string>
   <!-- Instructional text when the document is too blurry -->
+  <string name="stripe_reduce_blur">El documento de identidad no está centrado</string>
   <string name="stripe_reduce_blur_2">La imagen está borrosa. Sujeta el teléfono firme e inténtalo de nuevo.</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">No se ven los datos</string>
