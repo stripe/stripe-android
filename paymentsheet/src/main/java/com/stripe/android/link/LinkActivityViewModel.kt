@@ -92,7 +92,7 @@ internal class LinkActivityViewModel @Inject constructor(
 
     val navigationFlow = navigationManager.navigationFlow
 
-    private val _linkScreenState = MutableStateFlow<ScreenState>(ScreenState.Loading)
+    private val _linkScreenState = MutableStateFlow<ScreenState>(ScreenState.FullScreen(LinkScreen.Loading))
     val linkScreenState: StateFlow<ScreenState> = _linkScreenState
 
     val linkAccount: LinkAccount?
@@ -562,7 +562,6 @@ internal class LinkActivityViewModel @Inject constructor(
 internal sealed interface ScreenState {
     data class VerificationDialog(val linkAccount: LinkAccount) : ScreenState
     data class FullScreen(val initialDestination: LinkScreen) : ScreenState
-    data object Loading : ScreenState
 }
 
 internal class NoArgsException : IllegalArgumentException("NativeLinkArgs not found")
