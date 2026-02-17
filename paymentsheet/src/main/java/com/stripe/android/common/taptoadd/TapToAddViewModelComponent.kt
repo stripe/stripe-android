@@ -22,15 +22,24 @@ import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
+import com.stripe.android.core.utils.RealUserFacingLogger
+import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.networking.PaymentElementRequestSurfaceModule
+import com.stripe.android.paymentelement.AnalyticEventCallback
+import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
+import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.ConfirmationHandlerModule
 import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmationModule
+import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
@@ -53,6 +62,8 @@ import javax.inject.Singleton
         CoroutineContextModule::class,
         ConfirmationHandlerModule::class,
         DefaultConfirmationModule::class,
+        DefaultIntentConfirmationModule::class,
+        PaymentElementRequestSurfaceModule::class,
         TapToAddViewModelModule::class,
         TapToAddModule::class,
     ]
@@ -94,6 +105,11 @@ internal interface TapToAddViewModelModule {
     ): PrefsRepository.Factory
 
     @Binds
+    fun bindsUserFacingLogger(
+        userFacingLogger: RealUserFacingLogger
+    ): UserFacingLogger
+
+    @Binds
     fun bindsAnalyticsRequestFactory(
         paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory
     ): AnalyticsRequestFactory
@@ -117,6 +133,16 @@ internal interface TapToAddViewModelModule {
         @Provides
         @Named(ENABLE_LOGGING)
         fun provideEnabledLogging(): Boolean = BuildConfig.DEBUG
+
+        @Provides
+        @Singleton
+        @Named(ALLOWS_MANUAL_CONFIRMATION)
+        fun provideAllowsManualConfirmation() = true
+
+        @Provides
+        @Singleton
+        @Named(STATUS_BAR_COLOR)
+        fun providesStatusBarColor(): Int? = null
 
         @Provides
         fun providesContext(application: Application): Context {
@@ -161,6 +187,14 @@ internal interface TapToAddViewModelModule {
         fun provideStripeAccountId(
             paymentConfiguration: Provider<PaymentConfiguration>
         ): () -> String? = { paymentConfiguration.get().stripeAccountId }
+
+        @OptIn(ExperimentalAnalyticEventCallbackApi::class)
+        @Provides
+        fun providesAnalyticEventCallback(
+            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
+        ): AnalyticEventCallback? {
+            return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.analyticEventCallback
+        }
     }
 }
 
