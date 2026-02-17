@@ -215,7 +215,7 @@ internal class PaymentOptionsViewModel(
 
     private fun walletsAllowedInHeader(paymentMethodMetadata: PaymentMethodMetadata): List<WalletType> {
         val showsDirectForm = paymentMethodMetadata.supportedPaymentMethodTypes().size == 1 &&
-            this@PaymentOptionsViewModel.customerStateHolder.paymentMethods.value.isEmpty()
+            customerStateHolder.paymentMethods.value.isEmpty()
         return if (showsDirectForm) {
             // Direct to form: show wallets in header
             WalletType.entries
@@ -317,7 +317,7 @@ internal class PaymentOptionsViewModel(
                             selectedPayment = result.selectedPayment,
                             shippingAddress = result.shippingAddress,
                         ),
-                        paymentMethods = this@PaymentOptionsViewModel.customerStateHolder.paymentMethods.value
+                        paymentMethods = customerStateHolder.paymentMethods.value
                     )
                 )
             }
@@ -338,7 +338,7 @@ internal class PaymentOptionsViewModel(
                 linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                 mostRecentError = null,
                 paymentSelection = determinePaymentSelectionUponCancel(),
-                paymentMethods = this@PaymentOptionsViewModel.customerStateHolder.paymentMethods.value,
+                paymentMethods = customerStateHolder.paymentMethods.value,
             )
         )
     }
@@ -354,7 +354,7 @@ internal class PaymentOptionsViewModel(
     }
 
     private fun PaymentSelection.Saved.takeIfStillValid(): PaymentSelection.Saved? {
-        val paymentMethods = this@PaymentOptionsViewModel.customerStateHolder.paymentMethods.value
+        val paymentMethods = customerStateHolder.paymentMethods.value
         val paymentMethod = paymentMethods.firstOrNull { it.id == paymentMethod.id }
         return paymentMethod?.let {
             this.copy(paymentMethod = it)
@@ -388,7 +388,7 @@ internal class PaymentOptionsViewModel(
                     PaymentOptionsActivityResult.Succeeded(
                         linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                         paymentSelection = paymentSelection.withLinkDetails(),
-                        paymentMethods = this@PaymentOptionsViewModel.customerStateHolder.paymentMethods.value
+                        paymentMethods = customerStateHolder.paymentMethods.value
                     )
                 )
             }
