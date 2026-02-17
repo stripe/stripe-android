@@ -209,8 +209,7 @@ internal class OnrampActivity : ComponentActivity() {
                             onStartVerification = {
                                 onrampPresenter.verifyIdentity()
                             },
-                            onCollectPayment = { selection ->
-                                viewModel.updateSelectedPaymentMethod(selection.type)
+                            onCollectPayment = { type ->
                                 onrampPresenter.collectPaymentMethod(selection)
                             },
                             onCreatePaymentToken = {
@@ -492,7 +491,6 @@ internal fun OnrampScreen(
                     email = uiState.email,
                     consentedLinkAuthIntentIds = uiState.consentedLinkAuthIntentIds,
                     onrampSessionResponse = uiState.onrampSession,
-                    selectedPaymentType = uiState.selectedPaymentType,
                     selectedSettlementSpeed = uiState.settlementSpeed,
                     selectedPaymentData = uiState.selectedPaymentData,
                     googlePayIsReady = uiState.googlePayIsReady,
@@ -719,7 +717,6 @@ private fun AuthenticatedOperationsScreen(
     consentedLinkAuthIntentIds: List<String>,
     onrampSessionResponse: OnrampSessionResponse?,
     selectedPaymentData: PaymentMethodDisplayData?,
-    selectedPaymentType: PaymentMethodType?,
     selectedSettlementSpeed: SettlementSpeed?,
     googlePayIsReady: Boolean,
     onAuthenticate: (oauthScopes: String) -> Unit,
@@ -805,29 +802,32 @@ private fun AuthenticatedOperationsScreen(
         }
 
         selectedPaymentData?.let {
-            if (selectedPaymentType == PaymentMethodType.BankAccount) {
-                Text(
-                    text = "Settlement Speed",
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
+            when (it.type) {
+                PaymentMethodDisplayData.Type.Card -> { }
+                PaymentMethodDisplayData.Type.BankAccount -> {
+                    Text(
+                        text = "Settlement Speed",
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
 
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.padding(bottom = 16.dp)
-                ) {
-                    SettlementSpeed.entries.forEach { speed ->
-                        val isSelected = selectedSettlementSpeed == speed
-                        Box(
-                            modifier = Modifier
-                                .background(if (isSelected) MaterialTheme.colors.primary else Color.LightGray)
-                                .clickable { onSelectSettlementSpeed(speed) }
-                                .padding(horizontal = 16.dp, vertical = 8.dp)
-                        ) {
-                            Text(
-                                text = speed.name.lowercase().replaceFirstChar { it.uppercase() },
-                                color = if (isSelected) Color.White else Color.Black
-                            )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    ) {
+                        SettlementSpeed.entries.forEach { speed ->
+                            val isSelected = selectedSettlementSpeed == speed
+                            Box(
+                                modifier = Modifier
+                                    .background(if (isSelected) MaterialTheme.colors.primary else Color.LightGray)
+                                    .clickable { onSelectSettlementSpeed(speed) }
+                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                            ) {
+                                Text(
+                                    text = speed.name.lowercase().replaceFirstChar { it.uppercase() },
+                                    color = if (isSelected) Color.White else Color.Black
+                                )
+                            }
                         }
                     }
                 }
