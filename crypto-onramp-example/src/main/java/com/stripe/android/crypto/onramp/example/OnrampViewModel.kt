@@ -570,7 +570,7 @@ internal class OnrampViewModel(
             PaymentMethodDisplayData.Type.BankAccount -> {
                 currentState.settlementSpeed
             }
-            PaymentMethodDisplayData.Type.Card, null -> {
+            PaymentMethodDisplayData.Type.Card, PaymentMethodDisplayData.Type.GooglePay, null -> {
                 SettlementSpeed.INSTANT
             }
         }

@@ -604,7 +604,8 @@ internal class OnrampInteractor @Inject constructor(
                         )!!
                     },
                     label = "Google Pay",
-                    sublabel = result.paymentMethod.card?.last4
+                    sublabel = result.paymentMethod.card?.last4,
+                    type = PaymentMethodDisplayData.Type.GooglePay
                 )
             )
         }

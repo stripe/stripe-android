@@ -209,7 +209,7 @@ internal class OnrampActivity : ComponentActivity() {
                             onStartVerification = {
                                 onrampPresenter.verifyIdentity()
                             },
-                            onCollectPayment = { type ->
+                            onCollectPayment = { selection ->
                                 onrampPresenter.collectPaymentMethod(selection)
                             },
                             onCreatePaymentToken = {
@@ -803,7 +803,7 @@ private fun AuthenticatedOperationsScreen(
 
         selectedPaymentData?.let {
             when (it.type) {
-                PaymentMethodDisplayData.Type.Card -> { }
+                PaymentMethodDisplayData.Type.Card, PaymentMethodDisplayData.Type.GooglePay -> { }
                 PaymentMethodDisplayData.Type.BankAccount -> {
                     Text(
                         text = "Settlement Speed",
