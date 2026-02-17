@@ -29,13 +29,18 @@ internal class DefaultTapToAddCardAddedInteractor(
 
     class Factory @Inject constructor(
         private val navigator: Provider<TapToAddNavigator>,
+        private val confirmationInteractorFactory: TapToAddConfirmationInteractor.Factory,
     ) : TapToAddCardAddedInteractor.Factory {
         override fun create(paymentMethod: PaymentMethod): TapToAddCardAddedInteractor {
             return DefaultTapToAddCardAddedInteractor(
                 paymentMethod = paymentMethod,
                 onShown = {
                     navigator.get().performAction(
-                        action = TapToAddNavigator.Action.Close
+                        action = TapToAddNavigator.Action.NavigateTo(
+                            screen = TapToAddNavigator.Screen.Confirmation(
+                                interactor = confirmationInteractorFactory.create(paymentMethod),
+                            )
+                        )
                     )
                 },
             )
