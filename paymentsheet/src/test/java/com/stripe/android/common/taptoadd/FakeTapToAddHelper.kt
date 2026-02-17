@@ -10,14 +10,18 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 
-internal class FakeTapToAddHelper private constructor(
+internal class FakeTapToAddHelper(
     override val hasPreviouslyAttemptedCollection: Boolean = false,
 ) : TapToAddHelper {
-    private val registerCalls = Turbine<RegisterCall>()
-    private val collectCalls = Turbine<PaymentMethodMetadata>()
+    val registerCalls = Turbine<RegisterCall>()
+    val collectCalls = Turbine<PaymentMethodMetadata>()
 
-    override val result: SharedFlow<TapToAddResult> =
-        MutableSharedFlow<TapToAddResult>().asSharedFlow()
+    private val _result = MutableSharedFlow<TapToAddResult>()
+    override val result: SharedFlow<TapToAddResult> = _result.asSharedFlow()
+
+    suspend fun emitResult(result: TapToAddResult) {
+        _result.emit(result)
+    }
 
     override fun register(
         activityResultCaller: ActivityResultCaller,
@@ -30,6 +34,11 @@ internal class FakeTapToAddHelper private constructor(
         collectCalls.add(paymentMethodMetadata)
     }
 
+    fun validate() {
+        registerCalls.ensureAllEventsConsumed()
+        collectCalls.ensureAllEventsConsumed()
+    }
+
     class RegisterCall(
         val activityResultCaller: ActivityResultCaller,
         val lifecycleOwner: LifecycleOwner,
@@ -37,20 +46,25 @@ internal class FakeTapToAddHelper private constructor(
 
     class Scenario(
         val collectCalls: ReceiveTurbine<PaymentMethodMetadata>,
-        val helper: TapToAddHelper,
+        val helper: FakeTapToAddHelper,
     )
 
     class Factory private constructor() : TapToAddHelper.Factory {
         private val createCalls = Turbine<CreateCall>()
+        private var createdHelper: FakeTapToAddHelper? = null
 
         override fun create(
             coroutineScope: CoroutineScope,
             tapToAddMode: TapToAddMode
         ): TapToAddHelper {
+            val helper = FakeTapToAddHelper()
             createCalls.add(CreateCall(coroutineScope, tapToAddMode))
 
-            return FakeTapToAddHelper.noOp()
+            createdHelper = helper
+            return helper
         }
+
+        fun getCreatedHelper(): FakeTapToAddHelper? = createdHelper
 
         class CreateCall(
             val coroutineScope: CoroutineScope,
@@ -59,7 +73,7 @@ internal class FakeTapToAddHelper private constructor(
 
         class Scenario(
             val createCalls: ReceiveTurbine<CreateCall>,
-            val tapToAddHelperFactory: TapToAddHelper.Factory,
+            val tapToAddHelperFactory: Factory,
         )
 
         companion object {
@@ -94,8 +108,7 @@ internal class FakeTapToAddHelper private constructor(
                 )
             )
 
-            helper.collectCalls.ensureAllEventsConsumed()
-            helper.registerCalls.ensureAllEventsConsumed()
+            helper.validate()
         }
 
         fun noOp() = FakeTapToAddHelper()

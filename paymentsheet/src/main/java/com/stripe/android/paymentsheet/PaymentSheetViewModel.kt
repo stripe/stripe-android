@@ -16,6 +16,8 @@ import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.common.taptoadd.TapToAddHelper
+import com.stripe.android.common.taptoadd.TapToAddMode
+import com.stripe.android.common.taptoadd.TapToAddResult
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
@@ -101,7 +103,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     linkHandler = linkHandler,
     cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
     isCompleteFlow = true,
-    tapToAddHelperFactory = tapToAddHelperFactory,
     mode = mode,
 ) {
 
@@ -120,6 +121,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             checkout()
         },
         onDisabledClick = ::onDisabledClick,
+    )
+
+    override val tapToAddHelper = tapToAddHelperFactory.create(
+        coroutineScope = viewModelScope,
+        tapToAddMode = TapToAddMode.Complete,
     )
 
     private val _paymentSheetResult = MutableSharedFlow<PaymentSheetResult>(replay = 1)
@@ -231,6 +237,24 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
         viewModelScope.launch(workContext) {
             loadPaymentSheetState()
+        }
+
+        viewModelScope.launch {
+            tapToAddHelper.result.collect { result ->
+                when (result) {
+                    is TapToAddResult.Canceled -> {
+                        // Do nothing.
+                    }
+                    TapToAddResult.Complete -> {
+                        _paymentSheetResult.tryEmit(PaymentSheetResult.Completed())
+                    }
+                    is TapToAddResult.Continue -> {
+                        errorReporter.report(
+                            ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_PAYMENT_SHEET_RECEIVED_CONTINUE_RESULT,
+                        )
+                    }
+                }
+            }
         }
     }
 

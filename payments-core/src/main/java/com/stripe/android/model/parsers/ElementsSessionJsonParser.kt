@@ -183,31 +183,6 @@ internal class ElementsSessionJsonParser(
                     }
                 }
             }
-            is ElementsSessionParams.CheckoutSessionType -> {
-                val deferredIntentParams = params.deferredIntentParams
-                if (deferredIntentParams == null) {
-                    null
-                } else {
-                    when (deferredIntentParams.mode) {
-                        is DeferredIntentParams.Mode.Payment -> {
-                            DeferredPaymentIntentJsonParser(
-                                elementsSessionId = elementsSessionId,
-                                paymentMode = deferredIntentParams.mode,
-                                isLiveMode = isLiveMode,
-                                timeProvider = timeProvider
-                            ).parse(json)
-                        }
-                        is DeferredIntentParams.Mode.Setup -> {
-                            DeferredSetupIntentJsonParser(
-                                elementsSessionId = elementsSessionId,
-                                setupMode = deferredIntentParams.mode,
-                                isLiveMode = isLiveMode,
-                                timeProvider = timeProvider
-                            ).parse(json)
-                        }
-                    }
-                }
-            }
         }
     }
 

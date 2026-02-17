@@ -16,6 +16,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.customersheet.FakeStripeRepository
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.googlepaylauncher.injection.GooglePayRepositoryFactory
@@ -963,7 +964,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `Considers Link logged in if the account is verified`() = runScenario {
-        val loader = createPaymentElementLoader(linkAccountState = AccountStatus.Verified(true, null))
+        val loader = createPaymentElementLoader(linkAccountState = AccountStatus.Verified(consentPresentation = null))
 
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
@@ -1354,7 +1355,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `Disables Link inline signup if user already has an verified account`() = runScenario {
         val loader = createPaymentElementLoader(
-            linkAccountState = AccountStatus.Verified(true, null),
+            linkAccountState = AccountStatus.Verified(consentPresentation = null),
         )
 
         val result = loader.load(
@@ -4321,6 +4322,7 @@ internal class DefaultPaymentElementLoaderTest {
         val testDispatcher = UnconfinedTestDispatcher()
         val eventReporter = FakeLoadingEventReporter()
         val prefsRepository = FakePrefsRepository()
+        val stripeRepository = FakeStripeRepository()
 
         @Suppress("UNCHECKED_CAST")
         val paymentMethodTypeCaptor = ArgumentCaptor.forClass(List::class.java)
@@ -4330,6 +4332,7 @@ internal class DefaultPaymentElementLoaderTest {
             testDispatcher = testDispatcher,
             eventReporter = eventReporter,
             prefsRepository = prefsRepository,
+            stripeRepository = stripeRepository,
             paymentMethodTypeCaptor = paymentMethodTypeCaptor,
         ).apply {
             runTest {
@@ -4348,6 +4351,7 @@ internal class DefaultPaymentElementLoaderTest {
         val testDispatcher: TestDispatcher,
         val eventReporter: FakeLoadingEventReporter,
         val prefsRepository: FakePrefsRepository,
+        val stripeRepository: FakeStripeRepository,
         val paymentMethodTypeCaptor: ArgumentCaptor<List<PaymentMethod.Type>>,
     )
 
@@ -4355,7 +4359,7 @@ internal class DefaultPaymentElementLoaderTest {
         isGooglePayReady: Boolean = true,
         stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         customerRepo: CustomerRepository = FakeCustomerRepository(paymentMethods = PAYMENT_METHODS),
-        linkAccountState: AccountStatus = AccountStatus.Verified(true, null),
+        linkAccountState: AccountStatus = AccountStatus.Verified(consentPresentation = null),
         error: Throwable? = null,
         linkSettings: ElementsSession.LinkSettings? = null,
         linkGate: LinkGate = FakeLinkGate(),
@@ -4402,6 +4406,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         return DefaultPaymentElementLoader(
+            stripeRepository = stripeRepository,
             prefsRepositoryFactory = { prefsRepository },
             googlePayRepositoryFactory = object : GooglePayRepositoryFactory {
                 override fun invoke(

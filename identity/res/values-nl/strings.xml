@@ -92,8 +92,6 @@
   <string name="stripe_doc_front_warmup_title">Bereid je voor om je foto-ID te scannen</string>
   <!-- Label of the driver's license option for document type selection -->
   <string name="stripe_driver_license">Rijbewijs</string>
-  <!-- Text for error labels -->
-  <string name="stripe_error">Fout</string>
   <!-- Button that opens file upload screen -->
   <string name="stripe_file_upload">Bestand uploaden</string>
   <!-- Instructions for uploading images of drivers license -->
@@ -203,6 +201,7 @@
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Houd je gezicht in het midden van het frame.</string>
   <!-- Instructional text when the document is too blurry -->
+  <string name="stripe_reduce_blur">Identiteitsbewijs niet in focus</string>
   <string name="stripe_reduce_blur_2">Het beeld is wazig. Houd je telefoon stil en probeer het opnieuw.</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Details niet zichtbaar</string>

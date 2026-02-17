@@ -85,6 +85,8 @@ internal object TestFactory {
         verificationSessions = listOf(VERIFIED_SESSION),
         redactedPhoneNumber = "+1********42",
         redactedFormattedPhoneNumber = "+1 (***) ***-**42",
+        currentAuthenticationLevel = ConsumerSession.AuthenticationLevel.OneFactorAuthentication,
+        minimumAuthenticationLevel = ConsumerSession.AuthenticationLevel.OneFactorAuthentication,
     )
 
     val CONSUMER_SESSION_LOOKUP = ConsumerSessionLookup(

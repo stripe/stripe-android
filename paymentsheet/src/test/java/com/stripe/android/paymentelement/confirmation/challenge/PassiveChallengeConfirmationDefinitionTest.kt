@@ -525,12 +525,16 @@ internal class PassiveChallengeConfirmationDefinitionTest {
         val definition = createPassiveChallengeConfirmationDefinition()
         val testToken = "test_token"
         val attestationToken = "attestation_token"
+        val appId = "com.stripe.test"
 
         val result = definition.toResult(
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.copy(
                 createParams = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.createParams.copy(
                     radarOptions = RadarOptions(
-                        androidVerificationObject = AndroidVerificationObject(attestationToken),
+                        androidVerificationObject = AndroidVerificationObject(
+                            androidVerificationToken = attestationToken,
+                            appId = appId
+                        ),
                         hCaptchaToken = null
                     )
                 )
@@ -546,7 +550,10 @@ internal class PassiveChallengeConfirmationDefinitionTest {
         val expectedCreateParams = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.createParams.copy(
             radarOptions = RadarOptions(
                 hCaptchaToken = testToken,
-                androidVerificationObject = AndroidVerificationObject(attestationToken)
+                androidVerificationObject = AndroidVerificationObject(
+                    androidVerificationToken = attestationToken,
+                    appId = appId
+                )
             )
         )
         assertThat(option.createParams).isEqualTo(expectedCreateParams)

@@ -13,6 +13,7 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddMode
+import com.stripe.android.common.taptoadd.TapToAddResult
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
@@ -43,6 +44,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_SELECTION
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentelement.WalletButtonsPreview
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.addresselement.AutocompleteContract
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -60,6 +62,7 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.DummyActivityResultCaller
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -1156,6 +1159,62 @@ internal class PaymentOptionsViewModelTest {
             }
         }
 
+    @Test
+    fun `Tap to add helper is created with mode continue`() = runTest {
+        FakeTapToAddHelper.Factory.test {
+            createViewModel(
+                tapToAddHelperFactory = tapToAddHelperFactory,
+            )
+
+            val createCall = createCalls.awaitItem()
+            assertThat(createCall.tapToAddMode).isEqualTo(TapToAddMode.Continue)
+        }
+    }
+
+    @Test
+    fun `When tap to add result is Continue, activity completes with the selection chosen`() = runTest {
+        FakeTapToAddHelper.Factory.test {
+            val viewModel = createViewModel(
+                tapToAddHelperFactory = tapToAddHelperFactory,
+            )
+
+            createCalls.awaitItem()
+            val selection = SELECTION_SAVED_PAYMENT_METHOD
+
+            viewModel.paymentOptionsActivityResult.test {
+                tapToAddHelperFactory.getCreatedHelper()?.emitResult(
+                    TapToAddResult.Continue(selection)
+                )
+
+                val result = awaitItem()
+                assertThat(result).isInstanceOf<PaymentOptionsActivityResult.Succeeded>()
+
+                val succeededResult = result as PaymentOptionsActivityResult.Succeeded
+                assertThat(succeededResult.paymentSelection).isEqualTo(selection)
+            }
+        }
+    }
+
+    @Test
+    fun `When tap to add result is Complete, error is reported`() = runTest {
+        val errorReporter = FakeErrorReporter()
+
+        FakeTapToAddHelper.Factory.test {
+            createViewModel(
+                tapToAddHelperFactory = tapToAddHelperFactory,
+                errorReporter = errorReporter,
+            )
+
+            createCalls.awaitItem()
+
+            tapToAddHelperFactory.getCreatedHelper()?.emitResult(TapToAddResult.Complete)
+
+            assertThat(errorReporter.getLoggedErrors()).containsExactly(
+                ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_FLOW_CONTROLLER_RECEIVED_COMPLETE_RESULT.eventName
+            )
+        }
+    }
+
     @OptIn(WalletButtonsPreview::class)
     private fun testWalletVisibility(
         linkState: LinkState?,
@@ -1281,7 +1340,7 @@ internal class PaymentOptionsViewModelTest {
     private fun createLinkViewModel(): PaymentOptionsViewModel {
         val linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(
             attachNewCardToAccountResult = Result.success(LinkTestUtils.LINK_SAVED_PAYMENT_DETAILS),
-            accountStatus = AccountStatus.Verified(true, null),
+            accountStatus = AccountStatus.Verified(consentPresentation = null),
         )
 
         return createViewModel(
@@ -1300,6 +1359,7 @@ internal class PaymentOptionsViewModelTest {
         linkConfigurationCoordinator: LinkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
         workContext: CoroutineContext = testDispatcher,
         tapToAddHelperFactory: TapToAddHelper.Factory = FakeTapToAddHelper.Factory.noOp(),
+        errorReporter: ErrorReporter = FakeErrorReporter(),
     ) = TestViewModelFactory.create(linkConfigurationCoordinator) { linkHandler, savedStateHandle ->
         PaymentOptionsViewModel(
             args = args.copy(
@@ -1321,6 +1381,7 @@ internal class PaymentOptionsViewModelTest {
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             tapToAddHelperFactory = tapToAddHelperFactory,
             mode = EventReporter.Mode.Complete,
+            errorReporter = errorReporter,
         )
     }
 

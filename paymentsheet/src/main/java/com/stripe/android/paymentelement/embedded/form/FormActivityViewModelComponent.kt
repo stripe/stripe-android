@@ -7,6 +7,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.common.taptoadd.DefaultTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddMode
@@ -41,6 +42,7 @@ import javax.inject.Singleton
 
 @Component(
     modules = [
+        ApplicationIdModule::class,
         EmbeddedCommonModule::class,
         FormActivityViewModelModule::class,
         ExtendedPaymentElementConfirmationModule::class,
@@ -153,9 +155,10 @@ internal interface FormActivityViewModelModule {
         @Provides
         @Singleton
         fun providesFormActivityConfirmationHandlerRegistrar(
-            confirmationHandler: ConfirmationHandler
-        ): FormActivityConfirmationHandlerRegistrar {
-            return DefaultFormActivityConfirmationHandlerRegistrar(confirmationHandler)
+            confirmationHandler: ConfirmationHandler,
+            tapToAddHelper: TapToAddHelper,
+        ): FormActivityRegistrar {
+            return DefaultFormActivityRegistrar(confirmationHandler, tapToAddHelper)
         }
     }
 }

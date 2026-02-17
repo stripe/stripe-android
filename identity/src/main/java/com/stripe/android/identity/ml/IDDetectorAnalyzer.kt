@@ -132,7 +132,8 @@ internal class IDDetectorAnalyzer(
             bestCategory,
             bestScore,
             categoriesMapping,
-            laplacianBlurDetector.calculateBlurOutput(croppedImage)
+            laplacianBlurDetector.calculateBlurOutput(croppedImage),
+            croppedImage
         )
 
     internal class Factory(

@@ -42,7 +42,7 @@ internal fun NavController.navigateToErrorScreenWithRequirementError(
 
     navigateTo(
         ErrorDestination(
-            errorTitle = requirementError.title ?: context.getString(R.string.stripe_error),
+            errorTitle = requirementError.title ?: context.getString(stripeCoreR.string.stripe_error),
             errorContent = requirementError.body
                 ?: context.getString(stripeCoreR.string.stripe_unexpected_error_try_again),
             continueButtonText =
@@ -72,7 +72,7 @@ internal fun NavController.navigateToErrorScreenWithRequirementError(
 internal fun NavController.navigateToErrorScreenWithDefaultValues(context: Context) {
     navigateTo(
         ErrorDestination(
-            errorTitle = context.getString(R.string.stripe_error),
+            errorTitle = context.getString(stripeCoreR.string.stripe_error),
             errorContent = context.getString(stripeCoreR.string.stripe_unexpected_error_try_again),
             backButtonDestination = ConsentDestination.ROUTE.route,
             backButtonText = context.getString(R.string.stripe_go_back),

@@ -1,9 +1,11 @@
 package com.stripe.android.model.parsers
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CheckoutSessionFixtures
-import com.stripe.android.model.ElementsSessionParams
+import com.stripe.android.model.CheckoutSessionResponse
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import org.json.JSONObject
 import org.junit.Test
@@ -15,11 +17,7 @@ class CheckoutSessionResponseJsonParserTest {
 
     @Test
     fun `parse checkout session response`() {
-        val params = ElementsSessionParams.CheckoutSessionType(
-            clientSecret = "cs_test_123_secret_abc",
-        )
         val result = CheckoutSessionResponseJsonParser(
-            elementsSessionParams = params,
             isLiveMode = false,
         ).parse(CheckoutSessionFixtures.CHECKOUT_SESSION_RESPONSE_JSON)
 
@@ -67,8 +65,7 @@ class CheckoutSessionResponseJsonParserTest {
             }
             """.trimIndent()
         )
-        val params = ElementsSessionParams.CheckoutSessionType(clientSecret = "cs_test_secret")
-        val result = CheckoutSessionResponseJsonParser(params, isLiveMode = false).parse(json)
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
 
         assertThat(result).isNull()
     }
@@ -84,8 +81,7 @@ class CheckoutSessionResponseJsonParserTest {
             }
             """.trimIndent()
         )
-        val params = ElementsSessionParams.CheckoutSessionType(clientSecret = "cs_test_secret")
-        val result = CheckoutSessionResponseJsonParser(params, isLiveMode = false).parse(json)
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
 
         assertThat(result).isNull()
     }
@@ -101,8 +97,7 @@ class CheckoutSessionResponseJsonParserTest {
             }
             """.trimIndent()
         )
-        val params = ElementsSessionParams.CheckoutSessionType(clientSecret = "cs_test_secret")
-        val result = CheckoutSessionResponseJsonParser(params, isLiveMode = false).parse(json)
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
 
         assertThat(result).isNull()
     }
@@ -118,8 +113,7 @@ class CheckoutSessionResponseJsonParserTest {
             }
             """.trimIndent()
         )
-        val params = ElementsSessionParams.CheckoutSessionType(clientSecret = "cs_test_secret")
-        val result = CheckoutSessionResponseJsonParser(params, isLiveMode = false).parse(json)
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
 
         assertThat(result).isNotNull()
         assertThat(result?.id).isEqualTo("cs_test_123")
@@ -140,8 +134,7 @@ class CheckoutSessionResponseJsonParserTest {
             }
             """.trimIndent()
         )
-        val params = ElementsSessionParams.CheckoutSessionType(clientSecret = "cs_test_secret")
-        val result = CheckoutSessionResponseJsonParser(params, isLiveMode = false).parse(json)
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
 
         // Response is parsed successfully but elements_session is null due to invalid JSON
         assertThat(result).isNotNull()
@@ -151,8 +144,7 @@ class CheckoutSessionResponseJsonParserTest {
 
     @Test
     fun `parse confirm response with succeeded payment intent`() {
-        val params = ElementsSessionParams.CheckoutSessionType(clientSecret = "cs_test_secret")
-        val result = CheckoutSessionResponseJsonParser(params, isLiveMode = false)
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
             .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_CONFIRM_SUCCEEDED_JSON)
 
         assertThat(result).isNotNull()
@@ -173,8 +165,7 @@ class CheckoutSessionResponseJsonParserTest {
 
     @Test
     fun `parse confirm response with requires_action payment intent`() {
-        val params = ElementsSessionParams.CheckoutSessionType(clientSecret = "cs_test_secret")
-        val result = CheckoutSessionResponseJsonParser(params, isLiveMode = false)
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
             .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_CONFIRM_REQUIRES_ACTION_JSON)
 
         assertThat(result).isNotNull()
@@ -189,5 +180,104 @@ class CheckoutSessionResponseJsonParserTest {
 
         // Verify next_action is parsed
         assertThat(paymentIntent?.nextActionType).isEqualTo(StripeIntent.NextActionType.RedirectToUrl)
+    }
+
+    @Test
+    fun `parse init response with customer and saved payment methods`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_CUSTOMER_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.id).isEqualTo("cs_test_abc123")
+        assertThat(result?.amount).isEqualTo(1000L)
+
+        // Verify customer is parsed from top-level
+        val customer = result?.customer
+        assertThat(customer).isNotNull()
+        assertThat(customer?.id).isEqualTo("cus_test_customer")
+
+        // Verify payment methods are parsed
+        val paymentMethods = customer?.paymentMethods
+        assertThat(paymentMethods).hasSize(2)
+        assertThat(paymentMethods?.get(0)?.id).isEqualTo("pm_card_visa")
+        assertThat(paymentMethods?.get(0)?.type).isEqualTo(PaymentMethod.Type.Card)
+        assertThat(paymentMethods?.get(0)?.card?.last4).isEqualTo("4242")
+        assertThat(paymentMethods?.get(0)?.card?.brand).isEqualTo(CardBrand.Visa)
+
+        assertThat(paymentMethods?.get(1)?.id).isEqualTo("pm_card_mastercard")
+        assertThat(paymentMethods?.get(1)?.card?.last4).isEqualTo("5555")
+        assertThat(paymentMethods?.get(1)?.card?.brand).isEqualTo(CardBrand.MasterCard)
+    }
+
+    @Test
+    fun `parse init response with customer but empty payment methods`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_EMPTY_CUSTOMER_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.customer).isNotNull()
+        assertThat(result?.customer?.id).isEqualTo("cus_test_empty_customer")
+        assertThat(result?.customer?.paymentMethods).isEmpty()
+    }
+
+    @Test
+    fun `parse init response without customer returns null customer`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITHOUT_CUSTOMER_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.id).isEqualTo("cs_test_abc123")
+        assertThat(result?.customer).isNull()
+    }
+
+    @Test
+    fun `parse init response with save offer enabled and status not_accepted`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_SAVE_ENABLED_JSON)
+
+        assertThat(result).isNotNull()
+        val offerSave = result?.savedPaymentMethodsOfferSave
+        assertThat(offerSave).isNotNull()
+        assertThat(offerSave?.enabled).isTrue()
+        assertThat(offerSave?.status).isEqualTo(
+            CheckoutSessionResponse.SavedPaymentMethodsOfferSave.Status.NOT_ACCEPTED
+        )
+    }
+
+    @Test
+    fun `parse init response with save offer enabled and status accepted`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_SAVE_ACCEPTED_JSON)
+
+        assertThat(result).isNotNull()
+        val offerSave = result?.savedPaymentMethodsOfferSave
+        assertThat(offerSave).isNotNull()
+        assertThat(offerSave?.enabled).isTrue()
+        assertThat(offerSave?.status).isEqualTo(
+            CheckoutSessionResponse.SavedPaymentMethodsOfferSave.Status.ACCEPTED
+        )
+    }
+
+    @Test
+    fun `parse init response with save offer disabled`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_SAVE_DISABLED_JSON)
+
+        assertThat(result).isNotNull()
+        val offerSave = result?.savedPaymentMethodsOfferSave
+        assertThat(offerSave).isNotNull()
+        assertThat(offerSave?.enabled).isFalse()
+        assertThat(offerSave?.status).isEqualTo(
+            CheckoutSessionResponse.SavedPaymentMethodsOfferSave.Status.NOT_ACCEPTED
+        )
+    }
+
+    @Test
+    fun `parse init response without save offer returns null`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITHOUT_CUSTOMER_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.savedPaymentMethodsOfferSave).isNull()
     }
 }

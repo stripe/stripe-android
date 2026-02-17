@@ -99,7 +99,9 @@ class LinkControllerInteractorTest {
             }
 
             val unverifiedSession = TestFactory.CONSUMER_SESSION.copy(
-                verificationSessions = listOf(TestFactory.VERIFICATION_STARTED_SESSION)
+                verificationSessions = listOf(TestFactory.VERIFICATION_STARTED_SESSION),
+                currentAuthenticationLevel = null,
+                minimumAuthenticationLevel = null,
             )
             linkAccountHolder.set(LinkAccountUpdate.Value(LinkAccount(unverifiedSession)))
 
@@ -680,7 +682,9 @@ class LinkControllerInteractorTest {
 
         // Create an unverified account (one that needs verification)
         val unverifiedSession = TestFactory.CONSUMER_SESSION.copy(
-            verificationSessions = listOf(TestFactory.VERIFICATION_STARTED_SESSION)
+            verificationSessions = listOf(TestFactory.VERIFICATION_STARTED_SESSION),
+            currentAuthenticationLevel = null,
+            minimumAuthenticationLevel = null,
         )
         val unverifiedAccount = LinkAccount(unverifiedSession)
         linkAccountHolder.set(LinkAccountUpdate.Value(unverifiedAccount))
@@ -824,7 +828,9 @@ class LinkControllerInteractorTest {
 
         // Create an unverified account (one that needs verification)
         val unverifiedSession = TestFactory.CONSUMER_SESSION.copy(
-            verificationSessions = listOf(TestFactory.VERIFICATION_STARTED_SESSION)
+            verificationSessions = listOf(TestFactory.VERIFICATION_STARTED_SESSION),
+            currentAuthenticationLevel = null,
+            minimumAuthenticationLevel = null,
         )
         val unverifiedAccount = LinkAccount(unverifiedSession)
         linkAccountHolder.set(LinkAccountUpdate.Value(unverifiedAccount))

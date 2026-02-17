@@ -1206,7 +1206,8 @@ internal class IdentityViewModelTest {
                 category = Category.ID_FRONT,
                 resultScore = 0.8f,
                 allScores = ALL_SCORES,
-                blurScore = 1.0f
+                blurScore = 1.0f,
+                croppedImage = INPUT_BITMAP
             ),
             identityState = mock<IdentityScanState.Finished>()
         )
@@ -1223,7 +1224,8 @@ internal class IdentityViewModelTest {
                 category = Category.ID_BACK,
                 resultScore = 0.8f,
                 allScores = ALL_SCORES,
-                blurScore = 1.0f
+                blurScore = 1.0f,
+                croppedImage = INPUT_BITMAP
             ),
             identityState = mock<IdentityScanState.Finished>()
         )

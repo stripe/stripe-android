@@ -92,8 +92,6 @@
   <string name="stripe_doc_front_warmup_title">Chuẩn bị quét ID có ảnh</string>
   <!-- Label of the driver's license option for document type selection -->
   <string name="stripe_driver_license">Bằng lái xe</string>
-  <!-- Text for error labels -->
-  <string name="stripe_error">Lỗi</string>
   <!-- Button that opens file upload screen -->
   <string name="stripe_file_upload">Tải lên tệp</string>
   <!-- Instructions for uploading images of drivers license -->
@@ -203,6 +201,7 @@
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Đặt khuôn mặt của bạn ở giữa khung hình.</string>
   <!-- Instructional text when the document is too blurry -->
+  <string name="stripe_reduce_blur">ID không ở trong tiêu điểm</string>
   <string name="stripe_reduce_blur_2">Hình ảnh bị mờ. Giữ chắc điện thoại và thử lại.</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Không thấy rõ thông tin chi tiết</string>
