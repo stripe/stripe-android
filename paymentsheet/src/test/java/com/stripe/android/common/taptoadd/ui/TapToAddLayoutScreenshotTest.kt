@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.junit.Rule
 import org.junit.Test
+import java.lang.IllegalStateException
 import kotlin.String
 import kotlin.properties.Delegates
 
@@ -73,8 +74,14 @@ class TapToAddLayoutScreenshotTest {
                 primaryButton = TapToAddConfirmationInteractor.State.PrimaryButton(
                     label = "Pay".resolvableString,
                     locked = true,
+                    state = TapToAddConfirmationInteractor.State.PrimaryButton.State.Idle,
                 ),
+                error = null,
             )
         )
+
+        override fun performAction(action: TapToAddConfirmationInteractor.Action) {
+            throw IllegalStateException("Should not be called!")
+        }
     }
 }
