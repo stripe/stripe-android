@@ -495,6 +495,7 @@ internal fun OnrampScreen(
                     selectedPaymentType = uiState.selectedPaymentType,
                     selectedSettlementSpeed = uiState.settlementSpeed,
                     selectedPaymentData = uiState.selectedPaymentData,
+                    googlePayIsReady = uiState.googlePayIsReady,
                     onAuthenticate = onAuthenticateUser,
                     onRegisterWalletAddress = onRegisterWalletAddress,
                     onCollectKYC = { kycInfo -> viewModel.collectKycInfo(kycInfo) },
@@ -720,6 +721,7 @@ private fun AuthenticatedOperationsScreen(
     selectedPaymentData: PaymentMethodDisplayData?,
     selectedPaymentType: PaymentMethodType?,
     selectedSettlementSpeed: SettlementSpeed?,
+    googlePayIsReady: Boolean,
     onAuthenticate: (oauthScopes: String) -> Unit,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onCollectKYC: (KycInfo) -> Unit,
@@ -982,7 +984,7 @@ private fun AuthenticatedOperationsScreen(
         }
 
         GooglePayButton(
-            enabled = true,
+            enabled = googlePayIsReady,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)

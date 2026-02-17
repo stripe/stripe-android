@@ -877,7 +877,7 @@ internal class OnrampInteractor @Inject constructor(
      * Gets the platform publishable key from state, or fetches it if not available.
      * Returns null if fetch fails or key is null.
      */
-    suspend fun getOrFetchPlatformKey(): Result<String> {
+    internal suspend fun getOrFetchPlatformKey(): Result<String> {
         val cryptoCustomerId = _state.value.cryptoCustomerId
         val cachedKey = _state.value.platformKeyCache
 

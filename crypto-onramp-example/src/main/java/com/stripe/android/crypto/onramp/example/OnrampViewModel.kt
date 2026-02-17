@@ -63,6 +63,7 @@ internal class OnrampViewModel(
         .collectPaymentCallback(callback = ::onCollectPaymentResult)
         .authorizeCallback(callback = ::onAuthorizeResult)
         .onrampSessionClientSecretProvider(callback = ::checkoutWithBackend)
+        .googlePayIsReadyCallback(callback = ::googlePayIsReady)
 
     val onrampCoordinator: OnrampCoordinator =
         OnrampCoordinator
@@ -728,6 +729,14 @@ internal class OnrampViewModel(
         }
     }
 
+    private fun googlePayIsReady(isReady: Boolean) {
+        _uiState.update {
+            it.copy(
+                googlePayIsReady = isReady
+            )
+        }
+    }
+
     private val userDataKey = "onramp_user_data"
 
     private fun saveUserData(userData: OnrampUserData) {
@@ -775,6 +784,7 @@ data class OnrampUiState(
     val temporaryPaymentType: PaymentMethodType? = null,
     val selectedPaymentType: PaymentMethodType? = null,
     val settlementSpeed: SettlementSpeed = SettlementSpeed.INSTANT,
+    val googlePayIsReady: Boolean = false,
 )
 
 enum class Screen {
