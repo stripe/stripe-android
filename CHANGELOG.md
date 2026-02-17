@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 22.8.1 - 2026-02-17
+
 ### Identity
 * [Added] More live feedback during document capture.
 
