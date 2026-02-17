@@ -796,29 +796,32 @@ private fun AuthenticatedOperationsScreen(
         }
 
         selectedPaymentData?.let {
-            if (it.type == PaymentMethodDisplayData.Type.BankAccount) {
-                Text(
-                    text = "Settlement Speed",
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
+            when (it.type) {
+                PaymentMethodDisplayData.Type.Card -> { }
+                PaymentMethodDisplayData.Type.BankAccount -> {
+                    Text(
+                        text = "Settlement Speed",
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
 
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.padding(bottom = 16.dp)
-                ) {
-                    SettlementSpeed.entries.forEach { speed ->
-                        val isSelected = selectedSettlementSpeed == speed
-                        Box(
-                            modifier = Modifier
-                                .background(if (isSelected) MaterialTheme.colors.primary else Color.LightGray)
-                                .clickable { onSelectSettlementSpeed(speed) }
-                                .padding(horizontal = 16.dp, vertical = 8.dp)
-                        ) {
-                            Text(
-                                text = speed.name.lowercase().replaceFirstChar { it.uppercase() },
-                                color = if (isSelected) Color.White else Color.Black
-                            )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    ) {
+                        SettlementSpeed.entries.forEach { speed ->
+                            val isSelected = selectedSettlementSpeed == speed
+                            Box(
+                                modifier = Modifier
+                                    .background(if (isSelected) MaterialTheme.colors.primary else Color.LightGray)
+                                    .clickable { onSelectSettlementSpeed(speed) }
+                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                            ) {
+                                Text(
+                                    text = speed.name.lowercase().replaceFirstChar { it.uppercase() },
+                                    color = if (isSelected) Color.White else Color.Black
+                                )
+                            }
                         }
                     }
                 }

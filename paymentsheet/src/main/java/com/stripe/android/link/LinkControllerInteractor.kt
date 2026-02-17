@@ -227,15 +227,16 @@ internal class LinkControllerInteractor @Inject constructor(
                 } else {
                     val customerInfo = config.customerInfo
                         .copy(email = email ?: config.customerInfo.email)
-                    val nameCollectionConfig =
-                        if (
-                            paymentMethodType == LinkController.PaymentMethodType.BankAccount ||
-                            paymentMethodType == null
-                        ) {
+
+                    val nameCollectionConfig = when (paymentMethodType) {
+                        LinkController.PaymentMethodType.BankAccount, null -> {
                             PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
-                        } else {
+                        }
+                        LinkController.PaymentMethodType.Card -> {
                             config.billingDetailsCollectionConfiguration.name
                         }
+                    }
+
                     val billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration
                         .copy(name = nameCollectionConfig)
                     config.copy(

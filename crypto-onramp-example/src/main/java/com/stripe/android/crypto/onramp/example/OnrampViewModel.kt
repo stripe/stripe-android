@@ -548,10 +548,14 @@ internal class OnrampViewModel(
         val walletAddress = currentState.walletAddress
         val network = currentState.network
         val authToken = currentState.authToken
-        val settlementSpeed = if (currentState.selectedPaymentData?.type == PaymentMethodDisplayData.Type.BankAccount) {
-            currentState.settlementSpeed
-        } else {
-            SettlementSpeed.INSTANT
+
+        val settlementSpeed = when (currentState.selectedPaymentData?.type) {
+            PaymentMethodDisplayData.Type.BankAccount -> {
+                currentState.settlementSpeed
+            }
+            PaymentMethodDisplayData.Type.Card, null -> {
+                SettlementSpeed.INSTANT
+            }
         }
 
         // Check what's missing and provide helpful guidance

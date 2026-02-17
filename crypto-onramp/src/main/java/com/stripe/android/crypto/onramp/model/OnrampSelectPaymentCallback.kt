@@ -59,8 +59,7 @@ class PaymentMethodDisplayData internal constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class Type {
         Card,
-        BankAccount,
-        GooglePay
+        BankAccount
     }
 
     val icon: Drawable = DelegateDrawable(imageLoader = imageLoader)
