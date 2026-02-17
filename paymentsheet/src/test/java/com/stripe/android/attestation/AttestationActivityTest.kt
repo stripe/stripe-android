@@ -66,7 +66,7 @@ internal class AttestationActivityTest {
         val result = extractActivityResult(scenario)
         assertThat(result).isInstanceOf<AttestationActivityResult.Failed>()
         val failedResult = result as AttestationActivityResult.Failed
-        assertThat(failedResult.error).isEqualTo(testError)
+        assertThat(failedResult.error.message).isEqualTo(testError.message)
 
         scenario.close()
     }

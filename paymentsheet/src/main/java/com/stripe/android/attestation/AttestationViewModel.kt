@@ -39,7 +39,7 @@ internal class AttestationViewModel @Inject constructor(
                 _result.emit(AttestationActivityResult.Success(token))
             }.onFailure { error ->
                 attestationAnalyticsEventsReporter.requestTokenFailed(error)
-                _result.emit(AttestationActivityResult.Failed(error))
+                _result.emit(AttestationActivityResult.Failed(Throwable(error.message)))
             }
     }
 
