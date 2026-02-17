@@ -21,6 +21,7 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.LocalLinkAppearance
+import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.ui.FullScreenContent
 import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.link.ui.LinkContentScrollHandler
@@ -119,7 +120,7 @@ internal fun LinkScreenContentBody(
                 navigationChannel = navigationChannel,
             )
         }
-        ScreenState.Loading -> {
+        is ScreenState.Loading -> {
             ElementsBottomSheetLayout(
                 state = bottomSheetState,
                 cornerRadius = 24.dp,
@@ -135,7 +136,9 @@ internal fun LinkScreenContentBody(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier.padding(top = 10.dp)
                         ) {
-                            ProgressOverlayProcessing()
+                            StripeThemeForLink {
+                                ProgressOverlayProcessing()
+                            }
                         }
                     }
                 }
