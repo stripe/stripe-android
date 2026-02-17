@@ -23,11 +23,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.AppBarDefaults
 import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
@@ -978,7 +981,12 @@ private fun AuthenticatedOperationsScreen(
             Text("Collect Card or Bank Account")
         }
 
-        Button(
+        GooglePayButton(
+            enabled = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp)
+                .padding(bottom = 8.dp),
             onClick = {
                 val selection = PaymentMethodSelection.GooglePay(
                     currencyCode = "USD",
@@ -986,12 +994,9 @@ private fun AuthenticatedOperationsScreen(
                 )
                 onCollectPayment(selection)
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp)
-        ) {
-            Text("Google Pay")
-        }
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
 
         Button(
             onClick = onCreatePaymentToken,
@@ -1182,6 +1187,49 @@ fun OnrampExampleTheme(
         colors = if (isSystemInDarkTheme()) darkColors() else lightColors(),
         content = content,
     )
+}
+
+@Composable
+fun GooglePayButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+) {
+    val isDark = MaterialTheme.colors.isLight.not()
+
+    val background = if (isDark) Color.White else Color.Black
+    val content = if (isDark) Color.Black else Color.White
+
+    Button(
+        onClick = onClick,
+        enabled = enabled,
+        shape = RoundedCornerShape(8.dp),
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = background,
+            contentColor = content
+        ),
+        modifier = modifier
+            .fillMaxWidth()
+            .height(48.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+
+            Image(
+                painter = painterResource(
+                    com.stripe.android.R.drawable.stripe_google_pay_mark
+                ),
+                contentDescription = null,
+                modifier = Modifier.height(24.dp)
+            )
+
+            Spacer(Modifier.width(8.dp))
+
+            Text("Google Pay")
+        }
+    }
 }
 
 internal const val LOGIN_EMAIL_TAG = "LoginEmailTag"
