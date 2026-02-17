@@ -43,4 +43,56 @@ internal class TapToAddConfirmationScreenScreenshotTest {
             }
         }
     }
+
+    @Test
+    fun locked() {
+        paparazziRule.snapshot {
+            TapToAddTheme {
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colors.background)
+                        .padding(10.dp)
+                ) {
+                    TapToAddConfirmationScreen(
+                        state = TapToAddConfirmationInteractor.State(
+                            cardBrand = CardBrand.Visa,
+                            last4 = "4242",
+                            title = "Pay $10.00".resolvableString,
+                            primaryButton = TapToAddConfirmationInteractor.State.PrimaryButton(
+                                label = "Pay".resolvableString,
+                                locked = true,
+                            ),
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    @Test
+    fun noCardInfo() {
+        paparazziRule.snapshot {
+            TapToAddTheme {
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colors.background)
+                        .padding(10.dp)
+                ) {
+                    TapToAddConfirmationScreen(
+                        state = TapToAddConfirmationInteractor.State(
+                            cardBrand = CardBrand.Unknown,
+                            last4 = null,
+                            title = "Pay $10.00".resolvableString,
+                            primaryButton = TapToAddConfirmationInteractor.State.PrimaryButton(
+                                label = "Pay".resolvableString,
+                                locked = true,
+                            ),
+                        )
+                    )
+                }
+            }
+        }
+    }
 }
