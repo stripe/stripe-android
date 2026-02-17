@@ -56,7 +56,7 @@ class GooglePayPaymentMethodLauncherContractV2 :
         internal val cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
         internal val clientAttributionMetadata: ClientAttributionMetadata? = null,
         internal val isElements: Boolean = false,
-        internal val apiKeyOverride: String? = null
+        internal val publishableKey: String? = null
     ) : Parcelable {
         internal fun toBundle() = bundleOf(EXTRA_ARGS to this)
 

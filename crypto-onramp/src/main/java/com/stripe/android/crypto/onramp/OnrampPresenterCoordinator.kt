@@ -9,11 +9,11 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.utils.StatusBarCompat
-import com.stripe.android.core.utils.flatMapCatching
 import com.stripe.android.crypto.onramp.di.OnrampPresenterScope
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
+import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
@@ -53,16 +53,6 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         authorizeCallback = ::handleAuthorizeResult
     )
 
-    private val googlePayPaymentMethodLauncher: GooglePayPaymentMethodLauncher? = googlePayConfig()?.let {
-        GooglePayPaymentMethodLauncher(
-            activity = activity,
-            config = it,
-            readyCallback = { isReady ->
-            },
-            resultCallback = ::handleGooglePayPaymentSelection
-        )
-    }
-
     private var identityVerificationSheet: IdentityVerificationSheet? = null
 
     private val paymentLauncherFactory: PaymentLauncherFactory = PaymentLauncherFactory(
@@ -71,6 +61,15 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         statusBarColor = StatusBarCompat.color(activity),
         callback = ::handlePaymentLauncherResult
     )
+
+    private val googlePayPaymentMethodLauncher: GooglePayPaymentMethodLauncher? = googlePayConfig()?.let {
+        GooglePayPaymentMethodLauncher(
+            activity = activity,
+            config = it,
+            readyCallback = ::handleGooglePayIsReady,
+            resultCallback = ::handleGooglePayPaymentSelection
+        )
+    }
 
     private val verifyKycResultLauncher: ActivityResultLauncher<VerifyKycActivityArgs> =
         activity.activityResultRegistry.register(
@@ -147,11 +146,12 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     }
 
     fun collectPaymentMethod(selection: PaymentMethodSelection) {
+        interactor.onCollectPaymentMethod(selection.type)
+
         when (selection) {
             is PaymentMethodSelection.Card,
             is PaymentMethodSelection.BankAccount,
             is PaymentMethodSelection.CardAndBankAccount -> {
-                interactor.onCollectPaymentMethod(selection.type)
                 linkPresenter.presentPaymentMethodsForOnramp(
                     email = clientEmail(),
                     paymentMethodType = selection.type.toLinkType()
@@ -160,21 +160,20 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             is PaymentMethodSelection.GooglePay -> {
                 coroutineScope.launch {
                     interactor.getOrFetchPlatformKey().fold(
-                        onSuccess = { it
+                        onSuccess = {
                             googlePayPaymentMethodLauncher?.present(
                                 currencyCode = selection.currencyCode,
                                 amount = selection.amount,
                                 clientAttributionMetadata = null,
                                 transactionId = selection.transactionId,
                                 label = selection.label,
-                                apiKeyOverride = it
+                                publishableKey = it
                             )
-                                    },
-                        onFailure = {
-//                            onrampCallbacksState.collectPaymentCallback.onResult(
-//                                OnrampCollectPaymentMethodResult.Failed(it)
-//                            )
-//                            return@launch
+                        },
+                        onFailure = { error ->
+                            onrampCallbacksState.collectPaymentCallback.onResult(
+                                OnrampCollectPaymentMethodResult.Failed(error)
+                            )
                         }
                     )
                 }
@@ -320,6 +319,12 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             onrampCallbacksState.collectPaymentCallback.onResult(
                 interactor.handleGooglePayPaymentResult(result)
             )
+        }
+    }
+
+    private fun handleGooglePayIsReady(isReady: Boolean) {
+        coroutineScope.launch {
+            onrampCallbacksState.googlePayIsReadyCallback?.let { it(isReady) }
         }
     }
 }
