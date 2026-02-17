@@ -77,7 +77,7 @@ import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 @Singleton
-internal class PaymentSheetViewModel @Inject internal constructor(
+internal class PaymentSheetViewModel internal constructor(
     // Properties provided through PaymentSheetViewModelComponent.Builder
     internal val args: PaymentSheetContract.Args,
     eventReporter: EventReporter,
@@ -93,7 +93,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     internal val cvcRecollectionHandler: CvcRecollectionHandler,
     private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory,
     tapToAddHelperFactory: TapToAddHelper.Factory,
-    mode: EventReporter.Mode
+    mode: EventReporter.Mode,
+    initialCustomerStateHolder: CustomerStateHolder?,
 ) : BaseSheetViewModel(
     config = args.config,
     eventReporter = eventReporter,
@@ -104,7 +105,43 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
     isCompleteFlow = true,
     mode = mode,
+    customerStateHolder = initialCustomerStateHolder,
 ) {
+
+    @Inject internal constructor(
+        args: PaymentSheetContract.Args,
+        eventReporter: EventReporter,
+        paymentElementLoader: PaymentElementLoader,
+        customerRepository: CustomerRepository,
+        logger: Logger,
+        @IOContext workContext: CoroutineContext,
+        savedStateHandle: SavedStateHandle,
+        linkHandler: LinkHandler,
+        confirmationHandlerFactory: ConfirmationHandler.Factory,
+        cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
+        errorReporter: ErrorReporter,
+        cvcRecollectionHandler: CvcRecollectionHandler,
+        cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory,
+        tapToAddHelperFactory: TapToAddHelper.Factory,
+        mode: EventReporter.Mode,
+    ) : this(
+        args = args,
+        eventReporter = eventReporter,
+        paymentElementLoader = paymentElementLoader,
+        customerRepository = customerRepository,
+        logger = logger,
+        workContext = workContext,
+        savedStateHandle = savedStateHandle,
+        linkHandler = linkHandler,
+        confirmationHandlerFactory = confirmationHandlerFactory,
+        cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
+        errorReporter = errorReporter,
+        cvcRecollectionHandler = cvcRecollectionHandler,
+        cvcRecollectionInteractorFactory = cvcRecollectionInteractorFactory,
+        tapToAddHelperFactory = tapToAddHelperFactory,
+        mode = mode,
+        initialCustomerStateHolder = null,
+    )
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
         config = config,
@@ -243,7 +280,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             tapToAddHelper.result.collect { result ->
                 when (result) {
                     is TapToAddResult.Canceled -> {
-                        // Do nothing.
+                        result.paymentSelection?.let { paymentSelection ->
+                            customerStateHolder.addPaymentMethod(paymentSelection.paymentMethod)
+                            updateSelection(paymentSelection)
+                        }
                     }
                     TapToAddResult.Complete -> {
                         _paymentSheetResult.tryEmit(PaymentSheetResult.Completed())

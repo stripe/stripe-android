@@ -12,11 +12,11 @@ internal sealed interface TapToAddResult : Parcelable {
     data object Complete : TapToAddResult
 
     @Parcelize
-    data class Continue(val paymentSelection: PaymentSelection) : TapToAddResult
+    data class Continue(val paymentSelection: PaymentSelection.Saved) : TapToAddResult
 
     @Parcelize
     data class Canceled(
-        val paymentSelection: PaymentSelection?
+        val paymentSelection: PaymentSelection.Saved?
     ) : TapToAddResult
 
     companion object {
