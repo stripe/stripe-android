@@ -50,9 +50,29 @@ internal class TapToAddConfirmationScreenScreenshotTest {
         )
     }
 
+    @Test
+    fun locked() {
+        screenshotTest(
+            locked = true,
+        )
+    }
+
+    @Test
+    fun noCardInfo() {
+        screenshotTest(
+            last4 = null,
+            locked = true,
+            cardBrand = CardBrand.Unknown,
+        )
+    }
+
     private fun screenshotTest(
-        primaryButtonState: TapToAddConfirmationInteractor.State.PrimaryButton.State,
-        error: ResolvableString?,
+        cardBrand: CardBrand = CardBrand.Visa,
+        last4: String? = "4242",
+        locked: Boolean = false,
+        primaryButtonState: TapToAddConfirmationInteractor.State.PrimaryButton.State =
+            TapToAddConfirmationInteractor.State.PrimaryButton.State.Idle,
+        error: ResolvableString? = null,
     ) {
         paparazziRule.snapshot {
             TapToAddTheme {
@@ -64,70 +84,18 @@ internal class TapToAddConfirmationScreenScreenshotTest {
                 ) {
                     TapToAddConfirmationScreen(
                         state = TapToAddConfirmationInteractor.State(
-                            cardBrand = CardBrand.Visa,
-                            last4 = "4242",
+                            cardBrand = cardBrand,
+                            last4 = last4,
                             title = "Pay $10.00".resolvableString,
                             primaryButton = TapToAddConfirmationInteractor.State.PrimaryButton(
                                 label = "Pay".resolvableString,
-                                locked = false,
+                                locked = locked,
                                 state = primaryButtonState,
                             ),
                             error = error,
                         ),
                         onComplete = {},
                         onPrimaryButtonPress = {},
-                    )
-                }
-            }
-        }
-    }
-
-    @Test
-    fun locked() {
-        paparazziRule.snapshot {
-            TapToAddTheme {
-                Box(
-                    Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colors.background)
-                        .padding(10.dp)
-                ) {
-                    TapToAddConfirmationScreen(
-                        state = TapToAddConfirmationInteractor.State(
-                            cardBrand = CardBrand.Visa,
-                            last4 = "4242",
-                            title = "Pay $10.00".resolvableString,
-                            primaryButton = TapToAddConfirmationInteractor.State.PrimaryButton(
-                                label = "Pay".resolvableString,
-                                locked = true,
-                            ),
-                        )
-                    )
-                }
-            }
-        }
-    }
-
-    @Test
-    fun noCardInfo() {
-        paparazziRule.snapshot {
-            TapToAddTheme {
-                Box(
-                    Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colors.background)
-                        .padding(10.dp)
-                ) {
-                    TapToAddConfirmationScreen(
-                        state = TapToAddConfirmationInteractor.State(
-                            cardBrand = CardBrand.Unknown,
-                            last4 = null,
-                            title = "Pay $10.00".resolvableString,
-                            primaryButton = TapToAddConfirmationInteractor.State.PrimaryButton(
-                                label = "Pay".resolvableString,
-                                locked = true,
-                            ),
-                        )
                     )
                 }
             }
