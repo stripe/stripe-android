@@ -29,7 +29,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -48,7 +47,7 @@ import com.stripe.android.paymentsheet.ui.PromoBadge
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconWidth
 import com.stripe.android.uicore.DefaultStripeTheme
 import com.stripe.android.uicore.getBorderStroke
-import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.uicore.image.LocalStripeImageLoader
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.R as StripeUiCoreR
 
@@ -412,6 +411,7 @@ private fun ButtonPreview() {
         Column(
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
+            val imageLoader = LocalStripeImageLoader.current
             PaymentMethodRowButton(
                 isEnabled = true,
                 isSelected = true,
@@ -420,7 +420,7 @@ private fun ButtonPreview() {
                     PaymentMethodIcon(
                         iconRes = com.stripe.android.ui.core.R.drawable.stripe_ic_paymentsheet_pm_card,
                         iconUrl = null,
-                        imageLoader = StripeImageLoader(LocalContext.current.applicationContext),
+                        imageLoader = imageLoader,
                         iconRequiresTinting = true,
                         modifier = Modifier
                             .height(22.dp)
@@ -445,7 +445,7 @@ private fun ButtonPreview() {
                     PaymentMethodIcon(
                         iconRes = com.stripe.android.ui.core.R.drawable.stripe_ic_paymentsheet_pm_card,
                         iconUrl = null,
-                        imageLoader = StripeImageLoader(LocalContext.current.applicationContext),
+                        imageLoader = imageLoader,
                         iconRequiresTinting = true,
                         modifier = Modifier
                             .height(22.dp)

@@ -23,6 +23,8 @@ import com.stripe.android.uicore.LocalTextFieldInsets
 import com.stripe.android.uicore.LocalTypography
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.StripeTypography
+import com.stripe.android.uicore.image.LocalStripeImageLoader
+import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.toComposeTypography
 import java.lang.reflect.Method
 
@@ -86,6 +88,9 @@ internal fun AdoptForStripeTheme(
         subtitle1FontFamily = hostingAppTypography.subtitle1.fontFamily,
         captionFontFamily = hostingAppTypography.caption.fontFamily,
     )
+    val context = LocalContext.current
+    val imageLoader = remember { StripeImageLoader(context.applicationContext) }
+
     // These LocalProviders are required by StripeTheme, refer to StripeTheme.kt for details
     CompositionLocalProvider(
         LocalColors provides StripeThemeDefaults.colors(isSystemInDarkTheme()).copy(
@@ -101,6 +106,7 @@ internal fun AdoptForStripeTheme(
         LocalInspectionMode provides inspectionMode,
         LocalSectionStyle provides StripeThemeDefaults.sectionStyle,
         LocalTextFieldInsets provides StripeThemeDefaults.textFieldInsets,
+        LocalStripeImageLoader provides imageLoader,
     ) {
         MaterialTheme(
             colors = hostingAppColors,

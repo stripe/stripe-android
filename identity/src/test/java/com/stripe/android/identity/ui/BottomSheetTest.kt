@@ -2,6 +2,8 @@ package com.stripe.android.identity.ui
 
 import android.os.Build
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
@@ -14,6 +16,8 @@ import com.stripe.android.identity.networking.models.VerificationPageIconType
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentBottomSheetContent
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentBottomSheetLineContent
 import com.stripe.android.identity.viewmodel.BottomSheetViewModel
+import com.stripe.android.uicore.image.LocalStripeImageLoader
+import com.stripe.android.uicore.image.StripeImageLoader
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -133,7 +137,11 @@ internal class BottomSheetTest {
         composeTestRule.setContent {
             val viewModel = viewModel<BottomSheetViewModel>()
             viewModelBlock(viewModel)
-            BottomSheet()
+            CompositionLocalProvider(
+                LocalStripeImageLoader provides StripeImageLoader(LocalContext.current),
+            ) {
+                BottomSheet()
+            }
         }
 
         with(composeTestRule, testBlock)

@@ -3,6 +3,7 @@ package com.stripe.android.paymentmethodmessaging.element.analytics
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.PaymentMethod
@@ -15,6 +16,7 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.createComposeCleanupRule
+import com.stripe.android.uicore.image.StripeImageLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -195,7 +197,8 @@ internal class PaymentMethodMessageAnalyticsTest {
 
         val element = PaymentMethodMessagingElement(
             messagingCoordinator = coordinator,
-            eventReporter = eventReporter
+            eventReporter = eventReporter,
+            stripeImageLoader = StripeImageLoader(ApplicationProvider.getApplicationContext()),
         )
 
         assertThat(eventReporter.initTurbine.awaitItem()).isNotNull()

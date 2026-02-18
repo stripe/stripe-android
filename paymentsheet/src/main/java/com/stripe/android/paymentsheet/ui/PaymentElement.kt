@@ -17,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
@@ -34,7 +33,7 @@ import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormHeaderUI
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.getOuterFormInsets
-import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.uicore.image.LocalStripeImageLoader
 import java.util.UUID
 
 @Composable
@@ -52,10 +51,7 @@ internal fun PaymentElement(
     updatePaymentMethodVisibility: (AddPaymentMethodInitialVisibilityTrackerData) -> Unit = {},
     onInteractionEvent: () -> Unit = {},
 ) {
-    val context = LocalContext.current
-    val imageLoader = remember {
-        StripeImageLoader(context.applicationContext)
-    }
+    val imageLoader = LocalStripeImageLoader.current
 
     val horizontalPadding = StripeTheme.getOuterFormInsets()
 

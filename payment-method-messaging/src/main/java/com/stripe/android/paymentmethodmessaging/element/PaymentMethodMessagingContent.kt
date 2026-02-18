@@ -16,7 +16,6 @@ import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,8 +41,8 @@ import com.stripe.android.model.PaymentMethodMessageImage
 import com.stripe.android.model.PaymentMethodMessageLegalDisclosure
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
+import com.stripe.android.uicore.image.LocalStripeImageLoader
 import com.stripe.android.uicore.image.StripeImage
-import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.navigation.rememberKeyboardController
 import kotlinx.coroutines.launch
 
@@ -190,10 +189,7 @@ private fun Images(
     imageList: List<PaymentMethodMessageImage>,
     appearance: PaymentMethodMessagingElement.Appearance.State
 ) {
-    val context = LocalContext.current
-    val imageLoader = remember {
-        StripeImageLoader(context.applicationContext)
-    }
+    val imageLoader = LocalStripeImageLoader.current
     if (imageList.isNotEmpty()) {
         Row(Modifier.height(getIconHeight(appearance).dp)) {
             imageList.forEachIndexed { index, messagingImage ->
@@ -234,10 +230,7 @@ private fun TextWithLogo(
     appearance: PaymentMethodMessagingElement.Appearance.State,
     learnMoreMessage: String
 ) {
-    val context = LocalContext.current
-    val imageLoader = remember {
-        StripeImageLoader(context.applicationContext)
-    }
+    val imageLoader = LocalStripeImageLoader.current
     val style = appearance.font?.toTextStyle()
         ?: MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Normal)
 

@@ -28,10 +28,12 @@ import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
@@ -45,6 +47,8 @@ import androidx.compose.ui.unit.isUnspecified
 import androidx.compose.ui.unit.sp
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.ColorUtils
+import com.stripe.android.uicore.image.LocalStripeImageLoader
+import com.stripe.android.uicore.image.StripeImageLoader
 import java.lang.Float.max
 import androidx.compose.ui.unit.max as maxDp
 
@@ -516,6 +520,9 @@ fun StripeTheme(
 
     val inspectionMode = LocalInspectionMode.current || isRobolectricTest
 
+    val context = LocalContext.current
+    val imageLoader = remember { StripeImageLoader(context.applicationContext) }
+
     CompositionLocalProvider(
         LocalColors provides colors,
         LocalShapes provides shapes,
@@ -526,6 +533,7 @@ fun StripeTheme(
         LocalIconStyle provides iconStyle,
         LocalInspectionMode provides inspectionMode,
         LocalInstrumentationTest provides isInstrumentationTest,
+        LocalStripeImageLoader provides imageLoader,
     ) {
         MaterialTheme(
             colors = colors.materialColors,
@@ -554,10 +562,14 @@ fun DefaultStripeTheme(
     val shapes = StripeThemeDefaults.shapes
     val typography = StripeThemeDefaults.typography
 
+    val context = LocalContext.current
+    val imageLoader = remember { StripeImageLoader(context.applicationContext) }
+
     CompositionLocalProvider(
         LocalColors provides colors,
         LocalShapes provides shapes,
-        LocalTypography provides typography
+        LocalTypography provides typography,
+        LocalStripeImageLoader provides imageLoader,
     ) {
         MaterialTheme(
             colors = colors.materialColors,

@@ -2,6 +2,8 @@ package com.stripe.android.paymentsheet.ui
 
 import android.content.Context
 import android.os.Build
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -34,6 +36,8 @@ import com.stripe.android.uicore.elements.CheckboxFieldElement
 import com.stripe.android.uicore.elements.DEFAULT_CHECKBOX_TEST_TAG
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.uicore.image.LocalStripeImageLoader
+import com.stripe.android.uicore.image.StripeImageLoader
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
@@ -686,9 +690,13 @@ internal class AddPaymentMethodTest {
         val addPaymentMethodInteractor = FakeAddPaymentMethodInteractor(initialState, viewActionRecorder)
 
         composeRule.setContent {
-            AddPaymentMethod(
-                interactor = addPaymentMethodInteractor,
-            )
+            CompositionLocalProvider(
+                LocalStripeImageLoader provides StripeImageLoader(LocalContext.current),
+            ) {
+                AddPaymentMethod(
+                    interactor = addPaymentMethodInteractor,
+                )
+            }
         }
 
         viewActionRecorder.consume(

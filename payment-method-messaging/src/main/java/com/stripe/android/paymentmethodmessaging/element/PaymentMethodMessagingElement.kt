@@ -5,9 +5,12 @@ import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentmethodmessaging.element.analytics.PaymentMethodMessagingEventReporter
+import com.stripe.android.uicore.image.LocalStripeImageLoader
+import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.utils.collectAsState
 import java.util.Locale
 import javax.inject.Inject
@@ -15,7 +18,8 @@ import javax.inject.Inject
 @PaymentMethodMessagingElementPreview
 class PaymentMethodMessagingElement @Inject internal constructor(
     private val messagingCoordinator: PaymentMethodMessagingCoordinator,
-    private val eventReporter: PaymentMethodMessagingEventReporter
+    private val eventReporter: PaymentMethodMessagingEventReporter,
+    private val stripeImageLoader: StripeImageLoader,
 ) {
 
     init {
@@ -37,10 +41,12 @@ class PaymentMethodMessagingElement @Inject internal constructor(
      */
     @Composable
     fun Content(appearance: Appearance = Appearance()) {
-        val content by messagingCoordinator.messagingContent.collectAsState()
-        val appearanceState = appearance.build()
-        eventReporter.onElementDisplayed(appearanceState)
-        content?.Content(appearanceState)
+        CompositionLocalProvider(LocalStripeImageLoader provides stripeImageLoader) {
+            val content by messagingCoordinator.messagingContent.collectAsState()
+            val appearanceState = appearance.build()
+            eventReporter.onElementDisplayed(appearanceState)
+            content?.Content(appearanceState)
+        }
     }
 
     companion object {

@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import android.os.Build
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -28,6 +29,8 @@ import com.stripe.android.ui.core.cardscan.LocalCardScanEventsReporter
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
+import com.stripe.android.uicore.image.LocalStripeImageLoader
+import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.paymentelementtestpages.FormPage
 import com.stripe.paymentelementtestpages.assertHasErrorMessage
 import com.stripe.paymentelementtestpages.assertHasNoErrorMessage
@@ -148,7 +151,8 @@ internal class VerticalModeFormUITest {
             CompositionLocalProvider(
                 LocalCardScanEventsReporter provides NoOpCardScanEventsReporter,
                 LocalCardNumberCompletedEventReporter provides { },
-                LocalCardBrandDisallowedReporter provides { }
+                LocalCardBrandDisallowedReporter provides { },
+                LocalStripeImageLoader provides StripeImageLoader(LocalContext.current),
             ) {
                 VerticalModeFormUI(interactor, showsWalletHeader = showsWalletHeader)
             }

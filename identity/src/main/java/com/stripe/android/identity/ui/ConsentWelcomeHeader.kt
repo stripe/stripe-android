@@ -13,7 +13,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,8 +30,8 @@ import androidx.compose.ui.unit.sp
 import com.stripe.android.identity.R
 import com.stripe.android.identity.utils.isRemote
 import com.stripe.android.identity.utils.urlWithoutQuery
+import com.stripe.android.uicore.image.LocalStripeImageLoader
 import com.stripe.android.uicore.image.StripeImage
-import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.image.getDrawableFromUri
 import com.stripe.android.uicore.image.rememberDrawablePainter
 
@@ -53,10 +52,7 @@ internal fun ConsentWelcomeHeader(
             horizontalArrangement = Arrangement.Center
         ) {
             if (merchantLogoUri.isRemote()) {
-                val localContext = LocalContext.current
-                val imageLoader = remember(merchantLogoUri) {
-                    StripeImageLoader(localContext)
-                }
+                val imageLoader = LocalStripeImageLoader.current
                 StripeImage(
                     url = merchantLogoUri.urlWithoutQuery(),
                     imageLoader = imageLoader,

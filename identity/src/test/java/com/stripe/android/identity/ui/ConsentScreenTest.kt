@@ -1,6 +1,8 @@
 package com.stripe.android.identity.ui
 
 import android.os.Build
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextEquals
@@ -23,6 +25,8 @@ import com.stripe.android.identity.networking.models.VerificationPageRequirement
 import com.stripe.android.identity.networking.models.VerificationPageStaticConsentLineContent
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentConsentPage
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import com.stripe.android.uicore.image.LocalStripeImageLoader
+import com.stripe.android.uicore.image.StripeImageLoader
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
@@ -163,10 +167,14 @@ class ConsentScreenTest {
     ) {
         verificationPageLiveData.postValue(verificationState)
         composeTestRule.setContent {
-            ConsentScreen(
-                mockNavController,
-                mockIdentityViewModel
-            )
+            CompositionLocalProvider(
+                LocalStripeImageLoader provides StripeImageLoader(LocalContext.current),
+            ) {
+                ConsentScreen(
+                    mockNavController,
+                    mockIdentityViewModel
+                )
+            }
         }
 
         with(composeTestRule, testBlock)

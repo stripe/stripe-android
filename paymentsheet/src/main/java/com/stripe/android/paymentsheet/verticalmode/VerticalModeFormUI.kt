@@ -14,7 +14,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -25,7 +24,7 @@ import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
 import com.stripe.android.paymentsheet.ui.PromoBadge
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getOuterFormInsets
-import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.uicore.image.LocalStripeImageLoader
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
 
@@ -81,10 +80,7 @@ internal fun VerticalModeFormHeaderUI(
     isEnabled: Boolean,
     formHeaderInformation: FormHeaderInformation,
 ) {
-    val context = LocalContext.current
-    val imageLoader = remember {
-        StripeImageLoader(context)
-    }
+    val imageLoader = LocalStripeImageLoader.current
 
     Row(
         modifier = Modifier

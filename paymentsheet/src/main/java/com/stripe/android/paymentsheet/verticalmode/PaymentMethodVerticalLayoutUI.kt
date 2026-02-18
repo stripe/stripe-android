@@ -19,7 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -29,6 +28,7 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.image.LocalStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
@@ -51,10 +51,7 @@ internal fun PaymentMethodVerticalLayoutUI(
     interactor: PaymentMethodVerticalLayoutInteractor,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
-    val imageLoader = remember {
-        StripeImageLoader(context.applicationContext)
-    }
+    val imageLoader = LocalStripeImageLoader.current
 
     val state by interactor.state.collectAsState()
 

@@ -1,6 +1,8 @@
 package com.stripe.android.identity.ui
 
 import android.os.Build
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
@@ -21,6 +23,8 @@ import com.stripe.android.identity.networking.models.VerificationPageIconType
 import com.stripe.android.identity.networking.models.VerificationPageStaticConsentLineContent
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentIndividualWelcomePage
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import com.stripe.android.uicore.image.LocalStripeImageLoader
+import com.stripe.android.uicore.image.StripeImageLoader
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -102,10 +106,14 @@ class IndividualWelcomeScreenTest {
         testBlock: ComposeContentTestRule.() -> Unit = {}
     ) {
         composeTestRule.setContent {
-            IndividualWelcomeScreen(
-                navController = mockNavController,
-                identityViewModel = mockIdentityViewModel
-            )
+            CompositionLocalProvider(
+                LocalStripeImageLoader provides StripeImageLoader(LocalContext.current),
+            ) {
+                IndividualWelcomeScreen(
+                    navController = mockNavController,
+                    identityViewModel = mockIdentityViewModel
+                )
+            }
         }
 
         with(composeTestRule, testBlock)

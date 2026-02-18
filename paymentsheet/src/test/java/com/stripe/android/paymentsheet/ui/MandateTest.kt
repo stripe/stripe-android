@@ -2,13 +2,18 @@ package com.stripe.android.paymentsheet.ui
 
 import android.os.Build
 import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.dp
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.elements.Mandate
+import com.stripe.android.uicore.image.LocalStripeImageLoader
+import com.stripe.android.uicore.image.StripeImageLoader
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -26,7 +31,7 @@ internal class MandateTest {
 
     @Test
     fun testMandateText() {
-        composeRule.setContent {
+        setContent {
             Mandate(
                 mandateText = "Accept me!",
                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -38,7 +43,7 @@ internal class MandateTest {
 
     @Test
     fun testNullMandateText() {
-        composeRule.setContent {
+        setContent {
             Mandate(
                 mandateText = null,
                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -46,5 +51,15 @@ internal class MandateTest {
         }
 
         assertThat(composeRule.onRoot().fetchSemanticsNode().children).isEmpty()
+    }
+
+    private fun setContent(content: @Composable () -> Unit) {
+        composeRule.setContent {
+            CompositionLocalProvider(
+                LocalStripeImageLoader provides StripeImageLoader(LocalContext.current),
+            ) {
+                content()
+            }
+        }
     }
 }

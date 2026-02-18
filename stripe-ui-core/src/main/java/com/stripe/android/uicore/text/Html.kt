@@ -49,6 +49,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.text.HtmlCompat
+import com.stripe.android.uicore.image.LocalStripeImageLoader
 import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.image.isSupportedImageUrl
@@ -282,15 +283,9 @@ fun HtmlWithCustomOnClick(
     imageAlign: PlaceholderVerticalAlign = PlaceholderVerticalAlign.AboveBaseline,
     onClick: (List<AnnotatedString.Range<String>>) -> Unit
 ) {
-    val context = LocalContext.current
     val annotatedText = annotatedStringResource(html, imageLoader, urlSpanStyle)
     val remoteImagesLoaded = remember { mutableStateOf(false) }
-    val stripeImageLoader = remember {
-        StripeImageLoader(
-            context = context,
-            diskCache = null
-        )
-    }
+    val stripeImageLoader = LocalStripeImageLoader.current
 
     @Suppress("UNCHECKED_CAST")
     val drawableImages = rememberDrawableImages(

@@ -2,6 +2,8 @@
 
 package com.stripe.android.paymentmethodmessaging.element
 
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
@@ -19,6 +21,8 @@ import com.stripe.android.paymentmethodmessaging.element.analytics.FakeEventRepo
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.createComposeCleanupRule
+import com.stripe.android.uicore.image.LocalStripeImageLoader
+import com.stripe.android.uicore.image.StripeImageLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -65,7 +69,11 @@ internal class PaymentMethodMessagingContentTest {
             assertThat(content).isNotNull()
 
             composeRule.setContent {
-                content?.Content(PaymentMethodMessagingElement.Appearance().build())
+                CompositionLocalProvider(
+                    LocalStripeImageLoader provides StripeImageLoader(LocalContext.current),
+                ) {
+                    content?.Content(PaymentMethodMessagingElement.Appearance().build())
+                }
             }
 
             composeRule.waitForIdle()

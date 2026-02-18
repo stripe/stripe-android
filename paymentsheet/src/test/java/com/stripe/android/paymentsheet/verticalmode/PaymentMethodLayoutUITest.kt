@@ -5,7 +5,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertAll
 import androidx.compose.ui.test.isSelected
@@ -26,6 +28,8 @@ import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.Selection
 import com.stripe.android.testing.createComposeCleanupRule
+import com.stripe.android.uicore.image.LocalStripeImageLoader
+import com.stripe.android.uicore.image.StripeImageLoader
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -247,8 +251,12 @@ internal class PaymentMethodLayoutUITest(
         )
 
         composeRule.setContent {
-            Column {
-                layoutUI(interactor, Modifier.padding(horizontal = 20.dp))
+            CompositionLocalProvider(
+                LocalStripeImageLoader provides StripeImageLoader(LocalContext.current),
+            ) {
+                Column {
+                    layoutUI(interactor, Modifier.padding(horizontal = 20.dp))
+                }
             }
         }
 

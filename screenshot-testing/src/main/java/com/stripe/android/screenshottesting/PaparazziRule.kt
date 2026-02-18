@@ -8,11 +8,14 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import com.android.ide.common.rendering.api.SessionParams
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.image.LocalStripeImageLoader
+import com.stripe.android.uicore.image.StripeImageLoader
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
@@ -106,7 +109,10 @@ class PaparazziRule(
                             }
 
                             paparazziFunction {
-                                CompositionLocalProvider(LocalInspectionMode provides useLocalInspectionMode) {
+                                CompositionLocalProvider(
+                                    LocalInspectionMode provides useLocalInspectionMode,
+                                    LocalStripeImageLoader provides StripeImageLoader(LocalContext.current),
+                                ) {
                                     @Composable
                                     fun boxContent() {
                                         Box(

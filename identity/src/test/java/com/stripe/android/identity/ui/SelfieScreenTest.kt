@@ -3,6 +3,8 @@ package com.stripe.android.identity.ui
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.Build
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsOff
@@ -29,6 +31,8 @@ import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.identity.viewmodel.SelfieScanViewModel
+import com.stripe.android.uicore.image.LocalStripeImageLoader
+import com.stripe.android.uicore.image.StripeImageLoader
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -224,11 +228,15 @@ class SelfieScreenTest {
             feedbackStateFlow.value = it
         }
         composeTestRule.setContent {
-            SelfieScanScreen(
-                navController = mockNavController,
-                identityViewModel = mockIdentityViewModel,
-                selfieScanViewModel = mockSelfieScanViewModel
-            )
+            CompositionLocalProvider(
+                LocalStripeImageLoader provides StripeImageLoader(LocalContext.current),
+            ) {
+                SelfieScanScreen(
+                    navController = mockNavController,
+                    identityViewModel = mockIdentityViewModel,
+                    selfieScanViewModel = mockSelfieScanViewModel
+                )
+            }
         }
         with(composeTestRule, testBlock)
     }

@@ -1,6 +1,8 @@
 package com.stripe.android.identity.ui
 
 import android.os.Build
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -15,6 +17,8 @@ import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentTextPage
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import com.stripe.android.uicore.image.LocalStripeImageLoader
+import com.stripe.android.uicore.image.StripeImageLoader
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -68,11 +72,15 @@ class ConfirmationScreenTest {
         testBlock: ComposeContentTestRule.() -> Unit = {}
     ) {
         composeTestRule.setContent {
-            ConfirmationScreen(
-                mockNavController,
-                mockIdentityViewModel,
-                mockVerificationFlowFinishable
-            )
+            CompositionLocalProvider(
+                LocalStripeImageLoader provides StripeImageLoader(LocalContext.current),
+            ) {
+                ConfirmationScreen(
+                    mockNavController,
+                    mockIdentityViewModel,
+                    mockVerificationFlowFinishable
+                )
+            }
         }
         with(composeTestRule, testBlock)
     }
