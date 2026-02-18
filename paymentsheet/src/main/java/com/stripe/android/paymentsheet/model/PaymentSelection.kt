@@ -161,6 +161,7 @@ internal sealed class PaymentSelection : Parcelable {
         val paymentMethod: PaymentMethod,
         val walletType: WalletType? = null,
         val paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
+        val linkInput: UserInput? = null,
     ) : PaymentSelection() {
 
         enum class WalletType(val paymentSelection: PaymentSelection) {
@@ -226,7 +227,7 @@ internal sealed class PaymentSelection : Parcelable {
         }
 
         @Parcelize
-        data class Card(
+        data class Card constructor(
             override val paymentMethodCreateParams: PaymentMethodCreateParams,
             val brand: CardBrand,
             override val customerRequestedSave: CustomerRequestedSave,

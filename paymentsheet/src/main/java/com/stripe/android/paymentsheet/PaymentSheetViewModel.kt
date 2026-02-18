@@ -57,6 +57,7 @@ import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultSelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.utils.asGooglePayButtonType
 import com.stripe.android.paymentsheet.utils.toConfirmationError
+import com.stripe.android.paymentsheet.verticalmode.DefaultSavedCardConfirmInteractor
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
@@ -283,6 +284,38 @@ internal class PaymentSheetViewModel internal constructor(
                         result.paymentSelection?.let { paymentSelection ->
                             customerStateHolder.addPaymentMethod(paymentSelection.paymentMethod)
                             updateSelection(paymentSelection)
+                            // TODO: we obviously don't want to have to duplicate this code across PS + FC.
+                            val paymentMethodMetadata = paymentMethodMetadata.value ?: return@collect
+                            val newInitialScreens = determineInitialBackStack(
+                                paymentMethodMetadata,
+                                customerStateHolder,
+                            )
+                            val linkConfiguration = paymentMethodMetadata.linkState?.configuration
+                            // TODO: figure out when exactly we want in-line sign up to be available.
+                            val useLinkInlineSignup = linkConfiguration != null
+                            val newScreens =
+                                if (useLinkInlineSignup) {
+                                    newInitialScreens +
+                                        PaymentSheetScreen.SavedCardConfirm(
+                                            interactor = DefaultSavedCardConfirmInteractor(
+                                                isLiveMode = false,
+                                                paymentMethod = paymentSelection.paymentMethod,
+                                                paymentMethodMetadata = paymentMethodMetadata,
+                                                linkConfiguration = linkConfiguration,
+                                                linkConfigurationCoordinator = linkHandler.linkConfigurationCoordinator,
+                                                onUserInputChanged = { userInput ->
+                                                    updateSelection(
+                                                        paymentSelection.copy(
+                                                            linkInput = userInput
+                                                        )
+                                                    )
+                                                }
+                                            )
+                                        )
+                                } else {
+                                    newInitialScreens
+                                }
+                            navigationHandler.resetTo(newScreens)
                         }
                     }
                     TapToAddResult.Complete -> {

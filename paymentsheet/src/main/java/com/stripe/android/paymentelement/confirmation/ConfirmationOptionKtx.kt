@@ -12,6 +12,7 @@ import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethod
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationOption
+import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupSavedConfirmationOption
 import com.stripe.android.paymentelement.confirmation.shoppay.ShopPayConfirmationOption
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -22,7 +23,7 @@ internal fun PaymentSelection.toConfirmationOption(
     cardFundingFilter: CardFundingFilter
 ): ConfirmationHandler.Option? {
     return when (this) {
-        is PaymentSelection.Saved -> toConfirmationOption()
+        is PaymentSelection.Saved -> toConfirmationOption(linkConfiguration)
         is PaymentSelection.ExternalPaymentMethod -> toConfirmationOption()
         is PaymentSelection.CustomPaymentMethod -> toConfirmationOption(configuration)
         is PaymentSelection.New.USBankAccount -> toConfirmationOption()
@@ -37,11 +38,17 @@ internal fun PaymentSelection.toConfirmationOption(
     }
 }
 
-private fun PaymentSelection.Saved.toConfirmationOption(): PaymentMethodConfirmationOption.Saved {
-    return PaymentMethodConfirmationOption.Saved(
-        paymentMethod = paymentMethod,
-        optionsParams = paymentMethodOptionsParams,
-    )
+private fun PaymentSelection.Saved.toConfirmationOption(
+    linkConfiguration: LinkConfiguration?,
+): ConfirmationHandler.Option {
+    return if (linkInput != null && linkConfiguration != null) {
+        LinkInlineSignupSavedConfirmationOption(linkConfiguration, linkInput)
+    } else {
+        PaymentMethodConfirmationOption.Saved(
+            paymentMethod = paymentMethod,
+            optionsParams = paymentMethodOptionsParams,
+        )
+    }
 }
 
 private fun PaymentSelection.ExternalPaymentMethod.toConfirmationOption(): ExternalPaymentMethodConfirmationOption {

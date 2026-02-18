@@ -9,6 +9,7 @@ import com.stripe.android.common.ui.BottomSheetLoadingIndicator
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcCompletionState
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
@@ -27,6 +28,8 @@ import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenUI
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutUI
+import com.stripe.android.paymentsheet.verticalmode.SavedCardConfirmInteractor
+import com.stripe.android.paymentsheet.verticalmode.SavedCardConfirmUI
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormUI
 import com.stripe.android.ui.core.elements.CvcController
@@ -366,6 +369,46 @@ internal sealed interface PaymentSheetScreen {
         override fun close() {
             interactor.close()
         }
+    }
+
+    class SavedCardConfirm(
+        private val interactor: SavedCardConfirmInteractor,
+    ) : PaymentSheetScreen {
+        override val buyButtonState = stateFlowOf(
+            BuyButtonState(visible = true)
+        )
+        override val showsContinueButton: Boolean = true
+        override val topContentPadding: Dp = 0.dp
+        override val bottomContentPadding: Dp = formBottomContentPadding
+        override val walletsDividerSpacing: Dp = verticalModeWalletsDividerSpacing
+        override val showsPaymentConfirmationMandates: Boolean = true
+
+        override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
+            return stateFlowOf(
+                PaymentSheetTopBarStateFactory.create(
+                    isLiveMode = interactor.isLiveMode,
+                    editable = PaymentSheetTopBarState.Editable.Never,
+                )
+            )
+        }
+
+        override fun title(
+            isCompleteFlow: Boolean,
+            isWalletEnabled: Boolean
+        ): StateFlow<ResolvableString?> {
+            // TODO: use string resource
+            return stateFlowOf(resolvableString("Saved card"))
+        }
+
+        override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> {
+            return stateFlowOf(false)
+        }
+
+        @Composable
+        override fun Content(modifier: Modifier) {
+            SavedCardConfirmUI(interactor, modifier)
+        }
+
     }
 
     class ManageSavedPaymentMethods(private val interactor: ManageScreenInteractor) : PaymentSheetScreen, Closeable {

@@ -7,7 +7,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.PaymentMethod
 
-internal data class DisplayableSavedPaymentMethod private constructor(
+internal data class DisplayableSavedPaymentMethod(
     val displayName: ResolvableString,
     val paymentMethod: PaymentMethod,
     val savedPaymentMethod: SavedPaymentMethod,

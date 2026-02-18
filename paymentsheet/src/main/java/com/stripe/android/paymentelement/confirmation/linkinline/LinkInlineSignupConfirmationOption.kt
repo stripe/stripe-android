@@ -1,6 +1,8 @@
 package com.stripe.android.paymentelement.confirmation.linkinline
 
+import android.os.Parcel
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -52,3 +54,9 @@ internal data class LinkInlineSignupConfirmationOption(
             }
         }
 }
+
+@Parcelize
+internal data class LinkInlineSignupSavedConfirmationOption(
+    val linkConfiguration: LinkConfiguration,
+    val userInput: UserInput,
+) : ConfirmationHandler.Option
