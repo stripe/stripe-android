@@ -81,6 +81,40 @@ class TapToAddHelperTest {
     }
 
     @Test
+    fun `startPaymentMethodCollection when already collecting does not launch again`() = runScenario {
+        helper.register(
+            activityResultCaller = activityResultCallerScenario.activityResultCaller,
+            lifecycleOwner = TestLifecycleOwner()
+        )
+        assertThat(activityResultCallerScenario.awaitRegisterCall()).isNotNull()
+        assertThat(activityResultCallerScenario.awaitNextRegisteredLauncher()).isNotNull()
+
+        helper.startPaymentMethodCollection(DEFAULT_METADATA)
+        helper.startPaymentMethodCollection(DEFAULT_METADATA)
+
+        assertThat(activityResultCallerScenario.awaitLaunchCall()).isNotNull()
+    }
+
+    @Test
+    fun `startPaymentMethodCollection can launch again after result is received`() = runScenario {
+        helper.register(
+            activityResultCaller = activityResultCallerScenario.activityResultCaller,
+            lifecycleOwner = TestLifecycleOwner()
+        )
+        val registerCall = activityResultCallerScenario.awaitRegisterCall()
+        assertThat(activityResultCallerScenario.awaitNextRegisteredLauncher()).isNotNull()
+
+        helper.startPaymentMethodCollection(DEFAULT_METADATA)
+        assertThat(activityResultCallerScenario.awaitLaunchCall()).isNotNull()
+
+        val tapToAddCallback = registerCall.callback.asCallbackFor<TapToAddResult>()
+        tapToAddCallback.onActivityResult(TapToAddResult.Complete)
+
+        helper.startPaymentMethodCollection(DEFAULT_METADATA)
+        assertThat(activityResultCallerScenario.awaitLaunchCall()).isNotNull()
+    }
+
+    @Test
     fun `startPaymentMethodCollection calls launch with expected params`() = runScenario(
         tapToAddMode = TapToAddMode.Continue,
         eventMode = EventReporter.Mode.Embedded,
