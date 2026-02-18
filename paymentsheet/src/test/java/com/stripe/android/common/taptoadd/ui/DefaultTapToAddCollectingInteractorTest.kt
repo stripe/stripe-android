@@ -72,6 +72,16 @@ internal class DefaultTapToAddCollectingInteractorTest {
         }
     }
 
+    @Test
+    fun `onCanceled is invoked when collection is canceled`() {
+        runScenario(
+            collectResult = TapToAddCollectionHandler.CollectionState.Canceled,
+        ) {
+            assertThat(collectionHandlerScenario.collectCalls.awaitItem()).isNotNull()
+            assertThat(onCanceled.awaitItem()).isNotNull()
+        }
+    }
+
     private fun runScenario(
         metadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(isTapToAddSupported = true),
         collectResult: TapToAddCollectionHandler.CollectionState =
@@ -82,6 +92,7 @@ internal class DefaultTapToAddCollectingInteractorTest {
 
         val onCollected = Turbine<PaymentMethod>()
         val onFailedCollection = Turbine<ResolvableString>()
+        val onCanceled = Turbine<Unit>()
 
         FakeTapToAddCollectionHandler.test(collectResult) {
             val scenario = Scenario(
@@ -91,9 +102,11 @@ internal class DefaultTapToAddCollectingInteractorTest {
                     tapToAddCollectionHandler = handler,
                     onCollected = { onCollected.add(it) },
                     onFailedCollection = { onFailedCollection.add(it) },
+                    onCanceled = { onCanceled.add(Unit) },
                 ),
                 onCollected = onCollected,
                 onFailedCollection = onFailedCollection,
+                onCanceled = onCanceled,
                 collectionHandlerScenario = this,
             )
             testScope.advanceUntilIdle()
@@ -105,6 +118,7 @@ internal class DefaultTapToAddCollectingInteractorTest {
         val interactor: TapToAddCollectingInteractor,
         val onCollected: ReceiveTurbine<PaymentMethod>,
         val onFailedCollection: ReceiveTurbine<ResolvableString>,
+        val onCanceled: ReceiveTurbine<Unit>,
         val collectionHandlerScenario: FakeTapToAddCollectionHandler.Scenario,
     )
 }

@@ -244,8 +244,8 @@ class TapToAddCollectionHandlerTest {
         val retrievedSetupIntent = checkRetrieveSetupIntent("si_123_secret")
 
         val terminalException = TerminalException(
-            errorCode = TerminalErrorCode.CANCELED,
-            errorMessage = "Customer canceled the operation"
+            errorCode = TerminalErrorCode.DECLINED_BY_STRIPE_API,
+            errorMessage = "Card declined"
         )
 
         val collectPaymentMethodCall = terminalScenario.collectPaymentMethodCalls.awaitItem()
@@ -258,6 +258,35 @@ class TapToAddCollectionHandlerTest {
                 displayMessage = R.string.stripe_something_went_wrong.resolvableString
             )
         )
+    }
+
+    @Test
+    fun `handler returns Canceled when collectSetupIntentPaymentMethod fails with CANCELED`() = runScenario(
+        isConnected = true,
+        callbackResult = Result.success(
+            CreateCardPresentSetupIntentCallback {
+                CreateIntentResult.Success("si_123_secret")
+            }
+        ),
+    ) {
+        val result = testScope.backgroundScope.async {
+            handler.collect(DEFAULT_METADATA)
+        }
+
+        assertThat(retrieverScenario.waitForCallbackCalls.awaitItem()).isNotNull()
+
+        val retrievedSetupIntent = checkRetrieveSetupIntent("si_123_secret")
+
+        val terminalException = TerminalException(
+            errorCode = TerminalErrorCode.CANCELED,
+            errorMessage = "Customer canceled",
+        )
+
+        val collectPaymentMethodCall = terminalScenario.collectPaymentMethodCalls.awaitItem()
+        assertThat(collectPaymentMethodCall.intent).isEqualTo(retrievedSetupIntent)
+        collectPaymentMethodCall.callback.onFailure(terminalException)
+
+        assertThat(result.await()).isEqualTo(TapToAddCollectionHandler.CollectionState.Canceled)
     }
 
     @Test
