@@ -267,7 +267,7 @@ internal open class FakeLinkAccountManager(
 
     override suspend fun updatePaymentDetails(
         updateParams: ConsumerPaymentDetailsUpdateParams,
-        billingPhone: String?
+        phone: String?
     ): Result<ConsumerPaymentDetails> {
         updateCardDetailsTurbine.add(
             updateParams
