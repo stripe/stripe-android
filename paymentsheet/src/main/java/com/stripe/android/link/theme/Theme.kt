@@ -18,7 +18,6 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.ui.image.LocalStripeImageLoader
-import com.stripe.android.uicore.image.StripeImageLoader
 
 internal val LocalLinkAppearance = staticCompositionLocalOf<LinkAppearance.State?> { null }
 
@@ -43,8 +42,7 @@ internal fun DefaultLinkTheme(
     appearance: LinkAppearance.State? = LocalLinkAppearance.current,
     content: @Composable () -> Unit
 ) {
-    val stripeImageLoader = runCatching { LocalStripeImageLoader.current }
-        .getOrElse { StripeImageLoader(LocalContext.current) }
+    val stripeImageLoader = LocalStripeImageLoader.current
     val isDark = isLinkDarkTheme(appearance)
 
     // Colors
