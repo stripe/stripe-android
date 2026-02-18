@@ -7,8 +7,10 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.taptoadd.TapToAddMode
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
+import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.link.LinkFormElement
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -21,6 +23,9 @@ import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import com.stripe.android.ui.core.R as StripeUiCoreR
@@ -224,12 +229,68 @@ internal class DefaultTapToAddConfirmationInteractorTest {
         }
     }
 
+    @Test
+    fun `primary button disabled when link form state is Incomplete`() = runScenario(
+        paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
+        tapToAddMode = TapToAddMode.Complete,
+        linkFormHelper = FakeTapToAddLinkFormHelper(
+            initialState = TapToAddLinkFormHelper.State.Incomplete,
+        ),
+    ) {
+        interactor.state.test {
+            val state = awaitItem()
+            assertThat(state.primaryButton.enabled).isFalse()
+        }
+    }
+
+    @Test
+    fun `primary button enabled when link form state is Unused`() = runScenario(
+        paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
+        tapToAddMode = TapToAddMode.Complete,
+        linkFormHelper = FakeTapToAddLinkFormHelper(
+            initialState = TapToAddLinkFormHelper.State.Unused,
+        ),
+    ) {
+        interactor.state.test {
+            val state = awaitItem()
+            assertThat(state.primaryButton.enabled).isTrue()
+        }
+    }
+
+    @Test
+    fun `primary button enabled when link form state is Complete`() = runScenario(
+        paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
+        tapToAddMode = TapToAddMode.Complete,
+        linkFormHelper = FakeTapToAddLinkFormHelper(
+            initialState = TapToAddLinkFormHelper.State.Complete(
+                userInput = UserInput.SignIn(email = "email@email.com")
+            ),
+        ),
+    ) {
+        interactor.state.test {
+            val state = awaitItem()
+            assertThat(state.primaryButton.enabled).isTrue()
+        }
+    }
+
+    @Test
+    fun `form elements are empty when link form helper has no link form element`() = runScenario(
+        paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
+        tapToAddMode = TapToAddMode.Complete,
+    ) {
+        interactor.state.test {
+            val state = awaitItem()
+            assertThat(state.form.elements).isEmpty()
+        }
+    }
+
     private fun runScenario(
         paymentMethod: PaymentMethod,
         tapToAddMode: TapToAddMode = TapToAddMode.Complete,
         paymentMethodMetadata: PaymentMethodMetadata =
             PaymentMethodMetadataFactory.create(isTapToAddSupported = true),
         initialConfirmationState: ConfirmationHandler.State = ConfirmationHandler.State.Idle,
+        linkFormHelper: TapToAddLinkFormHelper = FakeTapToAddLinkFormHelper(),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val eventReporter = FakeEventReporter()
@@ -246,6 +307,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
                 paymentMethodMetadata = paymentMethodMetadata,
                 confirmationHandler = handler,
                 eventReporter = eventReporter,
+                linkFormHelper = linkFormHelper,
                 onContinue = {
                     onContinueCalls.add(it)
                 },
@@ -281,4 +343,12 @@ internal class DefaultTapToAddConfirmationInteractorTest {
         val onContinueCalls: ReceiveTurbine<PaymentSelection.Saved>,
         val eventReporter: FakeEventReporter,
     )
+
+    private class FakeTapToAddLinkFormHelper(
+        initialState: TapToAddLinkFormHelper.State = TapToAddLinkFormHelper.State.Unused,
+        override val formElement: LinkFormElement? = null,
+    ) : TapToAddLinkFormHelper {
+        private val _state = MutableStateFlow(initialState)
+        override val state: StateFlow<TapToAddLinkFormHelper.State> = _state.asStateFlow()
+    }
 }

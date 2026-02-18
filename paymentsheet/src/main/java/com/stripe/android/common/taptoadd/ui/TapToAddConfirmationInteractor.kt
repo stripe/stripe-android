@@ -14,6 +14,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.utils.buyButtonLabel
 import com.stripe.android.paymentsheet.utils.continueButtonLabel
 import com.stripe.android.paymentsheet.utils.reportPaymentResult
+import com.stripe.android.uicore.elements.FormElement
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -32,12 +33,19 @@ internal interface TapToAddConfirmationInteractor {
         val last4: String?,
         val title: ResolvableString,
         val primaryButton: PrimaryButton,
+        val form: Form,
         val error: ResolvableString?,
     ) {
+        data class Form(
+            val elements: List<FormElement>,
+            val enabled: Boolean,
+        )
+
         data class PrimaryButton(
             val label: ResolvableString,
             val locked: Boolean,
             val state: State,
+            val enabled: Boolean,
         ) {
             enum class State {
                 Idle,
@@ -65,6 +73,7 @@ internal class DefaultTapToAddConfirmationInteractor(
     private val paymentMethod: PaymentMethod,
     private val paymentMethodMetadata: PaymentMethodMetadata,
     private val confirmationHandler: ConfirmationHandler,
+    private val linkFormHelper: TapToAddLinkFormHelper,
     private val eventReporter: EventReporter,
     private val onContinue: (paymentSelection: PaymentSelection.Saved) -> Unit,
     private val onComplete: () -> Unit,
@@ -74,7 +83,10 @@ internal class DefaultTapToAddConfirmationInteractor(
     )
 
     private val _state = MutableStateFlow(
-        createInitialState(confirmationHandler.state.value)
+        createInitialState(
+            initialLinkState = linkFormHelper.state.value,
+            initialConfirmationState = confirmationHandler.state.value,
+        )
     )
     override val state: StateFlow<TapToAddConfirmationInteractor.State> = _state.asStateFlow()
 
@@ -90,6 +102,14 @@ internal class DefaultTapToAddConfirmationInteractor(
 
                 _state.update { state ->
                     state.withConfirmationState(confirmationState)
+                }
+            }
+        }
+
+        coroutineScope.launch {
+            linkFormHelper.state.collectLatest { linkState ->
+                _state.update { state ->
+                    state.withLinkState(linkState)
                 }
             }
         }
@@ -130,6 +150,7 @@ internal class DefaultTapToAddConfirmationInteractor(
     }
 
     private fun createInitialState(
+        initialLinkState: TapToAddLinkFormHelper.State,
         initialConfirmationState: ConfirmationHandler.State
     ): TapToAddConfirmationInteractor.State {
         return TapToAddConfirmationInteractor.State(
@@ -139,10 +160,19 @@ internal class DefaultTapToAddConfirmationInteractor(
             primaryButton = TapToAddConfirmationInteractor.State.PrimaryButton(
                 label = createLabel(useAmount = false),
                 locked = tapToAddMode == TapToAddMode.Complete,
+                enabled = true,
                 state = TapToAddConfirmationInteractor.State.PrimaryButton.State.Idle,
             ),
+            form = TapToAddConfirmationInteractor.State.Form(
+                elements = linkFormHelper.formElement?.let {
+                    listOf(it)
+                } ?: emptyList(),
+                enabled = true,
+            ),
             error = null,
-        ).withConfirmationState(initialConfirmationState)
+        )
+            .withLinkState(initialLinkState)
+            .withConfirmationState(initialConfirmationState)
     }
 
     private fun createLabel(useAmount: Boolean): ResolvableString {
@@ -156,6 +186,16 @@ internal class DefaultTapToAddConfirmationInteractor(
                 primaryButtonLabel = null
             )
         }
+    }
+
+    private fun TapToAddConfirmationInteractor.State.withLinkState(
+        linkState: TapToAddLinkFormHelper.State,
+    ): TapToAddConfirmationInteractor.State {
+        return copy(
+            primaryButton = primaryButton.copy(
+                enabled = linkState !is TapToAddLinkFormHelper.State.Incomplete,
+            ),
+        )
     }
 
     private fun TapToAddConfirmationInteractor.State.withConfirmationState(
@@ -176,6 +216,9 @@ internal class DefaultTapToAddConfirmationInteractor(
         }
 
         return copy(
+            form = form.copy(
+                enabled = confirmationState is ConfirmationHandler.State.Idle,
+            ),
             primaryButton = primaryButton.copy(
                 state = primaryButtonState,
             ),
@@ -194,6 +237,7 @@ internal class DefaultTapToAddConfirmationInteractor(
         @ViewModelScope private val viewModelScope: CoroutineScope,
         private val tapToAddMode: TapToAddMode,
         private val paymentMethodMetadata: PaymentMethodMetadata,
+        private val linkFormHelper: TapToAddLinkFormHelper,
         private val confirmationHandler: ConfirmationHandler,
         private val eventReporter: EventReporter,
         private val tapToAddNavigator: Provider<TapToAddNavigator>,
@@ -206,6 +250,7 @@ internal class DefaultTapToAddConfirmationInteractor(
                 confirmationHandler = confirmationHandler,
                 eventReporter = eventReporter,
                 coroutineScope = viewModelScope,
+                linkFormHelper = linkFormHelper,
                 onComplete = {
                     tapToAddNavigator.get().performAction(TapToAddNavigator.Action.Complete)
                 },

@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
+import com.stripe.android.ui.core.FormUI
 import com.stripe.android.uicore.strings.resolve
 
 @Composable
@@ -33,6 +34,19 @@ internal fun TapToAddConfirmationScreen(
         )
 
         Spacer(Modifier.size(20.dp))
+
+        with(state.form) {
+            if (elements.isNotEmpty()) {
+                FormUI(
+                    elements = elements,
+                    hiddenIdentifiers = emptySet(),
+                    lastTextFieldIdentifier = null,
+                    enabled = enabled,
+                )
+
+                Spacer(Modifier.size(10.dp))
+            }
+        }
 
         with(state.primaryButton) {
             PrimaryButton(
