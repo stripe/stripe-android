@@ -4,6 +4,13 @@
 
 ## 22.8.1 - 2026-02-17
 
+Dependencies updated in [12373](https://github.com/stripe/stripe-android/pull/12373):
+- Bumped Kotlin from 2.1.10 to 2.3.10.
+- Bumped Kotlin Coroutines from 1.10.1 to 1.10.2.
+- Bumped Kotlin Serialization from 1.8.0 to 1.10.0.
+- Bumped Android Gradle Plugin from 8.13.1 to 8.13.2.
+- Bumped Poko from 0.18.2 to 0.21.1.
+
 ### Identity
 * [Added] More live feedback during document capture.
 * [Added] Added best frame detector to improve document capture quality.
