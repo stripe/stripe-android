@@ -3354,6 +3354,127 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
+    fun `retrieveElementsSession with user key sends valid request for payment intents`() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            ElementsSessionFixtures.DEFERRED_INTENT_JSON.toString(),
+            emptyMap()
+        )
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(stripeResponse)
+
+        val userKeyOptions = ApiRequest.Options("uk_12345")
+
+        create().retrieveElementsSession(
+            params = ElementsSessionParams.PaymentIntentType(
+                clientSecret = "client_secret",
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                appId = APP_ID
+            ),
+            options = userKeyOptions,
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+
+        val request = apiRequestArgumentCaptor.firstValue
+        val params = requireNotNull(request.params)
+
+        assertThat(request.baseUrl).isEqualTo("https://api.stripe.com/v1/elements/sessions")
+
+        with(params) {
+            assertThat(this["type"]).isEqualTo("payment_intent")
+            assertThat(this["locale"]).isEqualTo("en-US")
+            assertThat(this["client_secret"]).isEqualTo("client_secret")
+            assertThat(this["mobile_app_id"]).isEqualTo(APP_ID)
+        }
+    }
+
+    @Test
+    fun `retrieveElementsSession with user key sends valid request for setup intents`() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            ElementsSessionFixtures.DEFERRED_INTENT_JSON.toString(),
+            emptyMap()
+        )
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(stripeResponse)
+
+        val userKeyOptions = ApiRequest.Options("uk_12345")
+
+        create().retrieveElementsSession(
+            params = ElementsSessionParams.SetupIntentType(
+                clientSecret = "client_secret",
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                appId = APP_ID
+            ),
+            options = userKeyOptions,
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+
+        val request = apiRequestArgumentCaptor.firstValue
+        val params = requireNotNull(request.params)
+
+        assertThat(request.baseUrl).isEqualTo("https://api.stripe.com/v1/elements/sessions")
+
+        with(params) {
+            assertThat(this["type"]).isEqualTo("setup_intent")
+            assertThat(this["locale"]).isEqualTo("en-US")
+            assertThat(this["client_secret"]).isEqualTo("client_secret")
+            assertThat(this["mobile_app_id"]).isEqualTo(APP_ID)
+        }
+    }
+
+    @Test
+    fun `retrieveElementsSession with user key sends valid request for deferred intents`() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            ElementsSessionFixtures.DEFERRED_INTENT_JSON.toString(),
+            emptyMap()
+        )
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(stripeResponse)
+
+        val userKeyOptions = ApiRequest.Options("uk_12345")
+
+        create().retrieveElementsSession(
+            params = ElementsSessionParams.DeferredIntentType(
+                deferredIntentParams = DeferredIntentParams(
+                    mode = DeferredIntentParams.Mode.Payment(
+                        amount = 2000,
+                        currency = "usd",
+                        captureMethod = PaymentIntent.CaptureMethod.Automatic,
+                        setupFutureUsage = null,
+                        paymentMethodOptionsJsonString = null,
+                    ),
+                    paymentMethodTypes = listOf("card"),
+                    paymentMethodConfigurationId = null,
+                    onBehalfOf = null
+                ),
+                customPaymentMethods = emptyList(),
+                externalPaymentMethods = emptyList(),
+                appId = APP_ID,
+            ),
+            options = userKeyOptions,
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+
+        val request = apiRequestArgumentCaptor.firstValue
+        val params = requireNotNull(request.params)
+
+        assertThat(request.baseUrl).isEqualTo("https://api.stripe.com/v1/elements/sessions")
+
+        with(params) {
+            assertThat(this["type"]).isEqualTo("deferred_intent")
+            assertThat(this["locale"]).isEqualTo("en-US")
+            assertThat(this["mobile_app_id"]).isEqualTo(APP_ID)
+        }
+    }
+
+    @Test
     fun testConfirmationTokensUrl() {
         assertThat(StripeApiRepository.confirmationTokensUrl)
             .isEqualTo("https://api.stripe.com/v1/confirmation_tokens")

@@ -4,8 +4,8 @@ import com.stripe.android.paymentsheet.state.LinkState
 
 internal sealed interface AccountStatus {
     data class Verified(
-        val hasVerifiedSMSSession: Boolean,
         val consentPresentation: ConsentPresentation?,
+        val meetsMinimumAuthenticationLevel: Boolean = false,
     ) : AccountStatus // Customer is signed in
     data class NeedsVerification(
         val webviewOpenUrl: String? = null,

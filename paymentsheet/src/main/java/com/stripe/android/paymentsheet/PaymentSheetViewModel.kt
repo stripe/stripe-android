@@ -17,6 +17,7 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddMode
+import com.stripe.android.common.taptoadd.TapToAddResult
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
@@ -76,7 +77,7 @@ import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 @Singleton
-internal class PaymentSheetViewModel @Inject internal constructor(
+internal class PaymentSheetViewModel internal constructor(
     // Properties provided through PaymentSheetViewModelComponent.Builder
     internal val args: PaymentSheetContract.Args,
     eventReporter: EventReporter,
@@ -92,7 +93,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     internal val cvcRecollectionHandler: CvcRecollectionHandler,
     private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory,
     tapToAddHelperFactory: TapToAddHelper.Factory,
-    mode: EventReporter.Mode
+    mode: EventReporter.Mode,
+    initialCustomerStateHolder: CustomerStateHolder?,
 ) : BaseSheetViewModel(
     config = args.config,
     eventReporter = eventReporter,
@@ -103,7 +105,43 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
     isCompleteFlow = true,
     mode = mode,
+    customerStateHolder = initialCustomerStateHolder,
 ) {
+
+    @Inject internal constructor(
+        args: PaymentSheetContract.Args,
+        eventReporter: EventReporter,
+        paymentElementLoader: PaymentElementLoader,
+        customerRepository: CustomerRepository,
+        logger: Logger,
+        @IOContext workContext: CoroutineContext,
+        savedStateHandle: SavedStateHandle,
+        linkHandler: LinkHandler,
+        confirmationHandlerFactory: ConfirmationHandler.Factory,
+        cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
+        errorReporter: ErrorReporter,
+        cvcRecollectionHandler: CvcRecollectionHandler,
+        cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory,
+        tapToAddHelperFactory: TapToAddHelper.Factory,
+        mode: EventReporter.Mode,
+    ) : this(
+        args = args,
+        eventReporter = eventReporter,
+        paymentElementLoader = paymentElementLoader,
+        customerRepository = customerRepository,
+        logger = logger,
+        workContext = workContext,
+        savedStateHandle = savedStateHandle,
+        linkHandler = linkHandler,
+        confirmationHandlerFactory = confirmationHandlerFactory,
+        cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
+        errorReporter = errorReporter,
+        cvcRecollectionHandler = cvcRecollectionHandler,
+        cvcRecollectionInteractorFactory = cvcRecollectionInteractorFactory,
+        tapToAddHelperFactory = tapToAddHelperFactory,
+        mode = mode,
+        initialCustomerStateHolder = null,
+    )
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
         config = config,
@@ -236,6 +274,27 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
         viewModelScope.launch(workContext) {
             loadPaymentSheetState()
+        }
+
+        viewModelScope.launch {
+            tapToAddHelper.result.collect { result ->
+                when (result) {
+                    is TapToAddResult.Canceled -> {
+                        result.paymentSelection?.let { paymentSelection ->
+                            customerStateHolder.addPaymentMethod(paymentSelection.paymentMethod)
+                            updateSelection(paymentSelection)
+                        }
+                    }
+                    TapToAddResult.Complete -> {
+                        _paymentSheetResult.tryEmit(PaymentSheetResult.Completed())
+                    }
+                    is TapToAddResult.Continue -> {
+                        errorReporter.report(
+                            ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_PAYMENT_SHEET_RECEIVED_CONTINUE_RESULT,
+                        )
+                    }
+                }
+            }
         }
     }
 

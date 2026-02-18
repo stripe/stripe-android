@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.embedded.form
 
+import android.app.Activity
 import android.app.Application
 import android.os.Bundle
 import androidx.compose.ui.test.assert
@@ -12,7 +13,9 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.espresso.Espresso.onIdle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodCode
@@ -75,13 +78,31 @@ internal class FormActivityTest {
         primaryButton.assert(hasText("Hi mom"))
     }
 
+    @Test
+    fun `When FormActivityStateHelper has result, activity finishes with that result`() = launch { scenario ->
+        scenario.onActivity { activity ->
+            activity.formActivityStateHelper.setResult(
+                FormResult.Complete(
+                    selection = null,
+                    hasBeenConfirmed = true,
+                )
+            )
+        }
+
+        onIdle()
+
+        assertThat(scenario.result.resultCode).isEqualTo(Activity.RESULT_OK)
+        val result = FormContract.parseResult(scenario.result.resultCode, scenario.result.resultData)
+        assertThat(result).isInstanceOf<FormResult.Complete>()
+    }
+
     private fun launch(
         selectedPaymentMethodCode: PaymentMethodCode = "card",
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         hasSavedPaymentMethods: Boolean = false,
         configuration: EmbeddedPaymentElement.Configuration =
             EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
-        block: () -> Unit,
+        block: (ActivityScenario<FormActivity>) -> Unit,
     ) {
         ActivityScenario.launchActivityForResult<FormActivity>(
             FormContract.createIntent(
@@ -97,7 +118,7 @@ internal class FormActivityTest {
                 ),
             )
         ).use { scenario ->
-            block()
+            block(scenario)
         }
     }
 }

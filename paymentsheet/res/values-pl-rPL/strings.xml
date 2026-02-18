@@ -259,6 +259,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_something_went_wrong">Coś poszło nie tak</string>
   <!-- Accessibility description when payment button shows a successful transaction animation. -->
   <string name="stripe_successful_transaction_description">Transakcja została zakończona</string>
+  <!-- Title shown in success screen shown after a user has added their card bu tapping -->
+  <string name="stripe_tap_to_add_card_added_title">Dodano kartę</string>
   <!-- Button label for a button that launches a flow for tapping a card on the device -->
   <string name="stripe_tap_to_add_card_button_label">Dotknij, aby dodać kartę</string>
   <!-- Button text on a screen asking the user to approve a payment -->

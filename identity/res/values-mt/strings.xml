@@ -92,8 +92,6 @@
   <string name="stripe_doc_front_warmup_title">Ħejji ruħek biex tiskennja d-dokument tal-identità bir-ritratt tiegħek</string>
   <!-- Label of the driver's license option for document type selection -->
   <string name="stripe_driver_license">Liċenzja tas-sewqan</string>
-  <!-- Text for error labels -->
-  <string name="stripe_error">Żball</string>
   <!-- Button that opens file upload screen -->
   <string name="stripe_file_upload">Tlugħ tal-Fajl</string>
   <!-- Instructions for uploading images of drivers license -->
@@ -203,6 +201,7 @@
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Qiegħed wiċċek f\'nofs il-gwarniċ.</string>
   <!-- Instructional text when the document is too blurry -->
+  <string name="stripe_reduce_blur">Id-dokument tal-identità sfukat</string>
   <string name="stripe_reduce_blur_2">L-immaġni hija mċajpra. Iċċaqlaqx il-mowbajl u erġa\' pprova.</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Id-dettalji ma jidhrux</string>

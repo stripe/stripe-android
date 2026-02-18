@@ -1,9 +1,18 @@
 package com.stripe.android.common.taptoadd
 
 import android.os.Bundle
+import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.lifecycleScope
+import com.stripe.android.common.taptoadd.ui.TapToAddLayout
+import com.stripe.android.common.taptoadd.ui.TapToAddNavigator
+import com.stripe.android.common.taptoadd.ui.TapToAddTheme
 import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
+import com.stripe.android.uicore.utils.collectAsState
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class TapToAddActivity : AppCompatActivity() {
@@ -16,6 +25,9 @@ internal class TapToAddActivity : AppCompatActivity() {
             requireNotNull(args)
         }
     }
+
+    @Inject
+    lateinit var tapToAddNavigator: TapToAddNavigator
 
     @Inject
     lateinit var tapToAddRegistrar: TapToAddRegistrar
@@ -36,5 +48,28 @@ internal class TapToAddActivity : AppCompatActivity() {
             activityResultCaller = this,
             lifecycleOwner = this,
         ).inject(this)
+
+        lifecycleScope.launch {
+            tapToAddNavigator.result.collectLatest {
+                setResult(
+                    RESULT_OK,
+                    TapToAddResult.toIntent(intent, it)
+                )
+                finish()
+            }
+        }
+
+        setContent {
+            TapToAddTheme {
+                val screen by tapToAddNavigator.screen.collectAsState()
+
+                TapToAddLayout(
+                    screen = screen,
+                    onCancel = {
+                        tapToAddNavigator.performAction(TapToAddNavigator.Action.Close)
+                    }
+                )
+            }
+        }
     }
 }

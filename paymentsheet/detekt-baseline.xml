@@ -118,6 +118,7 @@
     <ID>TooManyFunctions:PaymentSheet.kt$PaymentSheet.Appearance.Embedded.RowStyle.FlatWithDisclosure$Builder</ID>
     <ID>TooManyFunctions:PaymentSheet.kt$PaymentSheet.FlowController$Builder</ID>
     <ID>TooManyFunctions:ShopPayModule.kt$ShopPayModule$Companion</ID>
+    <ID>TooManyFunctions:TapToAddViewModelComponent.kt$TapToAddViewModelModule$Companion</ID>
     <ID>TooManyFunctions:WalletViewModel.kt$WalletViewModel : ViewModel</ID>
     <ID>UnusedPrivateClass:PaymentOptionsViewModelTest.kt$PaymentOptionsViewModelTest$MyHostActivity : AppCompatActivity</ID>
   </CurrentIssues>

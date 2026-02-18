@@ -92,8 +92,6 @@
   <string name="stripe_doc_front_warmup_title">사진이 있는 신분증 스캔 준비</string>
   <!-- Label of the driver's license option for document type selection -->
   <string name="stripe_driver_license">운전 면허증</string>
-  <!-- Text for error labels -->
-  <string name="stripe_error">오류</string>
   <!-- Button that opens file upload screen -->
   <string name="stripe_file_upload">파일 업로드</string>
   <!-- Instructions for uploading images of drivers license -->
@@ -203,6 +201,7 @@
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">프레임 중앙에 얼굴을 놓으십시오.</string>
   <!-- Instructional text when the document is too blurry -->
+  <string name="stripe_reduce_blur">신분증의 초점이 맞지 않음</string>
   <string name="stripe_reduce_blur_2">이미지가 흐릿합니다. 휴대폰을 안정적으로 잡고 다시 시도해 보십시오.</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">세부사항이 보이지 않음</string>

@@ -200,8 +200,7 @@ internal class LinkControllerInteractor @Inject constructor(
                 )
             },
             getLaunchMode = { linkAccount, _ ->
-                // This condition will need to change for web fallback.
-                if (linkAccount?.hasVerifiedSMSSession == true) {
+                if (linkAccount?.isVerified == true) {
                     logger.debug("$tag: account is already verified, skipping authentication")
                     _authenticationResultFlow.tryEmit(LinkController.AuthenticationResult.Success)
                     null

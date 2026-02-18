@@ -92,8 +92,6 @@
   <string name="stripe_doc_front_warmup_title">準備好掃描您帶照片的身份證件</string>
   <!-- Label of the driver's license option for document type selection -->
   <string name="stripe_driver_license">駕駛執照</string>
-  <!-- Text for error labels -->
-  <string name="stripe_error">錯誤</string>
   <!-- Button that opens file upload screen -->
   <string name="stripe_file_upload">文件上載</string>
   <!-- Instructions for uploading images of drivers license -->
@@ -203,6 +201,7 @@
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">將臉放在畫面正中間。</string>
   <!-- Instructional text when the document is too blurry -->
+  <string name="stripe_reduce_blur">證件未對焦</string>
   <string name="stripe_reduce_blur_2">影像模糊。請拿穩手機並重試。</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">細節不可見</string>

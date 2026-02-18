@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.embedded.form
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
@@ -92,6 +93,7 @@ internal class FormActivityConfirmationHandlerTest {
             eventReporter = FakeEventReporter(),
             coroutineScope = this,
             formActivityRegistrar = formActivityConfirmationHandlerRegistrar,
+            tapToAddHelper = FakeTapToAddHelper.noOp(),
         )
 
         assertThat(formActivityConfirmationHandlerRegistrar.registerAndBootstrapTurbine.awaitItem()).isNotNull()

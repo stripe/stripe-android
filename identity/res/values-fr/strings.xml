@@ -92,8 +92,6 @@
   <string name="stripe_doc_front_warmup_title">Préparez-vous à scanner votre pièce d\'identité</string>
   <!-- Label of the driver's license option for document type selection -->
   <string name="stripe_driver_license">Permis de conduire</string>
-  <!-- Text for error labels -->
-  <string name="stripe_error">Erreur</string>
   <!-- Button that opens file upload screen -->
   <string name="stripe_file_upload">Chargement de fichier</string>
   <!-- Instructions for uploading images of drivers license -->
@@ -203,6 +201,7 @@
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Placez votre visage au centre du cadre.</string>
   <!-- Instructional text when the document is too blurry -->
+  <string name="stripe_reduce_blur">La pièce d\'identité est floue</string>
   <string name="stripe_reduce_blur_2">Image floue. Stabilisez votre téléphone et réessayez.</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Détails non visibles</string>

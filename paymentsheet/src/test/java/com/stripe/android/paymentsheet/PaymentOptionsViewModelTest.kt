@@ -1215,6 +1215,36 @@ internal class PaymentOptionsViewModelTest {
         }
     }
 
+    @Test
+    fun `When tap to add result is Canceled with payment selection, selection and PMs are updated`() = runTest {
+        val expectedPaymentSelection = SELECTION_SAVED_PAYMENT_METHOD
+        val customerStateHolder = FakeCustomerStateHolder()
+
+        FakeTapToAddHelper.Factory.test {
+            val viewModel = createViewModel(
+                tapToAddHelperFactory = tapToAddHelperFactory,
+                customerStateHolder = customerStateHolder,
+            )
+
+            createCalls.awaitItem()
+
+            viewModel.selection.test {
+                assertThat(awaitItem()).isNull()
+
+                tapToAddHelperFactory.getCreatedHelper()?.emitResult(
+                    TapToAddResult.Canceled(
+                        expectedPaymentSelection
+                    )
+                )
+
+                assertThat(customerStateHolder.addPaymentMethodTurbine.awaitItem()).isEqualTo(
+                    expectedPaymentSelection.paymentMethod
+                )
+                assertThat(awaitItem()).isEqualTo(expectedPaymentSelection)
+            }
+        }
+    }
+
     @OptIn(WalletButtonsPreview::class)
     private fun testWalletVisibility(
         linkState: LinkState?,
@@ -1340,7 +1370,7 @@ internal class PaymentOptionsViewModelTest {
     private fun createLinkViewModel(): PaymentOptionsViewModel {
         val linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(
             attachNewCardToAccountResult = Result.success(LinkTestUtils.LINK_SAVED_PAYMENT_DETAILS),
-            accountStatus = AccountStatus.Verified(true, null),
+            accountStatus = AccountStatus.Verified(consentPresentation = null),
         )
 
         return createViewModel(
@@ -1360,6 +1390,7 @@ internal class PaymentOptionsViewModelTest {
         workContext: CoroutineContext = testDispatcher,
         tapToAddHelperFactory: TapToAddHelper.Factory = FakeTapToAddHelper.Factory.noOp(),
         errorReporter: ErrorReporter = FakeErrorReporter(),
+        customerStateHolder: CustomerStateHolder? = null,
     ) = TestViewModelFactory.create(linkConfigurationCoordinator) { linkHandler, savedStateHandle ->
         PaymentOptionsViewModel(
             args = args.copy(
@@ -1382,6 +1413,7 @@ internal class PaymentOptionsViewModelTest {
             tapToAddHelperFactory = tapToAddHelperFactory,
             mode = EventReporter.Mode.Complete,
             errorReporter = errorReporter,
+            initialCustomerStateHolder = customerStateHolder,
         )
     }
 
