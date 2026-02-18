@@ -11,6 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.uicore.StripeTheme
@@ -99,24 +100,27 @@ internal class FormActivity : AppCompatActivity() {
             FormResult.Complete(
                 selection = null,
                 hasBeenConfirmed = true,
-                customerState = customerStateHolder.customer.value,
+                customerState = getCustomerState(),
             )
         )
         finish()
     }
 
     private fun setCancelAndFinish() {
-        val customerState = if (::customerStateHolder.isInitialized) {
+        setFormResult(
+            FormResult.Cancelled(
+                customerState = getCustomerState(),
+            )
+        )
+        finish()
+    }
+
+    private fun getCustomerState(): CustomerState? {
+        return if (::customerStateHolder.isInitialized) {
             customerStateHolder.customer.value
         } else {
             null
         }
-        setFormResult(
-            FormResult.Cancelled(
-                customerState = customerState,
-            )
-        )
-        finish()
     }
 
     override fun finish() {

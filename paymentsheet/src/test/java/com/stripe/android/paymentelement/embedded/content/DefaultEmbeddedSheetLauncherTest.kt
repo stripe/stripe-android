@@ -212,7 +212,11 @@ internal class DefaultEmbeddedSheetLauncherTest {
             val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
             selectionHolder.set(selection)
 
-            val result = FormResult.Complete(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION, false, customerState = null)
+            val result = FormResult.Complete(
+                PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
+                false,
+                customerState = null,
+            )
             val callback = formRegisterCall.callback.asCallbackFor<FormResult>()
 
             callback.onActivityResult(result)
@@ -229,7 +233,11 @@ internal class DefaultEmbeddedSheetLauncherTest {
             val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
             selectionHolder.set(selection)
 
-            val result = FormResult.Complete(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION, true, customerState = null)
+            val result = FormResult.Complete(
+                PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
+                true,
+                customerState = null,
+            )
             val callback = formRegisterCall.callback.asCallbackFor<FormResult>()
 
             callback.onActivityResult(result)
@@ -284,7 +292,6 @@ internal class DefaultEmbeddedSheetLauncherTest {
         callback.onActivityResult(result)
         assertThat(customerStateHolder.customer.value).isEqualTo(customerState)
     }
-
 
     @Test
     fun `formActivityLauncher callback sets customer state when available on cancel`() = testScenario {
@@ -438,8 +445,6 @@ internal class DefaultEmbeddedSheetLauncherTest {
             selection = selectionHolder.selection,
             customerMetadataPermissions = stateFlowOf(paymentMethodMetadata.customerMetadata?.permissions)
         )
-        // Set default customer state for tests
-        customerStateHolder.setCustomerState(createCustomerState(paymentMethods = emptyList()))
         val sheetStateHolder = SheetStateHolder(savedStateHandle)
         val errorReporter = FakeErrorReporter()
         val stateHelper = FakeEmbeddedStateHelper()
