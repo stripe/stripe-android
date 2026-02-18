@@ -13,26 +13,31 @@ enum class PaymentMethodType(internal val value: String) {
     GooglePay("google_pay")
 }
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed interface PaymentMethodSelection {
     val type: PaymentMethodType
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Card : PaymentMethodSelection {
         override val type = PaymentMethodType.Card
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class BankAccount : PaymentMethodSelection {
         override val type = PaymentMethodType.BankAccount
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class CardAndBankAccount : PaymentMethodSelection {
         override val type = PaymentMethodType.CardAndBankAccount
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class GooglePay(
-        val currencyCode: String,
-        val amount: Long,
-        val transactionId: String? = null,
-        val label: String? = null
+        internal val currencyCode: String,
+        internal val amount: Long,
+        internal val transactionId: String? = null,
+        internal val label: String? = null
     ) : PaymentMethodSelection {
         override val type = PaymentMethodType.GooglePay
     }
