@@ -15,6 +15,7 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.MandateHandler
 import com.stripe.android.paymentsheet.NewPaymentOptionSelection
@@ -62,6 +63,7 @@ internal abstract class BaseSheetViewModel(
     val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     val isCompleteFlow: Boolean,
     val mode: EventReporter.Mode,
+    customerStateHolder: CustomerStateHolder? = null,
 ) : ViewModel() {
     private val autocompleteLauncher = DefaultAutocompleteLauncher(
         AutocompleteAppearanceContext.PaymentElement(config.appearance)
@@ -132,7 +134,7 @@ internal abstract class BaseSheetViewModel(
      */
     abstract var newPaymentSelection: NewPaymentOptionSelection?
 
-    val customerStateHolder: CustomerStateHolder = CustomerStateHolder.create(this)
+    val customerStateHolder: CustomerStateHolder = customerStateHolder ?: DefaultCustomerStateHolder.create(this)
     val savedPaymentMethodMutator: SavedPaymentMethodMutator = SavedPaymentMethodMutator.create(this)
 
     protected val buttonsEnabled = combineAsStateFlow(

@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import com.stripe.android.common.taptoadd.TapToAddResult
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.NavigationHandler
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.CoroutineScope
@@ -46,6 +47,20 @@ internal class TapToAddNavigator(
             is Action.Close -> {
                 coroutineScope.launch {
                     _result.emit(TapToAddResult.Canceled(paymentSelection = null))
+                }
+            }
+            is Action.Complete -> {
+                coroutineScope.launch {
+                    _result.emit(TapToAddResult.Complete)
+                }
+            }
+            is Action.Continue -> {
+                coroutineScope.launch {
+                    _result.emit(
+                        TapToAddResult.Continue(
+                            paymentSelection = action.paymentSelection
+                        )
+                    )
                 }
             }
             is Action.NavigateTo -> {
@@ -95,7 +110,15 @@ internal class TapToAddNavigator(
             override fun Content() {
                 val state by interactor.state.collectAsState()
 
-                TapToAddConfirmationScreen(state = state)
+                TapToAddConfirmationScreen(
+                    state = state,
+                    onComplete = {
+                        interactor.performAction(TapToAddConfirmationInteractor.Action.ShownSuccess)
+                    },
+                    onPrimaryButtonPress = {
+                        interactor.performAction(TapToAddConfirmationInteractor.Action.PrimaryButtonPressed)
+                    }
+                )
             }
         }
 
@@ -125,5 +148,7 @@ internal class TapToAddNavigator(
     sealed interface Action {
         class NavigateTo(val screen: Screen) : Action
         data object Close : Action
+        data object Complete : Action
+        data class Continue(val paymentSelection: PaymentSelection.Saved) : Action
     }
 }

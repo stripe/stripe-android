@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 
-internal class CustomerStateHolderTest {
+internal class DefaultCustomerStateHolderTest {
     @Test
     fun `customer is initialized as null`() = runScenario {
         customerStateHolder.customer.test {
@@ -58,6 +58,27 @@ internal class CustomerStateHolderTest {
             )
 
             assertThat(awaitItem()).hasSize(1)
+        }
+    }
+
+    @Test
+    fun `addPaymentMethod adds payment method to customer`() {
+        val savedStateHandle = SavedStateHandle()
+        val newPaymentMethod = PaymentMethodFixtures.LINK_PAYMENT_METHOD
+        val originalPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val customerState = CustomerState.createForLegacyEphemeralKey(
+            paymentMethods = listOf(originalPaymentMethod)
+        )
+        savedStateHandle[CustomerStateHolder.SAVED_CUSTOMER] = customerState
+
+        runScenario(savedStateHandle = savedStateHandle) {
+            customerStateHolder.addPaymentMethod(newPaymentMethod)
+
+            val updatedCustomer = savedStateHandle[CustomerStateHolder.SAVED_CUSTOMER] as CustomerState?
+            val updatedCustomerPaymentMethods = updatedCustomer!!.paymentMethods
+            assertThat(updatedCustomerPaymentMethods).hasSize(2)
+            assertThat(updatedCustomerPaymentMethods).contains(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            assertThat(updatedCustomerPaymentMethods).contains(newPaymentMethod)
         }
     }
 
@@ -369,7 +390,7 @@ internal class CustomerStateHolderTest {
             )
         )
 
-        val customerStateHolder = CustomerStateHolder(
+        val customerStateHolder = DefaultCustomerStateHolder(
             customerMetadataPermissions = customerMetadata.mapAsStateFlow { it.permissions },
             savedStateHandle = savedStateHandle,
             selection = selection,

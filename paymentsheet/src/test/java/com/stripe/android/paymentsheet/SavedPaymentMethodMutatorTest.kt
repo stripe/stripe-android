@@ -905,7 +905,7 @@ class SavedPaymentMethodMutatorTest {
     ) {
         val paymentMethods = PaymentMethodFixtures.createCards(3)
 
-        val customerStateHolder = CustomerStateHolder(
+        val customerStateHolder = DefaultCustomerStateHolder(
             savedStateHandle = SavedStateHandle(),
             selection = MutableStateFlow(null),
             customerMetadataPermissions =
@@ -947,7 +947,7 @@ class SavedPaymentMethodMutatorTest {
         paymentMethodMetadata: PaymentMethodMetadata? = PaymentMethodMetadataFactory.create(
             hasCustomerConfiguration = true,
         ),
-        customerStateHolder: CustomerStateHolder = CustomerStateHolder(
+        customerStateHolder: CustomerStateHolder = DefaultCustomerStateHolder(
             savedStateHandle = SavedStateHandle(),
             selection = selection,
             customerMetadataPermissions = stateFlowOf(

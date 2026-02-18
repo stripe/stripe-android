@@ -3398,6 +3398,34 @@ internal class PaymentSheetViewModelTest {
         }
     }
 
+    @Test
+    fun `When tap to add result is Canceled with payment selection, selection and PMs are updated`() = runTest {
+        val expectedPaymentSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
+        val customerStateHolder = FakeCustomerStateHolder()
+
+        FakeTapToAddHelper.Factory.test {
+            val viewModel = createViewModel(
+                tapToAddHelperFactory = tapToAddHelperFactory,
+                customerStateHolder = customerStateHolder,
+            )
+
+            createCalls.awaitItem()
+
+            viewModel.selection.test {
+                tapToAddHelperFactory.getCreatedHelper()?.emitResult(
+                    TapToAddResult.Canceled(
+                        expectedPaymentSelection
+                    )
+                )
+
+                assertThat(customerStateHolder.addPaymentMethodTurbine.awaitItem()).isEqualTo(
+                    expectedPaymentSelection.paymentMethod
+                )
+                assertThat(awaitItem()).isEqualTo(expectedPaymentSelection)
+            }
+        }
+    }
+
     private fun testConfirmationStateRestorationAfterPaymentSuccess(
         loadStateBeforePaymentResult: Boolean
     ) = confirmationTest(
@@ -3487,6 +3515,7 @@ internal class PaymentSheetViewModelTest {
         cvcRecollectionHandler: CvcRecollectionHandler = this@PaymentSheetViewModelTest.cvcRecollectionHandler,
         cvcRecollectionInteractor: FakeCvcRecollectionInteractor = FakeCvcRecollectionInteractor(),
         tapToAddHelperFactory: TapToAddHelper.Factory = FakeTapToAddHelper.Factory.noOp(),
+        customerStateHolder: CustomerStateHolder? = null,
     ): PaymentSheetViewModel {
         return createViewModel(
             args = args,
@@ -3508,6 +3537,7 @@ internal class PaymentSheetViewModelTest {
             cvcRecollectionInteractor = cvcRecollectionInteractor,
             confirmationHandlerFactory = { handler },
             tapToAddHelperFactory = tapToAddHelperFactory,
+            customerStateHolder = customerStateHolder,
         )
     }
 
@@ -3543,6 +3573,7 @@ internal class PaymentSheetViewModelTest {
         cvcRecollectionInteractor: FakeCvcRecollectionInteractor = FakeCvcRecollectionInteractor(),
         confirmationHandlerFactory: ConfirmationHandler.Factory? = null,
         tapToAddHelperFactory: TapToAddHelper.Factory = FakeTapToAddHelper.Factory.noOp(),
+        customerStateHolder: CustomerStateHolder? = null,
     ): PaymentSheetViewModel {
         return TestViewModelFactory.create(
             linkConfigurationCoordinator = linkConfigurationCoordinator,
@@ -3577,6 +3608,7 @@ internal class PaymentSheetViewModelTest {
                 },
                 tapToAddHelperFactory = tapToAddHelperFactory,
                 mode = EventReporter.Mode.Complete,
+                initialCustomerStateHolder = customerStateHolder,
             )
         }
     }

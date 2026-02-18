@@ -47,6 +47,7 @@ internal class DefaultTapToAddCollectingInteractor(
         private val paymentMethodMetadata: PaymentMethodMetadata,
         @ViewModelScope private val coroutineScope: CoroutineScope,
         private val tapToAddCollectionHandler: TapToAddCollectionHandler,
+        private val paymentMethodHolder: TapToAddPaymentMethodHolder,
         private val tapToAddCardAddedInteractorFactory: TapToAddCardAddedInteractor.Factory,
         private val navigator: Provider<TapToAddNavigator>,
     ) : TapToAddCollectingInteractor.Factory {
@@ -56,6 +57,8 @@ internal class DefaultTapToAddCollectingInteractor(
                 coroutineScope = coroutineScope,
                 tapToAddCollectionHandler = tapToAddCollectionHandler,
                 onCollected = { paymentMethod ->
+                    paymentMethodHolder.setPaymentMethod(paymentMethod)
+
                     navigator.get().performAction(
                         action = TapToAddNavigator.Action.NavigateTo(
                             screen = TapToAddNavigator.Screen.CardAdded(

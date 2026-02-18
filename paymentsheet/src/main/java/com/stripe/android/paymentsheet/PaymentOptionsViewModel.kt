@@ -59,7 +59,7 @@ import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
 @JvmSuppressWildcards
-internal class PaymentOptionsViewModel @Inject constructor(
+internal class PaymentOptionsViewModel(
     private val args: PaymentOptionContract.Args,
     private val linkAccountHolder: LinkAccountHolder,
     private val linkGateFactory: LinkGate.Factory,
@@ -73,6 +73,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     tapToAddHelperFactory: TapToAddHelper.Factory,
     mode: EventReporter.Mode,
+    initialCustomerStateHolder: CustomerStateHolder?,
 ) : BaseSheetViewModel(
     config = args.configuration,
     eventReporter = eventReporter,
@@ -83,7 +84,39 @@ internal class PaymentOptionsViewModel @Inject constructor(
     cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
     isCompleteFlow = false,
     mode = mode,
+    customerStateHolder = initialCustomerStateHolder,
 ) {
+
+    @Inject constructor(
+        args: PaymentOptionContract.Args,
+        linkAccountHolder: LinkAccountHolder,
+        linkGateFactory: LinkGate.Factory,
+        errorReporter: ErrorReporter,
+        linkPaymentLauncher: LinkPaymentLauncher,
+        eventReporter: EventReporter,
+        customerRepository: CustomerRepository,
+        @IOContext workContext: CoroutineContext,
+        savedStateHandle: SavedStateHandle,
+        linkHandler: LinkHandler,
+        cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
+        tapToAddHelperFactory: TapToAddHelper.Factory,
+        mode: EventReporter.Mode,
+    ) : this(
+        args = args,
+        linkAccountHolder = linkAccountHolder,
+        linkGateFactory = linkGateFactory,
+        errorReporter = errorReporter,
+        linkPaymentLauncher = linkPaymentLauncher,
+        eventReporter = eventReporter,
+        customerRepository = customerRepository,
+        workContext = workContext,
+        savedStateHandle = savedStateHandle,
+        linkHandler = linkHandler,
+        cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
+        tapToAddHelperFactory = tapToAddHelperFactory,
+        mode = mode,
+        initialCustomerStateHolder = null,
+    )
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
         config = config,
@@ -229,7 +262,10 @@ internal class PaymentOptionsViewModel @Inject constructor(
             tapToAddHelper.result.collect { result ->
                 when (result) {
                     is TapToAddResult.Canceled -> {
-                        // Do nothing.
+                        result.paymentSelection?.let { paymentSelection ->
+                            customerStateHolder.addPaymentMethod(paymentSelection.paymentMethod)
+                            updateSelection(paymentSelection)
+                        }
                     }
                     TapToAddResult.Complete -> {
                         errorReporter.report(
