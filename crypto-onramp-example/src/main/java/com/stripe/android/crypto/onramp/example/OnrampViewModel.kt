@@ -257,7 +257,7 @@ internal class OnrampViewModel(
         } ?: run {
             clearUserData()
             _message.value = "No auth token found, please log in again"
-            _uiState.update { OnrampUiState(screen = Screen.LoginSignup) }
+            _uiState.update { OnrampUiState(screen = Screen.LoginSignup, googlePayIsReady = it.googlePayIsReady) }
         }
     }
 
@@ -291,10 +291,15 @@ internal class OnrampViewModel(
     fun onBackToLoginSignup() {
         loadUserData()?.let {
             _uiState.update {
-                OnrampUiState(email = it.email, authToken = it.authToken, screen = Screen.SeamlessSignIn)
+                OnrampUiState(
+                    email = it.email,
+                    authToken = it.authToken,
+                    screen = Screen.SeamlessSignIn,
+                    googlePayIsReady = it.googlePayIsReady
+                )
             }
         } ?: run {
-            _uiState.update { OnrampUiState(screen = Screen.LoginSignup) }
+            _uiState.update { OnrampUiState(screen = Screen.LoginSignup, googlePayIsReady = it.googlePayIsReady) }
         }
     }
 
@@ -681,7 +686,7 @@ internal class OnrampViewModel(
         val tokenWithoutLAI = _uiState.value.authToken
         if (tokenWithoutLAI == null) {
             _message.value = "No auth token found, please log in again"
-            _uiState.update { OnrampUiState(screen = Screen.LoginSignup) }
+            _uiState.update { OnrampUiState(screen = Screen.LoginSignup, googlePayIsReady = it.googlePayIsReady) }
             return null
         }
 
@@ -716,7 +721,12 @@ internal class OnrampViewModel(
                 is OnrampLogOutResult.Completed -> {
                     _message.value = "Successfully logged out"
                     clearUserData()
-                    _uiState.update { OnrampUiState(screen = Screen.LoginSignup) }
+                    _uiState.update {
+                        OnrampUiState(
+                            screen = Screen.LoginSignup,
+                            googlePayIsReady = it.googlePayIsReady
+                        )
+                    }
                 }
                 is OnrampLogOutResult.Failed -> {
                     _message.value = "Logout failed: ${result.error.message}"
