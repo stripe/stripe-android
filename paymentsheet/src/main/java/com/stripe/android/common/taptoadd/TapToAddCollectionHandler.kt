@@ -17,6 +17,7 @@ import com.stripe.stripeterminal.external.callable.SetupIntentCallback
 import com.stripe.stripeterminal.external.models.AllowRedisplay
 import com.stripe.stripeterminal.external.models.SetupIntent
 import com.stripe.stripeterminal.external.models.SetupIntentConfiguration
+import com.stripe.stripeterminal.external.models.TerminalErrorCode
 import com.stripe.stripeterminal.external.models.TerminalException
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -33,6 +34,8 @@ internal interface TapToAddCollectionHandler {
             val error: Throwable,
             val displayMessage: ResolvableString?,
         ) : CollectionState
+
+        data object Canceled : CollectionState
     }
 
     companion object {
@@ -99,10 +102,14 @@ internal class DefaultTapToAddCollectionHandler(
     }.fold(
         onSuccess = { it },
         onFailure = { error ->
-            TapToAddCollectionHandler.CollectionState.FailedCollection(
-                error = error,
-                displayMessage = error.stripeErrorMessage()
-            )
+            if (error is TerminalException && error.errorCode == TerminalErrorCode.CANCELED) {
+                TapToAddCollectionHandler.CollectionState.Canceled
+            } else {
+                TapToAddCollectionHandler.CollectionState.FailedCollection(
+                    error = error,
+                    displayMessage = error.stripeErrorMessage()
+                )
+            }
         }
     )
 
