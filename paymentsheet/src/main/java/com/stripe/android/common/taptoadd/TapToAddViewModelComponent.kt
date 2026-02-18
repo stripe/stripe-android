@@ -10,9 +10,11 @@ import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.common.taptoadd.ui.DefaultTapToAddCardAddedInteractor
 import com.stripe.android.common.taptoadd.ui.DefaultTapToAddCollectingInteractor
 import com.stripe.android.common.taptoadd.ui.DefaultTapToAddConfirmationInteractor
+import com.stripe.android.common.taptoadd.ui.DefaultTapToAddPaymentMethodHolder
 import com.stripe.android.common.taptoadd.ui.TapToAddCardAddedInteractor
 import com.stripe.android.common.taptoadd.ui.TapToAddCollectingInteractor
 import com.stripe.android.common.taptoadd.ui.TapToAddConfirmationInteractor
+import com.stripe.android.common.taptoadd.ui.TapToAddPaymentMethodHolder
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -113,6 +115,11 @@ internal interface TapToAddViewModelModule {
     fun bindsAnalyticsRequestFactory(
         paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory
     ): AnalyticsRequestFactory
+
+    @Binds
+    fun bindsPaymentMethodHolder(
+        tapToAddPaymentMethodHolder: DefaultTapToAddPaymentMethodHolder
+    ): TapToAddPaymentMethodHolder
 
     @Binds
     fun bindsTapToAddCollectingInteractorFactory(
