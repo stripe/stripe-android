@@ -53,5 +53,6 @@ internal class FakeCustomerStateHolder : CustomerStateHolder {
         setCustomerStateCalls.ensureAllEventsConsumed()
         setDefaultPaymentMethodCalls.ensureAllEventsConsumed()
         updateMostRecentlySelectedSavedPaymentMethodCalls.ensureAllEventsConsumed()
+        addPaymentMethodTurbine.ensureAllEventsConsumed()
     }
 }
