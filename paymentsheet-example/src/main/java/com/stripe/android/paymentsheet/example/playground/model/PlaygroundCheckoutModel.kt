@@ -65,6 +65,8 @@ class CheckoutRequest private constructor(
     val customPublishableKey: String?,
     @SerialName("use_checkout_session")
     val useCheckoutSession: Boolean?,
+    @SerialName("checkout_session_payment_method_save")
+    val checkoutSessionPaymentMethodSave: FeatureState?,
 ) {
     @Serializable
     enum class CustomerKeyType {
@@ -109,6 +111,7 @@ class CheckoutRequest private constructor(
         private var customSecretKey: String? = null
         private var customPublishableKey: String? = null
         private var useCheckoutSession: Boolean? = null
+        private var checkoutSessionPaymentMethodSave: FeatureState? = null
 
         fun initialization(initialization: String?) = apply {
             this.initialization = initialization
@@ -226,6 +229,10 @@ class CheckoutRequest private constructor(
             this.useCheckoutSession = useCheckoutSession
         }
 
+        fun checkoutSessionPaymentMethodSave(state: FeatureState?) = apply {
+            this.checkoutSessionPaymentMethodSave = state
+        }
+
         fun build(): CheckoutRequest {
             return CheckoutRequest(
                 initialization = initialization,
@@ -260,6 +267,7 @@ class CheckoutRequest private constructor(
                 customSecretKey = customSecretKey,
                 customPublishableKey = customPublishableKey,
                 useCheckoutSession = useCheckoutSession,
+                checkoutSessionPaymentMethodSave = checkoutSessionPaymentMethodSave,
             )
         }
     }
