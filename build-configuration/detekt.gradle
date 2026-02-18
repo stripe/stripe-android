@@ -25,7 +25,8 @@ if (detektIgnoreFile.exists()) {
         }
     }
     afterEvaluate {
-        tasks.matching { it.class.name.startsWith('io.gitlab.arturbosch.detekt.') }.configureEach {
+        def targetTypes = ['io.gitlab.arturbosch.detekt.Detekt', 'io.gitlab.arturbosch.detekt.DetektCreateBaselineTask']
+        tasks.matching { targetTypes.contains(it.class.name) }.configureEach {
             detektIgnorePatterns.each { pattern -> exclude(pattern) }
         }
     }
