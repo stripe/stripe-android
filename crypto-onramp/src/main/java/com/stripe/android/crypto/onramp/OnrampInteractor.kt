@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import androidx.annotation.RestrictTo
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.content.ContextCompat
 import com.stripe.android.core.utils.flatMapCatching
 import com.stripe.android.crypto.onramp.CheckoutState.Status
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsEvent
@@ -598,7 +599,7 @@ internal class OnrampInteractor @Inject constructor(
             OnrampCollectPaymentMethodResult.Completed(
                 displayData = PaymentMethodDisplayData(
                     imageLoader = {
-                        AppCompatResources.getDrawable(
+                        ContextCompat.getDrawable(
                             application,
                             com.stripe.android.R.drawable.stripe_google_pay_mark
                         )!!

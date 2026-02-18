@@ -63,7 +63,9 @@ class PaymentMethodDisplayData internal constructor(
         GooglePay
     }
 
-    val icon: Drawable = DelegateDrawable(imageLoader = imageLoader)
+    val icon: Drawable by lazy {
+        DelegateDrawable(imageLoader = imageLoader)
+    }
 
     val iconPainter: Painter
         @Composable
