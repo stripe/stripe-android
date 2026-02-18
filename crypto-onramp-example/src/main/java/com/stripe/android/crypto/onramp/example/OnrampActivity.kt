@@ -1217,7 +1217,6 @@ fun GooglePayButton(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-
             Image(
                 painter = painterResource(
                     com.stripe.android.R.drawable.stripe_google_pay_mark
