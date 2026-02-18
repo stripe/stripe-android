@@ -17,6 +17,7 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.CoroutineTestRule
@@ -89,6 +90,7 @@ class DefaultFormActivityConfirmationHelperTest {
             FormResult.Complete(
                 selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
                 hasBeenConfirmed = false,
+                customerState = null,
             )
         )
 
@@ -99,8 +101,10 @@ class DefaultFormActivityConfirmationHelperTest {
     @Test
     fun `TapToAddResult Complete sets state helper result as expected`() {
         val tapToAddHelper = FakeTapToAddHelper()
+        val customerStateHolder = FakeCustomerStateHolder()
         testScenario(
             tapToAddHelper = tapToAddHelper,
+            customerStateHolder = customerStateHolder,
         ) {
             tapToAddHelper.emitResult(TapToAddResult.Complete)
 
@@ -108,6 +112,7 @@ class DefaultFormActivityConfirmationHelperTest {
                 FormResult.Complete(
                     selection = null,
                     hasBeenConfirmed = true,
+                    customerState = customerStateHolder.customer.value,
                 )
             )
         }
@@ -116,8 +121,10 @@ class DefaultFormActivityConfirmationHelperTest {
     @Test
     fun `TapToAddResult Continue sets state helper result as expected`() {
         val tapToAddHelper = FakeTapToAddHelper()
+        val customerStateHolder = FakeCustomerStateHolder()
         testScenario(
             tapToAddHelper = tapToAddHelper,
+            customerStateHolder = customerStateHolder,
         ) {
             val expectedSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
             tapToAddHelper.emitResult(
@@ -130,7 +137,11 @@ class DefaultFormActivityConfirmationHelperTest {
                 FormResult.Complete(
                     selection = expectedSelection,
                     hasBeenConfirmed = false,
+                    customerState = customerStateHolder.customer.value,
                 )
+            )
+            assertThat(customerStateHolder.addPaymentMethodTurbine.awaitItem()).isEqualTo(
+                expectedSelection.paymentMethod
             )
         }
     }
@@ -151,12 +162,34 @@ class DefaultFormActivityConfirmationHelperTest {
         }
     }
 
+    @Test
+    fun `TapToAddResult Canceled adds payment method to customer state when available`() {
+        val tapToAddHelper = FakeTapToAddHelper()
+        val customerStateHolder = FakeCustomerStateHolder()
+        val expectedSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
+        testScenario(
+            tapToAddHelper = tapToAddHelper,
+            customerStateHolder = customerStateHolder,
+        ) {
+            tapToAddHelper.emitResult(
+                TapToAddResult.Canceled(
+                    paymentSelection = expectedSelection,
+                )
+            )
+
+            assertThat(customerStateHolder.addPaymentMethodTurbine.awaitItem()).isEqualTo(
+                expectedSelection.paymentMethod
+            )
+        }
+    }
+
     private fun testScenario(
         configurationModifier:
         EmbeddedPaymentElement.Configuration.Builder.() -> EmbeddedPaymentElement.Configuration.Builder = {
             this
         },
         tapToAddHelper: TapToAddHelper = FakeTapToAddHelper.noOp(),
+        customerStateHolder: FakeCustomerStateHolder = FakeCustomerStateHolder(),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val formActivityRegistrar = FakeFormActivityRegistrar()
@@ -181,6 +214,7 @@ class DefaultFormActivityConfirmationHelperTest {
             onClickDelegate = onClickDelegate,
             eventReporter = eventReporter,
             tapToAddHelper = tapToAddHelper,
+            customerStateHolder = customerStateHolder,
             lifecycleOwner = testLifecycleOwner,
             activityResultCaller = mock(),
             coroutineScope = this,
@@ -202,6 +236,7 @@ class DefaultFormActivityConfirmationHelperTest {
         eventReporter.validate()
         confirmationHandler.validate()
         stateHelper.validate()
+        customerStateHolder.validate()
     }
 
     private class Scenario(

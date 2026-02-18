@@ -28,7 +28,8 @@ internal interface EmbeddedSheetLauncher {
         code: String,
         paymentMethodMetadata: PaymentMethodMetadata,
         hasSavedPaymentMethods: Boolean,
-        embeddedConfirmationState: EmbeddedConfirmationStateHolder.State?
+        embeddedConfirmationState: EmbeddedConfirmationStateHolder.State?,
+        customerState: CustomerState?,
     )
 
     fun launchManage(
@@ -68,6 +69,9 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         activityResultCaller.registerForActivityResult(FormContract) { result ->
             sheetStateHolder.sheetIsOpen = false
             selectionHolder.setTemporary(null)
+
+            result.customerState?.let { customerStateHolder.setCustomerState(it) }
+
             if (result is FormResult.Complete) {
                 selectionHolder.set(result.selection)
                 if (result.hasBeenConfirmed) {
@@ -103,7 +107,8 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         code: String,
         paymentMethodMetadata: PaymentMethodMetadata,
         hasSavedPaymentMethods: Boolean,
-        embeddedConfirmationState: EmbeddedConfirmationStateHolder.State?
+        embeddedConfirmationState: EmbeddedConfirmationStateHolder.State?,
+        customerState: CustomerState?,
     ) {
         if (embeddedConfirmationState == null) {
             errorReporter.report(
@@ -125,6 +130,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             statusBarColor = statusBarColor,
             paymentSelection = currentSelection,
+            customerState = customerState,
         )
         formActivityLauncher.launch(args)
     }

@@ -22,6 +22,7 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.manage.ManageActivity
+import com.stripe.android.paymentsheet.createCustomerState
 import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.paymentelementtestpages.FormPage
@@ -85,6 +86,7 @@ internal class FormActivityTest {
                 FormResult.Complete(
                     selection = null,
                     hasBeenConfirmed = true,
+                    customerState = null,
                 )
             )
         }
@@ -115,6 +117,7 @@ internal class FormActivityTest {
                     statusBarColor = null,
                     paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
                     paymentSelection = null,
+                    customerState = createCustomerState(paymentMethods = emptyList()),
                 ),
             )
         ).use { scenario ->
