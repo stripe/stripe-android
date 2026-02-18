@@ -6,8 +6,8 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.common.taptoadd.DefaultTapToAddHelper
+import com.stripe.android.common.taptoadd.TapToAddConnectionModule
 import com.stripe.android.common.taptoadd.TapToAddHelper
-import com.stripe.android.common.taptoadd.TapToAddModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
@@ -75,7 +75,7 @@ import javax.inject.Singleton
     ],
     includes = [
         LinkCommonModule::class,
-        TapToAddModule::class,
+        TapToAddConnectionModule::class,
         PaymentsIntegrityModule::class
     ]
 )

@@ -7,6 +7,8 @@ import com.stripe.android.paymentsheet.ui.PrimaryButtonColors
 import com.stripe.android.paymentsheet.ui.PrimaryButtonTheme
 import com.stripe.android.uicore.StripeColors
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.stripeterminal.external.models.TapToPayUxConfiguration
+import android.graphics.Color as BaseAndroidColor
 
 @Composable
 internal fun TapToAddTheme(
@@ -50,4 +52,19 @@ private object TapToAddThemeDefaults {
             error = Color.Red,
         ),
     )
+}
+
+internal fun createTapToAddUxConfiguration(): TapToPayUxConfiguration {
+    return TapToPayUxConfiguration.Builder()
+        .darkMode(darkMode = TapToPayUxConfiguration.DarkMode.DARK)
+        .colors(
+            colors = TapToPayUxConfiguration.ColorScheme.Builder()
+                .primary(
+                    primary = TapToPayUxConfiguration.Color.Value(
+                        color = BaseAndroidColor.BLACK
+                    )
+                )
+                .build()
+        )
+        .build()
 }
