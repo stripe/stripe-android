@@ -31,6 +31,7 @@ internal class TapToAddViewModel @Inject constructor(
                 savedStateHandle = extras.createSavedStateHandle(),
                 application = extras.requireApplication(),
                 paymentElementCallbackIdentifier = args.paymentElementCallbackIdentifier,
+                eventMode = args.eventMode,
                 productUsage = args.productUsage,
             )
 

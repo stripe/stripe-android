@@ -45,6 +45,8 @@ import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
+import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
@@ -80,6 +82,7 @@ internal interface TapToAddViewModelComponent {
         fun build(
             @BindsInstance paymentMethodMetadata: PaymentMethodMetadata,
             @BindsInstance tapToAddMode: TapToAddMode,
+            @BindsInstance eventMode: EventReporter.Mode,
             @BindsInstance
             @PaymentElementCallbackIdentifier
             paymentElementCallbackIdentifier: String,
@@ -120,6 +123,11 @@ internal interface TapToAddViewModelModule {
     fun bindsPaymentMethodHolder(
         tapToAddPaymentMethodHolder: DefaultTapToAddPaymentMethodHolder
     ): TapToAddPaymentMethodHolder
+
+    @Binds
+    fun bindsEventReporter(
+        eventReporter: DefaultEventReporter
+    ): EventReporter
 
     @Binds
     fun bindsTapToAddCollectingInteractorFactory(

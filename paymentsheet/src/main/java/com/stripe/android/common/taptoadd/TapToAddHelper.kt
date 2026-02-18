@@ -8,6 +8,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -45,6 +46,7 @@ internal class DefaultTapToAddHelper(
     private val productUsage: Set<String>,
     private val paymentElementCallbackIdentifier: String,
     private val tapToAddMode: TapToAddMode,
+    private val eventMode: EventReporter.Mode,
     private val savedStateHandle: SavedStateHandle,
 ) : TapToAddHelper {
     private var launcher: ActivityResultLauncher<TapToAddContract.Args>? = null
@@ -87,6 +89,7 @@ internal class DefaultTapToAddHelper(
         launcher?.launch(
             input = TapToAddContract.Args(
                 mode = tapToAddMode,
+                eventMode = eventMode,
                 paymentMethodMetadata = paymentMethodMetadata,
                 paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
                 productUsage = productUsage,
@@ -98,6 +101,7 @@ internal class DefaultTapToAddHelper(
         @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
         @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
         private val savedStateHandle: SavedStateHandle,
+        private val eventMode: EventReporter.Mode,
     ) : TapToAddHelper.Factory {
         override fun create(
             coroutineScope: CoroutineScope,
@@ -106,6 +110,7 @@ internal class DefaultTapToAddHelper(
             return DefaultTapToAddHelper(
                 coroutineScope = coroutineScope,
                 tapToAddMode = tapToAddMode,
+                eventMode = eventMode,
                 paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
                 savedStateHandle = savedStateHandle,
                 productUsage = productUsage,

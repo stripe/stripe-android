@@ -16,6 +16,8 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
@@ -171,14 +173,20 @@ internal class DefaultTapToAddConfirmationInteractorTest {
             assertThat(awaitItem().primaryButton.state)
                 .isEqualTo(TapToAddConfirmationInteractor.State.PrimaryButton.State.Idle)
 
+            val intent = PaymentIntentFixtures.PI_SUCCEEDED
+
             confirmationHandlerScenario.confirmationState.value = ConfirmationHandler.State.Complete(
-                ConfirmationHandler.Result.Succeeded(
-                    intent = PaymentIntentFixtures.PI_SUCCEEDED,
-                ),
+                ConfirmationHandler.Result.Succeeded(intent),
             )
 
             assertThat(awaitItem().primaryButton.state)
                 .isEqualTo(TapToAddConfirmationInteractor.State.PrimaryButton.State.Complete)
+
+            val paymentSuccessEventCall = eventReporter.paymentSuccessCalls.awaitItem()
+
+            assertThat(paymentSuccessEventCall.paymentSelection)
+                .isEqualTo(PaymentSelection.Saved(paymentMethod))
+            assertThat(paymentSuccessEventCall.intentId).isEqualTo(intent.id)
         }
     }
 
@@ -192,9 +200,11 @@ internal class DefaultTapToAddConfirmationInteractorTest {
             assertThat(awaitItem().primaryButton.state)
                 .isEqualTo(TapToAddConfirmationInteractor.State.PrimaryButton.State.Idle)
 
+            val exception = Exception("Payment failed")
+
             confirmationHandlerScenario.confirmationState.value = ConfirmationHandler.State.Complete(
                 ConfirmationHandler.Result.Failed(
-                    cause = Exception("Payment failed"),
+                    cause = exception,
                     message = errorMessage,
                     type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
                 ),
@@ -204,6 +214,13 @@ internal class DefaultTapToAddConfirmationInteractorTest {
             assertThat(state.primaryButton.state)
                 .isEqualTo(TapToAddConfirmationInteractor.State.PrimaryButton.State.Idle)
             assertThat(state.error).isEqualTo(errorMessage)
+
+            val paymentFailureEventCall = eventReporter.paymentFailureCalls.awaitItem()
+
+            assertThat(paymentFailureEventCall.paymentSelection)
+                .isEqualTo(PaymentSelection.Saved(paymentMethod))
+            assertThat(paymentFailureEventCall.error)
+                .isEqualTo(PaymentSheetConfirmationError.Stripe(exception))
         }
     }
 
@@ -215,6 +232,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
         initialConfirmationState: ConfirmationHandler.State = ConfirmationHandler.State.Idle,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
+        val eventReporter = FakeEventReporter()
         FakeConfirmationHandler.test(
             initialState = initialConfirmationState,
         ) {
@@ -227,6 +245,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
                 paymentMethod = paymentMethod,
                 paymentMethodMetadata = paymentMethodMetadata,
                 confirmationHandler = handler,
+                eventReporter = eventReporter,
                 onContinue = {
                     onContinueCalls.add(it)
                 },
@@ -242,10 +261,12 @@ internal class DefaultTapToAddConfirmationInteractorTest {
                     paymentMethodMetadata = paymentMethodMetadata,
                     confirmationHandlerScenario = this,
                     onCompleteCalls = onCompleteCalls,
-                    onContinueCalls = onContinueCalls
+                    onContinueCalls = onContinueCalls,
+                    eventReporter = eventReporter,
                 )
             )
 
+            eventReporter.validate()
             onCompleteCalls.ensureAllEventsConsumed()
             onContinueCalls.ensureAllEventsConsumed()
         }
@@ -258,5 +279,6 @@ internal class DefaultTapToAddConfirmationInteractorTest {
         val confirmationHandlerScenario: FakeConfirmationHandler.Scenario,
         val onCompleteCalls: ReceiveTurbine<Unit>,
         val onContinueCalls: ReceiveTurbine<PaymentSelection.Saved>,
+        val eventReporter: FakeEventReporter,
     )
 }
