@@ -9,9 +9,11 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.utils.buyButtonLabel
 import com.stripe.android.paymentsheet.utils.continueButtonLabel
+import com.stripe.android.paymentsheet.utils.reportPaymentResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -63,9 +65,14 @@ internal class DefaultTapToAddConfirmationInteractor(
     private val paymentMethod: PaymentMethod,
     private val paymentMethodMetadata: PaymentMethodMetadata,
     private val confirmationHandler: ConfirmationHandler,
+    private val eventReporter: EventReporter,
     private val onContinue: (paymentSelection: PaymentSelection.Saved) -> Unit,
     private val onComplete: () -> Unit,
 ) : TapToAddConfirmationInteractor {
+    private val selection = PaymentSelection.Saved(
+        paymentMethod = paymentMethod,
+    )
+
     private val _state = MutableStateFlow(
         createInitialState(confirmationHandler.state.value)
     )
@@ -74,6 +81,13 @@ internal class DefaultTapToAddConfirmationInteractor(
     init {
         coroutineScope.launch {
             confirmationHandler.state.collectLatest { confirmationState ->
+                if (confirmationState is ConfirmationHandler.State.Complete) {
+                    eventReporter.reportPaymentResult(
+                        result = confirmationState.result,
+                        paymentSelection = selection,
+                    )
+                }
+
                 _state.update { state ->
                     state.withConfirmationState(confirmationState)
                 }
@@ -94,11 +108,7 @@ internal class DefaultTapToAddConfirmationInteractor(
     }
 
     private fun onPrimaryButtonWithContinueMode() {
-        onContinue(
-            PaymentSelection.Saved(
-                paymentMethod = paymentMethod,
-            )
-        )
+        onContinue(selection)
     }
 
     private fun onPrimaryButtonWithCompleteMode() {
@@ -185,6 +195,7 @@ internal class DefaultTapToAddConfirmationInteractor(
         private val tapToAddMode: TapToAddMode,
         private val paymentMethodMetadata: PaymentMethodMetadata,
         private val confirmationHandler: ConfirmationHandler,
+        private val eventReporter: EventReporter,
         private val tapToAddNavigator: Provider<TapToAddNavigator>,
     ) : TapToAddConfirmationInteractor.Factory {
         override fun create(paymentMethod: PaymentMethod): TapToAddConfirmationInteractor {
@@ -193,6 +204,7 @@ internal class DefaultTapToAddConfirmationInteractor(
                 paymentMethodMetadata = paymentMethodMetadata,
                 paymentMethod = paymentMethod,
                 confirmationHandler = confirmationHandler,
+                eventReporter = eventReporter,
                 coroutineScope = viewModelScope,
                 onComplete = {
                     tapToAddNavigator.get().performAction(TapToAddNavigator.Action.Complete)
