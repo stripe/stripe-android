@@ -43,7 +43,10 @@ internal fun DefaultLinkTheme(
     appearance: LinkAppearance.State? = LocalLinkAppearance.current,
     content: @Composable () -> Unit
 ) {
-    val stripeImageLoader = runCatching { LocalStripeImageLoader.current }
+    val stripeImageLoader = runCatching {
+        LocalStripeImageLoader.current
+        throw RuntimeException("Got here!")
+    }
         .getOrElse { StripeImageLoader(LocalContext.current) }
     val isDark = isLinkDarkTheme(appearance)
 
