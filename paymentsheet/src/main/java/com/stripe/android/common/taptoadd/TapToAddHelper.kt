@@ -49,6 +49,12 @@ internal class DefaultTapToAddHelper(
     private val eventMode: EventReporter.Mode,
     private val savedStateHandle: SavedStateHandle,
 ) : TapToAddHelper {
+    private var collecting: Boolean
+        get() = savedStateHandle.get<Boolean>(CURRENTLY_COLLECTING_WITH_TAP_TO_ADD_KEY) == true
+        set(value) {
+            savedStateHandle[CURRENTLY_COLLECTING_WITH_TAP_TO_ADD_KEY] = value
+        }
+
     private var launcher: ActivityResultLauncher<TapToAddContract.Args>? = null
 
     private var _hasPreviouslyAttemptedCollection
@@ -65,6 +71,8 @@ internal class DefaultTapToAddHelper(
 
     override fun register(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner) {
         val launcher = activityResultCaller.registerForActivityResult(TapToAddContract) { result ->
+            collecting = false
+
             coroutineScope.launch {
                 _result.emit(result)
             }
@@ -86,15 +94,23 @@ internal class DefaultTapToAddHelper(
     override fun startPaymentMethodCollection(paymentMethodMetadata: PaymentMethodMetadata) {
         _hasPreviouslyAttemptedCollection = true
 
-        launcher?.launch(
-            input = TapToAddContract.Args(
-                mode = tapToAddMode,
-                eventMode = eventMode,
-                paymentMethodMetadata = paymentMethodMetadata,
-                paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
-                productUsage = productUsage,
+        if (collecting) {
+            return
+        }
+
+        launcher?.run {
+            collecting = true
+
+            launch(
+                input = TapToAddContract.Args(
+                    mode = tapToAddMode,
+                    eventMode = eventMode,
+                    paymentMethodMetadata = paymentMethodMetadata,
+                    paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
+                    productUsage = productUsage,
+                )
             )
-        )
+        }
     }
 
     class Factory @Inject constructor(
@@ -120,5 +136,6 @@ internal class DefaultTapToAddHelper(
 
     private companion object {
         const val PREVIOUSLY_COLLECTED_WITH_TAP_TO_ADD_KEY = "PREVIOUSLY_COLLECTED_WITH_TAP_TO_ADD"
+        const val CURRENTLY_COLLECTING_WITH_TAP_TO_ADD_KEY = "CURRENTLY_COLLECTING_WITH_TAP_TO_ADD"
     }
 }
