@@ -115,7 +115,8 @@ internal class PaymentMethodMetadataKtxTest {
                     mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                         isPaymentMethodSaveEnabled = isPaymentMethodSaveEnabled,
                         paymentMethodRemove = ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
-                        paymentMethodRemoveLast = ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
+                        paymentMethodRemoveLast =
+                        ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
                         allowRedisplayOverride = allowRedisplayOverride,
                         isPaymentMethodSetAsDefaultEnabled = false,
                     )
