@@ -9,6 +9,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.analytics.FakeLinkAnalyticsHelper
 import com.stripe.android.link.analytics.LinkAnalyticsHelper
@@ -362,6 +363,33 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
         assertThat(nextStepResult.arguments).isEqualTo(CONFIRMATION_PARAMETERS)
     }
 
+    @Test
+    fun `'action' with saved link option returns immediately with saved payment option`() =
+        test(
+            initialAccountStatus = AccountStatus.Verified(consentPresentation = null),
+        ) {
+            val savedOption = createLinkInlineSignupConfirmationOptionSaved()
+
+            val action = definition.action(
+                confirmationOption = savedOption,
+                confirmationArgs = CONFIRMATION_PARAMETERS,
+            )
+
+            val getAccountStatusFlowCall = coordinatorScenario.getAccountStatusFlowCalls.awaitItem()
+            assertThat(getAccountStatusFlowCall.configuration).isEqualTo(savedOption.linkConfiguration)
+
+            assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Launch<Unit>>()
+            val launchAction = action.asLaunch()
+            val nextConfirmationOption = launchAction.launcherArguments.nextConfirmationOption
+
+            assertThat(nextConfirmationOption).isInstanceOf<PaymentMethodConfirmationOption.Saved>()
+            val savedConfirmationOption = nextConfirmationOption.asSaved()
+            assertThat(savedConfirmationOption.paymentMethod).isEqualTo(savedOption.paymentMethod)
+            assertThat(savedConfirmationOption.optionsParams).isEqualTo(savedOption.optionsParams)
+
+            coordinatorScenario.attachNewCardToAccountCalls.expectNoEvents()
+        }
+
     private fun testSkippedLinkSignupOnSignInError(
         accountStatus: AccountStatus
     ) = test {
@@ -597,7 +625,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
     }
 
     private fun validateSkippedLaunchAction(
-        confirmationOption: LinkInlineSignupConfirmationOption,
+        confirmationOption: LinkInlineSignupConfirmationOption.New,
         launchAction: ConfirmationDefinition.Action.Launch<LinkInlineSignupConfirmationDefinition.LauncherArguments>
     ) {
         val nextConfirmationOption = launchAction.launcherArguments.nextConfirmationOption
@@ -706,8 +734,8 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
             consentAction = SignUpConsentAction.Checkbox,
         ),
         passthroughMode: Boolean = false,
-    ): LinkInlineSignupConfirmationOption {
-        return LinkInlineSignupConfirmationOption(
+    ): LinkInlineSignupConfirmationOption.New {
+        return LinkInlineSignupConfirmationOption.New(
             createParams = createParams,
             optionsParams = null,
             extraParams = null,
@@ -753,6 +781,19 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                 clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
                 cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
             ),
+            userInput = userInput,
+        )
+    }
+
+    private fun createLinkInlineSignupConfirmationOptionSaved(
+        paymentMethod: PaymentMethod = PaymentMethodFactory.card(),
+        optionsParams: PaymentMethodOptionsParams? = null,
+        userInput: UserInput = UserInput.SignIn(email = "saved@test.com"),
+    ): LinkInlineSignupConfirmationOption.Saved {
+        return LinkInlineSignupConfirmationOption.Saved(
+            paymentMethod = paymentMethod,
+            optionsParams = optionsParams,
+            linkConfiguration = TestFactory.LINK_CONFIGURATION,
             userInput = userInput,
         )
     }

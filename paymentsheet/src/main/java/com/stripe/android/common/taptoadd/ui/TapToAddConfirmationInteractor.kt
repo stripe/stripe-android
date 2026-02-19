@@ -9,7 +9,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
+import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.utils.buyButtonLabel
@@ -79,9 +79,9 @@ internal class DefaultTapToAddConfirmationInteractor(
     private val onContinue: (paymentSelection: PaymentSelection.Saved) -> Unit,
     private val onComplete: () -> Unit,
 ) : TapToAddConfirmationInteractor {
-    private val selection = PaymentSelection.Saved(
+    private var selection = PaymentSelection.Saved(
         paymentMethod = paymentMethod,
-    )
+    ).withLinkState(state = linkFormHelper.state.value)
 
     private val _state = MutableStateFlow(
         createInitialState(
@@ -109,6 +109,8 @@ internal class DefaultTapToAddConfirmationInteractor(
 
         coroutineScope.launch {
             linkFormHelper.state.collectLatest { linkState ->
+                selection = selection.withLinkState(linkState)
+
                 _state.update { state ->
                     state.withLinkState(linkState)
                 }
@@ -137,13 +139,16 @@ internal class DefaultTapToAddConfirmationInteractor(
             return
         }
 
+        val confirmationOption = selection.toConfirmationOption(
+            configuration = null,
+            linkConfiguration = paymentMethodMetadata.linkState?.configuration,
+            cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
+        ) ?: return
+
         coroutineScope.launch {
             confirmationHandler.start(
                 arguments = ConfirmationHandler.Args(
-                    confirmationOption = PaymentMethodConfirmationOption.Saved(
-                        paymentMethod = paymentMethod,
-                        optionsParams = null,
-                    ),
+                    confirmationOption = confirmationOption,
                     paymentMethodMetadata = paymentMethodMetadata,
                 )
             )
@@ -232,6 +237,16 @@ internal class DefaultTapToAddConfirmationInteractor(
                 null
             },
         )
+    }
+
+    private fun PaymentSelection.Saved.withLinkState(
+        state: SavedPaymentMethodLinkFormHelper.State,
+    ): PaymentSelection.Saved {
+        return when (state) {
+            is SavedPaymentMethodLinkFormHelper.State.Unused,
+            is SavedPaymentMethodLinkFormHelper.State.Incomplete -> copy(linkInput = null)
+            is SavedPaymentMethodLinkFormHelper.State.Complete -> copy(linkInput = state.userInput)
+        }
     }
 
     class Factory @Inject constructor(

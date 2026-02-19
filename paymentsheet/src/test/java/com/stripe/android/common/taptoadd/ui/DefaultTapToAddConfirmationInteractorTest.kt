@@ -8,6 +8,7 @@ import com.stripe.android.common.spms.SavedPaymentMethodLinkFormHelper
 import com.stripe.android.common.taptoadd.TapToAddMode
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
+import com.stripe.android.link.TestFactory
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -18,10 +19,12 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
+import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationOption
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -101,6 +104,55 @@ internal class DefaultTapToAddConfirmationInteractorTest {
 
         assertThat(receivedSelection.paymentMethod).isEqualTo(paymentMethod)
     }
+
+    @Test
+    fun `Continue mode with completed link form returns selection containing input`() =
+        runScenario(
+            paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
+            tapToAddMode = TapToAddMode.Continue,
+            linkFormHelper = FakeSavedPaymentMethodLinkFormHelper(
+                initialState = SavedPaymentMethodLinkFormHelper.State.Complete(
+                    userInput = UserInput.SignIn(email = "link@test.com"),
+                ),
+            ),
+        ) {
+            interactor.performAction(TapToAddConfirmationInteractor.Action.PrimaryButtonPressed)
+
+            val receivedSelection = onContinueCalls.awaitItem()
+
+            assertThat(receivedSelection.paymentMethod).isEqualTo(paymentMethod)
+            assertThat(receivedSelection.linkInput).isEqualTo(UserInput.SignIn(email = "link@test.com"))
+        }
+
+    @Test
+    fun `Complete mode with complete link form and link state in metadata confirms with link option`() =
+        runScenario(
+            paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
+            tapToAddMode = TapToAddMode.Complete,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                isTapToAddSupported = true,
+                linkState = LinkState(
+                    configuration = TestFactory.LINK_CONFIGURATION,
+                    loginState = LinkState.LoginState.LoggedOut,
+                    signupMode = null,
+                ),
+            ),
+            linkFormHelper = FakeSavedPaymentMethodLinkFormHelper(
+                initialState = SavedPaymentMethodLinkFormHelper.State.Complete(
+                    userInput = UserInput.SignIn(email = "link@test.com"),
+                ),
+            ),
+        ) {
+            interactor.performAction(TapToAddConfirmationInteractor.Action.PrimaryButtonPressed)
+
+            val args = confirmationHandlerScenario.startTurbine.awaitItem()
+
+            assertThat(args.confirmationOption).isInstanceOf<LinkInlineSignupConfirmationOption.Saved>()
+            val savedOption = args.confirmationOption as LinkInlineSignupConfirmationOption.Saved
+            assertThat(savedOption.paymentMethod).isEqualTo(paymentMethod)
+            assertThat(savedOption.sanitizedUserInput)
+                .isEqualTo(UserInput.SignIn(email = "link@test.com"))
+        }
 
     @Test
     fun `PrimaryButtonPressed in Complete mode when idle starts confirmation process`() = runScenario(
