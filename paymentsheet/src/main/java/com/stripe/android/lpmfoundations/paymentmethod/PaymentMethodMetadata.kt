@@ -96,11 +96,6 @@ internal data class PaymentMethodMetadata(
             is LinkDisabledState, null -> null
         }
 
-    // customerMetadata is null in guest mode (no customer). Fall back to Legacy
-    // to let SaveForFutureUseHelper decide based on intent + customer config.
-    val paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior
-        get() = customerMetadata?.permissions?.saveConsent ?: PaymentMethodSaveConsentBehavior.Legacy
-
     fun hasIntentToSetup(code: PaymentMethodCode): Boolean {
         return when (stripeIntent) {
             is PaymentIntent -> stripeIntent.isSetupFutureUsageSet(code)
@@ -351,10 +346,10 @@ internal data class PaymentMethodMetadata(
         code: PaymentMethodCode
     ): PaymentMethod.AllowRedisplay {
         val isSettingUp = hasIntentToSetup(code) || forceSetupFutureUseBehaviorAndNewMandate
-        return paymentMethodSaveConsentBehavior.allowRedisplay(
+        return customerMetadata?.permissions?.saveConsent?.allowRedisplay(
             isSetupIntent = isSettingUp,
             customerRequestedSave = customerRequestedSave,
-        )
+        ) ?: PaymentMethod.AllowRedisplay.UNSPECIFIED
     }
 
     internal companion object {
