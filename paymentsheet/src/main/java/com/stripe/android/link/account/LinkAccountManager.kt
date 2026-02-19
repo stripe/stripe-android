@@ -122,7 +122,7 @@ internal interface LinkAccountManager {
 
     suspend fun shareCardPaymentDetails(
         cardPaymentDetails: LinkPaymentDetails.New,
-    ): Result<LinkPaymentDetails.Saved>
+    ): Result<LinkPaymentDetails.Passthrough>
 
     suspend fun sharePaymentDetails(
         paymentDetailsId: String,

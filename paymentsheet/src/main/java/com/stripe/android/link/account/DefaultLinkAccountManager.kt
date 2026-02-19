@@ -230,7 +230,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
 
     override suspend fun shareCardPaymentDetails(
         cardPaymentDetails: LinkPaymentDetails.New
-    ): Result<LinkPaymentDetails.Saved> {
+    ): Result<LinkPaymentDetails.Passthrough> {
         return runCatching {
             requireNotNull(linkAccountHolder.linkAccountInfo.value.account)
         }.mapCatching { account ->

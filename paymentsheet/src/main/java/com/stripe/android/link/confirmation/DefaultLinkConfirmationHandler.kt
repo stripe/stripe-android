@@ -121,7 +121,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                     paymentMethodMetadata = paymentMethodMetadata,
                 )
             }
-            is LinkPaymentDetails.Saved -> {
+            is LinkPaymentDetails.Passthrough -> {
                 savedConfirmationArgs(
                     paymentDetails = paymentDetails,
                     cvc = cvc,
@@ -190,7 +190,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
     }
 
     private fun savedConfirmationArgs(
-        paymentDetails: LinkPaymentDetails.Saved,
+        paymentDetails: LinkPaymentDetails.Passthrough,
         cvc: String?,
         paymentMethodMetadata: PaymentMethodMetadata,
     ): ConfirmationHandler.Args {

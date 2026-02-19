@@ -18,10 +18,13 @@ internal sealed class LinkPaymentDetails(
 ) : Parcelable {
 
     /**
-     * A [ConsumerPaymentDetails.PaymentDetails] that is already saved to the consumer's account.
+     * A [ConsumerPaymentDetails.PaymentDetails] that is already saved to the Link consumer's account.
+     *
+     * @param paymentMethod The [PaymentMethod] object that represents the Link payment method stored in the user's
+     *   consumer account.
      */
     @Parcelize
-    class Saved(
+    class Passthrough(
         override val paymentDetails: ConsumerPaymentDetails.Passthrough,
         val paymentMethod: PaymentMethod,
     ) : LinkPaymentDetails(paymentDetails)

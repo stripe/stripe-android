@@ -3615,7 +3615,7 @@ internal class PaymentSheetViewModelTest {
 
     private fun FakeConfirmationHandler.Scenario.createLinkViewModel(): PaymentSheetViewModel {
         val linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(
-            attachNewCardToAccountResult = Result.success(LinkTestUtils.LINK_SAVED_PAYMENT_DETAILS),
+            attachNewCardToAccountResult = Result.success(LinkTestUtils.LINK_PASSTHROUGH_PAYMENT_DETAILS),
             accountStatus = AccountStatus.Verified(consentPresentation = null),
         )
 
