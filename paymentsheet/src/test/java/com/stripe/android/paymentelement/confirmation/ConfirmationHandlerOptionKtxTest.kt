@@ -254,6 +254,7 @@ class ConfirmationHandlerOptionKtxTest {
             )
         )
     }
+
     @Test
     fun `On Google Pay selection with config with null google pay config, should return null`() {
         assertThat(
