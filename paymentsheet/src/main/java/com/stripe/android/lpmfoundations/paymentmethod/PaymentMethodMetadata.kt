@@ -394,9 +394,10 @@ internal data class PaymentMethodMetadata(
                 customerMetadata = customerMetadata,
                 sharedDataSpecs = sharedDataSpecs,
                 externalPaymentMethodSpecs = externalPaymentMethodSpecs,
-                // customerMetadata is null in guest mode (no customer), so fall back to elements session.
+                // customerMetadata is null in guest mode (no customer). Fall back to Legacy
+                // to let SaveForFutureUseHelper decide based on intent + customer config.
                 paymentMethodSaveConsentBehavior = customerMetadata?.permissions?.saveConsent
-                    ?: elementsSession.toPaymentSheetSaveConsentBehavior(),
+                    ?: PaymentMethodSaveConsentBehavior.Legacy,
                 linkConfiguration = configuration.link,
                 linkMode = linkSettings?.linkMode,
                 linkStateResult = linkStateResult,
