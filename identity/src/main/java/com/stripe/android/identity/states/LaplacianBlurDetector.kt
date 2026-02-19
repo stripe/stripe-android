@@ -149,9 +149,15 @@ internal class LaplacianBlurDetector @Inject constructor(context: Context) {
     companion object {
         private const val TAG = "LaplacianBlurDetector"
         private val CLASSIC_MATRIX = floatArrayOf(
-            -1.0f, -1.0f, -1.0f,
-            -1.0f, 8.0f, -1.0f,
-            -1.0f, -1.0f, -1.0f
+            -1.0f,
+            -1.0f,
+            -1.0f,
+            -1.0f,
+            8.0f,
+            -1.0f,
+            -1.0f,
+            -1.0f,
+            -1.0f
         )
 
         private const val DEFAULT_SCORE = 1.0f

@@ -24,13 +24,11 @@ constructor(
      * Unique identifier for the object.
      */
     override val id: String?,
-
     /**
      * The list of payment method types (e.g. card) that this [PaymentIntent] is allowed to
      * use.
      */
     override val paymentMethodTypes: List<String>,
-
     /**
      * Amount intended to be collected by this [PaymentIntent]. A positive integer
      * representing how much to charge in the smallest currency unit (e.g., 100 cents to charge
@@ -39,24 +37,20 @@ constructor(
      * of 99999999 for a USD charge of $999,999.99).
      */
     val amount: Long?,
-
     /**
      * Populated when `status` is `canceled`, this is the time at which the [PaymentIntent]
      * was canceled. Measured in seconds since the Unix epoch. If unavailable, will return 0.
      */
     val canceledAt: Long = 0L,
-
     /**
      * Reason for cancellation of this [PaymentIntent].
      */
     val cancellationReason: CancellationReason? = null,
-
     /**
      * Controls when the funds will be captured from the customer’s account.
      * See [CaptureMethod].
      */
     val captureMethod: CaptureMethod = CaptureMethod.Automatic,
-
     /**
      * The client secret of this [PaymentIntent]. Used for client-side retrieval using a
      * publishable key.
@@ -67,7 +61,6 @@ constructor(
      * secret.
      */
     override val clientSecret: String?,
-
     /**
      * One of automatic (default) or manual. See [ConfirmationMethod].
      *
@@ -82,81 +75,63 @@ constructor(
      * payment attempt with an explicit confirmation.
      */
     val confirmationMethod: ConfirmationMethod = ConfirmationMethod.Automatic,
-
     /**
      * Country code of the user.
      */
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     override val countryCode: String?,
-
     /**
      * Time at which the object was created. Measured in seconds since the Unix epoch.
      */
     override val created: Long,
-
     /**
      * Three-letter ISO currency code, in lowercase. Must be a supported currency.
      */
     val currency: String?,
-
     /**
      * An arbitrary string attached to the object. Often useful for displaying to users.
      */
     override val description: String? = null,
-
     /**
      * Has the value `true` if the object exists in live mode or the value
      * `false` if the object exists in test mode.
      */
     override val isLiveMode: Boolean,
-
     override val paymentMethod: PaymentMethod? = null,
-
     /**
      * ID of the payment method (a PaymentMethod, Card, BankAccount, or saved Source object)
      * to attach to this [PaymentIntent].
      */
     override val paymentMethodId: String? = null,
-
     /**
      * Email address that the receipt for the resulting payment will be sent to.
      */
     val receiptEmail: String? = null,
-
     /**
      * Status of this [PaymentIntent].
      */
     override val status: StripeIntent.Status? = null,
-
     val setupFutureUsage: StripeIntent.Usage? = null,
-
     /**
      * The payment error encountered in the previous [PaymentIntent] confirmation.
      */
     val lastPaymentError: Error? = null,
-
     /**
      * Shipping information for this [PaymentIntent].
      */
     val shipping: Shipping? = null,
-
     /**
      * Payment types that have not been activated in livemode, but have been activated in testmode.
      */
     override val unactivatedPaymentMethods: List<String>,
-
     /**
      * Payment types that are accepted when paying with Link.
      */
     override val linkFundingSources: List<String> = emptyList(),
-
     override val nextActionData: StripeIntent.NextActionData? = null,
-
     private val paymentMethodOptionsJsonString: String? = null,
-
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     override val automaticPaymentMethodsEnabled: Boolean = false,
-
 ) : StripeIntent {
 
     override fun getPaymentMethodOptions() = paymentMethodOptionsJsonString?.let {
@@ -314,43 +289,36 @@ constructor(
          * For card errors, the ID of the failed charge.
          */
         val charge: String?,
-
         /**
          * For some errors that could be handled programmatically, a short string indicating the
          * [error code](https://stripe.com/docs/error-codes) reported.
          */
         val code: String?,
-
         /**
          * For card errors resulting from a card issuer decline, a short string indicating the
          * [card issuer’s reason for the decline](https://stripe.com/docs/declines#issuer-declines)
          * if they provide one.
          */
         val declineCode: String?,
-
         /**
          * A URL to more information about the
          * [error code](https://stripe.com/docs/error-codes) reported.
          */
         val docUrl: String?,
-
         /**
          * A human-readable message providing more details about the error. For card errors,
          * these messages can be shown to your users.
          */
         val message: String?,
-
         /**
          * If the error is parameter-specific, the parameter related to the error.
          * For example, you can use this to display a message near the correct form field.
          */
         val param: String?,
-
         /**
          * The PaymentMethod object for errors returned on a request involving a PaymentMethod.
          */
         val paymentMethod: PaymentMethod?,
-
         /**
          * The type of error returned.
          */
@@ -411,28 +379,24 @@ constructor(
          * See [shipping.address](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-shipping-address)
          */
         val address: Address,
-
         /**
          * The delivery service that shipped a physical product, such as Fedex, UPS, USPS, etc.
          *
          * See [shipping.carrier](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-shipping-carrier)
          */
         val carrier: String? = null,
-
         /**
          * Recipient name.
          *
          * See [shipping.name](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-shipping-name)
          */
         val name: String? = null,
-
         /**
          * Recipient phone (including extension).
          *
          * See [shipping.phone](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-shipping-phone)
          */
         val phone: String? = null,
-
         /**
          * The tracking number for a physical product, obtained from the delivery service.
          * If multiple tracking numbers were generated for this purchase, please separate them

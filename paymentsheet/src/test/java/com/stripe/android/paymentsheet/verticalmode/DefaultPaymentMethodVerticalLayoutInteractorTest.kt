@@ -1520,7 +1520,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         )
         runScenario(
             initialWalletsState = walletsState,
-
         ) {
             interactor.state.test {
                 val linkPaymentMethod = awaitItem().displayablePaymentMethods.firstOrNull { it.code == "link" }
@@ -1550,7 +1549,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         )
         runScenario(
             initialWalletsState = walletsState,
-
         ) {
             interactor.state.test {
                 val linkPaymentMethod = awaitItem().displayablePaymentMethods.firstOrNull { it.code == "link" }

@@ -12,10 +12,8 @@ import kotlinx.serialization.Serializable
 data class SharedDataSpec(
     @SerialName("type")
     val type: String,
-
     @SerialName("fields")
     val fields: ArrayList<FormItemSpec> = arrayListOf(),
-
     @SerialName("selector_icon")
     val selectorIcon: SelectorIcon? = null,
 ) : Parcelable

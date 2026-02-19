@@ -15,21 +15,18 @@ class BankAccountTokenParams @JvmOverloads constructor(
      * [bank_account.country](https://stripe.com/docs/api/tokens/create_bank_account#create_bank_account_token-bank_account-country)
      */
     private val country: String,
-
     /**
      * The currency the bank account is in. This must be a country/currency pairing that Stripe supports.
      *
      * [bank_account.currency](https://stripe.com/docs/api/tokens/create_bank_account#create_bank_account_token-bank_account-currency)
      */
     private val currency: String,
-
     /**
      * The account number for the bank account, in string form. Must be a checking account.
      *
      * [bank_account.account_number](https://stripe.com/docs/api/tokens/create_bank_account#create_bank_account_token-bank_account-account_number)
      */
     private val accountNumber: String,
-
     /**
      * The type of entity that holds the account. This can be either `individual` or `company`.
      * This field is required when attaching the bank account to a `Customer` object.
@@ -37,7 +34,6 @@ class BankAccountTokenParams @JvmOverloads constructor(
      * [bank_account.account_holder_type](https://stripe.com/docs/api/tokens/create_bank_account#create_bank_account_token-bank_account-account_holder_type)
      */
     private val accountHolderType: Type? = null,
-
     /**
      * The name of the person or business that owns the bank account. This field is required when
      * attaching the bank account to a `Customer` object.
@@ -45,7 +41,6 @@ class BankAccountTokenParams @JvmOverloads constructor(
      * [bank_account.account_holder_name](https://stripe.com/docs/api/tokens/create_bank_account#create_bank_account_token-bank_account-account_holder_name)
      */
     private val accountHolderName: String? = null,
-
     /**
      * The routing number, sort code, or other country-appropriate institution number for the
      * bank account. For US bank accounts, this is required and should be the ACH routing number,

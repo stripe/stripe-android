@@ -8,7 +8,6 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 internal data class VerificationPageData(
-
     /* Unique identifier for the object. */
     @SerialName("id")
     val id: String,

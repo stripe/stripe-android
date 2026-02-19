@@ -10,17 +10,14 @@ import kotlinx.serialization.Serializable
 @Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal class StartIdentityVerificationResponse(
-
     /**
      * The identifier for the resulting identity session
      */
     val id: String,
-
     /**
      * The hosted Identity Page for redirecting users for Hosted Onramp
      */
     val url: String,
-
     /** Used to authenticate the mobile Identity SDK.
      * - NOTE: Present only if `is_mobile` was `true` in the request. `nil` otherwise.
      */

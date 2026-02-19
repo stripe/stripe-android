@@ -21,30 +21,21 @@ internal data class SupportedPaymentMethod(
      * https://stripe.com/docs/api/payment_intents/create#create_payment_intent-payment_method_types
      */
     val code: PaymentMethodCode,
-
     val syntheticCode: String = code,
-
     /** This describes the name that appears under the selector. */
     val displayName: ResolvableString,
-
     /** This describes the image in the LPM selector.  These can be found internally [here](https://www.figma.com/file/2b9r3CJbyeVAmKi1VHV2h9/Mobile-Payment-Element?node-id=1128%3A0) */
     @DrawableRes val iconResource: Int,
-
     /** This describes the image in the LPM selector when the luminance of `Colors.component` is less than 0.5. */
     @DrawableRes val iconResourceNight: Int?,
-
     /** An optional light theme icon url if it's supported. */
     val lightThemeIconUrl: String?,
-
     /** An optional dark theme icon url if it's supported. */
     val darkThemeIconUrl: String?,
-
     /** Indicates if the lpm icon in the selector requires tinting. */
     val iconRequiresTinting: Boolean,
-
     /** The subtitle, or marketing copy for an LPM. */
     val subtitle: ResolvableString? = null,
-
     /** This describes the outlined version in the LPM selector. */
     @DrawableRes val outlinedIconResource: Int? = null,
 ) {

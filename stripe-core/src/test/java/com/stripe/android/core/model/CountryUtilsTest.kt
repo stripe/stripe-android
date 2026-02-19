@@ -51,10 +51,26 @@ class CountryUtilsTest {
         // Check the first 20 countries in the list.
         assertThat(orderedCountries.subList(0, 20).map { it.name }.toList()).isEqualTo(
             listOf(
-                "United States", "Afghanistan", "Åland Islands", "Albania", "Algeria",
-                "Andorra", "Angola", "Anguilla", "Antarctica", "Antigua & Barbuda",
-                "Argentina", "Armenia", "Aruba", "Australia", "Austria", "Azerbaijan",
-                "Bahamas", "Bahrain", "Bangladesh", "Barbados"
+                "United States",
+                "Afghanistan",
+                "Åland Islands",
+                "Albania",
+                "Algeria",
+                "Andorra",
+                "Angola",
+                "Anguilla",
+                "Antarctica",
+                "Antigua & Barbuda",
+                "Argentina",
+                "Armenia",
+                "Aruba",
+                "Australia",
+                "Austria",
+                "Azerbaijan",
+                "Bahamas",
+                "Bahrain",
+                "Bangladesh",
+                "Barbados"
             )
         )
     }
@@ -65,10 +81,26 @@ class CountryUtilsTest {
         // Check the first 20 countries in the list.
         assertThat(orderedCountries.subList(0, 20).map { it.name }.toList()).isEqualTo(
             listOf(
-                "Singapore", "Afghanistan", "Åland Islands", "Albania", "Algeria",
-                "Andorra", "Angola", "Anguilla", "Antarctica", "Antigua & Barbuda",
-                "Argentina", "Armenia", "Aruba", "Australia", "Austria", "Azerbaijan",
-                "Bahamas", "Bahrain", "Bangladesh", "Barbados"
+                "Singapore",
+                "Afghanistan",
+                "Åland Islands",
+                "Albania",
+                "Algeria",
+                "Andorra",
+                "Angola",
+                "Anguilla",
+                "Antarctica",
+                "Antigua & Barbuda",
+                "Argentina",
+                "Armenia",
+                "Aruba",
+                "Australia",
+                "Austria",
+                "Azerbaijan",
+                "Bahamas",
+                "Bahrain",
+                "Bangladesh",
+                "Barbados"
             )
         )
     }
@@ -79,9 +111,26 @@ class CountryUtilsTest {
         // Check the first 20 countries in the list.
         assertThat(orderedCountries.subList(0, 20).map { it.name }.toList()).isEqualTo(
             listOf(
-                "France", "Afghanistan", "Afrique du Sud", "Albanie", "Algérie", "Allemagne", "Andorre",
-                "Angola", "Anguilla", "Antarctique", "Antigua-et-Barbuda", "Arabie saoudite", "Argentine",
-                "Arménie", "Aruba", "Australie", "Autriche", "Azerbaïdjan", "Bahamas", "Bahreïn"
+                "France",
+                "Afghanistan",
+                "Afrique du Sud",
+                "Albanie",
+                "Algérie",
+                "Allemagne",
+                "Andorre",
+                "Angola",
+                "Anguilla",
+                "Antarctique",
+                "Antigua-et-Barbuda",
+                "Arabie saoudite",
+                "Argentine",
+                "Arménie",
+                "Aruba",
+                "Australie",
+                "Autriche",
+                "Azerbaïdjan",
+                "Bahamas",
+                "Bahreïn"
             )
         )
     }
@@ -92,10 +141,26 @@ class CountryUtilsTest {
         // Check the first 20 countries in the list.
         assertThat(orderedCountries.subList(0, 20).map { it.name }.toList()).isEqualTo(
             listOf(
-                "Deutschland", "Afghanistan", "Ägypten", "Ålandinseln", "Albanien",
-                "Algerien", "Andorra", "Angola", "Anguilla", "Antarktis", "Antigua und Barbuda",
-                "Äquatorialguinea", "Argentinien", "Armenien", "Aruba", "Aserbaidschan", "Äthiopien",
-                "Australien", "Bahamas", "Bahrain"
+                "Deutschland",
+                "Afghanistan",
+                "Ägypten",
+                "Ålandinseln",
+                "Albanien",
+                "Algerien",
+                "Andorra",
+                "Angola",
+                "Anguilla",
+                "Antarktis",
+                "Antigua und Barbuda",
+                "Äquatorialguinea",
+                "Argentinien",
+                "Armenien",
+                "Aruba",
+                "Aserbaidschan",
+                "Äthiopien",
+                "Australien",
+                "Bahamas",
+                "Bahrain"
             )
         )
     }
@@ -106,9 +171,25 @@ class CountryUtilsTest {
         // Check the first 20 countries in the list.
         assertThat(orderedCountries.subList(0, 20).map { it.name }.toList()).isEqualTo(
             listOf(
-                "中国", "阿尔巴尼亚", "阿尔及利亚", "阿富汗",
-                "阿根廷", "阿拉伯联合酋长国", "阿鲁巴", "阿曼", "阿塞拜疆", "埃及", "埃塞俄比亚",
-                "爱尔兰", "爱沙尼亚", "安道尔", "安哥拉", "安圭拉", "安提瓜和巴布达", "奥地利", "奥兰群岛",
+                "中国",
+                "阿尔巴尼亚",
+                "阿尔及利亚",
+                "阿富汗",
+                "阿根廷",
+                "阿拉伯联合酋长国",
+                "阿鲁巴",
+                "阿曼",
+                "阿塞拜疆",
+                "埃及",
+                "埃塞俄比亚",
+                "爱尔兰",
+                "爱沙尼亚",
+                "安道尔",
+                "安哥拉",
+                "安圭拉",
+                "安提瓜和巴布达",
+                "奥地利",
+                "奥兰群岛",
                 "澳大利亚"
             )
         )
@@ -120,9 +201,26 @@ class CountryUtilsTest {
         // Check the first 20 countries in the list.
         assertThat(orderedCountries.subList(0, 20).map { it.name }.toList()).isEqualTo(
             listOf(
-                "日本", "アイスランド", "アイルランド", "アゼルバイジャン", "アフガニスタン", "アメリカ合衆国",
-                "アラブ首長国連邦", "アルジェリア", "アルゼンチン", "アルバ", "アルバニア", "アルメニア", "アンギラ",
-                "アンゴラ", "アンティグア・バーブーダ", "アンドラ", "イエメン", "イギリス", "イスラエル", "イタリア"
+                "日本",
+                "アイスランド",
+                "アイルランド",
+                "アゼルバイジャン",
+                "アフガニスタン",
+                "アメリカ合衆国",
+                "アラブ首長国連邦",
+                "アルジェリア",
+                "アルゼンチン",
+                "アルバ",
+                "アルバニア",
+                "アルメニア",
+                "アンギラ",
+                "アンゴラ",
+                "アンティグア・バーブーダ",
+                "アンドラ",
+                "イエメン",
+                "イギリス",
+                "イスラエル",
+                "イタリア"
             )
         )
     }

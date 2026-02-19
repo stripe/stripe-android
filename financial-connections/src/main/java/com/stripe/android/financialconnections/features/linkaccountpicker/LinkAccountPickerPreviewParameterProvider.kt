@@ -114,7 +114,6 @@ internal class LinkAccountPickerPreviewParameterProvider :
                 selectionCta = "Repair and connect account"
             ),
         ),
-
         LinkedAccount(
             account = PartnerAccount(
                 authorization = "Authorization",
@@ -155,7 +154,6 @@ internal class LinkAccountPickerPreviewParameterProvider :
                 id = "id2",
             )
         ),
-
         LinkedAccount(
             account = PartnerAccount(
                 authorization = "Authorization",

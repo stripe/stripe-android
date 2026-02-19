@@ -438,7 +438,6 @@ internal class VerticalModePaymentSheetActivityTest {
     fun `Entering Amex card shows disallowed error when disallowed`() = runTest(
         cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
             listOf(
-
                 PaymentSheet.CardBrandAcceptance.BrandCategory.Amex
             )
         ),
@@ -468,7 +467,6 @@ internal class VerticalModePaymentSheetActivityTest {
     fun `Displayed saved payment method is correct when a card brand is disallowed`() = runTest(
         cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
             listOf(
-
                 PaymentSheet.CardBrandAcceptance.BrandCategory.Visa
             )
         ),
@@ -487,7 +485,6 @@ internal class VerticalModePaymentSheetActivityTest {
     fun `Disallowed brands are disabled in the CBC dropdown`() = runTest(
         cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
             listOf(
-
                 PaymentSheet.CardBrandAcceptance.BrandCategory.Visa
             )
         ),
