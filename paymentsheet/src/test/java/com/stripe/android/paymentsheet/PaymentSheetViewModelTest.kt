@@ -3608,7 +3608,7 @@ internal class PaymentSheetViewModelTest {
                 },
                 tapToAddHelperFactory = tapToAddHelperFactory,
                 mode = EventReporter.Mode.Complete,
-                initialCustomerStateHolder = customerStateHolder,
+                initialCustomerStateHolder = customerStateHolder,,
             )
         }
     }

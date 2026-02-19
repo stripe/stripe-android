@@ -53,11 +53,16 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
                     is TapToAddResult.Canceled -> {
                         result.paymentSelection?.let {
                             customerStateHolder.addPaymentMethod(it.paymentMethod)
-                            FormResult.Complete(
-                                selection = it,
-                                hasBeenConfirmed = false,
-                                customerState = customerStateHolder.customer.value,
-                            )
+                            if (paymentMethodMetadata.linkState?.signupMode != null) {
+                                stateHelper.updatePaymentSelection(it)
+                                null
+                            } else {
+                                FormResult.Complete(
+                                    selection = it,
+                                    hasBeenConfirmed = false,
+                                    customerState = customerStateHolder.customer.value,
+                                )
+                            }
                         }
                     }
                     TapToAddResult.Complete -> {

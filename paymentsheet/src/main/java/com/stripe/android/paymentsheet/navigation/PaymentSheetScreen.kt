@@ -5,6 +5,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
+import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmUI
 import com.stripe.android.common.ui.BottomSheetLoadingIndicator
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
@@ -465,6 +467,46 @@ internal sealed interface PaymentSheetScreen {
         @Composable
         override fun Content(modifier: Modifier) {
             UpdatePaymentMethodUI(interactor, modifier)
+        }
+    }
+
+    class SavedPaymentMethodConfirm(
+        private val interactor: SavedPaymentMethodConfirmInteractor,
+        private val isLiveMode: Boolean,
+    ) : PaymentSheetScreen {
+        override val buyButtonState = stateFlowOf(
+            BuyButtonState(visible = true)
+        )
+        override val showsContinueButton: Boolean = true
+        override val topContentPadding: Dp = 0.dp
+        override val bottomContentPadding: Dp = formBottomContentPadding
+        override val walletsDividerSpacing: Dp = verticalModeWalletsDividerSpacing
+        override val showsPaymentConfirmationMandates: Boolean = true
+
+        override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
+            return stateFlowOf(
+                PaymentSheetTopBarStateFactory.create(
+                    isLiveMode = isLiveMode,
+                    editable = PaymentSheetTopBarState.Editable.Never,
+                )
+            )
+        }
+
+        override fun title(
+            isCompleteFlow: Boolean,
+            isWalletEnabled: Boolean
+        ): StateFlow<ResolvableString?> {
+            // TODO: use string resource
+            return stateFlowOf(resolvableString("Saved card"))
+        }
+
+        override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> {
+            return stateFlowOf(false)
+        }
+
+        @Composable
+        override fun Content(modifier: Modifier) {
+            SavedPaymentMethodConfirmUI(interactor)
         }
     }
 }

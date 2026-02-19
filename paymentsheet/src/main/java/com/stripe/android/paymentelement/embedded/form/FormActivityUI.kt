@@ -10,6 +10,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -17,10 +18,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
 import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.TestModeBadge
@@ -28,6 +32,8 @@ import com.stripe.android.paymentsheet.utils.DismissKeyboardOnProcessing
 import com.stripe.android.paymentsheet.utils.EventReporterProvider
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
+import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmUI
+import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_HEADER_TITLE
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormUI
 import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.StripeTheme
@@ -39,11 +45,13 @@ import com.stripe.android.uicore.utils.collectAsState
 @Composable
 internal fun FormActivityUI(
     interactor: DefaultVerticalModeFormInteractor,
+    savedPaymentMethodConfirmInteractorFactory: SavedPaymentMethodConfirmInteractor.Factory,
     eventReporter: EventReporter,
     onClick: () -> Unit,
     onProcessingCompleted: () -> Unit,
     state: FormActivityStateHelper.State,
     onDismissed: () -> Unit,
+    updateSelection: (PaymentSelection) -> Unit,
 ) {
     val scrollState = rememberScrollState()
     val interactorState by interactor.state.collectAsState()
@@ -55,14 +63,31 @@ internal fun FormActivityUI(
             topBar = {
                 FormActivityTopBar(
                     isLiveMode = interactor.isLiveMode,
-                    onDismissed = onDismissed
+                    onDismissed = onDismissed,
                 )
             },
             content = {
-                VerticalModeFormUI(
-                    interactor = interactor,
-                    showsWalletHeader = false
-                )
+                if (state.paymentSelection != null) {
+                    val savedPaymentMethodConfirmInteractor = savedPaymentMethodConfirmInteractorFactory.create(
+                        paymentSelection = state.paymentSelection,
+                        updateSelection = updateSelection,
+                    )
+                    // TODO: styling on this.
+                    Text(
+                        text = "Saved card", // TODO: use string resource.
+                        style = MaterialTheme.typography.h4,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    SavedPaymentMethodConfirmUI(
+                        savedPaymentMethodConfirmInteractor
+                    )
+                } else {
+                    VerticalModeFormUI(
+                        interactor = interactor,
+                        showsWalletHeader = false
+                    )
+                }
                 USBankAccountMandate(state)
                 FormActivityError(state)
                 Spacer(Modifier.height(40.dp))

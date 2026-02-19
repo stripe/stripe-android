@@ -352,6 +352,7 @@ internal class SavedPaymentMethodMutator(
                 is PaymentSheetScreen.ManageSavedPaymentMethods,
                 is PaymentSheetScreen.VerticalMode -> popWithDelay(viewModel)
                 is PaymentSheetScreen.AddAnotherPaymentMethod,
+                is PaymentSheetScreen.SavedPaymentMethodConfirm,
                 is PaymentSheetScreen.AddFirstPaymentMethod,
                 is PaymentSheetScreen.CvcRecollection,
                 PaymentSheetScreen.Loading,
@@ -385,7 +386,7 @@ internal class SavedPaymentMethodMutator(
                             cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance),
                             addressCollectionMode = viewModel.config.billingDetailsCollectionConfiguration.address,
                             allowedBillingCountries =
-                            viewModel.config.billingDetailsCollectionConfiguration.allowedBillingCountries,
+                                viewModel.config.billingDetailsCollectionConfiguration.allowedBillingCountries,
                             removeExecutor = { method ->
                                 performRemove()
                             },
@@ -405,7 +406,7 @@ internal class SavedPaymentMethodMutator(
                             isDefaultPaymentMethod = (
                                 displayableSavedPaymentMethod.isDefaultPaymentMethod(
                                     defaultPaymentMethodId =
-                                    viewModel.customerStateHolder.customer.value?.defaultPaymentMethodId
+                                        viewModel.customerStateHolder.customer.value?.defaultPaymentMethodId
                                 )
                                 ),
                             removeMessage = paymentMethodMetadata?.customerMetadata?.permissions?.removePaymentMethod

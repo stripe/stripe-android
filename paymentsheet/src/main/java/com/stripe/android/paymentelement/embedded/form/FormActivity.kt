@@ -8,7 +8,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
+import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.state.CustomerState
@@ -47,6 +49,12 @@ internal class FormActivity : AppCompatActivity() {
     @Inject
     lateinit var customerStateHolder: CustomerStateHolder
 
+    @Inject
+    lateinit var savedPaymentMethodConfirmInteractorFactory: SavedPaymentMethodConfirmInteractor.Factory
+
+    @Inject
+    lateinit var embeddedSelectionHolder: EmbeddedSelectionHolder
+
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,13 +90,15 @@ internal class FormActivity : AppCompatActivity() {
                 ) {
                     FormActivityUI(
                         interactor = formInteractor,
+                        savedPaymentMethodConfirmInteractorFactory = savedPaymentMethodConfirmInteractorFactory,
                         eventReporter = eventReporter,
-                        onDismissed = ::setCancelAndFinish,
                         onClick = {
                             confirmationHelper.confirm()
                         },
                         onProcessingCompleted = ::setCompletedResultAndDismiss,
-                        state = state
+                        state = state,
+                        onDismissed = ::setCancelAndFinish,
+                        updateSelection = embeddedSelectionHolder::set,
                     )
                 }
             }

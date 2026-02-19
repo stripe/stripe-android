@@ -12,6 +12,8 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.common.spms.DefaultLinkFormElementFactory
+import com.stripe.android.common.spms.DefaultSavedPaymentMethodLinkFormHelper
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddMode
 import com.stripe.android.common.taptoadd.TapToAddResult
@@ -262,8 +264,20 @@ internal class PaymentOptionsViewModel(
                 when (result) {
                     is TapToAddResult.Canceled -> {
                         result.paymentSelection?.let { paymentSelection ->
-                            customerStateHolder.addPaymentMethod(paymentSelection.paymentMethod)
-                            updateSelection(paymentSelection)
+                            handleTapToAddCancel(
+                                paymentMethodMetadata = args.state.paymentMethodMetadata,
+                                customerStateHolder = customerStateHolder,
+                                savedPaymentMethodLinkFormHelper = DefaultSavedPaymentMethodLinkFormHelper(
+                                    paymentMethodMetadata = args.state.paymentMethodMetadata,
+                                    linkConfigurationCoordinator = linkHandler.linkConfigurationCoordinator,
+                                    savedStateHandle = savedStateHandle,
+                                    linkFormElementFactory = DefaultLinkFormElementFactory,
+                                ),
+                                paymentSelection = paymentSelection,
+                                determineInitialBackStack = ::determineInitialBackStack,
+                                updateSelection = ::updateSelection,
+                                navigationHandler = navigationHandler,
+                            )
                         }
                     }
                     TapToAddResult.Complete -> {
