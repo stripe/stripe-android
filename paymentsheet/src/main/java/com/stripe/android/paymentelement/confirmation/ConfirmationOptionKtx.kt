@@ -17,7 +17,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
 internal fun PaymentSelection.toConfirmationOption(
-    configuration: CommonConfiguration?,
+    configuration: CommonConfiguration,
     linkConfiguration: LinkConfiguration?,
     cardFundingFilter: CardFundingFilter
 ): ConfirmationHandler.Option? {
@@ -35,13 +35,6 @@ internal fun PaymentSelection.toConfirmationOption(
         is PaymentSelection.Link -> toConfirmationOption(linkConfiguration)
         is PaymentSelection.ShopPay -> toConfirmationOption(configuration)
     }
-}
-
-private fun PaymentSelection.Saved.toConfirmationOption(): PaymentMethodConfirmationOption.Saved {
-    return PaymentMethodConfirmationOption.Saved(
-        paymentMethod = paymentMethod,
-        optionsParams = paymentMethodOptionsParams,
-    )
 }
 
 private fun PaymentSelection.ExternalPaymentMethod.toConfirmationOption(): ExternalPaymentMethodConfirmationOption {
@@ -69,7 +62,7 @@ private fun PaymentSelection.New.USBankAccount.toConfirmationOption(): PaymentMe
     }
 }
 
-private fun PaymentSelection.Saved.toConfirmationOption(
+internal fun PaymentSelection.Saved.toConfirmationOption(
     linkConfiguration: LinkConfiguration?,
 ): ConfirmationHandler.Option {
     return if (linkInput != null && linkConfiguration != null) {
@@ -80,7 +73,10 @@ private fun PaymentSelection.Saved.toConfirmationOption(
             userInput = linkInput,
         )
     } else {
-        toConfirmationOption()
+        PaymentMethodConfirmationOption.Saved(
+            paymentMethod = paymentMethod,
+            optionsParams = paymentMethodOptionsParams,
+        )
     }
 }
 
@@ -125,10 +121,10 @@ private fun PaymentSelection.New.toConfirmationOption(): ConfirmationHandler.Opt
 }
 
 private fun PaymentSelection.GooglePay.toConfirmationOption(
-    configuration: CommonConfiguration?,
+    configuration: CommonConfiguration,
     cardFundingFilter: CardFundingFilter
 ): GooglePayConfirmationOption? {
-    return configuration?.googlePay?.let { googlePay ->
+    return configuration.googlePay?.let { googlePay ->
         GooglePayConfirmationOption(
             config = GooglePayConfirmationOption.Config(
                 environment = googlePay.environment,
@@ -164,9 +160,9 @@ private fun PaymentSelection.Link.toConfirmationOption(
 }
 
 private fun PaymentSelection.CustomPaymentMethod.toConfirmationOption(
-    configuration: CommonConfiguration?
+    configuration: CommonConfiguration
 ): CustomPaymentMethodConfirmationOption? {
-    return configuration?.customPaymentMethods?.firstOrNull { type ->
+    return configuration.customPaymentMethods.firstOrNull { type ->
         type.id == id
     }?.let { type ->
         CustomPaymentMethodConfirmationOption(
