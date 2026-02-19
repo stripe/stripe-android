@@ -3,6 +3,7 @@ package com.stripe.android.common.taptoadd
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.taptoadd.ui.createTapToAddUxConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.CardBrand
@@ -24,6 +25,7 @@ import com.stripe.stripeterminal.external.models.SetupIntent
 import com.stripe.stripeterminal.external.models.SetupIntentCardPresentDetails
 import com.stripe.stripeterminal.external.models.SetupIntentConfiguration
 import com.stripe.stripeterminal.external.models.SetupIntentPaymentMethodDetails
+import com.stripe.stripeterminal.external.models.TapToPayUxConfiguration
 import com.stripe.stripeterminal.external.models.TerminalErrorCode
 import com.stripe.stripeterminal.external.models.TerminalException
 import kotlinx.coroutines.async
@@ -53,6 +55,7 @@ class TapToAddCollectionHandlerTest {
             isStripeTerminalSdkAvailable = { false },
             terminalWrapper = TestTerminalWrapper.noOp(),
             connectionManager = FakeTapToAddConnectionManager.noOp(isSupported = true, isConnected = false),
+            tapToPayUxConfiguration = tapToPayUxConfiguration,
             errorReporter = FakeErrorReporter(),
             createCardPresentSetupIntentCallbackRetriever = FakeCreateCardPresentSetupIntentCallbackRetriever.noOp(
                 callbackResult = Result.success(DEFAULT_CALLBACK),
@@ -68,6 +71,7 @@ class TapToAddCollectionHandlerTest {
             isStripeTerminalSdkAvailable = { true },
             terminalWrapper = TestTerminalWrapper.noOp(),
             connectionManager = FakeTapToAddConnectionManager.noOp(isSupported = true, isConnected = false),
+            tapToPayUxConfiguration = tapToPayUxConfiguration,
             errorReporter = FakeErrorReporter(),
             createCardPresentSetupIntentCallbackRetriever = FakeCreateCardPresentSetupIntentCallbackRetriever.noOp(
                 callbackResult = Result.success(DEFAULT_CALLBACK),
@@ -174,6 +178,7 @@ class TapToAddCollectionHandlerTest {
             }
 
             assertThat(retrieverScenario.waitForCallbackCalls.awaitItem()).isNotNull()
+            assertThat(terminalScenario.setTapToPayUxConfigurationCalls.awaitItem()).isNotNull()
 
             val retrievedSetupIntent = checkRetrieveSetupIntent("si_123_secret")
             val collectedIntent = checkCollectCall(retrievedSetupIntent)
@@ -209,6 +214,7 @@ class TapToAddCollectionHandlerTest {
         }
 
         assertThat(retrieverScenario.waitForCallbackCalls.awaitItem()).isNotNull()
+        assertThat(terminalScenario.setTapToPayUxConfigurationCalls.awaitItem()).isNotNull()
 
         val terminalException = TerminalException(
             errorCode = TerminalErrorCode.UNEXPECTED_SDK_ERROR,
@@ -240,6 +246,7 @@ class TapToAddCollectionHandlerTest {
         }
 
         assertThat(retrieverScenario.waitForCallbackCalls.awaitItem()).isNotNull()
+        assertThat(terminalScenario.setTapToPayUxConfigurationCalls.awaitItem()).isNotNull()
 
         val retrievedSetupIntent = checkRetrieveSetupIntent("si_123_secret")
 
@@ -274,6 +281,7 @@ class TapToAddCollectionHandlerTest {
         }
 
         assertThat(retrieverScenario.waitForCallbackCalls.awaitItem()).isNotNull()
+        assertThat(terminalScenario.setTapToPayUxConfigurationCalls.awaitItem()).isNotNull()
 
         val retrievedSetupIntent = checkRetrieveSetupIntent("si_123_secret")
 
@@ -303,6 +311,7 @@ class TapToAddCollectionHandlerTest {
         }
 
         assertThat(retrieverScenario.waitForCallbackCalls.awaitItem()).isNotNull()
+        assertThat(terminalScenario.setTapToPayUxConfigurationCalls.awaitItem()).isNotNull()
 
         val retrievedSetupIntent = checkRetrieveSetupIntent("si_123_secret")
         val collectedIntent = checkCollectCall(retrievedSetupIntent)
@@ -338,6 +347,7 @@ class TapToAddCollectionHandlerTest {
         }
 
         assertThat(retrieverScenario.waitForCallbackCalls.awaitItem()).isNotNull()
+        assertThat(terminalScenario.setTapToPayUxConfigurationCalls.awaitItem()).isNotNull()
 
         val retrievedSetupIntent = checkRetrieveSetupIntent("si_123_secret")
 
@@ -363,6 +373,7 @@ class TapToAddCollectionHandlerTest {
         }
 
         assertThat(retrieverScenario.waitForCallbackCalls.awaitItem()).isNotNull()
+        assertThat(terminalScenario.setTapToPayUxConfigurationCalls.awaitItem()).isNotNull()
 
         val retrievedSetupIntent = checkRetrieveSetupIntent("si_123_secret")
         val collectedIntent = checkCollectCall(retrievedSetupIntent)
@@ -390,6 +401,9 @@ class TapToAddCollectionHandlerTest {
         }
 
         assertThat(retrieverScenario.waitForCallbackCalls.awaitItem()).isNotNull()
+
+        assertThat(terminalScenario.setTapToPayUxConfigurationCalls.awaitItem())
+            .isEqualTo(tapToPayUxConfiguration)
 
         val retrievedSetupIntent = checkRetrieveSetupIntent("si_123_secret")
         val collectedIntent = checkCollectCall(retrievedSetupIntent)
@@ -440,8 +454,10 @@ class TapToAddCollectionHandlerTest {
                             terminalWrapper = terminalWrapper,
                             connectionManager = managerScenario.tapToAddConnectionManager,
                             errorReporter = errorReporter,
+                            tapToPayUxConfiguration = tapToPayUxConfiguration,
                             createCardPresentSetupIntentCallbackRetriever = retrieverScenario.retriever,
                         ),
+                        tapToPayUxConfiguration = tapToPayUxConfiguration,
                         managerScenario = managerScenario,
                         retrieverScenario = retrieverScenario,
                         terminalScenario = terminalScenario,
@@ -452,6 +468,7 @@ class TapToAddCollectionHandlerTest {
             }
         }
 
+        terminalScenario.setTapToPayUxConfigurationCalls.ensureAllEventsConsumed()
         terminalScenario.confirmSetupIntentCalls.ensureAllEventsConsumed()
         terminalScenario.retrieveSetupIntentCalls.ensureAllEventsConsumed()
         terminalScenario.collectPaymentMethodCalls.ensureAllEventsConsumed()
@@ -462,8 +479,10 @@ class TapToAddCollectionHandlerTest {
         val retrieveSetupIntentCalls = Turbine<TerminalScenario.RetrieveSetupIntentCall>()
         val collectPaymentMethodCalls = Turbine<TerminalScenario.CollectPaymentMethodCall>()
         val confirmSetupIntentCalls = Turbine<TerminalScenario.ConfirmSetupIntentCall>()
+        val setTapToPayUxConfigurationCalls = Turbine<TapToPayUxConfiguration>()
 
         val terminalInstance: Terminal = mock {
+            mockSetTapToPayUxConfiguration(setTapToPayUxConfigurationCalls)
             mockRetrieveSetupIntent(retrieveSetupIntentCalls)
             mockCollectPaymentMethod(collectPaymentMethodCalls)
             mockConfirmSetupIntent(confirmSetupIntentCalls)
@@ -474,6 +493,7 @@ class TapToAddCollectionHandlerTest {
             retrieveSetupIntentCalls = retrieveSetupIntentCalls,
             collectPaymentMethodCalls = collectPaymentMethodCalls,
             confirmSetupIntentCalls = confirmSetupIntentCalls,
+            setTapToPayUxConfigurationCalls = setTapToPayUxConfigurationCalls,
         )
     }
 
@@ -557,6 +577,16 @@ class TapToAddCollectionHandlerTest {
         }
 
         confirmSetupIntentCall.callback.onSuccess(confirmedSetupIntent)
+    }
+
+    private fun KStubbing<Terminal>.mockSetTapToPayUxConfiguration(
+        setTapToPayUxConfigurationCalls: Turbine<TapToPayUxConfiguration>
+    ) {
+        on { setTapToPayUxConfiguration(any<TapToPayUxConfiguration>()) } doAnswer { invocation ->
+            val config = invocation.arguments[0] as? TapToPayUxConfiguration
+                ?: fail("Invalid argument: Not a TapToPayUxConfiguration!")
+            setTapToPayUxConfigurationCalls.add(config)
+        }
     }
 
     private fun KStubbing<Terminal>.mockRetrieveSetupIntent(
@@ -654,6 +684,7 @@ class TapToAddCollectionHandlerTest {
     private class Scenario(
         val testScope: TestScope,
         val handler: TapToAddCollectionHandler,
+        val tapToPayUxConfiguration: TapToPayUxConfiguration,
         val managerScenario: FakeTapToAddConnectionManager.Scenario,
         val retrieverScenario: FakeCreateCardPresentSetupIntentCallbackRetriever.Scenario,
         val terminalScenario: TerminalScenario,
@@ -665,6 +696,7 @@ class TapToAddCollectionHandlerTest {
         val retrieveSetupIntentCalls: ReceiveTurbine<RetrieveSetupIntentCall>,
         val collectPaymentMethodCalls: ReceiveTurbine<CollectPaymentMethodCall>,
         val confirmSetupIntentCalls: ReceiveTurbine<ConfirmSetupIntentCall>,
+        val setTapToPayUxConfigurationCalls: ReceiveTurbine<TapToPayUxConfiguration>,
     ) {
         class RetrieveSetupIntentCall(
             val clientSecret: String,
@@ -725,6 +757,7 @@ class TapToAddCollectionHandlerTest {
     }
 
     private companion object {
+        val tapToPayUxConfiguration = createTapToAddUxConfiguration()
         val DEFAULT_METADATA = PaymentMethodMetadataFactory.create(isTapToAddSupported = true)
         val DEFAULT_CALLBACK = CreateCardPresentSetupIntentCallback {
             CreateIntentResult.Success("si_123_secret")

@@ -15,6 +15,7 @@ import com.stripe.android.common.taptoadd.ui.TapToAddCardAddedInteractor
 import com.stripe.android.common.taptoadd.ui.TapToAddCollectingInteractor
 import com.stripe.android.common.taptoadd.ui.TapToAddConfirmationInteractor
 import com.stripe.android.common.taptoadd.ui.TapToAddPaymentMethodHolder
+import com.stripe.android.common.taptoadd.ui.createTapToAddUxConfiguration
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -47,6 +48,7 @@ import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.stripeterminal.external.models.TapToPayUxConfiguration
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
@@ -158,6 +160,12 @@ internal interface TapToAddViewModelModule {
         @Singleton
         @Named(STATUS_BAR_COLOR)
         fun providesStatusBarColor(): Int? = null
+
+        @Provides
+        @Singleton
+        fun providesTapToAddUxConfiguration(): TapToPayUxConfiguration {
+            return createTapToAddUxConfiguration()
+        }
 
         @Provides
         fun providesContext(application: Application): Context {
