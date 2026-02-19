@@ -53,7 +53,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.mockito.kotlin.wheneverBlocking
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import kotlin.test.assertFalse
@@ -327,7 +326,7 @@ class StripeConnectWebViewContainerViewModelTest {
         val intent = Intent()
         val expected = arrayOf(Uri.parse("content://path/to/file"))
         var actual: Array<Uri>? = null
-        wheneverBlocking { componentCoordinator.chooseFile(mockActivity, intent) } doReturn expected
+        whenever { componentCoordinator.chooseFile(mockActivity, intent) } doReturn expected
 
         viewModel.delegate.onChooseFile(
             activity = mockActivity,
@@ -396,7 +395,7 @@ class StripeConnectWebViewContainerViewModelTest {
             connectedAccountId = "connected_account_id"
         )
         val expected = FinancialConnectionsSheetResult.Canceled
-        wheneverBlocking {
+        whenever {
             componentCoordinator.presentFinancialConnections(
                 activity = mockActivity,
                 clientSecret = message.clientSecret,
@@ -433,7 +432,7 @@ class StripeConnectWebViewContainerViewModelTest {
             PackageManager.PERMISSION_DENIED
 
         whenever(mockPermissionRequest.resources) doReturn arrayOf(PermissionRequest.RESOURCE_VIDEO_CAPTURE)
-        wheneverBlocking { componentCoordinator.requestCameraPermission(any()) } doReturn true
+        whenever { componentCoordinator.requestCameraPermission(any()) } doReturn true
 
         viewModel.delegate.onPermissionRequest(mockActivity, mockPermissionRequest)
 
@@ -446,7 +445,7 @@ class StripeConnectWebViewContainerViewModelTest {
             PackageManager.PERMISSION_DENIED
 
         whenever(mockPermissionRequest.resources) doReturn arrayOf(PermissionRequest.RESOURCE_VIDEO_CAPTURE)
-        wheneverBlocking { componentCoordinator.requestCameraPermission(any()) } doReturn false
+        whenever { componentCoordinator.requestCameraPermission(any()) } doReturn false
 
         viewModel.delegate.onPermissionRequest(mockActivity, mockPermissionRequest)
 
