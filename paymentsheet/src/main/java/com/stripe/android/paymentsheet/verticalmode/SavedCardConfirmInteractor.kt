@@ -16,7 +16,7 @@ internal interface SavedCardConfirmInteractor {
 
     val linkConfigurationCoordinator: LinkConfigurationCoordinator
 
-    val linkConfiguration: LinkConfiguration
+    val linkConfiguration: LinkConfiguration?
 
     fun handleViewAction(viewAction: ViewAction)
 
@@ -25,6 +25,13 @@ internal interface SavedCardConfirmInteractor {
             val inlineSignupViewAction: InlineSignupViewState
         ) : ViewAction
     }
+
+    interface Factory {
+        fun create(
+            paymentMethod: PaymentMethod,
+            onUserInputChanged: (UserInput?) -> Unit,
+        ) : SavedCardConfirmInteractor
+    }
 }
 
 internal class DefaultSavedCardConfirmInteractor(
@@ -32,7 +39,7 @@ internal class DefaultSavedCardConfirmInteractor(
     paymentMethod: PaymentMethod,
     paymentMethodMetadata: PaymentMethodMetadata,
     override val linkConfigurationCoordinator: LinkConfigurationCoordinator,
-    override val linkConfiguration: LinkConfiguration,
+    override val linkConfiguration: LinkConfiguration?,
     val onUserInputChanged: (UserInput?) -> Unit,
 ) : SavedCardConfirmInteractor {
     override val paymentMethod = DisplayableSavedPaymentMethod(
@@ -54,6 +61,45 @@ internal class DefaultSavedCardConfirmInteractor(
                     viewState.useLink
                 })
             }
+        }
+    }
+
+    class Factory(
+        private val paymentMethodMetadata: PaymentMethodMetadata,
+        private val linkConfiguration: LinkConfiguration?,
+        private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
+    ): SavedCardConfirmInteractor.Factory {
+        override fun create(
+            paymentMethod: PaymentMethod,
+            onUserInputChanged: (UserInput?) -> Unit,
+        ): SavedCardConfirmInteractor {
+            return create(
+                paymentMethodMetadata = paymentMethodMetadata,
+                linkConfiguration = linkConfiguration,
+                linkConfigurationCoordinator = linkConfigurationCoordinator,
+                paymentMethod = paymentMethod,
+                onUserInputChanged = onUserInputChanged,
+            )
+        }
+
+    }
+
+    companion object {
+        fun create(
+            paymentMethodMetadata: PaymentMethodMetadata,
+            paymentMethod: PaymentMethod,
+            linkConfiguration: LinkConfiguration?,
+            linkConfigurationCoordinator: LinkConfigurationCoordinator,
+            onUserInputChanged: (UserInput?) -> Unit,
+        ): DefaultSavedCardConfirmInteractor {
+            return DefaultSavedCardConfirmInteractor(
+                isLiveMode = false,
+                paymentMethod = paymentMethod,
+                paymentMethodMetadata = paymentMethodMetadata,
+                linkConfiguration = linkConfiguration,
+                linkConfigurationCoordinator = linkConfigurationCoordinator,
+                onUserInputChanged = onUserInputChanged,
+            )
         }
     }
 }

@@ -49,7 +49,9 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
             tapToAddHelper.result.collect { result ->
                 val formResult = when (result) {
                     is TapToAddResult.Canceled -> {
-                        // Do nothing.
+                        result.paymentSelection?.let {
+                            stateHelper.updatePaymentMethod(it.paymentMethod)
+                        }
                         null
                     }
                     TapToAddResult.Complete -> {

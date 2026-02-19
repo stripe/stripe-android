@@ -1,6 +1,5 @@
 package com.stripe.android.paymentelement.embedded.form
 
-import android.app.Activity
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -9,8 +8,11 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
+import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
+import com.stripe.android.paymentsheet.verticalmode.DefaultSavedCardConfirmInteractor
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
@@ -41,6 +43,12 @@ internal class FormActivity : AppCompatActivity() {
 
     @Inject
     lateinit var confirmationHelper: FormActivityConfirmationHelper
+
+    @Inject
+    lateinit var embeddedSavedCardConfirmInteractorFactory: EmbeddedSavedCardConfirmInteractorFactory
+
+    @Inject
+    lateinit var embeddedSelectionHolder: EmbeddedSelectionHolder
 
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -78,12 +86,19 @@ internal class FormActivity : AppCompatActivity() {
                     FormActivityUI(
                         interactor = formInteractor,
                         eventReporter = eventReporter,
-                        onDismissed = ::setCancelAndFinish,
                         onClick = {
                             confirmationHelper.confirm()
                         },
                         onProcessingCompleted = ::setCompletedResultAndDismiss,
-                        state = state
+                        state = state,
+                        onDismissed = ::setCancelAndFinish,
+                        savedCardConfirmInteractorFactory = embeddedSavedCardConfirmInteractorFactory,
+                        onUserInputChanged = { paymentMethod ->
+                            embeddedSelectionHolder.set(
+                                PaymentSelection.Saved(paymentMethod = paymentMethod)
+                                    // with user input
+                            )
+                        }
                     )
                 }
             }
@@ -115,7 +130,7 @@ internal class FormActivity : AppCompatActivity() {
 
     private fun setFormResult(result: FormResult) {
         setResult(
-            Activity.RESULT_OK,
+            RESULT_OK,
             FormResult.toIntent(intent, result)
         )
     }

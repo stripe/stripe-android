@@ -23,6 +23,7 @@ internal class FakeFormActivityStateHelper : FormActivityStateHelper {
                 processingState = PrimaryButtonProcessingState.Idle(null),
                 isProcessing = false,
                 shouldDisplayLockIcon = true,
+                shouldDisplaySavedCardConfirm = false,,
             )
         )
 
@@ -48,6 +49,10 @@ internal class FakeFormActivityStateHelper : FormActivityStateHelper {
 
     override fun updateError(error: ResolvableString?) {
         error("This should never be called!")
+    }
+
+    override fun updateShouldDisplaySavedCardConfirm(shouldDisplaySavedCardConfirm: Boolean) {
+        TODO("Not yet implemented")
     }
 
     override fun setResult(result: FormResult) {

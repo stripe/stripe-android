@@ -15,7 +15,7 @@ import com.stripe.android.uicore.getOuterFormInsets
 @Composable
 internal fun SavedCardConfirmUI(
     interactor: SavedCardConfirmInteractor,
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
 ) {
     // TODO: do we need to have the modifier passed into this? are we gonna use it for anything? idk.
     val horizontalPadding = StripeTheme.getOuterFormInsets()
@@ -35,15 +35,23 @@ internal fun SavedCardConfirmUI(
         )
 
         // TODO: we'd use the link form helper here, not this directly.
-        LinkElement(
-            initialUserInput = null,
-            linkConfigurationCoordinator = interactor.linkConfigurationCoordinator,
-            configuration = interactor.linkConfiguration,
-            linkSignupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
-            enabled = true,
-            onLinkSignupStateChanged = { interactor.handleViewAction(SavedCardConfirmInteractor.ViewAction.CheckLinkInlineSignup(it)) },
-            modifier = Modifier,
-            previousLinkSignupCheckboxSelection = null,
-        )
+        interactor.linkConfiguration?.let {
+            LinkElement(
+                initialUserInput = null,
+                linkConfigurationCoordinator = interactor.linkConfigurationCoordinator,
+                configuration = it,
+                linkSignupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+                enabled = true,
+                onLinkSignupStateChanged = {
+                    interactor.handleViewAction(
+                        SavedCardConfirmInteractor.ViewAction.CheckLinkInlineSignup(
+                            it
+                        )
+                    )
+                },
+                modifier = Modifier,
+                previousLinkSignupCheckboxSelection = null,
+            )
+        }
     }
 }

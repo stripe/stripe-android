@@ -4,6 +4,7 @@ import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -37,6 +38,10 @@ internal interface FormActivityStateHelper {
     fun updatePrimaryButton(callback: (PrimaryButton.UIState?) -> PrimaryButton.UIState?)
     fun updateError(error: ResolvableString?)
 
+    fun updateShouldDisplaySavedCardConfirm(shouldDisplaySavedCardConfirm: Boolean)
+
+    fun updatePaymentMethod(paymentMethod: PaymentMethod)
+
     fun setResult(result: FormResult)
 
     data class State(
@@ -47,6 +52,8 @@ internal interface FormActivityStateHelper {
         val shouldDisplayLockIcon: Boolean,
         val error: ResolvableString? = null,
         val mandateText: ResolvableString? = null,
+        val shouldDisplaySavedCardConfirm: Boolean,
+        val paymentMethod: PaymentMethod?,
     )
 }
 
@@ -66,6 +73,8 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
             processingState = PrimaryButtonProcessingState.Idle(null),
             isProcessing = false,
             shouldDisplayLockIcon = configuration.formSheetAction == EmbeddedPaymentElement.FormSheetAction.Confirm,
+            shouldDisplaySavedCardConfirm = false,
+            paymentMethod = null,
         )
     )
     override val state: StateFlow<FormActivityStateHelper.State> = _state
@@ -91,6 +100,18 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
     override fun setResult(result: FormResult) {
         coroutineScope.launch {
             _result.emit(result)
+        }
+    }
+
+    override fun updateShouldDisplaySavedCardConfirm(shouldDisplaySavedCardConfirm: Boolean) {
+        _state.update {
+            it.copy(shouldDisplaySavedCardConfirm = shouldDisplaySavedCardConfirm)
+        }
+    }
+
+    override fun updatePaymentMethod(paymentMethod: PaymentMethod) {
+        _state.update {
+            it.copy(paymentMethod = paymentMethod)
         }
     }
 
