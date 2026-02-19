@@ -287,7 +287,7 @@ internal class LinkApiRepository @Inject constructor(
         id: String,
         consumerSessionClientSecret: String,
         clientAttributionMetadata: ClientAttributionMetadata,
-    ): Result<LinkPaymentDetails.Saved> = withContext(workContext) {
+    ): Result<LinkPaymentDetails.Passthrough> = withContext(workContext) {
         val allowRedisplay = paymentMethodCreateParams.allowRedisplay?.let {
             mapOf(ALLOW_REDISPLAY_PARAM to it.value)
         } ?: emptyMap()
@@ -307,7 +307,7 @@ internal class LinkApiRepository @Inject constructor(
         ).onFailure {
             errorReporter.report(ErrorReporter.ExpectedErrorEvent.LINK_SHARE_CARD_FAILURE, StripeException.create(it))
         }.map { paymentMethod ->
-            LinkPaymentDetails.Saved(
+            LinkPaymentDetails.Passthrough(
                 paymentDetails = ConsumerPaymentDetails.Passthrough(
                     id = id,
                     last4 = paymentMethodCreateParams.cardLast4().orEmpty(),

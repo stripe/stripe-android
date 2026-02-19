@@ -133,7 +133,7 @@ internal class LinkInlineSignupConfirmationDefinition(
 
                 linkPaymentDetails.toNewOption(saveOption, configuration, extraParams)
             }
-            is LinkPaymentDetails.Saved -> {
+            is LinkPaymentDetails.Passthrough -> {
                 linkStore.markLinkAsUsed()
 
                 linkPaymentDetails.toSavedOption(saveOption)
@@ -142,7 +142,7 @@ internal class LinkInlineSignupConfirmationDefinition(
         }
     }
 
-    private fun LinkPaymentDetails.Saved.toSavedOption(
+    private fun LinkPaymentDetails.Passthrough.toSavedOption(
         saveOption: LinkInlineSignupConfirmationOption.PaymentMethodSaveOption,
     ): PaymentMethodConfirmationOption.Saved {
         return PaymentMethodConfirmationOption.Saved(

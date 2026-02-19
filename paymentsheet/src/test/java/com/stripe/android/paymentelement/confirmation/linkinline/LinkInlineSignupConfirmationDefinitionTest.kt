@@ -231,7 +231,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
     @Test
     fun `'action' should return 'Launch' after successful sign-in & attach`() = test(
         attachNewCardToAccountResult = Result.success(
-            LinkPaymentDetails.Saved(
+            LinkPaymentDetails.Passthrough(
                 paymentDetails = ConsumerPaymentDetails.Passthrough(
                     id = "csmrpd_123",
                     last4 = "4242",
@@ -544,7 +544,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
 
         actionTest(
             attachNewCardToAccountResult = Result.success(
-                LinkPaymentDetails.Saved(
+                LinkPaymentDetails.Passthrough(
                     paymentDetails = ConsumerPaymentDetails.Passthrough(
                         id = "csmrpd_123",
                         last4 = "4242",

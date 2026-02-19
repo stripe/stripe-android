@@ -489,7 +489,7 @@ class DefaultLinkAccountManagerTest {
                 id: String,
                 consumerSessionClientSecret: String,
                 clientAttributionMetadata: ClientAttributionMetadata,
-            ): Result<LinkPaymentDetails.Saved> {
+            ): Result<LinkPaymentDetails.Passthrough> {
                 val paymentDetailsMatch = paymentMethodCreateParams == newPaymentDetails.originalParams &&
                     id == newPaymentDetails.paymentDetails.id
                 if (paymentDetailsMatch && consumerSessionClientSecret == TestFactory.CLIENT_SECRET) {
@@ -516,7 +516,7 @@ class DefaultLinkAccountManagerTest {
         assertThat(result.isSuccess).isTrue()
         val linkPaymentDetails = result.getOrThrow()
         assertThat(linkPaymentDetails.paymentDetails.id)
-            .isEqualTo(TestFactory.LINK_SAVED_PAYMENT_DETAILS.paymentDetails.id)
+            .isEqualTo(TestFactory.LINK_PASSTHROUGH_PAYMENT_DETAILS.paymentDetails.id)
 
         assertThat(linkRepository.shareCardPaymentDetailsCallCount).isEqualTo(1)
         assertThat(accountManager.linkAccountInfo.value.account).isNotNull()

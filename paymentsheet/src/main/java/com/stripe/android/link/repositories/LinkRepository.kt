@@ -126,7 +126,7 @@ internal interface LinkRepository {
         id: String,
         consumerSessionClientSecret: String,
         clientAttributionMetadata: ClientAttributionMetadata,
-    ): Result<LinkPaymentDetails.Saved>
+    ): Result<LinkPaymentDetails.Passthrough>
 
     suspend fun sharePaymentDetails(
         consumerSessionClientSecret: String,
