@@ -98,15 +98,15 @@ internal class IdentityViewModelTest {
     }
 
     private val mockIdentityRepository = mock<IdentityRepository> {
-        onBlocking {
+        on {
             retrieveVerificationPage(any(), any())
         }.thenReturn(mockVerificationPage)
     }
     private val mockIdentityModelFetcher = mock<IdentityModelFetcher> {
-        onBlocking {
+        on {
             fetchIdentityModel(eq(ID_DETECTOR_URL))
         }.thenReturn(ID_DETECTOR_FILE)
-        onBlocking {
+        on {
             fetchIdentityModel(eq(FACE_DETECTOR_URL))
         }.thenReturn(FACE_DETECTOR_FILE)
     }

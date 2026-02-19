@@ -151,7 +151,7 @@ internal class CustomerRepositoryTest {
             )
 
             stripeRepository.stub {
-                onBlocking {
+                on {
                     getPaymentMethods(
                         listPaymentMethodsParams = eq(
                             ListPaymentMethodsParams(
@@ -211,7 +211,7 @@ internal class CustomerRepositoryTest {
         )
 
         stripeRepository.stub {
-            onBlocking {
+            on {
                 getPaymentMethods(
                     listPaymentMethodsParams = eq(
                         ListPaymentMethodsParams(
@@ -641,7 +641,7 @@ internal class CustomerRepositoryTest {
         result: Result<List<PaymentMethod>>
     ) {
         stripeRepository.stub {
-            onBlocking {
+            on {
                 getPaymentMethods(
                     listPaymentMethodsParams = any(),
                     productUsageTokens = any(),
@@ -655,7 +655,7 @@ internal class CustomerRepositoryTest {
         result: Result<PaymentMethod>
     ) {
         stripeRepository.stub {
-            onBlocking {
+            on {
                 detachPaymentMethod(
                     productUsageTokens = any(),
                     paymentMethodId = anyString(),
@@ -669,7 +669,7 @@ internal class CustomerRepositoryTest {
         result: Result<PaymentMethod>
     ) {
         stripeRepository.stub {
-            onBlocking {
+            on {
                 detachPaymentMethod(
                     customerSessionClientSecret = any(),
                     productUsageTokens = any(),
@@ -684,7 +684,7 @@ internal class CustomerRepositoryTest {
         result: Result<PaymentMethod>
     ) {
         stripeRepository.stub {
-            onBlocking {
+            on {
                 attachPaymentMethod(
                     customerId = anyString(),
                     productUsageTokens = any(),
@@ -699,7 +699,7 @@ internal class CustomerRepositoryTest {
         result: Result<PaymentMethod>
     ) {
         stripeRepository.stub {
-            onBlocking {
+            on {
                 updatePaymentMethod(
                     paymentMethodId = any(),
                     paymentMethodUpdateParams = any(),
