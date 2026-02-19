@@ -11,7 +11,7 @@ ext.versions = [
         androidxAnnotation          : '1.9.1',
         androidxAppcompat           : '1.7.0',
         androidxArchCore            : '2.2.0',
-        androidxBrowser             : '1.8.0',
+        androidxBrowser             : '1.9.0',
         androidxCompose             : '1.9.4',
         androidxComposeRuntime      : '1.9.4',
         androidxComposeUi           : '1.9.4',
