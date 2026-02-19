@@ -75,6 +75,11 @@ class TapToAddLayoutScreenshotTest {
                     label = "Pay".resolvableString,
                     locked = true,
                     state = TapToAddConfirmationInteractor.State.PrimaryButton.State.Idle,
+                    enabled = true,
+                ),
+                form = TapToAddConfirmationInteractor.State.Form(
+                    elements = emptyList(),
+                    enabled = true,
                 ),
                 error = null,
             )

@@ -91,6 +91,11 @@ internal class TapToAddConfirmationScreenScreenshotTest {
                                 label = "Pay".resolvableString,
                                 locked = locked,
                                 state = primaryButtonState,
+                                enabled = true,
+                            ),
+                            form = TapToAddConfirmationInteractor.State.Form(
+                                elements = emptyList(),
+                                enabled = true,
                             ),
                             error = error,
                         ),

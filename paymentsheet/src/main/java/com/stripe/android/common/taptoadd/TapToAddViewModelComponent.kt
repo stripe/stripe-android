@@ -10,10 +10,14 @@ import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.common.taptoadd.ui.DefaultTapToAddCardAddedInteractor
 import com.stripe.android.common.taptoadd.ui.DefaultTapToAddCollectingInteractor
 import com.stripe.android.common.taptoadd.ui.DefaultTapToAddConfirmationInteractor
+import com.stripe.android.common.taptoadd.ui.DefaultTapToAddLinkFormElementFactory
+import com.stripe.android.common.taptoadd.ui.DefaultTapToAddLinkFormHelper
 import com.stripe.android.common.taptoadd.ui.DefaultTapToAddPaymentMethodHolder
 import com.stripe.android.common.taptoadd.ui.TapToAddCardAddedInteractor
 import com.stripe.android.common.taptoadd.ui.TapToAddCollectingInteractor
 import com.stripe.android.common.taptoadd.ui.TapToAddConfirmationInteractor
+import com.stripe.android.common.taptoadd.ui.TapToAddLinkFormElementFactory
+import com.stripe.android.common.taptoadd.ui.TapToAddLinkFormHelper
 import com.stripe.android.common.taptoadd.ui.TapToAddPaymentMethodHolder
 import com.stripe.android.common.taptoadd.ui.createTapToAddUxConfiguration
 import com.stripe.android.core.injection.CoreCommonModule
@@ -27,6 +31,12 @@ import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
+import com.stripe.android.link.LinkConfigurationCoordinator
+import com.stripe.android.link.RealLinkConfigurationCoordinator
+import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.injection.LinkAnalyticsComponent
+import com.stripe.android.link.injection.LinkCommonModule
+import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
@@ -100,6 +110,9 @@ internal interface TapToAddViewModelComponent {
 @Module(
     subcomponents = [
         TapToAddSubcomponent::class,
+    ],
+    includes = [
+        TapToAddLinkModule::class,
     ]
 )
 internal interface TapToAddViewModelModule {
@@ -217,6 +230,43 @@ internal interface TapToAddViewModelModule {
             @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
         ): AnalyticEventCallback? {
             return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.analyticEventCallback
+        }
+    }
+}
+
+@Module(
+    subcomponents = [
+        LinkAnalyticsComponent::class,
+        LinkComponent::class,
+    ],
+    includes = [
+        LinkCommonModule::class,
+    ]
+)
+internal interface TapToAddLinkModule {
+    @Binds
+    fun bindsLinkConfigurationCoordinator(
+        linkConfigurationCoordinator: RealLinkConfigurationCoordinator
+    ): LinkConfigurationCoordinator
+
+    @Binds
+    fun bindsTapToAddLinkFormHelper(
+        tapToAddLinkFormHelper: DefaultTapToAddLinkFormHelper
+    ): TapToAddLinkFormHelper
+
+    companion object {
+        @Provides
+        @Singleton
+        fun providesLinkAccountHolder(savedStateHandle: SavedStateHandle): LinkAccountHolder {
+            return LinkAccountHolder(savedStateHandle)
+        }
+
+        @Provides
+        @Singleton
+        fun providesTapToAddLinkFormElementFactory(
+            savedStateHandle: SavedStateHandle
+        ): TapToAddLinkFormElementFactory {
+            return DefaultTapToAddLinkFormElementFactory
         }
     }
 }
