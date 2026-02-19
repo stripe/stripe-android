@@ -6,6 +6,7 @@
 
 ### Identity
 * [Added] More live feedback during document capture.
+* [Added] Added best frame detector to improve document capture quality.
 
 ### PaymentSheet
 * [Changed] Afterpay/Clearpay no longer requires billing address by default. Set `billingDetailsCollectionConfiguration.address` to `AddressCollectionMode.Full` if you need to collect billing address for Afterpay.
