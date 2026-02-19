@@ -19,9 +19,6 @@ internal object CheckoutSessionSaveSettingsDefinition : BooleanSettingsDefinitio
         configurationData: PlaygroundConfigurationData,
         settings: Map<PlaygroundSettingDefinition<*>, Any?>,
     ): Boolean {
-        if (!configurationData.integrationType.isPaymentFlow()) {
-            return false
-        }
         // Only applicable when using Checkout Session initialization
         return settings[InitializationTypeSettingsDefinition] == InitializationType.CheckoutSession
     }
@@ -32,6 +29,7 @@ internal object CheckoutSessionSaveSettingsDefinition : BooleanSettingsDefinitio
         PlaygroundSettingDefinition.Displayable.Option("Enabled", true),
         PlaygroundSettingDefinition.Displayable.Option("Disabled", false),
     )
+
 
     override fun configure(value: Boolean, checkoutRequestBuilder: CheckoutRequest.Builder) {
         if (value) {
