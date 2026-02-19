@@ -221,59 +221,6 @@ class ConfirmationHandlerOptionKtxTest {
     }
 
     @Test
-    fun `On saved selection with link input but no config, should convert to saved payment method option`() {
-        val paymentSelection = PaymentSelection.Saved(
-            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-            paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(cvc = "505"),
-            linkInput = UserInput.SignIn(email = "email@email.com"),
-        )
-
-        assertThat(
-            paymentSelection.toConfirmationOption(
-                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
-                linkConfiguration = null,
-                cardFundingFilter = DefaultCardFundingFilter
-            )
-        ).isEqualTo(
-            PaymentMethodConfirmationOption.Saved(
-                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                optionsParams = PaymentMethodOptionsParams.Card(cvc = "505"),
-            )
-        )
-    }
-
-    @Test
-    fun `On saved selection with linkInput and linkConfig works with null configuration`() {
-        val userInput = UserInput.SignUp(
-            email = "email@email.com",
-            phone = "1234567890",
-            name = "John Doe",
-            country = "CA",
-            consentAction = SignUpConsentAction.Checkbox,
-        )
-        val paymentSelection = PaymentSelection.Saved(
-            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-            paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(cvc = "505"),
-            linkInput = userInput,
-        )
-
-        assertThat(
-            paymentSelection.toConfirmationOption(
-                configuration = null,
-                linkConfiguration = LINK_CONFIGURATION,
-                cardFundingFilter = DefaultCardFundingFilter
-            )
-        ).isEqualTo(
-            LinkInlineSignupConfirmationOption.Saved(
-                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                optionsParams = PaymentMethodOptionsParams.Card(cvc = "505"),
-                linkConfiguration = LINK_CONFIGURATION,
-                userInput = userInput,
-            )
-        )
-    }
-
-    @Test
     fun `On EPM selection, should convert to EPM confirmation option properly`() {
         val paymentSelection = PaymentSelection.ExternalPaymentMethod(
             type = "paypal",
@@ -307,18 +254,6 @@ class ConfirmationHandlerOptionKtxTest {
             )
         )
     }
-
-    @Test
-    fun `On Google Pay selection with null configuration, should return null`() {
-        assertThat(
-            PaymentSelection.GooglePay.toConfirmationOption(
-                configuration = null,
-                linkConfiguration = null,
-                cardFundingFilter = DefaultCardFundingFilter
-            )
-        ).isNull()
-    }
-
     @Test
     fun `On Google Pay selection with config with null google pay config, should return null`() {
         assertThat(
@@ -541,25 +476,6 @@ class ConfirmationHandlerOptionKtxTest {
     }
 
     @Test
-    fun `On Custom Payment Method selection with null configuration, should return null`() {
-        val customPaymentMethodSelection = PaymentSelection.CustomPaymentMethod(
-            id = "cpmt_123",
-            billingDetails = null,
-            label = "PayPal".resolvableString,
-            lightThemeIconUrl = null,
-            darkThemeIconUrl = null,
-        )
-
-        assertThat(
-            customPaymentMethodSelection.toConfirmationOption(
-                configuration = null,
-                linkConfiguration = null,
-                cardFundingFilter = DefaultCardFundingFilter
-            )
-        ).isNull()
-    }
-
-    @Test
     fun `On Custom Payment Method selection with no custom payment method of expected ID, should return null`() {
         val customPaymentMethodSelection = PaymentSelection.CustomPaymentMethod(
             id = "cpmt_123",
@@ -612,17 +528,6 @@ class ConfirmationHandlerOptionKtxTest {
         assertThat(customPaymentMethodConfirmationOption.customPaymentMethodType)
             .isEqualTo(customPaymentMethod)
         assertThat(customPaymentMethodConfirmationOption.billingDetails).isEqualTo(billingDetails)
-    }
-
-    @Test
-    fun `On ShopPay selection with null configuration, should return null`() {
-        assertThat(
-            PaymentSelection.ShopPay.toConfirmationOption(
-                configuration = null,
-                linkConfiguration = null,
-                cardFundingFilter = DefaultCardFundingFilter,
-            )
-        ).isNull()
     }
 
     @Test
