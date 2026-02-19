@@ -69,7 +69,6 @@ internal data class PaymentMethodMetadata(
     val customerMetadata: CustomerMetadata?,
     val isGooglePayReady: Boolean,
     val linkConfiguration: PaymentSheet.LinkConfiguration,
-    val paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
     val linkMode: LinkMode?,
     val linkStateResult: LinkStateResult?,
     val paymentMethodIncentive: PaymentMethodIncentive?,
@@ -96,6 +95,11 @@ internal data class PaymentMethodMetadata(
             is LinkState -> result
             is LinkDisabledState, null -> null
         }
+
+    // customerMetadata is null in guest mode (no customer). Fall back to Legacy
+    // to let SaveForFutureUseHelper decide based on intent + customer config.
+    val paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior
+        get() = customerMetadata?.permissions?.saveConsent ?: PaymentMethodSaveConsentBehavior.Legacy
 
     fun hasIntentToSetup(code: PaymentMethodCode): Boolean {
         return when (stripeIntent) {
@@ -394,10 +398,6 @@ internal data class PaymentMethodMetadata(
                 customerMetadata = customerMetadata,
                 sharedDataSpecs = sharedDataSpecs,
                 externalPaymentMethodSpecs = externalPaymentMethodSpecs,
-                // customerMetadata is null in guest mode (no customer). Fall back to Legacy
-                // to let SaveForFutureUseHelper decide based on intent + customer config.
-                paymentMethodSaveConsentBehavior = customerMetadata?.permissions?.saveConsent
-                    ?: PaymentMethodSaveConsentBehavior.Legacy,
                 linkConfiguration = configuration.link,
                 linkMode = linkSettings?.linkMode,
                 linkStateResult = linkStateResult,
@@ -430,7 +430,6 @@ internal data class PaymentMethodMetadata(
         internal fun createForCustomerSheet(
             elementsSession: ElementsSession,
             configuration: CustomerSheet.Configuration,
-            paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
             sharedDataSpecs: List<SharedDataSpec>,
             isGooglePayReady: Boolean,
             customerMetadata: CustomerMetadata,
@@ -460,7 +459,6 @@ internal data class PaymentMethodMetadata(
                 customerMetadata = customerMetadata,
                 sharedDataSpecs = sharedDataSpecs,
                 isGooglePayReady = isGooglePayReady,
-                paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
                 linkConfiguration = PaymentSheet.LinkConfiguration(),
                 linkMode = elementsSession.linkSettings?.linkMode,
                 linkStateResult = null,

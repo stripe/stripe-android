@@ -30,7 +30,6 @@ internal object CheckoutSessionSaveSettingsDefinition : BooleanSettingsDefinitio
         PlaygroundSettingDefinition.Displayable.Option("Disabled", false),
     )
 
-
     override fun configure(value: Boolean, checkoutRequestBuilder: CheckoutRequest.Builder) {
         if (value) {
             checkoutRequestBuilder.checkoutSessionPaymentMethodSave(FeatureState.Enabled)
