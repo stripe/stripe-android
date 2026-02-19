@@ -1,5 +1,6 @@
 package com.stripe.android.common.taptoadd.ui
 
+import com.stripe.android.common.spms.SavedPaymentMethodLinkFormHelper
 import com.stripe.android.common.taptoadd.TapToAddMode
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.strings.ResolvableString
@@ -73,7 +74,7 @@ internal class DefaultTapToAddConfirmationInteractor(
     private val paymentMethod: PaymentMethod,
     private val paymentMethodMetadata: PaymentMethodMetadata,
     private val confirmationHandler: ConfirmationHandler,
-    private val linkFormHelper: TapToAddLinkFormHelper,
+    private val linkFormHelper: SavedPaymentMethodLinkFormHelper,
     private val eventReporter: EventReporter,
     private val onContinue: (paymentSelection: PaymentSelection.Saved) -> Unit,
     private val onComplete: () -> Unit,
@@ -150,7 +151,7 @@ internal class DefaultTapToAddConfirmationInteractor(
     }
 
     private fun createInitialState(
-        initialLinkState: TapToAddLinkFormHelper.State,
+        initialLinkState: SavedPaymentMethodLinkFormHelper.State,
         initialConfirmationState: ConfirmationHandler.State
     ): TapToAddConfirmationInteractor.State {
         return TapToAddConfirmationInteractor.State(
@@ -189,11 +190,11 @@ internal class DefaultTapToAddConfirmationInteractor(
     }
 
     private fun TapToAddConfirmationInteractor.State.withLinkState(
-        linkState: TapToAddLinkFormHelper.State,
+        linkState: SavedPaymentMethodLinkFormHelper.State,
     ): TapToAddConfirmationInteractor.State {
         return copy(
             primaryButton = primaryButton.copy(
-                enabled = linkState !is TapToAddLinkFormHelper.State.Incomplete,
+                enabled = linkState !is SavedPaymentMethodLinkFormHelper.State.Incomplete,
             ),
         )
     }
@@ -237,7 +238,7 @@ internal class DefaultTapToAddConfirmationInteractor(
         @ViewModelScope private val viewModelScope: CoroutineScope,
         private val tapToAddMode: TapToAddMode,
         private val paymentMethodMetadata: PaymentMethodMetadata,
-        private val linkFormHelper: TapToAddLinkFormHelper,
+        private val linkFormHelper: SavedPaymentMethodLinkFormHelper,
         private val confirmationHandler: ConfirmationHandler,
         private val eventReporter: EventReporter,
         private val tapToAddNavigator: Provider<TapToAddNavigator>,

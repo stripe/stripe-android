@@ -1,4 +1,4 @@
-package com.stripe.android.common.taptoadd.ui
+package com.stripe.android.common.spms
 
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
@@ -8,7 +8,7 @@ import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.link.LinkFormElement
 import com.stripe.android.uicore.elements.FormElement
 
-internal interface TapToAddLinkFormElementFactory {
+internal interface LinkFormElementFactory {
     fun create(
         signupMode: LinkSignupMode,
         configuration: LinkConfiguration,
@@ -19,7 +19,7 @@ internal interface TapToAddLinkFormElementFactory {
     ): FormElement
 }
 
-internal object DefaultTapToAddLinkFormElementFactory : TapToAddLinkFormElementFactory {
+internal object DefaultLinkFormElementFactory : LinkFormElementFactory {
     override fun create(
         signupMode: LinkSignupMode,
         configuration: LinkConfiguration,
