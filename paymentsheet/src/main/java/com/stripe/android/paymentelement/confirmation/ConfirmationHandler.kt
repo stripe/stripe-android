@@ -69,7 +69,6 @@ internal interface ConfirmationHandler {
          * The confirmation option used to in order to potentially confirm the intent
          */
         val confirmationOption: Option,
-
         /**
          * The immutable data created during configuration.
          */

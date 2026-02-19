@@ -176,7 +176,6 @@ internal class PaymentOptionsViewModel(
         buttonsEnabled,
         selection,
         linkAccountHolder.linkAccountInfo
-
     ) { isLinkAvailable, linkEmail, buttonsEnabled, currentSelection, linkAccountInfo ->
         val paymentMethodMetadata = args.state.paymentMethodMetadata
         val linkConfiguration = paymentMethodMetadata.linkState?.configuration

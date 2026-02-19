@@ -38,14 +38,12 @@ class PaymentOption internal constructor(
      * - If this is Google Pay, the value is "google_pay".
      */
     val paymentMethodType: String,
-
     /**
      * The billing details associated with the customer's desired payment method.
      */
     val billingDetails: PaymentSheet.BillingDetails?,
     private val _shippingDetails: AddressDetails?,
     private val _labels: Labels,
-
     private val imageLoader: suspend () -> Drawable,
 ) {
 

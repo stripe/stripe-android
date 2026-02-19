@@ -116,7 +116,6 @@ internal fun ConsentWelcomeHeader(
         fontSize = 26.sp,
         fontWeight = FontWeight.Bold,
         textAlign = TextAlign.Center
-
     )
 }
 

@@ -70,7 +70,6 @@ private fun Card(
                 .padding(horizontal = 20.dp)
                 .align(Alignment.BottomCenter),
             verticalAlignment = Alignment.CenterVertically,
-
         ) {
             last4?.let {
                 Text(

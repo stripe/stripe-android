@@ -24,15 +24,12 @@ class ConfirmSetupIntentParams
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 constructor(
     @get:JvmSynthetic override val clientSecret: String,
-
     /**
      * ID of the payment method (a PaymentMethod, Card, or saved Source object) to attach to this
      * SetupIntent.
      */
     @get:JvmSynthetic internal val paymentMethodId: String? = null,
-
     @get:JvmSynthetic internal val paymentMethodCreateParams: PaymentMethodCreateParams? = null,
-
     /**
      * The URL to redirect your customer back to after they authenticate on the payment method’s
      * app or site. If you’d prefer to redirect to a mobile application, you can alternatively
@@ -40,28 +37,22 @@ constructor(
      * redirect-based payment methods.
      */
     override var returnUrl: String? = null,
-
     private val useStripeSdk: Boolean = false,
-
     /**
      * ID of the mandate to be used for this payment.
      */
     var mandateId: String? = null,
-
     /**
      * This hash contains details about the Mandate to create.
      *
      * See [mandate_data](https://stripe.com/docs/api/setup_intents/confirm#confirm_setup_intent-mandate_data).
      */
     var mandateData: MandateDataParams? = null,
-
     /**
      * Indicates that this should be the default payment method going forward.
      */
     internal val setAsDefaultPaymentMethod: Boolean? = null,
-
     internal val paymentMethodCode: PaymentMethodCode? = paymentMethodCreateParams?.code,
-
     /**
      * Payment-method-specific configuration for this SetupIntent.
      *
@@ -70,11 +61,8 @@ constructor(
      * ).
      */
     val paymentMethodOptions: PaymentMethodOptionsParams? = null,
-
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val radarOptions: RadarOptions? = null,
-
     private val clientAttributionMetadata: ClientAttributionMetadata? = null,
-
     /**
      * ID of the ConfirmationToken used to confirm this SetupIntent.
      *

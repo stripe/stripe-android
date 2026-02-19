@@ -200,7 +200,6 @@ internal class PaymentSheetDeferredTest {
             presentWithIntentConfiguration(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Setup()
-
                 ),
                 configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
                     .customer(PaymentSheet.CustomerConfiguration("cus_foobar", "ek_test_foobar"))
