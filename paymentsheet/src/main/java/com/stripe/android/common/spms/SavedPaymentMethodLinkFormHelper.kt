@@ -1,4 +1,4 @@
-package com.stripe.android.common.taptoadd.ui
+package com.stripe.android.common.spms
 
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.link.LinkConfigurationCoordinator
@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
-internal interface TapToAddLinkFormHelper {
+internal interface SavedPaymentMethodLinkFormHelper {
     val state: StateFlow<State>
     val formElement: FormElement?
 
@@ -24,28 +24,30 @@ internal interface TapToAddLinkFormHelper {
     }
 }
 
-internal class DefaultTapToAddLinkFormHelper @Inject constructor(
+internal class DefaultSavedPaymentMethodLinkFormHelper @Inject constructor(
     paymentMethodMetadata: PaymentMethodMetadata,
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val savedStateHandle: SavedStateHandle,
-    linkFormElementFactory: TapToAddLinkFormElementFactory,
-) : TapToAddLinkFormHelper {
+    linkFormElementFactory: LinkFormElementFactory,
+) : SavedPaymentMethodLinkFormHelper {
     private val linkState = paymentMethodMetadata.linkState
 
     private var storedCheckboxSelection: Boolean
-        get() = savedStateHandle.get<Boolean>(TAP_TO_ADD_LINK_CHECKBOX_SELECTED_KEY) == true
+        get() = savedStateHandle.get<Boolean>(SPM_LINK_CHECKBOX_SELECTED_KEY) == true
         set(value) {
-            savedStateHandle[TAP_TO_ADD_LINK_CHECKBOX_SELECTED_KEY] = value
+            savedStateHandle[SPM_LINK_CHECKBOX_SELECTED_KEY] = value
         }
 
     private var storedLinkInput: UserInput?
-        get() = savedStateHandle[TAP_TO_ADD_LINK_INPUT_KEY]
+        get() = savedStateHandle[SPM_LINK_INPUT_KEY]
         set(value) {
-            savedStateHandle[TAP_TO_ADD_LINK_INPUT_KEY] = value
+            savedStateHandle[SPM_LINK_INPUT_KEY] = value
         }
 
-    private val _state = MutableStateFlow<TapToAddLinkFormHelper.State>(TapToAddLinkFormHelper.State.Unused)
-    override val state: StateFlow<TapToAddLinkFormHelper.State> = _state.asStateFlow()
+    private val _state = MutableStateFlow<SavedPaymentMethodLinkFormHelper.State>(
+        SavedPaymentMethodLinkFormHelper.State.Unused
+    )
+    override val state: StateFlow<SavedPaymentMethodLinkFormHelper.State> = _state.asStateFlow()
 
     override val formElement: FormElement? = if (linkState?.signupMode != null) {
         linkFormElementFactory.create(
@@ -71,16 +73,16 @@ internal class DefaultTapToAddLinkFormHelper @Inject constructor(
     private fun createState(
         useLink: Boolean,
         userInput: UserInput?,
-    ): TapToAddLinkFormHelper.State {
+    ): SavedPaymentMethodLinkFormHelper.State {
         return when {
-            useLink && userInput != null -> TapToAddLinkFormHelper.State.Complete(userInput)
-            useLink -> TapToAddLinkFormHelper.State.Incomplete
-            else -> TapToAddLinkFormHelper.State.Unused
+            useLink && userInput != null -> SavedPaymentMethodLinkFormHelper.State.Complete(userInput)
+            useLink -> SavedPaymentMethodLinkFormHelper.State.Incomplete
+            else -> SavedPaymentMethodLinkFormHelper.State.Unused
         }
     }
 
     private companion object {
-        const val TAP_TO_ADD_LINK_CHECKBOX_SELECTED_KEY = "STRIPE_TAD_TO_ADD_LINK_CHECKBOX_SELECTED"
-        const val TAP_TO_ADD_LINK_INPUT_KEY = "STRIPE_TAD_TO_ADD_LINK_INPUT"
+        const val SPM_LINK_CHECKBOX_SELECTED_KEY = "STRIPE_SPM_LINK_CHECKBOX_SELECTED"
+        const val SPM_LINK_INPUT_KEY = "STRIPE_SPM_LINK_INPUT"
     }
 }

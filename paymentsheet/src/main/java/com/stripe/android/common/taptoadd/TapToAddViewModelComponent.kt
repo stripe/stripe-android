@@ -7,17 +7,17 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.di.ApplicationIdModule
+import com.stripe.android.common.spms.DefaultLinkFormElementFactory
+import com.stripe.android.common.spms.DefaultSavedPaymentMethodLinkFormHelper
+import com.stripe.android.common.spms.LinkFormElementFactory
+import com.stripe.android.common.spms.SavedPaymentMethodLinkFormHelper
 import com.stripe.android.common.taptoadd.ui.DefaultTapToAddCardAddedInteractor
 import com.stripe.android.common.taptoadd.ui.DefaultTapToAddCollectingInteractor
 import com.stripe.android.common.taptoadd.ui.DefaultTapToAddConfirmationInteractor
-import com.stripe.android.common.taptoadd.ui.DefaultTapToAddLinkFormElementFactory
-import com.stripe.android.common.taptoadd.ui.DefaultTapToAddLinkFormHelper
 import com.stripe.android.common.taptoadd.ui.DefaultTapToAddPaymentMethodHolder
 import com.stripe.android.common.taptoadd.ui.TapToAddCardAddedInteractor
 import com.stripe.android.common.taptoadd.ui.TapToAddCollectingInteractor
 import com.stripe.android.common.taptoadd.ui.TapToAddConfirmationInteractor
-import com.stripe.android.common.taptoadd.ui.TapToAddLinkFormElementFactory
-import com.stripe.android.common.taptoadd.ui.TapToAddLinkFormHelper
 import com.stripe.android.common.taptoadd.ui.TapToAddPaymentMethodHolder
 import com.stripe.android.common.taptoadd.ui.createTapToAddUxConfiguration
 import com.stripe.android.core.injection.CoreCommonModule
@@ -250,9 +250,9 @@ internal interface TapToAddLinkModule {
     ): LinkConfigurationCoordinator
 
     @Binds
-    fun bindsTapToAddLinkFormHelper(
-        tapToAddLinkFormHelper: DefaultTapToAddLinkFormHelper
-    ): TapToAddLinkFormHelper
+    fun bindsLinkFormHelper(
+        linkFormHelper: DefaultSavedPaymentMethodLinkFormHelper
+    ): SavedPaymentMethodLinkFormHelper
 
     companion object {
         @Provides
@@ -265,8 +265,8 @@ internal interface TapToAddLinkModule {
         @Singleton
         fun providesTapToAddLinkFormElementFactory(
             savedStateHandle: SavedStateHandle
-        ): TapToAddLinkFormElementFactory {
-            return DefaultTapToAddLinkFormElementFactory
+        ): LinkFormElementFactory {
+            return DefaultLinkFormElementFactory
         }
     }
 }

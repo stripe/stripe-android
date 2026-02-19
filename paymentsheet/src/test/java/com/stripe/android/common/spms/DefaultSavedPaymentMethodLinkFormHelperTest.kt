@@ -1,10 +1,10 @@
-package com.stripe.android.common.taptoadd.ui
+package com.stripe.android.common.spms
 
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import app.cash.turbine.test
-import com.google.common.truth.Truth.assertThat
+import com.google.common.truth.Truth
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
@@ -26,7 +26,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
-internal class DefaultTapToAddLinkFormHelperTest {
+internal class DefaultSavedPaymentMethodLinkFormHelperTest {
     @Test
     fun `link form is unavailable when signup mode is not defined`() = runScenario(
         linkState = LinkState(
@@ -36,10 +36,10 @@ internal class DefaultTapToAddLinkFormHelperTest {
         ),
     ) {
         helper.state.test {
-            assertThat(awaitItem()).isEqualTo(TapToAddLinkFormHelper.State.Unused)
+            Truth.assertThat(awaitItem()).isEqualTo(SavedPaymentMethodLinkFormHelper.State.Unused)
         }
 
-        assertThat(helper.formElement).isNull()
+        Truth.assertThat(helper.formElement).isNull()
 
         formElementFactoryCreateCalls.expectNoEvents()
     }
@@ -57,22 +57,22 @@ internal class DefaultTapToAddLinkFormHelperTest {
             ),
         ) {
             helper.state.test {
-                assertThat(awaitItem()).isEqualTo(TapToAddLinkFormHelper.State.Unused)
+                Truth.assertThat(awaitItem()).isEqualTo(SavedPaymentMethodLinkFormHelper.State.Unused)
             }
 
-            assertThat(helper.formElement).isNotNull()
+            Truth.assertThat(helper.formElement).isNotNull()
 
             val factoryCreateCall = formElementFactoryCreateCalls.awaitItem()
 
-            assertThat(factoryCreateCall.signupMode)
+            Truth.assertThat(factoryCreateCall.signupMode)
                 .isEqualTo(LinkSignupMode.InsteadOfSaveForFutureUse)
-            assertThat(factoryCreateCall.configuration)
+            Truth.assertThat(factoryCreateCall.configuration)
                 .isEqualTo(TestFactory.LINK_CONFIGURATION)
-            assertThat(factoryCreateCall.linkConfigurationCoordinator)
+            Truth.assertThat(factoryCreateCall.linkConfigurationCoordinator)
                 .isEqualTo(coordinator)
-            assertThat(factoryCreateCall.previousLinkSignupCheckboxSelection)
+            Truth.assertThat(factoryCreateCall.previousLinkSignupCheckboxSelection)
                 .isFalse()
-            assertThat(factoryCreateCall.userInput).isNull()
+            Truth.assertThat(factoryCreateCall.userInput).isNull()
         }
     }
 
@@ -88,11 +88,11 @@ internal class DefaultTapToAddLinkFormHelperTest {
                 signupMode = LinkSignupMode.AlongsideSaveForFutureUse,
             ),
         ) {
-            assertThat(helper.formElement).isNotNull()
+            Truth.assertThat(helper.formElement).isNotNull()
 
             val factoryCreateCall = formElementFactoryCreateCalls.awaitItem()
 
-            assertThat(factoryCreateCall.signupMode)
+            Truth.assertThat(factoryCreateCall.signupMode)
                 .isEqualTo(LinkSignupMode.InsteadOfSaveForFutureUse)
         }
     }
@@ -115,13 +115,13 @@ internal class DefaultTapToAddLinkFormHelperTest {
             ),
             handle = SavedStateHandle(
                 initialState = mapOf(
-                    TAP_TO_ADD_LINK_INPUT_KEY to userInput,
+                    SPM_LINK_INPUT_KEY to userInput,
                 ),
             ),
         ) {
             val call = formElementFactoryCreateCalls.awaitItem()
 
-            assertThat(call.userInput).isEqualTo(userInput)
+            Truth.assertThat(call.userInput).isEqualTo(userInput)
         }
     }
 
@@ -135,12 +135,12 @@ internal class DefaultTapToAddLinkFormHelperTest {
             ),
             handle = SavedStateHandle(
                 initialState = mapOf(
-                    TAP_TO_ADD_LINK_CHECKBOX_SELECTED_KEY to true,
+                    SPM_LINK_CHECKBOX_SELECTED_KEY to true,
                 ),
             ),
         ) {
             val call = formElementFactoryCreateCalls.awaitItem()
-            assertThat(call.previousLinkSignupCheckboxSelection).isTrue()
+            Truth.assertThat(call.previousLinkSignupCheckboxSelection).isTrue()
         }
 
     @Test
@@ -168,11 +168,11 @@ internal class DefaultTapToAddLinkFormHelperTest {
             call.onLinkInlineSignupStateChanged(viewState)
 
             helper.state.test {
-                assertThat(awaitItem()).isEqualTo(TapToAddLinkFormHelper.State.Unused)
+                Truth.assertThat(awaitItem()).isEqualTo(SavedPaymentMethodLinkFormHelper.State.Unused)
             }
 
-            assertThat(handle.get<Boolean>(TAP_TO_ADD_LINK_CHECKBOX_SELECTED_KEY)).isFalse()
-            assertThat(handle.get<UserInput>(TAP_TO_ADD_LINK_INPUT_KEY)).isNull()
+            Truth.assertThat(handle.get<Boolean>(SPM_LINK_CHECKBOX_SELECTED_KEY)).isFalse()
+            Truth.assertThat(handle.get<UserInput>(SPM_LINK_INPUT_KEY)).isNull()
         }
 
     @Test
@@ -200,11 +200,11 @@ internal class DefaultTapToAddLinkFormHelperTest {
             call.onLinkInlineSignupStateChanged(viewState)
 
             helper.state.test {
-                assertThat(awaitItem()).isEqualTo(TapToAddLinkFormHelper.State.Incomplete)
+                Truth.assertThat(awaitItem()).isEqualTo(SavedPaymentMethodLinkFormHelper.State.Incomplete)
             }
 
-            assertThat(handle.get<Boolean>(TAP_TO_ADD_LINK_CHECKBOX_SELECTED_KEY)).isTrue()
-            assertThat(handle.get<UserInput>(TAP_TO_ADD_LINK_INPUT_KEY)).isNull()
+            Truth.assertThat(handle.get<Boolean>(SPM_LINK_CHECKBOX_SELECTED_KEY)).isTrue()
+            Truth.assertThat(handle.get<UserInput>(SPM_LINK_INPUT_KEY)).isNull()
         }
 
     @Test
@@ -242,15 +242,15 @@ internal class DefaultTapToAddLinkFormHelperTest {
             helper.state.test {
                 val state = awaitItem()
 
-                assertThat(state).isInstanceOf<TapToAddLinkFormHelper.State.Complete>()
+                Truth.assertThat(state).isInstanceOf<SavedPaymentMethodLinkFormHelper.State.Complete>()
 
-                val completeState = state as TapToAddLinkFormHelper.State.Complete
+                val completeState = state as SavedPaymentMethodLinkFormHelper.State.Complete
 
-                assertThat(completeState.userInput).isEqualTo(userInput)
+                Truth.assertThat(completeState.userInput).isEqualTo(userInput)
             }
 
-            assertThat(handle.get<Boolean>(TAP_TO_ADD_LINK_CHECKBOX_SELECTED_KEY)).isTrue()
-            assertThat(handle.get<UserInput>(TAP_TO_ADD_LINK_INPUT_KEY)).isEqualTo(userInput)
+            Truth.assertThat(handle.get<Boolean>(SPM_LINK_CHECKBOX_SELECTED_KEY)).isTrue()
+            Truth.assertThat(handle.get<UserInput>(SPM_LINK_INPUT_KEY)).isEqualTo(userInput)
         }
 
     private fun runScenario(
@@ -262,9 +262,9 @@ internal class DefaultTapToAddLinkFormHelperTest {
         linkConfigurationCoordinator: LinkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
-        val factory = FakeTapToAddLinkFormElementFactory()
+        val factory = FakeLinkFormElementFactory()
 
-        val helper = DefaultTapToAddLinkFormHelper(
+        val helper = DefaultSavedPaymentMethodLinkFormHelper(
             paymentMethodMetadata = paymentMethodMetadata,
             linkConfigurationCoordinator = linkConfigurationCoordinator,
             savedStateHandle = handle,
@@ -283,12 +283,12 @@ internal class DefaultTapToAddLinkFormHelperTest {
     }
 
     private class Scenario(
-        val helper: TapToAddLinkFormHelper,
+        val helper: SavedPaymentMethodLinkFormHelper,
         val handle: SavedStateHandle,
-        val formElementFactoryCreateCalls: ReceiveTurbine<FakeTapToAddLinkFormElementFactory.Call>,
+        val formElementFactoryCreateCalls: ReceiveTurbine<FakeLinkFormElementFactory.Call>,
     )
 
-    private class FakeTapToAddLinkFormElementFactory : TapToAddLinkFormElementFactory {
+    private class FakeLinkFormElementFactory : LinkFormElementFactory {
         private val _calls = Turbine<Call>()
         val calls: ReceiveTurbine<Call> = _calls
 
@@ -347,7 +347,7 @@ internal class DefaultTapToAddLinkFormHelperTest {
     }
 
     private companion object {
-        const val TAP_TO_ADD_LINK_CHECKBOX_SELECTED_KEY = "STRIPE_TAD_TO_ADD_LINK_CHECKBOX_SELECTED"
-        const val TAP_TO_ADD_LINK_INPUT_KEY = "STRIPE_TAD_TO_ADD_LINK_INPUT"
+        const val SPM_LINK_CHECKBOX_SELECTED_KEY = "STRIPE_SPM_LINK_CHECKBOX_SELECTED"
+        const val SPM_LINK_INPUT_KEY = "STRIPE_SPM_LINK_INPUT"
     }
 }
