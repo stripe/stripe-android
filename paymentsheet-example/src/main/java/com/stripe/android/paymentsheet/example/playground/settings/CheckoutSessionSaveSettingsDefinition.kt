@@ -23,18 +23,7 @@ internal object CheckoutSessionSaveSettingsDefinition : BooleanSettingsDefinitio
         return settings[InitializationTypeSettingsDefinition] == InitializationType.CheckoutSession
     }
 
-    override fun createOptions(
-        configurationData: PlaygroundConfigurationData
-    ) = listOf(
-        PlaygroundSettingDefinition.Displayable.Option("Enabled", true),
-        PlaygroundSettingDefinition.Displayable.Option("Disabled", false),
-    )
-
     override fun configure(value: Boolean, checkoutRequestBuilder: CheckoutRequest.Builder) {
-        if (value) {
-            checkoutRequestBuilder.checkoutSessionPaymentMethodSave(FeatureState.Enabled)
-        } else {
-            checkoutRequestBuilder.checkoutSessionPaymentMethodSave(FeatureState.Disabled)
-        }
+        checkoutRequestBuilder.checkoutSessionPaymentMethodSave(FeatureState.fromBoolean(value))
     }
 }

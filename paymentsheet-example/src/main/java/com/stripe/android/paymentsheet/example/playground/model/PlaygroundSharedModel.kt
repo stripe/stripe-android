@@ -9,7 +9,13 @@ enum class FeatureState {
     Enabled,
 
     @SerialName("disabled")
-    Disabled
+    Disabled;
+
+    companion object {
+        fun fromBoolean(value: Boolean): FeatureState {
+            return if (value) Enabled else Disabled
+        }
+    }
 }
 
 @Serializable
