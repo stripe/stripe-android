@@ -897,9 +897,9 @@ internal class PaymentSheetViewModelTest {
 
             val arguments = startTurbine.awaitItem()
 
-            assertThat(arguments.confirmationOption).isInstanceOf<LinkInlineSignupConfirmationOption>()
+            assertThat(arguments.confirmationOption).isInstanceOf<LinkInlineSignupConfirmationOption.New>()
 
-            val inlineOption = arguments.confirmationOption as LinkInlineSignupConfirmationOption
+            val inlineOption = arguments.confirmationOption as LinkInlineSignupConfirmationOption.New
 
             assertThat(inlineOption.saveOption).isEqualTo(
                 LinkInlineSignupConfirmationOption.PaymentMethodSaveOption.RequestedReuse
@@ -928,9 +928,9 @@ internal class PaymentSheetViewModelTest {
 
             val arguments = startTurbine.awaitItem()
 
-            assertThat(arguments.confirmationOption).isInstanceOf<LinkInlineSignupConfirmationOption>()
+            assertThat(arguments.confirmationOption).isInstanceOf<LinkInlineSignupConfirmationOption.New>()
 
-            val inlineOption = arguments.confirmationOption as LinkInlineSignupConfirmationOption
+            val inlineOption = arguments.confirmationOption as LinkInlineSignupConfirmationOption.New
 
             assertThat(inlineOption.saveOption).isEqualTo(
                 LinkInlineSignupConfirmationOption.PaymentMethodSaveOption.NoRequest
