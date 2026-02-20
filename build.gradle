@@ -129,6 +129,10 @@ apiValidation {
 
 subprojects {
     plugins.withId("app.cash.paparazzi") {
+        tasks.withType(Test).configureEach { test ->
+            // https://github.com/cashapp/paparazzi/issues/2111
+            test.reports.html.required = false
+        }
         // Defer until afterEvaluate so that testImplementation is created by Android plugin.
         afterEvaluate {
             dependencies.constraints {
