@@ -147,22 +147,6 @@ class DefaultFormActivityConfirmationHelperTest {
     }
 
     @Test
-    fun `TapToAddResult Canceled without payment selection doesn't set state helper result`() {
-        val tapToAddHelper = FakeTapToAddHelper()
-        testScenario(
-            tapToAddHelper = tapToAddHelper,
-        ) {
-            tapToAddHelper.emitNextStep(
-                TapToAddNextStep.Canceled(
-                    paymentSelection = null,
-                )
-            )
-
-            stateHelper.resultTurbine.expectNoEvents()
-        }
-    }
-
-    @Test
     fun `TapToAddResult Canceled with payment selection sets state helper result as expected`() {
         val tapToAddHelper = FakeTapToAddHelper()
         val customerStateHolder = FakeCustomerStateHolder()
@@ -172,7 +156,7 @@ class DefaultFormActivityConfirmationHelperTest {
             customerStateHolder = customerStateHolder,
         ) {
             tapToAddHelper.emitNextStep(
-                TapToAddNextStep.Canceled(
+                TapToAddNextStep.ConfirmSavedPaymentMethod(
                     paymentSelection = expectedSelection,
                 )
             )

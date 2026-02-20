@@ -3413,7 +3413,7 @@ internal class PaymentSheetViewModelTest {
 
             viewModel.selection.test {
                 tapToAddHelperFactory.getCreatedHelper()?.emitNextStep(
-                    TapToAddNextStep.Canceled(
+                    TapToAddNextStep.ConfirmSavedPaymentMethod(
                         expectedPaymentSelection
                     )
                 )
@@ -3443,7 +3443,7 @@ internal class PaymentSheetViewModelTest {
                 awaitItem()
 
                 tapToAddHelperFactory.getCreatedHelper()?.emitNextStep(
-                    TapToAddNextStep.Canceled(
+                    TapToAddNextStep.ConfirmSavedPaymentMethod(
                         expectedPaymentSelection
                     )
                 )

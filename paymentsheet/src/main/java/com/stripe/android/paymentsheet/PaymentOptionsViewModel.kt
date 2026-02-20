@@ -230,25 +230,23 @@ internal class PaymentOptionsViewModel @Inject constructor(
         viewModelScope.launch {
             tapToAddHelper.nextStep.collect { result ->
                 when (result) {
-                    is TapToAddNextStep.Canceled -> {
-                        result.paymentSelection?.let { paymentSelection ->
-                            customerStateHolder.addPaymentMethod(paymentSelection.paymentMethod)
-                            updateSelection(paymentSelection)
-                            val paymentMethodMetadata = args.state.paymentMethodMetadata
-                            val savedPaymentMethodConfirmScreen =
-                                PaymentSheetScreen.SavedPaymentMethodConfirm(
-                                    DefaultSavedPaymentMethodConfirmInteractor.create(
-                                        paymentMethodMetadata,
-                                        paymentSelection,
-                                    ),
-                                    isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
-                                )
-                            val newScreens = determineInitialBackStack(
-                                paymentMethodMetadata,
-                                customerStateHolder,
-                            ).plus(savedPaymentMethodConfirmScreen)
-                            navigationHandler.resetTo(newScreens)
-                        }
+                    is TapToAddNextStep.ConfirmSavedPaymentMethod -> {
+                        customerStateHolder.addPaymentMethod(result.paymentSelection.paymentMethod)
+                        updateSelection(result.paymentSelection)
+                        val paymentMethodMetadata = args.state.paymentMethodMetadata
+                        val savedPaymentMethodConfirmScreen =
+                            PaymentSheetScreen.SavedPaymentMethodConfirm(
+                                DefaultSavedPaymentMethodConfirmInteractor.create(
+                                    paymentMethodMetadata,
+                                    result.paymentSelection,
+                                ),
+                                isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
+                            )
+                        val newScreens = determineInitialBackStack(
+                            paymentMethodMetadata,
+                            customerStateHolder,
+                        ).plus(savedPaymentMethodConfirmScreen)
+                        navigationHandler.resetTo(newScreens)
                     }
                     TapToAddNextStep.Complete -> {
                         errorReporter.report(

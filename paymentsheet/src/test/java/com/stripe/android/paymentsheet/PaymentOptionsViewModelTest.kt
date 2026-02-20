@@ -1239,7 +1239,7 @@ internal class PaymentOptionsViewModelTest {
                 assertThat(awaitItem()).isNull()
 
                 tapToAddHelperFactory.getCreatedHelper()?.emitNextStep(
-                    TapToAddNextStep.Canceled(
+                    TapToAddNextStep.ConfirmSavedPaymentMethod(
                         expectedPaymentSelection
                     )
                 )
@@ -1269,7 +1269,7 @@ internal class PaymentOptionsViewModelTest {
                 awaitItem()
 
                 tapToAddHelperFactory.getCreatedHelper()?.emitNextStep(
-                    TapToAddNextStep.Canceled(
+                    TapToAddNextStep.ConfirmSavedPaymentMethod(
                         expectedPaymentSelection
                     )
                 )
