@@ -97,7 +97,30 @@ workflows:
                   DOWNLOAD_URL="https://api.adoptium.net/v3/binary/latest/${JAVA_VERSION}/ga/${OS}/${ARCH}/jdk/hotspot/normal/eclipse"
 
                   mkdir -p "$JAVA_DIR"
-                  curl -L "$DOWNLOAD_URL" -o "/tmp/java-${JAVA_VERSION}.tar.gz"
+
+                  # Download with retries
+                  MAX_RETRIES=3
+                  RETRY_COUNT=0
+                  DOWNLOAD_SUCCESS=false
+
+                  while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+                    if curl -fSL --connect-timeout 30 --max-time 600 --retry 3 --retry-delay 5 \
+                         "$DOWNLOAD_URL" -o "/tmp/java-${JAVA_VERSION}.tar.gz"; then
+                      DOWNLOAD_SUCCESS=true
+                      break
+                    else
+                      RETRY_COUNT=$((RETRY_COUNT + 1))
+                      if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                        echo "Download failed, retrying in $((RETRY_COUNT * 5)) seconds... (attempt $((RETRY_COUNT + 1))/$MAX_RETRIES)"
+                        sleep $((RETRY_COUNT * 5))
+                      fi
+                    fi
+                  done
+
+                  if [ "$DOWNLOAD_SUCCESS" = false ]; then
+                    echo "Failed to download Java after $MAX_RETRIES attempts"
+                    exit 1
+                  fi
 
                   # Extract to Java directory
                   tar -xzf "/tmp/java-${JAVA_VERSION}.tar.gz" -C "$JAVA_DIR" --strip-components=1
