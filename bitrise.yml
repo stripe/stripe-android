@@ -432,11 +432,7 @@ workflows:
 
                 # Install SDKMAN!
                 curl -s "https://get.sdkman.io?rcupdate=false" | bash
-
-                # Source SDKMAN (temporarily disable -u for init script)
-                set +u
                 source "$HOME/.sdkman/bin/sdkman-init.sh"
-                set -u
 
                 # Install OpenJDK 25
                 sdk install java 25-open
