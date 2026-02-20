@@ -41,7 +41,6 @@ internal object PaymentMethodMetadataFactory {
         externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec> = emptyList(),
         displayableCustomPaymentMethods: List<DisplayableCustomPaymentMethod> = emptyList(),
         isGooglePayReady: Boolean = false,
-        paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
         linkConfiguration: PaymentSheet.LinkConfiguration = PaymentSheet.LinkConfiguration(),
         linkMode: LinkMode? = LinkMode.LinkPaymentMethod,
         linkState: LinkStateResult? = null,
@@ -91,7 +90,6 @@ internal object PaymentMethodMetadataFactory {
                 null
             },
             sharedDataSpecs = sharedDataSpecs,
-            paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             displayableCustomPaymentMethods = displayableCustomPaymentMethods,
             isGooglePayReady = isGooglePayReady,

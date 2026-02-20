@@ -160,6 +160,7 @@ internal class FormHelperTest {
     fun `createFormArguments produces the correct form arguments when payment intent is off-session`() = runTest {
         val observedArgs = createFormHelper(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                hasCustomerConfiguration = true,
                 stripeIntent = PaymentIntentFixtures.PI_OFF_SESSION
             )
         ).createFormArguments(
