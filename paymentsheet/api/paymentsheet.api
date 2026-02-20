@@ -4,14 +4,14 @@ public abstract interface annotation class com/stripe/android/ExperimentalAllows
 public final class com/stripe/android/common/taptoadd/ui/ComposableSingletons$TapToAddCardAddedScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/common/taptoadd/ui/ComposableSingletons$TapToAddCardAddedScreenKt;
 	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-1263718922$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-58476337$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 }
 
 public final class com/stripe/android/common/ui/ComposableSingletons$InlineContentTemplateBuilderKt {
 	public static final field INSTANCE Lcom/stripe/android/common/ui/ComposableSingletons$InlineContentTemplateBuilderKt;
 	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-1845148978$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public abstract interface class com/stripe/android/customersheet/CustomerAdapter {
@@ -228,132 +228,132 @@ public abstract interface class com/stripe/android/customersheet/SetupIntentClie
 public final class com/stripe/android/link/onramp/ui/ComposableSingletons$OnrampKYCRefreshScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/link/onramp/ui/ComposableSingletons$OnrampKYCRefreshScreenKt;
 	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-1308679633$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/link/ui/ComposableSingletons$ErrorTextKt {
 	public static final field INSTANCE Lcom/stripe/android/link/ui/ComposableSingletons$ErrorTextKt;
 	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$851973599$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/link/ui/ComposableSingletons$LinkAppBarKt {
 	public static final field INSTANCE Lcom/stripe/android/link/ui/ComposableSingletons$LinkAppBarKt;
 	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-3$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-4$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-1787374957$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-184689997$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$741088751$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$957945807$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/link/ui/ComposableSingletons$LinkContentKt {
 	public static final field INSTANCE Lcom/stripe/android/link/ui/ComposableSingletons$LinkContentKt;
 	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function4;
+	public final fun getLambda$-1779530385$paymentsheet_release ()Lkotlin/jvm/functions/Function4;
 }
 
 public final class com/stripe/android/link/ui/ComposableSingletons$LinkLoadingScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/link/ui/ComposableSingletons$LinkLoadingScreenKt;
 	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-1801501102$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-350180993$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/link/ui/ComposableSingletons$LinkSpinnerKt {
 	public static final field INSTANCE Lcom/stripe/android/link/ui/ComposableSingletons$LinkSpinnerKt;
 	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1627442911$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/link/ui/ComposableSingletons$LinkTermsKt {
 	public static final field INSTANCE Lcom/stripe/android/link/ui/ComposableSingletons$LinkTermsKt;
 	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-2087552559$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1274925453$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/link/ui/ComposableSingletons$PrimaryButtonKt {
 	public static final field INSTANCE Lcom/stripe/android/link/ui/ComposableSingletons$PrimaryButtonKt;
 	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1725442810$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/link/ui/ComposableSingletons$SecondaryButtonKt {
 	public static final field INSTANCE Lcom/stripe/android/link/ui/ComposableSingletons$SecondaryButtonKt;
 	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1093093247$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/link/ui/inline/ComposableSingletons$LinkInlineSignupFieldsKt {
 	public static final field INSTANCE Lcom/stripe/android/link/ui/inline/ComposableSingletons$LinkInlineSignupFieldsKt;
 	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1314356750$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1639009544$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/link/ui/inline/ComposableSingletons$LinkInlineSignupKt {
 	public static final field INSTANCE Lcom/stripe/android/link/ui/inline/ComposableSingletons$LinkInlineSignupKt;
 	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-3$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-4$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-5$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-2000398395$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-218964709$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-549453615$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1855839629$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$924369751$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/link/ui/inline/ComposableSingletons$LinkOptionalInlineSignupKt {
 	public static final field INSTANCE Lcom/stripe/android/link/ui/inline/ComposableSingletons$LinkOptionalInlineSignupKt;
 	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-3$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-4$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-5$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-6$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-1793392299$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-293016919$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-90794131$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1031560905$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1749904785$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1832128909$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/link/ui/oauth/ComposableSingletons$OAuthConsentScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/link/ui/oauth/ComposableSingletons$OAuthConsentScreenKt;
 	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-1038068000$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-491362140$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/link/ui/signup/ComposableSingletons$SignUpScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/link/ui/signup/ComposableSingletons$SignUpScreenKt;
 	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-463730935$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-780417639$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/link/ui/updatecard/ComposableSingletons$UpdateCardScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/link/ui/updatecard/ComposableSingletons$UpdateCardScreenKt;
 	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-349044966$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-852519330$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/link/ui/verification/ComposableSingletons$VerificationBodyKt {
 	public static final field INSTANCE Lcom/stripe/android/link/ui/verification/ComposableSingletons$VerificationBodyKt;
 	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda-3$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-4$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-5$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-391428647$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-690017062$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$1556541497$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$1594811933$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1814127193$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/link/ui/verification/ComposableSingletons$VerificationDialogKt {
 	public static final field INSTANCE Lcom/stripe/android/link/ui/verification/ComposableSingletons$VerificationDialogKt;
 	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-755570406$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$2046956246$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/link/ui/verification/ComposableSingletons$VerificationScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/link/ui/verification/ComposableSingletons$VerificationScreenKt;
 	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1060885898$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/link/ui/verification/VerificationDialogKt {
@@ -367,8 +367,8 @@ public final class com/stripe/android/link/ui/verification/VerificationScreenKt 
 public final class com/stripe/android/link/ui/wallet/ComposableSingletons$PaymentDetailsKt {
 	public static final field INSTANCE Lcom/stripe/android/link/ui/wallet/ComposableSingletons$PaymentDetailsKt;
 	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1381508991$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$629401301$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public abstract interface annotation class com/stripe/android/paymentelement/AddressAutocompletePreview : java/lang/annotation/Annotation {
@@ -1301,8 +1301,11 @@ public abstract interface class com/stripe/android/paymentsheet/PaymentSheet$Flo
 	public abstract fun WalletButtons (Landroidx/compose/runtime/Composer;I)V
 	public abstract fun WalletButtons (Lcom/stripe/android/paymentelement/WalletButtonsViewClickHandler;Landroidx/compose/runtime/Composer;I)V
 	public abstract fun configureWithIntentConfiguration (Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$ConfigCallback;)V
+	public static synthetic fun configureWithIntentConfiguration$default (Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$ConfigCallback;ILjava/lang/Object;)V
 	public abstract fun configureWithPaymentIntent (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$ConfigCallback;)V
+	public static synthetic fun configureWithPaymentIntent$default (Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$ConfigCallback;ILjava/lang/Object;)V
 	public abstract fun configureWithSetupIntent (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$ConfigCallback;)V
+	public static synthetic fun configureWithSetupIntent$default (Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$ConfigCallback;ILjava/lang/Object;)V
 	public abstract fun confirm ()V
 	public static fun create (Landroidx/activity/ComponentActivity;Lcom/stripe/android/paymentsheet/ExternalPaymentMethodConfirmHandler;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
 	public static fun create (Landroidx/activity/ComponentActivity;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/CreateIntentCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
@@ -2172,7 +2175,7 @@ public abstract interface class com/stripe/android/paymentsheet/addresselement/A
 public final class com/stripe/android/paymentsheet/addresselement/ComposableSingletons$AutocompleteScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/addresselement/ComposableSingletons$AutocompleteScreenKt;
 	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function4;
+	public final fun getLambda$-1578841985$paymentsheet_release ()Lkotlin/jvm/functions/Function4;
 }
 
 public final class com/stripe/android/paymentsheet/databinding/StripeFragmentPrimaryButtonContainerBinding : androidx/viewbinding/ViewBinding {
@@ -2231,89 +2234,89 @@ public final class com/stripe/android/paymentsheet/model/PaymentOption$Labels {
 public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/ComposableSingletons$USBankAccountFormKt {
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/ComposableSingletons$USBankAccountFormKt;
 	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1951545572$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/paymentsheet/paymentdatacollection/bacs/ComposableSingletons$BacsMandateConfirmationFormKt {
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/paymentdatacollection/bacs/ComposableSingletons$BacsMandateConfirmationFormKt;
 	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-374230487$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/paymentsheet/paymentdatacollection/cvcrecollection/ComposableSingletons$CvcRecollectionScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/paymentdatacollection/cvcrecollection/ComposableSingletons$CvcRecollectionScreenKt;
 	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-1155375669$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-1739181525$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/paymentsheet/paymentdatacollection/polling/ComposableSingletons$PollingScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/paymentdatacollection/polling/ComposableSingletons$PollingScreenKt;
 	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-3$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-4$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda-5$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-6$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-7$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-8$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-1411110753$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-1743939445$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-2126683352$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-845696550$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$110635542$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1927524451$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$662623310$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$792710640$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$DefaultPaymentMethodLabelKt {
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/ui/ComposableSingletons$DefaultPaymentMethodLabelKt;
 	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-2033318068$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$PaymentSheetScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/ui/ComposableSingletons$PaymentSheetScreenKt;
 	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function4;
+	public final fun getLambda$2125430138$paymentsheet_release ()Lkotlin/jvm/functions/Function4;
 }
 
 public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$PaymentSheetTopBarKt {
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/ui/ComposableSingletons$PaymentSheetTopBarKt;
 	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-2123154384$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1159340481$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$SavedPaymentMethodTabKt {
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/ui/ComposableSingletons$SavedPaymentMethodTabKt;
 	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-3$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-684400427$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$2089981125$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$258508796$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$SavedPaymentMethodTabLayoutUIKt {
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/ui/ComposableSingletons$SavedPaymentMethodTabLayoutUIKt;
 	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-641270447$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1720021032$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$SepaMandateActivityKt {
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/ui/ComposableSingletons$SepaMandateActivityKt;
 	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-1448355750$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$72907088$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 }
 
 public final class com/stripe/android/paymentsheet/verticalmode/ComposableSingletons$PaymentMethodRowButtonKt {
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/verticalmode/ComposableSingletons$PaymentMethodRowButtonKt;
 	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda-3$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda-4$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda-5$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-1179981339$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-1423392141$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-228724754$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$1616606426$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1795895082$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 }
 
 public final class com/stripe/android/shoppay/ComposableSingletons$ShopPayButtonKt {
 	public static final field INSTANCE Lcom/stripe/android/shoppay/ComposableSingletons$ShopPayButtonKt;
 	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-891608132$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 }
 

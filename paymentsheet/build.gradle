@@ -153,7 +153,8 @@ android {
     kotlinOptions {
         freeCompilerArgs += [
                 "-opt-in=kotlinx.coroutines.FlowPreview",
-                "-Xcontext-receivers",
+                "-Xcontext-parameters",
+                "-Xannotation-default-target=param-property",
                 "-Xconsistent-data-class-copy-visibility"
         ]
         if (gradle.ext.isCi) {

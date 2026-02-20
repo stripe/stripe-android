@@ -147,7 +147,7 @@ internal class DefaultShopPayBridgeHandlerTest {
 
         val result = handler.calculateShipping(message)
 
-        val response = JSONObject(result!!)
+        val response = JSONObject(result)
         assertThat(response.getString("type")).isEqualTo("data")
 
         val data = response.getJSONObject("data")
@@ -164,7 +164,7 @@ internal class DefaultShopPayBridgeHandlerTest {
 
         val result = handler.calculateShipping(message)
 
-        val response = JSONObject(result!!)
+        val response = JSONObject(result)
         assertThat(response.getString("type")).isEqualTo("error")
         assertThat(response.getString("message")).contains("Failed to parse shipping rate request")
     }
@@ -192,7 +192,7 @@ internal class DefaultShopPayBridgeHandlerTest {
 
         val result = handler.calculateShipping(message)
 
-        val response = JSONObject(result!!)
+        val response = JSONObject(result)
         assertThat(response.getString("type")).isEqualTo("data")
         assertThat(response.has("data")).isFalse()
     }
@@ -219,7 +219,7 @@ internal class DefaultShopPayBridgeHandlerTest {
 
         val result = handler.calculateShipping(message)
 
-        val response = JSONObject(result!!)
+        val response = JSONObject(result)
         assertThat(response.getString("type")).isEqualTo("data")
 
         val data = response.getJSONObject("data")
@@ -243,7 +243,7 @@ internal class DefaultShopPayBridgeHandlerTest {
 
         val result = handler.calculateShippingRateChange(message)
 
-        val response = JSONObject(result!!)
+        val response = JSONObject(result)
         assertThat(response.getString("type")).isEqualTo("data")
 
         val data = response.getJSONObject("data")
@@ -260,7 +260,7 @@ internal class DefaultShopPayBridgeHandlerTest {
 
         val result = handler.calculateShippingRateChange(message)
 
-        val response = JSONObject(result!!)
+        val response = JSONObject(result)
         assertThat(response.getString("type")).isEqualTo("error")
         assertThat(response.getString("message")).contains("Failed to parse shipping rate change request")
     }
@@ -280,7 +280,7 @@ internal class DefaultShopPayBridgeHandlerTest {
 
         val result = handler.calculateShippingRateChange(message)
 
-        val response = JSONObject(result!!)
+        val response = JSONObject(result)
         assertThat(response.getString("type")).isEqualTo("data")
         assertThat(response.has("data")).isFalse()
     }
@@ -299,7 +299,7 @@ internal class DefaultShopPayBridgeHandlerTest {
 
         val result = handler.calculateShippingRateChange(message)
 
-        val response = JSONObject(result!!)
+        val response = JSONObject(result)
         assertThat(response.getString("type")).isEqualTo("data")
 
         val data = response.getJSONObject("data")

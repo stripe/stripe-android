@@ -55,7 +55,6 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import kotlin.Result
 import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.link.confirmation.Result as LinkConfirmationResult
 
@@ -607,10 +606,10 @@ class WalletViewModelTest {
         val linkAccountManager = object : WalletLinkAccountManager() {
             override suspend fun updatePaymentDetails(
                 updateParams: ConsumerPaymentDetailsUpdateParams,
-                billingPhone: String?
+                phone: String?
             ): Result<ConsumerPaymentDetails> {
                 delay(CARD_PROCESSING_DELAY)
-                return super.updatePaymentDetails(updateParams, billingPhone)
+                return super.updatePaymentDetails(updateParams, phone)
             }
         }
         linkAccountManager.listPaymentDetailsResult = Result.success(

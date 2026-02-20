@@ -6,11 +6,23 @@ dependencies {
     ktlint("com.pinterest.ktlint:ktlint-cli:${versions.ktlint}")
 }
 
+def ktlintIgnoreArgs = []
+def ktlintIgnoreFile = file('.ktlintignore')
+if (ktlintIgnoreFile.exists()) {
+    ktlintIgnoreFile.eachLine { line ->
+        line = line.trim()
+        if (!line.isEmpty() && !line.startsWith('#')) {
+            ktlintIgnoreArgs.add("!${line}")
+        }
+    }
+}
+
 task ktlint(type: JavaExec, group: "verification") {
     description = "Check Kotlin code style."
     mainClass = "com.pinterest.ktlint.Main"
     classpath = configurations.ktlint
     args "src/**/*.kt"
+    args ktlintIgnoreArgs
 }
 
 task ktlintFormat(type: JavaExec, group: "formatting") {
@@ -18,4 +30,5 @@ task ktlintFormat(type: JavaExec, group: "formatting") {
     mainClass = "com.pinterest.ktlint.Main"
     classpath = configurations.ktlint
     args "-F", "src/**/*.kt"
+    args ktlintIgnoreArgs
 }
