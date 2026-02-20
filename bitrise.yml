@@ -127,9 +127,37 @@ workflows:
                     exit 1
                   fi
 
+                  # Verify download
+                  if [ ! -f "/tmp/java-${JAVA_VERSION}.tar.gz" ]; then
+                    echo "Downloaded file not found"
+                    exit 1
+                  fi
+
                   # Extract to Java directory
-                  tar -xzf "/tmp/java-${JAVA_VERSION}.tar.gz" -C "$JAVA_DIR" --strip-components=1
+                  echo "Extracting Java to $JAVA_DIR..."
+                  if ! tar -xzf "/tmp/java-${JAVA_VERSION}.tar.gz" -C "$JAVA_DIR" --strip-components=1; then
+                    echo "Extraction failed, trying without strip-components..."
+                    rm -rf "$JAVA_DIR"
+                    mkdir -p "$JAVA_DIR"
+                    tar -xzf "/tmp/java-${JAVA_VERSION}.tar.gz" -C "$JAVA_DIR"
+
+                    # Find the actual JDK directory and move contents up
+                    JDK_DIR=$(find "$JAVA_DIR" -maxdepth 1 -type d -name "jdk*" -o -name "temurin*" | head -1)
+                    if [ -n "$JDK_DIR" ]; then
+                      echo "Moving contents from $JDK_DIR to $JAVA_DIR"
+                      mv "$JDK_DIR"/* "$JAVA_DIR"/
+                      rmdir "$JDK_DIR"
+                    fi
+                  fi
+
                   rm "/tmp/java-${JAVA_VERSION}.tar.gz"
+
+                  # Verify Java was extracted correctly
+                  if [ ! -f "$JAVA_DIR/bin/java" ]; then
+                    echo "Java binary not found after extraction. Directory contents:"
+                    ls -la "$JAVA_DIR"
+                    exit 1
+                  fi
                 else
                   echo "Java ${JAVA_VERSION} already installed at $JAVA_DIR"
                 fi
