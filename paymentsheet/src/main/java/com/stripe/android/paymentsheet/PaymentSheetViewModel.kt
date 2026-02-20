@@ -77,7 +77,7 @@ import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 @Singleton
-internal class PaymentSheetViewModel internal constructor(
+internal class PaymentSheetViewModel @Inject internal constructor(
     // Properties provided through PaymentSheetViewModelComponent.Builder
     internal val args: PaymentSheetContract.Args,
     eventReporter: EventReporter,
@@ -94,7 +94,7 @@ internal class PaymentSheetViewModel internal constructor(
     private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory,
     tapToAddHelperFactory: TapToAddHelper.Factory,
     mode: EventReporter.Mode,
-    initialCustomerStateHolder: CustomerStateHolder?,
+    customerStateHolderFactory: CustomerStateHolder.Factory,
 ) : BaseSheetViewModel(
     config = args.config,
     eventReporter = eventReporter,
@@ -105,43 +105,8 @@ internal class PaymentSheetViewModel internal constructor(
     cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
     isCompleteFlow = true,
     mode = mode,
-    customerStateHolder = initialCustomerStateHolder,
+    customerStateHolderFactory = customerStateHolderFactory,
 ) {
-
-    @Inject internal constructor(
-        args: PaymentSheetContract.Args,
-        eventReporter: EventReporter,
-        paymentElementLoader: PaymentElementLoader,
-        customerRepository: CustomerRepository,
-        logger: Logger,
-        @IOContext workContext: CoroutineContext,
-        savedStateHandle: SavedStateHandle,
-        linkHandler: LinkHandler,
-        confirmationHandlerFactory: ConfirmationHandler.Factory,
-        cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
-        errorReporter: ErrorReporter,
-        cvcRecollectionHandler: CvcRecollectionHandler,
-        cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory,
-        tapToAddHelperFactory: TapToAddHelper.Factory,
-        mode: EventReporter.Mode,
-    ) : this(
-        args = args,
-        eventReporter = eventReporter,
-        paymentElementLoader = paymentElementLoader,
-        customerRepository = customerRepository,
-        logger = logger,
-        workContext = workContext,
-        savedStateHandle = savedStateHandle,
-        linkHandler = linkHandler,
-        confirmationHandlerFactory = confirmationHandlerFactory,
-        cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
-        errorReporter = errorReporter,
-        cvcRecollectionHandler = cvcRecollectionHandler,
-        cvcRecollectionInteractorFactory = cvcRecollectionInteractorFactory,
-        tapToAddHelperFactory = tapToAddHelperFactory,
-        mode = mode,
-        initialCustomerStateHolder = null,
-    )
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
         config = config,

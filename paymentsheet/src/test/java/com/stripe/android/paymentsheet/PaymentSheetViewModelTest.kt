@@ -3608,7 +3608,11 @@ internal class PaymentSheetViewModelTest {
                 },
                 tapToAddHelperFactory = tapToAddHelperFactory,
                 mode = EventReporter.Mode.Complete,
-                initialCustomerStateHolder = customerStateHolder,
+                customerStateHolderFactory = object : CustomerStateHolder.Factory {
+                    override fun create(viewModel: BaseSheetViewModel): CustomerStateHolder {
+                        return customerStateHolder ?: DefaultCustomerStateHolder.Factory.create(viewModel)
+                    }
+                }
             )
         }
     }
