@@ -14,7 +14,7 @@ import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddMode
-import com.stripe.android.common.taptoadd.TapToAddResult
+import com.stripe.android.common.taptoadd.TapToAddNextStep
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.utils.requireApplication
@@ -227,20 +227,20 @@ internal class PaymentOptionsViewModel @Inject constructor(
         )
 
         viewModelScope.launch {
-            tapToAddHelper.result.collect { result ->
+            tapToAddHelper.nextStep.collect { result ->
                 when (result) {
-                    is TapToAddResult.Canceled -> {
+                    is TapToAddNextStep.Canceled -> {
                         result.paymentSelection?.let { paymentSelection ->
                             customerStateHolder.addPaymentMethod(paymentSelection.paymentMethod)
                             updateSelection(paymentSelection)
                         }
                     }
-                    TapToAddResult.Complete -> {
+                    TapToAddNextStep.Complete -> {
                         errorReporter.report(
                             ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_FLOW_CONTROLLER_RECEIVED_COMPLETE_RESULT,
                         )
                     }
-                    is TapToAddResult.Continue -> {
+                    is TapToAddNextStep.Continue -> {
                         customerStateHolder.addPaymentMethod(result.paymentSelection.paymentMethod)
                         updateSelection(result.paymentSelection)
                         onUserSelection()

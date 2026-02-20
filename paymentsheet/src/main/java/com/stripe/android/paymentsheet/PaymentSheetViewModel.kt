@@ -17,7 +17,7 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddMode
-import com.stripe.android.common.taptoadd.TapToAddResult
+import com.stripe.android.common.taptoadd.TapToAddNextStep
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
@@ -242,18 +242,18 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
 
         viewModelScope.launch {
-            tapToAddHelper.result.collect { result ->
+            tapToAddHelper.nextStep.collect { result ->
                 when (result) {
-                    is TapToAddResult.Canceled -> {
+                    is TapToAddNextStep.Canceled -> {
                         result.paymentSelection?.let { paymentSelection ->
                             customerStateHolder.addPaymentMethod(paymentSelection.paymentMethod)
                             updateSelection(paymentSelection)
                         }
                     }
-                    TapToAddResult.Complete -> {
+                    TapToAddNextStep.Complete -> {
                         _paymentSheetResult.tryEmit(PaymentSheetResult.Completed())
                     }
-                    is TapToAddResult.Continue -> {
+                    is TapToAddNextStep.Continue -> {
                         errorReporter.report(
                             ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_PAYMENT_SHEET_RECEIVED_CONTINUE_RESULT,
                         )

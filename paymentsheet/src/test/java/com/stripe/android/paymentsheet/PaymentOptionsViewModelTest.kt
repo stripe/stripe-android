@@ -13,7 +13,7 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddMode
-import com.stripe.android.common.taptoadd.TapToAddResult
+import com.stripe.android.common.taptoadd.TapToAddNextStep
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
@@ -1185,8 +1185,8 @@ internal class PaymentOptionsViewModelTest {
             val selection = SELECTION_SAVED_PAYMENT_METHOD
 
             viewModel.paymentOptionsActivityResult.test {
-                tapToAddHelperFactory.getCreatedHelper()?.emitResult(
-                    TapToAddResult.Continue(selection)
+                tapToAddHelperFactory.getCreatedHelper()?.emitNextStep(
+                    TapToAddNextStep.Continue(selection)
                 )
 
                 val result = awaitItem()
@@ -1213,7 +1213,7 @@ internal class PaymentOptionsViewModelTest {
 
             createCalls.awaitItem()
 
-            tapToAddHelperFactory.getCreatedHelper()?.emitResult(TapToAddResult.Complete)
+            tapToAddHelperFactory.getCreatedHelper()?.emitNextStep(TapToAddNextStep.Complete)
 
             assertThat(errorReporter.getLoggedErrors()).containsExactly(
                 ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_FLOW_CONTROLLER_RECEIVED_COMPLETE_RESULT.eventName
@@ -1237,8 +1237,8 @@ internal class PaymentOptionsViewModelTest {
             viewModel.selection.test {
                 assertThat(awaitItem()).isNull()
 
-                tapToAddHelperFactory.getCreatedHelper()?.emitResult(
-                    TapToAddResult.Canceled(
+                tapToAddHelperFactory.getCreatedHelper()?.emitNextStep(
+                    TapToAddNextStep.Canceled(
                         expectedPaymentSelection
                     )
                 )

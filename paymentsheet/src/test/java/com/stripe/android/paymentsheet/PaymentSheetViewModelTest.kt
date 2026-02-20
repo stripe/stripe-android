@@ -16,7 +16,7 @@ import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddMode
-import com.stripe.android.common.taptoadd.TapToAddResult
+import com.stripe.android.common.taptoadd.TapToAddNextStep
 import com.stripe.android.core.Logger
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
@@ -3364,8 +3364,8 @@ internal class PaymentSheetViewModelTest {
             createCalls.awaitItem()
 
             viewModel.paymentSheetResult.test {
-                tapToAddHelperFactory.getCreatedHelper()?.emitResult(
-                    TapToAddResult.Complete
+                tapToAddHelperFactory.getCreatedHelper()?.emitNextStep(
+                    TapToAddNextStep.Complete
                 )
 
                 val result = awaitItem()
@@ -3386,8 +3386,8 @@ internal class PaymentSheetViewModelTest {
 
             createCalls.awaitItem()
 
-            tapToAddHelperFactory.getCreatedHelper()?.emitResult(
-                TapToAddResult.Continue(
+            tapToAddHelperFactory.getCreatedHelper()?.emitNextStep(
+                TapToAddNextStep.Continue(
                     PaymentSelection.Saved(CARD_PAYMENT_METHOD)
                 )
             )
@@ -3412,8 +3412,8 @@ internal class PaymentSheetViewModelTest {
             createCalls.awaitItem()
 
             viewModel.selection.test {
-                tapToAddHelperFactory.getCreatedHelper()?.emitResult(
-                    TapToAddResult.Canceled(
+                tapToAddHelperFactory.getCreatedHelper()?.emitNextStep(
+                    TapToAddNextStep.Canceled(
                         expectedPaymentSelection
                     )
                 )

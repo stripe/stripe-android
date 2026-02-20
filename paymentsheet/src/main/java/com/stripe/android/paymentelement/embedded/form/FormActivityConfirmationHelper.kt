@@ -5,7 +5,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.common.taptoadd.TapToAddHelper
-import com.stripe.android.common.taptoadd.TapToAddResult
+import com.stripe.android.common.taptoadd.TapToAddNextStep
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -48,9 +48,9 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
         )
 
         lifecycleOwner.lifecycleScope.launch {
-            tapToAddHelper.result.collect { result ->
+            tapToAddHelper.nextStep.collect { result ->
                 val formResult = when (result) {
-                    is TapToAddResult.Canceled -> {
+                    is TapToAddNextStep.Canceled -> {
                         result.paymentSelection?.let {
                             customerStateHolder.addPaymentMethod(it.paymentMethod)
                             FormResult.Complete(
@@ -60,14 +60,14 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
                             )
                         }
                     }
-                    TapToAddResult.Complete -> {
+                    TapToAddNextStep.Complete -> {
                         FormResult.Complete(
                             selection = null,
                             hasBeenConfirmed = true,
                             customerState = customerStateHolder.customer.value
                         )
                     }
-                    is TapToAddResult.Continue -> {
+                    is TapToAddNextStep.Continue -> {
                         customerStateHolder.addPaymentMethod(result.paymentSelection.paymentMethod)
                         FormResult.Complete(
                             selection = result.paymentSelection,

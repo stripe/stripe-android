@@ -7,7 +7,7 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddHelper
-import com.stripe.android.common.taptoadd.TapToAddResult
+import com.stripe.android.common.taptoadd.TapToAddNextStep
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -106,7 +106,7 @@ class DefaultFormActivityConfirmationHelperTest {
             tapToAddHelper = tapToAddHelper,
             customerStateHolder = customerStateHolder,
         ) {
-            tapToAddHelper.emitResult(TapToAddResult.Complete)
+            tapToAddHelper.emitNextStep(TapToAddNextStep.Complete)
 
             assertThat(stateHelper.resultTurbine.awaitItem()).isEqualTo(
                 FormResult.Complete(
@@ -127,8 +127,8 @@ class DefaultFormActivityConfirmationHelperTest {
             customerStateHolder = customerStateHolder,
         ) {
             val expectedSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
-            tapToAddHelper.emitResult(
-                TapToAddResult.Continue(
+            tapToAddHelper.emitNextStep(
+                TapToAddNextStep.Continue(
                     paymentSelection = expectedSelection,
                 )
             )
@@ -152,8 +152,8 @@ class DefaultFormActivityConfirmationHelperTest {
         testScenario(
             tapToAddHelper = tapToAddHelper,
         ) {
-            tapToAddHelper.emitResult(
-                TapToAddResult.Canceled(
+            tapToAddHelper.emitNextStep(
+                TapToAddNextStep.Canceled(
                     paymentSelection = null,
                 )
             )
@@ -171,8 +171,8 @@ class DefaultFormActivityConfirmationHelperTest {
             tapToAddHelper = tapToAddHelper,
             customerStateHolder = customerStateHolder,
         ) {
-            tapToAddHelper.emitResult(
-                TapToAddResult.Canceled(
+            tapToAddHelper.emitNextStep(
+                TapToAddNextStep.Canceled(
                     paymentSelection = expectedSelection,
                 )
             )
