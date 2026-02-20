@@ -1,9 +1,12 @@
 package com.stripe.android.common.taptoadd.ui
 
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.stripe.android.link.ui.inline.LocalLinkInlineSignupBackgroundColor
 import com.stripe.android.paymentsheet.ui.PrimaryButtonColors
 import com.stripe.android.paymentsheet.ui.PrimaryButtonShape
 import com.stripe.android.paymentsheet.ui.PrimaryButtonTheme
@@ -25,7 +28,11 @@ internal fun TapToAddTheme(
             colors = TapToAddThemeDefaults.primaryButtonColors,
             shape = TapToAddThemeDefaults.primaryButtonShape,
         ) {
-            content()
+            CompositionLocalProvider(
+                LocalLinkInlineSignupBackgroundColor provides MaterialTheme.colors.background
+            ) {
+                content()
+            }
         }
     }
 }
@@ -51,7 +58,7 @@ private object TapToAddThemeDefaults {
     )
 
     val colors = StripeColors(
-        component = Color.Black,
+        component = Color(0xFF1C1C1E),
         componentBorder = componentBorderColor,
         componentDivider = componentBorderColor,
         onComponent = Color.White,

@@ -32,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -215,12 +216,14 @@ private fun Modifier.applyBorders(
 ): Modifier = if (simplifiedCheckbox) {
     this
 } else {
+    val backgroundColor = LocalLinkInlineSignupBackgroundColor.current ?: MaterialTheme.stripeColors.component
+
     border(
         border = MaterialTheme.getBorderStroke(isSelected = false),
         shape = shape,
     )
         .background(
-            color = MaterialTheme.stripeColors.component,
+            color = backgroundColor,
             shape = shape,
         )
 }
@@ -454,6 +457,8 @@ internal fun LinkFields(
         }
     }
 }
+
+internal val LocalLinkInlineSignupBackgroundColor = staticCompositionLocalOf<Color?> { null }
 
 @Preview
 @Composable

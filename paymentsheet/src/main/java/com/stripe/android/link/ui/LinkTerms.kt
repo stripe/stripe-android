@@ -8,6 +8,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import com.stripe.android.link.ui.inline.LocalLinkInlineSignupBackgroundColor
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.StripeTheme
@@ -47,12 +48,14 @@ internal fun LinkTerms(
         }
     }
 
+    val backgroundColor = LocalLinkInlineSignupBackgroundColor.current ?: MaterialTheme.stripeColors.component
+
     val imageLoader = buildMap {
         if (type == LinkTermsType.InlineWithDefaultOptIn) {
             put(
                 "link_logo",
                 EmbeddableImage.Drawable(
-                    id = if (MaterialTheme.stripeColors.component.shouldUseDarkDynamicColor()) {
+                    id = if (backgroundColor.shouldUseDarkDynamicColor()) {
                         R.drawable.stripe_link_logo_knockout_black
                     } else {
                         R.drawable.stripe_link_logo_knockout_white
