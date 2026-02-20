@@ -67,7 +67,7 @@ workflows:
   _install_java:
     steps:
       - script@1:
-          title: Install Java via SDKMAN
+          title: Install Java via Direct Download
           inputs:
             - content: |-
                 #!/bin/bash
@@ -76,20 +76,43 @@ workflows:
                 # Default to Java 25 if not specified
                 JAVA_VERSION=${JAVA_VERSION:-25}
 
-                # Install SDKMAN!
-                curl -s "https://get.sdkman.io?rcupdate=false" | bash
-                source "$HOME/.sdkman/bin/sdkman-init.sh"
+                # Determine architecture
+                ARCH=$(uname -m)
+                if [ "$ARCH" = "x86_64" ]; then
+                  ARCH="x64"
+                elif [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
+                  ARCH="aarch64"
+                fi
 
-                # Install specified OpenJDK version
-                sdk install java ${JAVA_VERSION}-open
+                # Determine OS
+                OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+
+                # Download Java from Adoptium (Eclipse Temurin)
+                JAVA_DIR="$HOME/java-${JAVA_VERSION}"
+
+                if [ ! -d "$JAVA_DIR" ]; then
+                  echo "Downloading Java ${JAVA_VERSION} for ${OS}-${ARCH}..."
+
+                  # Construct download URL for Adoptium
+                  DOWNLOAD_URL="https://api.adoptium.net/v3/binary/latest/${JAVA_VERSION}/ga/${OS}/${ARCH}/jdk/hotspot/normal/eclipse"
+
+                  mkdir -p "$JAVA_DIR"
+                  curl -L "$DOWNLOAD_URL" -o "/tmp/java-${JAVA_VERSION}.tar.gz"
+
+                  # Extract to Java directory
+                  tar -xzf "/tmp/java-${JAVA_VERSION}.tar.gz" -C "$JAVA_DIR" --strip-components=1
+                  rm "/tmp/java-${JAVA_VERSION}.tar.gz"
+                else
+                  echo "Java ${JAVA_VERSION} already installed at $JAVA_DIR"
+                fi
 
                 # Export for subsequent Bitrise steps
-                JAVA_HOME=$(sdk home java ${JAVA_VERSION}-open)
+                JAVA_HOME="$JAVA_DIR"
                 envman add --key JAVA_HOME --value "$JAVA_HOME"
                 envman add --key PATH --value "$JAVA_HOME/bin:$PATH"
 
                 # Verify
-                java -version
+                "$JAVA_HOME/bin/java" -version
   check:
     envs:
       - JAVA_VERSION: 22
