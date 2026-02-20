@@ -55,8 +55,10 @@ import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultSelectSavedPaymentMethodsInteractor
+import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
 import com.stripe.android.paymentsheet.utils.asGooglePayButtonType
 import com.stripe.android.paymentsheet.utils.toConfirmationError
+import com.stripe.android.paymentsheet.verticalmode.DefaultSavedPaymentMethodConfirmInteractor
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
@@ -248,6 +250,20 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                         result.paymentSelection?.let { paymentSelection ->
                             customerStateHolder.addPaymentMethod(paymentSelection.paymentMethod)
                             updateSelection(paymentSelection)
+                            val paymentMethodMetadata = paymentMethodMetadata.value ?: return@collect
+                            val savedPaymentMethodConfirmScreen =
+                                PaymentSheetScreen.SavedPaymentMethodConfirm(
+                                    DefaultSavedPaymentMethodConfirmInteractor.create(
+                                        paymentMethodMetadata,
+                                        paymentSelection
+                                    ),
+                                    isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
+                                )
+                            val newScreens = determineInitialBackStack(
+                                paymentMethodMetadata,
+                                customerStateHolder,
+                            ).plus(savedPaymentMethodConfirmScreen)
+                            navigationHandler.resetTo(newScreens)
                         }
                     }
                     TapToAddNextStep.Complete -> {

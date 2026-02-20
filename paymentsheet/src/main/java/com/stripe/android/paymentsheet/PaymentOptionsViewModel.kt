@@ -44,6 +44,7 @@ import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultSelectSavedPaymentMethodsInteractor
+import com.stripe.android.paymentsheet.verticalmode.DefaultSavedPaymentMethodConfirmInteractor
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
@@ -233,6 +234,20 @@ internal class PaymentOptionsViewModel @Inject constructor(
                         result.paymentSelection?.let { paymentSelection ->
                             customerStateHolder.addPaymentMethod(paymentSelection.paymentMethod)
                             updateSelection(paymentSelection)
+                            val paymentMethodMetadata = args.state.paymentMethodMetadata
+                            val savedPaymentMethodConfirmScreen =
+                                PaymentSheetScreen.SavedPaymentMethodConfirm(
+                                    DefaultSavedPaymentMethodConfirmInteractor.create(
+                                        paymentMethodMetadata,
+                                        paymentSelection,
+                                    ),
+                                    isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
+                                )
+                            val newScreens = determineInitialBackStack(
+                                paymentMethodMetadata,
+                                customerStateHolder,
+                            ).plus(savedPaymentMethodConfirmScreen)
+                            navigationHandler.resetTo(newScreens)
                         }
                     }
                     TapToAddNextStep.Complete -> {
