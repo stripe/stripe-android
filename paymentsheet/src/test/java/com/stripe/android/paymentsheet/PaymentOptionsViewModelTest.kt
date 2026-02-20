@@ -41,6 +41,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures.DEFAULT_CARD
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_SELECTION
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentelement.WalletButtonsPreview
@@ -1247,6 +1248,33 @@ internal class PaymentOptionsViewModelTest {
                     expectedPaymentSelection.paymentMethod
                 )
                 assertThat(awaitItem()).isEqualTo(expectedPaymentSelection)
+            }
+        }
+    }
+
+    @Test
+    fun `When tap to add result is Canceled with payment selection, screens are updated`() = runTest {
+        val expectedPaymentSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
+        val customerStateHolder = FakeCustomerStateHolder()
+
+        FakeTapToAddHelper.Factory.test {
+            val viewModel = createViewModel(
+                tapToAddHelperFactory = tapToAddHelperFactory,
+                customerStateHolder = customerStateHolder,
+            )
+
+            createCalls.awaitItem()
+
+            viewModel.navigationHandler.currentScreen.test {
+                awaitItem()
+
+                tapToAddHelperFactory.getCreatedHelper()?.emitNextStep(
+                    TapToAddNextStep.Canceled(
+                        expectedPaymentSelection
+                    )
+                )
+
+                assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.SavedPaymentMethodConfirm>()
             }
         }
     }
