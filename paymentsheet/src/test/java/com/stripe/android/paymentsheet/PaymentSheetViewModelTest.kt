@@ -16,7 +16,7 @@ import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddMode
-import com.stripe.android.common.taptoadd.TapToAddResult
+import com.stripe.android.common.taptoadd.TapToAddNextStep
 import com.stripe.android.core.Logger
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
@@ -3364,8 +3364,8 @@ internal class PaymentSheetViewModelTest {
             createCalls.awaitItem()
 
             viewModel.paymentSheetResult.test {
-                tapToAddHelperFactory.getCreatedHelper()?.emitResult(
-                    TapToAddResult.Complete
+                tapToAddHelperFactory.getCreatedHelper()?.emitNextStep(
+                    TapToAddNextStep.Complete
                 )
 
                 val result = awaitItem()
@@ -3386,8 +3386,8 @@ internal class PaymentSheetViewModelTest {
 
             createCalls.awaitItem()
 
-            tapToAddHelperFactory.getCreatedHelper()?.emitResult(
-                TapToAddResult.Continue(
+            tapToAddHelperFactory.getCreatedHelper()?.emitNextStep(
+                TapToAddNextStep.Continue(
                     PaymentSelection.Saved(CARD_PAYMENT_METHOD)
                 )
             )
@@ -3399,7 +3399,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `When tap to add result is Canceled with payment selection, selection and PMs are updated`() = runTest {
+    fun `When tap to add result is Canceled with payment selection, selection, PMs, screens are updated`() = runTest {
         val expectedPaymentSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
         val customerStateHolder = FakeCustomerStateHolder()
 
@@ -3412,8 +3412,8 @@ internal class PaymentSheetViewModelTest {
             createCalls.awaitItem()
 
             viewModel.selection.test {
-                tapToAddHelperFactory.getCreatedHelper()?.emitResult(
-                    TapToAddResult.Canceled(
+                tapToAddHelperFactory.getCreatedHelper()?.emitNextStep(
+                    TapToAddNextStep.ConfirmSavedPaymentMethod(
                         expectedPaymentSelection
                     )
                 )
@@ -3422,6 +3422,33 @@ internal class PaymentSheetViewModelTest {
                     expectedPaymentSelection.paymentMethod
                 )
                 assertThat(awaitItem()).isEqualTo(expectedPaymentSelection)
+            }
+        }
+    }
+
+    @Test
+    fun `When tap to add result is Canceled with payment selection, screens are updated`() = runTest {
+        val expectedPaymentSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
+        val customerStateHolder = FakeCustomerStateHolder()
+
+        FakeTapToAddHelper.Factory.test {
+            val viewModel = createViewModel(
+                tapToAddHelperFactory = tapToAddHelperFactory,
+                customerStateHolder = customerStateHolder,
+            )
+
+            createCalls.awaitItem()
+
+            viewModel.navigationHandler.currentScreen.test {
+                awaitItem()
+
+                tapToAddHelperFactory.getCreatedHelper()?.emitNextStep(
+                    TapToAddNextStep.ConfirmSavedPaymentMethod(
+                        expectedPaymentSelection
+                    )
+                )
+
+                assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.SavedPaymentMethodConfirm>()
             }
         }
     }

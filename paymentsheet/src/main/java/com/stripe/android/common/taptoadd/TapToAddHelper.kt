@@ -18,7 +18,7 @@ import javax.inject.Inject
 import javax.inject.Named
 
 internal interface TapToAddHelper {
-    val result: SharedFlow<TapToAddResult>
+    val nextStep: SharedFlow<TapToAddNextStep>
 
     val hasPreviouslyAttemptedCollection: Boolean
 
@@ -66,15 +66,17 @@ internal class DefaultTapToAddHelper(
     override val hasPreviouslyAttemptedCollection: Boolean
         get() = _hasPreviouslyAttemptedCollection
 
-    private val _result = MutableSharedFlow<TapToAddResult>()
-    override val result: SharedFlow<TapToAddResult> = _result.asSharedFlow()
+    private val _nextStep = MutableSharedFlow<TapToAddNextStep>()
+    override val nextStep: SharedFlow<TapToAddNextStep> = _nextStep.asSharedFlow()
 
     override fun register(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner) {
         val launcher = activityResultCaller.registerForActivityResult(TapToAddContract) { result ->
             collecting = false
 
             coroutineScope.launch {
-                _result.emit(result)
+                mapResultToNextStep(result)?.let {
+                    _nextStep.emit(it)
+                }
             }
         }
 
@@ -89,6 +91,18 @@ internal class DefaultTapToAddHelper(
                 }
             }
         )
+    }
+
+    private fun mapResultToNextStep(tapToAddResult: TapToAddResult): TapToAddNextStep? {
+        return when (tapToAddResult) {
+            is TapToAddResult.Canceled -> tapToAddResult.paymentSelection?.let {
+                TapToAddNextStep.ConfirmSavedPaymentMethod(
+                    it
+                )
+            }
+            TapToAddResult.Complete -> TapToAddNextStep.Complete
+            is TapToAddResult.Continue -> TapToAddNextStep.Continue(tapToAddResult.paymentSelection)
+        }
     }
 
     override fun startPaymentMethodCollection(paymentMethodMetadata: PaymentMethodMetadata) {

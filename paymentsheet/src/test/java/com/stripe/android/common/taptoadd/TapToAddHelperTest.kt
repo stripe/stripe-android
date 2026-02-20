@@ -47,7 +47,7 @@ class TapToAddHelperTest {
             lifecycleOwner = TestLifecycleOwner(),
         )
 
-        helper.result.test {
+        helper.nextStep.test {
             assertThat(activityResultCallerScenario.awaitNextRegisteredLauncher()).isNotNull()
 
             val registerCall = activityResultCallerScenario.awaitRegisterCall()
@@ -58,7 +58,7 @@ class TapToAddHelperTest {
 
             tapToAddCallback.onActivityResult(TapToAddResult.Complete)
 
-            assertThat(awaitItem()).isEqualTo(TapToAddResult.Complete)
+            assertThat(awaitItem()).isEqualTo(TapToAddNextStep.Complete)
         }
     }
 

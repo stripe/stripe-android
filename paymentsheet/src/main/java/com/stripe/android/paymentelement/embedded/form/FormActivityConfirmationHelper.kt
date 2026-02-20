@@ -5,7 +5,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.common.taptoadd.TapToAddHelper
-import com.stripe.android.common.taptoadd.TapToAddResult
+import com.stripe.android.common.taptoadd.TapToAddNextStep
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -48,26 +48,24 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
         )
 
         lifecycleOwner.lifecycleScope.launch {
-            tapToAddHelper.result.collect { result ->
+            tapToAddHelper.nextStep.collect { result ->
                 val formResult = when (result) {
-                    is TapToAddResult.Canceled -> {
-                        result.paymentSelection?.let {
-                            customerStateHolder.addPaymentMethod(it.paymentMethod)
-                            FormResult.Complete(
-                                selection = it,
-                                hasBeenConfirmed = false,
-                                customerState = customerStateHolder.customer.value,
-                            )
-                        }
+                    is TapToAddNextStep.ConfirmSavedPaymentMethod -> {
+                        customerStateHolder.addPaymentMethod(result.paymentSelection.paymentMethod)
+                        FormResult.Complete(
+                            selection = result.paymentSelection,
+                            hasBeenConfirmed = false,
+                            customerState = customerStateHolder.customer.value,
+                        )
                     }
-                    TapToAddResult.Complete -> {
+                    TapToAddNextStep.Complete -> {
                         FormResult.Complete(
                             selection = null,
                             hasBeenConfirmed = true,
                             customerState = customerStateHolder.customer.value
                         )
                     }
-                    is TapToAddResult.Continue -> {
+                    is TapToAddNextStep.Continue -> {
                         customerStateHolder.addPaymentMethod(result.paymentSelection.paymentMethod)
                         FormResult.Complete(
                             selection = result.paymentSelection,
@@ -76,9 +74,7 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
                         )
                     }
                 }
-                formResult?.let {
-                    stateHelper.setResult(it)
-                }
+                stateHelper.setResult(formResult)
             }
         }
 

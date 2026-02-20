@@ -2314,6 +2314,12 @@ public final class com/stripe/android/paymentsheet/verticalmode/ComposableSingle
 	public final fun getLambda$1795895082$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 }
 
+public final class com/stripe/android/paymentsheet/verticalmode/ComposableSingletons$SavedPaymentMethodConfirmUIKt {
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/verticalmode/ComposableSingletons$SavedPaymentMethodConfirmUIKt;
+	public fun <init> ()V
+	public final fun getLambda$-130742141$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
+}
+
 public final class com/stripe/android/shoppay/ComposableSingletons$ShopPayButtonKt {
 	public static final field INSTANCE Lcom/stripe/android/shoppay/ComposableSingletons$ShopPayButtonKt;
 	public fun <init> ()V
