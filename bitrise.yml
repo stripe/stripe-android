@@ -152,18 +152,34 @@ workflows:
 
                   rm "/tmp/java-${JAVA_VERSION}.tar.gz"
 
+                  # On macOS, the JDK is in Contents/Home subdirectory
+                  if [ -d "$JAVA_DIR/Contents/Home" ]; then
+                    JAVA_HOME="$JAVA_DIR/Contents/Home"
+                  else
+                    JAVA_HOME="$JAVA_DIR"
+                  fi
+
                   # Verify Java was extracted correctly
-                  if [ ! -f "$JAVA_DIR/bin/java" ]; then
-                    echo "Java binary not found after extraction. Directory contents:"
+                  if [ ! -f "$JAVA_HOME/bin/java" ]; then
+                    echo "Java binary not found at $JAVA_HOME/bin/java. Directory contents:"
                     ls -la "$JAVA_DIR"
+                    if [ -d "$JAVA_DIR/Contents" ]; then
+                      echo "Contents directory:"
+                      ls -la "$JAVA_DIR/Contents"
+                    fi
                     exit 1
                   fi
                 else
                   echo "Java ${JAVA_VERSION} already installed at $JAVA_DIR"
+                  # On macOS, the JDK is in Contents/Home subdirectory
+                  if [ -d "$JAVA_DIR/Contents/Home" ]; then
+                    JAVA_HOME="$JAVA_DIR/Contents/Home"
+                  else
+                    JAVA_HOME="$JAVA_DIR"
+                  fi
                 fi
 
                 # Export for subsequent Bitrise steps
-                JAVA_HOME="$JAVA_DIR"
                 envman add --key JAVA_HOME --value "$JAVA_HOME"
                 envman add --key PATH --value "$JAVA_HOME/bin:$PATH"
 
