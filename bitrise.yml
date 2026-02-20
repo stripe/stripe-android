@@ -423,9 +423,27 @@ workflows:
       - git-clone@8: { }
       - restore-gradle-configuration-cache@1: { }
       - restore-gradle-cache@2: { }
-      - set-java-version@1:
+      - script@1:
+          title: Install Java 25 via SDKMAN
           inputs:
-            - set_java_version: 21
+            - content: |-
+                #!/bin/bash
+                set -euo pipefail
+
+                # Install SDKMAN!
+                curl -s "https://get.sdkman.io?rcupdate=false" | bash
+                source "$HOME/.sdkman/bin/sdkman-init.sh"
+
+                # Install OpenJDK 25
+                sdk install java 25-open
+
+                # Export for subsequent Bitrise steps
+                JAVA_HOME=$(sdk home java 25-open)
+                envman add --key JAVA_HOME --value "$JAVA_HOME"
+                envman add --key PATH --value "$JAVA_HOME/bin:$PATH"
+
+                # Verify
+                java -version
       - script@1:
           inputs:
             - content: mkdir -p ~/.gradle ; cp .bitrise/ci-gradle.properties ~/.gradle/gradle.properties
