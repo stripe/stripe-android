@@ -50,13 +50,15 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
         lifecycleOwner.lifecycleScope.launch {
             tapToAddHelper.nextStep.collect { result ->
                 val formResult = when (result) {
-                    is TapToAddNextStep.ConfirmSavedPaymentMethod -> {
-                        customerStateHolder.addPaymentMethod(result.paymentSelection.paymentMethod)
-                        FormResult.Complete(
-                            selection = result.paymentSelection,
-                            hasBeenConfirmed = false,
-                            customerState = customerStateHolder.customer.value,
-                        )
+                    is TapToAddNextStep.Canceled -> {
+                        result.paymentSelection?.let {
+                            customerStateHolder.addPaymentMethod(it.paymentMethod)
+                            FormResult.Complete(
+                                selection = it,
+                                hasBeenConfirmed = false,
+                                customerState = customerStateHolder.customer.value,
+                            )
+                        }
                     }
                     TapToAddNextStep.Complete -> {
                         FormResult.Complete(
@@ -74,7 +76,9 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
                         )
                     }
                 }
-                stateHelper.setResult(formResult)
+                formResult?.let {
+                    stateHelper.setResult(it)
+                }
             }
         }
 

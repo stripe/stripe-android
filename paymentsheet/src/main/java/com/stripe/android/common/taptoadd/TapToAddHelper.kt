@@ -74,9 +74,7 @@ internal class DefaultTapToAddHelper(
             collecting = false
 
             coroutineScope.launch {
-                mapResultToNextStep(result)?.let {
-                    _nextStep.emit(it)
-                }
+                _nextStep.emit(mapResultToNextStep(result))
             }
         }
 
@@ -93,13 +91,9 @@ internal class DefaultTapToAddHelper(
         )
     }
 
-    private fun mapResultToNextStep(tapToAddResult: TapToAddResult): TapToAddNextStep? {
+    private fun mapResultToNextStep(tapToAddResult: TapToAddResult): TapToAddNextStep {
         return when (tapToAddResult) {
-            is TapToAddResult.Canceled -> tapToAddResult.paymentSelection?.let {
-                TapToAddNextStep.ConfirmSavedPaymentMethod(
-                    it
-                )
-            }
+            is TapToAddResult.Canceled -> TapToAddNextStep.Canceled(tapToAddResult.paymentSelection)
             TapToAddResult.Complete -> TapToAddNextStep.Complete
             is TapToAddResult.Continue -> TapToAddNextStep.Continue(tapToAddResult.paymentSelection)
         }

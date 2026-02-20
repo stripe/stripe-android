@@ -3399,7 +3399,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `When tap to add result is Canceled with payment selection, selection, PMs, screens are updated`() = runTest {
+    fun `When tap to add result is Canceled with payment selection, selection and PMs are updated`() = runTest {
         val expectedPaymentSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
         val customerStateHolder = FakeCustomerStateHolder()
 
@@ -3413,7 +3413,7 @@ internal class PaymentSheetViewModelTest {
 
             viewModel.selection.test {
                 tapToAddHelperFactory.getCreatedHelper()?.emitNextStep(
-                    TapToAddNextStep.ConfirmSavedPaymentMethod(
+                    TapToAddNextStep.Canceled(
                         expectedPaymentSelection
                     )
                 )
@@ -3422,33 +3422,6 @@ internal class PaymentSheetViewModelTest {
                     expectedPaymentSelection.paymentMethod
                 )
                 assertThat(awaitItem()).isEqualTo(expectedPaymentSelection)
-            }
-        }
-    }
-
-    @Test
-    fun `When tap to add result is Canceled with payment selection, screens are updated`() = runTest {
-        val expectedPaymentSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
-        val customerStateHolder = FakeCustomerStateHolder()
-
-        FakeTapToAddHelper.Factory.test {
-            val viewModel = createViewModel(
-                tapToAddHelperFactory = tapToAddHelperFactory,
-                customerStateHolder = customerStateHolder,
-            )
-
-            createCalls.awaitItem()
-
-            viewModel.navigationHandler.currentScreen.test {
-                awaitItem()
-
-                tapToAddHelperFactory.getCreatedHelper()?.emitNextStep(
-                    TapToAddNextStep.ConfirmSavedPaymentMethod(
-                        expectedPaymentSelection
-                    )
-                )
-
-                assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.SavedPaymentMethodConfirm>()
             }
         }
     }
