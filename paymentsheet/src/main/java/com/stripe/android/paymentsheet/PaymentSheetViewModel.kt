@@ -252,8 +252,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                         val savedPaymentMethodConfirmScreen =
                             PaymentSheetScreen.SavedPaymentMethodConfirm(
                                 DefaultSavedPaymentMethodConfirmInteractor.create(
-                                    paymentMethodMetadata,
-                                    result.paymentSelection
+                                    paymentMethodMetadata = paymentMethodMetadata,
+                                    initialSelection = result.paymentSelection,
+                                    savedStateHandle = savedStateHandle,
+                                    linkConfigurationCoordinator = linkHandler.linkConfigurationCoordinator,
                                 ),
                                 isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
                             )
