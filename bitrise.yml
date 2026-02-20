@@ -84,8 +84,13 @@ workflows:
                   ARCH="aarch64"
                 fi
 
-                # Determine OS
-                OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+                # Determine OS (Adoptium uses "mac" for macOS, not "darwin")
+                OS=$(uname -s)
+                if [ "$OS" = "Darwin" ]; then
+                  OS="mac"
+                else
+                  OS=$(echo "$OS" | tr '[:upper:]' '[:lower:]')
+                fi
 
                 # Download Java from Adoptium (Eclipse Temurin)
                 JAVA_DIR="$HOME/java-${JAVA_VERSION}"
