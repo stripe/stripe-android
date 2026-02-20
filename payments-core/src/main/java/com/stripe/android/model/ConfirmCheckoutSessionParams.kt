@@ -8,19 +8,19 @@ import androidx.annotation.RestrictTo
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class ConfirmCheckoutSessionParams(
-    val checkoutSessionId: String,
-    val paymentMethodId: String,
-    val clientAttributionMetadata: ClientAttributionMetadata,
-    val returnUrl: String,
-    val savePaymentMethod: Boolean?,
+    internal val checkoutSessionId: String,
+    private val paymentMethodId: String,
+    private val clientAttributionMetadata: ClientAttributionMetadata,
+    private val returnUrl: String,
+    private val savePaymentMethod: Boolean?,
 ) {
     fun toParamMap(): Map<String, Any> {
         return buildMap {
             put("payment_method", paymentMethodId)
             put("client_attribution_metadata", clientAttributionMetadata.toParamMap())
             put("return_url", returnUrl)
-            if (savePaymentMethod == true) {
-                put("save_payment_method", true)
+            if (savePaymentMethod != null) {
+                put("save_payment_method", savePaymentMethod)
             }
         }
     }
