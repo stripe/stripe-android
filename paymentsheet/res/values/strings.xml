@@ -205,8 +205,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_remove_pm_title">Remove payment method</string>
   <!-- A button used for saving a new payment method -->
   <string name="stripe_paymentsheet_save">Save</string>
-  <!-- Title shown above a view containing a customer's saved card -->
-  <string name="stripe_paymentsheet_saved_card">Saved card</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_save_a_new_payment_method">Save a new payment method</string>
   <!-- US Bank Account copy title for Mobile payment element form -->
