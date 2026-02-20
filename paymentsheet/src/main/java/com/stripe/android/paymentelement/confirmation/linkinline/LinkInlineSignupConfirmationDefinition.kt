@@ -107,49 +107,84 @@ internal class LinkInlineSignupConfirmationDefinition(
         linkInlineSignupConfirmationOption: LinkInlineSignupConfirmationOption,
         userInput: UserInput,
     ): PaymentMethodConfirmationOption {
-        if (linkInlineSignupConfirmationOption !is LinkInlineSignupConfirmationOption.New) {
-            return linkInlineSignupConfirmationOption.toOption()
-        }
-
         if (userInput is UserInput.SignIn) {
             linkAnalyticsHelper.onLinkPopupSkipped()
 
             return linkInlineSignupConfirmationOption.toOption()
         }
 
-        val createParams = linkInlineSignupConfirmationOption.createParams
-        val saveOption = linkInlineSignupConfirmationOption.saveOption
-        val extraParams = linkInlineSignupConfirmationOption.extraParams
         val configuration = linkInlineSignupConfirmationOption.linkConfiguration
 
-        val linkPaymentDetails = linkConfigurationCoordinator.attachNewCardToAccount(
-            configuration,
-            createParams,
-        ).getOrNull()
+        return when (linkInlineSignupConfirmationOption) {
+            is LinkInlineSignupConfirmationOption.New -> {
+                val createParams = linkInlineSignupConfirmationOption.createParams
+                val saveOption = linkInlineSignupConfirmationOption.saveOption
+                val extraParams = linkInlineSignupConfirmationOption.extraParams
 
-        return when (linkPaymentDetails) {
-            is LinkPaymentDetails.New -> {
-                linkStore.markLinkAsUsed()
+                val linkPaymentDetails = linkConfigurationCoordinator.attachNewCardToAccount(
+                    configuration,
+                    createParams,
+                ).getOrNull()
 
-                linkPaymentDetails.toNewOption(saveOption, configuration, extraParams)
+                when (linkPaymentDetails) {
+                    is LinkPaymentDetails.New -> {
+                        linkStore.markLinkAsUsed()
+
+                        linkPaymentDetails.toNewOption(saveOption, configuration, extraParams)
+                    }
+                    is LinkPaymentDetails.Passthrough -> {
+                        linkStore.markLinkAsUsed()
+
+                        linkPaymentDetails.toSavedOption(saveOption)
+                    }
+                    is LinkPaymentDetails.Saved -> {
+                        linkStore.markLinkAsUsed()
+
+                        linkPaymentDetails.toSavedOption(
+                            savedConfirmationOption = null
+                        )
+                    }
+                    null -> linkInlineSignupConfirmationOption.toOption()
+                }
             }
-            is LinkPaymentDetails.Passthrough -> {
-                linkStore.markLinkAsUsed()
+            is LinkInlineSignupConfirmationOption.Saved -> {
+                val linkPaymentDetails = linkConfigurationCoordinator.attachExistingCardToAccount(
+                    configuration,
+                    linkInlineSignupConfirmationOption.paymentMethod,
+                ).getOrNull()
 
-                linkPaymentDetails.toSavedOption(saveOption)
+                when (linkPaymentDetails) {
+                    is LinkPaymentDetails.Saved -> {
+                        linkStore.markLinkAsUsed()
+
+                        linkPaymentDetails.toSavedOption(
+                            savedConfirmationOption = linkInlineSignupConfirmationOption
+                        )
+                    }
+                    null -> linkInlineSignupConfirmationOption.toOption()
+                }
             }
-            null -> linkInlineSignupConfirmationOption.toOption()
         }
     }
 
+    private fun LinkPaymentDetails.Saved.toSavedOption(
+        savedConfirmationOption: LinkInlineSignupConfirmationOption.Saved?,
+    ): PaymentMethodConfirmationOption.Saved {
+        return PaymentMethodConfirmationOption.Saved(
+            paymentMethod = paymentMethod,
+            optionsParams = savedConfirmationOption?.optionsParams,
+            originatedFromWallet = false,
+        )
+    }
+
     private fun LinkPaymentDetails.Passthrough.toSavedOption(
-        saveOption: LinkInlineSignupConfirmationOption.PaymentMethodSaveOption,
+        saveOption: LinkInlineSignupConfirmationOption.PaymentMethodSaveOption?,
     ): PaymentMethodConfirmationOption.Saved {
         return PaymentMethodConfirmationOption.Saved(
             paymentMethod = paymentMethod,
             optionsParams = PaymentMethodOptionsParams.Card(
                 setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession.takeIf {
-                    saveOption.shouldSave()
+                    saveOption?.shouldSave() ?: false
                 } ?: ConfirmPaymentIntentParams.SetupFutureUsage.Blank
             ),
             originatedFromWallet = true,

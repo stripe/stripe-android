@@ -256,6 +256,26 @@ internal class LinkApiRepository @Inject constructor(
         }
     }
 
+    override suspend fun createPaymentDetailsFromPaymentMethod(
+        paymentMethod: PaymentMethod,
+        userEmail: String,
+        stripeIntent: StripeIntent,
+        consumerSessionClientSecret: String,
+        clientAttributionMetadata: ClientAttributionMetadata
+    ): Result<LinkPaymentDetails.Saved> {
+        return consumersApiService.createPaymentDetails(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            paymentMethodId = paymentMethod.id,
+            requestSurface = requestSurface.value,
+            requestOptions = apiRequestOptions,
+        ).mapCatching {
+            LinkPaymentDetails.Saved(
+                paymentDetails = it.paymentDetails.first(),
+                paymentMethod = paymentMethod,
+            )
+        }
+    }
+
     override suspend fun createBankAccountPaymentDetails(
         bankAccountId: String,
         userEmail: String,

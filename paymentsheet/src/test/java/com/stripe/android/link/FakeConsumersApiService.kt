@@ -28,12 +28,16 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         consumerSession = TestFactory.CONSUMER_SESSION,
         linkAuthIntent = null
     )
+    var createPaymentDetailsFromPaymentMethodResult = Result.success(
+        ConsumerPaymentDetails(paymentDetails = listOf(TestFactory.CONSUMER_PAYMENT_DETAILS_CARD))
+    )
 
     val signUpCalls = arrayListOf<SignUpCall>()
     val mobileSignUpCalls = arrayListOf<SignUpCall>()
     val lookupCalls = arrayListOf<LookupCall>()
     val mobileLookupCalls = arrayListOf<MobileLookupCall>()
     val sharePaymentDetailsCalls = arrayListOf<SharePaymentDetailsCall>()
+    val createPaymentDetailsFromPaymentMethodCalls = arrayListOf<CreatePaymentDetailsFromPaymentMethodCall>()
 
     override suspend fun signUp(
         params: SignUpParams,
@@ -162,6 +166,23 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         TODO("Not yet implemented")
     }
 
+    override suspend fun createPaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentMethodId: String,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options
+    ): Result<ConsumerPaymentDetails> {
+        createPaymentDetailsFromPaymentMethodCalls.add(
+            CreatePaymentDetailsFromPaymentMethodCall(
+                consumerSessionClientSecret = consumerSessionClientSecret,
+                paymentMethodId = paymentMethodId,
+                requestSurface = requestSurface,
+                requestOptions = requestOptions,
+            )
+        )
+        return createPaymentDetailsFromPaymentMethodResult
+    }
+
     override suspend fun sharePaymentDetails(
         consumerSessionClientSecret: String,
         paymentDetailsId: String,
@@ -238,5 +259,12 @@ internal open class FakeConsumersApiService : ConsumersApiService {
 
     data class SharePaymentDetailsCall(
         val extraParams: Map<String, Any?>,
+    )
+
+    data class CreatePaymentDetailsFromPaymentMethodCall(
+        val consumerSessionClientSecret: String,
+        val paymentMethodId: String,
+        val requestSurface: String,
+        val requestOptions: ApiRequest.Options,
     )
 }
