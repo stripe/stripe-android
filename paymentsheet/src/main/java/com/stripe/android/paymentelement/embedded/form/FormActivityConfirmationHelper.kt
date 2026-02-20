@@ -74,9 +74,7 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
                         )
                     }
                 }
-                formResult?.let {
-                    stateHelper.setResult(it)
-                }
+                stateHelper.setResult(formResult)
             }
         }
 
