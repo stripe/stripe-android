@@ -49,6 +49,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.ConfirmationHandlerModule
 import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmationModule
 import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationModule
+import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -79,6 +80,7 @@ import javax.inject.Singleton
         ConfirmationHandlerModule::class,
         DefaultConfirmationModule::class,
         DefaultIntentConfirmationModule::class,
+        LinkInlineSignupConfirmationModule::class,
         PaymentElementRequestSurfaceModule::class,
         TapToAddViewModelModule::class,
         TapToAddModule::class,

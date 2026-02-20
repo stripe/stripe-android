@@ -17,6 +17,7 @@ import com.stripe.android.model.EmailSource
 import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.LinkAccountSession
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SharePaymentDetails
@@ -36,6 +37,12 @@ internal open class FakeLinkRepository : LinkRepository {
     var mobileConsumerSignUpResult = Result.success(TestFactory.CONSUMER_SESSION_SIGN_UP)
     var createLinkAccountSessionResult = Result.success(TestFactory.LINK_ACCOUNT_SESSION)
     var createCardPaymentDetailsResult = Result.success(TestFactory.LINK_NEW_PAYMENT_DETAILS)
+    var createPaymentDetailsFromPaymentMethodResult = Result.success(
+        LinkPaymentDetails.Saved(
+            paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+        )
+    )
     var createBankAccountPaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT)
     var shareCardPaymentDetailsResult = Result.success(TestFactory.LINK_PASSTHROUGH_PAYMENT_DETAILS)
     var sharePaymentDetails = Result.success(TestFactory.LINK_SHARE_PAYMENT_DETAILS)
@@ -160,6 +167,14 @@ internal open class FakeLinkRepository : LinkRepository {
         consumerSessionClientSecret: String,
         clientAttributionMetadata: ClientAttributionMetadata,
     ) = createCardPaymentDetailsResult
+
+    override suspend fun createPaymentDetailsFromPaymentMethod(
+        paymentMethod: PaymentMethod,
+        userEmail: String,
+        stripeIntent: StripeIntent,
+        consumerSessionClientSecret: String,
+        clientAttributionMetadata: ClientAttributionMetadata,
+    ): Result<LinkPaymentDetails.Saved> = createPaymentDetailsFromPaymentMethodResult
 
     override suspend fun createBankAccountPaymentDetails(
         bankAccountId: String,

@@ -30,8 +30,10 @@ import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.LinkAccountSession
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
@@ -471,6 +473,55 @@ class DefaultLinkAccountManagerTest {
 
         assertThat(linkRepository.result.size).isEqualTo(1)
         assertThat(linkRepository.callCount).isEqualTo(0)
+    }
+
+    @Test
+    fun `createPaymentDetailsFromPaymentMethod returns success when account exists`() = runSuspendTest {
+        val linkRepository = object : FakeLinkRepository() {
+            var createPaymentDetailsFromPaymentMethodCallCount = 0
+            override suspend fun createPaymentDetailsFromPaymentMethod(
+                paymentMethod: PaymentMethod,
+                userEmail: String,
+                stripeIntent: StripeIntent,
+                consumerSessionClientSecret: String,
+                clientAttributionMetadata: ClientAttributionMetadata,
+            ): Result<LinkPaymentDetails.Saved> {
+                createPaymentDetailsFromPaymentMethodCallCount += 1
+                return Result.success(
+                    LinkPaymentDetails.Saved(
+                        paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+                        paymentMethod = paymentMethod,
+                    )
+                )
+            }
+        }
+        val accountManager = accountManager(linkRepository = linkRepository)
+        accountManager.setLinkAccountFromLookupResult(
+            TestFactory.CONSUMER_SESSION_LOOKUP,
+            startSession = true,
+            linkAuthIntentId = null,
+        )
+
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val result = accountManager.createPaymentDetailsFromPaymentMethod(paymentMethod)
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrNull()?.paymentMethod).isEqualTo(paymentMethod)
+        assertThat(linkRepository.createPaymentDetailsFromPaymentMethodCallCount).isEqualTo(1)
+    }
+
+    @Test
+    fun `createPaymentDetailsFromPaymentMethod returns failure when link account is null`() = runSuspendTest {
+        val accountManager = accountManager()
+        accountManager.setTestAccount(null, null)
+
+        val result = accountManager.createPaymentDetailsFromPaymentMethod(
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        )
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
+        assertThat(result.exceptionOrNull()?.message).contains("non-null Link account")
     }
 
     @Test

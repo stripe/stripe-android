@@ -50,4 +50,16 @@ internal sealed class LinkPaymentDetails(
          */
         fun buildFormValues() = convertToFormValuesMap(originalParams.toParamMap())
     }
+
+    /**
+     * A new [ConsumerPaymentDetails.PaymentDetails], whose data comes from the user's already saved
+     * payment method.
+     *
+     * @param paymentMethod The [PaymentMethod] object that is already saved with a Stripe merchant.
+     */
+    @Parcelize
+    class Saved(
+        override val paymentDetails: ConsumerPaymentDetails.PaymentDetails,
+        val paymentMethod: PaymentMethod,
+    ) : LinkPaymentDetails(paymentDetails)
 }

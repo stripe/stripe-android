@@ -116,6 +116,10 @@ internal interface LinkAccountManager {
         paymentMethodCreateParams: PaymentMethodCreateParams
     ): Result<LinkPaymentDetails.New>
 
+    suspend fun createPaymentDetailsFromPaymentMethod(
+        paymentMethod: PaymentMethod,
+    ): Result<LinkPaymentDetails.Saved>
+
     suspend fun createBankAccountPaymentDetails(
         bankAccountId: String,
     ): Result<ConsumerPaymentDetails.PaymentDetails>

@@ -123,7 +123,14 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
             }
             is LinkPaymentDetails.Passthrough -> {
                 savedConfirmationArgs(
-                    paymentDetails = paymentDetails,
+                    paymentMethod = paymentDetails.paymentMethod,
+                    cvc = cvc,
+                    paymentMethodMetadata = paymentMethodMetadata,
+                )
+            }
+            is LinkPaymentDetails.Saved -> {
+                savedConfirmationArgs(
+                    paymentMethod = paymentDetails.paymentMethod,
                     cvc = cvc,
                     paymentMethodMetadata = paymentMethodMetadata,
                 )
@@ -190,13 +197,13 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
     }
 
     private fun savedConfirmationArgs(
-        paymentDetails: LinkPaymentDetails.Passthrough,
+        paymentMethod: PaymentMethod,
         cvc: String?,
         paymentMethodMetadata: PaymentMethodMetadata,
     ): ConfirmationHandler.Args {
         return ConfirmationHandler.Args(
             confirmationOption = PaymentMethodConfirmationOption.Saved(
-                paymentMethod = paymentDetails.paymentMethod,
+                paymentMethod = paymentMethod,
                 optionsParams = PaymentMethodOptionsParams.Card(
                     setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
                     cvc = cvc?.takeIf {
