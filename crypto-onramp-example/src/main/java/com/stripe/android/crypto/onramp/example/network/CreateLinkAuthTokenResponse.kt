@@ -7,7 +7,6 @@ import kotlinx.serialization.Serializable
 data class CreateLinkAuthTokenResponse(
     @SerialName("link_auth_token_client_secret")
     val linkAuthTokenClientSecret: String,
-
     @SerialName("expires_in")
     val expiresIn: Int,
 )

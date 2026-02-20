@@ -98,15 +98,15 @@ internal class IdentityViewModelTest {
     }
 
     private val mockIdentityRepository = mock<IdentityRepository> {
-        onBlocking {
+        on {
             retrieveVerificationPage(any(), any())
         }.thenReturn(mockVerificationPage)
     }
     private val mockIdentityModelFetcher = mock<IdentityModelFetcher> {
-        onBlocking {
+        on {
             fetchIdentityModel(eq(ID_DETECTOR_URL))
         }.thenReturn(ID_DETECTOR_FILE)
-        onBlocking {
+        on {
             fetchIdentityModel(eq(FACE_DETECTOR_URL))
         }.thenReturn(FACE_DETECTOR_FILE)
     }
@@ -1206,7 +1206,8 @@ internal class IdentityViewModelTest {
                 category = Category.ID_FRONT,
                 resultScore = 0.8f,
                 allScores = ALL_SCORES,
-                blurScore = 1.0f
+                blurScore = 1.0f,
+                croppedImage = INPUT_BITMAP
             ),
             identityState = mock<IdentityScanState.Finished>()
         )
@@ -1223,7 +1224,8 @@ internal class IdentityViewModelTest {
                 category = Category.ID_BACK,
                 resultScore = 0.8f,
                 allScores = ALL_SCORES,
-                blurScore = 1.0f
+                blurScore = 1.0f,
+                croppedImage = INPUT_BITMAP
             ),
             identityState = mock<IdentityScanState.Finished>()
         )

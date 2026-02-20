@@ -71,7 +71,7 @@ public final class com/stripe/android/identity/IdentityVerificationSheet$Verific
 public final class com/stripe/android/identity/navigation/ComposableSingletons$IdentityNavGraphKt {
 	public static final field INSTANCE Lcom/stripe/android/identity/navigation/ComposableSingletons$IdentityNavGraphKt;
 	public fun <init> ()V
-	public final fun getLambda-1$identity_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$2119843079$identity_release ()Lkotlin/jvm/functions/Function3;
 }
 
 public final class com/stripe/android/identity/navigation/NavControllerExtKt {
@@ -81,52 +81,52 @@ public final class com/stripe/android/identity/navigation/NavControllerExtKt {
 public final class com/stripe/android/identity/ui/ComposableSingletons$BottomSheetKt {
 	public static final field INSTANCE Lcom/stripe/android/identity/ui/ComposableSingletons$BottomSheetKt;
 	public fun <init> ()V
-	public final fun getLambda-1$identity_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda-2$identity_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-642111401$identity_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1967370484$identity_release ()Lkotlin/jvm/functions/Function3;
 }
 
 public final class com/stripe/android/identity/ui/ComposableSingletons$ConsentLinesKt {
 	public static final field INSTANCE Lcom/stripe/android/identity/ui/ComposableSingletons$ConsentLinesKt;
 	public fun <init> ()V
-	public final fun getLambda-1$identity_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-1182844547$identity_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/identity/ui/ComposableSingletons$ConsentScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/identity/ui/ComposableSingletons$ConsentScreenKt;
 	public fun <init> ()V
-	public final fun getLambda-1$identity_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1578963058$identity_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/identity/ui/ComposableSingletons$ConsentWelcomeHeaderKt {
 	public static final field INSTANCE Lcom/stripe/android/identity/ui/ComposableSingletons$ConsentWelcomeHeaderKt;
 	public fun <init> ()V
-	public final fun getLambda-1$identity_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1416929192$identity_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/identity/ui/ComposableSingletons$DebugScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/identity/ui/ComposableSingletons$DebugScreenKt;
 	public fun <init> ()V
-	public final fun getLambda-1$identity_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda-2$identity_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda-3$identity_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-1314258076$identity_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-780294704$identity_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$1318755751$identity_release ()Lkotlin/jvm/functions/Function3;
 }
 
 public final class com/stripe/android/identity/ui/ComposableSingletons$DocWarmupScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/identity/ui/ComposableSingletons$DocWarmupScreenKt;
 	public fun <init> ()V
-	public final fun getLambda-1$identity_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-1663912014$identity_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/identity/ui/ComposableSingletons$SelfieScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/identity/ui/ComposableSingletons$SelfieScreenKt;
 	public fun <init> ()V
-	public final fun getLambda-1$identity_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$313324597$identity_release ()Lkotlin/jvm/functions/Function3;
 }
 
 public final class com/stripe/android/identity/ui/ComposableSingletons$UploadScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/identity/ui/ComposableSingletons$UploadScreenKt;
 	public fun <init> ()V
-	public final fun getLambda-1$identity_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-950606659$identity_release ()Lkotlin/jvm/functions/Function3;
 }
 
 public final class com/stripe/android/identity/utils/ContentUriResult {

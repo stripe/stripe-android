@@ -205,7 +205,6 @@ class DefaultMessageTransformerTest {
                 "302 - Data could not be decrypted by the receiving " +
                     "system due to technical or other reason. (Counters are not equal. " +
                     "SDK counter: 0, ACS counter: 100)",
-
             )
     }
 

@@ -12,7 +12,6 @@ import kotlinx.serialization.Serializable
 data class DropdownItemSpec(
     @SerialName("api_value")
     val apiValue: String? = null,
-
     @SerialName("display_text")
     val displayText: String = "Other"
 ) : Parcelable

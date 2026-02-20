@@ -4,12 +4,15 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.common.taptoadd.TapToAddHelper
+import com.stripe.android.common.taptoadd.TapToAddResult
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
@@ -17,7 +20,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal interface FormActivityConfirmationHelper {
-    fun confirm(): FormResult?
+    fun confirm()
 }
 
 @FormActivityScope
@@ -29,6 +32,8 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
     private val stateHelper: FormActivityStateHelper,
     private val onClickDelegate: OnClickOverrideDelegate,
     private val eventReporter: EventReporter,
+    private val tapToAddHelper: TapToAddHelper,
+    private val customerStateHolder: CustomerStateHolder,
     lifecycleOwner: LifecycleOwner,
     activityResultCaller: ActivityResultCaller,
     @ViewModelScope private val coroutineScope: CoroutineScope,
@@ -43,13 +48,48 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
         )
 
         lifecycleOwner.lifecycleScope.launch {
+            tapToAddHelper.result.collect { result ->
+                val formResult = when (result) {
+                    is TapToAddResult.Canceled -> {
+                        result.paymentSelection?.let {
+                            customerStateHolder.addPaymentMethod(it.paymentMethod)
+                            FormResult.Complete(
+                                selection = it,
+                                hasBeenConfirmed = false,
+                                customerState = customerStateHolder.customer.value,
+                            )
+                        }
+                    }
+                    TapToAddResult.Complete -> {
+                        FormResult.Complete(
+                            selection = null,
+                            hasBeenConfirmed = true,
+                            customerState = customerStateHolder.customer.value
+                        )
+                    }
+                    is TapToAddResult.Continue -> {
+                        customerStateHolder.addPaymentMethod(result.paymentSelection.paymentMethod)
+                        FormResult.Complete(
+                            selection = result.paymentSelection,
+                            hasBeenConfirmed = false,
+                            customerState = customerStateHolder.customer.value
+                        )
+                    }
+                }
+                formResult?.let {
+                    stateHelper.setResult(it)
+                }
+            }
+        }
+
+        lifecycleOwner.lifecycleScope.launch {
             confirmationHandler.state.collectLatest {
                 stateHelper.updateConfirmationState(it)
             }
         }
     }
 
-    override fun confirm(): FormResult? {
+    override fun confirm() {
         if (onClickDelegate.onClickOverride != null) {
             onClickDelegate.onClickOverride?.invoke()
         } else {
@@ -59,7 +99,13 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
 
             when (configuration.formSheetAction) {
                 EmbeddedPaymentElement.FormSheetAction.Continue -> {
-                    return FormResult.Complete(selectionHolder.selection.value, false)
+                    stateHelper.setResult(
+                        FormResult.Complete(
+                            selection = selectionHolder.selection.value,
+                            hasBeenConfirmed = false,
+                            customerState = customerStateHolder.customer.value
+                        )
+                    )
                 }
                 EmbeddedPaymentElement.FormSheetAction.Confirm -> {
                     confirmationArgs()?.let { args ->
@@ -70,8 +116,6 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
                 }
             }
         }
-
-        return null
     }
 
     private fun confirmationArgs(): ConfirmationHandler.Args? {

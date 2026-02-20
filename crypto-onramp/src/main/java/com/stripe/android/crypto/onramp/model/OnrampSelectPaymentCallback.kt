@@ -43,12 +43,10 @@ sealed class OnrampCollectPaymentMethodResult {
 class PaymentMethodDisplayData internal constructor(
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     val imageLoader: suspend () -> Drawable,
-
     /**
      * User facing strings representing payment method information
      */
     val label: String,
-
     val sublabel: String?
 ) {
     val icon: Drawable = DelegateDrawable(imageLoader = imageLoader)

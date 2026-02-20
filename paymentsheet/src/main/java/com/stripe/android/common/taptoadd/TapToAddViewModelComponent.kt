@@ -6,8 +6,20 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.di.ApplicationIdModule
+import com.stripe.android.common.spms.DefaultLinkFormElementFactory
+import com.stripe.android.common.spms.DefaultSavedPaymentMethodLinkFormHelper
+import com.stripe.android.common.spms.LinkFormElementFactory
+import com.stripe.android.common.spms.SavedPaymentMethodLinkFormHelper
+import com.stripe.android.common.taptoadd.ui.DefaultTapToAddCardAddedInteractor
 import com.stripe.android.common.taptoadd.ui.DefaultTapToAddCollectingInteractor
+import com.stripe.android.common.taptoadd.ui.DefaultTapToAddConfirmationInteractor
+import com.stripe.android.common.taptoadd.ui.DefaultTapToAddPaymentMethodHolder
+import com.stripe.android.common.taptoadd.ui.TapToAddCardAddedInteractor
 import com.stripe.android.common.taptoadd.ui.TapToAddCollectingInteractor
+import com.stripe.android.common.taptoadd.ui.TapToAddConfirmationInteractor
+import com.stripe.android.common.taptoadd.ui.TapToAddPaymentMethodHolder
+import com.stripe.android.common.taptoadd.ui.createTapToAddUxConfiguration
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -17,18 +29,37 @@ import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
+import com.stripe.android.core.utils.RealUserFacingLogger
+import com.stripe.android.core.utils.UserFacingLogger
+import com.stripe.android.link.LinkConfigurationCoordinator
+import com.stripe.android.link.RealLinkConfigurationCoordinator
+import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.injection.LinkAnalyticsComponent
+import com.stripe.android.link.injection.LinkCommonModule
+import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.networking.PaymentElementRequestSurfaceModule
+import com.stripe.android.paymentelement.AnalyticEventCallback
+import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
+import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.ConfirmationHandlerModule
 import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmationModule
+import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationModule
+import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
+import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
+import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.stripeterminal.external.models.TapToPayUxConfiguration
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
@@ -43,10 +74,14 @@ import javax.inject.Singleton
 
 @Component(
     modules = [
+        ApplicationIdModule::class,
         CoreCommonModule::class,
         CoroutineContextModule::class,
         ConfirmationHandlerModule::class,
         DefaultConfirmationModule::class,
+        DefaultIntentConfirmationModule::class,
+        LinkInlineSignupConfirmationModule::class,
+        PaymentElementRequestSurfaceModule::class,
         TapToAddViewModelModule::class,
         TapToAddModule::class,
     ]
@@ -60,6 +95,8 @@ internal interface TapToAddViewModelComponent {
     interface Factory {
         fun build(
             @BindsInstance paymentMethodMetadata: PaymentMethodMetadata,
+            @BindsInstance tapToAddMode: TapToAddMode,
+            @BindsInstance eventMode: EventReporter.Mode,
             @BindsInstance
             @PaymentElementCallbackIdentifier
             paymentElementCallbackIdentifier: String,
@@ -75,6 +112,9 @@ internal interface TapToAddViewModelComponent {
 @Module(
     subcomponents = [
         TapToAddSubcomponent::class,
+    ],
+    includes = [
+        TapToAddLinkModule::class,
     ]
 )
 internal interface TapToAddViewModelModule {
@@ -87,19 +127,60 @@ internal interface TapToAddViewModelModule {
     ): PrefsRepository.Factory
 
     @Binds
+    fun bindsUserFacingLogger(
+        userFacingLogger: RealUserFacingLogger
+    ): UserFacingLogger
+
+    @Binds
     fun bindsAnalyticsRequestFactory(
         paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory
     ): AnalyticsRequestFactory
+
+    @Binds
+    fun bindsPaymentMethodHolder(
+        tapToAddPaymentMethodHolder: DefaultTapToAddPaymentMethodHolder
+    ): TapToAddPaymentMethodHolder
+
+    @Binds
+    fun bindsEventReporter(
+        eventReporter: DefaultEventReporter
+    ): EventReporter
 
     @Binds
     fun bindsTapToAddCollectingInteractorFactory(
         tapToAddCollectingInteractorFactory: DefaultTapToAddCollectingInteractor.Factory
     ): TapToAddCollectingInteractor.Factory
 
+    @Binds
+    fun bindsTapToAddCardAddedInteractorFactory(
+        tapToAddCardAddedInteractorFactory: DefaultTapToAddCardAddedInteractor.Factory
+    ): TapToAddCardAddedInteractor.Factory
+
+    @Binds
+    fun bindsTapToAddConfirmationInteractorFactory(
+        tapToAddConfirmationInteractorFactory: DefaultTapToAddConfirmationInteractor.Factory
+    ): TapToAddConfirmationInteractor.Factory
+
     companion object {
         @Provides
         @Named(ENABLE_LOGGING)
         fun provideEnabledLogging(): Boolean = BuildConfig.DEBUG
+
+        @Provides
+        @Singleton
+        @Named(ALLOWS_MANUAL_CONFIRMATION)
+        fun provideAllowsManualConfirmation() = true
+
+        @Provides
+        @Singleton
+        @Named(STATUS_BAR_COLOR)
+        fun providesStatusBarColor(): Int? = null
+
+        @Provides
+        @Singleton
+        fun providesTapToAddUxConfiguration(): TapToPayUxConfiguration {
+            return createTapToAddUxConfiguration()
+        }
 
         @Provides
         fun providesContext(application: Application): Context {
@@ -144,6 +225,51 @@ internal interface TapToAddViewModelModule {
         fun provideStripeAccountId(
             paymentConfiguration: Provider<PaymentConfiguration>
         ): () -> String? = { paymentConfiguration.get().stripeAccountId }
+
+        @OptIn(ExperimentalAnalyticEventCallbackApi::class)
+        @Provides
+        fun providesAnalyticEventCallback(
+            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
+        ): AnalyticEventCallback? {
+            return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.analyticEventCallback
+        }
+    }
+}
+
+@Module(
+    subcomponents = [
+        LinkAnalyticsComponent::class,
+        LinkComponent::class,
+    ],
+    includes = [
+        LinkCommonModule::class,
+    ]
+)
+internal interface TapToAddLinkModule {
+    @Binds
+    fun bindsLinkConfigurationCoordinator(
+        linkConfigurationCoordinator: RealLinkConfigurationCoordinator
+    ): LinkConfigurationCoordinator
+
+    @Binds
+    fun bindsLinkFormHelper(
+        linkFormHelper: DefaultSavedPaymentMethodLinkFormHelper
+    ): SavedPaymentMethodLinkFormHelper
+
+    companion object {
+        @Provides
+        @Singleton
+        fun providesLinkAccountHolder(savedStateHandle: SavedStateHandle): LinkAccountHolder {
+            return LinkAccountHolder(savedStateHandle)
+        }
+
+        @Provides
+        @Singleton
+        fun providesTapToAddLinkFormElementFactory(
+            savedStateHandle: SavedStateHandle
+        ): LinkFormElementFactory {
+            return DefaultLinkFormElementFactory
+        }
     }
 }
 

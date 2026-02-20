@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.luxe
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -151,7 +152,9 @@ class SaveForFutureUseHelperKtTest {
             metadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
                 hasCustomerConfiguration = true,
-                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
+                customerMetadataPermissions = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS.copy(
+                    saveConsent = PaymentMethodSaveConsentBehavior.Enabled
+                )
             )
         )
 

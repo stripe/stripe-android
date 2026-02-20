@@ -13,7 +13,7 @@ public final class com/stripe/android/uicore/StripeThemeKt {
 	public static final fun getStripeShapes (Landroidx/compose/material/MaterialTheme;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/uicore/StripeShapes;
 }
 
-public synthetic class com/stripe/android/uicore/address/CountryAddressSchema$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class com/stripe/android/uicore/address/CountryAddressSchema$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/uicore/address/CountryAddressSchema$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
@@ -22,13 +22,14 @@ public synthetic class com/stripe/android/uicore/address/CountryAddressSchema$$s
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/uicore/address/CountryAddressSchema;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/uicore/address/CountryAddressSchema$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public synthetic class com/stripe/android/uicore/address/FieldSchema$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class com/stripe/android/uicore/address/FieldSchema$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/uicore/address/FieldSchema$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
@@ -37,6 +38,7 @@ public synthetic class com/stripe/android/uicore/address/FieldSchema$$serializer
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/uicore/address/FieldSchema;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/uicore/address/FieldSchema$Companion {
@@ -47,7 +49,7 @@ public final class com/stripe/android/uicore/address/NameType$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public synthetic class com/stripe/android/uicore/address/StateSchema$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class com/stripe/android/uicore/address/StateSchema$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/uicore/address/StateSchema$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
@@ -56,6 +58,7 @@ public synthetic class com/stripe/android/uicore/address/StateSchema$$serializer
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/uicore/address/StateSchema;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/uicore/address/StateSchema$Companion {
@@ -69,17 +72,17 @@ public final class com/stripe/android/uicore/elements/AddressFieldConfiguration$
 public final class com/stripe/android/uicore/elements/ComposableSingletons$OTPElementUIKt {
 	public static final field INSTANCE Lcom/stripe/android/uicore/elements/ComposableSingletons$OTPElementUIKt;
 	public fun <init> ()V
-	public final fun getLambda-1$stripe_ui_core_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-2$stripe_ui_core_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1503171109$stripe_ui_core_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1851972617$stripe_ui_core_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/uicore/elements/ComposableSingletons$TextFieldUIKt {
 	public static final field INSTANCE Lcom/stripe/android/uicore/elements/ComposableSingletons$TextFieldUIKt;
 	public fun <init> ()V
-	public final fun getLambda-1$stripe_ui_core_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$549433638$stripe_ui_core_release ()Lkotlin/jvm/functions/Function2;
 }
 
-public synthetic class com/stripe/android/uicore/elements/IdentifierSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class com/stripe/android/uicore/elements/IdentifierSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/uicore/elements/IdentifierSpec$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
@@ -88,6 +91,7 @@ public synthetic class com/stripe/android/uicore/elements/IdentifierSpec$$serial
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/uicore/elements/IdentifierSpec;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/uicore/elements/SameAsShippingElementUIKt {
@@ -103,7 +107,7 @@ public final class com/stripe/android/uicore/elements/TextFieldUIKt {
 public final class com/stripe/android/uicore/elements/bottomsheet/ComposableSingletons$StripeBottomSheetLayoutKt {
 	public static final field INSTANCE Lcom/stripe/android/uicore/elements/bottomsheet/ComposableSingletons$StripeBottomSheetLayoutKt;
 	public fun <init> ()V
-	public final fun getLambda-1$stripe_ui_core_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-1207274653$stripe_ui_core_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/uicore/elements/bottomsheet/StripeBottomSheetLayoutInfoKt {
@@ -113,7 +117,7 @@ public final class com/stripe/android/uicore/elements/bottomsheet/StripeBottomSh
 public final class com/stripe/android/uicore/image/ComposableSingletons$StripeImageKt {
 	public static final field INSTANCE Lcom/stripe/android/uicore/image/ComposableSingletons$StripeImageKt;
 	public fun <init> ()V
-	public final fun getLambda-1$stripe_ui_core_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda-2$stripe_ui_core_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-621553741$stripe_ui_core_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$1996028391$stripe_ui_core_release ()Lkotlin/jvm/functions/Function3;
 }
 

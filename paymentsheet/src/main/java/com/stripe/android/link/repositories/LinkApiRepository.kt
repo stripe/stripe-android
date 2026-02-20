@@ -256,6 +256,26 @@ internal class LinkApiRepository @Inject constructor(
         }
     }
 
+    override suspend fun createPaymentDetailsFromPaymentMethod(
+        paymentMethod: PaymentMethod,
+        userEmail: String,
+        stripeIntent: StripeIntent,
+        consumerSessionClientSecret: String,
+        clientAttributionMetadata: ClientAttributionMetadata
+    ): Result<LinkPaymentDetails.Saved> {
+        return consumersApiService.createPaymentDetails(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            paymentMethodId = paymentMethod.id,
+            requestSurface = requestSurface.value,
+            requestOptions = apiRequestOptions,
+        ).mapCatching {
+            LinkPaymentDetails.Saved(
+                paymentDetails = it.paymentDetails.first(),
+                paymentMethod = paymentMethod,
+            )
+        }
+    }
+
     override suspend fun createBankAccountPaymentDetails(
         bankAccountId: String,
         userEmail: String,
@@ -287,7 +307,7 @@ internal class LinkApiRepository @Inject constructor(
         id: String,
         consumerSessionClientSecret: String,
         clientAttributionMetadata: ClientAttributionMetadata,
-    ): Result<LinkPaymentDetails.Saved> = withContext(workContext) {
+    ): Result<LinkPaymentDetails.Passthrough> = withContext(workContext) {
         val allowRedisplay = paymentMethodCreateParams.allowRedisplay?.let {
             mapOf(ALLOW_REDISPLAY_PARAM to it.value)
         } ?: emptyMap()
@@ -307,7 +327,7 @@ internal class LinkApiRepository @Inject constructor(
         ).onFailure {
             errorReporter.report(ErrorReporter.ExpectedErrorEvent.LINK_SHARE_CARD_FAILURE, StripeException.create(it))
         }.map { paymentMethod ->
-            LinkPaymentDetails.Saved(
+            LinkPaymentDetails.Passthrough(
                 paymentDetails = ConsumerPaymentDetails.Passthrough(
                     id = id,
                     last4 = paymentMethodCreateParams.cardLast4().orEmpty(),

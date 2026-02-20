@@ -73,6 +73,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     tapToAddHelperFactory: TapToAddHelper.Factory,
     mode: EventReporter.Mode,
+    customerStateHolderFactory: CustomerStateHolder.Factory,
 ) : BaseSheetViewModel(
     config = args.configuration,
     eventReporter = eventReporter,
@@ -83,6 +84,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
     isCompleteFlow = false,
     mode = mode,
+    customerStateHolderFactory = customerStateHolderFactory,
 ) {
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
@@ -143,7 +145,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
         buttonsEnabled,
         selection,
         linkAccountHolder.linkAccountInfo
-
     ) { isLinkAvailable, linkEmail, buttonsEnabled, currentSelection, linkAccountInfo ->
         val paymentMethodMetadata = args.state.paymentMethodMetadata
         val linkConfiguration = paymentMethodMetadata.linkState?.configuration
@@ -229,7 +230,10 @@ internal class PaymentOptionsViewModel @Inject constructor(
             tapToAddHelper.result.collect { result ->
                 when (result) {
                     is TapToAddResult.Canceled -> {
-                        // Do nothing.
+                        result.paymentSelection?.let { paymentSelection ->
+                            customerStateHolder.addPaymentMethod(paymentSelection.paymentMethod)
+                            updateSelection(paymentSelection)
+                        }
                     }
                     TapToAddResult.Complete -> {
                         errorReporter.report(
@@ -237,6 +241,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                         )
                     }
                     is TapToAddResult.Continue -> {
+                        customerStateHolder.addPaymentMethod(result.paymentSelection.paymentMethod)
                         updateSelection(result.paymentSelection)
                         onUserSelection()
                     }

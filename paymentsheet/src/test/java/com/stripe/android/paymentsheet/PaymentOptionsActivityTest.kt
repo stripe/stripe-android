@@ -475,6 +475,7 @@ internal class PaymentOptionsActivityTest {
                 tapToAddHelperFactory = FakeTapToAddHelper.Factory.noOp(),
                 mode = EventReporter.Mode.Complete,
                 errorReporter = FakeErrorReporter(),
+                customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
             )
         }
 

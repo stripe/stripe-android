@@ -6,6 +6,7 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.asCallbackFor
 import kotlinx.coroutines.CoroutineScope
@@ -80,8 +81,43 @@ class TapToAddHelperTest {
     }
 
     @Test
+    fun `startPaymentMethodCollection when already collecting does not launch again`() = runScenario {
+        helper.register(
+            activityResultCaller = activityResultCallerScenario.activityResultCaller,
+            lifecycleOwner = TestLifecycleOwner()
+        )
+        assertThat(activityResultCallerScenario.awaitRegisterCall()).isNotNull()
+        assertThat(activityResultCallerScenario.awaitNextRegisteredLauncher()).isNotNull()
+
+        helper.startPaymentMethodCollection(DEFAULT_METADATA)
+        helper.startPaymentMethodCollection(DEFAULT_METADATA)
+
+        assertThat(activityResultCallerScenario.awaitLaunchCall()).isNotNull()
+    }
+
+    @Test
+    fun `startPaymentMethodCollection can launch again after result is received`() = runScenario {
+        helper.register(
+            activityResultCaller = activityResultCallerScenario.activityResultCaller,
+            lifecycleOwner = TestLifecycleOwner()
+        )
+        val registerCall = activityResultCallerScenario.awaitRegisterCall()
+        assertThat(activityResultCallerScenario.awaitNextRegisteredLauncher()).isNotNull()
+
+        helper.startPaymentMethodCollection(DEFAULT_METADATA)
+        assertThat(activityResultCallerScenario.awaitLaunchCall()).isNotNull()
+
+        val tapToAddCallback = registerCall.callback.asCallbackFor<TapToAddResult>()
+        tapToAddCallback.onActivityResult(TapToAddResult.Complete)
+
+        helper.startPaymentMethodCollection(DEFAULT_METADATA)
+        assertThat(activityResultCallerScenario.awaitLaunchCall()).isNotNull()
+    }
+
+    @Test
     fun `startPaymentMethodCollection calls launch with expected params`() = runScenario(
         tapToAddMode = TapToAddMode.Continue,
+        eventMode = EventReporter.Mode.Embedded,
         paymentElementCallbackIdentifier = "mpe_callback_id",
         productUsage = setOf("PaymentSheet", "FlowController")
     ) {
@@ -102,6 +138,7 @@ class TapToAddHelperTest {
         val tapToAddArgs = launchCall as TapToAddContract.Args
 
         assertThat(tapToAddArgs.paymentMethodMetadata).isEqualTo(DEFAULT_METADATA)
+        assertThat(tapToAddArgs.eventMode).isEqualTo(EventReporter.Mode.Embedded)
         assertThat(tapToAddArgs.paymentElementCallbackIdentifier).isEqualTo("mpe_callback_id")
         assertThat(tapToAddArgs.productUsage).containsExactly("PaymentSheet", "FlowController")
         assertThat(tapToAddArgs.mode).isEqualTo(TapToAddMode.Continue)
@@ -126,6 +163,7 @@ class TapToAddHelperTest {
 
     private fun runScenario(
         tapToAddMode: TapToAddMode = TapToAddMode.Complete,
+        eventMode: EventReporter.Mode = EventReporter.Mode.Complete,
         paymentElementCallbackIdentifier: String = "callback_id",
         productUsage: Set<String> = emptySet(),
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
@@ -138,6 +176,7 @@ class TapToAddHelperTest {
                         productUsage = productUsage,
                         paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
                         tapToAddMode = tapToAddMode,
+                        eventMode = eventMode,
                         savedStateHandle = savedStateHandle,
                     ),
                     activityResultCallerScenario = this,
@@ -148,6 +187,7 @@ class TapToAddHelperTest {
 
     private suspend fun createTapToAddHelper(
         tapToAddMode: TapToAddMode = TapToAddMode.Complete,
+        eventMode: EventReporter.Mode = EventReporter.Mode.Complete,
         paymentElementCallbackIdentifier: String = "callback_id",
         productUsage: Set<String> = emptySet(),
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
@@ -158,6 +198,7 @@ class TapToAddHelperTest {
             productUsage = productUsage,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             tapToAddMode = tapToAddMode,
+            eventMode = eventMode,
         )
     }
 

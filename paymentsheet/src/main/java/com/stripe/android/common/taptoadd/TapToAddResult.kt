@@ -12,15 +12,19 @@ internal sealed interface TapToAddResult : Parcelable {
     data object Complete : TapToAddResult
 
     @Parcelize
-    data class Continue(val paymentSelection: PaymentSelection) : TapToAddResult
+    data class Continue(val paymentSelection: PaymentSelection.Saved) : TapToAddResult
 
     @Parcelize
     data class Canceled(
-        val paymentSelection: PaymentSelection?
+        val paymentSelection: PaymentSelection.Saved?
     ) : TapToAddResult
 
     companion object {
         internal const val EXTRA_RESULT = ActivityStarter.Result.EXTRA
+
+        fun toIntent(intent: Intent, result: TapToAddResult): Intent {
+            return intent.putExtra(EXTRA_RESULT, result)
+        }
 
         fun fromIntent(intent: Intent?): TapToAddResult {
             val result = intent?.extras?.let { bundle ->

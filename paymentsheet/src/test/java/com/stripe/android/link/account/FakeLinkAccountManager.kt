@@ -19,6 +19,7 @@ import com.stripe.android.model.ConsumerSessionRefresh
 import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.LinkAccountSession
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SharePaymentDetails
@@ -89,8 +90,14 @@ internal open class FakeLinkAccountManager(
     var createCardPaymentDetailsResult: Result<LinkPaymentDetails.New> = Result.success(
         value = TestFactory.LINK_NEW_PAYMENT_DETAILS
     )
-    var shareCardPaymentDetailsResult: Result<LinkPaymentDetails.Saved> = Result.success(
-        value = TestFactory.LINK_SAVED_PAYMENT_DETAILS
+    var createPaymentDetailsFromPaymentMethodResult: Result<LinkPaymentDetails.Saved> = Result.success(
+        LinkPaymentDetails.Saved(
+            paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+        )
+    )
+    var shareCardPaymentDetailsResult: Result<LinkPaymentDetails.Passthrough> = Result.success(
+        value = TestFactory.LINK_PASSTHROUGH_PAYMENT_DETAILS
     )
     var createBankAccountPaymentDetailsResult: Result<ConsumerPaymentDetails.BankAccount> = Result.success(
         value = TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
@@ -123,6 +130,7 @@ internal open class FakeLinkAccountManager(
 
     private val updateCardDetailsTurbine = Turbine<ConsumerPaymentDetailsUpdateParams>()
     private val startVerificationTurbine = Turbine<Boolean>()
+    private val createPaymentDetailsFromPaymentMethodTurbine = Turbine<PaymentMethod>()
 
     val confirmVerificationTurbine = Turbine<String>()
 
@@ -206,9 +214,16 @@ internal open class FakeLinkAccountManager(
         return createCardPaymentDetailsResult
     }
 
+    override suspend fun createPaymentDetailsFromPaymentMethod(
+        paymentMethod: PaymentMethod,
+    ): Result<LinkPaymentDetails.Saved> {
+        createPaymentDetailsFromPaymentMethodTurbine.add(paymentMethod)
+        return createPaymentDetailsFromPaymentMethodResult
+    }
+
     override suspend fun shareCardPaymentDetails(
         cardPaymentDetails: LinkPaymentDetails.New
-    ): Result<LinkPaymentDetails.Saved> {
+    ): Result<LinkPaymentDetails.Passthrough> {
         return shareCardPaymentDetailsResult
     }
 
@@ -267,7 +282,7 @@ internal open class FakeLinkAccountManager(
 
     override suspend fun updatePaymentDetails(
         updateParams: ConsumerPaymentDetailsUpdateParams,
-        billingPhone: String?
+        phone: String?
     ): Result<ConsumerPaymentDetails> {
         updateCardDetailsTurbine.add(
             updateParams
@@ -295,11 +310,16 @@ internal open class FakeLinkAccountManager(
         return confirmVerificationTurbine.awaitItem()
     }
 
+    suspend fun awaitCreatePaymentDetailsFromPaymentMethodTurbineCall(): PaymentMethod {
+        return createPaymentDetailsFromPaymentMethodTurbine.awaitItem()
+    }
+
     suspend fun awaitLogoutCall() {
         return logoutCall.awaitItem()
     }
 
     fun ensureAllEventsConsumed() {
+        createPaymentDetailsFromPaymentMethodTurbine.ensureAllEventsConsumed()
         lookupByAuthIntentTurbine.ensureAllEventsConsumed()
     }
 

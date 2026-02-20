@@ -110,7 +110,8 @@ android {
         kotlinOptions {
             freeCompilerArgs += [
                     "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
-                    "-Xcontext-receivers",
+                    "-Xcontext-parameters",
+                    "-Xannotation-default-target=param-property",
                     "-Xconsistent-data-class-copy-visibility",
             ]
         }

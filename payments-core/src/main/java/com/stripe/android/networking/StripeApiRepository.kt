@@ -1721,11 +1721,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
         options: ApiRequest.Options,
         analyticsEvent: PaymentAnalyticsEvent?,
     ): Result<ElementsSession> {
-        // Unsupported for user key sessions.
-        if (options.apiKeyIsUserKey) {
-            return Result.failure(IllegalArgumentException("Invalid API key"))
-        }
-
         fireFraudDetectionDataRequest()
 
         val parser = ElementsSessionJsonParser(

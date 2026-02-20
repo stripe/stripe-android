@@ -13,9 +13,14 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.compose.rememberNavController
 import com.stripe.android.link.LinkScreen
+import com.stripe.android.link.LinkScreenContentBody
+import com.stripe.android.link.ScreenState
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
+import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
+import kotlinx.coroutines.flow.MutableSharedFlow
 import org.junit.Rule
 import org.junit.Test
 
@@ -66,6 +71,44 @@ internal class LinkContentScreenshotTest {
                         changeEmail = {},
                     )
                 }
+            }
+        }
+    }
+
+    @Test
+    fun testLinkContentHasProperlyStyledLoadingIndicator() {
+        paparazziRule.snapshot {
+            val viewModelStoreOwner = object : ViewModelStoreOwner {
+                override val viewModelStore = ViewModelStore()
+            }
+
+            val bottomSheetState = rememberStripeBottomSheetState()
+            val eventReporter = FakeEventReporter()
+
+            CompositionLocalProvider(LocalViewModelStoreOwner provides viewModelStoreOwner) {
+                LinkScreenContentBody(
+                    bottomSheetState = bottomSheetState,
+                    screenState = ScreenState.FullScreen(initialDestination = LinkScreen.Loading),
+                    appBarState = LinkAppBarState(
+                        showHeader = true,
+                        canNavigateBack = false,
+                        title = null,
+                        isElevated = false,
+                    ),
+                    eventReporter = eventReporter,
+                    navigationChannel = MutableSharedFlow(),
+                    onNavBackStackEntryChanged = {},
+                    onBackPressed = {},
+                    onDismissClicked = {},
+                    navigate = { _, _ -> },
+                    dismiss = {},
+                    dismissWithResult = {},
+                    getLinkAccount = { null },
+                    handleViewAction = {},
+                    moveToWeb = {},
+                    goBack = {},
+                    changeEmail = {},
+                )
             }
         }
     }

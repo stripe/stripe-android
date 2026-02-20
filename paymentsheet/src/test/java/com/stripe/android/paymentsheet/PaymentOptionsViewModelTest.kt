@@ -61,6 +61,7 @@ import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
@@ -1174,8 +1175,10 @@ internal class PaymentOptionsViewModelTest {
     @Test
     fun `When tap to add result is Continue, activity completes with the selection chosen`() = runTest {
         FakeTapToAddHelper.Factory.test {
+            val customerStateHolder = FakeCustomerStateHolder()
             val viewModel = createViewModel(
                 tapToAddHelperFactory = tapToAddHelperFactory,
+                customerStateHolder = customerStateHolder,
             )
 
             createCalls.awaitItem()
@@ -1191,6 +1194,9 @@ internal class PaymentOptionsViewModelTest {
 
                 val succeededResult = result as PaymentOptionsActivityResult.Succeeded
                 assertThat(succeededResult.paymentSelection).isEqualTo(selection)
+                assertThat(customerStateHolder.addPaymentMethodTurbine.awaitItem()).isEqualTo(
+                    selection.paymentMethod
+                )
             }
         }
     }
@@ -1212,6 +1218,36 @@ internal class PaymentOptionsViewModelTest {
             assertThat(errorReporter.getLoggedErrors()).containsExactly(
                 ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_FLOW_CONTROLLER_RECEIVED_COMPLETE_RESULT.eventName
             )
+        }
+    }
+
+    @Test
+    fun `When tap to add result is Canceled with payment selection, selection and PMs are updated`() = runTest {
+        val expectedPaymentSelection = SELECTION_SAVED_PAYMENT_METHOD
+        val customerStateHolder = FakeCustomerStateHolder()
+
+        FakeTapToAddHelper.Factory.test {
+            val viewModel = createViewModel(
+                tapToAddHelperFactory = tapToAddHelperFactory,
+                customerStateHolder = customerStateHolder,
+            )
+
+            createCalls.awaitItem()
+
+            viewModel.selection.test {
+                assertThat(awaitItem()).isNull()
+
+                tapToAddHelperFactory.getCreatedHelper()?.emitResult(
+                    TapToAddResult.Canceled(
+                        expectedPaymentSelection
+                    )
+                )
+
+                assertThat(customerStateHolder.addPaymentMethodTurbine.awaitItem()).isEqualTo(
+                    expectedPaymentSelection.paymentMethod
+                )
+                assertThat(awaitItem()).isEqualTo(expectedPaymentSelection)
+            }
         }
     }
 
@@ -1339,8 +1375,8 @@ internal class PaymentOptionsViewModelTest {
 
     private fun createLinkViewModel(): PaymentOptionsViewModel {
         val linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(
-            attachNewCardToAccountResult = Result.success(LinkTestUtils.LINK_SAVED_PAYMENT_DETAILS),
-            accountStatus = AccountStatus.Verified(true, null),
+            attachNewCardToAccountResult = Result.success(LinkTestUtils.LINK_PASSTHROUGH_PAYMENT_DETAILS),
+            accountStatus = AccountStatus.Verified(consentPresentation = null),
         )
 
         return createViewModel(
@@ -1360,6 +1396,7 @@ internal class PaymentOptionsViewModelTest {
         workContext: CoroutineContext = testDispatcher,
         tapToAddHelperFactory: TapToAddHelper.Factory = FakeTapToAddHelper.Factory.noOp(),
         errorReporter: ErrorReporter = FakeErrorReporter(),
+        customerStateHolder: CustomerStateHolder? = null,
     ) = TestViewModelFactory.create(linkConfigurationCoordinator) { linkHandler, savedStateHandle ->
         PaymentOptionsViewModel(
             args = args.copy(
@@ -1382,6 +1419,11 @@ internal class PaymentOptionsViewModelTest {
             tapToAddHelperFactory = tapToAddHelperFactory,
             mode = EventReporter.Mode.Complete,
             errorReporter = errorReporter,
+            customerStateHolderFactory = object : CustomerStateHolder.Factory {
+                override fun create(viewModel: BaseSheetViewModel): CustomerStateHolder {
+                    return customerStateHolder ?: DefaultCustomerStateHolder.Factory.create(viewModel)
+                }
+            },
         )
     }
 

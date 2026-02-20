@@ -19,12 +19,10 @@ sealed class Response {
          * https://stripe.com/docs/api/payment_intents/object#payment_intent_object-amount
          */
         @field:Json(name = "amount") val amount: Int,
-
         /**
          * https://stripe.com/docs/api/payment_intents/object#payment_intent_object-currency
          */
         @field:Json(name = "currency") val currency: String,
-
         /**
          * https://stripe.com/docs/api/payment_intents/object#payment_intent_object-on_behalf_of
          */

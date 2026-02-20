@@ -714,7 +714,9 @@ internal class SignUpViewModelTest {
             val linkAccountManager = FakeLinkAccountManager()
             val linkAccount = LinkAccount(
                 consumerSession = TestFactory.CONSUMER_SESSION.copy(
-                    verificationSessions = listOf(TestFactory.VERIFICATION_STARTED_SESSION)
+                    verificationSessions = listOf(TestFactory.VERIFICATION_STARTED_SESSION),
+                    currentAuthenticationLevel = ConsumerSession.AuthenticationLevel.NotAuthenticated,
+                    minimumAuthenticationLevel = ConsumerSession.AuthenticationLevel.OneFactorAuthentication,
                 )
             )
             linkAccountManager.lookupResult = Result.success(linkAccount)
@@ -796,7 +798,9 @@ internal class SignUpViewModelTest {
             val linkAccountManager = FakeLinkAccountManager()
             val linkAccount = LinkAccount(
                 consumerSession = TestFactory.CONSUMER_SESSION.copy(
-                    verificationSessions = emptyList()
+                    verificationSessions = emptyList(),
+                    currentAuthenticationLevel = ConsumerSession.AuthenticationLevel.NotAuthenticated,
+                    minimumAuthenticationLevel = ConsumerSession.AuthenticationLevel.OneFactorAuthentication,
                 )
             )
             linkAccountManager.lookupResult = Result.success(null)
@@ -861,6 +865,20 @@ internal class SignUpViewModelTest {
         type: ConsumerSession.VerificationSession.SessionType,
         state: ConsumerSession.VerificationSession.SessionState
     ): ConsumerSession {
+        // Set auth levels based on verification state:
+        // - Verified sessions should meet minimum auth level
+        // - Started/unverified sessions should not meet minimum auth level
+        val (currentLevel, minimumLevel) = when (state) {
+            ConsumerSession.VerificationSession.SessionState.Verified -> {
+                ConsumerSession.AuthenticationLevel.OneFactorAuthentication to
+                    ConsumerSession.AuthenticationLevel.OneFactorAuthentication
+            }
+            else -> {
+                ConsumerSession.AuthenticationLevel.NotAuthenticated to
+                    ConsumerSession.AuthenticationLevel.OneFactorAuthentication
+            }
+        }
+
         return ConsumerSession(
             emailAddress = "",
             redactedPhoneNumber = "",
@@ -870,7 +888,9 @@ internal class SignUpViewModelTest {
                     state = state
                 )
             ),
-            redactedFormattedPhoneNumber = ""
+            redactedFormattedPhoneNumber = "",
+            currentAuthenticationLevel = currentLevel,
+            minimumAuthenticationLevel = minimumLevel,
         )
     }
 

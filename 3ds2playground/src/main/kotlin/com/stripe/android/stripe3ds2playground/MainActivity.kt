@@ -474,7 +474,6 @@ class MainActivity : AppCompatActivity() {
                     sdkTransId = SDK_TRANS_ID,
                     messageVersion = "2.2.0",
                     threeDSRequestorAppURL = "threeDSRequestorAppURL"
-
                 ),
                 cres,
                 ChallengeRequestExecutor.Config(

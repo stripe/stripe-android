@@ -8,6 +8,7 @@ import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.NewPaymentOptionSelection
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -48,6 +49,7 @@ internal class FakeBaseSheetViewModel private constructor(
     cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
     isCompleteFlow = true,
     mode = EventReporter.Mode.Complete,
+    customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
 ) {
     companion object {
         fun create(

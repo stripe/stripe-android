@@ -273,11 +273,14 @@ internal class AttestationConfirmationDefinitionTest {
                 radarOptions = RadarOptions(
                     hCaptchaToken = null,
                     androidVerificationObject = AndroidVerificationObject(
-                        androidVerificationToken = testToken
+                        androidVerificationToken = testToken,
+                        appId = APP_ID
                     )
                 )
             ),
-            confirmationChallengeState = ConfirmationChallengeState(attestationComplete = true)
+            confirmationChallengeState = ConfirmationChallengeState(
+                attestationComplete = true
+            )
         )
 
         assertThat(nextStepResult.confirmationOption).isEqualTo(expectedOption)
@@ -309,7 +312,7 @@ internal class AttestationConfirmationDefinitionTest {
     }
 
     @Test
-    fun `'toResult' should return 'NextStep' with attestationToken for Success result with Saved option`() {
+    fun `'toResult' should return 'NextStep' with attestationResult for Success result with Saved option`() {
         val definition = createAttestationConfirmationDefinition()
         val testToken = "test_token"
 
@@ -326,7 +329,10 @@ internal class AttestationConfirmationDefinitionTest {
 
         val expectedOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED.copy(
             confirmationChallengeState = ConfirmationChallengeState(
-                attestationToken = testToken,
+                attestationResult = AndroidVerificationObject(
+                    appId = APP_ID,
+                    androidVerificationToken = testToken
+                ),
                 attestationComplete = true
             )
         )
@@ -353,7 +359,9 @@ internal class AttestationConfirmationDefinitionTest {
 
         // When attestation fails, continue without the token but mark attestation as complete
         val expectedOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED.copy(
-            confirmationChallengeState = ConfirmationChallengeState(attestationComplete = true)
+            confirmationChallengeState = ConfirmationChallengeState(
+                attestationComplete = true
+            )
         )
         assertThat(nextStepResult.confirmationOption).isEqualTo(expectedOption)
         assertThat(nextStepResult.arguments).isEqualTo(CONFIRMATION_PARAMETERS)
@@ -385,7 +393,10 @@ internal class AttestationConfirmationDefinitionTest {
         val expectedCreateParams = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW.createParams.copy(
             radarOptions = RadarOptions(
                 hCaptchaToken = hCaptchaToken,
-                androidVerificationObject = AndroidVerificationObject(testToken)
+                androidVerificationObject = AndroidVerificationObject(
+                    androidVerificationToken = testToken,
+                    appId = APP_ID
+                )
             )
         )
         assertThat(option.createParams).isEqualTo(expectedCreateParams)
@@ -416,7 +427,12 @@ internal class AttestationConfirmationDefinitionTest {
         val definition = createAttestationConfirmationDefinition()
 
         val optionWithToken = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED.copy(
-            confirmationChallengeState = ConfirmationChallengeState(attestationToken = "existing_token")
+            confirmationChallengeState = ConfirmationChallengeState(
+                attestationResult = AndroidVerificationObject(
+                    androidVerificationToken = "existing_token",
+                    appId = APP_ID
+                )
+            )
         )
 
         val result = definition.canConfirm(
@@ -609,7 +625,8 @@ internal class AttestationConfirmationDefinitionTest {
         productUsage: Set<String> = launcherArgs.productUsage,
         eventsReporter: AttestationAnalyticsEventsReporter = FakeAttestationAnalyticsEventsReporter(),
         isEligibleForConfirmationChallenge: IsEligibleForConfirmationChallenge =
-            FakeIsEligibleForConfirmationChallenge()
+            FakeIsEligibleForConfirmationChallenge(),
+        appId: String = APP_ID
     ): AttestationConfirmationDefinition {
         return AttestationConfirmationDefinition(
             errorReporter = errorReporter,
@@ -619,11 +636,14 @@ internal class AttestationConfirmationDefinitionTest {
             publishableKeyProvider = { publishableKey },
             productUsage = productUsage,
             attestationAnalyticsEventsReporter = eventsReporter,
-            isEligibleForConfirmationChallenge = isEligibleForConfirmationChallenge
+            isEligibleForConfirmationChallenge = isEligibleForConfirmationChallenge,
+            appId = appId
         )
     }
 
     private companion object {
+        private const val APP_ID = "com.stripe.android.test"
+
         private val PAYMENT_METHOD_CONFIRMATION_OPTION_NEW = PaymentMethodConfirmationOption.New(
             createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             optionsParams = null,

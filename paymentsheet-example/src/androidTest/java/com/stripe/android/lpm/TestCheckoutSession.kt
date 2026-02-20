@@ -49,7 +49,9 @@ internal class TestCheckoutSession : BasePlaygroundTest() {
     @Test
     fun testCardPaymentWithCheckoutSession() {
         testDriver.confirmNewOrGuestComplete(
-            testParameters,
+            testParameters.copy(
+                saveForFutureUseCheckboxVisible = true,
+            ),
             populateCustomLpmFields = {
                 populateCardDetails()
             },

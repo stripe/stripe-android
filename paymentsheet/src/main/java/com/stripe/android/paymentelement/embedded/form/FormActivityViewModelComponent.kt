@@ -7,6 +7,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.common.taptoadd.DefaultTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddMode
@@ -25,9 +26,11 @@ import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
 import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
+import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
+import com.stripe.android.uicore.utils.stateFlowOf
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
@@ -36,11 +39,13 @@ import dagger.Provides
 import dagger.Subcomponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Named
 import javax.inject.Singleton
 
 @Component(
     modules = [
+        ApplicationIdModule::class,
         EmbeddedCommonModule::class,
         FormActivityViewModelModule::class,
         ExtendedPaymentElementConfirmationModule::class,
@@ -52,6 +57,7 @@ import javax.inject.Singleton
 internal interface FormActivityViewModelComponent {
     val viewModel: FormActivityViewModel
     val selectionHolder: EmbeddedSelectionHolder
+    val customerStateHolder: CustomerStateHolder
     val subcomponentFactory: FormActivitySubcomponent.Factory
 
     @Component.Factory
@@ -157,6 +163,13 @@ internal interface FormActivityViewModelModule {
             tapToAddHelper: TapToAddHelper,
         ): FormActivityRegistrar {
             return DefaultFormActivityRegistrar(confirmationHandler, tapToAddHelper)
+        }
+
+        @Provides
+        fun providePaymentMethodMetadataFlow(
+            paymentMethodMetadata: PaymentMethodMetadata
+        ): StateFlow<PaymentMethodMetadata?> {
+            return stateFlowOf(paymentMethodMetadata)
         }
     }
 }

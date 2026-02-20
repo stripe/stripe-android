@@ -56,12 +56,10 @@ internal class PaymentBrowserAuthContract :
         val enableLogging: Boolean = false,
         val toolbarCustomization: StripeToolbarCustomization? = null,
         val stripeAccountId: String? = null,
-
         /**
          * TODO(mshafrir-stripe): we should probably rename this to `canCancelSource`
          */
         val shouldCancelSource: Boolean = false,
-
         /**
          * For most payment methods, if the user navigates away from the webview
          * (e.g. by pressing the back button or tapping "close" in the menu bar),
@@ -72,7 +70,6 @@ internal class PaymentBrowserAuthContract :
          * navigate away after this.
          */
         val shouldCancelIntentOnUserNavigation: Boolean = true,
-
         val statusBarColor: Int?,
         val publishableKey: String,
         val isInstantApp: Boolean,

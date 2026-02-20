@@ -8,6 +8,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -45,8 +46,15 @@ internal class DefaultTapToAddHelper(
     private val productUsage: Set<String>,
     private val paymentElementCallbackIdentifier: String,
     private val tapToAddMode: TapToAddMode,
+    private val eventMode: EventReporter.Mode,
     private val savedStateHandle: SavedStateHandle,
 ) : TapToAddHelper {
+    private var collecting: Boolean
+        get() = savedStateHandle.get<Boolean>(CURRENTLY_COLLECTING_WITH_TAP_TO_ADD_KEY) == true
+        set(value) {
+            savedStateHandle[CURRENTLY_COLLECTING_WITH_TAP_TO_ADD_KEY] = value
+        }
+
     private var launcher: ActivityResultLauncher<TapToAddContract.Args>? = null
 
     private var _hasPreviouslyAttemptedCollection
@@ -63,6 +71,8 @@ internal class DefaultTapToAddHelper(
 
     override fun register(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner) {
         val launcher = activityResultCaller.registerForActivityResult(TapToAddContract) { result ->
+            collecting = false
+
             coroutineScope.launch {
                 _result.emit(result)
             }
@@ -84,20 +94,30 @@ internal class DefaultTapToAddHelper(
     override fun startPaymentMethodCollection(paymentMethodMetadata: PaymentMethodMetadata) {
         _hasPreviouslyAttemptedCollection = true
 
-        launcher?.launch(
-            input = TapToAddContract.Args(
-                mode = tapToAddMode,
-                paymentMethodMetadata = paymentMethodMetadata,
-                paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
-                productUsage = productUsage,
+        if (collecting) {
+            return
+        }
+
+        launcher?.run {
+            collecting = true
+
+            launch(
+                input = TapToAddContract.Args(
+                    mode = tapToAddMode,
+                    eventMode = eventMode,
+                    paymentMethodMetadata = paymentMethodMetadata,
+                    paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
+                    productUsage = productUsage,
+                )
             )
-        )
+        }
     }
 
     class Factory @Inject constructor(
         @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
         @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
         private val savedStateHandle: SavedStateHandle,
+        private val eventMode: EventReporter.Mode,
     ) : TapToAddHelper.Factory {
         override fun create(
             coroutineScope: CoroutineScope,
@@ -106,6 +126,7 @@ internal class DefaultTapToAddHelper(
             return DefaultTapToAddHelper(
                 coroutineScope = coroutineScope,
                 tapToAddMode = tapToAddMode,
+                eventMode = eventMode,
                 paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
                 savedStateHandle = savedStateHandle,
                 productUsage = productUsage,
@@ -115,5 +136,6 @@ internal class DefaultTapToAddHelper(
 
     private companion object {
         const val PREVIOUSLY_COLLECTED_WITH_TAP_TO_ADD_KEY = "PREVIOUSLY_COLLECTED_WITH_TAP_TO_ADD"
+        const val CURRENTLY_COLLECTING_WITH_TAP_TO_ADD_KEY = "CURRENTLY_COLLECTING_WITH_TAP_TO_ADD"
     }
 }

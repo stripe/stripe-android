@@ -92,8 +92,6 @@
   <string name="stripe_doc_front_warmup_title">Valmistuge oma fotoga isikut tõendava dokumendi skannimiseks</string>
   <!-- Label of the driver's license option for document type selection -->
   <string name="stripe_driver_license">Juhiluba</string>
-  <!-- Text for error labels -->
-  <string name="stripe_error">Viga</string>
   <!-- Button that opens file upload screen -->
   <string name="stripe_file_upload">Faili üleslaadimine</string>
   <!-- Instructions for uploading images of drivers license -->
@@ -203,6 +201,7 @@
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Jälgige, et nägu oleks raami keskel.</string>
   <!-- Instructional text when the document is too blurry -->
+  <string name="stripe_reduce_blur">ID ei ole fookuses</string>
   <string name="stripe_reduce_blur_2">Pilt on udune. Hoidke telefoni kindlalt ja proovige uuesti.</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Üksikasjad pole nähtavad</string>

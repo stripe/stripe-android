@@ -18,10 +18,13 @@ internal sealed class LinkPaymentDetails(
 ) : Parcelable {
 
     /**
-     * A [ConsumerPaymentDetails.PaymentDetails] that is already saved to the consumer's account.
+     * A [ConsumerPaymentDetails.PaymentDetails] that is already saved to the Link consumer's account.
+     *
+     * @param paymentMethod The [PaymentMethod] object that represents the Link payment method stored in the user's
+     *   consumer account.
      */
     @Parcelize
-    class Saved(
+    class Passthrough(
         override val paymentDetails: ConsumerPaymentDetails.Passthrough,
         val paymentMethod: PaymentMethod,
     ) : LinkPaymentDetails(paymentDetails)
@@ -47,4 +50,16 @@ internal sealed class LinkPaymentDetails(
          */
         fun buildFormValues() = convertToFormValuesMap(originalParams.toParamMap())
     }
+
+    /**
+     * A new [ConsumerPaymentDetails.PaymentDetails], whose data comes from the user's already saved
+     * payment method.
+     *
+     * @param paymentMethod The [PaymentMethod] object that is already saved with a Stripe merchant.
+     */
+    @Parcelize
+    class Saved(
+        override val paymentDetails: ConsumerPaymentDetails.PaymentDetails,
+        val paymentMethod: PaymentMethod,
+    ) : LinkPaymentDetails(paymentDetails)
 }

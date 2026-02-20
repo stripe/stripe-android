@@ -20,30 +20,25 @@ data class CheckoutSessionResponse(
      * The checkout session ID (e.g., "cs_xxx").
      */
     val id: String,
-
     /**
      * The payment amount in the smallest currency unit (e.g., cents for USD).
      */
     val amount: Long,
-
     /**
      * The three-letter ISO currency code (e.g., "usd").
      */
     val currency: String,
-
     /**
      * The embedded ElementsSession containing payment method preferences, Link settings,
      * customer data, and other configuration needed by PaymentSheet.
      * Only populated in responses from the init API.
      */
     val elementsSession: ElementsSession? = null,
-
     /**
      * The PaymentIntent created/confirmed during checkout session confirmation.
      * Only populated in responses from the confirm API.
      */
     val paymentIntent: PaymentIntent? = null,
-
     /**
      * Customer data from the checkout session init response.
      * This is parsed from the top-level "customer" field in the init response.
@@ -51,7 +46,6 @@ data class CheckoutSessionResponse(
      * so we get customer data directly in the init response rather than through customer session auth.
      */
     val customer: Customer? = null,
-
     /**
      * Server-side flag controlling the "Save for future use" checkbox.
      * Parsed from `customer_managed_saved_payment_methods_offer_save` in the init response.
@@ -108,7 +102,6 @@ data class CheckoutSessionResponse(
          * The customer ID (e.g., "cus_xxx").
          */
         val id: String,
-
         /**
          * The customer's saved payment methods.
          */

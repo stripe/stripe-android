@@ -93,7 +93,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     internal val cvcRecollectionHandler: CvcRecollectionHandler,
     private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory,
     tapToAddHelperFactory: TapToAddHelper.Factory,
-    mode: EventReporter.Mode
+    mode: EventReporter.Mode,
+    customerStateHolderFactory: CustomerStateHolder.Factory,
 ) : BaseSheetViewModel(
     config = args.config,
     eventReporter = eventReporter,
@@ -104,6 +105,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
     isCompleteFlow = true,
     mode = mode,
+    customerStateHolderFactory = customerStateHolderFactory,
 ) {
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
@@ -243,7 +245,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             tapToAddHelper.result.collect { result ->
                 when (result) {
                     is TapToAddResult.Canceled -> {
-                        // Do nothing.
+                        result.paymentSelection?.let { paymentSelection ->
+                            customerStateHolder.addPaymentMethod(paymentSelection.paymentMethod)
+                            updateSelection(paymentSelection)
+                        }
                     }
                     TapToAddResult.Complete -> {
                         _paymentSheetResult.tryEmit(PaymentSheetResult.Completed())

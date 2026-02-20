@@ -20,5 +20,4 @@ import kotlinx.serialization.Serializable
 data class CreditBalance(
     @SerialName("used")
     val used: Map<String, Int>? = null
-
 ) : StripeModel, Parcelable

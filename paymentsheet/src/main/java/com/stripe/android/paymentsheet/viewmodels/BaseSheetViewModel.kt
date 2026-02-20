@@ -62,6 +62,7 @@ internal abstract class BaseSheetViewModel(
     val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     val isCompleteFlow: Boolean,
     val mode: EventReporter.Mode,
+    val customerStateHolderFactory: CustomerStateHolder.Factory,
 ) : ViewModel() {
     private val autocompleteLauncher = DefaultAutocompleteLauncher(
         AutocompleteAppearanceContext.PaymentElement(config.appearance)
@@ -132,7 +133,7 @@ internal abstract class BaseSheetViewModel(
      */
     abstract var newPaymentSelection: NewPaymentOptionSelection?
 
-    val customerStateHolder: CustomerStateHolder = CustomerStateHolder.create(this)
+    val customerStateHolder: CustomerStateHolder = customerStateHolderFactory.create(this)
     val savedPaymentMethodMutator: SavedPaymentMethodMutator = SavedPaymentMethodMutator.create(this)
 
     protected val buttonsEnabled = combineAsStateFlow(

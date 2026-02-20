@@ -12,30 +12,25 @@ import kotlinx.parcelize.Parcelize
  */
 @Parcelize
 data class ChallengeParameters(
-
     /**
      * The 3DS Server Transaction ID. This ID is a transaction identifier assigned by the
      * 3DS Server to uniquely identify a single transaction.
      */
     var threeDsServerTransactionId: String? = null,
-
     /**
      * Transaction ID assigned by the ACS to uniquely identify a single transaction.
      */
     var acsTransactionId: String? = null,
-
     /**
      * EMVCo assigns the ACS this identifier after running the EMV 3-D Secure Testing and Approvals
      * process on the ACS.
      */
     var acsRefNumber: String? = null,
-
     /**
      * The ACS signed content. This content includes the
      * ACS URL, ACS ephemeral public key, and SDK ephemeral public key.
      */
     var acsSignedContent: String? = null,
-
     /**
      * The setThreeDSRequestorAppURL method may set the 3DS Requestor App URL.
      * If the app sets the URL, then the SDK shall pass the URL in the CReq.

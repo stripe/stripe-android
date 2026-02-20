@@ -17,6 +17,7 @@
     <ID>FunctionOnlyReturningConstant:FlowControllerModule.kt$FlowControllerModule$@Provides @Singleton @Named(ALLOWS_MANUAL_CONFIRMATION) fun provideAllowsManualConfirmation()</ID>
     <ID>FunctionOnlyReturningConstant:PaymentSheetLauncherModule.kt$PaymentSheetLauncherModule.Companion$@Provides @Singleton @Named(ALLOWS_MANUAL_CONFIRMATION) fun provideAllowsManualConfirmation()</ID>
     <ID>LargeClass:CardDefinitionTest.kt$CardDefinitionTest</ID>
+    <ID>LargeClass:ConfirmationHandlerOptionKtxTest.kt$ConfirmationHandlerOptionKtxTest</ID>
     <ID>LargeClass:CustomerAdapterTest.kt$CustomerAdapterTest</ID>
     <ID>LargeClass:CustomerSheetViewModel.kt$CustomerSheetViewModel : ViewModel</ID>
     <ID>LargeClass:CustomerSheetViewModelTest.kt$CustomerSheetViewModelTest</ID>
@@ -27,6 +28,7 @@
     <ID>LargeClass:ElementsSessionRepositoryTest.kt$ElementsSessionRepositoryTest</ID>
     <ID>LargeClass:FormHelperTest.kt$FormHelperTest</ID>
     <ID>LargeClass:InputAddressViewModelTest.kt$InputAddressViewModelTest</ID>
+    <ID>LargeClass:LinkInlineSignupConfirmationDefinitionTest.kt$LinkInlineSignupConfirmationDefinitionTest</ID>
     <ID>LargeClass:PaymentMethodMetadataTest.kt$PaymentMethodMetadataTest</ID>
     <ID>LargeClass:PaymentOptionsViewModelTest.kt$PaymentOptionsViewModelTest</ID>
     <ID>LargeClass:PaymentSheetActivityTest.kt$PaymentSheetActivityTest</ID>
@@ -118,6 +120,7 @@
     <ID>TooManyFunctions:PaymentSheet.kt$PaymentSheet.Appearance.Embedded.RowStyle.FlatWithDisclosure$Builder</ID>
     <ID>TooManyFunctions:PaymentSheet.kt$PaymentSheet.FlowController$Builder</ID>
     <ID>TooManyFunctions:ShopPayModule.kt$ShopPayModule$Companion</ID>
+    <ID>TooManyFunctions:TapToAddViewModelComponent.kt$TapToAddViewModelModule$Companion</ID>
     <ID>TooManyFunctions:WalletViewModel.kt$WalletViewModel : ViewModel</ID>
     <ID>UnusedPrivateClass:PaymentOptionsViewModelTest.kt$PaymentOptionsViewModelTest$MyHostActivity : AppCompatActivity</ID>
   </CurrentIssues>

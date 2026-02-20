@@ -30,8 +30,10 @@ import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.LinkAccountSession
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
@@ -68,7 +70,7 @@ class DefaultLinkAccountManagerTest {
                 TestFactory.EMAIL,
                 linkAuth = fakeLinkAuth
             ).accountStatus.first()
-        ).isEqualTo(AccountStatus.Verified(true, null))
+        ).isEqualTo(AccountStatus.Verified(consentPresentation = null, meetsMinimumAuthenticationLevel = true))
 
         assertThat(fakeLinkAuth.lookupCalls).hasSize(1)
         assertThat(fakeLinkAuth.lookupCalls[0].email).isEqualTo(TestFactory.EMAIL)
@@ -355,7 +357,10 @@ class DefaultLinkAccountManagerTest {
         assertThat(result.exceptionOrNull()).isEqualTo(
             AlreadyLoggedInLinkException(
                 email = TestFactory.EMAIL,
-                accountStatus = AccountStatus.Verified(true, null)
+                accountStatus = AccountStatus.Verified(
+                    consentPresentation = null,
+                    meetsMinimumAuthenticationLevel = true,
+                )
             )
         )
     }
@@ -471,6 +476,55 @@ class DefaultLinkAccountManagerTest {
     }
 
     @Test
+    fun `createPaymentDetailsFromPaymentMethod returns success when account exists`() = runSuspendTest {
+        val linkRepository = object : FakeLinkRepository() {
+            var createPaymentDetailsFromPaymentMethodCallCount = 0
+            override suspend fun createPaymentDetailsFromPaymentMethod(
+                paymentMethod: PaymentMethod,
+                userEmail: String,
+                stripeIntent: StripeIntent,
+                consumerSessionClientSecret: String,
+                clientAttributionMetadata: ClientAttributionMetadata,
+            ): Result<LinkPaymentDetails.Saved> {
+                createPaymentDetailsFromPaymentMethodCallCount += 1
+                return Result.success(
+                    LinkPaymentDetails.Saved(
+                        paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+                        paymentMethod = paymentMethod,
+                    )
+                )
+            }
+        }
+        val accountManager = accountManager(linkRepository = linkRepository)
+        accountManager.setLinkAccountFromLookupResult(
+            TestFactory.CONSUMER_SESSION_LOOKUP,
+            startSession = true,
+            linkAuthIntentId = null,
+        )
+
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val result = accountManager.createPaymentDetailsFromPaymentMethod(paymentMethod)
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrNull()?.paymentMethod).isEqualTo(paymentMethod)
+        assertThat(linkRepository.createPaymentDetailsFromPaymentMethodCallCount).isEqualTo(1)
+    }
+
+    @Test
+    fun `createPaymentDetailsFromPaymentMethod returns failure when link account is null`() = runSuspendTest {
+        val accountManager = accountManager()
+        accountManager.setTestAccount(null, null)
+
+        val result = accountManager.createPaymentDetailsFromPaymentMethod(
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        )
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
+        assertThat(result.exceptionOrNull()?.message).contains("non-null Link account")
+    }
+
+    @Test
     fun `shareCardPaymentDetails makes correct calls`() = runSuspendTest {
         val newPaymentDetails = LinkPaymentDetails.New(
             paymentDetails = TestFactory.LINK_NEW_PAYMENT_DETAILS.paymentDetails,
@@ -486,7 +540,7 @@ class DefaultLinkAccountManagerTest {
                 id: String,
                 consumerSessionClientSecret: String,
                 clientAttributionMetadata: ClientAttributionMetadata,
-            ): Result<LinkPaymentDetails.Saved> {
+            ): Result<LinkPaymentDetails.Passthrough> {
                 val paymentDetailsMatch = paymentMethodCreateParams == newPaymentDetails.originalParams &&
                     id == newPaymentDetails.paymentDetails.id
                 if (paymentDetailsMatch && consumerSessionClientSecret == TestFactory.CLIENT_SECRET) {
@@ -513,7 +567,7 @@ class DefaultLinkAccountManagerTest {
         assertThat(result.isSuccess).isTrue()
         val linkPaymentDetails = result.getOrThrow()
         assertThat(linkPaymentDetails.paymentDetails.id)
-            .isEqualTo(TestFactory.LINK_SAVED_PAYMENT_DETAILS.paymentDetails.id)
+            .isEqualTo(TestFactory.LINK_PASSTHROUGH_PAYMENT_DETAILS.paymentDetails.id)
 
         assertThat(linkRepository.shareCardPaymentDetailsCallCount).isEqualTo(1)
         assertThat(accountManager.linkAccountInfo.value.account).isNotNull()
@@ -963,7 +1017,7 @@ class DefaultLinkAccountManagerTest {
         accountStatusFlowTest(
             customerEmail = TestFactory.CUSTOMER_EMAIL,
             allowUserEmailEdits = true,
-            expectedStatus = AccountStatus.Verified(true, null),
+            expectedStatus = AccountStatus.Verified(consentPresentation = null, meetsMinimumAuthenticationLevel = true),
             expectedLookupEmail = TestFactory.CUSTOMER_EMAIL
         )
 
@@ -972,7 +1026,7 @@ class DefaultLinkAccountManagerTest {
         accountStatusFlowTest(
             customerEmail = TestFactory.CUSTOMER_EMAIL,
             allowUserEmailEdits = false,
-            expectedStatus = AccountStatus.Verified(true, null),
+            expectedStatus = AccountStatus.Verified(consentPresentation = null, meetsMinimumAuthenticationLevel = true),
             expectedLookupEmail = TestFactory.CUSTOMER_EMAIL
         )
 
