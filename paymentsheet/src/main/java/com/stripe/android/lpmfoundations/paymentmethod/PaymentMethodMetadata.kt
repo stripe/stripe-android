@@ -420,7 +420,7 @@ internal data class PaymentMethodMetadata(
                 integrationMetadata = integrationMetadata,
                 analyticsMetadata = analyticsMetadata,
                 experimentsData = elementsSession.experimentsData,
-                isTapToAddSupported = isTapToAddSupported,
+                isTapToAddSupported = isTapToAddSupported && customerMetadata != null,
             )
         }
 

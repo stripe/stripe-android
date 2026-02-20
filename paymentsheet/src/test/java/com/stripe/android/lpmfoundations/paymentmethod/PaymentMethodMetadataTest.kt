@@ -2231,6 +2231,54 @@ internal class PaymentMethodMetadataTest {
         assertThat(metadata.experimentsData).isEqualTo(elementsSession.experimentsData)
     }
 
+    @Test
+    fun `createForPaymentElement sets isTapToAddSupported to true is parameter is true & has customer`() {
+        val elementsSession = createElementsSession(
+            intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+        )
+
+        val metadata = PaymentMethodMetadata.createForPaymentElement(
+            elementsSession = elementsSession,
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+            sharedDataSpecs = emptyList(),
+            externalPaymentMethodSpecs = emptyList(),
+            isGooglePayReady = false,
+            linkStateResult = null,
+            customerMetadata = DEFAULT_CUSTOMER_METADATA,
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
+            clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
+            analyticsMetadata = AnalyticsMetadata(emptyMap()),
+            isTapToAddSupported = true,
+        )
+
+        assertThat(metadata.isTapToAddSupported).isTrue()
+    }
+
+    @Test
+    fun `createForPaymentElement sets isTapToAddSupported to false is parameter is true & no customer`() {
+        val elementsSession = createElementsSession(
+            intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+        )
+
+        val metadata = PaymentMethodMetadata.createForPaymentElement(
+            elementsSession = elementsSession,
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+            sharedDataSpecs = emptyList(),
+            externalPaymentMethodSpecs = emptyList(),
+            isGooglePayReady = false,
+            linkStateResult = null,
+            customerMetadata = null,
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
+            clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
+            analyticsMetadata = AnalyticsMetadata(emptyMap()),
+            isTapToAddSupported = true,
+        )
+
+        assertThat(metadata.isTapToAddSupported).isFalse()
+    }
+
     private fun createPaymentElementMetadata(
         attestOnIntentConfirmationFlag: Boolean? = null,
         elementsSession: ElementsSession? = null,
@@ -2383,28 +2431,4 @@ internal class PaymentMethodMetadataTest {
         shopPayConfiguration = shopPayConfiguration,
         allowedCardFundingTypes = allowedCardFundingTypes
     )
-
-    @Test
-    fun `createForPaymentElement sets isTapToAddSupported from parameter`() {
-        val elementsSession = createElementsSession(
-            intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-        )
-
-        val metadata = PaymentMethodMetadata.createForPaymentElement(
-            elementsSession = elementsSession,
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
-            sharedDataSpecs = emptyList(),
-            externalPaymentMethodSpecs = emptyList(),
-            isGooglePayReady = false,
-            linkStateResult = null,
-            customerMetadata = null,
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
-            clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
-            integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
-            analyticsMetadata = AnalyticsMetadata(emptyMap()),
-            isTapToAddSupported = true,
-        )
-
-        assertThat(metadata.isTapToAddSupported).isTrue()
-    }
 }
