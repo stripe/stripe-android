@@ -38,8 +38,6 @@ dependencies {
 
     debugImplementation libs.leakCanary
 
-    testImplementation testLibs.junit
-
     androidTestImplementation project(':payments-core-testing')
     androidTestImplementation testLibs.androidx.junit
     androidTestImplementation testLibs.androidx.junitKtx

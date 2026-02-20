@@ -56,7 +56,7 @@ ext.versions = [
         nimbusJwt                   : '10.4.2',
         okhttp                      : '4.12.0',
         okio                        : '3.16.4',
-        paparazzi                   : '2.0.0-alpha01',
+        paparazzi                   : '2.0.0-alpha04',
         poko                        : '0.18.2',
         payButtonCompose            : '0.1.3',
         places                      : '5.0.0',
