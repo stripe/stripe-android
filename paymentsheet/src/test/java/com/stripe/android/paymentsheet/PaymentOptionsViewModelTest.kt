@@ -1174,8 +1174,10 @@ internal class PaymentOptionsViewModelTest {
     @Test
     fun `When tap to add result is Continue, activity completes with the selection chosen`() = runTest {
         FakeTapToAddHelper.Factory.test {
+            val customerStateHolder = FakeCustomerStateHolder()
             val viewModel = createViewModel(
                 tapToAddHelperFactory = tapToAddHelperFactory,
+                customerStateHolder = customerStateHolder,
             )
 
             createCalls.awaitItem()
@@ -1191,6 +1193,9 @@ internal class PaymentOptionsViewModelTest {
 
                 val succeededResult = result as PaymentOptionsActivityResult.Succeeded
                 assertThat(succeededResult.paymentSelection).isEqualTo(selection)
+                assertThat(customerStateHolder.addPaymentMethodTurbine.awaitItem()).isEqualTo(
+                    selection.paymentMethod
+                )
             }
         }
     }

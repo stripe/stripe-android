@@ -272,6 +272,7 @@ internal class PaymentOptionsViewModel(
                         )
                     }
                     is TapToAddResult.Continue -> {
+                        customerStateHolder.addPaymentMethod(result.paymentSelection.paymentMethod)
                         updateSelection(result.paymentSelection)
                         onUserSelection()
                     }
