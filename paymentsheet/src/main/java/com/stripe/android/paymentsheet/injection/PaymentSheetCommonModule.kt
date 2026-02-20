@@ -35,6 +35,8 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferen
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.paymentsheet.BuildConfig
+import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
@@ -183,6 +185,11 @@ internal abstract class PaymentSheetCommonModule {
         @Provides
         fun providePaymentConfiguration(appContext: Context): PaymentConfiguration {
             return PaymentConfiguration.getInstance(appContext)
+        }
+
+        @Provides
+        fun provideCustomerStateHolderFactory(): CustomerStateHolder.Factory {
+            return DefaultCustomerStateHolder.Factory
         }
 
         @Provides

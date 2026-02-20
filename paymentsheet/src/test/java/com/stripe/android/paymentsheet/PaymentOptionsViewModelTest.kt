@@ -61,6 +61,7 @@ import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
@@ -1418,7 +1419,11 @@ internal class PaymentOptionsViewModelTest {
             tapToAddHelperFactory = tapToAddHelperFactory,
             mode = EventReporter.Mode.Complete,
             errorReporter = errorReporter,
-            initialCustomerStateHolder = customerStateHolder,
+            customerStateHolderFactory = object : CustomerStateHolder.Factory {
+                override fun create(viewModel: BaseSheetViewModel): CustomerStateHolder {
+                    return customerStateHolder ?: DefaultCustomerStateHolder.Factory.create(viewModel)
+                }
+            },
         )
     }
 
