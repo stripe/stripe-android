@@ -78,33 +78,38 @@ internal class LinkContentScreenshotTest {
     @Test
     fun testLinkContentHasProperlyStyledLoadingIndicator() {
         paparazziRule.snapshot {
-            val bottomSheetState = rememberStripeBottomSheetState()
+            val viewModelStoreOwner = object : ViewModelStoreOwner {
+                override val viewModelStore = ViewModelStore()
+            }
 
+            val bottomSheetState = rememberStripeBottomSheetState()
             val eventReporter = FakeEventReporter()
 
-            LinkScreenContentBody(
-                bottomSheetState = bottomSheetState,
-                screenState = ScreenState.Loading,
-                appBarState = LinkAppBarState(
-                    showHeader = false,
-                    canNavigateBack = false,
-                    title = null,
-                    isElevated = false,
-                ),
-                eventReporter = eventReporter,
-                navigationChannel = MutableSharedFlow(),
-                onNavBackStackEntryChanged = {},
-                onBackPressed = {},
-                onDismissClicked = {},
-                navigate = { _, _ -> },
-                dismiss = {},
-                dismissWithResult = {},
-                getLinkAccount = { null },
-                handleViewAction = {},
-                moveToWeb = {},
-                goBack = {},
-                changeEmail = {},
-            )
+            CompositionLocalProvider(LocalViewModelStoreOwner provides viewModelStoreOwner) {
+                LinkScreenContentBody(
+                    bottomSheetState = bottomSheetState,
+                    screenState = ScreenState.FullScreen(initialDestination = LinkScreen.Loading),
+                    appBarState = LinkAppBarState(
+                        showHeader = true,
+                        canNavigateBack = false,
+                        title = null,
+                        isElevated = false,
+                    ),
+                    eventReporter = eventReporter,
+                    navigationChannel = MutableSharedFlow(),
+                    onNavBackStackEntryChanged = {},
+                    onBackPressed = {},
+                    onDismissClicked = {},
+                    navigate = { _, _ -> },
+                    dismiss = {},
+                    dismissWithResult = {},
+                    getLinkAccount = { null },
+                    handleViewAction = {},
+                    moveToWeb = {},
+                    goBack = {},
+                    changeEmail = {},
+                )
+            }
         }
     }
 }
