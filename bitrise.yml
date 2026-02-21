@@ -64,32 +64,6 @@ stages:
     workflows:
       - notify-connections-e2e-failure: { }
 workflows:
-  _install_java:
-    steps:
-      - script@1:
-          title: Install Java via SDKMAN
-          inputs:
-            - content: |-
-                #!/bin/bash
-                set -eo pipefail
-
-                # Default to Java 25 if not specified
-                JAVA_VERSION=${JAVA_VERSION:-25}
-
-                # Install SDKMAN!
-                curl -s "https://get.sdkman.io?rcupdate=false" | bash
-                source "$HOME/.sdkman/bin/sdkman-init.sh"
-
-                # Install specified OpenJDK version
-                sdk install java ${JAVA_VERSION}-open
-
-                # Export for subsequent Bitrise steps
-                JAVA_HOME=$(sdk home java ${JAVA_VERSION}-open)
-                envman add --key JAVA_HOME --value "$JAVA_HOME"
-                envman add --key PATH --value "$JAVA_HOME/bin:$PATH"
-
-                # Verify
-                java -version
   check:
     envs:
       - JAVA_VERSION: 22
@@ -445,12 +419,14 @@ workflows:
                 -gpu swiftshader_indirect
                 -no-boot-anim
   prepare_all:
-    before_run:
-      - _install_java
     steps:
       - activate-ssh-key@4:
           run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
       - git-clone@8: { }
+      - script@1:
+          title: Install Java via Direct Download
+          inputs:
+            - content: ./scripts/retry.sh 3 ./scripts/install_java.sh
       - restore-gradle-configuration-cache@1: { }
       - restore-gradle-cache@2: { }
       - script@1:
