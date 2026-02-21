@@ -70,6 +70,7 @@ internal class TapToAddNavigator(
     }
 
     sealed interface Screen {
+        val isCentered: Boolean
         val cancelButton: CancelButton
 
         @Composable
@@ -78,6 +79,7 @@ internal class TapToAddNavigator(
         data class Collecting(
             val interactor: TapToAddCollectingInteractor,
         ) : Screen {
+            override val isCentered: Boolean = true
             override val cancelButton: CancelButton = CancelButton.None
 
             @Composable
@@ -89,6 +91,7 @@ internal class TapToAddNavigator(
         data class CardAdded(
             val interactor: TapToAddCardAddedInteractor,
         ) : Screen {
+            override val isCentered: Boolean = false
             override val cancelButton: CancelButton = CancelButton.Invisible
 
             @Composable
@@ -104,6 +107,7 @@ internal class TapToAddNavigator(
         data class Confirmation(
             val interactor: TapToAddConfirmationInteractor,
         ) : Screen {
+            override val isCentered: Boolean = false
             override val cancelButton: CancelButton = CancelButton.Visible
 
             @Composable
@@ -125,6 +129,7 @@ internal class TapToAddNavigator(
         data class Error(
             val message: ResolvableString,
         ) : Screen {
+            override val isCentered: Boolean = true
             override val cancelButton: CancelButton = CancelButton.Visible
 
             @Composable

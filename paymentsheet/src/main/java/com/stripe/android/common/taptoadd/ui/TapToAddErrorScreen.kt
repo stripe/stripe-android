@@ -1,10 +1,8 @@
 package com.stripe.android.common.taptoadd.ui
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -25,38 +23,33 @@ import com.stripe.android.core.R as StripeCoreR
 internal fun TapToAddErrorScreen(
     message: ResolvableString,
 ) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Image(
-                painter = painterResource(R.drawable.stripe_ic_warning_symbol),
-                contentDescription = null,
-                colorFilter = ColorFilter.tint(
-                    color = MaterialTheme.colors.primaryVariant,
-                ),
-            )
+        Image(
+            painter = painterResource(R.drawable.stripe_ic_warning_symbol),
+            contentDescription = null,
+            colorFilter = ColorFilter.tint(
+                color = MaterialTheme.colors.primaryVariant,
+            ),
+        )
 
-            Spacer(Modifier.size(50.dp))
+        Spacer(Modifier.size(50.dp))
 
-            Text(
-                text = stringResource(StripeCoreR.string.stripe_error),
-                color = MaterialTheme.colors.onBackground,
-                style = MaterialTheme.typography.h4,
-                fontWeight = FontWeight.W800,
-            )
+        Text(
+            text = stringResource(StripeCoreR.string.stripe_error),
+            color = MaterialTheme.colors.onBackground,
+            style = MaterialTheme.typography.h4,
+            fontWeight = FontWeight.W800,
+        )
 
-            Spacer(Modifier.size(10.dp))
+        Spacer(Modifier.size(10.dp))
 
-            Text(
-                text = message.resolve(),
-                color = MaterialTheme.colors.onBackground,
-                style = MaterialTheme.typography.h4,
-                fontWeight = FontWeight.W400
-            )
-        }
+        Text(
+            text = message.resolve(),
+            color = MaterialTheme.colors.onBackground,
+            style = MaterialTheme.typography.h4,
+            fontWeight = FontWeight.W400
+        )
     }
 }
