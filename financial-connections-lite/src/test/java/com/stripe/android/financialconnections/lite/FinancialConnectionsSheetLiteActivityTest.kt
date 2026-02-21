@@ -5,11 +5,14 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 internal class FinancialConnectionsSheetLiteActivityTest {
 
@@ -21,6 +24,8 @@ internal class FinancialConnectionsSheetLiteActivityTest {
                 FinancialConnectionsSheetLiteActivity::class.java
             )
         ).use { scenario ->
+            advanceUntilIdle()
+
             // Activity should finish gracefully without crashing
             assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
         }
