@@ -39,7 +39,7 @@ class CheckoutSessionConfirmationInterceptorTest {
                 PaymentIntentFactory.create(status = StripeIntent.Status.Succeeded)
             )
         ),
-    ) { interceptor ->
+    ) {
         val result = interceptor.intercept(
             intent = PaymentIntentFactory.create(),
             confirmationOption = PaymentMethodConfirmationOption.New(
@@ -73,7 +73,7 @@ class CheckoutSessionConfirmationInterceptorTest {
                 PaymentIntentFactory.create(status = StripeIntent.Status.RequiresAction)
             )
         ),
-    ) { interceptor ->
+    ) {
         val result = interceptor.intercept(
             intent = PaymentIntentFactory.create(),
             confirmationOption = PaymentMethodConfirmationOption.New(
@@ -100,7 +100,7 @@ class CheckoutSessionConfirmationInterceptorTest {
 
         runScenario(
             createPaymentMethodResult = Result.failure(error),
-        ) { interceptor ->
+        ) {
             val result = interceptor.intercept(
                 intent = PaymentIntentFactory.create(),
                 confirmationOption = PaymentMethodConfirmationOption.New(
@@ -127,7 +127,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         runScenario(
             createPaymentMethodResult = Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
             confirmCheckoutSessionResult = Result.failure(error),
-        ) { interceptor ->
+        ) {
             val result = interceptor.intercept(
                 intent = PaymentIntentFactory.create(),
                 confirmationOption = PaymentMethodConfirmationOption.New(
@@ -153,7 +153,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         confirmCheckoutSessionResult = Result.success(
             createCheckoutSessionResponse(paymentIntent = null)
         ),
-    ) { interceptor ->
+    ) {
         val result = interceptor.intercept(
             intent = PaymentIntentFactory.create(),
             confirmationOption = PaymentMethodConfirmationOption.New(
@@ -179,7 +179,7 @@ class CheckoutSessionConfirmationInterceptorTest {
                 PaymentIntentFactory.create(status = StripeIntent.Status.Succeeded)
             )
         ),
-    ) { interceptor ->
+    ) {
         val result = interceptor.intercept(
             intent = PaymentIntentFactory.create(),
             confirmationOption = PaymentMethodConfirmationOption.Saved(
@@ -211,7 +211,7 @@ class CheckoutSessionConfirmationInterceptorTest {
                     PaymentIntentFactory.create(status = StripeIntent.Status.RequiresAction)
                 )
             ),
-        ) { interceptor ->
+        ) {
             val result = interceptor.intercept(
                 intent = PaymentIntentFactory.create(),
                 confirmationOption = PaymentMethodConfirmationOption.Saved(
@@ -236,7 +236,7 @@ class CheckoutSessionConfirmationInterceptorTest {
 
         runScenario(
             confirmCheckoutSessionResult = Result.failure(error),
-        ) { interceptor ->
+        ) {
             val result = interceptor.intercept(
                 intent = PaymentIntentFactory.create(),
                 confirmationOption = PaymentMethodConfirmationOption.Saved(
@@ -262,7 +262,7 @@ class CheckoutSessionConfirmationInterceptorTest {
                 PaymentIntentFactory.create(status = StripeIntent.Status.Succeeded)
             )
         ),
-    ) { interceptor, scenario ->
+    ) {
         interceptor.intercept(
             intent = PaymentIntentFactory.create(),
             confirmationOption = PaymentMethodConfirmationOption.New(
@@ -274,7 +274,7 @@ class CheckoutSessionConfirmationInterceptorTest {
             shippingValues = null,
         )
 
-        val params = scenario.confirmCheckoutSessionCalls.awaitItem().toParamMap()
+        val params = confirmCheckoutSessionCalls.awaitItem().toParamMap()
         assertThat(params["save_payment_method"]).isEqualTo(true)
     }
 
@@ -286,7 +286,7 @@ class CheckoutSessionConfirmationInterceptorTest {
                 PaymentIntentFactory.create(status = StripeIntent.Status.Succeeded)
             )
         ),
-    ) { interceptor, scenario ->
+    ) {
         interceptor.intercept(
             intent = PaymentIntentFactory.create(),
             confirmationOption = PaymentMethodConfirmationOption.New(
@@ -298,7 +298,7 @@ class CheckoutSessionConfirmationInterceptorTest {
             shippingValues = null,
         )
 
-        val params = scenario.confirmCheckoutSessionCalls.awaitItem().toParamMap()
+        val params = confirmCheckoutSessionCalls.awaitItem().toParamMap()
         assertThat(params["save_payment_method"]).isEqualTo(false)
     }
 
@@ -309,7 +309,7 @@ class CheckoutSessionConfirmationInterceptorTest {
                 PaymentIntentFactory.create(status = StripeIntent.Status.Succeeded)
             )
         ),
-    ) { interceptor, scenario ->
+    ) {
         interceptor.intercept(
             intent = PaymentIntentFactory.create(),
             confirmationOption = PaymentMethodConfirmationOption.Saved(
@@ -319,14 +319,14 @@ class CheckoutSessionConfirmationInterceptorTest {
             shippingValues = null,
         )
 
-        val params = scenario.confirmCheckoutSessionCalls.awaitItem().toParamMap()
+        val params = confirmCheckoutSessionCalls.awaitItem().toParamMap()
         assertThat(params).doesNotContainKey("save_payment_method")
     }
 
     private fun runScenario(
         createPaymentMethodResult: Result<PaymentMethod> = Result.failure(NotImplementedError()),
         confirmCheckoutSessionResult: Result<CheckoutSessionResponse> = Result.failure(NotImplementedError()),
-        block: suspend (CheckoutSessionConfirmationInterceptor, Scenario) -> Unit,
+        block: suspend Scenario.() -> Unit,
     ) {
         val confirmCheckoutSessionCalls = Turbine<ConfirmCheckoutSessionParams>()
 
@@ -349,29 +349,17 @@ class CheckoutSessionConfirmationInterceptorTest {
         )
 
         val scenario = Scenario(
+            interceptor = interceptor,
             confirmCheckoutSessionCalls = confirmCheckoutSessionCalls,
         )
 
         runTest {
-            block(interceptor, scenario)
-        }
-    }
-
-    // Overload for tests that don't need the scenario.
-    private fun runScenario(
-        createPaymentMethodResult: Result<PaymentMethod> = Result.failure(NotImplementedError()),
-        confirmCheckoutSessionResult: Result<CheckoutSessionResponse> = Result.failure(NotImplementedError()),
-        block: suspend (CheckoutSessionConfirmationInterceptor) -> Unit,
-    ) {
-        runScenario(
-            createPaymentMethodResult = createPaymentMethodResult,
-            confirmCheckoutSessionResult = confirmCheckoutSessionResult,
-        ) { interceptor, _ ->
-            block(interceptor)
+            scenario.block()
         }
     }
 
     private data class Scenario(
+        val interceptor: CheckoutSessionConfirmationInterceptor,
         val confirmCheckoutSessionCalls: ReceiveTurbine<ConfirmCheckoutSessionParams>,
     )
 
