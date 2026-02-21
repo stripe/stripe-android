@@ -432,6 +432,7 @@ interface StripeRepository {
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun confirmCheckoutSession(
+        checkoutSessionId: String,
         confirmCheckoutSessionParams: ConfirmCheckoutSessionParams,
         options: ApiRequest.Options,
     ): Result<CheckoutSessionResponse>

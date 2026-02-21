@@ -8,7 +8,6 @@ import androidx.annotation.RestrictTo
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class ConfirmCheckoutSessionParams(
-    internal val checkoutSessionId: String,
     private val paymentMethodId: String,
     private val clientAttributionMetadata: ClientAttributionMetadata,
     private val returnUrl: String,

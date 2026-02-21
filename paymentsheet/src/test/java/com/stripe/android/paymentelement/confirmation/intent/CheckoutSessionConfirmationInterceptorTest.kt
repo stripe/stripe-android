@@ -401,6 +401,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         }
 
         override suspend fun confirmCheckoutSession(
+            checkoutSessionId: String,
             confirmCheckoutSessionParams: ConfirmCheckoutSessionParams,
             options: ApiRequest.Options,
         ): Result<CheckoutSessionResponse> {

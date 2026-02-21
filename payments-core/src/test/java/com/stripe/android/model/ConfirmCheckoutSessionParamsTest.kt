@@ -37,7 +37,6 @@ class ConfirmCheckoutSessionParamsTest {
 
     private fun createParams(savePaymentMethod: Boolean?): ConfirmCheckoutSessionParams {
         return ConfirmCheckoutSessionParams(
-            checkoutSessionId = "cs_test_123",
             paymentMethodId = "pm_test_123",
             clientAttributionMetadata = ClientAttributionMetadata(
                 elementsSessionConfigId = "test_session_id",

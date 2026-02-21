@@ -1571,13 +1571,14 @@ class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     override suspend fun confirmCheckoutSession(
+        checkoutSessionId: String,
         confirmCheckoutSessionParams: ConfirmCheckoutSessionParams,
         options: ApiRequest.Options,
     ): Result<CheckoutSessionResponse> {
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createPost(
                 url = getApiUrl(
-                    "payment_pages/${confirmCheckoutSessionParams.checkoutSessionId}/confirm"
+                    "payment_pages/$checkoutSessionId/confirm"
                 ),
                 options = options,
                 params = confirmCheckoutSessionParams.toParamMap(),

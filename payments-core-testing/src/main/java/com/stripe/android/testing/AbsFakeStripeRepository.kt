@@ -449,6 +449,7 @@ abstract class AbsFakeStripeRepository : StripeRepository {
     }
 
     override suspend fun confirmCheckoutSession(
+        checkoutSessionId: String,
         confirmCheckoutSessionParams: ConfirmCheckoutSessionParams,
         options: ApiRequest.Options,
     ): Result<CheckoutSessionResponse> {

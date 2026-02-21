@@ -90,8 +90,8 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         savePaymentMethod: Boolean?,
     ): ConfirmationDefinition.Action<Args> {
         return stripeRepository.confirmCheckoutSession(
+            checkoutSessionId = checkoutSessionId,
             confirmCheckoutSessionParams = ConfirmCheckoutSessionParams(
-                checkoutSessionId = checkoutSessionId,
                 paymentMethodId = paymentMethod.id,
                 clientAttributionMetadata = clientAttributionMetadata,
                 returnUrl = returnUrl,
