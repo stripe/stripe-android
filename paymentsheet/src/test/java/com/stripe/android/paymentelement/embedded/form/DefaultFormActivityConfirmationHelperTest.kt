@@ -7,7 +7,7 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddHelper
-import com.stripe.android.common.taptoadd.TapToAddResult
+import com.stripe.android.common.taptoadd.TapToAddNextStep
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -106,7 +106,7 @@ class DefaultFormActivityConfirmationHelperTest {
             tapToAddHelper = tapToAddHelper,
             customerStateHolder = customerStateHolder,
         ) {
-            tapToAddHelper.emitResult(TapToAddResult.Complete)
+            tapToAddHelper.emitNextStep(TapToAddNextStep.Complete)
 
             assertThat(stateHelper.resultTurbine.awaitItem()).isEqualTo(
                 FormResult.Complete(
@@ -127,8 +127,8 @@ class DefaultFormActivityConfirmationHelperTest {
             customerStateHolder = customerStateHolder,
         ) {
             val expectedSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
-            tapToAddHelper.emitResult(
-                TapToAddResult.Continue(
+            tapToAddHelper.emitNextStep(
+                TapToAddNextStep.Continue(
                     paymentSelection = expectedSelection,
                 )
             )
@@ -147,22 +147,6 @@ class DefaultFormActivityConfirmationHelperTest {
     }
 
     @Test
-    fun `TapToAddResult Canceled without payment selection doesn't set state helper result`() {
-        val tapToAddHelper = FakeTapToAddHelper()
-        testScenario(
-            tapToAddHelper = tapToAddHelper,
-        ) {
-            tapToAddHelper.emitResult(
-                TapToAddResult.Canceled(
-                    paymentSelection = null,
-                )
-            )
-
-            stateHelper.resultTurbine.expectNoEvents()
-        }
-    }
-
-    @Test
     fun `TapToAddResult Canceled with payment selection sets state helper result as expected`() {
         val tapToAddHelper = FakeTapToAddHelper()
         val customerStateHolder = FakeCustomerStateHolder()
@@ -171,8 +155,8 @@ class DefaultFormActivityConfirmationHelperTest {
             tapToAddHelper = tapToAddHelper,
             customerStateHolder = customerStateHolder,
         ) {
-            tapToAddHelper.emitResult(
-                TapToAddResult.Canceled(
+            tapToAddHelper.emitNextStep(
+                TapToAddNextStep.ConfirmSavedPaymentMethod(
                     paymentSelection = expectedSelection,
                 )
             )

@@ -357,6 +357,7 @@ internal class SavedPaymentMethodMutator(
                 PaymentSheetScreen.Loading,
                 is PaymentSheetScreen.UpdatePaymentMethod,
                 is PaymentSheetScreen.VerticalModeForm,
+                is PaymentSheetScreen.SavedPaymentMethodConfirm,
                 null -> {
                     // We don't allow navigating to the payment method remove screen from these screens.
                 }
