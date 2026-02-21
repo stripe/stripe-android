@@ -33,9 +33,6 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentMethodMessagingContentTest {
     @get:Rule
-    val composeRule = createComposeRule()
-
-    @get:Rule
     val composeCleanupRule = createComposeCleanupRule()
 
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -64,12 +61,12 @@ internal class PaymentMethodMessagingContentTest {
             val content = awaitItem()
             assertThat(content).isNotNull()
 
-            composeRule.setContent {
+            composeTestRule.setContent {
                 content?.Content(PaymentMethodMessagingElement.Appearance().build())
             }
 
-            composeRule.waitForIdle()
-            composeRule.onNodeWithText(text = "buy stuff", substring = true).performClick()
+            composeTestRule.waitForIdle()
+            composeTestRule.onNodeWithText(text = "buy stuff", substring = true).performClick()
 
             intended(
                 allOf(
