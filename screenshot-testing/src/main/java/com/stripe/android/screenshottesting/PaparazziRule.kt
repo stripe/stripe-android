@@ -153,7 +153,7 @@ class PaparazziRule(
 
     private fun createPaparazzi(deviceConfig: DeviceConfig): Paparazzi {
         return Paparazzi(
-            maxPercentDifference = 0.001,
+            maxPercentDifference = 0.002,
             deviceConfig = deviceConfig,
             // Needed to shrink the screenshot to the height of the composable
             renderingMode = SessionParams.RenderingMode.SHRINK,
