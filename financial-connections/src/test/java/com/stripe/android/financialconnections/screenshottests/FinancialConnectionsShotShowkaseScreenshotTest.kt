@@ -54,6 +54,7 @@ class PaparazziSampleScreenshotTest {
 
     @get:Rule
     val paparazzi = Paparazzi(
+        maxPercentDifference = 0.001,
         // Needed to shrink the screenshot to the height of the composable
         renderingMode = SessionParams.RenderingMode.SHRINK,
     )
