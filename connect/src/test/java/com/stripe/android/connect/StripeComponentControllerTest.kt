@@ -35,14 +35,17 @@ class StripeComponentControllerTest {
 
     @Test
     fun `show and dismiss shows and dismisses the dialog fragment respectively`() {
-        val controller = activityController.create().start().resume().get().controller
+        val activity = activityController.create().start().resume().get()
+        val controller = activity.controller
         assertThat(controller.dialogFragment.isAdded).isFalse()
 
         controller.show()
+        activity.supportFragmentManager.executePendingTransactions()
         awaitMainLooper()
         assertThat(controller.dialogFragment.isAdded).isTrue()
 
         controller.dismiss()
+        activity.supportFragmentManager.executePendingTransactions()
         awaitMainLooper()
         assertThat(controller.dialogFragment.isAdded).isFalse()
     }
@@ -55,6 +58,7 @@ class StripeComponentControllerTest {
         val controller = TestComponentController(activity, activity.embeddedComponentManager)
         val dialogFragment = controller.dialogFragment
         controller.show()
+        activity.supportFragmentManager.executePendingTransactions()
         awaitMainLooper()
 
         // Second controller should obtain the DF that was added.
@@ -67,6 +71,7 @@ class StripeComponentControllerTest {
         // Show the DF
         val firstActivity = activityController.create().start().resume().get()
         firstActivity.controller.show()
+        firstActivity.supportFragmentManager.executePendingTransactions()
         awaitMainLooper()
         val firstDialogFragment = firstActivity.controller.dialogFragment
 
