@@ -443,14 +443,16 @@
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.3.10 (*)
 |    +--- project :stripe-core
 |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.3.10 (*)
-|    |    +--- androidx.browser:browser:1.8.0
-|    |    |    +--- androidx.annotation:annotation:1.2.0 -> 1.9.1 (*)
-|    |    |    +--- androidx.annotation:annotation-experimental:1.4.0 -> 1.4.1 (*)
-|    |    |    +--- androidx.collection:collection:1.1.0 -> 1.5.0 (*)
+|    |    +--- androidx.browser:browser:1.9.0
+|    |    |    +--- androidx.activity:activity:1.9.0 -> 1.9.3 (*)
+|    |    |    +--- androidx.annotation:annotation:1.8.1 -> 1.9.1 (*)
+|    |    |    +--- androidx.annotation:annotation-experimental:1.4.1 (*)
+|    |    |    +--- androidx.collection:collection:1.4.2 -> 1.5.0 (*)
 |    |    |    +--- androidx.concurrent:concurrent-futures:1.0.0 -> 1.1.0 (*)
-|    |    |    +--- androidx.core:core:1.1.0 -> 1.15.0 (*)
+|    |    |    +--- androidx.core:core:1.10.0 -> 1.15.0 (*)
 |    |    |    +--- androidx.interpolator:interpolator:1.0.0 (*)
-|    |    |    \--- com.google.guava:listenablefuture:1.0
+|    |    |    +--- com.google.guava:listenablefuture:1.0
+|    |    |    \--- org.jspecify:jspecify:1.0.0
 |    |    +--- com.google.dagger:dagger:2.58
 |    |    |    +--- jakarta.inject:jakarta.inject-api:2.0.1
 |    |    |    +--- javax.inject:javax.inject:1
@@ -820,7 +822,7 @@
 |    |    |    +--- androidx.activity:activity-ktx:1.9.3 (*)
 |    |    |    +--- androidx.lifecycle:lifecycle-runtime-ktx:2.8.7 -> 2.9.4 (*)
 |    |    |    +--- androidx.annotation:annotation:1.9.1 (*)
-|    |    |    +--- androidx.browser:browser:1.8.0 (*)
+|    |    |    +--- androidx.browser:browser:1.9.0 (*)
 |    |    |    +--- androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7 -> 2.9.4 (*)
 |    |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2 (*)
 |    |    |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.10.0 (*)
@@ -919,7 +921,7 @@
 |    |    +--- androidx.activity:activity-ktx:1.9.3 (*)
 |    |    +--- androidx.annotation:annotation:1.9.1 (*)
 |    |    +--- androidx.appcompat:appcompat:1.7.0 (*)
-|    |    +--- androidx.browser:browser:1.8.0 (*)
+|    |    +--- androidx.browser:browser:1.9.0 (*)
 |    |    +--- androidx.constraintlayout:constraintlayout:2.2.0 (*)
 |    |    +--- androidx.fragment:fragment-ktx:1.8.6 (*)
 |    |    +--- androidx.lifecycle:lifecycle-runtime-compose:2.8.7 -> 2.9.4 (*)
@@ -1011,7 +1013,7 @@
 |    |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.10.0 (*)
 |    |    +--- androidx.annotation:annotation:1.9.1 (*)
 |    |    +--- androidx.appcompat:appcompat:1.7.0 (*)
-|    |    +--- androidx.browser:browser:1.8.0 (*)
+|    |    +--- androidx.browser:browser:1.9.0 (*)
 |    |    +--- androidx.lifecycle:lifecycle-runtime-ktx:2.8.7 -> 2.9.4 (*)
 |    |    +--- androidx.lifecycle:lifecycle-runtime-compose:2.8.7 -> 2.9.4 (*)
 |    |    +--- androidx.lifecycle:lifecycle-viewmodel-savedstate:2.8.7 -> 2.9.4 (*)
@@ -1175,7 +1177,7 @@
 |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.22 -> 2.3.10 (*)
 |    |    +--- androidx.activity:activity-ktx:1.9.3 (*)
 |    |    +--- androidx.appcompat:appcompat:1.7.0 (*)
-|    |    +--- androidx.browser:browser:1.8.0 (*)
+|    |    +--- androidx.browser:browser:1.9.0 (*)
 |    |    +--- androidx.constraintlayout:constraintlayout:2.2.0 (*)
 |    |    +--- androidx.core:core-ktx:1.13.1 -> 1.15.0 (*)
 |    |    +--- androidx.fragment:fragment-ktx:1.8.6 (*)
