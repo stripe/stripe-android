@@ -47,6 +47,7 @@ ext.versions = [
         kotlinSerialization         : '1.10.0',
         lint                        : '31.4.0',
         ktlint                      : '1.8.0',
+        layoutlib                   : '16.2.2',
         leakCanary                  : '2.14',
         material                    : '1.12.0',
         mockito                     : '5.21.0',
@@ -246,6 +247,7 @@ ext.testLibs = [
                 test       : "org.jetbrains.kotlin:kotlin-test:${versions.kotlin}",
         ],
         leakCanaryInstrumentation : "com.squareup.leakcanary:leakcanary-android-instrumentation:${versions.leakCanary}",
+        layoutlib            : "com.android.tools.layoutlib:layoutlib:${versions.layoutlib}",
         mockito              : [
                 android: "org.mockito:mockito-android:${versions.mockito}",
                 core   : "org.mockito:mockito-core:${versions.mockito}",
