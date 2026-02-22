@@ -1,9 +1,15 @@
 apply from: configs.androidLibrary
 apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 
-configurations.all {
-    resolutionStrategy {
-        force testLibs.layoutlib
+configurations.configureEach {
+    if (!name.toLowerCase().contains('androidtest')) {
+        resolutionStrategy {
+            force testLibs.layoutlib
+        }
+    } else {
+        // Exclude layoutlib from androidTest configurations to prevent dexing errors
+        // This module is only used for unit tests (Paparazzi), not instrumentation tests
+        exclude group: 'com.android.tools.layoutlib', module: 'layoutlib'
     }
     exclude group: 'com.google.errorprone', module: 'error_prone_annotations'
 }
