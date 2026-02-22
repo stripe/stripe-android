@@ -337,6 +337,74 @@ internal class DefaultTapToAddConfirmationInteractorTest {
         }
     }
 
+    @Test
+    fun `form is enabled when confirmation state is Idle`() = runScenario(
+        paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
+        tapToAddMode = TapToAddMode.Complete,
+    ) {
+        interactor.state.test {
+            val state = awaitItem()
+            assertThat(state.form.enabled).isTrue()
+        }
+    }
+
+    @Test
+    fun `form is disabled when confirmation state is Confirming`() = runScenario(
+        paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
+        tapToAddMode = TapToAddMode.Complete,
+    ) {
+        interactor.state.test {
+            assertThat(awaitItem().form.enabled).isTrue()
+
+            confirmationHandlerScenario.confirmationState.value = ConfirmationHandler.State.Confirming(
+                PaymentMethodConfirmationOption.Saved(
+                    paymentMethod = paymentMethod,
+                    optionsParams = null,
+                ),
+            )
+
+            assertThat(awaitItem().form.enabled).isFalse()
+        }
+    }
+
+    @Test
+    fun `form is disabled when confirmation succeeds`() = runScenario(
+        paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
+        tapToAddMode = TapToAddMode.Complete,
+    ) {
+        interactor.state.test {
+            assertThat(awaitItem().form.enabled).isTrue()
+
+            confirmationHandlerScenario.confirmationState.value = ConfirmationHandler.State.Complete(
+                ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED),
+            )
+
+            assertThat(awaitItem().form.enabled).isFalse()
+            assertThat(eventReporter.paymentSuccessCalls.awaitItem()).isNotNull()
+        }
+    }
+
+    @Test
+    fun `form is enabled when confirmation fails so user can retry`() = runScenario(
+        paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
+        tapToAddMode = TapToAddMode.Complete,
+    ) {
+        interactor.state.test {
+            assertThat(awaitItem().form.enabled).isTrue()
+
+            confirmationHandlerScenario.confirmationState.value = ConfirmationHandler.State.Complete(
+                ConfirmationHandler.Result.Failed(
+                    cause = Exception("Payment failed"),
+                    message = "Payment failed".resolvableString,
+                    type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                ),
+            )
+
+            assertThat(awaitItem().form.enabled).isTrue()
+            assertThat(eventReporter.paymentFailureCalls.awaitItem()).isNotNull()
+        }
+    }
+
     private fun runScenario(
         paymentMethod: PaymentMethod,
         tapToAddMode: TapToAddMode = TapToAddMode.Complete,

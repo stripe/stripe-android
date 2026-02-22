@@ -219,9 +219,17 @@ internal class DefaultTapToAddConfirmationInteractor(
             }
         }
 
+        val formEnabled = when (confirmationState) {
+            is ConfirmationHandler.State.Complete -> {
+                confirmationState.result !is ConfirmationHandler.Result.Succeeded
+            }
+            is ConfirmationHandler.State.Confirming -> false
+            is ConfirmationHandler.State.Idle -> true
+        }
+
         return copy(
             form = form.copy(
-                enabled = confirmationState is ConfirmationHandler.State.Idle,
+                enabled = formEnabled,
             ),
             primaryButton = primaryButton.copy(
                 state = primaryButtonState,
