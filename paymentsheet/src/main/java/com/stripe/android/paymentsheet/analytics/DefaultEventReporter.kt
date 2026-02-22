@@ -240,17 +240,12 @@ internal class DefaultEventReporter @Inject internal constructor(
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         intentId: String?,
     ) {
-        // Wallets are treated as a saved payment method after confirmation, so we need
-        // to "reset" to the correct PaymentSelection for accurate reporting.
-        val savedSelection = (paymentSelection as? PaymentSelection.Saved)
-
-        val realSelection = savedSelection?.walletType?.paymentSelection ?: paymentSelection
         val duration = durationProvider.end(DurationProvider.Key.Checkout)
 
         fireEvent(
             PaymentSheetEvent.Payment(
                 mode = mode,
-                paymentSelection = realSelection,
+                paymentSelection = paymentSelection,
                 duration = duration,
                 result = PaymentSheetEvent.Payment.Result.Success,
                 deferredIntentConfirmationType = deferredIntentConfirmationType,
