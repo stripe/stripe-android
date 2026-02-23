@@ -7,6 +7,8 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
+import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.DummyActivityResultCaller
@@ -87,6 +89,34 @@ class TapToAddHelperTest {
             )
 
             assertThat(selection).isEqualTo(expectedPaymentSelection)
+        }
+    }
+
+    @Test
+    fun `when TapToAddActivity result is canceled with selection, payment method is added to customer`() {
+        val expectedPaymentSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
+        val tapToAddResult = TapToAddResult.Canceled(
+            paymentSelection = expectedPaymentSelection,
+        )
+        val customerStateHolder = FakeCustomerStateHolder()
+
+        runScenario(
+            customerStateHolder = customerStateHolder,
+        ) {
+            helper.register(
+                activityResultCaller = activityResultCallerScenario.activityResultCaller,
+                lifecycleOwner = TestLifecycleOwner(),
+            )
+
+            finishTapToAddActivityWithResult(
+                tapToAddResult,
+                helper = helper,
+                activityResultCallerScenario = activityResultCallerScenario,
+            )
+
+            assertThat(customerStateHolder.addPaymentMethodTurbine.awaitItem()).isEqualTo(
+                expectedPaymentSelection.paymentMethod
+            )
         }
     }
 
@@ -216,6 +246,7 @@ class TapToAddHelperTest {
         productUsage: Set<String> = emptySet(),
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
         updateSelection: (PaymentSelection.Saved) -> Unit = {},
+        customerStateHolder: CustomerStateHolder = FakeCustomerStateHolder(),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         DummyActivityResultCaller.test {
@@ -228,6 +259,7 @@ class TapToAddHelperTest {
                         eventMode = eventMode,
                         savedStateHandle = savedStateHandle,
                         updateSelection = updateSelection,
+                        customerStateHolder = customerStateHolder,
                     ),
                     activityResultCallerScenario = this,
                 )
@@ -242,15 +274,17 @@ class TapToAddHelperTest {
         productUsage: Set<String> = emptySet(),
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
         updateSelection: (PaymentSelection.Saved) -> Unit = {},
+        customerStateHolder: CustomerStateHolder = FakeCustomerStateHolder(),
     ): TapToAddHelper {
         return DefaultTapToAddHelper(
             coroutineScope = CoroutineScope(currentCoroutineContext()),
-            savedStateHandle = savedStateHandle,
             productUsage = productUsage,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             tapToAddMode = tapToAddMode,
             eventMode = eventMode,
+            savedStateHandle = savedStateHandle,
             updateSelection = updateSelection,
+            customerStateHolder = customerStateHolder,
         )
     }
 

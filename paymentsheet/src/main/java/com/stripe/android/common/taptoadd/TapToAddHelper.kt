@@ -8,6 +8,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.CoroutineScope
@@ -39,11 +40,12 @@ internal interface TapToAddHelper {
             coroutineScope: CoroutineScope,
             tapToAddMode: TapToAddMode,
             updateSelection: (PaymentSelection.Saved) -> Unit,
+            customerStateHolder: CustomerStateHolder,
         ): TapToAddHelper
     }
 }
 
-internal class DefaultTapToAddHelper(
+internal class DefaultTapToAddHelper constructor(
     private val coroutineScope: CoroutineScope,
     private val productUsage: Set<String>,
     private val paymentElementCallbackIdentifier: String,
@@ -51,6 +53,7 @@ internal class DefaultTapToAddHelper(
     private val eventMode: EventReporter.Mode,
     private val savedStateHandle: SavedStateHandle,
     private val updateSelection: (PaymentSelection.Saved) -> Unit,
+    private val customerStateHolder: CustomerStateHolder,
 ) : TapToAddHelper {
     private var collecting: Boolean
         get() = savedStateHandle.get<Boolean>(CURRENTLY_COLLECTING_WITH_TAP_TO_ADD_KEY) == true
@@ -99,6 +102,7 @@ internal class DefaultTapToAddHelper(
     private fun mapResultToNextStep(tapToAddResult: TapToAddResult): TapToAddNextStep? {
         return when (tapToAddResult) {
             is TapToAddResult.Canceled -> tapToAddResult.paymentSelection?.let { paymentSelection ->
+                customerStateHolder.addPaymentMethod(paymentSelection.paymentMethod)
                 updateSelection(paymentSelection)
                 TapToAddNextStep.ConfirmSavedPaymentMethod(
                     paymentSelection,
@@ -141,15 +145,17 @@ internal class DefaultTapToAddHelper(
             coroutineScope: CoroutineScope,
             tapToAddMode: TapToAddMode,
             updateSelection: (PaymentSelection.Saved) -> Unit,
+            customerStateHolder: CustomerStateHolder,
         ): TapToAddHelper {
             return DefaultTapToAddHelper(
                 coroutineScope = coroutineScope,
+                productUsage = productUsage,
+                paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
                 tapToAddMode = tapToAddMode,
                 eventMode = eventMode,
-                paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
                 savedStateHandle = savedStateHandle,
-                productUsage = productUsage,
                 updateSelection = updateSelection,
+                customerStateHolder = customerStateHolder,
             )
         }
     }
