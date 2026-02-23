@@ -129,6 +129,16 @@ apiValidation {
 
 subprojects {
     plugins.withId("app.cash.paparazzi") {
+        configurations.configureEach {
+            if (!name.toLowerCase().contains('androidtest')) {
+                resolutionStrategy {
+                    force testLibs.layoutlib
+                }
+            } else {
+                // Exclude layoutlib from androidTest configurations to prevent dexing errors
+                exclude group: 'com.android.tools.layoutlib', module: 'layoutlib'
+            }
+        }
         tasks.withType(Test).configureEach { test ->
             // https://github.com/cashapp/paparazzi/issues/2111
             test.reports.html.required = false
