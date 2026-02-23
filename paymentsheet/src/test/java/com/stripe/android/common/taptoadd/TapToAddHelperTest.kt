@@ -6,7 +6,9 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.asCallbackFor
 import kotlinx.coroutines.CoroutineScope
@@ -59,6 +61,52 @@ class TapToAddHelperTest {
             tapToAddCallback.onActivityResult(TapToAddResult.Complete)
 
             assertThat(awaitItem()).isEqualTo(TapToAddNextStep.Complete)
+        }
+    }
+
+    @Test
+    fun `when TapToAddActivity result is canceled with selection, updateSelection is called with new selection`() {
+        val expectedPaymentSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
+        val tapToAddResult = TapToAddResult.Canceled(
+            paymentSelection = expectedPaymentSelection,
+        )
+
+        var selection: PaymentSelection.Saved? = null
+        runScenario(
+            updateSelection = { selection = it },
+        ) {
+            helper.register(
+                activityResultCaller = activityResultCallerScenario.activityResultCaller,
+                lifecycleOwner = TestLifecycleOwner(),
+            )
+
+            finishTapToAddActivityWithResult(
+                tapToAddResult,
+                helper = helper,
+                activityResultCallerScenario = activityResultCallerScenario,
+            )
+
+            assertThat(selection).isEqualTo(expectedPaymentSelection)
+        }
+    }
+
+    private suspend fun finishTapToAddActivityWithResult(
+        result: TapToAddResult,
+        helper: TapToAddHelper,
+        activityResultCallerScenario: DummyActivityResultCaller.Scenario,
+    ) {
+        helper.nextStep.test {
+            assertThat(activityResultCallerScenario.awaitNextRegisteredLauncher()).isNotNull()
+
+            val registerCall = activityResultCallerScenario.awaitRegisterCall()
+
+            assertThat(registerCall.contract).isEqualTo(TapToAddContract)
+
+            val tapToAddCallback = registerCall.callback.asCallbackFor<TapToAddResult>()
+
+            tapToAddCallback.onActivityResult(result)
+
+            awaitItem()
         }
     }
 
@@ -167,6 +215,7 @@ class TapToAddHelperTest {
         paymentElementCallbackIdentifier: String = "callback_id",
         productUsage: Set<String> = emptySet(),
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
+        updateSelection: (PaymentSelection.Saved) -> Unit = {},
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         DummyActivityResultCaller.test {
@@ -178,6 +227,7 @@ class TapToAddHelperTest {
                         tapToAddMode = tapToAddMode,
                         eventMode = eventMode,
                         savedStateHandle = savedStateHandle,
+                        updateSelection = updateSelection,
                     ),
                     activityResultCallerScenario = this,
                 )
@@ -191,6 +241,7 @@ class TapToAddHelperTest {
         paymentElementCallbackIdentifier: String = "callback_id",
         productUsage: Set<String> = emptySet(),
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
+        updateSelection: (PaymentSelection.Saved) -> Unit = {},
     ): TapToAddHelper {
         return DefaultTapToAddHelper(
             coroutineScope = CoroutineScope(currentCoroutineContext()),
@@ -199,6 +250,7 @@ class TapToAddHelperTest {
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             tapToAddMode = tapToAddMode,
             eventMode = eventMode,
+            updateSelection = updateSelection,
         )
     }
 

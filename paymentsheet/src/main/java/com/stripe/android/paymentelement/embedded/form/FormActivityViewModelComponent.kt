@@ -142,13 +142,15 @@ internal interface FormActivityViewModelModule {
             @ViewModelScope coroutineScope: CoroutineScope,
             configuration: EmbeddedPaymentElement.Configuration,
             tapToAddHelperFactory: TapToAddHelper.Factory,
+            embeddedSelectionHolder: EmbeddedSelectionHolder,
         ): TapToAddHelper {
             return tapToAddHelperFactory.create(
                 coroutineScope = coroutineScope,
                 tapToAddMode = when (configuration.formSheetAction) {
                     EmbeddedPaymentElement.FormSheetAction.Continue -> TapToAddMode.Continue
                     EmbeddedPaymentElement.FormSheetAction.Confirm -> TapToAddMode.Complete
-                }
+                },
+                updateSelection = embeddedSelectionHolder::set,
             )
         }
 
