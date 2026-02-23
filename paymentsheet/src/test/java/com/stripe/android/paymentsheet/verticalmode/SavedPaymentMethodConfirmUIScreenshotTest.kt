@@ -33,6 +33,7 @@ internal class SavedPaymentMethodConfirmUIScreenshotTest {
                 )
             )
         )
+        override val formElement = null
     }
 
     @Test
