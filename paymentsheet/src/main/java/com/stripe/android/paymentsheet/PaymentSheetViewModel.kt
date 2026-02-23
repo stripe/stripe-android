@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.analytics.SessionSavedStateHandler
@@ -57,7 +58,6 @@ import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultSelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.utils.asGooglePayButtonType
 import com.stripe.android.paymentsheet.utils.toConfirmationError
-import com.stripe.android.paymentsheet.verticalmode.DefaultSavedPaymentMethodConfirmInteractor
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
@@ -249,18 +249,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                         customerStateHolder.addPaymentMethod(result.paymentSelection.paymentMethod)
                         updateSelection(result.paymentSelection)
                         val paymentMethodMetadata = paymentMethodMetadata.value ?: return@collect
-                        val savedPaymentMethodConfirmScreen =
-                            PaymentSheetScreen.SavedPaymentMethodConfirm(
-                                DefaultSavedPaymentMethodConfirmInteractor.create(
-                                    paymentMethodMetadata = paymentMethodMetadata,
-                                    initialSelection = result.paymentSelection,
-                                    savedStateHandle = savedStateHandle,
-                                    linkConfigurationCoordinator = linkHandler.linkConfigurationCoordinator,
-                                    coroutineScope = this,
-                                    updateSelection = ::updateSelection,
-                                ),
-                                isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
-                            )
+                        val savedPaymentMethodConfirmScreen = PaymentSheetScreen.SavedPaymentMethodConfirm.create(
+                            paymentMethodMetadata = paymentMethodMetadata,
+                            initialSelection = result.paymentSelection,
+                            viewModel = this@PaymentSheetViewModel,
+                        )
                         val newScreens = determineInitialBackStack(
                             paymentMethodMetadata,
                             customerStateHolder,

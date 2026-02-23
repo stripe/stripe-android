@@ -1,18 +1,18 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.annotation.RestrictTo
-import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import com.stripe.android.common.spms.DefaultLinkFormElementFactory
 import com.stripe.android.common.spms.DefaultSavedPaymentMethodLinkFormHelper
 import com.stripe.android.common.spms.SavedPaymentMethodLinkFormHelper
 import com.stripe.android.common.spms.withLinkState
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
-import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
@@ -55,12 +55,9 @@ internal class DefaultSavedPaymentMethodConfirmInteractor(
 
     companion object {
         fun create(
+            viewModel: BaseSheetViewModel,
             paymentMethodMetadata: PaymentMethodMetadata,
             initialSelection: PaymentSelection.Saved,
-            linkConfigurationCoordinator: LinkConfigurationCoordinator,
-            savedStateHandle: SavedStateHandle,
-            updateSelection: (PaymentSelection.Saved) -> Unit,
-            coroutineScope: CoroutineScope,
         ): DefaultSavedPaymentMethodConfirmInteractor {
             return DefaultSavedPaymentMethodConfirmInteractor(
                 initialSelection = initialSelection,
@@ -69,12 +66,12 @@ internal class DefaultSavedPaymentMethodConfirmInteractor(
                 )?.displayName.orEmpty(),
                 savedPaymentMethodLinkFormHelper = DefaultSavedPaymentMethodLinkFormHelper(
                     paymentMethodMetadata = paymentMethodMetadata,
-                    linkConfigurationCoordinator = linkConfigurationCoordinator,
-                    savedStateHandle = savedStateHandle,
+                    linkConfigurationCoordinator = viewModel.linkHandler.linkConfigurationCoordinator,
+                    savedStateHandle = viewModel.savedStateHandle,
                     linkFormElementFactory = DefaultLinkFormElementFactory,
                 ),
-                updateSelection = updateSelection,
-                coroutineScope = coroutineScope,
+                updateSelection = viewModel::updateSelection,
+                coroutineScope = viewModel.viewModelScope,
             )
         }
     }

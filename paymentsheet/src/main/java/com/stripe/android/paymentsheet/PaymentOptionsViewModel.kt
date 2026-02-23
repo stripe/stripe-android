@@ -44,7 +44,6 @@ import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultSelectSavedPaymentMethodsInteractor
-import com.stripe.android.paymentsheet.verticalmode.DefaultSavedPaymentMethodConfirmInteractor
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
@@ -234,18 +233,11 @@ internal class PaymentOptionsViewModel @Inject constructor(
                         customerStateHolder.addPaymentMethod(result.paymentSelection.paymentMethod)
                         updateSelection(result.paymentSelection)
                         val paymentMethodMetadata = args.state.paymentMethodMetadata
-                        val savedPaymentMethodConfirmScreen =
-                            PaymentSheetScreen.SavedPaymentMethodConfirm(
-                                DefaultSavedPaymentMethodConfirmInteractor.create(
-                                    paymentMethodMetadata = paymentMethodMetadata,
-                                    initialSelection = result.paymentSelection,
-                                    savedStateHandle = savedStateHandle,
-                                    linkConfigurationCoordinator = linkHandler.linkConfigurationCoordinator,
-                                    updateSelection = ::updateSelection,
-                                    coroutineScope = this,
-                                ),
-                                isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
-                            )
+                        val savedPaymentMethodConfirmScreen = PaymentSheetScreen.SavedPaymentMethodConfirm.create(
+                            viewModel = this@PaymentOptionsViewModel,
+                            paymentMethodMetadata = paymentMethodMetadata,
+                            initialSelection = result.paymentSelection,
+                        )
                         val newScreens = determineInitialBackStack(
                             paymentMethodMetadata,
                             customerStateHolder,
