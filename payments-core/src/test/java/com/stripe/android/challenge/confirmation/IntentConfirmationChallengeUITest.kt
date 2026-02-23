@@ -42,6 +42,7 @@ internal class IntentConfirmationChallengeUITest {
         composeTestRule.setContent {
             IntentConfirmationChallengeUI(
                 hostUrl = "http://10.0.2.2:3004",
+                userAgent = "fake-user-agent",
                 bridgeHandler = bridgeHandler,
                 showProgressIndicator = false,
                 webViewFactory = { context ->
@@ -57,6 +58,8 @@ internal class IntentConfirmationChallengeUITest {
         assertThat(fakeWebView?.awaitCall())
             .isEqualTo(FakeIntentConfirmationChallengeWebView.Call.AddBridgeHandler(bridgeHandler))
         assertThat(fakeWebView?.awaitCall())
+            .isEqualTo(FakeIntentConfirmationChallengeWebView.Call.UpdateUserAgent("fake-user-agent"))
+        assertThat(fakeWebView?.awaitCall())
             .isEqualTo(FakeIntentConfirmationChallengeWebView.Call.LoadUrl("http://10.0.2.2:3004"))
         fakeWebView?.ensureAllEventsConsumed()
     }
@@ -64,6 +67,7 @@ internal class IntentConfirmationChallengeUITest {
     private fun setContent(showProgressIndicator: Boolean) = composeTestRule.setContent {
         IntentConfirmationChallengeUI(
             hostUrl = "http://10.0.2.2:3004",
+            userAgent = "fake-user-agent",
             bridgeHandler = FakeConfirmationChallengeBridgeHandler(),
             showProgressIndicator = showProgressIndicator,
             webViewClientFactory = { WebViewClient() }

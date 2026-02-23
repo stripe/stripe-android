@@ -13,6 +13,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.challenge.confirmation.analytics.IntentConfirmationChallengeAnalyticsEventReporter
 import com.stripe.android.challenge.confirmation.di.DaggerIntentConfirmationChallengeComponent
+import com.stripe.android.challenge.confirmation.di.SDK_USER_AGENT
 import com.stripe.android.core.injection.UIContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -20,12 +21,14 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 
 internal class IntentConfirmationChallengeViewModel @Inject constructor(
     val bridgeHandler: ConfirmationChallengeBridgeHandler,
     @UIContext private val workContext: CoroutineContext,
-    private val analyticsEventReporter: IntentConfirmationChallengeAnalyticsEventReporter
+    private val analyticsEventReporter: IntentConfirmationChallengeAnalyticsEventReporter,
+    @Named(SDK_USER_AGENT) val userAgent: String
 ) : ViewModel(), DefaultLifecycleObserver {
 
     private val _bridgeReady = MutableSharedFlow<Unit>()

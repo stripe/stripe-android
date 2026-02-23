@@ -188,7 +188,8 @@ internal class IntentConfirmationChallengeActivityTest {
                 return IntentConfirmationChallengeViewModel(
                     bridgeHandler = bridgeHandler,
                     workContext = testDispatcher,
-                    analyticsEventReporter = analyticsReporter
+                    analyticsEventReporter = analyticsReporter,
+                    userAgent = "fake-user-agent"
                 ) as T
             }
         }
@@ -227,7 +228,8 @@ internal class IntentConfirmationChallengeActivityTest {
                 return IntentConfirmationChallengeViewModel(
                     bridgeHandler = bridgeHandler,
                     workContext = testDispatcher,
-                    analyticsEventReporter = FakeIntentConfirmationChallengeAnalyticsEventReporter()
+                    analyticsEventReporter = FakeIntentConfirmationChallengeAnalyticsEventReporter(),
+                    userAgent = "fake-user-agent"
                 ) as T
             }
         }
