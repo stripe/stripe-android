@@ -134,6 +134,7 @@ android {
     buildFeatures {
         compose = true
         viewBinding true
+        buildConfig = true
     }
 
     testOptions {
@@ -145,20 +146,20 @@ android {
             }
         }
 
-        kotlinOptions {
-            freeCompilerArgs += ["-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"]
-        }
     }
 
-    kotlinOptions {
-        freeCompilerArgs += [
-                "-opt-in=kotlinx.coroutines.FlowPreview",
-                "-Xcontext-parameters",
-                "-Xannotation-default-target=param-property",
-                "-Xconsistent-data-class-copy-visibility"
-        ]
-        if (gradle.ext.isCi) {
-            kotlinOptions.allWarningsAsErrors = true
+    kotlin {
+        compilerOptions {
+            freeCompilerArgs.addAll([
+                    "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+                    "-opt-in=kotlinx.coroutines.FlowPreview",
+                    "-Xcontext-parameters",
+                    "-Xannotation-default-target=param-property",
+                    "-Xconsistent-data-class-copy-visibility"
+            ])
+            if (gradle.ext.isCi) {
+                allWarningsAsErrors = true
+            }
         }
     }
 }

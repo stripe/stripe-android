@@ -17,11 +17,13 @@ dependencies {
 }
 
 android {
-    kotlinOptions {
-        freeCompilerArgs += [
-                "-opt-in=kotlin.RequiresOptIn",
-                "-Xconsistent-data-class-copy-visibility",
-        ]
+    kotlin {
+        compilerOptions {
+            freeCompilerArgs.addAll([
+                    "-opt-in=kotlin.RequiresOptIn",
+                    "-Xconsistent-data-class-copy-visibility",
+            ])
+        }
     }
 }
 

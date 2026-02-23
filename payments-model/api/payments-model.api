@@ -405,10 +405,3 @@ public final class com/stripe/android/model/TokenizationMethod : java/lang/Enum 
 	public static fun values ()[Lcom/stripe/android/model/TokenizationMethod;
 }
 
-public final class com/stripe/payments/model/BuildConfig {
-	public static final field BUILD_TYPE Ljava/lang/String;
-	public static final field DEBUG Z
-	public static final field LIBRARY_PACKAGE_NAME Ljava/lang/String;
-	public fun <init> ()V
-}
-
