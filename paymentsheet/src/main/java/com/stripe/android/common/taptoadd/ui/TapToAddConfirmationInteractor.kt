@@ -1,6 +1,7 @@
 package com.stripe.android.common.taptoadd.ui
 
 import com.stripe.android.common.spms.SavedPaymentMethodLinkFormHelper
+import com.stripe.android.common.spms.withLinkState
 import com.stripe.android.common.taptoadd.TapToAddMode
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.strings.ResolvableString
@@ -243,16 +244,6 @@ internal class DefaultTapToAddConfirmationInteractor(
                 null
             },
         )
-    }
-
-    private fun PaymentSelection.Saved.withLinkState(
-        state: SavedPaymentMethodLinkFormHelper.State,
-    ): PaymentSelection.Saved {
-        return when (state) {
-            is SavedPaymentMethodLinkFormHelper.State.Unused,
-            is SavedPaymentMethodLinkFormHelper.State.Incomplete -> copy(linkInput = null)
-            is SavedPaymentMethodLinkFormHelper.State.Complete -> copy(linkInput = state.userInput)
-        }
     }
 
     class Factory @Inject constructor(

@@ -256,6 +256,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                                     initialSelection = result.paymentSelection,
                                     savedStateHandle = savedStateHandle,
                                     linkConfigurationCoordinator = linkHandler.linkConfigurationCoordinator,
+                                    coroutineScope = this,
+                                    updateSelection = ::updateSelection,
                                 ),
                                 isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
                             )

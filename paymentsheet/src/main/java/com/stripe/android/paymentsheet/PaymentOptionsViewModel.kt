@@ -241,6 +241,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
                                     initialSelection = result.paymentSelection,
                                     savedStateHandle = savedStateHandle,
                                     linkConfigurationCoordinator = linkHandler.linkConfigurationCoordinator,
+                                    updateSelection = ::updateSelection,
+                                    coroutineScope = this,
                                 ),
                                 isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
                             )

@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.spms.DefaultLinkFormElementFactory
 import com.stripe.android.common.spms.DefaultSavedPaymentMethodLinkFormHelper
 import com.stripe.android.common.spms.SavedPaymentMethodLinkFormHelper
+import com.stripe.android.common.spms.withLinkState
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.link.LinkConfigurationCoordinator
@@ -13,6 +14,10 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.utils.mapAsStateFlow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 internal interface SavedPaymentMethodConfirmInteractor {
     val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod
@@ -25,6 +30,8 @@ internal class DefaultSavedPaymentMethodConfirmInteractor(
     val initialSelection: PaymentSelection.Saved,
     val displayName: ResolvableString,
     val savedPaymentMethodLinkFormHelper: SavedPaymentMethodLinkFormHelper,
+    val updateSelection: (PaymentSelection.Saved) -> Unit,
+    val coroutineScope: CoroutineScope,
 ) : SavedPaymentMethodConfirmInteractor {
 
     override val formElement = savedPaymentMethodLinkFormHelper.formElement
@@ -34,12 +41,26 @@ internal class DefaultSavedPaymentMethodConfirmInteractor(
         paymentMethod = initialSelection.paymentMethod,
     )
 
+    private val selection = savedPaymentMethodLinkFormHelper.state.mapAsStateFlow {
+        initialSelection.withLinkState(it)
+    }
+
+    init {
+        coroutineScope.launch {
+            selection.collectLatest {
+                updateSelection(it)
+            }
+        }
+    }
+
     companion object {
         fun create(
             paymentMethodMetadata: PaymentMethodMetadata,
             initialSelection: PaymentSelection.Saved,
             linkConfigurationCoordinator: LinkConfigurationCoordinator,
             savedStateHandle: SavedStateHandle,
+            updateSelection: (PaymentSelection.Saved) -> Unit,
+            coroutineScope: CoroutineScope,
         ): DefaultSavedPaymentMethodConfirmInteractor {
             return DefaultSavedPaymentMethodConfirmInteractor(
                 initialSelection = initialSelection,
@@ -52,6 +73,8 @@ internal class DefaultSavedPaymentMethodConfirmInteractor(
                     savedStateHandle = savedStateHandle,
                     linkFormElementFactory = DefaultLinkFormElementFactory,
                 ),
+                updateSelection = updateSelection,
+                coroutineScope = coroutineScope,
             )
         }
     }
