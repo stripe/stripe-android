@@ -773,7 +773,7 @@ class LinkController @Inject internal constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        val imageLoader: suspend () -> Drawable,
+        val imageLoader: () -> Drawable,
         val label: String,
         val sublabel: String?,
     ) {

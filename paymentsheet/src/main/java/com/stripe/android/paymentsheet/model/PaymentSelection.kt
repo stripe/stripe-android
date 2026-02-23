@@ -306,27 +306,30 @@ internal sealed class PaymentSelection : Parcelable {
             return StripeTheme.colorsLightMutable.component.luminance() < MIN_LUMINANCE_FOR_LIGHT_ICON
         }
 
+        fun loadResource(
+            @DrawableRes drawableResourceId: Int,
+            @DrawableRes drawableResourceIdNight: Int?,
+        ): Drawable {
+            @Suppress("DEPRECATION")
+            return runCatching {
+                ResourcesCompat.getDrawable(
+                    resources,
+                    if (!isDarkTheme()) drawableResourceId else drawableResourceIdNight ?: drawableResourceId,
+                    null
+                )
+            }.getOrNull() ?: emptyDrawable
+        }
+
         suspend fun load(
             @DrawableRes drawableResourceId: Int,
             @DrawableRes drawableResourceIdNight: Int?,
             lightThemeIconUrl: String?,
             darkThemeIconUrl: String?,
         ): Drawable {
-            fun loadResource(): Drawable {
-                @Suppress("DEPRECATION")
-                return runCatching {
-                    ResourcesCompat.getDrawable(
-                        resources,
-                        if (!isDarkTheme()) drawableResourceId else drawableResourceIdNight ?: drawableResourceId,
-                        null
-                    )
-                }.getOrNull() ?: emptyDrawable
-            }
-
             suspend fun loadIcon(url: String): Drawable {
                 return imageLoader.load(url).getOrNull()?.let {
                     BitmapDrawable(resources, it)
-                } ?: loadResource()
+                } ?: loadResource(drawableResourceId, drawableResourceIdNight)
             }
 
             // If the payment option has an icon URL, we prefer it.
@@ -336,7 +339,7 @@ internal sealed class PaymentSelection : Parcelable {
             } else if (lightThemeIconUrl != null) {
                 loadIcon(lightThemeIconUrl)
             } else {
-                loadResource()
+                loadResource(drawableResourceId, drawableResourceIdNight)
             }
         }
 

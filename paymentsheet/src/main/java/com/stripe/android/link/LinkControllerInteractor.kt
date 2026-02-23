@@ -685,11 +685,9 @@ internal fun PaymentMethodPreviewDetails.toPreview(
 
     return LinkController.PaymentMethodPreview(
         imageLoader = {
-            iconLoader.load(
+            iconLoader.loadResource(
                 drawableResourceId = drawableResourceId,
                 drawableResourceIdNight = null,
-                lightThemeIconUrl = null,
-                darkThemeIconUrl = null,
             )
         },
         label = label,
@@ -714,11 +712,9 @@ internal fun ConsumerPaymentDetails.PaymentDetails.toPreview(
 
     return LinkController.PaymentMethodPreview(
         imageLoader = {
-            iconLoader.load(
+            iconLoader.loadResource(
                 drawableResourceId = drawableResourceId,
                 drawableResourceIdNight = null,
-                lightThemeIconUrl = null,
-                darkThemeIconUrl = null,
             )
         },
         label = label,
