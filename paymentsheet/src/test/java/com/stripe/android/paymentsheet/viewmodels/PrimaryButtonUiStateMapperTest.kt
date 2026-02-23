@@ -406,7 +406,7 @@ class PrimaryButtonUiStateMapperTest {
             ).isEqualTo(
                 resolvableString(
                     id = com.stripe.android.ui.core.R.string.stripe_pay_button_amount,
-                    formatArgs = arrayOf("12,34 \$US")
+                    formatArgs = arrayOf("$12.34")
                 )
             )
             assertThat(item?.lockVisible).isTrue()
