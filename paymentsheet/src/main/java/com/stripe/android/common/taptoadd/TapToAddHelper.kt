@@ -45,7 +45,7 @@ internal interface TapToAddHelper {
     }
 }
 
-internal class DefaultTapToAddHelper constructor(
+internal class DefaultTapToAddHelper(
     private val coroutineScope: CoroutineScope,
     private val productUsage: Set<String>,
     private val paymentElementCallbackIdentifier: String,
