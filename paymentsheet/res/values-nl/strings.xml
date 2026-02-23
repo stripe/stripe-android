@@ -213,6 +213,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Deze kaart opslaan voor toekomstige aankopen bij %s</string>
   <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
   <string name="stripe_paymentsheet_saved">Opgeslagen</string>
+  <!-- Title shown above a view containing a customer's saved card -->
+  <string name="stripe_paymentsheet_saved_card">Opgeslagen betaalkaart</string>
   <!-- Title shown above a view containing the customer's cards -->
   <string name="stripe_paymentsheet_select_card">Betaalkaart selecteren</string>
   <!-- Title shown above a view containing the customer's payment methods -->
