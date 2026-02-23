@@ -11,19 +11,24 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -39,10 +44,7 @@ internal fun TapToAddLayout(
     onCancel: () -> Unit,
 ) {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colors.background)
-            .windowInsetsPadding(WindowInsets.systemBars)
+        modifier = Modifier.fillMaxSize().background(MaterialTheme.colors.background)
     ) {
         SharedTransitionLayout {
             AnimatedContent(
@@ -62,16 +64,34 @@ internal fun TapToAddLayout(
                     )
                 }
 
-                CompositionLocalProvider(LocalSharedElementScope provides scope) {
-                    Column(Modifier.fillMaxSize()) {
-                        Box(Modifier.padding(20.dp).weight(1f)) {
-                            screen.Content()
-                        }
+                BoxWithConstraints {
+                    CompositionLocalProvider(
+                        LocalSharedElementScope provides scope,
+                        LocalTapToAddMaxContentHeight provides maxHeight,
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .imePadding()
+                                .verticalScroll(rememberScrollState())
+                                .windowInsetsPadding(WindowInsets.safeDrawing),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            if (screen.isCentered) {
+                                Spacer(Modifier.weight(1f))
+                            }
 
-                        CancelButton(
-                            button = screen.cancelButton,
-                            onClick = onCancel,
-                        )
+                            Box(Modifier.padding(20.dp)) {
+                                screen.Content()
+                            }
+
+                            Spacer(Modifier.weight(1f))
+
+                            CancelButton(
+                                button = screen.cancelButton,
+                                onClick = onCancel,
+                            )
+                        }
                     }
                 }
             }
@@ -113,5 +133,7 @@ private fun ColumnScope.CancelButton(
         }
     }
 }
+
+internal val LocalTapToAddMaxContentHeight = staticCompositionLocalOf { 0.dp }
 
 private const val ANIMATION_DURATION = 300
