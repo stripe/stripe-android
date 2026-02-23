@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.stripe.android.ui.core.FormUI
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getOuterFormInsets
 
@@ -27,5 +28,14 @@ internal fun SavedPaymentMethodConfirmUI(
             onClick = { },
             trailingContent = { },
         )
+
+        savedPaymentMethodConfirmInteractor.formElement?.let {
+            FormUI(
+                elements = listOf(it),
+                hiddenIdentifiers = emptySet(),
+                lastTextFieldIdentifier = null,
+                enabled = true,
+            )
+        }
     }
 }
