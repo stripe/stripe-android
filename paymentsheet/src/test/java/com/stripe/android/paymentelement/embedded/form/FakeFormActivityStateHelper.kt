@@ -4,6 +4,7 @@ import app.cash.turbine.Turbine
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
 internal class FakeFormActivityStateHelper : FormActivityStateHelper {
     val updateEnabledTurbine = Turbine<Boolean>()
     val updateTurbine = Turbine<ConfirmationHandler.State>()
+    val selectionTurbine = Turbine<PaymentSelection.Saved?>()
 
     override val state: StateFlow<FormActivityStateHelper.State>
         get() = stateFlowOf(
@@ -53,6 +55,10 @@ internal class FakeFormActivityStateHelper : FormActivityStateHelper {
 
     override fun setResult(result: FormResult) {
         resultTurbine.add(result)
+    }
+
+    override fun updateSavedPaymentSelectionToConfirm(selection: PaymentSelection.Saved?) {
+        selectionTurbine.add(selection)
     }
 
     fun validate() {

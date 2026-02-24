@@ -88,7 +88,7 @@ internal class DefaultSavedPaymentMethodConfirmInteractor(
         private val paymentMethodMetadata: PaymentMethodMetadata,
         private val savedPaymentMethodLinkFormHelper: SavedPaymentMethodLinkFormHelper,
         private val coroutineScope: CoroutineScope,
-    ): SavedPaymentMethodConfirmInteractor.Factory {
+    ) : SavedPaymentMethodConfirmInteractor.Factory {
         override fun create(
             initialSelection: PaymentSelection.Saved,
             updateSelection: (PaymentSelection.Saved) -> Unit
@@ -103,6 +103,5 @@ internal class DefaultSavedPaymentMethodConfirmInteractor(
                 coroutineScope = coroutineScope,
             )
         }
-
     }
 }

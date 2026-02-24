@@ -113,6 +113,7 @@ internal interface FormActivityViewModelModule {
         helper: DefaultSavedPaymentMethodLinkFormHelper
     ): SavedPaymentMethodLinkFormHelper
 
+    @Suppress("TooManyFunctions")
     companion object {
         @Provides
         fun providesContext(application: Application): Context {

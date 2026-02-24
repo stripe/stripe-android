@@ -131,7 +131,7 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
 
     override fun updateSavedPaymentSelectionToConfirm(selection: PaymentSelection.Saved?) {
         _state.update {
-            it.copy(savedPaymentSelectionToConfirm =  selection)
+            it.copy(savedPaymentSelectionToConfirm = selection)
         }
     }
 
