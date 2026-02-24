@@ -106,5 +106,10 @@ data class CheckoutSessionResponse(
          * The customer's saved payment methods.
          */
         val paymentMethods: List<PaymentMethod>,
+        /**
+         * Whether the customer has permission to detach saved payment methods.
+         * Defaults to false when not present in the response.
+         */
+        val canDetachPaymentMethod: Boolean,
     ) : StripeModel
 }

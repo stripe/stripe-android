@@ -128,7 +128,8 @@ internal class CheckoutSessionResponseJsonParser(
      * {
      *   "customer": {
      *     "id": "cus_xxx",
-     *     "payment_methods": [...]
+     *     "payment_methods": [...],
+     *     "can_detach_payment_method": true
      *   }
      * }
      * ```
@@ -145,10 +146,12 @@ internal class CheckoutSessionResponseJsonParser(
                 PaymentMethodJsonParser().parse(pmsJson.optJSONObject(index))
             }
         } ?: emptyList()
+        val canDetachPaymentMethod = json.optBoolean(FIELD_CAN_DETACH_PAYMENT_METHOD, false)
 
         return CheckoutSessionResponse.Customer(
             id = customerId,
             paymentMethods = paymentMethods,
+            canDetachPaymentMethod = canDetachPaymentMethod,
         )
     }
 
@@ -194,6 +197,7 @@ internal class CheckoutSessionResponseJsonParser(
         private const val FIELD_CUSTOMER = "customer"
         private const val FIELD_CUSTOMER_ID = "id"
         private const val FIELD_PAYMENT_METHODS = "payment_methods"
+        private const val FIELD_CAN_DETACH_PAYMENT_METHOD = "can_detach_payment_method"
         private const val FIELD_SAVED_PAYMENT_METHODS_OFFER_SAVE =
             "customer_managed_saved_payment_methods_offer_save"
         private const val FIELD_OFFER_SAVE_ENABLED = "enabled"
