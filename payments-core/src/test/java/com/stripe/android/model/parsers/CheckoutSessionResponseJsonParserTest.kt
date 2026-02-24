@@ -280,4 +280,70 @@ class CheckoutSessionResponseJsonParserTest {
         assertThat(result).isNotNull()
         assertThat(result?.savedPaymentMethodsOfferSave).isNull()
     }
+
+    @Test
+    fun `parse customer with can_detach_payment_method true`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_abc123",
+                "currency": "usd",
+                "total_summary": {
+                    "due": 1000
+                },
+                "customer": {
+                    "id": "cus_test_customer",
+                    "payment_methods": [],
+                    "can_detach_payment_method": true
+                },
+                "elements_session": ${CheckoutSessionFixtures.MINIMAL_ELEMENTS_SESSION_JSON}
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+
+        assertThat(result).isNotNull()
+        val customer = result?.customer
+        assertThat(customer).isNotNull()
+        assertThat(customer?.canDetachPaymentMethod).isTrue()
+    }
+
+    @Test
+    fun `parse customer with can_detach_payment_method false`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_abc123",
+                "currency": "usd",
+                "total_summary": {
+                    "due": 1000
+                },
+                "customer": {
+                    "id": "cus_test_customer",
+                    "payment_methods": [],
+                    "can_detach_payment_method": false
+                },
+                "elements_session": ${CheckoutSessionFixtures.MINIMAL_ELEMENTS_SESSION_JSON}
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+
+        assertThat(result).isNotNull()
+        val customer = result?.customer
+        assertThat(customer).isNotNull()
+        assertThat(customer?.canDetachPaymentMethod).isFalse()
+    }
+
+    @Test
+    fun `parse customer without can_detach_payment_method defaults to false`() {
+        // Use existing fixture that doesn't have can_detach_payment_method field
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_CUSTOMER_JSON)
+
+        assertThat(result).isNotNull()
+        val customer = result?.customer
+        assertThat(customer).isNotNull()
+        assertThat(customer?.canDetachPaymentMethod).isFalse()
+    }
 }
