@@ -49,6 +49,7 @@ internal class IntentConfirmationChallengeActivity : AppCompatActivity() {
 
             IntentConfirmationChallengeUI(
                 hostUrl = HOST_URL,
+                userAgent = viewModel.userAgent,
                 bridgeHandler = viewModel.bridgeHandler,
                 showProgressIndicator = showProgressIndicator,
                 webViewClientFactory = {
