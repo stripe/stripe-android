@@ -49,7 +49,7 @@ ext.versions = [
         ktlint                      : '1.8.0',
         layoutlib                   : '16.2.2',
         leakCanary                  : '2.14',
-        material                    : '1.12.0',
+        material                    : '1.13.0',
         mockito                     : '5.21.0',
         mockitoInline               : '5.2.0',
         mockitoKotlin               : '6.2.3',
