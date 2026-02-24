@@ -4,13 +4,21 @@ android {
     buildFeatures {
         buildConfig = false
     }
+    packaging {
+        jniLibs {
+            // Exclude the OpenCL GPU accelerator from LiteRT 2.x — identity ML uses CPU inference.
+            excludes += '**/libLiteRtOpenClAccelerator.so'
+        }
+    }
 }
 
 dependencies {
     api project(':ml-core:base')
     implementation libs.androidx.annotation
     implementation libs.litert
-    api libs.litertSupport
+    api(libs.litertSupport) {
+        exclude group: 'com.google.ai.edge.litert', module: 'litert-api'
+    }
 }
 
 ext {

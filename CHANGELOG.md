@@ -24,7 +24,7 @@ Dependencies updated in [12373](https://github.com/stripe/stripe-android/pull/12
 - Bumped androidx.webkit from 1.14.0 to 1.15.0.
 - Bumped Google Places from 5.0.0 to 5.1.1.
 - Bumped Play Services Wallet from 19.4.0 to 19.5.0.
-- Bumped LiteRT from 1.4.0 to 1.4.1.
+- Bumped LiteRT from 1.4.0 to 2.1.1.
 - Bumped WorkManager from 2.9.0 to 2.11.1.
 - Bumped Material from 1.12.0 to 1.13.0.
 
