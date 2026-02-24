@@ -3,6 +3,7 @@ package com.stripe.android.payments
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
@@ -22,8 +23,9 @@ class PaymentFlowFailureMessageFactoryTest {
     fun `create() with PaymentIntent with requiresAction on a card`() {
         assertThat(
             factory.create(
-                PaymentIntentJsonParser().parse(PaymentIntentFixtures.EXPANDED_PAYMENT_METHOD_JSON)!!,
-                StripeIntentResult.Outcome.FAILED
+                intent = PaymentIntentJsonParser().parse(PaymentIntentFixtures.EXPANDED_PAYMENT_METHOD_JSON)!!,
+                requestId = null,
+                outcome = StripeIntentResult.Outcome.FAILED
             )
         ).isEqualTo(
             "We are unable to authenticate your payment method. Please choose a different payment method and try again."
@@ -34,8 +36,9 @@ class PaymentFlowFailureMessageFactoryTest {
     fun `create() with PaymentIntent with requiresAction on oxxo`() {
         assertThat(
             factory.create(
-                PaymentIntentJsonParser().parse(PaymentIntentFixtures.OXXO_REQUIRES_ACTION_JSON)!!,
-                StripeIntentResult.Outcome.FAILED
+                intent = PaymentIntentJsonParser().parse(PaymentIntentFixtures.OXXO_REQUIRES_ACTION_JSON)!!,
+                requestId = null,
+                outcome = StripeIntentResult.Outcome.FAILED
             )
         ).isNull()
     }
@@ -44,8 +47,9 @@ class PaymentFlowFailureMessageFactoryTest {
     fun `create() with PaymentIntent with lastPaymentError`() {
         assertThat(
             factory.create(
-                PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR,
-                StripeIntentResult.Outcome.FAILED
+                intent = PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR,
+                requestId = null,
+                outcome = StripeIntentResult.Outcome.FAILED
             )
         ).isEqualTo(
             "We are unable to authenticate your payment method. Please choose a different payment method and try again."
@@ -56,10 +60,11 @@ class PaymentFlowFailureMessageFactoryTest {
     fun `create() with SetupIntent with lastPaymentError`() {
         assertThat(
             factory.create(
-                SetupIntentFixtures.SI_WITH_LAST_PAYMENT_ERROR.copy(
+                intent = SetupIntentFixtures.SI_WITH_LAST_PAYMENT_ERROR.copy(
                     status = StripeIntent.Status.RequiresPaymentMethod
                 ),
-                StripeIntentResult.Outcome.FAILED
+                requestId = null,
+                outcome = StripeIntentResult.Outcome.FAILED
             )
         ).isEqualTo(
             "We are unable to authenticate your payment method. Please choose a different payment method and try again."
@@ -70,11 +75,37 @@ class PaymentFlowFailureMessageFactoryTest {
     fun `create() with timed out outcome`() {
         assertThat(
             factory.create(
-                SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT,
-                StripeIntentResult.Outcome.TIMEDOUT
+                intent = SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT,
+                requestId = null,
+                outcome = StripeIntentResult.Outcome.TIMEDOUT
             )
         ).isEqualTo(
             "Timed out authenticating your payment method -- try again"
+        )
+    }
+
+    @Test
+    fun `create() uses requestId with default messaging in live mode`() {
+        assertThat(
+            factory.create(
+                intent = PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR.copy(
+                    lastPaymentError = PaymentIntent.Error(
+                        code = "generic_deline",
+                        declineCode = null,
+                        charge = null,
+                        docUrl = null,
+                        paymentMethod = null,
+                        param = null,
+                        message = "Server error",
+                        type = PaymentIntent.Error.Type.ApiError,
+                    ),
+                    isLiveMode = true
+                ),
+                requestId = "req_abc123",
+                outcome = StripeIntentResult.Outcome.FAILED
+            )
+        ).isEqualTo(
+            "Something went wrong. req_abc123"
         )
     }
 }
