@@ -236,7 +236,8 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                     hasSavedPaymentMethods = customerStateHolder.paymentMethods.value.any {
                         it.type?.code == code
                     },
-                    embeddedConfirmationState = confirmationStateHolder.state
+                    embeddedConfirmationState = confirmationStateHolder.state,
+                    customerState = customerStateHolder.customer.value,
                 )
             },
             paymentMethods = customerStateHolder.paymentMethods,

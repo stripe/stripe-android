@@ -87,7 +87,6 @@ class ExternalPaymentMethodsRepositoryTest {
             "3x-26040e151c8f87187da2f997791fcc31.png",
         lightImageUrl = "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-paypal@" +
             "3x-5227ab4fca3d36846bd6622f495cdf4b.png",
-
     )
 
     private val VENMO_EXTERNAL_PAYMENT_METHOD_DATA = """

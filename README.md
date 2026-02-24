@@ -72,6 +72,8 @@ dependencies {
 
 ### Compatibility with Jetpack Compose
 
+To ensure broad compatibility across the ecosystem, `stripe-android` updates its dependencies (including Jetpack Compose) to their latest versions on a monthly basis.
+
 `stripe-android` uses Jetpack Compose internally and expects consumers to use a compatible version:
 
 <table>
@@ -82,7 +84,13 @@ dependencies {
   <td>20.32.0-20.53.0</td><td>Compose UI 1.5.x</td>
  </tr>
  <tr>
-  <td>21.0.0-Current</td><td>Compose UI 1.6.x or Compose UI 1.7.x</td>
+  <td>21.0.0-22.6.1</td><td>Compose UI 1.6.x or Compose UI 1.7.x or Compose UI 1.8.x</td>
+ </tr>
+ <tr>
+  <td>22.7.0-22.8.1</td><td>Compose UI 1.9.x</td>
+ </tr>
+ <tr>
+  <td>23.0.0-Current</td><td>Compose UI 1.10.x</td>
  </tr>
 </table>
 

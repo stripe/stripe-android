@@ -11,6 +11,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.Initializatio
 import com.stripe.android.paymentsheet.example.playground.settings.Merchant
 import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.test.core.TestParameters
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -21,6 +22,7 @@ import org.junit.runner.RunWith
  * the checkout session API (/v1/payment_pages/{cs_id}/init and /confirm).
  */
 @RunWith(AndroidJUnit4::class)
+@Ignore("#ir-tallest-solar")
 internal class TestCheckoutSession : BasePlaygroundTest() {
 
     private val testParameters = TestParameters.create(
@@ -49,7 +51,9 @@ internal class TestCheckoutSession : BasePlaygroundTest() {
     @Test
     fun testCardPaymentWithCheckoutSession() {
         testDriver.confirmNewOrGuestComplete(
-            testParameters,
+            testParameters.copy(
+                saveForFutureUseCheckboxVisible = true,
+            ),
             populateCustomLpmFields = {
                 populateCardDetails()
             },

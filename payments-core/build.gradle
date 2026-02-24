@@ -107,18 +107,23 @@ android {
             }
         }
 
-        kotlinOptions {
-            freeCompilerArgs += [
+    }
+
+    kotlin {
+        compilerOptions {
+            freeCompilerArgs.addAll([
                     "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
-                    "-Xcontext-receivers",
+                    "-Xcontext-parameters",
+                    "-Xannotation-default-target=param-property",
                     "-Xconsistent-data-class-copy-visibility",
-            ]
+            ])
         }
     }
 
     buildFeatures {
         compose = true
         viewBinding true
+        buildConfig = true
     }
 
     packagingOptions {

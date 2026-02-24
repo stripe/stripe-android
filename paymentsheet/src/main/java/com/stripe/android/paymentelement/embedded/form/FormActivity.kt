@@ -9,7 +9,9 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
+import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.uicore.StripeTheme
@@ -41,6 +43,9 @@ internal class FormActivity : AppCompatActivity() {
 
     @Inject
     lateinit var confirmationHelper: FormActivityConfirmationHelper
+
+    @Inject
+    lateinit var customerStateHolder: CustomerStateHolder
 
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -91,13 +96,31 @@ internal class FormActivity : AppCompatActivity() {
     }
 
     private fun setCompletedResultAndDismiss() {
-        setFormResult(FormResult.Complete(selection = null, hasBeenConfirmed = true))
+        setFormResult(
+            FormResult.Complete(
+                selection = null,
+                hasBeenConfirmed = true,
+                customerState = getCustomerState(),
+            )
+        )
         finish()
     }
 
     private fun setCancelAndFinish() {
-        setFormResult(FormResult.Cancelled)
+        setFormResult(
+            FormResult.Cancelled(
+                customerState = getCustomerState(),
+            )
+        )
         finish()
+    }
+
+    private fun getCustomerState(): CustomerState? {
+        return if (::customerStateHolder.isInitialized) {
+            customerStateHolder.customer.value
+        } else {
+            null
+        }
     }
 
     override fun finish() {

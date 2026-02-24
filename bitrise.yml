@@ -65,6 +65,8 @@ stages:
       - notify-connections-e2e-failure: { }
 workflows:
   check:
+    envs:
+      - JAVA_VERSION: 22
     before_run:
       - prepare_all
     after_run:
@@ -421,11 +423,12 @@ workflows:
       - activate-ssh-key@4:
           run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
       - git-clone@8: { }
+      - script@1:
+          title: Install Java via Direct Download
+          inputs:
+            - content: ./scripts/retry.sh 3 ./scripts/install_java.sh
       - restore-gradle-configuration-cache@1: { }
       - restore-gradle-cache@2: { }
-      - set-java-version@1:
-          inputs:
-            - set_java_version: 21
       - script@1:
           inputs:
             - content: mkdir -p ~/.gradle ; cp .bitrise/ci-gradle.properties ~/.gradle/gradle.properties

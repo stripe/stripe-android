@@ -8,19 +8,24 @@ import androidx.core.os.BundleCompat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
 internal sealed interface FormResult : Parcelable {
+    val customerState: CustomerState?
 
     @Parcelize
     data class Complete(
         val selection: PaymentSelection?,
         val hasBeenConfirmed: Boolean,
+        override val customerState: CustomerState?,
     ) : FormResult
 
     @Parcelize
-    object Cancelled : FormResult
+    data class Cancelled(
+        override val customerState: CustomerState?
+    ) : FormResult
 
     companion object {
         internal const val EXTRA_RESULT = ActivityStarter.Result.EXTRA
@@ -34,7 +39,7 @@ internal sealed interface FormResult : Parcelable {
                 BundleCompat.getParcelable(bundle, EXTRA_RESULT, FormResult::class.java)
             }
 
-            return result ?: Cancelled
+            return result ?: Cancelled(customerState = null)
         }
     }
 }
@@ -60,6 +65,7 @@ internal object FormContract : ActivityResultContract<FormContract.Args, FormRes
         val paymentElementCallbackIdentifier: String,
         val statusBarColor: Int?,
         val paymentSelection: PaymentSelection?,
+        val customerState: CustomerState?,
     ) : Parcelable {
         companion object {
             fun fromIntent(intent: Intent): Args? {

@@ -23,9 +23,7 @@ class SourceParams internal constructor(
      * The type of the source to create.
      */
     @SourceType val typeRaw: String,
-
     internal var typeData: TypeData? = null,
-
     /**
      * Amount associated with the source. This is the amount for which the source will
      * be chargeable once ready. Required for `single_use` sources. Not supported for `receiver`
@@ -34,7 +32,6 @@ class SourceParams internal constructor(
      * See [amount](https://stripe.com/docs/api/sources/create#create_source-amount)
      */
     var amount: Long? = null,
-
     /**
      * Three-letter ISO code for the currency associated with the source.
      * This is the currency for which the source will be chargeable once ready.
@@ -42,13 +39,11 @@ class SourceParams internal constructor(
      * See [currency](https://stripe.com/docs/api/sources/create#create_source-currency)
      */
     var currency: String? = null,
-
     /**
      * Information about the owner of the payment instrument that may be used or required by
      * particular source types.
      */
     var owner: OwnerParams? = null,
-
     /**
      * Either `reusable` or `single_use`. Whether this source should be reusable or not.
      * Some source types may or may not be reusable by construction, while others may leave the
@@ -57,7 +52,6 @@ class SourceParams internal constructor(
      * See [usage](https://stripe.com/docs/api/sources/create#create_source-usage)
      */
     var usage: Source.Usage? = null,
-
     /**
      * Information about the items and shipping associated with the source. Required for
      * transactional credit (for example Klarna) sources before you can charge it.
@@ -65,7 +59,6 @@ class SourceParams internal constructor(
      * See [source_order](https://stripe.com/docs/api/sources/create#create_source-source_order)
      */
     var sourceOrder: SourceOrderParams? = null,
-
     /**
      * An optional token used to create the source. When passed, token properties will
      * override source parameters.
@@ -73,15 +66,12 @@ class SourceParams internal constructor(
      * See [token](https://stripe.com/docs/api/sources/create#create_source-token)
      */
     var token: String? = null,
-
     /**
      * Set of key-value pairs that you can attach to an object. This can be useful for storing
      * additional information about the object in a structured format.
      */
     var metadata: Map<String, String>? = null,
-
     private var apiParams: ApiParams = ApiParams(),
-
     /**
      * A set of identifiers representing the component that created this instance.
      */
@@ -371,7 +361,6 @@ class SourceParams internal constructor(
              * The [number] of this card
              */
             val number: String? = null,
-
             /**
              * Two-digit number representing the card’s expiration month.
              *
@@ -379,14 +368,12 @@ class SourceParams internal constructor(
              */
             @get:IntRange(from = 1, to = 12)
             val expMonth: Int?,
-
             /**
              * Four-digit number representing the card’s expiration year.
              *
              * See [API Reference](https://stripe.com/docs/api/cards/object#card_object-exp_year).
              */
             val expYear: Int?,
-
             /**
              * The [cvc] for this card
              */

@@ -45,7 +45,6 @@ constructor(
     private val metadata: Map<String, String>? = null,
     private val productUsage: Set<String> = emptySet(),
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val clientAttributionMetadata: ClientAttributionMetadata? = null,
-
     /**
      * If provided, will be used as the representation of this object when calling the Stripe API,
      * instead of generating the map from its content.
@@ -600,7 +599,6 @@ constructor(
          * The bank account number (e.g. 00012345)
          */
         var accountNumber: String,
-
         /**
          * The sort code of the bank account (e.g. 10-88-00)
          */

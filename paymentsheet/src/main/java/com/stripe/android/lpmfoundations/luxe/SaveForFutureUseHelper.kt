@@ -20,21 +20,23 @@ internal fun isSaveForFutureUseValueChangeable(
     return isSaveForFutureUseValueChangeable(
         code = code,
         intent = metadata.stripeIntent,
-        paymentMethodSaveConsentBehavior = metadata.paymentMethodSaveConsentBehavior,
+        paymentMethodSaveConsentBehavior = metadata.customerMetadata?.permissions?.saveConsent,
         hasCustomerConfiguration = metadata.customerMetadata != null,
     )
 }
 
 internal fun isSaveForFutureUseValueChangeable(
     code: PaymentMethodCode,
-    paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
+    paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior?,
     intent: StripeIntent,
     hasCustomerConfiguration: Boolean,
 ): Boolean {
     return when (paymentMethodSaveConsentBehavior) {
         is PaymentMethodSaveConsentBehavior.Disabled -> false
         is PaymentMethodSaveConsentBehavior.Enabled -> hasCustomerConfiguration
-        is PaymentMethodSaveConsentBehavior.Legacy -> {
+        // PaymentMethodSaveConsentBehavior is null in guest mode (no customer). Fall back to Legacy
+        // to let SaveForFutureUseHelper decide based on intent + customer config.
+        is PaymentMethodSaveConsentBehavior.Legacy, null -> {
             when (intent) {
                 is PaymentIntent -> {
                     val isSetupFutureUsageSet = intent.isSetupFutureUsageSet(code)

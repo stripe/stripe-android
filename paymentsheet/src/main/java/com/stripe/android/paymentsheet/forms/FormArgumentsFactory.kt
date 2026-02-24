@@ -19,7 +19,7 @@ internal object FormArgumentsFactory {
             billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration,
             cbcEligibility = metadata.cbcEligibility,
             hasIntentToSetup = metadata.hasIntentToSetup(paymentMethodCode),
-            paymentMethodSaveConsentBehavior = metadata.paymentMethodSaveConsentBehavior,
+            paymentMethodSaveConsentBehavior = metadata.customerMetadata?.permissions?.saveConsent
         )
     }
 }

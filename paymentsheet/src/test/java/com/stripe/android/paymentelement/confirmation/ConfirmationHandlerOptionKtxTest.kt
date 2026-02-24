@@ -189,6 +189,38 @@ class ConfirmationHandlerOptionKtxTest {
     }
 
     @Test
+    fun `On saved selection with link input and link configuration, should convert to saved link option`() {
+        val userInput = UserInput.SignUp(
+            email = "email@email.com",
+            phone = "1234567890",
+            name = "John Doe",
+            country = "CA",
+            consentAction = SignUpConsentAction.Checkbox,
+        )
+
+        val paymentSelection = PaymentSelection.Saved(
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(cvc = "505"),
+            linkInput = userInput,
+        )
+
+        assertThat(
+            paymentSelection.toConfirmationOption(
+                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+                linkConfiguration = LINK_CONFIGURATION,
+                cardFundingFilter = DefaultCardFundingFilter
+            )
+        ).isEqualTo(
+            LinkInlineSignupConfirmationOption.Saved(
+                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                optionsParams = PaymentMethodOptionsParams.Card(cvc = "505"),
+                linkConfiguration = LINK_CONFIGURATION,
+                userInput = userInput,
+            )
+        )
+    }
+
+    @Test
     fun `On EPM selection, should convert to EPM confirmation option properly`() {
         val paymentSelection = PaymentSelection.ExternalPaymentMethod(
             type = "paypal",
@@ -439,8 +471,8 @@ class ConfirmationHandlerOptionKtxTest {
             cardFundingFilter = DefaultCardFundingFilter,
         )
 
-        assertThat(confirmationOption).isInstanceOf<LinkInlineSignupConfirmationOption>()
-        val linkConfirmationOption = confirmationOption as LinkInlineSignupConfirmationOption
+        assertThat(confirmationOption).isInstanceOf<LinkInlineSignupConfirmationOption.New>()
+        val linkConfirmationOption = confirmationOption as LinkInlineSignupConfirmationOption.New
         assertThat(linkConfirmationOption.extraParams).isEqualTo(paymentMethodExtraParams)
     }
 
@@ -570,7 +602,7 @@ class ConfirmationHandlerOptionKtxTest {
                     cardFundingFilter = DefaultCardFundingFilter,
                 )
         ).isEqualTo(
-            LinkInlineSignupConfirmationOption(
+            LinkInlineSignupConfirmationOption.New(
                 createParams = paymentMethodCreateParams,
                 optionsParams = null,
                 extraParams = null,

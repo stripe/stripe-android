@@ -500,7 +500,7 @@ internal class LinkActivityViewModelTest {
 
         vm.onCreate(mock())
 
-        assertThat(vm.linkScreenState.value).isEqualTo(ScreenState.Loading)
+        assertThat(vm.linkScreenState.value).isEqualTo(ScreenState.FullScreen(initialDestination = LinkScreen.Loading))
 
         assertThat(launchWebConfig).isNotNull()
     }
@@ -575,7 +575,7 @@ internal class LinkActivityViewModelTest {
         linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification())
 
         vm.linkScreenState.test {
-            assertThat(awaitItem()).isEqualTo(ScreenState.Loading)
+            assertThat(awaitItem()).isEqualTo(ScreenState.FullScreen(initialDestination = LinkScreen.Loading))
             vm.onCreate(mock())
             assertThat(awaitItem()).isEqualTo(ScreenState.VerificationDialog(TestFactory.LINK_ACCOUNT))
 

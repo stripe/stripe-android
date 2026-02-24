@@ -11,6 +11,7 @@ internal object PaymentMethodMetadataFixtures {
 
     internal val DEFAULT_CUSTOMER_METADATA_PERMISSIONS = CustomerMetadata.Permissions(
         removePaymentMethod = PaymentMethodRemovePermission.Full,
+        saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
         canRemoveLastPaymentMethod = true,
         canRemoveDuplicates = true,
         canUpdateFullPaymentMethodDetails = false,

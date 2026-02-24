@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import app.cash.turbine.Turbine
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.state.CustomerState
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
 
@@ -53,5 +54,12 @@ internal class FakeCustomerStateHolder : CustomerStateHolder {
         setCustomerStateCalls.ensureAllEventsConsumed()
         setDefaultPaymentMethodCalls.ensureAllEventsConsumed()
         updateMostRecentlySelectedSavedPaymentMethodCalls.ensureAllEventsConsumed()
+        addPaymentMethodTurbine.ensureAllEventsConsumed()
+    }
+
+    class Factory : CustomerStateHolder.Factory {
+        override fun create(viewModel: BaseSheetViewModel): CustomerStateHolder {
+            return FakeCustomerStateHolder()
+        }
     }
 }

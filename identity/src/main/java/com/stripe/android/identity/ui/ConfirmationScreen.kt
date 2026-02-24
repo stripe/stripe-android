@@ -84,7 +84,6 @@ internal fun ConfirmationScreen(
                         .clip(RoundedCornerShape(10.dp))
                         .background(MaterialTheme.colors.primary),
                     contentAlignment = Alignment.Center
-
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.stripe_clock_icon),

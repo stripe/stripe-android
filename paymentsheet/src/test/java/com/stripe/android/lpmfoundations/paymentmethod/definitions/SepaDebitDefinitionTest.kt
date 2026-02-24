@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.model.PaymentIntentFixtures
@@ -68,7 +69,9 @@ class SepaDebitDefinitionTest {
                 stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodTypes = listOf("sepa_debit")
                 ),
-                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
+                customerMetadataPermissions = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS.copy(
+                    saveConsent = PaymentMethodSaveConsentBehavior.Enabled
+                ),
                 hasCustomerConfiguration = true
             )
         )

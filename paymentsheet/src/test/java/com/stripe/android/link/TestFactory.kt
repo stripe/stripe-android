@@ -175,7 +175,7 @@ internal object TestFactory {
         encodedPaymentMethod = "{\"id\": \"pm_123\"}",
     )
 
-    val LINK_SAVED_PAYMENT_DETAILS = LinkPaymentDetails.Saved(
+    val LINK_PASSTHROUGH_PAYMENT_DETAILS = LinkPaymentDetails.Passthrough(
         paymentDetails = CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
         paymentMethod = PaymentMethod.Builder()
             .setId(CONSUMER_PAYMENT_DETAILS_PASSTHROUGH.paymentMethodId)
@@ -189,7 +189,7 @@ internal object TestFactory {
             .build(),
     )
 
-    val LINK_SAVED_PAYMENT_DETAILS_WITH_BILLING = LinkPaymentDetails.Saved(
+    val LINK_PASSTHROUGH_PAYMENT_DETAILS_WITH_BILLING = LinkPaymentDetails.Passthrough(
         paymentDetails = CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
         paymentMethod = PaymentMethod.Builder()
             .setId(CONSUMER_PAYMENT_DETAILS_PASSTHROUGH.paymentMethodId)

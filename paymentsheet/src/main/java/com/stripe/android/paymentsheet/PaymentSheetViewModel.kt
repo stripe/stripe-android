@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.analytics.SessionSavedStateHandler
@@ -17,7 +18,7 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddMode
-import com.stripe.android.common.taptoadd.TapToAddResult
+import com.stripe.android.common.taptoadd.TapToAddNextStep
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
@@ -77,7 +78,7 @@ import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 @Singleton
-internal class PaymentSheetViewModel internal constructor(
+internal class PaymentSheetViewModel @Inject internal constructor(
     // Properties provided through PaymentSheetViewModelComponent.Builder
     internal val args: PaymentSheetContract.Args,
     eventReporter: EventReporter,
@@ -94,7 +95,7 @@ internal class PaymentSheetViewModel internal constructor(
     private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory,
     tapToAddHelperFactory: TapToAddHelper.Factory,
     mode: EventReporter.Mode,
-    initialCustomerStateHolder: CustomerStateHolder?,
+    customerStateHolderFactory: CustomerStateHolder.Factory,
 ) : BaseSheetViewModel(
     config = args.config,
     eventReporter = eventReporter,
@@ -105,43 +106,8 @@ internal class PaymentSheetViewModel internal constructor(
     cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
     isCompleteFlow = true,
     mode = mode,
-    customerStateHolder = initialCustomerStateHolder,
+    customerStateHolderFactory = customerStateHolderFactory,
 ) {
-
-    @Inject internal constructor(
-        args: PaymentSheetContract.Args,
-        eventReporter: EventReporter,
-        paymentElementLoader: PaymentElementLoader,
-        customerRepository: CustomerRepository,
-        logger: Logger,
-        @IOContext workContext: CoroutineContext,
-        savedStateHandle: SavedStateHandle,
-        linkHandler: LinkHandler,
-        confirmationHandlerFactory: ConfirmationHandler.Factory,
-        cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
-        errorReporter: ErrorReporter,
-        cvcRecollectionHandler: CvcRecollectionHandler,
-        cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory,
-        tapToAddHelperFactory: TapToAddHelper.Factory,
-        mode: EventReporter.Mode,
-    ) : this(
-        args = args,
-        eventReporter = eventReporter,
-        paymentElementLoader = paymentElementLoader,
-        customerRepository = customerRepository,
-        logger = logger,
-        workContext = workContext,
-        savedStateHandle = savedStateHandle,
-        linkHandler = linkHandler,
-        confirmationHandlerFactory = confirmationHandlerFactory,
-        cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
-        errorReporter = errorReporter,
-        cvcRecollectionHandler = cvcRecollectionHandler,
-        cvcRecollectionInteractorFactory = cvcRecollectionInteractorFactory,
-        tapToAddHelperFactory = tapToAddHelperFactory,
-        mode = mode,
-        initialCustomerStateHolder = null,
-    )
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
         config = config,
@@ -163,6 +129,8 @@ internal class PaymentSheetViewModel internal constructor(
     override val tapToAddHelper = tapToAddHelperFactory.create(
         coroutineScope = viewModelScope,
         tapToAddMode = TapToAddMode.Complete,
+        updateSelection = ::updateSelection,
+        customerStateHolder = customerStateHolder,
     )
 
     private val _paymentSheetResult = MutableSharedFlow<PaymentSheetResult>(replay = 1)
@@ -277,18 +245,25 @@ internal class PaymentSheetViewModel internal constructor(
         }
 
         viewModelScope.launch {
-            tapToAddHelper.result.collect { result ->
+            tapToAddHelper.nextStep.collect { result ->
                 when (result) {
-                    is TapToAddResult.Canceled -> {
-                        result.paymentSelection?.let { paymentSelection ->
-                            customerStateHolder.addPaymentMethod(paymentSelection.paymentMethod)
-                            updateSelection(paymentSelection)
-                        }
+                    is TapToAddNextStep.ConfirmSavedPaymentMethod -> {
+                        val paymentMethodMetadata = paymentMethodMetadata.value ?: return@collect
+                        val savedPaymentMethodConfirmScreen = PaymentSheetScreen.SavedPaymentMethodConfirm.create(
+                            paymentMethodMetadata = paymentMethodMetadata,
+                            initialSelection = result.paymentSelection,
+                            viewModel = this@PaymentSheetViewModel,
+                        )
+                        val newScreens = determineInitialBackStack(
+                            paymentMethodMetadata,
+                            customerStateHolder,
+                        ).plus(savedPaymentMethodConfirmScreen)
+                        navigationHandler.resetTo(newScreens)
                     }
-                    TapToAddResult.Complete -> {
+                    TapToAddNextStep.Complete -> {
                         _paymentSheetResult.tryEmit(PaymentSheetResult.Completed())
                     }
-                    is TapToAddResult.Continue -> {
+                    is TapToAddNextStep.Continue -> {
                         errorReporter.report(
                             ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_PAYMENT_SHEET_RECEIVED_CONTINUE_RESULT,
                         )

@@ -95,4 +95,10 @@ internal class DefaultCustomerStateHolder(
             )
         }
     }
+
+    object Factory : CustomerStateHolder.Factory {
+        override fun create(viewModel: BaseSheetViewModel): CustomerStateHolder {
+            return DefaultCustomerStateHolder.create(viewModel)
+        }
+    }
 }

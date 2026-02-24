@@ -604,7 +604,6 @@ internal class DefaultHCaptchaServiceTest {
                     hCaptchaProvider = hCaptchaProvider,
                     service = service,
                     captchaEventsReporter = captchaEventsReporter
-
                 ).apply { block(this) }
             }
         }

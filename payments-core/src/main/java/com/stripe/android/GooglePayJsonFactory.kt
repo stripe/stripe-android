@@ -26,19 +26,16 @@ import javax.inject.Singleton
 @Singleton
 class GooglePayJsonFactory internal constructor(
     private val googlePayConfig: GooglePayConfig,
-
     /**
      * Enable JCB as an allowed card network. By default, JCB is disabled.
      *
      * JCB currently can only be accepted in Japan.
      */
     private val isJcbEnabled: Boolean = false,
-
     /**
      * Enable additional networks, e.g. INTERAC
      */
     private val additionalEnabledNetworks: List<String> = emptyList(),
-
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
     private val cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter
 ) {
@@ -48,14 +45,12 @@ class GooglePayJsonFactory internal constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         context: Context,
-
         /**
          * Enable JCB as an allowed card network. By default, JCB is disabled.
          *
          * JCB currently can only be accepted in Japan.
          */
         isJcbEnabled: Boolean = false,
-
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
         cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
         additionalEnabledNetworks: List<String> = emptyList()
@@ -68,7 +63,6 @@ class GooglePayJsonFactory internal constructor(
 
     constructor(
         context: Context,
-
         /**
          * Enable JCB as an allowed card network. By default, JCB is disabled.
          *
@@ -84,14 +78,12 @@ class GooglePayJsonFactory internal constructor(
 
     constructor(
         googlePayConfig: GooglePayConfig,
-
         /**
          * Enable JCB as an allowed card network. By default, JCB is disabled.
          *
          * JCB currently can only be accepted in Japan.
          */
         isJcbEnabled: Boolean = false,
-
         /**
          * Enable additional networks, e.g. INTERAC
          */
@@ -128,14 +120,12 @@ class GooglePayJsonFactory internal constructor(
          * Configure additional fields to be returned for a requested billing address.
          */
         billingAddressParameters: BillingAddressParameters? = null,
-
         /**
          * If set to true, then the `isReadyToPay()` class method will return `true` if the current
          * viewer is ready to pay with one or more payment methods specified in
          * `allowedPaymentMethods`.
          */
         existingPaymentMethodRequired: Boolean? = null,
-
         /**
          * Set to false if you don't support credit cards
          */
@@ -172,28 +162,23 @@ class GooglePayJsonFactory internal constructor(
          * the transaction or not. Includes total price and price status.
          */
         transactionInfo: TransactionInfo,
-
         /**
          * Configure additional fields to be returned for a requested billing address.
          */
         billingAddressParameters: BillingAddressParameters? = null,
-
         /**
          * Specify shipping address restrictions.
          */
         shippingAddressParameters: ShippingAddressParameters? = null,
-
         /**
          * Set to true to request an email address.
          */
         isEmailRequired: Boolean = false,
-
         /**
          * Merchant name encoded as UTF-8. Merchant name is rendered in the payment sheet.
          * In TEST environment, or if a merchant isn't recognized, a “Pay Unverified Merchant” message is displayed in the payment sheet.
          */
         merchantInfo: MerchantInfo? = null,
-
         /**
          * Set to false if you don't support credit cards
          */
@@ -372,12 +357,10 @@ class GooglePayJsonFactory internal constructor(
     @Poko
     class BillingAddressParameters @JvmOverloads constructor(
         internal val isRequired: Boolean = false,
-
         /**
          * Billing address format required to complete the transaction.
          */
         internal val format: Format = Format.Min,
-
         /**
          * Set to true if a phone number is required to process the transaction.
          */
@@ -498,13 +481,11 @@ class GooglePayJsonFactory internal constructor(
          * Set to true to request a full shipping address.
          */
         internal val isRequired: Boolean = false,
-
         /**
          * ISO 3166-1 alpha-2 country code values of the countries where shipping is allowed.
          * If this object isn't specified, all shipping address countries are allowed.
          */
         private val allowedCountryCodes: Set<String> = emptySet(),
-
         /**
          * Set to true if a phone number is required for the provided shipping address.
          */
@@ -570,7 +551,6 @@ class GooglePayJsonFactory internal constructor(
          * message is displayed in the payment sheet.
          */
         internal val merchantName: String? = null,
-
         /**
          * Basic information about the library used to make calls to Google Pay from this SDK.
          */
