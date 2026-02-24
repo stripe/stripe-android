@@ -2,7 +2,7 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
-Dependencies updated in [12373](https://github.com/stripe/stripe-android/pull/12373) and [12410](https://github.com/stripe/stripe-android/pull/12410):
+Dependencies updated in [12373](https://github.com/stripe/stripe-android/pull/12373), [12410](https://github.com/stripe/stripe-android/pull/12410), and [12419](https://github.com/stripe/stripe-android/pull/12419):
 - Bumped Kotlin from 2.1.10 to 2.3.10.
 - Bumped Kotlin Coroutines from 1.10.1 to 1.10.2.
 - Bumped Kotlin Serialization from 1.8.0 to 1.10.0.
@@ -11,8 +11,21 @@ Dependencies updated in [12373](https://github.com/stripe/stripe-android/pull/12
 - Bumped App compat from 1.7.0 to 1.7.1.
 - Bumped nimbus-jose-jwt from 10.4.2 to 10.6.
 - Bumped constraintlayout from 2.2.0 to 2.2.1.
-- Bumped androidx.camera from 1.4.1 to 1.4.2.
+- Bumped androidx.camera from 1.4.2 to 1.5.3.
 - Bumped recyclerview from 1.3.2 to 1.4.0.
+- Bumped Compose from 1.9.4 to 1.10.3.
+- Bumped androidx.activity from 1.9.3 to 1.12.4.
+- Bumped androidx.browser from 1.8.0 to 1.9.0.
+- Bumped androidx.core from 1.13.1 to 1.17.0.
+- Bumped androidx.fragment from 1.8.6 to 1.8.9.
+- Bumped androidx.hilt from 1.2.0 to 1.3.0.
+- Bumped androidx.lifecycle from 2.8.7 to 2.10.0.
+- Bumped androidx.navigation from 2.8.5 to 2.9.7.
+- Bumped androidx.webkit from 1.14.0 to 1.15.0.
+- Bumped Google Places from 5.0.0 to 5.1.1.
+- Bumped Play Services Wallet from 19.4.0 to 19.5.0.
+- Bumped LiteRT from 1.4.0 to 1.4.1.
+- Bumped WorkManager from 2.9.0 to 2.11.1.
 
 ## 22.8.1 - 2026-02-17
 
