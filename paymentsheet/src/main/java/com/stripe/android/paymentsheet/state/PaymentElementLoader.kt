@@ -681,7 +681,13 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     )
                 )
             }
-            else -> null
+            is CustomerInfo.CheckoutSession -> {
+                CustomerState.createForCheckoutSession(
+                    customer = customerInfo.customer,
+                    supportedSavedPaymentMethodTypes = metadata.supportedSavedPaymentMethodTypes(),
+                )
+            }
+            null -> null
         }
 
         return customerState?.let { state ->
