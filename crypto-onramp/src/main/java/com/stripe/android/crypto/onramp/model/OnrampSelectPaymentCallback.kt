@@ -47,9 +47,7 @@ class PaymentMethodDisplayData internal constructor(
      * User facing strings representing payment method information
      */
     val label: String,
-
     val sublabel: String?,
-
     /**
      * The type of payment being displayed.
      */
