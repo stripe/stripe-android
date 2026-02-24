@@ -18,11 +18,19 @@ import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 internal interface SavedPaymentMethodConfirmInteractor {
     val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod
 
     val formElement: FormElement?
+
+    interface Factory {
+        fun create(
+            initialSelection: PaymentSelection.Saved,
+            updateSelection: (PaymentSelection.Saved) -> Unit,
+        ): SavedPaymentMethodConfirmInteractor
+    }
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -74,5 +82,27 @@ internal class DefaultSavedPaymentMethodConfirmInteractor(
                 coroutineScope = viewModel.viewModelScope,
             )
         }
+    }
+
+    class Factory @Inject constructor(
+        private val paymentMethodMetadata: PaymentMethodMetadata,
+        private val savedPaymentMethodLinkFormHelper: SavedPaymentMethodLinkFormHelper,
+        private val coroutineScope: CoroutineScope,
+    ): SavedPaymentMethodConfirmInteractor.Factory {
+        override fun create(
+            initialSelection: PaymentSelection.Saved,
+            updateSelection: (PaymentSelection.Saved) -> Unit
+        ): SavedPaymentMethodConfirmInteractor {
+            return DefaultSavedPaymentMethodConfirmInteractor(
+                initialSelection = initialSelection,
+                displayName = paymentMethodMetadata.supportedPaymentMethodForCode(
+                    PaymentMethod.Type.Card.code
+                )?.displayName.orEmpty(),
+                savedPaymentMethodLinkFormHelper = savedPaymentMethodLinkFormHelper,
+                updateSelection = updateSelection,
+                coroutineScope = coroutineScope,
+            )
+        }
+
     }
 }

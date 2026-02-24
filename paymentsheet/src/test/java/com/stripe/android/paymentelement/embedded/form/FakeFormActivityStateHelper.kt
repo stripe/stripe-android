@@ -23,6 +23,7 @@ internal class FakeFormActivityStateHelper : FormActivityStateHelper {
                 processingState = PrimaryButtonProcessingState.Idle(null),
                 isProcessing = false,
                 shouldDisplayLockIcon = true,
+                savedPaymentSelectionToConfirm = null,
             )
         )
 

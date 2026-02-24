@@ -9,11 +9,13 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
+import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
+import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.collectAsState
@@ -46,6 +48,12 @@ internal class FormActivity : AppCompatActivity() {
 
     @Inject
     lateinit var customerStateHolder: CustomerStateHolder
+
+    @Inject
+    lateinit var embeddedSelectionHolder: EmbeddedSelectionHolder
+
+    @Inject
+    lateinit var savedPaymentMethodConfirmInteractorFactory: SavedPaymentMethodConfirmInteractor.Factory
 
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -83,12 +91,14 @@ internal class FormActivity : AppCompatActivity() {
                     FormActivityUI(
                         interactor = formInteractor,
                         eventReporter = eventReporter,
-                        onDismissed = ::setCancelAndFinish,
                         onClick = {
                             confirmationHelper.confirm()
                         },
                         onProcessingCompleted = ::setCompletedResultAndDismiss,
-                        state = state
+                        state = state,
+                        onDismissed = ::setCancelAndFinish,
+                        updateSelection = embeddedSelectionHolder::set,
+                        savedPaymentMethodConfirmInteractorFactory = savedPaymentMethodConfirmInteractorFactory,
                     )
                 }
             }
