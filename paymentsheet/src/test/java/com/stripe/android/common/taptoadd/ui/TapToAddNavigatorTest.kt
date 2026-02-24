@@ -40,21 +40,22 @@ internal class TapToAddNavigatorTest {
         }
 
     @Test
-    fun `performAction with Close event emits Canceled with payment selection when payment method collected`() = runTest {
-        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        val initialScreen = TapToAddNavigator.Screen.Collecting(FakeTapToAddCollectingInteractor)
-        val navigator = TapToAddNavigator(
-            coroutineScope = this,
-            initialScreen = initialScreen,
-            paymentMethodHolder = FakePaymentMethodHolder(paymentMethod = paymentMethod),
-        )
+    fun `performAction with Close event emits Canceled with payment selection when payment method collected`() =
+        runTest {
+            val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+            val initialScreen = TapToAddNavigator.Screen.Collecting(FakeTapToAddCollectingInteractor)
+            val navigator = TapToAddNavigator(
+                coroutineScope = this,
+                initialScreen = initialScreen,
+                paymentMethodHolder = FakePaymentMethodHolder(paymentMethod = paymentMethod),
+            )
 
-        navigator.result.test {
-            navigator.performAction(TapToAddNavigator.Action.Close)
-            val result = awaitItem() as TapToAddResult.Canceled
-            assertThat(result.paymentSelection).isEqualTo(PaymentSelection.Saved(paymentMethod))
+            navigator.result.test {
+                navigator.performAction(TapToAddNavigator.Action.Close)
+                val result = awaitItem() as TapToAddResult.Canceled
+                assertThat(result.paymentSelection).isEqualTo(PaymentSelection.Saved(paymentMethod))
+            }
         }
-    }
 
     private object FakeTapToAddCollectingInteractor : TapToAddCollectingInteractor
 }
