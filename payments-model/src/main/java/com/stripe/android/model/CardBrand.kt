@@ -16,12 +16,10 @@ enum class CardBrand(
     @DrawableRes val icon: Int,
     @DrawableRes val cvcIcon: Int = R.drawable.stripe_ic_cvc,
     @DrawableRes val errorIcon: Int = R.drawable.stripe_ic_error,
-
     /**
      * Accepted CVC lengths
      */
     val cvcLength: Set<Int> = setOf(3),
-
     /**
      * The default max length when the card number is formatted without spaces (e.g. "4242424242424242")
      *
@@ -29,27 +27,22 @@ enum class CardBrand(
      * In the case of a [CardBrand.DinersClub] card, use [getMaxLengthForCardNumber].
      */
     private val defaultMaxLength: Int = 16,
-
     /**
      * Based on [Issuer identification number table](http://en.wikipedia.org/wiki/Bank_card_number#Issuer_identification_number_.28IIN.29)
      */
     private val pattern: Pattern? = null,
-
     /**
      * Patterns for discrete lengths
      */
     private val partialPatterns: Map<Int, Pattern>,
-
     /**
      * By default, a [CardBrand] does not have variants.
      */
     private val variantMaxLength: Map<Pattern, Int> = emptyMap(),
-
     /**
      * Whether the brand should be rendered
      */
     private val shouldRender: Boolean = true,
-
     /**
      * The rendering order in the card details cell
      */

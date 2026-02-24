@@ -20,26 +20,11 @@ internal object CustomerSessionRemoveLastSettingsDefinition : BooleanSettingsDef
         return settings[CustomerSessionSettingsDefinition] == true
     }
 
-    override fun createOptions(
-        configurationData: PlaygroundConfigurationData
-    ) = listOf(
-        PlaygroundSettingDefinition.Displayable.Option("Enabled", true),
-        PlaygroundSettingDefinition.Displayable.Option("Disabled", false),
-    )
-
     override fun configure(value: Boolean, checkoutRequestBuilder: CheckoutRequest.Builder) {
-        if (value) {
-            checkoutRequestBuilder.paymentMethodRemoveLastFeature(FeatureState.Enabled)
-        } else {
-            checkoutRequestBuilder.paymentMethodRemoveLastFeature(FeatureState.Disabled)
-        }
+        checkoutRequestBuilder.paymentMethodRemoveLastFeature(FeatureState.fromBoolean(value))
     }
 
     override fun configure(value: Boolean, customerEphemeralKeyRequestBuilder: CustomerEphemeralKeyRequest.Builder) {
-        if (value) {
-            customerEphemeralKeyRequestBuilder.paymentMethodRemoveLastFeature(FeatureState.Enabled)
-        } else {
-            customerEphemeralKeyRequestBuilder.paymentMethodRemoveLastFeature(FeatureState.Disabled)
-        }
+        customerEphemeralKeyRequestBuilder.paymentMethodRemoveLastFeature(FeatureState.fromBoolean(value))
     }
 }

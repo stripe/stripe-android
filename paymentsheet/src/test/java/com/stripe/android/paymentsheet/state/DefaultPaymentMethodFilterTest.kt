@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.state
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.model.Address
@@ -214,6 +215,7 @@ class DefaultPaymentMethodFilterTest {
                     isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
                     permissions = CustomerMetadata.Permissions(
                         removePaymentMethod = PaymentMethodRemovePermission.Full,
+                        saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
                         canRemoveLastPaymentMethod = false,
                         canRemoveDuplicates = false,
                         canUpdateFullPaymentMethodDetails = false,

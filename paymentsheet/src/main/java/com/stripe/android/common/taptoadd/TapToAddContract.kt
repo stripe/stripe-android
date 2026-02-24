@@ -6,6 +6,7 @@ import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.BundleCompat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import kotlinx.parcelize.Parcelize
 
 internal object TapToAddContract : ActivityResultContract<TapToAddContract.Args, TapToAddResult>() {
@@ -23,6 +24,7 @@ internal object TapToAddContract : ActivityResultContract<TapToAddContract.Args,
     @Parcelize
     data class Args(
         val mode: TapToAddMode,
+        val eventMode: EventReporter.Mode,
         val paymentMethodMetadata: PaymentMethodMetadata,
         val paymentElementCallbackIdentifier: String,
         val productUsage: Set<String>,

@@ -50,139 +50,94 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Parcelize
 internal data class FinancialConnectionsSessionManifest(
-
     @SerialName(value = "allow_manual_entry")
     val allowManualEntry: Boolean,
-
     @SerialName(value = "consent_required")
     val consentRequired: Boolean,
-
     @SerialName(value = "consent_acquired_at")
     val consentAcquiredAt: String?,
-
     @SerialName(value = "custom_manual_entry_handling")
     val customManualEntryHandling: Boolean,
-
     @SerialName(value = "disable_link_more_accounts")
     val disableLinkMoreAccounts: Boolean,
-
     @SerialName(value = "id")
     val id: String,
-
     @SerialName(value = "instant_verification_disabled")
     val instantVerificationDisabled: Boolean,
-
     @SerialName(value = "institution_search_disabled")
     val institutionSearchDisabled: Boolean,
-
     @SerialName(value = "app_verification_enabled")
     val appVerificationEnabled: Boolean,
-
     @SerialName(value = "livemode")
     val livemode: Boolean,
-
     @SerialName(value = "manual_entry_uses_microdeposits")
     val manualEntryUsesMicrodeposits: Boolean,
-
     @SerialName(value = "mobile_handoff_enabled")
     val mobileHandoffEnabled: Boolean,
-
     @SerialName(value = "next_pane")
     val nextPane: Pane,
-
     @SerialName(value = "manual_entry_mode")
     val manualEntryMode: ManualEntryMode,
-
     @SerialName(value = "permissions")
     val permissions: List<FinancialConnectionsAccount.Permissions>,
-
     @SerialName(value = "product")
     val product: Product,
-
     @SerialName(value = "single_account")
     val singleAccount: Boolean,
-
     @SerialName(value = "use_single_sort_search")
     val useSingleSortSearch: Boolean,
-
     @SerialName(value = "account_disconnection_method")
     val accountDisconnectionMethod: AccountDisconnectionMethod? = null,
-
     @SerialName(value = "accountholder_customer_email_address")
     val accountholderCustomerEmailAddress: String? = null,
-
     @SerialName(value = "accountholder_is_link_consumer")
     val accountholderIsLinkConsumer: Boolean? = null,
-
     @SerialName(value = "accountholder_phone_number")
     val accountholderPhoneNumber: String? = null,
-
     @SerialName(value = "accountholder_token")
     val accountholderToken: String? = null,
-
     @SerialName(value = "active_auth_session")
     val activeAuthSession: FinancialConnectionsAuthorizationSession? = null,
-
     @SerialName(value = "active_institution")
     val activeInstitution: FinancialConnectionsInstitution? = null,
-
     @SerialName(value = "assignment_event_id")
     val assignmentEventId: String? = null,
-
     @SerialName(value = "business_name")
     val businessName: String? = null,
-
     @SerialName(value = "cancel_url")
     val cancelUrl: String? = null,
-
     @SerialName(value = "connect_platform_name")
     val connectPlatformName: String? = null,
-
     @SerialName(value = "connected_account_name")
     val connectedAccountName: String? = null,
-
     @SerialName(value = "experiment_assignments")
     val experimentAssignments: Map<String, String>? = null,
-
     @SerialName(value = "display_text")
     val displayText: TextUpdate? = null,
-
     @SerialName(value = "features")
     val features: Map<String, Boolean>? = null,
-
     @SerialName(value = "hosted_auth_url")
     val hostedAuthUrl: String? = null,
-
     @SerialName(value = "initial_institution")
     val initialInstitution: FinancialConnectionsInstitution? = null,
-
     @SerialName(value = "is_end_user_facing")
     val isEndUserFacing: Boolean? = null,
-
     @SerialName(value = "is_link_with_stripe")
     val isLinkWithStripe: Boolean? = null,
-
     @SerialName(value = "is_networking_user_flow")
     val isNetworkingUserFlow: Boolean? = null,
-
     @SerialName(value = "is_stripe_direct")
     val isStripeDirect: Boolean? = null,
-
     @SerialName(value = "link_account_session_cancellation_behavior")
     val linkAccountSessionCancellationBehavior: LinkAccountSessionCancellationBehavior? = null,
-
     @SerialName(value = "modal_customization")
     val modalCustomization: Map<String, Boolean>? = null,
-
     @SerialName(value = "payment_method_type")
     val paymentMethodType: SupportedPaymentMethodTypes? = null,
-
     @SerialName(value = "success_url")
     val successUrl: String? = null,
-
     @SerialName("skip_success_pane")
     val skipSuccessPane: Boolean? = null,
-
     @SerialName("theme")
     val theme: Theme? = null,
 ) : Parcelable {

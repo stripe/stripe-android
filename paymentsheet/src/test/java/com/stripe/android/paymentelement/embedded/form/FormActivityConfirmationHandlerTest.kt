@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.embedded.form
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
@@ -12,6 +13,7 @@ import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateFixtures
+import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.test.runTest
@@ -80,6 +82,7 @@ internal class FormActivityConfirmationHandlerTest {
         val onClickOverrideDelegate = OnClickDelegateOverrideImpl()
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
 
+        val customerStateHolder = FakeCustomerStateHolder()
         val confirmationHelper = DefaultFormActivityConfirmationHelper(
             paymentMethodMetadata = paymentMethodMetadata,
             confirmationHandler = confirmationHandler,
@@ -90,8 +93,10 @@ internal class FormActivityConfirmationHandlerTest {
             activityResultCaller = mock(),
             onClickDelegate = onClickOverrideDelegate,
             eventReporter = FakeEventReporter(),
+            customerStateHolder = customerStateHolder,
             coroutineScope = this,
             formActivityRegistrar = formActivityConfirmationHandlerRegistrar,
+            tapToAddHelper = FakeTapToAddHelper.noOp(),
         )
 
         assertThat(formActivityConfirmationHandlerRegistrar.registerAndBootstrapTurbine.awaitItem()).isNotNull()
@@ -107,6 +112,7 @@ internal class FormActivityConfirmationHandlerTest {
 
         stateHelper.validate()
         confirmationHandler.validate()
+        customerStateHolder.validate()
     }
     private class Scenario(
         val formConfirmationHelper: FormActivityConfirmationHelper,

@@ -826,6 +826,7 @@ class DefaultAnalyticsMetadataFactoryTest {
         isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
         permissions = CustomerMetadata.Permissions(
             removePaymentMethod = PaymentMethodRemovePermission.Full,
+            saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
             canRemoveLastPaymentMethod = true,
             canRemoveDuplicates = true,
             canUpdateFullPaymentMethodDetails = true,

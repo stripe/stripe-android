@@ -92,8 +92,6 @@
   <string name="stripe_doc_front_warmup_title">Sagatavojieties skenēt savu identifikācijas dokumentu ar fotogrāfiju</string>
   <!-- Label of the driver's license option for document type selection -->
   <string name="stripe_driver_license">Autovadītāja apliecība</string>
-  <!-- Text for error labels -->
-  <string name="stripe_error">Kļūda</string>
   <!-- Button that opens file upload screen -->
   <string name="stripe_file_upload">Faila augšupielāde</string>
   <!-- Instructions for uploading images of drivers license -->
@@ -203,6 +201,7 @@
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Gādājiet, lai seja būtu kadra centrā.</string>
   <!-- Instructional text when the document is too blurry -->
+  <string name="stripe_reduce_blur">ID nav fokusēts</string>
   <string name="stripe_reduce_blur_2">Attēls ir neskaidrs. Turiet tālruni stabili un mēģiniet vēlreiz.</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Detaļas nav redzamas</string>

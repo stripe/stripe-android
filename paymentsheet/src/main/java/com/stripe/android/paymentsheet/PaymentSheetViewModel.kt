@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.analytics.SessionSavedStateHandler
@@ -17,7 +18,7 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddMode
-import com.stripe.android.common.taptoadd.TapToAddResult
+import com.stripe.android.common.taptoadd.TapToAddNextStep
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
@@ -93,7 +94,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     internal val cvcRecollectionHandler: CvcRecollectionHandler,
     private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory,
     tapToAddHelperFactory: TapToAddHelper.Factory,
-    mode: EventReporter.Mode
+    mode: EventReporter.Mode,
+    customerStateHolderFactory: CustomerStateHolder.Factory,
 ) : BaseSheetViewModel(
     config = args.config,
     eventReporter = eventReporter,
@@ -104,6 +106,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
     isCompleteFlow = true,
     mode = mode,
+    customerStateHolderFactory = customerStateHolderFactory,
 ) {
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
@@ -240,15 +243,27 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
 
         viewModelScope.launch {
-            tapToAddHelper.result.collect { result ->
+            tapToAddHelper.nextStep.collect { result ->
                 when (result) {
-                    is TapToAddResult.Canceled -> {
-                        // Do nothing.
+                    is TapToAddNextStep.ConfirmSavedPaymentMethod -> {
+                        customerStateHolder.addPaymentMethod(result.paymentSelection.paymentMethod)
+                        updateSelection(result.paymentSelection)
+                        val paymentMethodMetadata = paymentMethodMetadata.value ?: return@collect
+                        val savedPaymentMethodConfirmScreen = PaymentSheetScreen.SavedPaymentMethodConfirm.create(
+                            paymentMethodMetadata = paymentMethodMetadata,
+                            initialSelection = result.paymentSelection,
+                            viewModel = this@PaymentSheetViewModel,
+                        )
+                        val newScreens = determineInitialBackStack(
+                            paymentMethodMetadata,
+                            customerStateHolder,
+                        ).plus(savedPaymentMethodConfirmScreen)
+                        navigationHandler.resetTo(newScreens)
                     }
-                    TapToAddResult.Complete -> {
+                    TapToAddNextStep.Complete -> {
                         _paymentSheetResult.tryEmit(PaymentSheetResult.Completed())
                     }
-                    is TapToAddResult.Continue -> {
+                    is TapToAddNextStep.Continue -> {
                         errorReporter.report(
                             ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_PAYMENT_SHEET_RECEIVED_CONTINUE_RESULT,
                         )

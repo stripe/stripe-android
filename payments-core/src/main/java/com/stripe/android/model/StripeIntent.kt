@@ -190,12 +190,10 @@ sealed interface StripeIntent : StripeModel {
              * The timestamp after which the OXXO expires.
              */
             val expiresAfter: Int = 0,
-
             /**
              * The OXXO number.
              */
             val number: String? = null,
-
             /**
              * URL of a webpage containing the voucher for this OXXO payment.
              */

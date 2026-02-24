@@ -213,6 +213,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Simpan kad ini untuk pembayaran %s masa hadapan</string>
   <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
   <string name="stripe_paymentsheet_saved">Disimpan</string>
+  <!-- Title shown above a view containing a customer's saved card -->
+  <string name="stripe_paymentsheet_saved_card">Kad yang disimpan</string>
   <!-- Title shown above a view containing the customer's cards -->
   <string name="stripe_paymentsheet_select_card">Pilih kad</string>
   <!-- Title shown above a view containing the customer's payment methods -->
@@ -259,6 +261,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_something_went_wrong">Ada sesuatu yang tidak kena</string>
   <!-- Accessibility description when payment button shows a successful transaction animation. -->
   <string name="stripe_successful_transaction_description">Transaksi selesai</string>
+  <!-- Title shown in success screen shown after a user has added their card bu tapping -->
+  <string name="stripe_tap_to_add_card_added_title">Kad ditambah</string>
   <!-- Button label for a button that launches a flow for tapping a card on the device -->
   <string name="stripe_tap_to_add_card_button_label">Ketik untuk menambah kad</string>
   <!-- Button text on a screen asking the user to approve a payment -->

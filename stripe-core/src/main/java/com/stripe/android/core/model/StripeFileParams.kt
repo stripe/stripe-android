@@ -17,7 +17,6 @@ data class StripeFileParams constructor(
      * transfers for the `multipart/form-data` protocol).
      */
     internal val file: File,
-
     /**
      * The purpose of the uploaded file. Possible values are `business_icon`, `business_logo`,
      * `customer_signature`, `dispute_evidence`, `identity_document`, `pci_document`,
@@ -52,14 +51,12 @@ data class StripeFileParams constructor(
          * [file_link_data.create](https://stripe.com/docs/api/files/create#create_file-file_link_data-create)
          */
         internal val create: Boolean = false,
-
         /**
          * A future timestamp after which the link will no longer be usable.
          *
          * [file_link_data.expires_at](https://stripe.com/docs/api/files/create#create_file-file_link_data-expires_at)
          */
         internal val expiresAt: Long? = null,
-
         /**
          * Set of key-value pairs that you can attach to an object. This can be useful for storing
          * additional information about the object in a structured format. Individual keys can be

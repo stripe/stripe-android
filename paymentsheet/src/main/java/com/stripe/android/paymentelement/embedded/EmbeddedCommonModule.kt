@@ -3,7 +3,7 @@ package com.stripe.android.paymentelement.embedded
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.common.taptoadd.TapToAddModule
+import com.stripe.android.common.taptoadd.TapToAddConnectionModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
@@ -28,6 +28,7 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.LoadingEventReporter
@@ -48,7 +49,7 @@ import kotlin.coroutines.CoroutineContext
     includes = [
         StripeRepositoryModule::class,
         CoreCommonModule::class,
-        TapToAddModule::class,
+        TapToAddConnectionModule::class,
         PaymentsIntegrityModule::class,
         PaymentElementRequestSurfaceModule::class,
     ],
@@ -138,7 +139,7 @@ internal interface EmbeddedCommonModule {
             val customerMetadataPermissions = paymentMethodMetadataFlow.mapAsStateFlow {
                 it?.customerMetadata?.permissions
             }
-            return CustomerStateHolder(
+            return DefaultCustomerStateHolder(
                 savedStateHandle = savedStateHandle,
                 selection = selectionHolder.selection,
                 customerMetadataPermissions = customerMetadataPermissions

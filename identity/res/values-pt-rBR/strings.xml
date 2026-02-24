@@ -92,8 +92,6 @@
   <string name="stripe_doc_front_warmup_title">Prepare-se para digitalizar seu documento de identificação com foto</string>
   <!-- Label of the driver's license option for document type selection -->
   <string name="stripe_driver_license">CNH</string>
-  <!-- Text for error labels -->
-  <string name="stripe_error">Erro</string>
   <!-- Button that opens file upload screen -->
   <string name="stripe_file_upload">Carregamento de arquivo</string>
   <!-- Instructions for uploading images of drivers license -->
@@ -203,6 +201,7 @@
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Posicione seu rosto no centro do quadro.</string>
   <!-- Instructional text when the document is too blurry -->
+  <string name="stripe_reduce_blur">Documento fora de foco</string>
   <string name="stripe_reduce_blur_2">A imagem está borrada. Segure o celular firme e tente novamente.</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Detalhes não visíveis</string>

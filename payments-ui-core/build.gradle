@@ -61,6 +61,7 @@ android {
     buildFeatures {
         compose = true
         viewBinding = true
+        buildConfig = true
     }
 
     testOptions {
@@ -73,8 +74,10 @@ android {
         }
     }
 
-    kotlinOptions {
-        freeCompilerArgs += ["-opt-in=kotlinx.coroutines.FlowPreview", "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"]
+    kotlin {
+        compilerOptions {
+            freeCompilerArgs.addAll(["-opt-in=kotlinx.coroutines.FlowPreview", "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"])
+        }
     }
 }
 

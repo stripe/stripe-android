@@ -16,11 +16,11 @@ internal class FakeTapToAddHelper(
     val registerCalls = Turbine<RegisterCall>()
     val collectCalls = Turbine<PaymentMethodMetadata>()
 
-    private val _result = MutableSharedFlow<TapToAddResult>()
-    override val result: SharedFlow<TapToAddResult> = _result.asSharedFlow()
+    private val _nextStep = MutableSharedFlow<TapToAddNextStep>()
+    override val nextStep: SharedFlow<TapToAddNextStep> = _nextStep.asSharedFlow()
 
-    suspend fun emitResult(result: TapToAddResult) {
-        _result.emit(result)
+    suspend fun emitNextStep(nextStep: TapToAddNextStep) {
+        _nextStep.emit(nextStep)
     }
 
     override fun register(
@@ -46,7 +46,7 @@ internal class FakeTapToAddHelper(
 
     class Scenario(
         val collectCalls: ReceiveTurbine<PaymentMethodMetadata>,
-        val helper: TapToAddHelper,
+        val helper: FakeTapToAddHelper,
     )
 
     class Factory private constructor() : TapToAddHelper.Factory {

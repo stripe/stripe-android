@@ -29,9 +29,11 @@ import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata.Permissi
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata.Permissions.Companion.createForPaymentSheetLegacyEphemeralKey
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
 import com.stripe.android.lpmfoundations.paymentmethod.create
+import com.stripe.android.lpmfoundations.paymentmethod.toSaveConsentBehavior
 import com.stripe.android.model.CheckoutSessionResponse
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
@@ -303,7 +305,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val customerInfo = createCustomerInfo(
             configuration = configuration,
             elementsSession = elementsSession,
-            checkoutSessionCustomer = checkoutSession?.customer,
+            checkoutSession = checkoutSession,
         )
 
         val isGooglePayReady = isGooglePayReady(configuration, elementsSession, isGooglePaySupportedByConfiguration)
@@ -549,38 +551,46 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val customerId: String
         val ephemeralKeySecret: String
         val customerSessionClientSecret: String?
+        val isPaymentMethodSetAsDefaultEnabled: Boolean
+        val permissions: CustomerMetadata.Permissions
 
         when (customerInfo) {
             is CustomerInfo.CustomerSession -> {
-                val customer = elementsSession.customer
-                if (customer != null) {
-                    customerId = customer.session.customerId
-                    ephemeralKeySecret = customer.session.apiKey
-                    customerSessionClientSecret = customerInfo.customerSessionClientSecret
-                } else {
-                    return null
-                }
+                val customer = elementsSession.customer ?: return null
+                customerId = customer.session.customerId
+                ephemeralKeySecret = customer.session.apiKey
+                customerSessionClientSecret = customerInfo.customerSessionClientSecret
+                isPaymentMethodSetAsDefaultEnabled = getDefaultPaymentMethodsEnabled(elementsSession)
+                permissions = createForPaymentSheetCustomerSession(
+                    configuration = configuration,
+                    customer = customerInfo.elementsSessionCustomer
+                )
             }
             is CustomerInfo.Legacy -> {
                 customerId = customerInfo.id
                 ephemeralKeySecret = customerInfo.ephemeralKeySecret
                 customerSessionClientSecret = null
+                isPaymentMethodSetAsDefaultEnabled = getDefaultPaymentMethodsEnabled(elementsSession)
+                permissions = createForPaymentSheetLegacyEphemeralKey(
+                    configuration = configuration
+                )
             }
             is CustomerInfo.CheckoutSession -> {
+                customerId = customerInfo.customer.id
                 // Checkout sessions don't use ephemeral keys or customer sessions.
-                // We create a minimal CustomerMetadata so that hasCustomerConfiguration is true.
-                return CustomerMetadata(
-                    id = customerInfo.customer.id,
-                    ephemeralKeySecret = "",
-                    customerSessionClientSecret = null,
-                    isPaymentMethodSetAsDefaultEnabled = false,
-                    // TODO: revisit the permissions when working on the payment method management
-                    permissions = CustomerMetadata.Permissions(
-                        removePaymentMethod = PaymentMethodRemovePermission.None,
-                        canRemoveLastPaymentMethod = false,
-                        canRemoveDuplicates = false,
-                        canUpdateFullPaymentMethodDetails = false,
-                    )
+                ephemeralKeySecret = ""
+                customerSessionClientSecret = null
+                isPaymentMethodSetAsDefaultEnabled = false
+                permissions = CustomerMetadata.Permissions(
+                    removePaymentMethod = PaymentMethodRemovePermission.None,
+                    // Checkout sessions control save behavior via offerSave. If the server
+                    // didn't provide it, default to Disabled rather than Legacy to avoid
+                    // falling back to intent-level SFU behavior.
+                    saveConsent = customerInfo.offerSave?.toSaveConsentBehavior()
+                        ?: PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
+                    canRemoveLastPaymentMethod = false,
+                    canRemoveDuplicates = false,
+                    canUpdateFullPaymentMethodDetails = false,
                 )
             }
             null -> return null
@@ -590,17 +600,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             id = customerId,
             ephemeralKeySecret = ephemeralKeySecret,
             customerSessionClientSecret = customerSessionClientSecret,
-            isPaymentMethodSetAsDefaultEnabled = getDefaultPaymentMethodsEnabled(elementsSession),
-            permissions = if (customerInfo is CustomerInfo.CustomerSession) {
-                createForPaymentSheetCustomerSession(
-                    configuration = configuration,
-                    customer = customerInfo.elementsSessionCustomer
-                )
-            } else {
-                createForPaymentSheetLegacyEphemeralKey(
-                    configuration = configuration
-                )
-            }
+            isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
+            permissions = permissions,
         )
     }
 
@@ -614,11 +615,15 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private fun createCustomerInfo(
         configuration: CommonConfiguration,
         elementsSession: ElementsSession,
-        checkoutSessionCustomer: CheckoutSessionResponse.Customer? = null,
+        checkoutSession: CheckoutSessionResponse?,
     ): CustomerInfo? {
         // Checkout session customer data comes from the init response, not from customer sessions.
-        if (checkoutSessionCustomer != null) {
-            return CustomerInfo.CheckoutSession(customer = checkoutSessionCustomer)
+        val checkoutCustomer = checkoutSession?.customer
+        if (checkoutCustomer != null) {
+            return CustomerInfo.CheckoutSession(
+                customer = checkoutCustomer,
+                offerSave = checkoutSession.savedPaymentMethodsOfferSave,
+            )
         }
 
         val customer = configuration.customer
@@ -990,6 +995,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
          */
         data class CheckoutSession(
             val customer: CheckoutSessionResponse.Customer,
+            val offerSave: CheckoutSessionResponse.SavedPaymentMethodsOfferSave?,
         ) : CustomerInfo
     }
 

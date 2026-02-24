@@ -7,14 +7,18 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
+import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.fadeOut
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class FormActivity : AppCompatActivity() {
@@ -40,6 +44,9 @@ internal class FormActivity : AppCompatActivity() {
     @Inject
     lateinit var confirmationHelper: FormActivityConfirmationHelper
 
+    @Inject
+    lateinit var customerStateHolder: CustomerStateHolder
+
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,6 +63,13 @@ internal class FormActivity : AppCompatActivity() {
             lifecycleOwner = this,
         ).inject(this)
 
+        lifecycleScope.launch {
+            formActivityStateHelper.result.collect {
+                setFormResult(it)
+                finish()
+            }
+        }
+
         setContent {
             StripeTheme {
                 val state by formActivityStateHelper.state.collectAsState()
@@ -71,10 +85,7 @@ internal class FormActivity : AppCompatActivity() {
                         eventReporter = eventReporter,
                         onDismissed = ::setCancelAndFinish,
                         onClick = {
-                            confirmationHelper.confirm()?.let {
-                                setFormResult(it)
-                                finish()
-                            }
+                            confirmationHelper.confirm()
                         },
                         onProcessingCompleted = ::setCompletedResultAndDismiss,
                         state = state
@@ -85,13 +96,31 @@ internal class FormActivity : AppCompatActivity() {
     }
 
     private fun setCompletedResultAndDismiss() {
-        setFormResult(FormResult.Complete(selection = null, hasBeenConfirmed = true))
+        setFormResult(
+            FormResult.Complete(
+                selection = null,
+                hasBeenConfirmed = true,
+                customerState = getCustomerState(),
+            )
+        )
         finish()
     }
 
     private fun setCancelAndFinish() {
-        setFormResult(FormResult.Cancelled)
+        setFormResult(
+            FormResult.Cancelled(
+                customerState = getCustomerState(),
+            )
+        )
         finish()
+    }
+
+    private fun getCustomerState(): CustomerState? {
+        return if (::customerStateHolder.isInitialized) {
+            customerStateHolder.customer.value
+        } else {
+            null
+        }
     }
 
     override fun finish() {

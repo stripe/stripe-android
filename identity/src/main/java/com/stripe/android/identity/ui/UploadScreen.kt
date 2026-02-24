@@ -129,7 +129,6 @@ internal fun UploadScreen(
             Text(
                 text = stringResource(id = R.string.stripe_upload_your_photo_id),
                 fontSize = dimensionResourceSp(id = R.dimen.stripe_upload_title_text_size),
-
                 modifier = Modifier.padding(
                     vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin)
                 )

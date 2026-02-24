@@ -35,6 +35,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.model.Address
@@ -107,6 +108,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
+    @Suppress("LongMethod")
     fun `load with configuration should return expected result`() = runScenario {
         prefsRepository.setSavedSelection(
             SavedSelection.PaymentMethod(PaymentMethodFixtures.CARD_PAYMENT_METHOD.id)
@@ -154,6 +156,7 @@ internal class DefaultPaymentElementLoaderTest {
                     customerMetadataPermissions = CustomerMetadata.Permissions(
                         canRemoveDuplicates = false,
                         removePaymentMethod = PaymentMethodRemovePermission.Full,
+                        saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
                         canRemoveLastPaymentMethod = true,
                         canUpdateFullPaymentMethodDetails = false,
                     ),
@@ -964,7 +967,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `Considers Link logged in if the account is verified`() = runScenario {
-        val loader = createPaymentElementLoader(linkAccountState = AccountStatus.Verified(true, null))
+        val loader = createPaymentElementLoader(linkAccountState = AccountStatus.Verified(consentPresentation = null))
 
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
@@ -1355,7 +1358,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `Disables Link inline signup if user already has an verified account`() = runScenario {
         val loader = createPaymentElementLoader(
-            linkAccountState = AccountStatus.Verified(true, null),
+            linkAccountState = AccountStatus.Verified(consentPresentation = null),
         )
 
         val result = loader.load(
@@ -2675,6 +2678,7 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(state.paymentMethodMetadata.customerMetadata?.permissions).isEqualTo(
                 CustomerMetadata.Permissions(
                     removePaymentMethod = PaymentMethodRemovePermission.Full,
+                    saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
                     canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = true,
                     canUpdateFullPaymentMethodDetails = true
@@ -2724,6 +2728,7 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(state.paymentMethodMetadata.customerMetadata?.permissions).isEqualTo(
                 CustomerMetadata.Permissions(
                     removePaymentMethod = PaymentMethodRemovePermission.None,
+                    saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
                     canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = true,
                     canUpdateFullPaymentMethodDetails = true
@@ -2773,6 +2778,7 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(state.paymentMethodMetadata.customerMetadata?.permissions).isEqualTo(
                 CustomerMetadata.Permissions(
                     removePaymentMethod = PaymentMethodRemovePermission.None,
+                    saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
                     canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = true,
                     canUpdateFullPaymentMethodDetails = true
@@ -2822,6 +2828,7 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(state.paymentMethodMetadata.customerMetadata?.permissions).isEqualTo(
                 CustomerMetadata.Permissions(
                     removePaymentMethod = PaymentMethodRemovePermission.Partial,
+                    saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
                     canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = true,
                     canUpdateFullPaymentMethodDetails = true
@@ -2871,6 +2878,7 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(state.paymentMethodMetadata.customerMetadata?.permissions).isEqualTo(
                 CustomerMetadata.Permissions(
                     removePaymentMethod = PaymentMethodRemovePermission.None,
+                    saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
                     canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = true,
                     canUpdateFullPaymentMethodDetails = true
@@ -2903,6 +2911,7 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(state.paymentMethodMetadata.customerMetadata?.permissions).isEqualTo(
                 CustomerMetadata.Permissions(
                     removePaymentMethod = PaymentMethodRemovePermission.Full,
+                    saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
                     canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = false,
                     canUpdateFullPaymentMethodDetails = false
@@ -4359,7 +4368,7 @@ internal class DefaultPaymentElementLoaderTest {
         isGooglePayReady: Boolean = true,
         stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         customerRepo: CustomerRepository = FakeCustomerRepository(paymentMethods = PAYMENT_METHODS),
-        linkAccountState: AccountStatus = AccountStatus.Verified(true, null),
+        linkAccountState: AccountStatus = AccountStatus.Verified(consentPresentation = null),
         error: Throwable? = null,
         linkSettings: ElementsSession.LinkSettings? = null,
         linkGate: LinkGate = FakeLinkGate(),

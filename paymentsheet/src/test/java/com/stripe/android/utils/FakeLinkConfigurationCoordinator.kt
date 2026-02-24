@@ -15,7 +15,9 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.CvcCheck
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,6 +25,25 @@ import kotlinx.coroutines.flow.flowOf
 import org.mockito.kotlin.mock
 
 internal class FakeLinkConfigurationCoordinator(
+    private val attachExistingCardToAccountResult: Result<LinkPaymentDetails.Saved> = Result.success(
+        LinkPaymentDetails.Saved(
+            paymentDetails = ConsumerPaymentDetails.Card(
+                id = "csmrpd_saved",
+                last4 = "4242",
+                isDefault = false,
+                nickname = null,
+                billingAddress = null,
+                billingEmailAddress = null,
+                expiryYear = 2024,
+                expiryMonth = 4,
+                brand = CardBrand.Visa,
+                networks = emptyList(),
+                cvcCheck = CvcCheck.Pass,
+                funding = ConsumerPaymentDetails.Card.Funding.Credit,
+            ),
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+        )
+    ),
     private val attachNewCardToAccountResult: Result<LinkPaymentDetails> = Result.success(
         LinkPaymentDetails.New(
             paymentDetails = ConsumerPaymentDetails.Card(
@@ -85,6 +106,13 @@ internal class FakeLinkConfigurationCoordinator(
         paymentMethodCreateParams: PaymentMethodCreateParams
     ): Result<LinkPaymentDetails> {
         return attachNewCardToAccountResult
+    }
+
+    override suspend fun attachExistingCardToAccount(
+        configuration: LinkConfiguration,
+        paymentMethod: PaymentMethod
+    ): Result<LinkPaymentDetails.Saved> {
+        return attachExistingCardToAccountResult
     }
 
     override suspend fun logOut(configuration: LinkConfiguration): Result<ConsumerSession> {

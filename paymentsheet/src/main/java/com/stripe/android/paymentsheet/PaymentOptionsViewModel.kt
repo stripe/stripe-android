@@ -14,7 +14,7 @@ import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddMode
-import com.stripe.android.common.taptoadd.TapToAddResult
+import com.stripe.android.common.taptoadd.TapToAddNextStep
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.utils.requireApplication
@@ -73,6 +73,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     tapToAddHelperFactory: TapToAddHelper.Factory,
     mode: EventReporter.Mode,
+    customerStateHolderFactory: CustomerStateHolder.Factory,
 ) : BaseSheetViewModel(
     config = args.configuration,
     eventReporter = eventReporter,
@@ -83,6 +84,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
     isCompleteFlow = false,
     mode = mode,
+    customerStateHolderFactory = customerStateHolderFactory,
 ) {
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
@@ -143,7 +145,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
         buttonsEnabled,
         selection,
         linkAccountHolder.linkAccountInfo
-
     ) { isLinkAvailable, linkEmail, buttonsEnabled, currentSelection, linkAccountInfo ->
         val paymentMethodMetadata = args.state.paymentMethodMetadata
         val linkConfiguration = paymentMethodMetadata.linkState?.configuration
@@ -226,17 +227,30 @@ internal class PaymentOptionsViewModel @Inject constructor(
         )
 
         viewModelScope.launch {
-            tapToAddHelper.result.collect { result ->
+            tapToAddHelper.nextStep.collect { result ->
                 when (result) {
-                    is TapToAddResult.Canceled -> {
-                        // Do nothing.
+                    is TapToAddNextStep.ConfirmSavedPaymentMethod -> {
+                        customerStateHolder.addPaymentMethod(result.paymentSelection.paymentMethod)
+                        updateSelection(result.paymentSelection)
+                        val paymentMethodMetadata = args.state.paymentMethodMetadata
+                        val savedPaymentMethodConfirmScreen = PaymentSheetScreen.SavedPaymentMethodConfirm.create(
+                            viewModel = this@PaymentOptionsViewModel,
+                            paymentMethodMetadata = paymentMethodMetadata,
+                            initialSelection = result.paymentSelection,
+                        )
+                        val newScreens = determineInitialBackStack(
+                            paymentMethodMetadata,
+                            customerStateHolder,
+                        ).plus(savedPaymentMethodConfirmScreen)
+                        navigationHandler.resetTo(newScreens)
                     }
-                    TapToAddResult.Complete -> {
+                    TapToAddNextStep.Complete -> {
                         errorReporter.report(
                             ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_FLOW_CONTROLLER_RECEIVED_COMPLETE_RESULT,
                         )
                     }
-                    is TapToAddResult.Continue -> {
+                    is TapToAddNextStep.Continue -> {
+                        customerStateHolder.addPaymentMethod(result.paymentSelection.paymentMethod)
                         updateSelection(result.paymentSelection)
                         onUserSelection()
                     }

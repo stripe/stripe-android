@@ -172,7 +172,6 @@ private fun AccountSubtitle(
                             shape = RoundedCornerShape(4.dp)
                         )
                         .padding(horizontal = 6.dp, vertical = 4.dp)
-
                 )
             }
     }

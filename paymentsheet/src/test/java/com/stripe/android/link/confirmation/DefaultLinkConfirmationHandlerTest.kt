@@ -255,7 +255,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             )
         )
 
-        val savedPaymentDetails = TestFactory.LINK_SAVED_PAYMENT_DETAILS
+        val savedPaymentDetails = TestFactory.LINK_PASSTHROUGH_PAYMENT_DETAILS
         val result = handler.confirm(
             paymentDetails = savedPaymentDetails,
             linkAccount = TestFactory.LINK_ACCOUNT,
@@ -266,7 +266,7 @@ internal class DefaultLinkConfirmationHandlerTest {
         assertThat(result).isEqualTo(Result.Succeeded)
         confirmationHandler.startTurbine.awaitItem().assertSavedConfirmationArgs(
             configuration = configuration,
-            paymentDetails = TestFactory.LINK_SAVED_PAYMENT_DETAILS,
+            paymentDetails = TestFactory.LINK_PASSTHROUGH_PAYMENT_DETAILS,
             cvc = CVC
         )
     }
@@ -286,7 +286,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             )
         )
 
-        val savedPaymentDetailsWithBilling = TestFactory.LINK_SAVED_PAYMENT_DETAILS_WITH_BILLING
+        val savedPaymentDetailsWithBilling = TestFactory.LINK_PASSTHROUGH_PAYMENT_DETAILS_WITH_BILLING
         val result = handler.confirm(
             paymentDetails = savedPaymentDetailsWithBilling,
             linkAccount = TestFactory.LINK_ACCOUNT,
@@ -318,7 +318,7 @@ internal class DefaultLinkConfirmationHandlerTest {
         )
 
         val result = handler.confirm(
-            paymentDetails = TestFactory.LINK_SAVED_PAYMENT_DETAILS,
+            paymentDetails = TestFactory.LINK_PASSTHROUGH_PAYMENT_DETAILS,
             linkAccount = TestFactory.LINK_ACCOUNT,
             cvc = CVC,
             billingPhone = null
@@ -327,7 +327,7 @@ internal class DefaultLinkConfirmationHandlerTest {
         assertThat(result).isEqualTo(Result.Succeeded)
         confirmationHandler.startTurbine.awaitItem().assertSavedConfirmationArgs(
             configuration = configuration,
-            paymentDetails = TestFactory.LINK_SAVED_PAYMENT_DETAILS,
+            paymentDetails = TestFactory.LINK_PASSTHROUGH_PAYMENT_DETAILS,
             cvc = null
         )
     }
@@ -595,7 +595,7 @@ internal class DefaultLinkConfirmationHandlerTest {
                 )
             )
 
-            val savedPaymentDetails = TestFactory.LINK_SAVED_PAYMENT_DETAILS
+            val savedPaymentDetails = TestFactory.LINK_PASSTHROUGH_PAYMENT_DETAILS
             val result = handler.confirm(
                 paymentDetails = savedPaymentDetails,
                 linkAccount = TestFactory.LINK_ACCOUNT,
@@ -606,7 +606,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             assertThat(result).isEqualTo(Result.Succeeded)
             confirmationHandler.startTurbine.awaitItem().assertSavedConfirmationArgs(
                 configuration = configuration,
-                paymentDetails = TestFactory.LINK_SAVED_PAYMENT_DETAILS,
+                paymentDetails = TestFactory.LINK_PASSTHROUGH_PAYMENT_DETAILS,
                 cvc = CVC,
                 passiveCaptchaParams = null
             )
@@ -639,7 +639,7 @@ internal class DefaultLinkConfirmationHandlerTest {
 
     private fun ConfirmationHandler.Args.assertSavedConfirmationArgs(
         configuration: LinkConfiguration,
-        paymentDetails: LinkPaymentDetails.Saved,
+        paymentDetails: LinkPaymentDetails.Passthrough,
         cvc: String?,
         passiveCaptchaParams: PassiveCaptchaParams? = PASSIVE_CAPTCHA_PARAMS
     ) {

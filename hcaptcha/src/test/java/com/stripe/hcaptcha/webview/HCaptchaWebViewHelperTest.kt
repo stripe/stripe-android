@@ -26,19 +26,19 @@ class HCaptchaWebViewHelperTest {
 
     private val context = mock<Context>()
     private val config = mock<HCaptchaConfig>()
-    private val internalConfig = mock<HCaptchaInternalConfig>()
+    private val internalConfig = HCaptchaInternalConfig {
+        MOCK_HTML
+    }
     private val captchaVerifier = mock<IHCaptchaVerifier>()
     private val stateListener = mock<HCaptchaStateListener>()
     private val webView = mock<WebView>()
     private val webSettings = mock<WebSettings>()
     private val handler = mock<Handler>()
-    private val htmlProvider = { MOCK_HTML }
     private val androidLogMock = mockStatic(Log::class.java)
 
     @Before
     fun init() {
         whenever(webView.settings).thenReturn(webSettings)
-        whenever(internalConfig.htmlProvider).thenReturn(htmlProvider)
     }
 
     @After

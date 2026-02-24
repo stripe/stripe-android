@@ -285,19 +285,16 @@ class GooglePayLauncher internal constructor(
         val environment: GooglePayEnvironment,
         val merchantCountryCode: String,
         val merchantName: String,
-
         /**
          * Flag to indicate whether Google Pay collect the customer's email address.
          *
          * Default to `false`.
          */
         var isEmailRequired: Boolean = false,
-
         /**
          * Billing address collection configuration.
          */
         var billingAddressConfig: BillingAddressConfig = BillingAddressConfig(),
-
         /**
          * If `true`, Google Pay is considered ready if the customer's Google Pay wallet
          * has existing payment methods.
@@ -305,14 +302,12 @@ class GooglePayLauncher internal constructor(
          * Default to `true`.
          */
         var existingPaymentMethodRequired: Boolean = true,
-
         /**
          * Set to false if you don't support credit cards.
          *
          * Default: The credit card class is supported for the card networks specified.
          */
         var allowCreditCards: Boolean = true,
-
         /**
          * Set this property to enable other card networks in additional to the default list, such as "INTERAC"
          */
@@ -327,12 +322,10 @@ class GooglePayLauncher internal constructor(
     @Poko
     class BillingAddressConfig @JvmOverloads constructor(
         internal val isRequired: Boolean = false,
-
         /**
          * Billing address format required to complete the transaction.
          */
         internal val format: Format = Format.Min,
-
         /**
          * Set to true if a phone number is required to process the transaction.
          */

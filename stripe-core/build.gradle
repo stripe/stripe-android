@@ -12,10 +12,15 @@ ext {
 }
 
 android {
-    kotlinOptions {
-        freeCompilerArgs += [
-                "-Xconsistent-data-class-copy-visibility"
-        ]
+    buildFeatures {
+        buildConfig = true
+    }
+    kotlin {
+        compilerOptions {
+            freeCompilerArgs.addAll([
+                    "-Xconsistent-data-class-copy-visibility"
+            ])
+        }
     }
 }
 

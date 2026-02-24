@@ -459,14 +459,14 @@ private class CachedFirstResultSuspend1<in Input, out Result>(
     // contract { callsInPlace(f, EXACTLY_ONCE) }
     private val initializeMutex = Mutex()
 
-    private object UNINITIALIZED_VALUE
+    private object UninitializedValue
 
     @Volatile
-    private var value: Any? = UNINITIALIZED_VALUE
+    private var value: Any? = UninitializedValue
 
     fun cacheFirstResult(): suspend (Input) -> Result = { input ->
         initializeMutex.withLock {
-            if (value == UNINITIALIZED_VALUE) {
+            if (value == UninitializedValue) {
                 value = f(input)
             }
             @Suppress("UNCHECKED_CAST")
@@ -487,14 +487,14 @@ private class CachedFirstResultSuspend2<in Input1, in Input2, out Result>(
     // contract { callsInPlace(f, EXACTLY_ONCE) }
     private val initializeMutex = Mutex()
 
-    private object UNINITIALIZED_VALUE
+    private object UninitializedValue
 
     @Volatile
-    private var value: Any? = UNINITIALIZED_VALUE
+    private var value: Any? = UninitializedValue
 
     fun cacheFirstResult(): suspend (Input1, Input2) -> Result = { input1, input2 ->
         initializeMutex.withLock {
-            if (value == UNINITIALIZED_VALUE) {
+            if (value == UninitializedValue) {
                 value = f(input1, input2)
             }
             @Suppress("UNCHECKED_CAST")
@@ -515,14 +515,14 @@ private class CachedFirstResultSuspend3<in Input1, in Input2, in Input3, out Res
     // contract { callsInPlace(f, EXACTLY_ONCE) }
     private val initializeMutex = Mutex()
 
-    private object UNINITIALIZED_VALUE
+    private object UninitializedValue
 
     @Volatile
-    private var value: Any? = UNINITIALIZED_VALUE
+    private var value: Any? = UninitializedValue
 
     fun cacheFirstResult(): suspend (Input1, Input2, Input3) -> Result = { input1, input2, input3 ->
         initializeMutex.withLock {
-            if (value == UNINITIALIZED_VALUE) {
+            if (value == UninitializedValue) {
                 value = f(input1, input2, input3)
             }
             @Suppress("UNCHECKED_CAST")
@@ -541,14 +541,14 @@ private class CachedFirstResult1<in Input, out Result>(
     private val function: (Input) -> Result
 ) : (Input) -> Result {
     // contract { callsInPlace(f, EXACTLY_ONCE) }
-    private object UNINITIALIZED_VALUE
+    private object UninitializedValue
 
     @Volatile
-    private var value: Any? = UNINITIALIZED_VALUE
+    private var value: Any? = UninitializedValue
 
     @Synchronized
     override fun invoke(input: Input): Result {
-        if (value == UNINITIALIZED_VALUE) {
+        if (value == UninitializedValue) {
             value = function(input)
         }
         @Suppress("UNCHECKED_CAST")
@@ -566,14 +566,14 @@ private class CachedFirstResult2<in Input1, in Input2, out Result>(
     private val function: (Input1, Input2) -> Result
 ) : (Input1, Input2) -> Result {
     // contract { callsInPlace(f, EXACTLY_ONCE) }
-    private object UNINITIALIZED_VALUE
+    private object UninitializedValue
 
     @Volatile
-    private var value: Any? = UNINITIALIZED_VALUE
+    private var value: Any? = UninitializedValue
 
     @Synchronized
     override fun invoke(input1: Input1, input2: Input2): Result {
-        if (value == UNINITIALIZED_VALUE) {
+        if (value == UninitializedValue) {
             value = function(input1, input2)
         }
         @Suppress("UNCHECKED_CAST")
@@ -591,14 +591,14 @@ private class CachedFirstResult3<in Input1, in Input2, in Input3, out Result>(
     private val function: (Input1, Input2, Input3) -> Result
 ) : (Input1, Input2, Input3) -> Result {
     // contract { callsInPlace(f, EXACTLY_ONCE) }
-    private object UNINITIALIZED_VALUE
+    private object UninitializedValue
 
     @Volatile
-    private var value: Any? = UNINITIALIZED_VALUE
+    private var value: Any? = UninitializedValue
 
     @Synchronized
     override fun invoke(input1: Input1, input2: Input2, input3: Input3): Result {
-        if (value == UNINITIALIZED_VALUE) {
+        if (value == UninitializedValue) {
             value = function(input1, input2, input3)
         }
         @Suppress("UNCHECKED_CAST")

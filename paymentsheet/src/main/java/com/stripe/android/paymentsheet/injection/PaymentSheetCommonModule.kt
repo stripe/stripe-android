@@ -6,8 +6,8 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.common.taptoadd.DefaultTapToAddHelper
+import com.stripe.android.common.taptoadd.TapToAddConnectionModule
 import com.stripe.android.common.taptoadd.TapToAddHelper
-import com.stripe.android.common.taptoadd.TapToAddModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
@@ -35,6 +35,8 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferen
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.paymentsheet.BuildConfig
+import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
@@ -75,7 +77,7 @@ import javax.inject.Singleton
     ],
     includes = [
         LinkCommonModule::class,
-        TapToAddModule::class,
+        TapToAddConnectionModule::class,
         PaymentsIntegrityModule::class
     ]
 )
@@ -183,6 +185,11 @@ internal abstract class PaymentSheetCommonModule {
         @Provides
         fun providePaymentConfiguration(appContext: Context): PaymentConfiguration {
             return PaymentConfiguration.getInstance(appContext)
+        }
+
+        @Provides
+        fun provideCustomerStateHolderFactory(): CustomerStateHolder.Factory {
+            return DefaultCustomerStateHolder.Factory
         }
 
         @Provides

@@ -16,7 +16,7 @@ import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddMode
-import com.stripe.android.common.taptoadd.TapToAddResult
+import com.stripe.android.common.taptoadd.TapToAddNextStep
 import com.stripe.android.core.Logger
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
@@ -897,9 +897,9 @@ internal class PaymentSheetViewModelTest {
 
             val arguments = startTurbine.awaitItem()
 
-            assertThat(arguments.confirmationOption).isInstanceOf<LinkInlineSignupConfirmationOption>()
+            assertThat(arguments.confirmationOption).isInstanceOf<LinkInlineSignupConfirmationOption.New>()
 
-            val inlineOption = arguments.confirmationOption as LinkInlineSignupConfirmationOption
+            val inlineOption = arguments.confirmationOption as LinkInlineSignupConfirmationOption.New
 
             assertThat(inlineOption.saveOption).isEqualTo(
                 LinkInlineSignupConfirmationOption.PaymentMethodSaveOption.RequestedReuse
@@ -928,9 +928,9 @@ internal class PaymentSheetViewModelTest {
 
             val arguments = startTurbine.awaitItem()
 
-            assertThat(arguments.confirmationOption).isInstanceOf<LinkInlineSignupConfirmationOption>()
+            assertThat(arguments.confirmationOption).isInstanceOf<LinkInlineSignupConfirmationOption.New>()
 
-            val inlineOption = arguments.confirmationOption as LinkInlineSignupConfirmationOption
+            val inlineOption = arguments.confirmationOption as LinkInlineSignupConfirmationOption.New
 
             assertThat(inlineOption.saveOption).isEqualTo(
                 LinkInlineSignupConfirmationOption.PaymentMethodSaveOption.NoRequest
@@ -3364,8 +3364,8 @@ internal class PaymentSheetViewModelTest {
             createCalls.awaitItem()
 
             viewModel.paymentSheetResult.test {
-                tapToAddHelperFactory.getCreatedHelper()?.emitResult(
-                    TapToAddResult.Complete
+                tapToAddHelperFactory.getCreatedHelper()?.emitNextStep(
+                    TapToAddNextStep.Complete
                 )
 
                 val result = awaitItem()
@@ -3386,8 +3386,8 @@ internal class PaymentSheetViewModelTest {
 
             createCalls.awaitItem()
 
-            tapToAddHelperFactory.getCreatedHelper()?.emitResult(
-                TapToAddResult.Continue(
+            tapToAddHelperFactory.getCreatedHelper()?.emitNextStep(
+                TapToAddNextStep.Continue(
                     PaymentSelection.Saved(CARD_PAYMENT_METHOD)
                 )
             )
@@ -3395,6 +3395,61 @@ internal class PaymentSheetViewModelTest {
             assertThat(errorReporter.getLoggedErrors()).containsExactly(
                 ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_PAYMENT_SHEET_RECEIVED_CONTINUE_RESULT.eventName
             )
+        }
+    }
+
+    @Test
+    fun `When tap to add result is Canceled with payment selection, selection, PMs, screens are updated`() = runTest {
+        val expectedPaymentSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
+        val customerStateHolder = FakeCustomerStateHolder()
+
+        FakeTapToAddHelper.Factory.test {
+            val viewModel = createViewModel(
+                tapToAddHelperFactory = tapToAddHelperFactory,
+                customerStateHolder = customerStateHolder,
+            )
+
+            createCalls.awaitItem()
+
+            viewModel.selection.test {
+                tapToAddHelperFactory.getCreatedHelper()?.emitNextStep(
+                    TapToAddNextStep.ConfirmSavedPaymentMethod(
+                        expectedPaymentSelection
+                    )
+                )
+
+                assertThat(customerStateHolder.addPaymentMethodTurbine.awaitItem()).isEqualTo(
+                    expectedPaymentSelection.paymentMethod
+                )
+                assertThat(awaitItem()).isEqualTo(expectedPaymentSelection)
+            }
+        }
+    }
+
+    @Test
+    fun `When tap to add result is Canceled with payment selection, screens are updated`() = runTest {
+        val expectedPaymentSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
+        val customerStateHolder = FakeCustomerStateHolder()
+
+        FakeTapToAddHelper.Factory.test {
+            val viewModel = createViewModel(
+                tapToAddHelperFactory = tapToAddHelperFactory,
+                customerStateHolder = customerStateHolder,
+            )
+
+            createCalls.awaitItem()
+
+            viewModel.navigationHandler.currentScreen.test {
+                awaitItem()
+
+                tapToAddHelperFactory.getCreatedHelper()?.emitNextStep(
+                    TapToAddNextStep.ConfirmSavedPaymentMethod(
+                        expectedPaymentSelection
+                    )
+                )
+
+                assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.SavedPaymentMethodConfirm>()
+            }
         }
     }
 
@@ -3487,6 +3542,7 @@ internal class PaymentSheetViewModelTest {
         cvcRecollectionHandler: CvcRecollectionHandler = this@PaymentSheetViewModelTest.cvcRecollectionHandler,
         cvcRecollectionInteractor: FakeCvcRecollectionInteractor = FakeCvcRecollectionInteractor(),
         tapToAddHelperFactory: TapToAddHelper.Factory = FakeTapToAddHelper.Factory.noOp(),
+        customerStateHolder: CustomerStateHolder? = null,
     ): PaymentSheetViewModel {
         return createViewModel(
             args = args,
@@ -3508,6 +3564,7 @@ internal class PaymentSheetViewModelTest {
             cvcRecollectionInteractor = cvcRecollectionInteractor,
             confirmationHandlerFactory = { handler },
             tapToAddHelperFactory = tapToAddHelperFactory,
+            customerStateHolder = customerStateHolder,
         )
     }
 
@@ -3543,6 +3600,7 @@ internal class PaymentSheetViewModelTest {
         cvcRecollectionInteractor: FakeCvcRecollectionInteractor = FakeCvcRecollectionInteractor(),
         confirmationHandlerFactory: ConfirmationHandler.Factory? = null,
         tapToAddHelperFactory: TapToAddHelper.Factory = FakeTapToAddHelper.Factory.noOp(),
+        customerStateHolder: CustomerStateHolder? = null,
     ): PaymentSheetViewModel {
         return TestViewModelFactory.create(
             linkConfigurationCoordinator = linkConfigurationCoordinator,
@@ -3577,14 +3635,19 @@ internal class PaymentSheetViewModelTest {
                 },
                 tapToAddHelperFactory = tapToAddHelperFactory,
                 mode = EventReporter.Mode.Complete,
+                customerStateHolderFactory = object : CustomerStateHolder.Factory {
+                    override fun create(viewModel: BaseSheetViewModel): CustomerStateHolder {
+                        return customerStateHolder ?: DefaultCustomerStateHolder.Factory.create(viewModel)
+                    }
+                }
             )
         }
     }
 
     private fun FakeConfirmationHandler.Scenario.createLinkViewModel(): PaymentSheetViewModel {
         val linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(
-            attachNewCardToAccountResult = Result.success(LinkTestUtils.LINK_SAVED_PAYMENT_DETAILS),
-            accountStatus = AccountStatus.Verified(true, null),
+            attachNewCardToAccountResult = Result.success(LinkTestUtils.LINK_PASSTHROUGH_PAYMENT_DETAILS),
+            accountStatus = AccountStatus.Verified(consentPresentation = null),
         )
 
         return createViewModel(

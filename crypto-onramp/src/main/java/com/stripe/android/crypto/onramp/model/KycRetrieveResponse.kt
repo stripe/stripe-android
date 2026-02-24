@@ -27,7 +27,6 @@ data class KycRetrieveResponse(
     @SerialName("dob")
     @Serializable(with = DateOfBirthSerializer::class)
     val dateOfBirth: DateOfBirth,
-
     @SerialName("address")
     @Serializable(with = PaymentSheetAddressSerializer::class)
     val address: PaymentSheet.Address

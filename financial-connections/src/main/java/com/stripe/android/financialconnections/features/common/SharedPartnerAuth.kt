@@ -141,7 +141,6 @@ private fun SharedPartnerLoading(inModal: Boolean) {
                     .fillMaxWidth()
                     .height(32.dp)
                     .background(shimmerBrush, RoundedCornerShape(8.dp))
-
             )
             Spacer(modifier = Modifier.size(16.dp))
 
@@ -150,7 +149,6 @@ private fun SharedPartnerLoading(inModal: Boolean) {
                     .fillMaxWidth()
                     .height(16.dp)
                     .background(shimmerBrush, RoundedCornerShape(8.dp))
-
             )
             Spacer(modifier = Modifier.size(8.dp))
             Box(
@@ -158,7 +156,6 @@ private fun SharedPartnerLoading(inModal: Boolean) {
                     .fillMaxWidth(.50f)
                     .height(16.dp)
                     .background(shimmerBrush, RoundedCornerShape(8.dp))
-
             )
             if (inModal) {
                 Spacer(modifier = Modifier.height(16.dp))
@@ -170,7 +167,6 @@ private fun SharedPartnerLoading(inModal: Boolean) {
                     .fillMaxWidth()
                     .height(56.dp)
                     .background(shimmerBrush, RoundedCornerShape(8.dp))
-
             )
             Spacer(modifier = Modifier.height(16.dp))
             Box(
@@ -178,7 +174,6 @@ private fun SharedPartnerLoading(inModal: Boolean) {
                     .fillMaxWidth()
                     .height(56.dp)
                     .background(shimmerBrush, RoundedCornerShape(8.dp))
-
             )
             Spacer(modifier = Modifier.size(24.dp))
         }

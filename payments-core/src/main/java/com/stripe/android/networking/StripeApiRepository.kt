@@ -49,7 +49,7 @@ import com.stripe.android.exception.CardException
 import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.CheckoutSessionResponse
-import com.stripe.android.model.ClientAttributionMetadata
+import com.stripe.android.model.ConfirmCheckoutSessionParams
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -1572,20 +1572,16 @@ class StripeApiRepository @JvmOverloads internal constructor(
 
     override suspend fun confirmCheckoutSession(
         checkoutSessionId: String,
-        paymentMethodId: String,
-        clientAttributionMetadata: ClientAttributionMetadata,
-        returnUrl: String,
+        confirmCheckoutSessionParams: ConfirmCheckoutSessionParams,
         options: ApiRequest.Options,
     ): Result<CheckoutSessionResponse> {
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createPost(
-                url = getApiUrl("payment_pages/$checkoutSessionId/confirm"),
-                options = options,
-                params = mapOf(
-                    "payment_method" to paymentMethodId,
-                    "client_attribution_metadata" to clientAttributionMetadata.toParamMap(),
-                    "return_url" to returnUrl,
+                url = getApiUrl(
+                    "payment_pages/$checkoutSessionId/confirm"
                 ),
+                options = options,
+                params = confirmCheckoutSessionParams.toParamMap(),
             ),
             jsonParser = CheckoutSessionResponseJsonParser(
                 isLiveMode = options.apiKeyIsLiveMode,
@@ -1726,11 +1722,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
         options: ApiRequest.Options,
         analyticsEvent: PaymentAnalyticsEvent?,
     ): Result<ElementsSession> {
-        // Unsupported for user key sessions.
-        if (options.apiKeyIsUserKey) {
-            return Result.failure(IllegalArgumentException("Invalid API key"))
-        }
-
         fireFraudDetectionDataRequest()
 
         val parser = ElementsSessionJsonParser(

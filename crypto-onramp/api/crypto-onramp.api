@@ -1,15 +1,8 @@
-public final class com/stripe/android/crypto/onramp/BuildConfig {
-	public static final field BUILD_TYPE Ljava/lang/String;
-	public static final field DEBUG Z
-	public static final field LIBRARY_PACKAGE_NAME Ljava/lang/String;
-	public fun <init> ()V
-}
-
 public final class com/stripe/android/crypto/onramp/model/CryptoNetwork$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public synthetic class com/stripe/android/crypto/onramp/model/KycRetrieveResponse$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class com/stripe/android/crypto/onramp/model/KycRetrieveResponse$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/crypto/onramp/model/KycRetrieveResponse$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
@@ -18,6 +11,7 @@ public synthetic class com/stripe/android/crypto/onramp/model/KycRetrieveRespons
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/crypto/onramp/model/KycRetrieveResponse;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/crypto/onramp/model/KycRetrieveResponse$Companion {

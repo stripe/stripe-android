@@ -165,6 +165,57 @@ internal class CustomerMetadataTest {
         }
 
     @Test
+    fun `Should set saveConsent to Enabled when save is enabled for customer session`() {
+        customerSessionPermissionsTest { permissions ->
+            assertThat(permissions.saveConsent).isEqualTo(PaymentMethodSaveConsentBehavior.Enabled)
+        }
+    }
+
+    @Test
+    fun `Should set saveConsent to Disabled when save is disabled for customer session`() {
+        val mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
+            isPaymentMethodSaveEnabled = false,
+            paymentMethodRemove = ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
+            paymentMethodRemoveLast = ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
+            allowRedisplayOverride = PaymentMethod.AllowRedisplay.ALWAYS,
+            isPaymentMethodSetAsDefaultEnabled = false,
+        )
+        val configuration = createConfiguration()
+        val customer = createElementsSessionCustomer(
+            mobilePaymentElementComponent = mobilePaymentElement,
+        )
+        val permissions = CustomerMetadata.Permissions.createForPaymentSheetCustomerSession(
+            configuration = configuration,
+            customer = customer,
+        )
+        assertThat(permissions.saveConsent).isEqualTo(
+            PaymentMethodSaveConsentBehavior.Disabled(
+                overrideAllowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS,
+            )
+        )
+    }
+
+    @Test
+    fun `Should set saveConsent to Disabled when MPE is disabled for customer session`() {
+        customerSessionPermissionsTest(
+            paymentElementDisabled = true,
+        ) { permissions ->
+            assertThat(permissions.saveConsent).isEqualTo(
+                PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null)
+            )
+        }
+    }
+
+    @Test
+    fun `Should set saveConsent to Legacy for legacy ephemeral keys`() {
+        legacyEphemeralKeyTestingScenario(
+            allowsRemovalOfLastSavedPaymentMethod = true,
+        ) { permissions ->
+            assertThat(permissions.saveConsent).isEqualTo(PaymentMethodSaveConsentBehavior.Legacy)
+        }
+    }
+
+    @Test
     fun `'createForCustomerSheet' should have payment method remove permissions of 'Full'`() {
         val customerSheetSession = createCustomerSheetSession(PaymentMethodRemovePermission.Full)
 

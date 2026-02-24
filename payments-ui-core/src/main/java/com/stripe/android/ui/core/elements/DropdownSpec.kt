@@ -14,10 +14,8 @@ import kotlinx.serialization.Serializable
 data class DropdownSpec(
     @SerialName("api_path")
     override val apiPath: IdentifierSpec,
-
     @SerialName("translation_id")
     val labelTranslationId: TranslationId,
-
     @SerialName("items")
     val items: List<DropdownItemSpec>
 ) : FormItemSpec() {

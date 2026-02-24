@@ -57,7 +57,6 @@ private class FinancialConnectionsInstitutionsRepositoryImpl(
         clientSecret: String,
         query: String,
         limit: Int
-
     ): InstitutionResponse {
         val request = apiRequestFactory.createGet(
             url = institutionsUrl,

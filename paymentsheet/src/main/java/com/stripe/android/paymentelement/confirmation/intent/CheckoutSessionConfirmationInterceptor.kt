@@ -4,6 +4,7 @@ import android.content.Context
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.ClientAttributionMetadata
+import com.stripe.android.model.ConfirmCheckoutSessionParams
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -49,7 +50,10 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             options = requestOptions,
         ).fold(
             onSuccess = { paymentMethod ->
-                confirmCheckoutSession(paymentMethod)
+                confirmCheckoutSession(
+                    paymentMethod = paymentMethod,
+                    savePaymentMethod = confirmationOption.shouldSave,
+                )
             },
             onFailure = { error ->
                 ConfirmationDefinition.Action.Fail(
@@ -66,22 +70,33 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         confirmationOption: PaymentMethodConfirmationOption.Saved,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
     ): ConfirmationDefinition.Action<Args> {
-        // For saved payment methods, we don't need to create a new PM.
-        // The confirm API accepts existing payment method IDs directly.
-        return confirmCheckoutSession(confirmationOption.paymentMethod)
+        // For saved payment methods, we don't need to create a new PM or save it again.
+        return confirmCheckoutSession(
+            paymentMethod = confirmationOption.paymentMethod,
+            savePaymentMethod = null,
+        )
     }
 
     /**
-     * Confirms the checkout session with the created payment method.
+     * Confirms the checkout session with the payment method.
+     *
+     * @param paymentMethod The payment method to confirm with.
+     * @param savePaymentMethod Whether to save the payment method for future use.
+     *        Pass `true` if user checked "Save for future use", `false` otherwise.
+     *        Pass `null` for saved payment methods (already saved).
      */
     private suspend fun confirmCheckoutSession(
         paymentMethod: PaymentMethod,
+        savePaymentMethod: Boolean?,
     ): ConfirmationDefinition.Action<Args> {
         return stripeRepository.confirmCheckoutSession(
             checkoutSessionId = checkoutSessionId,
-            paymentMethodId = paymentMethod.id,
-            clientAttributionMetadata = clientAttributionMetadata,
-            returnUrl = returnUrl,
+            confirmCheckoutSessionParams = ConfirmCheckoutSessionParams(
+                paymentMethodId = paymentMethod.id,
+                clientAttributionMetadata = clientAttributionMetadata,
+                returnUrl = returnUrl,
+                savePaymentMethod = savePaymentMethod,
+            ),
             options = requestOptions,
         ).fold(
             onSuccess = { response ->

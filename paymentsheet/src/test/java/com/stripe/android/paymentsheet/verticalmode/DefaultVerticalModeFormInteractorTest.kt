@@ -9,6 +9,7 @@ import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
@@ -238,7 +239,9 @@ internal class DefaultVerticalModeFormInteractorTest {
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                 address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
             ),
-            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
+            customerMetadataPermissions = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS.copy(
+                saveConsent = PaymentMethodSaveConsentBehavior.Enabled
+            ),
             hasCustomerConfiguration = true,
             isPaymentMethodSetAsDefaultEnabled = true,
         )

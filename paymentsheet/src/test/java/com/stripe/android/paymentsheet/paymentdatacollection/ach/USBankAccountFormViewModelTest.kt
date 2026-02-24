@@ -319,9 +319,9 @@ class USBankAccountFormViewModelTest {
             assertThat(input.phone).isEqualTo(CUSTOMER_PHONE)
             assertThat(input.address).isEqualTo(customerAddress)
 
-            assertThat(paymentSelection?.paymentMethodCreateParams).isNotNull()
+            assertThat(paymentSelection.paymentMethodCreateParams).isNotNull()
 
-            val paymentMethodCreateParams = requireNotNull(paymentSelection?.paymentMethodCreateParams)
+            val paymentMethodCreateParams = requireNotNull(paymentSelection.paymentMethodCreateParams)
 
             assertThat(paymentMethodCreateParams.billingDetails).isNotNull()
 
@@ -385,9 +385,9 @@ class USBankAccountFormViewModelTest {
             assertThat(input.phone).isEqualTo(CUSTOMER_PHONE)
             assertThat(input.address).isEqualTo(customerAddress)
 
-            assertThat(paymentSelection?.paymentMethodCreateParams).isNotNull()
+            assertThat(paymentSelection.paymentMethodCreateParams).isNotNull()
 
-            val paymentMethodCreateParams = requireNotNull(paymentSelection?.paymentMethodCreateParams)
+            val paymentMethodCreateParams = requireNotNull(paymentSelection.paymentMethodCreateParams)
 
             assertThat(paymentMethodCreateParams.billingDetails).isNotNull()
 

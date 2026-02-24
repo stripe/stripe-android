@@ -195,7 +195,6 @@ internal object PaymentIntentFixtures {
 
     val PI_REQUIRES_MASTERCARD_3DS2_JSON by lazy {
         JSONObject(
-
             """
         {
             "id": "pi_1ExkUeAWhjPjYwPiXph9ouXa",
@@ -1401,7 +1400,6 @@ internal object PaymentIntentFixtures {
 
     val LLAMAPAY_REQUIRES_ACTION_JSON by lazy {
         JSONObject(
-
             """
         {
             "id": "pi_1IcuwoL32KlRo",
@@ -1459,7 +1457,6 @@ internal object PaymentIntentFixtures {
 
     val KONBINI_REQUIRES_ACTION_JSON by lazy {
         JSONObject(
-
             """
         {
             "id": "pi_1IcuwoL32KlRo",
