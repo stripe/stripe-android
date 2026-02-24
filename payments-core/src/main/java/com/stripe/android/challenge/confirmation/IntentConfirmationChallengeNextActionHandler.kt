@@ -9,7 +9,7 @@ import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.payments.PaymentFlowResult
+import com.stripe.android.payments.PaymentFlowResult.Unvalidated
 import com.stripe.android.payments.core.authentication.PaymentNextActionHandler
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.view.AuthActivityStarterHost
@@ -38,7 +38,7 @@ internal class IntentConfirmationChallengeNextActionHandler @Inject constructor(
 
     override fun onNewActivityResultCaller(
         activityResultCaller: ActivityResultCaller,
-        activityResultCallback: ActivityResultCallback<PaymentFlowResult.Unvalidated>
+        activityResultCallback: ActivityResultCallback<Unvalidated>
     ) {
         intentConfirmationChallengeActivityContractNextActionLauncher = activityResultCaller.registerForActivityResult(
             IntentConfirmationChallengeActivityContract()
@@ -46,14 +46,20 @@ internal class IntentConfirmationChallengeNextActionHandler @Inject constructor(
             activityResultCallback.onActivityResult(
                 when (result) {
                     is IntentConfirmationChallengeActivityResult.Failed -> {
-                        PaymentFlowResult.Unvalidated(
+                        Unvalidated(
                             flowOutcome = StripeIntentResult.Outcome.FAILED,
                             exception = StripeException.create(result.error)
                         )
                     }
                     is IntentConfirmationChallengeActivityResult.Success -> {
-                        PaymentFlowResult.Unvalidated(
+                        Unvalidated(
                             clientSecret = result.clientSecret,
+                        )
+                    }
+                    IntentConfirmationChallengeActivityResult.Canceled -> {
+                        Unvalidated(
+                            flowOutcome = StripeIntentResult.Outcome.CANCELED,
+                            exception = null
                         )
                     }
                 }

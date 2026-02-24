@@ -8,5 +8,8 @@ internal sealed interface IntentConfirmationChallengeActivityResult : Parcelable
     data class Success(val clientSecret: String) : IntentConfirmationChallengeActivityResult
 
     @Parcelize
+    data object Canceled : IntentConfirmationChallengeActivityResult
+
+    @Parcelize
     data class Failed(val error: Throwable) : IntentConfirmationChallengeActivityResult
 }
