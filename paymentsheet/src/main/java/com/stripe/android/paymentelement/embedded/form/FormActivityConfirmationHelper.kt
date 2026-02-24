@@ -51,11 +51,10 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
             tapToAddHelper.nextStep.collect { result ->
                 val formResult = when (result) {
                     is TapToAddNextStep.ConfirmSavedPaymentMethod -> {
-                        FormResult.Complete(
-                            selection = result.paymentSelection,
-                            hasBeenConfirmed = false,
-                            customerState = customerStateHolder.customer.value,
+                        stateHelper.updateSavedPaymentSelectionToConfirm(
+                            result.paymentSelection,
                         )
+                        null
                     }
                     TapToAddNextStep.Complete -> {
                         FormResult.Complete(
@@ -73,7 +72,9 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
                         )
                     }
                 }
-                stateHelper.setResult(formResult)
+                formResult?.let {
+                    stateHelper.setResult(it)
+                }
             }
         }
 

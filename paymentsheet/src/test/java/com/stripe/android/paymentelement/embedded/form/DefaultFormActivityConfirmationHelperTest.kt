@@ -147,7 +147,7 @@ class DefaultFormActivityConfirmationHelperTest {
     }
 
     @Test
-    fun `TapToAddResult Canceled with payment selection sets state helper result as expected`() {
+    fun `TapToAddResult confirm saved payment method sets saved payment method confirm selection`() {
         val tapToAddHelper = FakeTapToAddHelper()
         val customerStateHolder = FakeCustomerStateHolder()
         val expectedSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
@@ -161,12 +161,8 @@ class DefaultFormActivityConfirmationHelperTest {
                 )
             )
 
-            assertThat(stateHelper.resultTurbine.awaitItem()).isEqualTo(
-                FormResult.Complete(
-                    selection = expectedSelection,
-                    hasBeenConfirmed = false,
-                    customerState = customerStateHolder.customer.value,
-                )
+            assertThat(stateHelper.selectionTurbine.awaitItem()).isEqualTo(
+                expectedSelection,
             )
         }
     }
