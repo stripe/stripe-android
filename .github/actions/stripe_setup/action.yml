@@ -9,7 +9,7 @@ runs:
       shell: bash
     - uses: actions/setup-java@v5
       with:
-        distribution: 'temurin'
-        java-version: '25'
+        distribution: 'corretto'
+        java-version: '21'
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v4
