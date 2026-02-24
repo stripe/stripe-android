@@ -74,7 +74,8 @@ internal fun IntentConfirmationChallengeUI(
         ) {
             IconButton(
                 modifier = Modifier
-                    .align(Alignment.CenterEnd),
+                    .align(Alignment.CenterStart)
+                    .testTag(INTENT_CONFIRMATION_CHALLENGE_CLOSE_BUTTON_TAG),
                 onClick = closeClicked
             ) {
                 Icon(
@@ -89,3 +90,4 @@ internal fun IntentConfirmationChallengeUI(
 
 internal const val INTENT_CONFIRMATION_CHALLENGE_LOADER_TAG = "intent_confirmation_challenge_loader"
 internal const val INTENT_CONFIRMATION_CHALLENGE_WEB_VIEW_TAG = "intent_confirmation_challenge_webview"
+internal const val INTENT_CONFIRMATION_CHALLENGE_CLOSE_BUTTON_TAG = "intent_confirmation_challenge_close_button"

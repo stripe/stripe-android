@@ -139,6 +139,21 @@ internal class IntentConfirmationChallengeViewModelTest {
     }
 
     @Test
+    fun `when closeClicked is called, result emits Canceled`() = runTest {
+        val fakeBridgeHandler = FakeConfirmationChallengeBridgeHandler()
+        val viewModel = createViewModel(fakeBridgeHandler)
+
+        viewModel.result.test {
+            viewModel.closeClicked()
+
+            val result = awaitItem()
+            assertThat(result).isEqualTo(IntentConfirmationChallengeActivityResult.Canceled)
+
+            ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
     fun `when onStart is called, analytics start is reported`() = runTest {
         val fakeBridgeHandler = FakeConfirmationChallengeBridgeHandler()
         val fakeAnalyticsReporter = FakeIntentConfirmationChallengeAnalyticsEventReporter()
