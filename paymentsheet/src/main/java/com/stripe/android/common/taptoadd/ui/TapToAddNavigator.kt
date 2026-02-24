@@ -20,14 +20,17 @@ import javax.inject.Singleton
 @Singleton
 internal class TapToAddNavigator(
     private val coroutineScope: CoroutineScope,
+    private val paymentMethodHolder: TapToAddPaymentMethodHolder,
     initialScreen: Screen,
 ) {
     @Inject constructor(
         @ViewModelScope coroutineScope: CoroutineScope,
         initialTapToAddScreenFactory: InitialTapToAddScreenFactory,
+        paymentMethodHolder: TapToAddPaymentMethodHolder,
     ) : this(
         coroutineScope = coroutineScope,
         initialScreen = initialTapToAddScreenFactory.createInitialScreen(),
+        paymentMethodHolder = paymentMethodHolder,
     )
 
     private val navigationHandler = NavigationHandler(
@@ -46,7 +49,10 @@ internal class TapToAddNavigator(
         when (action) {
             is Action.Close -> {
                 coroutineScope.launch {
-                    _result.emit(TapToAddResult.Canceled(paymentSelection = null))
+                    val paymentSelection = paymentMethodHolder.paymentMethod?.let { paymentMethod ->
+                        PaymentSelection.Saved(paymentMethod)
+                    }
+                    _result.emit(TapToAddResult.Canceled(paymentSelection = paymentSelection))
                 }
             }
             is Action.Complete -> {
