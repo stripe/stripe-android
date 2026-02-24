@@ -3,7 +3,7 @@ public final class com/stripe/android/connect/AccountOnboardingController : com/
 }
 
 public abstract interface class com/stripe/android/connect/AccountOnboardingListener : com/stripe/android/connect/StripeEmbeddedComponentListener {
-	public abstract fun onExit ()V
+	public fun onExit ()V
 }
 
 public final class com/stripe/android/connect/AccountOnboardingListener$DefaultImpls {
@@ -326,8 +326,8 @@ public abstract interface class com/stripe/android/connect/StripeComponentContro
 }
 
 public abstract interface class com/stripe/android/connect/StripeEmbeddedComponentListener {
-	public abstract fun onLoadError (Ljava/lang/Throwable;)V
-	public abstract fun onLoaderStart ()V
+	public fun onLoadError (Ljava/lang/Throwable;)V
+	public fun onLoaderStart ()V
 }
 
 public final class com/stripe/android/connect/StripeEmbeddedComponentListener$DefaultImpls {
@@ -500,7 +500,7 @@ public final class com/stripe/android/connect/appearance/fonts/CustomFontSource 
 	public fun toString ()Ljava/lang/String;
 }
 
-public synthetic class com/stripe/android/connect/appearance/fonts/CustomFontSource$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class com/stripe/android/connect/appearance/fonts/CustomFontSource$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/connect/appearance/fonts/CustomFontSource$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
@@ -509,6 +509,7 @@ public synthetic class com/stripe/android/connect/appearance/fonts/CustomFontSou
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/connect/appearance/fonts/CustomFontSource;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/connect/appearance/fonts/CustomFontSource$Companion {

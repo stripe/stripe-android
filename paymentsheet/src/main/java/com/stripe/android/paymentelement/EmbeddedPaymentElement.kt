@@ -622,17 +622,14 @@ class EmbeddedPaymentElement @Inject internal constructor(
     class PaymentOptionDisplayData internal constructor(
         @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         val imageLoader: suspend () -> Drawable,
-
         /**
          * A user facing string representing the payment method; e.g. "Google Pay" or "···· 4242" for a card.
          */
         val label: String,
-
         /**
          * The billing details associated with the customer's desired payment method.
          */
         val billingDetails: PaymentSheet.BillingDetails?,
-
         /**
          * A string representation of the customer's desired payment method:
          * - If this is a Stripe payment method, see
@@ -643,7 +640,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
          * - If this is Google Pay, the value is "google_pay".
          */
         val paymentMethodType: String,
-
         /**
          * If you set [Configuration.Builder.embeddedViewDisplaysMandateText] to `false`, this text must be displayed to
          * the customer near your "Buy" button to comply with regulations.

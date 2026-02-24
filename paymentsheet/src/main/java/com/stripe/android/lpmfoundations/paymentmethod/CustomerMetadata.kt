@@ -20,6 +20,7 @@ internal data class CustomerMetadata(
     @Parcelize
     internal data class Permissions(
         val removePaymentMethod: PaymentMethodRemovePermission,
+        val saveConsent: PaymentMethodSaveConsentBehavior,
         val canRemoveLastPaymentMethod: Boolean,
         val canRemoveDuplicates: Boolean,
         val canUpdateFullPaymentMethodDetails: Boolean,
@@ -53,8 +54,24 @@ internal data class CustomerMetadata(
                     mobilePaymentElementComponent is ElementsSession.Customer.Components.MobilePaymentElement.Enabled &&
                     mobilePaymentElementComponent.canRemoveLastPaymentMethod
 
+                val saveConsent = when (mobilePaymentElementComponent) {
+                    is ElementsSession.Customer.Components.MobilePaymentElement.Enabled -> {
+                        if (mobilePaymentElementComponent.isPaymentMethodSaveEnabled) {
+                            PaymentMethodSaveConsentBehavior.Enabled
+                        } else {
+                            PaymentMethodSaveConsentBehavior.Disabled(
+                                overrideAllowRedisplay = mobilePaymentElementComponent.allowRedisplayOverride
+                            )
+                        }
+                    }
+                    is ElementsSession.Customer.Components.MobilePaymentElement.Disabled -> {
+                        PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null)
+                    }
+                }
+
                 return Permissions(
                     removePaymentMethod = removePaymentMethod,
+                    saveConsent = saveConsent,
                     canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
                     // Should always remove duplicates when using `customer_session`
                     canRemoveDuplicates = true,
@@ -72,6 +89,11 @@ internal data class CustomerMetadata(
                      * always be set to true.
                      */
                     removePaymentMethod = PaymentMethodRemovePermission.Full,
+                    /*
+                     * Legacy ephemeral keys don't have server-side save consent configuration, so we use
+                     * the legacy behavior which shows the save checkbox based on the setup intent usage.
+                     */
+                    saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
                     /*
                      * Un-scoped legacy ephemeral keys normally have full permissions to remove the last payment
                      * method, however we do have client-side configuration option to configure this ability. This
@@ -94,6 +116,7 @@ internal data class CustomerMetadata(
             ): Permissions {
                 return Permissions(
                     removePaymentMethod = customerSheetSession.permissions.removePaymentMethod,
+                    saveConsent = customerSheetSession.paymentMethodSaveConsentBehavior,
                     canRemoveLastPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod,
                     canRemoveDuplicates = true,
                     canUpdateFullPaymentMethodDetails =

@@ -251,7 +251,6 @@ internal class LinkConfirmationDefinitionTest {
             result = LinkActivityResult.Failed(
                 error = exception,
                 linkAccountUpdate = LinkAccountUpdate.Value(null)
-
             )
         )
 

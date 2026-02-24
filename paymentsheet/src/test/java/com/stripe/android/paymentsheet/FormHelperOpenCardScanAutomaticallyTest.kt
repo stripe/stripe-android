@@ -159,6 +159,7 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                 tapToAddHelperFactory = FakeTapToAddHelper.Factory.noOp(),
                 mode = EventReporter.Mode.Complete,
                 errorReporter = FakeErrorReporter(),
+                customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
             )
         }
     }
@@ -205,7 +206,8 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                     }
                 },
                 tapToAddHelperFactory = FakeTapToAddHelper.Factory.noOp(),
-                mode = EventReporter.Mode.Complete
+                mode = EventReporter.Mode.Complete,
+                customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
             )
         }
     }

@@ -9,6 +9,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.analytics.FakeLinkAnalyticsHelper
 import com.stripe.android.link.analytics.LinkAnalyticsHelper
@@ -230,7 +231,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
     @Test
     fun `'action' should return 'Launch' after successful sign-in & attach`() = test(
         attachNewCardToAccountResult = Result.success(
-            LinkPaymentDetails.Saved(
+            LinkPaymentDetails.Passthrough(
                 paymentDetails = ConsumerPaymentDetails.Passthrough(
                     id = "csmrpd_123",
                     last4 = "4242",
@@ -361,6 +362,73 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
         assertThat(nextStepResult.confirmationOption).isEqualTo(nextOption)
         assertThat(nextStepResult.arguments).isEqualTo(CONFIRMATION_PARAMETERS)
     }
+
+    @Test
+    fun `'action' with saved link option calls attachExistingCardToAccount and returns saved payment option`() =
+        test(
+            attachExistingCardToAccountResult = Result.success(
+                LinkPaymentDetails.Saved(
+                    paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+                    paymentMethod = PaymentMethodFactory.card(),
+                )
+            ),
+            initialAccountStatus = AccountStatus.Verified(consentPresentation = null),
+        ) {
+            val savedOption = createSavedLinkInlineSignupConfirmationOption()
+
+            val action = definition.action(
+                confirmationOption = savedOption,
+                confirmationArgs = CONFIRMATION_PARAMETERS,
+            )
+
+            val getAccountStatusFlowCall = coordinatorScenario.getAccountStatusFlowCalls.awaitItem()
+            assertThat(getAccountStatusFlowCall.configuration).isEqualTo(savedOption.linkConfiguration)
+
+            val attachExistingCardCall = coordinatorScenario.attachExistingCardToAccountCalls.awaitItem()
+            assertThat(attachExistingCardCall.configuration).isEqualTo(savedOption.linkConfiguration)
+            assertThat(attachExistingCardCall.paymentMethod).isEqualTo(savedOption.paymentMethod)
+
+            assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Launch<Unit>>()
+            val launchAction = action.asLaunch()
+            val nextConfirmationOption = launchAction.launcherArguments.nextConfirmationOption
+
+            assertThat(nextConfirmationOption).isInstanceOf<PaymentMethodConfirmationOption.Saved>()
+            val savedConfirmationOption = nextConfirmationOption.asSaved()
+            assertThat(savedConfirmationOption.paymentMethod).isEqualTo(savedOption.paymentMethod)
+            assertThat(savedConfirmationOption.optionsParams).isEqualTo(savedOption.optionsParams)
+
+            assertThat(storeScenario.markAsUsedCalls.awaitItem()).isNotNull()
+
+            coordinatorScenario.attachNewCardToAccountCalls.expectNoEvents()
+        }
+
+    @Test
+    fun `'action' with saved link option returns original option when attachExistingCardToAccount fails`() =
+        test(
+            attachExistingCardToAccountResult = Result.failure(IllegalStateException("API error")),
+            initialAccountStatus = AccountStatus.Verified(consentPresentation = null),
+        ) {
+            val savedOption = createSavedLinkInlineSignupConfirmationOption()
+
+            val action = definition.action(
+                confirmationOption = savedOption,
+                confirmationArgs = CONFIRMATION_PARAMETERS,
+            )
+
+            assertThat(coordinatorScenario.getAccountStatusFlowCalls.awaitItem()).isNotNull()
+
+            val attachExistingCardCall = coordinatorScenario.attachExistingCardToAccountCalls.awaitItem()
+            assertThat(attachExistingCardCall.paymentMethod).isEqualTo(savedOption.paymentMethod)
+
+            assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Launch<Unit>>()
+
+            val launchAction = action.asLaunch()
+            val nextConfirmationOption = launchAction.launcherArguments.nextConfirmationOption
+
+            assertThat(nextConfirmationOption).isInstanceOf<PaymentMethodConfirmationOption.Saved>()
+            assertThat(nextConfirmationOption.asSaved().paymentMethod).isEqualTo(savedOption.paymentMethod)
+            assertThat(nextConfirmationOption.asSaved().optionsParams).isEqualTo(savedOption.optionsParams)
+        }
 
     private fun testSkippedLinkSignupOnSignInError(
         accountStatus: AccountStatus
@@ -516,7 +584,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
 
         actionTest(
             attachNewCardToAccountResult = Result.success(
-                LinkPaymentDetails.Saved(
+                LinkPaymentDetails.Passthrough(
                     paymentDetails = ConsumerPaymentDetails.Passthrough(
                         id = "csmrpd_123",
                         last4 = "4242",
@@ -597,7 +665,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
     }
 
     private fun validateSkippedLaunchAction(
-        confirmationOption: LinkInlineSignupConfirmationOption,
+        confirmationOption: LinkInlineSignupConfirmationOption.New,
         launchAction: ConfirmationDefinition.Action.Launch<LinkInlineSignupConfirmationDefinition.LauncherArguments>
     ) {
         val nextConfirmationOption = launchAction.launcherArguments.nextConfirmationOption
@@ -615,29 +683,15 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
     private fun test(
         attachNewCardToAccountResult: Result<LinkPaymentDetails> = Result.success(
             LinkPaymentDetails.New(
-                paymentDetails = ConsumerPaymentDetails.Card(
-                    id = "pm_123",
-                    last4 = "4242",
-                    expiryYear = 2024,
-                    expiryMonth = 4,
-                    brand = CardBrand.DinersClub,
-                    cvcCheck = CvcCheck.Fail,
-                    isDefault = false,
-                    networks = emptyList(),
-                    funding = ConsumerPaymentDetails.Card.Funding.Credit,
-                    nickname = null,
-                    billingAddress = ConsumerPaymentDetails.BillingAddress(
-                        name = null,
-                        line1 = null,
-                        line2 = null,
-                        locality = null,
-                        administrativeArea = null,
-                        countryCode = CountryCode.US,
-                        postalCode = "42424"
-                    )
-                ),
+                paymentDetails = DEFAULT_CONSUMER_CARD,
                 confirmParams = mock(),
                 originalParams = mock(),
+            )
+        ),
+        attachExistingCardToAccountResult: Result<LinkPaymentDetails.Saved> = Result.success(
+            LinkPaymentDetails.Saved(
+                paymentDetails = DEFAULT_CONSUMER_CARD,
+                paymentMethod = PaymentMethodFactory.card(),
             )
         ),
         signInResult: Result<Boolean> = Result.success(true),
@@ -648,6 +702,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
     ) = runTest {
         RecordingLinkConfigurationCoordinator.test(
             attachNewCardToAccountResult = attachNewCardToAccountResult,
+            attachExistingCardToAccountResult = attachExistingCardToAccountResult,
             signInResult = signInResult,
             initialAccountStatus = initialAccountStatus,
             accountStatusOnSignIn = accountStatusOnSignIn,
@@ -706,8 +761,8 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
             consentAction = SignUpConsentAction.Checkbox,
         ),
         passthroughMode: Boolean = false,
-    ): LinkInlineSignupConfirmationOption {
-        return LinkInlineSignupConfirmationOption(
+    ): LinkInlineSignupConfirmationOption.New {
+        return LinkInlineSignupConfirmationOption.New(
             createParams = createParams,
             optionsParams = null,
             extraParams = null,
@@ -753,6 +808,25 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                 clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
                 cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
             ),
+            userInput = userInput,
+        )
+    }
+
+    private fun createSavedLinkInlineSignupConfirmationOption(
+        paymentMethod: PaymentMethod = PaymentMethodFactory.card(),
+        optionsParams: PaymentMethodOptionsParams? = null,
+        userInput: UserInput = UserInput.SignUp(
+            email = "email@email.com",
+            phone = "1234567890",
+            country = "CA",
+            name = "John Doe",
+            consentAction = SignUpConsentAction.Checkbox,
+        ),
+    ): LinkInlineSignupConfirmationOption.Saved {
+        return LinkInlineSignupConfirmationOption.Saved(
+            paymentMethod = paymentMethod,
+            optionsParams = optionsParams,
+            linkConfiguration = TestFactory.LINK_CONFIGURATION,
             userInput = userInput,
         )
     }
@@ -827,6 +901,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
 
     private class RecordingLinkConfigurationCoordinator private constructor(
         private val attachNewCardToAccountResult: Result<LinkPaymentDetails>,
+        private val attachExistingCardToAccountResult: Result<LinkPaymentDetails.Saved>,
         private val signInResult: Result<Boolean>,
         initialAccountStatus: AccountStatus,
         private val accountStatusOnSignIn: AccountStatus,
@@ -834,6 +909,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
         private val getAccountStatusFlowCalls = Turbine<GetAccountStatusFlowCall>()
         private val signInCalls = Turbine<SignInCall>()
         private val attachNewCardToAccountCalls = Turbine<AttachNewCardToAccountCall>()
+        private val attachExistingCardToAccountCalls = Turbine<AttachExistingCardToAccountCall>()
 
         private val accountStatusFlow = MutableStateFlow(initialAccountStatus)
 
@@ -880,6 +956,15 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
             return attachNewCardToAccountResult
         }
 
+        override suspend fun attachExistingCardToAccount(
+            configuration: LinkConfiguration,
+            paymentMethod: PaymentMethod,
+        ): Result<LinkPaymentDetails.Saved> {
+            attachExistingCardToAccountCalls.add(AttachExistingCardToAccountCall(configuration, paymentMethod))
+
+            return attachExistingCardToAccountResult
+        }
+
         override suspend fun logOut(configuration: LinkConfiguration): Result<ConsumerSession> {
             throw NotImplementedError()
         }
@@ -898,16 +983,23 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
             val paymentMethodCreateParams: PaymentMethodCreateParams,
         )
 
+        data class AttachExistingCardToAccountCall(
+            val configuration: LinkConfiguration,
+            val paymentMethod: PaymentMethod,
+        )
+
         class Scenario(
             val coordinator: LinkConfigurationCoordinator,
             val getAccountStatusFlowCalls: ReceiveTurbine<GetAccountStatusFlowCall>,
             val signInCalls: ReceiveTurbine<SignInCall>,
             val attachNewCardToAccountCalls: ReceiveTurbine<AttachNewCardToAccountCall>,
+            val attachExistingCardToAccountCalls: ReceiveTurbine<AttachExistingCardToAccountCall>,
         )
 
         companion object {
             suspend fun test(
                 attachNewCardToAccountResult: Result<LinkPaymentDetails>,
+                attachExistingCardToAccountResult: Result<LinkPaymentDetails.Saved>,
                 signInResult: Result<Boolean>,
                 initialAccountStatus: AccountStatus,
                 accountStatusOnSignIn: AccountStatus,
@@ -915,6 +1007,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
             ) {
                 val coordinator = RecordingLinkConfigurationCoordinator(
                     attachNewCardToAccountResult = attachNewCardToAccountResult,
+                    attachExistingCardToAccountResult = attachExistingCardToAccountResult,
                     signInResult = signInResult,
                     initialAccountStatus = initialAccountStatus,
                     accountStatusOnSignIn = accountStatusOnSignIn,
@@ -925,14 +1018,40 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                         coordinator = coordinator,
                         getAccountStatusFlowCalls = coordinator.getAccountStatusFlowCalls,
                         signInCalls = coordinator.signInCalls,
-                        attachNewCardToAccountCalls = coordinator.attachNewCardToAccountCalls
+                        attachNewCardToAccountCalls = coordinator.attachNewCardToAccountCalls,
+                        attachExistingCardToAccountCalls = coordinator.attachExistingCardToAccountCalls,
                     )
                 )
 
                 coordinator.getAccountStatusFlowCalls.ensureAllEventsConsumed()
                 coordinator.signInCalls.ensureAllEventsConsumed()
                 coordinator.attachNewCardToAccountCalls.ensureAllEventsConsumed()
+                coordinator.attachExistingCardToAccountCalls.ensureAllEventsConsumed()
             }
         }
+    }
+
+    private companion object {
+        private val DEFAULT_CONSUMER_CARD = ConsumerPaymentDetails.Card(
+            id = "pm_123",
+            last4 = "4242",
+            expiryYear = 2024,
+            expiryMonth = 4,
+            brand = CardBrand.DinersClub,
+            cvcCheck = CvcCheck.Fail,
+            isDefault = false,
+            networks = emptyList(),
+            funding = ConsumerPaymentDetails.Card.Funding.Credit,
+            nickname = null,
+            billingAddress = ConsumerPaymentDetails.BillingAddress(
+                name = null,
+                line1 = null,
+                line2 = null,
+                locality = null,
+                administrativeArea = null,
+                countryCode = CountryCode.US,
+                postalCode = "42424"
+            )
+        )
     }
 }

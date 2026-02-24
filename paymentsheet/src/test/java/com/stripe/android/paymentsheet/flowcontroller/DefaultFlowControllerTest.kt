@@ -1062,7 +1062,7 @@ internal class DefaultFlowControllerTest {
             val arguments = startTurbine.awaitItem()
 
             assertThat(arguments.confirmationOption).isEqualTo(
-                LinkInlineSignupConfirmationOption(
+                LinkInlineSignupConfirmationOption.New(
                     createParams = paymentSelection.paymentMethodCreateParams,
                     optionsParams = paymentSelection.paymentMethodOptionsParams,
                     extraParams = paymentSelection.paymentMethodExtraParams,
@@ -1120,7 +1120,7 @@ internal class DefaultFlowControllerTest {
             val arguments = startTurbine.awaitItem()
 
             assertThat(arguments.confirmationOption).isEqualTo(
-                LinkInlineSignupConfirmationOption(
+                LinkInlineSignupConfirmationOption.New(
                     createParams = paymentSelection.paymentMethodCreateParams,
                     optionsParams = paymentSelection.paymentMethodOptionsParams,
                     extraParams = paymentSelection.paymentMethodExtraParams,
@@ -1174,7 +1174,7 @@ internal class DefaultFlowControllerTest {
             val arguments = startTurbine.awaitItem()
 
             assertThat(arguments.confirmationOption).isEqualTo(
-                LinkInlineSignupConfirmationOption(
+                LinkInlineSignupConfirmationOption.New(
                     createParams = paymentSelection.paymentMethodCreateParams,
                     optionsParams = paymentSelection.paymentMethodOptionsParams,
                     extraParams = paymentSelection.paymentMethodExtraParams,

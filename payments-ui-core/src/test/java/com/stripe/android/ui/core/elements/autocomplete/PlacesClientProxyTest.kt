@@ -23,7 +23,7 @@ import com.google.android.libraries.places.api.net.SearchByTextRequest
 import com.google.android.libraries.places.api.net.SearchByTextResponse
 import com.google.android.libraries.places.api.net.SearchNearbyRequest
 import com.google.android.libraries.places.api.net.SearchNearbyResponse
-import com.google.android.libraries.places.internal.zzmu
+import com.google.android.libraries.places.internal.zzmy
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
@@ -254,28 +254,28 @@ class PlacesClientProxyTest {
 
             override fun zza(
                 p0: FindAutocompletePredictionsRequest?,
-                p1: zzmu?
+                p1: zzmy?
             ): Task<*>? {
                 throw AssertionError("Not expected")
             }
 
             override fun zzb(
                 p0: FetchPhotoRequest?,
-                p1: zzmu?
+                p1: zzmy?
             ): Task<*>? {
                 throw AssertionError("Not expected")
             }
 
             override fun zzc(
                 p0: FetchResolvedPhotoUriRequest?,
-                p1: zzmu?
+                p1: zzmy?
             ): Task<*>? {
                 throw AssertionError("Not expected")
             }
 
             override fun zzd(
                 p0: FetchPlaceRequest?,
-                p1: zzmu?
+                p1: zzmy?
             ): Task<*>? {
                 throw AssertionError("Not expected")
             }
@@ -286,28 +286,28 @@ class PlacesClientProxyTest {
 
             override fun zzf(
                 p0: FindCurrentPlaceRequest?,
-                p1: zzmu?
+                p1: zzmy?
             ): Task<*>? {
                 throw AssertionError("Not expected")
             }
 
             override fun zzh(
                 p0: IsOpenRequest?,
-                p1: zzmu?
+                p1: zzmy?
             ): Task<*>? {
                 throw AssertionError("Not expected")
             }
 
             override fun zzi(
                 p0: SearchByTextRequest?,
-                p1: zzmu?
+                p1: zzmy?
             ): Task<*>? {
                 throw AssertionError("Not expected")
             }
 
             override fun zzj(
                 p0: SearchNearbyRequest?,
-                p1: zzmu?
+                p1: zzmy?
             ): Task<*>? {
                 throw AssertionError("Not expected")
             }

@@ -17,4 +17,10 @@ internal open class IntentConfirmationChallengeWebView(context: Context) : WebVi
     open fun addBridgeHandler(handler: ConfirmationChallengeBridgeHandler) {
         addJavascriptInterface(handler, "Android")
     }
+
+    open fun updateUserAgent(userAgent: String) {
+        settings.apply {
+            userAgentString = "${settings.userAgentString.orEmpty()} [$userAgent]"
+        }
+    }
 }

@@ -318,11 +318,9 @@ class LinkController @Inject internal constructor(
         @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @field:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         val elementsSessionId: String? = null,
-
         @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @field:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         val internalLinkAccount: LinkAccount? = null,
-
         @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @field:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         val merchantLogoUrl: String? = null,

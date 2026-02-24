@@ -175,10 +175,21 @@ class LpmSerializerTest {
     @Test
     fun `Verify all types api_path parsed correctly`() {
         val types = listOf(
-            "billing_address", "affirm_header", "afterpay_header",
-            "au_becs_bsb_number", "au_becs_account_number", "au_becs_mandate",
-            "country", "email", "iban", "klarna_country",
-            "klarna_header", "static_text", "name", "mandate", "sepa_mandate"
+            "billing_address",
+            "affirm_header",
+            "afterpay_header",
+            "au_becs_bsb_number",
+            "au_becs_account_number",
+            "au_becs_mandate",
+            "country",
+            "email",
+            "iban",
+            "klarna_country",
+            "klarna_header",
+            "static_text",
+            "name",
+            "mandate",
+            "sepa_mandate"
         )
         types.forEach { fieldType ->
             println("field type: $fieldType")

@@ -14,7 +14,7 @@ import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddMode
-import com.stripe.android.common.taptoadd.TapToAddResult
+import com.stripe.android.common.taptoadd.TapToAddNextStep
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.utils.requireApplication
@@ -59,7 +59,7 @@ import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
 @JvmSuppressWildcards
-internal class PaymentOptionsViewModel(
+internal class PaymentOptionsViewModel @Inject constructor(
     private val args: PaymentOptionContract.Args,
     private val linkAccountHolder: LinkAccountHolder,
     private val linkGateFactory: LinkGate.Factory,
@@ -73,7 +73,7 @@ internal class PaymentOptionsViewModel(
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     tapToAddHelperFactory: TapToAddHelper.Factory,
     mode: EventReporter.Mode,
-    initialCustomerStateHolder: CustomerStateHolder?,
+    customerStateHolderFactory: CustomerStateHolder.Factory,
 ) : BaseSheetViewModel(
     config = args.configuration,
     eventReporter = eventReporter,
@@ -84,39 +84,8 @@ internal class PaymentOptionsViewModel(
     cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
     isCompleteFlow = false,
     mode = mode,
-    customerStateHolder = initialCustomerStateHolder,
+    customerStateHolderFactory = customerStateHolderFactory,
 ) {
-
-    @Inject constructor(
-        args: PaymentOptionContract.Args,
-        linkAccountHolder: LinkAccountHolder,
-        linkGateFactory: LinkGate.Factory,
-        errorReporter: ErrorReporter,
-        linkPaymentLauncher: LinkPaymentLauncher,
-        eventReporter: EventReporter,
-        customerRepository: CustomerRepository,
-        @IOContext workContext: CoroutineContext,
-        savedStateHandle: SavedStateHandle,
-        linkHandler: LinkHandler,
-        cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
-        tapToAddHelperFactory: TapToAddHelper.Factory,
-        mode: EventReporter.Mode,
-    ) : this(
-        args = args,
-        linkAccountHolder = linkAccountHolder,
-        linkGateFactory = linkGateFactory,
-        errorReporter = errorReporter,
-        linkPaymentLauncher = linkPaymentLauncher,
-        eventReporter = eventReporter,
-        customerRepository = customerRepository,
-        workContext = workContext,
-        savedStateHandle = savedStateHandle,
-        linkHandler = linkHandler,
-        cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
-        tapToAddHelperFactory = tapToAddHelperFactory,
-        mode = mode,
-        initialCustomerStateHolder = null,
-    )
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
         config = config,
@@ -138,6 +107,8 @@ internal class PaymentOptionsViewModel(
     override val tapToAddHelper = tapToAddHelperFactory.create(
         coroutineScope = viewModelScope,
         tapToAddMode = TapToAddMode.Continue,
+        updateSelection = ::updateSelection,
+        customerStateHolder = customerStateHolder,
     )
 
     private val _paymentOptionsActivityResult = MutableSharedFlow<PaymentOptionsActivityResult>(replay = 1)
@@ -176,7 +147,6 @@ internal class PaymentOptionsViewModel(
         buttonsEnabled,
         selection,
         linkAccountHolder.linkAccountInfo
-
     ) { isLinkAvailable, linkEmail, buttonsEnabled, currentSelection, linkAccountInfo ->
         val paymentMethodMetadata = args.state.paymentMethodMetadata
         val linkConfiguration = paymentMethodMetadata.linkState?.configuration
@@ -259,20 +229,28 @@ internal class PaymentOptionsViewModel(
         )
 
         viewModelScope.launch {
-            tapToAddHelper.result.collect { result ->
+            tapToAddHelper.nextStep.collect { result ->
                 when (result) {
-                    is TapToAddResult.Canceled -> {
-                        result.paymentSelection?.let { paymentSelection ->
-                            customerStateHolder.addPaymentMethod(paymentSelection.paymentMethod)
-                            updateSelection(paymentSelection)
-                        }
+                    is TapToAddNextStep.ConfirmSavedPaymentMethod -> {
+                        val paymentMethodMetadata = args.state.paymentMethodMetadata
+                        val savedPaymentMethodConfirmScreen = PaymentSheetScreen.SavedPaymentMethodConfirm.create(
+                            viewModel = this@PaymentOptionsViewModel,
+                            paymentMethodMetadata = paymentMethodMetadata,
+                            initialSelection = result.paymentSelection,
+                        )
+                        val newScreens = determineInitialBackStack(
+                            paymentMethodMetadata,
+                            customerStateHolder,
+                        ).plus(savedPaymentMethodConfirmScreen)
+                        navigationHandler.resetTo(newScreens)
                     }
-                    TapToAddResult.Complete -> {
+                    TapToAddNextStep.Complete -> {
                         errorReporter.report(
                             ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_FLOW_CONTROLLER_RECEIVED_COMPLETE_RESULT,
                         )
                     }
-                    is TapToAddResult.Continue -> {
+                    is TapToAddNextStep.Continue -> {
+                        customerStateHolder.addPaymentMethod(result.paymentSelection.paymentMethod)
                         updateSelection(result.paymentSelection)
                         onUserSelection()
                     }

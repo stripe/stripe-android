@@ -6,6 +6,7 @@ import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -37,6 +38,11 @@ internal interface LinkConfigurationCoordinator {
         configuration: LinkConfiguration,
         paymentMethodCreateParams: PaymentMethodCreateParams
     ): Result<LinkPaymentDetails>
+
+    suspend fun attachExistingCardToAccount(
+        configuration: LinkConfiguration,
+        paymentMethod: PaymentMethod,
+    ): Result<LinkPaymentDetails.Saved>
 
     suspend fun logOut(
         configuration: LinkConfiguration,
@@ -113,6 +119,14 @@ internal class RealLinkConfigurationCoordinator @Inject internal constructor(
                 linkPaymentDetails
             }
         }
+    }
+
+    override suspend fun attachExistingCardToAccount(
+        configuration: LinkConfiguration,
+        paymentMethod: PaymentMethod
+    ): Result<LinkPaymentDetails.Saved> {
+        val accountManager = getLinkPaymentLauncherComponent(configuration).linkAccountManager
+        return accountManager.createPaymentDetailsFromPaymentMethod(paymentMethod)
     }
 
     override suspend fun logOut(

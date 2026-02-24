@@ -383,7 +383,7 @@ class CollectBankAccountViewModelTest {
         result: Result<FinancialConnectionsSession>
     ) {
         createFinancialConnectionsSession.stub {
-            onBlocking {
+            on {
                 forPaymentIntent(
                     publishableKey = publishableKey,
                     clientSecret = clientSecret,
@@ -402,7 +402,7 @@ class CollectBankAccountViewModelTest {
         result: Result<PaymentIntent>
     ) {
         attachFinancialConnectionsSession.stub {
-            onBlocking {
+            on {
                 forPaymentIntent(
                     publishableKey = publishableKey,
                     linkedAccountSessionId = linkedAccountSessionId,
@@ -417,7 +417,7 @@ class CollectBankAccountViewModelTest {
         result: Result<SetupIntent>
     ) {
         attachFinancialConnectionsSession.stub {
-            onBlocking {
+            on {
                 forSetupIntent(
                     publishableKey = publishableKey,
                     linkedAccountSessionId = linkedAccountSessionId,
@@ -432,7 +432,7 @@ class CollectBankAccountViewModelTest {
         result: Result<FinancialConnectionsSession>
     ) {
         createFinancialConnectionsSession.stub {
-            onBlocking {
+            on {
                 forSetupIntent(
                     publishableKey = publishableKey,
                     clientSecret = clientSecret,
@@ -451,7 +451,7 @@ class CollectBankAccountViewModelTest {
         result: Result<FinancialConnectionsSession>
     ) {
         createFinancialConnectionsSession.stub {
-            onBlocking {
+            on {
                 forDeferredIntent(
                     publishableKey = publishableKey,
                     stripeAccountId = stripeAccountId,
@@ -472,7 +472,7 @@ class CollectBankAccountViewModelTest {
         result: Result<FinancialConnectionsSession>
     ) {
         createFinancialConnectionsSession.stub {
-            onBlocking {
+            on {
                 forDeferredIntent(
                     publishableKey = publishableKey,
                     stripeAccountId = stripeAccountId,
@@ -493,7 +493,7 @@ class CollectBankAccountViewModelTest {
         result: Result<StripeIntent>
     ) {
         retrieveStripeIntent.stub {
-            onBlocking {
+            on {
                 this(
                     publishableKey = publishableKey,
                     stripeAccountId = stripeAccountId,

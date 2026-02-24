@@ -1,6 +1,5 @@
 package com.stripe.android.common.taptoadd.ui
 
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -12,12 +11,12 @@ import androidx.compose.ui.Modifier
 internal fun TapToAddCardLayout(
     content: @Composable () -> Unit,
 ) {
-    BoxWithConstraints(Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier.fillMaxSize().padding(top = maxHeight * 0.1f),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            content()
-        }
+    Column(
+        modifier = Modifier.fillMaxSize().padding(
+            top = LocalTapToAddMaxContentHeight.current * 0.08f
+        ),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        content()
     }
 }

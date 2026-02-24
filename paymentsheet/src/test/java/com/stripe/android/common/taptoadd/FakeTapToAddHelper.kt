@@ -5,6 +5,8 @@ import androidx.lifecycle.LifecycleOwner
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -16,11 +18,11 @@ internal class FakeTapToAddHelper(
     val registerCalls = Turbine<RegisterCall>()
     val collectCalls = Turbine<PaymentMethodMetadata>()
 
-    private val _result = MutableSharedFlow<TapToAddResult>()
-    override val result: SharedFlow<TapToAddResult> = _result.asSharedFlow()
+    private val _nextStep = MutableSharedFlow<TapToAddNextStep>()
+    override val nextStep: SharedFlow<TapToAddNextStep> = _nextStep.asSharedFlow()
 
-    suspend fun emitResult(result: TapToAddResult) {
-        _result.emit(result)
+    suspend fun emitNextStep(nextStep: TapToAddNextStep) {
+        _nextStep.emit(nextStep)
     }
 
     override fun register(
@@ -55,7 +57,9 @@ internal class FakeTapToAddHelper(
 
         override fun create(
             coroutineScope: CoroutineScope,
-            tapToAddMode: TapToAddMode
+            tapToAddMode: TapToAddMode,
+            updateSelection: (PaymentSelection.Saved) -> Unit,
+            customerStateHolder: CustomerStateHolder,
         ): TapToAddHelper {
             val helper = FakeTapToAddHelper()
             createCalls.add(CreateCall(coroutineScope, tapToAddMode))

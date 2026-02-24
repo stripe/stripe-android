@@ -180,17 +180,14 @@ class CustomerSheet internal constructor(
          * Describes the appearance of [CustomerSheet].
          */
         val appearance: PaymentSheet.Appearance = ConfigurationDefaults.appearance,
-
         /**
          * Whether [CustomerSheet] displays Google Pay as a payment option.
          */
         val googlePayEnabled: Boolean = ConfigurationDefaults.googlePayEnabled,
-
         /**
          * The text to display at the top of the presented bottom sheet.
          */
         val headerTextForSelectionScreen: String? = ConfigurationDefaults.headerTextForSelectionScreen,
-
         /**
          * [CustomerSheet] pre-populates fields with the values provided. If
          * [PaymentSheet.BillingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod]
@@ -198,7 +195,6 @@ class CustomerSheet internal constructor(
          * collected by the [CustomerSheet] UI.
          */
         val defaultBillingDetails: PaymentSheet.BillingDetails = ConfigurationDefaults.billingDetails,
-
         /**
          * Describes how billing details should be collected. All values default to
          * [PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic].
@@ -208,12 +204,10 @@ class CustomerSheet internal constructor(
          */
         val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
             ConfigurationDefaults.billingDetailsCollectionConfiguration,
-
         /**
          * Your customer-facing business name. The default value is the name of your app.
          */
         val merchantDisplayName: String,
-
         /**
          * A list of preferred networks that should be used to process payments made with a co-branded card if your user
          * hasn't selected a network themselves.
@@ -222,14 +216,10 @@ class CustomerSheet internal constructor(
          * applicable, Stripe will select the network.
          */
         val preferredNetworks: List<CardBrand> = ConfigurationDefaults.preferredNetworks,
-
         internal val allowsRemovalOfLastSavedPaymentMethod: Boolean =
             ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
-
         internal val paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder,
-
         internal val cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
-
         internal val opensCardScannerAutomatically: Boolean = ConfigurationDefaults.opensCardScannerAutomatically,
     ) : Parcelable {
 

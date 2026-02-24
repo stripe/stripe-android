@@ -20,7 +20,9 @@ open class UiAutomatorText(
             } else {
                 UiSelector().textContains(label).className(it)
             }
-        } ?: if (labelMatchesExactly) UiSelector().textMatches(label) else { UiSelector().textContains(label) }
+        } ?: if (labelMatchesExactly) {
+            UiSelector().textMatches(label)
+        } else { UiSelector().textContains(label) }
 
     open fun click() {
         if (!exists()) {

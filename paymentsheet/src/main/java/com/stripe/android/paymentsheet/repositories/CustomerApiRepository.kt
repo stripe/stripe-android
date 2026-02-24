@@ -275,21 +275,17 @@ internal class CustomerApiRepository @Inject constructor(
          */
         val paymentMethodAsyncRemovals = paymentMethodsToRemove.map { paymentMethod ->
             async {
-                val paymentMethodIdToRemove = paymentMethod.id
-
-                paymentMethodIdToRemove?.let { id ->
-                    detachPaymentMethod(
-                        customerInfo = customerInfo,
-                        paymentMethodId = id,
-                        canRemoveDuplicates = false,
-                    ).onFailure { exception ->
-                        failureResults.add(
-                            DuplicatePaymentMethodDetachFailureException.DuplicateDetachFailure(
-                                paymentMethodId = id,
-                                exception = exception,
-                            )
+                detachPaymentMethod(
+                    customerInfo = customerInfo,
+                    paymentMethodId = paymentMethod.id,
+                    canRemoveDuplicates = false,
+                ).onFailure { exception ->
+                    failureResults.add(
+                        DuplicatePaymentMethodDetachFailureException.DuplicateDetachFailure(
+                            paymentMethodId = paymentMethod.id,
+                            exception = exception,
                         )
-                    }
+                    )
                 }
             }
         }

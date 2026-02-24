@@ -16,6 +16,7 @@ import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
+import com.stripe.android.core.networking.RequestHeadersFactory
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -86,5 +87,11 @@ internal interface IntentConfirmationChallengeModule {
         fun provideProductUsage(args: IntentConfirmationChallengeArgs): Set<String> {
             return args.productUsage.toSet()
         }
+
+        @Provides
+        @Named(SDK_USER_AGENT)
+        fun providesSdkUserAgent(): String = RequestHeadersFactory.getUserAgent()
     }
 }
+
+internal const val SDK_USER_AGENT = "SDK_USER_AGENT"

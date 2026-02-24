@@ -2973,7 +2973,7 @@ class CustomerSheetViewModelTest {
                 currentState = awaitItem()
             }
 
-            val selectPaymentMethodState = currentState as SelectPaymentMethod
+            val selectPaymentMethodState = currentState
 
             // Should only include the accepted card payment method
             assertThat(selectPaymentMethodState.savedPaymentMethods).hasSize(1)

@@ -55,7 +55,7 @@ class Stripe3ds2TransactionActivityTest {
     fun `fragmentFactory should be a ChallengeProgressFragmentFactory`() {
         val viewModel = mock<Stripe3ds2TransactionViewModel>()
         viewModel.stub {
-            onBlocking { viewModel.start3ds2Flow() } doReturn NextStep.Complete(PaymentFlowResult.Unvalidated())
+            on { viewModel.start3ds2Flow() } doReturn NextStep.Complete(PaymentFlowResult.Unvalidated())
         }
         injectableActivityScenario<Stripe3ds2TransactionActivity> {
             injectActivity {

@@ -15,6 +15,22 @@ detekt {
     }
 }
 
+def detektIgnoreFile = file('.detektignore')
+if (detektIgnoreFile.exists()) {
+    def detektIgnorePatterns = []
+    detektIgnoreFile.eachLine { line ->
+        line = line.trim()
+        if (!line.isEmpty() && !line.startsWith('#')) {
+            detektIgnorePatterns.add(line)
+        }
+    }
+    afterEvaluate {
+        tasks.matching { it.name.startsWith('detekt') && it instanceof org.gradle.api.tasks.SourceTask }.configureEach {
+            detektIgnorePatterns.each { pattern -> exclude(pattern) }
+        }
+    }
+}
+
 dependencies {
     detektPlugins "io.gitlab.arturbosch.detekt:detekt-formatting:$versions.detekt"
     detektPlugins "io.gitlab.arturbosch.detekt:detekt-cli:$versions.detekt"

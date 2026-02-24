@@ -168,6 +168,7 @@ internal class IntentConfirmationChallengeViewModelTest {
     ) = IntentConfirmationChallengeViewModel(
         bridgeHandler = bridgeHandler,
         workContext = testDispatcher,
-        analyticsEventReporter = analyticsReporter
+        analyticsEventReporter = analyticsReporter,
+        userAgent = "fake-user-agent"
     )
 }

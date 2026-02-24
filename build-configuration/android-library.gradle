@@ -34,7 +34,7 @@ android {
     compileSdkVersion rootProject.ext.compileSdkVersion
 
     defaultConfig {
-        minSdkVersion 21
+        minSdkVersion 23
         targetSdkVersion rootProject.ext.compileSdkVersion
         consumerProguardFiles "consumer-rules.txt"
 
@@ -83,15 +83,15 @@ android {
         targetCompatibility JavaVersion.VERSION_11
     }
 
-    kotlinOptions {
-        jvmTarget = "11"
-    }
-
-    if (JavaVersion.current() < JavaVersion.VERSION_17) {
-        kotlin {
+    kotlin {
+        if (JavaVersion.current() < JavaVersion.VERSION_17) {
             jvmToolchain {
                 languageVersion.set(JavaLanguageVersion.of("17"))
             }
+        }
+
+        compilerOptions {
+            jvmTarget.set("JVM_11")
         }
     }
 }

@@ -33,22 +33,17 @@ enum class DisplayField {
 data class AddressSpec(
     @SerialName("api_path")
     override val apiPath: IdentifierSpec = IdentifierSpec.Generic("billing_details[address]"),
-
     @SerialName("allowed_country_codes")
     val allowedCountryCodes: Set<String> = CountryUtils.supportedBillingCountries,
-
     @SerialName("display_fields")
     val displayFields: Set<DisplayField> = emptySet(),
-
     @SerialName("show_label")
     val showLabel: Boolean = true,
-
     /**
      * This field is not deserialized, this field is used for the Address Element
      */
     @Transient
     val type: AddressInputMode = AddressInputMode.NoAutocomplete(),
-
     /**
      * This field is not deserialized, it is used for the special case where the address element
      * shouldn't show country.

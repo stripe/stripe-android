@@ -17,6 +17,8 @@ import com.stripe.stripeterminal.external.callable.SetupIntentCallback
 import com.stripe.stripeterminal.external.models.AllowRedisplay
 import com.stripe.stripeterminal.external.models.SetupIntent
 import com.stripe.stripeterminal.external.models.SetupIntentConfiguration
+import com.stripe.stripeterminal.external.models.TapToPayUxConfiguration
+import com.stripe.stripeterminal.external.models.TerminalErrorCode
 import com.stripe.stripeterminal.external.models.TerminalException
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -33,6 +35,8 @@ internal interface TapToAddCollectionHandler {
             val error: Throwable,
             val displayMessage: ResolvableString?,
         ) : CollectionState
+
+        data object Canceled : CollectionState
     }
 
     companion object {
@@ -41,6 +45,7 @@ internal interface TapToAddCollectionHandler {
             isStripeTerminalSdkAvailable: IsStripeTerminalSdkAvailable,
             terminalWrapper: TerminalWrapper,
             connectionManager: TapToAddConnectionManager,
+            tapToPayUxConfiguration: TapToPayUxConfiguration,
             errorReporter: ErrorReporter,
             createCardPresentSetupIntentCallbackRetriever: CreateCardPresentSetupIntentCallbackRetriever,
         ): TapToAddCollectionHandler {
@@ -48,6 +53,7 @@ internal interface TapToAddCollectionHandler {
                 DefaultTapToAddCollectionHandler(
                     terminalWrapper = terminalWrapper,
                     connectionManager = connectionManager,
+                    tapToPayUxConfiguration = tapToPayUxConfiguration,
                     errorReporter = errorReporter,
                     createCardPresentSetupIntentCallbackRetriever = createCardPresentSetupIntentCallbackRetriever,
                 )
@@ -63,6 +69,7 @@ internal class DefaultTapToAddCollectionHandler(
     private val terminalWrapper: TerminalWrapper,
     private val connectionManager: TapToAddConnectionManager,
     private val errorReporter: ErrorReporter,
+    private val tapToPayUxConfiguration: TapToPayUxConfiguration,
     private val createCardPresentSetupIntentCallbackRetriever: CreateCardPresentSetupIntentCallbackRetriever,
 ) : TapToAddCollectionHandler {
     override suspend fun collect(
@@ -88,7 +95,10 @@ internal class DefaultTapToAddCollectionHandler(
         }
 
         when (val result = callback.createCardPresentSetupIntent()) {
-            is CreateIntentResult.Success -> collectWithIntent(result.clientSecret, metadata)
+            is CreateIntentResult.Success -> {
+                setUxConfiguration()
+                collectWithIntent(result.clientSecret, metadata)
+            }
             is CreateIntentResult.Failure -> {
                 TapToAddCollectionHandler.CollectionState.FailedCollection(
                     error = result.cause,
@@ -99,10 +109,14 @@ internal class DefaultTapToAddCollectionHandler(
     }.fold(
         onSuccess = { it },
         onFailure = { error ->
-            TapToAddCollectionHandler.CollectionState.FailedCollection(
-                error = error,
-                displayMessage = error.stripeErrorMessage()
-            )
+            if (error is TerminalException && error.errorCode == TerminalErrorCode.CANCELED) {
+                TapToAddCollectionHandler.CollectionState.Canceled
+            } else {
+                TapToAddCollectionHandler.CollectionState.FailedCollection(
+                    error = error,
+                    displayMessage = error.stripeErrorMessage()
+                )
+            }
         }
     )
 
@@ -116,6 +130,10 @@ internal class DefaultTapToAddCollectionHandler(
         val paymentMethod = createPaymentMethod(confirmedIntent)
 
         return TapToAddCollectionHandler.CollectionState.Collected(paymentMethod)
+    }
+
+    private fun setUxConfiguration() {
+        terminal().setTapToPayUxConfiguration(tapToPayUxConfiguration)
     }
 
     private suspend fun retrieveSetupIntent(clientSecret: String) = suspendCoroutine { continuation ->

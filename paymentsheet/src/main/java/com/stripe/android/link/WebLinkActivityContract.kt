@@ -50,7 +50,6 @@ internal class WebLinkActivityContract @Inject internal constructor(
                     LinkActivityResult.Failed(
                         error = exception,
                         linkAccountUpdate = LinkAccountUpdate.None
-
                     )
                 } else {
                     LinkActivityResult.Canceled(

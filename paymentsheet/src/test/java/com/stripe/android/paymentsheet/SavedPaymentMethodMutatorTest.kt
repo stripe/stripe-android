@@ -10,6 +10,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -58,6 +59,7 @@ class SavedPaymentMethodMutatorTest {
             hasCustomerConfiguration = true,
             customerMetadataPermissions = CustomerMetadata.Permissions(
                 removePaymentMethod = PaymentMethodRemovePermission.Full,
+                saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
                 canRemoveLastPaymentMethod = true,
                 canRemoveDuplicates = false,
                 canUpdateFullPaymentMethodDetails = false,
@@ -82,6 +84,7 @@ class SavedPaymentMethodMutatorTest {
             hasCustomerConfiguration = true,
             customerMetadataPermissions = CustomerMetadata.Permissions(
                 removePaymentMethod = PaymentMethodRemovePermission.Full,
+                saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
                 canRemoveLastPaymentMethod = false,
                 canRemoveDuplicates = false,
                 canUpdateFullPaymentMethodDetails = false,
@@ -206,6 +209,7 @@ class SavedPaymentMethodMutatorTest {
             hasCustomerConfiguration = true,
             customerMetadataPermissions = CustomerMetadata.Permissions(
                 removePaymentMethod = PaymentMethodRemovePermission.Full,
+                saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
                 canRemoveLastPaymentMethod = true,
                 canRemoveDuplicates = false,
                 canUpdateFullPaymentMethodDetails = false,
@@ -237,6 +241,7 @@ class SavedPaymentMethodMutatorTest {
             customerMetadataPermissions = CustomerMetadata.Permissions(
                 canRemoveDuplicates = true,
                 removePaymentMethod = PaymentMethodRemovePermission.Full,
+                saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
                 canRemoveLastPaymentMethod = true,
                 canUpdateFullPaymentMethodDetails = true,
             )
@@ -265,6 +270,7 @@ class SavedPaymentMethodMutatorTest {
             customerMetadataPermissions = CustomerMetadata.Permissions(
                 canRemoveDuplicates = true,
                 removePaymentMethod = PaymentMethodRemovePermission.Full,
+                saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
                 canRemoveLastPaymentMethod = false,
                 canUpdateFullPaymentMethodDetails = true,
             )
@@ -860,6 +866,7 @@ class SavedPaymentMethodMutatorTest {
                 hasCustomerConfiguration = true,
                 customerMetadataPermissions = CustomerMetadata.Permissions(
                     removePaymentMethod = PaymentMethodRemovePermission.Full,
+                    saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
                     canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = shouldRemoveDuplicates,
                     canUpdateFullPaymentMethodDetails = false,

@@ -13,6 +13,7 @@ import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateFixtures
+import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.test.runTest
@@ -81,6 +82,7 @@ internal class FormActivityConfirmationHandlerTest {
         val onClickOverrideDelegate = OnClickDelegateOverrideImpl()
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
 
+        val customerStateHolder = FakeCustomerStateHolder()
         val confirmationHelper = DefaultFormActivityConfirmationHelper(
             paymentMethodMetadata = paymentMethodMetadata,
             confirmationHandler = confirmationHandler,
@@ -91,6 +93,7 @@ internal class FormActivityConfirmationHandlerTest {
             activityResultCaller = mock(),
             onClickDelegate = onClickOverrideDelegate,
             eventReporter = FakeEventReporter(),
+            customerStateHolder = customerStateHolder,
             coroutineScope = this,
             formActivityRegistrar = formActivityConfirmationHandlerRegistrar,
             tapToAddHelper = FakeTapToAddHelper.noOp(),
@@ -109,6 +112,7 @@ internal class FormActivityConfirmationHandlerTest {
 
         stateHelper.validate()
         confirmationHandler.validate()
+        customerStateHolder.validate()
     }
     private class Scenario(
         val formConfirmationHelper: FormActivityConfirmationHelper,

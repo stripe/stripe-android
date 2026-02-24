@@ -23,6 +23,7 @@ internal class DefaultTapToAddCollectingInteractor(
     private val tapToAddCollectionHandler: TapToAddCollectionHandler,
     private val onCollected: (paymentMethod: PaymentMethod) -> Unit,
     private val onFailedCollection: (message: ResolvableString) -> Unit,
+    private val onCanceled: () -> Unit,
 ) : TapToAddCollectingInteractor {
     init {
         coroutineScope.launch {
@@ -39,6 +40,9 @@ internal class DefaultTapToAddCollectingInteractor(
                 onFailedCollection(
                     collectionState.displayMessage ?: collectionState.error.stripeErrorMessage()
                 )
+            }
+            is TapToAddCollectionHandler.CollectionState.Canceled -> {
+                onCanceled()
             }
         }
     }
@@ -75,7 +79,12 @@ internal class DefaultTapToAddCollectingInteractor(
                             ),
                         ),
                     )
-                }
+                },
+                onCanceled = {
+                    navigator.get().performAction(
+                        action = TapToAddNavigator.Action.Close,
+                    )
+                },
             )
         }
     }

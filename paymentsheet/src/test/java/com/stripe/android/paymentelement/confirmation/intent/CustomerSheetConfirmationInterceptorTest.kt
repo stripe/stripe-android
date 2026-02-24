@@ -267,7 +267,6 @@ class CustomerSheetConfirmationInterceptorTest {
         integrationMetadata = IntegrationMetadata.CustomerSheet(
             attachmentStyle = IntegrationMetadata.CustomerSheet.AttachmentStyle.SetupIntent,
         ),
-
         setupInterceptAction = ConfirmationDefinition.Action.Fail(
             cause = Exception("Failed to create setup intent"),
             message = "Unable to create setup intent".resolvableString,
@@ -384,8 +383,7 @@ class CustomerSheetConfirmationInterceptorTest {
         val interceptor: CustomerSheetConfirmationInterceptor,
         val createSetupIntentInterceptorFactoryCalls: Turbine<FakeSetupIntentInterceptorFactory.CreateCall>,
         val createAttachPaymentMethodInterceptorFactoryCalls: Turbine<Unit>,
-        val createSetupIntentInterceptCalls:
-        Turbine<FakeCustomerSheetSetupIntentConfirmationInterceptor.InterceptCall>,
+        val createSetupIntentInterceptCalls: Turbine<FakeCustomerSheetSetupIntentConfirmationInterceptor.InterceptCall>,
         val createAttachPaymentMethodInterceptCalls:
         Turbine<FakeCustomerSheetAttachPaymentMethodInterceptor.InterceptCall>,
     )
