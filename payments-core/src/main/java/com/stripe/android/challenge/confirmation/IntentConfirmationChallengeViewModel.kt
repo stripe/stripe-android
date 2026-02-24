@@ -71,6 +71,12 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
         }
     }
 
+    fun closeClicked() {
+        viewModelScope.launch {
+            _result.emit(IntentConfirmationChallengeActivityResult.Canceled)
+        }
+    }
+
     private suspend fun listenToEvents() {
         bridgeHandler.event.collectLatest { event ->
             when (event) {
