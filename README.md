@@ -87,7 +87,10 @@ To ensure broad compatibility across the ecosystem, `stripe-android` updates its
   <td>21.0.0-22.6.1</td><td>Compose UI 1.6.x or Compose UI 1.7.x or Compose UI 1.8.x</td>
  </tr>
  <tr>
-  <td>22.7.0-Current</td><td>Compose UI 1.9.x</td>
+  <td>22.7.0-22.8.1</td><td>Compose UI 1.9.x</td>
+ </tr>
+ <tr>
+  <td>23.0.0-Current</td><td>Compose UI 1.10.x</td>
  </tr>
 </table>
 
