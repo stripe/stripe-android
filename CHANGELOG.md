@@ -2,7 +2,7 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
-Dependencies updated in [12373](https://github.com/stripe/stripe-android/pull/12373), [12410](https://github.com/stripe/stripe-android/pull/12410), and [12419](https://github.com/stripe/stripe-android/pull/12419):
+Dependencies updated in [12373](https://github.com/stripe/stripe-android/pull/12373), [12410](https://github.com/stripe/stripe-android/pull/12410), [12419](https://github.com/stripe/stripe-android/pull/12419), and [12433](https://github.com/stripe/stripe-android/pull/12433):
 - Bumped Kotlin from 2.1.10 to 2.3.10.
 - Bumped Kotlin Coroutines from 1.10.1 to 1.10.2.
 - Bumped Kotlin Serialization from 1.8.0 to 1.10.0.
@@ -26,6 +26,7 @@ Dependencies updated in [12373](https://github.com/stripe/stripe-android/pull/12
 - Bumped Play Services Wallet from 19.4.0 to 19.5.0.
 - Bumped LiteRT from 1.4.0 to 1.4.1.
 - Bumped WorkManager from 2.9.0 to 2.11.1.
+- Bumped Material from 1.12.0 to 1.13.0.
 
 ## 22.8.1 - 2026-02-17
 
