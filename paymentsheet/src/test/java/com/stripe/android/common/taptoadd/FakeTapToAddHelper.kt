@@ -5,6 +5,8 @@ import androidx.lifecycle.LifecycleOwner
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -55,7 +57,9 @@ internal class FakeTapToAddHelper(
 
         override fun create(
             coroutineScope: CoroutineScope,
-            tapToAddMode: TapToAddMode
+            tapToAddMode: TapToAddMode,
+            updateSelection: (PaymentSelection.Saved) -> Unit,
+            customerStateHolder: CustomerStateHolder,
         ): TapToAddHelper {
             val helper = FakeTapToAddHelper()
             createCalls.add(CreateCall(coroutineScope, tapToAddMode))

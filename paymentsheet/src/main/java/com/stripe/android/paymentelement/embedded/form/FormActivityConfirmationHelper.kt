@@ -51,7 +51,6 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
             tapToAddHelper.nextStep.collect { result ->
                 val formResult = when (result) {
                     is TapToAddNextStep.ConfirmSavedPaymentMethod -> {
-                        customerStateHolder.addPaymentMethod(result.paymentSelection.paymentMethod)
                         FormResult.Complete(
                             selection = result.paymentSelection,
                             hasBeenConfirmed = false,

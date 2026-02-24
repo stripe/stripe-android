@@ -129,6 +129,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     override val tapToAddHelper = tapToAddHelperFactory.create(
         coroutineScope = viewModelScope,
         tapToAddMode = TapToAddMode.Complete,
+        updateSelection = ::updateSelection,
+        customerStateHolder = customerStateHolder,
     )
 
     private val _paymentSheetResult = MutableSharedFlow<PaymentSheetResult>(replay = 1)
@@ -246,8 +248,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             tapToAddHelper.nextStep.collect { result ->
                 when (result) {
                     is TapToAddNextStep.ConfirmSavedPaymentMethod -> {
-                        customerStateHolder.addPaymentMethod(result.paymentSelection.paymentMethod)
-                        updateSelection(result.paymentSelection)
                         val paymentMethodMetadata = paymentMethodMetadata.value ?: return@collect
                         val savedPaymentMethodConfirmScreen = PaymentSheetScreen.SavedPaymentMethodConfirm.create(
                             paymentMethodMetadata = paymentMethodMetadata,

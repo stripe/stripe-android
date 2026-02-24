@@ -161,9 +161,6 @@ class DefaultFormActivityConfirmationHelperTest {
                 )
             )
 
-            assertThat(customerStateHolder.addPaymentMethodTurbine.awaitItem()).isEqualTo(
-                expectedSelection.paymentMethod
-            )
             assertThat(stateHelper.resultTurbine.awaitItem()).isEqualTo(
                 FormResult.Complete(
                     selection = expectedSelection,
