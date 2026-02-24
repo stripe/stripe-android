@@ -59,7 +59,6 @@ internal class IntentConfirmationChallengeNextActionHandler @Inject constructor(
                     IntentConfirmationChallengeActivityResult.Canceled -> {
                         Unvalidated(
                             flowOutcome = StripeIntentResult.Outcome.CANCELED,
-                            exception = null
                         )
                     }
                 }
