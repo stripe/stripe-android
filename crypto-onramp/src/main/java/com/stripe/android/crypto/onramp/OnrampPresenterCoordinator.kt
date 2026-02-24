@@ -2,11 +2,14 @@ package com.stripe.android.crypto.onramp
 
 import android.content.ContentResolver
 import android.net.Uri
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.crypto.onramp.di.OnrampPresenterScope
@@ -28,6 +31,7 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncherFactory
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -76,11 +80,22 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
         identityVerificationSheet = createIdentityVerificationSheet()
 
+        val tag = "OnrampCheckoutObs"
+        Log.d(tag, "Collecting interactor=${System.identityHashCode(interactor)} " +
+            "stateFlow=${System.identityHashCode(interactor.state)}")
+
         // Observe checkout state changes and react accordingly
         lifecycleOwner.lifecycleScope.launch {
             interactor.state
+                .onEach { s ->
+                    Log.d(tag, "EMIT interactor=${System.identityHashCode(interactor)} " +
+                        "checkoutState=${s.checkoutState}")
+                }
                 .distinctUntilChangedBy { it.checkoutState }
-                .collect { it.checkoutState?.let(::handleCheckoutStateChange) }
+                .collect { s ->
+                    Log.d(tag, "DISTINCT checkoutState=${s.checkoutState}")
+                    s.checkoutState?.let(::handleCheckoutStateChange)
+                }
         }
 
         lifecycleOwner.lifecycle.addObserver(
@@ -155,7 +170,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         onrampSessionId: String
     ) {
         coroutineScope.launch {
-            interactor.startCheckout(onrampSessionId, onrampCallbacksState.onrampSessionClientSecretProvider)
+            interactor.startCheckout(onrampSessionId)
         }
     }
 

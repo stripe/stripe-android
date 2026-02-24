@@ -3,6 +3,7 @@ package com.stripe.android.crypto.onramp.example
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.Parcelable
 import androidx.compose.ui.graphics.Color
 import androidx.core.content.edit
 import androidx.lifecycle.AndroidViewModel
@@ -13,8 +14,8 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.github.kittinunf.result.Result
-import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.crypto.onramp.OnrampCoordinator
+import com.stripe.android.crypto.onramp.example.network.CheckoutTransactionDetails
 import com.stripe.android.crypto.onramp.example.network.OnrampSessionResponse
 import com.stripe.android.crypto.onramp.example.network.SettlementSpeed
 import com.stripe.android.crypto.onramp.example.network.TestBackendRepository
@@ -45,6 +46,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
@@ -65,11 +67,19 @@ internal class OnrampViewModel(
     val onrampCoordinator: OnrampCoordinator =
         OnrampCoordinator
             .Builder()
-            .build(application, savedStateHandle, callbacks)
+            .build(
+                application,
+                savedStateHandle,
+                callbacks,
+                )
 
     private val testBackendRepository = TestBackendRepository()
 
-    private val _uiState = MutableStateFlow(OnrampUiState())
+    private val _uiState = MutableStateFlow(
+        savedStateHandle.get<OnrampUiStateSnapshot>(KEY_UI_SNAPSHOT)
+            ?.toUiState()
+            ?: OnrampUiState()
+    )
     val uiState: StateFlow<OnrampUiState> = _uiState.asStateFlow()
 
     private val _message = MutableStateFlow<String?>(null)
@@ -135,10 +145,18 @@ internal class OnrampViewModel(
 
             onrampCoordinator.configure(configuration = configuration)
 
-            loadUserData()?.let { data ->
-                _uiState.update { it.copy(email = data.email, authToken = data.token, screen = Screen.SeamlessSignIn) }
-            } ?: run {
-                _uiState.update { it.copy(screen = Screen.LoginSignup) }
+            val restored = savedStateHandle.get<OnrampUiStateSnapshot>(KEY_UI_SNAPSHOT) != null
+
+            if (!restored) {
+                loadUserData()?.let { data ->
+                    _uiState.update { it.copy(email = data.email, authToken = data.token, screen = Screen.SeamlessSignIn) }
+                } ?: run {
+                    _uiState.update { it.copy(screen = Screen.LoginSignup) }
+                }
+            }
+
+            _uiState.collect { state ->
+                savedStateHandle[KEY_UI_SNAPSHOT] = state.toSnapshot()
             }
         }
     }
@@ -733,15 +751,67 @@ internal class OnrampViewModel(
         return application.applicationContext.getSharedPreferences(ONRAMP_PREFS_NAME, Context.MODE_PRIVATE)
     }
 
-    class Factory : ViewModelProvider.Factory {
+    class Factory(
+        private val application: Application,
+    ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(
             modelClass: Class<T>,
             extras: CreationExtras
         ): T {
-            val application = extras.requireApplication()
-            return OnrampViewModel(application, extras.createSavedStateHandle()) as T
+            return OnrampViewModel(
+                application,
+                extras.createSavedStateHandle()
+            ) as T
         }
+    }
+
+    private fun OnrampUiState.toSnapshot(): OnrampUiStateSnapshot {
+        return OnrampUiStateSnapshot(
+            screenName = screen.name,
+            email = email,
+            linkAuthIntentId = linkAuthIntentId,
+            consentedLinkAuthIntentIds = ArrayList(consentedLinkAuthIntentIds),
+
+            selectedPaymentTypeName = selectedPaymentData?.type?.name,
+            selectedPaymentLabel = selectedPaymentData?.label,
+            selectedPaymentSublabel = selectedPaymentData?.sublabel,
+
+            cryptoPaymentToken = cryptoPaymentToken,
+            walletAddress = walletAddress,
+            networkName = network?.name,
+            authToken = authToken,
+
+            onrampSessionId = onrampSession?.id,
+            onrampSessionStatus = onrampSession?.status,
+            onrampSessionSourceTotalAmount = onrampSession?.sourceTotalAmount,
+            onrampSessionPaymentMethod = onrampSession?.paymentMethod,
+
+            loadingMessage = loadingMessage,
+            settlementSpeedName = settlementSpeed.name,
+            googlePayIsReady = googlePayIsReady
+        )
+    }
+
+    private fun OnrampUiStateSnapshot.toUiState(): OnrampUiState {
+        return OnrampUiState(
+            screen = Screen.valueOf(screenName),
+            email = email,
+            linkAuthIntentId = linkAuthIntentId,
+            consentedLinkAuthIntentIds = consentedLinkAuthIntentIds.toList(),
+
+            // Not restorable; you rebuild later when SDK provides it again.
+            selectedPaymentData = null,
+
+            cryptoPaymentToken = cryptoPaymentToken,
+            walletAddress = walletAddress,
+            network = networkName?.let(CryptoNetwork::valueOf),
+            authToken = authToken,
+            onrampSession = null,
+            loadingMessage = loadingMessage,
+            settlementSpeed = SettlementSpeed.valueOf(settlementSpeedName),
+            googlePayIsReady = googlePayIsReady
+        )
     }
 }
 
@@ -788,3 +858,33 @@ data class OnrampUserData(
 )
 
 internal const val ONRAMP_PREFS_NAME = "onramp_prefs"
+
+private const val KEY_UI_SNAPSHOT = "onramp_ui_snapshot"
+
+@Parcelize
+data class OnrampUiStateSnapshot(
+    val screenName: String,
+    val email: String,
+    val linkAuthIntentId: String?,
+    val consentedLinkAuthIntentIds: ArrayList<String>,
+
+    // Payment display (restorable)
+    val selectedPaymentTypeName: String?,   // PaymentMethodDisplayData.Type.name
+    val selectedPaymentLabel: String?,
+    val selectedPaymentSublabel: String?,
+
+    val cryptoPaymentToken: String?,
+    val walletAddress: String?,
+    val networkName: String?,               // CryptoNetwork.name
+    val authToken: String?,
+
+    // Session (either store an ID, or store fields you display)
+    val onrampSessionId: String?,
+    val onrampSessionStatus: String?,
+    val onrampSessionSourceTotalAmount: String?,
+    val onrampSessionPaymentMethod: String?,
+
+    val loadingMessage: String?,
+    val settlementSpeedName: String,        // SettlementSpeed.name
+    val googlePayIsReady: Boolean,
+) : Parcelable

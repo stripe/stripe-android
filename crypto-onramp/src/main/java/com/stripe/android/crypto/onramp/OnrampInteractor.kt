@@ -2,6 +2,7 @@ package com.stripe.android.crypto.onramp
 
 import android.app.Application
 import android.content.Context
+import android.util.Log
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.utils.flatMapCatching
 import com.stripe.android.crypto.onramp.CheckoutState.Status
@@ -51,6 +52,10 @@ import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 import javax.inject.Singleton
 
+fun interface OnrampSessionClientSecretProvider {
+    suspend fun getClientSecret(onrampSessionId: String): String
+}
+
 @Suppress("LargeClass", "TooManyFunctions")
 @Singleton
 internal class OnrampInteractor @Inject constructor(
@@ -58,6 +63,7 @@ internal class OnrampInteractor @Inject constructor(
     private val linkController: LinkController,
     private val cryptoApiRepository: CryptoApiRepository,
     private val analyticsServiceFactory: OnrampAnalyticsService.Factory,
+    private val checkoutHandler: OnrampSessionClientSecretProvider
 ) {
     private val _state = MutableStateFlow(OnrampState())
     val state: StateFlow<OnrampState> = _state.asStateFlow()
@@ -644,8 +650,8 @@ internal class OnrampInteractor @Inject constructor(
      * @param checkoutHandler An async closure that calls your backend to perform a checkout.
      */
     suspend fun startCheckout(
-        onrampSessionId: String,
-        checkoutHandler: suspend (String) -> String
+        onrampSessionId: String
+
     ) {
         if (_state.value.checkoutState?.status?.inProgress == true) {
             // Checkout is already in progress - ignore duplicate calls
@@ -656,7 +662,6 @@ internal class OnrampInteractor @Inject constructor(
                 checkoutState = CheckoutState(
                     status = Status.Processing(
                         onrampSessionId = onrampSessionId,
-                        checkoutHandler = checkoutHandler
                     )
                 )
             )
@@ -669,7 +674,6 @@ internal class OnrampInteractor @Inject constructor(
         )
         performCheckoutInternal(
             onrampSessionId = onrampSessionId,
-            checkoutHandler = checkoutHandler,
             isContinuation = false,
         )
     }
@@ -688,14 +692,12 @@ internal class OnrampInteractor @Inject constructor(
                         checkoutState = CheckoutState(
                             status = Status.Processing(
                                 onrampSessionId = status.onrampSessionId,
-                                checkoutHandler = status.checkoutHandler
                             )
                         )
                     )
                 }
                 performCheckoutInternal(
                     onrampSessionId = status.onrampSessionId,
-                    checkoutHandler = status.checkoutHandler,
                     isContinuation = true,
                 )
             }
@@ -718,14 +720,13 @@ internal class OnrampInteractor @Inject constructor(
     @Suppress("LongMethod")
     private suspend fun performCheckoutInternal(
         onrampSessionId: String,
-        checkoutHandler: suspend (String) -> String,
         isContinuation: Boolean,
     ) {
         val checkoutStatus = getOrFetchPlatformKey()
             .flatMapCatching { platformApiKey ->
                 retrievePaymentIntent(
                     onrampSessionId = onrampSessionId,
-                    onrampSessionClientSecret = checkoutHandler(onrampSessionId),
+                    onrampSessionClientSecret = checkoutHandler.getClientSecret(onrampSessionId),
                     platformApiKey = platformApiKey
                 ).map { platformApiKey to it }
             }
@@ -747,7 +748,6 @@ internal class OnrampInteractor @Inject constructor(
                         ?: Status.RequiresNextAction(
                             platformKey = platformApiKey,
                             onrampSessionId = onrampSessionId,
-                            checkoutHandler = checkoutHandler,
                             paymentIntent = paymentIntent
                         )
                 },
@@ -761,7 +761,14 @@ internal class OnrampInteractor @Inject constructor(
                     Status.Completed(OnrampCheckoutResult.Failed(error))
                 }
             )
-        _state.update { it.copy(checkoutState = CheckoutState(checkoutStatus)) }
+        val tag = "OnrampCheckoutUpd"
+        Log.d(tag, "Updating interactor=${System.identityHashCode(this)} " +
+            "_stateFlow=${System.identityHashCode(_state)} " +
+            "newStatus=$checkoutStatus")
+
+        _state.update {
+            it.copy(checkoutState = CheckoutState(checkoutStatus))
+        }
     }
 
     /**

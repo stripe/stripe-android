@@ -227,12 +227,15 @@ class OnrampCoordinator @Inject internal constructor(
             savedStateHandle: SavedStateHandle,
             onrampCallbacks: OnrampCallbacks
         ): OnrampCoordinator {
+            val callbacksState = onrampCallbacks.build()
+
             val onrampComponent: OnrampComponent =
                 DaggerOnrampComponent.factory()
                     .build(
                         application = application,
                         savedStateHandle = savedStateHandle,
-                        onrampCallbacks = onrampCallbacks
+                        onrampCallbacks = onrampCallbacks,
+                        checkoutHandler = callbacksState.onrampSessionClientSecretProvider
                     )
             return onrampComponent.onrampCoordinator
         }

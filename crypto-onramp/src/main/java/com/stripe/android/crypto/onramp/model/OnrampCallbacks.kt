@@ -1,6 +1,7 @@
 package com.stripe.android.crypto.onramp.model
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.crypto.onramp.OnrampSessionClientSecretProvider
 
 /**
  * Container for all callbacks required by the Onramp coordinator.
@@ -19,7 +20,8 @@ class OnrampCallbacks {
     private var collectPaymentCallback: OnrampCollectPaymentMethodCallback? = null
     private var authorizeCallback: OnrampAuthorizeCallback? = null
     private var checkoutCallback: OnrampCheckoutCallback? = null
-    private var onrampSessionClientSecretProvider: (suspend (String) -> String)? = null
+    private var onrampSessionClientSecretProvider: OnrampSessionClientSecretProvider? = null
+    private var googlePayIsReadyCallback: ((Boolean) -> Unit)? = null
 
     /**
      * Callback invoked when signaling the result of verifying the user's identity.
@@ -64,7 +66,8 @@ class OnrampCallbacks {
      *     @param The session ID of the current checkout.
      */
     fun onrampSessionClientSecretProvider(callback: suspend (String) -> String) = apply {
-        this.onrampSessionClientSecretProvider = callback
+        this.onrampSessionClientSecretProvider =
+            OnrampSessionClientSecretProvider { id -> callback(id) }
     }
 
     internal class State(
@@ -73,7 +76,8 @@ class OnrampCallbacks {
         val collectPaymentCallback: OnrampCollectPaymentMethodCallback,
         val authorizeCallback: OnrampAuthorizeCallback,
         val checkoutCallback: OnrampCheckoutCallback,
-        val onrampSessionClientSecretProvider: suspend (String) -> String
+        val onrampSessionClientSecretProvider: OnrampSessionClientSecretProvider,
+        val googlePayIsReadyCallback: ((Boolean) -> Unit)?
     )
 
     internal fun build(): State {
