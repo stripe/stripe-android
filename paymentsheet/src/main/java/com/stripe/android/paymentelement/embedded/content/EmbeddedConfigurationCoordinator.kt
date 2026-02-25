@@ -6,7 +6,6 @@ import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.EmbeddedPaymentElement.ConfigureResult
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
@@ -15,8 +14,8 @@ import javax.inject.Singleton
 
 internal interface EmbeddedConfigurationCoordinator {
     suspend fun configure(
-        intentConfiguration: PaymentSheet.IntentConfiguration,
         configuration: EmbeddedPaymentElement.Configuration,
+        initializationMode: PaymentElementLoader.InitializationMode,
     ): ConfigureResult
 }
 
@@ -30,14 +29,14 @@ internal class DefaultEmbeddedConfigurationCoordinator @Inject constructor(
     @ViewModelScope private val viewModelScope: CoroutineScope,
 ) : EmbeddedConfigurationCoordinator {
     override suspend fun configure(
-        intentConfiguration: PaymentSheet.IntentConfiguration,
-        configuration: EmbeddedPaymentElement.Configuration
+        configuration: EmbeddedPaymentElement.Configuration,
+        initializationMode: PaymentElementLoader.InitializationMode,
     ): ConfigureResult {
         return viewModelScope.async {
             confirmationStateHolder.state = null
             configurationHandler.configure(
-                intentConfiguration = intentConfiguration,
                 configuration = configuration,
+                initializationMode = initializationMode,
             ).fold(
                 onSuccess = { state ->
                     handleLoadedState(
