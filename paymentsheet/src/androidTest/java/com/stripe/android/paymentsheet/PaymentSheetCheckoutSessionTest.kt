@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.checkout.Checkout
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
@@ -61,9 +62,12 @@ internal class PaymentSheetCheckoutSessionTest {
             response.testBodyFromFile("checkout-session-init.json")
         }
 
+        val checkout = Checkout.configure("cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh_secret_example")
+            .getOrThrow()
+
         testContext.presentPaymentSheet {
-            presentWithCheckoutSession(
-                checkoutSessionClientSecret = "cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh_secret_example",
+            presentWithCheckout(
+                checkout = checkout,
                 configuration = defaultConfiguration,
             )
         }

@@ -1,3 +1,5 @@
+@file:OptIn(CheckoutSessionPreview::class)
+
 package com.stripe.android.paymentsheet.example.playground
 
 import android.content.Intent
@@ -76,6 +78,7 @@ import com.stripe.android.paymentsheet.example.playground.activity.AppearanceSto
 import com.stripe.android.paymentsheet.example.playground.activity.CustomPaymentMethodActivity
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity
+import com.stripe.android.paymentsheet.example.playground.checkout.CheckoutPlaygroundContract
 import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundOneStepContract
 import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundTwoStepContract
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
@@ -144,6 +147,14 @@ internal class PaymentSheetPlaygroundActivity :
             is EmbeddedPlaygroundTwoStepContract.Result.Updated -> {
                 embeddedPaymentElement.state = result.embeddedPaymentElementState
             }
+        }
+    }
+
+    private val checkoutPlaygroundLauncher = registerForActivityResult(
+        CheckoutPlaygroundContract()
+    ) { checkoutState ->
+        if (checkoutState != null) {
+            viewModel.checkout?.state = checkoutState
         }
     }
 
@@ -307,6 +318,10 @@ internal class PaymentSheetPlaygroundActivity :
                         targetState = playgroundState
                     ) { playgroundState ->
                         Column {
+                            CheckoutSessionUi(
+                                playgroundState = playgroundState,
+                            )
+
                             PlaygroundStateUi(
                                 playgroundState = playgroundState,
                                 paymentSheet = paymentSheet,
@@ -727,8 +742,27 @@ internal class PaymentSheetPlaygroundActivity :
         }
     }
 
-    @OptIn(CheckoutSessionPreview::class)
-    private fun presentPaymentSheet(paymentSheet: PaymentSheet, playgroundState: PlaygroundState.Payment) {
+    @Composable
+    private fun CheckoutSessionUi(
+        playgroundState: PlaygroundState?,
+    ) {
+        val paymentState = playgroundState?.asPaymentState()
+        if (paymentState?.initializationType == InitializationType.CheckoutSession) {
+            Button(
+                onClick = {
+                    checkoutPlaygroundLauncher.launch(requireNotNull(viewModel.checkout?.state))
+                },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("Launch Checkout Playground")
+            }
+        }
+    }
+
+    private fun presentPaymentSheet(
+        paymentSheet: PaymentSheet,
+        playgroundState: PlaygroundState.Payment,
+    ) {
         if (playgroundState.initializationType == InitializationType.Normal) {
             if (playgroundState.checkoutMode == CheckoutMode.SETUP) {
                 paymentSheet.presentWithSetupIntent(
@@ -742,9 +776,9 @@ internal class PaymentSheetPlaygroundActivity :
                 )
             }
         } else if (playgroundState.initializationType == InitializationType.CheckoutSession) {
-            paymentSheet.presentWithCheckoutSession(
-                checkoutSessionClientSecret = playgroundState.clientSecret,
-                configuration = playgroundState.paymentSheetConfiguration(viewModel.settings)
+            paymentSheet.presentWithCheckout(
+                checkout = requireNotNull(viewModel.checkout),
+                configuration = playgroundState.paymentSheetConfiguration(viewModel.settings),
             )
         } else {
             paymentSheet.presentWithIntentConfiguration(
@@ -772,6 +806,12 @@ internal class PaymentSheetPlaygroundActivity :
                     callback = viewModel::onFlowControllerConfigured,
                 )
             }
+        } else if (playgroundState.initializationType == InitializationType.CheckoutSession) {
+            flowController.configureWithCheckout(
+                checkout = requireNotNull(viewModel.checkout),
+                configuration = playgroundState.paymentSheetConfiguration(viewModel.settings),
+                callback = viewModel::onFlowControllerConfigured,
+            )
         } else {
             flowController.configureWithIntentConfiguration(
                 intentConfiguration = playgroundState.intentConfiguration(),
