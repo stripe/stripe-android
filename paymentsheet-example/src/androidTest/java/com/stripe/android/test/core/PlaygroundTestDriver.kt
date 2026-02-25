@@ -54,6 +54,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.Merchant
 import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.RequireCvcRecollectionDefinition
+import com.stripe.android.paymentsheet.example.samples.ui.shared.CHECKOUT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_ERROR_TEXT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
@@ -1179,6 +1180,17 @@ internal class PlaygroundTestDriver(
         Espresso.onIdle()
     }
 
+    private fun waitUntilCheckoutButtonIsGone() {
+        composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+            composeTestRule.onAllNodesWithTag(CHECKOUT_TEST_TAG)
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isEmpty()
+        }
+
+        composeTestRule.waitForIdle()
+        Espresso.onIdle()
+    }
+
     /**
      * Here we wait for an activity different from the playground to be in view.  We
      * don't specifically look for PaymentSheetActivity or PaymentOptionsActivity because
@@ -1514,6 +1526,11 @@ internal class PlaygroundTestDriver(
                     }
 
                     waitForPlaygroundActivity()
+
+                    if (integrationType == PlaygroundConfigurationData.IntegrationType.FlowController) {
+                        waitUntilCheckoutButtonIsGone()
+                    }
+
                     resultCountDownLatch?.let {
                         assertThat(it.await(5, TimeUnit.SECONDS)).isTrue()
                     }
