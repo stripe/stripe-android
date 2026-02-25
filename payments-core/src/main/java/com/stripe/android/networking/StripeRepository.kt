@@ -437,6 +437,21 @@ interface StripeRepository {
         options: ApiRequest.Options,
     ): Result<CheckoutSessionResponse>
 
+    /**
+     * Updates a checkout session by calling the `/v1/payment_pages/{sessionId}` endpoint.
+     *
+     * @param sessionId The checkout session ID (e.g., "cs_test_xxx").
+     * @param paymentMethodIdToDetach The payment method ID to detach from the session.
+     * @param options API request options including the publishable key.
+     * @return A [CheckoutSessionResponse] containing the updated session state.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun updateCheckoutSession(
+        sessionId: String,
+        paymentMethodIdToDetach: String,
+        options: ApiRequest.Options,
+    ): Result<CheckoutSessionResponse>
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun retrieveCardMetadata(
         cardNumber: String,

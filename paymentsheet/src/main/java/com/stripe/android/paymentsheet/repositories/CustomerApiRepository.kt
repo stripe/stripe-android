@@ -184,6 +184,29 @@ internal class CustomerApiRepository @Inject constructor(
         )
     )
 
+    override suspend fun detachCheckoutSessionPaymentMethod(
+        checkoutSessionId: String,
+        paymentMethodId: String,
+    ): Result<PaymentMethod> {
+        return stripeRepository.updateCheckoutSession(
+            sessionId = checkoutSessionId,
+            paymentMethodIdToDetach = paymentMethodId,
+            options = ApiRequest.Options(
+                apiKey = lazyPaymentConfig.get().publishableKey,
+                stripeAccount = lazyPaymentConfig.get().stripeAccountId,
+            ),
+        ).map { response ->
+            // The API returns the updated checkout session, but we need the PaymentMethod.
+            // Find the detached PM from the customer's saved payment methods (it should no longer be there).
+            // For now, return a minimal PaymentMethod with the ID so callers can update state.
+            PaymentMethod.Builder()
+                .setId(paymentMethodId)
+                .build()
+        }.onFailure {
+            logger.error("Failed to detach payment method $paymentMethodId from checkout session.", it)
+        }
+    }
+
     private fun filterPaymentMethods(allPaymentMethods: List<PaymentMethod>): List<PaymentMethod> {
         val paymentMethods = mutableListOf<PaymentMethod>()
 

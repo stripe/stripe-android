@@ -456,6 +456,14 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         TODO("Not yet implemented")
     }
 
+    override suspend fun updateCheckoutSession(
+        sessionId: String,
+        paymentMethodIdToDetach: String,
+        options: ApiRequest.Options,
+    ): Result<CheckoutSessionResponse> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun retrieveCardMetadata(
         cardNumber: String,
         requestOptions: ApiRequest.Options

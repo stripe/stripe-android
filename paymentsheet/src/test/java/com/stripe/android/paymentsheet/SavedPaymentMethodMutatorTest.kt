@@ -413,6 +413,46 @@ class SavedPaymentMethodMutatorTest {
     }
 
     @Test
+    fun `removePaymentMethodInEditScreen routes through checkout session detach for CheckoutSession access`() {
+        val displayableSavedPaymentMethod = PaymentMethodFactory.cards(1).first().toDisplayableSavedPaymentMethod()
+        val customerRepository = FakeCustomerRepository(
+            onDetachPaymentMethod = { paymentMethodId ->
+                assertThat(paymentMethodId).isEqualTo(displayableSavedPaymentMethod.paymentMethod.id)
+                Result.success(displayableSavedPaymentMethod.paymentMethod)
+            }
+        )
+
+        runScenario(
+            customerRepository = customerRepository,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                hasCustomerConfiguration = true,
+                accessInfo = CustomerMetadata.AccessInfo.CheckoutSession(
+                    checkoutSessionId = "cs_test_123",
+                ),
+            ),
+        ) {
+            customerStateHolder.setCustomerState(
+                createCustomerState(
+                    paymentMethods = listOf(displayableSavedPaymentMethod.paymentMethod),
+                )
+            )
+
+            savedPaymentMethodMutator.removePaymentMethodInEditScreen(displayableSavedPaymentMethod.paymentMethod)
+
+            // Verify the checkout session detach path was used (not the regular detach)
+            val detachRequest = customerRepository.checkoutSessionDetachRequests.awaitItem()
+            assertThat(detachRequest.checkoutSessionId).isEqualTo("cs_test_123")
+            assertThat(detachRequest.paymentMethodId).isEqualTo(displayableSavedPaymentMethod.paymentMethod.id)
+
+            assertThat(prePaymentMethodRemovedTurbine.awaitItem()).isNotNull()
+            assertThat(eventReporter.removePaymentMethodCalls.awaitItem().code).isEqualTo("card")
+            assertThat(postPaymentMethodRemovedTurbine.awaitItem()).isNotNull()
+
+            assertThat(customerStateHolder.paymentMethods.value).isEmpty()
+        }
+    }
+
+    @Test
     fun `updatePaymentMethod performRemove failure callback`() {
         val displayableSavedPaymentMethod = PaymentMethodFactory.cards(1).first().toDisplayableSavedPaymentMethod()
         val calledDetach = Turbine<Boolean>()
@@ -855,10 +895,15 @@ class SavedPaymentMethodMutatorTest {
     private fun removeDuplicatesTest(shouldRemoveDuplicates: Boolean) {
         val repository = FakeCustomerRepository()
 
-        val customerSessionClientSecret = if (shouldRemoveDuplicates) {
-            "customer_session_client_secret"
+        val accessInfo = if (shouldRemoveDuplicates) {
+            CustomerMetadata.AccessInfo.CustomerSession(
+                ephemeralKeySecret = "ek_123",
+                customerSessionClientSecret = "customer_session_client_secret",
+            )
         } else {
-            null
+            CustomerMetadata.AccessInfo.LegacyEphemeralKey(
+                ephemeralKeySecret = "ek_123",
+            )
         }
         runScenario(
             customerRepository = repository,
@@ -871,7 +916,7 @@ class SavedPaymentMethodMutatorTest {
                     canRemoveDuplicates = shouldRemoveDuplicates,
                     canUpdateFullPaymentMethodDetails = false,
                 ),
-                customerSessionClientSecret = customerSessionClientSecret,
+                accessInfo = accessInfo,
             )
         ) {
             customerStateHolder.setCustomerState(
@@ -893,7 +938,11 @@ class SavedPaymentMethodMutatorTest {
                     customerInfo = CustomerRepository.CustomerInfo(
                         id = "cus_123",
                         ephemeralKeySecret = "ek_123",
-                        customerSessionClientSecret = customerSessionClientSecret,
+                        customerSessionClientSecret = if (shouldRemoveDuplicates) {
+                            "customer_session_client_secret"
+                        } else {
+                            null
+                        },
                     ),
                     canRemoveDuplicates = shouldRemoveDuplicates,
                 )

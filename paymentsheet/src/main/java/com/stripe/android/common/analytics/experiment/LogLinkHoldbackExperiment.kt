@@ -9,6 +9,7 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.repositories.LinkRepository
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.Customer.Components.MobilePaymentElement
 import com.stripe.android.model.ElementsSession.Customer.Components.MobilePaymentElement.Enabled
@@ -170,11 +171,20 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
         paymentMethodMetadata.linkState?.configuration?.customerInfo?.email ?: retrieveCustomerEmail(
             configuration = config,
             customer = paymentMethodMetadata.customerMetadata?.let { customerMetadata ->
-                CustomerRepository.CustomerInfo(
-                    id = customerMetadata.id,
-                    ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
-                    customerSessionClientSecret = customerMetadata.customerSessionClientSecret
-                )
+                when (val accessInfo = customerMetadata.accessInfo) {
+                    is CustomerMetadata.AccessInfo.LegacyEphemeralKey -> CustomerRepository.CustomerInfo(
+                        id = customerMetadata.id,
+                        ephemeralKeySecret = accessInfo.ephemeralKeySecret,
+                        customerSessionClientSecret = null,
+                    )
+                    is CustomerMetadata.AccessInfo.CustomerSession -> CustomerRepository.CustomerInfo(
+                        id = customerMetadata.id,
+                        ephemeralKeySecret = accessInfo.ephemeralKeySecret,
+                        customerSessionClientSecret = accessInfo.customerSessionClientSecret,
+                    )
+                    // Checkout sessions don't use ephemeral keys for customer email retrieval.
+                    is CustomerMetadata.AccessInfo.CheckoutSession -> null
+                }
             }
         )
 }

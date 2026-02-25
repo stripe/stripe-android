@@ -821,8 +821,10 @@ class DefaultAnalyticsMetadataFactoryTest {
         isPaymentMethodSetAsDefaultEnabled: Boolean
     ): CustomerMetadata = CustomerMetadata(
         id = "cus_1234",
-        ephemeralKeySecret = "ek_123",
-        customerSessionClientSecret = "cuss_132_secret_123",
+        accessInfo = CustomerMetadata.AccessInfo.CustomerSession(
+            ephemeralKeySecret = "ek_123",
+            customerSessionClientSecret = "cuss_132_secret_123",
+        ),
         isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
         permissions = CustomerMetadata.Permissions(
             removePaymentMethod = PaymentMethodRemovePermission.Full,
