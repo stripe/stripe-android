@@ -158,8 +158,10 @@ internal class DefaultCustomerSheetLoader(
 
         val customerMetadata = CustomerMetadata(
             id = customerSheetSession.customerId,
-            ephemeralKeySecret = customerSheetSession.customerEphemeralKeySecret,
-            customerSessionClientSecret = customerSheetSession.customerSessionClientSecret,
+            accessInfo = CustomerMetadata.AccessInfo.CustomerSession(
+                ephemeralKeySecret = customerSheetSession.customerEphemeralKeySecret,
+                customerSessionClientSecret = requireNotNull(customerSheetSession.customerSessionClientSecret),
+            ),
             isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
             permissions = CustomerMetadata.Permissions.createForCustomerSheet(
                 configuration = configuration,

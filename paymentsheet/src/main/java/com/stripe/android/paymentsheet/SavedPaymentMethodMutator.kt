@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.strings.orEmpty
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.PaymentMethod
@@ -154,15 +155,34 @@ internal class SavedPaymentMethodMutator(
             }
         }
 
-        return customerRepository.detachPaymentMethod(
-            customerInfo = CustomerRepository.CustomerInfo(
-                id = customerMetadata.id,
-                ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
-                customerSessionClientSecret = customerMetadata.customerSessionClientSecret,
-            ),
-            paymentMethodId = paymentMethodId,
-            canRemoveDuplicates = canRemoveDuplicates,
-        )
+        return when (val accessInfo = customerMetadata.accessInfo) {
+            is CustomerMetadata.AccessInfo.LegacyEphemeralKey -> {
+                customerRepository.detachPaymentMethod(
+                    customerInfo = CustomerRepository.CustomerInfo(
+                        id = customerMetadata.id,
+                        ephemeralKeySecret = accessInfo.ephemeralKeySecret,
+                        customerSessionClientSecret = null,
+                    ),
+                    paymentMethodId = paymentMethodId,
+                    canRemoveDuplicates = canRemoveDuplicates,
+                )
+            }
+            is CustomerMetadata.AccessInfo.CustomerSession -> {
+                customerRepository.detachPaymentMethod(
+                    customerInfo = CustomerRepository.CustomerInfo(
+                        id = customerMetadata.id,
+                        ephemeralKeySecret = accessInfo.ephemeralKeySecret,
+                        customerSessionClientSecret = accessInfo.customerSessionClientSecret,
+                    ),
+                    paymentMethodId = paymentMethodId,
+                    canRemoveDuplicates = canRemoveDuplicates,
+                )
+            }
+            is CustomerMetadata.AccessInfo.CheckoutSession -> {
+                // Will be implemented in Task 5
+                Result.failure(IllegalStateException("Checkout session PM removal not yet implemented"))
+            }
+        }
     }
 
     private suspend fun removeDeletedPaymentMethodFromState(paymentMethodId: String) {
@@ -210,12 +230,23 @@ internal class SavedPaymentMethodMutator(
                 IllegalStateException("Unable to set default payment method when customer is null.")
             )
 
-        return customerRepository.setDefaultPaymentMethod(
-            customerInfo = CustomerRepository.CustomerInfo(
+        val customerInfo = when (val accessInfo = customer.accessInfo) {
+            is CustomerMetadata.AccessInfo.LegacyEphemeralKey -> CustomerRepository.CustomerInfo(
                 id = customer.id,
-                ephemeralKeySecret = customer.ephemeralKeySecret,
-                customerSessionClientSecret = customer.customerSessionClientSecret,
-            ),
+                ephemeralKeySecret = accessInfo.ephemeralKeySecret,
+                customerSessionClientSecret = null,
+            )
+            is CustomerMetadata.AccessInfo.CustomerSession -> CustomerRepository.CustomerInfo(
+                id = customer.id,
+                ephemeralKeySecret = accessInfo.ephemeralKeySecret,
+                customerSessionClientSecret = accessInfo.customerSessionClientSecret,
+            )
+            is CustomerMetadata.AccessInfo.CheckoutSession -> return Result.failure(
+                IllegalStateException("Set default payment method is not supported for checkout sessions.")
+            )
+        }
+        return customerRepository.setDefaultPaymentMethod(
+            customerInfo = customerInfo,
             paymentMethodId = paymentMethod.id,
         ).onFailure { error ->
             eventReporter.onSetAsDefaultPaymentMethodFailed(
@@ -261,12 +292,23 @@ internal class SavedPaymentMethodMutator(
             )
         )
 
-        return customerRepository.updatePaymentMethod(
-            customerInfo = CustomerRepository.CustomerInfo(
+        val customerInfo = when (val accessInfo = customerMetadata.accessInfo) {
+            is CustomerMetadata.AccessInfo.LegacyEphemeralKey -> CustomerRepository.CustomerInfo(
                 id = customerMetadata.id,
-                ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
-                customerSessionClientSecret = customerMetadata.customerSessionClientSecret,
-            ),
+                ephemeralKeySecret = accessInfo.ephemeralKeySecret,
+                customerSessionClientSecret = null,
+            )
+            is CustomerMetadata.AccessInfo.CustomerSession -> CustomerRepository.CustomerInfo(
+                id = customerMetadata.id,
+                ephemeralKeySecret = accessInfo.ephemeralKeySecret,
+                customerSessionClientSecret = accessInfo.customerSessionClientSecret,
+            )
+            is CustomerMetadata.AccessInfo.CheckoutSession -> return Result.failure(
+                IllegalStateException("Update payment method is not supported for checkout sessions.")
+            )
+        }
+        return customerRepository.updatePaymentMethod(
+            customerInfo = customerInfo,
             paymentMethodId = paymentMethod.id,
             params = PaymentMethodUpdateParams.createCard(
                 networks = cardUpdateParams.cardBrand?.let {

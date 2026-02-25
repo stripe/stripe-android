@@ -11,11 +11,45 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 internal data class CustomerMetadata(
     val id: String,
-    val ephemeralKeySecret: String,
-    val customerSessionClientSecret: String?,
+    val accessInfo: AccessInfo,
     val isPaymentMethodSetAsDefaultEnabled: Boolean,
     val permissions: Permissions,
 ) : Parcelable {
+
+    /**
+     * Integration-specific authentication/access information.
+     * Each integration type uses different credentials to authenticate customer operations.
+     */
+    @Parcelize
+    sealed class AccessInfo : Parcelable {
+        /**
+         * Legacy ephemeral key integration.
+         * Uses an un-scoped ephemeral key for all customer API calls.
+         */
+        @Parcelize
+        data class LegacyEphemeralKey(
+            val ephemeralKeySecret: String,
+        ) : AccessInfo()
+
+        /**
+         * Customer session integration.
+         * Uses a scoped ephemeral key + customer session client secret.
+         */
+        @Parcelize
+        data class CustomerSession(
+            val ephemeralKeySecret: String,
+            val customerSessionClientSecret: String,
+        ) : AccessInfo()
+
+        /**
+         * Checkout session integration.
+         * Uses publishable key + checkout session ID (no ephemeral key).
+         */
+        @Parcelize
+        data class CheckoutSession(
+            val checkoutSessionId: String,
+        ) : AccessInfo()
+    }
 
     @Parcelize
     internal data class Permissions(
