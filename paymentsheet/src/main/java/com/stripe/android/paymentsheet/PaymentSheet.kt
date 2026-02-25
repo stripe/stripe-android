@@ -18,6 +18,7 @@ import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.checkout.Checkout
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.reactnative.UnregisterSignal
@@ -475,18 +476,17 @@ class PaymentSheet internal constructor(
     /**
      * Present [PaymentSheet] with a Checkout Session.
      *
-     * @param checkoutSessionClientSecret The client secret of the Checkout Session (format: `cs_*_secret_*`).
+     * @param checkout The configured checkout.
      * @param configuration An optional [PaymentSheet] configuration.
      */
     @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    @JvmOverloads
-    fun presentWithCheckoutSession(
-        checkoutSessionClientSecret: String,
-        configuration: Configuration? = null,
+    fun presentWithCheckout(
+        checkout: Checkout,
+        configuration: Configuration,
     ) {
         paymentSheetLauncher.present(
-            mode = InitializationMode.CheckoutSession(checkoutSessionClientSecret),
+            mode = InitializationMode.CheckoutSession(checkout.state.checkoutSessionClientSecret),
             configuration = configuration,
         )
     }
@@ -4010,6 +4010,21 @@ class PaymentSheet internal constructor(
             intentConfiguration: IntentConfiguration,
             configuration: Configuration? = null,
             callback: ConfigCallback
+        )
+
+        /**
+         * Configure the FlowController with a [Checkout].
+         *
+         * @param checkout The configured checkout.
+         * @param configuration An optional [PaymentSheet] configuration.
+         * @param callback called with the result of configuring the FlowController.
+         */
+        @CheckoutSessionPreview
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun configureWithCheckout(
+            checkout: Checkout,
+            configuration: Configuration,
+            callback: ConfigCallback,
         )
 
         /**
