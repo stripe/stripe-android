@@ -56,9 +56,10 @@ internal class IntentConfirmationChallengeNextActionHandler @Inject constructor(
                             clientSecret = result.clientSecret,
                         )
                     }
-                    IntentConfirmationChallengeActivityResult.Canceled -> {
+                    is IntentConfirmationChallengeActivityResult.Canceled -> {
                         Unvalidated(
                             flowOutcome = StripeIntentResult.Outcome.CANCELED,
+                            clientSecret = result.clientSecret
                         )
                     }
                 }
