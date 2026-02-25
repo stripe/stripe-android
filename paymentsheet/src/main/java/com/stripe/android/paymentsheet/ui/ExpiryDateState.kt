@@ -19,7 +19,7 @@ internal data class ExpiryDateState(
 ) {
 
     private val textFieldState: TextFieldState = run {
-        if (text == CARD_EDIT_UI_FALLBACK_EXPIRY_DATE) {
+        if (text == CARD_EDIT_UI_FALLBACK_EXPIRY_DATE || text == CARD_EDIT_UI_MISSING_EXPIRY_DATE) {
             TextFieldStateConstants.Error.Blank
         } else {
             dateConfig.determineState(text)
@@ -111,6 +111,10 @@ private fun formattedExpiryDate(
         (monthIsInvalid(expiryMonth) || yearIsInvalid(expiryYear))
     ) {
         return CARD_EDIT_UI_FALLBACK_EXPIRY_DATE
+    }
+
+    if (expiryMonth == null && expiryYear == null) {
+        return CARD_EDIT_UI_MISSING_EXPIRY_DATE
     }
 
     val formattedExpiryMonth = when {

@@ -253,3 +253,4 @@ private fun CvcField(cardBrand: CardBrand, modifier: Modifier) {
 
 internal const val CARD_EDIT_UI_ERROR_MESSAGE = "card_edit_ui_error_message"
 internal const val CARD_EDIT_UI_FALLBACK_EXPIRY_DATE = "•• / ••"
+internal const val CARD_EDIT_UI_MISSING_EXPIRY_DATE = ""
