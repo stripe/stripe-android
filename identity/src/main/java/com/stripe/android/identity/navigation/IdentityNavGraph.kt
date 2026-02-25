@@ -305,9 +305,8 @@ internal fun IdentityNavGraph(
                         if (ErrorDestination.shouldFail(it)) {
                             verificationFlowFinishable.finishWithResult(
                                 IdentityVerificationSheet.VerificationFlowResult.Failed(
-                                    requireNotNull(identityViewModel.errorCause.value) {
-                                        "cause of error is null"
-                                    }
+                                    identityViewModel.errorCause.value
+                                        ?: IllegalStateException("Unknown verification error")
                                 )
                             )
                         } else {
