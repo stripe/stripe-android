@@ -776,6 +776,7 @@ class LinkController @Inject internal constructor(
         val imageLoader: suspend () -> Drawable,
         val label: String,
         val sublabel: String?,
+        val type: PaymentMethodType
     ) {
 
         /**

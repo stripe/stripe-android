@@ -37,7 +37,6 @@ import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
-import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.utils.isLinkAuthorizationError
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -333,8 +332,6 @@ internal class OnrampViewModel(
                     it.copy(
                         screen = Screen.AuthenticatedOperations,
                         selectedPaymentData = result.displayData,
-                        selectedPaymentType = it.temporaryPaymentType,
-                        temporaryPaymentType = null
                     )
                 }
             }
@@ -551,10 +548,14 @@ internal class OnrampViewModel(
         val walletAddress = currentState.walletAddress
         val network = currentState.network
         val authToken = currentState.authToken
-        val settlementSpeed = if (currentState.selectedPaymentType == PaymentMethodType.BankAccount) {
-            currentState.settlementSpeed
-        } else {
-            SettlementSpeed.INSTANT
+
+        val settlementSpeed = when (currentState.selectedPaymentData?.type) {
+            PaymentMethodDisplayData.Type.BankAccount -> {
+                currentState.settlementSpeed
+            }
+            PaymentMethodDisplayData.Type.Card, null -> {
+                SettlementSpeed.INSTANT
+            }
         }
 
         // Check what's missing and provide helpful guidance
@@ -644,10 +645,6 @@ internal class OnrampViewModel(
             return false
         }
         return true
-    }
-
-    fun updateSelectedPaymentMethod(paymentMethodType: PaymentMethodType) {
-        _uiState.update { it.copy(temporaryPaymentType = paymentMethodType) }
     }
 
     fun updateSettlementSpeed(settlementSpeed: SettlementSpeed) {
@@ -757,8 +754,6 @@ data class OnrampUiState(
     val authToken: String? = null,
     val onrampSession: OnrampSessionResponse? = null,
     val loadingMessage: String? = null,
-    val temporaryPaymentType: PaymentMethodType? = null,
-    val selectedPaymentType: PaymentMethodType? = null,
     val settlementSpeed: SettlementSpeed = SettlementSpeed.INSTANT,
 )
 
