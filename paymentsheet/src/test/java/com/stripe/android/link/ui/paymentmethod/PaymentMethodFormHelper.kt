@@ -57,10 +57,6 @@ internal class PaymentMethodFormHelper : FormHelper {
         TODO("Not yet implemented")
     }
 
-    override fun runActionForCode(paymentMethodCode: PaymentMethodCode) {
-        // No-op
-    }
-
     data class GetPaymentMethodParamsCall(
         val formValues: FormFieldValues?,
         val selectedPaymentMethodCode: String

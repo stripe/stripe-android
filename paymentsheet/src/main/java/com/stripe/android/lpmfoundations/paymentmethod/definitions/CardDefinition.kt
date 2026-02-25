@@ -61,7 +61,7 @@ internal object CardDefinition : PaymentMethodDefinition {
     }
 }
 
-private object CardUiDefinitionFactory : UiDefinitionFactory.Custom, UiDefinitionFactory.Actionable {
+private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
     override fun createSupportedPaymentMethod(
         metadata: PaymentMethodMetadata,
     ): SupportedPaymentMethod {
@@ -92,17 +92,6 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom, UiDefinitio
             outlinedIconResource = outlinedIconResource,
             iconRequiresTinting = true,
         )
-    }
-
-    override fun action(
-        metadata: PaymentMethodMetadata,
-        arguments: UiDefinitionFactory.Arguments
-    ) {
-        val tapToAddHelper = arguments.tapToAddHelper
-
-        if (metadata.isTapToAddSupported && tapToAddHelper?.hasPreviouslyAttemptedCollection == false) {
-            tapToAddHelper.startPaymentMethodCollection(metadata)
-        }
     }
 
     override fun createFormHeaderInformation(
