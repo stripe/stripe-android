@@ -1,3 +1,5 @@
+@file:OptIn(CheckoutSessionPreview::class)
+
 package com.stripe.android.paymentsheet.example.playground.embedded
 
 import android.app.Activity
@@ -5,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import kotlinx.parcelize.Parcelize

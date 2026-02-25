@@ -626,10 +626,7 @@ internal class PaymentSheetPlaygroundActivity :
 
         LaunchedEffect(playgroundState) {
             if (isTwoStep) {
-                val configureResult = embeddedPaymentElement.configure(
-                    intentConfiguration = playgroundState.intentConfiguration(),
-                    configuration = playgroundState.embeddedConfiguration(),
-                )
+                val configureResult = configure(playgroundState)
                 hasConfigured = configureResult is EmbeddedPaymentElement.ConfigureResult.Succeeded
             }
         }
@@ -661,7 +658,12 @@ internal class PaymentSheetPlaygroundActivity :
                 if (isTwoStep) {
                     embeddedPaymentElement.confirm()
                 } else {
-                    embeddedPlaygroundOneStepLauncher.launch(playgroundState)
+                    embeddedPlaygroundOneStepLauncher.launch(
+                        EmbeddedPlaygroundOneStepContract.Args(
+                            playgroundState = playgroundState,
+                            checkoutState = viewModel.checkout?.state,
+                        )
+                    )
                 }
             },
             enabled = if (isTwoStep) hasConfigured else true,
@@ -756,6 +758,22 @@ internal class PaymentSheetPlaygroundActivity :
             ) {
                 Text("Launch Checkout Playground")
             }
+        }
+    }
+
+    private suspend fun configure(
+        playgroundState: PlaygroundState.Payment,
+    ): EmbeddedPaymentElement.ConfigureResult {
+        return if (playgroundState.initializationType == InitializationType.CheckoutSession) {
+            embeddedPaymentElement.configure(
+                checkout = requireNotNull(viewModel.checkout),
+                configuration = playgroundState.embeddedConfiguration(),
+            )
+        } else {
+            embeddedPaymentElement.configure(
+                intentConfiguration = playgroundState.intentConfiguration(),
+                configuration = playgroundState.embeddedConfiguration(),
+            )
         }
     }
 
