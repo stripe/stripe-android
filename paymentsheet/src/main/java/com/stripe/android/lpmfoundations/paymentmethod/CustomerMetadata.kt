@@ -6,6 +6,7 @@ import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.data.CustomerSheetSession
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -17,11 +18,27 @@ internal data class CustomerMetadata(
 ) : Parcelable {
 
     /**
+     * Converts this [CustomerMetadata] to a [CustomerRepository.CustomerInfo] for use with
+     * [CustomerRepository] API calls. Returns null for [AccessInfo.CheckoutSession] since
+     * checkout sessions use different API endpoints that don't require ephemeral keys.
+     */
+    fun toCustomerRepositoryInfo(): CustomerRepository.CustomerInfo? = when (val accessInfo = accessInfo) {
+        is AccessInfo.LegacyEphemeralKey -> CustomerRepository.CustomerInfo(
+            id = id,
+            ephemeralKeySecret = accessInfo.ephemeralKeySecret,
+            customerSessionClientSecret = null,
+        )
+        is AccessInfo.CustomerSession -> CustomerRepository.CustomerInfo(
+            id = id,
+            ephemeralKeySecret = accessInfo.ephemeralKeySecret,
+            customerSessionClientSecret = accessInfo.customerSessionClientSecret,
+        )
+        is AccessInfo.CheckoutSession -> null
+    }
+
+    /**
      * Integration-specific authentication/access information.
      * Each integration type uses different credentials to authenticate customer operations.
-     *
-     * TODO: Unify AccessInfo, PaymentElementLoader.CustomerInfo, and CustomerRepository.CustomerInfo.
-     *  See #12444 discussion for details on the proposed refactor.
      */
     @Parcelize
     sealed class AccessInfo : Parcelable {

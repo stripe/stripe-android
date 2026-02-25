@@ -9,7 +9,6 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.repositories.LinkRepository
-import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.Customer.Components.MobilePaymentElement
 import com.stripe.android.model.ElementsSession.Customer.Components.MobilePaymentElement.Enabled
@@ -18,7 +17,6 @@ import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_DISABLE_LINK_GLOBA
 import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_ENABLE_LINK_SPM
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.LinkDisabledApiRepository
-import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
 import kotlinx.coroutines.CoroutineScope
@@ -170,21 +168,6 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
     private suspend fun PaymentElementLoader.State.getEmail(): String? =
         paymentMethodMetadata.linkState?.configuration?.customerInfo?.email ?: retrieveCustomerEmail(
             configuration = config,
-            customer = paymentMethodMetadata.customerMetadata?.let { customerMetadata ->
-                when (val accessInfo = customerMetadata.accessInfo) {
-                    is CustomerMetadata.AccessInfo.LegacyEphemeralKey -> CustomerRepository.CustomerInfo(
-                        id = customerMetadata.id,
-                        ephemeralKeySecret = accessInfo.ephemeralKeySecret,
-                        customerSessionClientSecret = null,
-                    )
-                    is CustomerMetadata.AccessInfo.CustomerSession -> CustomerRepository.CustomerInfo(
-                        id = customerMetadata.id,
-                        ephemeralKeySecret = accessInfo.ephemeralKeySecret,
-                        customerSessionClientSecret = accessInfo.customerSessionClientSecret,
-                    )
-                    // Checkout sessions don't use ephemeral keys for customer email retrieval.
-                    is CustomerMetadata.AccessInfo.CheckoutSession -> null
-                }
-            }
+            customer = paymentMethodMetadata.customerMetadata?.toCustomerRepositoryInfo()
         )
 }
