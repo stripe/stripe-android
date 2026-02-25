@@ -206,7 +206,12 @@ internal class IntentConfirmationChallengeNextActionHandlerTest {
 
     private fun createTestPaymentIntent(): PaymentIntent {
         return PaymentIntentFixtures.PI_SUCCEEDED.copy(
-            nextActionData = StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge
+            nextActionData = StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge(
+                stripeJs = StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge.StripeJs(
+                    siteKey = "test_site_key",
+                    verificationUrl = "/v1/payment_intents/pi_123/verify_challenge",
+                )
+            )
         )
     }
 

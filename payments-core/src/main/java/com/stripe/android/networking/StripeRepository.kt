@@ -41,6 +41,7 @@ import com.stripe.android.model.Stripe3ds2AuthResult
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
+import com.stripe.android.model.VerifyIntentConfirmationChallengeParams
 
 /**
  * An interface for data operations on Stripe API objects.
@@ -475,6 +476,13 @@ interface StripeRepository {
         paymentDetailsUpdateParams: ConsumerPaymentDetailsUpdateParams,
         requestOptions: ApiRequest.Options
     ): Result<ConsumerPaymentDetails>
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun verifyIntentConfirmationChallenge(
+        verificationUrl: String,
+        params: VerifyIntentConfirmationChallengeParams,
+        requestOptions: ApiRequest.Options
+    ): Result<StripeIntent>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun buildPaymentUserAgent(attribution: Set<String> = emptySet()): String

@@ -3,6 +3,7 @@ package com.stripe.android.challenge.confirmation
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.FakeLogger
@@ -15,10 +16,16 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 internal class DefaultConfirmationChallengeBridgeHandlerTest {
 
+    private val testStripeJs = StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge.StripeJs(
+        siteKey = "test_site_key",
+        verificationUrl = "/v1/payment_intents/pi_123/verify_challenge",
+    )
+
     private val testArgs = IntentConfirmationChallengeArgs(
         publishableKey = "pk_test_123",
         intent = PaymentIntentFixtures.PI_SUCCEEDED,
         productUsage = listOf("PaymentSheet"),
+        stripeJs = testStripeJs,
     )
 
     @Test
@@ -30,6 +37,8 @@ internal class DefaultConfirmationChallengeBridgeHandlerTest {
         val json = JSONObject(result)
         assertThat(json.getString("publishableKey")).isEqualTo("pk_test_123")
         assertThat(json.getString("clientSecret")).isEqualTo(PaymentIntentFixtures.PI_SUCCEEDED.clientSecret)
+        assertThat(json.getString("siteKey")).isEqualTo("test_site_key")
+        assertThat(json.getString("verificationUrl")).isEqualTo("/v1/payment_intents/pi_123/verify_challenge")
     }
 
     @Test

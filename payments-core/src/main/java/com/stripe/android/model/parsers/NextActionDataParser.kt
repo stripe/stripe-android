@@ -185,7 +185,7 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
                     optString(json, FIELD_THREE_D_SECURE_2_INTENT),
                     optString(json, FIELD_PUBLISHABLE_KEY)
                 )
-                TYPE_INTENT_CONFIRMATION_CHALLENGE -> StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge
+                TYPE_INTENT_CONFIRMATION_CHALLENGE -> IntentConfirmationChallengeJsonParser().parse(json)
                 else -> null
             }
         }
@@ -229,6 +229,70 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
 
             private const val FIELD_THREE_D_SECURE_2_INTENT = "three_d_secure_2_intent"
             private const val FIELD_PUBLISHABLE_KEY = "publishable_key"
+        }
+    }
+
+    internal class IntentConfirmationChallengeJsonParser :
+        ModelJsonParser<StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge> {
+        override fun parse(
+            json: JSONObject
+        ): StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge? {
+            val stripeJsJson = json.optJSONObject(FIELD_STRIPE_JS) ?: return null
+            val siteKey = optString(stripeJsJson, FIELD_SITE_KEY) ?: return null
+            val verificationUrl = optString(stripeJsJson, FIELD_VERIFICATION_URL) ?: return null
+            val vendorName = StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge
+                .CaptchaVendorName.fromCode(optString(stripeJsJson, FIELD_CAPTCHA_VENDOR_NAME))
+            return StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge(
+                stripeJs = StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge.StripeJs(
+                    siteKey = siteKey,
+                    verificationUrl = verificationUrl,
+                    rqdata = optString(stripeJsJson, FIELD_RQDATA),
+                    captchaVendorName = vendorName,
+                    captchaVendorData = parseCaptchaVendorData(
+                        vendorName,
+                        stripeJsJson.optJSONObject(FIELD_CAPTCHA_VENDOR_DATA)
+                    ),
+                )
+            )
+        }
+
+        private fun parseCaptchaVendorData(
+            vendorName: StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge.CaptchaVendorName?,
+            json: JSONObject?
+        ): StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge.CaptchaVendorData? {
+            if (vendorName == null || json == null) return null
+            return when (vendorName) {
+                StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge.CaptchaVendorName.HumanSecurity -> {
+                    val uuid = optString(json, FIELD_UUID) ?: return null
+                    val vid = optString(json, FIELD_VID) ?: return null
+                    val appId = optString(json, FIELD_APP_ID) ?: return null
+                    StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge.CaptchaVendorData.HumanSecurity(
+                        uuid = uuid,
+                        vid = vid,
+                        appId = appId,
+                    )
+                }
+                StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge.CaptchaVendorName.Arkose -> {
+                    val blob = optString(json, FIELD_BLOB) ?: return null
+                    StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge.CaptchaVendorData.Arkose(
+                        blob = blob,
+                    )
+                }
+                StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge.CaptchaVendorName.HCaptcha -> null
+            }
+        }
+
+        private companion object {
+            private const val FIELD_STRIPE_JS = "stripe_js"
+            private const val FIELD_SITE_KEY = "site_key"
+            private const val FIELD_VERIFICATION_URL = "verification_url"
+            private const val FIELD_RQDATA = "rqdata"
+            private const val FIELD_CAPTCHA_VENDOR_NAME = "captcha_vendor_name"
+            private const val FIELD_CAPTCHA_VENDOR_DATA = "captcha_vendor_data"
+            private const val FIELD_UUID = "uuid"
+            private const val FIELD_VID = "vid"
+            private const val FIELD_APP_ID = "app_id"
+            private const val FIELD_BLOB = "blob"
         }
     }
 

@@ -8,5 +8,6 @@ import kotlinx.parcelize.Parcelize
 internal data class IntentConfirmationChallengeArgs(
     val publishableKey: String,
     val productUsage: List<String>,
-    val intent: StripeIntent
+    val intent: StripeIntent,
+    val stripeJs: StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge.StripeJs? = null,
 ) : Parcelable

@@ -15,6 +15,9 @@ import com.stripe.android.challenge.confirmation.analytics.IntentConfirmationCha
 import com.stripe.android.challenge.confirmation.di.DaggerIntentConfirmationChallengeComponent
 import com.stripe.android.challenge.confirmation.di.SDK_USER_AGENT
 import com.stripe.android.core.injection.UIContext
+import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.VerifyIntentConfirmationChallengeParams
+import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -29,7 +32,8 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
     val bridgeHandler: ConfirmationChallengeBridgeHandler,
     @UIContext private val workContext: CoroutineContext,
     private val analyticsEventReporter: IntentConfirmationChallengeAnalyticsEventReporter,
-    @Named(SDK_USER_AGENT) val userAgent: String
+    @Named(SDK_USER_AGENT) val userAgent: String,
+    private val stripeRepository: StripeRepository,
 ) : ViewModel(), DefaultLifecycleObserver {
 
     private val _bridgeReady = MutableSharedFlow<Unit>()
@@ -66,8 +70,38 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
     }
 
     fun closeClicked() {
+        val stripeJs = args.stripeJs
         viewModelScope.launch {
-            _result.emit(IntentConfirmationChallengeActivityResult.Canceled(args.intent.clientSecret))
+            if (stripeJs == null) {
+                _result.emit(IntentConfirmationChallengeActivityResult.Canceled(args.intent.clientSecret))
+                return@launch
+            }
+
+            val params = VerifyIntentConfirmationChallengeParams(
+                clientSecret = args.intent.clientSecret.orEmpty(),
+                captchaVendorName = stripeJs.captchaVendorName?.code.orEmpty(),
+            )
+            val requestOptions = ApiRequest.Options(apiKey = args.publishableKey)
+
+            stripeRepository.verifyIntentConfirmationChallenge(
+                verificationUrl = stripeJs.verificationUrl,
+                params = params,
+                requestOptions = requestOptions,
+            ).fold(
+                onSuccess = {
+                    _result.emit(
+                        IntentConfirmationChallengeActivityResult.Canceled(args.intent.clientSecret)
+                    )
+                },
+                onFailure = { error ->
+                    _result.emit(
+                        IntentConfirmationChallengeActivityResult.Failed(
+                            clientSecret = args.intent.clientSecret,
+                            error = error,
+                        )
+                    )
+                }
+            )
         }
     }
 

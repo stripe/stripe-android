@@ -17,6 +17,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.injectableActivityScenario
@@ -215,7 +216,8 @@ internal class IntentConfirmationChallengeActivityTest {
                     bridgeHandler = bridgeHandler,
                     workContext = testDispatcher,
                     analyticsEventReporter = analyticsReporter,
-                    userAgent = "fake-user-agent"
+                    userAgent = "fake-user-agent",
+                    stripeRepository = object : AbsFakeStripeRepository() {},
                 ) as T
             }
         }
@@ -256,7 +258,8 @@ internal class IntentConfirmationChallengeActivityTest {
                     bridgeHandler = bridgeHandler,
                     workContext = testDispatcher,
                     analyticsEventReporter = FakeIntentConfirmationChallengeAnalyticsEventReporter(),
-                    userAgent = "fake-user-agent"
+                    userAgent = "fake-user-agent",
+                    stripeRepository = object : AbsFakeStripeRepository() {},
                 ) as T
             }
         }

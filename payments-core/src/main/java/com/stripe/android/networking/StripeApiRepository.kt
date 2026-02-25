@@ -83,6 +83,7 @@ import com.stripe.android.model.Stripe3ds2AuthResult
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
+import com.stripe.android.model.VerifyIntentConfirmationChallengeParams
 import com.stripe.android.model.parsers.CardMetadataJsonParser
 import com.stripe.android.model.parsers.CheckoutSessionResponseJsonParser
 import com.stripe.android.model.parsers.ConfirmationTokenJsonParser
@@ -1714,6 +1715,28 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 )
             ),
             ConsumerPaymentDetailsJsonParser
+        )
+    }
+
+    override suspend fun verifyIntentConfirmationChallenge(
+        verificationUrl: String,
+        params: VerifyIntentConfirmationChallengeParams,
+        requestOptions: ApiRequest.Options
+    ): Result<StripeIntent> {
+        val url = "${ApiRequest.API_HOST}${verificationUrl}"
+        val isSetupIntent = SetupIntent.ClientSecret.isMatch(params.clientSecret)
+        val jsonParser = if (isSetupIntent) {
+            SetupIntentJsonParser()
+        } else {
+            PaymentIntentJsonParser()
+        }
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = url,
+                options = requestOptions,
+                params = params.toParamMap(),
+            ),
+            jsonParser = jsonParser,
         )
     }
 

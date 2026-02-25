@@ -330,7 +330,47 @@ sealed interface StripeIntent : StripeModel {
 
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @Parcelize
-            data object IntentConfirmationChallenge : SdkData()
+            data class IntentConfirmationChallenge(
+                val stripeJs: StripeJs
+            ) : SdkData() {
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                @Parcelize
+                data class StripeJs(
+                    val siteKey: String,
+                    val verificationUrl: String,
+                    val rqdata: String? = null,
+                    val captchaVendorName: CaptchaVendorName? = null,
+                    val captchaVendorData: CaptchaVendorData? = null,
+                ) : Parcelable
+
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                enum class CaptchaVendorName(val code: String) {
+                    HumanSecurity("human_security"),
+                    HCaptcha("hcaptcha"),
+                    Arkose("arkose");
+
+                    internal companion object {
+                        fun fromCode(code: String?): CaptchaVendorName? {
+                            return entries.firstOrNull { it.code == code }
+                        }
+                    }
+                }
+
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                sealed interface CaptchaVendorData : Parcelable {
+                    @Parcelize
+                    data class HumanSecurity(
+                        val uuid: String,
+                        val vid: String,
+                        val appId: String,
+                    ) : CaptchaVendorData
+
+                    @Parcelize
+                    data class Arkose(
+                        val blob: String,
+                    ) : CaptchaVendorData
+                }
+            }
         }
 
         @Parcelize

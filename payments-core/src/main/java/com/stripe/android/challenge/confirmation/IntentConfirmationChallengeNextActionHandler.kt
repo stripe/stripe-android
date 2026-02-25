@@ -72,12 +72,15 @@ internal class IntentConfirmationChallengeNextActionHandler @Inject constructor(
         actionable: StripeIntent,
         requestOptions: ApiRequest.Options
     ) = withContext(uiContext) {
+        val nextActionData =
+            actionable.nextActionData as? StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge
         val intentConfirmationChallengeNextActionStarter = intentConfirmationChallengeNextActionStarterFactory(host)
         intentConfirmationChallengeNextActionStarter.start(
             IntentConfirmationChallengeActivityContract.Args(
                 publishableKey = publishableKeyProvider(),
                 intent = actionable,
-                productUsage = productUsageTokens
+                productUsage = productUsageTokens,
+                stripeJs = nextActionData?.stripeJs
             )
         )
     }

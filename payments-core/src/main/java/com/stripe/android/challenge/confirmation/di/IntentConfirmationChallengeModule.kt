@@ -13,9 +13,7 @@ import com.stripe.android.challenge.confirmation.analytics.IntentConfirmationCha
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.model.parsers.ModelJsonParser
-import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
-import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.networking.RequestHeadersFactory
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
@@ -54,11 +52,6 @@ internal interface IntentConfirmationChallengeModule {
     fun bindAnalyticsReporter(
         analyticsReporter: DefaultIntentConfirmationChallengeAnalyticsEventReporter
     ): IntentConfirmationChallengeAnalyticsEventReporter
-
-    @Binds
-    fun bindAnalyticsRequestExecutor(
-        analyticsRequestExecutor: DefaultAnalyticsRequestExecutor
-    ): AnalyticsRequestExecutor
 
     @Binds
     fun bindAnalyticsRequestFactory(

@@ -40,6 +40,7 @@ import com.stripe.android.model.Stripe3ds2AuthResult
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
+import com.stripe.android.model.VerifyIntentConfirmationChallengeParams
 import com.stripe.android.networking.StripeRepository
 
 abstract class AbsFakeStripeRepository : StripeRepository {
@@ -502,6 +503,14 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         paymentDetailsUpdateParams: ConsumerPaymentDetailsUpdateParams,
         requestOptions: ApiRequest.Options
     ): Result<ConsumerPaymentDetails> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun verifyIntentConfirmationChallenge(
+        verificationUrl: String,
+        params: VerifyIntentConfirmationChallengeParams,
+        requestOptions: ApiRequest.Options
+    ): Result<StripeIntent> {
         TODO("Not yet implemented")
     }
 }
