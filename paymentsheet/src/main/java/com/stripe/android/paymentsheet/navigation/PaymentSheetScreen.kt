@@ -500,7 +500,7 @@ internal sealed interface PaymentSheetScreen {
             isCompleteFlow: Boolean,
             isWalletEnabled: Boolean
         ): StateFlow<ResolvableString?> {
-            return stateFlowOf(R.string.stripe_paymentsheet_saved_card.resolvableString)
+            return stateFlowOf(null)
         }
 
         override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> {

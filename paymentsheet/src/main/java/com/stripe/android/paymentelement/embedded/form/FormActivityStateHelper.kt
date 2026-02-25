@@ -9,6 +9,7 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.amount
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -39,6 +40,8 @@ internal interface FormActivityStateHelper {
 
     fun setResult(result: FormResult)
 
+    fun updateSavedPaymentSelectionToConfirm(selection: PaymentSelection.Saved?)
+
     data class State(
         val primaryButtonLabel: ResolvableString,
         val isEnabled: Boolean,
@@ -47,6 +50,7 @@ internal interface FormActivityStateHelper {
         val shouldDisplayLockIcon: Boolean,
         val error: ResolvableString? = null,
         val mandateText: ResolvableString? = null,
+        val savedPaymentSelectionToConfirm: PaymentSelection.Saved? = null,
     )
 }
 
@@ -66,6 +70,7 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
             processingState = PrimaryButtonProcessingState.Idle(null),
             isProcessing = false,
             shouldDisplayLockIcon = configuration.formSheetAction == EmbeddedPaymentElement.FormSheetAction.Confirm,
+            savedPaymentSelectionToConfirm = null,
         )
     )
     override val state: StateFlow<FormActivityStateHelper.State> = _state
@@ -121,6 +126,12 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
             it.copy(
                 error = error
             )
+        }
+    }
+
+    override fun updateSavedPaymentSelectionToConfirm(selection: PaymentSelection.Saved?) {
+        _state.update {
+            it.copy(savedPaymentSelectionToConfirm = selection)
         }
     }
 
