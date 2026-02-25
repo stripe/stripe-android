@@ -9,10 +9,10 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.repositories.LinkRepository
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.Customer.Components.MobilePaymentElement
 import com.stripe.android.model.ElementsSession.Customer.Components.MobilePaymentElement.Enabled
-import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.model.ElementsSession.ExperimentAssignment
 import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_DISABLE_LINK_GLOBAL_HOLDBACK_LOOKUP
 import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_ENABLE_LINK_SPM
