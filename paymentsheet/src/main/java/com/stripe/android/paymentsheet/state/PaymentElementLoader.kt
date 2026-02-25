@@ -549,8 +549,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         customerInfo: CustomerInfo?,
     ): CustomerMetadata? {
         val customerId: String
-        val ephemeralKeySecret: String
-        val customerSessionClientSecret: String?
+        val accessInfo: CustomerMetadata.AccessInfo
         val isPaymentMethodSetAsDefaultEnabled: Boolean
         val permissions: CustomerMetadata.Permissions
 
@@ -558,8 +557,10 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             is CustomerInfo.CustomerSession -> {
                 val customer = elementsSession.customer ?: return null
                 customerId = customer.session.customerId
-                ephemeralKeySecret = customer.session.apiKey
-                customerSessionClientSecret = customerInfo.customerSessionClientSecret
+                accessInfo = CustomerMetadata.AccessInfo.CustomerSession(
+                    ephemeralKeySecret = customer.session.apiKey,
+                    customerSessionClientSecret = customerInfo.customerSessionClientSecret,
+                )
                 isPaymentMethodSetAsDefaultEnabled = getDefaultPaymentMethodsEnabled(elementsSession)
                 permissions = createForPaymentSheetCustomerSession(
                     configuration = configuration,
@@ -568,8 +569,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             }
             is CustomerInfo.Legacy -> {
                 customerId = customerInfo.id
-                ephemeralKeySecret = customerInfo.ephemeralKeySecret
-                customerSessionClientSecret = null
+                accessInfo = CustomerMetadata.AccessInfo.LegacyEphemeralKey(
+                    ephemeralKeySecret = customerInfo.ephemeralKeySecret,
+                )
                 isPaymentMethodSetAsDefaultEnabled = getDefaultPaymentMethodsEnabled(elementsSession)
                 permissions = createForPaymentSheetLegacyEphemeralKey(
                     configuration = configuration
@@ -577,9 +579,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             }
             is CustomerInfo.CheckoutSession -> {
                 customerId = customerInfo.customer.id
-                // Checkout sessions don't use ephemeral keys or customer sessions.
-                ephemeralKeySecret = ""
-                customerSessionClientSecret = null
+                accessInfo = CustomerMetadata.AccessInfo.CheckoutSession(
+                    checkoutSessionId = customerInfo.checkoutSessionId,
+                )
                 isPaymentMethodSetAsDefaultEnabled = false
                 permissions = CustomerMetadata.Permissions(
                     removePaymentMethod = if (customerInfo.customer.canDetachPaymentMethod) {
@@ -602,8 +604,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
         return CustomerMetadata(
             id = customerId,
-            ephemeralKeySecret = ephemeralKeySecret,
-            customerSessionClientSecret = customerSessionClientSecret,
+            accessInfo = accessInfo,
             isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
             permissions = permissions,
         )
@@ -627,6 +628,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             return CustomerInfo.CheckoutSession(
                 customer = checkoutCustomer,
                 offerSave = checkoutSession.savedPaymentMethodsOfferSave,
+                checkoutSessionId = checkoutSession.id,
             )
         }
 
@@ -1000,6 +1002,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         data class CheckoutSession(
             val customer: CheckoutSessionResponse.Customer,
             val offerSave: CheckoutSessionResponse.SavedPaymentMethodsOfferSave?,
+            val checkoutSessionId: String,
         ) : CustomerInfo
     }
 
