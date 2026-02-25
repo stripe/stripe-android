@@ -40,6 +40,10 @@ internal open class FakeCustomerRepository(
     private val _setDefaultPaymentMethodRequests = Turbine<SetDefaultRequest>()
     val setDefaultPaymentMethodRequests: ReceiveTurbine<SetDefaultRequest> = _setDefaultPaymentMethodRequests
 
+    private val _checkoutSessionDetachRequests = Turbine<CheckoutSessionDetachRequest>()
+    val checkoutSessionDetachRequests: ReceiveTurbine<CheckoutSessionDetachRequest> =
+        _checkoutSessionDetachRequests
+
     var error: Throwable? = null
 
     override suspend fun retrieveCustomer(
@@ -104,6 +108,12 @@ internal open class FakeCustomerRepository(
         checkoutSessionId: String,
         paymentMethodId: String,
     ): Result<PaymentMethod> {
+        _checkoutSessionDetachRequests.add(
+            CheckoutSessionDetachRequest(
+                checkoutSessionId = checkoutSessionId,
+                paymentMethodId = paymentMethodId,
+            )
+        )
         return onDetachPaymentMethod(paymentMethodId)
     }
 
@@ -122,5 +132,10 @@ internal open class FakeCustomerRepository(
     data class SetDefaultRequest(
         val paymentMethodId: String?,
         val customerInfo: CustomerRepository.CustomerInfo,
+    )
+
+    data class CheckoutSessionDetachRequest(
+        val checkoutSessionId: String,
+        val paymentMethodId: String,
     )
 }

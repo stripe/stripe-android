@@ -12,7 +12,7 @@ class FakeStripeRepository(
     private val createPaymentMethodResult: Result<PaymentMethod> = Result.failure(NotImplementedError()),
     private val retrieveSetupIntent: Result<SetupIntent> = Result.failure(NotImplementedError()),
     private val retrieveIntent: Result<StripeIntent> = Result.failure(NotImplementedError()),
-    var initCheckoutSessionResult: Result<CheckoutSessionResponse> = Result.failure(NotImplementedError()),
+    private val initCheckoutSessionResult: Result<CheckoutSessionResponse> = Result.failure(NotImplementedError()),
 ) : AbsFakeStripeRepository() {
 
     override suspend fun initCheckoutSession(
