@@ -13,6 +13,7 @@ fun SectionFieldElementUI(
     hiddenIdentifiers: Set<IdentifierSpec> = emptySet(),
     lastTextFieldIdentifier: IdentifierSpec?,
 ) {
+    // huh
     if (!hiddenIdentifiers.contains(field.identifier)) {
         (field.sectionFieldErrorController() as? SectionFieldComposable)?.ComposeUI(
             enabled,

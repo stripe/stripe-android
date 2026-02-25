@@ -209,7 +209,13 @@ private fun CardNumberField(
         },
         trailingIcon = {
             if (shouldShowCardBrandDropdown) {
-                CardBrandDropdown(
+                // flag here
+//                CardBrandDropdown(
+//                    selectedBrand = selectedBrand,
+//                    availableBrands = availableNetworks,
+//                    onBrandChoiceChanged = onBrandChoiceChanged,
+//                )
+                CardBrandSelector(
                     selectedBrand = selectedBrand,
                     availableBrands = availableNetworks,
                     onBrandChoiceChanged = onBrandChoiceChanged,

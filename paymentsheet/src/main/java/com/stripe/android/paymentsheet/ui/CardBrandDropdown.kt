@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
+import android.graphics.drawable.Icon
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -27,6 +28,7 @@ import com.stripe.android.uicore.elements.SingleChoiceDropdown
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 
+// here
 @Composable
 internal fun CardBrandDropdown(
     selectedBrand: CardBrandChoice,
@@ -87,6 +89,49 @@ internal fun CardBrandDropdown(
                 expanded = false
             }
         )
+    }
+}
+
+@Composable
+internal fun CardBrandSelector(
+    selectedBrand: CardBrandChoice,
+    availableBrands: List<CardBrandChoice>,
+    onBrandChoiceChanged: (CardBrandChoice) -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .semantics {
+                this.contentDescription = selectedBrand.brand.displayName
+            }
+            .testTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
+    ) {
+        Row(
+            modifier = Modifier.padding(10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            availableBrands.forEach {
+                if (it == selectedBrand) {
+                    Icon(
+                        painter = painterResource(R.drawable.stripe_ic_checkmark),
+                        contentDescription = null
+                    )
+                }
+                Image(
+                    modifier = Modifier
+                        .testTag("${SELECTED_CARD_BRAND_DROPDOWN_TAG}_${selectedBrand.label.resolve()}")
+                        .clickable(
+                            enabled = true,
+                            onClick = {
+                                onBrandChoiceChanged(it)
+                            }
+                        ),
+                    painter = painterResource(id = selectedBrand.icon),
+                    contentDescription = null
+                )
+            }
+
+        }
     }
 }
 
