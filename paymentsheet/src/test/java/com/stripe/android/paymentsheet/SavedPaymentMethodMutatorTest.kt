@@ -857,11 +857,13 @@ class SavedPaymentMethodMutatorTest {
 
         val accessInfo = if (shouldRemoveDuplicates) {
             CustomerMetadata.AccessInfo.CustomerSession(
+                customerId = "cus_123",
                 ephemeralKeySecret = "ek_123",
                 customerSessionClientSecret = "customer_session_client_secret",
             )
         } else {
             CustomerMetadata.AccessInfo.LegacyEphemeralKey(
+                customerId = "cus_123",
                 ephemeralKeySecret = "ek_123",
             )
         }
@@ -895,15 +897,7 @@ class SavedPaymentMethodMutatorTest {
             assertThat(repository.detachRequests.awaitItem()).isEqualTo(
                 FakeCustomerRepository.DetachRequest(
                     paymentMethodId = paymentMethod.id,
-                    customerInfo = CustomerRepository.CustomerInfo(
-                        id = "cus_123",
-                        ephemeralKeySecret = "ek_123",
-                        customerSessionClientSecret = if (shouldRemoveDuplicates) {
-                            "customer_session_client_secret"
-                        } else {
-                            null
-                        },
-                    ),
+                    accessInfo = accessInfo,
                     canRemoveDuplicates = shouldRemoveDuplicates,
                 )
             )

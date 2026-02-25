@@ -209,8 +209,8 @@ class DefaultPaymentMethodFilterTest {
             params = PaymentMethodFilter.FilterParams(
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
                 customerMetadata = CustomerMetadata(
-                    id = "cus_1",
                     accessInfo = CustomerMetadata.AccessInfo.CustomerSession(
+                        customerId = "cus_1",
                         ephemeralKeySecret = "ek_123",
                         customerSessionClientSecret = "cuss_123",
                     ),

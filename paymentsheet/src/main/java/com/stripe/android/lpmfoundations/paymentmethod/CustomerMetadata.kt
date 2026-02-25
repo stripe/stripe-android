@@ -6,42 +6,29 @@ import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.data.CustomerSheetSession
 import com.stripe.android.model.ElementsSession
-import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
 internal data class CustomerMetadata(
-    val id: String,
     val accessInfo: AccessInfo,
     val isPaymentMethodSetAsDefaultEnabled: Boolean,
     val permissions: Permissions,
 ) : Parcelable {
 
-    /**
-     * Converts this [CustomerMetadata] to a [CustomerRepository.CustomerInfo] for use with
-     * [CustomerRepository] API calls. Returns null for [AccessInfo.CheckoutSession] since
-     * checkout sessions use different API endpoints that don't require ephemeral keys.
-     */
-    fun toCustomerRepositoryInfo(): CustomerRepository.CustomerInfo? = when (val accessInfo = accessInfo) {
-        is AccessInfo.LegacyEphemeralKey -> CustomerRepository.CustomerInfo(
-            id = id,
-            ephemeralKeySecret = accessInfo.ephemeralKeySecret,
-            customerSessionClientSecret = null,
-        )
-        is AccessInfo.CustomerSession -> CustomerRepository.CustomerInfo(
-            id = id,
-            ephemeralKeySecret = accessInfo.ephemeralKeySecret,
-            customerSessionClientSecret = accessInfo.customerSessionClientSecret,
-        )
-        is AccessInfo.CheckoutSession -> null
-    }
+    /** Convenience accessor for the customer ID stored in [accessInfo]. */
+    val id: String get() = accessInfo.customerId
 
     /**
      * Integration-specific authentication/access information.
      * Each integration type uses different credentials to authenticate customer operations.
+     * Contains all the information needed to make authenticated customer API calls,
+     * including the customer ID and relevant credentials.
      */
     @Parcelize
     sealed class AccessInfo : Parcelable {
+        /** The customer ID associated with these credentials. */
+        abstract val customerId: String
+
         /**
          * The ephemeral key secret, if applicable to this access type.
          * Returns null for [CheckoutSession] which uses publishable key auth.
@@ -49,11 +36,18 @@ internal data class CustomerMetadata(
         open val ephemeralKeySecret: String? get() = null
 
         /**
+         * The customer session client secret, if applicable to this access type.
+         * Returns null for [LegacyEphemeralKey] and [CheckoutSession].
+         */
+        open val customerSessionClientSecret: String? get() = null
+
+        /**
          * Legacy ephemeral key integration.
          * Uses an un-scoped ephemeral key for all customer API calls.
          */
         @Parcelize
         data class LegacyEphemeralKey(
+            override val customerId: String,
             override val ephemeralKeySecret: String,
         ) : AccessInfo()
 
@@ -63,8 +57,9 @@ internal data class CustomerMetadata(
          */
         @Parcelize
         data class CustomerSession(
+            override val customerId: String,
             override val ephemeralKeySecret: String,
-            val customerSessionClientSecret: String,
+            override val customerSessionClientSecret: String,
         ) : AccessInfo()
 
         /**
@@ -73,6 +68,7 @@ internal data class CustomerMetadata(
          */
         @Parcelize
         data class CheckoutSession(
+            override val customerId: String,
             val checkoutSessionId: String,
         ) : AccessInfo()
     }

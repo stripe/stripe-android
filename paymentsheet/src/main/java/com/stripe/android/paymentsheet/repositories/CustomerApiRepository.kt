@@ -5,6 +5,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.model.Customer
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentMethod
@@ -37,23 +38,28 @@ internal class CustomerApiRepository @Inject constructor(
 ) : CustomerRepository {
 
     override suspend fun retrieveCustomer(
-        customerInfo: CustomerRepository.CustomerInfo
+        accessInfo: CustomerMetadata.AccessInfo,
     ): Customer? {
         return stripeRepository.retrieveCustomer(
-            customerInfo.id,
+            accessInfo.customerId,
             productUsageTokens,
             ApiRequest.Options(
-                customerInfo.ephemeralKeySecret,
+                requireNotNull(accessInfo.ephemeralKeySecret) {
+                    "Cannot retrieve customer without an ephemeral key"
+                },
                 lazyPaymentConfig.get().stripeAccountId
             )
         ).getOrNull()
     }
 
     override suspend fun getPaymentMethods(
-        customerInfo: CustomerRepository.CustomerInfo,
+        accessInfo: CustomerMetadata.AccessInfo,
         types: List<PaymentMethod.Type>,
         silentlyFail: Boolean,
     ): Result<List<PaymentMethod>> = withContext(workContext) {
+        val ephemeralKeySecret = requireNotNull(accessInfo.ephemeralKeySecret) {
+            "Cannot get payment methods without an ephemeral key"
+        }
         val requests = types.filter { paymentMethodType ->
             paymentMethodType in setOf(
                 PaymentMethod.Type.Card,
@@ -64,13 +70,13 @@ internal class CustomerApiRepository @Inject constructor(
             async {
                 stripeRepository.getPaymentMethods(
                     listPaymentMethodsParams = ListPaymentMethodsParams(
-                        customerId = customerInfo.id,
+                        customerId = accessInfo.customerId,
                         limit = 100,
                         paymentMethodType = paymentMethodType,
                     ),
                     productUsageTokens = productUsageTokens,
                     requestOptions = ApiRequest.Options(
-                        apiKey = customerInfo.ephemeralKeySecret,
+                        apiKey = ephemeralKeySecret,
                         stripeAccount = lazyPaymentConfig.get().stripeAccountId,
                     ),
                 ).onFailure {
@@ -103,23 +109,27 @@ internal class CustomerApiRepository @Inject constructor(
     }
 
     override suspend fun detachPaymentMethod(
-        customerInfo: CustomerRepository.CustomerInfo,
+        accessInfo: CustomerMetadata.AccessInfo,
         paymentMethodId: String,
         canRemoveDuplicates: Boolean
     ): Result<PaymentMethod> {
+        val ephemeralKeySecret = requireNotNull(accessInfo.ephemeralKeySecret) {
+            "Cannot detach payment method without an ephemeral key"
+        }
         val result = if (canRemoveDuplicates) {
             detachPaymentMethodAndDuplicates(
-                customerInfo,
+                accessInfo,
                 paymentMethodId
             )
         } else {
-            if (customerInfo.customerSessionClientSecret != null) {
+            val clientSecret = accessInfo.customerSessionClientSecret
+            if (clientSecret != null) {
                 stripeRepository.detachPaymentMethod(
-                    customerSessionClientSecret = customerInfo.customerSessionClientSecret,
+                    customerSessionClientSecret = clientSecret,
                     productUsageTokens = productUsageTokens,
                     paymentMethodId = paymentMethodId,
                     requestOptions = ApiRequest.Options(
-                        apiKey = customerInfo.ephemeralKeySecret,
+                        apiKey = ephemeralKeySecret,
                         stripeAccount = lazyPaymentConfig.get().stripeAccountId,
                     )
                 )
@@ -128,7 +138,7 @@ internal class CustomerApiRepository @Inject constructor(
                     productUsageTokens = productUsageTokens,
                     paymentMethodId = paymentMethodId,
                     requestOptions = ApiRequest.Options(
-                        apiKey = customerInfo.ephemeralKeySecret,
+                        apiKey = ephemeralKeySecret,
                         stripeAccount = lazyPaymentConfig.get().stripeAccountId,
                     )
                 )
@@ -141,15 +151,17 @@ internal class CustomerApiRepository @Inject constructor(
     }
 
     override suspend fun attachPaymentMethod(
-        customerInfo: CustomerRepository.CustomerInfo,
+        accessInfo: CustomerMetadata.AccessInfo,
         paymentMethodId: String
     ): Result<PaymentMethod> =
         stripeRepository.attachPaymentMethod(
-            customerId = customerInfo.id,
+            customerId = accessInfo.customerId,
             productUsageTokens = productUsageTokens,
             paymentMethodId = paymentMethodId,
             requestOptions = ApiRequest.Options(
-                apiKey = customerInfo.ephemeralKeySecret,
+                apiKey = requireNotNull(accessInfo.ephemeralKeySecret) {
+                    "Cannot attach payment method without an ephemeral key"
+                },
                 stripeAccount = lazyPaymentConfig.get().stripeAccountId,
             )
         ).onFailure {
@@ -157,7 +169,7 @@ internal class CustomerApiRepository @Inject constructor(
         }
 
     override suspend fun updatePaymentMethod(
-        customerInfo: CustomerRepository.CustomerInfo,
+        accessInfo: CustomerMetadata.AccessInfo,
         paymentMethodId: String,
         params: PaymentMethodUpdateParams,
     ): Result<PaymentMethod> =
@@ -165,7 +177,9 @@ internal class CustomerApiRepository @Inject constructor(
             paymentMethodId = paymentMethodId,
             paymentMethodUpdateParams = params,
             options = ApiRequest.Options(
-                apiKey = customerInfo.ephemeralKeySecret,
+                apiKey = requireNotNull(accessInfo.ephemeralKeySecret) {
+                    "Cannot update payment method without an ephemeral key"
+                },
                 stripeAccount = lazyPaymentConfig.get().stripeAccountId,
             )
         ).onFailure {
@@ -173,13 +187,15 @@ internal class CustomerApiRepository @Inject constructor(
         }
 
     override suspend fun setDefaultPaymentMethod(
-        customerInfo: CustomerRepository.CustomerInfo,
+        accessInfo: CustomerMetadata.AccessInfo,
         paymentMethodId: String?
     ): Result<Customer> = stripeRepository.setDefaultPaymentMethod(
         paymentMethodId = paymentMethodId,
-        customerId = customerInfo.id,
+        customerId = accessInfo.customerId,
         options = ApiRequest.Options(
-            apiKey = customerInfo.ephemeralKeySecret,
+            apiKey = requireNotNull(accessInfo.ephemeralKeySecret) {
+                "Cannot set default payment method without an ephemeral key"
+            },
             stripeAccount = lazyPaymentConfig.get().stripeAccountId,
         )
     )
@@ -226,17 +242,17 @@ internal class CustomerApiRepository @Inject constructor(
      *
      * This function should eventually be replaced by an endpoint that does this logic in the backend.
      *
-     * @param customerInfo authentication information that can perform detaching operations.
+     * @param accessInfo authentication information that can perform detaching operations
      * @param paymentMethodId the id of the payment method to remove and to compare with for stored duplicates
      *
      * @return a result containing the requested payment method to remove
      */
     private suspend fun CustomerRepository.detachPaymentMethodAndDuplicates(
-        customerInfo: CustomerRepository.CustomerInfo,
+        accessInfo: CustomerMetadata.AccessInfo,
         paymentMethodId: String,
     ): Result<PaymentMethod> = with(CoroutineScope(workContext)) {
         val paymentMethods = getPaymentMethods(
-            customerInfo = customerInfo,
+            accessInfo = accessInfo,
             // We only support removing duplicate cards.
             types = listOf(PaymentMethod.Type.Card),
             silentlyFail = false,
@@ -252,7 +268,7 @@ internal class CustomerApiRepository @Inject constructor(
              * could be that the payment method is not a card but a saved US Bank Account or SEPA Debit PM.
              */
             return@with detachPaymentMethod(
-                customerInfo = customerInfo,
+                accessInfo = accessInfo,
                 paymentMethodId = paymentMethodId,
                 canRemoveDuplicates = false,
             )
@@ -276,7 +292,7 @@ internal class CustomerApiRepository @Inject constructor(
         val paymentMethodAsyncRemovals = paymentMethodsToRemove.map { paymentMethod ->
             async {
                 detachPaymentMethod(
-                    customerInfo = customerInfo,
+                    accessInfo = accessInfo,
                     paymentMethodId = paymentMethod.id,
                     canRemoveDuplicates = false,
                 ).onFailure { exception ->
@@ -298,7 +314,7 @@ internal class CustomerApiRepository @Inject constructor(
 
         // Remove the original payment method
         return detachPaymentMethod(
-            customerInfo = customerInfo,
+            accessInfo = accessInfo,
             paymentMethodId = paymentMethodId,
             canRemoveDuplicates = false,
         )

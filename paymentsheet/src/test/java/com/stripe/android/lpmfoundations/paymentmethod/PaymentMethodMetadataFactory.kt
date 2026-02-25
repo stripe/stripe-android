@@ -53,6 +53,7 @@ internal object PaymentMethodMetadataFactory {
         customerMetadataPermissions: CustomerMetadata.Permissions =
             PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS,
         accessInfo: CustomerMetadata.AccessInfo = CustomerMetadata.AccessInfo.LegacyEphemeralKey(
+            customerId = "cus_123",
             ephemeralKeySecret = "ek_123",
         ),
         termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay> = emptyMap(),

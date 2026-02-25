@@ -11,6 +11,7 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.toLoginState
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
 import com.stripe.android.lpmfoundations.paymentmethod.toPaymentSheetSaveConsentBehavior
@@ -24,7 +25,6 @@ import com.stripe.android.paymentelement.confirmation.utils.sellerBusinessName
 import com.stripe.android.payments.financialconnections.GetFinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
@@ -32,7 +32,7 @@ internal interface CreateLinkState {
     suspend operator fun invoke(
         elementsSession: ElementsSession,
         configuration: CommonConfiguration,
-        customer: CustomerRepository.CustomerInfo?,
+        accessInfo: CustomerMetadata.AccessInfo?,
         initializationMode: PaymentElementLoader.InitializationMode,
         clientAttributionMetadata: ClientAttributionMetadata,
     ): LinkStateResult
@@ -70,7 +70,7 @@ internal class DefaultCreateLinkState @Inject constructor(
     override suspend fun invoke(
         elementsSession: ElementsSession,
         configuration: CommonConfiguration,
-        customer: CustomerRepository.CustomerInfo?,
+        accessInfo: CustomerMetadata.AccessInfo?,
         initializationMode: PaymentElementLoader.InitializationMode,
         clientAttributionMetadata: ClientAttributionMetadata,
     ): LinkStateResult {
@@ -86,7 +86,7 @@ internal class DefaultCreateLinkState @Inject constructor(
 
         val linkConfiguration = createLinkConfigurationWithoutValidation(
             configuration = configuration,
-            customer = customer,
+            accessInfo = accessInfo,
             elementsSession = elementsSession,
             initializationMode = initializationMode,
             clientAttributionMetadata = clientAttributionMetadata,
@@ -201,7 +201,7 @@ internal class DefaultCreateLinkState @Inject constructor(
     // Validation is done in getLinkDisabledReasons.
     private suspend fun createLinkConfigurationWithoutValidation(
         configuration: CommonConfiguration,
-        customer: CustomerRepository.CustomerInfo?,
+        accessInfo: CustomerMetadata.AccessInfo?,
         elementsSession: ElementsSession,
         initializationMode: PaymentElementLoader.InitializationMode,
         clientAttributionMetadata: ClientAttributionMetadata,
@@ -214,7 +214,7 @@ internal class DefaultCreateLinkState @Inject constructor(
         val customerPhone = getCustomerPhone(shippingDetails, configuration)
         val customerEmail = retrieveCustomerEmail(
             configuration = configuration,
-            customer = customer
+            accessInfo = accessInfo,
         )
         val customerInfo = LinkConfiguration.CustomerInfo(
             name = configuration.defaultBillingDetails?.name,

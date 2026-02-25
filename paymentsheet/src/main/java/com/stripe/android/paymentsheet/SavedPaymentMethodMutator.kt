@@ -9,6 +9,7 @@ import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
@@ -154,13 +155,14 @@ internal class SavedPaymentMethodMutator(
             }
         }
 
-        val customerInfo = customerMetadata.toCustomerRepositoryInfo()
-            ?: return Result.failure(
+        if (customerMetadata.accessInfo is CustomerMetadata.AccessInfo.CheckoutSession) {
+            return Result.failure(
                 IllegalStateException("Checkout session PM removal not yet implemented")
             )
+        }
 
         return customerRepository.detachPaymentMethod(
-            customerInfo = customerInfo,
+            accessInfo = customerMetadata.accessInfo,
             paymentMethodId = paymentMethodId,
             canRemoveDuplicates = canRemoveDuplicates,
         )
@@ -211,13 +213,14 @@ internal class SavedPaymentMethodMutator(
                 IllegalStateException("Unable to set default payment method when customer is null.")
             )
 
-        val customerInfo = customer.toCustomerRepositoryInfo()
-            ?: return Result.failure(
+        if (customer.accessInfo is CustomerMetadata.AccessInfo.CheckoutSession) {
+            return Result.failure(
                 IllegalStateException("Set default payment method is not supported for checkout sessions.")
             )
+        }
 
         return customerRepository.setDefaultPaymentMethod(
-            customerInfo = customerInfo,
+            accessInfo = customer.accessInfo,
             paymentMethodId = paymentMethod.id,
         ).onFailure { error ->
             eventReporter.onSetAsDefaultPaymentMethodFailed(
@@ -264,15 +267,16 @@ internal class SavedPaymentMethodMutator(
             )
         )
 
-        val customerInfo = customerMetadata.toCustomerRepositoryInfo()
-            ?: return Result.failure(
+        if (customerMetadata.accessInfo is CustomerMetadata.AccessInfo.CheckoutSession) {
+            return Result.failure(
                 IllegalStateException(
                     "Update payment method is not supported for checkout sessions yet."
                 )
             )
+        }
 
         return customerRepository.updatePaymentMethod(
-            customerInfo = customerInfo,
+            accessInfo = customerMetadata.accessInfo,
             paymentMethodId = paymentMethod.id,
             params = PaymentMethodUpdateParams.createCard(
                 networks = cardUpdateParams.cardBrand?.let {

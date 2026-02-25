@@ -332,7 +332,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             createLinkState(
                 elementsSession = elementsSession,
                 configuration = configuration,
-                customer = customerInfo?.toCustomerInfo(),
+                accessInfo = customerInfo?.toAccessInfo(),
                 initializationMode = initializationMode,
                 clientAttributionMetadata = clientAttributionMetadata,
             )
@@ -558,6 +558,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 val customer = elementsSession.customer ?: return null
                 customerId = customer.session.customerId
                 accessInfo = CustomerMetadata.AccessInfo.CustomerSession(
+                    customerId = customerId,
                     ephemeralKeySecret = customer.session.apiKey,
                     customerSessionClientSecret = customerInfo.customerSessionClientSecret,
                 )
@@ -570,6 +571,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             is CustomerInfo.Legacy -> {
                 customerId = customerInfo.id
                 accessInfo = CustomerMetadata.AccessInfo.LegacyEphemeralKey(
+                    customerId = customerId,
                     ephemeralKeySecret = customerInfo.ephemeralKeySecret,
                 )
                 isPaymentMethodSetAsDefaultEnabled = getDefaultPaymentMethodsEnabled(elementsSession)
@@ -580,6 +582,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             is CustomerInfo.CheckoutSession -> {
                 customerId = customerInfo.customer.id
                 accessInfo = CustomerMetadata.AccessInfo.CheckoutSession(
+                    customerId = customerId,
                     checkoutSessionId = customerInfo.checkoutSessionId,
                 )
                 isPaymentMethodSetAsDefaultEnabled = false
@@ -603,7 +606,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         }
 
         return CustomerMetadata(
-            id = customerId,
             accessInfo = accessInfo,
             isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
             permissions = permissions,
@@ -722,12 +724,21 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val customerSession = (customerConfig.accessType as? PaymentSheet.CustomerAccessType.CustomerSession)
         val customerSessionClientSecret = customerSession?.customerSessionClientSecret
 
-        val paymentMethods = customerRepository.getPaymentMethods(
-            customerInfo = CustomerRepository.CustomerInfo(
-                id = customerConfig.id,
+        val accessInfo = if (customerSessionClientSecret != null) {
+            CustomerMetadata.AccessInfo.CustomerSession(
+                customerId = customerConfig.id,
                 ephemeralKeySecret = customerConfig.ephemeralKeySecret,
                 customerSessionClientSecret = customerSessionClientSecret,
-            ),
+            )
+        } else {
+            CustomerMetadata.AccessInfo.LegacyEphemeralKey(
+                customerId = customerConfig.id,
+                ephemeralKeySecret = customerConfig.ephemeralKeySecret,
+            )
+        }
+
+        val paymentMethods = customerRepository.getPaymentMethods(
+            accessInfo = accessInfo,
             types = paymentMethodTypes,
             silentlyFail = metadata.stripeIntent.isLiveMode,
         ).getOrThrow()
@@ -1006,16 +1017,15 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         ) : CustomerInfo
     }
 
-    private fun CustomerInfo.toCustomerInfo(): CustomerRepository.CustomerInfo? = when (this) {
-        is CustomerInfo.CustomerSession -> CustomerRepository.CustomerInfo(
-            id = id,
+    private fun CustomerInfo.toAccessInfo(): CustomerMetadata.AccessInfo? = when (this) {
+        is CustomerInfo.CustomerSession -> CustomerMetadata.AccessInfo.CustomerSession(
+            customerId = id,
             ephemeralKeySecret = ephemeralKeySecret,
             customerSessionClientSecret = customerSessionClientSecret,
         )
-        is CustomerInfo.Legacy -> CustomerRepository.CustomerInfo(
-            id = id,
+        is CustomerInfo.Legacy -> CustomerMetadata.AccessInfo.LegacyEphemeralKey(
+            customerId = id,
             ephemeralKeySecret = ephemeralKeySecret,
-            customerSessionClientSecret = null,
         )
         // Checkout sessions don't use ephemeral keys for customer API calls.
         is CustomerInfo.CheckoutSession -> null

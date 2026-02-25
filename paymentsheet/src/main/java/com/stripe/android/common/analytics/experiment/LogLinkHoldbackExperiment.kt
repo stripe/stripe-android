@@ -168,6 +168,6 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
     private suspend fun PaymentElementLoader.State.getEmail(): String? =
         paymentMethodMetadata.linkState?.configuration?.customerInfo?.email ?: retrieveCustomerEmail(
             configuration = config,
-            customer = paymentMethodMetadata.customerMetadata?.toCustomerRepositoryInfo()
+            accessInfo = paymentMethodMetadata.customerMetadata?.accessInfo,
         )
 }
