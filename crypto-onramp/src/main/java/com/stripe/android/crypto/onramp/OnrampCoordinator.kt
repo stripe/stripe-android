@@ -21,7 +21,7 @@ import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampTokenAuthenticationResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
-import com.stripe.android.crypto.onramp.model.PaymentMethodType
+import com.stripe.android.crypto.onramp.model.PaymentMethodSelection
 import com.stripe.android.paymentsheet.PaymentSheet
 import javax.inject.Inject
 
@@ -35,7 +35,6 @@ import javax.inject.Inject
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class OnrampCoordinator @Inject internal constructor(
     private val interactor: OnrampInteractor,
-    private val onrampCallbacks: OnrampCallbacks,
     private val presenterComponentFactory: OnrampPresenterComponent.Factory,
 ) {
 
@@ -137,7 +136,6 @@ class OnrampCoordinator @Inject internal constructor(
      * Create a presenter for handling Link UI interactions.
      *
      * @param activity The activity that will host the Link flows.
-     * @param onrampCallbacks Callbacks for handling asynchronous responses from UI operations.
      * @return A presenter instance for handling Link UI operations.
      */
     fun createPresenter(
@@ -181,12 +179,12 @@ class OnrampCoordinator @Inject internal constructor(
         }
 
         /**
-         * Presents UI to collect/select a payment method of the given type.
+         * Presents UI to collect/select a payment method.
          *
-         * @param type The payment method type to collect.
+         * @param selection The payment method to collect.
          */
-        fun collectPaymentMethod(type: PaymentMethodType) {
-            coordinator.collectPaymentMethod(type)
+        fun collectPaymentMethod(selection: PaymentMethodSelection) {
+            coordinator.collectPaymentMethod(selection)
         }
 
         /**

@@ -37,6 +37,8 @@ import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
+import com.stripe.android.googlepaylauncher.GooglePayEnvironment
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.utils.isLinkAuthorizationError
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -60,6 +62,7 @@ internal class OnrampViewModel(
         .collectPaymentCallback(callback = ::onCollectPaymentResult)
         .authorizeCallback(callback = ::onAuthorizeResult)
         .onrampSessionClientSecretProvider(callback = ::checkoutWithBackend)
+        .googlePayIsReadyCallback(callback = ::googlePayIsReady)
 
     val onrampCoordinator: OnrampCoordinator =
         OnrampCoordinator
@@ -130,6 +133,19 @@ internal class OnrampViewModel(
                         )
                         .style(LinkAppearance.Style.ALWAYS_DARK)
                         .primaryButton(LinkAppearance.PrimaryButton())
+                )
+                .googlePayConfig(
+                    GooglePayPaymentMethodLauncher.Config(
+                        environment = GooglePayEnvironment.Test,
+                        merchantCountryCode = "US",
+                        merchantName = "Onramp Example",
+                        billingAddressConfig = GooglePayPaymentMethodLauncher.BillingAddressConfig(
+                            isRequired = true,
+                            format = GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Full,
+                            isPhoneNumberRequired = false
+                        ),
+                        existingPaymentMethodRequired = false
+                    )
                 )
 
             onrampCoordinator.configure(configuration = configuration)
@@ -241,7 +257,7 @@ internal class OnrampViewModel(
         } ?: run {
             clearUserData()
             _message.value = "No auth token found, please log in again"
-            _uiState.update { OnrampUiState(screen = Screen.LoginSignup) }
+            _uiState.update { OnrampUiState(screen = Screen.LoginSignup, googlePayIsReady = it.googlePayIsReady) }
         }
     }
 
@@ -275,10 +291,15 @@ internal class OnrampViewModel(
     fun onBackToLoginSignup() {
         loadUserData()?.let {
             _uiState.update {
-                OnrampUiState(email = it.email, authToken = it.authToken, screen = Screen.SeamlessSignIn)
+                OnrampUiState(
+                    email = it.email,
+                    authToken = it.authToken,
+                    screen = Screen.SeamlessSignIn,
+                    googlePayIsReady = it.googlePayIsReady
+                )
             }
         } ?: run {
-            _uiState.update { OnrampUiState(screen = Screen.LoginSignup) }
+            _uiState.update { OnrampUiState(screen = Screen.LoginSignup, googlePayIsReady = it.googlePayIsReady) }
         }
     }
 
@@ -553,7 +574,7 @@ internal class OnrampViewModel(
             PaymentMethodDisplayData.Type.BankAccount -> {
                 currentState.settlementSpeed
             }
-            PaymentMethodDisplayData.Type.Card, null -> {
+            PaymentMethodDisplayData.Type.Card, PaymentMethodDisplayData.Type.GooglePay, null -> {
                 SettlementSpeed.INSTANT
             }
         }
@@ -665,7 +686,7 @@ internal class OnrampViewModel(
         val tokenWithoutLAI = _uiState.value.authToken
         if (tokenWithoutLAI == null) {
             _message.value = "No auth token found, please log in again"
-            _uiState.update { OnrampUiState(screen = Screen.LoginSignup) }
+            _uiState.update { OnrampUiState(screen = Screen.LoginSignup, googlePayIsReady = it.googlePayIsReady) }
             return null
         }
 
@@ -700,13 +721,26 @@ internal class OnrampViewModel(
                 is OnrampLogOutResult.Completed -> {
                     _message.value = "Successfully logged out"
                     clearUserData()
-                    _uiState.update { OnrampUiState(screen = Screen.LoginSignup) }
+                    _uiState.update {
+                        OnrampUiState(
+                            screen = Screen.LoginSignup,
+                            googlePayIsReady = it.googlePayIsReady
+                        )
+                    }
                 }
                 is OnrampLogOutResult.Failed -> {
                     _message.value = "Logout failed: ${result.error.message}"
                     _uiState.update { it.copy(screen = Screen.AuthenticatedOperations, loadingMessage = null) }
                 }
             }
+        }
+    }
+
+    private fun googlePayIsReady(isReady: Boolean) {
+        _uiState.update {
+            it.copy(
+                googlePayIsReady = isReady
+            )
         }
     }
 
@@ -755,6 +789,7 @@ data class OnrampUiState(
     val onrampSession: OnrampSessionResponse? = null,
     val loadingMessage: String? = null,
     val settlementSpeed: SettlementSpeed = SettlementSpeed.INSTANT,
+    val googlePayIsReady: Boolean = false,
 )
 
 enum class Screen {
