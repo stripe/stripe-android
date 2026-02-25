@@ -23,6 +23,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.ViewActionRecorder
+import com.stripe.android.paymentsheet.verticalmode.PaymentMethodLayoutInitialVisibilityTracker.Companion.EMBEDDED_PAYMENT_METHOD_LAYOUT_NAME
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.Selection
 import com.stripe.android.testing.createComposeCleanupRule
@@ -38,7 +39,8 @@ internal class PaymentMethodLayoutUITest(
     private val paymentMethodsTag: String,
     private val allPaymentMethodsChildCount: Int,
     private val layoutUI:
-    @Composable ColumnScope.(interactor: FakePaymentMethodVerticalLayoutInteractor, modifier: Modifier) -> Unit
+    @Composable ColumnScope.(interactor: FakePaymentMethodVerticalLayoutInteractor, modifier: Modifier) -> Unit,
+    private val shouldTrackIndividualPaymentMethod: Boolean,
 ) {
     @get:Rule
     val composeRule = createComposeRule()
@@ -252,16 +254,24 @@ internal class PaymentMethodLayoutUITest(
             }
         }
 
-        initialState.displayedSavedPaymentMethod?.let {
-            viewActionRecorder.consume {
-                it is PaymentMethodVerticalLayoutInteractor.ViewAction.UpdatePaymentMethodVisibility &&
-                    it.itemCode == "saved"
+        if (shouldTrackIndividualPaymentMethod) {
+            initialState.displayedSavedPaymentMethod?.let {
+                viewActionRecorder.consume {
+                    it is PaymentMethodVerticalLayoutInteractor.ViewAction.UpdatePaymentMethodVisibility &&
+                        it.itemCode == "saved"
+                }
             }
-        }
-        initialState.displayablePaymentMethods.forEach { paymentMethod ->
+
+            initialState.displayablePaymentMethods.forEach { paymentMethod ->
+                viewActionRecorder.consume {
+                    it is PaymentMethodVerticalLayoutInteractor.ViewAction.UpdatePaymentMethodVisibility &&
+                        it.itemCode == paymentMethod.code
+                }
+            }
+        } else {
             viewActionRecorder.consume {
                 it is PaymentMethodVerticalLayoutInteractor.ViewAction.UpdatePaymentMethodVisibility &&
-                    it.itemCode == paymentMethod.code
+                    it.itemCode == EMBEDDED_PAYMENT_METHOD_LAYOUT_NAME
             }
         }
 
@@ -281,7 +291,8 @@ internal class PaymentMethodLayoutUITest(
                 allPaymentMethodsChildCount = 3,
                 layoutUI = { interactor, modifier ->
                     PaymentMethodVerticalLayoutUI(interactor, modifier)
-                }
+                },
+                shouldTrackIndividualPaymentMethod = true,
             ),
             parameters(
                 paymentMethodsTag = TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT,
@@ -293,7 +304,8 @@ internal class PaymentMethodLayoutUITest(
                         modifier = modifier,
                         appearance = Embedded(Embedded.RowStyle.FloatingButton.default),
                     )
-                }
+                },
+                shouldTrackIndividualPaymentMethod = false,
             )
         )
 
@@ -303,8 +315,9 @@ internal class PaymentMethodLayoutUITest(
             layoutUI: @Composable ColumnScope.(
                 interactor: FakePaymentMethodVerticalLayoutInteractor,
                 modifier: Modifier
-            ) -> Unit
-        ) = arrayOf(paymentMethodsTag, allPaymentMethodsChildCount, layoutUI)
+            ) -> Unit,
+            shouldTrackIndividualPaymentMethod: Boolean,
+        ) = arrayOf(paymentMethodsTag, allPaymentMethodsChildCount, layoutUI, shouldTrackIndividualPaymentMethod)
 
         private fun createState(
             displayablePaymentMethods: List<DisplayablePaymentMethod> = emptyList(),

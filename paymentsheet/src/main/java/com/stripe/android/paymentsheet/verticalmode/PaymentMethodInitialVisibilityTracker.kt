@@ -1,11 +1,5 @@
 package com.stripe.android.paymentsheet.verticalmode
 
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.layout.LayoutCoordinates
-import androidx.compose.ui.layout.boundsInWindow
-import androidx.compose.ui.layout.positionInWindow
-import androidx.compose.ui.unit.IntSize
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -26,35 +20,20 @@ import kotlin.coroutines.CoroutineContext
  * Once stable, it dispatches a single analytics event.
  */
 internal class PaymentMethodInitialVisibilityTracker(
-    private var expectedItems: List<String> = emptyList(),
-    private val renderedLpmCallback: (List<String>, List<String>) -> Unit,
+    expectedItems: List<String>,
     dispatcher: CoroutineContext = Dispatchers.Default,
+    private val renderedLpmCallback: (List<String>, List<String>) -> Unit,
+) : LayoutCoordinateInitialVisibilityTracker(
+    expectedItems = expectedItems,
+    visibilityThreshold = DEFAULT_VISIBILITY_THRESHOLD_PERCENT
 ) {
-    private data class CoordinateSnapshot(
-        val positionInWindow: Offset,
-        val size: IntSize,
-        val boundsInWindow: Rect
-    )
 
     private val visibilityMap = mutableMapOf<String, Boolean>()
     private val previousCoordinateSnapshots = mutableMapOf<String, CoordinateSnapshot>()
     private val coordinateStabilityMap = mutableMapOf<String, Boolean>()
-    private var hasDispatched = false
 
     private val coroutineScope = CoroutineScope(dispatcher)
     private var dispatchEventJob: Job? = null
-
-    fun updateExpectedItems(items: List<String>) {
-        if (this.expectedItems != items) {
-            // Reset to initial state with new items
-            this.expectedItems = items
-            reset()
-        }
-    }
-
-    fun getHasDispatched(): Boolean {
-        return this.hasDispatched
-    }
 
     /**
      * When this function is called from onGloballyPositioned
@@ -65,30 +44,11 @@ internal class PaymentMethodInitialVisibilityTracker(
      * when coordinates have moved
      * and when the composition is finalized and stable.
      */
-    fun updateVisibility(itemCode: String, coordinates: LayoutCoordinates) {
-        if (itemCode !in expectedItems || expectedItems.isEmpty()) return
-        if (hasDispatched) return // Only dispatch once per tracker instance
-
-        /**
-         * Capture only the relevant fields from [LayoutCoordinates] when we know the coordinates are attached.
-         * Whether previous coordinates is/isn't attached or not is irrelevant, we only need to know
-         * the previous coordinate's boundsInWindow, positionInWindow, and size.
-         *
-         * When implemented, [LayoutCoordinates.isAttached] provides a getter to a var, so we cannot rely on being able
-         * to call `positionInWindow` and `boundsInWindow` of saved [LayoutCoordinates].
-         */
-        val coordinateSnapshot: CoordinateSnapshot
-        if (coordinates.isAttached) {
-            coordinateSnapshot = CoordinateSnapshot(
-                positionInWindow = coordinates.positionInWindow(),
-                size = coordinates.size,
-                boundsInWindow = coordinates.boundsInWindow(),
-            )
-        } else {
-            return
-        }
-
-        val newVisibility = calculateVisibility(coordinateSnapshot)
+    override fun updateVisibilityHelper(
+        itemCode: String,
+        coordinateSnapshot: CoordinateSnapshot,
+        isVisible: Boolean,
+    ) {
         val previousCoordinatesForItem = previousCoordinateSnapshots[itemCode]
 
         // Check if coordinates are stable (haven't changed)
@@ -102,8 +62,8 @@ internal class PaymentMethodInitialVisibilityTracker(
 
         // Update our tracking
         this.previousCoordinateSnapshots[itemCode] = coordinateSnapshot
-        val wasVisibilityStable = visibilityMap[itemCode] == newVisibility
-        visibilityMap[itemCode] = newVisibility
+        val wasVisibilityStable = visibilityMap[itemCode] == isVisible
+        visibilityMap[itemCode] = isVisible
 
         if (coordinatesAreStable && wasVisibilityStable) {
             coordinateStabilityMap[itemCode] = true
@@ -114,32 +74,6 @@ internal class PaymentMethodInitialVisibilityTracker(
         }
 
         checkStabilityAndDispatch()
-    }
-
-    @Suppress("MagicNumber")
-    private fun calculateVisibility(coordinates: CoordinateSnapshot): Boolean {
-        val bounds = coordinates.boundsInWindow
-
-        // Check if completely out of bounds (hidden)
-        @Suppress("ComplexCondition")
-        if (bounds.left == 0f && bounds.top == 0f && bounds.right == 0f && bounds.bottom == 0f) {
-            return false
-        }
-
-        // Calculate visibility percentage
-        val widthInBounds = bounds.width
-        val heightInBounds = bounds.height
-        val totalArea = coordinates.size.height * coordinates.size.width
-        val areaInBounds = widthInBounds * heightInBounds
-
-        // 100 refers to percentages
-        val percentVisible = if (totalArea > 0) {
-            ((areaInBounds / totalArea) * 100).toInt().coerceIn(0, 100)
-        } else {
-            0
-        }
-
-        return percentVisible >= DEFAULT_VISIBILITY_THRESHOLD_PERCENT
     }
 
     private fun checkStability(): Boolean {
@@ -176,7 +110,7 @@ internal class PaymentMethodInitialVisibilityTracker(
         }
     }
 
-    fun reset() {
+    override fun reset() {
         coordinateStabilityMap.clear()
         previousCoordinateSnapshots.clear()
         visibilityMap.clear()
