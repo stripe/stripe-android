@@ -76,7 +76,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.core.utils.FeatureFlags
-import com.stripe.android.crypto.onramp.OnrampCoordinator
+import com.stripe.android.crypto.onramp.DEFAULT_ONRAMP_INSTANCE_KEY
 import com.stripe.android.crypto.onramp.example.network.OnrampSessionResponse
 import com.stripe.android.crypto.onramp.example.network.SettlementSpeed
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
@@ -84,17 +84,20 @@ import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
 import com.stripe.android.crypto.onramp.model.PaymentMethodSelection
+import com.stripe.android.crypto.onramp.onrampCallbackAttachment
+import com.stripe.android.crypto.onramp.rememberOnrampPresenter
+import com.stripe.android.crypto.onramp.OnrampCoordinator
 import com.stripe.android.model.DateOfBirth
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.launch
 
 internal class OnrampActivity : ComponentActivity() {
 
-    private lateinit var onrampPresenter: OnrampCoordinator.Presenter
-
     private val viewModel: OnrampViewModel by viewModels {
         OnrampViewModel.Factory(application)
     }
+
+    private lateinit var onrampPresenter: OnrampCoordinator.Presenter
 
     @Suppress("LongMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -103,32 +106,37 @@ internal class OnrampActivity : ComponentActivity() {
 
         FeatureFlags.nativeLinkEnabled.setEnabled(true)
 
-        onrampPresenter = viewModel.onrampCoordinator
-            .createPresenter(this)
-
-        // ViewModel notifies UI to launch checkout flow.
-        // Note checkout requires an Activity context since it might launch UI to handle next actions (e.g. 3DS2).
-        lifecycleScope.launch {
-            viewModel.checkoutEvent.collect { event ->
-                event?.let {
-                    onrampPresenter.performCheckout(
-                        onrampSessionId = event.sessionId,
-                    )
-                    viewModel.clearCheckoutEvent()
-                }
-            }
-        }
-
-        lifecycleScope.launch {
-            viewModel.authorizeEvent.collect { event ->
-                event?.let {
-                    onrampPresenter.authorize(event.linkAuthIntentId)
-                    viewModel.clearAuthorizeEvent()
-                }
-            }
-        }
+        onrampPresenter = viewModel.onrampCoordinator.createPresenter(this, DEFAULT_ONRAMP_INSTANCE_KEY)
 
         setContent {
+            onrampCallbackAttachment(DEFAULT_ONRAMP_INSTANCE_KEY, viewModel.callbacks)
+//            val onrampPresenter = rememberOnrampPresenter(
+//                coordinator = viewModel.onrampCoordinator,
+//                callbacks = viewModel.callbacks
+//            )
+
+            // ViewModel notifies UI to launch checkout flow.
+            // Note checkout requires an Activity context since it might launch UI to handle next actions (e.g. 3DS2).
+            LaunchedEffect(onrampPresenter) {
+                viewModel.checkoutEvent.collect { event ->
+                    event?.let {
+                        onrampPresenter.performCheckout(
+                            onrampSessionId = event.sessionId,
+                        )
+                        viewModel.clearCheckoutEvent()
+                    }
+                }
+            }
+
+            LaunchedEffect(onrampPresenter) {
+                viewModel.authorizeEvent.collect { event ->
+                    event?.let {
+                        onrampPresenter.authorize(event.linkAuthIntentId)
+                        viewModel.clearAuthorizeEvent()
+                    }
+                }
+            }
+
             val showAddressModal by viewModel.updateAddressEvent.collectAsStateWithLifecycle()
             val message by viewModel.message.collectAsStateWithLifecycle()
             val snackbarHostState = remember { SnackbarHostState() }

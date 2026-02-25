@@ -57,7 +57,7 @@ internal class OnrampViewModel(
     savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) {
 
-    private val callbacks = OnrampCallbacks()
+    internal val callbacks = OnrampCallbacks()
         .verifyIdentityCallback(callback = ::onVerifyIdentityResult)
         .verifyKycCallback(callback = ::onVerifyKycResult)
         .checkoutCallback(callback = ::onCheckoutResult)

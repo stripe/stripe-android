@@ -44,10 +44,13 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     linkController: LinkController,
     lifecycleOwner: LifecycleOwner,
     private val activity: ComponentActivity,
-    onrampCallbacks: OnrampCallbacks,
+    private val onrampCallbacks: OnrampCallbacks,
     private val coroutineScope: CoroutineScope,
+    private val onrampCallbackIdentifier: String
 ) {
-    private val onrampCallbacksState = onrampCallbacks.build()
+    private val onrampCallbacksState: OnrampCallbacks.State
+        get() = OnrampCallbackReferences[onrampCallbackIdentifier] ?: onrampCallbacks.build()
+
     private val linkControllerState = linkController.state(activity)
 
     private val linkPresenter = linkController.createPresenter(
@@ -77,7 +80,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
     private val verifyKycResultLauncher: ActivityResultLauncher<VerifyKycActivityArgs> =
         activity.activityResultRegistry.register(
-            key = "OnrampPresenterCoordinator_VerifyKycResultLauncher",
+            key = "OnrampPresenterCoordinator_VerifyKycResultLauncher($onrampCallbackIdentifier)",
             contract = VerifyKycInfoActivityContract(),
             callback = ::handleVerifyKycResult
         )
