@@ -211,6 +211,7 @@ internal class IntentConfirmationChallengeActivityTest {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return IntentConfirmationChallengeViewModel(
+                    args = createTestArgs(),
                     bridgeHandler = bridgeHandler,
                     workContext = testDispatcher,
                     analyticsEventReporter = analyticsReporter,
@@ -251,6 +252,7 @@ internal class IntentConfirmationChallengeActivityTest {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return IntentConfirmationChallengeViewModel(
+                    args = createTestArgs(),
                     bridgeHandler = bridgeHandler,
                     workContext = testDispatcher,
                     analyticsEventReporter = FakeIntentConfirmationChallengeAnalyticsEventReporter(),

@@ -6,6 +6,7 @@ import androidx.lifecycle.LifecycleRegistry
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.challenge.confirmation.analytics.IntentConfirmationChallengeAnalyticsEventReporter
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -147,7 +148,9 @@ internal class IntentConfirmationChallengeViewModelTest {
             viewModel.closeClicked()
 
             val result = awaitItem()
-            assertThat(result).isEqualTo(IntentConfirmationChallengeActivityResult.Canceled)
+            assertThat(result).isInstanceOf(IntentConfirmationChallengeActivityResult.Canceled::class.java)
+            val canceledResult = result as IntentConfirmationChallengeActivityResult.Canceled
+            assertThat(canceledResult.clientSecret).isEqualTo(TEST_ARGS.intent.clientSecret)
 
             ensureAllEventsConsumed()
         }
@@ -181,9 +184,18 @@ internal class IntentConfirmationChallengeViewModelTest {
         analyticsReporter: IntentConfirmationChallengeAnalyticsEventReporter =
             FakeIntentConfirmationChallengeAnalyticsEventReporter()
     ) = IntentConfirmationChallengeViewModel(
+        args = TEST_ARGS,
         bridgeHandler = bridgeHandler,
         workContext = testDispatcher,
         analyticsEventReporter = analyticsReporter,
         userAgent = "fake-user-agent"
     )
+
+    private companion object {
+        val TEST_ARGS = IntentConfirmationChallengeArgs(
+            publishableKey = "pk_test_123",
+            intent = PaymentIntentFixtures.PI_SUCCEEDED,
+            productUsage = listOf("PaymentSheet")
+        )
+    }
 }
