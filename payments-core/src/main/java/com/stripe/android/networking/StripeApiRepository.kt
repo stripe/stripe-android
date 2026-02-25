@@ -1589,6 +1589,25 @@ class StripeApiRepository @JvmOverloads internal constructor(
         )
     }
 
+    override suspend fun updateCheckoutSession(
+        sessionId: String,
+        paymentMethodIdToDetach: String,
+        options: ApiRequest.Options,
+    ): Result<CheckoutSessionResponse> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = getApiUrl("payment_pages/$sessionId"),
+                options = options,
+                params = mapOf(
+                    "payment_method_to_detach" to paymentMethodIdToDetach,
+                ),
+            ),
+            jsonParser = CheckoutSessionResponseJsonParser(
+                isLiveMode = options.apiKeyIsLiveMode,
+            ),
+        )
+    }
+
     override suspend fun retrieveCardMetadata(
         cardNumber: String,
         requestOptions: ApiRequest.Options
