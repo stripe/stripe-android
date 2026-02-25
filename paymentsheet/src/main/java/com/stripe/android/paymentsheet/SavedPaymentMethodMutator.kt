@@ -179,8 +179,10 @@ internal class SavedPaymentMethodMutator(
                 )
             }
             is CustomerMetadata.AccessInfo.CheckoutSession -> {
-                // Will be implemented in Task 5
-                Result.failure(IllegalStateException("Checkout session PM removal not yet implemented"))
+                customerRepository.detachCheckoutSessionPaymentMethod(
+                    checkoutSessionId = accessInfo.checkoutSessionId,
+                    paymentMethodId = paymentMethodId,
+                )
             }
         }
     }

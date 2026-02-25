@@ -100,6 +100,13 @@ internal open class FakeCustomerRepository(
         return onSetDefaultPaymentMethod()
     }
 
+    override suspend fun detachCheckoutSessionPaymentMethod(
+        checkoutSessionId: String,
+        paymentMethodId: String,
+    ): Result<PaymentMethod> {
+        return onDetachPaymentMethod(paymentMethodId)
+    }
+
     data class DetachRequest(
         val paymentMethodId: String,
         val customerInfo: CustomerRepository.CustomerInfo,

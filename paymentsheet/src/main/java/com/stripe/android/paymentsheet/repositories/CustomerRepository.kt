@@ -52,6 +52,15 @@ internal interface CustomerRepository {
         paymentMethodId: String?,
     ): Result<Customer>
 
+    /**
+     * Detach a payment method from a checkout session customer.
+     * Uses the checkout session update endpoint instead of the customer PM detach endpoint.
+     */
+    suspend fun detachCheckoutSessionPaymentMethod(
+        checkoutSessionId: String,
+        paymentMethodId: String,
+    ): Result<PaymentMethod>
+
     data class CustomerInfo(
         val id: String,
         val ephemeralKeySecret: String,
