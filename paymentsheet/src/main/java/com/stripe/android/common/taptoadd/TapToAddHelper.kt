@@ -24,8 +24,6 @@ import javax.inject.Named
 internal interface TapToAddHelper {
     val nextStep: SharedFlow<TapToAddNextStep>
 
-    val hasPreviouslyAttemptedCollection: Boolean
-
     fun register(
         activityResultCaller: ActivityResultCaller,
         lifecycleOwner: LifecycleOwner
@@ -66,15 +64,6 @@ internal class DefaultTapToAddHelper(
         }
 
     private var launcher: ActivityResultLauncher<TapToAddContract.Args>? = null
-
-    private var _hasPreviouslyAttemptedCollection
-        get() = savedStateHandle.get<Boolean>(PREVIOUSLY_COLLECTED_WITH_TAP_TO_ADD_KEY) == true
-        set(value) {
-            savedStateHandle[PREVIOUSLY_COLLECTED_WITH_TAP_TO_ADD_KEY] = value
-        }
-
-    override val hasPreviouslyAttemptedCollection: Boolean
-        get() = _hasPreviouslyAttemptedCollection
 
     private val _nextStep = MutableSharedFlow<TapToAddNextStep>()
     override val nextStep: SharedFlow<TapToAddNextStep> = _nextStep.asSharedFlow()
@@ -126,8 +115,6 @@ internal class DefaultTapToAddHelper(
     }
 
     override fun startPaymentMethodCollection(paymentMethodMetadata: PaymentMethodMetadata) {
-        _hasPreviouslyAttemptedCollection = true
-
         if (collecting) {
             return
         }
@@ -175,7 +162,6 @@ internal class DefaultTapToAddHelper(
     }
 
     private companion object {
-        const val PREVIOUSLY_COLLECTED_WITH_TAP_TO_ADD_KEY = "PREVIOUSLY_COLLECTED_WITH_TAP_TO_ADD"
         const val CURRENTLY_COLLECTING_WITH_TAP_TO_ADD_KEY = "CURRENTLY_COLLECTING_WITH_TAP_TO_ADD"
     }
 }

@@ -319,28 +319,6 @@ internal data class PaymentMethodMetadata(
         }
     }
 
-    fun actionForCode(
-        code: String,
-        uiDefinitionFactoryArgumentsFactory: UiDefinitionFactory.Arguments.Factory,
-    ) {
-        val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code }
-            ?: return
-
-        val uiFactory = definition.uiDefinitionFactory(this)
-
-        if (uiFactory !is UiDefinitionFactory.Actionable) {
-            return
-        }
-
-        uiFactory.action(
-            metadata = this,
-            arguments = uiDefinitionFactoryArgumentsFactory.create(
-                metadata = this,
-                requiresMandate = definition.requiresMandate(this),
-            ),
-        )
-    }
-
     fun allowRedisplay(
         customerRequestedSave: PaymentSelection.CustomerRequestedSave,
         code: PaymentMethodCode

@@ -26,27 +26,6 @@ import org.robolectric.RobolectricTestRunner
 class TapToAddHelperTest {
 
     @Test
-    fun `hasPreviouslyAttemptedCollection is initially false`() = runScenario {
-        assertThat(helper.hasPreviouslyAttemptedCollection).isFalse()
-    }
-
-    @Test
-    fun `hasPreviouslyAttemptedCollection is true after startPaymentMethodCollection`() = runScenario {
-        helper.startPaymentMethodCollection(DEFAULT_METADATA)
-
-        assertThat(helper.hasPreviouslyAttemptedCollection).isTrue()
-    }
-
-    @Test
-    fun `hasPreviouslyAttemptedCollection remains true after multiple start calls`() = runScenario {
-        helper.startPaymentMethodCollection(DEFAULT_METADATA)
-        helper.startPaymentMethodCollection(DEFAULT_METADATA)
-        helper.startPaymentMethodCollection(DEFAULT_METADATA)
-
-        assertThat(helper.hasPreviouslyAttemptedCollection).isTrue()
-    }
-
-    @Test
     fun `register uses activity result caller to register callback which updates result state`() = runScenario {
         helper.register(
             activityResultCaller = activityResultCallerScenario.activityResultCaller,
@@ -261,23 +240,6 @@ class TapToAddHelperTest {
         assertThat(tapToAddArgs.paymentElementCallbackIdentifier).isEqualTo("mpe_callback_id")
         assertThat(tapToAddArgs.productUsage).containsExactly("PaymentSheet", "FlowController")
         assertThat(tapToAddArgs.mode).isEqualTo(TapToAddMode.Continue)
-    }
-
-    @Test
-    fun `hasPreviouslyAttemptedCollection persists across instances via SavedStateHandle`() = runTest {
-        val savedStateHandle = SavedStateHandle()
-
-        FakeTapToAddCollectionHandler.test {
-            val helper1 = createTapToAddHelper(savedStateHandle = savedStateHandle)
-
-            assertThat(helper1.hasPreviouslyAttemptedCollection).isFalse()
-            helper1.startPaymentMethodCollection(DEFAULT_METADATA)
-            assertThat(helper1.hasPreviouslyAttemptedCollection).isTrue()
-
-            val helper2 = createTapToAddHelper(savedStateHandle = savedStateHandle)
-
-            assertThat(helper2.hasPreviouslyAttemptedCollection).isTrue()
-        }
     }
 
     private fun runScenario(
