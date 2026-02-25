@@ -174,7 +174,9 @@ internal class IntentConfirmationChallengeNextActionHandlerTest {
 
             // Simulate canceled result
             val callback = registerCall.callback.asCallbackFor<IntentConfirmationChallengeActivityResult>()
-            callback.onActivityResult(IntentConfirmationChallengeActivityResult.Canceled(clientSecret = "pi_test_secret"))
+            callback.onActivityResult(
+                IntentConfirmationChallengeActivityResult.Canceled(clientSecret = "pi_test_secret")
+            )
 
             assertThat(resultCallback).hasSize(1)
             val capturedResult = resultCallback[0]
