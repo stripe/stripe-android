@@ -4,7 +4,6 @@ import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.common.exception.stripeErrorMessage
-import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -44,13 +43,7 @@ internal class IntentConfirmationDefinition(
             interceptor = intentConfirmationInterceptorFactory.create(
                 integrationMetadata = confirmationArgs.paymentMethodMetadata.integrationMetadata,
                 customerId = paymentMethodMetadata.customerMetadata?.id,
-                ephemeralKeySecret = paymentMethodMetadata.customerMetadata?.accessInfo?.let { accessInfo ->
-                    when (accessInfo) {
-                        is CustomerMetadata.AccessInfo.LegacyEphemeralKey -> accessInfo.ephemeralKeySecret
-                        is CustomerMetadata.AccessInfo.CustomerSession -> accessInfo.ephemeralKeySecret
-                        is CustomerMetadata.AccessInfo.CheckoutSession -> null
-                    }
-                },
+                ephemeralKeySecret = paymentMethodMetadata.customerMetadata?.accessInfo?.ephemeralKeySecret,
                 clientAttributionMetadata = paymentMethodMetadata.clientAttributionMetadata,
             )
         } catch (e: CallbackNotFoundException) {

@@ -305,7 +305,9 @@ internal class SavedPaymentMethodMutator(
                 customerSessionClientSecret = accessInfo.customerSessionClientSecret,
             )
             is CustomerMetadata.AccessInfo.CheckoutSession -> return Result.failure(
-                IllegalStateException("Update payment method is not supported for checkout sessions.")
+                IllegalStateException(
+                    "Update payment method is not supported for checkout sessions yet."
+                )
             )
         }
         return customerRepository.updatePaymentMethod(

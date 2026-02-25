@@ -19,16 +19,25 @@ internal data class CustomerMetadata(
     /**
      * Integration-specific authentication/access information.
      * Each integration type uses different credentials to authenticate customer operations.
+     *
+     * TODO: Unify AccessInfo, PaymentElementLoader.CustomerInfo, and CustomerRepository.CustomerInfo.
+     *  See #12444 discussion for details on the proposed refactor.
      */
     @Parcelize
     sealed class AccessInfo : Parcelable {
+        /**
+         * The ephemeral key secret, if applicable to this access type.
+         * Returns null for [CheckoutSession] which uses publishable key auth.
+         */
+        open val ephemeralKeySecret: String? get() = null
+
         /**
          * Legacy ephemeral key integration.
          * Uses an un-scoped ephemeral key for all customer API calls.
          */
         @Parcelize
         data class LegacyEphemeralKey(
-            val ephemeralKeySecret: String,
+            override val ephemeralKeySecret: String,
         ) : AccessInfo()
 
         /**
@@ -37,7 +46,7 @@ internal data class CustomerMetadata(
          */
         @Parcelize
         data class CustomerSession(
-            val ephemeralKeySecret: String,
+            override val ephemeralKeySecret: String,
             val customerSessionClientSecret: String,
         ) : AccessInfo()
 
