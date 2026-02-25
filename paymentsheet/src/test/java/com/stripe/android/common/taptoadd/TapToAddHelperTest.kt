@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -13,8 +14,9 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.asCallbackFor
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.currentCoroutineContext
+import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -62,6 +64,8 @@ class TapToAddHelperTest {
 
             tapToAddCallback.onActivityResult(TapToAddResult.Complete)
 
+            testScope.advanceUntilIdle()
+
             assertThat(awaitItem()).isEqualTo(TapToAddNextStep.Complete)
         }
     }
@@ -86,6 +90,8 @@ class TapToAddHelperTest {
                 tapToAddResult,
                 helper = helper,
                 activityResultCallerScenario = activityResultCallerScenario,
+                expectedNextStep = null,
+                testScope = testScope,
             )
 
             assertThat(selection).isEqualTo(expectedPaymentSelection)
@@ -112,6 +118,8 @@ class TapToAddHelperTest {
                 tapToAddResult,
                 helper = helper,
                 activityResultCallerScenario = activityResultCallerScenario,
+                expectedNextStep = null,
+                testScope = testScope,
             )
 
             assertThat(customerStateHolder.addPaymentMethodTurbine.awaitItem()).isEqualTo(
@@ -120,10 +128,37 @@ class TapToAddHelperTest {
         }
     }
 
+    @Test
+    fun `when TapToAddActivity result is canceled with selection and link signup available, next step is correct`() {
+        val expectedPaymentSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
+        val tapToAddResult = TapToAddResult.Canceled(expectedPaymentSelection)
+
+        runScenario(
+            linkSignupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+        ) {
+            helper.register(
+                activityResultCaller = activityResultCallerScenario.activityResultCaller,
+                lifecycleOwner = TestLifecycleOwner(),
+            )
+
+            finishTapToAddActivityWithResult(
+                tapToAddResult,
+                helper = helper,
+                activityResultCallerScenario = activityResultCallerScenario,
+                expectedNextStep = TapToAddNextStep.ConfirmSavedPaymentMethod(
+                    expectedPaymentSelection,
+                ),
+                testScope = testScope,
+            )
+        }
+    }
+
     private suspend fun finishTapToAddActivityWithResult(
         result: TapToAddResult,
         helper: TapToAddHelper,
         activityResultCallerScenario: DummyActivityResultCaller.Scenario,
+        expectedNextStep: TapToAddNextStep?,
+        testScope: TestScope,
     ) {
         helper.nextStep.test {
             assertThat(activityResultCallerScenario.awaitNextRegisteredLauncher()).isNotNull()
@@ -136,7 +171,13 @@ class TapToAddHelperTest {
 
             tapToAddCallback.onActivityResult(result)
 
-            awaitItem()
+            testScope.advanceUntilIdle()
+
+            if (expectedNextStep == null) {
+                ensureAllEventsConsumed()
+            } else {
+                assertThat(awaitItem()).isEqualTo(expectedNextStep)
+            }
         }
     }
 
@@ -247,8 +288,10 @@ class TapToAddHelperTest {
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
         updateSelection: (PaymentSelection.Saved) -> Unit = {},
         customerStateHolder: CustomerStateHolder = FakeCustomerStateHolder(),
+        linkSignupMode: LinkSignupMode? = null,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
+        val testScope = this
         DummyActivityResultCaller.test {
             block(
                 Scenario(
@@ -260,8 +303,11 @@ class TapToAddHelperTest {
                         savedStateHandle = savedStateHandle,
                         updateSelection = updateSelection,
                         customerStateHolder = customerStateHolder,
+                        linkSignupMode = linkSignupMode,
+                        testScope = testScope,
                     ),
                     activityResultCallerScenario = this,
+                    testScope = testScope,
                 )
             )
         }
@@ -275,9 +321,11 @@ class TapToAddHelperTest {
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
         updateSelection: (PaymentSelection.Saved) -> Unit = {},
         customerStateHolder: CustomerStateHolder = FakeCustomerStateHolder(),
+        linkSignupMode: LinkSignupMode? = null,
+        testScope: TestScope = TestScope(),
     ): TapToAddHelper {
         return DefaultTapToAddHelper(
-            coroutineScope = CoroutineScope(currentCoroutineContext()),
+            coroutineScope = testScope,
             productUsage = productUsage,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             tapToAddMode = tapToAddMode,
@@ -285,12 +333,14 @@ class TapToAddHelperTest {
             savedStateHandle = savedStateHandle,
             updateSelection = updateSelection,
             customerStateHolder = customerStateHolder,
+            linkSignupMode = stateFlowOf(linkSignupMode),
         )
     }
 
     private class Scenario(
         val helper: TapToAddHelper,
         val activityResultCallerScenario: DummyActivityResultCaller.Scenario,
+        val testScope: TestScope,
     )
 
     private companion object {

@@ -70,6 +70,16 @@ class OnrampCallbacks {
             OnrampSessionClientSecretProvider { id -> callback(id) }
     }
 
+    /**
+     * Callback invoked with the result of checking whether Google Pay is ready.
+     * This may be called more than once, and should update the UI to reflect the availability
+     * of Google Pay as a payment method.
+     * Only applicable if the merchant has provided a Google Pay configuration in OnrampConfiguration.
+     */
+    fun googlePayIsReadyCallback(callback: (Boolean) -> Unit) = apply {
+        this.googlePayIsReadyCallback = callback
+    }
+
     internal class State(
         val verifyIdentityCallback: OnrampVerifyIdentityCallback,
         val verifyKycCallback: OnrampVerifyKycCallback,
@@ -100,6 +110,7 @@ class OnrampCallbacks {
             onrampSessionClientSecretProvider = requireNotNull(onrampSessionClientSecretProvider) {
                 "onrampSessionClientSecretProvider must be not null"
             },
+            googlePayIsReadyCallback = googlePayIsReadyCallback
         )
     }
 }

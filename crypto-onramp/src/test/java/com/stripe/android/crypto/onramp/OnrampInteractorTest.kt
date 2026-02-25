@@ -33,10 +33,12 @@ import com.stripe.android.crypto.onramp.model.StartIdentityVerificationResponse
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.crypto.onramp.ui.KycRefreshScreenAction
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowResult
 import com.stripe.android.link.LinkController
 import com.stripe.android.link.LinkController.ConfigureResult
 import com.stripe.android.model.DateOfBirth
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -203,6 +205,46 @@ class OnrampInteractorTest {
 
     @Test
     fun testCreateCryptoPaymentTokenIsSuccessful() = runTest {
+        whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithSelectedPaymentPreview()))
+        interactor.onLinkControllerState(mockLinkStateWithSelectedPaymentPreview())
+
+        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        interactor.configure(createConfigurationState(cryptoCustomerId = "cpt_123"))
+
+        val mockPlatformSettings = mock<GetPlatformSettingsResponse>()
+        doReturn("pk_platform_123").whenever(mockPlatformSettings).publishableKey
+        whenever(
+            cryptoApiRepository.getPlatformSettings(
+                cryptoCustomerId = eq("cpt_123"),
+                countryHint = anyOrNull()
+            )
+        ).thenReturn(Result.success(mockPlatformSettings))
+
+        val mockPaymentMethod = createCardPaymentMethod()
+
+        val mockResult = mock<LinkController.CreatePaymentMethodResult.Success> {
+            on { paymentMethod } doReturn mockPaymentMethod
+        }
+        whenever(linkController.createPaymentMethodForOnramp(any())).thenReturn(mockResult)
+
+        val createPaymentTokenResponse = CreatePaymentTokenResponse(id = "crypto_token_123")
+        whenever(
+            cryptoApiRepository.createPaymentToken(cryptoCustomerId = any(), paymentMethod = any())
+        ).thenReturn(Result.success(createPaymentTokenResponse))
+
+        interactor.handlePresentPaymentMethodsResult(
+            LinkController.PresentPaymentMethodsResult.Success,
+            RuntimeEnvironment.getApplication()
+        )
+
+        val result = interactor.createCryptoPaymentToken()
+        assertThat(result).isInstanceOf(OnrampCreateCryptoPaymentTokenResult.Completed::class.java)
+
+        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.CryptoPaymentTokenCreated(null))
+    }
+
+    @Test
+    fun testCreateCryptoPaymentTokenForGooglePayIsSuccessful() = runTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
         interactor.onLinkControllerState(mockLinkStateWithAccount())
 
@@ -229,6 +271,19 @@ class OnrampInteractorTest {
         whenever(
             cryptoApiRepository.createPaymentToken(cryptoCustomerId = any(), paymentMethod = any())
         ).thenReturn(Result.success(createPaymentTokenResponse))
+
+        val pm = PaymentMethod(
+            id = "pm_123456789",
+            created = 1550757934255L,
+            liveMode = false,
+            type = PaymentMethod.Type.Card,
+            customerId = "cus_AQsHpvKfKwJDrF",
+            code = "card"
+        )
+
+        interactor.handleGooglePayPaymentResult(
+            GooglePayPaymentMethodLauncher.Result.Completed(pm)
+        )
 
         val result = interactor.createCryptoPaymentToken()
         assertThat(result).isInstanceOf(OnrampCreateCryptoPaymentTokenResult.Completed::class.java)
@@ -282,16 +337,8 @@ class OnrampInteractorTest {
     @Test
     fun testHandlePresentPaymentMethodsResultSuccess() {
         val context = RuntimeEnvironment.getApplication()
-        val paymentMethodPreview = LinkController.PaymentMethodPreview(
-            imageLoader = {
-                BitmapDrawable(
-                    null,
-                    Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
-                )
-            },
-            label = "Visa",
-            sublabel = "•••• 4242"
-        )
+        val paymentMethodPreview = mockCardPaymentMethodPreview()
+
         val mockState = LinkController.State(
             internalLinkAccount = null,
             merchantLogoUrl = null,
@@ -512,6 +559,29 @@ class OnrampInteractorTest {
         createdPaymentMethod = null,
         elementsSessionId = "test-elements-session-id"
     )
+
+    private fun mockLinkStateWithSelectedPaymentPreview(
+        account: LinkController.LinkAccount = mockLinkAccount()
+    ): LinkController.State = LinkController.State(
+        internalLinkAccount = account,
+        merchantLogoUrl = null,
+        selectedPaymentMethodPreview = mockCardPaymentMethodPreview(),
+        createdPaymentMethod = null,
+        elementsSessionId = "test-elements-session-id"
+    )
+
+    private fun mockCardPaymentMethodPreview(): LinkController.PaymentMethodPreview =
+        LinkController.PaymentMethodPreview(
+            imageLoader = {
+                BitmapDrawable(
+                    null,
+                    Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+                )
+            },
+            label = "Visa",
+            sublabel = "•••• 4242",
+            type = LinkController.PaymentMethodType.Card
+        )
 
     private fun mockLinkAccount(): LinkController.LinkAccount = LinkController.LinkAccount(
         email = "test@email.com",

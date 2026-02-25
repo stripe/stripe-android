@@ -47,9 +47,22 @@ class PaymentMethodDisplayData internal constructor(
      * User facing strings representing payment method information
      */
     val label: String,
-    val sublabel: String?
+    val sublabel: String?,
+    /**
+     * The type of payment being displayed.
+     */
+    val type: Type
 ) {
-    val icon: Drawable = DelegateDrawable(imageLoader = imageLoader)
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    enum class Type {
+        Card,
+        BankAccount,
+        GooglePay
+    }
+
+    val icon: Drawable by lazy {
+        DelegateDrawable(imageLoader = imageLoader)
+    }
 
     val iconPainter: Painter
         @Composable

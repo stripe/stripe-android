@@ -16,13 +16,16 @@ import com.stripe.android.crypto.onramp.di.OnrampPresenterScope
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
+import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
+import com.stripe.android.crypto.onramp.model.PaymentMethodSelection
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityArgs
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
 import com.stripe.android.crypto.onramp.ui.VerifyKycInfoActivityContract
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
 import com.stripe.android.model.PaymentIntent
@@ -62,6 +65,15 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         statusBarColor = StatusBarCompat.color(activity),
         callback = ::handlePaymentLauncherResult
     )
+
+    private val googlePayPaymentMethodLauncher: GooglePayPaymentMethodLauncher? = googlePayConfig()?.let {
+        GooglePayPaymentMethodLauncher(
+            activity = activity,
+            config = it,
+            readyCallback = ::handleGooglePayIsReady,
+            resultCallback = ::handleGooglePayPaymentSelection
+        )
+    }
 
     private val verifyKycResultLauncher: ActivityResultLauncher<VerifyKycActivityArgs> =
         activity.activityResultRegistry.register(
@@ -148,12 +160,40 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         }
     }
 
-    fun collectPaymentMethod(type: PaymentMethodType) {
-        interactor.onCollectPaymentMethod(type)
-        linkPresenter.presentPaymentMethodsForOnramp(
-            email = clientEmail(),
-            paymentMethodType = type.toLinkType()
-        )
+    fun collectPaymentMethod(selection: PaymentMethodSelection) {
+        interactor.onCollectPaymentMethod(selection.type)
+
+        when (selection) {
+            is PaymentMethodSelection.Card,
+            is PaymentMethodSelection.BankAccount,
+            is PaymentMethodSelection.CardAndBankAccount -> {
+                linkPresenter.presentPaymentMethodsForOnramp(
+                    email = clientEmail(),
+                    paymentMethodType = selection.type.toLinkType()
+                )
+            }
+            is PaymentMethodSelection.GooglePay -> {
+                coroutineScope.launch {
+                    interactor.getOrFetchPlatformKey().fold(
+                        onSuccess = {
+                            googlePayPaymentMethodLauncher?.present(
+                                currencyCode = selection.currencyCode,
+                                amount = selection.amount,
+                                clientAttributionMetadata = null,
+                                transactionId = selection.transactionId,
+                                label = selection.label,
+                                publishableKey = it
+                            )
+                        },
+                        onFailure = { error ->
+                            onrampCallbacksState.collectPaymentCallback.onResult(
+                                OnrampCollectPaymentMethodResult.Failed(error)
+                            )
+                        }
+                    )
+                }
+            }
+        }
     }
 
     fun authorize(linkAuthIntentId: String) {
@@ -243,6 +283,9 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         }
     }
 
+    private fun googlePayConfig(): GooglePayPaymentMethodLauncher.Config? =
+        interactor.state.value.configurationState?.googlePayConfig
+
     private fun clientEmail(): String? =
         interactor.state.value.linkControllerState?.internalLinkAccount?.email
 
@@ -285,6 +328,20 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             identityVerificationCallback = ::handleIdentityVerificationResult
         )
     }
+
+    private fun handleGooglePayPaymentSelection(result: GooglePayPaymentMethodLauncher.Result) {
+        coroutineScope.launch {
+            onrampCallbacksState.collectPaymentCallback.onResult(
+                interactor.handleGooglePayPaymentResult(result)
+            )
+        }
+    }
+
+    private fun handleGooglePayIsReady(isReady: Boolean) {
+        coroutineScope.launch {
+            onrampCallbacksState.googlePayIsReadyCallback?.let { it(isReady) }
+        }
+    }
 }
 
 private fun PaymentMethodType.toLinkType(): LinkController.PaymentMethodType? =
@@ -292,4 +349,5 @@ private fun PaymentMethodType.toLinkType(): LinkController.PaymentMethodType? =
         PaymentMethodType.Card -> LinkController.PaymentMethodType.Card
         PaymentMethodType.BankAccount -> LinkController.PaymentMethodType.BankAccount
         PaymentMethodType.CardAndBankAccount -> null
+        PaymentMethodType.GooglePay -> error("Google Pay is not supported in LinkController")
     }

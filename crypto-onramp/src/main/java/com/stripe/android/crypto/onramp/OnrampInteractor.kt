@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.util.Log
 import androidx.annotation.RestrictTo
+import androidx.core.content.ContextCompat
 import com.stripe.android.core.utils.flatMapCatching
 import com.stripe.android.crypto.onramp.CheckoutState.Status
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsEvent
@@ -37,6 +38,7 @@ import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.crypto.onramp.ui.KycRefreshScreenAction
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.LinkController
@@ -408,18 +410,29 @@ internal class OnrampInteractor @Inject constructor(
         return getOrFetchPlatformKey()
             // Create a PaymentMethod + Crypto PaymentToken
             .flatMapCatching { platformPublishableKey ->
-                when (val result = linkController.createPaymentMethodForOnramp(apiKey = platformPublishableKey)) {
-                    is LinkController.CreatePaymentMethodResult.Success -> {
-                        // Create a crypto payment token
-                        cryptoApiRepository.createPaymentToken(
-                            cryptoCustomerId = cryptoCustomerId,
-                            paymentMethod = result.paymentMethod.id,
-                        )
+                val selected = _state.value.selectedPaymentSource
+                    ?: throw IllegalStateException("No selected payment source")
+
+                val paymentMethodId = when (selected) {
+                    SelectedPaymentSource.Link -> {
+                        when (
+                            val result = linkController.createPaymentMethodForOnramp(apiKey = platformPublishableKey)
+                        ) {
+                            is LinkController.CreatePaymentMethodResult.Success -> {
+                                result.paymentMethod.id
+                            }
+                            is LinkController.CreatePaymentMethodResult.Failed -> {
+                                throw result.error
+                            }
+                        }
                     }
-                    is LinkController.CreatePaymentMethodResult.Failed -> {
-                        throw result.error
-                    }
+                    is SelectedPaymentSource.GooglePay -> selected.paymentMethodId
                 }
+
+                cryptoApiRepository.createPaymentToken(
+                    cryptoCustomerId = cryptoCustomerId,
+                    paymentMethod = paymentMethodId,
+                )
             }
             .fold(
                 onSuccess = { cryptoPaymentToken ->
@@ -541,11 +554,16 @@ internal class OnrampInteractor @Inject constructor(
                 )
             )
             linkController.state(context).value.selectedPaymentMethodPreview?.let {
+                _state.update { state ->
+                    state.copy(selectedPaymentSource = SelectedPaymentSource.Link)
+                }
+
                 OnrampCollectPaymentMethodResult.Completed(
                     displayData = PaymentMethodDisplayData(
                         imageLoader = it.imageLoader,
                         label = it.label,
-                        sublabel = it.sublabel
+                        sublabel = it.sublabel,
+                        type = it.type.toDisplayType()
                     )
                 )
             } ?: run {
@@ -562,6 +580,51 @@ internal class OnrampInteractor @Inject constructor(
             OnrampCollectPaymentMethodResult.Failed(result.error)
         }
         is LinkController.PresentPaymentMethodsResult.Canceled ->
+            OnrampCollectPaymentMethodResult.Cancelled()
+    }
+
+    fun handleGooglePayPaymentResult(
+        result: GooglePayPaymentMethodLauncher.Result
+    ): OnrampCollectPaymentMethodResult = when (result) {
+        is GooglePayPaymentMethodLauncher.Result.Completed -> {
+            analyticsService?.track(
+                OnrampAnalyticsEvent.CollectPaymentMethodCompleted(
+                    paymentMethodType = PaymentMethodType.GooglePay
+                )
+            )
+
+            _state.update { state ->
+                state.copy(
+                    selectedPaymentSource = SelectedPaymentSource.GooglePay(
+                        result.paymentMethod.id
+                    )
+                )
+            }
+
+            OnrampCollectPaymentMethodResult.Completed(
+                displayData = PaymentMethodDisplayData(
+                    imageLoader = {
+                        ContextCompat.getDrawable(
+                            application,
+                            com.stripe.android.R.drawable.stripe_google_pay_mark
+                        )!!
+                    },
+                    label = "Google Pay",
+                    sublabel = result.paymentMethod.card?.last4,
+                    type = PaymentMethodDisplayData.Type.GooglePay
+                )
+            )
+        }
+        is GooglePayPaymentMethodLauncher.Result.Failed -> {
+            analyticsService?.track(
+                OnrampAnalyticsEvent.ErrorOccurred(
+                    operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.CollectPaymentMethod,
+                    error = result.error,
+                )
+            )
+            OnrampCollectPaymentMethodResult.Failed(result.error)
+        }
+        is GooglePayPaymentMethodLauncher.Result.Canceled ->
             OnrampCollectPaymentMethodResult.Cancelled()
     }
 
@@ -823,7 +886,7 @@ internal class OnrampInteractor @Inject constructor(
      * Gets the platform publishable key from state, or fetches it if not available.
      * Returns null if fetch fails or key is null.
      */
-    private suspend fun getOrFetchPlatformKey(): Result<String> {
+    internal suspend fun getOrFetchPlatformKey(): Result<String> {
         val cryptoCustomerId = _state.value.cryptoCustomerId
         val cachedKey = _state.value.platformKeyCache
 
@@ -863,6 +926,7 @@ internal data class OnrampState(
     val collectingPaymentMethodType: PaymentMethodType? = null,
     val checkoutState: CheckoutState? = null,
     val platformKeyCache: PlatformKeyCache? = null,
+    val selectedPaymentSource: SelectedPaymentSource? = null
 )
 
 /**
@@ -872,6 +936,20 @@ internal data class PlatformKeyCache(
     val publishableKey: String,
     val cryptoCustomerId: String?
 )
+
+internal sealed interface SelectedPaymentSource {
+    val analyticsValue: String
+
+    data object Link : SelectedPaymentSource {
+        override val analyticsValue: String = "link"
+    }
+
+    data class GooglePay(
+        val paymentMethodId: String
+    ) : SelectedPaymentSource {
+        override val analyticsValue: String = "google_pay"
+    }
+}
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal sealed interface OnrampStartKycVerificationResult {
@@ -892,4 +970,15 @@ internal sealed interface OnrampStartKycVerificationResult {
     class Failed internal constructor(
         val error: Throwable
     ) : OnrampStartKycVerificationResult
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+internal fun LinkController.PaymentMethodType.toDisplayType(): PaymentMethodDisplayData.Type {
+    return when (this) {
+        LinkController.PaymentMethodType.Card ->
+            PaymentMethodDisplayData.Type.Card
+
+        LinkController.PaymentMethodType.BankAccount ->
+            PaymentMethodDisplayData.Type.BankAccount
+    }
 }

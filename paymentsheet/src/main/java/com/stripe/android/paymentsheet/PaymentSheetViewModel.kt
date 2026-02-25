@@ -9,7 +9,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.analytics.SessionSavedStateHandler
@@ -131,6 +130,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         tapToAddMode = TapToAddMode.Complete,
         updateSelection = ::updateSelection,
         customerStateHolder = customerStateHolder,
+        linkSignupMode = paymentMethodMetadata.mapAsStateFlow { it?.linkState?.signupMode },
     )
 
     private val _paymentSheetResult = MutableSharedFlow<PaymentSheetResult>(replay = 1)

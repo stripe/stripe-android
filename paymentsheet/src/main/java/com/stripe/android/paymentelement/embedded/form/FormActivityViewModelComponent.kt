@@ -8,6 +8,10 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.common.di.ApplicationIdModule
+import com.stripe.android.common.spms.DefaultLinkFormElementFactory
+import com.stripe.android.common.spms.DefaultSavedPaymentMethodLinkFormHelper
+import com.stripe.android.common.spms.LinkFormElementFactory
+import com.stripe.android.common.spms.SavedPaymentMethodLinkFormHelper
 import com.stripe.android.common.taptoadd.DefaultTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddMode
@@ -29,7 +33,9 @@ import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
+import com.stripe.android.paymentsheet.verticalmode.DefaultSavedPaymentMethodConfirmInteractor
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
+import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
 import com.stripe.android.uicore.utils.stateFlowOf
 import dagger.Binds
 import dagger.BindsInstance
@@ -102,6 +108,12 @@ internal interface FormActivityViewModelModule {
     @Binds
     fun bindsTapToAddHelperFactory(factory: DefaultTapToAddHelper.Factory): TapToAddHelper.Factory
 
+    @Binds
+    fun bindsSavedPaymentMethodLinkFormHelper(
+        helper: DefaultSavedPaymentMethodLinkFormHelper
+    ): SavedPaymentMethodLinkFormHelper
+
+    @Suppress("TooManyFunctions")
     companion object {
         @Provides
         fun providesContext(application: Application): Context {
@@ -144,6 +156,7 @@ internal interface FormActivityViewModelModule {
             tapToAddHelperFactory: TapToAddHelper.Factory,
             embeddedSelectionHolder: EmbeddedSelectionHolder,
             customerStateHolder: CustomerStateHolder,
+            paymentMethodMetadata: PaymentMethodMetadata,
         ): TapToAddHelper {
             return tapToAddHelperFactory.create(
                 coroutineScope = coroutineScope,
@@ -153,6 +166,7 @@ internal interface FormActivityViewModelModule {
                 },
                 updateSelection = embeddedSelectionHolder::set,
                 customerStateHolder = customerStateHolder,
+                linkSignupMode = stateFlowOf(paymentMethodMetadata.linkState?.signupMode),
             )
         }
 
@@ -174,6 +188,24 @@ internal interface FormActivityViewModelModule {
             paymentMethodMetadata: PaymentMethodMetadata
         ): StateFlow<PaymentMethodMetadata?> {
             return stateFlowOf(paymentMethodMetadata)
+        }
+
+        @Provides
+        fun providesTapToAddLinkFormElementFactory(): LinkFormElementFactory {
+            return DefaultLinkFormElementFactory
+        }
+
+        @Provides
+        fun provideSavedPaymentMethodConfirmInteractorFactory(
+            @ViewModelScope coroutineScope: CoroutineScope,
+            paymentMethodMetadata: PaymentMethodMetadata,
+            savedPaymentMethodLinkFormHelper: SavedPaymentMethodLinkFormHelper,
+        ): SavedPaymentMethodConfirmInteractor.Factory {
+            return DefaultSavedPaymentMethodConfirmInteractor.Factory(
+                paymentMethodMetadata = paymentMethodMetadata,
+                savedPaymentMethodLinkFormHelper = savedPaymentMethodLinkFormHelper,
+                coroutineScope = coroutineScope,
+            )
         }
     }
 }

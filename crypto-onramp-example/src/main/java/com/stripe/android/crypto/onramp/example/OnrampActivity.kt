@@ -23,11 +23,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.AppBarDefaults
 import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
@@ -80,7 +83,7 @@ import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
-import com.stripe.android.crypto.onramp.model.PaymentMethodType
+import com.stripe.android.crypto.onramp.model.PaymentMethodSelection
 import com.stripe.android.model.DateOfBirth
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.launch
@@ -205,9 +208,8 @@ internal class OnrampActivity : ComponentActivity() {
                             onStartVerification = {
                                 onrampPresenter.verifyIdentity()
                             },
-                            onCollectPayment = { type ->
-                                viewModel.updateSelectedPaymentMethod(type)
-                                onrampPresenter.collectPaymentMethod(type)
+                            onCollectPayment = { selection ->
+                                onrampPresenter.collectPaymentMethod(selection)
                             },
                             onCreatePaymentToken = {
                                 viewModel.createCryptoPaymentToken()
@@ -422,7 +424,7 @@ internal fun OnrampScreen(
     onAuthenticateUser: (oauthScopes: String) -> Unit,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onStartVerification: () -> Unit,
-    onCollectPayment: (type: PaymentMethodType) -> Unit,
+    onCollectPayment: (type: PaymentMethodSelection) -> Unit,
     onCreatePaymentToken: () -> Unit,
     onVerifyKyc: () -> Unit,
 ) {
@@ -488,9 +490,9 @@ internal fun OnrampScreen(
                     email = uiState.email,
                     consentedLinkAuthIntentIds = uiState.consentedLinkAuthIntentIds,
                     onrampSessionResponse = uiState.onrampSession,
-                    selectedPaymentType = uiState.selectedPaymentType,
                     selectedSettlementSpeed = uiState.settlementSpeed,
                     selectedPaymentData = uiState.selectedPaymentData,
+                    googlePayIsReady = uiState.googlePayIsReady,
                     onAuthenticate = onAuthenticateUser,
                     onRegisterWalletAddress = onRegisterWalletAddress,
                     onCollectKYC = { kycInfo -> viewModel.collectKycInfo(kycInfo) },
@@ -714,14 +716,14 @@ private fun AuthenticatedOperationsScreen(
     consentedLinkAuthIntentIds: List<String>,
     onrampSessionResponse: OnrampSessionResponse?,
     selectedPaymentData: PaymentMethodDisplayData?,
-    selectedPaymentType: PaymentMethodType?,
     selectedSettlementSpeed: SettlementSpeed?,
+    googlePayIsReady: Boolean,
     onAuthenticate: (oauthScopes: String) -> Unit,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onCollectKYC: (KycInfo) -> Unit,
     onVerifyKyc: () -> Unit,
     onStartVerification: () -> Unit,
-    onCollectPayment: (type: PaymentMethodType) -> Unit,
+    onCollectPayment: (type: PaymentMethodSelection) -> Unit,
     onCreatePaymentToken: () -> Unit,
     onCreateSession: () -> Unit,
     onPerformCheckout: () -> Unit,
@@ -799,29 +801,32 @@ private fun AuthenticatedOperationsScreen(
         }
 
         selectedPaymentData?.let {
-            if (selectedPaymentType == PaymentMethodType.BankAccount) {
-                Text(
-                    text = "Settlement Speed",
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
+            when (it.type) {
+                PaymentMethodDisplayData.Type.Card, PaymentMethodDisplayData.Type.GooglePay -> { }
+                PaymentMethodDisplayData.Type.BankAccount -> {
+                    Text(
+                        text = "Settlement Speed",
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
 
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.padding(bottom = 16.dp)
-                ) {
-                    SettlementSpeed.entries.forEach { speed ->
-                        val isSelected = selectedSettlementSpeed == speed
-                        Box(
-                            modifier = Modifier
-                                .background(if (isSelected) MaterialTheme.colors.primary else Color.LightGray)
-                                .clickable { onSelectSettlementSpeed(speed) }
-                                .padding(horizontal = 16.dp, vertical = 8.dp)
-                        ) {
-                            Text(
-                                text = speed.name.lowercase().replaceFirstChar { it.uppercase() },
-                                color = if (isSelected) Color.White else Color.Black
-                            )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    ) {
+                        SettlementSpeed.entries.forEach { speed ->
+                            val isSelected = selectedSettlementSpeed == speed
+                            Box(
+                                modifier = Modifier
+                                    .background(if (isSelected) MaterialTheme.colors.primary else Color.LightGray)
+                                    .clickable { onSelectSettlementSpeed(speed) }
+                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                            ) {
+                                Text(
+                                    text = speed.name.lowercase().replaceFirstChar { it.uppercase() },
+                                    color = if (isSelected) Color.White else Color.Black
+                                )
+                            }
                         }
                     }
                 }
@@ -950,7 +955,7 @@ private fun AuthenticatedOperationsScreen(
         )
 
         Button(
-            onClick = { onCollectPayment(PaymentMethodType.Card) },
+            onClick = { onCollectPayment(PaymentMethodSelection.Card()) },
             modifier = Modifier
                 .testTag(COLLECT_CARD_BUTTON_TAG)
                 .fillMaxWidth()
@@ -960,7 +965,7 @@ private fun AuthenticatedOperationsScreen(
         }
 
         Button(
-            onClick = { onCollectPayment(PaymentMethodType.BankAccount) },
+            onClick = { onCollectPayment(PaymentMethodSelection.BankAccount()) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
@@ -969,13 +974,30 @@ private fun AuthenticatedOperationsScreen(
         }
 
         Button(
-            onClick = { onCollectPayment(PaymentMethodType.CardAndBankAccount) },
+            onClick = { onCollectPayment(PaymentMethodSelection.CardAndBankAccount()) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
         ) {
             Text("Collect Card or Bank Account")
         }
+
+        GooglePayButton(
+            enabled = googlePayIsReady,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp)
+                .padding(bottom = 8.dp),
+            onClick = {
+                val selection = PaymentMethodSelection.GooglePay(
+                    currencyCode = "USD",
+                    amount = 0L
+                )
+                onCollectPayment(selection)
+            },
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
 
         Button(
             onClick = onCreatePaymentToken,
@@ -1166,6 +1188,48 @@ fun OnrampExampleTheme(
         colors = if (isSystemInDarkTheme()) darkColors() else lightColors(),
         content = content,
     )
+}
+
+@Composable
+fun GooglePayButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+) {
+    val isDark = MaterialTheme.colors.isLight.not()
+
+    val background = if (isDark) Color.White else Color.Black
+    val content = if (isDark) Color.Black else Color.White
+
+    Button(
+        onClick = onClick,
+        enabled = enabled,
+        shape = RoundedCornerShape(8.dp),
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = background,
+            contentColor = content
+        ),
+        modifier = modifier
+            .fillMaxWidth()
+            .height(48.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Image(
+                painter = painterResource(
+                    com.stripe.android.R.drawable.stripe_google_pay_mark
+                ),
+                contentDescription = null,
+                modifier = Modifier.height(24.dp)
+            )
+
+            Spacer(Modifier.width(8.dp))
+
+            Text("Google Pay")
+        }
+    }
 }
 
 internal const val LOGIN_EMAIL_TAG = "LoginEmailTag"

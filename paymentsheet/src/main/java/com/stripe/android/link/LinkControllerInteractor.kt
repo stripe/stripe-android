@@ -226,12 +226,16 @@ internal class LinkControllerInteractor @Inject constructor(
                 } else {
                     val customerInfo = config.customerInfo
                         .copy(email = email ?: config.customerInfo.email)
-                    val nameCollectionConfig =
-                        if (paymentMethodType == LinkController.PaymentMethodType.BankAccount) {
+
+                    val nameCollectionConfig = when (paymentMethodType) {
+                        LinkController.PaymentMethodType.BankAccount, null -> {
                             PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
-                        } else {
+                        }
+                        LinkController.PaymentMethodType.Card -> {
                             config.billingDetailsCollectionConfiguration.name
                         }
+                    }
+
                     val billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration
                         .copy(name = nameCollectionConfig)
                     config.copy(
@@ -667,6 +671,7 @@ internal fun PaymentMethodPreviewDetails.toPreview(
     val sublabel = buildString {
         val name: ResolvableString
         val last4: String
+
         when (this@toPreview) {
             is PaymentMethodPreviewDetails.Card -> {
                 name = makeFallbackCardName(funding, brand.displayName)
@@ -683,6 +688,15 @@ internal fun PaymentMethodPreviewDetails.toPreview(
         append(last4)
     }
 
+    val type = when (this@toPreview) {
+        is PaymentMethodPreviewDetails.Card -> {
+            LinkController.PaymentMethodType.Card
+        }
+        is PaymentMethodPreviewDetails.BankAccount -> {
+            LinkController.PaymentMethodType.BankAccount
+        }
+    }
+
     return LinkController.PaymentMethodPreview(
         imageLoader = {
             iconLoader.load(
@@ -694,6 +708,7 @@ internal fun PaymentMethodPreviewDetails.toPreview(
         },
         label = label,
         sublabel = sublabel,
+        type = type
     )
 }
 
@@ -712,6 +727,15 @@ internal fun ConsumerPaymentDetails.PaymentDetails.toPreview(
     }
     val drawableResourceId = getIconDrawableRes(context.isSystemDarkTheme())
 
+    val type = when (this@toPreview) {
+        is ConsumerPaymentDetails.Card, is ConsumerPaymentDetails.Passthrough -> {
+            LinkController.PaymentMethodType.Card
+        }
+        is ConsumerPaymentDetails.BankAccount -> {
+            LinkController.PaymentMethodType.BankAccount
+        }
+    }
+
     return LinkController.PaymentMethodPreview(
         imageLoader = {
             iconLoader.load(
@@ -723,6 +747,7 @@ internal fun ConsumerPaymentDetails.PaymentDetails.toPreview(
         },
         label = label,
         sublabel = sublabel,
+        type = type
     )
 }
 
