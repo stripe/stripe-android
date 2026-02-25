@@ -156,6 +156,7 @@ internal interface FormActivityViewModelModule {
             tapToAddHelperFactory: TapToAddHelper.Factory,
             embeddedSelectionHolder: EmbeddedSelectionHolder,
             customerStateHolder: CustomerStateHolder,
+            paymentMethodMetadata: PaymentMethodMetadata,
         ): TapToAddHelper {
             return tapToAddHelperFactory.create(
                 coroutineScope = coroutineScope,
@@ -165,6 +166,7 @@ internal interface FormActivityViewModelModule {
                 },
                 updateSelection = embeddedSelectionHolder::set,
                 customerStateHolder = customerStateHolder,
+                linkSignupMode = stateFlowOf(paymentMethodMetadata.linkState?.signupMode),
             )
         }
 

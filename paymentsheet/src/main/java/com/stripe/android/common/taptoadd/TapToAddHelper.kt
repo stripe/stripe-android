@@ -5,6 +5,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -14,6 +15,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -41,6 +43,7 @@ internal interface TapToAddHelper {
             tapToAddMode: TapToAddMode,
             updateSelection: (PaymentSelection.Saved) -> Unit,
             customerStateHolder: CustomerStateHolder,
+            linkSignupMode: StateFlow<LinkSignupMode?>,
         ): TapToAddHelper
     }
 }
@@ -54,6 +57,7 @@ internal class DefaultTapToAddHelper(
     private val savedStateHandle: SavedStateHandle,
     private val updateSelection: (PaymentSelection.Saved) -> Unit,
     private val customerStateHolder: CustomerStateHolder,
+    private val linkSignupMode: StateFlow<LinkSignupMode?>,
 ) : TapToAddHelper {
     private var collecting: Boolean
         get() = savedStateHandle.get<Boolean>(CURRENTLY_COLLECTING_WITH_TAP_TO_ADD_KEY) == true
@@ -104,13 +108,21 @@ internal class DefaultTapToAddHelper(
             is TapToAddResult.Canceled -> tapToAddResult.paymentSelection?.let { paymentSelection ->
                 customerStateHolder.addPaymentMethod(paymentSelection.paymentMethod)
                 updateSelection(paymentSelection)
-                TapToAddNextStep.ConfirmSavedPaymentMethod(
-                    paymentSelection,
-                )
+                if (isLinkInlineSignupEnabled()) {
+                    TapToAddNextStep.ConfirmSavedPaymentMethod(
+                        paymentSelection,
+                    )
+                } else {
+                    null
+                }
             }
             TapToAddResult.Complete -> TapToAddNextStep.Complete
             is TapToAddResult.Continue -> TapToAddNextStep.Continue(tapToAddResult.paymentSelection)
         }
+    }
+
+    private fun isLinkInlineSignupEnabled(): Boolean {
+        return linkSignupMode.value != null
     }
 
     override fun startPaymentMethodCollection(paymentMethodMetadata: PaymentMethodMetadata) {
@@ -146,6 +158,7 @@ internal class DefaultTapToAddHelper(
             tapToAddMode: TapToAddMode,
             updateSelection: (PaymentSelection.Saved) -> Unit,
             customerStateHolder: CustomerStateHolder,
+            linkSignupMode: StateFlow<LinkSignupMode?>,
         ): TapToAddHelper {
             return DefaultTapToAddHelper(
                 coroutineScope = coroutineScope,
@@ -156,6 +169,7 @@ internal class DefaultTapToAddHelper(
                 savedStateHandle = savedStateHandle,
                 updateSelection = updateSelection,
                 customerStateHolder = customerStateHolder,
+                linkSignupMode = linkSignupMode,
             )
         }
     }

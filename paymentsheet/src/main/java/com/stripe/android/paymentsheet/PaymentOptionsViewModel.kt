@@ -48,6 +48,7 @@ import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFac
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
 import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -109,6 +110,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         tapToAddMode = TapToAddMode.Continue,
         updateSelection = ::updateSelection,
         customerStateHolder = customerStateHolder,
+        linkSignupMode = paymentMethodMetadata.mapAsStateFlow { it?.linkState?.signupMode },
     )
 
     private val _paymentOptionsActivityResult = MutableSharedFlow<PaymentOptionsActivityResult>(replay = 1)
