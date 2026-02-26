@@ -17,7 +17,9 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.isInstanceOf
+import com.stripe.android.model.CancelCaptchaChallengeParams
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
@@ -221,7 +223,7 @@ internal class IntentConfirmationChallengeActivityTest {
                     userAgent = "fake-user-agent",
                     stripeRepository = object : AbsFakeStripeRepository() {},
                     errorReporter = FakeErrorReporter(),
-                    requestOptions = ApiRequest.Options("")
+                    requestOptions = ApiRequest.Options("pk_test_123")
                 ) as T
             }
         }
@@ -263,9 +265,17 @@ internal class IntentConfirmationChallengeActivityTest {
                     workContext = testDispatcher,
                     analyticsEventReporter = FakeIntentConfirmationChallengeAnalyticsEventReporter(),
                     userAgent = "fake-user-agent",
-                    stripeRepository = object : AbsFakeStripeRepository() {},
+                    stripeRepository = object : AbsFakeStripeRepository() {
+                        override suspend fun cancelCaptchaChallenge(
+                            intentId: String,
+                            params: CancelCaptchaChallengeParams,
+                            requestOptions: ApiRequest.Options
+                        ): Result<StripeIntent> {
+                            return Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
+                        }
+                    },
                     errorReporter = FakeErrorReporter(),
-                    requestOptions = ApiRequest.Options(""),
+                    requestOptions = ApiRequest.Options("pk_test_123"),
                 ) as T
             }
         }
