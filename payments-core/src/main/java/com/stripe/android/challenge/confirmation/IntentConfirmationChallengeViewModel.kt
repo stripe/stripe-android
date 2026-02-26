@@ -25,6 +25,7 @@ import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 
 internal class IntentConfirmationChallengeViewModel @Inject constructor(
+    private val args: IntentConfirmationChallengeArgs,
     val bridgeHandler: ConfirmationChallengeBridgeHandler,
     @UIContext private val workContext: CoroutineContext,
     private val analyticsEventReporter: IntentConfirmationChallengeAnalyticsEventReporter,
@@ -55,7 +56,18 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
             fromBridge = false,
         )
         viewModelScope.launch {
-            _result.emit(IntentConfirmationChallengeActivityResult.Failed(error))
+            _result.emit(
+                value = IntentConfirmationChallengeActivityResult.Failed(
+                    clientSecret = args.intent.clientSecret,
+                    error = error
+                )
+            )
+        }
+    }
+
+    fun closeClicked() {
+        viewModelScope.launch {
+            _result.emit(IntentConfirmationChallengeActivityResult.Canceled(args.intent.clientSecret))
         }
     }
 
@@ -82,7 +94,8 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
                     )
                     _result.emit(
                         IntentConfirmationChallengeActivityResult.Failed(
-                            error = event.error
+                            error = event.error,
+                            clientSecret = args.intent.clientSecret
                         )
                     )
                 }

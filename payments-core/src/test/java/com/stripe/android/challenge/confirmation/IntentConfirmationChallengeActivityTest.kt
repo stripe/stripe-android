@@ -6,6 +6,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
 import androidx.core.os.BundleCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
@@ -138,6 +139,30 @@ internal class IntentConfirmationChallengeActivityTest {
     }
 
     @Test
+    fun `finishes with Canceled result when close is clicked`() = runTest {
+        val bridgeHandler = FakeConfirmationChallengeBridgeHandler()
+
+        val scenario = launchActivityWithBridgeHandler(bridgeHandler)
+
+        // Emit Ready to ensure the UI is loaded
+        bridgeHandler.emitEvent(ConfirmationChallengeBridgeEvent.Ready)
+        advanceUntilIdle()
+
+        // Click the close button
+        composeTestRule
+            .onNodeWithTag(INTENT_CONFIRMATION_CHALLENGE_CLOSE_BUTTON_TAG)
+            .performClick()
+        advanceUntilIdle()
+
+        assertThat(scenario.getResult().resultCode).isEqualTo(IntentConfirmationChallengeActivity.RESULT_COMPLETE)
+
+        val result = extractActivityResult(scenario)
+        assertThat(result).isInstanceOf<IntentConfirmationChallengeActivityResult.Canceled>()
+
+        scenario.close()
+    }
+
+    @Test
     fun `progress indicator resets on configuration change`() = runTest {
         val bridgeHandler = FakeConfirmationChallengeBridgeHandler()
 
@@ -186,6 +211,7 @@ internal class IntentConfirmationChallengeActivityTest {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return IntentConfirmationChallengeViewModel(
+                    args = createTestArgs(),
                     bridgeHandler = bridgeHandler,
                     workContext = testDispatcher,
                     analyticsEventReporter = analyticsReporter,
@@ -226,6 +252,7 @@ internal class IntentConfirmationChallengeActivityTest {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return IntentConfirmationChallengeViewModel(
+                    args = createTestArgs(),
                     bridgeHandler = bridgeHandler,
                     workContext = testDispatcher,
                     analyticsEventReporter = FakeIntentConfirmationChallengeAnalyticsEventReporter(),

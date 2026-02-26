@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
@@ -34,6 +35,27 @@ internal class IntentConfirmationChallengeUITest {
     }
 
     @Test
+    fun `close button is displayed and invokes closeClicked`() {
+        var closeClicked = false
+
+        composeTestRule.setContent {
+            IntentConfirmationChallengeUI(
+                hostUrl = "http://10.0.2.2:3004",
+                userAgent = "fake-user-agent",
+                bridgeHandler = FakeConfirmationChallengeBridgeHandler(),
+                showProgressIndicator = false,
+                closeClicked = { closeClicked = true },
+                webViewClientFactory = { WebViewClient() }
+            )
+        }
+
+        onCloseButton().assertIsDisplayed()
+        onCloseButton().performClick()
+
+        assertThat(closeClicked).isTrue()
+    }
+
+    @Test
     fun `addBridgeHandler and loadUrl are called in correct order`() = runTest {
         val bridgeHandler = FakeConfirmationChallengeBridgeHandler()
         val webViewClient = WebViewClient()
@@ -45,6 +67,7 @@ internal class IntentConfirmationChallengeUITest {
                 userAgent = "fake-user-agent",
                 bridgeHandler = bridgeHandler,
                 showProgressIndicator = false,
+                closeClicked = {},
                 webViewFactory = { context ->
                     FakeIntentConfirmationChallengeWebView(context)
                         .also { fakeWebView = it }
@@ -70,10 +93,12 @@ internal class IntentConfirmationChallengeUITest {
             userAgent = "fake-user-agent",
             bridgeHandler = FakeConfirmationChallengeBridgeHandler(),
             showProgressIndicator = showProgressIndicator,
+            closeClicked = {},
             webViewClientFactory = { WebViewClient() }
         )
     }
 
     private fun onLoader() = composeTestRule.onNodeWithTag(INTENT_CONFIRMATION_CHALLENGE_LOADER_TAG)
     private fun onWebView() = composeTestRule.onNodeWithTag(INTENT_CONFIRMATION_CHALLENGE_WEB_VIEW_TAG)
+    private fun onCloseButton() = composeTestRule.onNodeWithTag(INTENT_CONFIRMATION_CHALLENGE_CLOSE_BUTTON_TAG)
 }
