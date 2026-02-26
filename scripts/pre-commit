@@ -10,8 +10,15 @@ set -e
 echo "Running pre-commit checks (same as Bitrise 'check' workflow)..."
 echo ""
 
-# Run the same Gradle tasks as the Bitrise check workflow
-./gradlew ktlint detekt lintRelease apiCheck verifyReleaseResources
+# Run detekt with auto-retry (detekt can autofix issues, so try twice)
+echo "Running detekt..."
+if ! ./gradlew detekt; then
+    echo "Detekt failed, running again after autofixes..."
+    ./gradlew detekt
+fi
+
+# Run the rest of the checks
+./gradlew ktlint lintRelease apiCheck verifyReleaseResources
 
 echo ""
 echo "✓ All checks passed!"
