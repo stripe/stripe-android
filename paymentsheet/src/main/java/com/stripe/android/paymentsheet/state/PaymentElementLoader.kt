@@ -582,7 +582,11 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 customerSessionClientSecret = null
                 isPaymentMethodSetAsDefaultEnabled = false
                 permissions = CustomerMetadata.Permissions(
-                    removePaymentMethod = PaymentMethodRemovePermission.None,
+                    removePaymentMethod = if (customerInfo.customer.canDetachPaymentMethod) {
+                        PaymentMethodRemovePermission.Full
+                    } else {
+                        PaymentMethodRemovePermission.None
+                    },
                     // Checkout sessions control save behavior via offerSave. If the server
                     // didn't provide it, default to Disabled rather than Legacy to avoid
                     // falling back to intent-level SFU behavior.

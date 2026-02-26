@@ -39,6 +39,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentB
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.model.Address
+import com.stripe.android.model.CheckoutSessionResponse
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.LinkDisabledReason
@@ -2923,6 +2924,55 @@ internal class DefaultPaymentElementLoaderTest {
         }
 
     @Test
+    fun `When checkout session has canDetachPaymentMethod true, should enable remove permissions`() =
+        testCheckoutSessionRemovePermission(
+            canDetachPaymentMethod = true,
+            expectedPermission = PaymentMethodRemovePermission.Full,
+        )
+
+    @Test
+    fun `When checkout session has canDetachPaymentMethod false, should disable remove permissions`() =
+        testCheckoutSessionRemovePermission(
+            canDetachPaymentMethod = false,
+            expectedPermission = PaymentMethodRemovePermission.None,
+        )
+
+    private fun testCheckoutSessionRemovePermission(
+        canDetachPaymentMethod: Boolean,
+        expectedPermission: PaymentMethodRemovePermission,
+    ) {
+        val checkoutSessionResponse = createCheckoutSessionResponse(
+            canDetachPaymentMethod = canDetachPaymentMethod,
+        )
+
+        runScenario(
+            stripeRepository = FakeStripeRepository(
+                initCheckoutSessionResult = Result.success(checkoutSessionResponse),
+            ),
+        ) {
+            val loader = createPaymentElementLoader()
+
+            val state = loader.load(
+                initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                    clientSecret = "cs_test_123_secret_abc",
+                ),
+                paymentSheetConfiguration = PaymentSheet.Configuration(
+                    merchantDisplayName = "Merchant, Inc.",
+                ),
+                metadata = PaymentElementLoader.Metadata(
+                    initializedViaCompose = false,
+                ),
+            ).getOrThrow()
+
+            assertThat(state.paymentMethodMetadata.customerMetadata?.permissions?.removePaymentMethod)
+                .isEqualTo(expectedPermission)
+
+            assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+            assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+        }
+    }
+
+    @Test
     fun `When 'CustomerSession' config is provided but no customer object was returned in test mode, should report error and return error`() =
         runScenario {
             val errorReporter = FakeErrorReporter()
@@ -4326,12 +4376,12 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     private fun runScenario(
+        stripeRepository: FakeStripeRepository = FakeStripeRepository(),
         block: suspend Scenario.() -> Unit
     ) {
         val testDispatcher = UnconfinedTestDispatcher()
         val eventReporter = FakeLoadingEventReporter()
         val prefsRepository = FakePrefsRepository()
-        val stripeRepository = FakeStripeRepository()
 
         @Suppress("UNCHECKED_CAST")
         val paymentMethodTypeCaptor = ArgumentCaptor.forClass(List::class.java)
@@ -4544,6 +4594,42 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
 
         return result
+    }
+
+    private fun createCheckoutSessionResponse(
+        canDetachPaymentMethod: Boolean,
+    ): CheckoutSessionResponse {
+        return CheckoutSessionResponse(
+            id = "cs_test_123",
+            amount = 5099,
+            currency = "usd",
+            elementsSession = ElementsSession(
+                linkSettings = null,
+                paymentMethodSpecs = null,
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                merchantCountry = null,
+                isGooglePayEnabled = true,
+                sessionsError = null,
+                externalPaymentMethodData = null,
+                customer = null,
+                cardBrandChoice = null,
+                customPaymentMethods = emptyList(),
+                elementsSessionId = "es_123",
+                flags = emptyMap(),
+                orderedPaymentMethodTypesAndWallets = listOf("card"),
+                experimentsData = null,
+                passiveCaptcha = null,
+                merchantLogoUrl = null,
+                elementsSessionConfigId = "config_123",
+                accountId = "acct_123",
+                merchantId = "acct_123",
+            ),
+            customer = CheckoutSessionResponse.Customer(
+                id = "cus_test_123",
+                paymentMethods = PaymentMethodFactory.cards(2),
+                canDetachPaymentMethod = canDetachPaymentMethod,
+            ),
+        )
     }
 
     private fun createEnabledMobilePaymentElement(
