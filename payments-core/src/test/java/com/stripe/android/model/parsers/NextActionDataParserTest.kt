@@ -17,11 +17,7 @@ internal class NextActionDataParserTest {
             {
                 "type": "use_stripe_sdk",
                 "use_stripe_sdk": {
-                    "type": "intent_confirmation_challenge",
-                    "stripe_js": {
-                        "site_key": "test_site_key",
-                        "verification_url": "/v1/payment_intents/pi_123/verify_challenge"
-                    }
+                    "type": "intent_confirmation_challenge"
                 }
             }
             """.trimIndent()
@@ -29,12 +25,8 @@ internal class NextActionDataParserTest {
 
         val nextActionData = NextActionDataParser().parse(nextActionJson)
 
-        assertThat(nextActionData).isInstanceOf(
-            StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge::class.java
-        )
-        val challenge = nextActionData as StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge
-        assertThat(challenge.stripeJs.siteKey).isEqualTo("test_site_key")
-        assertThat(challenge.stripeJs.verificationUrl).isEqualTo("/v1/payment_intents/pi_123/verify_challenge")
+        assertThat(nextActionData)
+            .isEqualTo(StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge)
     }
 
     @Test

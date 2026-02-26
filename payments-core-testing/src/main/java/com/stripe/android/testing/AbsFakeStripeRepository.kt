@@ -6,6 +6,7 @@ import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.model.BankStatuses
+import com.stripe.android.model.CancelCaptchaChallengeParams
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.CheckoutSessionResponse
 import com.stripe.android.model.ConfirmCheckoutSessionParams
@@ -40,7 +41,6 @@ import com.stripe.android.model.Stripe3ds2AuthResult
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
-import com.stripe.android.model.VerifyIntentConfirmationChallengeParams
 import com.stripe.android.networking.StripeRepository
 
 abstract class AbsFakeStripeRepository : StripeRepository {
@@ -506,9 +506,9 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         TODO("Not yet implemented")
     }
 
-    override suspend fun verifyIntentConfirmationChallenge(
-        verificationUrl: String,
-        params: VerifyIntentConfirmationChallengeParams,
+    override suspend fun cancelCaptchaChallenge(
+        intentId: String,
+        params: CancelCaptchaChallengeParams,
         requestOptions: ApiRequest.Options
     ): Result<StripeIntent> {
         TODO("Not yet implemented")

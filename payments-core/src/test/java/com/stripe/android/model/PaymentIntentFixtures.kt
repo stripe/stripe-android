@@ -43,6 +43,26 @@ internal object PaymentIntentFixtures {
         requireNotNull(PARSER.parse(PI_SUCCEEDED_JSON))
     }
 
+    private val PI_WITH_NULL_ID_JSON by lazy {
+        JSONObject(
+            """
+        {
+            "object": "payment_intent",
+            "amount": 1099,
+            "client_secret": "pi_1IRg6VCRMbs6F_secret_7oH5g4v8GaCrHfsGYS6kiSnwF",
+            "currency": "usd",
+            "livemode": false,
+            "payment_method_types": ["card"],
+            "status": "succeeded"
+        }
+            """.trimIndent()
+        )
+    }
+
+    val PI_WITH_NULL_ID by lazy {
+        requireNotNull(PARSER.parse(PI_WITH_NULL_ID_JSON))
+    }
+
     val PI_VISA_3DS2_JSON by lazy {
         JSONObject(
             """

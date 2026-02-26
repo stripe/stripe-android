@@ -19,7 +19,6 @@ internal class IntentConfirmationChallengeActivityContract :
                 input.publishableKey,
                 input.productUsage.toList(),
                 input.intent,
-                input.stripeJs,
             )
         )
     }
@@ -38,7 +37,6 @@ internal class IntentConfirmationChallengeActivityContract :
         val publishableKey: String,
         val productUsage: Set<String>,
         val intent: StripeIntent,
-        val stripeJs: StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge.StripeJs? = null,
     )
 
     companion object {

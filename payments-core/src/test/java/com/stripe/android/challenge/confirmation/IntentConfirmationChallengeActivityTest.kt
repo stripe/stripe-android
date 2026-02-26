@@ -15,10 +15,12 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.injectableActivityScenario
 import kotlinx.coroutines.test.TestDispatcher
@@ -218,6 +220,8 @@ internal class IntentConfirmationChallengeActivityTest {
                     analyticsEventReporter = analyticsReporter,
                     userAgent = "fake-user-agent",
                     stripeRepository = object : AbsFakeStripeRepository() {},
+                    errorReporter = FakeErrorReporter(),
+                    requestOptions = ApiRequest.Options("")
                 ) as T
             }
         }
@@ -260,6 +264,8 @@ internal class IntentConfirmationChallengeActivityTest {
                     analyticsEventReporter = FakeIntentConfirmationChallengeAnalyticsEventReporter(),
                     userAgent = "fake-user-agent",
                     stripeRepository = object : AbsFakeStripeRepository() {},
+                    errorReporter = FakeErrorReporter(),
+                    requestOptions = ApiRequest.Options(""),
                 ) as T
             }
         }

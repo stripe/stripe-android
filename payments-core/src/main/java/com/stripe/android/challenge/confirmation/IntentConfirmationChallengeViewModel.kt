@@ -1,6 +1,7 @@
 package com.stripe.android.challenge.confirmation
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
@@ -16,8 +17,10 @@ import com.stripe.android.challenge.confirmation.di.DaggerIntentConfirmationChal
 import com.stripe.android.challenge.confirmation.di.SDK_USER_AGENT
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.model.VerifyIntentConfirmationChallengeParams
+import com.stripe.android.model.CancelCaptchaChallengeParams
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.analytics.ErrorReporter.UnexpectedErrorEvent
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -34,6 +37,8 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
     private val analyticsEventReporter: IntentConfirmationChallengeAnalyticsEventReporter,
     @Named(SDK_USER_AGENT) val userAgent: String,
     private val stripeRepository: StripeRepository,
+    private val errorReporter: ErrorReporter,
+    private val requestOptions: ApiRequest.Options,
 ) : ViewModel(), DefaultLifecycleObserver {
 
     private val _bridgeReady = MutableSharedFlow<Unit>()
@@ -70,27 +75,32 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
     }
 
     fun closeClicked() {
-        val stripeJs = args.stripeJs
         viewModelScope.launch {
-            if (stripeJs == null) {
-                _result.emit(IntentConfirmationChallengeActivityResult.Canceled(args.intent.clientSecret))
+            val intentId = args.intent.id
+            val clientSecret = args.intent.clientSecret
+
+            if (intentId == null || clientSecret == null) {
+                errorReporter.report(
+                    errorEvent = UnexpectedErrorEvent.INTENT_CONFIRMATION_CHALLENGE_INTENT_PARAMETERS_UNAVAILABLE,
+                )
+                _result.emit(
+                    IntentConfirmationChallengeActivityResult.Failed(
+                        clientSecret = clientSecret,
+                        error = IllegalArgumentException("Intent parameters are unavailable")
+                    )
+                )
                 return@launch
             }
+            val params = CancelCaptchaChallengeParams(clientSecret)
 
-            val params = VerifyIntentConfirmationChallengeParams(
-                clientSecret = args.intent.clientSecret.orEmpty(),
-                captchaVendorName = stripeJs.captchaVendorName?.code.orEmpty(),
-            )
-            val requestOptions = ApiRequest.Options(apiKey = args.publishableKey)
-
-            stripeRepository.verifyIntentConfirmationChallenge(
-                verificationUrl = stripeJs.verificationUrl,
+            stripeRepository.cancelCaptchaChallenge(
+                intentId = intentId,
                 params = params,
                 requestOptions = requestOptions,
             ).fold(
-                onSuccess = {
+                onSuccess = { intent ->
                     _result.emit(
-                        IntentConfirmationChallengeActivityResult.Canceled(args.intent.clientSecret)
+                        IntentConfirmationChallengeActivityResult.Canceled(intent.clientSecret)
                     )
                 },
                 onFailure = { error ->

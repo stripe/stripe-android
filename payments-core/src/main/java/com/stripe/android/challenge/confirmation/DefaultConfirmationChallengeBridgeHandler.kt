@@ -27,28 +27,6 @@ internal class DefaultConfirmationChallengeBridgeHandler @Inject constructor(
         val initParams = JSONObject().apply {
             put("publishableKey", args.publishableKey)
             put("clientSecret", args.intent.clientSecret)
-            args.stripeJs?.let { stripeJs ->
-                put("siteKey", stripeJs.siteKey)
-                put("verificationUrl", stripeJs.verificationUrl)
-                stripeJs.rqdata?.let { put("rqdata", it) }
-                stripeJs.captchaVendorName?.let { put("captchaVendorName", it.code) }
-                stripeJs.captchaVendorData?.let { vendorData ->
-                    val vendorDataJson = JSONObject()
-                    when (vendorData) {
-                        is com.stripe.android.model.StripeIntent.NextActionData.SdkData
-                            .IntentConfirmationChallenge.CaptchaVendorData.HumanSecurity -> {
-                            vendorDataJson.put("uuid", vendorData.uuid)
-                            vendorDataJson.put("vid", vendorData.vid)
-                            vendorDataJson.put("appId", vendorData.appId)
-                        }
-                        is com.stripe.android.model.StripeIntent.NextActionData.SdkData
-                            .IntentConfirmationChallenge.CaptchaVendorData.Arkose -> {
-                            vendorDataJson.put("blob", vendorData.blob)
-                        }
-                    }
-                    put("captchaVendorData", vendorDataJson)
-                }
-            }
         }
         logMessage("Returning init params: $initParams")
         return initParams.toString()

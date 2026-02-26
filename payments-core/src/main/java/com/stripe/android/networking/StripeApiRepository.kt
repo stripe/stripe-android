@@ -2,6 +2,7 @@ package com.stripe.android.networking
 
 import android.content.Context
 import android.net.http.HttpResponseCache
+import android.util.Log
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.DefaultFraudDetectionDataRepository
@@ -47,6 +48,7 @@ import com.stripe.android.core.networking.responseJson
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.exception.CardException
 import com.stripe.android.model.BankStatuses
+import com.stripe.android.model.CancelCaptchaChallengeParams
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.CheckoutSessionResponse
 import com.stripe.android.model.ConfirmCheckoutSessionParams
@@ -83,7 +85,6 @@ import com.stripe.android.model.Stripe3ds2AuthResult
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
-import com.stripe.android.model.VerifyIntentConfirmationChallengeParams
 import com.stripe.android.model.parsers.CardMetadataJsonParser
 import com.stripe.android.model.parsers.CheckoutSessionResponseJsonParser
 import com.stripe.android.model.parsers.ConfirmationTokenJsonParser
@@ -1718,13 +1719,18 @@ class StripeApiRepository @JvmOverloads internal constructor(
         )
     }
 
-    override suspend fun verifyIntentConfirmationChallenge(
-        verificationUrl: String,
-        params: VerifyIntentConfirmationChallengeParams,
+    override suspend fun cancelCaptchaChallenge(
+        intentId: String,
+        params: CancelCaptchaChallengeParams,
         requestOptions: ApiRequest.Options
     ): Result<StripeIntent> {
-        val url = "${ApiRequest.API_HOST}${verificationUrl}"
         val isSetupIntent = SetupIntent.ClientSecret.isMatch(params.clientSecret)
+        val intentPath = if (isSetupIntent) {
+            "setup_intents"
+        } else {
+            "payment_intents"
+        }
+        val url = "${ApiRequest.API_HOST}/v1/$intentPath/$intentId/cancel_challenge"
         val jsonParser = if (isSetupIntent) {
             SetupIntentJsonParser()
         } else {

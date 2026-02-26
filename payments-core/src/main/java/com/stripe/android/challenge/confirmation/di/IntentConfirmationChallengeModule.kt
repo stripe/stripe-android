@@ -1,6 +1,8 @@
 package com.stripe.android.challenge.confirmation.di
 
+import android.content.Context
 import com.stripe.android.BuildConfig
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.challenge.confirmation.BridgeErrorParams
 import com.stripe.android.challenge.confirmation.BridgeErrorParamsJsonParser
 import com.stripe.android.challenge.confirmation.BridgeSuccessParams
@@ -12,6 +14,7 @@ import com.stripe.android.challenge.confirmation.analytics.DefaultIntentConfirma
 import com.stripe.android.challenge.confirmation.analytics.IntentConfirmationChallengeAnalyticsEventReporter
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.RequestHeadersFactory
@@ -84,6 +87,11 @@ internal interface IntentConfirmationChallengeModule {
         @Provides
         @Named(SDK_USER_AGENT)
         fun providesSdkUserAgent(): String = RequestHeadersFactory.getUserAgent()
+
+        @Provides
+        @Named(STRIPE_ACCOUNT_ID)
+        fun provideStripeAccountId(context: Context): () -> String? =
+            { PaymentConfiguration.getInstance(context).stripeAccountId }
     }
 }
 

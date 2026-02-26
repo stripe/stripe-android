@@ -28,6 +28,7 @@ import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.AddressFixtures
 import com.stripe.android.model.BankAccountTokenParamsFixtures
 import com.stripe.android.model.BinFixtures
+import com.stripe.android.model.CancelCaptchaChallengeParams
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.CardParamsFixtures
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -3833,6 +3834,68 @@ internal class StripeApiRepositoryTest {
         assertThat(analyticsParams["event"]).isEqualTo(event.toString())
         assertThat(analyticsParams["product_usage"]).isEqualTo(productUsage)
         assertThat(analyticsParams["error_message"]).isEqualTo(errorMessage)
+    }
+
+    @Test
+    fun cancelCaptchaChallenge_forPaymentIntent_sendsCorrectRequest() = runTest {
+        verifyCancelCaptchaChallengeRequest(
+            intentId = "pi_123",
+            clientSecret = "pi_123_secret_456",
+            responseJson = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2_JSON.toString(),
+            expectedIntentPath = "payment_intents",
+        )
+    }
+
+    @Test
+    fun cancelCaptchaChallenge_forSetupIntent_sendsCorrectRequest() = runTest {
+        verifyCancelCaptchaChallengeRequest(
+            intentId = "seti_123",
+            clientSecret = "seti_123_secret_456",
+            responseJson = SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT_JSON.toString(),
+            expectedIntentPath = "setup_intents",
+        )
+    }
+
+    @Test
+    fun cancelCaptchaChallenge_onNetworkFailure_returnsFailure() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenAnswer { throw IOException("Network error") }
+
+        val result = create().cancelCaptchaChallenge(
+            intentId = "pi_123",
+            params = CancelCaptchaChallengeParams(clientSecret = "pi_123_secret_456"),
+            requestOptions = DEFAULT_OPTIONS,
+        )
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isInstanceOf(APIConnectionException::class.java)
+    }
+
+    private suspend fun verifyCancelCaptchaChallengeRequest(
+        intentId: String,
+        clientSecret: String,
+        responseJson: String,
+        expectedIntentPath: String,
+    ) {
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(StripeResponse(200, responseJson, emptyMap()))
+
+        val params = CancelCaptchaChallengeParams(clientSecret = clientSecret)
+
+        val result = create().cancelCaptchaChallenge(
+            intentId = intentId,
+            params = params,
+            requestOptions = DEFAULT_OPTIONS,
+        )
+
+        assertThat(result.isSuccess).isTrue()
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+        val apiRequest = apiRequestArgumentCaptor.firstValue
+        assertThat(apiRequest.url)
+            .isEqualTo("https://api.stripe.com/v1/$expectedIntentPath/$intentId/cancel_challenge")
+        assertThat(apiRequest.method).isEqualTo(StripeRequest.Method.POST)
+        assertThat(apiRequest.params?.get("client_secret")).isEqualTo(clientSecret)
     }
 
     private fun create(productUsage: Set<String> = emptySet()): StripeApiRepository {

@@ -3,16 +3,19 @@ package com.stripe.android.challenge.confirmation
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
+import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.challenge.confirmation.analytics.IntentConfirmationChallengeAnalyticsEventReporter
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.CancelCaptchaChallengeParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.model.VerifyIntentConfirmationChallengeParams
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -148,7 +151,7 @@ internal class IntentConfirmationChallengeViewModelTest {
     fun `when closeClicked is called and verify succeeds, result emits Canceled`() = runTest {
         val fakeBridgeHandler = FakeConfirmationChallengeBridgeHandler()
         val fakeStripeRepository = FakeStripeRepository(
-            verifyResult = Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
+            cancelResult = Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
         )
         val viewModel = createViewModel(
             bridgeHandler = fakeBridgeHandler,
@@ -166,12 +169,45 @@ internal class IntentConfirmationChallengeViewModelTest {
             ensureAllEventsConsumed()
         }
 
-        // Verify the API was called with correct params
-        assertThat(fakeStripeRepository.verifyCallCount).isEqualTo(1)
-        assertThat(fakeStripeRepository.lastVerificationUrl).isEqualTo(TEST_STRIPE_JS.verificationUrl)
-        assertThat(fakeStripeRepository.lastVerifyParams?.clientSecret).isEqualTo(TEST_ARGS.intent.clientSecret)
-        assertThat(fakeStripeRepository.lastVerifyParams?.captchaVendorName)
-            .isEqualTo(TEST_STRIPE_JS.captchaVendorName?.code)
+        val repoCall = fakeStripeRepository.awaitCall()
+        assertThat(repoCall.intentId).isEqualTo(TEST_ARGS.intent.id)
+        assertThat(repoCall.params.clientSecret).isEqualTo(TEST_ARGS.intent.clientSecret)
+        assertThat(repoCall.requestOptions).isEqualTo(REQUEST_OPTIONS)
+        fakeStripeRepository.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `when closeClicked is called and intent id is null, errorReporter reports and result emits Failed`() = runTest {
+        val fakeBridgeHandler = FakeConfirmationChallengeBridgeHandler()
+        val fakeErrorReporter = FakeErrorReporter()
+        val argsWithNullId = IntentConfirmationChallengeArgs(
+            publishableKey = "pk_test_123",
+            intent = PaymentIntentFixtures.PI_WITH_NULL_ID,
+            productUsage = listOf("PaymentSheet"),
+        )
+        val viewModel = createViewModel(
+            bridgeHandler = fakeBridgeHandler,
+            args = argsWithNullId,
+            errorReporter = fakeErrorReporter,
+        )
+
+        viewModel.result.test {
+            viewModel.closeClicked()
+
+            val result = awaitItem()
+            assertThat(result).isInstanceOf(IntentConfirmationChallengeActivityResult.Failed::class.java)
+            val failedResult = result as IntentConfirmationChallengeActivityResult.Failed
+            assertThat(failedResult.error).isInstanceOf(IllegalArgumentException::class.java)
+            assertThat(failedResult.error).hasMessageThat().isEqualTo("Intent parameters are unavailable")
+
+            ensureAllEventsConsumed()
+        }
+
+        val errorCall = fakeErrorReporter.awaitCall()
+        assertThat(errorCall.errorEvent).isEqualTo(
+            ErrorReporter.UnexpectedErrorEvent.INTENT_CONFIRMATION_CHALLENGE_INTENT_PARAMETERS_UNAVAILABLE
+        )
+        fakeErrorReporter.ensureAllEventsConsumed()
     }
 
     @Test
@@ -179,7 +215,7 @@ internal class IntentConfirmationChallengeViewModelTest {
         val fakeBridgeHandler = FakeConfirmationChallengeBridgeHandler()
         val expectedError = IOException("Network error")
         val fakeStripeRepository = FakeStripeRepository(
-            verifyResult = Result.failure(expectedError)
+            cancelResult = Result.failure(expectedError)
         )
         val viewModel = createViewModel(
             bridgeHandler = fakeBridgeHandler,
@@ -198,34 +234,8 @@ internal class IntentConfirmationChallengeViewModelTest {
             ensureAllEventsConsumed()
         }
 
-        assertThat(fakeStripeRepository.verifyCallCount).isEqualTo(1)
-    }
-
-    @Test
-    fun `when closeClicked is called with null stripeJs, result emits Canceled without API call`() = runTest {
-        val fakeBridgeHandler = FakeConfirmationChallengeBridgeHandler()
-        val fakeStripeRepository = FakeStripeRepository(
-            verifyResult = Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
-        )
-        val viewModel = createViewModel(
-            bridgeHandler = fakeBridgeHandler,
-            stripeRepository = fakeStripeRepository,
-            args = TEST_ARGS_NO_STRIPE_JS,
-        )
-
-        viewModel.result.test {
-            viewModel.closeClicked()
-
-            val result = awaitItem()
-            assertThat(result).isInstanceOf(IntentConfirmationChallengeActivityResult.Canceled::class.java)
-            val canceledResult = result as IntentConfirmationChallengeActivityResult.Canceled
-            assertThat(canceledResult.clientSecret).isEqualTo(TEST_ARGS_NO_STRIPE_JS.intent.clientSecret)
-
-            ensureAllEventsConsumed()
-        }
-
-        // Verify the API was NOT called
-        assertThat(fakeStripeRepository.verifyCallCount).isEqualTo(0)
+        fakeStripeRepository.awaitCall()
+        fakeStripeRepository.ensureAllEventsConsumed()
     }
 
     @Test
@@ -256,9 +266,10 @@ internal class IntentConfirmationChallengeViewModelTest {
         analyticsReporter: IntentConfirmationChallengeAnalyticsEventReporter =
             FakeIntentConfirmationChallengeAnalyticsEventReporter(),
         stripeRepository: StripeRepository = FakeStripeRepository(
-            verifyResult = Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
+            cancelResult = Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
         ),
         args: IntentConfirmationChallengeArgs = TEST_ARGS,
+        errorReporter: FakeErrorReporter = FakeErrorReporter()
     ) = IntentConfirmationChallengeViewModel(
         args = args,
         bridgeHandler = bridgeHandler,
@@ -266,49 +277,52 @@ internal class IntentConfirmationChallengeViewModelTest {
         analyticsEventReporter = analyticsReporter,
         userAgent = "fake-user-agent",
         stripeRepository = stripeRepository,
+        errorReporter = errorReporter,
+        requestOptions = REQUEST_OPTIONS,
     )
 
     private class FakeStripeRepository(
-        private val verifyResult: Result<StripeIntent>,
+        private val cancelResult: Result<StripeIntent>,
     ) : AbsFakeStripeRepository() {
-        var verifyCallCount = 0
-            private set
-        var lastVerificationUrl: String? = null
-            private set
-        var lastVerifyParams: VerifyIntentConfirmationChallengeParams? = null
-            private set
+        private val calls = Turbine<Call>()
 
-        override suspend fun verifyIntentConfirmationChallenge(
-            verificationUrl: String,
-            params: VerifyIntentConfirmationChallengeParams,
+        override suspend fun cancelCaptchaChallenge(
+            intentId: String,
+            params: CancelCaptchaChallengeParams,
             requestOptions: ApiRequest.Options
         ): Result<StripeIntent> {
-            verifyCallCount++
-            lastVerificationUrl = verificationUrl
-            lastVerifyParams = params
-            return verifyResult
+            calls.add(
+                item = Call(
+                    intentId = intentId,
+                    params = params,
+                    requestOptions = requestOptions
+                )
+            )
+            return cancelResult
         }
+
+        suspend fun awaitCall(): Call {
+            return calls.awaitItem()
+        }
+
+        fun ensureAllEventsConsumed() {
+            calls.ensureAllEventsConsumed()
+        }
+
+        data class Call(
+            val intentId: String,
+            val params: CancelCaptchaChallengeParams,
+            val requestOptions: ApiRequest.Options
+        )
     }
 
     private companion object {
-        val TEST_STRIPE_JS = StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge.StripeJs(
-            siteKey = "test_site_key",
-            verificationUrl = "https://api.stripe.com/v1/payment_intents/verify",
-            captchaVendorName = StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge.CaptchaVendorName.HCaptcha,
-        )
+        private val REQUEST_OPTIONS = ApiRequest.Options("pk_test_vOo1umqsYxSrP5UXfOeL3ecm")
 
         val TEST_ARGS = IntentConfirmationChallengeArgs(
             publishableKey = "pk_test_123",
             intent = PaymentIntentFixtures.PI_SUCCEEDED,
             productUsage = listOf("PaymentSheet"),
-            stripeJs = TEST_STRIPE_JS,
-        )
-
-        val TEST_ARGS_NO_STRIPE_JS = IntentConfirmationChallengeArgs(
-            publishableKey = "pk_test_123",
-            intent = PaymentIntentFixtures.PI_SUCCEEDED,
-            productUsage = listOf("PaymentSheet"),
-            stripeJs = null,
         )
     }
 }
