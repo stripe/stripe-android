@@ -2,7 +2,6 @@ package com.stripe.android.networking
 
 import android.content.Context
 import android.net.http.HttpResponseCache
-import android.util.Log
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.DefaultFraudDetectionDataRepository
