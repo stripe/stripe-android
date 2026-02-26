@@ -6,6 +6,7 @@ import com.stripe.android.challenge.confirmation.IntentConfirmationChallengeView
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
+import com.stripe.android.payments.core.injection.PaymentConfigurationModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
@@ -19,6 +20,7 @@ import javax.inject.Singleton
         CoroutineContextModule::class,
         StripeRepositoryModule::class,
         PaymentElementRequestSurfaceModule::class,
+        PaymentConfigurationModule::class
     ]
 )
 internal interface IntentConfirmationChallengeComponent {

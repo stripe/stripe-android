@@ -11,7 +11,6 @@ import com.stripe.android.challenge.confirmation.IntentConfirmationChallengeArgs
 import com.stripe.android.challenge.confirmation.analytics.DefaultIntentConfirmationChallengeAnalyticsEventReporter
 import com.stripe.android.challenge.confirmation.analytics.IntentConfirmationChallengeAnalyticsEventReporter
 import com.stripe.android.core.injection.ENABLE_LOGGING
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.RequestHeadersFactory
@@ -67,12 +66,6 @@ internal interface IntentConfirmationChallengeModule {
         @Singleton
         fun provideDurationProvider(): DurationProvider {
             return DefaultDurationProvider.instance
-        }
-
-        @Provides
-        @Named(PUBLISHABLE_KEY)
-        fun providePublishableKey(args: IntentConfirmationChallengeArgs): () -> String {
-            return { args.publishableKey }
         }
 
         @Provides
