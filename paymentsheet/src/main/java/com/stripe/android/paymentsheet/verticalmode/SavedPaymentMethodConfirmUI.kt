@@ -25,7 +25,7 @@ internal fun SavedPaymentMethodConfirmUI(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         H4Text(
-            text = stringResource(R.string.stripe_paymentsheet_saved_card),
+            text = stringResource(R.string.stripe_paymentsheet_added_card),
             modifier = Modifier.padding(bottom = 4.dp),
         )
 
