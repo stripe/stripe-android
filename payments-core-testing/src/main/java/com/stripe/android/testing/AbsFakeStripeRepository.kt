@@ -506,11 +506,19 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         TODO("Not yet implemented")
     }
 
-    override suspend fun cancelCaptchaChallenge(
-        intentId: String,
+    override suspend fun cancelPaymentIntentCaptchaChallenge(
+        paymentIntentId: String,
         params: CancelCaptchaChallengeParams,
         requestOptions: ApiRequest.Options
-    ): Result<StripeIntent> {
+    ): Result<PaymentIntent> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun cancelSetupIntentCaptchaChallenge(
+        setupIntentId: String,
+        params: CancelCaptchaChallengeParams,
+        requestOptions: ApiRequest.Options
+    ): Result<SetupIntent> {
         TODO("Not yet implemented")
     }
 }

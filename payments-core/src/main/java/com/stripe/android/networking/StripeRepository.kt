@@ -478,11 +478,18 @@ interface StripeRepository {
     ): Result<ConsumerPaymentDetails>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    suspend fun cancelCaptchaChallenge(
-        intentId: String,
+    suspend fun cancelPaymentIntentCaptchaChallenge(
+        paymentIntentId: String,
         params: CancelCaptchaChallengeParams,
         requestOptions: ApiRequest.Options
-    ): Result<StripeIntent>
+    ): Result<PaymentIntent>
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun cancelSetupIntentCaptchaChallenge(
+        setupIntentId: String,
+        params: CancelCaptchaChallengeParams,
+        requestOptions: ApiRequest.Options
+    ): Result<SetupIntent>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun buildPaymentUserAgent(attribution: Set<String> = emptySet()): String

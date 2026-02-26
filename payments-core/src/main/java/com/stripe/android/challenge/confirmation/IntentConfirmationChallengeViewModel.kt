@@ -17,6 +17,8 @@ import com.stripe.android.challenge.confirmation.di.SDK_USER_AGENT
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.CancelCaptchaChallengeParams
+import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.ErrorReporter.UnexpectedErrorEvent
@@ -92,11 +94,24 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
             }
             val params = CancelCaptchaChallengeParams(clientSecret)
 
-            stripeRepository.cancelCaptchaChallenge(
-                intentId = intentId,
-                params = params,
-                requestOptions = requestOptions,
-            ).fold(
+            val cancellationResult = when (args.intent) {
+                is PaymentIntent -> {
+                    stripeRepository.cancelPaymentIntentCaptchaChallenge(
+                        paymentIntentId = intentId,
+                        params = params,
+                        requestOptions = requestOptions,
+                    )
+                }
+                is SetupIntent -> {
+                    stripeRepository.cancelSetupIntentCaptchaChallenge(
+                        setupIntentId = intentId,
+                        params = params,
+                        requestOptions = requestOptions,
+                    )
+                }
+            }
+
+            cancellationResult.fold(
                 onSuccess = { intent ->
                     _result.emit(
                         IntentConfirmationChallengeActivityResult.Canceled(intent.clientSecret)

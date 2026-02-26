@@ -9,7 +9,9 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.challenge.confirmation.analytics.IntentConfirmationChallengeAnalyticsEventReporter
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.CancelCaptchaChallengeParams
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -283,19 +285,36 @@ internal class IntentConfirmationChallengeViewModelTest {
     ) : AbsFakeStripeRepository() {
         private val calls = Turbine<Call>()
 
-        override suspend fun cancelCaptchaChallenge(
-            intentId: String,
+        override suspend fun cancelPaymentIntentCaptchaChallenge(
+            paymentIntentId: String,
             params: CancelCaptchaChallengeParams,
             requestOptions: ApiRequest.Options
-        ): Result<StripeIntent> {
+        ): Result<PaymentIntent> {
             calls.add(
                 item = Call(
-                    intentId = intentId,
+                    intentId = paymentIntentId,
                     params = params,
                     requestOptions = requestOptions
                 )
             )
-            return cancelResult
+            @Suppress("UNCHECKED_CAST")
+            return cancelResult as Result<PaymentIntent>
+        }
+
+        override suspend fun cancelSetupIntentCaptchaChallenge(
+            setupIntentId: String,
+            params: CancelCaptchaChallengeParams,
+            requestOptions: ApiRequest.Options
+        ): Result<SetupIntent> {
+            calls.add(
+                item = Call(
+                    intentId = setupIntentId,
+                    params = params,
+                    requestOptions = requestOptions
+                )
+            )
+            @Suppress("UNCHECKED_CAST")
+            return cancelResult as Result<SetupIntent>
         }
 
         suspend fun awaitCall(): Call {
