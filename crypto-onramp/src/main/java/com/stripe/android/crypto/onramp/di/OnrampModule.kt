@@ -4,7 +4,6 @@ import android.app.Application
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.BuildConfig
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
 import com.stripe.android.common.di.MobileSessionIdModule
 import com.stripe.android.core.ApiVersion
@@ -22,6 +21,7 @@ import com.stripe.android.link.LinkController
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.payments.core.injection.PaymentConfigurationModule
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
@@ -29,7 +29,7 @@ import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 @Module(
-    includes = [MobileSessionIdModule::class],
+    includes = [MobileSessionIdModule::class, PaymentConfigurationModule::class],
     subcomponents = [OnrampPresenterComponent::class]
 )
 internal class OnrampModule {
@@ -48,16 +48,6 @@ internal class OnrampModule {
         workContext = context,
         logger = logger
     )
-
-    @Provides
-    @Named(PUBLISHABLE_KEY)
-    fun providePublishableKey(context: Context): () -> String =
-        { PaymentConfiguration.getInstance(context).publishableKey }
-
-    @Provides
-    @Named(STRIPE_ACCOUNT_ID)
-    fun provideStripeAccountId(context: Context): () -> String? =
-        { PaymentConfiguration.getInstance(context).stripeAccountId }
 
     @Provides
     fun provideRequestSurface(): RequestSurface = RequestSurface.CryptoOnramp

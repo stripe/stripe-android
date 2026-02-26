@@ -1,14 +1,10 @@
 package com.stripe.android.paymentelement.embedded
 
-import android.content.Context
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.taptoadd.TapToAddConnectionModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DefaultDurationProvider
@@ -25,6 +21,7 @@ import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.payments.core.injection.PaymentConfigurationModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -41,7 +38,6 @@ import dagger.Provides
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Named
-import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -52,6 +48,7 @@ import kotlin.coroutines.CoroutineContext
         TapToAddConnectionModule::class,
         PaymentsIntegrityModule::class,
         PaymentElementRequestSurfaceModule::class,
+        PaymentConfigurationModule::class,
     ],
 )
 internal interface EmbeddedCommonModule {
@@ -103,31 +100,6 @@ internal interface EmbeddedCommonModule {
         @Singleton
         @Named(ALLOWS_MANUAL_CONFIRMATION)
         fun provideAllowsManualConfirmation() = true
-
-        /**
-         * Provides a non-singleton PaymentConfiguration.
-         *
-         * Should be fetched only when it's needed, to allow client to set the publishableKey and
-         * stripeAccountId in PaymentConfiguration any time before configuring the FlowController
-         * or presenting Payment Sheet.
-         *
-         * Should always be injected with [Lazy] or [Provider].
-         */
-        @Provides
-        fun providePaymentConfiguration(appContext: Context): PaymentConfiguration {
-            return PaymentConfiguration.getInstance(appContext)
-        }
-
-        @Provides
-        @Named(PUBLISHABLE_KEY)
-        fun providePublishableKey(
-            paymentConfiguration: Provider<PaymentConfiguration>
-        ): () -> String = { paymentConfiguration.get().publishableKey }
-
-        @Provides
-        @Named(STRIPE_ACCOUNT_ID)
-        fun provideStripeAccountId(paymentConfiguration: Provider<PaymentConfiguration>):
-            () -> String? = { paymentConfiguration.get().stripeAccountId }
 
         @Provides
         @Singleton

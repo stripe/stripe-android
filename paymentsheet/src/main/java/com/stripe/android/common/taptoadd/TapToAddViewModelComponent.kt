@@ -5,7 +5,6 @@ import android.content.Context
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.common.spms.DefaultLinkFormElementFactory
 import com.stripe.android.common.spms.DefaultSavedPaymentMethodLinkFormHelper
@@ -23,8 +22,6 @@ import com.stripe.android.common.taptoadd.ui.createTapToAddUxConfiguration
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DefaultDurationProvider
@@ -53,6 +50,7 @@ import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignu
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.payments.core.injection.PaymentConfigurationModule
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
@@ -69,7 +67,6 @@ import dagger.Subcomponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Named
-import javax.inject.Provider
 import javax.inject.Singleton
 
 @Component(
@@ -81,6 +78,7 @@ import javax.inject.Singleton
         DefaultConfirmationModule::class,
         DefaultIntentConfirmationModule::class,
         LinkInlineSignupConfirmationModule::class,
+        PaymentConfigurationModule::class,
         PaymentElementRequestSurfaceModule::class,
         TapToAddViewModelModule::class,
         TapToAddModule::class,
@@ -208,23 +206,6 @@ internal interface TapToAddViewModelModule {
         fun provideViewModelScope(): CoroutineScope {
             return CoroutineScope(Dispatchers.Main)
         }
-
-        @Provides
-        fun providePaymentConfiguration(appContext: Context): PaymentConfiguration {
-            return PaymentConfiguration.getInstance(appContext)
-        }
-
-        @Provides
-        @Named(PUBLISHABLE_KEY)
-        fun providePublishableKey(
-            paymentConfiguration: Provider<PaymentConfiguration>
-        ): () -> String = { paymentConfiguration.get().publishableKey }
-
-        @Provides
-        @Named(STRIPE_ACCOUNT_ID)
-        fun provideStripeAccountId(
-            paymentConfiguration: Provider<PaymentConfiguration>
-        ): () -> String? = { paymentConfiguration.get().stripeAccountId }
 
         @OptIn(ExperimentalAnalyticEventCallbackApi::class)
         @Provides
