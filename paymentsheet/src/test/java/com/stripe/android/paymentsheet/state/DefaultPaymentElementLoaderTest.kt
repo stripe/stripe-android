@@ -855,7 +855,7 @@ internal class DefaultPaymentElementLoaderTest {
         val result = createPaymentElementLoader(
             customerRepo = object : FakeCustomerRepository() {
                 override suspend fun getPaymentMethods(
-                    customerInfo: CustomerRepository.CustomerInfo,
+                    accessInfo: CustomerMetadata.AccessInfo,
                     types: List<PaymentMethod.Type>,
                     silentlyFail: Boolean
                 ): Result<List<PaymentMethod>> {
@@ -3238,8 +3238,8 @@ internal class DefaultPaymentElementLoaderTest {
             )
 
             verify(customerRepository).retrieveCustomer(
-                CustomerRepository.CustomerInfo(
-                    id = "cus_1",
+                CustomerMetadata.AccessInfo.CustomerSession(
+                    customerId = "cus_1",
                     ephemeralKeySecret = "ek_123",
                     customerSessionClientSecret = "cuss_1",
                 )

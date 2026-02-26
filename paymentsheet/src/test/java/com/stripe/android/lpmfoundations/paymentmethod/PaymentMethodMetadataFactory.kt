@@ -52,7 +52,10 @@ internal object PaymentMethodMetadataFactory {
         financialConnectionsAvailability: FinancialConnectionsAvailability? = FinancialConnectionsAvailability.Lite,
         customerMetadataPermissions: CustomerMetadata.Permissions =
             PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS,
-        customerSessionClientSecret: String? = null,
+        accessInfo: CustomerMetadata.AccessInfo = CustomerMetadata.AccessInfo.LegacyEphemeralKey(
+            customerId = "cus_123",
+            ephemeralKeySecret = "ek_123",
+        ),
         termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay> = emptyMap(),
         forceSetupFutureUseBehaviorAndNewMandate: Boolean = false,
         passiveCaptchaParams: PassiveCaptchaParams? = null,
@@ -82,9 +85,9 @@ internal object PaymentMethodMetadataFactory {
             shippingDetails = shippingDetails,
             customerMetadata = if (hasCustomerConfiguration) {
                 PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.copy(
+                    accessInfo = accessInfo,
                     isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
                     permissions = customerMetadataPermissions,
-                    customerSessionClientSecret = customerSessionClientSecret,
                 )
             } else {
                 null

@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import javax.inject.Inject
 
@@ -12,14 +13,14 @@ import javax.inject.Inject
  *
  * @param customerRepository The repository to fetch customer information.
  * @param configuration The common configuration containing default billing details.
- * @param customer The customer information to retrieve the email from.
+ * @param accessInfo The access info to retrieve the customer email from.
  * @return The customer's email if available, otherwise null.
  */
 internal interface RetrieveCustomerEmail {
 
     suspend operator fun invoke(
         configuration: CommonConfiguration,
-        customer: CustomerRepository.CustomerInfo?
+        accessInfo: CustomerMetadata.AccessInfo?,
     ): String?
 }
 
@@ -29,9 +30,13 @@ internal class DefaultRetrieveCustomerEmail @Inject constructor(
 
     override suspend operator fun invoke(
         configuration: CommonConfiguration,
-        customer: CustomerRepository.CustomerInfo?
+        accessInfo: CustomerMetadata.AccessInfo?,
     ): String? {
         return configuration.defaultBillingDetails?.email
-            ?: customer?.let { customerRepository.retrieveCustomer(it) }?.email
+            ?: if (accessInfo != null && accessInfo.ephemeralKeySecret != null) {
+                customerRepository.retrieveCustomer(accessInfo)?.email
+            } else {
+                null
+            }
     }
 }

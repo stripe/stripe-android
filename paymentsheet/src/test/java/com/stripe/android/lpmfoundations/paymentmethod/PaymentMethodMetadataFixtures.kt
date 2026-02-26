@@ -18,9 +18,10 @@ internal object PaymentMethodMetadataFixtures {
     )
 
     internal val DEFAULT_CUSTOMER_METADATA = CustomerMetadata(
-        id = "cus_123",
-        ephemeralKeySecret = "ek_123",
-        customerSessionClientSecret = null,
+        accessInfo = CustomerMetadata.AccessInfo.LegacyEphemeralKey(
+            customerId = "cus_123",
+            ephemeralKeySecret = "ek_123",
+        ),
         isPaymentMethodSetAsDefaultEnabled = false,
         permissions = DEFAULT_CUSTOMER_METADATA_PERMISSIONS
     )
@@ -36,7 +37,11 @@ internal object PaymentMethodMetadataFixtures {
     )
 
     internal val CUSTOMER_SESSIONS_CUSTOMER_METADATA = DEFAULT_CUSTOMER_METADATA.copy(
-        customerSessionClientSecret = "cuss_123",
+        accessInfo = CustomerMetadata.AccessInfo.CustomerSession(
+            customerId = "cus_123",
+            ephemeralKeySecret = "ek_123",
+            customerSessionClientSecret = "cuss_123",
+        ),
     )
 
     internal fun getDefaultCustomerMetadata(

@@ -2,6 +2,7 @@ package com.stripe.android.utils
 
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
@@ -43,24 +44,24 @@ internal open class FakeCustomerRepository(
     var error: Throwable? = null
 
     override suspend fun retrieveCustomer(
-        customerInfo: CustomerRepository.CustomerInfo
+        accessInfo: CustomerMetadata.AccessInfo
     ): Customer? = onRetrieveCustomer()
 
     override suspend fun getPaymentMethods(
-        customerInfo: CustomerRepository.CustomerInfo,
+        accessInfo: CustomerMetadata.AccessInfo,
         types: List<PaymentMethod.Type>,
         silentlyFail: Boolean,
     ): Result<List<PaymentMethod>> = onGetPaymentMethods()
 
     override suspend fun detachPaymentMethod(
-        customerInfo: CustomerRepository.CustomerInfo,
+        accessInfo: CustomerMetadata.AccessInfo,
         paymentMethodId: String,
         canRemoveDuplicates: Boolean,
     ): Result<PaymentMethod> {
         _detachRequests.add(
             DetachRequest(
                 paymentMethodId = paymentMethodId,
-                customerInfo = customerInfo,
+                accessInfo = accessInfo,
                 canRemoveDuplicates = canRemoveDuplicates,
             )
         )
@@ -69,19 +70,19 @@ internal open class FakeCustomerRepository(
     }
 
     override suspend fun attachPaymentMethod(
-        customerInfo: CustomerRepository.CustomerInfo,
+        accessInfo: CustomerMetadata.AccessInfo,
         paymentMethodId: String
     ): Result<PaymentMethod> = onAttachPaymentMethod()
 
     override suspend fun updatePaymentMethod(
-        customerInfo: CustomerRepository.CustomerInfo,
+        accessInfo: CustomerMetadata.AccessInfo,
         paymentMethodId: String,
         params: PaymentMethodUpdateParams
     ): Result<PaymentMethod> {
         _updateRequests.add(
             UpdateRequest(
                 paymentMethodId = paymentMethodId,
-                customerInfo = customerInfo,
+                accessInfo = accessInfo,
                 params = params,
             )
         )
@@ -90,11 +91,11 @@ internal open class FakeCustomerRepository(
     }
 
     override suspend fun setDefaultPaymentMethod(
-        customerInfo: CustomerRepository.CustomerInfo,
+        accessInfo: CustomerMetadata.AccessInfo,
         paymentMethodId: String?
     ): Result<Customer> {
         _setDefaultPaymentMethodRequests.add(
-            SetDefaultRequest(paymentMethodId = paymentMethodId, customerInfo = customerInfo)
+            SetDefaultRequest(paymentMethodId = paymentMethodId, accessInfo = accessInfo)
         )
 
         return onSetDefaultPaymentMethod()
@@ -102,18 +103,18 @@ internal open class FakeCustomerRepository(
 
     data class DetachRequest(
         val paymentMethodId: String,
-        val customerInfo: CustomerRepository.CustomerInfo,
+        val accessInfo: CustomerMetadata.AccessInfo,
         val canRemoveDuplicates: Boolean,
     )
 
     data class UpdateRequest(
         val paymentMethodId: String,
-        val customerInfo: CustomerRepository.CustomerInfo,
+        val accessInfo: CustomerMetadata.AccessInfo,
         val params: PaymentMethodUpdateParams,
     )
 
     data class SetDefaultRequest(
         val paymentMethodId: String?,
-        val customerInfo: CustomerRepository.CustomerInfo,
+        val accessInfo: CustomerMetadata.AccessInfo,
     )
 }

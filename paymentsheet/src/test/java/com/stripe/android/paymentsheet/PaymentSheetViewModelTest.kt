@@ -97,6 +97,7 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSaved
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Args
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcCompletionState
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.LinkState
@@ -253,19 +254,18 @@ internal class PaymentSheetViewModelTest {
             assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
         }
 
-        val customerInfoCaptor = argumentCaptor<CustomerRepository.CustomerInfo>()
+        val accessInfoCaptor = argumentCaptor<CustomerMetadata.AccessInfo>()
 
         verify(customerRepository).updatePaymentMethod(
-            customerInfoCaptor.capture(),
+            accessInfoCaptor.capture(),
             any(),
             any()
         )
 
-        assertThat(customerInfoCaptor.firstValue).isEqualTo(
-            CustomerRepository.CustomerInfo(
-                id = "cus_123",
+        assertThat(accessInfoCaptor.firstValue).isEqualTo(
+            CustomerMetadata.AccessInfo.LegacyEphemeralKey(
+                customerId = "cus_123",
                 ephemeralKeySecret = "ek_123",
-                customerSessionClientSecret = null,
             )
         )
     }

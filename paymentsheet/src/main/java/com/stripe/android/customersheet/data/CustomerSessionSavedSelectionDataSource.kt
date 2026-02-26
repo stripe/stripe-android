@@ -4,6 +4,7 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.customersheet.util.getDefaultPaymentMethodAsPaymentSelection
 import com.stripe.android.customersheet.util.getDefaultPaymentMethodsEnabledForCustomerSheet
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.toSavedSelection
@@ -98,12 +99,12 @@ internal class CustomerSessionSavedSelectionDataSource @Inject constructor(
     ) {
         val paymentMethodId = (selection as? SavedSelection.PaymentMethod)?.id
         customerRepository.setDefaultPaymentMethod(
-            paymentMethodId = paymentMethodId,
-            customerInfo = CustomerRepository.CustomerInfo(
-                id = ephemeralKey.customerId,
+            accessInfo = CustomerMetadata.AccessInfo.CustomerSession(
+                customerId = ephemeralKey.customerId,
                 ephemeralKeySecret = ephemeralKey.ephemeralKey,
                 customerSessionClientSecret = ephemeralKey.customerSessionClientSecret,
-            )
+            ),
+            paymentMethodId = paymentMethodId,
         ).getOrThrow()
     }
 

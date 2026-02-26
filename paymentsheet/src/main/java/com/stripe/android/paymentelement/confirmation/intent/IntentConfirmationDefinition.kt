@@ -43,7 +43,7 @@ internal class IntentConfirmationDefinition(
             interceptor = intentConfirmationInterceptorFactory.create(
                 integrationMetadata = confirmationArgs.paymentMethodMetadata.integrationMetadata,
                 customerId = paymentMethodMetadata.customerMetadata?.id,
-                ephemeralKeySecret = paymentMethodMetadata.customerMetadata?.ephemeralKeySecret,
+                ephemeralKeySecret = paymentMethodMetadata.customerMetadata?.accessInfo?.ephemeralKeySecret,
                 clientAttributionMetadata = paymentMethodMetadata.clientAttributionMetadata,
             )
         } catch (e: CallbackNotFoundException) {

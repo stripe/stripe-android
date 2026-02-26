@@ -10,12 +10,68 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 internal data class CustomerMetadata(
-    val id: String,
-    val ephemeralKeySecret: String,
-    val customerSessionClientSecret: String?,
+    val accessInfo: AccessInfo,
     val isPaymentMethodSetAsDefaultEnabled: Boolean,
     val permissions: Permissions,
 ) : Parcelable {
+
+    /** Convenience accessor for the customer ID stored in [accessInfo]. */
+    val id: String get() = accessInfo.customerId
+
+    /**
+     * Integration-specific authentication/access information.
+     * Each integration type uses different credentials to authenticate customer operations.
+     * Contains all the information needed to make authenticated customer API calls,
+     * including the customer ID and relevant credentials.
+     */
+    @Parcelize
+    sealed class AccessInfo : Parcelable {
+        /** The customer ID associated with these credentials. */
+        abstract val customerId: String
+
+        /**
+         * The ephemeral key secret, if applicable to this access type.
+         * Returns null for [CheckoutSession] which uses publishable key auth.
+         */
+        open val ephemeralKeySecret: String? get() = null
+
+        /**
+         * The customer session client secret, if applicable to this access type.
+         * Returns null for [LegacyEphemeralKey] and [CheckoutSession].
+         */
+        open val customerSessionClientSecret: String? get() = null
+
+        /**
+         * Legacy ephemeral key integration.
+         * Uses an un-scoped ephemeral key for all customer API calls.
+         */
+        @Parcelize
+        data class LegacyEphemeralKey(
+            override val customerId: String,
+            override val ephemeralKeySecret: String,
+        ) : AccessInfo()
+
+        /**
+         * Customer session integration.
+         * Uses a scoped ephemeral key + customer session client secret.
+         */
+        @Parcelize
+        data class CustomerSession(
+            override val customerId: String,
+            override val ephemeralKeySecret: String,
+            override val customerSessionClientSecret: String,
+        ) : AccessInfo()
+
+        /**
+         * Checkout session integration.
+         * Uses publishable key + checkout session ID (no ephemeral key).
+         */
+        @Parcelize
+        data class CheckoutSession(
+            override val customerId: String,
+            val checkoutSessionId: String,
+        ) : AccessInfo()
+    }
 
     @Parcelize
     internal data class Permissions(

@@ -9,6 +9,7 @@ import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
@@ -154,12 +155,14 @@ internal class SavedPaymentMethodMutator(
             }
         }
 
+        if (customerMetadata.accessInfo is CustomerMetadata.AccessInfo.CheckoutSession) {
+            return Result.failure(
+                IllegalStateException("Checkout session PM removal not yet implemented")
+            )
+        }
+
         return customerRepository.detachPaymentMethod(
-            customerInfo = CustomerRepository.CustomerInfo(
-                id = customerMetadata.id,
-                ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
-                customerSessionClientSecret = customerMetadata.customerSessionClientSecret,
-            ),
+            accessInfo = customerMetadata.accessInfo,
             paymentMethodId = paymentMethodId,
             canRemoveDuplicates = canRemoveDuplicates,
         )
@@ -210,12 +213,14 @@ internal class SavedPaymentMethodMutator(
                 IllegalStateException("Unable to set default payment method when customer is null.")
             )
 
+        if (customer.accessInfo is CustomerMetadata.AccessInfo.CheckoutSession) {
+            return Result.failure(
+                IllegalStateException("Set default payment method is not supported for checkout sessions.")
+            )
+        }
+
         return customerRepository.setDefaultPaymentMethod(
-            customerInfo = CustomerRepository.CustomerInfo(
-                id = customer.id,
-                ephemeralKeySecret = customer.ephemeralKeySecret,
-                customerSessionClientSecret = customer.customerSessionClientSecret,
-            ),
+            accessInfo = customer.accessInfo,
             paymentMethodId = paymentMethod.id,
         ).onFailure { error ->
             eventReporter.onSetAsDefaultPaymentMethodFailed(
@@ -248,6 +253,7 @@ internal class SavedPaymentMethodMutator(
         return result.exceptionOrNull()
     }
 
+    @Suppress("LongMethod")
     suspend fun modifyCardPaymentMethod(
         paymentMethod: PaymentMethod,
         cardUpdateParams: CardUpdateParams,
@@ -261,12 +267,16 @@ internal class SavedPaymentMethodMutator(
             )
         )
 
+        if (customerMetadata.accessInfo is CustomerMetadata.AccessInfo.CheckoutSession) {
+            return Result.failure(
+                IllegalStateException(
+                    "Update payment method is not supported for checkout sessions yet."
+                )
+            )
+        }
+
         return customerRepository.updatePaymentMethod(
-            customerInfo = CustomerRepository.CustomerInfo(
-                id = customerMetadata.id,
-                ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
-                customerSessionClientSecret = customerMetadata.customerSessionClientSecret,
-            ),
+            accessInfo = customerMetadata.accessInfo,
             paymentMethodId = paymentMethod.id,
             params = PaymentMethodUpdateParams.createCard(
                 networks = cardUpdateParams.cardBrand?.let {

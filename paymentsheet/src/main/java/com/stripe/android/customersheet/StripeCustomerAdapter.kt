@@ -7,6 +7,7 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.R
@@ -67,10 +68,9 @@ internal class StripeCustomerAdapter @Inject internal constructor(
 
         return getCustomerEphemeralKey().map { customerEphemeralKey ->
             customerRepository.getPaymentMethods(
-                customerInfo = CustomerRepository.CustomerInfo(
-                    id = customerEphemeralKey.customerId,
+                accessInfo = CustomerMetadata.AccessInfo.LegacyEphemeralKey(
+                    customerId = customerEphemeralKey.customerId,
                     ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
-                    customerSessionClientSecret = null,
                 ),
                 types = requestedTypes,
                 silentlyFail = false,
@@ -88,10 +88,9 @@ internal class StripeCustomerAdapter @Inject internal constructor(
     ): CustomerAdapter.Result<PaymentMethod> {
         return getCustomerEphemeralKey().map { customerEphemeralKey ->
             customerRepository.attachPaymentMethod(
-                customerInfo = CustomerRepository.CustomerInfo(
-                    id = customerEphemeralKey.customerId,
+                accessInfo = CustomerMetadata.AccessInfo.LegacyEphemeralKey(
+                    customerId = customerEphemeralKey.customerId,
                     ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
-                    customerSessionClientSecret = null,
                 ),
                 paymentMethodId = paymentMethodId
             ).getOrElse {
@@ -108,10 +107,9 @@ internal class StripeCustomerAdapter @Inject internal constructor(
     ): CustomerAdapter.Result<PaymentMethod> {
         return getCustomerEphemeralKey().mapCatching { customerEphemeralKey ->
             customerRepository.detachPaymentMethod(
-                customerInfo = CustomerRepository.CustomerInfo(
-                    id = customerEphemeralKey.customerId,
+                accessInfo = CustomerMetadata.AccessInfo.LegacyEphemeralKey(
+                    customerId = customerEphemeralKey.customerId,
                     ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
-                    customerSessionClientSecret = null,
                 ),
                 paymentMethodId = paymentMethodId,
                 canRemoveDuplicates = false,
@@ -130,10 +128,9 @@ internal class StripeCustomerAdapter @Inject internal constructor(
     ): CustomerAdapter.Result<PaymentMethod> {
         return getCustomerEphemeralKey().mapCatching { customerEphemeralKey ->
             customerRepository.updatePaymentMethod(
-                customerInfo = CustomerRepository.CustomerInfo(
-                    id = customerEphemeralKey.customerId,
+                accessInfo = CustomerMetadata.AccessInfo.LegacyEphemeralKey(
+                    customerId = customerEphemeralKey.customerId,
                     ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
-                    customerSessionClientSecret = null,
                 ),
                 paymentMethodId = paymentMethodId,
                 params = params

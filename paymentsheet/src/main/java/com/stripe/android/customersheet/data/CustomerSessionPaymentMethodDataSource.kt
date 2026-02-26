@@ -5,6 +5,7 @@ import com.stripe.android.customersheet.util.filterToSupportedPaymentMethods
 import com.stripe.android.customersheet.util.getDefaultPaymentMethodsEnabledForCustomerSheet
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import kotlinx.coroutines.withContext
@@ -38,8 +39,8 @@ internal class CustomerSessionPaymentMethodDataSource @Inject constructor(
         return withContext(workContext) {
             elementsSessionManager.fetchCustomerSessionEphemeralKey().mapCatching { ephemeralKey ->
                 customerRepository.updatePaymentMethod(
-                    customerInfo = CustomerRepository.CustomerInfo(
-                        id = ephemeralKey.customerId,
+                    accessInfo = CustomerMetadata.AccessInfo.CustomerSession(
+                        customerId = ephemeralKey.customerId,
                         ephemeralKeySecret = ephemeralKey.ephemeralKey,
                         customerSessionClientSecret = ephemeralKey.customerSessionClientSecret,
                     ),
@@ -65,8 +66,8 @@ internal class CustomerSessionPaymentMethodDataSource @Inject constructor(
         return withContext(workContext) {
             elementsSessionManager.fetchCustomerSessionEphemeralKey().mapCatching { ephemeralKey ->
                 customerRepository.detachPaymentMethod(
-                    customerInfo = CustomerRepository.CustomerInfo(
-                        id = ephemeralKey.customerId,
+                    accessInfo = CustomerMetadata.AccessInfo.CustomerSession(
+                        customerId = ephemeralKey.customerId,
                         ephemeralKeySecret = ephemeralKey.ephemeralKey,
                         customerSessionClientSecret = ephemeralKey.customerSessionClientSecret,
                     ),
