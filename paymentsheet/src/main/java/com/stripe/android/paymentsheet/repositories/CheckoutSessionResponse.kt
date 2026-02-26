@@ -1,7 +1,10 @@
-package com.stripe.android.model
+package com.stripe.android.paymentsheet.repositories
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
+import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
 import kotlinx.parcelize.Parcelize
 
 /**

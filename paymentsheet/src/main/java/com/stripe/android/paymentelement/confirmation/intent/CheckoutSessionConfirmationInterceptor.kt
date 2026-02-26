@@ -4,7 +4,6 @@ import android.content.Context
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.ClientAttributionMetadata
-import com.stripe.android.model.ConfirmCheckoutSessionParams
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -15,6 +14,8 @@ import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadat
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition.Args
 import com.stripe.android.payments.DefaultReturnUrl
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
+import com.stripe.android.paymentsheet.repositories.ConfirmCheckoutSessionParams
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -35,6 +36,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
     @Assisted private val clientAttributionMetadata: ClientAttributionMetadata,
     context: Context,
     private val stripeRepository: StripeRepository,
+    private val checkoutSessionRepository: CheckoutSessionRepository,
     private val requestOptions: ApiRequest.Options,
 ) : IntentConfirmationInterceptor {
 
@@ -89,9 +91,9 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         paymentMethod: PaymentMethod,
         savePaymentMethod: Boolean?,
     ): ConfirmationDefinition.Action<Args> {
-        return stripeRepository.confirmCheckoutSession(
-            checkoutSessionId = checkoutSessionId,
-            confirmCheckoutSessionParams = ConfirmCheckoutSessionParams(
+        return checkoutSessionRepository.confirm(
+            id = checkoutSessionId,
+            params = ConfirmCheckoutSessionParams(
                 paymentMethodId = paymentMethod.id,
                 clientAttributionMetadata = clientAttributionMetadata,
                 returnUrl = returnUrl,

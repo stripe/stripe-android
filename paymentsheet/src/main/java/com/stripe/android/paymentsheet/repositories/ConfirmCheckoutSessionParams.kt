@@ -1,6 +1,7 @@
-package com.stripe.android.model
+package com.stripe.android.paymentsheet.repositories
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.model.ClientAttributionMetadata
 
 /**
  * Parameters for confirming a checkout session via the confirm API

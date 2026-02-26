@@ -1,9 +1,7 @@
-package com.stripe.android.model.parsers
+package com.stripe.android.paymentsheet.repositories
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.CheckoutSessionFixtures
-import com.stripe.android.model.CheckoutSessionResponse
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent

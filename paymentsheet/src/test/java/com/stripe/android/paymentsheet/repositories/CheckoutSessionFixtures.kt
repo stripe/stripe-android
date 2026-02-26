@@ -1,4 +1,4 @@
-package com.stripe.android.model
+package com.stripe.android.paymentsheet.repositories
 
 import org.json.JSONObject
 
