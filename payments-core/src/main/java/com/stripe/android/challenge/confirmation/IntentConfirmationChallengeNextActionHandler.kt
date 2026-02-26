@@ -77,7 +77,7 @@ internal class IntentConfirmationChallengeNextActionHandler @Inject constructor(
             IntentConfirmationChallengeActivityContract.Args(
                 publishableKey = publishableKeyProvider(),
                 intent = actionable,
-                productUsage = productUsageTokens,
+                productUsage = productUsageTokens
             )
         )
     }
