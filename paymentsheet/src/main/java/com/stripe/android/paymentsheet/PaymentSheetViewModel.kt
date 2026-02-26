@@ -260,6 +260,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                         ).plus(savedPaymentMethodConfirmScreen)
                         navigationHandler.resetTo(newScreens)
                     }
+                    is TapToAddNextStep.ShowSavedPaymentMethods -> {
+                        val paymentMethodMetadata = paymentMethodMetadata.value ?: return@collect
+                        navigateToInitialScreens(paymentMethodMetadata)
+                    }
                     TapToAddNextStep.Complete -> {
                         _paymentSheetResult.tryEmit(PaymentSheetResult.Completed())
                     }
@@ -383,6 +387,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
 
         resetViewState(errorMessage)
+        navigateToInitialScreens(metadata)
+    }
+
+    private fun navigateToInitialScreens(metadata: PaymentMethodMetadata) {
         navigationHandler.resetTo(
             determineInitialBackStack(
                 paymentMethodMetadata = metadata,

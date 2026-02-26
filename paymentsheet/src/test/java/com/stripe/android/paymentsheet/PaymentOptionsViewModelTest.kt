@@ -1223,7 +1223,7 @@ internal class PaymentOptionsViewModelTest {
     }
 
     @Test
-    fun `When tap to add result is Canceled with payment selection, screens are updated`() = runTest {
+    fun `When tap to add next step is confirm spm, screens are updated`() = runTest {
         val expectedPaymentSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
         val customerStateHolder = FakeCustomerStateHolder()
 
@@ -1245,6 +1245,29 @@ internal class PaymentOptionsViewModelTest {
                 )
 
                 assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.SavedPaymentMethodConfirm>()
+            }
+        }
+    }
+
+    @Test
+    fun `When tap to add next step is show spm, screens are updated`() = runTest {
+        FakeTapToAddHelper.Factory.test {
+            val viewModel = createViewModel(
+                tapToAddHelperFactory = tapToAddHelperFactory,
+            )
+
+            createCalls.awaitItem()
+
+            viewModel.navigationHandler.currentScreen.test {
+                awaitItem()
+
+                tapToAddHelperFactory.getCreatedHelper()?.emitNextStep(
+                    TapToAddNextStep.ShowSavedPaymentMethods(
+                        PaymentSelection.Saved(CARD_PAYMENT_METHOD),
+                    )
+                )
+
+                assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
             }
         }
     }

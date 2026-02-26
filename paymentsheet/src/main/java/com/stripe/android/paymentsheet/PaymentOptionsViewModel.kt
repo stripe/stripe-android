@@ -223,12 +223,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
         updateSelection(args.state.paymentSelection)
 
-        navigationHandler.resetTo(
-            determineInitialBackStack(
-                paymentMethodMetadata = args.state.paymentMethodMetadata,
-                customerStateHolder = customerStateHolder,
-            )
-        )
+        navigateToInitialScreens()
 
         viewModelScope.launch {
             tapToAddHelper.nextStep.collect { result ->
@@ -246,6 +241,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                         ).plus(savedPaymentMethodConfirmScreen)
                         navigationHandler.resetTo(newScreens)
                     }
+                    is TapToAddNextStep.ShowSavedPaymentMethods -> navigateToInitialScreens()
                     TapToAddNextStep.Complete -> {
                         errorReporter.report(
                             ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_FLOW_CONTROLLER_RECEIVED_COMPLETE_RESULT,
@@ -259,6 +255,15 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun navigateToInitialScreens() {
+        navigationHandler.resetTo(
+            determineInitialBackStack(
+                paymentMethodMetadata = args.state.paymentMethodMetadata,
+                customerStateHolder = customerStateHolder,
+            )
+        )
     }
 
     override fun registerFromActivity(
