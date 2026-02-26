@@ -1,6 +1,7 @@
 package com.stripe.android.customersheet
 
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.CheckoutSessionResponse
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SetupIntent
@@ -11,7 +12,15 @@ class FakeStripeRepository(
     private val createPaymentMethodResult: Result<PaymentMethod> = Result.failure(NotImplementedError()),
     private val retrieveSetupIntent: Result<SetupIntent> = Result.failure(NotImplementedError()),
     private val retrieveIntent: Result<StripeIntent> = Result.failure(NotImplementedError()),
+    private val initCheckoutSessionResult: Result<CheckoutSessionResponse> = Result.failure(NotImplementedError()),
 ) : AbsFakeStripeRepository() {
+
+    override suspend fun initCheckoutSession(
+        sessionId: String,
+        options: ApiRequest.Options,
+    ): Result<CheckoutSessionResponse> {
+        return initCheckoutSessionResult
+    }
 
     override suspend fun createPaymentMethod(
         paymentMethodCreateParams: PaymentMethodCreateParams,
