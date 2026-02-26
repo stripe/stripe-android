@@ -397,14 +397,13 @@ internal fun CardBrandSelector(
                 this.contentDescription = icon.title.resolve(context)
             }
             .testTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
-            .animateContentSize()
     ) {
         Row(
             modifier = Modifier.padding(10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            val tooltipState = remember { BasicTooltipState(isPersistent = false) }
+            val tooltipState = remember { BasicTooltipState(isPersistent = true) }
             val density = LocalDensity.current
             val positionProvider = DropdownMenuPositionProvider(
                 contentOffset = DpOffset(0.dp, 0.dp),
@@ -414,7 +413,7 @@ internal fun CardBrandSelector(
                 positionProvider = positionProvider,
                 tooltip = {
                     Box(Modifier.background(color = MaterialTheme.stripeColors.component)) {
-                        Text("Choose a card brand")
+                        Text(stringResource(R.string.stripe_cbc_choose_card_brand))
                     }
                 },
                 state = tooltipState,
