@@ -1,0 +1,17 @@
+#!/bin/bash
+#
+# Pre-commit hook that runs the same checks as the Bitrise "check" workflow
+# See bitrise.yml for reference
+#
+# To install this hook, run: ./scripts/install-git-hooks.sh
+
+set -e
+
+echo "Running pre-commit checks (same as Bitrise 'check' workflow)..."
+echo ""
+
+# Run the same Gradle tasks as the Bitrise check workflow
+./gradlew ktlint detekt lintRelease apiCheck verifyReleaseResources
+
+echo ""
+echo "✓ All checks passed!"
