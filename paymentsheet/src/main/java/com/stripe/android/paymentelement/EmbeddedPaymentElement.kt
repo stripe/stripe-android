@@ -16,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.checkout.Checkout
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.core.utils.StatusBarCompat
@@ -83,6 +84,25 @@ class EmbeddedPaymentElement @Inject internal constructor(
         configuration: Configuration,
     ): ConfigureResult {
         val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration)
+        return configurationCoordinator.configure(configuration, initializationMode)
+    }
+
+    /**
+     * Call this method to configure [EmbeddedPaymentElement] or when the [Checkout] values you used to
+     *  configure [EmbeddedPaymentElement] change.
+     *
+     * This ensures the appropriate payment methods are displayed, collect the right fields, etc.
+     * - Note: Upon completion, [paymentOption] may become null if it's no longer available.
+     */
+    @CheckoutSessionPreview
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun configure(
+        checkout: Checkout,
+        configuration: Configuration,
+    ): ConfigureResult {
+        val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            clientSecret = checkout.state.checkoutSessionClientSecret
+        )
         return configurationCoordinator.configure(configuration, initializationMode)
     }
 
