@@ -34,12 +34,10 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilt
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
 import com.stripe.android.lpmfoundations.paymentmethod.create
 import com.stripe.android.lpmfoundations.paymentmethod.toSaveConsentBehavior
-import com.stripe.android.model.CheckoutSessionResponse
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
@@ -54,6 +52,8 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.model.validate
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
@@ -231,7 +231,7 @@ internal interface PaymentElementLoader {
 @Singleton
 @SuppressWarnings("LargeClass")
 internal class DefaultPaymentElementLoader @Inject constructor(
-    private val stripeRepository: StripeRepository,
+    private val checkoutSessionRepository: CheckoutSessionRepository,
     private val prefsRepositoryFactory: PrefsRepository.Factory,
     private val googlePayRepositoryFactory: GooglePayRepositoryFactory,
     private val elementsSessionRepository: ElementsSessionRepository,
@@ -419,7 +419,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         if (initializationMode !is PaymentElementLoader.InitializationMode.CheckoutSession) {
             return null
         }
-        return stripeRepository.initCheckoutSession(
+        return checkoutSessionRepository.init(
             sessionId = initializationMode.id,
             options = ApiRequest.Options(
                 paymentConfiguration.get().publishableKey,

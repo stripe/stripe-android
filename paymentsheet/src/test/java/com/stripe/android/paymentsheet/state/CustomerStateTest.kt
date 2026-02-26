@@ -1,10 +1,10 @@
 package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.model.CheckoutSessionResponse
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.test.runTest
 import org.junit.Test

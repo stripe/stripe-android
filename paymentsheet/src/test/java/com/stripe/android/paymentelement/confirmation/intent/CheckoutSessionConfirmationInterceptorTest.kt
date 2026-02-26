@@ -6,9 +6,7 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.isInstanceOf
-import com.stripe.android.model.CheckoutSessionResponse
 import com.stripe.android.model.ClientAttributionMetadata
-import com.stripe.android.model.ConfirmCheckoutSessionParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentCreationFlow
 import com.stripe.android.model.PaymentMethod
@@ -21,6 +19,9 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.ConfirmCheckoutSessionParams
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.PaymentIntentFactory
 import kotlinx.coroutines.test.runTest
@@ -330,8 +331,11 @@ class CheckoutSessionConfirmationInterceptorTest {
     ) {
         val confirmCheckoutSessionCalls = Turbine<ConfirmCheckoutSessionParams>()
 
-        val repository = FakeCheckoutSessionStripeRepository(
+        val stripeRepository = FakeCreatePaymentMethodRepository(
             createPaymentMethodResult = createPaymentMethodResult,
+        )
+
+        val checkoutSessionRepository = FakeConfirmCheckoutSessionRepository(
             confirmCheckoutSessionResult = confirmCheckoutSessionResult,
             confirmCheckoutSessionCalls = confirmCheckoutSessionCalls,
         )
@@ -344,7 +348,8 @@ class CheckoutSessionConfirmationInterceptorTest {
                 paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
             ),
             context = ApplicationProvider.getApplicationContext(),
-            stripeRepository = repository,
+            stripeRepository = stripeRepository,
+            checkoutSessionRepository = checkoutSessionRepository,
             requestOptions = ApiRequest.Options(apiKey = "pk_test_123"),
         )
 
@@ -373,12 +378,9 @@ class CheckoutSessionConfirmationInterceptorTest {
         )
     }
 
-    private class FakeCheckoutSessionStripeRepository(
+    private class FakeCreatePaymentMethodRepository(
         private val createPaymentMethodResult: Result<PaymentMethod> =
             Result.failure(NotImplementedError()),
-        private val confirmCheckoutSessionResult: Result<CheckoutSessionResponse> =
-            Result.failure(NotImplementedError()),
-        private val confirmCheckoutSessionCalls: Turbine<ConfirmCheckoutSessionParams> = Turbine(),
     ) : AbsFakeStripeRepository() {
 
         override suspend fun createPaymentMethod(
@@ -387,13 +389,27 @@ class CheckoutSessionConfirmationInterceptorTest {
         ): Result<PaymentMethod> {
             return createPaymentMethodResult
         }
+    }
 
-        override suspend fun confirmCheckoutSession(
-            checkoutSessionId: String,
-            confirmCheckoutSessionParams: ConfirmCheckoutSessionParams,
+    private class FakeConfirmCheckoutSessionRepository(
+        private val confirmCheckoutSessionResult: Result<CheckoutSessionResponse> =
+            Result.failure(NotImplementedError()),
+        private val confirmCheckoutSessionCalls: Turbine<ConfirmCheckoutSessionParams> = Turbine(),
+    ) : CheckoutSessionRepository {
+
+        override suspend fun init(
+            sessionId: String,
             options: ApiRequest.Options,
         ): Result<CheckoutSessionResponse> {
-            confirmCheckoutSessionCalls.add(confirmCheckoutSessionParams)
+            error("Not expected in this test")
+        }
+
+        override suspend fun confirm(
+            id: String,
+            params: ConfirmCheckoutSessionParams,
+            options: ApiRequest.Options,
+        ): Result<CheckoutSessionResponse> {
+            confirmCheckoutSessionCalls.add(params)
             return confirmCheckoutSessionResult
         }
     }

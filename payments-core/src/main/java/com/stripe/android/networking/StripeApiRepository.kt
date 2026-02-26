@@ -48,8 +48,6 @@ import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.exception.CardException
 import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.CardMetadata
-import com.stripe.android.model.CheckoutSessionResponse
-import com.stripe.android.model.ConfirmCheckoutSessionParams
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -84,7 +82,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
 import com.stripe.android.model.parsers.CardMetadataJsonParser
-import com.stripe.android.model.parsers.CheckoutSessionResponseJsonParser
 import com.stripe.android.model.parsers.ConfirmationTokenJsonParser
 import com.stripe.android.model.parsers.ConsumerPaymentDetailsJsonParser
 import com.stripe.android.model.parsers.ConsumerPaymentDetailsShareJsonParser
@@ -116,8 +113,6 @@ import java.io.IOException
 import java.net.HttpURLConnection
 import java.security.Security
 import java.util.Locale
-import java.util.TimeZone
-import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
@@ -1545,47 +1540,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
             params = params,
             options = options,
             analyticsEvent = null,
-        )
-    }
-
-    override suspend fun initCheckoutSession(
-        sessionId: String,
-        options: ApiRequest.Options,
-    ): Result<CheckoutSessionResponse> {
-        return fetchStripeModelResult(
-            apiRequest = apiRequestFactory.createPost(
-                url = getApiUrl("payment_pages/$sessionId/init"),
-                options = options,
-                params = mapOf(
-                    "browser_locale" to Locale.getDefault().toLanguageTag(),
-                    "browser_timezone" to TimeZone.getDefault().id,
-                    "eid" to UUID.randomUUID().toString(),
-                    "redirect_type" to "embedded",
-                    "elements_session_client[is_aggregation_expected]" to "true",
-                ),
-            ),
-            jsonParser = CheckoutSessionResponseJsonParser(
-                isLiveMode = options.apiKeyIsLiveMode,
-            ),
-        )
-    }
-
-    override suspend fun confirmCheckoutSession(
-        checkoutSessionId: String,
-        confirmCheckoutSessionParams: ConfirmCheckoutSessionParams,
-        options: ApiRequest.Options,
-    ): Result<CheckoutSessionResponse> {
-        return fetchStripeModelResult(
-            apiRequest = apiRequestFactory.createPost(
-                url = getApiUrl(
-                    "payment_pages/$checkoutSessionId/confirm"
-                ),
-                options = options,
-                params = confirmCheckoutSessionParams.toParamMap(),
-            ),
-            jsonParser = CheckoutSessionResponseJsonParser(
-                isLiveMode = options.apiKeyIsLiveMode,
-            ),
         )
     }
 

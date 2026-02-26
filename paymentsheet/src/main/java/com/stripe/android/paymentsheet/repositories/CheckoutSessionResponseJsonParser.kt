@@ -1,11 +1,13 @@
-package com.stripe.android.model.parsers
+package com.stripe.android.paymentsheet.repositories
 
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArrayToList
-import com.stripe.android.model.CheckoutSessionResponse
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
+import com.stripe.android.model.parsers.ElementsSessionJsonParser
+import com.stripe.android.model.parsers.PaymentIntentJsonParser
+import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import org.json.JSONObject
 
 /**

@@ -16,7 +16,6 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.customersheet.FakeStripeRepository
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.googlepaylauncher.injection.GooglePayRepositoryFactory
@@ -39,7 +38,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentB
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.model.Address
-import com.stripe.android.model.CheckoutSessionResponse
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.LinkDisabledReason
@@ -71,8 +69,11 @@ import com.stripe.android.paymentsheet.analytics.FakeLogLinkHoldbackExperiment
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.toSavedSelection
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
+import com.stripe.android.paymentsheet.repositories.FakeCheckoutSessionRepository
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.PaymentIntentInTerminalState
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.FakeErrorReporter
@@ -2946,8 +2947,8 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         runScenario(
-            stripeRepository = FakeStripeRepository(
-                initCheckoutSessionResult = Result.success(checkoutSessionResponse),
+            checkoutSessionRepository = FakeCheckoutSessionRepository(
+                initResult = Result.success(checkoutSessionResponse),
             ),
         ) {
             val loader = createPaymentElementLoader()
@@ -4376,7 +4377,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     private fun runScenario(
-        stripeRepository: FakeStripeRepository = FakeStripeRepository(),
+        checkoutSessionRepository: CheckoutSessionRepository = FakeCheckoutSessionRepository(),
         block: suspend Scenario.() -> Unit
     ) {
         val testDispatcher = UnconfinedTestDispatcher()
@@ -4391,7 +4392,7 @@ internal class DefaultPaymentElementLoaderTest {
             testDispatcher = testDispatcher,
             eventReporter = eventReporter,
             prefsRepository = prefsRepository,
-            stripeRepository = stripeRepository,
+            checkoutSessionRepository = checkoutSessionRepository,
             paymentMethodTypeCaptor = paymentMethodTypeCaptor,
         ).apply {
             runTest {
@@ -4410,7 +4411,7 @@ internal class DefaultPaymentElementLoaderTest {
         val testDispatcher: TestDispatcher,
         val eventReporter: FakeLoadingEventReporter,
         val prefsRepository: FakePrefsRepository,
-        val stripeRepository: FakeStripeRepository,
+        val checkoutSessionRepository: CheckoutSessionRepository,
         val paymentMethodTypeCaptor: ArgumentCaptor<List<PaymentMethod.Type>>,
     )
 
@@ -4465,7 +4466,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         return DefaultPaymentElementLoader(
-            stripeRepository = stripeRepository,
+            checkoutSessionRepository = checkoutSessionRepository,
             prefsRepositoryFactory = { prefsRepository },
             googlePayRepositoryFactory = object : GooglePayRepositoryFactory {
                 override fun invoke(
