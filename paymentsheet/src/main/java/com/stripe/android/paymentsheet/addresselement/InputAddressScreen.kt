@@ -5,9 +5,9 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -46,7 +46,7 @@ internal fun InputAddressScreen(
         modifier = Modifier
             .fillMaxHeight()
             .imePadding(),
-        backgroundColor = MaterialTheme.colors.surface,
+        containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
             AddressOptionsAppBar(
                 isRootScreen = true,
@@ -65,7 +65,7 @@ internal fun InputAddressScreen(
             ) {
                 Text(
                     title,
-                    style = MaterialTheme.typography.h4,
+                    style = MaterialTheme.typography.headlineMedium,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
                 topContent()

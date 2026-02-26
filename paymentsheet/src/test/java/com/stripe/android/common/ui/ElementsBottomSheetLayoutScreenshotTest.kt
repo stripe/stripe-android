@@ -2,8 +2,7 @@ package com.stripe.android.common.ui
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.Text
+import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
@@ -16,6 +15,7 @@ import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetS
 import org.junit.Rule
 import org.junit.Test
 
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 class ElementsBottomSheetLayoutScreenshotTest {
     @get:Rule
     val paparazzi = PaparazziRule(
@@ -35,9 +35,7 @@ class ElementsBottomSheetLayoutScreenshotTest {
             )
 
             ElementsBottomSheetLayout(
-                state = rememberStripeBottomSheetState(
-                    initialValue = ModalBottomSheetValue.Expanded,
-                ),
+                state = rememberStripeBottomSheetState(),
                 onDismissed = {},
             ) {
                 Text(

@@ -17,10 +17,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.material.LinearProgressIndicator
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -72,7 +72,7 @@ internal class CustomerSheetExampleActivity : AppCompatActivity() {
                 ) {
                     Text(
                         text = "Payment Methods",
-                        color = MaterialTheme.colors.onBackground,
+                        color = MaterialTheme.colorScheme.onBackground,
                         fontSize = 18.sp,
                     )
 
@@ -88,7 +88,7 @@ internal class CustomerSheetExampleActivity : AppCompatActivity() {
                         is CustomerSheetExampleViewState.FailedToLoad -> {
                             Text(
                                 text = state.message,
-                                color = MaterialTheme.colors.onBackground,
+                                color = MaterialTheme.colorScheme.onBackground,
                             )
                         }
                         is CustomerSheetExampleViewState.Loading -> {
@@ -134,7 +134,7 @@ private fun CustomerPaymentMethods(
             Text(
                 "Payment default",
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colors.onBackground,
+                color = MaterialTheme.colorScheme.onBackground,
             )
             TextButton(
                 onClick = onUpdateDefaultPaymentMethod,
@@ -149,7 +149,7 @@ private fun CustomerPaymentMethods(
                     }
                     Text(
                         text = state.selection?.paymentOption?.label ?: "Select",
-                        color = MaterialTheme.colors.onBackground,
+                        color = MaterialTheme.colorScheme.onBackground,
                     )
                 }
             }

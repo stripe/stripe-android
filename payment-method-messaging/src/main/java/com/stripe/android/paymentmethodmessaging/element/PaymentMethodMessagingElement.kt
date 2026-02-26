@@ -3,7 +3,7 @@ package com.stripe.android.paymentmethodmessaging.element
 import android.app.Application
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import com.stripe.android.model.PaymentMethod
@@ -164,7 +164,7 @@ class PaymentMethodMessagingElement @Inject internal constructor(
 
         /**
          * The font style of PaymentMethodMessagingElement text.
-         * - Note: If null, [MaterialTheme.typography.body1] will be used.
+         * - Note: If null, [MaterialTheme.typography.bodyLarge] will be used.
          */
         fun font(font: Font) = apply {
             this.font = font.build()

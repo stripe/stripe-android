@@ -2,10 +2,10 @@ package com.stripe.android.uicore.elements.bottomsheet
 
 import android.os.Build
 import androidx.annotation.RestrictTo
-import androidx.compose.animation.core.tween
-import androidx.compose.material.ModalBottomSheetState
-import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SheetState
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
@@ -13,17 +13,17 @@ import com.stripe.android.uicore.BuildConfig
 import kotlinx.coroutines.flow.first
 import kotlin.coroutines.cancellation.CancellationException
 
+@OptIn(ExperimentalMaterial3Api::class)
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 @Composable
 fun rememberStripeBottomSheetState(
-    initialValue: ModalBottomSheetValue = ModalBottomSheetValue.Hidden,
-    confirmValueChange: (ModalBottomSheetValue) -> Boolean = { true },
+    confirmValueChange: (SheetValue) -> Boolean = { true },
 ): StripeBottomSheetState {
     val modalBottomSheetState = rememberModalBottomSheetState(
-        initialValue = initialValue,
+//        initialValue = initialValue,
         confirmValueChange = confirmValueChange,
-        skipHalfExpanded = true,
-        animationSpec = tween(),
+        skipPartiallyExpanded = true,
+//        animationSpec = tween(),
     )
 
     val keyboardHandler = rememberStripeBottomSheetKeyboardHandler()
@@ -37,8 +37,10 @@ fun rememberStripeBottomSheetState(
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY)
-class StripeBottomSheetState internal constructor(
-    val modalBottomSheetState: ModalBottomSheetState,
+@OptIn(ExperimentalMaterial3Api::class)
+class StripeBottomSheetState
+internal constructor(
+    val modalBottomSheetState: SheetState,
     private val keyboardHandler: StripeBottomSheetKeyboardHandler,
 ) {
 

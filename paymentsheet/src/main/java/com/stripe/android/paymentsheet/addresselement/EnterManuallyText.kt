@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.addresselement
 
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.LinkAnnotation
@@ -39,9 +39,9 @@ internal fun EnterManuallyText(
                 }
             }
         },
-        style = MaterialTheme.typography.body1.copy(
+        style = MaterialTheme.typography.bodyLarge.copy(
             fontSize = StripeThemeDefaults.typography.largeFontSize,
-            color = MaterialTheme.colors.primary
+            color = MaterialTheme.colorScheme.primary
         )
     )
 }

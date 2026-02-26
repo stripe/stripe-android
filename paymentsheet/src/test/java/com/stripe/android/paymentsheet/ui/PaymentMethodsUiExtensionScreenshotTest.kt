@@ -13,8 +13,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,7 +26,7 @@ import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.uicore.DefaultStripeTheme
 import com.stripe.android.uicore.elements.SectionCard
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import org.junit.Rule
 import org.junit.Test
 
@@ -60,7 +60,7 @@ class PaymentMethodsUiExtensionScreenshotTest {
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
-                    .background(backgroundColorOverride ?: MaterialTheme.stripeColors.component)
+                    .background(backgroundColorOverride ?: MaterialTheme.stripeColorScheme.component)
             ) {
                 Image(
                     painter = painterResource(iconRes),

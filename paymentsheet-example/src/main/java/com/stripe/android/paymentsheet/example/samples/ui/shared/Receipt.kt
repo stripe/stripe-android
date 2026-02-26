@@ -9,14 +9,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Card
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.LinearProgressIndicator
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material3.Card
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,7 +49,7 @@ fun Receipt(
     val scrollState = rememberScrollState()
     Surface(
         modifier = modifier,
-        color = MaterialTheme.colors.background,
+        color = MaterialTheme.colorScheme.background,
     ) {
         Column(
             Modifier
@@ -73,7 +73,7 @@ fun Receipt(
             }
             Text(
                 stringResource(R.string.cart_title),
-                style = MaterialTheme.typography.h5,
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(vertical = 12.dp)
             )
@@ -101,7 +101,7 @@ fun Receipt(
             ) {
                 ReceiptRow(stringResource(R.string.subtotal), cartState.formattedSubtotal)
                 ReceiptRow(stringResource(R.string.sales_tax), cartState.formattedTax)
-                Divider(
+                HorizontalDivider(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = PADDING)
@@ -194,14 +194,14 @@ fun ReceiptRow(
             text = description,
             modifier = Modifier.fillMaxWidth(ROW_START),
             fontSize = MAIN_FONT_SIZE,
-            color = MaterialTheme.colors.onSurface,
+            color = MaterialTheme.colorScheme.onSurface,
         )
         Text(
             text = priceString,
             modifier = Modifier.fillMaxWidth(),
             style = TextStyle.Default.copy(textAlign = TextAlign.End),
             fontSize = MAIN_FONT_SIZE,
-            color = MaterialTheme.colors.onSurface,
+            color = MaterialTheme.colorScheme.onSurface,
         )
     }
 }

@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet.verticalmode
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Text
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
@@ -89,13 +89,13 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
             .colorsLight(
                 FlatWithCheckmark.Colors(
                     separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
-                    checkmarkColor = StripeThemeDefaults.colorsLight.materialColors.error.toArgb()
+                    checkmarkColor = StripeThemeDefaults.colorsLight.materialColorScheme.error.toArgb()
                 )
             )
             .colorsDark(
                 FlatWithCheckmark.Colors(
                     separatorColor = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
-                    checkmarkColor = StripeThemeDefaults.colorsDark.materialColors.error.toArgb()
+                    checkmarkColor = StripeThemeDefaults.colorsDark.materialColorScheme.error.toArgb()
                 )
             )
             .build()

@@ -1,10 +1,10 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -56,11 +56,11 @@ fun SimpleDialogElementUI(
                     Text(
                         text = confirmText,
                         color = if (destructive) {
-                            MaterialTheme.colors.error
+                            MaterialTheme.colorScheme.error
                         } else {
                             Color.Unspecified
                         },
-                        style = MaterialTheme.typography.body1
+                        style = MaterialTheme.typography.bodyLarge
                     )
                 }
             },
@@ -73,7 +73,7 @@ fun SimpleDialogElementUI(
                 ) {
                     Text(
                         text = dismissText,
-                        style = MaterialTheme.typography.body1
+                        style = MaterialTheme.typography.bodyLarge
                     )
                 }
             }

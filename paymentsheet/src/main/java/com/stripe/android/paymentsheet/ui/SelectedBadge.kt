@@ -4,8 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,7 +20,7 @@ import com.stripe.android.uicore.shouldUseDarkDynamicColor
 internal fun SelectedBadge(
     modifier: Modifier = Modifier,
 ) {
-    val iconColor = MaterialTheme.colors.primary
+    val iconColor = MaterialTheme.colorScheme.primary
     val checkSymbolColor = if (iconColor.shouldUseDarkDynamicColor()) {
         Color.Black
     } else {
@@ -31,7 +31,7 @@ internal fun SelectedBadge(
         modifier = modifier
             .clip(CircleShape)
             .size(24.dp)
-            .background(MaterialTheme.colors.primary)
+            .background(MaterialTheme.colorScheme.primary)
     ) {
         Icon(
             painter = painterResource(R.drawable.stripe_ic_selected_symbol),

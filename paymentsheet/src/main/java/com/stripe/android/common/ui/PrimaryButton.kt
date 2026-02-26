@@ -10,13 +10,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.Icon
-import androidx.compose.material.LocalContentAlpha
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
@@ -60,7 +59,7 @@ internal fun PrimaryButton(
     val textStyle = StripeTheme.primaryButtonStyle.getComposeTextStyle()
 
     CompositionLocalProvider(
-        LocalContentAlpha provides if (isEnabled) ContentAlpha.high else ContentAlpha.disabled
+        LocalContentColor provides if (isEnabled) onBackground else onBackground.copy(alpha = 0.38f)
     ) {
         Box(
             modifier = modifier.fillMaxWidth(),
@@ -77,13 +76,13 @@ internal fun PrimaryButton(
                 shape = shape,
                 border = borderStroke,
                 colors = ButtonDefaults.buttonColors(
-                    backgroundColor = background,
-                    disabledBackgroundColor = background
+                    containerColor = background,
+                    disabledContainerColor = background
                 )
             ) {
                 PrimaryButtonContent(
                     text = label,
-                    color = onBackground.copy(alpha = LocalContentAlpha.current),
+                    color = LocalContentColor.current,
                     style = textStyle,
                     isEnabled = isEnabled,
                     isLoading = isLoading,
@@ -126,7 +125,7 @@ private fun PrimaryButtonContent(
                     .padding(end = 8.dp)
             ) {
                 LoadingIndicator(
-                    color = MaterialTheme.colors.onPrimary,
+                    color = MaterialTheme.colorScheme.onPrimary,
                     modifier = Modifier.align(Alignment.CenterEnd)
                 )
             }
@@ -142,7 +141,7 @@ private fun PrimaryButtonContent(
                     ),
                     tint = onBackground.copy(
                         alpha = if (isEnabled) {
-                            LocalContentAlpha.current
+                            LocalContentColor.current.alpha
                         } else {
                             0.5f
                         }

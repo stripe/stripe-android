@@ -22,8 +22,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.BadgedBox
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -120,7 +120,7 @@ internal fun SavedPaymentMethodTab(
                 LpmSelectorText(
                     icon = labelIcon,
                     text = labelText,
-                    textColor = MaterialTheme.colors.onSurface,
+                    textColor = MaterialTheme.colorScheme.onSurface,
                     isEnabled = isEnabled,
                     shouldTintIcon = shouldTintLabelIcon,
                     modifier = Modifier
@@ -203,7 +203,7 @@ private fun ModifyBadge(
     onPressed: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val shouldUseDarkColor = MaterialTheme.colors.background.shouldUseDarkDynamicColor()
+    val shouldUseDarkColor = MaterialTheme.colorScheme.background.shouldUseDarkDynamicColor()
 
     val backgroundColor = if (shouldUseDarkColor) {
         editIconBackgroundColorLight

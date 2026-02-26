@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.stripe.android.paymentsheet.addresselement
 
 import android.content.Intent
@@ -8,8 +10,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Surface
+import androidx.compose.material3.Surface
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -29,7 +31,6 @@ import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetS
 import com.stripe.android.uicore.utils.fadeOut
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterialApi::class)
 internal class AddressElementActivity : ComponentActivity() {
 
     @VisibleForTesting

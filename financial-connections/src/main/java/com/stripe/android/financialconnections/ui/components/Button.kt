@@ -16,16 +16,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonColors
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.ButtonDefaults.buttonColors
-import androidx.compose.material.ButtonElevation
-import androidx.compose.material.LocalRippleConfiguration
-import androidx.compose.material.ProvideTextStyle
-import androidx.compose.material.RippleConfiguration
-import androidx.compose.material.RippleDefaults
-import androidx.compose.material.Text
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ButtonDefaults.buttonColors
+import androidx.compose.material3.ButtonElevation
+import androidx.compose.material3.LocalRippleConfiguration
+import androidx.compose.material3.ProvideTextStyle
+import androidx.compose.material3.RippleConfiguration
+import androidx.compose.material3.RippleDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -148,10 +148,7 @@ private fun Type.rippleConfiguration() = RippleConfiguration(
         Primary -> Neutral0
         Secondary -> colors.textDefault
     },
-    rippleAlpha = RippleDefaults.rippleAlpha(
-        contentColor = buttonColors().contentColor(enabled = true).value,
-        lightTheme = true
-    )
+    rippleAlpha = RippleDefaults.RippleAlpha
 )
 
 internal object FinancialConnectionsButton {
@@ -168,31 +165,37 @@ internal object FinancialConnectionsButton {
         data object Primary : Type() {
             @Composable
             override fun buttonColors(): ButtonColors = buttonColors(
-                backgroundColor = colors.primary,
+                containerColor = colors.primary,
                 contentColor = colors.primaryAccent,
-                disabledBackgroundColor = colors.primary,
+                disabledContainerColor = colors.primary,
                 disabledContentColor = colors.primaryAccent.copy(alpha = 0.4f)
             )
 
             override fun rippleColor(): Color = Brand400
 
             @Composable
-            override fun elevation(): ButtonElevation = ButtonDefaults.elevation()
+            override fun elevation(): ButtonElevation = ButtonDefaults.buttonElevation(
+                defaultElevation = 2.dp,
+                pressedElevation = 8.dp,
+                disabledElevation = 0.dp,
+                hoveredElevation = 4.dp,
+                focusedElevation = 4.dp
+            )
         }
 
         data object Secondary : Type() {
             @Composable
             override fun buttonColors(): ButtonColors = buttonColors(
-                backgroundColor = colors.backgroundSecondary,
+                containerColor = colors.backgroundSecondary,
                 contentColor = colors.textDefault,
-                disabledBackgroundColor = colors.backgroundSecondary,
+                disabledContainerColor = colors.backgroundSecondary,
                 disabledContentColor = colors.textDefault.copy(alpha = 0.4f)
             )
 
             override fun rippleColor(): Color = Neutral50
 
             @Composable
-            override fun elevation(): ButtonElevation = ButtonDefaults.elevation(
+            override fun elevation(): ButtonElevation = ButtonDefaults.buttonElevation(
                 defaultElevation = 0.dp,
                 pressedElevation = 0.dp,
                 disabledElevation = 0.dp,

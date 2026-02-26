@@ -19,8 +19,8 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -65,7 +65,7 @@ import com.stripe.android.uicore.elements.SectionValidationMessage
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.strings.resolve
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
@@ -329,7 +329,7 @@ private fun AddCardTab(
     onAddCardPressed: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val iconRes = if (MaterialTheme.stripeColors.component.shouldUseDarkDynamicColor()) {
+    val iconRes = if (MaterialTheme.stripeColorScheme.component.shouldUseDarkDynamicColor()) {
         R.drawable.stripe_ic_paymentsheet_add_dark
     } else {
         R.drawable.stripe_ic_paymentsheet_add_light
@@ -385,7 +385,7 @@ private fun LinkTab(
         shouldShowDefaultBadge = false,
         isSelected = isSelected,
         isEnabled = isEnabled,
-        iconRes = getLinkIcon(showNightIcon = !MaterialTheme.stripeColors.component.shouldUseDarkDynamicColor()),
+        iconRes = getLinkIcon(showNightIcon = !MaterialTheme.stripeColorScheme.component.shouldUseDarkDynamicColor()),
         iconTint = null,
         labelText = stringResource(StripeR.string.stripe_link),
         description = stringResource(StripeR.string.stripe_link),
@@ -427,7 +427,7 @@ private fun SavedPaymentMethodTab(
             isEnabled = isEnabled,
             isClickable = !isEditing,
             iconRes = paymentMethod.paymentMethod.getSavedPaymentMethodIcon(
-                showNightIcon = !MaterialTheme.stripeColors.component.shouldUseDarkDynamicColor()
+                showNightIcon = !MaterialTheme.stripeColorScheme.component.shouldUseDarkDynamicColor()
             ),
             labelIcon = labelIcon,
             shouldTintLabelIcon = paymentMethod.paymentMethod.shouldTintLabelIcon,
@@ -490,8 +490,8 @@ internal fun CvcRecollectionField(
         ) {
             Text(
                 text = stringResource(R.string.stripe_paymentsheet_confirm_your_cvc),
-                style = MaterialTheme.typography.body1,
-                color = MaterialTheme.stripeColors.subtitle
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.stripeColorScheme.subtitle
             )
             SectionCard(
                 Modifier

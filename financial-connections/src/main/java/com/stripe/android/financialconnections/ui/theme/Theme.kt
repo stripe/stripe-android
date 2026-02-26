@@ -7,12 +7,14 @@ import android.view.Window
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
-import androidx.compose.material.Colors
-import androidx.compose.material.LocalRippleConfiguration
-import androidx.compose.material.LocalTextStyle
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.RippleConfiguration
-import androidx.compose.material.RippleDefaults
+import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalRippleConfiguration
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RippleConfiguration
+import androidx.compose.material3.RippleDefaults
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
@@ -239,14 +241,8 @@ internal val TextSelectionColors: TextSelectionColors
 private val FinancialConnectionsRippleConfiguration: RippleConfiguration
     @Composable
     get() = RippleConfiguration(
-        color = RippleDefaults.rippleColor(
-            contentColor = FinancialConnectionsTheme.colors.textAction,
-            lightTheme = MaterialTheme.colors.isLight,
-        ),
-        rippleAlpha = RippleDefaults.rippleAlpha(
-            contentColor = FinancialConnectionsTheme.colors.textAction,
-            lightTheme = MaterialTheme.colors.isLight,
-        )
+        color = FinancialConnectionsTheme.colors.textAction,
+        rippleAlpha = RippleDefaults.RippleAlpha
     )
 
 @Composable
@@ -274,9 +270,10 @@ internal fun FinancialConnectionsTheme(
         }
 
         MaterialTheme(
-            colors = debugColors(),
+            colorScheme = debugColorScheme(),
             content = {
                 CompositionLocalProvider(
+                    LocalContentColor provides FinancialConnectionsTheme.colors.textDefault,
                     LocalTextSelectionColors provides TextSelectionColors,
                     LocalTextStyle provides LocalTextStyle.current.toCompat(useDefaultLineHeight = true),
                     LocalRippleConfiguration provides FinancialConnectionsRippleConfiguration
@@ -332,23 +329,46 @@ private fun TextStyle.toCompat(useDefaultLineHeight: Boolean = false): TextStyle
 }
 
 /**
- * A Material [Colors] implementation which sets all colors to [debugColor] to discourage usage of
- * [MaterialTheme.colors] in preference to [FinancialConnectionsColors].
+ * A Material [ColorScheme] implementation which sets all colors to [debugColor] to discourage usage of
+ * [MaterialTheme.colorScheme] in preference to [FinancialConnectionsColors].
  */
-private fun debugColors(
+private fun debugColorScheme(
     debugColor: Color = Color.Magenta
-) = Colors(
+) = lightColorScheme(
     primary = debugColor,
-    primaryVariant = debugColor,
-    secondary = debugColor,
-    secondaryVariant = debugColor,
-    background = debugColor,
-    surface = debugColor,
-    error = debugColor,
     onPrimary = debugColor,
+    primaryContainer = debugColor,
+    onPrimaryContainer = debugColor,
+    inversePrimary = debugColor,
+    secondary = debugColor,
     onSecondary = debugColor,
+    secondaryContainer = debugColor,
+    onSecondaryContainer = debugColor,
+    tertiary = debugColor,
+    onTertiary = debugColor,
+    tertiaryContainer = debugColor,
+    onTertiaryContainer = debugColor,
+    background = debugColor,
     onBackground = debugColor,
+    surface = debugColor,
     onSurface = debugColor,
+    surfaceVariant = debugColor,
+    onSurfaceVariant = debugColor,
+    surfaceTint = debugColor,
+    inverseSurface = debugColor,
+    inverseOnSurface = debugColor,
+    error = debugColor,
     onError = debugColor,
-    isLight = true
+    errorContainer = debugColor,
+    onErrorContainer = debugColor,
+    outline = debugColor,
+    outlineVariant = debugColor,
+    scrim = debugColor,
+    surfaceBright = debugColor,
+    surfaceDim = debugColor,
+    surfaceContainer = debugColor,
+    surfaceContainerHigh = debugColor,
+    surfaceContainerHighest = debugColor,
+    surfaceContainerLow = debugColor,
+    surfaceContainerLowest = debugColor,
 )

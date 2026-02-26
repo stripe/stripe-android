@@ -1,8 +1,8 @@
 package com.stripe.android.screenshottesting
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
@@ -119,7 +119,7 @@ class PaparazziRule(
 
                                     if (includeStripeTheme) {
                                         StripeTheme {
-                                            Surface(color = MaterialTheme.colors.surface) {
+                                            Surface(color = MaterialTheme.colorScheme.surface) {
                                                 boxContent()
                                             }
                                         }

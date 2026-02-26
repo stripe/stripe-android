@@ -13,8 +13,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -139,7 +139,7 @@ private fun MultiPartner(
     analyticsOnClick: () -> Unit
 ) {
     val style = appearance.font?.toTextStyle()
-        ?: MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Normal)
+        ?: MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Normal)
 
     val context = LocalContext.current
     val keyboardController = rememberKeyboardController()
@@ -239,7 +239,7 @@ private fun TextWithLogo(
         StripeImageLoader(context.applicationContext)
     }
     val style = appearance.font?.toTextStyle()
-        ?: MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Normal)
+        ?: MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Normal)
 
     Text(
         text = label.maybeAddPeriod().buildInlineLogoAnnotatedString(
@@ -327,7 +327,7 @@ private fun LegalDisclosure(
     Text(
         text = legalDisclosure.message,
         color = StripeThemeDefaults.colors(theme == PaymentMethodMessagingElement.Appearance.Theme.DARK).subtitle,
-        style = MaterialTheme.typography.caption
+        style = MaterialTheme.typography.bodySmall
     )
 }
 
@@ -340,7 +340,7 @@ private fun getTextColor(appearance: PaymentMethodMessagingElement.Appearance.St
 private fun getLinkTextColor(appearance: PaymentMethodMessagingElement.Appearance.State): Int {
     return appearance.colors.linkTextColor ?: StripeTheme.getColors(
         appearance.theme == PaymentMethodMessagingElement.Appearance.Theme.DARK
-    ).materialColors.primary.toArgb()
+    ).materialColorScheme.primary.toArgb()
 }
 
 private const val DEFAULT_TEXT_SIZE = 16F

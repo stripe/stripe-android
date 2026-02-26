@@ -20,15 +20,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.LocalContentColor
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
@@ -363,8 +363,8 @@ internal class SharedPaymentTokenPlaygroundActivity : AppCompatActivity() {
                         Color(primaryButtonStyle.getBorderStrokeColor(context))
                     ),
                     colors = ButtonDefaults.buttonColors(
-                        backgroundColor = Color(primaryButtonStyle.getBackgroundColor(context)),
-                        disabledBackgroundColor = Color(primaryButtonStyle.getBackgroundColor(context)),
+                        containerColor = Color(primaryButtonStyle.getBackgroundColor(context)),
+                        disabledContainerColor = Color(primaryButtonStyle.getBackgroundColor(context)),
                     ),
                 ) {
                     Text(
@@ -404,15 +404,15 @@ internal class SharedPaymentTokenPlaygroundActivity : AppCompatActivity() {
                     ) {
                         Text(
                             text = option.labels.label,
-                            style = MaterialTheme.typography.h5,
-                            color = MaterialTheme.colors.onBackground,
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.onBackground,
                         )
 
                         option.labels.sublabel?.let {
                             Text(
                                 text = it,
-                                style = MaterialTheme.typography.body1,
-                                color = MaterialTheme.colors.onBackground,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onBackground,
                             )
                         }
                     }

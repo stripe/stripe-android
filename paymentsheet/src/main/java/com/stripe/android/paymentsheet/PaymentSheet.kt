@@ -2404,42 +2404,42 @@ class PaymentSheet internal constructor(
                  * Creates a [Builder] prepopulated with default light mode values.
                  */
                 fun light(): Builder = Builder(
-                    primary = StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
-                    surface = StripeThemeDefaults.colorsLight.materialColors.surface.toArgb(),
+                    primary = StripeThemeDefaults.colorsLight.materialColorScheme.primary.toArgb(),
+                    surface = StripeThemeDefaults.colorsLight.materialColorScheme.surface.toArgb(),
                     component = StripeThemeDefaults.colorsLight.component.toArgb(),
                     componentBorder = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
                     componentDivider = StripeThemeDefaults.colorsLight.componentDivider.toArgb(),
                     onComponent = StripeThemeDefaults.colorsLight.onComponent.toArgb(),
                     subtitle = StripeThemeDefaults.colorsLight.subtitle.toArgb(),
                     placeholderText = StripeThemeDefaults.colorsLight.placeholderText.toArgb(),
-                    onSurface = StripeThemeDefaults.colorsLight.materialColors.onSurface.toArgb(),
+                    onSurface = StripeThemeDefaults.colorsLight.materialColorScheme.onSurface.toArgb(),
                     appBarIcon = StripeThemeDefaults.colorsLight.appBarIcon.toArgb(),
-                    error = StripeThemeDefaults.colorsLight.materialColors.error.toArgb()
+                    error = StripeThemeDefaults.colorsLight.materialColorScheme.error.toArgb()
                 )
 
                 /**
                  * Creates a [Builder] prepopulated with default dark mode values.
                  */
                 fun dark(): Builder = Builder(
-                    primary = StripeThemeDefaults.colorsDark.materialColors.primary.toArgb(),
-                    surface = StripeThemeDefaults.colorsDark.materialColors.surface.toArgb(),
+                    primary = StripeThemeDefaults.colorsDark.materialColorScheme.primary.toArgb(),
+                    surface = StripeThemeDefaults.colorsDark.materialColorScheme.surface.toArgb(),
                     component = StripeThemeDefaults.colorsDark.component.toArgb(),
                     componentBorder = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
                     componentDivider = StripeThemeDefaults.colorsDark.componentDivider.toArgb(),
                     onComponent = StripeThemeDefaults.colorsDark.onComponent.toArgb(),
                     subtitle = StripeThemeDefaults.colorsDark.subtitle.toArgb(),
                     placeholderText = StripeThemeDefaults.colorsDark.placeholderText.toArgb(),
-                    onSurface = StripeThemeDefaults.colorsDark.materialColors.onSurface.toArgb(),
+                    onSurface = StripeThemeDefaults.colorsDark.materialColorScheme.onSurface.toArgb(),
                     appBarIcon = StripeThemeDefaults.colorsDark.appBarIcon.toArgb(),
-                    error = StripeThemeDefaults.colorsDark.materialColors.error.toArgb()
+                    error = StripeThemeDefaults.colorsDark.materialColorScheme.error.toArgb()
                 )
             }
         }
 
         companion object {
             internal fun configureDefaultLight(
-                primary: Color = StripeThemeDefaults.colorsLight.materialColors.primary,
-                surface: Color = StripeThemeDefaults.colorsLight.materialColors.surface,
+                primary: Color = StripeThemeDefaults.colorsLight.materialColorScheme.primary,
+                surface: Color = StripeThemeDefaults.colorsLight.materialColorScheme.surface,
             ) = Colors(
                 primary = primary,
                 surface = surface,
@@ -2449,16 +2449,16 @@ class PaymentSheet internal constructor(
                 onComponent = StripeThemeDefaults.colorsLight.onComponent,
                 subtitle = StripeThemeDefaults.colorsLight.subtitle,
                 placeholderText = StripeThemeDefaults.colorsLight.placeholderText,
-                onSurface = StripeThemeDefaults.colorsLight.materialColors.onSurface,
+                onSurface = StripeThemeDefaults.colorsLight.materialColorScheme.onSurface,
                 appBarIcon = StripeThemeDefaults.colorsLight.appBarIcon,
-                error = StripeThemeDefaults.colorsLight.materialColors.error
+                error = StripeThemeDefaults.colorsLight.materialColorScheme.error
             )
 
             val defaultLight = configureDefaultLight()
 
             internal fun configureDefaultDark(
-                primary: Color = StripeThemeDefaults.colorsDark.materialColors.primary,
-                surface: Color = StripeThemeDefaults.colorsDark.materialColors.surface,
+                primary: Color = StripeThemeDefaults.colorsDark.materialColorScheme.primary,
+                surface: Color = StripeThemeDefaults.colorsDark.materialColorScheme.surface,
             ) = Colors(
                 primary = primary,
                 surface = surface,
@@ -2468,9 +2468,9 @@ class PaymentSheet internal constructor(
                 onComponent = StripeThemeDefaults.colorsDark.onComponent,
                 subtitle = StripeThemeDefaults.colorsDark.subtitle,
                 placeholderText = StripeThemeDefaults.colorsDark.placeholderText,
-                onSurface = StripeThemeDefaults.colorsDark.materialColors.onSurface,
+                onSurface = StripeThemeDefaults.colorsDark.materialColorScheme.onSurface,
                 appBarIcon = StripeThemeDefaults.colorsDark.appBarIcon,
-                error = StripeThemeDefaults.colorsDark.materialColors.error
+                error = StripeThemeDefaults.colorsDark.materialColorScheme.error
             )
 
             val defaultDark = configureDefaultDark()

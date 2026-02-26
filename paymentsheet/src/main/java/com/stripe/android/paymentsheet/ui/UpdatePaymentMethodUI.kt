@@ -6,9 +6,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
-import androidx.compose.material.Card
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,7 +38,7 @@ import com.stripe.android.uicore.elements.CheckboxElementUI
 import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.strings.resolve
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.paymentsheet.R as PaymentSheetR
@@ -134,8 +135,8 @@ private fun DetailsCannotBeChangedText(
     )?.let {
         Text(
             text = it.resolve(context),
-            style = MaterialTheme.typography.subtitle2,
-            color = MaterialTheme.stripeColors.subtitle,
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.stripeColorScheme.subtitle,
             fontWeight = FontWeight.Normal,
             modifier = Modifier
                 .padding(top = 8.dp)
@@ -261,7 +262,7 @@ private fun BankAccountTextField(
 ) {
     Card(
         border = MaterialTheme.getBorderStroke(false),
-        elevation = 0.dp,
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = modifier,
     ) {
         CommonTextField(
@@ -300,7 +301,7 @@ private fun DeletePaymentMethodUi(interactor: UpdatePaymentMethodInteractor) {
 
     RemoveButton(
         title = R.string.stripe_remove.resolvableString,
-        borderColor = MaterialTheme.colors.error,
+        borderColor = MaterialTheme.colorScheme.error,
         idle = status == UpdatePaymentMethodInteractor.Status.Idle,
         removing = status == UpdatePaymentMethodInteractor.Status.Removing,
         onRemove = { openDialogValue.value = true },

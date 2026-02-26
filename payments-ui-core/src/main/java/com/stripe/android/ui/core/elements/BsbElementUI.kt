@@ -2,8 +2,8 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -11,7 +11,7 @@ import androidx.compose.ui.text.input.ImeAction
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.Section
 import com.stripe.android.uicore.elements.TextField
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
@@ -44,7 +44,7 @@ fun BsbElementUI(
         bankName?.let {
             Text(
                 it,
-                color = MaterialTheme.stripeColors.subtitle
+                color = MaterialTheme.stripeColorScheme.subtitle
             )
         }
     }

@@ -18,7 +18,7 @@ internal fun StripeThemeForConnections(
             componentBorder = colors.borderNeutral,
             placeholderText = colors.textSubdued,
             textCursor = colors.textDefault,
-            materialColors = stripeDefaultColors.materialColors.copy(
+            materialColorScheme = stripeDefaultColors.materialColorScheme.copy(
                 primary = colors.border,
                 error = colors.textCritical,
             )

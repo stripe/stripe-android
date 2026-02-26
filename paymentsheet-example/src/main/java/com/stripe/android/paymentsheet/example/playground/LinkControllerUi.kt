@@ -28,16 +28,16 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.Checkbox
-import androidx.compose.material.Divider
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
+import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -127,11 +127,11 @@ internal fun LinkControllerUi(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            val color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+            val color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             Text(
                 modifier = Modifier.weight(1f),
                 text = if (showRegistrationForm) "Hide registration form" else "Show registration form",
-                style = MaterialTheme.typography.subtitle2,
+                style = MaterialTheme.typography.titleSmall,
                 color = color,
             )
             Icon(
@@ -309,7 +309,7 @@ private fun StatusBox(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(
-                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.05f),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
                     shape = RoundedCornerShape(8.dp)
                 )
                 .padding(16.dp),
@@ -323,14 +323,14 @@ private fun StatusBox(
                     Text(
                         modifier = Modifier.padding(end = 8.dp),
                         text = "$label:",
-                        style = MaterialTheme.typography.body2,
-                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )
                     Text(
                         modifier = Modifier.padding(start = 8.dp),
                         text = value,
-                        style = MaterialTheme.typography.body2,
-                        color = MaterialTheme.colors.onSurface
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
@@ -381,11 +381,11 @@ private fun ConfirmButton(
         modifier = modifier
             .clip(CircleShape)
             .clickable(onClick = onClick, enabled = enabled)
-            .background(color = MaterialTheme.colors.primary)
+            .background(color = MaterialTheme.colorScheme.primary)
             .padding(horizontal = 16.dp, vertical = 16.dp)
             .fillMaxWidth(),
-        style = MaterialTheme.typography.h6,
-        color = MaterialTheme.colors.onPrimary,
+        style = MaterialTheme.typography.titleLarge,
+        color = MaterialTheme.colorScheme.onPrimary,
         textAlign = TextAlign.Center,
         text = "Confirm",
     )
@@ -397,8 +397,9 @@ private fun PaymentMethodButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // TODO: Fix this
     val (bgColor, contentColor) =
-        if (MaterialTheme.colors.isLight) {
+        if (true) {
             Color.LightGray to Color.Black
         } else {
             Color.DarkGray to Color.White
@@ -438,14 +439,14 @@ private fun PaymentMethodButton(
                         Text(
                             modifier = Modifier,
                             text = preview.label,
-                            style = MaterialTheme.typography.h6,
+                            style = MaterialTheme.typography.titleLarge,
                             color = contentColor,
                         )
                         preview.sublabel?.let { sublabel ->
                             Text(
                                 modifier = Modifier.padding(top = 2.dp),
                                 text = sublabel,
-                                style = MaterialTheme.typography.body2,
+                                style = MaterialTheme.typography.bodyMedium,
                                 color = contentColor.copy(alpha = 0.6f),
                             )
                         }
@@ -465,7 +466,7 @@ private fun PaymentMethodButton(
                         Text(
                             modifier = Modifier,
                             text = "Choose payment method",
-                            style = MaterialTheme.typography.h6,
+                            style = MaterialTheme.typography.titleLarge,
                             color = contentColor,
                         )
                     }
@@ -546,7 +547,7 @@ private fun LabeledCheckbox(
             modifier = Modifier.padding(start = 8.dp),
             text = label,
             maxLines = 1,
-            style = MaterialTheme.typography.body2,
+            style = MaterialTheme.typography.bodyMedium,
             overflow = TextOverflow.Ellipsis
         )
     }
@@ -633,8 +634,8 @@ private fun PaymentMethodTypeSelector(
         Column {
             Text(
                 text = "Payment Method Type",
-                style = MaterialTheme.typography.caption,
-                color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 modifier = Modifier.padding(bottom = 4.dp)
             )
             OutlinedButton(
@@ -662,22 +663,24 @@ private fun PaymentMethodTypeSelector(
             onDismissRequest = { isExpanded = false }
         ) {
             DropdownMenuItem(
+                text = {
+                    Text("Any")
+                },
                 onClick = {
                     onSelectionChange(null)
                     isExpanded = false
                 }
-            ) {
-                Text("Any")
-            }
+            )
             LinkController.PaymentMethodType.entries.forEach { type ->
                 DropdownMenuItem(
+                    text = {
+                        Text(type.name)
+                    },
                     onClick = {
                         onSelectionChange(type)
                         isExpanded = false
                     }
-                ) {
-                    Text(type.name)
-                }
+                )
             }
         }
     }

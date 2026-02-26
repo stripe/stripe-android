@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Surface
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -46,7 +46,7 @@ internal fun BottomSheetScaffold(
     Column(modifier = modifier) {
         // We need to set a z-index to make sure that the Surface's elevation shadow is rendered
         // correctly above the screen content.
-        Surface(elevation = elevation, modifier = Modifier.zIndex(1f)) {
+        Surface(shadowElevation = elevation, modifier = Modifier.zIndex(1f)) {
             topBar()
         }
 

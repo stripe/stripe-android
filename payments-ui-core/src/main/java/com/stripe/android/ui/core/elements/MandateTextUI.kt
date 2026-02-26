@@ -1,7 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -15,7 +15,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.uicore.text.EmbeddableImage
 import com.stripe.android.uicore.text.Html
 
@@ -40,12 +40,12 @@ fun Mandate(
     imageLoader: Map<String, EmbeddableImage> = emptyMap(),
 ) {
     mandateText?.let {
-        val caption = MaterialTheme.typography.caption
+        val caption = MaterialTheme.typography.bodySmall
         val lineHeight = caption.calculateLineHeight(spacing = 3)
 
         Html(
             html = mandateText,
-            color = MaterialTheme.stripeColors.subtitle,
+            color = MaterialTheme.stripeColorScheme.subtitle,
             style = caption.copy(
                 textAlign = textAlign,
                 lineHeight = lineHeight,
@@ -56,7 +56,7 @@ fun Mandate(
                 .semantics(mergeDescendants = true) {} // Makes it a separate accessible item.
                 .testTag(MANDATE_TEST_TAG),
             urlSpanStyle = SpanStyle(
-                color = MaterialTheme.colors.primary
+                color = MaterialTheme.colorScheme.primary
             ),
             imageAlign = imageAlign,
             imageLoader = imageLoader,

@@ -17,10 +17,10 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.material.Divider
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -46,7 +46,7 @@ import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldSection
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.uicore.text.annotatedStringResource
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.flow.collectLatest
@@ -106,7 +106,7 @@ internal fun AutocompleteScreenUI(
         viewModel = viewModel,
         attributionDrawable = attributionDrawable,
         isRootScreen = false,
-        backgroundColor = MaterialTheme.colors.surface,
+        backgroundColor = MaterialTheme.colorScheme.surface,
         appBar = { isRoot, onBack ->
             AddressOptionsAppBar(isRootScreen = isRoot) {
                 onBack()
@@ -211,7 +211,8 @@ internal fun AutocompleteScreenUI(
             appBar(isRootScreen, onBackPressed)
         },
         bottomBar = {
-            val background = if (MaterialTheme.stripeColors.materialColors.surface.shouldUseDarkDynamicColor()) {
+            val surface = MaterialTheme.stripeColorScheme.materialColorScheme.surface
+            val background = if (surface.shouldUseDarkDynamicColor()) {
                 Color.Black.copy(alpha = 0.07f)
             } else {
                 Color.White.copy(alpha = 0.07f)
@@ -231,7 +232,7 @@ internal fun AutocompleteScreenUI(
                 }
             }
         },
-        backgroundColor = backgroundColor,
+        containerColor = backgroundColor,
     ) { paddingValues ->
         val focusRequester = remember { FocusRequester() }
 
@@ -278,7 +279,7 @@ internal fun AutocompleteScreenUI(
                 } else if (query.isNotBlank()) {
                     predictions?.let {
                         if (it.isNotEmpty()) {
-                            Divider(
+                            HorizontalDivider(
                                 modifier = Modifier.padding(vertical = 8.dp)
                             )
                             Column(
@@ -310,16 +311,16 @@ internal fun AutocompleteScreenUI(
                                         }
                                         Text(
                                             text = annotatedStringResource(text = text),
-                                            color = MaterialTheme.stripeColors.onComponent,
-                                            style = MaterialTheme.typography.body1
+                                            color = MaterialTheme.stripeColorScheme.onComponent,
+                                            style = MaterialTheme.typography.bodyLarge
                                         )
                                         Text(
                                             text = secondaryText.toString(),
-                                            color = MaterialTheme.stripeColors.onComponent,
-                                            style = MaterialTheme.typography.body1
+                                            color = MaterialTheme.stripeColorScheme.onComponent,
+                                            style = MaterialTheme.typography.bodyLarge
                                         )
                                     }
-                                    Divider()
+                                    HorizontalDivider()
                                 }
                             }
                         }

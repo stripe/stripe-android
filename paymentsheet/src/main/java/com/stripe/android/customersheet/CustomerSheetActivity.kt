@@ -7,8 +7,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SheetValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.core.view.WindowCompat
@@ -45,7 +45,7 @@ internal class CustomerSheetActivity : AppCompatActivity() {
         factoryProducer = { viewModelFactoryProducer() },
     )
 
-    @OptIn(ExperimentalMaterialApi::class)
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -69,7 +69,7 @@ internal class CustomerSheetActivity : AppCompatActivity() {
             StripeTheme {
                 val bottomSheetState = rememberStripeBottomSheetState(
                     confirmValueChange = {
-                        if (it == ModalBottomSheetValue.Hidden) {
+                        if (it == SheetValue.Hidden) {
                             viewModel.bottomSheetConfirmStateChange()
                         } else {
                             true

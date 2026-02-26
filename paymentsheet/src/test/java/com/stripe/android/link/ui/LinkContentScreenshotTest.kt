@@ -3,7 +3,7 @@ package com.stripe.android.link.ui
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Text
+import androidx.compose.material3.Text
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import org.junit.Rule
 import org.junit.Test
 
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 internal class LinkContentScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(

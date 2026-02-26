@@ -1,10 +1,10 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.bacs
 
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,15 +23,15 @@ internal fun BacsMandateButton(type: BacsMandateButtonType, label: String, onCli
         BacsMandateButtonType.Secondary -> {
             // Use the same text style as the primary button but a different color.
             val textStyle = StripeTheme.primaryButtonStyle.getComposeTextStyle().copy(
-                color = MaterialTheme.colors.primary
+                color = MaterialTheme.colorScheme.primary
             )
 
             TextButton(
                 modifier = Modifier.fillMaxWidth(),
                 shape = MaterialTheme.shapes.small,
                 colors = ButtonDefaults.buttonColors(
-                    backgroundColor = Color.Transparent,
-                    contentColor = MaterialTheme.colors.primary
+                    containerColor = Color.Transparent,
+                    contentColor = MaterialTheme.colorScheme.primary
                 ),
                 onClick = onClick
             ) {

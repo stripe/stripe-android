@@ -33,14 +33,14 @@ import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.Card
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.LocalContentAlpha
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.ProvideTextStyle
-import androidx.compose.material.ripple
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProvideTextStyle
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
@@ -59,7 +59,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupPositionProvider
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.uicore.stripeShapes
 import kotlin.math.max
 import kotlin.math.min
@@ -128,7 +128,7 @@ internal fun DropdownMenuContent(
     Card(
         border = BorderStroke(
             MaterialTheme.stripeShapes.borderStrokeWidth.dp,
-            MaterialTheme.stripeColors.componentBorder
+            MaterialTheme.stripeColorScheme.componentBorder
         ),
         modifier = Modifier.graphicsLayer {
             scaleX = scale
@@ -136,7 +136,9 @@ internal fun DropdownMenuContent(
             this.alpha = alpha
             transformOrigin = transformOriginState.value
         },
-        elevation = MenuElevation
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = MenuElevation
+        )
     ) {
         val lazyListState = rememberLazyListState(
             initialFirstVisibleItemIndex = initialFirstVisibleItemIndex
@@ -180,9 +182,13 @@ internal fun DropdownMenuItemContent(
         verticalAlignment = Alignment.CenterVertically
     ) {
         val typography = MaterialTheme.typography
-        ProvideTextStyle(typography.subtitle1) {
-            val contentAlpha = if (enabled) ContentAlpha.high else ContentAlpha.disabled
-            CompositionLocalProvider(LocalContentAlpha provides contentAlpha) {
+        ProvideTextStyle(typography.titleMedium) {
+            val contentColor = if (enabled) {
+                MaterialTheme.colorScheme.onSurface
+            } else {
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+            }
+            CompositionLocalProvider(LocalContentColor provides contentColor) {
                 content()
             }
         }

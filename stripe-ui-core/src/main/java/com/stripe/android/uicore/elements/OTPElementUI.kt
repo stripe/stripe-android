@@ -15,11 +15,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -59,7 +57,7 @@ import androidx.compose.ui.unit.sp
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getBorderStrokeWidth
 import com.stripe.android.uicore.moveFocusSafely
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
@@ -103,9 +101,9 @@ fun OTPElementUI(
     middleSpacing: Dp = 20.dp,
     otpInputPlaceholder: String = "●",
     colors: OTPElementColors = OTPElementColors(
-        selectedBorder = MaterialTheme.colors.primary,
-        unselectedBorder = MaterialTheme.stripeColors.componentBorder,
-        placeholder = MaterialTheme.stripeColors.placeholderText,
+        selectedBorder = MaterialTheme.colorScheme.primary,
+        unselectedBorder = MaterialTheme.stripeColorScheme.componentBorder,
+        placeholder = MaterialTheme.stripeColorScheme.placeholderText,
         background = Color.Transparent,
         selectedBackground = Color.Transparent
     ),
@@ -129,10 +127,10 @@ fun OTPElementUI(
 
             SectionCard(
                 modifier = Modifier
-                    .alpha(if (enabled) 1f else ContentAlpha.disabled)
+                    .alpha(if (enabled) 1f else .38f)
                     .weight(1f),
                 shape = boxShape,
-                backgroundColor = MaterialTheme.stripeColors.component,
+                backgroundColor = MaterialTheme.stripeColorScheme.component,
                 border = BorderStroke(
                     width = MaterialTheme.getBorderStrokeWidth(
                         isSelected = isSelected,
@@ -242,7 +240,7 @@ private fun OTPInputBox(
         modifier = modifier,
         enabled = enabled,
         textStyle = textStyle,
-        cursorBrush = SolidColor(MaterialTheme.stripeColors.textCursor),
+        cursorBrush = SolidColor(MaterialTheme.stripeColorScheme.textCursor),
         keyboardOptions = KeyboardOptions(
             keyboardType = element.controller.keyboardType
         ),
@@ -256,7 +254,6 @@ private fun OTPInputBox(
 }
 
 @Composable
-@OptIn(ExperimentalMaterialApi::class)
 private fun OTPInputDecorationBox(
     value: String,
     isSelected: Boolean,
@@ -264,7 +261,7 @@ private fun OTPInputDecorationBox(
     enabled: Boolean,
     colors: OTPElementColors
 ) = @Composable { innerTextField: @Composable () -> Unit ->
-    TextFieldDefaults.TextFieldDecorationBox(
+    TextFieldDefaults.DecorationBox(
         value = value,
         visualTransformation = VisualTransformation.None,
         innerTextField = innerTextField,
@@ -278,15 +275,20 @@ private fun OTPInputDecorationBox(
         singleLine = true,
         enabled = enabled,
         interactionSource = remember { MutableInteractionSource() },
-        colors = TextFieldDefaults.textFieldColors(
-            textColor = MaterialTheme.stripeColors.onComponent,
-            backgroundColor = if (isSelected) colors.selectedBackground else colors.background,
-            cursorColor = MaterialTheme.stripeColors.textCursor,
+        colors = TextFieldDefaults.colors(
+            focusedTextColor = MaterialTheme.stripeColorScheme.onComponent,
+            unfocusedTextColor = MaterialTheme.stripeColorScheme.onComponent,
+            disabledTextColor = MaterialTheme.stripeColorScheme.onComponent,
+            focusedContainerColor = if (isSelected) colors.selectedBackground else colors.background,
+            unfocusedContainerColor = colors.background,
+            disabledContainerColor = colors.background,
+            cursorColor = MaterialTheme.stripeColorScheme.textCursor,
             focusedIndicatorColor = colors.background,
             disabledIndicatorColor = colors.background,
             unfocusedIndicatorColor = colors.background,
-            placeholderColor = colors.placeholder,
-            disabledPlaceholderColor = colors.placeholder
+            focusedPlaceholderColor = colors.placeholder,
+            unfocusedPlaceholderColor = colors.placeholder,
+            disabledPlaceholderColor = colors.placeholder,
         ),
         // TextField has a default padding, here we are specifying 0.dp padding
         contentPadding = PaddingValues()
@@ -300,7 +302,7 @@ internal object OTPElementUI {
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.SemiBold,
         fontSize = 24.sp,
-        color = MaterialTheme.stripeColors.onComponent,
+        color = MaterialTheme.stripeColorScheme.onComponent,
         textAlign = TextAlign.Center
     )
 }

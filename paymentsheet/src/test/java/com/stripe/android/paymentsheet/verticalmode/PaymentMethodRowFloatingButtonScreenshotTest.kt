@@ -8,9 +8,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -217,7 +217,7 @@ internal class PaymentMethodRowFloatingButtonScreenshotTest {
             Icon(
                 painter = painterResource(com.stripe.android.paymentsheet.R.drawable.stripe_ic_chevron_right),
                 contentDescription = null,
-                tint = MaterialTheme.colors.primary,
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(start = 4.dp, top = 2.dp)
                     .height(iconHeight).width(iconWidth)
                     .defaultMinSize(minWidth = iconWidth, minHeight = iconHeight)

@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.ui.components
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,13 +39,16 @@ internal fun FinancialConnectionsModalBottomSheetLayout(
 ) {
     val layoutInfo = rememberFinancialConnectionsBottomSheetLayoutInfo()
 
-    ModalBottomSheetLayout(
-        bottomSheetNavigator = bottomSheetNavigator,
-        sheetBackgroundColor = layoutInfo.sheetBackgroundColor,
-        sheetShape = layoutInfo.sheetShape,
-        scrimColor = layoutInfo.scrimColor,
-        content = content,
-    )
+    Box {
+        content()
+        ModalBottomSheetLayout(
+            bottomSheetNavigator = bottomSheetNavigator,
+            sheetBackgroundColor = layoutInfo.sheetBackgroundColor,
+            sheetShape = layoutInfo.sheetShape,
+            scrimColor = layoutInfo.scrimColor,
+            content = content,
+        )
+    }
 }
 
 @Composable

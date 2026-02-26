@@ -1,6 +1,6 @@
 package com.stripe.android.common.taptoadd.ui
 
-import androidx.compose.material.darkColors
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -59,9 +59,9 @@ private object TapToAddThemeDefaults {
         textCursor = Color.White,
         placeholderText = Color(0xFF95959C),
         appBarIcon = Color.White,
-        materialColors = darkColors(
+        materialColorScheme = darkColorScheme(
             primary = Color.White,
-            primaryVariant = Color(0xFF7A7A7A),
+            secondary = Color(0xFF7A7A7A),
             background = Color.Black,
             onBackground = Color(0xFFE3E3E3),
             surface = Color.Black,

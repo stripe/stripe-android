@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,7 +28,7 @@ internal fun BottomSheetLoadingIndicator(
 @Composable
 internal fun LoadingIndicator(
     modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colors.onSurface,
+    color: Color = MaterialTheme.colorScheme.onSurface,
 ) {
     val indicatorSize = dimensionResource(R.dimen.stripe_paymentsheet_loading_indicator_size)
     val strokeWidth = dimensionResource(R.dimen.stripe_paymentsheet_loading_indicator_stroke_width)

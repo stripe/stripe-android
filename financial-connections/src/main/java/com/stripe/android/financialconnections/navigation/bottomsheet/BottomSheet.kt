@@ -16,11 +16,13 @@
 
 package com.stripe.android.financialconnections.navigation.bottomsheet
 
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.ModalBottomSheetDefaults
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.contentColorFor
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.ModalBottomSheetDefaults
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,27 +34,30 @@ import androidx.compose.ui.unit.Dp
  *
  * @see [ModalBottomSheetLayout]
  */
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ModalBottomSheetLayout(
     bottomSheetNavigator: BottomSheetNavigator,
     modifier: Modifier = Modifier,
     sheetShape: Shape = MaterialTheme.shapes.large,
-    sheetElevation: Dp = ModalBottomSheetDefaults.Elevation,
-    sheetBackgroundColor: Color = MaterialTheme.colors.surface,
+    sheetElevation: Dp = BottomSheetDefaults.Elevation,
+    sheetBackgroundColor: Color = MaterialTheme.colorScheme.surface,
     sheetContentColor: Color = contentColorFor(sheetBackgroundColor),
-    scrimColor: Color = ModalBottomSheetDefaults.scrimColor,
+    scrimColor: Color = BottomSheetDefaults.ScrimColor,
     content: @Composable () -> Unit
 ) {
-    ModalBottomSheetLayout(
+    ModalBottomSheet(
         sheetState = bottomSheetNavigator.sheetState,
-        sheetContent = bottomSheetNavigator.sheetContent,
         modifier = modifier,
-        sheetShape = sheetShape,
-        sheetElevation = sheetElevation,
-        sheetBackgroundColor = sheetBackgroundColor,
-        sheetContentColor = sheetContentColor,
+        shape = sheetShape,
+        tonalElevation = sheetElevation,
+        containerColor = sheetBackgroundColor,
+        contentColor = sheetContentColor,
         scrimColor = scrimColor,
-        content = content
-    )
+        onDismissRequest = {}
+    ) {
+        Column {
+            bottomSheetNavigator.sheetContent(this)
+        }
+    }
 }

@@ -1,7 +1,8 @@
 package com.stripe.android.financialconnections.ui.components
 
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.material.Scaffold
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
@@ -11,9 +12,10 @@ internal fun FinancialConnectionsScaffold(
     content: @Composable (PaddingValues) -> Unit
 ) {
     Scaffold(
-        backgroundColor = FinancialConnectionsTheme.colors.background,
+        containerColor = FinancialConnectionsTheme.colors.background,
         contentColor = FinancialConnectionsTheme.colors.textDefault,
         topBar = topBar,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         content = content
     )
 }

@@ -4,7 +4,8 @@ import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
@@ -25,6 +26,7 @@ const val BottomSheetContentTestTag = "BottomSheetContentTestTag"
  * inform your view model about this change.
  * @param sheetContent The content to render in the sheet
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 @Composable
 fun StripeBottomSheetLayout(
@@ -45,21 +47,21 @@ fun StripeBottomSheetLayout(
         }
     }
 
-    ModalBottomSheetLayout(
+    ModalBottomSheet(
         modifier = modifier
             .statusBarsPadding()
             .imePadding(),
         scrimColor = layoutInfo.scrimColor,
-        sheetBackgroundColor = layoutInfo.sheetBackgroundColor,
-        sheetElevation = 0.dp,
+        containerColor = layoutInfo.sheetBackgroundColor,
+        tonalElevation = 0.dp,
         sheetGesturesEnabled = false,
-        sheetShape = layoutInfo.sheetShape,
+        shape = layoutInfo.sheetShape,
         sheetState = state.modalBottomSheetState,
-        sheetContent = {
-            Box(modifier = Modifier.testTag(BottomSheetContentTestTag)) {
-                sheetContent()
-            }
-        },
-        content = {},
-    )
+        dragHandle = null,
+        onDismissRequest = {}
+    ) {
+        Box(modifier = Modifier.testTag(BottomSheetContentTestTag)) {
+            sheetContent()
+        }
+    }
 }

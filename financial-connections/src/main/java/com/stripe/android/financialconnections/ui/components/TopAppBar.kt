@@ -9,11 +9,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.AppBarDefaults
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarColors
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.State
@@ -63,7 +65,8 @@ internal fun FinancialConnectionsTopAppBar(
     onCloseClick: () -> Unit
 ) {
     val elevation = animateDpAsState(
-        targetValue = if (state.isElevated) AppBarDefaults.TopAppBarElevation else 0.dp,
+        // Top App bar has no elevation in material3
+        targetValue = 0.dp,
         label = "TopAppBarElevation",
     )
 
@@ -77,6 +80,7 @@ internal fun FinancialConnectionsTopAppBar(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun FinancialConnectionsTopAppBar(
     hideStripeLogo: Boolean,
@@ -104,17 +108,15 @@ private fun FinancialConnectionsTopAppBar(
                 theme = theme,
             )
         },
-        elevation = 0.dp,
-        navigationIcon = if (canShowBackIcon && allowBackNavigation) {
-            {
+//        elevation = 0.dp,
+        navigationIcon = {
+            if (canShowBackIcon && allowBackNavigation) {
                 BackButton(
                     scope = scope,
                     keyboardController = keyboardController,
                     localBackPressed = localBackPressed
                 )
             }
-        } else {
-            null
         },
         actions = {
             CloseButton(
@@ -123,8 +125,14 @@ private fun FinancialConnectionsTopAppBar(
                 onCloseClick = onCloseClick
             )
         },
-        backgroundColor = FinancialConnectionsTheme.colors.background,
-        contentColor = FinancialConnectionsTheme.colors.textAction,
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = FinancialConnectionsTheme.colors.background,
+            scrolledContainerColor = FinancialConnectionsTheme.colors.background,
+            navigationIconContentColor = FinancialConnectionsTheme.colors.textAction,
+            titleContentColor = FinancialConnectionsTheme.colors.textAction,
+            actionIconContentColor = FinancialConnectionsTheme.colors.textAction,
+            subtitleContentColor = FinancialConnectionsTheme.colors.textAction,
+        ),
         modifier = modifier.graphicsLayer {
             shadowElevation = elevation.value.toPx()
         }
