@@ -16,9 +16,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -346,11 +345,11 @@ internal fun ResendCodeButton(
         contentAlignment = Alignment.Companion.Center
     ) {
         val textAlpha = if (isProcessing) {
-            ContentAlpha.disabled
+            0.38f
         } else if (isSendingNewCode) {
             0f
         } else {
-            ContentAlpha.high
+            1f
         }
 
         Text(

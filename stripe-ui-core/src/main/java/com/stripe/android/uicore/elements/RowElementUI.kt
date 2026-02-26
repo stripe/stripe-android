@@ -7,15 +7,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material.Divider
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.dp
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.uicore.stripeShapes
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -52,7 +52,7 @@ fun RowElementUI(
                         modifier = Modifier
                             .height(dividerHeight.value)
                             .width(MaterialTheme.stripeShapes.borderStrokeWidth.dp),
-                        color = MaterialTheme.stripeColors.componentDivider
+                        color = MaterialTheme.stripeColorScheme.componentDivider
                     )
                 }
             }

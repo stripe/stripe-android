@@ -6,8 +6,9 @@ import android.content.res.Resources
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Colors
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
@@ -95,7 +96,7 @@ internal fun DefaultLinkTheme(
         LocalStripeImageLoader provides stripeImageLoader,
     ) {
         MaterialTheme(
-            colors = debugColors(),
+            colorScheme = debugColors(),
             content = content
         )
     }
@@ -137,16 +138,14 @@ private fun Context.withUiMode(uiMode: Int, inspectionMode: Boolean): Context {
 }
 
 /**
- * A Material [Colors] implementation which sets all colors to [debugColor] to discourage usage of
- * [MaterialTheme.colors] in preference to [FinancialConnectionsColors].
+ * A Material [ColorScheme] implementation which sets all colors to [debugColor] to discourage usage of
+ * [MaterialTheme.colorScheme] in preference to [LinkColors].
  */
 private fun debugColors(
     debugColor: Color = Color.Magenta
-) = Colors(
+) = lightColorScheme(
     primary = debugColor,
-    primaryVariant = debugColor,
     secondary = debugColor,
-    secondaryVariant = debugColor,
     background = debugColor,
     surface = debugColor,
     error = debugColor,
@@ -155,5 +154,4 @@ private fun debugColors(
     onBackground = debugColor,
     onSurface = debugColor,
     onError = debugColor,
-    isLight = true
 )

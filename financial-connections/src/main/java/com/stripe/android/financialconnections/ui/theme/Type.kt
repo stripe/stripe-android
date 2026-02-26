@@ -2,8 +2,8 @@ package com.stripe.android.financialconnections.ui.theme
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material.Divider
-import androidx.compose.material.Text
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
@@ -52,7 +52,7 @@ internal fun TypePreview() {
                 text = "Heading Medium",
                 style = typography.headingMedium
             )
-            Divider()
+            HorizontalDivider()
             Text(
                 text = "Body Medium Emphasized",
                 style = typography.bodyMediumEmphasized
@@ -65,7 +65,7 @@ internal fun TypePreview() {
                 text = "Body Small",
                 style = typography.bodySmall
             )
-            Divider()
+            HorizontalDivider()
             Text(
                 text = "Label Large Emphasized",
                 style = typography.labelLargeEmphasized

@@ -304,31 +304,31 @@ internal object AppearanceStore {
 
             companion object {
                 fun light() = Colors(
-                    primary = StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
-                    surface = StripeThemeDefaults.colorsLight.materialColors.surface.toArgb(),
+                    primary = StripeThemeDefaults.colorsLight.materialColorScheme.primary.toArgb(),
+                    surface = StripeThemeDefaults.colorsLight.materialColorScheme.surface.toArgb(),
                     component = StripeThemeDefaults.colorsLight.component.toArgb(),
                     componentBorder = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
                     componentDivider = StripeThemeDefaults.colorsLight.componentDivider.toArgb(),
                     onComponent = StripeThemeDefaults.colorsLight.onComponent.toArgb(),
-                    onSurface = StripeThemeDefaults.colorsLight.materialColors.onSurface.toArgb(),
+                    onSurface = StripeThemeDefaults.colorsLight.materialColorScheme.onSurface.toArgb(),
                     subtitle = StripeThemeDefaults.colorsLight.subtitle.toArgb(),
                     placeholderText = StripeThemeDefaults.colorsLight.placeholderText.toArgb(),
                     appBarIcon = StripeThemeDefaults.colorsLight.appBarIcon.toArgb(),
-                    error = StripeThemeDefaults.colorsLight.materialColors.error.toArgb(),
+                    error = StripeThemeDefaults.colorsLight.materialColorScheme.error.toArgb(),
                 )
 
                 fun dark() = Colors(
-                    primary = StripeThemeDefaults.colorsDark.materialColors.primary.toArgb(),
-                    surface = StripeThemeDefaults.colorsDark.materialColors.surface.toArgb(),
+                    primary = StripeThemeDefaults.colorsDark.materialColorScheme.primary.toArgb(),
+                    surface = StripeThemeDefaults.colorsDark.materialColorScheme.surface.toArgb(),
                     component = StripeThemeDefaults.colorsDark.component.toArgb(),
                     componentBorder = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
                     componentDivider = StripeThemeDefaults.colorsDark.componentDivider.toArgb(),
                     onComponent = StripeThemeDefaults.colorsDark.onComponent.toArgb(),
-                    onSurface = StripeThemeDefaults.colorsDark.materialColors.onSurface.toArgb(),
+                    onSurface = StripeThemeDefaults.colorsDark.materialColorScheme.onSurface.toArgb(),
                     subtitle = StripeThemeDefaults.colorsDark.subtitle.toArgb(),
                     placeholderText = StripeThemeDefaults.colorsDark.placeholderText.toArgb(),
                     appBarIcon = StripeThemeDefaults.colorsDark.appBarIcon.toArgb(),
-                    error = StripeThemeDefaults.colorsDark.materialColors.error.toArgb(),
+                    error = StripeThemeDefaults.colorsDark.materialColorScheme.error.toArgb(),
                 )
             }
         }

@@ -18,13 +18,13 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Colors
-import androidx.compose.material.LocalTextStyle
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Shapes
-import androidx.compose.material.Typography
-import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
+import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Shapes
+import androidx.compose.material3.Typography
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
@@ -58,7 +58,7 @@ data class StripeColors(
     val textCursor: Color,
     val placeholderText: Color,
     val appBarIcon: Color,
-    val materialColors: Colors
+    val materialColorScheme: ColorScheme
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -209,7 +209,7 @@ object StripeThemeDefaults {
         textCursor = Color.Black,
         placeholderText = Color(0x993C3C43),
         appBarIcon = Color(0x99000000),
-        materialColors = lightColors(
+        materialColorScheme = lightColorScheme(
             primary = Color(0xFF007AFF),
             surface = Color.White,
             onSurface = Color.Black,
@@ -226,7 +226,7 @@ object StripeThemeDefaults {
         textCursor = Color.White,
         placeholderText = Color(0x61FFFFFF),
         appBarIcon = Color.White,
-        materialColors = darkColors(
+        materialColorScheme = darkColorScheme(
             primary = Color(0xFF0074D4),
             surface = Color(0xFF2E2E2E),
             onSurface = Color.White,
@@ -256,14 +256,14 @@ object StripeThemeDefaults {
 
     val primaryButtonStyle = PrimaryButtonStyle(
         colorsLight = PrimaryButtonColors(
-            background = colors(false).materialColors.primary,
+            background = colors(false).materialColorScheme.primary,
             onBackground = Color.White,
             border = Color.Transparent,
             successBackground = PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR,
             onSuccessBackground = Color.White
         ),
         colorsDark = PrimaryButtonColors(
-            background = colors(true).materialColors.primary,
+            background = colors(true).materialColorScheme.primary,
             onBackground = Color.White,
             border = Color.Transparent,
             successBackground = PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR,
@@ -289,22 +289,22 @@ object StripeThemeDefaults {
 
     val checkmarkColorsLight = EmbeddedCheckmarkColors(
         separatorColor = colorsLight.componentBorder,
-        checkmarkColor = colorsLight.materialColors.primary
+        checkmarkColor = colorsLight.materialColorScheme.primary
     )
 
     val checkmarkColorsDark = EmbeddedCheckmarkColors(
         separatorColor = EMBEDDED_SEPARATOR_COLOR_DARK,
-        checkmarkColor = colorsDark.materialColors.primary
+        checkmarkColor = colorsDark.materialColorScheme.primary
     )
 
     val radioColorsLight = EmbeddedRadioColors(
-        selectedColor = colorsLight.materialColors.primary,
+        selectedColor = colorsLight.materialColorScheme.primary,
         unselectedColor = colorsLight.componentBorder,
         separatorColor = colorsLight.componentBorder
     )
 
     val radioColorsDark = EmbeddedRadioColors(
-        selectedColor = colorsDark.materialColors.primary,
+        selectedColor = colorsDark.materialColorScheme.primary,
         unselectedColor = EMBEDDED_SEPARATOR_COLOR_DARK,
         separatorColor = EMBEDDED_SEPARATOR_COLOR_DARK
     )
@@ -384,61 +384,61 @@ fun StripeTypography.toComposeTypography(): Typography {
     val globalFontFamily = fontFamily?.let { FontFamily(Font(it)) }
     val defaultTextStyle = TextStyle.Default.toCompat()
 
-    // h4 is our largest headline. It is used for the most important labels in our UI
+    // headlineMedium (formerly h4) is our largest headline. It is used for the most important labels in our UI
     // ex: "Select your payment method" in Payment Sheet.
-    val h4 = defaultTextStyle.copy(
+    val headlineMedium = defaultTextStyle.copy(
         fontFamily = h4?.fontFamily ?: globalFontFamily ?: FontFamily.Default,
         fontSize = h4?.fontSize.elseIfNullOrUnspecified(unit = xLargeFontSize * fontSizeMultiplier),
         fontWeight = h4?.fontWeight ?: FontWeight(fontWeightBold),
         letterSpacing = h4?.letterSpacing.elseIfNullOrUnspecified(defaultTextStyle.letterSpacing)
     )
 
-    // h5 is our medium headline label.
+    // headlineSmall (formerly h5) is our medium headline label.
     // ex: "Pay $50.99" in Payment Sheet's buy button.
-    val h5 = defaultTextStyle.copy(
+    val headlineSmall = defaultTextStyle.copy(
         fontFamily = globalFontFamily ?: h5FontFamily ?: FontFamily.Default,
         fontSize = (largeFontSize * fontSizeMultiplier),
         fontWeight = FontWeight(fontWeightMedium),
         letterSpacing = (-0.32).sp
     )
 
-    // h6 is our smallest headline label.
+    // titleLarge (formerly h6) is our smallest headline label.
     // ex: Section labels in Payment Sheet
-    val h6 = defaultTextStyle.copy(
+    val titleLarge = defaultTextStyle.copy(
         fontFamily = globalFontFamily ?: h6FontFamily ?: FontFamily.Default,
         fontSize = (smallFontSize * fontSizeMultiplier),
         fontWeight = FontWeight(fontWeightMedium),
         letterSpacing = (-0.15).sp
     )
 
-    // body1 is our larger body text. Used for the bulk of our elements and forms.
+    // bodyLarge (formerly body1) is our larger body text. Used for the bulk of our elements and forms.
     // ex: the text used in Payment Sheet's text form elements.
-    val body1 = defaultTextStyle.copy(
+    val bodyLarge = defaultTextStyle.copy(
         fontFamily = globalFontFamily ?: body1FontFamily ?: FontFamily.Default,
         fontSize = (mediumFontSize * fontSizeMultiplier),
         fontWeight = FontWeight(fontWeightNormal)
     )
 
-    // subtitle1 is our only subtitle size. Used for labeling fields.
+    // titleMedium (formerly subtitle1) is our only subtitle size. Used for labeling fields.
     // ex: the placeholder texts that appear when you type in Payment Sheet's forms.
-    val subtitle1 = defaultTextStyle.copy(
+    val titleMedium = defaultTextStyle.copy(
         fontFamily = globalFontFamily ?: subtitle1FontFamily ?: FontFamily.Default,
         fontSize = (mediumFontSize * fontSizeMultiplier),
         fontWeight = FontWeight(fontWeightNormal),
         letterSpacing = (-0.15).sp
     )
 
-    // caption is used to label images in payment sheet.
+    // labelSmall (formerly caption) is used to label images in payment sheet.
     // ex: the labels under our payment method selectors in Payment Sheet.
-    val caption = defaultTextStyle.copy(
+    val labelSmall = defaultTextStyle.copy(
         fontFamily = globalFontFamily ?: captionFontFamily ?: FontFamily.Default,
         fontSize = (xSmallFontSize * fontSizeMultiplier),
         fontWeight = FontWeight(fontWeightMedium)
     )
 
-    // body2 is our smaller body text. Used for less important fields that are not required to
+    // bodySmall (formerly body2) is our smaller body text. Used for less important fields that are not required to
     // read. Ex: our mandate texts in Payment Sheet.
-    val body2 = defaultTextStyle.copy(
+    val bodySmall = defaultTextStyle.copy(
         fontFamily = globalFontFamily ?: body2FontFamily ?: FontFamily.Default,
         fontSize = (xxSmallFontSize * fontSizeMultiplier),
         fontWeight = FontWeight(fontWeightNormal),
@@ -448,19 +448,21 @@ fun StripeTypography.toComposeTypography(): Typography {
     val materialTypography = MaterialTheme.typography
 
     return materialTypography.copy(
-        body1 = body1,
-        body2 = body2,
-        h1 = materialTypography.h1.toCompat(),
-        h2 = materialTypography.h2.toCompat(),
-        h3 = materialTypography.h3.toCompat(),
-        h4 = h4,
-        h5 = h5,
-        h6 = h6,
-        subtitle1 = subtitle1,
-        subtitle2 = materialTypography.subtitle2.toCompat(),
-        button = materialTypography.button.toCompat(),
-        caption = caption,
-        overline = materialTypography.overline.toCompat()
+        displayLarge = materialTypography.displayLarge.toCompat(),
+        displayMedium = materialTypography.displayMedium.toCompat(),
+        displaySmall = materialTypography.displaySmall.toCompat(),
+        headlineLarge = materialTypography.headlineLarge.toCompat(),
+        headlineMedium = headlineMedium,
+        headlineSmall = headlineSmall,
+        titleLarge = titleLarge,
+        titleMedium = titleMedium,
+        titleSmall = materialTypography.titleSmall.toCompat(),
+        bodyLarge = bodyLarge,
+        bodyMedium = materialTypography.bodyMedium.toCompat(),
+        bodySmall = bodySmall,
+        labelLarge = materialTypography.labelLarge.toCompat(),
+        labelMedium = materialTypography.labelMedium.toCompat(),
+        labelSmall = labelSmall,
     )
 }
 
@@ -528,7 +530,7 @@ fun StripeTheme(
         LocalInstrumentationTest provides isInstrumentationTest,
     ) {
         MaterialTheme(
-            colors = colors.materialColors,
+            colorScheme = colors.materialColorScheme,
             typography = typography.toComposeTypography(),
             shapes = shapes.toComposeShapes().material,
         ) {
@@ -560,7 +562,7 @@ fun DefaultStripeTheme(
         LocalTypography provides typography
     ) {
         MaterialTheme(
-            colors = colors.materialColors,
+            colorScheme = colors.materialColorScheme,
             typography = typography.toComposeTypography(),
             shapes = shapes.toComposeShapes().material,
             content = content
@@ -569,7 +571,7 @@ fun DefaultStripeTheme(
 }
 
 @Suppress("UnusedReceiverParameter")
-val MaterialTheme.stripeColors: StripeColors
+val MaterialTheme.stripeColorScheme: StripeColors
     @Composable
     @ReadOnlyComposable
     get() = LocalColors.current
@@ -599,7 +601,7 @@ fun MaterialTheme.getBorderStrokeWidth(
 @ReadOnlyComposable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun MaterialTheme.getBorderStrokeColor(isSelected: Boolean) =
-    if (isSelected) stripeColors.materialColors.primary else stripeColors.componentBorder
+    if (isSelected) stripeColorScheme.materialColorScheme.primary else stripeColorScheme.componentBorder
 
 @Composable
 @ReadOnlyComposable
@@ -747,7 +749,7 @@ fun PrimaryButtonStyle.getBorderStrokeColor(context: Context): Int {
 @ReadOnlyComposable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun PrimaryButtonStyle.getComposeTextStyle(): TextStyle {
-    val baseStyle = MaterialTheme.typography.h5.copy(
+    val baseStyle = MaterialTheme.typography.headlineSmall.copy(
         color = (if (isSystemInDarkTheme()) colorsDark else colorsLight).onBackground,
         fontSize = typography.fontSize
     )

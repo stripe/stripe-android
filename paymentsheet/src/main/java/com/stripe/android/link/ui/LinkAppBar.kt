@@ -14,10 +14,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.AppBarDefaults
-import androidx.compose.material.Icon
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -47,7 +47,7 @@ internal fun LinkAppBar(
     onBackPressed: () -> Unit,
 ) {
     val elevation = animateDpAsState(
-        targetValue = if (state.isElevated) AppBarDefaults.TopAppBarElevation else 0.dp,
+        targetValue = if (state.isElevated) TopAppBarDefaults.LargeAppBarExpandedHeight else 0.dp,
         label = "LinkAppBarElevation",
     )
 

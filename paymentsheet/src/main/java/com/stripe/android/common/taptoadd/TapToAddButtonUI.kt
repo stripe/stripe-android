@@ -7,8 +7,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -36,14 +36,14 @@ internal fun TapToButtonUI(
         Image(
             painter = painterResource(R.drawable.stripe_ic_nfc_tap),
             contentDescription = stringResource(R.string.stripe_tap_to_add_card_button_label),
-            colorFilter = ColorFilter.tint(MaterialTheme.colors.primary),
+            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
             modifier = Modifier.width(18.dp).height(18.dp),
         )
         Text(
             text = stringResource(R.string.stripe_tap_to_add_card_button_label),
             modifier = Modifier.padding(start = 4.dp),
-            color = MaterialTheme.colors.primary,
-            style = MaterialTheme.typography.h6,
+            color = MaterialTheme.colorScheme.primary,
+            style = MaterialTheme.typography.titleLarge,
         )
     }
 }

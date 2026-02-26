@@ -7,9 +7,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -95,22 +95,22 @@ private fun Title() {
             append(" ")
             appendInlineContent(CHECKMARK_ID)
         },
-        color = MaterialTheme.colors.onSurface,
-        style = MaterialTheme.typography.h4.copy(
+        color = MaterialTheme.colorScheme.onSurface,
+        style = MaterialTheme.typography.headlineSmall.copy(
             fontWeight = FontWeight.Normal,
         ),
         inlineContent = mapOf(
             CHECKMARK_ID to InlineTextContent(
                 placeholder = Placeholder(
-                    width = MaterialTheme.typography.h5.fontSize,
-                    height = MaterialTheme.typography.h5.fontSize,
+                    width = MaterialTheme.typography.titleLarge.fontSize,
+                    height = MaterialTheme.typography.titleLarge.fontSize,
                     placeholderVerticalAlign = PlaceholderVerticalAlign.Center
                 )
             ) {
                 Icon(
                     painter = painterResource(com.stripe.android.uicore.R.drawable.stripe_ic_checkmark),
                     contentDescription = null,
-                    tint = MaterialTheme.colors.onSurface
+                    tint = MaterialTheme.colorScheme.onSurface
                 )
             }
         ),

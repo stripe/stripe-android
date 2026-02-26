@@ -7,8 +7,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -68,7 +68,7 @@ class LinkControllerPaymentMethodPreviewScreenshotTest {
     @Composable
     private fun PaymentMethodPreview(preview: LinkController.PaymentMethodPreview) {
         val iconSize = 24.dp
-        val contentColor = MaterialTheme.colors.onSurface
+        val contentColor = MaterialTheme.colorScheme.onSurface
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
@@ -86,14 +86,14 @@ class LinkControllerPaymentMethodPreviewScreenshotTest {
                 Text(
                     modifier = Modifier,
                     text = preview.label,
-                    style = MaterialTheme.typography.h6,
+                    style = MaterialTheme.typography.titleLarge,
                     color = contentColor,
                 )
                 preview.sublabel?.let { sublabel ->
                     Text(
                         modifier = Modifier.padding(top = 2.dp),
                         text = sublabel,
-                        style = MaterialTheme.typography.body2,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = contentColor.copy(alpha = 0.6f),
                     )
                 }

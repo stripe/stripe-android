@@ -4,9 +4,8 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.TextFieldDefaults.indicatorLine
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TextFieldDefaults.indicatorLine
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -20,7 +19,6 @@ import com.stripe.android.uicore.elements.ExpiryDateVisualTransformation
 import com.stripe.android.uicore.elements.compat.errorSemanticsWithDefault
 import com.stripe.android.uicore.strings.resolve
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 internal fun ExpiryTextField(
     modifier: Modifier = Modifier,
@@ -42,7 +40,7 @@ internal fun ExpiryTextField(
                 enabled = state.enabled,
                 isError = isError && state.enabled,
                 interactionSource = interactionSource,
-                colors = colors
+                colors = colors.m3Colors
             )
             .errorSemanticsWithDefault(
                 isError = isError,

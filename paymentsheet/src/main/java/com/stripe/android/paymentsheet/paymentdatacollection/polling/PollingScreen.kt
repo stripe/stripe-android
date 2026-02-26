@@ -9,14 +9,16 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
-import androidx.compose.material.TopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -37,7 +39,7 @@ import com.stripe.android.common.ui.LoadingIndicator
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getOuterFormInsets
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.uicore.utils.collectAsState
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -115,12 +117,12 @@ private fun ActivePolling(
     ) {
         LoadingIndicator(
             modifier = Modifier.padding(bottom = Spacing.extended),
-            color = MaterialTheme.stripeColors.appBarIcon,
+            color = MaterialTheme.stripeColorScheme.appBarIcon,
         )
 
         Text(
             text = stringResource(R.string.stripe_upi_polling_header),
-            style = MaterialTheme.typography.h4,
+            style = MaterialTheme.typography.headlineMedium,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(bottom = Spacing.normal),
         )
@@ -128,7 +130,7 @@ private fun ActivePolling(
         Text(
             text = rememberActivePollingMessage(remainingDuration, ctaText),
             textAlign = TextAlign.Center,
-            lineHeight = MaterialTheme.typography.body1.fontSize * Spacing.lineHeightMultiplier,
+            lineHeight = MaterialTheme.typography.bodyLarge.fontSize * Spacing.lineHeightMultiplier,
             modifier = Modifier.padding(bottom = Spacing.normal),
         )
 
@@ -138,6 +140,7 @@ private fun ActivePolling(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun FailedPolling(
     onCancel: () -> Unit,
@@ -147,8 +150,9 @@ private fun FailedPolling(
         topBar = {
             TopAppBar(
                 title = {},
-                elevation = 0.dp,
-                backgroundColor = MaterialTheme.colors.surface,
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
                 navigationIcon = {
                     IconButton(onClick = onCancel) {
                         Icon(
@@ -183,7 +187,7 @@ private fun FailedPolling(
 
                 Text(
                     text = stringResource(R.string.stripe_upi_polling_payment_failed_title),
-                    style = MaterialTheme.typography.h4,
+                    style = MaterialTheme.typography.headlineMedium,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(bottom = Spacing.normal),
                 )
@@ -191,7 +195,7 @@ private fun FailedPolling(
                 Text(
                     text = stringResource(R.string.stripe_upi_polling_payment_failed_message),
                     textAlign = TextAlign.Center,
-                    lineHeight = MaterialTheme.typography.body1.fontSize * Spacing.lineHeightMultiplier,
+                    lineHeight = MaterialTheme.typography.bodyLarge.fontSize * Spacing.lineHeightMultiplier,
                 )
             }
 

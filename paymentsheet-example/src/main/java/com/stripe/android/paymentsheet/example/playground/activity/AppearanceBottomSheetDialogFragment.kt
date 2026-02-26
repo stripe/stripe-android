@@ -20,25 +20,33 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Card
-import androidx.compose.material.Divider
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Slider
-import androidx.compose.material.Switch
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
-import androidx.compose.material.TopAppBar
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AlertDialogDefaults
+import androidx.compose.material3.BasicAlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -203,6 +211,7 @@ private fun AppearancePicker(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AppearanceTopAppBar(resetAppearance: () -> Unit) {
     TopAppBar(
@@ -214,8 +223,9 @@ private fun AppearanceTopAppBar(resetAppearance: () -> Unit) {
                 Text(text = stringResource(R.string.reset))
             }
         },
-        backgroundColor = MaterialTheme.colors.surface,
-        contentColor = MaterialTheme.colors.onSurface,
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+        )
     )
 }
 
@@ -234,8 +244,8 @@ private fun CustomizationCard(
             modifier = Modifier.padding(vertical = BASE_PADDING)
         )
         Card(
-            backgroundColor = Color.White,
-            elevation = 2.dp,
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
         ) {
             Column {
                 content()
@@ -1153,6 +1163,7 @@ private fun <T> ColorItem(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ColorPicker(
     openDialog: MutableState<Boolean>,
@@ -1161,35 +1172,45 @@ private fun ColorPicker(
 ) {
     val currentColor = remember { mutableStateOf(defaultColor) }
     if (openDialog.value) {
-        AlertDialog(
+        BasicAlertDialog(
             onDismissRequest = {
                 openDialog.value = false
                 onClose(currentColor.value)
-            },
-            text = {
-                ClassicColorPicker(
-                    modifier = Modifier.fillMaxSize(),
-                    color = HsvColor.from(currentColor.value),
-                    onColorChanged = {
-                        currentColor.value = it.toColor()
+            }
+        ) {
+            Surface(
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .wrapContentHeight(),
+                shape = MaterialTheme.shapes.large,
+                tonalElevation = AlertDialogDefaults.TonalElevation,
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    ClassicColorPicker(
+                        modifier = Modifier.fillMaxSize(),
+                        color = HsvColor.from(currentColor.value),
+                        onColorChanged = {
+                            currentColor.value = it.toColor()
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+                    TextButton(
+                        onClick = {
+                            openDialog.value = false
+                            onClose(currentColor.value)
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = currentColor.value
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(all = BASE_PADDING),
+                    ) {
+                        Text("Pick Color")
                     }
-                )
-            },
-            buttons = {
-                Button(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(all = BASE_PADDING),
-                    colors = ButtonDefaults.buttonColors(backgroundColor = currentColor.value),
-                    onClick = {
-                        openDialog.value = false
-                        onClose(currentColor.value)
-                    }
-                ) {
-                    Text(text = "Pick Color")
                 }
             }
-        )
+        }
     }
 }
 
@@ -1333,13 +1354,14 @@ private fun IconStyleDropDown(
         ) {
             AppearanceStore.State.IconStyle.entries.forEach {
                 DropdownMenuItem(
+                    text = {
+                        Text(it.name)
+                    },
                     onClick = {
                         expanded = false
                         onIconStyleSelected(it)
                     }
-                ) {
-                    Text(it.name)
-                }
+                )
             }
         }
     }
@@ -1373,13 +1395,14 @@ private fun RowStyleDropDown(
         ) {
             AppearanceStore.State.Embedded.Row.entries.forEach {
                 DropdownMenuItem(
+                    text = {
+                        Text(it.name)
+                    },
                     onClick = {
                         expanded = false
                         rowStyleSelectedCallback(it)
                     }
-                ) {
-                    Text(it.name)
-                }
+                )
             }
         }
     }
@@ -1455,12 +1478,17 @@ private fun EmbeddedFontDropDown(
     items[currentFont]?.let {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxSize().padding(all = BASE_PADDING).wrapContentSize(Alignment.TopStart)
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(all = BASE_PADDING)
+                .wrapContentSize(Alignment.TopStart)
         ) {
             Text(
                 text = "$displayText: $it",
                 fontSize = BASE_FONT_SIZE,
-                modifier = Modifier.fillMaxWidth().clickable(onClick = { expanded = true })
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = { expanded = true })
             )
             DropdownMenu(
                 expanded = expanded,
@@ -1475,16 +1503,17 @@ private fun EmbeddedFontDropDown(
                         letterSpacing = font.key?.letterSpacingSp?.sp ?: TextUnit.Unspecified,
                     )
                     DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = font.value,
+                                style = style
+                            )
+                        },
                         onClick = {
                             expanded = false
                             fontSelectedCallback(font.key)
-                        },
-                    ) {
-                        Text(
-                            text = font.value,
-                            style = style
-                        )
-                    }
+                        }
+                    )
                 }
             }
         }
@@ -1495,12 +1524,13 @@ private fun EmbeddedFontDropDown(
 private fun FontDropDownMenuItem(label: String, fontResId: Int?, onClick: () -> Unit) {
     DropdownMenuItem(
         onClick = onClick,
-    ) {
-        Text(
-            text = label,
-            fontFamily = getFontFromResource(fontResId)
-        )
-    }
+        text = {
+            Text(
+                text = label,
+                fontFamily = getFontFromResource(fontResId)
+            )
+        }
+    )
 }
 
 @Composable
@@ -1537,18 +1567,20 @@ private fun IconDropDown(iconResId: Int?, iconSelectedCallback: (Int) -> Unit) {
                         onClick = {
                             expanded = false
                             iconSelectedCallback(icon.key)
-                        }
-                    ) {
-                        Text(
-                            text = icon.value
-                        )
-                        icon.key?.let { iconResId ->
+                        },
+                        text = {
+                            Text(
+                                text = icon.value
+                            )
+
+                        },
+                        trailingIcon = {
                             Icon(
-                                painter = painterResource(iconResId),
+                                painter = painterResource(icon.key),
                                 contentDescription = null
                             )
                         }
-                    }
+                    )
                 }
             }
         }

@@ -11,9 +11,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -50,7 +50,7 @@ import com.stripe.android.uicore.elements.TextField
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.strings.resolve
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.job
 
@@ -197,7 +197,7 @@ internal fun EmailCollection(
                     .semantics {
                         testTag = ProgressIndicatorTestTag
                     },
-                color = MaterialTheme.colors.primary,
+                color = MaterialTheme.colorScheme.primary,
                 strokeWidth = 2.dp
             )
         }
@@ -220,7 +220,7 @@ internal fun LinkLogo(
 ) {
     Icon(
         painter = painterResource(
-            id = if (MaterialTheme.stripeColors.component.shouldUseDarkDynamicColor()) {
+            id = if (MaterialTheme.stripeColorScheme.component.shouldUseDarkDynamicColor()) {
                 R.drawable.stripe_link_logo_knockout_black
             } else {
                 R.drawable.stripe_link_logo_knockout_white

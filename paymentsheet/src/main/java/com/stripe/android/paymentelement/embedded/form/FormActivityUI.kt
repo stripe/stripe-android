@@ -7,9 +7,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -36,7 +36,7 @@ import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.strings.resolve
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
@@ -146,7 +146,7 @@ internal fun FormActivityTopBar(
     isLiveMode: Boolean,
     onDismissed: () -> Unit
 ) {
-    val tintColor = MaterialTheme.stripeColors.appBarIcon
+    val tintColor = MaterialTheme.stripeColorScheme.appBarIcon
     Box(
         modifier = Modifier
             .fillMaxWidth()

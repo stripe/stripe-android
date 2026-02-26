@@ -9,8 +9,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Text
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -50,7 +49,6 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
 import com.stripe.android.uicore.utils.collectAsState
 
-@ExperimentalMaterialApi
 @Composable
 internal fun ConsentScreen() {
     val viewModel: ConsentViewModel = paneViewModel { ConsentViewModel.factory(it) }

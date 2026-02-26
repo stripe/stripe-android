@@ -25,15 +25,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.Icon
-import androidx.compose.material.LocalContentAlpha
-import androidx.compose.material.RadioButton
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
@@ -116,37 +113,35 @@ internal fun PrimaryButton(
         ).value
     }
 
-    CompositionLocalProvider(
-        LocalContentAlpha provides if (enabled) ContentAlpha.high else ContentAlpha.disabled,
+    val contentAlpha = if (enabled) 1f else 0.38f
+    Box(
+        modifier = modifier.fillMaxWidth(),
+        contentAlignment = Alignment.Center,
     ) {
-        Box(
-            modifier = modifier.fillMaxWidth(),
-            contentAlignment = Alignment.Center,
-        ) {
-            TextButton(
-                onClick = onClick,
-                modifier = Modifier
-                    .testTag(PRIMARY_BUTTON_TEST_TAG)
-                    .fillMaxWidth()
-                    .defaultMinSize(
-                        minHeight = shape.height
-                    ),
-                enabled = enabled,
-                shape = RoundedCornerShape(shape.cornerRadius),
-                border = BorderStroke(shape.borderStrokeWidth, colors.border),
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = animatedBackground,
-                    disabledBackgroundColor = animatedBackground,
+        TextButton(
+            onClick = onClick,
+            modifier = Modifier
+                .testTag(PRIMARY_BUTTON_TEST_TAG)
+                .fillMaxWidth()
+                .defaultMinSize(
+                    minHeight = shape.height
                 ),
-            ) {
-                Content(
-                    label = label,
-                    processingState = processingState,
-                    areAnimationsDisabled = areAnimationsDisabled,
-                    locked = locked,
-                    onProcessingCompleted = onProcessingCompleted,
-                )
-            }
+            enabled = enabled,
+            shape = RoundedCornerShape(shape.cornerRadius),
+            border = BorderStroke(shape.borderStrokeWidth, colors.border),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = animatedBackground,
+                disabledContainerColor = animatedBackground,
+            ),
+        ) {
+            Content(
+                label = label,
+                processingState = processingState,
+                areAnimationsDisabled = areAnimationsDisabled,
+                locked = locked,
+                onProcessingCompleted = onProcessingCompleted,
+                contentAlpha = contentAlpha,
+            )
         }
     }
 }
@@ -158,6 +153,7 @@ private fun Content(
     areAnimationsDisabled: Boolean,
     locked: Boolean,
     onProcessingCompleted: () -> Unit,
+    contentAlpha: Float = 1f,
 ) {
     ContentContainer(
         processingState = processingState,
@@ -182,6 +178,7 @@ private fun Content(
                     },
                     processing = processingState !is PrimaryButtonProcessingState.Idle,
                     locked = locked,
+                    contentAlpha = contentAlpha,
                 )
             }
         }
@@ -235,6 +232,7 @@ private fun BoxScope.StaticIncompleteProcessing(
     text: String,
     processing: Boolean,
     locked: Boolean,
+    contentAlpha: Float = 1f,
 ) {
     val colors = PrimaryButtonTheme.colors
     val typography = PrimaryButtonTheme.typography
@@ -245,7 +243,7 @@ private fun BoxScope.StaticIncompleteProcessing(
         fontWeight = FontWeight.Medium,
     )
 
-    val onBackground = colors.onBackground.copy(LocalContentAlpha.current)
+    val onBackground = colors.onBackground.copy(contentAlpha)
 
     Text(
         text = text,

@@ -18,12 +18,12 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -55,7 +55,7 @@ import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.elements.TextFieldColors
 import com.stripe.android.uicore.elements.TrailingIcon
 import com.stripe.android.uicore.getOuterFormInsets
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
@@ -68,7 +68,7 @@ internal fun CvcRecollectionScreen(
     StripeTheme {
         Column(
             Modifier
-                .background(MaterialTheme.stripeColors.materialColors.surface)
+                .background(MaterialTheme.stripeColorScheme.materialColorScheme.surface)
                 .padding(StripeTheme.getOuterFormInsets())
         ) {
             CvcRecollectionTopBar(isTestMode) {
@@ -99,7 +99,7 @@ internal fun CvcRecollectionPaymentSheetScreen(
     StripeTheme {
         Column(
             Modifier
-                .background(MaterialTheme.stripeColors.materialColors.surface)
+                .background(MaterialTheme.stripeColorScheme.materialColorScheme.surface)
                 .padding(StripeTheme.getOuterFormInsets())
         ) {
             CvcRecollectionTitle()
@@ -166,7 +166,7 @@ internal fun CvcRecollectionField(
                             R.string.stripe_paymentsheet_payment_method_item_card_number,
                             lastFour
                         ),
-                        style = MaterialTheme.typography.body1,
+                        style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.testTag(TEST_TAG_CVC_LAST_FOUR)
                     )
                 }
@@ -175,7 +175,7 @@ internal fun CvcRecollectionField(
                 modifier = Modifier
                     .width(1.dp)
                     .fillMaxHeight(),
-                color = MaterialTheme.stripeColors.componentBorder
+                color = MaterialTheme.stripeColorScheme.componentBorder
             )
             TextField(
                 modifier = Modifier
@@ -190,7 +190,7 @@ internal fun CvcRecollectionField(
                 value = cvcState.cvc,
                 onValueChange = onValueChanged,
                 shape = MaterialTheme.shapes.large,
-                colors = TextFieldColors(),
+                colors = TextFieldColors().m3Colors,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.NumberPassword
                 ),

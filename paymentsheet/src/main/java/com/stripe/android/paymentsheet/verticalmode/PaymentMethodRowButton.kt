@@ -17,12 +17,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.RadioButton
-import androidx.compose.material.RadioButtonDefaults
-import androidx.compose.material.Text
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,7 +50,7 @@ import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconWidth
 import com.stripe.android.uicore.DefaultStripeTheme
 import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.image.StripeImageLoader
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.uicore.R as StripeUiCoreR
 
 @Composable
@@ -195,9 +196,11 @@ private fun RowButtonFloatingOuterContent(
                 modifier.alpha(alpha = if (isEnabled) 1.0F else 0.6F)
             ),
         shape = MaterialTheme.shapes.medium,
-        backgroundColor = MaterialTheme.stripeColors.component,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.stripeColorScheme.component
+        ),
         border = MaterialTheme.getBorderStroke(isSelected),
-        elevation = if (isSelected) 1.5.dp else 0.dp
+        elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 1.5.dp else 0.dp),
     ) {
         Column(
             modifier = Modifier.padding(contentPaddingValues),
@@ -381,7 +384,7 @@ private fun TitleContent(
         Text(
             text = title,
             style = appearance.titleFont?.toTextStyle()
-                ?: MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Medium),
+                ?: MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
             color = if (isEnabled) titleColor else titleColor.copy(alpha = 0.6f),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -397,7 +400,7 @@ private fun TitleContent(
             Text(
                 text = subtitle,
                 style = appearance.subtitleFont?.toTextStyle()
-                    ?: MaterialTheme.typography.caption.copy(fontWeight = FontWeight.Normal),
+                    ?: MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Normal),
                 color = if (isEnabled) subtitleTextColor else subtitleTextColor.copy(alpha = 0.6f),
             )
         }
@@ -468,14 +471,14 @@ private fun ButtonPreview() {
 
 @Composable
 private fun RowStyle.getTitleTextColor() = when (this) {
-    is RowStyle.FloatingButton -> MaterialTheme.stripeColors.onComponent
-    else -> MaterialTheme.colors.onSurface
+    is RowStyle.FloatingButton -> MaterialTheme.stripeColorScheme.onComponent
+    else -> MaterialTheme.colorScheme.onSurface
 }
 
 @Composable
 private fun RowStyle.getSubtitleTextColor() = when (this) {
-    is RowStyle.FloatingButton -> MaterialTheme.stripeColors.placeholderText
-    else -> MaterialTheme.stripeColors.subtitle
+    is RowStyle.FloatingButton -> MaterialTheme.stripeColorScheme.placeholderText
+    else -> MaterialTheme.stripeColorScheme.subtitle
 }
 
 private fun RowStyle.shouldAddModifierWeight(): Boolean {

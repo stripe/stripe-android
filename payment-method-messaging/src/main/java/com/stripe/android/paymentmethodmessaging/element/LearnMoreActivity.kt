@@ -22,8 +22,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -53,7 +53,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import com.stripe.android.uicore.R as UiCoreR
 
-@OptIn(PaymentMethodMessagingElementPreview::class)
+@OptIn(PaymentMethodMessagingElementPreview::class, androidx.compose.material3.ExperimentalMaterial3Api::class)
 internal class LearnMoreActivity : AppCompatActivity() {
     private val args: LearnMoreActivityArgs? by lazy {
         LearnMoreActivityArgs.fromIntent(intent)
@@ -173,7 +173,7 @@ internal class LearnMoreActivity : AppCompatActivity() {
                 .fillMaxWidth()
         ) {
             CircularProgressIndicator(
-                color = MaterialTheme.colors.primary,
+                color = MaterialTheme.colorScheme.primary,
                 strokeWidth = 2.dp,
                 modifier = Modifier.requiredSize(48.dp),
             )

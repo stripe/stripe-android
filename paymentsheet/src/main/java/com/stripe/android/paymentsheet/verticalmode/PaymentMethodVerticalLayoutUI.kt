@@ -8,9 +8,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -30,7 +30,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.image.StripeImageLoader
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 import com.stripe.android.uicore.utils.collectAsState
 import org.jetbrains.annotations.VisibleForTesting
 
@@ -123,8 +123,8 @@ internal fun PaymentMethodVerticalLayoutUI(
     DisposableEffect(paymentMethodCodes) { onDispose { cancelPaymentMethodVisibilityTracking.invoke() } }
 
     Column(modifier = modifier) {
-        val textStyle = MaterialTheme.typography.subtitle1
-        val textColor = MaterialTheme.stripeColors.onComponent
+        val textStyle = MaterialTheme.typography.titleMedium
+        val textColor = MaterialTheme.stripeColorScheme.onComponent
 
         val rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.default.run {
             PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.Builder()
@@ -208,8 +208,8 @@ internal fun SavedPaymentMethodTrailingContent(
 private fun EditButton(onClick: () -> Unit) {
     Text(
         stringResource(id = com.stripe.android.R.string.stripe_edit),
-        color = MaterialTheme.colors.primary,
-        style = MaterialTheme.typography.subtitle1,
+        color = MaterialTheme.colorScheme.primary,
+        style = MaterialTheme.typography.titleMedium,
         fontWeight = FontWeight.Medium,
         modifier = Modifier
             .testTag(TEST_TAG_EDIT_SAVED_CARD)
@@ -234,15 +234,15 @@ private fun ViewMoreButton(
     ) {
         Text(
             stringResource(id = R.string.stripe_view_more),
-            color = MaterialTheme.colors.primary,
-            style = MaterialTheme.typography.subtitle1,
+            color = MaterialTheme.colorScheme.primary,
+            style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Medium,
         )
         if (showChevron) {
             Icon(
                 painter = painterResource(R.drawable.stripe_ic_chevron_right),
                 contentDescription = null,
-                tint = MaterialTheme.colors.primary,
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(start = 4.dp, top = 2.dp)
             )
         }

@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.stripe.android.paymentelement.embedded.form
 
 import android.app.Activity
@@ -5,7 +7,7 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
@@ -55,7 +57,6 @@ internal class FormActivity : AppCompatActivity() {
     @Inject
     lateinit var savedPaymentMethodConfirmInteractorFactory: SavedPaymentMethodConfirmInteractor.Factory
 
-    @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

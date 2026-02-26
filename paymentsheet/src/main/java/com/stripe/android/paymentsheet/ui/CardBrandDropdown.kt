@@ -6,8 +6,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -25,7 +25,7 @@ import com.stripe.android.uicore.R
 import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
 import com.stripe.android.uicore.elements.SingleChoiceDropdown
 import com.stripe.android.uicore.strings.resolve
-import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeColorScheme
 
 @Composable
 internal fun CardBrandDropdown(
@@ -76,8 +76,8 @@ internal fun CardBrandDropdown(
             title = com.stripe.android.R.string.stripe_card_brand_choice_selection_header.resolvableString,
             currentChoice = selectedBrand,
             choices = availableBrands,
-            headerTextColor = MaterialTheme.stripeColors.subtitle,
-            optionTextColor = MaterialTheme.stripeColors.onComponent,
+            headerTextColor = MaterialTheme.stripeColorScheme.subtitle,
+            optionTextColor = MaterialTheme.stripeColorScheme.onComponent,
             onChoiceSelected = { item ->
                 expanded = false
 

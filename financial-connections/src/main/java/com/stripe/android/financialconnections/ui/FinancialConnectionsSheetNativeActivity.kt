@@ -10,13 +10,16 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -77,6 +80,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
     @Inject
     lateinit var browserManager: BrowserManager
 
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -96,8 +100,12 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
             FinancialConnectionsTheme(args.theme) {
                 val state by viewModel.stateFlow.collectAsState()
                 val bottomSheetState = rememberStripeBottomSheetState(
-                    initialValue = ModalBottomSheetValue.Expanded,
+//                    initialValue = ModalBottomSheetValue.Expanded,
                 )
+
+                LaunchedEffect("start") {
+                    bottomSheetState.show()
+                }
 
                 FinancialConnectionsBottomSheetLayout(
                     state = bottomSheetState,
@@ -150,6 +158,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
         }
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun NavHost(
         initialPane: Pane,
@@ -161,8 +170,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
         val topAppBarState by viewModel.topAppBarState.collectAsState()
 
         val sheetState = rememberModalBottomSheetState(
-            ModalBottomSheetValue.Hidden,
-            skipHalfExpanded = true
+            skipPartiallyExpanded = true
         )
 
         val bottomSheetNavigator = remember { BottomSheetNavigator(sheetState) }
@@ -197,10 +205,11 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
                             onCloseClick = viewModel::handleOnCloseClick,
                         )
                     },
-                ) {
+                ) { innerPadding ->
                     NavHost(
                         navController = navController,
                         startDestination = initialDestination.fullRoute,
+                        modifier = Modifier.padding(innerPadding),
                     ) {
                         composable(Destination.Consent)
                         composable(Destination.IDConsentContent)

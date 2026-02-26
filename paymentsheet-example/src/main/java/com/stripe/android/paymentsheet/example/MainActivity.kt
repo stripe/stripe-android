@@ -13,13 +13,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.Chip
-import androidx.compose.material.ChipDefaults
-import androidx.compose.material.Divider
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -199,7 +199,7 @@ private fun MainScreen(items: List<MenuItem>) {
             ) {
                 Text(
                     text = "Version ${StripeSdkVersion.VERSION_NAME}",
-                    style = MaterialTheme.typography.caption,
+                    style = MaterialTheme.typography.labelSmall,
                 )
             }
         }
@@ -213,7 +213,7 @@ private fun LazyListScope.Section(
     item {
         Text(
             text = title,
-            color = MaterialTheme.colors.onSurface,
+            color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier
                 .alpha(SECTION_ALPHA)
                 .padding(top = 16.dp, start = 16.dp),
@@ -224,12 +224,15 @@ private fun LazyListScope.Section(
         MenuItemRow(item)
 
         if (index < items.lastIndex) {
-            Divider(startIndent = 16.dp)
+            HorizontalDivider(
+                modifier = Modifier
+                    .padding(start = 16.dp)
+            )
         }
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MenuItemRow(item: MenuItem) {
     val context = LocalContext.current
@@ -244,18 +247,18 @@ private fun MenuItemRow(item: MenuItem) {
             text = stringResource(item.titleResId),
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(bottom = 2.dp),
-            color = MaterialTheme.colors.onSurface,
+            color = MaterialTheme.colorScheme.onSurface,
         )
 
         Text(
             text = stringResource(item.subtitleResId),
-            color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f),
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
         )
 
         if (item.badge != null) {
-            Chip(
-                colors = ChipDefaults.chipColors(
-                    backgroundColor = MaterialTheme.colors.secondary.copy(
+            AssistChip(
+                colors = AssistChipDefaults.assistChipColors(
+                    containerColor = MaterialTheme.colorScheme.secondary.copy(
                         alpha = SurfaceOverlayOpacity,
                     ),
                 ),
@@ -267,9 +270,10 @@ private fun MenuItemRow(item: MenuItem) {
                 },
                 onClick = item.badge.onClick,
                 modifier = Modifier.padding(top = 4.dp),
-            ) {
-                Text(text = stringResource(item.badge.labelResId))
-            }
+                label = {
+                    Text(text = stringResource(item.badge.labelResId))
+                }
+            )
         }
     }
 }
