@@ -405,7 +405,7 @@ constructor(
             PaymentIntentResult(
                 refreshedPaymentIntent,
                 outcome,
-                failureMessageFactory.create(refreshedPaymentIntent, outcome)
+                failureMessageFactory.create(refreshedPaymentIntent, null, outcome)
             )
         }
     }

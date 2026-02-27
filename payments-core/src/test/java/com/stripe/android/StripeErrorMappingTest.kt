@@ -36,6 +36,7 @@ class StripeErrorMappingTest {
     fun `Uses localized client error for error code`() {
         runStripeErrorMappingTest(
             message = null,
+            type = "card_error",
             code = "generic_decline",
             context = context,
         ) { actualMessage ->
@@ -61,6 +62,7 @@ class StripeErrorMappingTest {
 
         runStripeErrorMappingTest(
             message = null,
+            type = "card_error",
             code = "generic_decline",
             context = context,
         ) { actualMessage ->
@@ -88,6 +90,18 @@ class StripeErrorMappingTest {
             context = context,
         ) { actualMessage ->
             assertThat(actualMessage).isEqualTo("Votre moyen de paiement a été refusé.")
+        }
+    }
+
+    @Test
+    fun `Uses localized client error for card_declined code`() {
+        runStripeErrorMappingTest(
+            message = null,
+            type = "card_error",
+            code = "card_declined",
+            context = context,
+        ) { actualMessage ->
+            assertThat(actualMessage).isEqualTo("Your card was declined")
         }
     }
 
@@ -130,14 +144,77 @@ class StripeErrorMappingTest {
         }
     }
 
+    @Test
+    fun `In live mode with no message falls back to message with request ID`() {
+        runStripeErrorMappingTest(
+            requestId = "req_abc123",
+            message = null,
+            type = "card_error",
+            isLiveMode = true,
+            context = context,
+        ) { actualMessage ->
+            assertThat(actualMessage)
+                .isEqualTo("Something went wrong. Request ID: req_abc123")
+        }
+    }
+
+    @Test
+    fun `In live mode with no message and no requestId falls back to unexpected error`() {
+        runStripeErrorMappingTest(
+            requestId = null,
+            message = null,
+            type = "card_error",
+            isLiveMode = true,
+            context = context,
+        ) { actualMessage ->
+            assertThat(actualMessage)
+                .isEqualTo("There was an unexpected error -- try again in a few seconds")
+        }
+    }
+
+    @Test
+    fun `In test mode, when type is not card_error code mapping is skipped and original message used in test mode`() {
+        runStripeErrorMappingTest(
+            type = "api_error",
+            message = "Server error",
+            code = "api_error",
+            declineCode = null,
+            isLiveMode = false,
+            context = context,
+        ) { actualMessage ->
+            assertThat(actualMessage)
+                .isEqualTo("Server error")
+        }
+    }
+
+    @Test
+    fun `In live mode with original message set, requestId message is used when requestId is set`() {
+        runStripeErrorMappingTest(
+            requestId = "req_abc123",
+            message = "Server error",
+            type = "api_error",
+            code = "api_error",
+            declineCode = null,
+            isLiveMode = true,
+            context = context,
+        ) { actualMessage ->
+            assertThat(actualMessage)
+                .isEqualTo("Something went wrong. Request ID: req_abc123")
+        }
+    }
+
     private fun runStripeErrorMappingTest(
         message: String? = null,
         code: String? = null,
         declineCode: String? = null,
+        type: String? = null,
         context: Context,
+        requestId: String? = null,
+        isLiveMode: Boolean = false,
         block: (String?) -> Unit,
     ) {
         val stripeError = StripeError(
+            type = type,
             message = message,
             code = code,
             declineCode = declineCode
@@ -166,10 +243,28 @@ class StripeErrorMappingTest {
 
         val localizedContext = localeTestRule.contextForLocale(context)
 
-        block(stripeError.withLocalizedMessage(localizedContext).message)
+        block(
+            stripeError.withLocalizedMessage(
+                localizedContext,
+                requestId,
+                isLiveMode
+            ).message
+        )
 
-        block(paymentIntentError.withLocalizedMessage(localizedContext).message)
+        block(
+            paymentIntentError.withLocalizedMessage(
+                localizedContext,
+                requestId,
+                isLiveMode
+            ).message
+        )
 
-        block(setupIntentError.withLocalizedMessage(localizedContext).message)
+        block(
+            setupIntentError.withLocalizedMessage(
+                localizedContext,
+                requestId,
+                isLiveMode
+            ).message
+        )
     }
 }

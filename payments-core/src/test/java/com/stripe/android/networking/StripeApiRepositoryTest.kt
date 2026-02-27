@@ -659,6 +659,36 @@ internal class StripeApiRepositoryTest {
         }
 
     @Test
+    fun confirmPaymentIntent_errorResponseWithRequestIdInLiveMode_throwsWithLocalizedMessageContainingRequestId() =
+        runTest {
+            val clientSecret = "pi_12345_secret_fake"
+            val requestId = "req_abc123"
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenAnswer {
+                    StripeResponse(
+                        code = 400,
+                        body = """{"error":{"type":"api_error","message":"Server error"}}""",
+                        headers = mapOf("Request-Id" to listOf(requestId))
+                    )
+                }
+
+            val confirmPaymentIntentParams =
+                ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    clientSecret
+                )
+
+            val result = create().confirmPaymentIntent(
+                confirmPaymentIntentParams,
+                ApiRequest.Options("pk_live_123")
+            )
+
+            assertThat(result.isFailure).isTrue()
+            assertThat(result.exceptionOrNull()?.message)
+                .isEqualTo("Something went wrong. Request ID: $requestId")
+        }
+
+    @Test
     fun confirmPaymentIntent_withSourceAttribution_setsCorrectPaymentUserAgent() =
         runTest {
             // put a private key here to simulate the backend

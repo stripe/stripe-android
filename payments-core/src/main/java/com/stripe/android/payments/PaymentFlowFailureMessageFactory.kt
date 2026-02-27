@@ -14,6 +14,7 @@ internal class PaymentFlowFailureMessageFactory(
 ) {
     fun create(
         intent: StripeIntent,
+        requestId: String?,
         @StripeIntentResult.Outcome outcome: Int
     ) = when {
         outcome == StripeIntentResult.Outcome.TIMEDOUT -> {
@@ -26,10 +27,10 @@ internal class PaymentFlowFailureMessageFactory(
             (intent.status == StripeIntent.Status.RequiresAction) -> {
             when (intent) {
                 is PaymentIntent -> {
-                    createForPaymentIntent(intent)
+                    createForPaymentIntent(intent, requestId)
                 }
                 is SetupIntent -> {
-                    createForSetupIntent(intent)
+                    createForSetupIntent(intent, requestId)
                 }
             }
         }
@@ -39,7 +40,8 @@ internal class PaymentFlowFailureMessageFactory(
     }
 
     private fun createForPaymentIntent(
-        paymentIntent: PaymentIntent
+        paymentIntent: PaymentIntent,
+        requestId: String?,
     ) = when {
         (
             paymentIntent.status == StripeIntent.Status.RequiresAction &&
@@ -52,18 +54,27 @@ internal class PaymentFlowFailureMessageFactory(
             context.resources.getString(R.string.stripe_failure_reason_authentication)
         }
         else -> {
-            paymentIntent.lastPaymentError?.withLocalizedMessage(context)?.message
+            paymentIntent.lastPaymentError?.withLocalizedMessage(
+                context = context,
+                requestId = requestId,
+                isLiveMode = paymentIntent.isLiveMode,
+            )?.message
         }
     }
 
     private fun createForSetupIntent(
-        setupIntent: SetupIntent
+        setupIntent: SetupIntent,
+        requestId: String?,
     ) = when {
         setupIntent.lastSetupError?.code == SetupIntent.Error.CODE_AUTHENTICATION_ERROR -> {
             context.resources.getString(R.string.stripe_failure_reason_authentication)
         }
         else -> {
-            setupIntent.lastSetupError?.withLocalizedMessage(context)?.message
+            setupIntent.lastSetupError?.withLocalizedMessage(
+                context = context,
+                requestId = requestId,
+                isLiveMode = setupIntent.isLiveMode,
+            )?.message
         }
     }
 

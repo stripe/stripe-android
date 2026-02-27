@@ -269,7 +269,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             fireAnalyticsRequest(
                 paymentAnalyticsRequestFactory.createPaymentIntentConfirmation(
                     paymentMethodType = paymentMethodType,
-                    errorMessage = result.errorMessage,
+                    errorMessage = result.errorMessage(options),
                 )
             )
         }
@@ -459,7 +459,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             fireAnalyticsRequest(
                 paymentAnalyticsRequestFactory.createSetupIntentConfirmation(
                     paymentMethodType = confirmSetupIntentParams.paymentMethodCreateParams?.typeCode,
-                    errorMessage = result.errorMessage,
+                    errorMessage = result.errorMessage(options),
                 )
             )
         }
@@ -1084,6 +1084,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     ): Result<StripeFile> {
         val response = runCatching {
             makeFileUploadRequest(
+                apiRequestOptions = requestOptions,
                 fileUploadRequest = FileUploadRequest(fileParams, requestOptions, appInfo),
                 onResponse = { fireAnalyticsRequest(PaymentAnalyticsEvent.FileCreate) },
             )
@@ -1753,13 +1754,16 @@ class StripeApiRepository @JvmOverloads internal constructor(
         CardException::class,
         APIException::class
     )
-    private fun handleApiError(response: StripeResponse<String>) {
+    private fun handleApiError(
+        requestOptions: ApiRequest.Options,
+        response: StripeResponse<String>
+    ) {
         val requestId = response.requestId?.value
         val responseCode = response.code
 
         val stripeError = StripeErrorJsonParser()
             .parse(response.responseJson())
-            .withLocalizedMessage(context)
+            .withLocalizedMessage(context, requestId, requestOptions.apiKeyIsLiveMode)
 
         when (responseCode) {
             HttpURLConnection.HTTP_BAD_REQUEST, HttpURLConnection.HTTP_NOT_FOUND -> {
@@ -1826,7 +1830,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         }
 
         if (response.isError) {
-            handleApiError(response)
+            handleApiError(apiRequest.options, response)
         }
 
         resetDnsCache(dnsCacheData)
@@ -1843,6 +1847,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         APIException::class
     )
     internal suspend fun makeFileUploadRequest(
+        apiRequestOptions: ApiRequest.Options,
         fileUploadRequest: FileUploadRequest,
         onResponse: (RequestId?) -> Unit
     ): StripeResponse<String> {
@@ -1860,7 +1865,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         }
 
         if (response.isError) {
-            handleApiError(response)
+            handleApiError(apiRequestOptions, response)
         }
 
         resetDnsCache(dnsCacheData)
@@ -1994,24 +1999,25 @@ class StripeApiRepository @JvmOverloads internal constructor(
         }
     }
 
-    private val Result<StripeResponse<String>>.errorMessage: String?
-        get() {
-            val response = getOrNull()
-            val resultError = exceptionOrNull()
+    private fun Result<StripeResponse<String>>.errorMessage(
+        requestOptions: ApiRequest.Options,
+    ): String? {
+        val response = getOrNull()
+        val resultError = exceptionOrNull()
 
-            return when {
-                resultError != null -> resultError.safeAnalyticsMessage
-                response != null && response.isError -> {
-                    runCatching {
-                        handleApiError(response)
-                    }.let { errorResult ->
-                        errorResult.exceptionOrNull()?.safeAnalyticsMessage
-                    }
+        return when {
+            resultError != null -> resultError.safeAnalyticsMessage
+            response != null && response.isError -> {
+                runCatching {
+                    handleApiError(requestOptions, response)
+                }.let { errorResult ->
+                    errorResult.exceptionOrNull()?.safeAnalyticsMessage
                 }
-
-                else -> null
             }
+
+            else -> null
         }
+    }
 
     private sealed class DnsCacheData {
         data class Success(

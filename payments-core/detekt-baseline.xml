@@ -5,10 +5,8 @@
     <ID>ComplexCondition:AccountRangeJsonParser.kt$AccountRangeJsonParser$accountRangeHigh != null &amp;&amp; accountRangeLow != null &amp;&amp; panLength != null &amp;&amp; brandInfo != null</ID>
     <ID>ComplexCondition:BecsDebitWidget.kt$BecsDebitWidget$name.isBlank() || email.isNullOrBlank() || bsbNumber.isNullOrBlank() || accountNumber.isNullOrBlank()</ID>
     <ID>ComplexCondition:ExpiryDateEditText.kt$ExpiryDateEditText.&lt;no name provided>$expirationDate.month.length == 2 &amp;&amp; latestInsertionSize > 0 &amp;&amp; !inErrorState || rawNumericInput.length > 2</ID>
-    <ID>ConstructorParameterNaming:Source.kt$Source$private val _weChat: WeChat? = null</ID>
     <ID>CyclomaticComplexMethod:NextActionDataParser.kt$NextActionDataParser$override fun parse( json: JSONObject ): StripeIntent.NextActionData?</ID>
     <ID>CyclomaticComplexMethod:PaymentMethodJsonParser.kt$PaymentMethodJsonParser$override fun parse(json: JSONObject): PaymentMethod</ID>
-    <ID>CyclomaticComplexMethod:SourceJsonParser.kt$SourceJsonParser.Companion$private inline fun &lt;reified T : StripeModel> optStripeJsonModel( jsonObject: JSONObject, @Size(min = 1) key: String ): T?</ID>
     <ID>CyclomaticComplexMethod:StripeErrorMapping.kt$internal fun Context.mapErrorCodeToLocalizedMessage(code: String?): String?</ID>
     <ID>EmptyFunctionBlock:CardWidgetProgressView.kt$CardWidgetProgressView.&lt;no name provided>${ }</ID>
     <ID>EmptyFunctionBlock:FakeFraudDetectionDataRepository.kt$FakeFraudDetectionDataRepository${ }</ID>
@@ -23,7 +21,6 @@
     <ID>LargeClass:PaymentIntentFixtures.kt$PaymentIntentFixtures</ID>
     <ID>LargeClass:PaymentIntentFlowResultProcessorTest.kt$PaymentIntentFlowResultProcessorTest</ID>
     <ID>LargeClass:SetupIntentFixtures.kt$SetupIntentFixtures</ID>
-    <ID>LargeClass:SourceParamsTest.kt$SourceParamsTest</ID>
     <ID>LargeClass:Stripe.kt$Stripe</ID>
     <ID>LargeClass:StripeApiRepository.kt$StripeApiRepository : StripeRepository</ID>
     <ID>LargeClass:StripeApiRepositoryTest.kt$StripeApiRepositoryTest</ID>
@@ -140,7 +137,7 @@
     <ID>MaximumLineLength:PaymentRelayContract.kt$PaymentRelayContract$internal</ID>
     <ID>SwallowedException:ActivityUtils.kt$e: IllegalArgumentException</ID>
     <ID>SwallowedException:PaymentUtils.kt$PaymentUtils$e: ClassCastException</ID>
-    <ID>ThrowsCount:StripeApiRepository.kt$StripeApiRepository$@Throws( InvalidRequestException::class, AuthenticationException::class, CardException::class, APIException::class ) private fun handleApiError(response: StripeResponse&lt;String>)</ID>
+    <ID>ThrowsCount:StripeApiRepository.kt$StripeApiRepository$@Throws( InvalidRequestException::class, AuthenticationException::class, CardException::class, APIException::class ) private fun handleApiError( requestOptions: ApiRequest.Options, response: StripeResponse&lt;String> )</ID>
     <ID>TooGenericExceptionCaught:CollectBankAccountViewModel.kt$CollectBankAccountViewModel$e: Exception</ID>
     <ID>TooGenericExceptionThrown:DefaultAlipayRepository.kt$DefaultAlipayRepository$throw RuntimeException("Unable to authenticate Payment Intent with Alipay SDK")</ID>
     <ID>TooManyFunctions:AccountParams.kt$AccountParams.BusinessTypeParams.Company$Builder</ID>
@@ -154,7 +151,6 @@
     <ID>TooManyFunctions:PaymentMethod.kt$PaymentMethod$Builder</ID>
     <ID>TooManyFunctions:PaymentMethodCreateParams.kt$PaymentMethodCreateParams$Companion</ID>
     <ID>TooManyFunctions:PersonTokenParams.kt$PersonTokenParams$Builder</ID>
-    <ID>TooManyFunctions:SourceParams.kt$SourceParams$Companion</ID>
     <ID>TooManyFunctions:Stripe.kt$Stripe</ID>
     <ID>TooManyFunctions:StripeApiRepository.kt$StripeApiRepository : StripeRepository</ID>
     <ID>TooManyFunctions:StripeApiRepository.kt$StripeApiRepository$Companion</ID>
