@@ -47,6 +47,7 @@ import com.stripe.android.core.networking.responseJson
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.exception.CardException
 import com.stripe.android.model.BankStatuses
+import com.stripe.android.model.CancelCaptchaChallengeParams
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -1671,6 +1672,36 @@ class StripeApiRepository @JvmOverloads internal constructor(
         )
     }
 
+    override suspend fun cancelPaymentIntentCaptchaChallenge(
+        paymentIntentId: String,
+        params: CancelCaptchaChallengeParams,
+        requestOptions: ApiRequest.Options
+    ): Result<PaymentIntent> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = getCancelPaymentIntentCaptchaChallengeUrl(paymentIntentId),
+                options = requestOptions,
+                params = params.toParamMap(),
+            ),
+            jsonParser = PaymentIntentJsonParser(),
+        )
+    }
+
+    override suspend fun cancelSetupIntentCaptchaChallenge(
+        setupIntentId: String,
+        params: CancelCaptchaChallengeParams,
+        requestOptions: ApiRequest.Options
+    ): Result<SetupIntent> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = getCancelSetupIntentCaptchaChallengeUrl(setupIntentId),
+                options = requestOptions,
+                params = params.toParamMap(),
+            ),
+            jsonParser = SetupIntentJsonParser(),
+        )
+    }
+
     private suspend fun retrieveElementsSession(
         params: ElementsSessionParams,
         options: ApiRequest.Options,
@@ -2155,6 +2186,24 @@ class StripeApiRepository @JvmOverloads internal constructor(
         @JvmSynthetic
         internal fun getCancelSetupIntentSourceUrl(setupIntentId: String): String {
             return getApiUrl("setup_intents/%s/source_cancel", setupIntentId)
+        }
+
+        /**
+         * @return `https://api.stripe.com/v1/payment_intents/:id/cancel_challenge`
+         */
+        @VisibleForTesting
+        @JvmSynthetic
+        internal fun getCancelPaymentIntentCaptchaChallengeUrl(paymentIntentId: String): String {
+            return getApiUrl("payment_intents/%s/cancel_challenge", paymentIntentId)
+        }
+
+        /**
+         * @return `https://api.stripe.com/v1/setup_intents/:id/cancel_challenge`
+         */
+        @VisibleForTesting
+        @JvmSynthetic
+        internal fun getCancelSetupIntentCaptchaChallengeUrl(setupIntentId: String): String {
+            return getApiUrl("setup_intents/%s/cancel_challenge", setupIntentId)
         }
 
         /**

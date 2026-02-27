@@ -289,6 +289,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         INTENT_CONFIRMATION_CHALLENGE_FAILED_TO_PARSE_ERROR_CALLBACK_PARAMS(
             partialEventName = "intent_confirmation_challenge.failed_to_parse_error_callback_params"
         ),
+        INTENT_CONFIRMATION_CHALLENGE_INTENT_PARAMETERS_UNAVAILABLE(
+            partialEventName = "intent_confirmation_challenge.intent_parameters_unavailable"
+        ),
         HCAPTCHA_UNEXPECTED_FAILURE(
             partialEventName = "elements.captcha.passive.unexpected_failure"
         ),
