@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet.repositories
 
-import com.stripe.android.core.AppInfo
+import com.stripe.android.Stripe
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
@@ -9,6 +11,8 @@ import com.stripe.android.core.version.StripeSdkVersion
 import java.util.Locale
 import java.util.TimeZone
 import java.util.UUID
+import javax.inject.Inject
+import javax.inject.Named
 
 internal interface CheckoutSessionRepository {
     suspend fun init(
@@ -21,18 +25,15 @@ internal interface CheckoutSessionRepository {
     ): Result<CheckoutSessionResponse>
 }
 
-internal class DefaultCheckoutSessionRepository(
+internal class DefaultCheckoutSessionRepository @Inject constructor(
     private val stripeNetworkClient: StripeNetworkClient,
-    apiVersion: String,
-    sdkVersion: String = StripeSdkVersion.VERSION,
-    appInfo: AppInfo?,
-    private val publishableKeyProvider: () -> String,
-    private val stripeAccountIdProvider: () -> String?,
+    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
+    @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
 ) : CheckoutSessionRepository {
     private val apiRequestFactory = ApiRequest.Factory(
-        appInfo = appInfo,
-        apiVersion = apiVersion,
-        sdkVersion = sdkVersion,
+        appInfo = Stripe.appInfo,
+        apiVersion = Stripe.API_VERSION,
+        sdkVersion = StripeSdkVersion.VERSION,
     )
     private val stripeErrorJsonParser = StripeErrorJsonParser()
 
