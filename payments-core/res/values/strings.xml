@@ -199,5 +199,5 @@
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Verify your payment</string>
   <!-- A request error from Stripe has occurred due to a valid issue or merchant integration problem that has a request ID -->
-  <string name="stripe_request_error">Something went wrong. %1$s</string>
+  <string name="stripe_request_error">Something went wrong. Request ID: %1$s</string>
 </resources>
