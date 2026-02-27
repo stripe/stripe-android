@@ -32,6 +32,12 @@ internal object InitializationTypeSettingsDefinition :
         return configurationData.integrationType.isPaymentFlow()
     }
 
+    override fun valueUpdated(value: InitializationType, playgroundSettings: PlaygroundSettings) {
+        if (value == InitializationType.CheckoutSession) {
+            playgroundSettings[CustomerSessionSettingsDefinition] = false
+        }
+    }
+
     override fun configure(
         value: InitializationType,
         checkoutRequestBuilder: CheckoutRequest.Builder
