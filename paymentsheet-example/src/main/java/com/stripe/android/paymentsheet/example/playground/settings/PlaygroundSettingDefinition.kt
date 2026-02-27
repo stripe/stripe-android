@@ -117,6 +117,8 @@ internal interface PlaygroundSettingDefinition<T> {
         private val billingDetailsCollectionConfigurationBuilder: BillingDetailsCollectionConfigurationBuilder =
             BillingDetailsCollectionConfigurationBuilder()
     ) {
+        var customEmail: String? = null
+
         // Billing details is a nested configuration, but we have individual settings for it in the
         // UI, this helper keeps all of the configurations, rather than just the most recent.
         fun updateBillingDetails(
@@ -136,6 +138,8 @@ internal interface PlaygroundSettingDefinition<T> {
         private val billingDetailsCollectionConfigurationBuilder: BillingDetailsCollectionConfigurationBuilder =
             BillingDetailsCollectionConfigurationBuilder()
     ) {
+        var customEmail: String? = null
+
         // Billing details is a nested configuration, but we have individual settings for it in the
         // UI, this helper keeps all of the configurations, rather than just the most recent.
         fun updateBillingDetails(
@@ -155,6 +159,8 @@ internal interface PlaygroundSettingDefinition<T> {
         private val billingDetailsCollectionConfigurationBuilder: BillingDetailsCollectionConfigurationBuilder =
             BillingDetailsCollectionConfigurationBuilder()
     ) {
+        var customEmail: String? = null
+
         // Billing details is a nested configuration, but we have individual settings for it in the
         // UI, this helper keeps all of the configurations, rather than just the most recent.
         fun updateBillingDetails(
@@ -174,6 +180,8 @@ internal interface PlaygroundSettingDefinition<T> {
         private val billingDetailsCollectionConfigurationBuilder: BillingDetailsCollectionConfigurationBuilder =
             BillingDetailsCollectionConfigurationBuilder()
     ) {
+        var customEmail: String? = null
+
         // Billing details is a nested configuration, but we have individual settings for it in the
         // UI, this helper keeps all of the configurations, rather than just the most recent.
         fun updateBillingDetails(
