@@ -399,7 +399,6 @@ class CheckoutSessionConfirmationInterceptorTest {
 
         override suspend fun init(
             sessionId: String,
-            options: ApiRequest.Options,
         ): Result<CheckoutSessionResponse> {
             error("Not expected in this test")
         }
@@ -407,7 +406,6 @@ class CheckoutSessionConfirmationInterceptorTest {
         override suspend fun confirm(
             id: String,
             params: ConfirmCheckoutSessionParams,
-            options: ApiRequest.Options,
         ): Result<CheckoutSessionResponse> {
             confirmCheckoutSessionCalls.add(params)
             return confirmCheckoutSessionResult

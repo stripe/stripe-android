@@ -13,13 +13,11 @@ import java.util.UUID
 internal interface CheckoutSessionRepository {
     suspend fun init(
         sessionId: String,
-        options: ApiRequest.Options,
     ): Result<CheckoutSessionResponse>
 
     suspend fun confirm(
         id: String,
         params: ConfirmCheckoutSessionParams,
-        options: ApiRequest.Options,
     ): Result<CheckoutSessionResponse>
 }
 
@@ -28,6 +26,8 @@ internal class DefaultCheckoutSessionRepository(
     apiVersion: String,
     sdkVersion: String = StripeSdkVersion.VERSION,
     appInfo: AppInfo?,
+    private val publishableKeyProvider: () -> String,
+    private val stripeAccountIdProvider: () -> String?,
 ) : CheckoutSessionRepository {
     private val apiRequestFactory = ApiRequest.Factory(
         appInfo = appInfo,
@@ -36,10 +36,15 @@ internal class DefaultCheckoutSessionRepository(
     )
     private val stripeErrorJsonParser = StripeErrorJsonParser()
 
+    private fun createOptions(): ApiRequest.Options = ApiRequest.Options(
+        apiKey = publishableKeyProvider(),
+        stripeAccount = stripeAccountIdProvider(),
+    )
+
     override suspend fun init(
         sessionId: String,
-        options: ApiRequest.Options,
     ): Result<CheckoutSessionResponse> {
+        val options = createOptions()
         return executeRequestWithResultParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
             stripeNetworkClient = stripeNetworkClient,
@@ -63,8 +68,8 @@ internal class DefaultCheckoutSessionRepository(
     override suspend fun confirm(
         id: String,
         params: ConfirmCheckoutSessionParams,
-        options: ApiRequest.Options,
     ): Result<CheckoutSessionResponse> {
+        val options = createOptions()
         return executeRequestWithResultParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
             stripeNetworkClient = stripeNetworkClient,

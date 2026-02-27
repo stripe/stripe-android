@@ -99,7 +99,6 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                 returnUrl = returnUrl,
                 savePaymentMethod = savePaymentMethod,
             ),
-            options = requestOptions,
         ).fold(
             onSuccess = { response ->
                 val exception = IllegalStateException("No PaymentIntent in checkout session confirm response")
