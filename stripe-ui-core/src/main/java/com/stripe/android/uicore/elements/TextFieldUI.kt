@@ -22,6 +22,7 @@ import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -68,6 +69,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.uicore.BuildConfig
 import com.stripe.android.uicore.LocalInstrumentationTest
 import com.stripe.android.uicore.LocalTextFieldInsets
@@ -261,7 +263,7 @@ internal fun TextFieldUi(
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions(),
     onValueChange: (value: TextFieldValue) -> Unit = {},
-    onDropdownItemClicked: (item: TextFieldIcon.Dropdown.Item) -> Unit = {}
+    onDropdownItemClicked: (item: TextFieldIcon.CardBrandChoice.Item) -> Unit = {}
 ) {
     val displayState = when (shouldShowValidationMessage) {
         true -> {
@@ -321,7 +323,7 @@ internal fun TextFieldUi(
 @Composable
 private fun TextFieldIcon.Composable(
     loading: Boolean,
-    onDropdownItemClicked: (item: TextFieldIcon.Dropdown.Item) -> Unit,
+    onDropdownItemClicked: (item: TextFieldIcon.CardBrandChoice.Item) -> Unit,
 ) {
     Row {
         when (this@Composable) {
@@ -338,12 +340,16 @@ private fun TextFieldIcon.Composable(
                 }
             }
 
-            is TextFieldIcon.Dropdown -> {
-                TrailingDropdown(
-                    icon = this@Composable,
-                    loading = loading,
-                    onDropdownItemClicked = onDropdownItemClicked
-                )
+            is TextFieldIcon.CardBrandChoice -> {
+//                if (FeatureFlags.newCbcSelector.isEnabled) {
+//
+//                } else {
+                    CardBrandChoice(
+                        icon = this@Composable,
+                        loading = loading,
+                        onDropdownItemClicked = onDropdownItemClicked
+                    )
+                //}
             }
         }
     }
@@ -444,10 +450,10 @@ fun TrailingIcon(
 }
 
 @Composable
-private fun TrailingDropdown(
-    icon: TextFieldIcon.Dropdown,
+private fun CardBrandChoice(
+    icon: TextFieldIcon.CardBrandChoice,
     loading: Boolean,
-    onDropdownItemClicked: (item: TextFieldIcon.Dropdown.Item) -> Unit
+    onDropdownItemClicked: (item: TextFieldIcon.CardBrandChoice.Item) -> Unit
 ) {
     var expanded by remember {
         mutableStateOf(false)
@@ -490,24 +496,30 @@ private fun TrailingDropdown(
             }
         }
 
-        SingleChoiceDropdown(
-            expanded = expanded,
-            title = icon.title,
-            currentChoice = icon.currentItem,
-            choices = icon.items,
-            headerTextColor = MaterialTheme.stripeColors.subtitle,
-            optionTextColor = MaterialTheme.stripeColors.onComponent,
-            onChoiceSelected = { item ->
-                onDropdownItemClicked(item)
+        if (FeatureFlags.newCbcSelector.isEnabled) {
+            if (icon.items.size > 1) Text(text = icon.message.resolve())
+        } else {
+            SingleChoiceDropdown(
+                expanded = expanded,
+                title = icon.message,
+                currentChoice = icon.currentItem,
+                choices = icon.items,
+                headerTextColor = MaterialTheme.stripeColors.subtitle,
+                optionTextColor = MaterialTheme.stripeColors.onComponent,
+                onChoiceSelected = { item ->
+                    onDropdownItemClicked(item)
 
-                expanded = false
-            },
-            onDismiss = {
-                expanded = false
-            }
-        )
+                    expanded = false
+                },
+                onDismiss = {
+                    expanded = false
+                }
+            )
+        }
     }
 }
+
+
 
 private fun Modifier.onPreviewKeyEvent(
     value: String,

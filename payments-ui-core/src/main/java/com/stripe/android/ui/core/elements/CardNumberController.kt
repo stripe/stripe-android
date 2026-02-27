@@ -24,6 +24,7 @@ import com.stripe.android.cards.DefaultStaticCardAccountRanges
 import com.stripe.android.cards.StaticCardAccountRanges
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.networking.PaymentAnalyticsEvent
@@ -286,7 +287,7 @@ internal class DefaultCardNumberController(
         _hasFocus.value = newHasFocus
     }
 
-    override fun onDropdownItemClicked(item: TextFieldIcon.Dropdown.Item) {
+    override fun onDropdownItemClicked(item: TextFieldIcon.CardBrandChoice.Item) {
         mostRecentUserSelectedBrand.value = CardBrand.fromCode(item.id)
     }
 
@@ -431,8 +432,8 @@ internal class DefaultCardNumberController(
     private fun createDropdownIcon(
         brands: List<CardBrand>,
         chosen: CardBrand
-    ): TextFieldIcon.Dropdown {
-        val noSelection = TextFieldIcon.Dropdown.Item(
+    ): TextFieldIcon.CardBrandChoice {
+        val noSelection = TextFieldIcon.CardBrandChoice.Item(
             id = CardBrand.Unknown.code,
             label = PaymentsCoreR.string.stripe_card_brand_choice_no_selection.resolvableString,
             icon = CardBrand.Unknown.icon
@@ -440,7 +441,7 @@ internal class DefaultCardNumberController(
 
         val selected = if (brands.size == 1) {
             val onlyAvailableBrand = brands[0]
-            TextFieldIcon.Dropdown.Item(
+            TextFieldIcon.CardBrandChoice.Item(
                 id = onlyAvailableBrand.code,
                 label = onlyAvailableBrand.displayName.resolvableString,
                 icon = onlyAvailableBrand.icon
@@ -448,7 +449,7 @@ internal class DefaultCardNumberController(
         } else {
             when (chosen) {
                 CardBrand.Unknown -> null
-                else -> TextFieldIcon.Dropdown.Item(
+                else -> TextFieldIcon.CardBrandChoice.Item(
                     id = chosen.code,
                     label = chosen.displayName.resolvableString,
                     icon = chosen.icon
@@ -458,7 +459,7 @@ internal class DefaultCardNumberController(
 
         val items = brands.map { brand ->
             val enabled = cardBrandFilter.isAccepted(brand)
-            TextFieldIcon.Dropdown.Item(
+            TextFieldIcon.CardBrandChoice.Item(
                 id = brand.code,
                 label = if (enabled) {
                     brand.displayName.resolvableString
@@ -473,8 +474,14 @@ internal class DefaultCardNumberController(
             )
         }
 
-        return TextFieldIcon.Dropdown(
-            title = PaymentsCoreR.string.stripe_card_brand_choice_selection_header.resolvableString,
+        val title = if (FeatureFlags.newCbcSelector.isEnabled) {
+            PaymentsCoreR.string.stripe_cbc_choose_card_brand.resolvableString
+        } else {
+            PaymentsCoreR.string.stripe_card_brand_choice_selection_header.resolvableString
+        }
+
+        return TextFieldIcon.CardBrandChoice(
+            message = title,
             currentItem = selected ?: noSelection,
             items = items,
             hide = brands.size < 2
