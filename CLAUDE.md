@@ -15,7 +15,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Code Quality**
 - `./gradlew detekt` - Run static analysis with Detekt
-- `./gradlew ktlint` - Run Android lint
 
 **Documentation**
 - `./gradlew :dokkaGenerate` - Generate API documentation (outputs to docs/)
@@ -59,7 +58,6 @@ This is the **Stripe Android SDK**, a multi-module Android library for payment p
 - **identity**: Identity verification features
 - **connect**: Stripe Connect marketplace functionality
 - **3ds2sdk**: 3D Secure 2.0 authentication
-- **stripecardscan**: Credit card OCR scanning
 
 **Development Infrastructure**
 - **example**: Main example/demo application
@@ -77,15 +75,15 @@ This is the **Stripe Android SDK**, a multi-module Android library for payment p
 
 **Build System**
 - Multi-module Gradle project with shared dependency management (dependencies.gradle)
-- Android Gradle Plugin 8.8.x with Kotlin 2.1.x
+- Android Gradle Plugin 8.13.x with Kotlin 2.3.x
 - Build configurations in build-configuration/ directory
-- Detekt for static analysis, ktlint for formatting
+- Detekt for static analysis
 - Paparazzi for screenshot testing
 - Custom deployment and versioning scripts in scripts/
 
 **Testing Strategy**
 - Unit tests with JUnit, **fakes** (preferred over mocks), and Truth assertions  
-- Use **Turbine** for Flow testing when needed
+- Use **Turbine** for Flow testing and for call tracking/verification in fakes
 - Instrumentation tests using Espresso and AndroidX Test
 - Robolectric for Android unit tests  
 - Screenshot testing with Paparazzi and custom screenshot-testing module
