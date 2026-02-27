@@ -9,7 +9,7 @@ import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
-import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
@@ -34,7 +34,7 @@ internal class SavedPaymentMethodMutator(
     private val coroutineScope: CoroutineScope,
     private val workContext: CoroutineContext,
     private val uiContext: CoroutineContext,
-    private val customerRepository: CustomerRepository,
+    private val savedPaymentMethodRepository: SavedPaymentMethodRepository,
     private val selection: StateFlow<PaymentSelection?>,
     private val setSelection: (PaymentSelection?) -> Unit,
     private val customerStateHolder: CustomerStateHolder,
@@ -154,12 +154,8 @@ internal class SavedPaymentMethodMutator(
             }
         }
 
-        return customerRepository.detachPaymentMethod(
-            customerInfo = CustomerRepository.CustomerInfo(
-                id = customerMetadata.id,
-                ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
-                customerSessionClientSecret = customerMetadata.customerSessionClientSecret,
-            ),
+        return savedPaymentMethodRepository.detachPaymentMethod(
+            customerMetadata = customerMetadata,
             paymentMethodId = paymentMethodId,
             canRemoveDuplicates = canRemoveDuplicates,
         )
@@ -210,12 +206,8 @@ internal class SavedPaymentMethodMutator(
                 IllegalStateException("Unable to set default payment method when customer is null.")
             )
 
-        return customerRepository.setDefaultPaymentMethod(
-            customerInfo = CustomerRepository.CustomerInfo(
-                id = customer.id,
-                ephemeralKeySecret = customer.ephemeralKeySecret,
-                customerSessionClientSecret = customer.customerSessionClientSecret,
-            ),
+        return savedPaymentMethodRepository.setDefaultPaymentMethod(
+            customerMetadata = customer,
             paymentMethodId = paymentMethod.id,
         ).onFailure { error ->
             eventReporter.onSetAsDefaultPaymentMethodFailed(
@@ -261,12 +253,8 @@ internal class SavedPaymentMethodMutator(
             )
         )
 
-        return customerRepository.updatePaymentMethod(
-            customerInfo = CustomerRepository.CustomerInfo(
-                id = customerMetadata.id,
-                ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
-                customerSessionClientSecret = customerMetadata.customerSessionClientSecret,
-            ),
+        return savedPaymentMethodRepository.updatePaymentMethod(
+            customerMetadata = customerMetadata,
             paymentMethodId = paymentMethod.id,
             params = PaymentMethodUpdateParams.createCard(
                 networks = cardUpdateParams.cardBrand?.let {
@@ -425,7 +413,7 @@ internal class SavedPaymentMethodMutator(
                 coroutineScope = viewModel.viewModelScope,
                 workContext = viewModel.workContext,
                 uiContext = Dispatchers.Main,
-                customerRepository = viewModel.customerRepository,
+                savedPaymentMethodRepository = viewModel.savedPaymentMethodRepository,
                 selection = viewModel.selection,
                 setSelection = viewModel::updateSelection,
                 customerStateHolder = viewModel.customerStateHolder,

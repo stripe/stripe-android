@@ -20,8 +20,8 @@ import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.AnalyticEventCallbackRule
-import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
+import com.stripe.android.utils.FakeSavedPaymentMethodRepository
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import com.stripe.android.utils.RecordingLinkPaymentLauncher
 import kotlinx.coroutines.CoroutineScope
@@ -161,7 +161,7 @@ internal class DefaultEmbeddedContentHelperTest {
             eventReporter = eventReporter,
             workContext = Dispatchers.Unconfined,
             uiContext = Dispatchers.Unconfined,
-            customerRepository = FakeCustomerRepository(),
+            savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(),
             selectionHolder = selectionHolder,
             embeddedLinkHelper = object : EmbeddedLinkHelper {
                 override val linkEmail: StateFlow<String?> = stateFlowOf(null)
