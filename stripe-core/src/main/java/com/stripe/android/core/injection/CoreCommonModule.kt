@@ -12,7 +12,6 @@ import javax.inject.Singleton
 @Module
 class CoreCommonModule {
     @Provides
-    @Singleton
     fun provideLogger(@Named(ENABLE_LOGGING) enableLogging: Boolean) =
         Logger.getInstance(enableLogging)
 
