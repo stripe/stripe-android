@@ -105,7 +105,7 @@ class PaymentFlowFailureMessageFactoryTest {
                 outcome = StripeIntentResult.Outcome.FAILED
             )
         ).isEqualTo(
-            "Something went wrong. req_abc123"
+            "Something went wrong. Request ID: req_abc123"
         )
     }
 }

@@ -154,7 +154,7 @@ class StripeErrorMappingTest {
             context = context,
         ) { actualMessage ->
             assertThat(actualMessage)
-                .isEqualTo("Something went wrong. req_abc123")
+                .isEqualTo("Something went wrong. Request ID: req_abc123")
         }
     }
 
@@ -199,7 +199,7 @@ class StripeErrorMappingTest {
             context = context,
         ) { actualMessage ->
             assertThat(actualMessage)
-                .isEqualTo("Something went wrong. req_abc123")
+                .isEqualTo("Something went wrong. Request ID: req_abc123")
         }
     }
 

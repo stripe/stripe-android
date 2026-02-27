@@ -683,7 +683,8 @@ internal class StripeApiRepositoryTest {
             )
 
             assertThat(result.isFailure).isTrue()
-            assertThat(result.exceptionOrNull()?.message).isEqualTo("Something went wrong. $requestId")
+            assertThat(result.exceptionOrNull()?.message)
+                .isEqualTo("Something went wrong. Request ID: $requestId")
         }
 
     @Test
