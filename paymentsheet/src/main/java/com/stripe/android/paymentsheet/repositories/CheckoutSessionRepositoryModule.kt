@@ -1,34 +1,29 @@
 package com.stripe.android.paymentsheet.repositories
 
-import com.stripe.android.Stripe
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
-import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.core.networking.StripeNetworkClient
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
-import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 
 @Module
-internal object CheckoutSessionRepositoryModule {
-    @Provides
-    fun provideCheckoutSessionRepository(
-        logger: Logger,
-        @IOContext workContext: CoroutineContext,
-        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
-        @Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?,
-    ): CheckoutSessionRepository = DefaultCheckoutSessionRepository(
-        stripeNetworkClient = DefaultStripeNetworkClient(
+internal interface CheckoutSessionRepositoryModule {
+    @Binds
+    fun bindCheckoutSessionRepository(
+        impl: DefaultCheckoutSessionRepository,
+    ): CheckoutSessionRepository
+
+    companion object {
+        @Provides
+        fun provideStripeNetworkClient(
+            logger: Logger,
+            @IOContext workContext: CoroutineContext,
+        ): StripeNetworkClient = DefaultStripeNetworkClient(
             logger = logger,
             workContext = workContext,
-        ),
-        apiVersion = Stripe.API_VERSION,
-        sdkVersion = StripeSdkVersion.VERSION,
-        appInfo = Stripe.appInfo,
-        publishableKeyProvider = publishableKeyProvider,
-        stripeAccountIdProvider = stripeAccountIdProvider,
-    )
+        )
+    }
 }
