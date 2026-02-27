@@ -102,7 +102,7 @@ internal class DefaultTapToAddHelper(
                         paymentSelection,
                     )
                 } else {
-                    null
+                    TapToAddNextStep.ShowSavedPaymentMethods(paymentSelection)
                 }
             }
             TapToAddResult.Complete -> TapToAddNextStep.Complete

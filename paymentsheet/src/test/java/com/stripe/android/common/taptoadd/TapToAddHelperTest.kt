@@ -69,7 +69,7 @@ class TapToAddHelperTest {
                 tapToAddResult,
                 helper = helper,
                 activityResultCallerScenario = activityResultCallerScenario,
-                expectedNextStep = null,
+                expectedNextStep = TapToAddNextStep.ShowSavedPaymentMethods(expectedPaymentSelection),
                 testScope = testScope,
             )
 
@@ -97,7 +97,7 @@ class TapToAddHelperTest {
                 tapToAddResult,
                 helper = helper,
                 activityResultCallerScenario = activityResultCallerScenario,
-                expectedNextStep = null,
+                expectedNextStep = TapToAddNextStep.ShowSavedPaymentMethods(expectedPaymentSelection),
                 testScope = testScope,
             )
 

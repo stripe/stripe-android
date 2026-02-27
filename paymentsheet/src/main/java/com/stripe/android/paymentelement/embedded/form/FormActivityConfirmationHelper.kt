@@ -56,6 +56,13 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
                         )
                         null
                     }
+                    is TapToAddNextStep.ShowSavedPaymentMethods -> {
+                        FormResult.Complete(
+                            selection = result.paymentSelection,
+                            hasBeenConfirmed = false,
+                            customerState = customerStateHolder.customer.value,
+                        )
+                    }
                     TapToAddNextStep.Complete -> {
                         FormResult.Complete(
                             selection = null,
