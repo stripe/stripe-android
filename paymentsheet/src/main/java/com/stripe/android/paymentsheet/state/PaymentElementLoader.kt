@@ -15,7 +15,6 @@ import com.stripe.android.common.taptoadd.TapToAddConnectionManager
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.utils.FeatureFlag
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.UserFacingLogger
@@ -421,10 +420,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         }
         return checkoutSessionRepository.init(
             sessionId = initializationMode.id,
-            options = ApiRequest.Options(
-                paymentConfiguration.get().publishableKey,
-                paymentConfiguration.get().stripeAccountId,
-            ),
         ).getOrThrow()
     }
 
