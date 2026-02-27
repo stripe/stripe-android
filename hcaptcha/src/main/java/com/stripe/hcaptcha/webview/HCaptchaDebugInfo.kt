@@ -8,11 +8,8 @@ import androidx.annotation.RestrictTo
 import com.stripe.hcaptcha.encode.encodeToJson
 import dalvik.system.DexFile
 import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
-import java.io.BufferedReader
 import java.io.IOException
-import java.io.InputStreamReader
 import java.io.Serializable
 import java.math.BigInteger
 import java.security.MessageDigest
@@ -31,16 +28,6 @@ internal class HCaptchaDebugInfo(private val context: Context) : Serializable {
         } catch (e: IOException) {
             Log.d(JS_INTERFACE_TAG, "Cannot build debugInfo")
             "[]"
-        }
-    }
-
-    @get:JavascriptInterface
-    val sysDebug: String by lazy {
-        try {
-            encodeToJson(MapSerializer(String.serializer(), String.serializer()), roBuildProps())
-        } catch (e: IOException) {
-            Log.d(JS_INTERFACE_TAG, "Cannot build sysDebug")
-            "{}"
         }
     }
 
@@ -74,45 +61,11 @@ internal class HCaptchaDebugInfo(private val context: Context) : Serializable {
         return result
     }
 
-    @Throws(IOException::class)
-    private fun roBuildProps(): Map<String, String> {
-        var getpropProcess: Process? = null
-        val props: MutableMap<String, String> = HashMap()
-        try {
-            getpropProcess = ProcessBuilder(GET_PROP_BIN).start()
-            BufferedReader(
-                InputStreamReader(getpropProcess.inputStream, CHARSET_NAME)
-            ).use { br ->
-                var line: String
-                val entry = StringBuilder()
-                while (br.readLine().also { line = it } != null) {
-                    if (line.endsWith("]")) {
-                        entry.replace(0, if (entry.length == 0) 0 else entry.length - 1, line)
-                    } else {
-                        entry.append(line)
-                        continue
-                    }
-                    val parsedLine =
-                        entry.toString().split("]: \\[".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-                    val key = parsedLine[0].substring(1) // strip first [
-                    if (key.startsWith("ro")) {
-                        val value = parsedLine[1].substring(0, parsedLine[1].length - 2) // strip last ]
-                        props[key] = value
-                    }
-                }
-            }
-        } finally {
-            getpropProcess?.destroy()
-        }
-        return props
-    }
-
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         private const val serialVersionUID: Long = -2969617621043154137L
         const val JS_INTERFACE_TAG = "JSDI"
 
-        private const val GET_PROP_BIN = "/system/bin/getprop"
         private const val CHARSET_NAME = "UTF-8"
     }
 }
