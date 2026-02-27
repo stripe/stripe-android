@@ -98,6 +98,8 @@ import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Arg
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcCompletionState
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.repositories.DefaultSavedPaymentMethodRepository
+import com.stripe.android.paymentsheet.repositories.FakeCheckoutSessionRepository
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -3582,7 +3584,10 @@ internal class PaymentSheetViewModelTest {
                 args = args,
                 eventReporter = eventReporter,
                 paymentElementLoader = paymentElementLoader,
-                customerRepository = customerRepository,
+                savedPaymentMethodRepository = DefaultSavedPaymentMethodRepository(
+                    customerRepository = customerRepository,
+                    checkoutSessionRepository = FakeCheckoutSessionRepository(),
+                ),
                 logger = Logger.noop(),
                 workContext = testDispatcher,
                 savedStateHandle = thisSavedStateHandle,

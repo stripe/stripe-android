@@ -29,8 +29,11 @@ import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.LoadingEventReporter
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepositoryModule
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.repositories.DefaultSavedPaymentMethodRepository
+import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import dagger.Binds
 import dagger.Module
@@ -49,6 +52,7 @@ import kotlin.coroutines.CoroutineContext
         PaymentsIntegrityModule::class,
         PaymentElementRequestSurfaceModule::class,
         PaymentConfigurationModule::class,
+        CheckoutSessionRepositoryModule::class,
     ],
 )
 internal interface EmbeddedCommonModule {
@@ -65,6 +69,11 @@ internal interface EmbeddedCommonModule {
 
     @Binds
     fun bindsCustomerRepository(repository: CustomerApiRepository): CustomerRepository
+
+    @Binds
+    fun bindsSavedPaymentMethodRepository(
+        repository: DefaultSavedPaymentMethodRepository,
+    ): SavedPaymentMethodRepository
 
     @Binds
     fun bindsPaymentAnalyticsRequestFactory(

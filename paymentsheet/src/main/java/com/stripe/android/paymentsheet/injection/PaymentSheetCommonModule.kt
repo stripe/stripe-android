@@ -43,9 +43,12 @@ import com.stripe.android.paymentsheet.flowcontroller.DefaultPaymentSelectionUpd
 import com.stripe.android.paymentsheet.flowcontroller.PaymentSelectionUpdater
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.DefaultCvcRecollectionInteractor
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepositoryModule
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.repositories.DefaultSavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
+import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
 import com.stripe.android.paymentsheet.state.CreateLinkState
 import com.stripe.android.paymentsheet.state.DefaultAnalyticsMetadataFactory
@@ -75,6 +78,7 @@ import javax.inject.Singleton
         TapToAddConnectionModule::class,
         PaymentsIntegrityModule::class,
         PaymentConfigurationModule::class,
+        CheckoutSessionRepositoryModule::class,
     ]
 )
 internal abstract class PaymentSheetCommonModule {
@@ -89,6 +93,11 @@ internal abstract class PaymentSheetCommonModule {
 
     @Binds
     abstract fun bindsCustomerRepository(repository: CustomerApiRepository): CustomerRepository
+
+    @Binds
+    abstract fun bindsSavedPaymentMethodRepository(
+        repository: DefaultSavedPaymentMethodRepository,
+    ): SavedPaymentMethodRepository
 
     @Binds
     abstract fun bindsErrorReporter(errorReporter: RealErrorReporter): ErrorReporter

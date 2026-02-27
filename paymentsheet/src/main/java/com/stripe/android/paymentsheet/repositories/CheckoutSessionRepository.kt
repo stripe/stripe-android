@@ -21,6 +21,11 @@ internal interface CheckoutSessionRepository {
         params: ConfirmCheckoutSessionParams,
         options: ApiRequest.Options,
     ): Result<CheckoutSessionResponse>
+
+    suspend fun detachPaymentMethod(
+        sessionId: String,
+        paymentMethodId: String,
+    ): Result<CheckoutSessionResponse>
 }
 
 internal class DefaultCheckoutSessionRepository(
@@ -28,6 +33,8 @@ internal class DefaultCheckoutSessionRepository(
     apiVersion: String,
     sdkVersion: String = StripeSdkVersion.VERSION,
     appInfo: AppInfo?,
+    private val publishableKeyProvider: () -> String,
+    private val stripeAccountIdProvider: () -> String?,
 ) : CheckoutSessionRepository {
     private val apiRequestFactory = ApiRequest.Factory(
         appInfo = appInfo,
@@ -79,11 +86,38 @@ internal class DefaultCheckoutSessionRepository(
         )
     }
 
+    override suspend fun detachPaymentMethod(
+        sessionId: String,
+        paymentMethodId: String,
+    ): Result<CheckoutSessionResponse> {
+        val options = ApiRequest.Options(
+            apiKey = publishableKeyProvider(),
+            stripeAccount = stripeAccountIdProvider(),
+        )
+        return executeRequestWithResultParser(
+            stripeErrorJsonParser = stripeErrorJsonParser,
+            stripeNetworkClient = stripeNetworkClient,
+            request = apiRequestFactory.createPost(
+                url = updateUrl(sessionId),
+                options = options,
+                params = mapOf(
+                    "payment_method_to_detach" to paymentMethodId,
+                ),
+            ),
+            responseJsonParser = CheckoutSessionResponseJsonParser(
+                isLiveMode = options.apiKeyIsLiveMode,
+            ),
+        )
+    }
+
     private companion object {
         private fun initUrl(sessionId: String): String =
             "${ApiRequest.API_HOST}/v1/payment_pages/$sessionId/init"
 
         private fun confirmUrl(checkoutSessionId: String): String =
             "${ApiRequest.API_HOST}/v1/payment_pages/$checkoutSessionId/confirm"
+
+        private fun updateUrl(sessionId: String): String =
+            "${ApiRequest.API_HOST}/v1/payment_pages/$sessionId"
     }
 }

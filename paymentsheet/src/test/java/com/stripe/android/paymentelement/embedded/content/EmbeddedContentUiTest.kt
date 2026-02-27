@@ -24,6 +24,8 @@ import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.AnalyticEventCallbackRule
+import com.stripe.android.paymentsheet.repositories.DefaultSavedPaymentMethodRepository
+import com.stripe.android.paymentsheet.repositories.FakeCheckoutSessionRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
@@ -157,7 +159,10 @@ internal class EmbeddedContentUiTest {
                 eventReporter = eventReporter,
                 workContext = Dispatchers.Unconfined,
                 uiContext = Dispatchers.Unconfined,
-                customerRepository = FakeCustomerRepository(),
+                savedPaymentMethodRepository = DefaultSavedPaymentMethodRepository(
+                    customerRepository = FakeCustomerRepository(),
+                    checkoutSessionRepository = FakeCheckoutSessionRepository(),
+                ),
                 selectionHolder = selectionHolder,
                 embeddedLinkHelper = object : EmbeddedLinkHelper {
                     override val linkEmail: StateFlow<String?> = stateFlowOf(null)
