@@ -1567,11 +1567,11 @@ internal class PlaygroundTestDriver(
         }
 
         onWebView()
-            .withElementByTestId("agree-button")
+            .withElementByTestId("institution-default")
             .perform(webClick())
 
         onWebView()
-            .withElementByTestId("institution-default")
+            .withElementByTestId("agree-button")
             .perform(webClick())
 
         onWebView()

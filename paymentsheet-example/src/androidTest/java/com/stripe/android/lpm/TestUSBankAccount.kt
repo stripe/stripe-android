@@ -150,7 +150,6 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
         )
     }
 
-    @Ignore("#ir-bumper-lonely")
     @Test
     fun testUSBankAccountLiteSuccess() {
         testDriver.confirmUSBankAccount(
