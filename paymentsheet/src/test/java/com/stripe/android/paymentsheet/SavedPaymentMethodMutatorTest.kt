@@ -20,10 +20,12 @@ import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.repositories.DefaultSavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.utils.stateFlowOf
+import com.stripe.android.paymentsheet.repositories.FakeCheckoutSessionRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -977,7 +979,10 @@ class SavedPaymentMethodMutatorTest {
                 coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
                 workContext = coroutineContext,
                 uiContext = coroutineContext,
-                customerRepository = customerRepository,
+                savedPaymentMethodRepository = DefaultSavedPaymentMethodRepository(
+                    customerRepository = customerRepository,
+                    checkoutSessionRepository = FakeCheckoutSessionRepository(),
+                ),
                 selection = selection,
                 setSelection = { selection.value = it },
                 customerStateHolder = customerStateHolder,

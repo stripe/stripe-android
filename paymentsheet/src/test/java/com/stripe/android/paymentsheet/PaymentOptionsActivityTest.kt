@@ -48,6 +48,8 @@ import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.RetryRule
 import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
+import com.stripe.android.paymentsheet.repositories.DefaultSavedPaymentMethodRepository
+import com.stripe.android.paymentsheet.repositories.FakeCheckoutSessionRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.InjectableActivityScenario
@@ -464,7 +466,10 @@ internal class PaymentOptionsActivityTest {
             PaymentOptionsViewModel(
                 args = args,
                 eventReporter = eventReporter,
-                customerRepository = FakeCustomerRepository(),
+                savedPaymentMethodRepository = DefaultSavedPaymentMethodRepository(
+                    customerRepository = FakeCustomerRepository(),
+                    checkoutSessionRepository = FakeCheckoutSessionRepository(),
+                ),
                 workContext = testDispatcher,
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,

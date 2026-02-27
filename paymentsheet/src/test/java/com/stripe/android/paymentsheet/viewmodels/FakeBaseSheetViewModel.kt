@@ -19,6 +19,8 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.repositories.DefaultSavedPaymentMethodRepository
+import com.stripe.android.paymentsheet.repositories.FakeCheckoutSessionRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
@@ -42,7 +44,10 @@ internal class FakeBaseSheetViewModel private constructor(
 ) : BaseSheetViewModel(
     config = PaymentSheet.Configuration.Builder("Example, Inc.").build(),
     eventReporter = FakeEventReporter(),
-    customerRepository = FakeCustomerRepository(),
+    savedPaymentMethodRepository = DefaultSavedPaymentMethodRepository(
+        customerRepository = FakeCustomerRepository(),
+        checkoutSessionRepository = FakeCheckoutSessionRepository(),
+    ),
     workContext = Dispatchers.IO,
     savedStateHandle = savedStateHandle,
     linkHandler = linkHandler,

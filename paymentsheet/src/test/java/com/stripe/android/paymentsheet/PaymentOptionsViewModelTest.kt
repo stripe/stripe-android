@@ -55,6 +55,8 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.repositories.DefaultSavedPaymentMethodRepository
+import com.stripe.android.paymentsheet.repositories.FakeCheckoutSessionRepository
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.state.WalletLocation
@@ -1406,7 +1408,10 @@ internal class PaymentOptionsViewModelTest {
                 )
             ),
             eventReporter = eventReporter,
-            customerRepository = customerRepository,
+            savedPaymentMethodRepository = DefaultSavedPaymentMethodRepository(
+                    customerRepository = customerRepository,
+                    checkoutSessionRepository = FakeCheckoutSessionRepository(),
+                ),
             workContext = workContext,
             savedStateHandle = savedStateHandle,
             linkHandler = linkHandler,

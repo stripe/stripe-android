@@ -5,6 +5,7 @@ import com.stripe.android.core.networking.ApiRequest
 internal class FakeCheckoutSessionRepository(
     var initResult: Result<CheckoutSessionResponse> = Result.failure(NotImplementedError()),
     var confirmResult: Result<CheckoutSessionResponse> = Result.failure(NotImplementedError()),
+    var detachResult: Result<CheckoutSessionResponse> = Result.failure(NotImplementedError()),
 ) : CheckoutSessionRepository {
 
     override suspend fun init(
@@ -17,4 +18,9 @@ internal class FakeCheckoutSessionRepository(
         params: ConfirmCheckoutSessionParams,
         options: ApiRequest.Options,
     ): Result<CheckoutSessionResponse> = confirmResult
+
+    override suspend fun detachPaymentMethod(
+        sessionId: String,
+        paymentMethodId: String,
+    ): Result<CheckoutSessionResponse> = detachResult
 }

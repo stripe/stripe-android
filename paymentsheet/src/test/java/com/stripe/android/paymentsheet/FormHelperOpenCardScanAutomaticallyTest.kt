@@ -33,6 +33,8 @@ import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.elements.CardDetailsSectionController
 import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.paymentsheet.repositories.DefaultSavedPaymentMethodRepository
+import com.stripe.android.paymentsheet.repositories.FakeCheckoutSessionRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentElementLoader
@@ -148,7 +150,10 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
             PaymentOptionsViewModel(
                 args = args,
                 eventReporter = FakeEventReporter(),
-                customerRepository = FakeCustomerRepository(customer?.paymentMethods ?: emptyList()),
+                savedPaymentMethodRepository = DefaultSavedPaymentMethodRepository(
+                    customerRepository = FakeCustomerRepository(customer?.paymentMethods ?: emptyList()),
+                    checkoutSessionRepository = FakeCheckoutSessionRepository(),
+                ),
                 workContext = testDispatcher,
                 savedStateHandle = thisSavedStateHandle,
                 linkHandler = linkHandler,
@@ -187,7 +192,10 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                 args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
                 eventReporter = FakeEventReporter(),
                 paymentElementLoader = paymentElementLoader,
-                customerRepository = FakeCustomerRepository(customer?.paymentMethods ?: emptyList()),
+                savedPaymentMethodRepository = DefaultSavedPaymentMethodRepository(
+                    customerRepository = FakeCustomerRepository(customer?.paymentMethods ?: emptyList()),
+                    checkoutSessionRepository = FakeCheckoutSessionRepository(),
+                ),
                 logger = Logger.noop(),
                 workContext = testDispatcher,
                 savedStateHandle = thisSavedStateHandle,
