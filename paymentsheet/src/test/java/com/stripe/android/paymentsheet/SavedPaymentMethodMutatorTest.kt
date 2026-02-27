@@ -19,12 +19,12 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
-import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.utils.stateFlowOf
-import com.stripe.android.utils.FakeCustomerRepository
+import com.stripe.android.utils.FakeSavedPaymentMethodRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
@@ -151,7 +151,7 @@ class SavedPaymentMethodMutatorTest {
     @Test
     fun `removePaymentMethod triggers async removal`() {
         var calledDetach = false
-        val customerRepository = FakeCustomerRepository(
+        val savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(
             onDetachPaymentMethod = { paymentMethodId ->
                 assertThat(paymentMethodId).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_METHOD.id)
                 calledDetach = true
@@ -160,7 +160,7 @@ class SavedPaymentMethodMutatorTest {
         )
 
         runScenario(
-            customerRepository = customerRepository,
+            savedPaymentMethodRepository = savedPaymentMethodRepository,
         ) {
             customerStateHolder.setCustomerState(
                 createCustomerState(
@@ -186,7 +186,7 @@ class SavedPaymentMethodMutatorTest {
     @Test
     fun `removePaymentMethod with no CustomerConfiguration available, should not attempt detach`() {
         var calledDetach = false
-        val customerRepository = FakeCustomerRepository(
+        val savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(
             onDetachPaymentMethod = {
                 calledDetach = true
                 throw AssertionError("Not expected")
@@ -194,7 +194,7 @@ class SavedPaymentMethodMutatorTest {
         )
 
         runScenario(
-            customerRepository = customerRepository,
+            savedPaymentMethodRepository = savedPaymentMethodRepository,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         ) {
             savedPaymentMethodMutator.removePaymentMethod(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
@@ -350,7 +350,7 @@ class SavedPaymentMethodMutatorTest {
     fun `updatePaymentMethod performRemove callback`() {
         val displayableSavedPaymentMethod = PaymentMethodFactory.cards(1).first().toDisplayableSavedPaymentMethod()
         val calledDetach = Turbine<Boolean>()
-        val customerRepository = FakeCustomerRepository(
+        val savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(
             onDetachPaymentMethod = { paymentMethodId ->
                 assertThat(paymentMethodId).isEqualTo(displayableSavedPaymentMethod.paymentMethod.id)
                 calledDetach.add(true)
@@ -358,7 +358,7 @@ class SavedPaymentMethodMutatorTest {
             }
         )
 
-        runScenario(customerRepository = customerRepository) {
+        runScenario(savedPaymentMethodRepository = savedPaymentMethodRepository) {
             customerStateHolder.setCustomerState(
                 createCustomerState(
                     paymentMethods = listOf(displayableSavedPaymentMethod.paymentMethod),
@@ -384,7 +384,7 @@ class SavedPaymentMethodMutatorTest {
     fun `removePaymentMethodInEditScreen calls prePaymentMethodRemoveActions and postPaymentMethodRemoveActions`() {
         val displayableSavedPaymentMethod = PaymentMethodFactory.cards(1).first().toDisplayableSavedPaymentMethod()
         val calledDetach = Turbine<Boolean>()
-        val customerRepository = FakeCustomerRepository(
+        val savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(
             onDetachPaymentMethod = { paymentMethodId ->
                 assertThat(paymentMethodId).isEqualTo(displayableSavedPaymentMethod.paymentMethod.id)
                 calledDetach.add(true)
@@ -392,7 +392,7 @@ class SavedPaymentMethodMutatorTest {
             }
         )
 
-        runScenario(customerRepository = customerRepository) {
+        runScenario(savedPaymentMethodRepository = savedPaymentMethodRepository) {
             customerStateHolder.setCustomerState(
                 createCustomerState(
                     paymentMethods = listOf(displayableSavedPaymentMethod.paymentMethod),
@@ -416,7 +416,7 @@ class SavedPaymentMethodMutatorTest {
     fun `updatePaymentMethod performRemove failure callback`() {
         val displayableSavedPaymentMethod = PaymentMethodFactory.cards(1).first().toDisplayableSavedPaymentMethod()
         val calledDetach = Turbine<Boolean>()
-        val customerRepository = FakeCustomerRepository(
+        val savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(
             onDetachPaymentMethod = { paymentMethodId ->
                 assertThat(paymentMethodId).isEqualTo(displayableSavedPaymentMethod.paymentMethod.id)
                 calledDetach.add(true)
@@ -424,7 +424,7 @@ class SavedPaymentMethodMutatorTest {
             }
         )
 
-        runScenario(customerRepository = customerRepository) {
+        runScenario(savedPaymentMethodRepository = savedPaymentMethodRepository) {
             customerStateHolder.setCustomerState(
                 createCustomerState(
                     paymentMethods = listOf(displayableSavedPaymentMethod.paymentMethod),
@@ -447,7 +447,7 @@ class SavedPaymentMethodMutatorTest {
     fun `updatePaymentMethod updateExecutor callback`() {
         val displayableSavedPaymentMethod = PaymentMethodFactory.cards(1).first().toDisplayableSavedPaymentMethod()
         val calledUpdate = Turbine<Boolean>()
-        val customerRepository = FakeCustomerRepository(
+        val savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(
             onUpdatePaymentMethod = {
                 calledUpdate.add(true)
                 Result.success(
@@ -458,7 +458,7 @@ class SavedPaymentMethodMutatorTest {
             }
         )
 
-        runScenario(customerRepository = customerRepository) {
+        runScenario(savedPaymentMethodRepository = savedPaymentMethodRepository) {
             customerStateHolder.setCustomerState(
                 createCustomerState(
                     paymentMethods = listOf(displayableSavedPaymentMethod.paymentMethod),
@@ -485,7 +485,7 @@ class SavedPaymentMethodMutatorTest {
     @Test
     fun `updatePaymentMethod updateExecutor analytics events received`() {
         val displayableSavedPaymentMethod = PaymentMethodFactory.cards(1).first().toDisplayableSavedPaymentMethod()
-        val customerRepository = FakeCustomerRepository(
+        val savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(
             onUpdatePaymentMethod = {
                 Result.success(
                     displayableSavedPaymentMethod.paymentMethod.copy(
@@ -495,7 +495,7 @@ class SavedPaymentMethodMutatorTest {
             }
         )
 
-        runScenario(customerRepository = customerRepository) {
+        runScenario(savedPaymentMethodRepository = savedPaymentMethodRepository) {
             customerStateHolder.setCustomerState(
                 createCustomerState(
                     paymentMethods = listOf(displayableSavedPaymentMethod.paymentMethod),
@@ -515,7 +515,7 @@ class SavedPaymentMethodMutatorTest {
     fun `modifyCardPaymentMethod updates card`() {
         val displayableSavedPaymentMethod = PaymentMethodFactory.cards(1).first().toDisplayableSavedPaymentMethod()
         val calledUpdate = Turbine<Boolean>()
-        val customerRepository = FakeCustomerRepository(
+        val savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(
             onUpdatePaymentMethod = {
                 calledUpdate.add(true)
                 Result.success(
@@ -526,7 +526,7 @@ class SavedPaymentMethodMutatorTest {
             }
         )
 
-        runScenario(customerRepository = customerRepository) {
+        runScenario(savedPaymentMethodRepository = savedPaymentMethodRepository) {
             customerStateHolder.setCustomerState(
                 createCustomerState(
                     paymentMethods = listOf(displayableSavedPaymentMethod.paymentMethod),
@@ -553,9 +553,9 @@ class SavedPaymentMethodMutatorTest {
     fun `successful card modification updates selected payment method if already selected`() {
         val paymentMethod = PaymentMethodFactory.cards(1).first()
         val selection = MutableStateFlow<PaymentSelection?>(PaymentSelection.Saved(paymentMethod))
-        val customerRepository = createRepositoryThatUpdatesCard(paymentMethod)
+        val savedPaymentMethodRepository = createRepositoryThatUpdatesCard(paymentMethod)
 
-        runScenario(customerRepository = customerRepository, selection = selection) {
+        runScenario(savedPaymentMethodRepository = savedPaymentMethodRepository, selection = selection) {
             setupCustomerState(paymentMethod)
             savedPaymentMethodMutator.modifyCardPaymentMethod(
                 paymentMethod = paymentMethod,
@@ -576,9 +576,9 @@ class SavedPaymentMethodMutatorTest {
         val selection = MutableStateFlow<PaymentSelection?>(
             PaymentSelection.Saved(paymentMethod.copy(id = differentPaymentMethodId))
         )
-        val customerRepository = createRepositoryThatUpdatesCard(paymentMethod)
+        val savedPaymentMethodRepository = createRepositoryThatUpdatesCard(paymentMethod)
 
-        runScenario(customerRepository = customerRepository, selection = selection) {
+        runScenario(savedPaymentMethodRepository = savedPaymentMethodRepository, selection = selection) {
             setupCustomerState(paymentMethod)
 
             savedPaymentMethodMutator.modifyCardPaymentMethod(
@@ -593,9 +593,9 @@ class SavedPaymentMethodMutatorTest {
         }
     }
 
-    private fun createRepositoryThatUpdatesCard(paymentMethod: PaymentMethod): FakeCustomerRepository {
+    private fun createRepositoryThatUpdatesCard(paymentMethod: PaymentMethod): FakeSavedPaymentMethodRepository {
         val displayable = paymentMethod.toDisplayableSavedPaymentMethod()
-        return FakeCustomerRepository(
+        return FakeSavedPaymentMethodRepository(
             onUpdatePaymentMethod = {
                 Result.success(
                     displayable.paymentMethod.copy(
@@ -609,7 +609,7 @@ class SavedPaymentMethodMutatorTest {
     @Test
     fun `modifyCardPaymentMethod analytics events received`() {
         val displayableSavedPaymentMethod = PaymentMethodFactory.cards(1).first().toDisplayableSavedPaymentMethod()
-        val customerRepository = FakeCustomerRepository(
+        val savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(
             onUpdatePaymentMethod = {
                 Result.success(
                     displayableSavedPaymentMethod.paymentMethod.copy(
@@ -619,7 +619,7 @@ class SavedPaymentMethodMutatorTest {
             }
         )
 
-        runScenario(customerRepository = customerRepository) {
+        runScenario(savedPaymentMethodRepository = savedPaymentMethodRepository) {
             customerStateHolder.setCustomerState(
                 createCustomerState(
                     paymentMethods = listOf(displayableSavedPaymentMethod.paymentMethod),
@@ -639,13 +639,13 @@ class SavedPaymentMethodMutatorTest {
     fun `updatePaymentMethod updateExecutor failure callback`() {
         val displayableSavedPaymentMethod = PaymentMethodFactory.cards(1).first().toDisplayableSavedPaymentMethod()
         val calledUpdate = Turbine<Boolean>()
-        val customerRepository = FakeCustomerRepository(
+        val savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(
             onUpdatePaymentMethod = {
                 calledUpdate.add(true)
                 Result.failure(IllegalStateException("Test failure"))
             }
         )
-        runScenario(customerRepository = customerRepository) {
+        runScenario(savedPaymentMethodRepository = savedPaymentMethodRepository) {
             customerStateHolder.setCustomerState(
                 createCustomerState(
                     paymentMethods = listOf(displayableSavedPaymentMethod.paymentMethod),
@@ -672,13 +672,13 @@ class SavedPaymentMethodMutatorTest {
     @Test
     fun `updatePaymentMethod updateExecutor failure analytics events received`() {
         val displayableSavedPaymentMethod = PaymentMethodFactory.cards(1).first().toDisplayableSavedPaymentMethod()
-        val customerRepository = FakeCustomerRepository(
+        val savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(
             onUpdatePaymentMethod = {
                 Result.failure(IllegalStateException("Test failure"))
             }
         )
 
-        runScenario(customerRepository = customerRepository) {
+        runScenario(savedPaymentMethodRepository = savedPaymentMethodRepository) {
             customerStateHolder.setCustomerState(
                 createCustomerState(
                     paymentMethods = listOf(displayableSavedPaymentMethod.paymentMethod),
@@ -695,12 +695,12 @@ class SavedPaymentMethodMutatorTest {
 
     @Test
     fun `setDefaultPaymentMethod updates default payment method on success`() {
-        val customerRepository = FakeCustomerRepository(
+        val savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(
             onSetDefaultPaymentMethod = { Result.success(mock()) }
         )
         val paymentMethods = PaymentMethodFixtures.createCards(3)
 
-        runScenario(customerRepository = customerRepository) {
+        runScenario(savedPaymentMethodRepository = savedPaymentMethodRepository) {
             customerStateHolder.setCustomerState(
                 createCustomerState(
                     paymentMethods = paymentMethods,
@@ -723,7 +723,7 @@ class SavedPaymentMethodMutatorTest {
         val paymentMethods = PaymentMethodFixtures.createCards(3)
 
         runScenario(
-            customerRepository = FakeCustomerRepository(
+            savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(
                 onSetDefaultPaymentMethod = { Result.success(mock()) }
             )
         ) {
@@ -748,13 +748,13 @@ class SavedPaymentMethodMutatorTest {
     fun `setDefaultPaymentMethod success analytics events received`() {
         val paymentMethods = PaymentMethodFixtures.createCards(3)
 
-        val customerRepository = FakeCustomerRepository(
+        val savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(
             onSetDefaultPaymentMethod = {
                 Result.success(mock())
             }
         )
 
-        runScenario(customerRepository = customerRepository) {
+        runScenario(savedPaymentMethodRepository = savedPaymentMethodRepository) {
             customerStateHolder.setCustomerState(
                 createCustomerState(
                     paymentMethods = paymentMethods,
@@ -771,7 +771,7 @@ class SavedPaymentMethodMutatorTest {
     fun `setDefaultPaymentMethod failed analytics events received`() {
         val paymentMethods = PaymentMethodFixtures.createCards(3)
 
-        val customerRepository = FakeCustomerRepository(
+        val savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(
             onSetDefaultPaymentMethod = {
                 Result.failure(IllegalStateException("Test failure"))
             }
@@ -779,7 +779,7 @@ class SavedPaymentMethodMutatorTest {
 
         val eventReporter = FakeEventReporter()
 
-        runScenario(eventReporter = eventReporter, customerRepository = customerRepository) {
+        runScenario(eventReporter = eventReporter, savedPaymentMethodRepository = savedPaymentMethodRepository) {
             customerStateHolder.setCustomerState(
                 createCustomerState(
                     paymentMethods = paymentMethods,
@@ -853,7 +853,7 @@ class SavedPaymentMethodMutatorTest {
     }
 
     private fun removeDuplicatesTest(shouldRemoveDuplicates: Boolean) {
-        val repository = FakeCustomerRepository()
+        val repository = FakeSavedPaymentMethodRepository()
 
         val customerSessionClientSecret = if (shouldRemoveDuplicates) {
             "customer_session_client_secret"
@@ -861,7 +861,7 @@ class SavedPaymentMethodMutatorTest {
             null
         }
         runScenario(
-            customerRepository = repository,
+            savedPaymentMethodRepository = repository,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 hasCustomerConfiguration = true,
                 customerMetadataPermissions = CustomerMetadata.Permissions(
@@ -888,12 +888,20 @@ class SavedPaymentMethodMutatorTest {
             assertThat(postPaymentMethodRemovedTurbine.awaitItem()).isEqualTo(Unit)
 
             assertThat(repository.detachRequests.awaitItem()).isEqualTo(
-                FakeCustomerRepository.DetachRequest(
+                FakeSavedPaymentMethodRepository.DetachRequest(
                     paymentMethodId = paymentMethod.id,
-                    customerInfo = CustomerRepository.CustomerInfo(
+                    customerMetadata = CustomerMetadata(
                         id = "cus_123",
                         ephemeralKeySecret = "ek_123",
                         customerSessionClientSecret = customerSessionClientSecret,
+                        isPaymentMethodSetAsDefaultEnabled = false,
+                        permissions = CustomerMetadata.Permissions(
+                            removePaymentMethod = PaymentMethodRemovePermission.Full,
+                            saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
+                            canRemoveLastPaymentMethod = true,
+                            canRemoveDuplicates = shouldRemoveDuplicates,
+                            canUpdateFullPaymentMethodDetails = false,
+                        ),
                     ),
                     canRemoveDuplicates = shouldRemoveDuplicates,
                 )
@@ -948,7 +956,7 @@ class SavedPaymentMethodMutatorTest {
 
     @Suppress("LongMethod")
     private fun runScenario(
-        customerRepository: CustomerRepository = FakeCustomerRepository(),
+        savedPaymentMethodRepository: SavedPaymentMethodRepository = FakeSavedPaymentMethodRepository(),
         eventReporter: FakeEventReporter = FakeEventReporter(),
         selection: MutableStateFlow<PaymentSelection?> = MutableStateFlow(null),
         paymentMethodMetadata: PaymentMethodMetadata? = PaymentMethodMetadataFactory.create(
@@ -977,7 +985,7 @@ class SavedPaymentMethodMutatorTest {
                 coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
                 workContext = coroutineContext,
                 uiContext = coroutineContext,
-                customerRepository = customerRepository,
+                savedPaymentMethodRepository = savedPaymentMethodRepository,
                 selection = selection,
                 setSelection = { selection.value = it },
                 customerStateHolder = customerStateHolder,

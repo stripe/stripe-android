@@ -31,6 +31,8 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.LoadingEventReporter
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.repositories.DefaultSavedPaymentMethodRepository
+import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import dagger.Binds
 import dagger.Module
@@ -65,6 +67,11 @@ internal interface EmbeddedCommonModule {
 
     @Binds
     fun bindsCustomerRepository(repository: CustomerApiRepository): CustomerRepository
+
+    @Binds
+    fun bindsSavedPaymentMethodRepository(
+        repository: DefaultSavedPaymentMethodRepository,
+    ): SavedPaymentMethodRepository
 
     @Binds
     fun bindsPaymentAnalyticsRequestFactory(

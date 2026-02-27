@@ -36,6 +36,7 @@ import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.link.utils.errorMessage
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.model.CardBrand
@@ -97,7 +98,7 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSaved
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Args
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcCompletionState
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
-import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -124,9 +125,9 @@ import com.stripe.android.ui.core.Amount
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.BankFormScreenStateFactory
-import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentElementLoader
+import com.stripe.android.utils.FakeSavedPaymentMethodRepository
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import com.stripe.android.utils.PaymentElementCallbackTestRule
 import com.stripe.android.utils.RelayingPaymentElementLoader
@@ -206,8 +207,8 @@ internal class PaymentSheetViewModelTest {
         Dispatchers.setMain(testDispatcher)
         val paymentMethods = listOf(CARD_WITH_NETWORKS_PAYMENT_METHOD)
 
-        val customerRepository = spy(
-            FakeCustomerRepository(
+        val savedPaymentMethodRepository = spy(
+            FakeSavedPaymentMethodRepository(
                 onUpdatePaymentMethod = {
                     Result.success(paymentMethods.first())
                 }
@@ -228,7 +229,7 @@ internal class PaymentSheetViewModelTest {
                 paymentMethods = paymentMethods,
                 defaultPaymentMethodId = null,
             ),
-            customerRepository = customerRepository
+            savedPaymentMethodRepository = savedPaymentMethodRepository
         )
 
         viewModel.navigationHandler.currentScreen.test {
@@ -253,21 +254,19 @@ internal class PaymentSheetViewModelTest {
             assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
         }
 
-        val customerInfoCaptor = argumentCaptor<CustomerRepository.CustomerInfo>()
+        val customerMetadataCaptor = argumentCaptor<CustomerMetadata>()
 
-        verify(customerRepository).updatePaymentMethod(
-            customerInfoCaptor.capture(),
+        verify(savedPaymentMethodRepository).updatePaymentMethod(
+            customerMetadataCaptor.capture(),
             any(),
             any()
         )
 
-        assertThat(customerInfoCaptor.firstValue).isEqualTo(
-            CustomerRepository.CustomerInfo(
-                id = "cus_123",
-                ephemeralKeySecret = "ek_123",
-                customerSessionClientSecret = null,
-            )
-        )
+        with(customerMetadataCaptor.firstValue) {
+            assertThat(id).isEqualTo("cus_123")
+            assertThat(ephemeralKeySecret).isEqualTo("ek_123")
+            assertThat(customerSessionClientSecret).isNull()
+        }
     }
 
     @Test
@@ -287,8 +286,8 @@ internal class PaymentSheetViewModelTest {
             )
         )
 
-        val customerRepository = spy(
-            FakeCustomerRepository(
+        val savedPaymentMethodRepository = spy(
+            FakeSavedPaymentMethodRepository(
                 onUpdatePaymentMethod = {
                     Result.success(updatedPaymentMethod)
                 }
@@ -296,7 +295,7 @@ internal class PaymentSheetViewModelTest {
         )
         val viewModel = createViewModel(
             customer = EMPTY_CUSTOMER_STATE.copy(paymentMethods = paymentMethods),
-            customerRepository = customerRepository,
+            savedPaymentMethodRepository = savedPaymentMethodRepository,
             eventReporter = eventReporter
         )
 
@@ -334,7 +333,7 @@ internal class PaymentSheetViewModelTest {
         val idCaptor = argumentCaptor<String>()
         val paramsCaptor = argumentCaptor<PaymentMethodUpdateParams>()
 
-        verify(customerRepository).updatePaymentMethod(
+        verify(savedPaymentMethodRepository).updatePaymentMethod(
             any(),
             idCaptor.capture(),
             paramsCaptor.capture()
@@ -368,8 +367,8 @@ internal class PaymentSheetViewModelTest {
 
         val firstPaymentMethod = paymentMethods.first()
 
-        val customerRepository = spy(
-            FakeCustomerRepository(
+        val savedPaymentMethodRepository = spy(
+            FakeSavedPaymentMethodRepository(
                 onUpdatePaymentMethod = {
                     Result.failure(Exception("No network found!"))
                 }
@@ -377,7 +376,7 @@ internal class PaymentSheetViewModelTest {
         )
         val viewModel = createViewModel(
             customer = EMPTY_CUSTOMER_STATE.copy(paymentMethods = paymentMethods),
-            customerRepository = customerRepository,
+            savedPaymentMethodRepository = savedPaymentMethodRepository,
             eventReporter = eventReporter
         )
 
@@ -1712,7 +1711,7 @@ internal class PaymentSheetViewModelTest {
                 signupMode = null,
             ),
             customer = null,
-            customerRepository = FakeCustomerRepository(PAYMENT_METHODS),
+            savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(PAYMENT_METHODS),
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(
                 linkAttestationCheck = FakeLinkAttestationCheck().apply {
                     result = LinkAttestationCheck.Result.AccountError(
@@ -1741,7 +1740,7 @@ internal class PaymentSheetViewModelTest {
                 signupMode = null,
             ),
             customer = null,
-            customerRepository = FakeCustomerRepository(PAYMENT_METHODS),
+            savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(PAYMENT_METHODS),
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(
                 linkAttestationCheck = FakeLinkAttestationCheck().apply {
                     result = LinkAttestationCheck.Result.AccountError(
@@ -2902,11 +2901,11 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `on 'modifyPaymentMethod' with no customer available, should not attempt update`() = runTest {
-        val customerRepository = spy(FakeCustomerRepository())
+        val savedPaymentMethodRepository = spy(FakeSavedPaymentMethodRepository())
 
         val viewModel = createViewModel(
             customer = null,
-            customerRepository = customerRepository,
+            savedPaymentMethodRepository = savedPaymentMethodRepository,
         )
 
         viewModel.navigationHandler.currentScreen.test {
@@ -2924,7 +2923,7 @@ internal class PaymentSheetViewModelTest {
                 val interactor = currentScreen.interactor
                 interactor.cardParamsUpdateAction(CardBrand.Visa)
 
-                verify(customerRepository, never()).updatePaymentMethod(any(), any(), any())
+                verify(savedPaymentMethodRepository, never()).updatePaymentMethod(any(), any(), any())
             }
         }
     }
@@ -3508,8 +3507,8 @@ internal class PaymentSheetViewModelTest {
         customer: CustomerState? = EMPTY_CUSTOMER_STATE.copy(paymentMethods = PAYMENT_METHODS),
         linkConfigurationCoordinator: LinkConfigurationCoordinator =
             this@PaymentSheetViewModelTest.linkConfigurationCoordinator,
-        customerRepository: CustomerRepository =
-            FakeCustomerRepository(customer?.paymentMethods ?: emptyList()),
+        savedPaymentMethodRepository: SavedPaymentMethodRepository =
+            FakeSavedPaymentMethodRepository(customer?.paymentMethods ?: emptyList()),
         shouldFailLoad: Boolean = false,
         linkState: LinkState? = null,
         isGooglePayReady: Boolean = false,
@@ -3546,7 +3545,7 @@ internal class PaymentSheetViewModelTest {
             stripeIntent = stripeIntent,
             customer = customer,
             linkConfigurationCoordinator = linkConfigurationCoordinator,
-            customerRepository = customerRepository,
+            savedPaymentMethodRepository = savedPaymentMethodRepository,
             shouldFailLoad = shouldFailLoad,
             linkState = linkState,
             isGooglePayReady = isGooglePayReady,
@@ -3570,7 +3569,9 @@ internal class PaymentSheetViewModelTest {
         stripeIntent: StripeIntent = PAYMENT_INTENT,
         customer: CustomerState? = EMPTY_CUSTOMER_STATE.copy(paymentMethods = PAYMENT_METHODS),
         linkConfigurationCoordinator: LinkConfigurationCoordinator = this.linkConfigurationCoordinator,
-        customerRepository: CustomerRepository = FakeCustomerRepository(customer?.paymentMethods ?: emptyList()),
+        savedPaymentMethodRepository: SavedPaymentMethodRepository = FakeSavedPaymentMethodRepository(
+            customer?.paymentMethods ?: emptyList()
+        ),
         shouldFailLoad: Boolean = false,
         linkState: LinkState? = null,
         isGooglePayReady: Boolean = false,
@@ -3607,7 +3608,7 @@ internal class PaymentSheetViewModelTest {
                 args = args,
                 eventReporter = eventReporter,
                 paymentElementLoader = paymentElementLoader,
-                customerRepository = customerRepository,
+                savedPaymentMethodRepository = savedPaymentMethodRepository,
                 logger = Logger.noop(),
                 workContext = testDispatcher,
                 savedStateHandle = thisSavedStateHandle,
