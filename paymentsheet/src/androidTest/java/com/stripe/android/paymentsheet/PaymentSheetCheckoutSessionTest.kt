@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.checkout.Checkout
 import com.stripe.android.networktesting.RequestMatchers.host
@@ -46,17 +48,23 @@ internal class PaymentSheetCheckoutSessionTest {
         networkRule = networkRule,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        // Mock checkout session init API
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("POST"),
-            path("/v1/payment_pages/cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh/init"),
-        ) { response ->
-            response.testBodyFromFile("checkout-session-init.json")
+        // We shouldn't need 2 times, but while we're building it out, we do the request twice.
+        repeat(2) {
+            // Mock checkout session init API
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh/init"),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-init.json")
+            }
         }
 
-        val checkout = Checkout.configure("cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh_secret_example")
-            .getOrThrow()
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val checkout = Checkout.configure(
+            context = context,
+            checkoutSessionClientSecret = "cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh_secret_example",
+        ).getOrThrow()
 
         testContext.presentPaymentSheet {
             presentWithCheckout(
