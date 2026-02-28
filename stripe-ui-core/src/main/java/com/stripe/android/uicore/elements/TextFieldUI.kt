@@ -5,7 +5,13 @@ import android.view.KeyEvent
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.BasicTooltipBox
+import androidx.compose.foundation.BasicTooltipDefaults
+import androidx.compose.foundation.BasicTooltipState
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,9 +25,11 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ContentAlpha
+import androidx.compose.material.ExposedDropdownMenuDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -48,6 +56,7 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
@@ -64,21 +73,32 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntRect
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.PopupPositionProvider
 import com.stripe.android.core.Logger
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.BuildConfig
 import com.stripe.android.uicore.LocalInstrumentationTest
 import com.stripe.android.uicore.LocalTextFieldInsets
 import com.stripe.android.uicore.R
+import com.stripe.android.uicore.StripeColors
+import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.compat.CompatTextField
 import com.stripe.android.uicore.moveFocusSafely
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.collections.forEach
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val LocalAutofillEventReporter = staticCompositionLocalOf(::defaultAutofillEventReporter)
@@ -173,6 +193,7 @@ fun TextField(
 
     val context = LocalContext.current
 
+    // here
     TextFieldUi(
         value = TextFieldValue(
             text = value,
@@ -243,6 +264,7 @@ fun TextField(
     )
 }
 
+// here
 @Composable
 internal fun TextFieldUi(
     value: TextFieldValue,
@@ -261,7 +283,8 @@ internal fun TextFieldUi(
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions(),
     onValueChange: (value: TextFieldValue) -> Unit = {},
-    onDropdownItemClicked: (item: TextFieldIcon.Dropdown.Item) -> Unit = {}
+    // update this
+    onDropdownItemClicked: (item: TextFieldIcon.Selector.Item) -> Unit = {}
 ) {
     val displayState = when (shouldShowValidationMessage) {
         true -> {
@@ -303,6 +326,7 @@ internal fun TextFieldUi(
             },
             trailingIcon = trailingIcon?.let { icon ->
                 {
+                    // here
                     icon.Composable(loading, onDropdownItemClicked)
                 }
             },
@@ -318,10 +342,11 @@ internal fun TextFieldUi(
     }
 }
 
+// here
 @Composable
 private fun TextFieldIcon.Composable(
     loading: Boolean,
-    onDropdownItemClicked: (item: TextFieldIcon.Dropdown.Item) -> Unit,
+    onDropdownItemClicked: (item: TextFieldIcon.Selector.Item) -> Unit,
 ) {
     Row {
         when (this@Composable) {
@@ -338,8 +363,16 @@ private fun TextFieldIcon.Composable(
                 }
             }
 
+            // here
             is TextFieldIcon.Dropdown -> {
-                TrailingDropdown(
+//                TrailingDropdown(
+//                    icon = this@Composable,
+//                    loading = loading,
+//                    onDropdownItemClicked = onDropdownItemClicked
+//                )
+            }
+            is TextFieldIcon.Selector -> {
+                CardBrandSelector(
                     icon = this@Composable,
                     loading = loading,
                     onDropdownItemClicked = onDropdownItemClicked
@@ -349,6 +382,134 @@ private fun TextFieldIcon.Composable(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+internal fun CardBrandSelector(
+    icon: TextFieldIcon.Selector,
+    loading: Boolean,
+    onDropdownItemClicked: (item: TextFieldIcon.Selector.Item) -> Unit
+) {
+    var hasShownTooltip by rememberSaveable { mutableStateOf(false) }
+    val context = LocalContext.current
+    Box(
+        modifier = Modifier
+            .semantics {
+                this.contentDescription = icon.title.resolve(context)
+            }
+            .testTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
+    ) {
+        Row(
+            modifier = Modifier.padding(10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            val tooltipState = remember { BasicTooltipState(isPersistent = true) }
+            val density = LocalDensity.current
+            val positionProvider = DropdownMenuPositionProvider(
+                contentOffset = DpOffset(0.dp, 0.dp),
+                density = density,
+            )
+            BasicTooltipBox(
+                positionProvider = positionProvider,
+                tooltip = {
+                    Box(Modifier.background(color = MaterialTheme.stripeColors.component)) {
+                        Text(stringResource(R.string.stripe_cbc_choose_card_brand))
+                    }
+                },
+                state = tooltipState,
+            ) {
+                Row {
+                    icon.items.forEach {
+                        LaunchedEffect(icon.items) {
+                            if (!hasShownTooltip) {
+                                hasShownTooltip = true
+                                tooltipState.show()
+                            }
+                        }
+                        if (it == icon.currentItem) {
+                            Icon(
+                                painter = painterResource(R.drawable.stripe_ic_checkmark),
+                                contentDescription = null
+                            )
+                        }
+                        Image(
+                            modifier = Modifier
+                                .clickable(
+                                    enabled = true,
+                                    onClick = {
+                                        onDropdownItemClicked(it)
+                                    }
+                                ),
+                            painter = painterResource(id = it.icon),
+                            contentDescription = null
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+internal val MenuVerticalMargin = 48.dp
+internal data class DropdownMenuPositionProvider(
+    val contentOffset: DpOffset,
+    val density: Density,
+    val onPositionCalculated: (IntRect, IntRect) -> Unit = { _, _ -> }
+) : PopupPositionProvider {
+    override fun calculatePosition(
+        anchorBounds: IntRect,
+        windowSize: IntSize,
+        layoutDirection: LayoutDirection,
+        popupContentSize: IntSize
+    ): IntOffset {
+        // The min margin above and below the menu, relative to the screen.
+        val verticalMargin = with(density) { MenuVerticalMargin.roundToPx() }
+        // The content offset specified using the dropdown offset parameter.
+        val contentOffsetX = with(density) { contentOffset.x.roundToPx() }
+        val contentOffsetY = with(density) { contentOffset.y.roundToPx() }
+
+        // Compute horizontal position.
+        val toRight = anchorBounds.left + contentOffsetX
+        val toLeft = anchorBounds.right - contentOffsetX - popupContentSize.width
+        val toDisplayRight = windowSize.width - popupContentSize.width
+        val toDisplayLeft = 0
+        val x = if (layoutDirection == LayoutDirection.Ltr) {
+            sequenceOf(
+                toRight,
+                toLeft,
+                // If the anchor gets outside of the window on the left, we want to position
+                // toDisplayLeft for proximity to the anchor. Otherwise, toDisplayRight.
+                if (anchorBounds.left >= 0) toDisplayRight else toDisplayLeft
+            )
+        } else {
+            sequenceOf(
+                toLeft,
+                toRight,
+                // If the anchor gets outside of the window on the right, we want to position
+                // toDisplayRight for proximity to the anchor. Otherwise, toDisplayLeft.
+                if (anchorBounds.right <= windowSize.width) toDisplayLeft else toDisplayRight
+            )
+        }.firstOrNull {
+            it >= 0 && it + popupContentSize.width <= windowSize.width
+        } ?: toLeft
+
+        // Compute vertical position.
+        val toBottom = maxOf(anchorBounds.bottom + contentOffsetY, verticalMargin)
+        val toTop = anchorBounds.top - contentOffsetY - popupContentSize.height
+        val toCenter = anchorBounds.top - popupContentSize.height / 2
+        val toDisplayBottom = windowSize.height - popupContentSize.height - verticalMargin
+        val y = sequenceOf(toBottom, toTop, toCenter, toDisplayBottom).firstOrNull {
+            it >= verticalMargin &&
+                it + popupContentSize.height <= windowSize.height - verticalMargin
+        } ?: toTop
+
+        onPositionCalculated(
+            anchorBounds,
+            IntRect(x, y, x + popupContentSize.width, y + popupContentSize.height)
+        )
+        return IntOffset(x, y)
+    }
+}
 @Composable
 fun AnimatedIcons(
     icons: List<TextFieldIcon.Trailing>,
