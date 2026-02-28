@@ -15,6 +15,7 @@ internal data class CustomerMetadata(
     val customerSessionClientSecret: String?,
     val isPaymentMethodSetAsDefaultEnabled: Boolean,
     val permissions: Permissions,
+    val checkoutSessionId: String? = null,
 ) : Parcelable {
 
     @Parcelize

@@ -542,40 +542,39 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         configuration: CommonConfiguration,
         elementsSession: ElementsSession,
         customerInfo: CustomerInfo?,
-    ): CustomerMetadata? {
-        val customerId: String
-        val ephemeralKeySecret: String
-        val customerSessionClientSecret: String?
-        val isPaymentMethodSetAsDefaultEnabled: Boolean
-        val permissions: CustomerMetadata.Permissions
-
-        when (customerInfo) {
-            is CustomerInfo.CustomerSession -> {
-                val customer = elementsSession.customer ?: return null
-                customerId = customer.session.customerId
-                ephemeralKeySecret = customer.session.apiKey
-                customerSessionClientSecret = customerInfo.customerSessionClientSecret
-                isPaymentMethodSetAsDefaultEnabled = getDefaultPaymentMethodsEnabled(elementsSession)
+    ): CustomerMetadata? = when (customerInfo) {
+        is CustomerInfo.CustomerSession -> {
+            val customer = elementsSession.customer ?: return null
+            CustomerMetadata(
+                id = customer.session.customerId,
+                ephemeralKeySecret = customer.session.apiKey,
+                customerSessionClientSecret = customerInfo.customerSessionClientSecret,
+                isPaymentMethodSetAsDefaultEnabled = getDefaultPaymentMethodsEnabled(elementsSession),
                 permissions = createForPaymentSheetCustomerSession(
                     configuration = configuration,
-                    customer = customerInfo.elementsSessionCustomer
-                )
-            }
-            is CustomerInfo.Legacy -> {
-                customerId = customerInfo.id
-                ephemeralKeySecret = customerInfo.ephemeralKeySecret
-                customerSessionClientSecret = null
-                isPaymentMethodSetAsDefaultEnabled = getDefaultPaymentMethodsEnabled(elementsSession)
+                    customer = customerInfo.elementsSessionCustomer,
+                ),
+            )
+        }
+        is CustomerInfo.Legacy -> {
+            CustomerMetadata(
+                id = customerInfo.id,
+                ephemeralKeySecret = customerInfo.ephemeralKeySecret,
+                customerSessionClientSecret = null,
+                isPaymentMethodSetAsDefaultEnabled = getDefaultPaymentMethodsEnabled(elementsSession),
                 permissions = createForPaymentSheetLegacyEphemeralKey(
-                    configuration = configuration
-                )
-            }
-            is CustomerInfo.CheckoutSession -> {
-                customerId = customerInfo.customer.id
+                    configuration = configuration,
+                ),
+            )
+        }
+        is CustomerInfo.CheckoutSession -> {
+            CustomerMetadata(
+                id = customerInfo.customer.id,
                 // Checkout sessions don't use ephemeral keys or customer sessions.
-                ephemeralKeySecret = ""
-                customerSessionClientSecret = null
-                isPaymentMethodSetAsDefaultEnabled = false
+                ephemeralKeySecret = "",
+                customerSessionClientSecret = null,
+                isPaymentMethodSetAsDefaultEnabled = false,
+                checkoutSessionId = customerInfo.checkoutSessionId,
                 permissions = CustomerMetadata.Permissions(
                     removePaymentMethod = if (customerInfo.customer.canDetachPaymentMethod) {
                         PaymentMethodRemovePermission.Full
@@ -590,18 +589,10 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     canRemoveLastPaymentMethod = false,
                     canRemoveDuplicates = false,
                     canUpdateFullPaymentMethodDetails = false,
-                )
-            }
-            null -> return null
+                ),
+            )
         }
-
-        return CustomerMetadata(
-            id = customerId,
-            ephemeralKeySecret = ephemeralKeySecret,
-            customerSessionClientSecret = customerSessionClientSecret,
-            isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
-            permissions = permissions,
-        )
+        null -> null
     }
 
     private fun getDefaultPaymentMethodsEnabled(elementsSession: ElementsSession): Boolean {
@@ -622,6 +613,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             return CustomerInfo.CheckoutSession(
                 customer = checkoutCustomer,
                 offerSave = checkoutSession.savedPaymentMethodsOfferSave,
+                checkoutSessionId = checkoutSession.id,
             )
         }
 
@@ -995,6 +987,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         data class CheckoutSession(
             val customer: CheckoutSessionResponse.Customer,
             val offerSave: CheckoutSessionResponse.SavedPaymentMethodsOfferSave?,
+            val checkoutSessionId: String,
         ) : CustomerInfo
     }
 
