@@ -53,12 +53,12 @@ import com.stripe.android.paymentsheet.state.CreateLinkState
 import com.stripe.android.paymentsheet.state.DefaultAnalyticsMetadataFactory
 import com.stripe.android.paymentsheet.state.DefaultCreateLinkState
 import com.stripe.android.paymentsheet.state.DefaultLinkAccountStatusProvider
-import com.stripe.android.paymentsheet.state.DefaultLoadSessionAndCustomerInfo
+import com.stripe.android.paymentsheet.state.DefaultLoadSession
 import com.stripe.android.paymentsheet.state.DefaultPaymentElementLoader
 import com.stripe.android.paymentsheet.state.DefaultPaymentMethodFilter
 import com.stripe.android.paymentsheet.state.DefaultRetrieveCustomerEmail
 import com.stripe.android.paymentsheet.state.LinkAccountStatusProvider
-import com.stripe.android.paymentsheet.state.LoadSessionAndCustomerInfo
+import com.stripe.android.paymentsheet.state.LoadSession
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentMethodFilter
 import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
@@ -137,9 +137,9 @@ internal abstract class PaymentSheetCommonModule {
     ): CreateLinkState
 
     @Binds
-    abstract fun bindsLoadSessionAndCustomerInfo(
-        impl: DefaultLoadSessionAndCustomerInfo,
-    ): LoadSessionAndCustomerInfo
+    abstract fun bindsLoadSession(
+        impl: DefaultLoadSession,
+    ): LoadSession
 
     @Binds
     abstract fun bindsPaymentSheetUpdater(

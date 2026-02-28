@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.asCommonConfiguration
-import com.stripe.android.isInstanceOf
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -10,17 +9,16 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.FakeCheckoutSessionRepository
-import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.FakeElementsSessionRepository
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 
-internal class DefaultLoadSessionAndCustomerInfoTest {
+internal class DefaultLoadSessionTest {
 
     @Test
     fun `dispatches to elements session loader for PaymentIntent mode`() = runScenario {
-        val result = loadSessionAndCustomerInfo(
+        val result = loadSession(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
@@ -30,7 +28,7 @@ internal class DefaultLoadSessionAndCustomerInfoTest {
 
         assertThat(result.elementsSession.stripeIntent)
             .isEqualTo(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
-        assertThat(result.customerInfo).isNull()
+        assertThat(result.checkoutSession).isNull()
     }
 
     @Test
@@ -39,7 +37,7 @@ internal class DefaultLoadSessionAndCustomerInfoTest {
             initResult = Result.success(CHECKOUT_SESSION_RESPONSE),
         ),
     ) {
-        val result = loadSessionAndCustomerInfo(
+        val result = loadSession(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
                 clientSecret = "cs_test_123_secret_abc",
             ),
@@ -48,14 +46,14 @@ internal class DefaultLoadSessionAndCustomerInfoTest {
         )
 
         assertThat(result.elementsSession).isEqualTo(CHECKOUT_SESSION_RESPONSE.elementsSession)
-        assertThat(result.customerInfo).isInstanceOf<CustomerInfo.CheckoutSession>()
+        assertThat(result.checkoutSession).isEqualTo(CHECKOUT_SESSION_RESPONSE)
     }
 
     @Test
     fun `passes savedPaymentMethodSelection to elements session repository`() = runScenario {
         val savedSelection = SavedSelection.PaymentMethod(id = "pm_123")
 
-        loadSessionAndCustomerInfo(
+        loadSession(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
@@ -68,7 +66,7 @@ internal class DefaultLoadSessionAndCustomerInfoTest {
     }
 
     private data class Scenario(
-        val loadSessionAndCustomerInfo: DefaultLoadSessionAndCustomerInfo,
+        val loadSession: DefaultLoadSession,
         val elementsSessionRepository: FakeElementsSessionRepository,
     )
 
@@ -83,17 +81,16 @@ internal class DefaultLoadSessionAndCustomerInfoTest {
             linkSettings = null,
             sessionsCustomer = sessionsCustomer,
         )
-        val loader = DefaultLoadSessionAndCustomerInfo(
-            checkoutSessionLoader = CheckoutSessionLoadSessionAndCustomerInfo(
+        val loader = DefaultLoadSession(
+            checkoutSessionLoader = CheckoutSessionLoader(
                 checkoutSessionRepository = checkoutSessionRepository,
             ),
-            elementsSessionLoader = ElementsSessionLoadSessionAndCustomerInfo(
+            elementsSessionLoader = ElementsSessionLoader(
                 elementsSessionRepository = elementsSessionRepository,
-                errorReporter = FakeErrorReporter(),
             ),
         )
         Scenario(
-            loadSessionAndCustomerInfo = loader,
+            loadSession = loader,
             elementsSessionRepository = elementsSessionRepository,
         ).block()
     }

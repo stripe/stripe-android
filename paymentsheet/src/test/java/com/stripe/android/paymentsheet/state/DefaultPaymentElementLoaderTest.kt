@@ -4465,13 +4465,12 @@ internal class DefaultPaymentElementLoaderTest {
             cardFundingFilterFactory = PaymentSheetCardFundingFilter.Factory()
         )
 
-        val loadSessionAndCustomerInfo = DefaultLoadSessionAndCustomerInfo(
-            checkoutSessionLoader = CheckoutSessionLoadSessionAndCustomerInfo(
+        val loadSession = DefaultLoadSession(
+            checkoutSessionLoader = CheckoutSessionLoader(
                 checkoutSessionRepository = checkoutSessionRepository,
             ),
-            elementsSessionLoader = ElementsSessionLoadSessionAndCustomerInfo(
+            elementsSessionLoader = ElementsSessionLoader(
                 elementsSessionRepository = elementsSessionRepository,
-                errorReporter = errorReporter,
             ),
         )
 
@@ -4503,7 +4502,7 @@ internal class DefaultPaymentElementLoaderTest {
             paymentConfiguration = { PaymentConfiguration(publishableKey = if (isLiveMode) "pk_live" else "pk_test") },
             paymentMethodFilter = paymentMethodFilter,
             cardFundingFilterFactory = PaymentSheetCardFundingFilter.Factory(),
-            loadSessionAndCustomerInfo = loadSessionAndCustomerInfo,
+            loadSession = loadSession,
         )
     }
 
