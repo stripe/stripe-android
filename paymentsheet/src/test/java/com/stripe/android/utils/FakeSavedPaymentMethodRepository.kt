@@ -74,6 +74,12 @@ internal class FakeSavedPaymentMethodRepository(
         return onSetDefaultPaymentMethod()
     }
 
+    fun validate() {
+        _detachRequests.ensureAllEventsConsumed()
+        _updateRequests.ensureAllEventsConsumed()
+        _setDefaultPaymentMethodRequests.ensureAllEventsConsumed()
+    }
+
     data class DetachRequest(
         val paymentMethodId: String,
         val customerMetadata: CustomerMetadata,
