@@ -65,5 +65,12 @@ class CheckoutSessionLoaderTest {
         ): Result<CheckoutSessionResponse> {
             throw NotImplementedError()
         }
+
+        override suspend fun detachPaymentMethod(
+            sessionId: String,
+            paymentMethodId: String,
+        ): Result<CheckoutSessionResponse> {
+            throw NotImplementedError()
+        }
     }
 }

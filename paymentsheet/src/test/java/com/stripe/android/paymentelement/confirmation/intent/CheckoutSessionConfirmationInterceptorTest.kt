@@ -410,5 +410,12 @@ class CheckoutSessionConfirmationInterceptorTest {
             confirmCheckoutSessionCalls.add(params)
             return confirmCheckoutSessionResult
         }
+
+        override suspend fun detachPaymentMethod(
+            sessionId: String,
+            paymentMethodId: String,
+        ): Result<CheckoutSessionResponse> {
+            error("Not expected in this test")
+        }
     }
 }

@@ -32,6 +32,7 @@ internal interface SavedPaymentMethodRepository {
 
 internal class DefaultSavedPaymentMethodRepository @Inject constructor(
     private val customerRepository: CustomerRepository,
+    private val checkoutSessionRepository: CheckoutSessionRepository,
 ) : SavedPaymentMethodRepository {
 
     private fun CustomerMetadata.toCustomerInfo() = CustomerRepository.CustomerInfo(
@@ -44,11 +45,23 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
         customerMetadata: CustomerMetadata,
         paymentMethodId: String,
         canRemoveDuplicates: Boolean,
-    ): Result<PaymentMethod> = customerRepository.detachPaymentMethod(
-        customerInfo = customerMetadata.toCustomerInfo(),
-        paymentMethodId = paymentMethodId,
-        canRemoveDuplicates = canRemoveDuplicates,
-    )
+    ): Result<PaymentMethod> {
+        val checkoutSessionId = customerMetadata.checkoutSessionId
+        if (checkoutSessionId != null) {
+            return checkoutSessionRepository.detachPaymentMethod(
+                sessionId = checkoutSessionId,
+                paymentMethodId = paymentMethodId,
+            ).map {
+                PaymentMethod.Builder().setId(paymentMethodId).build()
+            }
+        }
+
+        return customerRepository.detachPaymentMethod(
+            customerInfo = customerMetadata.toCustomerInfo(),
+            paymentMethodId = paymentMethodId,
+            canRemoveDuplicates = canRemoveDuplicates,
+        )
+    }
 
     override suspend fun updatePaymentMethod(
         customerMetadata: CustomerMetadata,

@@ -23,6 +23,11 @@ internal interface CheckoutSessionRepository {
         id: String,
         params: ConfirmCheckoutSessionParams,
     ): Result<CheckoutSessionResponse>
+
+    suspend fun detachPaymentMethod(
+        sessionId: String,
+        paymentMethodId: String,
+    ): Result<CheckoutSessionResponse>
 }
 
 internal class DefaultCheckoutSessionRepository @Inject constructor(
@@ -85,11 +90,35 @@ internal class DefaultCheckoutSessionRepository @Inject constructor(
         )
     }
 
+    override suspend fun detachPaymentMethod(
+        sessionId: String,
+        paymentMethodId: String,
+    ): Result<CheckoutSessionResponse> {
+        val options = createOptions()
+        return executeRequestWithResultParser(
+            stripeErrorJsonParser = stripeErrorJsonParser,
+            stripeNetworkClient = stripeNetworkClient,
+            request = apiRequestFactory.createPost(
+                url = updateUrl(sessionId),
+                options = options,
+                params = mapOf(
+                    "payment_method_to_detach" to paymentMethodId,
+                ),
+            ),
+            responseJsonParser = CheckoutSessionResponseJsonParser(
+                isLiveMode = options.apiKeyIsLiveMode,
+            ),
+        )
+    }
+
     private companion object {
         private fun initUrl(sessionId: String): String =
             "${ApiRequest.API_HOST}/v1/payment_pages/$sessionId/init"
 
         private fun confirmUrl(checkoutSessionId: String): String =
             "${ApiRequest.API_HOST}/v1/payment_pages/$checkoutSessionId/confirm"
+
+        private fun updateUrl(sessionId: String): String =
+            "${ApiRequest.API_HOST}/v1/payment_pages/$sessionId"
     }
 }
