@@ -397,7 +397,7 @@ internal class SavedPaymentMethodMutator(
                                     viewModel.customerStateHolder.customer.value?.defaultPaymentMethodId
                                 )
                                 ),
-                            removeMessage = paymentMethodMetadata?.customerMetadata?.permissions?.removePaymentMethod
+                            removeMessage = paymentMethodMetadata?.customerMetadata?.removePaymentMethod
                                 ?.removeMessage(paymentMethodMetadata.merchantName),
                             onUpdateSuccess = viewModel.navigationHandler::pop,
                         )

@@ -155,13 +155,11 @@ internal class DefaultPaymentElementLoaderTest {
                     cardFundingFilter = PaymentSheetCardFundingFilter(ConfigurationDefaults.allowedCardFundingTypes),
                     hasCustomerConfiguration = true,
                     financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
-                    customerMetadataPermissions = CustomerMetadata.Permissions(
-                        canRemoveDuplicates = false,
-                        removePaymentMethod = PaymentMethodRemovePermission.Full,
-                        saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
-                        canRemoveLastPaymentMethod = true,
-                        canUpdateFullPaymentMethodDetails = false,
-                    ),
+                    canRemoveDuplicates = false,
+                    removePaymentMethod = PaymentMethodRemovePermission.Full,
+                    saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
+                    canRemoveLastPaymentMethod = true,
+                    canUpdateFullPaymentMethodDetails = false,
                     clientAttributionMetadata = ClientAttributionMetadata(
                         elementsSessionConfigId = DEFAULT_ELEMENTS_SESSION_CONFIG_ID,
                         paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
@@ -2677,15 +2675,16 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
             ).getOrThrow()
 
-            assertThat(state.paymentMethodMetadata.customerMetadata?.permissions).isEqualTo(
-                CustomerMetadata.Permissions(
-                    removePaymentMethod = PaymentMethodRemovePermission.Full,
-                    saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
-                    canRemoveLastPaymentMethod = true,
-                    canRemoveDuplicates = true,
-                    canUpdateFullPaymentMethodDetails = true
-                )
-            )
+            assertThat(state.paymentMethodMetadata.customerMetadata?.removePaymentMethod)
+                .isEqualTo(PaymentMethodRemovePermission.Full)
+            assertThat(state.paymentMethodMetadata.customerMetadata?.saveConsent)
+                .isEqualTo(PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null))
+            assertThat(state.paymentMethodMetadata.customerMetadata?.canRemoveLastPaymentMethod)
+                .isEqualTo(true)
+            assertThat(state.paymentMethodMetadata.customerMetadata?.canRemoveDuplicates)
+                .isEqualTo(true)
+            assertThat(state.paymentMethodMetadata.customerMetadata?.canUpdateFullPaymentMethodDetails)
+                .isEqualTo(true)
 
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
@@ -2727,15 +2726,16 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
             ).getOrThrow()
 
-            assertThat(state.paymentMethodMetadata.customerMetadata?.permissions).isEqualTo(
-                CustomerMetadata.Permissions(
-                    removePaymentMethod = PaymentMethodRemovePermission.None,
-                    saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
-                    canRemoveLastPaymentMethod = true,
-                    canRemoveDuplicates = true,
-                    canUpdateFullPaymentMethodDetails = true
-                )
-            )
+            assertThat(state.paymentMethodMetadata.customerMetadata?.removePaymentMethod)
+                .isEqualTo(PaymentMethodRemovePermission.None)
+            assertThat(state.paymentMethodMetadata.customerMetadata?.saveConsent)
+                .isEqualTo(PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null))
+            assertThat(state.paymentMethodMetadata.customerMetadata?.canRemoveLastPaymentMethod)
+                .isEqualTo(true)
+            assertThat(state.paymentMethodMetadata.customerMetadata?.canRemoveDuplicates)
+                .isEqualTo(true)
+            assertThat(state.paymentMethodMetadata.customerMetadata?.canUpdateFullPaymentMethodDetails)
+                .isEqualTo(true)
 
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
@@ -2777,15 +2777,16 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
             ).getOrThrow()
 
-            assertThat(state.paymentMethodMetadata.customerMetadata?.permissions).isEqualTo(
-                CustomerMetadata.Permissions(
-                    removePaymentMethod = PaymentMethodRemovePermission.None,
-                    saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
-                    canRemoveLastPaymentMethod = true,
-                    canRemoveDuplicates = true,
-                    canUpdateFullPaymentMethodDetails = true
-                )
-            )
+            assertThat(state.paymentMethodMetadata.customerMetadata?.removePaymentMethod)
+                .isEqualTo(PaymentMethodRemovePermission.None)
+            assertThat(state.paymentMethodMetadata.customerMetadata?.saveConsent)
+                .isEqualTo(PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null))
+            assertThat(state.paymentMethodMetadata.customerMetadata?.canRemoveLastPaymentMethod)
+                .isEqualTo(true)
+            assertThat(state.paymentMethodMetadata.customerMetadata?.canRemoveDuplicates)
+                .isEqualTo(true)
+            assertThat(state.paymentMethodMetadata.customerMetadata?.canUpdateFullPaymentMethodDetails)
+                .isEqualTo(true)
 
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
@@ -2827,15 +2828,16 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
             ).getOrThrow()
 
-            assertThat(state.paymentMethodMetadata.customerMetadata?.permissions).isEqualTo(
-                CustomerMetadata.Permissions(
-                    removePaymentMethod = PaymentMethodRemovePermission.Partial,
-                    saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
-                    canRemoveLastPaymentMethod = true,
-                    canRemoveDuplicates = true,
-                    canUpdateFullPaymentMethodDetails = true
-                )
-            )
+            assertThat(state.paymentMethodMetadata.customerMetadata?.removePaymentMethod)
+                .isEqualTo(PaymentMethodRemovePermission.Partial)
+            assertThat(state.paymentMethodMetadata.customerMetadata?.saveConsent)
+                .isEqualTo(PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null))
+            assertThat(state.paymentMethodMetadata.customerMetadata?.canRemoveLastPaymentMethod)
+                .isEqualTo(true)
+            assertThat(state.paymentMethodMetadata.customerMetadata?.canRemoveDuplicates)
+                .isEqualTo(true)
+            assertThat(state.paymentMethodMetadata.customerMetadata?.canUpdateFullPaymentMethodDetails)
+                .isEqualTo(true)
 
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
@@ -2877,15 +2879,16 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
             ).getOrThrow()
 
-            assertThat(state.paymentMethodMetadata.customerMetadata?.permissions).isEqualTo(
-                CustomerMetadata.Permissions(
-                    removePaymentMethod = PaymentMethodRemovePermission.None,
-                    saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
-                    canRemoveLastPaymentMethod = true,
-                    canRemoveDuplicates = true,
-                    canUpdateFullPaymentMethodDetails = true
-                )
-            )
+            assertThat(state.paymentMethodMetadata.customerMetadata?.removePaymentMethod)
+                .isEqualTo(PaymentMethodRemovePermission.None)
+            assertThat(state.paymentMethodMetadata.customerMetadata?.saveConsent)
+                .isEqualTo(PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null))
+            assertThat(state.paymentMethodMetadata.customerMetadata?.canRemoveLastPaymentMethod)
+                .isEqualTo(true)
+            assertThat(state.paymentMethodMetadata.customerMetadata?.canRemoveDuplicates)
+                .isEqualTo(true)
+            assertThat(state.paymentMethodMetadata.customerMetadata?.canUpdateFullPaymentMethodDetails)
+                .isEqualTo(true)
 
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
@@ -2910,15 +2913,16 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
             ).getOrThrow()
 
-            assertThat(state.paymentMethodMetadata.customerMetadata?.permissions).isEqualTo(
-                CustomerMetadata.Permissions(
-                    removePaymentMethod = PaymentMethodRemovePermission.Full,
-                    saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
-                    canRemoveLastPaymentMethod = true,
-                    canRemoveDuplicates = false,
-                    canUpdateFullPaymentMethodDetails = false
-                )
-            )
+            assertThat(state.paymentMethodMetadata.customerMetadata?.removePaymentMethod)
+                .isEqualTo(PaymentMethodRemovePermission.Full)
+            assertThat(state.paymentMethodMetadata.customerMetadata?.saveConsent)
+                .isEqualTo(PaymentMethodSaveConsentBehavior.Legacy)
+            assertThat(state.paymentMethodMetadata.customerMetadata?.canRemoveLastPaymentMethod)
+                .isEqualTo(true)
+            assertThat(state.paymentMethodMetadata.customerMetadata?.canRemoveDuplicates)
+                .isEqualTo(false)
+            assertThat(state.paymentMethodMetadata.customerMetadata?.canUpdateFullPaymentMethodDetails)
+                .isEqualTo(false)
 
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
@@ -2965,7 +2969,7 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
             ).getOrThrow()
 
-            assertThat(state.paymentMethodMetadata.customerMetadata?.permissions?.removePaymentMethod)
+            assertThat(state.paymentMethodMetadata.customerMetadata?.removePaymentMethod)
                 .isEqualTo(expectedPermission)
 
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
@@ -3934,7 +3938,7 @@ internal class DefaultPaymentElementLoaderTest {
         paymentMethodRemoveLastFeature: ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature =
             ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.NotProvided,
         canRemoveLastPaymentMethodFromConfig: Boolean = true,
-        test: (CustomerMetadata.Permissions) -> Unit,
+        test: (CustomerMetadata) -> Unit,
     ) = runScenario {
         val loader = createPaymentElementLoader(
             customer = ElementsSession.Customer(
@@ -3970,7 +3974,7 @@ internal class DefaultPaymentElementLoaderTest {
             ),
         ).getOrThrow()
 
-        test(requireNotNull(state.paymentMethodMetadata.customerMetadata).permissions)
+        test(requireNotNull(state.paymentMethodMetadata.customerMetadata))
 
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
