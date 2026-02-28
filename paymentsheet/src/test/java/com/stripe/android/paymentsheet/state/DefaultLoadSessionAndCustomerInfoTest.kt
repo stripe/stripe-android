@@ -5,7 +5,6 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.SavedSelection
@@ -16,7 +15,6 @@ import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.FakeElementsSessionRepository
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
-import kotlin.test.assertFailsWith
 
 internal class DefaultLoadSessionAndCustomerInfoTest {
 

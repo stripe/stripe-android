@@ -872,7 +872,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             )
         }
     }
-
 }
 
 private fun PaymentMethod.toPaymentSelection(): PaymentSelection.Saved {
