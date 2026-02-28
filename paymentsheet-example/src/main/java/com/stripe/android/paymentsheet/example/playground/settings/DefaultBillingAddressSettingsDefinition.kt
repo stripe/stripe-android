@@ -24,6 +24,7 @@ internal object DefaultBillingAddressSettingsDefinition :
     ) = listOf(
         option("On", DefaultBillingAddress.On),
         option("On with random email", DefaultBillingAddress.OnWithRandomEmail),
+        option("On with custom email", DefaultBillingAddress.OnWithCustomEmail),
         option("Off", DefaultBillingAddress.Off),
     )
 
@@ -33,7 +34,7 @@ internal object DefaultBillingAddressSettingsDefinition :
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData
     ) {
-        createBillingDetails(value)?.let { billingDetails ->
+        createBillingDetails(value, configurationData.customEmail)?.let { billingDetails ->
             configurationBuilder.defaultBillingDetails(billingDetails)
         }
     }
@@ -44,7 +45,7 @@ internal object DefaultBillingAddressSettingsDefinition :
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.EmbeddedConfigurationData
     ) {
-        createBillingDetails(value)?.let { billingDetails ->
+        createBillingDetails(value, configurationData.customEmail)?.let { billingDetails ->
             configurationBuilder.defaultBillingDetails(billingDetails)
         }
     }
@@ -55,7 +56,7 @@ internal object DefaultBillingAddressSettingsDefinition :
         playgroundState: PlaygroundState.Customer,
         configurationData: PlaygroundSettingDefinition.CustomerSheetConfigurationData
     ) {
-        createBillingDetails(value)?.let { billingDetails ->
+        createBillingDetails(value, configurationData.customEmail)?.let { billingDetails ->
             configurationBuilder.defaultBillingDetails(billingDetails)
         }
     }
@@ -66,7 +67,7 @@ internal object DefaultBillingAddressSettingsDefinition :
         playgroundState: PlaygroundState.SharedPaymentToken,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData
     ) {
-        createBillingDetails(value)?.let { billingDetails ->
+        createBillingDetails(value, configurationData.customEmail)?.let { billingDetails ->
             configurationBuilder.defaultBillingDetails(billingDetails)
         }
     }
@@ -77,15 +78,19 @@ internal object DefaultBillingAddressSettingsDefinition :
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.LinkControllerConfigurationData
     ) {
-        createBillingDetails(value)?.let { billingDetails ->
+        createBillingDetails(value, configurationData.customEmail)?.let { billingDetails ->
             configurationBuilder.defaultBillingDetails(billingDetails)
         }
     }
 
-    private fun createBillingDetails(value: DefaultBillingAddress): PaymentSheet.BillingDetails? {
+    private fun createBillingDetails(
+        value: DefaultBillingAddress,
+        customEmail: String? = null
+    ): PaymentSheet.BillingDetails? {
         val email = when (value) {
             DefaultBillingAddress.On -> "email@email.com"
             DefaultBillingAddress.OnWithRandomEmail -> "email_${UUID.randomUUID()}@email.com"
+            DefaultBillingAddress.OnWithCustomEmail -> customEmail?.takeIf { it.isNotEmpty() }
             DefaultBillingAddress.Off -> null
         }
 
@@ -110,5 +115,6 @@ internal object DefaultBillingAddressSettingsDefinition :
 internal enum class DefaultBillingAddress(override val value: String) : ValueEnum {
     On("on"),
     OnWithRandomEmail("on_with_random_email"),
+    OnWithCustomEmail("on_with_custom_email"),
     Off("off"),
 }

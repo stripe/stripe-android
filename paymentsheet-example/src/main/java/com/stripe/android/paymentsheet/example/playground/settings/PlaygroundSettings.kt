@@ -499,6 +499,7 @@ internal class PlaygroundSettings private constructor(
             GooglePaySettingsDefinition,
             GooglePayCustomerSheetSettingsDefinition,
             DefaultBillingAddressSettingsDefinition,
+            CustomEmailSettingsDefinition,
             AttachBillingDetailsToPaymentMethodSettingsDefinition,
             CollectNameSettingsDefinition,
             CollectEmailSettingsDefinition,
