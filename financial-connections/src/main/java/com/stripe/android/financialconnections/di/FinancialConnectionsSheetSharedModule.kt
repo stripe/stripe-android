@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import androidx.core.os.LocaleListCompat
 import com.stripe.android.core.ApiVersion
+import com.stripe.android.core.DefaultIsExampleApp
 import com.stripe.android.core.Logger
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -109,8 +110,10 @@ internal interface FinancialConnectionsSheetSharedModule {
 
         @Provides
         @ActivityRetainedScope
-        internal fun provideLogger(@Named(ENABLE_LOGGING) enableLogging: Boolean) =
-            Logger.getInstance(enableLogging)
+        internal fun provideLogger(
+            @Named(ENABLE_LOGGING) enableLogging: Boolean,
+            context: Context,
+        ) = Logger.getInstance(enableLogging, DefaultIsExampleApp(context)())
 
         @Provides
         @ActivityRetainedScope

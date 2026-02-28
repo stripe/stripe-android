@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.res.Resources
 import androidx.core.os.LocaleListCompat
 import com.stripe.android.BuildConfig
+import com.stripe.android.core.DefaultIsExampleApp
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
@@ -124,8 +125,10 @@ internal interface CustomerSheetViewModelModule {
         fun providesEnableLogging(): Boolean = BuildConfig.DEBUG
 
         @Provides
-        fun provideLogger(@Named(ENABLE_LOGGING) enableLogging: Boolean) =
-            Logger.getInstance(enableLogging)
+        fun provideLogger(
+            @Named(ENABLE_LOGGING) enableLogging: Boolean,
+            context: Context,
+        ) = Logger.getInstance(enableLogging, DefaultIsExampleApp(context)())
 
         @Provides
         fun provideLocale() =

@@ -81,6 +81,7 @@ import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivit
 import com.stripe.android.paymentsheet.example.playground.checkout.CheckoutPlaygroundContract
 import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundOneStepContract
 import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundTwoStepContract
+import com.stripe.android.paymentsheet.example.playground.logger.LoggerOverlay
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.ConfirmationTokenSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedTwoStepSettingsDefinition
@@ -270,77 +271,79 @@ internal class PaymentSheetPlaygroundActivity :
             }
 
             var settingsSearchQuery by rememberSaveable { mutableStateOf("") }
-            PlaygroundTheme(
-                topBarContent = {
-                    SearchSettingsField(
-                        modifier = Modifier
-                            .statusBarsPadding()
-                            .padding(horizontal = 16.dp),
-                        query = settingsSearchQuery,
-                        onQueryChanged = { settingsSearchQuery = it }
-                    )
-                },
-                content = {
-                    playgroundState?.asPaymentState()?.endpoint?.let { customEndpoint ->
-                        Text(
-                            text = "Using $customEndpoint",
+            LoggerOverlay {
+                PlaygroundTheme(
+                    topBarContent = {
+                        SearchSettingsField(
                             modifier = Modifier
-                                .clickable { showCustomEndpointDialog = true }
-                                .padding(bottom = 16.dp),
+                                .statusBarsPadding()
+                                .padding(horizontal = 16.dp),
+                            query = settingsSearchQuery,
+                            onQueryChanged = { settingsSearchQuery = it }
                         )
-                    }
-
-                    playgroundState?.asPaymentState()?.stripeIntentId?.let { stripeIntentId ->
-                        Text(
-                            text = stripeIntentId,
-                            modifier = Modifier.padding(bottom = 16.dp)
-                        )
-                    }
-
-                    SettingsUi(
-                        searchQuery = settingsSearchQuery,
-                        playgroundSettings = localPlaygroundSettings,
-                    )
-
-                    AppearanceButton()
-
-                    QrCodeButton(playgroundSettings = localPlaygroundSettings)
-
-                    ClearLinkDataButton()
-
-                    ResetToDefaultsButton()
-                },
-                bottomBarContent = {
-                    ReloadButton(playgroundSettings = localPlaygroundSettings)
-
-                    AnimatedContent(
-                        label = PLAYGROUND_BOTTOM_BAR_LABEL,
-                        targetState = playgroundState
-                    ) { playgroundState ->
-                        Column {
-                            CheckoutSessionUi(
-                                playgroundState = playgroundState,
-                            )
-
-                            PlaygroundStateUi(
-                                playgroundState = playgroundState,
-                                paymentSheet = paymentSheet,
-                                flowController = flowController,
-                                customerSheet = customerSheet,
-                                addressLauncher = addressLauncher,
+                    },
+                    content = {
+                        playgroundState?.asPaymentState()?.endpoint?.let { customEndpoint ->
+                            Text(
+                                text = "Using $customEndpoint",
+                                modifier = Modifier
+                                    .clickable { showCustomEndpointDialog = true }
+                                    .padding(bottom = 16.dp),
                             )
                         }
-                    }
 
-                    Spacer(
-                        Modifier.height(
-                            WindowInsets.ime.exclude(WindowInsets.systemBars)
-                                .asPaddingValues()
-                                .calculateBottomPadding()
+                        playgroundState?.asPaymentState()?.stripeIntentId?.let { stripeIntentId ->
+                            Text(
+                                text = stripeIntentId,
+                                modifier = Modifier.padding(bottom = 16.dp)
+                            )
+                        }
+
+                        SettingsUi(
+                            searchQuery = settingsSearchQuery,
+                            playgroundSettings = localPlaygroundSettings,
                         )
-                    )
-                },
-            )
+
+                        AppearanceButton()
+
+                        QrCodeButton(playgroundSettings = localPlaygroundSettings)
+
+                        ClearLinkDataButton()
+
+                        ResetToDefaultsButton()
+                    },
+                    bottomBarContent = {
+                        ReloadButton(playgroundSettings = localPlaygroundSettings)
+
+                        AnimatedContent(
+                            label = PLAYGROUND_BOTTOM_BAR_LABEL,
+                            targetState = playgroundState
+                        ) { playgroundState ->
+                            Column {
+                                CheckoutSessionUi(
+                                    playgroundState = playgroundState,
+                                )
+
+                                PlaygroundStateUi(
+                                    playgroundState = playgroundState,
+                                    paymentSheet = paymentSheet,
+                                    flowController = flowController,
+                                    customerSheet = customerSheet,
+                                    addressLauncher = addressLauncher,
+                                )
+                            }
+                        }
+
+                        Spacer(
+                            Modifier.height(
+                                WindowInsets.ime.exclude(WindowInsets.systemBars)
+                                    .asPaddingValues()
+                                    .calculateBottomPadding()
+                            )
+                        )
+                    },
+                )
+            }
 
             val status by viewModel.status.collectAsState()
             val context = LocalContext.current

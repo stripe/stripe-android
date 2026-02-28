@@ -1,7 +1,9 @@
 package com.stripe.android.core.injection
 
+import android.content.Context
 import androidx.annotation.RestrictTo
 import androidx.core.os.LocaleListCompat
+import com.stripe.android.core.DefaultIsExampleApp
 import com.stripe.android.core.Logger
 import dagger.Module
 import dagger.Provides
@@ -12,8 +14,10 @@ import javax.inject.Singleton
 @Module
 class CoreCommonModule {
     @Provides
-    fun provideLogger(@Named(ENABLE_LOGGING) enableLogging: Boolean) =
-        Logger.getInstance(enableLogging)
+    fun provideLogger(
+        @Named(ENABLE_LOGGING) enableLogging: Boolean,
+        context: Context,
+    ) = Logger.getInstance(enableLogging, DefaultIsExampleApp(context)())
 
     @Provides
     @Singleton

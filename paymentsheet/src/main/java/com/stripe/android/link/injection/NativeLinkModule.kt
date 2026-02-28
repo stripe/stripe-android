@@ -8,6 +8,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.core.DefaultIsExampleApp
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
@@ -180,8 +181,10 @@ internal interface NativeLinkModule {
 
         @Provides
         @NativeLinkScope
-        fun provideLogger(@Named(ENABLE_LOGGING) enableLogging: Boolean) =
-            Logger.getInstance(enableLogging)
+        fun provideLogger(
+            @Named(ENABLE_LOGGING) enableLogging: Boolean,
+            context: Context,
+        ) = Logger.getInstance(enableLogging, DefaultIsExampleApp(context)())
 
         @Provides
         @NativeLinkScope
