@@ -4465,8 +4465,13 @@ internal class DefaultPaymentElementLoaderTest {
             cardFundingFilterFactory = PaymentSheetCardFundingFilter.Factory()
         )
 
-        return DefaultPaymentElementLoader(
+        val loadSessionAndCustomerInfo = DefaultLoadSessionAndCustomerInfo(
             checkoutSessionRepository = checkoutSessionRepository,
+            elementsSessionRepository = elementsSessionRepository,
+            errorReporter = errorReporter,
+        )
+
+        return DefaultPaymentElementLoader(
             prefsRepositoryFactory = { prefsRepository },
             googlePayRepositoryFactory = object : GooglePayRepositoryFactory {
                 override fun invoke(
@@ -4477,7 +4482,6 @@ internal class DefaultPaymentElementLoaderTest {
                     return GooglePayRepository { flowOf(isGooglePayReady) }
                 }
             },
-            elementsSessionRepository = elementsSessionRepository,
             customerRepository = customerRepo,
             lpmRepository = LpmRepository(),
             logger = Logger.noop(),
@@ -4495,6 +4499,7 @@ internal class DefaultPaymentElementLoaderTest {
             paymentConfiguration = { PaymentConfiguration(publishableKey = if (isLiveMode) "pk_live" else "pk_test") },
             paymentMethodFilter = paymentMethodFilter,
             cardFundingFilterFactory = PaymentSheetCardFundingFilter.Factory(),
+            loadSessionAndCustomerInfo = loadSessionAndCustomerInfo,
         )
     }
 
