@@ -13,41 +13,6 @@ internal data class SessionResult(
     val checkoutSession: CheckoutSessionResponse?,
 )
 
-internal interface LoadSession {
-    suspend operator fun invoke(
-        initializationMode: PaymentElementLoader.InitializationMode,
-        configuration: CommonConfiguration,
-        savedPaymentMethodSelection: SavedSelection.PaymentMethod?,
-    ): SessionResult
-}
-
-/**
- * Dispatches to the appropriate strategy based on initialization mode:
- * - [CheckoutSessionLoader] for checkout session flows
- * - [ElementsSessionLoader] for all other flows
- */
-internal class DefaultLoadSession @Inject constructor(
-    private val checkoutSessionLoader: CheckoutSessionLoader,
-    private val elementsSessionLoader: ElementsSessionLoader,
-) : LoadSession {
-
-    override suspend fun invoke(
-        initializationMode: PaymentElementLoader.InitializationMode,
-        configuration: CommonConfiguration,
-        savedPaymentMethodSelection: SavedSelection.PaymentMethod?,
-    ): SessionResult {
-        return if (initializationMode is PaymentElementLoader.InitializationMode.CheckoutSession) {
-            checkoutSessionLoader(initializationMode)
-        } else {
-            elementsSessionLoader(
-                initializationMode = initializationMode,
-                configuration = configuration,
-                savedPaymentMethodSelection = savedPaymentMethodSelection,
-            )
-        }
-    }
-}
-
 /**
  * Loads session data via [CheckoutSessionRepository].
  *
