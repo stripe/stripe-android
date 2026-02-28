@@ -4465,15 +4465,6 @@ internal class DefaultPaymentElementLoaderTest {
             cardFundingFilterFactory = PaymentSheetCardFundingFilter.Factory()
         )
 
-        val loadSession = DefaultLoadSession(
-            checkoutSessionLoader = CheckoutSessionLoader(
-                checkoutSessionRepository = checkoutSessionRepository,
-            ),
-            elementsSessionLoader = ElementsSessionLoader(
-                elementsSessionRepository = elementsSessionRepository,
-            ),
-        )
-
         return DefaultPaymentElementLoader(
             prefsRepositoryFactory = { prefsRepository },
             googlePayRepositoryFactory = object : GooglePayRepositoryFactory {
@@ -4502,7 +4493,12 @@ internal class DefaultPaymentElementLoaderTest {
             paymentConfiguration = { PaymentConfiguration(publishableKey = if (isLiveMode) "pk_live" else "pk_test") },
             paymentMethodFilter = paymentMethodFilter,
             cardFundingFilterFactory = PaymentSheetCardFundingFilter.Factory(),
-            loadSession = loadSession,
+            checkoutSessionLoader = CheckoutSessionLoader(
+                checkoutSessionRepository = checkoutSessionRepository,
+            ),
+            elementsSessionLoader = ElementsSessionLoader(
+                elementsSessionRepository = elementsSessionRepository,
+            ),
         )
     }
 

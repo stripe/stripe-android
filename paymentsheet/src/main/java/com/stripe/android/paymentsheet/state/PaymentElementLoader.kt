@@ -247,7 +247,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val analyticsMetadataFactory: AnalyticsMetadataFactory,
     private val paymentMethodFilter: PaymentMethodFilter,
     private val cardFundingFilterFactory: PaymentSheetCardFundingFilterFactory,
-    private val loadSession: LoadSession,
+    private val checkoutSessionLoader: CheckoutSessionLoader,
+    private val elementsSessionLoader: ElementsSessionLoader,
 ) : PaymentElementLoader {
 
     fun interface AnalyticsMetadataFactory {
@@ -402,6 +403,22 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         )
 
         return@runCatching state
+    }
+
+    private suspend fun loadSession(
+        initializationMode: PaymentElementLoader.InitializationMode,
+        configuration: CommonConfiguration,
+        savedPaymentMethodSelection: SavedSelection.PaymentMethod?,
+    ): SessionResult {
+        return if (initializationMode is PaymentElementLoader.InitializationMode.CheckoutSession) {
+            checkoutSessionLoader(initializationMode)
+        } else {
+            elementsSessionLoader(
+                initializationMode = initializationMode,
+                configuration = configuration,
+                savedPaymentMethodSelection = savedPaymentMethodSelection,
+            )
+        }
     }
 
     private fun ElementsSession.shouldWarmUpIntegrity(): Boolean = when {
