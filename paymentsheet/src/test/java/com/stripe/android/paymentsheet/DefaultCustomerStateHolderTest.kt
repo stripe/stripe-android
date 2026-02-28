@@ -12,7 +12,6 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.testing.PaymentMethodFactory
-import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.runTest
@@ -380,20 +379,18 @@ internal class DefaultCustomerStateHolderTest {
         selection: StateFlow<PaymentSelection?> = stateFlowOf(null),
         block: suspend Scenario.() -> Unit
     ) {
-        val customerMetadata: StateFlow<CustomerMetadata> = stateFlowOf(
+        val customerMetadata: StateFlow<CustomerMetadata?> = stateFlowOf(
             DEFAULT_CUSTOMER_METADATA.copy(
-                permissions = CustomerMetadata.Permissions(
-                    removePaymentMethod = paymentMethodRemovePermission,
-                    saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
-                    canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
-                    canRemoveDuplicates = true,
-                    canUpdateFullPaymentMethodDetails = false,
-                )
+                removePaymentMethod = paymentMethodRemovePermission,
+                saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
+                canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
+                canRemoveDuplicates = true,
+                canUpdateFullPaymentMethodDetails = false,
             )
         )
 
         val customerStateHolder = DefaultCustomerStateHolder(
-            customerMetadataPermissions = customerMetadata.mapAsStateFlow { it.permissions },
+            customerMetadata = customerMetadata,
             savedStateHandle = savedStateHandle,
             selection = selection,
         )

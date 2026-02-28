@@ -166,8 +166,8 @@ internal class EmbeddedContentUiTest {
                 customerStateHolder = DefaultCustomerStateHolder(
                     savedStateHandle = savedStateHandle,
                     selection = selectionHolder.selection,
-                    customerMetadataPermissions = stateFlowOf(
-                        PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.permissions
+                    customerMetadata = stateFlowOf(
+                        PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
                     ),
                 ),
                 embeddedFormHelperFactory = embeddedFormHelperFactory,

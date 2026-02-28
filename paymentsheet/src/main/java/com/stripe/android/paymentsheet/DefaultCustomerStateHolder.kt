@@ -12,7 +12,7 @@ import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 internal class DefaultCustomerStateHolder(
-    private val customerMetadataPermissions: StateFlow<CustomerMetadata.Permissions?>,
+    private val customerMetadata: StateFlow<CustomerMetadata?>,
     private val savedStateHandle: SavedStateHandle,
     private val selection: StateFlow<PaymentSelection?>,
 ) : CustomerStateHolder {
@@ -35,18 +35,18 @@ internal class DefaultCustomerStateHolder(
 
     override val canRemoveDuplicate: StateFlow<Boolean> = combineAsStateFlow(
         customer,
-        customerMetadataPermissions,
-    ) { customerState, customerMetadataPermissions ->
-        return@combineAsStateFlow customerMetadataPermissions?.canRemoveDuplicates ?: false
+        customerMetadata,
+    ) { _, customerMetadata ->
+        return@combineAsStateFlow customerMetadata?.canRemoveDuplicates ?: false
     }
 
     override val canRemove: StateFlow<Boolean> = combineAsStateFlow(
         paymentMethods,
-        customerMetadataPermissions,
-    ) { paymentMethods, customerMetadataPermissions ->
-        customerMetadataPermissions?.run {
-            val hasRemovePermissions = customerMetadataPermissions.canRemovePaymentMethods
-            val hasRemoveLastPaymentMethodPermissions = customerMetadataPermissions.canRemoveLastPaymentMethod
+        customerMetadata,
+    ) { paymentMethods, customerMetadata ->
+        customerMetadata?.run {
+            val hasRemovePermissions = customerMetadata.canRemovePaymentMethods
+            val hasRemoveLastPaymentMethodPermissions = customerMetadata.canRemoveLastPaymentMethod
             when (paymentMethods.size) {
                 0 -> false
                 1 -> hasRemoveLastPaymentMethodPermissions && hasRemovePermissions
@@ -55,7 +55,7 @@ internal class DefaultCustomerStateHolder(
         } ?: false
     }
 
-    override val canUpdateFullPaymentMethodDetails: StateFlow<Boolean> = customerMetadataPermissions.mapAsStateFlow {
+    override val canUpdateFullPaymentMethodDetails: StateFlow<Boolean> = customerMetadata.mapAsStateFlow {
         it?.canUpdateFullPaymentMethodDetails ?: false
     }
 
@@ -89,8 +89,8 @@ internal class DefaultCustomerStateHolder(
             return DefaultCustomerStateHolder(
                 savedStateHandle = viewModel.savedStateHandle,
                 selection = viewModel.selection,
-                customerMetadataPermissions = viewModel.paymentMethodMetadata.mapAsStateFlow {
-                    it?.customerMetadata?.permissions
+                customerMetadata = viewModel.paymentMethodMetadata.mapAsStateFlow {
+                    it?.customerMetadata
                 }
             )
         }

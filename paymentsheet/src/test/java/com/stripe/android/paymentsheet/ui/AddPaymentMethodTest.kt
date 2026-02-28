@@ -13,7 +13,6 @@ import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
@@ -355,9 +354,7 @@ internal class AddPaymentMethodTest {
     @Test
     fun `when customer reuse is not requested, should have allow_redisplay in params`() {
         val metadata = PaymentMethodMetadataFactory.create(
-            customerMetadataPermissions = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS.copy(
-                saveConsent = PaymentMethodSaveConsentBehavior.Enabled
-            ),
+            saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
         )
 
         val formValues = FormFieldValues(
@@ -378,9 +375,7 @@ internal class AddPaymentMethodTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
             hasCustomerConfiguration = true,
-            customerMetadataPermissions = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS.copy(
-                saveConsent = PaymentMethodSaveConsentBehavior.Enabled
-            ),
+            saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
         )
 
         val formValues = FormFieldValues(
@@ -401,9 +396,7 @@ internal class AddPaymentMethodTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
             hasCustomerConfiguration = true,
-            customerMetadataPermissions = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS.copy(
-                saveConsent = PaymentMethodSaveConsentBehavior.Enabled
-            ),
+            saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
         )
 
         val formValues = FormFieldValues(
@@ -423,9 +416,7 @@ internal class AddPaymentMethodTest {
     fun `when customer reuse is not requested with pmo sfu, should have allow_redisplay in params`() {
         val metadata = PaymentMethodMetadataFactory.create(
             hasCustomerConfiguration = true,
-            customerMetadataPermissions = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS.copy(
-                saveConsent = PaymentMethodSaveConsentBehavior.Enabled
-            ),
+            saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
             )
@@ -448,9 +439,7 @@ internal class AddPaymentMethodTest {
     fun `when customer reuse is requested with reuse and pmo sfu, should have allow_redisplay in params`() {
         val metadata = PaymentMethodMetadataFactory.create(
             hasCustomerConfiguration = true,
-            customerMetadataPermissions = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS.copy(
-                saveConsent = PaymentMethodSaveConsentBehavior.Enabled
-            ),
+            saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
             )

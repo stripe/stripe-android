@@ -9,7 +9,6 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.PaymentMethodRemovePermission
-import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
@@ -190,13 +189,11 @@ internal class ManageActivityTest {
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
             cbcEligibility = CardBrandChoiceEligibility.Eligible(preferredNetworks = listOf()),
             hasCustomerConfiguration = true,
-            customerMetadataPermissions = CustomerMetadata.Permissions(
-                canRemoveDuplicates = false,
-                removePaymentMethod = PaymentMethodRemovePermission.Full,
-                saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
-                canRemoveLastPaymentMethod = true,
-                canUpdateFullPaymentMethodDetails = false,
-            )
+            canRemoveDuplicates = false,
+            removePaymentMethod = PaymentMethodRemovePermission.Full,
+            saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
+            canRemoveLastPaymentMethod = true,
+            canUpdateFullPaymentMethodDetails = false,
         ),
         paymentMethods: List<PaymentMethod> = defaultPaymentMethods(),
         selection: PaymentSelection? = null,

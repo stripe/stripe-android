@@ -4,6 +4,7 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
+import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.LinkMode
@@ -50,8 +51,13 @@ internal object PaymentMethodMetadataFactory {
         paymentMethodIncentive: PaymentMethodIncentive? = null,
         isPaymentMethodSetAsDefaultEnabled: Boolean = IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE,
         financialConnectionsAvailability: FinancialConnectionsAvailability? = FinancialConnectionsAvailability.Lite,
-        customerMetadataPermissions: CustomerMetadata.Permissions =
-            PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS,
+        removePaymentMethod: PaymentMethodRemovePermission =
+            PaymentMethodRemovePermission.Full,
+        saveConsent: PaymentMethodSaveConsentBehavior =
+            PaymentMethodSaveConsentBehavior.Legacy,
+        canRemoveLastPaymentMethod: Boolean = true,
+        canRemoveDuplicates: Boolean = true,
+        canUpdateFullPaymentMethodDetails: Boolean = false,
         customerSessionClientSecret: String? = null,
         termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay> = emptyMap(),
         forceSetupFutureUseBehaviorAndNewMandate: Boolean = false,
@@ -83,7 +89,11 @@ internal object PaymentMethodMetadataFactory {
             customerMetadata = if (hasCustomerConfiguration) {
                 PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.copy(
                     isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
-                    permissions = customerMetadataPermissions,
+                    removePaymentMethod = removePaymentMethod,
+                    saveConsent = saveConsent,
+                    canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
+                    canRemoveDuplicates = canRemoveDuplicates,
+                    canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
                     customerSessionClientSecret = customerSessionClientSecret,
                 )
             } else {

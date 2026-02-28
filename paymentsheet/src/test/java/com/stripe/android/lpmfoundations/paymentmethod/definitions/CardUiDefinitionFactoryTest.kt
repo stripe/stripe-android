@@ -2,7 +2,6 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.getDefaultCustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
@@ -225,9 +224,7 @@ class CardUiDefinitionFactoryTest {
                     ),
                     customerMetadata = getDefaultCustomerMetadata(
                         isPaymentMethodSetAsDefaultEnabled = false,
-                        permissions = DEFAULT_CUSTOMER_METADATA_PERMISSIONS.copy(
-                            saveConsent = PaymentMethodSaveConsentBehavior.Enabled
-                        )
+                        saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
                     ),
                 ),
             )
@@ -245,9 +242,7 @@ class CardUiDefinitionFactoryTest {
                 metadata = metadata.copy(
                     stripeIntent = setupIntent,
                     customerMetadata = getDefaultCustomerMetadata(
-                        permissions = DEFAULT_CUSTOMER_METADATA_PERMISSIONS.copy(
-                            saveConsent = PaymentMethodSaveConsentBehavior.Enabled
-                        )
+                        saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
                     ),
                 ),
             )
@@ -265,9 +260,7 @@ class CardUiDefinitionFactoryTest {
                 metadata = metadata.copy(
                     stripeIntent = setupIntent,
                     customerMetadata = getDefaultCustomerMetadata(
-                        permissions = DEFAULT_CUSTOMER_METADATA_PERMISSIONS.copy(
-                            saveConsent = PaymentMethodSaveConsentBehavior.Enabled
-                        )
+                        saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
                     ),
                 ),
             )

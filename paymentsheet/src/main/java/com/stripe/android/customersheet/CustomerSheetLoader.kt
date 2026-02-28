@@ -156,15 +156,13 @@ internal class DefaultCustomerSheetLoader(
         ).isReady().first()
         val isGooglePayReadyAndEnabled = configuration.googlePayEnabled && isGooglePaySupportedOnDevice
 
-        val customerMetadata = CustomerMetadata(
+        val customerMetadata = CustomerMetadata.createForCustomerSheet(
+            configuration = configuration,
+            customerSheetSession = customerSheetSession,
             id = customerSheetSession.customerId,
             ephemeralKeySecret = customerSheetSession.customerEphemeralKeySecret,
             customerSessionClientSecret = customerSheetSession.customerSessionClientSecret,
             isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
-            permissions = CustomerMetadata.Permissions.createForCustomerSheet(
-                configuration = configuration,
-                customerSheetSession = customerSheetSession
-            )
         )
 
         return PaymentMethodMetadata.createForCustomerSheet(
