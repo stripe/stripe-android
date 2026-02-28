@@ -3,9 +3,9 @@ package com.stripe.android.paymentsheet.state
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.paymentsheet.model.SavedSelection
 
-internal class FakeLoadSessionAndCustomerInfo(
-    var result: SessionAndCustomerInfo,
-) : LoadSessionAndCustomerInfo {
+internal class FakeLoadSession(
+    var result: SessionResult,
+) : LoadSession {
 
     var lastInitializationMode: PaymentElementLoader.InitializationMode? = null
         private set
@@ -18,7 +18,7 @@ internal class FakeLoadSessionAndCustomerInfo(
         initializationMode: PaymentElementLoader.InitializationMode,
         configuration: CommonConfiguration,
         savedPaymentMethodSelection: SavedSelection.PaymentMethod?,
-    ): SessionAndCustomerInfo {
+    ): SessionResult {
         lastInitializationMode = initializationMode
         lastConfiguration = configuration
         lastSavedPaymentMethodSelection = savedPaymentMethodSelection
