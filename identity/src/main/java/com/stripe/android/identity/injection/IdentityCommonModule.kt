@@ -2,8 +2,8 @@ package com.stripe.android.identity.injection
 
 import android.content.Context
 import android.content.res.Resources
-import com.stripe.android.core.networking.DefaultStripeNetworkClient
-import com.stripe.android.core.networking.StripeNetworkClient
+import com.stripe.android.core.BuildConfig
+import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.identity.networking.DefaultIdentityModelFetcher
 import com.stripe.android.identity.networking.DefaultIdentityRepository
 import com.stripe.android.identity.networking.IdentityModelFetcher
@@ -39,8 +39,8 @@ internal abstract class IdentityCommonModule {
 
     companion object {
         @Provides
-        @Singleton
-        fun provideStripeNetworkClient(): StripeNetworkClient = DefaultStripeNetworkClient()
+        @Named(ENABLE_LOGGING)
+        fun provideEnableLogging(): Boolean = BuildConfig.DEBUG
 
         @Provides
         @Singleton
