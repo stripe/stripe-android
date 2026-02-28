@@ -4466,9 +4466,13 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         val loadSessionAndCustomerInfo = DefaultLoadSessionAndCustomerInfo(
-            checkoutSessionRepository = checkoutSessionRepository,
-            elementsSessionRepository = elementsSessionRepository,
-            errorReporter = errorReporter,
+            checkoutSessionLoader = CheckoutSessionLoadSessionAndCustomerInfo(
+                checkoutSessionRepository = checkoutSessionRepository,
+            ),
+            elementsSessionLoader = ElementsSessionLoadSessionAndCustomerInfo(
+                elementsSessionRepository = elementsSessionRepository,
+                errorReporter = errorReporter,
+            ),
         )
 
         return DefaultPaymentElementLoader(

@@ -14,7 +14,6 @@ import javax.inject.Inject
 
 internal data class SessionAndCustomerInfo(
     val elementsSession: ElementsSession,
-    val checkoutSession: CheckoutSessionResponse?,
     val customerInfo: CustomerInfo?,
 )
 
@@ -26,10 +25,14 @@ internal interface LoadSessionAndCustomerInfo {
     ): SessionAndCustomerInfo
 }
 
+/**
+ * Dispatches to the appropriate strategy based on initialization mode:
+ * - [CheckoutSessionLoadSessionAndCustomerInfo] for checkout session flows
+ * - [ElementsSessionLoadSessionAndCustomerInfo] for all other flows
+ */
 internal class DefaultLoadSessionAndCustomerInfo @Inject constructor(
-    private val checkoutSessionRepository: CheckoutSessionRepository,
-    private val elementsSessionRepository: ElementsSessionRepository,
-    private val errorReporter: ErrorReporter,
+    private val checkoutSessionLoader: CheckoutSessionLoadSessionAndCustomerInfo,
+    private val elementsSessionLoader: ElementsSessionLoadSessionAndCustomerInfo,
 ) : LoadSessionAndCustomerInfo {
 
     override suspend fun invoke(
@@ -37,55 +40,66 @@ internal class DefaultLoadSessionAndCustomerInfo @Inject constructor(
         configuration: CommonConfiguration,
         savedPaymentMethodSelection: SavedSelection.PaymentMethod?,
     ): SessionAndCustomerInfo {
-        val checkoutSession = retrieveCheckoutSession(initializationMode)
-        val elementsSession = retrieveElementsSession(
-            initializationMode = initializationMode,
-            checkoutSession = checkoutSession,
-            configuration = configuration,
-            savedPaymentMethodSelection = savedPaymentMethodSelection,
-        )
-        val customerInfo = createCustomerInfo(
-            configuration = configuration,
-            elementsSession = elementsSession,
-            checkoutSession = checkoutSession,
-        )
+        return if (initializationMode is PaymentElementLoader.InitializationMode.CheckoutSession) {
+            checkoutSessionLoader(initializationMode)
+        } else {
+            elementsSessionLoader(
+                initializationMode = initializationMode,
+                configuration = configuration,
+                savedPaymentMethodSelection = savedPaymentMethodSelection,
+            )
+        }
+    }
+}
+
+/**
+ * Loads session data via [CheckoutSessionRepository].
+ *
+ * The checkout session init response contains both the elements session and customer data,
+ * so no separate elements session fetch or configuration-based customer lookup is needed.
+ */
+internal class CheckoutSessionLoadSessionAndCustomerInfo @Inject constructor(
+    private val checkoutSessionRepository: CheckoutSessionRepository,
+) {
+    suspend operator fun invoke(
+        initializationMode: PaymentElementLoader.InitializationMode.CheckoutSession,
+    ): SessionAndCustomerInfo {
+        val checkoutSession = checkoutSessionRepository.init(
+            sessionId = initializationMode.id,
+        ).getOrThrow()
+
+        val elementsSession = checkoutSession.elementsSession
+            ?: throw IllegalStateException("CheckoutSession init response missing elements_session")
+
+        val customerInfo = checkoutSession.customer?.let { customer ->
+            CustomerInfo.CheckoutSession(
+                customer = customer,
+                offerSave = checkoutSession.savedPaymentMethodsOfferSave,
+            )
+        }
+
         return SessionAndCustomerInfo(
             elementsSession = elementsSession,
-            checkoutSession = checkoutSession,
             customerInfo = customerInfo,
         )
     }
+}
 
-    /**
-     * Fetches the [CheckoutSessionResponse] if the initialization mode is a checkout session.
-     * Returns null for all other flows.
-     */
-    private suspend fun retrieveCheckoutSession(
+/**
+ * Loads session data via [ElementsSessionRepository] for standard (non-checkout) flows.
+ *
+ * Customer info is derived from the merchant's configuration and the elements session response.
+ */
+internal class ElementsSessionLoadSessionAndCustomerInfo @Inject constructor(
+    private val elementsSessionRepository: ElementsSessionRepository,
+    private val errorReporter: ErrorReporter,
+) {
+    suspend operator fun invoke(
         initializationMode: PaymentElementLoader.InitializationMode,
-    ): CheckoutSessionResponse? {
-        if (initializationMode !is PaymentElementLoader.InitializationMode.CheckoutSession) {
-            return null
-        }
-        return checkoutSessionRepository.init(
-            sessionId = initializationMode.id,
-        ).getOrThrow()
-    }
-
-    /**
-     * Returns the [ElementsSession] — extracted from the checkout session response if present,
-     * or fetched via the standard elements session repository otherwise.
-     */
-    private suspend fun retrieveElementsSession(
-        initializationMode: PaymentElementLoader.InitializationMode,
-        checkoutSession: CheckoutSessionResponse?,
         configuration: CommonConfiguration,
         savedPaymentMethodSelection: SavedSelection.PaymentMethod?,
-    ): ElementsSession {
-        if (checkoutSession != null) {
-            return checkoutSession.elementsSession
-                ?: throw IllegalStateException("CheckoutSession init response missing elements_session")
-        }
-        return elementsSessionRepository.get(
+    ): SessionAndCustomerInfo {
+        val elementsSession = elementsSessionRepository.get(
             initializationMode = initializationMode,
             customer = configuration.customer,
             externalPaymentMethods = configuration.externalPaymentMethods,
@@ -94,22 +108,22 @@ internal class DefaultLoadSessionAndCustomerInfo @Inject constructor(
             countryOverride = configuration.userOverrideCountry,
             linkDisallowedFundingSourceCreation = configuration.link.disallowFundingSourceCreation,
         ).getOrThrow()
+
+        val customerInfo = createCustomerInfo(
+            configuration = configuration,
+            elementsSession = elementsSession,
+        )
+
+        return SessionAndCustomerInfo(
+            elementsSession = elementsSession,
+            customerInfo = customerInfo,
+        )
     }
 
     private fun createCustomerInfo(
         configuration: CommonConfiguration,
         elementsSession: ElementsSession,
-        checkoutSession: CheckoutSessionResponse?,
     ): CustomerInfo? {
-        // Checkout session customer data comes from the init response, not from customer sessions.
-        val checkoutCustomer = checkoutSession?.customer
-        if (checkoutCustomer != null) {
-            return CustomerInfo.CheckoutSession(
-                customer = checkoutCustomer,
-                offerSave = checkoutSession.savedPaymentMethodsOfferSave,
-            )
-        }
-
         val customer = configuration.customer
 
         return when (val accessType = customer?.accessType) {
