@@ -65,8 +65,6 @@ stages:
       - notify-connections-e2e-failure: { }
 workflows:
   check:
-    envs:
-      - JAVA_VERSION: 22
     before_run:
       - prepare_all
     after_run:
