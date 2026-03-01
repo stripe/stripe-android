@@ -4502,6 +4502,7 @@ internal class DefaultPaymentElementLoaderTest {
             ),
             elementsSessionLoader = ElementsSessionLoader(
                 elementsSessionRepository = elementsSessionRepository,
+                errorReporter = errorReporter,
             ),
         )
     }
