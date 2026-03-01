@@ -7,6 +7,8 @@ import kotlinx.serialization.Serializable
 class SharedPaymentTokenCreateSessionRequest(
     @SerialName("customerId")
     val customerId: String?,
+    @SerialName("customerEmail")
+    val customerEmail: String?,
     @SerialName("isMobile")
     val isMobile: Boolean,
 )
