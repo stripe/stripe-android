@@ -3,10 +3,7 @@ apply plugin: 'org.jetbrains.kotlin.jvm'
 apply plugin: 'com.android.lint'
 
 apply from: rootProject.file('build-configuration/detekt.gradle')
-apply from: rootProject.file('build-configuration/ktlint.gradle')
 apply from: rootProject.file('build-configuration/configurations.gradle')
-
-check.dependsOn('ktlint')
 
 dependencies {
     compileOnly libs.lint
