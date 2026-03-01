@@ -1594,17 +1594,18 @@ internal class PlaygroundTestDriver(
 
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
             composeTestRule
-                .onAllNodesWithText("Agree and continue")
+                .onAllNodesWithTag("consent_cta")
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .size == 1
+                .isNotEmpty()
         }
 
-        clickButton("Agree and continue")
+        clickButtonWithTag("consent_cta")
+        // TODO: Replace with institution ID tag when available
         clickButton("Test (Non-OAuth)")
 
         // Verifies bank in web view so Compose hierarchy can detach. Button should be available
         // after web view verification.
-        clickButton("Connect account", composeCanDetach = true)
+        clickButtonWithTag("prepane_cta", composeCanDetach = true)
 
         clickButtonWithTag("skip_cta")
         clickButtonWithTag("done_button")
@@ -1617,16 +1618,16 @@ internal class PlaygroundTestDriver(
 
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
             composeTestRule
-                .onAllNodesWithText("Agree and continue")
+                .onAllNodesWithTag("consent_cta")
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .size == 1
+                .isNotEmpty()
         }
 
-        clickButton("Agree and continue")
+        clickButtonWithTag("consent_cta")
         clickButtonWithTag("existing_email-button")
-        clickButton("Use test code")
-        clickButton("Success")
-        clickButton("Connect account")
+        clickButtonWithTag("test_mode_fill_button")
+        clickButtonWithTag("link_account_picker_cta")
+        clickButtonWithTag("prepane_cta")
         clickButtonWithTag("done_button")
     }
 
