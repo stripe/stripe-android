@@ -7,6 +7,9 @@ import com.stripe.android.checkout.injection.DaggerCheckoutComponent
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import dev.drewhamilton.poko.Poko
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.parcelize.Parcelize
 
 @CheckoutSessionPreview
@@ -42,4 +45,7 @@ class Checkout private constructor(
         internal val checkoutSessionClientSecret: String,
         internal val checkoutSessionResponse: CheckoutSessionResponse,
     ) : Parcelable
+
+    private val _checkoutSession = MutableStateFlow(state.checkoutSessionResponse.asCheckoutSession())
+    val checkoutSession: StateFlow<CheckoutSession> = _checkoutSession.asStateFlow()
 }
