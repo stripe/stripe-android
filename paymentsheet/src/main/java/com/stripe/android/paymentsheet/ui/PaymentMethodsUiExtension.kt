@@ -102,11 +102,6 @@ internal fun EditCardPayload.getSavedPaymentMethodIcon(
 }
 
 @DrawableRes
-internal fun CardBrand.getCardBrandIcon(): Int {
-    return this.getCardBrandIconRef()
-}
-
-@DrawableRes
 internal fun CardBrand.getCardBrandIconForVerticalMode(): Int = when (this) {
     CardBrand.Visa -> com.stripe.payments.model.R.drawable.stripe_ic_visa_unpadded
     CardBrand.AmericanExpress -> com.stripe.payments.model.R.drawable.stripe_ic_amex_unpadded
@@ -133,7 +128,7 @@ internal fun CardBrand.getCardBrandIconForHorizontalMode(
 }
 
 @DrawableRes
-private fun CardBrand.getCardBrandIconRef(): Int {
+internal fun CardBrand.getCardBrandIconRef(): Int {
     return when (this) {
         CardBrand.Visa -> R.drawable.stripe_ic_paymentsheet_card_visa_ref
         CardBrand.AmericanExpress -> R.drawable.stripe_ic_paymentsheet_card_amex_ref
@@ -149,7 +144,7 @@ private fun CardBrand.getCardBrandIconRef(): Int {
 }
 
 @DrawableRes
-private fun CardBrand.getNightIcon(): Int {
+internal fun CardBrand.getNightIcon(): Int {
     return when (this) {
         CardBrand.Visa -> R.drawable.stripe_ic_paymentsheet_card_visa_night
         CardBrand.AmericanExpress -> R.drawable.stripe_ic_paymentsheet_card_amex_night
