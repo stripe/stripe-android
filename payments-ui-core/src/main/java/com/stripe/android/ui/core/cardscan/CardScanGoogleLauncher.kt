@@ -9,6 +9,7 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.core.app.ActivityOptionsCompat
@@ -16,11 +17,12 @@ import com.google.android.gms.wallet.PaymentCardRecognitionResult
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import java.lang.ref.WeakReference
 
 internal class CardScanGoogleLauncher @VisibleForTesting constructor(
     context: Context,
     private val options: ActivityOptionsCompat?,
-    private val eventsReporter: CardScanEventsReporter,
+    eventsReporter: CardScanEventsReporter,
     private val paymentCardRecognitionClient: PaymentCardRecognitionClient
 ) {
     private val implementation = "google_pay"
@@ -28,24 +30,31 @@ internal class CardScanGoogleLauncher @VisibleForTesting constructor(
     private val _isAvailable = MutableStateFlow(false)
     val isAvailable: StateFlow<Boolean> = _isAvailable.asStateFlow()
 
+    // Use WeakReference to avoid memory leaks when GMS SDK holds lambdas that capture the launcher.
+    // The GMS SDK may hold TaskCompletionSource callbacks longer than expected, which would
+    // otherwise keep the eventsReporter (and thus the ViewModel) alive after Activity destruction.
+    private val eventsReporterRef = WeakReference(eventsReporter)
+
     @VisibleForTesting
-    lateinit var activityLauncher: ActivityResultLauncher<IntentSenderRequest>
+    var activityLauncher: ActivityResultLauncher<IntentSenderRequest>? = null
 
     init {
         paymentCardRecognitionClient.fetchIntent(
             context = context,
             onFailure = { e ->
                 _isAvailable.value = false
-                eventsReporter.onCardScanApiCheckFailed(implementation, e)
+                eventsReporterRef.get()?.onCardScanApiCheckFailed(implementation, e)
             },
             onSuccess = {
                 _isAvailable.value = true
-                eventsReporter.onCardScanApiCheckSucceeded(implementation)
+                eventsReporterRef.get()?.onCardScanApiCheckSucceeded(implementation)
             }
         )
     }
 
     fun launch(context: Context) {
+        val launcher = activityLauncher ?: return
+
         if (_isLaunching) {
             // Prevent multiple simultaneous launches
             return
@@ -55,11 +64,12 @@ internal class CardScanGoogleLauncher @VisibleForTesting constructor(
         paymentCardRecognitionClient.fetchIntent(
             context = context,
             onFailure = { e ->
-                eventsReporter.onCardScanFailed(implementation, e)
+                _isLaunching = false
+                eventsReporterRef.get()?.onCardScanFailed(implementation, e)
             },
             onSuccess = { intentSenderRequest ->
-                eventsReporter.onCardScanStarted("google_pay")
-                activityLauncher.launch(intentSenderRequest, options)
+                eventsReporterRef.get()?.onCardScanStarted("google_pay")
+                launcher.launch(intentSenderRequest, options)
             }
         )
     }
@@ -92,10 +102,12 @@ internal class CardScanGoogleLauncher @VisibleForTesting constructor(
         }
 
         // Report events based on the result
-        when (scanResult) {
-            is CardScanResult.Completed -> eventsReporter.onCardScanSucceeded(implementation)
-            is CardScanResult.Canceled -> eventsReporter.onCardScanCancelled(implementation)
-            is CardScanResult.Failed -> eventsReporter.onCardScanFailed(implementation, scanResult.error)
+        eventsReporterRef.get()?.let { reporter ->
+            when (scanResult) {
+                is CardScanResult.Completed -> reporter.onCardScanSucceeded(implementation)
+                is CardScanResult.Canceled -> reporter.onCardScanCancelled(implementation)
+                is CardScanResult.Failed -> reporter.onCardScanFailed(implementation, scanResult.error)
+            }
         }
 
         return scanResult
@@ -124,6 +136,17 @@ internal class CardScanGoogleLauncher @VisibleForTesting constructor(
                 launcher._isLaunching = false
                 onResult(launcher.parseActivityResult(result))
             }
+
+            // Clean up references when the composable leaves composition to prevent memory leaks.
+            // The GMS Wallet SDK may hold references to callbacks that capture the launcher,
+            // which in turn holds references to the Activity's ActivityResultRegistry.
+            DisposableEffect(launcher) {
+                onDispose {
+                    launcher.activityLauncher = null
+                    launcher._isLaunching = false
+                }
+            }
+
             return remember(activityLauncher) {
                 launcher.apply { this.activityLauncher = activityLauncher }
             }
