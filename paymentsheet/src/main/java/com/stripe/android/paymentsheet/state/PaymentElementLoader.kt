@@ -13,7 +13,6 @@ import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.common.taptoadd.TapToAddConnectionManager
 import com.stripe.android.core.Logger
-import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.utils.FeatureFlag
 import com.stripe.android.core.utils.FeatureFlags
@@ -51,7 +50,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.model.validate
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
@@ -291,18 +289,13 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             savedPaymentMethodSelection = savedPaymentMethodSelection,
         )
         val elementsSession = sessionResult.elementsSession
+        val customerInfo = sessionResult.customerInfo
 
         // Preemptively prepare Integrity asynchronously if needed, as warm up can take
         // a few seconds.
         if (elementsSession.shouldWarmUpIntegrity()) {
             launch { integrityRequestManager.prepare() }
         }
-
-        val customerInfo = createCustomerInfo(
-            configuration = configuration,
-            elementsSession = elementsSession,
-            checkoutSession = sessionResult.checkoutSession,
-        )
 
         val isGooglePayReady = isGooglePayReady(configuration, elementsSession, isGooglePaySupportedByConfiguration)
 
@@ -582,53 +575,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             as? ElementsSession.Customer.Components.MobilePaymentElement.Enabled
         return mobilePaymentElement?.isPaymentMethodSetAsDefaultEnabled
             ?: false
-    }
-
-    private fun createCustomerInfo(
-        configuration: CommonConfiguration,
-        elementsSession: ElementsSession,
-        checkoutSession: CheckoutSessionResponse?,
-    ): CustomerInfo? {
-        // Checkout session customer data comes from the init response, not from customer sessions.
-        val checkoutCustomer = checkoutSession?.customer
-        if (checkoutCustomer != null) {
-            return CustomerInfo.CheckoutSession(
-                customer = checkoutCustomer,
-                offerSave = checkoutSession.savedPaymentMethodsOfferSave,
-            )
-        }
-
-        val customer = configuration.customer
-
-        return when (val accessType = customer?.accessType) {
-            is PaymentSheet.CustomerAccessType.CustomerSession -> {
-                elementsSession.customer?.let { elementsSessionCustomer ->
-                    CustomerInfo.CustomerSession(elementsSessionCustomer, accessType.customerSessionClientSecret)
-                } ?: run {
-                    val exception = IllegalStateException(
-                        "Excepted 'customer' attribute as part of 'elements_session' response!"
-                    )
-
-                    errorReporter.report(
-                        ErrorReporter.UnexpectedErrorEvent.PAYMENT_SHEET_LOADER_ELEMENTS_SESSION_CUSTOMER_NOT_FOUND,
-                        StripeException.create(exception)
-                    )
-
-                    if (!elementsSession.stripeIntent.isLiveMode) {
-                        throw exception
-                    }
-
-                    null
-                }
-            }
-            is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey -> {
-                CustomerInfo.Legacy(
-                    customerConfig = customer,
-                    accessType = accessType,
-                )
-            }
-            else -> null
-        }
     }
 
     private suspend fun createCustomerState(
@@ -942,48 +888,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     "error \"${unavailableCustomPaymentMethod.error}\"!"
             )
         }
-    }
-
-    internal sealed interface CustomerInfo {
-        data class CustomerSession(
-            val elementsSessionCustomer: ElementsSession.Customer,
-            val customerSessionClientSecret: String,
-        ) : CustomerInfo {
-            val id: String = elementsSessionCustomer.session.customerId
-            val ephemeralKeySecret: String = elementsSessionCustomer.session.apiKey
-        }
-
-        data class Legacy(
-            val customerConfig: PaymentSheet.CustomerConfiguration,
-            val accessType: PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey
-        ) : CustomerInfo {
-            val id: String = customerConfig.id
-            val ephemeralKeySecret: String = accessType.ephemeralKeySecret
-        }
-
-        /**
-         * Customer data from checkout session init response.
-         * Checkout sessions don't use ephemeral keys — customer is associated server-side.
-         */
-        data class CheckoutSession(
-            val customer: CheckoutSessionResponse.Customer,
-            val offerSave: CheckoutSessionResponse.SavedPaymentMethodsOfferSave?,
-        ) : CustomerInfo
-    }
-
-    private fun CustomerInfo.toCustomerInfo(): CustomerRepository.CustomerInfo? = when (this) {
-        is CustomerInfo.CustomerSession -> CustomerRepository.CustomerInfo(
-            id = id,
-            ephemeralKeySecret = ephemeralKeySecret,
-            customerSessionClientSecret = customerSessionClientSecret,
-        )
-        is CustomerInfo.Legacy -> CustomerRepository.CustomerInfo(
-            id = id,
-            ephemeralKeySecret = ephemeralKeySecret,
-            customerSessionClientSecret = null,
-        )
-        // Checkout sessions don't use ephemeral keys for customer API calls.
-        is CustomerInfo.CheckoutSession -> null
     }
 }
 

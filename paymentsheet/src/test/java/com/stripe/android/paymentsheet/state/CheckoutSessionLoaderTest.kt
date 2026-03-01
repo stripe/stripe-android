@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.isInstanceOf
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -24,14 +25,27 @@ internal class CheckoutSessionLoaderTest {
     }
 
     @Test
-    fun `returns checkout session response`() = runTest {
+    fun `returns CheckoutSession customer info when customer present`() = runTest {
         val loader = createLoader(
             initResult = Result.success(CHECKOUT_SESSION_RESPONSE),
         )
 
         val result = loader(INIT_MODE)
 
-        assertThat(result.checkoutSession).isEqualTo(CHECKOUT_SESSION_RESPONSE)
+        assertThat(result.customerInfo).isInstanceOf<CustomerInfo.CheckoutSession>()
+        val checkoutCustomer = result.customerInfo as CustomerInfo.CheckoutSession
+        assertThat(checkoutCustomer.customer.id).isEqualTo("cus_test_123")
+    }
+
+    @Test
+    fun `returns null customer info when checkout response has no customer`() = runTest {
+        val loader = createLoader(
+            initResult = Result.success(CHECKOUT_SESSION_RESPONSE.copy(customer = null)),
+        )
+
+        val result = loader(INIT_MODE)
+
+        assertThat(result.customerInfo).isNull()
     }
 
     @Test
