@@ -12,7 +12,7 @@ internal data class PaymentSheetCardBrandFilter(
 ) : CardBrandFilter {
 
     override fun isAccepted(cardBrand: CardBrand): Boolean {
-        val brandCategory = cardBrand.toBrandCategory()
+        val brandCategory = cardBrand.toPaymentSheetBrandCategory()
 
         return when (cardBrandAcceptance) {
             is PaymentSheet.CardBrandAcceptance.All -> true
@@ -40,7 +40,7 @@ internal data class PaymentSheetCardBrandFilter(
 }
 
 // Extension function to map CardBrand to BrandCategory
-internal fun CardBrand.toBrandCategory(): PaymentSheet.CardBrandAcceptance.BrandCategory? {
+internal fun CardBrand.toPaymentSheetBrandCategory(): PaymentSheet.CardBrandAcceptance.BrandCategory? {
     return when (this) {
         CardBrand.Visa -> PaymentSheet.CardBrandAcceptance.BrandCategory.Visa
         CardBrand.MasterCard -> PaymentSheet.CardBrandAcceptance.BrandCategory.Mastercard

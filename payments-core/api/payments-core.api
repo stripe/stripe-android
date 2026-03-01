@@ -750,11 +750,13 @@ public final class com/stripe/android/googlepaylauncher/GooglePayLauncher$Config
 	public fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig;Z)V
 	public fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig;ZZ)V
 	public fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig;ZZLjava/util/List;)V
-	public synthetic fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig;ZZLjava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig;ZZLjava/util/List;Lcom/stripe/android/model/CardBrand$CardBrandAcceptance;)V
+	public synthetic fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig;ZZLjava/util/List;Lcom/stripe/android/model/CardBrand$CardBrandAcceptance;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAllowCreditCards ()Z
 	public final fun getBillingAddressConfig ()Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig;
+	public final fun getCardBrandAcceptance ()Lcom/stripe/android/model/CardBrand$CardBrandAcceptance;
 	public final fun getEnvironment ()Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;
 	public final fun getExistingPaymentMethodRequired ()Z
 	public final fun getMerchantCountryCode ()Ljava/lang/String;
@@ -763,6 +765,7 @@ public final class com/stripe/android/googlepaylauncher/GooglePayLauncher$Config
 	public final fun isEmailRequired ()Z
 	public final fun setAllowCreditCards (Z)V
 	public final fun setBillingAddressConfig (Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig;)V
+	public final fun setCardBrandAcceptance (Lcom/stripe/android/model/CardBrand$CardBrandAcceptance;)V
 	public final fun setEmailRequired (Z)V
 	public final fun setExistingPaymentMethodRequired (Z)V
 	public fun toString ()Ljava/lang/String;
@@ -872,11 +875,13 @@ public final class com/stripe/android/googlepaylauncher/GooglePayPaymentMethodLa
 	public fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$BillingAddressConfig;Z)V
 	public fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$BillingAddressConfig;ZZ)V
 	public fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$BillingAddressConfig;ZZLjava/util/List;)V
-	public synthetic fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$BillingAddressConfig;ZZLjava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$BillingAddressConfig;ZZLjava/util/List;Lcom/stripe/android/model/CardBrand$CardBrandAcceptance;)V
+	public synthetic fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$BillingAddressConfig;ZZLjava/util/List;Lcom/stripe/android/model/CardBrand$CardBrandAcceptance;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAllowCreditCards ()Z
 	public final fun getBillingAddressConfig ()Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$BillingAddressConfig;
+	public final fun getCardBrandAcceptance ()Lcom/stripe/android/model/CardBrand$CardBrandAcceptance;
 	public final fun getEnvironment ()Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;
 	public final fun getExistingPaymentMethodRequired ()Z
 	public final fun getMerchantCountryCode ()Ljava/lang/String;
@@ -885,6 +890,7 @@ public final class com/stripe/android/googlepaylauncher/GooglePayPaymentMethodLa
 	public final fun isEmailRequired ()Z
 	public final fun setAllowCreditCards (Z)V
 	public final fun setBillingAddressConfig (Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$BillingAddressConfig;)V
+	public final fun setCardBrandAcceptance (Lcom/stripe/android/model/CardBrand$CardBrandAcceptance;)V
 	public final fun setEmailRequired (Z)V
 	public final fun setExistingPaymentMethodRequired (Z)V
 	public fun toString ()Ljava/lang/String;
