@@ -6,6 +6,17 @@ apply from: rootProject.file('build-configuration/detekt.gradle')
 apply from: rootProject.file('build-configuration/ktlint.gradle')
 apply from: rootProject.file('build-configuration/configurations.gradle')
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set("JVM_21")
+    }
+}
+
 check.dependsOn('ktlint')
 
 dependencies {
