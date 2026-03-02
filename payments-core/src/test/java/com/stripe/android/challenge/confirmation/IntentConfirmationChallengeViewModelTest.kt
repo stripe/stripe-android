@@ -18,6 +18,7 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -278,6 +279,7 @@ internal class IntentConfirmationChallengeViewModelTest {
         stripeRepository = stripeRepository,
         errorReporter = errorReporter,
         requestOptions = REQUEST_OPTIONS,
+        fireAndForgetScope = TestScope(testDispatcher)
     )
 
     private class FakeStripeRepository(
