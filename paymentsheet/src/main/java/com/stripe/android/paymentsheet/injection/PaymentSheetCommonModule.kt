@@ -7,6 +7,7 @@ import com.stripe.android.common.taptoadd.DefaultTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddConnectionModule
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.core.injection.ENABLE_LOGGING
+import com.stripe.android.core.injection.StripeNetworkClientModule
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
@@ -79,6 +80,7 @@ import javax.inject.Singleton
         PaymentsIntegrityModule::class,
         PaymentConfigurationModule::class,
         CheckoutSessionRepositoryModule::class,
+        StripeNetworkClientModule::class,
     ]
 )
 internal abstract class PaymentSheetCommonModule {

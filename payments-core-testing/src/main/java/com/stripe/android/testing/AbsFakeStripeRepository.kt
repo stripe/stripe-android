@@ -19,8 +19,6 @@ import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.Customer
-import com.stripe.android.model.ElementsSession
-import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.MobileCardElementConfig
@@ -439,13 +437,6 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         locale: String,
         requestOptions: ApiRequest.Options
     ): Result<PaymentMethodMessage> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun retrieveElementsSession(
-        params: ElementsSessionParams,
-        options: ApiRequest.Options
-    ): Result<ElementsSession> {
         TODO("Not yet implemented")
     }
 

@@ -70,12 +70,11 @@ data class DeferredIntentParams(
                     Mode.Payment(
                         amount = deferredIntentParamsJson.optLong("amount"),
                         currency = deferredIntentParamsJson.optString("currency"),
-                        setupFutureUsage = StripeIntent.Usage.fromCode(
-                            deferredIntentParamsJson.optString("setup_future_usage")
-                        ),
-                        captureMethod = PaymentIntent.CaptureMethod.fromCode(
-                            deferredIntentParamsJson.optString("capture_method")
-                        ),
+                        setupFutureUsage = deferredIntentParamsJson.optString("setup_future_usage")
+                            .let { code -> StripeIntent.Usage.entries.firstOrNull { it.code == code } },
+                        captureMethod = deferredIntentParamsJson.optString("capture_method")
+                            .let { code -> PaymentIntent.CaptureMethod.entries.firstOrNull { it.code == code } }
+                            ?: PaymentIntent.CaptureMethod.Automatic,
                         paymentMethodOptionsJsonString = deferredIntentParamsJson
                             .optJSONObject("payment_method_options")?.toString()
                     )
@@ -83,9 +82,9 @@ data class DeferredIntentParams(
                 "setup" -> {
                     Mode.Setup(
                         currency = deferredIntentParamsJson.optString("currency"),
-                        setupFutureUsage = StripeIntent.Usage.fromCode(
-                            deferredIntentParamsJson.optString("setup_future_usage")
-                        ) ?: return null
+                        setupFutureUsage = deferredIntentParamsJson.optString("setup_future_usage")
+                            .let { code -> StripeIntent.Usage.entries.firstOrNull { it.code == code } }
+                            ?: return null
                     )
                 }
                 else -> return null
