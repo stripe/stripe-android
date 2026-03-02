@@ -48,6 +48,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.model.validate
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
@@ -179,24 +180,14 @@ internal interface PaymentElementLoader {
 
         @Parcelize
         data class CheckoutSession(
-            val clientSecret: String,
+            val checkoutSessionResponse: CheckoutSessionResponse,
         ) : InitializationMode() {
-            /**
-             * The checkout session ID extracted from the client secret.
-             */
-            val id: String
-                get() = clientSecret.substringBefore("_secret_")
-
             override fun validate() {
-                if (!clientSecret.startsWith("cs_") || !clientSecret.contains("_secret_")) {
-                    throw IllegalArgumentException(
-                        "Must use a checkout session client secret."
-                    )
-                }
+                // Nothing to validate — the response was already loaded successfully.
             }
 
             override fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata {
-                return IntegrationMetadata.CheckoutSession(id)
+                return IntegrationMetadata.CheckoutSession(checkoutSessionResponse.id)
             }
         }
     }
