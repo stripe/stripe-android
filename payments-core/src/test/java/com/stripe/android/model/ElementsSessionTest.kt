@@ -202,6 +202,42 @@ class ElementsSessionTest {
         assertThat(session.enableCardFundFiltering).isFalse()
     }
 
+    @Test
+    fun `ELEMENTS_MOBILE_ANDROID_TAP_TO_ADD_ENABLED flag has correct value`() {
+        assertThat(ElementsSession.Flag.ELEMENTS_MOBILE_ANDROID_TAP_TO_ADD_ENABLED.flagValue)
+            .isEqualTo("elements_mobile_android_tap_to_add_enabled")
+    }
+
+    @Test
+    fun `isTapToAddEnabled returns true when flag is enabled`() {
+        val session = createElementsSession(
+            passiveCaptcha = null,
+            flags = mapOf(ElementsSession.Flag.ELEMENTS_MOBILE_ANDROID_TAP_TO_ADD_ENABLED to true)
+        )
+
+        assertThat(session.isTapToAddEnabled).isTrue()
+    }
+
+    @Test
+    fun `isTapToAddEnabled returns false when flag is disabled`() {
+        val session = createElementsSession(
+            passiveCaptcha = null,
+            flags = mapOf(ElementsSession.Flag.ELEMENTS_MOBILE_ANDROID_TAP_TO_ADD_ENABLED to false)
+        )
+
+        assertThat(session.isTapToAddEnabled).isFalse()
+    }
+
+    @Test
+    fun `isTapToAddEnabled returns false when flag is missing`() {
+        val session = createElementsSession(
+            passiveCaptcha = null,
+            flags = emptyMap()
+        )
+
+        assertThat(session.isTapToAddEnabled).isFalse()
+    }
+
     private fun createElementsSession(
         passiveCaptcha: PassiveCaptchaParams? = null,
         flags: Map<ElementsSession.Flag, Boolean> = emptyMap(),

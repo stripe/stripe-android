@@ -396,7 +396,9 @@ internal data class PaymentMethodMetadata(
                 integrationMetadata = integrationMetadata,
                 analyticsMetadata = analyticsMetadata,
                 experimentsData = elementsSession.experimentsData,
-                isTapToAddSupported = isTapToAddSupported && customerMetadata != null,
+                isTapToAddSupported = isTapToAddSupported &&
+                    elementsSession.isTapToAddEnabled &&
+                    customerMetadata != null,
             )
         }
 

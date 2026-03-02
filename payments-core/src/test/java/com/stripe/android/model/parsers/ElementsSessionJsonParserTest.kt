@@ -1731,6 +1731,69 @@ class ElementsSessionJsonParserTest {
             .isEqualTo(enabled)
     }
 
+    @Test
+    fun `parse elements_mobile_android_tap_to_add_enabled flag when present`() {
+        testTapToAddEnabledFlag(enabled = true)
+        testTapToAddEnabledFlag(enabled = false)
+    }
+
+    @Test
+    fun `parse elements_mobile_android_tap_to_add_enabled flag when missing`() {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                appId = APP_ID
+            ),
+            isLiveMode = false,
+        )
+
+        val session = parser.parse(ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON)
+
+        assertThat(session?.flags?.get(ElementsSession.Flag.ELEMENTS_MOBILE_ANDROID_TAP_TO_ADD_ENABLED))
+            .isNull()
+    }
+
+    private fun testTapToAddEnabledFlag(enabled: Boolean) {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                appId = APP_ID
+            ),
+            isLiveMode = false,
+        )
+
+        val json = JSONObject(
+            """
+            {
+              "payment_method_preference": {
+                "object": "payment_method_preference",
+                "country_code": "US",
+                "payment_intent": {
+                  "id": "pi_123",
+                  "object": "payment_intent",
+                  "amount": 1099,
+                  "currency": "usd",
+                  "status": "requires_payment_method"
+                },
+                "ordered_payment_method_types": ["card"]
+              },
+              "flags": {
+                "elements_mobile_android_tap_to_add_enabled": $enabled
+              }
+            }
+            """.trimIndent()
+        )
+
+        val session = parser.parse(json)
+
+        assertThat(session?.flags?.get(ElementsSession.Flag.ELEMENTS_MOBILE_ANDROID_TAP_TO_ADD_ENABLED))
+            .isEqualTo(enabled)
+    }
+
     companion object {
         private const val APP_ID = "com.app.id"
     }

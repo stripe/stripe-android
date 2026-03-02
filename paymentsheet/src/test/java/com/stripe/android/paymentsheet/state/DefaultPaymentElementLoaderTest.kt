@@ -547,6 +547,49 @@ internal class DefaultPaymentElementLoaderTest {
             }
         }
 
+    @Test
+    fun `isTapToAddSupported should be false when elements session has tap to add flag disabled`() =
+        runScenario {
+            FakeTapToAddConnectionManager.test(
+                isSupported = true,
+                isConnected = true,
+            ) {
+                val elementsSessionRepository = FakeElementsSessionRepository(
+                    stripeIntent = PaymentIntentFactory.create(),
+                    error = null,
+                    linkSettings = null,
+                    flags = mapOf(
+                        ElementsSession.Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA to true,
+                        ElementsSession.Flag.ELEMENTS_MOBILE_ANDROID_TAP_TO_ADD_ENABLED to false,
+                    ),
+                )
+                val loader = createPaymentElementLoader(
+                    stripeIntent = PaymentIntentFactory.create(),
+                    isGooglePayReady = true,
+                    customerRepo = FakeCustomerRepository(paymentMethods = emptyList()),
+                    tapToAddConnectionManager = tapToAddConnectionManager,
+                    elementsSessionRepository = elementsSessionRepository,
+                )
+
+                val result = loader.load(
+                    initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(
+                        clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value
+                    ),
+                    paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+                    metadata = PaymentElementLoader.Metadata(
+                        initializedViaCompose = false,
+                    ),
+                ).getOrThrow()
+
+                assertThat(connectCalls.awaitItem()).isNotNull()
+
+                assertThat(result.paymentMethodMetadata.isTapToAddSupported).isFalse()
+
+                assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+                assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+            }
+        }
+
     @OptIn(WalletButtonsPreview::class)
     @Test
     fun `Should default to no payment method when using wallet buttons & google is saved selection`() =
