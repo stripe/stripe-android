@@ -6,13 +6,13 @@ import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.data.CustomerSheetSession
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodAccess
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
 internal data class CustomerMetadata(
-    val id: String,
-    val ephemeralKeySecret: String,
-    val customerSessionClientSecret: String?,
+    val savedPaymentMethodAccess: SavedPaymentMethodAccess,
     val isPaymentMethodSetAsDefaultEnabled: Boolean,
     val removePaymentMethod: PaymentMethodRemovePermission,
     val saveConsent: PaymentMethodSaveConsentBehavior,
@@ -69,9 +69,13 @@ internal data class CustomerMetadata(
             }
 
             return CustomerMetadata(
-                id = id,
-                ephemeralKeySecret = ephemeralKeySecret,
-                customerSessionClientSecret = customerSessionClientSecret,
+                savedPaymentMethodAccess = SavedPaymentMethodAccess.Customer(
+                    info = CustomerRepository.CustomerInfo(
+                        id = id,
+                        ephemeralKeySecret = ephemeralKeySecret,
+                        customerSessionClientSecret = customerSessionClientSecret,
+                    ),
+                ),
                 isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
                 removePaymentMethod = removePaymentMethod,
                 saveConsent = saveConsent,
@@ -90,9 +94,13 @@ internal data class CustomerMetadata(
             isPaymentMethodSetAsDefaultEnabled: Boolean,
         ): CustomerMetadata {
             return CustomerMetadata(
-                id = id,
-                ephemeralKeySecret = ephemeralKeySecret,
-                customerSessionClientSecret = null,
+                savedPaymentMethodAccess = SavedPaymentMethodAccess.Customer(
+                    info = CustomerRepository.CustomerInfo(
+                        id = id,
+                        ephemeralKeySecret = ephemeralKeySecret,
+                        customerSessionClientSecret = null,
+                    ),
+                ),
                 isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
                 /*
                  * Un-scoped legacy ephemeral keys have full permissions to remove/save/modify. This should
@@ -129,9 +137,13 @@ internal data class CustomerMetadata(
             isPaymentMethodSetAsDefaultEnabled: Boolean,
         ): CustomerMetadata {
             return CustomerMetadata(
-                id = id,
-                ephemeralKeySecret = ephemeralKeySecret,
-                customerSessionClientSecret = customerSessionClientSecret,
+                savedPaymentMethodAccess = SavedPaymentMethodAccess.Customer(
+                    info = CustomerRepository.CustomerInfo(
+                        id = id,
+                        ephemeralKeySecret = ephemeralKeySecret,
+                        customerSessionClientSecret = customerSessionClientSecret,
+                    ),
+                ),
                 isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
                 removePaymentMethod = customerSheetSession.permissions.removePaymentMethod,
                 saveConsent = customerSheetSession.paymentMethodSaveConsentBehavior,

@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet
 
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.strings.orEmpty
-import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.PaymentMethod
@@ -10,8 +9,6 @@ import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
-import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodAccess
 import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
@@ -138,12 +135,13 @@ internal class SavedPaymentMethodMutator(
 
     private suspend fun removePaymentMethodInternal(paymentMethodId: String): Result<PaymentMethod> {
         // TODO(samer-stripe): Send 'unexpected_error' here
-        val access = paymentMethodMetadataFlow.value?.toAccess() ?: return Result.failure(
-            IllegalStateException(
-                "Could not remove payment method because CustomerConfiguration was not found! Make sure it is " +
-                    "provided as part of PaymentSheet.Configuration"
+        val access = paymentMethodMetadataFlow.value?.customerMetadata?.savedPaymentMethodAccess
+            ?: return Result.failure(
+                IllegalStateException(
+                    "Could not remove payment method because CustomerConfiguration was not found! Make sure it is " +
+                        "provided as part of PaymentSheet.Configuration"
+                )
             )
-        )
 
         val canRemoveDuplicates = customerStateHolder.canRemoveDuplicate.value
         val currentSelection = (selection.value as? PaymentSelection.Saved)?.paymentMethod
@@ -204,7 +202,7 @@ internal class SavedPaymentMethodMutator(
     }
 
     internal suspend fun setDefaultPaymentMethod(paymentMethod: PaymentMethod): Result<Unit> {
-        val access = paymentMethodMetadataFlow.value?.toAccess()
+        val access = paymentMethodMetadataFlow.value?.customerMetadata?.savedPaymentMethodAccess
             ?: return Result.failure(
                 IllegalStateException("Unable to set default payment method when customer is null.")
             )
@@ -249,12 +247,13 @@ internal class SavedPaymentMethodMutator(
         onSuccess: (PaymentMethod) -> Unit = {},
     ): Result<PaymentMethod> {
         // TODO(samer-stripe): Send 'unexpected_error' here
-        val access = paymentMethodMetadataFlow.value?.toAccess() ?: return Result.failure(
-            IllegalStateException(
-                "Could not update payment method because CustomerConfiguration was not found! Make sure it is " +
-                    "provided as part of PaymentSheet.Configuration"
+        val access = paymentMethodMetadataFlow.value?.customerMetadata?.savedPaymentMethodAccess
+            ?: return Result.failure(
+                IllegalStateException(
+                    "Could not update payment method because CustomerConfiguration was not found! Make sure it is " +
+                        "provided as part of PaymentSheet.Configuration"
+                )
             )
-        )
 
         return savedPaymentMethodRepository.updatePaymentMethod(
             access = access,
@@ -458,22 +457,6 @@ internal class SavedPaymentMethodMutator(
                 }
             }
         }
-    }
-}
-
-private fun PaymentMethodMetadata.toAccess(): SavedPaymentMethodAccess? {
-    val cm = customerMetadata ?: return null
-    return when (val integration = integrationMetadata) {
-        is IntegrationMetadata.CheckoutSession -> SavedPaymentMethodAccess.CheckoutSession(
-            sessionId = integration.id,
-        )
-        else -> SavedPaymentMethodAccess.Customer(
-            info = CustomerRepository.CustomerInfo(
-                id = cm.id,
-                ephemeralKeySecret = cm.ephemeralKeySecret,
-                customerSessionClientSecret = cm.customerSessionClientSecret,
-            ),
-        )
     }
 }
 

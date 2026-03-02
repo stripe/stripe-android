@@ -50,6 +50,7 @@ import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.model.validate
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodAccess
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
 import com.stripe.attestation.IntegrityRequestManager
@@ -458,13 +459,14 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
         logCustomPaymentMethodErrors(elementsSession.customPaymentMethods)
 
+        val integrationMetadata = initializationMode.integrationMetadata(
+            paymentElementCallbacks = PaymentElementCallbackReferences[paymentElementCallbackIdentifier]
+        )
         val customerMetadata = getCustomerMetadata(
             configuration = configuration,
             elementsSession = elementsSession,
             customerInfo = customerInfo,
-        )
-        val integrationMetadata = initializationMode.integrationMetadata(
-            paymentElementCallbacks = PaymentElementCallbackReferences[paymentElementCallbackIdentifier]
+            integrationMetadata = integrationMetadata,
         )
 
         val analyticsMetadata = analyticsMetadataFactory.create(
@@ -497,6 +499,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         configuration: CommonConfiguration,
         elementsSession: ElementsSession,
         customerInfo: CustomerInfo?,
+        integrationMetadata: IntegrationMetadata,
     ): CustomerMetadata? {
         return when (customerInfo) {
             is CustomerInfo.CustomerSession -> {
@@ -519,11 +522,12 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 )
             }
             is CustomerInfo.CheckoutSession -> {
+                val sessionId = (integrationMetadata as? IntegrationMetadata.CheckoutSession)?.id
+                    ?: return null
                 CustomerMetadata(
-                    id = customerInfo.customer.id,
-                    // Checkout sessions don't use ephemeral keys or customer sessions.
-                    ephemeralKeySecret = "",
-                    customerSessionClientSecret = null,
+                    savedPaymentMethodAccess = SavedPaymentMethodAccess.CheckoutSession(
+                        sessionId = sessionId,
+                    ),
                     isPaymentMethodSetAsDefaultEnabled = false,
                     removePaymentMethod = if (customerInfo.customer.canDetachPaymentMethod) {
                         PaymentMethodRemovePermission.Full

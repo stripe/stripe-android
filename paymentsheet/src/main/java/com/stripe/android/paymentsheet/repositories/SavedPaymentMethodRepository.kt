@@ -1,19 +1,23 @@
 package com.stripe.android.paymentsheet.repositories
 
+import android.os.Parcelable
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
+import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
 /**
  * Carries the routing context that [DefaultSavedPaymentMethodRepository] needs to decide
  * which backend to delegate to.
  */
-internal sealed interface SavedPaymentMethodAccess {
+internal sealed interface SavedPaymentMethodAccess : Parcelable {
+    @Parcelize
     data class Customer(
         val info: CustomerRepository.CustomerInfo,
     ) : SavedPaymentMethodAccess
 
+    @Parcelize
     data class CheckoutSession(
         val sessionId: String,
     ) : SavedPaymentMethodAccess

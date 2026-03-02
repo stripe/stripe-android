@@ -16,6 +16,7 @@ import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
+import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodAccess
 import kotlinx.parcelize.Parcelize
 
 internal class IntentConfirmationDefinition(
@@ -42,8 +43,10 @@ internal class IntentConfirmationDefinition(
         try {
             interceptor = intentConfirmationInterceptorFactory.create(
                 integrationMetadata = confirmationArgs.paymentMethodMetadata.integrationMetadata,
-                customerId = paymentMethodMetadata.customerMetadata?.id,
-                ephemeralKeySecret = paymentMethodMetadata.customerMetadata?.ephemeralKeySecret,
+                customerId = (paymentMethodMetadata.customerMetadata?.savedPaymentMethodAccess
+                    as? SavedPaymentMethodAccess.Customer)?.info?.id,
+                ephemeralKeySecret = (paymentMethodMetadata.customerMetadata?.savedPaymentMethodAccess
+                    as? SavedPaymentMethodAccess.Customer)?.info?.ephemeralKeySecret,
                 clientAttributionMetadata = paymentMethodMetadata.clientAttributionMetadata,
             )
         } catch (e: CallbackNotFoundException) {

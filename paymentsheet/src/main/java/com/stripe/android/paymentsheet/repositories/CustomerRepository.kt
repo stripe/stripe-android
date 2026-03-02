@@ -1,8 +1,10 @@
 package com.stripe.android.paymentsheet.repositories
 
+import android.os.Parcelable
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
+import kotlinx.parcelize.Parcelize
 
 /**
  * Interface for fetching and modifying information about a Customer.
@@ -52,9 +54,10 @@ internal interface CustomerRepository {
         paymentMethodId: String?,
     ): Result<Customer>
 
+    @Parcelize
     data class CustomerInfo(
         val id: String,
         val ephemeralKeySecret: String,
         val customerSessionClientSecret: String?,
-    )
+    ) : Parcelable
 }
