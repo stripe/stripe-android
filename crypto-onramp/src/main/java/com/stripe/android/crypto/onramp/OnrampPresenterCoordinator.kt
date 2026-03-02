@@ -106,7 +106,6 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                 }
             }
         )
-
     }
 
     fun verifyIdentity() {

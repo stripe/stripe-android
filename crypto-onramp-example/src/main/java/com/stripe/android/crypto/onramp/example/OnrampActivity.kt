@@ -85,7 +85,6 @@ import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
 import com.stripe.android.crypto.onramp.model.PaymentMethodSelection
 import com.stripe.android.crypto.onramp.onrampCallbackAttachment
-import com.stripe.android.crypto.onramp.rememberOnrampPresenter
 import com.stripe.android.crypto.onramp.OnrampCoordinator
 import com.stripe.android.model.DateOfBirth
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -93,11 +92,11 @@ import kotlinx.coroutines.launch
 
 internal class OnrampActivity : ComponentActivity() {
 
+    private lateinit var onrampPresenter: OnrampCoordinator.Presenter
+
     private val viewModel: OnrampViewModel by viewModels {
         OnrampViewModel.Factory()
     }
-
-    private lateinit var onrampPresenter: OnrampCoordinator.Presenter
 
     @Suppress("LongMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -106,14 +105,11 @@ internal class OnrampActivity : ComponentActivity() {
 
         FeatureFlags.nativeLinkEnabled.setEnabled(true)
 
-        onrampPresenter = viewModel.onrampCoordinator.createPresenter(this, DEFAULT_ONRAMP_INSTANCE_KEY)
+        onrampPresenter = viewModel
+            .onrampCoordinator.createPresenter(this)
 
         setContent {
-            onrampCallbackAttachment(DEFAULT_ONRAMP_INSTANCE_KEY, viewModel.callbacks)
-//            val onrampPresenter = rememberOnrampPresenter(
-//                coordinator = viewModel.onrampCoordinator,
-//                callbacks = viewModel.callbacks
-//            )
+            onrampCallbackAttachment(viewModel.callbacks)
 
             // ViewModel notifies UI to launch checkout flow.
             // Note checkout requires an Activity context since it might launch UI to handle next actions (e.g. 3DS2).

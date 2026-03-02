@@ -138,8 +138,7 @@ class OnrampCoordinator @Inject internal constructor(
      * @return A presenter instance for handling Link UI operations.
      */
     fun createPresenter(
-        activity: ComponentActivity,
-        onrampCallbackIdentifier: String
+        activity: ComponentActivity
     ): Presenter {
         return presenterComponentFactory
             .build(
