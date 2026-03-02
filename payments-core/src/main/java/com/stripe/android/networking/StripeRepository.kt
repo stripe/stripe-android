@@ -210,6 +210,14 @@ interface StripeRepository {
     ): Result<List<PaymentMethod>>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun retrieveCustomerPaymentMethod(
+        customerId: String,
+        paymentMethodId: String,
+        productUsageTokens: Set<String>,
+        requestOptions: ApiRequest.Options
+    ): Result<PaymentMethod>
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun setDefaultCustomerSource(
         customerId: String,
         publishableKey: String,

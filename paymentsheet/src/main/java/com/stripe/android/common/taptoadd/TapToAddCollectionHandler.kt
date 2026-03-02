@@ -1,11 +1,14 @@
 package com.stripe.android.common.taptoadd
 
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.confirmation.intent.CallbackNotFoundException
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -22,6 +25,7 @@ import com.stripe.stripeterminal.external.models.TerminalErrorCode
 import com.stripe.stripeterminal.external.models.TerminalException
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.suspendCancellableCoroutine
+import javax.inject.Provider
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.suspendCoroutine
 
@@ -44,6 +48,9 @@ internal interface TapToAddCollectionHandler {
         fun create(
             isStripeTerminalSdkAvailable: IsStripeTerminalSdkAvailable,
             terminalWrapper: TerminalWrapper,
+            stripeRepository: StripeRepository,
+            paymentConfiguration: Provider<PaymentConfiguration>,
+            productUsage: Set<String>,
             connectionManager: TapToAddConnectionManager,
             tapToPayUxConfiguration: TapToPayUxConfiguration,
             errorReporter: ErrorReporter,
@@ -53,8 +60,11 @@ internal interface TapToAddCollectionHandler {
                 DefaultTapToAddCollectionHandler(
                     terminalWrapper = terminalWrapper,
                     connectionManager = connectionManager,
+                    stripeRepository = stripeRepository,
                     tapToPayUxConfiguration = tapToPayUxConfiguration,
                     errorReporter = errorReporter,
+                    productUsage = productUsage,
+                    paymentConfiguration = paymentConfiguration,
                     createCardPresentSetupIntentCallbackRetriever = createCardPresentSetupIntentCallbackRetriever,
                 )
             } else {
@@ -67,14 +77,28 @@ internal interface TapToAddCollectionHandler {
 @OptIn(TapToAddPreview::class)
 internal class DefaultTapToAddCollectionHandler(
     private val terminalWrapper: TerminalWrapper,
+    private val stripeRepository: StripeRepository,
     private val connectionManager: TapToAddConnectionManager,
     private val errorReporter: ErrorReporter,
     private val tapToPayUxConfiguration: TapToPayUxConfiguration,
+    private val productUsage: Set<String>,
+    private val paymentConfiguration: Provider<PaymentConfiguration>,
     private val createCardPresentSetupIntentCallbackRetriever: CreateCardPresentSetupIntentCallbackRetriever,
 ) : TapToAddCollectionHandler {
     override suspend fun collect(
         metadata: PaymentMethodMetadata
     ): TapToAddCollectionHandler.CollectionState = runCatching {
+        val customerMetadata = metadata.customerMetadata
+
+        if (customerMetadata == null) {
+            val exception = IllegalStateException("Attempted to collect with tap to add without a customer")
+
+            return@runCatching TapToAddCollectionHandler.CollectionState.FailedCollection(
+                error = exception,
+                displayMessage = exception.stripeErrorMessage(),
+            )
+        }
+
         if (!connectionManager.isConnected) {
             connectionManager.connect()
 
@@ -97,7 +121,7 @@ internal class DefaultTapToAddCollectionHandler(
         when (val result = callback.createCardPresentSetupIntent()) {
             is CreateIntentResult.Success -> {
                 setUxConfiguration()
-                collectWithIntent(result.clientSecret, metadata)
+                collectWithIntent(result.clientSecret, metadata, customerMetadata)
             }
             is CreateIntentResult.Failure -> {
                 TapToAddCollectionHandler.CollectionState.FailedCollection(
@@ -123,11 +147,12 @@ internal class DefaultTapToAddCollectionHandler(
     private suspend fun collectWithIntent(
         clientSecret: String,
         metadata: PaymentMethodMetadata,
+        customerMetadata: CustomerMetadata,
     ): TapToAddCollectionHandler.CollectionState {
         val setupIntent = retrieveSetupIntent(clientSecret)
         val setupIntentWithAttachedPaymentMethod = collectPaymentMethod(setupIntent, metadata)
         val confirmedIntent = confirmSetupIntent(setupIntentWithAttachedPaymentMethod)
-        val paymentMethod = createPaymentMethod(confirmedIntent)
+        val paymentMethod = fetchPaymentMethod(confirmedIntent, customerMetadata)
 
         return TapToAddCollectionHandler.CollectionState.Collected(paymentMethod)
     }
@@ -211,11 +236,14 @@ internal class DefaultTapToAddCollectionHandler(
         }
     }
 
-    private fun createPaymentMethod(intent: SetupIntent): PaymentMethod {
+    private suspend fun fetchPaymentMethod(
+        intent: SetupIntent,
+        customerMetadata: CustomerMetadata,
+    ): PaymentMethod {
         val paymentMethodDetails = intent.latestAttempt?.paymentMethodDetails
         val presentDetails = paymentMethodDetails?.cardPresentDetails
             ?: paymentMethodDetails?.interacPresentDetails
-        val generatedCard = presentDetails?.generatedCardExpanded
+        val generatedCardId = presentDetails?.generatedCard
             ?: run {
                 errorReporter.report(
                     ErrorReporter
@@ -228,17 +256,15 @@ internal class DefaultTapToAddCollectionHandler(
                 )
             }
 
-        return PaymentMethod.Builder()
-            .setCode(PaymentMethod.Type.Card.code)
-            .setType(PaymentMethod.Type.Card)
-            .setId(generatedCard.id)
-            .setCard(
-                PaymentMethod.Card(
-                    last4 = generatedCard.cardDetails?.last4,
-                    brand = CardBrand.fromCode(generatedCard.cardDetails?.brand)
-                )
-            )
-            .build()
+        return stripeRepository.retrieveCustomerPaymentMethod(
+            customerId = customerMetadata.id,
+            paymentMethodId = generatedCardId,
+            productUsageTokens = productUsage,
+            requestOptions = ApiRequest.Options(
+                apiKey = customerMetadata.ephemeralKeySecret,
+                stripeAccount = paymentConfiguration.get().stripeAccountId,
+            ),
+        ).getOrThrow()
     }
 
     private fun terminal() = terminalWrapper.getInstance()
