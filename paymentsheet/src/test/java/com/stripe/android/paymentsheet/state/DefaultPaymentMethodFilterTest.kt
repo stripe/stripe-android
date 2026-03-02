@@ -213,13 +213,11 @@ class DefaultPaymentMethodFilterTest {
                     ephemeralKeySecret = "ek_123",
                     customerSessionClientSecret = "cuss_123",
                     isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
-                    permissions = CustomerMetadata.Permissions(
-                        removePaymentMethod = PaymentMethodRemovePermission.Full,
-                        saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
-                        canRemoveLastPaymentMethod = false,
-                        canRemoveDuplicates = false,
-                        canUpdateFullPaymentMethodDetails = false,
-                    )
+                    removePaymentMethod = PaymentMethodRemovePermission.Full,
+                    saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
+                    canRemoveLastPaymentMethod = false,
+                    canRemoveDuplicates = false,
+                    canUpdateFullPaymentMethodDetails = false,
                 ),
                 remoteDefaultPaymentMethodId = remoteDefaultPaymentMethodId,
                 localSavedSelection = CompletableDeferred(localSavedSelection),

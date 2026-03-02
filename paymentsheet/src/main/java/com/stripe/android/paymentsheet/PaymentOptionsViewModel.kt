@@ -39,7 +39,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection.Link
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
-import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
@@ -67,7 +67,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     private val errorReporter: ErrorReporter,
     val linkPaymentLauncher: LinkPaymentLauncher,
     eventReporter: EventReporter,
-    customerRepository: CustomerRepository,
+    savedPaymentMethodRepository: SavedPaymentMethodRepository,
     @IOContext workContext: CoroutineContext,
     savedStateHandle: SavedStateHandle,
     linkHandler: LinkHandler,
@@ -78,7 +78,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
 ) : BaseSheetViewModel(
     config = args.configuration,
     eventReporter = eventReporter,
-    customerRepository = customerRepository,
+    savedPaymentMethodRepository = savedPaymentMethodRepository,
     workContext = workContext,
     savedStateHandle = savedStateHandle,
     linkHandler = linkHandler,
@@ -223,12 +223,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
         updateSelection(args.state.paymentSelection)
 
-        navigationHandler.resetTo(
-            determineInitialBackStack(
-                paymentMethodMetadata = args.state.paymentMethodMetadata,
-                customerStateHolder = customerStateHolder,
-            )
-        )
+        navigateToInitialScreens()
 
         viewModelScope.launch {
             tapToAddHelper.nextStep.collect { result ->
@@ -246,6 +241,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                         ).plus(savedPaymentMethodConfirmScreen)
                         navigationHandler.resetTo(newScreens)
                     }
+                    is TapToAddNextStep.ShowSavedPaymentMethods -> navigateToInitialScreens()
                     TapToAddNextStep.Complete -> {
                         errorReporter.report(
                             ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_FLOW_CONTROLLER_RECEIVED_COMPLETE_RESULT,
@@ -259,6 +255,15 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun navigateToInitialScreens() {
+        navigationHandler.resetTo(
+            determineInitialBackStack(
+                paymentMethodMetadata = args.state.paymentMethodMetadata,
+                customerStateHolder = customerStateHolder,
+            )
+        )
     }
 
     override fun registerFromActivity(

@@ -3,13 +3,12 @@ package com.stripe.android.paymentsheet.injection
 import android.app.Application
 import android.content.Context
 import com.stripe.android.BuildConfig
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.payments.core.injection.PaymentConfigurationModule
 import com.stripe.android.paymentsheet.addresselement.AutocompleteContract
 import com.stripe.android.paymentsheet.addresselement.AutocompleteViewModel
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
@@ -22,7 +21,7 @@ import dagger.Provides
 import javax.inject.Named
 import javax.inject.Singleton
 
-@Module
+@Module(includes = [PaymentConfigurationModule::class])
 internal interface AutocompleteViewModelModule {
     @Binds
     fun bindsAnalyticsRequestFactory(
@@ -52,13 +51,6 @@ internal interface AutocompleteViewModelModule {
         @Provides
         @Named(ENABLE_LOGGING)
         fun providesEnableLogging(): Boolean = BuildConfig.DEBUG
-
-        @Provides
-        @Named(PUBLISHABLE_KEY)
-        @Singleton
-        fun providesPublishableKey(
-            context: Context
-        ): () -> String = { PaymentConfiguration.getInstance(context).publishableKey }
 
         @Provides
         @Singleton

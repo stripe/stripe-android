@@ -27,6 +27,11 @@ import kotlin.test.Test
 
 internal class DefaultEmbeddedConfigurationCoordinatorTest {
     private val defaultConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
+    private val defaultInitializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+        PaymentSheet.IntentConfiguration(
+            PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
+        )
+    )
 
     private fun createPaymentElementLoaderState(
         isGooglePayReady: Boolean = false,
@@ -59,10 +64,8 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
 
         assertThat(
             configurationCoordinator.configure(
-                PaymentSheet.IntentConfiguration(
-                    PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
-                ),
                 configuration = defaultConfiguration,
+                initializationMode = defaultInitializationMode,
             )
         ).isInstanceOf<EmbeddedPaymentElement.ConfigureResult.Succeeded>()
         stateHelper.stateTurbine.awaitItem().let { state ->
@@ -91,10 +94,8 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
 
         assertThat(
             configurationCoordinator.configure(
-                PaymentSheet.IntentConfiguration(
-                    PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
-                ),
                 configuration = defaultConfiguration,
+                initializationMode = defaultInitializationMode,
             )
         ).isInstanceOf<EmbeddedPaymentElement.ConfigureResult.Succeeded>()
         stateHelper.stateTurbine.awaitItem().let { state ->
@@ -112,10 +113,8 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
 
         assertThat(
             configurationCoordinator.configure(
-                PaymentSheet.IntentConfiguration(
-                    PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
-                ),
                 configuration = defaultConfiguration,
+                initializationMode = defaultInitializationMode,
             )
         ).isInstanceOf<EmbeddedPaymentElement.ConfigureResult.Succeeded>()
         stateHelper.stateTurbine.awaitItem().let { state ->
@@ -125,10 +124,8 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
 
         val secondConfigureResult = testScope.async {
             configurationCoordinator.configure(
-                PaymentSheet.IntentConfiguration(
-                    PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
-                ),
                 configuration = defaultConfiguration,
+                initializationMode = defaultInitializationMode,
             )
         }
 
@@ -147,10 +144,8 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
         configurationHandler.emit(Result.success(createPaymentElementLoaderState()))
         assertThat(
             configurationCoordinator.configure(
-                PaymentSheet.IntentConfiguration(
-                    PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
-                ),
                 configuration = defaultConfiguration,
+                initializationMode = defaultInitializationMode,
             )
         ).isInstanceOf<EmbeddedPaymentElement.ConfigureResult.Succeeded>()
 
@@ -173,10 +168,8 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
 
             assertThat(
                 configurationCoordinator.configure(
-                    PaymentSheet.IntentConfiguration(
-                        PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
-                    ),
                     configuration = defaultConfiguration,
+                    initializationMode = defaultInitializationMode,
                 )
             ).isInstanceOf<EmbeddedPaymentElement.ConfigureResult.Succeeded>()
         }
@@ -190,10 +183,8 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
         configurationHandler.emit(Result.failure(exception))
         assertThat(
             configurationCoordinator.configure(
-                PaymentSheet.IntentConfiguration(
-                    PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
-                ),
-                configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
+                configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+                initializationMode = defaultInitializationMode,
             )
         ).isEqualTo(EmbeddedPaymentElement.ConfigureResult.Failed(exception))
     }
@@ -255,8 +246,8 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
         }
 
         override suspend fun configure(
-            intentConfiguration: PaymentSheet.IntentConfiguration,
-            configuration: EmbeddedPaymentElement.Configuration
+            configuration: EmbeddedPaymentElement.Configuration,
+            initializationMode: PaymentElementLoader.InitializationMode,
         ): Result<PaymentElementLoader.State> {
             return turbine.awaitItem()
         }

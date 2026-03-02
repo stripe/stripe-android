@@ -82,7 +82,7 @@ internal class USBankAccountFormArguments(
             val isSaveForFutureUseValueChangeable = isSaveForFutureUseValueChangeable(
                 code = selectedPaymentMethodCode,
                 intent = paymentMethodMetadata.stripeIntent,
-                paymentMethodSaveConsentBehavior = paymentMethodMetadata.customerMetadata?.permissions?.saveConsent,
+                paymentMethodSaveConsentBehavior = paymentMethodMetadata.customerMetadata?.saveConsent,
                 hasCustomerConfiguration = paymentMethodMetadata.customerMetadata != null,
             )
             val instantDebits = selectedPaymentMethodCode == PaymentMethod.Type.Link.code
@@ -139,7 +139,7 @@ internal class USBankAccountFormArguments(
             val isSaveForFutureUseValueChangeable = isSaveForFutureUseValueChangeable(
                 code = selectedPaymentMethodCode,
                 intent = paymentMethodMetadata.stripeIntent,
-                paymentMethodSaveConsentBehavior = paymentMethodMetadata.customerMetadata?.permissions?.saveConsent,
+                paymentMethodSaveConsentBehavior = paymentMethodMetadata.customerMetadata?.saveConsent,
                 hasCustomerConfiguration = paymentMethodMetadata.customerMetadata != null,
             )
             val instantDebits = selectedPaymentMethodCode == PaymentMethod.Type.Link.code

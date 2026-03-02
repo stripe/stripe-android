@@ -28,6 +28,7 @@ import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.AddressFixtures
 import com.stripe.android.model.BankAccountTokenParamsFixtures
 import com.stripe.android.model.BinFixtures
+import com.stripe.android.model.CancelCaptchaChallengeParams
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.CardParamsFixtures
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -655,6 +656,36 @@ internal class StripeApiRepositoryTest {
                 productUsage = productUsage,
                 errorMessage = "apiError",
             )
+        }
+
+    @Test
+    fun confirmPaymentIntent_errorResponseWithRequestIdInLiveMode_throwsWithLocalizedMessageContainingRequestId() =
+        runTest {
+            val clientSecret = "pi_12345_secret_fake"
+            val requestId = "req_abc123"
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenAnswer {
+                    StripeResponse(
+                        code = 400,
+                        body = """{"error":{"type":"api_error","message":"Server error"}}""",
+                        headers = mapOf("Request-Id" to listOf(requestId))
+                    )
+                }
+
+            val confirmPaymentIntentParams =
+                ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    clientSecret
+                )
+
+            val result = create().confirmPaymentIntent(
+                confirmPaymentIntentParams,
+                ApiRequest.Options("pk_live_123")
+            )
+
+            assertThat(result.isFailure).isTrue()
+            assertThat(result.exceptionOrNull()?.message)
+                .isEqualTo("Something went wrong. Request ID: $requestId")
         }
 
     @Test
@@ -3833,6 +3864,85 @@ internal class StripeApiRepositoryTest {
         assertThat(analyticsParams["event"]).isEqualTo(event.toString())
         assertThat(analyticsParams["product_usage"]).isEqualTo(productUsage)
         assertThat(analyticsParams["error_message"]).isEqualTo(errorMessage)
+    }
+
+    @Test
+    fun cancelPaymentIntentCaptchaChallenge_sendsCorrectRequest() = runTest {
+        val intentId = "pi_123"
+        val clientSecret = "pi_123_secret_456"
+
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(
+                StripeResponse(
+                    200,
+                    PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2_JSON.toString(),
+                    emptyMap()
+                )
+            )
+
+        val params = CancelCaptchaChallengeParams(clientSecret = clientSecret)
+
+        val result = create().cancelPaymentIntentCaptchaChallenge(
+            paymentIntentId = intentId,
+            params = params,
+            requestOptions = DEFAULT_OPTIONS,
+        )
+
+        assertThat(result.isSuccess).isTrue()
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+        val apiRequest = apiRequestArgumentCaptor.firstValue
+        assertThat(apiRequest.url)
+            .isEqualTo("https://api.stripe.com/v1/payment_intents/$intentId/cancel_challenge")
+        assertThat(apiRequest.method).isEqualTo(StripeRequest.Method.POST)
+        assertThat(apiRequest.params?.get("client_secret")).isEqualTo(clientSecret)
+    }
+
+    @Test
+    fun cancelSetupIntentCaptchaChallenge_sendsCorrectRequest() = runTest {
+        val intentId = "seti_123"
+        val clientSecret = "seti_123_secret_456"
+
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(
+                StripeResponse(
+                    200,
+                    SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT_JSON.toString(),
+                    emptyMap()
+                )
+            )
+
+        val params = CancelCaptchaChallengeParams(clientSecret = clientSecret)
+
+        val result = create().cancelSetupIntentCaptchaChallenge(
+            setupIntentId = intentId,
+            params = params,
+            requestOptions = DEFAULT_OPTIONS,
+        )
+
+        assertThat(result.isSuccess).isTrue()
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+        val apiRequest = apiRequestArgumentCaptor.firstValue
+        assertThat(apiRequest.url)
+            .isEqualTo("https://api.stripe.com/v1/setup_intents/$intentId/cancel_challenge")
+        assertThat(apiRequest.method).isEqualTo(StripeRequest.Method.POST)
+        assertThat(apiRequest.params?.get("client_secret")).isEqualTo(clientSecret)
+    }
+
+    @Test
+    fun cancelPaymentIntentCaptchaChallenge_onNetworkFailure_returnsFailure() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenAnswer { throw IOException("Network error") }
+
+        val result = create().cancelPaymentIntentCaptchaChallenge(
+            paymentIntentId = "pi_123",
+            params = CancelCaptchaChallengeParams(clientSecret = "pi_123_secret_456"),
+            requestOptions = DEFAULT_OPTIONS,
+        )
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isInstanceOf(APIConnectionException::class.java)
     }
 
     private fun create(productUsage: Set<String> = emptySet()): StripeApiRepository {

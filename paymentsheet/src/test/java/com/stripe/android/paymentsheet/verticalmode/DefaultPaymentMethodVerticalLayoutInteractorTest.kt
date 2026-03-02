@@ -782,22 +782,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
-    fun handleViewAction_PaymentMethodSelected_callsRunActionForCode() {
-        val actionForCode = Turbine<PaymentMethodCode>()
-
-        runScenario(
-            formTypeForCode = { FormHelper.FormType.UserInteractionRequired },
-            actionForCode = { actionForCode.add(it) }
-        ) {
-            interactor.handleViewAction(ViewAction.PaymentMethodSelected("card"))
-            assertThat(actionForCode.awaitItem()).isEqualTo("card")
-            assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("card")
-            assertThat(transitionToFormScreenTurbine.awaitItem()).isEqualTo("card")
-            assertThat(reportFormShownTurbine.awaitItem()).isEqualTo("card")
-        }
-    }
-
-    @Test
     fun handleViewAction_PaymentMethodSelected_transitionsToFormScreen_whenSelectedIsUsBank() {
         runScenario(
             formTypeForCode = { FormHelper.FormType.UserInteractionRequired },
@@ -1727,7 +1711,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         invokeRowSelectionCallback: (() -> Unit)? = null,
         initialWalletsState: WalletsState? = null,
         displaysMandatesInFormScreen: Boolean = false,
-        actionForCode: (PaymentMethodCode) -> Unit = {},
         testBlock: suspend TestParams.() -> Unit
     ) {
         val processing: MutableStateFlow<Boolean> = MutableStateFlow(initialProcessing)
@@ -1756,9 +1739,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             temporarySelection = temporarySelection,
             selection = selection,
             paymentMethodIncentiveInteractor = paymentMethodIncentiveInteractor,
-            runActionForCode = { code ->
-                actionForCode(code)
-            },
             formTypeForCode = formTypeForCode,
             onFormFieldValuesChanged = { formValues: FormFieldValues, selectedPaymentMethodCode: String ->
                 onFormFieldValuesChangedTurbine.add(Pair(formValues, selectedPaymentMethodCode))

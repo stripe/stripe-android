@@ -16,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.checkout.Checkout
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.core.utils.StatusBarCompat
@@ -39,6 +40,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.TermsDisplay
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.CustomerState
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.utils.applicationIsTaskOwner
 import com.stripe.android.uicore.image.rememberDrawablePainter
 import com.stripe.android.uicore.utils.collectAsState
@@ -81,7 +83,27 @@ class EmbeddedPaymentElement @Inject internal constructor(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         configuration: Configuration,
     ): ConfigureResult {
-        return configurationCoordinator.configure(intentConfiguration, configuration)
+        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration)
+        return configurationCoordinator.configure(configuration, initializationMode)
+    }
+
+    /**
+     * Call this method to configure [EmbeddedPaymentElement] or when the [Checkout] values you used to
+     *  configure [EmbeddedPaymentElement] change.
+     *
+     * This ensures the appropriate payment methods are displayed, collect the right fields, etc.
+     * - Note: Upon completion, [paymentOption] may become null if it's no longer available.
+     */
+    @CheckoutSessionPreview
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun configure(
+        checkout: Checkout,
+        configuration: Configuration,
+    ): ConfigureResult {
+        val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            checkoutSessionResponse = checkout.state.checkoutSessionResponse
+        )
+        return configurationCoordinator.configure(configuration, initializationMode)
     }
 
     /**

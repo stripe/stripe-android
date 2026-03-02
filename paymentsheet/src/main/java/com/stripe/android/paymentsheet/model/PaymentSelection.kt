@@ -159,15 +159,9 @@ internal sealed class PaymentSelection : Parcelable {
     @Parcelize
     data class Saved(
         val paymentMethod: PaymentMethod,
-        val walletType: WalletType? = null,
         val paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
         val linkInput: UserInput? = null,
     ) : PaymentSelection() {
-
-        enum class WalletType(val paymentSelection: PaymentSelection) {
-            GooglePay(PaymentSelection.GooglePay), Link(Link())
-        }
-
         val showMandateAbovePrimaryButton: Boolean
             get() {
                 return paymentMethod.type == PaymentMethod.Type.SepaDebit
@@ -353,7 +347,7 @@ internal val PaymentSelection.isLink: Boolean
         is PaymentSelection.Link -> true
         is PaymentSelection.New.Card -> linkInput != null
         is PaymentSelection.New -> false
-        is PaymentSelection.Saved -> walletType == PaymentSelection.Saved.WalletType.Link
+        is PaymentSelection.Saved -> linkInput != null
         is PaymentSelection.CustomPaymentMethod,
         is PaymentSelection.ExternalPaymentMethod -> false
         is PaymentSelection.ShopPay -> false
@@ -396,16 +390,7 @@ private fun getSavedIcon(selection: PaymentSelection.Saved): Int {
         return R.drawable.stripe_ic_paymentsheet_link_arrow
     }
 
-    return when (val resourceId = selection.paymentMethod.getSavedPaymentMethodIcon(forPaymentOption = true)) {
-        R.drawable.stripe_ic_paymentsheet_card_unknown_ref -> {
-            when (selection.walletType) {
-                PaymentSelection.Saved.WalletType.Link -> getLinkIcon(iconOnly = true)
-                PaymentSelection.Saved.WalletType.GooglePay -> R.drawable.stripe_google_pay_mark
-                else -> resourceId
-            }
-        }
-        else -> resourceId
-    }
+    return selection.paymentMethod.getSavedPaymentMethodIcon(forPaymentOption = true)
 }
 
 internal val PaymentSelection.lightThemeIconUrl: String?
@@ -448,13 +433,7 @@ internal val PaymentSelection.label: ResolvableString
     }
 
 private fun getSavedLabel(selection: PaymentSelection.Saved): ResolvableString? {
-    return selection.paymentMethod.getLabel(canShowSublabel = true) ?: run {
-        when (selection.walletType) {
-            PaymentSelection.Saved.WalletType.Link -> StripeR.string.stripe_link.resolvableString
-            PaymentSelection.Saved.WalletType.GooglePay -> StripeR.string.stripe_google_pay.resolvableString
-            else -> null
-        }
-    }
+    return selection.paymentMethod.getLabel(canShowSublabel = true)
 }
 
 internal val PaymentSelection.paymentMethodType: String

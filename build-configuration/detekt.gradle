@@ -1,18 +1,23 @@
-apply plugin: 'io.gitlab.arturbosch.detekt'
+apply plugin: 'dev.detekt'
+
+def isDetektFormat = gradle.startParameter.taskNames.any { it.contains('detektFormat') }
 
 detekt {
     buildUponDefaultConfig = true
-    baseline = file("detekt-baseline.xml") // https://detekt.dev/docs/introduction/baseline/
+    if (!isDetektFormat) {
+        baseline = file("detekt-baseline.xml") // https://detekt.dev/docs/introduction/baseline/
+    }
     ignoredBuildTypes = ["debug"]
     ignoredFlavors = []
     ignoredVariants = []
     parallel = true
-    autoCorrect = !gradle.ext.isCi
-    reports {
-        html.enabled = !gradle.ext.isCi
-        xml.enabled = true
-        txt.enabled = !gradle.ext.isCi
-    }
+    autoCorrect = isDetektFormat
+}
+
+tasks.register('detektFormat') {
+    group = 'formatting'
+    description = 'Run detekt with auto-correction enabled.'
+    dependsOn 'detekt'
 }
 
 def detektIgnoreFile = file('.detektignore')
@@ -32,6 +37,5 @@ if (detektIgnoreFile.exists()) {
 }
 
 dependencies {
-    detektPlugins "io.gitlab.arturbosch.detekt:detekt-formatting:$versions.detekt"
-    detektPlugins "io.gitlab.arturbosch.detekt:detekt-cli:$versions.detekt"
+    detektPlugins "dev.detekt:detekt-rules-ktlint-wrapper:$versions.detekt"
 }

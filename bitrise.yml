@@ -65,8 +65,6 @@ stages:
       - notify-connections-e2e-failure: { }
 workflows:
   check:
-    envs:
-      - JAVA_VERSION: 22
     before_run:
       - prepare_all
     after_run:
@@ -75,7 +73,7 @@ workflows:
       - script@1:
           timeout: 1200
           inputs:
-            - content: ./gradlew ktlint detekt lintRelease apiCheck verifyReleaseResources
+            - content: ./gradlew detekt lintRelease apiCheck verifyReleaseResources
   test:
     envs:
       - opts:

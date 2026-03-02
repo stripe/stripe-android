@@ -27,7 +27,10 @@ internal class IntentConfirmationChallengeActivityContract :
         val result = intent?.extras?.let {
             BundleCompat.getParcelable(it, EXTRA_RESULT, IntentConfirmationChallengeActivityResult::class.java)
         }
-        return result ?: IntentConfirmationChallengeActivityResult.Failed(Throwable("No result"))
+        return result ?: IntentConfirmationChallengeActivityResult.Failed(
+            clientSecret = null,
+            error = Throwable("No result")
+        )
     }
 
     data class Args(

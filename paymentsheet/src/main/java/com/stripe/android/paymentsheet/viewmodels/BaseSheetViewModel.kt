@@ -29,7 +29,7 @@ import com.stripe.android.paymentsheet.analytics.PaymentSheetAnalyticsListener
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.NavigationHandler
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
-import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -55,7 +55,7 @@ import kotlin.coroutines.CoroutineContext
 internal abstract class BaseSheetViewModel(
     val config: PaymentSheet.Configuration,
     val eventReporter: EventReporter,
-    val customerRepository: CustomerRepository,
+    val savedPaymentMethodRepository: SavedPaymentMethodRepository,
     val workContext: CoroutineContext = Dispatchers.IO,
     val savedStateHandle: SavedStateHandle,
     val linkHandler: LinkHandler,

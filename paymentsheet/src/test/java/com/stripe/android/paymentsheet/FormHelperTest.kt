@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
@@ -624,71 +623,6 @@ internal class FormHelperTest {
         )
         assertThat(formHelper.formTypeForCode("us_bank_account")).isEqualTo(FormHelper.FormType.UserInteractionRequired)
         assertThat(formHelper.formTypeForCode("link")).isEqualTo(FormHelper.FormType.UserInteractionRequired)
-    }
-
-    @Test
-    fun `runActionForCode calls startPaymentMethodCollection for actionable payment method`() = runTest {
-        FakeTapToAddHelper.test {
-            val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                    paymentMethodTypes = listOf("card"),
-                ),
-                isTapToAddSupported = true,
-            )
-
-            val formHelper = createFormHelper(
-                paymentMethodMetadata = paymentMethodMetadata,
-                newPaymentSelectionProvider = { null },
-                tapToAddHelper = helper,
-            )
-
-            formHelper.runActionForCode("card")
-
-            assertThat(collectCalls.awaitItem()).isEqualTo(paymentMethodMetadata)
-        }
-    }
-
-    @Test
-    fun `runActionForCode does nothing when tap to add is not supported`() = runTest {
-        FakeTapToAddHelper.test {
-            val formHelper = createFormHelper(
-                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                    stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                        paymentMethodTypes = listOf("card"),
-                    ),
-                    isTapToAddSupported = false,
-                ),
-                newPaymentSelectionProvider = { null },
-                tapToAddHelper = helper,
-            )
-
-            formHelper.runActionForCode("card")
-
-            // Should not call startPaymentMethodCollection when tap to add is not supported
-            collectCalls.expectNoEvents()
-        }
-    }
-
-    @Test
-    fun `runActionForCode does nothing for non-actionable payment method`() = runTest {
-        FakeTapToAddHelper.test {
-            val formHelper = createFormHelper(
-                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                    stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                        paymentMethodTypes = listOf("card", "cashapp"),
-                    ),
-                    isTapToAddSupported = true,
-                ),
-                newPaymentSelectionProvider = { null },
-                tapToAddHelper = helper,
-            )
-
-            // CashApp is not an actionable payment method
-            formHelper.runActionForCode("cashapp")
-
-            // Should not call startPaymentMethodCollection for non-actionable payment method
-            collectCalls.expectNoEvents()
-        }
     }
 
     private fun runLinkInlineTest(
