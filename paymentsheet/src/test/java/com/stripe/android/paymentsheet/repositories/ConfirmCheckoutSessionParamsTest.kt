@@ -1,6 +1,9 @@
-package com.stripe.android.model
+package com.stripe.android.paymentsheet.repositories
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.ClientAttributionMetadata
+import com.stripe.android.model.PaymentIntentCreationFlow
+import com.stripe.android.model.PaymentMethodSelectionFlow
 import kotlin.test.Test
 
 class ConfirmCheckoutSessionParamsTest {

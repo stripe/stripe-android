@@ -2,6 +2,6 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>MagicNumber:FinancialConnectionsSheetLiteActivity.kt$FinancialConnectionsSheetLiteActivity.&lt;no name provided>$100</ID>
+    <ID>MagicNumber:FinancialConnectionsSheetLiteActivity.kt:FinancialConnectionsSheetLiteActivity.&lt;no name provided>$100</ID>
   </CurrentIssues>
 </SmellBaseline>

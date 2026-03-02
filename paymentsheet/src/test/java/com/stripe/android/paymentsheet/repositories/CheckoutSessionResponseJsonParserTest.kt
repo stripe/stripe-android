@@ -1,9 +1,7 @@
-package com.stripe.android.model.parsers
+package com.stripe.android.paymentsheet.repositories
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.CheckoutSessionFixtures
-import com.stripe.android.model.CheckoutSessionResponse
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -279,5 +277,206 @@ class CheckoutSessionResponseJsonParserTest {
 
         assertThat(result).isNotNull()
         assertThat(result?.savedPaymentMethodsOfferSave).isNull()
+    }
+
+    @Test
+    fun `parse customer with can_detach_payment_method true`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_abc123",
+                "currency": "usd",
+                "total_summary": {
+                    "due": 1000
+                },
+                "customer": {
+                    "id": "cus_test_customer",
+                    "payment_methods": [],
+                    "can_detach_payment_method": true
+                },
+                "elements_session": ${CheckoutSessionFixtures.MINIMAL_ELEMENTS_SESSION_JSON}
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+
+        assertThat(result).isNotNull()
+        val customer = result?.customer
+        assertThat(customer).isNotNull()
+        assertThat(customer?.canDetachPaymentMethod).isTrue()
+    }
+
+    @Test
+    fun `parse customer with can_detach_payment_method false`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_abc123",
+                "currency": "usd",
+                "total_summary": {
+                    "due": 1000
+                },
+                "customer": {
+                    "id": "cus_test_customer",
+                    "payment_methods": [],
+                    "can_detach_payment_method": false
+                },
+                "elements_session": ${CheckoutSessionFixtures.MINIMAL_ELEMENTS_SESSION_JSON}
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+
+        assertThat(result).isNotNull()
+        val customer = result?.customer
+        assertThat(customer).isNotNull()
+        assertThat(customer?.canDetachPaymentMethod).isFalse()
+    }
+
+    @Test
+    fun `parse customer without can_detach_payment_method defaults to false`() {
+        // Use existing fixture that doesn't have can_detach_payment_method field
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_CUSTOMER_JSON)
+
+        assertThat(result).isNotNull()
+        val customer = result?.customer
+        assertThat(customer).isNotNull()
+        assertThat(customer?.canDetachPaymentMethod).isFalse()
+    }
+
+    @Test
+    fun `parse full order summary with discounts, taxes, and shipping`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_ORDER_SUMMARY_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.amount).isEqualTo(4044L)
+
+        val totalSummary = result?.totalSummary
+        assertThat(totalSummary).isNotNull()
+        assertThat(totalSummary?.subtotal).isEqualTo(5000L)
+        assertThat(totalSummary?.totalDueToday).isEqualTo(4044L)
+        assertThat(totalSummary?.totalAmountDue).isEqualTo(4044L)
+
+        // Discounts
+        assertThat(totalSummary?.discountAmounts).hasSize(2)
+        assertThat(totalSummary?.discountAmounts?.get(0)?.amount).isEqualTo(500L)
+        assertThat(totalSummary?.discountAmounts?.get(0)?.displayName).isEqualTo("SUMMER10")
+        assertThat(totalSummary?.discountAmounts?.get(1)?.amount).isEqualTo(250L)
+        assertThat(totalSummary?.discountAmounts?.get(1)?.displayName).isEqualTo("LOYALTY5")
+
+        // Taxes
+        assertThat(totalSummary?.taxAmounts).hasSize(1)
+        assertThat(totalSummary?.taxAmounts?.get(0)?.amount).isEqualTo(294L)
+        assertThat(totalSummary?.taxAmounts?.get(0)?.inclusive).isFalse()
+        assertThat(totalSummary?.taxAmounts?.get(0)?.displayName).isEqualTo("Sales Tax")
+        assertThat(totalSummary?.taxAmounts?.get(0)?.percentage).isEqualTo(6.875)
+
+        // Shipping
+        assertThat(totalSummary?.shippingRate).isNotNull()
+        assertThat(totalSummary?.shippingRate?.amount).isEqualTo(500L)
+        assertThat(totalSummary?.shippingRate?.displayName).isEqualTo("Standard Shipping")
+        assertThat(totalSummary?.shippingRate?.deliveryEstimate).isEqualTo("5-7 business days")
+
+        // No applied balance
+        assertThat(totalSummary?.appliedBalance).isNull()
+    }
+
+    @Test
+    fun `parse applied balance`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_APPLIED_BALANCE_JSON)
+
+        assertThat(result).isNotNull()
+        val totalSummary = result?.totalSummary
+        assertThat(totalSummary).isNotNull()
+        assertThat(totalSummary?.subtotal).isEqualTo(1000L)
+        assertThat(totalSummary?.totalDueToday).isEqualTo(800L)
+        assertThat(totalSummary?.totalAmountDue).isEqualTo(1000L)
+        assertThat(totalSummary?.appliedBalance).isEqualTo(-200L)
+    }
+
+    @Test
+    fun `parse shipping option fallback`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_SHIPPING_OPTION_JSON)
+
+        assertThat(result).isNotNull()
+        val totalSummary = result?.totalSummary
+        assertThat(totalSummary).isNotNull()
+        assertThat(totalSummary?.shippingRate).isNotNull()
+        assertThat(totalSummary?.shippingRate?.amount).isEqualTo(500L)
+        assertThat(totalSummary?.shippingRate?.displayName).isEqualTo("Express Shipping")
+        assertThat(totalSummary?.shippingRate?.deliveryEstimate).isEqualTo("1-3 business days")
+    }
+
+    @Test
+    fun `parse without total_summary falls back to line_item_group`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITHOUT_TOTAL_SUMMARY_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.amount).isEqualTo(2000L)
+
+        val totalSummary = result?.totalSummary
+        assertThat(totalSummary).isNotNull()
+        assertThat(totalSummary?.subtotal).isEqualTo(2000L)
+        assertThat(totalSummary?.totalDueToday).isEqualTo(2000L)
+        assertThat(totalSummary?.totalAmountDue).isEqualTo(2000L)
+        assertThat(totalSummary?.discountAmounts).isEmpty()
+        assertThat(totalSummary?.taxAmounts).isEmpty()
+        assertThat(totalSummary?.shippingRate).isNull()
+        assertThat(totalSummary?.appliedBalance).isNull()
+    }
+
+    @Test
+    fun `parse with empty discount and tax arrays`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_abc123",
+                "currency": "usd",
+                "total_summary": {
+                    "due": 1000,
+                    "subtotal": 1000,
+                    "total": 1000
+                },
+                "line_item_group": {
+                    "currency": "usd",
+                    "total": 1000,
+                    "subtotal": 1000,
+                    "due": 1000,
+                    "discount_amounts": [],
+                    "tax_amounts": []
+                },
+                "elements_session": ${CheckoutSessionFixtures.MINIMAL_ELEMENTS_SESSION_JSON}
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+
+        assertThat(result).isNotNull()
+        val totalSummary = result?.totalSummary
+        assertThat(totalSummary).isNotNull()
+        assertThat(totalSummary?.discountAmounts).isEmpty()
+        assertThat(totalSummary?.taxAmounts).isEmpty()
+    }
+
+    @Test
+    fun `parse returns null totalSummary when neither total_summary nor line_item_group has subtotal`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "currency": "usd",
+                "total_summary": { "due": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.totalSummary).isNull()
     }
 }

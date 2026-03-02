@@ -1,14 +1,14 @@
 package com.stripe.android.paymentsheet
 
-import com.google.testing.junit.testparameterinjector.TestParameter
-import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.stripe.android.checkout.Checkout
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.paymentsheet.utils.IntegrationType
-import com.stripe.android.paymentsheet.utils.IntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
@@ -17,7 +17,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @OptIn(CheckoutSessionPreview::class)
-@RunWith(TestParameterInjector::class)
+@RunWith(AndroidJUnit4::class)
 internal class PaymentSheetCheckoutSessionTest {
     @get:Rule
     val testRules: TestRules = TestRules.create()
@@ -26,9 +26,6 @@ internal class PaymentSheetCheckoutSessionTest {
     private val networkRule = testRules.networkRule
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
-
-    @TestParameter(valuesProvider = IntegrationTypeProvider::class)
-    lateinit var integrationType: IntegrationType
 
     private val defaultConfiguration = PaymentSheet.Configuration(
         merchantDisplayName = "Checkout Session Test",
@@ -49,7 +46,6 @@ internal class PaymentSheetCheckoutSessionTest {
     @Test
     fun testSuccessfulCardPaymentWithCheckoutSession() = runPaymentSheetTest(
         networkRule = networkRule,
-        integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
         // Mock checkout session init API
@@ -61,9 +57,15 @@ internal class PaymentSheetCheckoutSessionTest {
             response.testBodyFromFile("checkout-session-init.json")
         }
 
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val checkout = Checkout.configure(
+            context = context,
+            checkoutSessionClientSecret = "cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh_secret_example",
+        ).getOrThrow()
+
         testContext.presentPaymentSheet {
-            presentWithCheckoutSession(
-                checkoutSessionClientSecret = "cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh_secret_example",
+            presentWithCheckout(
+                checkout = checkout,
                 configuration = defaultConfiguration,
             )
         }

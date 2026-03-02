@@ -42,6 +42,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncherFactory
+import com.stripe.android.paymentsheet.repositories.FakeCheckoutSessionRepository
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeErrorReporter
@@ -149,6 +150,7 @@ internal suspend fun createIntentConfirmationInterceptor(
                     clientAttributionMetadata = clientAttributionMetadata,
                     context = ApplicationProvider.getApplicationContext(),
                     stripeRepository = stripeRepository,
+                    checkoutSessionRepository = FakeCheckoutSessionRepository(),
                     requestOptions = requestOptions,
                 )
             }

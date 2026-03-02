@@ -1,5 +1,6 @@
 package com.stripe.android.model.parsers
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArrayToList
@@ -15,7 +16,8 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.util.UUID
 
-internal class ElementsSessionJsonParser(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class ElementsSessionJsonParser(
     private val params: ElementsSessionParams,
     private val isLiveMode: Boolean,
     private val timeProvider: () -> Long = {

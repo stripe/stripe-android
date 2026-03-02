@@ -1,10 +1,10 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.model.CheckoutSessionResponse
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import org.junit.Test
 
 internal class PaymentMethodMetadataKtxTest {

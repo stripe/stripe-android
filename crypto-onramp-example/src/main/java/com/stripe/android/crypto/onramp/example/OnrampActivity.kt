@@ -94,7 +94,7 @@ import kotlinx.coroutines.launch
 internal class OnrampActivity : ComponentActivity() {
 
     private val viewModel: OnrampViewModel by viewModels {
-        OnrampViewModel.Factory(application)
+        OnrampViewModel.Factory()
     }
 
     private lateinit var onrampPresenter: OnrampCoordinator.Presenter

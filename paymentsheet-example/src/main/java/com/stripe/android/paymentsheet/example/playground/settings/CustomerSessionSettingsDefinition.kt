@@ -12,6 +12,10 @@ internal object CustomerSessionSettingsDefinition : BooleanSettingsDefinition(
         configurationData: PlaygroundConfigurationData,
         settings: Map<PlaygroundSettingDefinition<*>, Any?>,
     ): Boolean {
+        if (settings[InitializationTypeSettingsDefinition] == InitializationType.CheckoutSession) {
+            return false
+        }
+
         return configurationData.integrationType.isPaymentFlow() ||
             configurationData.integrationType.isCustomerFlow()
     }

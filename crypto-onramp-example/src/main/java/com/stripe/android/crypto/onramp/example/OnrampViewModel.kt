@@ -14,8 +14,8 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.github.kittinunf.result.Result
+import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.crypto.onramp.OnrampCoordinator
-import com.stripe.android.crypto.onramp.example.network.CheckoutTransactionDetails
 import com.stripe.android.crypto.onramp.example.network.OnrampSessionResponse
 import com.stripe.android.crypto.onramp.example.network.SettlementSpeed
 import com.stripe.android.crypto.onramp.example.network.TestBackendRepository
@@ -164,7 +164,9 @@ internal class OnrampViewModel(
 
             if (!restored) {
                 loadUserData()?.let { data ->
-                    _uiState.update { it.copy(email = data.email, authToken = data.token, screen = Screen.SeamlessSignIn) }
+                    _uiState.update {
+                        it.copy(email = data.email, authToken = data.token, screen = Screen.SeamlessSignIn)
+                    }
                 } ?: run {
                     _uiState.update { it.copy(screen = Screen.LoginSignup) }
                 }
@@ -782,18 +784,14 @@ internal class OnrampViewModel(
         return application.applicationContext.getSharedPreferences(ONRAMP_PREFS_NAME, Context.MODE_PRIVATE)
     }
 
-    class Factory(
-        private val application: Application,
-    ) : ViewModelProvider.Factory {
+    class Factory : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(
             modelClass: Class<T>,
             extras: CreationExtras
         ): T {
-            return OnrampViewModel(
-                application,
-                extras.createSavedStateHandle()
-            ) as T
+            val application = extras.requireApplication()
+            return OnrampViewModel(application, extras.createSavedStateHandle()) as T
         }
     }
 
@@ -897,24 +895,18 @@ data class OnrampUiStateSnapshot(
     val email: String,
     val linkAuthIntentId: String?,
     val consentedLinkAuthIntentIds: ArrayList<String>,
-
-    // Payment display (restorable)
-    val selectedPaymentTypeName: String?,   // PaymentMethodDisplayData.Type.name
+    val selectedPaymentTypeName: String?,
     val selectedPaymentLabel: String?,
     val selectedPaymentSublabel: String?,
-
     val cryptoPaymentToken: String?,
     val walletAddress: String?,
-    val networkName: String?,               // CryptoNetwork.name
+    val networkName: String?,
     val authToken: String?,
-
-    // Session (either store an ID, or store fields you display)
     val onrampSessionId: String?,
     val onrampSessionStatus: String?,
     val onrampSessionSourceTotalAmount: String?,
     val onrampSessionPaymentMethod: String?,
-
     val loadingMessage: String?,
-    val settlementSpeedName: String,        // SettlementSpeed.name
+    val settlementSpeedName: String,
     val googlePayIsReady: Boolean,
 ) : Parcelable

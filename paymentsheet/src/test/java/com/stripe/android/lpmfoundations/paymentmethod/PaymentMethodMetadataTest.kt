@@ -147,7 +147,7 @@ internal class PaymentMethodMetadataTest {
     fun `filterSupportedPaymentMethods filters payment methods without shared data specs`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("card", "ideal")
+                paymentMethodTypes = listOf("card", "sepa_debit")
             ),
             sharedDataSpecs = listOf(SharedDataSpec("card")),
         )
@@ -216,11 +216,11 @@ internal class PaymentMethodMetadataTest {
     fun `supportedPaymentMethodForCode returns null when sharedDataSpecs are missing`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("ideal")
+                paymentMethodTypes = listOf("sepa_debit")
             ),
             sharedDataSpecs = emptyList(),
         )
-        assertThat(metadata.supportedPaymentMethodForCode("ideal")).isNull()
+        assertThat(metadata.supportedPaymentMethodForCode("sepa_debit")).isNull()
     }
 
     @Test
@@ -312,7 +312,7 @@ internal class PaymentMethodMetadataTest {
     fun `sortedSupportedPaymentMethods filters payment methods without a sharedDataSpec`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("affirm", "ideal", "card"),
+                paymentMethodTypes = listOf("affirm", "sepa_debit", "card"),
             ),
             allowsPaymentMethodsRequiringShippingAddress = true,
             sharedDataSpecs = listOf(
@@ -1479,10 +1479,7 @@ internal class PaymentMethodMetadataTest {
             val metadataForSetupIntent = PaymentMethodMetadataFactory.create(
                 stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
                 hasCustomerConfiguration = true,
-                customerMetadataPermissions = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS
-                    .copy(
-                        saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
-                    ),
+                saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
             )
 
             assertThat(
@@ -1497,10 +1494,7 @@ internal class PaymentMethodMetadataTest {
                     setupFutureUsage = StripeIntent.Usage.OnSession,
                 ),
                 hasCustomerConfiguration = true,
-                customerMetadataPermissions = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS
-                    .copy(
-                        saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
-                    ),
+                saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
             )
 
             assertThat(
@@ -1515,10 +1509,7 @@ internal class PaymentMethodMetadataTest {
                     paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
                 ),
                 hasCustomerConfiguration = true,
-                customerMetadataPermissions = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS
-                    .copy(
-                        saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
-                    ),
+                saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
             )
 
             assertThat(
@@ -1536,10 +1527,7 @@ internal class PaymentMethodMetadataTest {
             val metadataForSetupIntent = PaymentMethodMetadataFactory.create(
                 stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
                 hasCustomerConfiguration = true,
-                customerMetadataPermissions = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS
-                    .copy(
-                        saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
-                    ),
+                saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
             )
 
             assertThat(
@@ -1561,10 +1549,7 @@ internal class PaymentMethodMetadataTest {
                     setupFutureUsage = StripeIntent.Usage.OnSession,
                 ),
                 hasCustomerConfiguration = true,
-                customerMetadataPermissions = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS
-                    .copy(
-                        saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
-                    ),
+                saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
             )
 
             assertThat(
@@ -1586,10 +1571,7 @@ internal class PaymentMethodMetadataTest {
                     paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
                 ),
                 hasCustomerConfiguration = true,
-                customerMetadataPermissions = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS
-                    .copy(
-                        saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
-                    ),
+                saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
             )
 
             assertThat(
@@ -1613,10 +1595,7 @@ internal class PaymentMethodMetadataTest {
             val metadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 hasCustomerConfiguration = true,
-                customerMetadataPermissions = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS
-                    .copy(
-                        saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
-                    ),
+                saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
             )
 
             assertThat(
@@ -1633,10 +1612,7 @@ internal class PaymentMethodMetadataTest {
             val metadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 hasCustomerConfiguration = true,
-                customerMetadataPermissions = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS
-                    .copy(
-                        saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
-                    ),
+                saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
             )
 
             assertThat(
@@ -1658,12 +1634,9 @@ internal class PaymentMethodMetadataTest {
     fun `allowRedisplay returns Unspecified when consent behavior is Disabled and not setting up`() = runTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            customerMetadataPermissions = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS
-                .copy(
-                    saveConsent = PaymentMethodSaveConsentBehavior.Disabled(
-                        overrideAllowRedisplay = null
-                    ),
-                ),
+            saveConsent = PaymentMethodSaveConsentBehavior.Disabled(
+                overrideAllowRedisplay = null
+            ),
         )
 
         testAllowRedisplayValueForCustomerRequestedSave(
@@ -1677,12 +1650,9 @@ internal class PaymentMethodMetadataTest {
         val metadataForSetupIntent = PaymentMethodMetadataFactory.create(
             stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
             hasCustomerConfiguration = true,
-            customerMetadataPermissions = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS
-                .copy(
-                    saveConsent = PaymentMethodSaveConsentBehavior.Disabled(
-                        overrideAllowRedisplay = null
-                    ),
-                ),
+            saveConsent = PaymentMethodSaveConsentBehavior.Disabled(
+                overrideAllowRedisplay = null
+            ),
         )
 
         testAllowRedisplayValueForCustomerRequestedSave(
@@ -1695,12 +1665,9 @@ internal class PaymentMethodMetadataTest {
                 setupFutureUsage = StripeIntent.Usage.OnSession,
             ),
             hasCustomerConfiguration = true,
-            customerMetadataPermissions = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS
-                .copy(
-                    saveConsent = PaymentMethodSaveConsentBehavior.Disabled(
-                        overrideAllowRedisplay = null
-                    ),
-                ),
+            saveConsent = PaymentMethodSaveConsentBehavior.Disabled(
+                overrideAllowRedisplay = null
+            ),
         )
 
         testAllowRedisplayValueForCustomerRequestedSave(
@@ -1713,12 +1680,9 @@ internal class PaymentMethodMetadataTest {
                 paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
             ),
             hasCustomerConfiguration = true,
-            customerMetadataPermissions = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS
-                .copy(
-                    saveConsent = PaymentMethodSaveConsentBehavior.Disabled(
-                        overrideAllowRedisplay = null
-                    ),
-                ),
+            saveConsent = PaymentMethodSaveConsentBehavior.Disabled(
+                overrideAllowRedisplay = null
+            ),
         )
 
         testAllowRedisplayValueForCustomerRequestedSave(
@@ -1733,12 +1697,9 @@ internal class PaymentMethodMetadataTest {
             val metadataForSetupIntent = PaymentMethodMetadataFactory.create(
                 stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
                 hasCustomerConfiguration = true,
-                customerMetadataPermissions = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS
-                    .copy(
-                        saveConsent = PaymentMethodSaveConsentBehavior.Disabled(
-                            overrideAllowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS
-                        ),
-                    ),
+                saveConsent = PaymentMethodSaveConsentBehavior.Disabled(
+                    overrideAllowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS
+                ),
             )
 
             testAllowRedisplayValueForCustomerRequestedSave(
@@ -1751,12 +1712,9 @@ internal class PaymentMethodMetadataTest {
                     setupFutureUsage = StripeIntent.Usage.OnSession,
                 ),
                 hasCustomerConfiguration = true,
-                customerMetadataPermissions = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS
-                    .copy(
-                        saveConsent = PaymentMethodSaveConsentBehavior.Disabled(
-                            overrideAllowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED
-                        ),
-                    ),
+                saveConsent = PaymentMethodSaveConsentBehavior.Disabled(
+                    overrideAllowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED
+                ),
             )
 
             testAllowRedisplayValueForCustomerRequestedSave(

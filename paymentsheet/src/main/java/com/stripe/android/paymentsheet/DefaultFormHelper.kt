@@ -198,13 +198,6 @@ internal class DefaultFormHelper(
         }
     }
 
-    override fun runActionForCode(paymentMethodCode: PaymentMethodCode) {
-        paymentMethodMetadata.actionForCode(
-            code = paymentMethodCode,
-            uiDefinitionFactoryArgumentsFactory = createArgumentsFactory(paymentMethodCode),
-        )
-    }
-
     private fun supportedPaymentMethodForCode(code: String): SupportedPaymentMethod {
         return requireNotNull(paymentMethodMetadata.supportedPaymentMethodForCode(code = code))
     }

@@ -54,7 +54,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
-import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.state.WalletLocation
@@ -101,7 +101,7 @@ internal class PaymentOptionsViewModelTest {
     private val standardTestDispatcher = StandardTestDispatcher()
 
     private val eventReporter = mock<EventReporter>()
-    private val customerRepository = mock<CustomerRepository>()
+    private val savedPaymentMethodRepository = mock<SavedPaymentMethodRepository>()
     private val linkPaymentLauncher = mock<LinkPaymentLauncher>()
 
     private val linkGate = FakeLinkGate()
@@ -810,7 +810,9 @@ internal class PaymentOptionsViewModelTest {
         val cards = PaymentMethodFactory.cards(3)
         val paymentMethodToRemove = cards.first()
 
-        whenever(customerRepository.detachPaymentMethod(any(), eq(paymentMethodToRemove.id), eq(false))).thenReturn(
+        whenever(
+            savedPaymentMethodRepository.detachPaymentMethod(any(), eq(paymentMethodToRemove.id), eq(false))
+        ).thenReturn(
             Result.success(paymentMethodToRemove)
         )
 
@@ -1223,7 +1225,7 @@ internal class PaymentOptionsViewModelTest {
     }
 
     @Test
-    fun `When tap to add result is Canceled with payment selection, screens are updated`() = runTest {
+    fun `When tap to add next step is confirm spm, screens are updated`() = runTest {
         val expectedPaymentSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
         val customerStateHolder = FakeCustomerStateHolder()
 
@@ -1245,6 +1247,29 @@ internal class PaymentOptionsViewModelTest {
                 )
 
                 assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.SavedPaymentMethodConfirm>()
+            }
+        }
+    }
+
+    @Test
+    fun `When tap to add next step is show spm, screens are updated`() = runTest {
+        FakeTapToAddHelper.Factory.test {
+            val viewModel = createViewModel(
+                tapToAddHelperFactory = tapToAddHelperFactory,
+            )
+
+            createCalls.awaitItem()
+
+            viewModel.navigationHandler.currentScreen.test {
+                awaitItem()
+
+                tapToAddHelperFactory.getCreatedHelper()?.emitNextStep(
+                    TapToAddNextStep.ShowSavedPaymentMethods(
+                        PaymentSelection.Saved(CARD_PAYMENT_METHOD),
+                    )
+                )
+
+                assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
             }
         }
     }
@@ -1406,7 +1431,7 @@ internal class PaymentOptionsViewModelTest {
                 )
             ),
             eventReporter = eventReporter,
-            customerRepository = customerRepository,
+            savedPaymentMethodRepository = savedPaymentMethodRepository,
             workContext = workContext,
             savedStateHandle = savedStateHandle,
             linkHandler = linkHandler,

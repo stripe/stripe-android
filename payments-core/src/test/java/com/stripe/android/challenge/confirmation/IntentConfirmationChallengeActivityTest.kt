@@ -6,6 +6,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
 import androidx.core.os.BundleCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
@@ -14,9 +15,14 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.isInstanceOf
+import com.stripe.android.model.CancelCaptchaChallengeParams
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.injectableActivityScenario
 import kotlinx.coroutines.test.TestDispatcher
@@ -138,6 +144,30 @@ internal class IntentConfirmationChallengeActivityTest {
     }
 
     @Test
+    fun `finishes with Canceled result when close is clicked`() = runTest {
+        val bridgeHandler = FakeConfirmationChallengeBridgeHandler()
+
+        val scenario = launchActivityWithBridgeHandler(bridgeHandler)
+
+        // Emit Ready to ensure the UI is loaded
+        bridgeHandler.emitEvent(ConfirmationChallengeBridgeEvent.Ready)
+        advanceUntilIdle()
+
+        // Click the close button
+        composeTestRule
+            .onNodeWithTag(INTENT_CONFIRMATION_CHALLENGE_CLOSE_BUTTON_TAG)
+            .performClick()
+        advanceUntilIdle()
+
+        assertThat(scenario.getResult().resultCode).isEqualTo(IntentConfirmationChallengeActivity.RESULT_COMPLETE)
+
+        val result = extractActivityResult(scenario)
+        assertThat(result).isInstanceOf<IntentConfirmationChallengeActivityResult.Canceled>()
+
+        scenario.close()
+    }
+
+    @Test
     fun `progress indicator resets on configuration change`() = runTest {
         val bridgeHandler = FakeConfirmationChallengeBridgeHandler()
 
@@ -186,10 +216,14 @@ internal class IntentConfirmationChallengeActivityTest {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return IntentConfirmationChallengeViewModel(
+                    args = createTestArgs(),
                     bridgeHandler = bridgeHandler,
                     workContext = testDispatcher,
                     analyticsEventReporter = analyticsReporter,
-                    userAgent = "fake-user-agent"
+                    userAgent = "fake-user-agent",
+                    stripeRepository = object : AbsFakeStripeRepository() {},
+                    errorReporter = FakeErrorReporter(),
+                    requestOptions = ApiRequest.Options("pk_test_123")
                 ) as T
             }
         }
@@ -226,10 +260,22 @@ internal class IntentConfirmationChallengeActivityTest {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return IntentConfirmationChallengeViewModel(
+                    args = createTestArgs(),
                     bridgeHandler = bridgeHandler,
                     workContext = testDispatcher,
                     analyticsEventReporter = FakeIntentConfirmationChallengeAnalyticsEventReporter(),
-                    userAgent = "fake-user-agent"
+                    userAgent = "fake-user-agent",
+                    stripeRepository = object : AbsFakeStripeRepository() {
+                        override suspend fun cancelPaymentIntentCaptchaChallenge(
+                            paymentIntentId: String,
+                            params: CancelCaptchaChallengeParams,
+                            requestOptions: ApiRequest.Options
+                        ): Result<PaymentIntent> {
+                            return Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
+                        }
+                    },
+                    errorReporter = FakeErrorReporter(),
+                    requestOptions = ApiRequest.Options("pk_test_123"),
                 ) as T
             }
         }

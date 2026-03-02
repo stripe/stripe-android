@@ -52,6 +52,8 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
 
         val initialRetrieveIntentStartTime = System.currentTimeMillis()
 
+        val requestId = unvalidatedResult.exception?.requestId
+
         retrieveStripeIntent(
             clientSecret = result.clientSecret,
             requestOptions = requestOptions,
@@ -63,7 +65,11 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
                     createStripeIntentResult(
                         stripeIntent,
                         SUCCEEDED,
-                        failureMessageFactory.create(stripeIntent, result.flowOutcome)
+                        failureMessageFactory.create(
+                            intent = stripeIntent,
+                            requestId = requestId,
+                            outcome = result.flowOutcome
+                        )
                     )
                 }
                 shouldRefreshOrPollIntent(stripeIntent, result.flowOutcome) -> {
@@ -86,7 +92,11 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
                     createStripeIntentResult(
                         intent,
                         flowOutcome,
-                        failureMessageFactory.create(intent, result.flowOutcome)
+                        failureMessageFactory.create(
+                            intent = intent,
+                            requestId = requestId,
+                            outcome = result.flowOutcome
+                        )
                     )
                 }
                 shouldCancelIntentSource(stripeIntent, result.canCancelSource) -> {
@@ -111,14 +121,22 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
                     createStripeIntentResult(
                         intent,
                         result.flowOutcome,
-                        failureMessageFactory.create(intent, result.flowOutcome)
+                        failureMessageFactory.create(
+                            intent = intent,
+                            requestId = requestId,
+                            outcome = result.flowOutcome
+                        )
                     )
                 }
                 else -> {
                     createStripeIntentResult(
                         stripeIntent,
                         result.flowOutcome,
-                        failureMessageFactory.create(stripeIntent, result.flowOutcome)
+                        failureMessageFactory.create(
+                            intent = stripeIntent,
+                            requestId = requestId,
+                            outcome = result.flowOutcome
+                        )
                     )
                 }
             }

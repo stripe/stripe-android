@@ -14,9 +14,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 
-internal class FakeTapToAddHelper(
-    override val hasPreviouslyAttemptedCollection: Boolean = false,
-) : TapToAddHelper {
+internal class FakeTapToAddHelper : TapToAddHelper {
     val registerCalls = Turbine<RegisterCall>()
     val collectCalls = Turbine<PaymentMethodMetadata>()
 
@@ -103,10 +101,9 @@ internal class FakeTapToAddHelper(
 
     companion object {
         suspend fun test(
-            hasPreviouslyAttemptedCollection: Boolean = false,
             block: suspend Scenario.() -> Unit,
         ) {
-            val helper = FakeTapToAddHelper(hasPreviouslyAttemptedCollection)
+            val helper = FakeTapToAddHelper()
 
             block(
                 Scenario(

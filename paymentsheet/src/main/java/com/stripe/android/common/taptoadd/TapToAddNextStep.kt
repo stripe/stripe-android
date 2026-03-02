@@ -7,6 +7,8 @@ internal sealed interface TapToAddNextStep {
 
     data class Continue(val paymentSelection: PaymentSelection.Saved) : TapToAddNextStep
 
+    data class ShowSavedPaymentMethods(val paymentSelection: PaymentSelection.Saved) : TapToAddNextStep
+
     data class ConfirmSavedPaymentMethod(
         val paymentSelection: PaymentSelection.Saved
     ) : TapToAddNextStep

@@ -15,6 +15,13 @@ import com.stripe.android.challenge.confirmation.analytics.IntentConfirmationCha
 import com.stripe.android.challenge.confirmation.di.DaggerIntentConfirmationChallengeComponent
 import com.stripe.android.challenge.confirmation.di.SDK_USER_AGENT
 import com.stripe.android.core.injection.UIContext
+import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.CancelCaptchaChallengeParams
+import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.SetupIntent
+import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.analytics.ErrorReporter.UnexpectedErrorEvent
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -25,10 +32,14 @@ import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 
 internal class IntentConfirmationChallengeViewModel @Inject constructor(
+    private val args: IntentConfirmationChallengeArgs,
     val bridgeHandler: ConfirmationChallengeBridgeHandler,
     @UIContext private val workContext: CoroutineContext,
     private val analyticsEventReporter: IntentConfirmationChallengeAnalyticsEventReporter,
-    @Named(SDK_USER_AGENT) val userAgent: String
+    @Named(SDK_USER_AGENT) val userAgent: String,
+    private val stripeRepository: StripeRepository,
+    private val errorReporter: ErrorReporter,
+    private val requestOptions: ApiRequest.Options,
 ) : ViewModel(), DefaultLifecycleObserver {
 
     private val _bridgeReady = MutableSharedFlow<Unit>()
@@ -55,7 +66,66 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
             fromBridge = false,
         )
         viewModelScope.launch {
-            _result.emit(IntentConfirmationChallengeActivityResult.Failed(error))
+            _result.emit(
+                value = IntentConfirmationChallengeActivityResult.Failed(
+                    clientSecret = args.intent.clientSecret,
+                    error = error
+                )
+            )
+        }
+    }
+
+    fun closeClicked() {
+        viewModelScope.launch {
+            val intentId = args.intent.id
+            val clientSecret = args.intent.clientSecret
+
+            if (intentId == null || clientSecret == null) {
+                errorReporter.report(
+                    errorEvent = UnexpectedErrorEvent.INTENT_CONFIRMATION_CHALLENGE_INTENT_PARAMETERS_UNAVAILABLE,
+                )
+                _result.emit(
+                    IntentConfirmationChallengeActivityResult.Failed(
+                        clientSecret = clientSecret,
+                        error = IllegalArgumentException("Intent parameters are unavailable")
+                    )
+                )
+                return@launch
+            }
+            val params = CancelCaptchaChallengeParams(clientSecret)
+
+            val cancellationResult = when (args.intent) {
+                is PaymentIntent -> {
+                    stripeRepository.cancelPaymentIntentCaptchaChallenge(
+                        paymentIntentId = intentId,
+                        params = params,
+                        requestOptions = requestOptions,
+                    )
+                }
+                is SetupIntent -> {
+                    stripeRepository.cancelSetupIntentCaptchaChallenge(
+                        setupIntentId = intentId,
+                        params = params,
+                        requestOptions = requestOptions,
+                    )
+                }
+            }
+
+            cancellationResult.fold(
+                onSuccess = { intent ->
+                    _result.emit(
+                        IntentConfirmationChallengeActivityResult.Canceled(intent.clientSecret)
+                    )
+                },
+                onFailure = { error ->
+                    _result.emit(
+                        IntentConfirmationChallengeActivityResult.Failed(
+                            clientSecret = args.intent.clientSecret,
+                            error = error,
+                        )
+                    )
+                }
+            )
         }
     }
 
@@ -82,7 +152,8 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
                     )
                     _result.emit(
                         IntentConfirmationChallengeActivityResult.Failed(
-                            error = event.error
+                            error = event.error,
+                            clientSecret = args.intent.clientSecret
                         )
                     )
                 }

@@ -139,6 +139,7 @@ internal class IntentConfirmationChallengeNextActionHandlerTest {
             // Simulate failed result
             val testError = Throwable("Test error")
             val failedResult = IntentConfirmationChallengeActivityResult.Failed(
+                clientSecret = null,
                 error = testError
             )
             val callback = registerCall.callback.asCallbackFor<IntentConfirmationChallengeActivityResult>()
@@ -149,6 +150,38 @@ internal class IntentConfirmationChallengeNextActionHandlerTest {
             assertThat(capturedResult.flowOutcome).isEqualTo(StripeIntentResult.Outcome.FAILED)
             assertThat(capturedResult.exception).isInstanceOf(StripeException::class.java)
             assertThat(capturedResult.exception?.message).isEqualTo("Test error")
+        }
+    }
+
+    @Test
+    fun `onNewActivityResultCaller registers for activity result and handles Canceled`() = runTest {
+        DummyActivityResultCaller.test {
+            val handler = IntentConfirmationChallengeNextActionHandler(
+                publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+                uiContext = testDispatcher,
+                productUsageTokens = PRODUCT_USAGE
+            )
+
+            val resultCallback = mutableListOf<PaymentFlowResult.Unvalidated>()
+            handler.onNewActivityResultCaller(
+                activityResultCaller = activityResultCaller,
+                activityResultCallback = { result -> resultCallback.add(result) }
+            )
+
+            val registerCall = awaitRegisterCall()
+            awaitNextRegisteredLauncher()
+            assertThat(registerCall.contract).isInstanceOf(IntentConfirmationChallengeActivityContract::class.java)
+
+            // Simulate canceled result
+            val callback = registerCall.callback.asCallbackFor<IntentConfirmationChallengeActivityResult>()
+            callback.onActivityResult(
+                IntentConfirmationChallengeActivityResult.Canceled(clientSecret = "pi_test_secret")
+            )
+
+            assertThat(resultCallback).hasSize(1)
+            val capturedResult = resultCallback[0]
+            assertThat(capturedResult.flowOutcome).isEqualTo(StripeIntentResult.Outcome.CANCELED)
+            assertThat(capturedResult.exception).isNull()
         }
     }
 

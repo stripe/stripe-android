@@ -1,10 +1,10 @@
 package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.model.CheckoutSessionResponse
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -149,6 +149,7 @@ class CustomerStateTest {
         val customer = CheckoutSessionResponse.Customer(
             id = "cus_checkout_123",
             paymentMethods = paymentMethods,
+            canDetachPaymentMethod = false,
         )
 
         val customerState = CustomerState.createForCheckoutSession(
@@ -165,6 +166,7 @@ class CustomerStateTest {
         val customer = CheckoutSessionResponse.Customer(
             id = "cus_checkout_empty",
             paymentMethods = emptyList(),
+            canDetachPaymentMethod = false,
         )
 
         val customerState = CustomerState.createForCheckoutSession(
@@ -185,6 +187,7 @@ class CustomerStateTest {
                 PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
                 PaymentMethodFixtures.LINK_PAYMENT_METHOD,
             ),
+            canDetachPaymentMethod = false,
         )
 
         val customerState = CustomerState.createForCheckoutSession(

@@ -2,7 +2,6 @@ package com.stripe.android.crypto.onramp
 
 import android.app.Application
 import android.content.Context
-import android.util.Log
 import androidx.annotation.RestrictTo
 import androidx.core.content.ContextCompat
 import com.stripe.android.core.utils.flatMapCatching
@@ -824,10 +823,6 @@ internal class OnrampInteractor @Inject constructor(
                     Status.Completed(OnrampCheckoutResult.Failed(error))
                 }
             )
-        val tag = "OnrampCheckoutUpd"
-        Log.d(tag, "Updating interactor=${System.identityHashCode(this)} " +
-            "_stateFlow=${System.identityHashCode(_state)} " +
-            "newStatus=$checkoutStatus")
 
         _state.update {
             it.copy(checkoutState = CheckoutState(checkoutStatus))
