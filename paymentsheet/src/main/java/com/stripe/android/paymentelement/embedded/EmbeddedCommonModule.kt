@@ -115,13 +115,13 @@ internal interface EmbeddedCommonModule {
             selectionHolder: EmbeddedSelectionHolder,
             paymentMethodMetadataFlow: StateFlow<PaymentMethodMetadata?>
         ): CustomerStateHolder {
-            val customerMetadataPermissions = paymentMethodMetadataFlow.mapAsStateFlow {
-                it?.customerMetadata?.permissions
+            val customerMetadata = paymentMethodMetadataFlow.mapAsStateFlow {
+                it?.customerMetadata
             }
             return DefaultCustomerStateHolder(
                 savedStateHandle = savedStateHandle,
                 selection = selectionHolder.selection,
-                customerMetadataPermissions = customerMetadataPermissions
+                customerMetadata = customerMetadata
             )
         }
 

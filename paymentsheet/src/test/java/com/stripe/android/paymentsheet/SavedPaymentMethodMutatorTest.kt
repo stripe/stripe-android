@@ -56,13 +56,11 @@ class SavedPaymentMethodMutatorTest {
     fun `canEdit is correct when user has permissions to remove last PM`() = runScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             hasCustomerConfiguration = true,
-            customerMetadataPermissions = CustomerMetadata.Permissions(
-                removePaymentMethod = PaymentMethodRemovePermission.Full,
-                saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
-                canRemoveLastPaymentMethod = true,
-                canRemoveDuplicates = false,
-                canUpdateFullPaymentMethodDetails = false,
-            )
+            removePaymentMethod = PaymentMethodRemovePermission.Full,
+            saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
+            canRemoveLastPaymentMethod = true,
+            canRemoveDuplicates = false,
+            canUpdateFullPaymentMethodDetails = false,
         )
     ) {
         savedPaymentMethodMutator.canEdit.test {
@@ -81,13 +79,11 @@ class SavedPaymentMethodMutatorTest {
     fun `canEdit is correct when when user does not have permissions to remove last PM`() = runScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             hasCustomerConfiguration = true,
-            customerMetadataPermissions = CustomerMetadata.Permissions(
-                removePaymentMethod = PaymentMethodRemovePermission.Full,
-                saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
-                canRemoveLastPaymentMethod = false,
-                canRemoveDuplicates = false,
-                canUpdateFullPaymentMethodDetails = false,
-            )
+            removePaymentMethod = PaymentMethodRemovePermission.Full,
+            saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
+            canRemoveLastPaymentMethod = false,
+            canRemoveDuplicates = false,
+            canUpdateFullPaymentMethodDetails = false,
         )
     ) {
         savedPaymentMethodMutator.canEdit.test {
@@ -208,13 +204,11 @@ class SavedPaymentMethodMutatorTest {
     fun `Sets editing to false when removing the last payment method while editing`() = runScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             hasCustomerConfiguration = true,
-            customerMetadataPermissions = CustomerMetadata.Permissions(
-                removePaymentMethod = PaymentMethodRemovePermission.Full,
-                saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
-                canRemoveLastPaymentMethod = true,
-                canRemoveDuplicates = false,
-                canUpdateFullPaymentMethodDetails = false,
-            )
+            removePaymentMethod = PaymentMethodRemovePermission.Full,
+            saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
+            canRemoveLastPaymentMethod = true,
+            canRemoveDuplicates = false,
+            canUpdateFullPaymentMethodDetails = false,
         )
     ) {
         val customerPaymentMethods = PaymentMethodFixtures.createCards(1)
@@ -241,13 +235,11 @@ class SavedPaymentMethodMutatorTest {
         paymentMethodMetadata =
         PaymentMethodMetadataFactory.create(
             hasCustomerConfiguration = true,
-            customerMetadataPermissions = CustomerMetadata.Permissions(
-                canRemoveDuplicates = true,
-                removePaymentMethod = PaymentMethodRemovePermission.Full,
-                saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
-                canRemoveLastPaymentMethod = true,
-                canUpdateFullPaymentMethodDetails = true,
-            )
+            canRemoveDuplicates = true,
+            removePaymentMethod = PaymentMethodRemovePermission.Full,
+            saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
+            canRemoveLastPaymentMethod = true,
+            canUpdateFullPaymentMethodDetails = true,
         )
     ) {
         val cards = PaymentMethodFixtures.createCards(3)
@@ -270,13 +262,11 @@ class SavedPaymentMethodMutatorTest {
     fun `updatePaymentMethod should be called correctly when 1 PM & cannot remove last PM`() = runScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             hasCustomerConfiguration = true,
-            customerMetadataPermissions = CustomerMetadata.Permissions(
-                canRemoveDuplicates = true,
-                removePaymentMethod = PaymentMethodRemovePermission.Full,
-                saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
-                canRemoveLastPaymentMethod = false,
-                canUpdateFullPaymentMethodDetails = true,
-            )
+            canRemoveDuplicates = true,
+            removePaymentMethod = PaymentMethodRemovePermission.Full,
+            saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
+            canRemoveLastPaymentMethod = false,
+            canUpdateFullPaymentMethodDetails = true,
         )
     ) {
         val cards = PaymentMethodFixtures.createCards(1)
@@ -901,13 +891,11 @@ class SavedPaymentMethodMutatorTest {
             savedPaymentMethodRepository = repository,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 hasCustomerConfiguration = true,
-                customerMetadataPermissions = CustomerMetadata.Permissions(
-                    removePaymentMethod = PaymentMethodRemovePermission.Full,
-                    saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
-                    canRemoveLastPaymentMethod = true,
-                    canRemoveDuplicates = shouldRemoveDuplicates,
-                    canUpdateFullPaymentMethodDetails = false,
-                ),
+                removePaymentMethod = PaymentMethodRemovePermission.Full,
+                saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
+                canRemoveLastPaymentMethod = true,
+                canRemoveDuplicates = shouldRemoveDuplicates,
+                canUpdateFullPaymentMethodDetails = false,
                 customerSessionClientSecret = customerSessionClientSecret,
             )
         ) {
@@ -932,13 +920,11 @@ class SavedPaymentMethodMutatorTest {
                         ephemeralKeySecret = "ek_123",
                         customerSessionClientSecret = customerSessionClientSecret,
                         isPaymentMethodSetAsDefaultEnabled = false,
-                        permissions = CustomerMetadata.Permissions(
-                            removePaymentMethod = PaymentMethodRemovePermission.Full,
-                            saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
-                            canRemoveLastPaymentMethod = true,
-                            canRemoveDuplicates = shouldRemoveDuplicates,
-                            canUpdateFullPaymentMethodDetails = false,
-                        ),
+                        removePaymentMethod = PaymentMethodRemovePermission.Full,
+                        saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
+                        canRemoveLastPaymentMethod = true,
+                        canRemoveDuplicates = shouldRemoveDuplicates,
+                        canUpdateFullPaymentMethodDetails = false,
                     ),
                     canRemoveDuplicates = shouldRemoveDuplicates,
                 )
@@ -960,8 +946,8 @@ class SavedPaymentMethodMutatorTest {
         val customerStateHolder = DefaultCustomerStateHolder(
             savedStateHandle = SavedStateHandle(),
             selection = MutableStateFlow(null),
-            customerMetadataPermissions =
-            stateFlowOf(PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.permissions),
+            customerMetadata =
+            stateFlowOf(PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA),
         )
         runScenario(
             customerStateHolder = customerStateHolder,
@@ -1002,9 +988,9 @@ class SavedPaymentMethodMutatorTest {
         customerStateHolder: CustomerStateHolder = DefaultCustomerStateHolder(
             savedStateHandle = SavedStateHandle(),
             selection = selection,
-            customerMetadataPermissions = stateFlowOf(
-                paymentMethodMetadata?.customerMetadata?.permissions
-                    ?: PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.permissions
+            customerMetadata = stateFlowOf(
+                paymentMethodMetadata?.customerMetadata
+                    ?: PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
             ),
         ),
         block: suspend Scenario.() -> Unit
