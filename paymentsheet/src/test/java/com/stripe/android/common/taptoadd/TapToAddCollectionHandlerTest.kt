@@ -5,6 +5,7 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.taptoadd.ui.createTapToAddUxConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.resolvableString
@@ -366,6 +367,44 @@ class TapToAddCollectionHandlerTest {
                 displayMessage = R.string.stripe_something_went_wrong.resolvableString
             )
         )
+    }
+
+    @Test
+    fun `handler returns FailedCollection when retrieve payment method fails`() {
+        val retrieveError = IllegalStateException("Failed to retrieve payment method")
+        runScenario(
+            isConnected = true,
+            retrieveCustomerPaymentMethodResult = Result.failure(retrieveError),
+            callbackResult = Result.success(
+                CreateCardPresentSetupIntentCallback {
+                    CreateIntentResult.Success("si_123_secret")
+                }
+            ),
+        ) {
+            val result = testScope.backgroundScope.async {
+                handler.collect(DEFAULT_METADATA)
+            }
+
+            assertThat(retrieverScenario.waitForCallbackCalls.awaitItem()).isNotNull()
+            assertThat(terminalScenario.setTapToPayUxConfigurationCalls.awaitItem()).isNotNull()
+
+            val retrievedSetupIntent = checkRetrieveSetupIntent("si_123_secret")
+            val collectedIntent = checkCollectCall(retrievedSetupIntent)
+            val paymentMethod = createTerminalPaymentMethod(id = "pm_4563", last4 = "7294", brand = "mastercard")
+
+            checkConfirmCall(
+                useInterac = false,
+                collectedSetupIntent = collectedIntent,
+                paymentMethod = paymentMethod,
+            )
+
+            assertThat(result.await()).isEqualTo(
+                TapToAddCollectionHandler.CollectionState.FailedCollection(
+                    error = retrieveError,
+                    displayMessage = retrieveError.stripeErrorMessage()
+                )
+            )
+        }
     }
 
     @Test
