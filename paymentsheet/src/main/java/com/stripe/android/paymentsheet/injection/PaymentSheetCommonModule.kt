@@ -43,6 +43,7 @@ import com.stripe.android.paymentsheet.flowcontroller.DefaultPaymentSelectionUpd
 import com.stripe.android.paymentsheet.flowcontroller.PaymentSelectionUpdater
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.DefaultCvcRecollectionInteractor
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepositoryModule
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.DefaultSavedPaymentMethodRepository
@@ -77,6 +78,7 @@ import javax.inject.Singleton
         TapToAddConnectionModule::class,
         PaymentsIntegrityModule::class,
         PaymentConfigurationModule::class,
+        CheckoutSessionRepositoryModule::class,
     ]
 )
 internal abstract class PaymentSheetCommonModule {
