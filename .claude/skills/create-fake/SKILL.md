@@ -1,3 +1,8 @@
+---
+name: create-fake
+description: Explains how to create a fake following stripe-android's coding standards
+---
+
 # Creating Fakes for Testing
 
 This skill describes how to create fake implementations for testing in the Stripe Android SDK. The codebase **strongly prefers fakes over mocks** for better test reliability and clarity.

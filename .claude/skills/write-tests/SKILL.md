@@ -1,3 +1,7 @@
+---
+name: write-test
+description: Explains how to write tests and structure test classes following stripe-android's coding standards
+---
 # Setting Up Tests
 
 This skill describes how to structure tests in the Stripe Android SDK using fakes, scenarios, and proper verification patterns.
