@@ -824,13 +824,11 @@ class DefaultAnalyticsMetadataFactoryTest {
         ephemeralKeySecret = "ek_123",
         customerSessionClientSecret = "cuss_132_secret_123",
         isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
-        permissions = CustomerMetadata.Permissions(
-            removePaymentMethod = PaymentMethodRemovePermission.Full,
-            saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
-            canRemoveLastPaymentMethod = true,
-            canRemoveDuplicates = true,
-            canUpdateFullPaymentMethodDetails = true,
-        )
+        removePaymentMethod = PaymentMethodRemovePermission.Full,
+        saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
+        canRemoveLastPaymentMethod = true,
+        canRemoveDuplicates = true,
+        canUpdateFullPaymentMethodDetails = true,
     )
 
     private fun createElementsSessionCustomer(): ElementsSession.Customer {

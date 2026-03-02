@@ -403,4 +403,135 @@ internal object CheckoutSessionFixtures {
         }
         """.trimIndent()
     )
+
+    /**
+     * Init response with full order summary: discounts, taxes, and shipping.
+     */
+    val CHECKOUT_SESSION_WITH_ORDER_SUMMARY_JSON = JSONObject(
+        """
+        {
+            "session_id": "cs_test_abc123",
+            "currency": "usd",
+            "total_summary": {
+                "due": 4044,
+                "subtotal": 5000,
+                "total": 4044
+            },
+            "line_item_group": {
+                "currency": "usd",
+                "total": 4044,
+                "subtotal": 5000,
+                "due": 4044,
+                "discount_amounts": [
+                    {
+                        "amount": 500,
+                        "discount": {
+                            "name": "SUMMER10"
+                        }
+                    },
+                    {
+                        "amount": 250,
+                        "discount": {
+                            "name": "LOYALTY5"
+                        }
+                    }
+                ],
+                "tax_amounts": [
+                    {
+                        "amount": 294,
+                        "inclusive": false,
+                        "tax_rate": {
+                            "display_name": "Sales Tax",
+                            "percentage": 6.875
+                        }
+                    }
+                ],
+                "shipping_rate": {
+                    "amount": 500,
+                    "display_name": "Standard Shipping",
+                    "delivery_estimate": "5-7 business days"
+                }
+            },
+            "elements_session": $MINIMAL_ELEMENTS_SESSION_JSON
+        }
+        """.trimIndent()
+    )
+
+    /**
+     * Init response without total_summary but with line_item_group (fallback path).
+     */
+    val CHECKOUT_SESSION_WITHOUT_TOTAL_SUMMARY_JSON = JSONObject(
+        """
+        {
+            "session_id": "cs_test_abc123",
+            "currency": "usd",
+            "line_item_group": {
+                "currency": "usd",
+                "total": 2000,
+                "subtotal": 2000,
+                "due": 2000
+            },
+            "elements_session": $MINIMAL_ELEMENTS_SESSION_JSON
+        }
+        """.trimIndent()
+    )
+
+    /**
+     * Init response with applied balance.
+     */
+    val CHECKOUT_SESSION_WITH_APPLIED_BALANCE_JSON = JSONObject(
+        """
+        {
+            "session_id": "cs_test_abc123",
+            "currency": "usd",
+            "total_summary": {
+                "due": 800,
+                "subtotal": 1000,
+                "total": 1000,
+                "applied_balance": -200
+            },
+            "elements_session": $MINIMAL_ELEMENTS_SESSION_JSON
+        }
+        """.trimIndent()
+    )
+
+    /**
+     * Init response with shipping from shipping.shipping_option fallback path.
+     */
+    val CHECKOUT_SESSION_WITH_SHIPPING_OPTION_JSON = JSONObject(
+        """
+        {
+            "session_id": "cs_test_abc123",
+            "currency": "usd",
+            "total_summary": {
+                "due": 1500,
+                "subtotal": 1000,
+                "total": 1500
+            },
+            "line_item_group": {
+                "currency": "usd",
+                "total": 1500,
+                "subtotal": 1000,
+                "due": 1500
+            },
+            "shipping": {
+                "shipping_option": {
+                    "amount": 500,
+                    "display_name": "Express Shipping",
+                    "delivery_estimate": {
+                        "minimum": {
+                            "value": 1,
+                            "unit": "business_day"
+                        },
+                        "maximum": {
+                            "value": 3,
+                            "unit": "business_day"
+                        }
+                    }
+                }
+            },
+            "elements_session": $MINIMAL_ELEMENTS_SESSION_JSON
+        }
+        """.trimIndent()
+    )
 }

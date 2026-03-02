@@ -107,8 +107,8 @@ class VerticalModeInitialScreenFactoryTest {
         val customerStateHolder = DefaultCustomerStateHolder(
             savedStateHandle = SavedStateHandle(),
             selection = fakeViewModel.selection,
-            customerMetadataPermissions = stateFlowOf(
-                paymentMethodMetadata.customerMetadata?.permissions
+            customerMetadata = stateFlowOf(
+                paymentMethodMetadata.customerMetadata
             )
         )
         if (hasSavedPaymentMethods) {

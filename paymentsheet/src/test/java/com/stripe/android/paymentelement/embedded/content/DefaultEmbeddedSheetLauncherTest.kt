@@ -443,7 +443,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val customerStateHolder = DefaultCustomerStateHolder(
             savedStateHandle = savedStateHandle,
             selection = selectionHolder.selection,
-            customerMetadataPermissions = stateFlowOf(paymentMethodMetadata.customerMetadata?.permissions)
+            customerMetadata = stateFlowOf(paymentMethodMetadata.customerMetadata)
         )
         val sheetStateHolder = SheetStateHolder(savedStateHandle)
         val errorReporter = FakeErrorReporter()

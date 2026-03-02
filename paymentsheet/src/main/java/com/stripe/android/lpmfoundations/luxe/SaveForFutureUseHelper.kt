@@ -20,7 +20,7 @@ internal fun isSaveForFutureUseValueChangeable(
     return isSaveForFutureUseValueChangeable(
         code = code,
         intent = metadata.stripeIntent,
-        paymentMethodSaveConsentBehavior = metadata.customerMetadata?.permissions?.saveConsent,
+        paymentMethodSaveConsentBehavior = metadata.customerMetadata?.saveConsent,
         hasCustomerConfiguration = metadata.customerMetadata != null,
     )
 }

@@ -48,16 +48,13 @@ internal class PaymentSheetCheckoutSessionTest {
         networkRule = networkRule,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        // We shouldn't need 2 times, but while we're building it out, we do the request twice.
-        repeat(2) {
-            // Mock checkout session init API
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("POST"),
-                path("/v1/payment_pages/cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh/init"),
-            ) { response ->
-                response.testBodyFromFile("checkout-session-init.json")
-            }
+        // Mock checkout session init API
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("POST"),
+            path("/v1/payment_pages/cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh/init"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-init.json")
         }
 
         val context = ApplicationProvider.getApplicationContext<Context>()

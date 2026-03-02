@@ -2,7 +2,7 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
-Dependencies updated in [12373](https://github.com/stripe/stripe-android/pull/12373), [12410](https://github.com/stripe/stripe-android/pull/12410), [12419](https://github.com/stripe/stripe-android/pull/12419), and [12433](https://github.com/stripe/stripe-android/pull/12433):
+Dependencies updated in [12373](https://github.com/stripe/stripe-android/pull/12373), [12410](https://github.com/stripe/stripe-android/pull/12410), [12419](https://github.com/stripe/stripe-android/pull/12419), [12433](https://github.com/stripe/stripe-android/pull/12433), and [12486](https://github.com/stripe/stripe-android/pull/12486):
 - Bumped Kotlin from 2.1.10 to 2.3.10.
 - Bumped Kotlin Coroutines from 1.10.1 to 1.10.2.
 - Bumped Kotlin Serialization from 1.8.0 to 1.10.0.
@@ -13,7 +13,7 @@ Dependencies updated in [12373](https://github.com/stripe/stripe-android/pull/12
 - Bumped constraintlayout from 2.2.0 to 2.2.1.
 - Bumped androidx.camera from 1.4.2 to 1.5.3.
 - Bumped recyclerview from 1.3.2 to 1.4.0.
-- Bumped Compose from 1.9.4 to 1.10.3.
+- Bumped Compose from 1.9.4 to 1.10.4.
 - Bumped androidx.activity from 1.9.3 to 1.12.4.
 - Bumped androidx.browser from 1.8.0 to 1.9.0.
 - Bumped androidx.core from 1.13.1 to 1.17.0.

@@ -92,6 +92,10 @@ This is the **Stripe Android SDK**, a multi-module Android library for payment p
 **Testing Patterns**
 - Prefer **fakes over mocks** - create `FakeClassName` implementations when possible
 - Use mocks or indirect testing only when necessary
+- Prefer **`runScenario` pattern** to reduce test boilerplate — define a private `runScenario` function per test class that encapsulates fixture setup, exposing dependencies via lambda parameters or a `Scenario` data class receiver
+  - Simple tests: lambda parameters `runScenario { sut, fakeDep1, fakeDep2 -> ... }`
+  - Stateful/coroutine tests: `Scenario` data class + `runTest` integration
+  - Configurable tests: add parameters with defaults for behavioral variations
 - Flow testing: `flow.test { assertThat(awaitItem()).isEqualTo(expected) }`
 - Compose testing: `composeTestRule.onNodeWithText("text").assertIsDisplayed()`
 - Truth assertions: `assertThat(actual).isEqualTo(expected)`
