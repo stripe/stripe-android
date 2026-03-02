@@ -102,12 +102,12 @@
   <string name="stripe_becs_widget_name_required">Your name is required.</string>
   <!-- Button title to cancel action in an alert -->
   <string name="stripe_cancel">Cancel</string>
+  <!-- String to prompt user to select card brand. -->
+  <string name="stripe_card_brand_choice_choose_card_brand">Choose a card brand</string>
   <!-- Title for a dropdown option when selecting a card brand -->
   <string name="stripe_card_brand_choice_no_selection">No selection</string>
   <!-- Title for a dropdown where the customer can select a card brand -->
   <string name="stripe_card_brand_choice_selection_header">Select card brand (optional)</string>
-  <!-- String to prompt user to select card brand. -->
-  <string name="stripe_card_brand_choice_choose_card_brand">Choose a card brand</string>
   <!-- Error when the card was declined by the credit card networks -->
   <string name="stripe_card_declined">Your card was declined</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
@@ -184,6 +184,8 @@
   <string name="stripe_remove">Remove</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="stripe_removed">Removed %s</string>
+  <!-- A request error from Stripe has occurred due to a valid issue or merchant integration problem that has a request ID -->
+  <string name="stripe_request_error">Something went wrong. Request ID: %1$s</string>
   <string name="stripe_secure_checkout">Secure Checkout</string>
   <string name="stripe_title_add_a_card">Add a card</string>
   <!-- Screen title telling users they should add an address -->
@@ -200,6 +202,4 @@
   <string name="stripe_update">Update</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Verify your payment</string>
-  <!-- A request error from Stripe has occurred due to a valid issue or merchant integration problem that has a request ID -->
-  <string name="stripe_request_error">Something went wrong. Request ID: %1$s</string>
 </resources>
