@@ -5,6 +5,7 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.taptoadd.ui.createTapToAddUxConfiguration
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -161,6 +162,20 @@ class TapToAddCollectionHandlerTest {
     @Test
     fun `handler returns Collected when flow is successfully completed with interac card`() = testSuccessfulFlow(
         useInterac = true,
+    )
+
+    @Test
+    fun `collected payment method has customerId when customer metadata is present`() = testSuccessfulFlow(
+        useInterac = false,
+        metadata = DEFAULT_METADATA,
+        expectedCustomerId = "cus_123",
+    )
+
+    @Test
+    fun `collected payment method has null customerId when customer metadata is absent`() = testSuccessfulFlow(
+        useInterac = false,
+        metadata = METADATA_WITHOUT_CUSTOMER,
+        expectedCustomerId = null,
     )
 
     @Test
@@ -388,6 +403,8 @@ class TapToAddCollectionHandlerTest {
 
     private fun testSuccessfulFlow(
         useInterac: Boolean,
+        metadata: PaymentMethodMetadata = DEFAULT_METADATA,
+        expectedCustomerId: String? = DEFAULT_METADATA.customerMetadata?.id,
     ) = runScenario(
         isConnected = true,
         callbackResult = Result.success(
@@ -397,7 +414,7 @@ class TapToAddCollectionHandlerTest {
         ),
     ) {
         val result = testScope.backgroundScope.async {
-            handler.collect(DEFAULT_METADATA)
+            handler.collect(metadata)
         }
 
         assertThat(retrieverScenario.waitForCallbackCalls.awaitItem()).isNotNull()
@@ -425,6 +442,7 @@ class TapToAddCollectionHandlerTest {
         assertThat(collected.paymentMethod.id).isEqualTo("pm_4563")
         assertThat(collected.paymentMethod.card?.last4).isEqualTo("7294")
         assertThat(collected.paymentMethod.card?.brand).isEqualTo(CardBrand.MasterCard)
+        assertThat(collected.paymentMethod.customerId).isEqualTo(expectedCustomerId)
     }
 
     private fun runScenario(
@@ -758,7 +776,14 @@ class TapToAddCollectionHandlerTest {
 
     private companion object {
         val tapToPayUxConfiguration = createTapToAddUxConfiguration()
-        val DEFAULT_METADATA = PaymentMethodMetadataFactory.create(isTapToAddSupported = true)
+        val DEFAULT_METADATA = PaymentMethodMetadataFactory.create(
+            isTapToAddSupported = true,
+            hasCustomerConfiguration = true,
+        )
+        val METADATA_WITHOUT_CUSTOMER = PaymentMethodMetadataFactory.create(
+            isTapToAddSupported = true,
+            hasCustomerConfiguration = false,
+        )
         val DEFAULT_CALLBACK = CreateCardPresentSetupIntentCallback {
             CreateIntentResult.Success("si_123_secret")
         }

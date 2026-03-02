@@ -127,7 +127,7 @@ internal class DefaultTapToAddCollectionHandler(
         val setupIntent = retrieveSetupIntent(clientSecret)
         val setupIntentWithAttachedPaymentMethod = collectPaymentMethod(setupIntent, metadata)
         val confirmedIntent = confirmSetupIntent(setupIntentWithAttachedPaymentMethod)
-        val paymentMethod = createPaymentMethod(confirmedIntent)
+        val paymentMethod = createPaymentMethod(confirmedIntent, metadata.customerMetadata?.id)
 
         return TapToAddCollectionHandler.CollectionState.Collected(paymentMethod)
     }
@@ -211,7 +211,7 @@ internal class DefaultTapToAddCollectionHandler(
         }
     }
 
-    private fun createPaymentMethod(intent: SetupIntent): PaymentMethod {
+    private fun createPaymentMethod(intent: SetupIntent, customerId: String?): PaymentMethod {
         val paymentMethodDetails = intent.latestAttempt?.paymentMethodDetails
         val presentDetails = paymentMethodDetails?.cardPresentDetails
             ?: paymentMethodDetails?.interacPresentDetails
@@ -232,6 +232,7 @@ internal class DefaultTapToAddCollectionHandler(
             .setCode(PaymentMethod.Type.Card.code)
             .setType(PaymentMethod.Type.Card)
             .setId(generatedCard.id)
+            .setCustomerId(customerId)
             .setCard(
                 PaymentMethod.Card(
                     last4 = generatedCard.cardDetails?.last4,
