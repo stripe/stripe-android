@@ -54,6 +54,7 @@ data class CheckoutSessionResponse(
      * Parsed from `customer_managed_saved_payment_methods_offer_save` in the init response.
      */
     val savedPaymentMethodsOfferSave: SavedPaymentMethodsOfferSave? = null,
+    val totalSummary: TotalSummaryResponse? = null,
 ) : StripeModel {
 
     /**
@@ -114,5 +115,41 @@ data class CheckoutSessionResponse(
          * Defaults to false when not present in the response.
          */
         val canDetachPaymentMethod: Boolean,
+    ) : StripeModel
+
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class TotalSummaryResponse(
+        val subtotal: Long,
+        val totalDueToday: Long,
+        val totalAmountDue: Long,
+        val discountAmounts: List<DiscountAmount>,
+        val taxAmounts: List<TaxAmount>,
+        val shippingRate: ShippingRate?,
+        val appliedBalance: Long?,
+    ) : StripeModel
+
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class DiscountAmount(
+        val amount: Long,
+        val displayName: String,
+    ) : StripeModel
+
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class TaxAmount(
+        val amount: Long,
+        val inclusive: Boolean,
+        val displayName: String,
+        val percentage: Double,
+    ) : StripeModel
+
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class ShippingRate(
+        val amount: Long,
+        val displayName: String,
+        val deliveryEstimate: String?,
     ) : StripeModel
 }
