@@ -9,12 +9,18 @@ internal class FakeCheckoutSessionRepository(
     var detachResult: Result<CheckoutSessionResponse> = Result.failure(NotImplementedError()),
 ) : CheckoutSessionRepository {
 
+    private val _initRequests = Turbine<String>()
+    val initRequests: ReceiveTurbine<String> = _initRequests
+
     private val _detachRequests = Turbine<DetachRequest>()
     val detachRequests: ReceiveTurbine<DetachRequest> = _detachRequests
 
     override suspend fun init(
         sessionId: String,
-    ): Result<CheckoutSessionResponse> = initResult
+    ): Result<CheckoutSessionResponse> {
+        _initRequests.add(sessionId)
+        return initResult
+    }
 
     override suspend fun confirm(
         id: String,
