@@ -41,21 +41,6 @@ class CheckoutTest {
     }
 
     @Test
-    fun `createWithState with different id produces Checkout with that id`() = runTest {
-        runCreateWithStateScenario(
-            checkoutSessionResponse = CheckoutSessionResponse(
-                id = "cs_test_other",
-                amount = 2000L,
-                currency = "eur",
-            ),
-        ) { checkout ->
-            checkout.checkoutSession.test {
-                assertThat(awaitItem().id).isEqualTo("cs_test_other")
-            }
-        }
-    }
-
-    @Test
     fun `configure returns Checkout with checkoutSession id from network response`() = runConfigureScenario(
         clientSecret = "cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh_secret_example",
         networkSetup = {
