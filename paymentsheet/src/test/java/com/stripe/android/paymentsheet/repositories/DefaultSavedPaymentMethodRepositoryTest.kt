@@ -1,9 +1,6 @@
 package com.stripe.android.paymentsheet.repositories
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.common.model.PaymentMethodRemovePermission
-import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.utils.FakeCustomerRepository
 import kotlinx.coroutines.test.runTest
@@ -12,12 +9,12 @@ import org.junit.Test
 class DefaultSavedPaymentMethodRepositoryTest {
 
     @Test
-    fun `detach routes to checkout session repository when checkoutSessionId is present`() = runScenario(
+    fun `detach routes to checkout session repository when access is CheckoutSession`() = runScenario(
         checkoutSessionDetachResult = Result.success(FAKE_CHECKOUT_SESSION_RESPONSE),
-        customerMetadata = CHECKOUT_SESSION_CUSTOMER_METADATA,
+        access = CHECKOUT_SESSION_ACCESS,
     ) {
         val result = repository.detachPaymentMethod(
-            customerMetadata = customerMetadata,
+            access = access,
             paymentMethodId = "pm_123",
             canRemoveDuplicates = false,
         )
@@ -31,11 +28,11 @@ class DefaultSavedPaymentMethodRepositoryTest {
     }
 
     @Test
-    fun `detach routes to customer repository when checkoutSessionId is null`() = runScenario(
-        customerMetadata = CUSTOMER_SESSION_METADATA,
+    fun `detach routes to customer repository when access is Customer`() = runScenario(
+        access = CUSTOMER_ACCESS,
     ) {
         val result = repository.detachPaymentMethod(
-            customerMetadata = customerMetadata,
+            access = access,
             paymentMethodId = "pm_123",
             canRemoveDuplicates = true,
         )
@@ -50,10 +47,10 @@ class DefaultSavedPaymentMethodRepositoryTest {
     @Test
     fun `detach propagates failure from checkout session repository`() = runScenario(
         checkoutSessionDetachResult = Result.failure(RuntimeException("Detach failed")),
-        customerMetadata = CHECKOUT_SESSION_CUSTOMER_METADATA,
+        access = CHECKOUT_SESSION_ACCESS,
     ) {
         val result = repository.detachPaymentMethod(
-            customerMetadata = customerMetadata,
+            access = access,
             paymentMethodId = "pm_123",
             canRemoveDuplicates = false,
         )
@@ -63,7 +60,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
     }
 
     private fun runScenario(
-        customerMetadata: CustomerMetadata = CUSTOMER_SESSION_METADATA,
+        access: SavedPaymentMethodAccess = CUSTOMER_ACCESS,
         checkoutSessionDetachResult: Result<CheckoutSessionResponse> = Result.failure(NotImplementedError()),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
@@ -82,7 +79,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
             repository = repository,
             customerRepository = customerRepository,
             checkoutSessionRepository = checkoutSessionRepository,
-            customerMetadata = customerMetadata,
+            access = access,
         ).block()
     }
 
@@ -90,7 +87,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
         val repository: DefaultSavedPaymentMethodRepository,
         val customerRepository: FakeCustomerRepository,
         val checkoutSessionRepository: FakeCheckoutSessionRepository,
-        val customerMetadata: CustomerMetadata,
+        val access: SavedPaymentMethodAccess,
     )
 
     companion object {
@@ -100,32 +97,15 @@ class DefaultSavedPaymentMethodRepositoryTest {
             currency = "usd",
         )
 
-        private val CHECKOUT_SESSION_CUSTOMER_METADATA = CustomerMetadata(
-            id = "cus_123",
-            ephemeralKeySecret = "",
-            customerSessionClientSecret = null,
-            isPaymentMethodSetAsDefaultEnabled = false,
-            permissions = CustomerMetadata.Permissions(
-                removePaymentMethod = PaymentMethodRemovePermission.Full,
-                saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
-                canRemoveLastPaymentMethod = false,
-                canRemoveDuplicates = false,
-                canUpdateFullPaymentMethodDetails = false,
-            ),
-            checkoutSessionId = "cs_123",
+        private val CHECKOUT_SESSION_ACCESS = SavedPaymentMethodAccess.CheckoutSession(
+            sessionId = "cs_123",
         )
 
-        private val CUSTOMER_SESSION_METADATA = CustomerMetadata(
-            id = "cus_456",
-            ephemeralKeySecret = "ek_456",
-            customerSessionClientSecret = "css_456",
-            isPaymentMethodSetAsDefaultEnabled = false,
-            permissions = CustomerMetadata.Permissions(
-                removePaymentMethod = PaymentMethodRemovePermission.Full,
-                saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
-                canRemoveLastPaymentMethod = true,
-                canRemoveDuplicates = true,
-                canUpdateFullPaymentMethodDetails = true,
+        private val CUSTOMER_ACCESS = SavedPaymentMethodAccess.Customer(
+            info = CustomerRepository.CustomerInfo(
+                id = "cus_456",
+                ephemeralKeySecret = "ek_456",
+                customerSessionClientSecret = "css_456",
             ),
         )
     }

@@ -574,7 +574,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 ephemeralKeySecret = "",
                 customerSessionClientSecret = null,
                 isPaymentMethodSetAsDefaultEnabled = false,
-                checkoutSessionId = customerInfo.checkoutSessionId,
                 permissions = CustomerMetadata.Permissions(
                     removePaymentMethod = if (customerInfo.customer.canDetachPaymentMethod) {
                         PaymentMethodRemovePermission.Full
