@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.example.samples.ui.shared
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -26,12 +27,14 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.samples.ui.MAIN_FONT_SIZE
 import com.stripe.android.paymentsheet.example.samples.ui.PADDING
+import com.stripe.android.paymentsheet.example.samples.ui.SUB_FONT_SIZE
 
 @Composable
 fun PaymentMethodSelector(
     isEnabled: Boolean,
     paymentMethodLabel: String,
     paymentMethodPainter: Painter?,
+    paymentMethodSublabel: String? = null,
     clickable: Boolean = isEnabled,
     onClick: () -> Unit,
 ) {
@@ -65,11 +68,21 @@ fun PaymentMethodSelector(
                     tint = Color.Unspecified,
                 )
 
-                Text(
-                    text = paymentMethodLabel,
-                    fontSize = MAIN_FONT_SIZE,
-                    modifier = Modifier.alpha(if (isEnabled) 1f else 0.5f),
-                )
+                Column(
+                    modifier = Modifier.alpha(if (isEnabled) 1f else 0.5f)
+                ) {
+                    Text(
+                        text = paymentMethodLabel,
+                        fontSize = MAIN_FONT_SIZE,
+                    )
+                    paymentMethodSublabel?.let { sublabel ->
+                        Text(
+                            text = sublabel,
+                            fontSize = SUB_FONT_SIZE,
+                            color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
+                        )
+                    }
+                }
             } else {
                 TextButton(
                     onClick = onClick,
