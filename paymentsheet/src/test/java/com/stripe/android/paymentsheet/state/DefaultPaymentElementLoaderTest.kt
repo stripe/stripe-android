@@ -69,11 +69,9 @@ import com.stripe.android.paymentsheet.analytics.FakeLogLinkHoldbackExperiment
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.toSavedSelection
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
-import com.stripe.android.paymentsheet.repositories.FakeCheckoutSessionRepository
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.PaymentIntentInTerminalState
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.FakeErrorReporter
@@ -1632,46 +1630,24 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Returns failure if configuring checkout session with invalid prefix`() = runScenario {
-        assertFailsWith<IllegalArgumentException>(
-            "Must use a checkout session client secret (format: cs_*_secret_*)."
-        ) {
-            PaymentElementLoader.InitializationMode.CheckoutSession(
-                clientSecret = "pi_test_123_secret_abc",
-            ).validate()
-        }
-    }
-
-    @Test
-    fun `Returns failure if configuring checkout session without secret part`() = runScenario {
-        assertFailsWith<IllegalArgumentException>(
-            "Must use a checkout session client secret (format: cs_*_secret_*)."
-        ) {
-            PaymentElementLoader.InitializationMode.CheckoutSession(
-                clientSecret = "cs_test_123",
-            ).validate()
-        }
-    }
-
-    @Test
-    fun `CheckoutSession validate succeeds with valid client secret`() = runScenario {
+    fun `CheckoutSession validate is a no-op`() = runScenario {
         PaymentElementLoader.InitializationMode.CheckoutSession(
-            clientSecret = "cs_test_123_secret_abc",
+            checkoutSessionResponse = createCheckoutSessionResponse(canDetachPaymentMethod = true),
         ).validate()
     }
 
     @Test
-    fun `CheckoutSession id property extracts id from client secret`() = runScenario {
+    fun `CheckoutSession id property returns id from response`() = runScenario {
         val checkoutSession = PaymentElementLoader.InitializationMode.CheckoutSession(
-            clientSecret = "cs_test_123_secret_abc",
+            checkoutSessionResponse = createCheckoutSessionResponse(canDetachPaymentMethod = true),
         )
-        assertThat(checkoutSession.id).isEqualTo("cs_test_123")
+        assertThat(checkoutSession.checkoutSessionResponse.id).isEqualTo("cs_test_123")
     }
 
     @Test
-    fun `integrationMetadata returns checkout session with extracted id`() = runScenario {
+    fun `integrationMetadata returns checkout session with id from response`() = runScenario {
         val checkoutSession = PaymentElementLoader.InitializationMode.CheckoutSession(
-            clientSecret = "cs_test_123_secret_abc"
+            checkoutSessionResponse = createCheckoutSessionResponse(canDetachPaymentMethod = true),
         )
         assertThat(checkoutSession.integrationMetadata(null))
             .isEqualTo(IntegrationMetadata.CheckoutSession("cs_test_123"))
@@ -2950,16 +2926,12 @@ internal class DefaultPaymentElementLoaderTest {
             canDetachPaymentMethod = canDetachPaymentMethod,
         )
 
-        runScenario(
-            checkoutSessionRepository = FakeCheckoutSessionRepository(
-                initResult = Result.success(checkoutSessionResponse),
-            ),
-        ) {
+        runScenario {
             val loader = createPaymentElementLoader()
 
             val state = loader.load(
                 initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
-                    clientSecret = "cs_test_123_secret_abc",
+                    checkoutSessionResponse = checkoutSessionResponse,
                 ),
                 paymentSheetConfiguration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
@@ -4381,7 +4353,6 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     private fun runScenario(
-        checkoutSessionRepository: CheckoutSessionRepository = FakeCheckoutSessionRepository(),
         block: suspend Scenario.() -> Unit
     ) {
         val testDispatcher = UnconfinedTestDispatcher()
@@ -4396,7 +4367,6 @@ internal class DefaultPaymentElementLoaderTest {
             testDispatcher = testDispatcher,
             eventReporter = eventReporter,
             prefsRepository = prefsRepository,
-            checkoutSessionRepository = checkoutSessionRepository,
             paymentMethodTypeCaptor = paymentMethodTypeCaptor,
         ).apply {
             runTest {
@@ -4415,7 +4385,6 @@ internal class DefaultPaymentElementLoaderTest {
         val testDispatcher: TestDispatcher,
         val eventReporter: FakeLoadingEventReporter,
         val prefsRepository: FakePrefsRepository,
-        val checkoutSessionRepository: CheckoutSessionRepository,
         val paymentMethodTypeCaptor: ArgumentCaptor<List<PaymentMethod.Type>>,
     )
 
@@ -4497,9 +4466,7 @@ internal class DefaultPaymentElementLoaderTest {
             paymentConfiguration = { PaymentConfiguration(publishableKey = if (isLiveMode) "pk_live" else "pk_test") },
             paymentMethodFilter = paymentMethodFilter,
             cardFundingFilterFactory = PaymentSheetCardFundingFilter.Factory(),
-            checkoutSessionLoader = CheckoutSessionLoader(
-                checkoutSessionRepository = checkoutSessionRepository,
-            ),
+            checkoutSessionLoader = CheckoutSessionLoader(),
             elementsSessionLoader = ElementsSessionLoader(
                 elementsSessionRepository = elementsSessionRepository,
                 errorReporter = errorReporter,

@@ -6,7 +6,6 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
@@ -18,19 +17,15 @@ internal data class SessionResult(
 )
 
 /**
- * Loads session data via [CheckoutSessionRepository].
+ * Extracts session data from the [CheckoutSessionResponse] already loaded during [Checkout.configure].
  *
  * The checkout session init response contains the elements session and customer data.
  */
-internal class CheckoutSessionLoader @Inject constructor(
-    private val checkoutSessionRepository: CheckoutSessionRepository,
-) {
-    suspend operator fun invoke(
+internal class CheckoutSessionLoader @Inject constructor() {
+    operator fun invoke(
         initializationMode: PaymentElementLoader.InitializationMode.CheckoutSession,
     ): SessionResult {
-        val checkoutSession = checkoutSessionRepository.init(
-            sessionId = initializationMode.id,
-        ).getOrThrow()
+        val checkoutSession = initializationMode.checkoutSessionResponse
 
         val elementsSession = checkoutSession.elementsSession
             ?: throw IllegalStateException("CheckoutSession init response missing elements_session")
