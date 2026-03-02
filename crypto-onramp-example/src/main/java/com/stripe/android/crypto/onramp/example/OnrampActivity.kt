@@ -93,7 +93,7 @@ internal class OnrampActivity : ComponentActivity() {
     private lateinit var onrampPresenter: OnrampCoordinator.Presenter
 
     private val viewModel: OnrampViewModel by viewModels {
-        OnrampViewModel.Factory(application)
+        OnrampViewModel.Factory()
     }
 
     @Suppress("LongMethod")
