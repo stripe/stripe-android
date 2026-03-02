@@ -45,7 +45,7 @@ class OnrampPresenterCoordinatorTest {
         testScope.testScheduler.advanceUntilIdle()
 
         // Verify startCheckout was called
-        verify(interactor).startCheckout(onrampSessionId, onrampSessionClientSecretProvider)
+        verify(interactor).startCheckout(onrampSessionId)
 
         // Simulate the interactor emitting a completed checkout state (this will trigger the observer)
         onrampStateFlow.value = OnrampState(
@@ -98,7 +98,8 @@ class OnrampPresenterCoordinatorTest {
             lifecycleOwner = lifecycleOwner,
             activity = activity,
             onrampCallbacks = callbacks,
-            coroutineScope = testScope
+            coroutineScope = testScope,
+            onrampCallbackIdentifier = DEFAULT_ONRAMP_INSTANCE_KEY
         )
     }
 

@@ -46,7 +46,6 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 ) {
     private val onrampCallbacksState: OnrampCallbacks.State
         get() = OnrampCallbackReferences[onrampCallbackIdentifier] ?: onrampCallbacks.build()
-
     private val linkControllerState = linkController.state(activity)
 
     private val linkPresenter = linkController.createPresenter(
@@ -107,6 +106,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                 }
             }
         )
+
     }
 
     fun verifyIdentity() {
@@ -252,12 +252,14 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             }
             is InternalPaymentResult.Canceled -> {
                 // User canceled the next action
+                interactor.clearPendingCheckout()
                 onrampCallbacksState.checkoutCallback.onResult(
                     OnrampCheckoutResult.Canceled()
                 )
             }
             is InternalPaymentResult.Failed -> {
                 // Next action failed
+                interactor.clearPendingCheckout()
                 onrampCallbacksState.checkoutCallback.onResult(
                     OnrampCheckoutResult.Failed(paymentResult.throwable)
                 )

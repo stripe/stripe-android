@@ -67,7 +67,9 @@ class OnrampInteractorTest {
         application = RuntimeEnvironment.getApplication(),
         linkController = linkController,
         cryptoApiRepository = cryptoApiRepository,
-        analyticsServiceFactory = analyticsServiceFactory
+        analyticsServiceFactory = analyticsServiceFactory,
+        checkoutHandler = OnrampSessionClientSecretProvider { "test_secret" },
+        savedStateHandle = androidx.lifecycle.SavedStateHandle()
     )
 
     @Test
