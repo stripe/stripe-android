@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,12 +15,18 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkout.CheckoutSession
@@ -52,6 +59,7 @@ class CheckoutPlaygroundActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
 
         val checkoutState = getCheckoutState(savedInstanceState)
         if (checkoutState == null) {
@@ -82,8 +90,26 @@ class CheckoutPlaygroundActivity : AppCompatActivity() {
 fun CheckoutScreen(checkout: Checkout) {
     val checkoutSession by checkout.checkoutSession.collectAsState()
 
+    var discountCode by rememberSaveable { mutableStateOf("") }
+
     PlaygroundTheme(
         content = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(PADDING),
+            ) {
+                OutlinedTextField(
+                    value = discountCode,
+                    onValueChange = { discountCode = it },
+                    label = { Text("Discount code") },
+                    singleLine = true,
+                    modifier = Modifier.weight(1f),
+                )
+                Button(onClick = { }) {
+                    Text("Apply")
+                }
+            }
         },
         bottomBarContent = {
             TotalSummary(checkoutSession)
