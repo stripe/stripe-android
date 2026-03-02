@@ -36,7 +36,7 @@ plugins {
     id 'com.google.dagger.hilt.android' version '2.58' apply false
 }
 
-apply plugin: "io.gitlab.arturbosch.detekt"
+apply plugin: "dev.detekt"
 
 allprojects {
     group = GROUP

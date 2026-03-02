@@ -75,7 +75,7 @@ workflows:
       - script@1:
           timeout: 1200
           inputs:
-            - content: ./gradlew ktlint detekt lintRelease apiCheck verifyReleaseResources
+            - content: ./gradlew detekt lintRelease apiCheck verifyReleaseResources
   test:
     envs:
       - opts:
