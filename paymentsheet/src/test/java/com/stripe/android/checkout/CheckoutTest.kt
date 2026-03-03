@@ -13,6 +13,7 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.testing.PaymentConfigurationTestRule
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -73,15 +74,17 @@ class CheckoutTest {
                 response.testBodyFromFile("checkout-session-apply-discount.json")
             }
 
-            assertThat(checkout.checkoutSession.value.totalSummary).isNull()
+            checkout.checkoutSession.test {
+                assertThat(awaitItem().totalSummary).isNull()
 
-            val result = checkout.applyPromotionCode("10OFF")
-            assertThat(result.isSuccess).isTrue()
+                backgroundScope.launch { checkout.applyPromotionCode("10OFF") }
 
-            val totalSummary = checkout.checkoutSession.value.totalSummary
-            assertThat(totalSummary).isNotNull()
-            assertThat(totalSummary!!.discountAmounts).hasSize(1)
-            assertThat(totalSummary.discountAmounts[0].displayName).isEqualTo("10OFF")
+                val updated = awaitItem()
+                val totalSummary = updated.totalSummary
+                assertThat(totalSummary).isNotNull()
+                assertThat(totalSummary!!.discountAmounts).hasSize(1)
+                assertThat(totalSummary.discountAmounts[0].displayName).isEqualTo("10OFF")
+            }
         }
     }
 
@@ -97,12 +100,15 @@ class CheckoutTest {
                 response.setBody("""{"error": {"message": "Invalid promotion code"}}""")
             }
 
-            val initial = checkout.checkoutSession.value
+            checkout.checkoutSession.test {
+                val initial = awaitItem()
 
-            val result = checkout.applyPromotionCode("INVALID")
-            assertThat(result.isFailure).isTrue()
+                val result = checkout.applyPromotionCode("INVALID")
+                assertThat(result.isFailure).isTrue()
 
-            assertThat(checkout.checkoutSession.value).isEqualTo(initial)
+                expectNoEvents()
+                assertThat(checkout.checkoutSession.value).isEqualTo(initial)
+            }
         }
     }
 
@@ -118,8 +124,14 @@ class CheckoutTest {
                 response.testBodyFromFile("checkout-session-apply-discount.json")
             }
 
-            val result = checkout.applyPromotionCode("  10OFF  ")
-            assertThat(result.isSuccess).isTrue()
+            checkout.checkoutSession.test {
+                assertThat(awaitItem().totalSummary).isNull()
+
+                backgroundScope.launch { checkout.applyPromotionCode("  10OFF  ") }
+
+                val updated = awaitItem()
+                assertThat(updated.totalSummary).isNotNull()
+            }
         }
     }
 

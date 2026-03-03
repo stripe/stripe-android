@@ -24,6 +24,9 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.stripe.android.checkout.Checkout
@@ -67,7 +70,7 @@ class CheckoutPlaygroundActivity : AppCompatActivity() {
 @Composable
 private fun CheckoutScreen(checkout: Checkout, viewModel: CheckoutPlaygroundViewModel) {
     val checkoutSession by checkout.checkoutSession.collectAsState()
-    val promotionCode by viewModel.promotionCode.collectAsState()
+    var promotionCode by rememberSaveable { mutableStateOf("") }
 
     PlaygroundTheme(
         content = {
@@ -78,13 +81,13 @@ private fun CheckoutScreen(checkout: Checkout, viewModel: CheckoutPlaygroundView
             ) {
                 OutlinedTextField(
                     value = promotionCode,
-                    onValueChange = { viewModel.setPromotionCode(it) },
+                    onValueChange = { promotionCode = it },
                     label = { Text("Promotion code") },
                     singleLine = true,
                     modifier = Modifier.weight(1f),
                 )
                 Button(
-                    onClick = { viewModel.applyPromotionCode() },
+                    onClick = { viewModel.applyPromotionCode(promotionCode) },
                 ) {
                     Text("Apply")
                 }
