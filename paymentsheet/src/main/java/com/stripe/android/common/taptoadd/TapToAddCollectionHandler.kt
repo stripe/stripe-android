@@ -5,8 +5,9 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodAccess
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.TapToAddPreview
@@ -88,9 +89,10 @@ internal class DefaultTapToAddCollectionHandler(
     override suspend fun collect(
         metadata: PaymentMethodMetadata
     ): TapToAddCollectionHandler.CollectionState = runCatching {
-        val customerMetadata = metadata.customerMetadata
+        val customerInfo = (metadata.customerMetadata?.savedPaymentMethodAccess
+            as? SavedPaymentMethodAccess.Customer)?.info
 
-        if (customerMetadata == null) {
+        if (customerInfo == null) {
             val exception = IllegalStateException("Attempted to collect with tap to add without a customer")
 
             return@runCatching TapToAddCollectionHandler.CollectionState.FailedCollection(
@@ -121,7 +123,7 @@ internal class DefaultTapToAddCollectionHandler(
         when (val result = callback.createCardPresentSetupIntent()) {
             is CreateIntentResult.Success -> {
                 setUxConfiguration()
-                collectWithIntent(result.clientSecret, metadata, customerMetadata)
+                collectWithIntent(result.clientSecret, metadata, customerInfo)
             }
             is CreateIntentResult.Failure -> {
                 TapToAddCollectionHandler.CollectionState.FailedCollection(
@@ -147,12 +149,12 @@ internal class DefaultTapToAddCollectionHandler(
     private suspend fun collectWithIntent(
         clientSecret: String,
         metadata: PaymentMethodMetadata,
-        customerMetadata: CustomerMetadata,
+        customerInfo: CustomerRepository.CustomerInfo,
     ): TapToAddCollectionHandler.CollectionState {
         val setupIntent = retrieveSetupIntent(clientSecret)
         val setupIntentWithAttachedPaymentMethod = collectPaymentMethod(setupIntent, metadata)
         val confirmedIntent = confirmSetupIntent(setupIntentWithAttachedPaymentMethod)
-        val paymentMethod = fetchPaymentMethod(confirmedIntent, customerMetadata)
+        val paymentMethod = fetchPaymentMethod(confirmedIntent, customerInfo)
 
         return TapToAddCollectionHandler.CollectionState.Collected(paymentMethod)
     }
@@ -238,7 +240,7 @@ internal class DefaultTapToAddCollectionHandler(
 
     private suspend fun fetchPaymentMethod(
         intent: SetupIntent,
-        customerMetadata: CustomerMetadata,
+        customerInfo: CustomerRepository.CustomerInfo,
     ): PaymentMethod {
         val paymentMethodDetails = intent.latestAttempt?.paymentMethodDetails
         val presentDetails = paymentMethodDetails?.cardPresentDetails
@@ -257,11 +259,11 @@ internal class DefaultTapToAddCollectionHandler(
             }
 
         return stripeRepository.retrieveCustomerPaymentMethod(
-            customerId = customerMetadata.id,
+            customerId = customerInfo.id,
             paymentMethodId = generatedCardId,
             productUsageTokens = productUsage,
             requestOptions = ApiRequest.Options(
-                apiKey = customerMetadata.ephemeralKeySecret,
+                apiKey = customerInfo.ephemeralKeySecret,
                 stripeAccount = paymentConfiguration.get().stripeAccountId,
             ),
         ).getOrThrow()
