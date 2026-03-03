@@ -823,10 +823,193 @@ internal class ElementsSessionRepositoryTest {
         assertThat(params.containsKey("external_payment_methods")).isFalse()
     }
 
-    private fun createRepository() = RealElementsSessionRepository(
+    @Test
+    fun `Verify customer session client secret not in params when null`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any())).thenReturn(
+            StripeResponse(200, ElementsSessionFixtures.DEFERRED_INTENT_JSON.toString(), emptyMap())
+        )
+
+        createRepository().get(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = "client_secret",
+            ),
+            customer = null,
+            externalPaymentMethods = emptyList(),
+            customPaymentMethods = emptyList(),
+            savedPaymentMethodSelectionId = null,
+            countryOverride = null,
+        )
+
+        verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
+        val request = requestCaptor.firstValue as ApiRequest
+        val params = requireNotNull(request.params)
+        assertThat(params.containsKey("customer_session_client_secret")).isFalse()
+    }
+
+    @Test
+    fun `Verify legacy customer ephemeral key not in params when null`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any())).thenReturn(
+            StripeResponse(200, ElementsSessionFixtures.DEFERRED_INTENT_JSON.toString(), emptyMap())
+        )
+
+        createRepository().get(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = "client_secret",
+            ),
+            customer = null,
+            externalPaymentMethods = emptyList(),
+            customPaymentMethods = emptyList(),
+            savedPaymentMethodSelectionId = null,
+            countryOverride = null,
+        )
+
+        verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
+        val request = requestCaptor.firstValue as ApiRequest
+        val params = requireNotNull(request.params)
+        assertThat(params.containsKey("legacy_customer_ephemeral_key")).isFalse()
+    }
+
+    @Test
+    fun `Verify seller details not in params when not provided`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any())).thenReturn(
+            StripeResponse(200, ElementsSessionFixtures.DEFERRED_INTENT_JSON.toString(), emptyMap())
+        )
+
+        createRepository().get(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 1000,
+                        currency = "usd",
+                    ),
+                )
+            ),
+            customer = null,
+            externalPaymentMethods = emptyList(),
+            customPaymentMethods = emptyList(),
+            savedPaymentMethodSelectionId = null,
+            countryOverride = null,
+        )
+
+        verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
+        val request = requestCaptor.firstValue as ApiRequest
+        val params = requireNotNull(request.params)
+        assertThat(params.containsKey("seller_details[network_id]")).isFalse()
+        assertThat(params.containsKey("seller_details[external_id]")).isFalse()
+    }
+
+    @Test
+    fun `Verify client_default_payment_method not in params when not provided`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any())).thenReturn(
+            StripeResponse(200, ElementsSessionFixtures.DEFERRED_INTENT_JSON.toString(), emptyMap())
+        )
+
+        createRepository().get(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = "client_secret",
+            ),
+            customer = null,
+            externalPaymentMethods = emptyList(),
+            customPaymentMethods = emptyList(),
+            savedPaymentMethodSelectionId = null,
+            countryOverride = null,
+        )
+
+        verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
+        val request = requestCaptor.firstValue as ApiRequest
+        val params = requireNotNull(request.params)
+        assertThat(params.containsKey("client_default_payment_method")).isFalse()
+    }
+
+    @Test
+    fun `User key sends valid request for payment intents`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any())).thenReturn(
+            StripeResponse(200, ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString(), emptyMap())
+        )
+
+        createRepository(publishableKey = "uk_12345").get(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = "client_secret",
+            ),
+            customer = null,
+            externalPaymentMethods = emptyList(),
+            customPaymentMethods = emptyList(),
+            savedPaymentMethodSelectionId = null,
+            countryOverride = null,
+        )
+
+        verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
+        val request = requestCaptor.firstValue as ApiRequest
+        val params = requireNotNull(request.params)
+        assertThat(request.baseUrl).isEqualTo("https://api.stripe.com/v1/elements/sessions")
+        assertThat(params["type"]).isEqualTo("payment_intent")
+        assertThat(params["client_secret"]).isEqualTo("client_secret")
+        assertThat(params["mobile_app_id"]).isEqualTo(APP_ID)
+    }
+
+    @Test
+    fun `User key sends valid request for setup intents`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any())).thenReturn(
+            StripeResponse(200, ElementsSessionFixtures.DEFERRED_INTENT_JSON.toString(), emptyMap())
+        )
+
+        createRepository(publishableKey = "uk_12345").get(
+            initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(
+                clientSecret = "client_secret",
+            ),
+            customer = null,
+            externalPaymentMethods = emptyList(),
+            customPaymentMethods = emptyList(),
+            savedPaymentMethodSelectionId = null,
+            countryOverride = null,
+        )
+
+        verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
+        val request = requestCaptor.firstValue as ApiRequest
+        val params = requireNotNull(request.params)
+        assertThat(request.baseUrl).isEqualTo("https://api.stripe.com/v1/elements/sessions")
+        assertThat(params["type"]).isEqualTo("setup_intent")
+        assertThat(params["client_secret"]).isEqualTo("client_secret")
+        assertThat(params["mobile_app_id"]).isEqualTo(APP_ID)
+    }
+
+    @Test
+    fun `User key sends valid request for deferred intents`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any())).thenReturn(
+            StripeResponse(200, ElementsSessionFixtures.DEFERRED_INTENT_JSON.toString(), emptyMap())
+        )
+
+        createRepository(publishableKey = "uk_12345").get(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 2000,
+                        currency = "usd",
+                    ),
+                    paymentMethodTypes = listOf("card"),
+                )
+            ),
+            customer = null,
+            externalPaymentMethods = emptyList(),
+            customPaymentMethods = emptyList(),
+            savedPaymentMethodSelectionId = null,
+            countryOverride = null,
+        )
+
+        verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
+        val request = requestCaptor.firstValue as ApiRequest
+        val params = requireNotNull(request.params)
+        assertThat(request.baseUrl).isEqualTo("https://api.stripe.com/v1/elements/sessions")
+        assertThat(params["type"]).isEqualTo("deferred_intent")
+        assertThat(params["mobile_app_id"]).isEqualTo(APP_ID)
+    }
+
+    private fun createRepository(
+        publishableKey: String = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+    ) = RealElementsSessionRepository(
         stripeNetworkClient,
         stripeRepository,
-        { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
+        { PaymentConfiguration(publishableKey) },
         testDispatcher,
         { MOBILE_SESSION_ID },
         appId = APP_ID
