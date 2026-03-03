@@ -12,7 +12,7 @@ import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.StripeNetworkClientModule
 import com.stripe.android.core.networking.StripeNetworkClient
-import com.stripe.android.crypto.onramp.OnrampSessionClientSecretProvider
+import com.stripe.android.crypto.onramp.model.OnrampSessionClientSecretProvider
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsService
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsServiceImpl
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks

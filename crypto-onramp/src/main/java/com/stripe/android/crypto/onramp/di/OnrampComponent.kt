@@ -30,7 +30,7 @@ internal interface OnrampComponent {
         fun build(
             @BindsInstance application: Application,
             @BindsInstance savedStateHandle: SavedStateHandle,
-            @BindsInstance onrampCallbacks: OnrampCallbacks,
+            @BindsInstance onrampCallbacks: OnrampCallbacks
         ): OnrampComponent
     }
 }

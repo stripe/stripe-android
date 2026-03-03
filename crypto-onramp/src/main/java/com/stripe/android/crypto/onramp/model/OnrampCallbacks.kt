@@ -1,7 +1,6 @@
 package com.stripe.android.crypto.onramp.model
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.crypto.onramp.OnrampSessionClientSecretProvider
 
 /**
  * Container for all callbacks required by the Onramp coordinator.
