@@ -193,7 +193,7 @@ internal class CardNumberControllerTest {
             assertThat(awaitItem() as TextFieldIcon.CardBrandChoice)
                 .isEqualTo(
                     TextFieldIcon.CardBrandChoice(
-                        title = R.string.stripe_card_brand_choice_selection_header.resolvableString,
+                        message = R.string.stripe_card_brand_choice_selection_header.resolvableString,
                         currentItem = TextFieldIcon.CardBrandChoice.Item(
                             id = CardBrand.Unknown.code,
                             label = R.string.stripe_card_brand_choice_no_selection.resolvableString,
@@ -211,7 +211,8 @@ internal class CardNumberControllerTest {
                                 icon = CardBrand.Visa.icon
                             ),
                         ),
-                        hide = false
+                        hide = false,
+                        hasMadeSelection = false
                     )
                 )
         }
@@ -259,7 +260,7 @@ internal class CardNumberControllerTest {
             assertThat(awaitItem() as TextFieldIcon.CardBrandChoice)
                 .isEqualTo(
                     TextFieldIcon.CardBrandChoice(
-                        title = R.string.stripe_card_brand_choice_selection_header.resolvableString,
+                        message = R.string.stripe_card_brand_choice_selection_header.resolvableString,
                         currentItem = TextFieldIcon.CardBrandChoice.Item(
                             id = CardBrand.CartesBancaires.code,
                             label = "Cartes Bancaires".resolvableString,
@@ -277,7 +278,8 @@ internal class CardNumberControllerTest {
                                 icon = CardBrand.Visa.icon
                             ),
                         ),
-                        hide = false
+                        hide = false,
+                        hasMadeSelection = false
                     )
                 )
         }
@@ -306,7 +308,7 @@ internal class CardNumberControllerTest {
             assertThat(awaitItem() as TextFieldIcon.CardBrandChoice)
                 .isEqualTo(
                     TextFieldIcon.CardBrandChoice(
-                        title = R.string.stripe_card_brand_choice_selection_header.resolvableString,
+                        message = R.string.stripe_card_brand_choice_selection_header.resolvableString,
                         currentItem = TextFieldIcon.CardBrandChoice.Item(
                             id = CardBrand.CartesBancaires.code,
                             label = "Cartes Bancaires".resolvableString,
@@ -324,7 +326,8 @@ internal class CardNumberControllerTest {
                                 icon = CardBrand.Visa.icon
                             ),
                         ),
-                        hide = false
+                        hide = false,
+                        hasMadeSelection = false
                     )
                 )
         }
@@ -356,7 +359,7 @@ internal class CardNumberControllerTest {
             assertThat(awaitItem() as TextFieldIcon.CardBrandChoice)
                 .isEqualTo(
                     TextFieldIcon.CardBrandChoice(
-                        title = R.string.stripe_card_brand_choice_selection_header.resolvableString,
+                        message = R.string.stripe_card_brand_choice_selection_header.resolvableString,
                         currentItem = TextFieldIcon.CardBrandChoice.Item(
                             id = CardBrand.CartesBancaires.code,
                             label = "Cartes Bancaires".resolvableString,
@@ -374,7 +377,8 @@ internal class CardNumberControllerTest {
                                 icon = CardBrand.Visa.icon
                             ),
                         ),
-                        hide = false
+                        hide = false,
+                        hasMadeSelection = false
                     )
                 )
         }
