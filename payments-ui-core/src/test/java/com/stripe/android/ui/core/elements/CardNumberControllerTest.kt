@@ -279,7 +279,7 @@ internal class CardNumberControllerTest {
                             ),
                         ),
                         hide = false,
-                        hasMadeSelection = false
+                        hasMadeSelection = true
                     )
                 )
         }
@@ -327,7 +327,7 @@ internal class CardNumberControllerTest {
                             ),
                         ),
                         hide = false,
-                        hasMadeSelection = false
+                        hasMadeSelection = true
                     )
                 )
         }
@@ -378,7 +378,7 @@ internal class CardNumberControllerTest {
                             ),
                         ),
                         hide = false,
-                        hasMadeSelection = false
+                        hasMadeSelection = true
                     )
                 )
         }
