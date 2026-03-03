@@ -2,7 +2,6 @@ package com.stripe.android.crypto.onramp.di
 
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.crypto.onramp.OnrampSessionClientSecretProvider
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 
 /**
@@ -23,14 +22,12 @@ internal object OnrampComponentHolder {
         application: Application,
         savedStateHandle: SavedStateHandle,
         onrampCallbacks: OnrampCallbacks,
-        checkoutHandler: OnrampSessionClientSecretProvider
     ): OnrampComponent {
         return component ?: synchronized(this) {
             component ?: buildComponent(
                 application,
                 savedStateHandle,
                 onrampCallbacks,
-                checkoutHandler
             ).also { component = it }
         }
     }
@@ -45,7 +42,6 @@ internal object OnrampComponentHolder {
         application: Application,
         savedStateHandle: SavedStateHandle,
         onrampCallbacks: OnrampCallbacks,
-        checkoutHandler: OnrampSessionClientSecretProvider
     ): OnrampComponent {
         return DaggerOnrampComponent
             .factory()
@@ -53,7 +49,6 @@ internal object OnrampComponentHolder {
                 application = application,
                 savedStateHandle = savedStateHandle,
                 onrampCallbacks = onrampCallbacks,
-                checkoutHandler = checkoutHandler
             )
     }
 }
