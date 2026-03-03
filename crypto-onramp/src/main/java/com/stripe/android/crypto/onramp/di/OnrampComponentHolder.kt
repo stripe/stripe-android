@@ -2,7 +2,6 @@ package com.stripe.android.crypto.onramp.di
 
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 
 /**
  * A singleton holder for the [OnrampComponent], ensuring it is initialized only once and
@@ -21,34 +20,24 @@ internal object OnrampComponentHolder {
     fun getOrCreate(
         application: Application,
         savedStateHandle: SavedStateHandle,
-        onrampCallbacks: OnrampCallbacks,
     ): OnrampComponent {
         return component ?: synchronized(this) {
             component ?: buildComponent(
                 application,
                 savedStateHandle,
-                onrampCallbacks,
             ).also { component = it }
-        }
-    }
-
-    fun clear() {
-        synchronized(this) {
-            component = null
         }
     }
 
     private fun buildComponent(
         application: Application,
         savedStateHandle: SavedStateHandle,
-        onrampCallbacks: OnrampCallbacks,
     ): OnrampComponent {
         return DaggerOnrampComponent
             .factory()
             .build(
                 application = application,
                 savedStateHandle = savedStateHandle,
-                onrampCallbacks = onrampCallbacks,
             )
     }
 }

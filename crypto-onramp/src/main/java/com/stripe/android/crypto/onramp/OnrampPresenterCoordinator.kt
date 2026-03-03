@@ -40,12 +40,12 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     linkController: LinkController,
     lifecycleOwner: LifecycleOwner,
     private val activity: ComponentActivity,
-    private val onrampCallbacks: OnrampCallbacks,
     private val coroutineScope: CoroutineScope,
     private val onrampCallbackIdentifier: String
 ) {
     private val onrampCallbacksState: OnrampCallbacks.State
-        get() = OnrampCallbackReferences[onrampCallbackIdentifier] ?: onrampCallbacks.build()
+        get() = OnrampCallbackReferences[onrampCallbackIdentifier]
+            ?: error("OnrampCallbackReferences not registered for key: $onrampCallbackIdentifier")
     private val linkControllerState = linkController.state(activity)
 
     private val linkPresenter = linkController.createPresenter(

@@ -92,12 +92,13 @@ class OnrampPresenterCoordinatorTest {
             .verifyKycCallback {}
             .onrampSessionClientSecretProvider(onrampSessionClientSecretProvider)
 
+        OnrampCallbackReferences[DEFAULT_ONRAMP_INSTANCE_KEY] = callbacks.build()
+
         return OnrampPresenterCoordinator(
             linkController = linkController,
             interactor = interactor,
             lifecycleOwner = lifecycleOwner,
             activity = activity,
-            onrampCallbacks = callbacks,
             coroutineScope = testScope,
             onrampCallbackIdentifier = DEFAULT_ONRAMP_INSTANCE_KEY
         )
