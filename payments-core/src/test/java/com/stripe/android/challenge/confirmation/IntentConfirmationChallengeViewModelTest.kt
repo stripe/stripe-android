@@ -221,6 +221,20 @@ internal class IntentConfirmationChallengeViewModelTest {
     }
 
     @Test
+    fun `when closeClicked is called, analytics cancel is reported`() = testScenario {
+        viewModel.result.test {
+            viewModel.closeClicked()
+            awaitItem()
+            ensureAllEventsConsumed()
+        }
+
+        assertThat(analyticsReporter.calls).hasSize(1)
+        assertThat(analyticsReporter.calls.last()).isEqualTo(
+            FakeIntentConfirmationChallengeAnalyticsEventReporter.Call.Cancel
+        )
+    }
+
+    @Test
     fun `when onStart is called, analytics start is reported`() = testScenario {
         val lifecycleOwner = object : LifecycleOwner {
             private val registry = LifecycleRegistry(this)
