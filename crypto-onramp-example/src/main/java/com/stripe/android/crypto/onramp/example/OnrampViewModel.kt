@@ -3,6 +3,7 @@ package com.stripe.android.crypto.onramp.example
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.Parcel
 import android.os.Parcelable
 import androidx.compose.ui.graphics.Color
 import androidx.core.content.edit
@@ -47,7 +48,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.parcelize.Parceler
 import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.TypeParceler
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
@@ -73,10 +76,8 @@ internal class OnrampViewModel(
 
     private val testBackendRepository = TestBackendRepository()
 
-    private val savedUiStateSnapshot get(): OnrampUiStateSnapshot? =
-        savedStateHandle.get<OnrampUiStateSnapshot>(KEY_UI_SNAPSHOT)
-
-    private val _uiState = MutableStateFlow(savedUiStateSnapshot?.toUiState()?: OnrampUiState())
+    private val savedUIState get() = savedStateHandle.get<OnrampUiState>(KEY_UI_STATE)
+    private val _uiState = MutableStateFlow(savedUIState ?: OnrampUiState())
     val uiState: StateFlow<OnrampUiState> = _uiState.asStateFlow()
 
     private val _message = MutableStateFlow<String?>(null)
@@ -155,7 +156,7 @@ internal class OnrampViewModel(
 
             onrampCoordinator.configure(configuration = configuration)
 
-            if (savedUiStateSnapshot == null) {
+            if (savedUIState == null) {
                 loadUserData()?.let { data ->
                     _uiState.update {
                         it.copy(email = data.email, authToken = data.token, screen = Screen.SeamlessSignIn)
@@ -166,7 +167,7 @@ internal class OnrampViewModel(
             }
 
             _uiState.collect { state ->
-                savedStateHandle[KEY_UI_SNAPSHOT] = state.toSnapshot()
+                savedStateHandle[KEY_UI_STATE] = state
             }
         }
     }
@@ -787,71 +788,26 @@ internal class OnrampViewModel(
             return OnrampViewModel(application, extras.createSavedStateHandle()) as T
         }
     }
-
-    private fun OnrampUiState.toSnapshot(): OnrampUiStateSnapshot {
-        return OnrampUiStateSnapshot(
-            screenName = screen.name,
-            email = email,
-            linkAuthIntentId = linkAuthIntentId,
-            consentedLinkAuthIntentIds = ArrayList(consentedLinkAuthIntentIds),
-
-            selectedPaymentTypeName = selectedPaymentData?.type?.name,
-            selectedPaymentLabel = selectedPaymentData?.label,
-            selectedPaymentSublabel = selectedPaymentData?.sublabel,
-
-            cryptoPaymentToken = cryptoPaymentToken,
-            walletAddress = walletAddress,
-            networkName = network?.name,
-            authToken = authToken,
-
-            onrampSessionId = onrampSession?.id,
-            onrampSessionStatus = onrampSession?.status,
-            onrampSessionSourceTotalAmount = onrampSession?.sourceTotalAmount,
-            onrampSessionPaymentMethod = onrampSession?.paymentMethod,
-
-            loadingMessage = loadingMessage,
-            settlementSpeedName = settlementSpeed.name,
-            googlePayIsReady = googlePayIsReady
-        )
-    }
-
-    private fun OnrampUiStateSnapshot.toUiState(): OnrampUiState {
-        return OnrampUiState(
-            screen = Screen.valueOf(screenName),
-            email = email,
-            linkAuthIntentId = linkAuthIntentId,
-            consentedLinkAuthIntentIds = consentedLinkAuthIntentIds.toList(),
-
-            // Not restorable; you rebuild later when SDK provides it again.
-            selectedPaymentData = null,
-
-            cryptoPaymentToken = cryptoPaymentToken,
-            walletAddress = walletAddress,
-            network = networkName?.let(CryptoNetwork::valueOf),
-            authToken = authToken,
-            onrampSession = null,
-            loadingMessage = loadingMessage,
-            settlementSpeed = SettlementSpeed.valueOf(settlementSpeedName),
-            googlePayIsReady = googlePayIsReady
-        )
-    }
 }
 
+@Parcelize
 data class OnrampUiState(
     val screen: Screen = Screen.Loading,
     val email: String = "",
     val linkAuthIntentId: String? = null,
     val consentedLinkAuthIntentIds: List<String> = emptyList(),
+    @TypeParceler<PaymentMethodDisplayData?, NullPaymentMethodDisplayDataParceler>
     val selectedPaymentData: PaymentMethodDisplayData? = null,
     val cryptoPaymentToken: String? = null,
     val walletAddress: String? = null,
     val network: CryptoNetwork? = null,
     val authToken: String? = null,
+    @TypeParceler<OnrampSessionResponse?, NullOnrampSessionResponseParceler>
     val onrampSession: OnrampSessionResponse? = null,
     val loadingMessage: String? = null,
     val settlementSpeed: SettlementSpeed = SettlementSpeed.INSTANT,
     val googlePayIsReady: Boolean = false,
-)
+) : Parcelable
 
 enum class Screen {
     SeamlessSignIn,
@@ -870,8 +826,6 @@ data class CheckoutEvent(
 
 data class AuthorizeEvent(val linkAuthIntentId: String)
 
-data object UpdateAddressEvent
-
 @Serializable
 data class OnrampUserData(
     val email: String,
@@ -880,26 +834,14 @@ data class OnrampUserData(
 
 internal const val ONRAMP_PREFS_NAME = "onramp_prefs"
 
-private const val KEY_UI_SNAPSHOT = "onramp_ui_snapshot"
+private const val KEY_UI_STATE = "onramp_ui_state"
 
-@Parcelize
-data class OnrampUiStateSnapshot(
-    val screenName: String,
-    val email: String,
-    val linkAuthIntentId: String?,
-    val consentedLinkAuthIntentIds: ArrayList<String>,
-    val selectedPaymentTypeName: String?,
-    val selectedPaymentLabel: String?,
-    val selectedPaymentSublabel: String?,
-    val cryptoPaymentToken: String?,
-    val walletAddress: String?,
-    val networkName: String?,
-    val authToken: String?,
-    val onrampSessionId: String?,
-    val onrampSessionStatus: String?,
-    val onrampSessionSourceTotalAmount: String?,
-    val onrampSessionPaymentMethod: String?,
-    val loadingMessage: String?,
-    val settlementSpeedName: String,
-    val googlePayIsReady: Boolean,
-) : Parcelable
+private object NullPaymentMethodDisplayDataParceler : Parceler<PaymentMethodDisplayData?> {
+    override fun create(parcel: Parcel): PaymentMethodDisplayData? = null
+    override fun PaymentMethodDisplayData?.write(parcel: Parcel, flags: Int) { /* no-op */ }
+}
+
+private object NullOnrampSessionResponseParceler : Parceler<OnrampSessionResponse?> {
+    override fun create(parcel: Parcel): OnrampSessionResponse? = null
+    override fun OnrampSessionResponse?.write(parcel: Parcel, flags: Int) { /* no-op */ }
+}
