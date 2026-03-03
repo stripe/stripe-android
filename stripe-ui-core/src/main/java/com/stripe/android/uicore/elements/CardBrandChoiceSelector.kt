@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -25,6 +26,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -106,7 +108,7 @@ private fun CardBrandChoiceItem(
     Box(
         Modifier
             .clickable(
-                enabled = true,
+                enabled = item.enabled,
                 onClick = { onItemSelected(item) }
             )
             .background(color = backgroundColor)
@@ -126,6 +128,8 @@ private fun CardBrandChoiceItem(
             Image(
                 painter = painterResource(id = item.icon),
                 contentDescription = item.label.resolve(),
+                modifier = Modifier
+                    .alpha(if (item.enabled) 1f else ContentAlpha.disabled)
             )
         }
     }
