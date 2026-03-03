@@ -84,6 +84,7 @@ import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
 import com.stripe.android.crypto.onramp.model.PaymentMethodSelection
+import com.stripe.android.crypto.onramp.rememberOnrampCallbacks
 import com.stripe.android.model.DateOfBirth
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.launch
@@ -129,6 +130,8 @@ internal class OnrampActivity : ComponentActivity() {
         }
 
         setContent {
+            rememberOnrampCallbacks(viewModel.callbacks)
+
             val showAddressModal by viewModel.updateAddressEvent.collectAsStateWithLifecycle()
             val message by viewModel.message.collectAsStateWithLifecycle()
             val snackbarHostState = remember { SnackbarHostState() }

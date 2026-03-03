@@ -9,7 +9,7 @@ import androidx.compose.runtime.LaunchedEffect
 internal const val DEFAULT_ONRAMP_INSTANCE_KEY = "DEFAULT_ONRAMP_INSTANCE_KEY"
 
 @Composable
-fun onrampCallbackAttachment(
+fun rememberOnrampCallbacks(
     callbacks: OnrampCallbacks
 ) {
     val built = remember(callbacks) { callbacks.build() }
