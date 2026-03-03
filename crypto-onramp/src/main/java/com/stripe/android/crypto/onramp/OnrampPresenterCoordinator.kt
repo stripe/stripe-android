@@ -94,9 +94,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         lifecycleOwner.lifecycleScope.launch {
             interactor.state
                 .distinctUntilChangedBy { it.checkoutState }
-                .collect { s ->
-                    s.checkoutState?.let(::handleCheckoutStateChange)
-                }
+                .collect { it.checkoutState?.let(::handleCheckoutStateChange) }
         }
 
         lifecycleOwner.lifecycle.addObserver(

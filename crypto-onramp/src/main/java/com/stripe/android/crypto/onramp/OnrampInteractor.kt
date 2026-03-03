@@ -713,30 +713,14 @@ internal class OnrampInteractor @Inject constructor(
      * through the state StateFlow. The coordinator should observe the checkoutState and react accordingly.
      *
      * @param onrampSessionId The onramp session identifier.
-     * @param checkoutHandler An async closure that calls your backend to perform a checkout.
      */
-    suspend fun startCheckout(
-        onrampSessionId: String
+    suspend fun startCheckout(onrampSessionId: String) {
+        if (_state.value.checkoutState?.status?.inProgress == true) return
 
-    ) {
-        if (_state.value.checkoutState?.status?.inProgress == true) {
-            // Checkout is already in progress - ignore duplicate calls
-            return
-        }
-
-        // Persist checkout intent to SavedStateHandle so it can be resumed after
-        // ViewModel recreation (activity destruction without process death).
-        savedStateHandle[KEY_PENDING_CHECKOUT_SESSION_ID] = onrampSessionId
-        savedStateHandle[KEY_CHECKOUT_CRYPTO_CUSTOMER_ID] = _state.value.cryptoCustomerId
+        savePendingCheckout(onrampSessionId)
 
         _state.update {
-            it.copy(
-                checkoutState = CheckoutState(
-                    status = Status.Processing(
-                        onrampSessionId = onrampSessionId,
-                    )
-                )
-            )
+            it.copy(checkoutState = CheckoutState(Status.Processing(onrampSessionId)))
         }
         analyticsService?.track(
             OnrampAnalyticsEvent.CheckoutStarted(
@@ -744,59 +728,49 @@ internal class OnrampInteractor @Inject constructor(
                 paymentMethodType = _state.value.collectingPaymentMethodType
             )
         )
-        performCheckoutInternal(
-            onrampSessionId = onrampSessionId,
-            isContinuation = false,
-        )
+        performCheckoutInternal(onrampSessionId, isContinuation = false)
     }
 
     /**
      * Continues the checkout flow after PaymentLauncher completes a next action.
-     * This should be called by the coordinator when PaymentLauncher finishes successfully.
+     * Reads the session ID from in-memory state, or falls back to SavedStateHandle
+     * if the process was killed and restored.
      */
     suspend fun continueCheckout() {
-        val currentCheckoutState = _state.value.checkoutState
-        val onrampSessionId = when (val status = currentCheckoutState?.status) {
-            is Status.RequiresNextAction -> status.onrampSessionId
-            else -> {
-                // Fallback to SavedStateHandle for process death recovery
-                val savedSessionId = savedStateHandle.get<String>(KEY_PENDING_CHECKOUT_SESSION_ID)
-                if (savedSessionId != null) {
-                    // Restore cryptoCustomerId from SavedStateHandle if not already in memory
-                    if (_state.value.cryptoCustomerId == null) {
-                        savedStateHandle.get<String>(KEY_CHECKOUT_CRYPTO_CUSTOMER_ID)?.let { savedId ->
-                            _state.update { it.copy(cryptoCustomerId = savedId) }
-                        }
-                    }
-                }
-                savedSessionId
+        val onrampSessionId = resolveOnrampSessionId()
+        if (onrampSessionId == null) {
+            _state.update {
+                it.copy(
+                    checkoutState = CheckoutState(
+                        Status.Completed(OnrampCheckoutResult.Failed(PaymentFailedException()))
+                    )
+                )
             }
+            return
         }
 
-        if (onrampSessionId != null) {
-            _state.update {
-                it.copy(
-                    checkoutState = CheckoutState(
-                        status = Status.Processing(
-                            onrampSessionId = onrampSessionId,
-                        )
-                    )
-                )
-            }
-            performCheckoutInternal(
-                onrampSessionId = onrampSessionId,
-                isContinuation = true,
-            )
-        } else {
-            // No valid session to continue
-            _state.update {
-                it.copy(
-                    checkoutState = CheckoutState(
-                        status = Status.Completed(OnrampCheckoutResult.Failed(PaymentFailedException()))
-                    )
-                )
+        _state.update {
+            it.copy(checkoutState = CheckoutState(Status.Processing(onrampSessionId)))
+        }
+        performCheckoutInternal(onrampSessionId, isContinuation = true)
+    }
+
+    /**
+     * Resolves the onramp session ID from in-memory state, falling back to
+     * SavedStateHandle for process death recovery.
+     */
+    private fun resolveOnrampSessionId(): String? {
+        val status = _state.value.checkoutState?.status
+        if (status is Status.RequiresNextAction) return status.onrampSessionId
+
+        // Process death recovery: restore from SavedStateHandle
+        val savedSessionId = savedStateHandle.get<String>(KEY_PENDING_CHECKOUT_SESSION_ID) ?: return null
+        if (_state.value.cryptoCustomerId == null) {
+            savedStateHandle.get<String>(KEY_CHECKOUT_CRYPTO_CUSTOMER_ID)?.let { savedId ->
+                _state.update { it.copy(cryptoCustomerId = savedId) }
             }
         }
+        return savedSessionId
     }
 
     /**
@@ -856,11 +830,12 @@ internal class OnrampInteractor @Inject constructor(
         }
     }
 
-    /**
-     * Clears any pending checkout state from SavedStateHandle.
-     * Called when checkout is canceled or fails from the presenter side.
-     */
-    fun clearPendingCheckout() {
+    private fun savePendingCheckout(onrampSessionId: String) {
+        savedStateHandle[KEY_PENDING_CHECKOUT_SESSION_ID] = onrampSessionId
+        savedStateHandle[KEY_CHECKOUT_CRYPTO_CUSTOMER_ID] = _state.value.cryptoCustomerId
+    }
+
+    internal fun clearPendingCheckout() {
         savedStateHandle.remove<String>(KEY_PENDING_CHECKOUT_SESSION_ID)
         savedStateHandle.remove<String>(KEY_CHECKOUT_CRYPTO_CUSTOMER_ID)
     }
