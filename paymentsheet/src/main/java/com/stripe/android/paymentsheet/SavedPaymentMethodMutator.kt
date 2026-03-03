@@ -135,7 +135,7 @@ internal class SavedPaymentMethodMutator(
 
     private suspend fun removePaymentMethodInternal(paymentMethodId: String): Result<PaymentMethod> {
         // TODO(samer-stripe): Send 'unexpected_error' here
-        val access = paymentMethodMetadataFlow.value?.customerMetadata?.savedPaymentMethodAccess
+        val customerMetadata = paymentMethodMetadataFlow.value?.customerMetadata
             ?: return Result.failure(
                 IllegalStateException(
                     "Could not remove payment method because CustomerConfiguration was not found! Make sure it is " +
@@ -143,7 +143,7 @@ internal class SavedPaymentMethodMutator(
                 )
             )
 
-        val canRemoveDuplicates = customerStateHolder.canRemoveDuplicate.value
+        val canRemoveDuplicates = customerMetadata.canRemoveDuplicates
         val currentSelection = (selection.value as? PaymentSelection.Saved)?.paymentMethod
         val didRemoveSelectedItem = currentSelection?.id == paymentMethodId
 
@@ -156,7 +156,7 @@ internal class SavedPaymentMethodMutator(
         }
 
         return savedPaymentMethodRepository.detachPaymentMethod(
-            access = access,
+            customerMetadata = customerMetadata,
             paymentMethodId = paymentMethodId,
             canRemoveDuplicates = canRemoveDuplicates,
         )
@@ -202,13 +202,13 @@ internal class SavedPaymentMethodMutator(
     }
 
     internal suspend fun setDefaultPaymentMethod(paymentMethod: PaymentMethod): Result<Unit> {
-        val access = paymentMethodMetadataFlow.value?.customerMetadata?.savedPaymentMethodAccess
+        val customerMetadata = paymentMethodMetadataFlow.value?.customerMetadata
             ?: return Result.failure(
                 IllegalStateException("Unable to set default payment method when customer is null.")
             )
 
         return savedPaymentMethodRepository.setDefaultPaymentMethod(
-            access = access,
+            customerMetadata = customerMetadata,
             paymentMethodId = paymentMethod.id,
         ).onFailure { error ->
             eventReporter.onSetAsDefaultPaymentMethodFailed(
@@ -247,7 +247,7 @@ internal class SavedPaymentMethodMutator(
         onSuccess: (PaymentMethod) -> Unit = {},
     ): Result<PaymentMethod> {
         // TODO(samer-stripe): Send 'unexpected_error' here
-        val access = paymentMethodMetadataFlow.value?.customerMetadata?.savedPaymentMethodAccess
+        val customerMetadata = paymentMethodMetadataFlow.value?.customerMetadata
             ?: return Result.failure(
                 IllegalStateException(
                     "Could not update payment method because CustomerConfiguration was not found! Make sure it is " +
@@ -256,7 +256,7 @@ internal class SavedPaymentMethodMutator(
             )
 
         return savedPaymentMethodRepository.updatePaymentMethod(
-            access = access,
+            customerMetadata = customerMetadata,
             paymentMethodId = paymentMethod.id,
             params = PaymentMethodUpdateParams.createCard(
                 networks = cardUpdateParams.cardBrand?.let {

@@ -19,7 +19,7 @@ import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.confirmation.intent.CallbackNotFoundException
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CreateIntentResult
-import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodAccess
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeErrorReporter
@@ -192,11 +192,16 @@ class TapToAddCollectionHandlerTest {
 
     @Test
     fun `handler returns FailedCollection when using CheckoutSession`() = runScenario {
+        val existingCustomerMetadata = DEFAULT_METADATA.customerMetadata as CustomerMetadata.Customer
         val metadataWithCheckoutSession = DEFAULT_METADATA.copy(
-            customerMetadata = DEFAULT_METADATA.customerMetadata?.copy(
-                savedPaymentMethodAccess = SavedPaymentMethodAccess.CheckoutSession(
-                    sessionId = "cs_123",
-                ),
+            customerMetadata = CustomerMetadata.CheckoutSession(
+                sessionId = "cs_123",
+                isPaymentMethodSetAsDefaultEnabled = existingCustomerMetadata.isPaymentMethodSetAsDefaultEnabled,
+                removePaymentMethod = existingCustomerMetadata.removePaymentMethod,
+                saveConsent = existingCustomerMetadata.saveConsent,
+                canRemoveLastPaymentMethod = existingCustomerMetadata.canRemoveLastPaymentMethod,
+                canRemoveDuplicates = existingCustomerMetadata.canRemoveDuplicates,
+                canUpdateFullPaymentMethodDetails = existingCustomerMetadata.canUpdateFullPaymentMethodDetails,
             ),
         )
 
@@ -208,7 +213,7 @@ class TapToAddCollectionHandlerTest {
 
         assertThat(failed.error).isInstanceOf(IllegalStateException::class.java)
         assertThat(failed.error.message)
-            .isEqualTo("Attempted to collect with tap to add using CheckoutSession")
+            .isEqualTo("Tap to add is not supported for CheckoutSession")
     }
 
     @Test

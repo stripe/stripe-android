@@ -40,7 +40,7 @@ import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssisted
 import com.stripe.android.paymentsheet.cvcrecollection.RecordingCvcRecollectionLauncherFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.FakeBacsMandateConfirmationLauncher
-import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodAccess
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.FakeErrorReporter
@@ -87,7 +87,7 @@ internal object CustomerSheetTestHelper {
             object : IntentConfirmationInterceptor.Factory {
                 override suspend fun create(
                     integrationMetadata: IntegrationMetadata,
-                    savedPaymentMethodAccess: SavedPaymentMethodAccess?,
+                    customerMetadata: CustomerMetadata?,
                     clientAttributionMetadata: ClientAttributionMetadata,
                 ): IntentConfirmationInterceptor {
                     return FakeIntentConfirmationInterceptor().apply {

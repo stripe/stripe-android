@@ -17,7 +17,7 @@ import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_DISABLE_LINK_GLOBA
 import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_ENABLE_LINK_SPM
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.LinkDisabledApiRepository
-import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodAccess
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
 import kotlinx.coroutines.CoroutineScope
@@ -168,11 +168,11 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
 
     private suspend fun PaymentElementLoader.State.getEmail(): String? =
         paymentMethodMetadata.linkState?.configuration?.customerInfo?.email
-            ?: when (val access = paymentMethodMetadata.customerMetadata?.savedPaymentMethodAccess) {
-                is SavedPaymentMethodAccess.Customer -> retrieveCustomerEmail(
+            ?: when (val customerMetadata = paymentMethodMetadata.customerMetadata) {
+                is CustomerMetadata.Customer -> retrieveCustomerEmail(
                     configuration = config,
-                    customer = access.info
+                    customer = customerMetadata.info
                 )
-                is SavedPaymentMethodAccess.CheckoutSession, null -> null
+                is CustomerMetadata.CheckoutSession, null -> null
             }
 }

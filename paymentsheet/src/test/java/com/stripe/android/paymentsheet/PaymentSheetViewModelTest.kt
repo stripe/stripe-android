@@ -36,7 +36,7 @@ import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.link.utils.errorMessage
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
-import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodAccess
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.model.CardBrand
@@ -251,8 +251,8 @@ internal class PaymentSheetViewModelTest {
         }
 
         val updateRequest = savedPaymentMethodRepository.updateRequests.awaitItem()
-        assertThat(updateRequest.access).isInstanceOf(SavedPaymentMethodAccess.Customer::class.java)
-        with(updateRequest.access as SavedPaymentMethodAccess.Customer) {
+        assertThat(updateRequest.customerMetadata).isInstanceOf(CustomerMetadata.Customer::class.java)
+        with(updateRequest.customerMetadata as CustomerMetadata.Customer) {
             assertThat(info.id).isEqualTo("cus_123")
             assertThat(info.ephemeralKeySecret).isEqualTo("ek_123")
             assertThat(info.customerSessionClientSecret).isNull()

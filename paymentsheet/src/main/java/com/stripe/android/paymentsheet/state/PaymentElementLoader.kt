@@ -50,7 +50,7 @@ import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.model.validate
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodAccess
+import com.stripe.android.model.ElementsSession.Customer.Components.MobilePaymentElement
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
 import com.stripe.attestation.IntegrityRequestManager
@@ -506,7 +506,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 val customer = elementsSession.customer ?: return null
                 CustomerMetadata.createForPaymentSheetCustomerSession(
                     configuration = configuration,
-                    customer = customerInfo.elementsSessionCustomer,
+                    customer = customer,
                     id = customer.session.customerId,
                     ephemeralKeySecret = customer.session.apiKey,
                     customerSessionClientSecret = customerInfo.customerSessionClientSecret,
@@ -524,10 +524,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             is CustomerInfo.CheckoutSession -> {
                 val sessionId = (integrationMetadata as? IntegrationMetadata.CheckoutSession)?.id
                     ?: return null
-                CustomerMetadata(
-                    savedPaymentMethodAccess = SavedPaymentMethodAccess.CheckoutSession(
-                        sessionId = sessionId,
-                    ),
+                CustomerMetadata.CheckoutSession(
+                    sessionId = sessionId,
                     isPaymentMethodSetAsDefaultEnabled = false,
                     removePaymentMethod = if (customerInfo.customer.canDetachPaymentMethod) {
                         PaymentMethodRemovePermission.Full

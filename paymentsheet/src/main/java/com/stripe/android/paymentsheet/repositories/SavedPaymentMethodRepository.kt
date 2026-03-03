@@ -1,27 +1,10 @@
 package com.stripe.android.paymentsheet.repositories
 
-import android.os.Parcelable
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
-import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
-
-/**
- * Carries the routing context that [DefaultSavedPaymentMethodRepository] needs to decide
- * which backend to delegate to.
- */
-internal sealed interface SavedPaymentMethodAccess : Parcelable {
-    @Parcelize
-    data class Customer(
-        val info: CustomerRepository.CustomerInfo,
-    ) : SavedPaymentMethodAccess
-
-    @Parcelize
-    data class CheckoutSession(
-        val sessionId: String,
-    ) : SavedPaymentMethodAccess
-}
 
 /**
  * Repository for managing saved payment methods. This abstracts over the underlying
@@ -30,19 +13,19 @@ internal sealed interface SavedPaymentMethodAccess : Parcelable {
  */
 internal interface SavedPaymentMethodRepository {
     suspend fun detachPaymentMethod(
-        access: SavedPaymentMethodAccess,
+        customerMetadata: CustomerMetadata,
         paymentMethodId: String,
         canRemoveDuplicates: Boolean,
     ): Result<PaymentMethod>
 
     suspend fun updatePaymentMethod(
-        access: SavedPaymentMethodAccess,
+        customerMetadata: CustomerMetadata,
         paymentMethodId: String,
         params: PaymentMethodUpdateParams,
     ): Result<PaymentMethod>
 
     suspend fun setDefaultPaymentMethod(
-        access: SavedPaymentMethodAccess,
+        customerMetadata: CustomerMetadata,
         paymentMethodId: String?,
     ): Result<Customer>
 }
@@ -53,21 +36,21 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
 ) : SavedPaymentMethodRepository {
 
     override suspend fun detachPaymentMethod(
-        access: SavedPaymentMethodAccess,
+        customerMetadata: CustomerMetadata,
         paymentMethodId: String,
         canRemoveDuplicates: Boolean,
-    ): Result<PaymentMethod> = when (access) {
-        is SavedPaymentMethodAccess.CheckoutSession -> {
+    ): Result<PaymentMethod> = when (customerMetadata) {
+        is CustomerMetadata.CheckoutSession -> {
             checkoutSessionRepository.detachPaymentMethod(
-                sessionId = access.sessionId,
+                sessionId = customerMetadata.sessionId,
                 paymentMethodId = paymentMethodId,
             ).map {
                 PaymentMethod.Builder().setId(paymentMethodId).build()
             }
         }
-        is SavedPaymentMethodAccess.Customer -> {
+        is CustomerMetadata.Customer -> {
             customerRepository.detachPaymentMethod(
-                customerInfo = access.info,
+                customerInfo = customerMetadata.info,
                 paymentMethodId = paymentMethodId,
                 canRemoveDuplicates = canRemoveDuplicates,
             )
@@ -75,16 +58,16 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
     }
 
     override suspend fun updatePaymentMethod(
-        access: SavedPaymentMethodAccess,
+        customerMetadata: CustomerMetadata,
         paymentMethodId: String,
         params: PaymentMethodUpdateParams,
-    ): Result<PaymentMethod> = when (access) {
-        is SavedPaymentMethodAccess.CheckoutSession -> {
+    ): Result<PaymentMethod> = when (customerMetadata) {
+        is CustomerMetadata.CheckoutSession -> {
             Result.failure(NotImplementedError("Checkout sessions do not support updating payment methods"))
         }
-        is SavedPaymentMethodAccess.Customer -> {
+        is CustomerMetadata.Customer -> {
             customerRepository.updatePaymentMethod(
-                customerInfo = access.info,
+                customerInfo = customerMetadata.info,
                 paymentMethodId = paymentMethodId,
                 params = params,
             )
@@ -92,15 +75,15 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
     }
 
     override suspend fun setDefaultPaymentMethod(
-        access: SavedPaymentMethodAccess,
+        customerMetadata: CustomerMetadata,
         paymentMethodId: String?,
-    ): Result<Customer> = when (access) {
-        is SavedPaymentMethodAccess.CheckoutSession -> {
+    ): Result<Customer> = when (customerMetadata) {
+        is CustomerMetadata.CheckoutSession -> {
             Result.failure(NotImplementedError("Checkout sessions do not support setting default payment methods"))
         }
-        is SavedPaymentMethodAccess.Customer -> {
+        is CustomerMetadata.Customer -> {
             customerRepository.setDefaultPaymentMethod(
-                customerInfo = access.info,
+                customerInfo = customerMetadata.info,
                 paymentMethodId = paymentMethodId,
             )
         }

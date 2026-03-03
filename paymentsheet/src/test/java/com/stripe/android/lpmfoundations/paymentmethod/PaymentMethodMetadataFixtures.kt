@@ -5,19 +5,16 @@ import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentIntentCreationFlow
 import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodAccess
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
 
 internal object PaymentMethodMetadataFixtures {
 
-    internal val DEFAULT_CUSTOMER_METADATA = CustomerMetadata(
-        savedPaymentMethodAccess = SavedPaymentMethodAccess.Customer(
-            info = CustomerRepository.CustomerInfo(
-                id = "cus_123",
-                ephemeralKeySecret = "ek_123",
-                customerSessionClientSecret = null,
-            ),
+    internal val DEFAULT_CUSTOMER_METADATA = CustomerMetadata.Customer(
+        info = CustomerRepository.CustomerInfo(
+            id = "cus_123",
+            ephemeralKeySecret = "ek_123",
+            customerSessionClientSecret = null,
         ),
         isPaymentMethodSetAsDefaultEnabled = false,
         removePaymentMethod = PaymentMethodRemovePermission.Full,
@@ -38,12 +35,10 @@ internal object PaymentMethodMetadataFixtures {
     )
 
     internal val CUSTOMER_SESSIONS_CUSTOMER_METADATA = DEFAULT_CUSTOMER_METADATA.copy(
-        savedPaymentMethodAccess = SavedPaymentMethodAccess.Customer(
-            info = CustomerRepository.CustomerInfo(
-                id = "cus_123",
-                ephemeralKeySecret = "ek_123",
-                customerSessionClientSecret = "cuss_123",
-            ),
+        info = CustomerRepository.CustomerInfo(
+            id = "cus_123",
+            ephemeralKeySecret = "ek_123",
+            customerSessionClientSecret = "cuss_123",
         ),
     )
 

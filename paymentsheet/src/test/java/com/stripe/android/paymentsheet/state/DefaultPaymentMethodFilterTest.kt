@@ -14,7 +14,6 @@ import com.stripe.android.paymentsheet.CardFundingFilteringPrivatePreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodAccess
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
 import kotlinx.coroutines.CompletableDeferred
@@ -210,13 +209,11 @@ class DefaultPaymentMethodFilterTest {
             paymentMethods = paymentMethods,
             params = PaymentMethodFilter.FilterParams(
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-                customerMetadata = CustomerMetadata(
-                    savedPaymentMethodAccess = SavedPaymentMethodAccess.Customer(
-                        info = CustomerRepository.CustomerInfo(
-                            id = "cus_1",
-                            ephemeralKeySecret = "ek_123",
-                            customerSessionClientSecret = "cuss_123",
-                        ),
+                customerMetadata = CustomerMetadata.Customer(
+                    info = CustomerRepository.CustomerInfo(
+                        id = "cus_1",
+                        ephemeralKeySecret = "ek_123",
+                        customerSessionClientSecret = "cuss_123",
                     ),
                     isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
                     removePaymentMethod = PaymentMethodRemovePermission.Full,

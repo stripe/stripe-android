@@ -6,8 +6,8 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodAccess
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.TapToAddPreview
@@ -89,8 +89,15 @@ internal class DefaultTapToAddCollectionHandler(
     override suspend fun collect(
         metadata: PaymentMethodMetadata
     ): TapToAddCollectionHandler.CollectionState = runCatching {
-        val customerInfo = resolveCustomerInfo(metadata)
-            ?: return@runCatching failedCollection(metadata)
+        val customerInfo = when (val customerMetadata = metadata.customerMetadata) {
+            is CustomerMetadata.Customer -> customerMetadata.info
+            is CustomerMetadata.CheckoutSession -> return@runCatching failedCollection(
+                "Tap to add is not supported for CheckoutSession"
+            )
+            null -> return@runCatching failedCollection(
+                "Attempted to collect with tap to add without a customer"
+            )
+        }
 
         if (!connectionManager.isConnected) {
             connectionManager.connect()
@@ -150,23 +157,9 @@ internal class DefaultTapToAddCollectionHandler(
         return TapToAddCollectionHandler.CollectionState.Collected(paymentMethod)
     }
 
-    private fun resolveCustomerInfo(
-        metadata: PaymentMethodMetadata,
-    ): CustomerRepository.CustomerInfo? {
-        return when (val access = metadata.customerMetadata?.savedPaymentMethodAccess) {
-            is SavedPaymentMethodAccess.Customer -> access.info
-            is SavedPaymentMethodAccess.CheckoutSession, null -> null
-        }
-    }
-
     private fun failedCollection(
-        metadata: PaymentMethodMetadata,
+        message: String,
     ): TapToAddCollectionHandler.CollectionState.FailedCollection {
-        val message = when (metadata.customerMetadata?.savedPaymentMethodAccess) {
-            is SavedPaymentMethodAccess.CheckoutSession ->
-                "Attempted to collect with tap to add using CheckoutSession"
-            else -> "Attempted to collect with tap to add without a customer"
-        }
         val error = IllegalStateException(message)
         return TapToAddCollectionHandler.CollectionState.FailedCollection(
             error = error,

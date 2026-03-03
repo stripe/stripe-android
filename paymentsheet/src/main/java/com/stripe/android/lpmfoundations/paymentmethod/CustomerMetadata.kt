@@ -6,23 +6,33 @@ import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.data.CustomerSheetSession
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.ElementsSession.Customer.Components.MobilePaymentElement
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodAccess
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-internal data class CustomerMetadata(
-    val savedPaymentMethodAccess: SavedPaymentMethodAccess,
-    val isPaymentMethodSetAsDefaultEnabled: Boolean,
-    val removePaymentMethod: PaymentMethodRemovePermission,
-    val saveConsent: PaymentMethodSaveConsentBehavior,
-    val canRemoveLastPaymentMethod: Boolean,
-    val canRemoveDuplicates: Boolean,
-    val canUpdateFullPaymentMethodDetails: Boolean,
-) : Parcelable {
+internal sealed class CustomerMetadata : Parcelable {
+    abstract val removePaymentMethod: PaymentMethodRemovePermission
+    abstract val saveConsent: PaymentMethodSaveConsentBehavior
+    abstract val canRemoveLastPaymentMethod: Boolean
+    abstract val canRemoveDuplicates: Boolean
+    abstract val canUpdateFullPaymentMethodDetails: Boolean
+    abstract val isPaymentMethodSetAsDefaultEnabled: Boolean
+
     val canRemovePaymentMethods: Boolean
         get() = removePaymentMethod == PaymentMethodRemovePermission.Full ||
             removePaymentMethod == PaymentMethodRemovePermission.Partial
+
+    @Parcelize
+    data class Customer(
+        val info: CustomerRepository.CustomerInfo,
+        override val removePaymentMethod: PaymentMethodRemovePermission,
+        override val saveConsent: PaymentMethodSaveConsentBehavior,
+        override val canRemoveLastPaymentMethod: Boolean,
+        override val canRemoveDuplicates: Boolean,
+        override val canUpdateFullPaymentMethodDetails: Boolean,
+        override val isPaymentMethodSetAsDefaultEnabled: Boolean,
+    ) : CustomerMetadata()
 
     companion object {
         internal fun createForPaymentSheetCustomerSession(
@@ -32,10 +42,10 @@ internal data class CustomerMetadata(
             ephemeralKeySecret: String,
             customerSessionClientSecret: String?,
             isPaymentMethodSetAsDefaultEnabled: Boolean,
-        ): CustomerMetadata {
+        ): Customer {
             val mobilePaymentElementComponent = customer.session.components.mobilePaymentElement
             val removePaymentMethod = when (mobilePaymentElementComponent) {
-                is ElementsSession.Customer.Components.MobilePaymentElement.Enabled -> {
+                is MobilePaymentElement.Enabled -> {
                     when (mobilePaymentElementComponent.paymentMethodRemove) {
                         ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled ->
                             PaymentMethodRemovePermission.Full
@@ -45,16 +55,16 @@ internal data class CustomerMetadata(
                             PaymentMethodRemovePermission.None
                     }
                 }
-                is ElementsSession.Customer.Components.MobilePaymentElement.Disabled ->
+                is MobilePaymentElement.Disabled ->
                     PaymentMethodRemovePermission.None
             }
 
             val canRemoveLastPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod &&
-                mobilePaymentElementComponent is ElementsSession.Customer.Components.MobilePaymentElement.Enabled &&
+                mobilePaymentElementComponent is MobilePaymentElement.Enabled &&
                 mobilePaymentElementComponent.canRemoveLastPaymentMethod
 
             val saveConsent = when (mobilePaymentElementComponent) {
-                is ElementsSession.Customer.Components.MobilePaymentElement.Enabled -> {
+                is MobilePaymentElement.Enabled -> {
                     if (mobilePaymentElementComponent.isPaymentMethodSaveEnabled) {
                         PaymentMethodSaveConsentBehavior.Enabled
                     } else {
@@ -63,18 +73,16 @@ internal data class CustomerMetadata(
                         )
                     }
                 }
-                is ElementsSession.Customer.Components.MobilePaymentElement.Disabled -> {
+                is MobilePaymentElement.Disabled -> {
                     PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null)
                 }
             }
 
-            return CustomerMetadata(
-                savedPaymentMethodAccess = SavedPaymentMethodAccess.Customer(
-                    info = CustomerRepository.CustomerInfo(
-                        id = id,
-                        ephemeralKeySecret = ephemeralKeySecret,
-                        customerSessionClientSecret = customerSessionClientSecret,
-                    ),
+            return Customer(
+                info = CustomerRepository.CustomerInfo(
+                    id = id,
+                    ephemeralKeySecret = ephemeralKeySecret,
+                    customerSessionClientSecret = customerSessionClientSecret,
                 ),
                 isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
                 removePaymentMethod = removePaymentMethod,
@@ -92,14 +100,12 @@ internal data class CustomerMetadata(
             id: String,
             ephemeralKeySecret: String,
             isPaymentMethodSetAsDefaultEnabled: Boolean,
-        ): CustomerMetadata {
-            return CustomerMetadata(
-                savedPaymentMethodAccess = SavedPaymentMethodAccess.Customer(
-                    info = CustomerRepository.CustomerInfo(
-                        id = id,
-                        ephemeralKeySecret = ephemeralKeySecret,
-                        customerSessionClientSecret = null,
-                    ),
+        ): Customer {
+            return Customer(
+                info = CustomerRepository.CustomerInfo(
+                    id = id,
+                    ephemeralKeySecret = ephemeralKeySecret,
+                    customerSessionClientSecret = null,
                 ),
                 isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
                 /*
@@ -135,14 +141,12 @@ internal data class CustomerMetadata(
             ephemeralKeySecret: String,
             customerSessionClientSecret: String?,
             isPaymentMethodSetAsDefaultEnabled: Boolean,
-        ): CustomerMetadata {
-            return CustomerMetadata(
-                savedPaymentMethodAccess = SavedPaymentMethodAccess.Customer(
-                    info = CustomerRepository.CustomerInfo(
-                        id = id,
-                        ephemeralKeySecret = ephemeralKeySecret,
-                        customerSessionClientSecret = customerSessionClientSecret,
-                    ),
+        ): Customer {
+            return Customer(
+                info = CustomerRepository.CustomerInfo(
+                    id = id,
+                    ephemeralKeySecret = ephemeralKeySecret,
+                    customerSessionClientSecret = customerSessionClientSecret,
                 ),
                 isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
                 removePaymentMethod = customerSheetSession.permissions.removePaymentMethod,
@@ -150,8 +154,19 @@ internal data class CustomerMetadata(
                 canRemoveLastPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod,
                 canRemoveDuplicates = true,
                 canUpdateFullPaymentMethodDetails =
-                customerSheetSession.permissions.canUpdateFullPaymentMethodDetails,
+                    customerSheetSession.permissions.canUpdateFullPaymentMethodDetails,
             )
         }
     }
+
+    @Parcelize
+    data class CheckoutSession(
+        val sessionId: String,
+        override val removePaymentMethod: PaymentMethodRemovePermission,
+        override val saveConsent: PaymentMethodSaveConsentBehavior,
+        override val canRemoveLastPaymentMethod: Boolean,
+        override val canRemoveDuplicates: Boolean,
+        override val canUpdateFullPaymentMethodDetails: Boolean,
+        override val isPaymentMethodSetAsDefaultEnabled: Boolean,
+    ) : CustomerMetadata()
 }

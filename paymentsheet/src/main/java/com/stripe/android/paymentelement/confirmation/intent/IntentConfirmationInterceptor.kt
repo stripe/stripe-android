@@ -11,7 +11,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition.Args
-import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodAccess
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import javax.inject.Inject
 
 internal interface IntentConfirmationInterceptor {
@@ -31,7 +31,7 @@ internal interface IntentConfirmationInterceptor {
     interface Factory {
         suspend fun create(
             integrationMetadata: IntegrationMetadata,
-            savedPaymentMethodAccess: SavedPaymentMethodAccess?,
+            customerMetadata: CustomerMetadata?,
             clientAttributionMetadata: ClientAttributionMetadata,
         ): IntentConfirmationInterceptor
     }
@@ -53,7 +53,7 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
     @Suppress("ThrowsCount")
     override suspend fun create(
         integrationMetadata: IntegrationMetadata,
-        savedPaymentMethodAccess: SavedPaymentMethodAccess?,
+        customerMetadata: CustomerMetadata?,
         clientAttributionMetadata: ClientAttributionMetadata,
     ): IntentConfirmationInterceptor {
         return when (integrationMetadata) {
@@ -67,23 +67,20 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
                 throw IllegalStateException("No intent confirmation interceptor for CryptoOnramp.")
             }
             is IntegrationMetadata.DeferredIntent.WithConfirmationToken -> {
-                when (savedPaymentMethodAccess) {
-                    is SavedPaymentMethodAccess.CheckoutSession -> {
-                        throw IllegalStateException(
-                            "Checkout session cannot be used with confirmation token"
-                        )
-                    }
-                    is SavedPaymentMethodAccess.Customer, null -> {
-                        confirmationTokenConfirmationInterceptorFactory.create(
-                            intentConfiguration = integrationMetadata.intentConfiguration,
-                            createIntentCallback = deferredIntentCallbackRetriever
-                                .waitForConfirmationTokenCallback(),
-                            customerId = savedPaymentMethodAccess?.info?.id,
-                            ephemeralKeySecret = savedPaymentMethodAccess?.info?.ephemeralKeySecret,
-                            clientAttributionMetadata = clientAttributionMetadata,
-                        )
-                    }
+                if (customerMetadata is CustomerMetadata.CheckoutSession) {
+                    throw IllegalStateException(
+                        "Checkout session cannot be used with confirmation token"
+                    )
                 }
+                val customerInfo = (customerMetadata as? CustomerMetadata.Customer)?.info
+                confirmationTokenConfirmationInterceptorFactory.create(
+                    intentConfiguration = integrationMetadata.intentConfiguration,
+                    createIntentCallback = deferredIntentCallbackRetriever
+                        .waitForConfirmationTokenCallback(),
+                    customerId = customerInfo?.id,
+                    ephemeralKeySecret = customerInfo?.ephemeralKeySecret,
+                    clientAttributionMetadata = clientAttributionMetadata,
+                )
             }
             is IntegrationMetadata.DeferredIntent.WithPaymentMethod -> {
                 deferredIntentConfirmationInterceptorFactory.create(

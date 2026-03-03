@@ -13,7 +13,7 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
-import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodAccess
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import dagger.assisted.Assisted
@@ -129,7 +129,7 @@ internal class CustomerSheetIntentConfirmationInterceptorFactory @Inject constru
 ) : IntentConfirmationInterceptor.Factory {
     override suspend fun create(
         integrationMetadata: IntegrationMetadata,
-        savedPaymentMethodAccess: SavedPaymentMethodAccess?,
+        customerMetadata: CustomerMetadata?,
         clientAttributionMetadata: ClientAttributionMetadata
     ): IntentConfirmationInterceptor {
         return when (integrationMetadata) {

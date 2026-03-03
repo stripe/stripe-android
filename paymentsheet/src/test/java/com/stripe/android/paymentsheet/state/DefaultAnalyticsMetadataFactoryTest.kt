@@ -36,7 +36,6 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodAccess
 import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode
 import org.junit.Test
 import javax.inject.Provider
@@ -821,13 +820,11 @@ class DefaultAnalyticsMetadataFactoryTest {
 
     private fun createCustomerMetadata(
         isPaymentMethodSetAsDefaultEnabled: Boolean
-    ): CustomerMetadata = CustomerMetadata(
-        savedPaymentMethodAccess = SavedPaymentMethodAccess.Customer(
-            info = CustomerRepository.CustomerInfo(
-                id = "cus_1234",
-                ephemeralKeySecret = "ek_123",
-                customerSessionClientSecret = "cuss_132_secret_123",
-            ),
+    ): CustomerMetadata = CustomerMetadata.Customer(
+        info = CustomerRepository.CustomerInfo(
+            id = "cus_1234",
+            ephemeralKeySecret = "ek_123",
+            customerSessionClientSecret = "cuss_132_secret_123",
         ),
         isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
         removePaymentMethod = PaymentMethodRemovePermission.Full,

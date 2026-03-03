@@ -42,7 +42,9 @@ import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodAccess
+import com.stripe.android.common.model.PaymentMethodRemovePermission
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
@@ -519,7 +521,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         runInterceptorScenario(
             integrationMetadata = defaultIntegrationMetadata,
             scenario = InterceptorTestScenario(
-                savedPaymentMethodAccess = DEFAULT_CUSTOMER_ACCESS,
+                customerMetadata = DEFAULT_CUSTOMER_METADATA,
                 stripeRepository = object : AbsFakeStripeRepository() {
                     override suspend fun createConfirmationToken(
                         confirmationTokenParams: ConfirmationTokenParams,
@@ -570,7 +572,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         )
 
         val interceptor = createIntentConfirmationInterceptor(
-            savedPaymentMethodAccess = DEFAULT_CUSTOMER_ACCESS,
+            customerMetadata = DEFAULT_CUSTOMER_METADATA,
             integrationMetadata = defaultIntegrationMetadata,
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun createConfirmationToken(
@@ -749,7 +751,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         val observedParams = mutableListOf<ConfirmationTokenParams>()
 
         val interceptor = createIntentConfirmationInterceptor(
-            savedPaymentMethodAccess = DEFAULT_CUSTOMER_ACCESS,
+            customerMetadata = DEFAULT_CUSTOMER_METADATA,
             integrationMetadata = defaultIntegrationMetadata,
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun createConfirmationToken(
@@ -795,7 +797,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         val observedParams = mutableListOf<ConfirmationTokenParams>()
 
         val interceptor = createIntentConfirmationInterceptor(
-            savedPaymentMethodAccess = DEFAULT_CUSTOMER_ACCESS,
+            customerMetadata = DEFAULT_CUSTOMER_METADATA,
             integrationMetadata = defaultIntegrationMetadata,
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun createConfirmationToken(
@@ -841,7 +843,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         val observedParams = mutableListOf<ConfirmationTokenParams>()
 
         val interceptor = createIntentConfirmationInterceptor(
-            savedPaymentMethodAccess = DEFAULT_CUSTOMER_ACCESS,
+            customerMetadata = DEFAULT_CUSTOMER_METADATA,
             integrationMetadata = IntegrationMetadata.DeferredIntent.WithConfirmationToken(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
@@ -895,7 +897,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         val observedParams = mutableListOf<ConfirmationTokenParams>()
 
         val interceptor = createIntentConfirmationInterceptor(
-            savedPaymentMethodAccess = DEFAULT_CUSTOMER_ACCESS,
+            customerMetadata = DEFAULT_CUSTOMER_METADATA,
             integrationMetadata = IntegrationMetadata.DeferredIntent.WithConfirmationToken(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
@@ -949,7 +951,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         val observedParams = mutableListOf<ConfirmationTokenParams>()
 
         val interceptor = createIntentConfirmationInterceptor(
-            savedPaymentMethodAccess = DEFAULT_CUSTOMER_ACCESS,
+            customerMetadata = DEFAULT_CUSTOMER_METADATA,
             publishableKeyProvider = { "pk_test_123" },
             integrationMetadata = IntegrationMetadata.DeferredIntent.WithConfirmationToken(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
@@ -1236,7 +1238,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         runInterceptorScenario(
             integrationMetadata = integrationMetadata,
             scenario = InterceptorTestScenario(
-                savedPaymentMethodAccess = DEFAULT_CUSTOMER_ACCESS,
+                customerMetadata = DEFAULT_CUSTOMER_METADATA,
                 publishableKeyProvider = { if (isLiveMode) "pk_live_123" else "pk_test_123" },
                 stripeRepository = createFakeStripeRepositoryForConfirmationToken(
                     observedParams,
@@ -1394,12 +1396,18 @@ class ConfirmationTokenConfirmationInterceptorTest {
     }
 
     private companion object {
-        val DEFAULT_CUSTOMER_ACCESS = SavedPaymentMethodAccess.Customer(
+        val DEFAULT_CUSTOMER_METADATA = CustomerMetadata.Customer(
             info = CustomerRepository.CustomerInfo(
                 id = "cus_1",
                 ephemeralKeySecret = "ek_test_123",
                 customerSessionClientSecret = null,
-            )
+            ),
+            isPaymentMethodSetAsDefaultEnabled = false,
+            removePaymentMethod = PaymentMethodRemovePermission.Full,
+            saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
+            canRemoveLastPaymentMethod = true,
+            canRemoveDuplicates = true,
+            canUpdateFullPaymentMethodDetails = false,
         )
     }
 }

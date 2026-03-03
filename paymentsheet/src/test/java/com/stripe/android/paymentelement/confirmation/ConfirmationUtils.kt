@@ -43,7 +43,7 @@ import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImp
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncherFactory
 import com.stripe.android.paymentsheet.repositories.FakeCheckoutSessionRepository
-import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodAccess
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeErrorReporter
@@ -54,7 +54,7 @@ import javax.inject.Provider
 @OptIn(SharedPaymentTokenSessionPreview::class)
 internal suspend fun createIntentConfirmationInterceptor(
     integrationMetadata: IntegrationMetadata,
-    savedPaymentMethodAccess: SavedPaymentMethodAccess? = null,
+    customerMetadata: CustomerMetadata? = null,
     stripeRepository: StripeRepository = object : AbsFakeStripeRepository() {},
     publishableKeyProvider: () -> String = { "pk" },
     errorReporter: ErrorReporter = FakeErrorReporter(),
@@ -157,7 +157,7 @@ internal suspend fun createIntentConfirmationInterceptor(
         },
     ).create(
         integrationMetadata = integrationMetadata,
-        savedPaymentMethodAccess = savedPaymentMethodAccess,
+        customerMetadata = customerMetadata,
         clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
     )
 }
