@@ -93,6 +93,9 @@ data class ElementsSession(
     val enableCardFundFiltering: Boolean
         get() = flags[Flag.ELEMENTS_MOBILE_CARD_FUND_FILTERING] == true
 
+    val isTapToAddEnabled: Boolean
+        get() = flags[Flag.ELEMENTS_MOBILE_ANDROID_TAP_TO_ADD_ENABLED] == true
+
     val onBehalfOf: String?
         get() = accountId.takeIf { !it.equals(merchantId) }
 
@@ -245,7 +248,8 @@ data class ElementsSession(
             "elements_mobile_force_setup_future_use_behavior_and_new_mandate_text"
         ),
         ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION("elements_mobile_attest_on_intent_confirmation"),
-        ELEMENTS_MOBILE_CARD_FUND_FILTERING("elements_mobile_card_funding_filtering")
+        ELEMENTS_MOBILE_CARD_FUND_FILTERING("elements_mobile_card_funding_filtering"),
+        ELEMENTS_MOBILE_ANDROID_TAP_TO_ADD_ENABLED("elements_mobile_android_tap_to_add_enabled")
     }
 
     /**

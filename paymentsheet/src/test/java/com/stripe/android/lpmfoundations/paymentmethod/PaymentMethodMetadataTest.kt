@@ -1389,7 +1389,8 @@ internal class PaymentMethodMetadataTest {
         passiveCaptchaParams: PassiveCaptchaParams? = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
         experimentsData: ElementsSession.ExperimentsData? = null,
         flags: Map<ElementsSession.Flag, Boolean> = mapOf(
-            ElementsSession.Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA to true
+            ElementsSession.Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA to true,
+            ElementsSession.Flag.ELEMENTS_MOBILE_ANDROID_TAP_TO_ADD_ENABLED to true,
         ),
     ): ElementsSession {
         return ElementsSession(
@@ -2195,6 +2196,34 @@ internal class PaymentMethodMetadataTest {
             isGooglePayReady = false,
             linkStateResult = null,
             customerMetadata = null,
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
+            clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
+            analyticsMetadata = AnalyticsMetadata(emptyMap()),
+            isTapToAddSupported = true,
+        )
+
+        assertThat(metadata.isTapToAddSupported).isFalse()
+    }
+
+    @Test
+    fun `createForPaymentElement sets isTapToAddSupported to false when elements session flag is false`() {
+        val elementsSession = createElementsSession(
+            intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            flags = mapOf(
+                ElementsSession.Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA to true,
+                ElementsSession.Flag.ELEMENTS_MOBILE_ANDROID_TAP_TO_ADD_ENABLED to false,
+            ),
+        )
+
+        val metadata = PaymentMethodMetadata.createForPaymentElement(
+            elementsSession = elementsSession,
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+            sharedDataSpecs = emptyList(),
+            externalPaymentMethodSpecs = emptyList(),
+            isGooglePayReady = false,
+            linkStateResult = null,
+            customerMetadata = DEFAULT_CUSTOMER_METADATA,
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
