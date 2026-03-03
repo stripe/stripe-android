@@ -36,7 +36,8 @@ class TextFieldUiScreenshotTest {
                 shouldShowValidationMessage = false,
                 validationMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = null
+                trailingIcon = null,
+                hasFocus = false
             )
         }
     }
@@ -53,7 +54,8 @@ class TextFieldUiScreenshotTest {
                 shouldShowValidationMessage = false,
                 validationMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = null
+                trailingIcon = null,
+                hasFocus = false
             )
         }
     }
@@ -70,7 +72,8 @@ class TextFieldUiScreenshotTest {
                 shouldShowValidationMessage = true,
                 validationMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = null
+                trailingIcon = null,
+                hasFocus = false
             )
         }
     }
@@ -89,7 +92,8 @@ class TextFieldUiScreenshotTest {
                     message = R.string.stripe_address_zip_incomplete
                 ),
                 showOptionalLabel = false,
-                trailingIcon = null
+                trailingIcon = null,
+                hasFocus = false
             )
         }
     }
@@ -106,7 +110,8 @@ class TextFieldUiScreenshotTest {
                 shouldShowValidationMessage = false,
                 validationMessage = null,
                 showOptionalLabel = true,
-                trailingIcon = null
+                trailingIcon = null,
+                hasFocus = false
             )
         }
     }
@@ -126,7 +131,8 @@ class TextFieldUiScreenshotTest {
                 trailingIcon = TextFieldIcon.Trailing(
                     idRes = R.drawable.stripe_ic_search,
                     isTintable = true,
-                )
+                ),
+                hasFocus = false
             )
         }
     }
@@ -144,7 +150,7 @@ class TextFieldUiScreenshotTest {
                 validationMessage = null,
                 showOptionalLabel = false,
                 trailingIcon = TextFieldIcon.CardBrandChoice(
-                    title = "Select an option".resolvableString,
+                    message = "Select an option".resolvableString,
                     hide = false,
                     currentItem = TextFieldIcon.CardBrandChoice.Item(
                         id = "visa",
@@ -157,8 +163,10 @@ class TextFieldUiScreenshotTest {
                             label = "Visa".resolvableString,
                             icon = R.drawable.stripe_ic_card_visa
                         )
-                    )
-                )
+                    ),
+                    hasMadeSelection = false
+                ),
+                hasFocus = false
             )
         }
     }
@@ -176,7 +184,7 @@ class TextFieldUiScreenshotTest {
                 validationMessage = null,
                 showOptionalLabel = false,
                 trailingIcon = TextFieldIcon.CardBrandChoice(
-                    title = "Select an option".resolvableString,
+                    message = "Select an option".resolvableString,
                     hide = true,
                     currentItem = TextFieldIcon.CardBrandChoice.Item(
                         id = "visa",
@@ -189,8 +197,10 @@ class TextFieldUiScreenshotTest {
                             label = "Visa".resolvableString,
                             icon = R.drawable.stripe_ic_card_visa
                         )
-                    )
-                )
+                    ),
+                    hasMadeSelection = false
+                ),
+                hasFocus = false
             )
         }
     }
@@ -207,7 +217,8 @@ class TextFieldUiScreenshotTest {
                 shouldShowValidationMessage = false,
                 validationMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = null
+                trailingIcon = null,
+                hasFocus = false
             )
         }
     }
@@ -224,7 +235,8 @@ class TextFieldUiScreenshotTest {
                 shouldShowValidationMessage = false,
                 validationMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = null
+                trailingIcon = null,
+                hasFocus = false
             )
         }
     }
@@ -241,7 +253,8 @@ class TextFieldUiScreenshotTest {
                 shouldShowValidationMessage = false,
                 validationMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = null
+                trailingIcon = null,
+                hasFocus = false
             )
         }
     }
@@ -258,7 +271,8 @@ class TextFieldUiScreenshotTest {
                 shouldShowValidationMessage = false,
                 validationMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = null
+                trailingIcon = null,
+                hasFocus = false
             )
         }
     }
