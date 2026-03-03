@@ -199,7 +199,7 @@ class CardDetailsElementTest {
         cardDetailsElement.controller.nameElement?.controller?.onValueChange("Jane Doe")
         cardDetailsElement.controller.numberElement.controller.onValueChange("4000002500001001")
         cardDetailsElement.controller.numberElement.controller.onDropdownItemClicked(
-            TextFieldIcon.Dropdown.Item(
+            TextFieldIcon.CardBrandChoice.Item(
                 id = CardBrand.CartesBancaires.code,
                 label = CardBrand.CartesBancaires.displayName.resolvableString,
                 icon = CardBrand.CartesBancaires.icon

@@ -143,16 +143,16 @@ class TextFieldUiScreenshotTest {
                 shouldShowValidationMessage = false,
                 validationMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = TextFieldIcon.Dropdown(
+                trailingIcon = TextFieldIcon.CardBrandChoice(
                     title = "Select an option".resolvableString,
                     hide = false,
-                    currentItem = TextFieldIcon.Dropdown.Item(
+                    currentItem = TextFieldIcon.CardBrandChoice.Item(
                         id = "visa",
                         label = "Visa".resolvableString,
                         icon = R.drawable.stripe_ic_card_visa
                     ),
                     items = listOf(
-                        TextFieldIcon.Dropdown.Item(
+                        TextFieldIcon.CardBrandChoice.Item(
                             id = "visa",
                             label = "Visa".resolvableString,
                             icon = R.drawable.stripe_ic_card_visa
@@ -175,16 +175,16 @@ class TextFieldUiScreenshotTest {
                 shouldShowValidationMessage = false,
                 validationMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = TextFieldIcon.Dropdown(
+                trailingIcon = TextFieldIcon.CardBrandChoice(
                     title = "Select an option".resolvableString,
                     hide = true,
-                    currentItem = TextFieldIcon.Dropdown.Item(
+                    currentItem = TextFieldIcon.CardBrandChoice.Item(
                         id = "visa",
                         label = "Visa".resolvableString,
                         icon = R.drawable.stripe_ic_card_visa
                     ),
                     items = listOf(
-                        TextFieldIcon.Dropdown.Item(
+                        TextFieldIcon.CardBrandChoice.Item(
                             id = "visa",
                             label = "Visa".resolvableString,
                             icon = R.drawable.stripe_ic_card_visa
