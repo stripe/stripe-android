@@ -89,8 +89,10 @@ internal class DefaultTapToAddCollectionHandler(
     override suspend fun collect(
         metadata: PaymentMethodMetadata
     ): TapToAddCollectionHandler.CollectionState = runCatching {
-        val customerInfo = (metadata.customerMetadata?.savedPaymentMethodAccess
-            as? SavedPaymentMethodAccess.Customer)?.info
+        val customerInfo = (
+            metadata.customerMetadata?.savedPaymentMethodAccess
+                as? SavedPaymentMethodAccess.Customer
+            )?.info
 
         if (customerInfo == null) {
             val exception = IllegalStateException("Attempted to collect with tap to add without a customer")

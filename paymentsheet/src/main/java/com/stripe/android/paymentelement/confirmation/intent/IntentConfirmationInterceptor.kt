@@ -11,6 +11,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition.Args
+import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodAccess
 import javax.inject.Inject
 
 internal interface IntentConfirmationInterceptor {
@@ -30,8 +31,7 @@ internal interface IntentConfirmationInterceptor {
     interface Factory {
         suspend fun create(
             integrationMetadata: IntegrationMetadata,
-            customerId: String?,
-            ephemeralKeySecret: String?,
+            savedPaymentMethodAccess: SavedPaymentMethodAccess?,
             clientAttributionMetadata: ClientAttributionMetadata,
         ): IntentConfirmationInterceptor
     }
@@ -50,10 +50,10 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
     private val sharedPaymentTokenConfirmationInterceptorFactory: SharedPaymentTokenConfirmationInterceptor.Factory,
     private val checkoutSessionConfirmationInterceptorFactory: CheckoutSessionConfirmationInterceptor.Factory,
 ) : IntentConfirmationInterceptor.Factory {
+    @Suppress("ThrowsCount")
     override suspend fun create(
         integrationMetadata: IntegrationMetadata,
-        customerId: String?,
-        ephemeralKeySecret: String?,
+        savedPaymentMethodAccess: SavedPaymentMethodAccess?,
         clientAttributionMetadata: ClientAttributionMetadata,
     ): IntentConfirmationInterceptor {
         return when (integrationMetadata) {
@@ -67,13 +67,23 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
                 throw IllegalStateException("No intent confirmation interceptor for CryptoOnramp.")
             }
             is IntegrationMetadata.DeferredIntent.WithConfirmationToken -> {
-                confirmationTokenConfirmationInterceptorFactory.create(
-                    intentConfiguration = integrationMetadata.intentConfiguration,
-                    createIntentCallback = deferredIntentCallbackRetriever.waitForConfirmationTokenCallback(),
-                    customerId = customerId,
-                    ephemeralKeySecret = ephemeralKeySecret,
-                    clientAttributionMetadata = clientAttributionMetadata,
-                )
+                when (savedPaymentMethodAccess) {
+                    is SavedPaymentMethodAccess.CheckoutSession -> {
+                        throw IllegalStateException(
+                            "Checkout session cannot be used with confirmation token"
+                        )
+                    }
+                    is SavedPaymentMethodAccess.Customer, null -> {
+                        confirmationTokenConfirmationInterceptorFactory.create(
+                            intentConfiguration = integrationMetadata.intentConfiguration,
+                            createIntentCallback = deferredIntentCallbackRetriever
+                                .waitForConfirmationTokenCallback(),
+                            customerId = savedPaymentMethodAccess?.info?.id,
+                            ephemeralKeySecret = savedPaymentMethodAccess?.info?.ephemeralKeySecret,
+                            clientAttributionMetadata = clientAttributionMetadata,
+                        )
+                    }
+                }
             }
             is IntegrationMetadata.DeferredIntent.WithPaymentMethod -> {
                 deferredIntentConfirmationInterceptorFactory.create(

@@ -27,6 +27,7 @@ import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodAccess
 import com.stripe.android.testing.FakePaymentLauncher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -274,8 +275,7 @@ internal class IntentConfirmationFlowTest {
             object : IntentConfirmationInterceptor.Factory {
                 override suspend fun create(
                     integrationMetadata: IntegrationMetadata,
-                    customerId: String?,
-                    ephemeralKeySecret: String?,
+                    savedPaymentMethodAccess: SavedPaymentMethodAccess?,
                     clientAttributionMetadata: ClientAttributionMetadata,
                 ): IntentConfirmationInterceptor {
                     return createIntentConfirmationInterceptor(

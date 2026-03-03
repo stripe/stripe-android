@@ -167,9 +167,12 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
     }
 
     private suspend fun PaymentElementLoader.State.getEmail(): String? =
-        paymentMethodMetadata.linkState?.configuration?.customerInfo?.email ?: retrieveCustomerEmail(
-            configuration = config,
-            customer = (paymentMethodMetadata.customerMetadata?.savedPaymentMethodAccess
-                as? SavedPaymentMethodAccess.Customer)?.info
-        )
+        paymentMethodMetadata.linkState?.configuration?.customerInfo?.email
+            ?: when (val access = paymentMethodMetadata.customerMetadata?.savedPaymentMethodAccess) {
+                is SavedPaymentMethodAccess.Customer -> retrieveCustomerEmail(
+                    configuration = config,
+                    customer = access.info
+                )
+                is SavedPaymentMethodAccess.CheckoutSession, null -> null
+            }
 }

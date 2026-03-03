@@ -26,6 +26,7 @@ import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationD
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CreateIntentCallback
+import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodAccess
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
@@ -36,7 +37,7 @@ import javax.inject.Provider
 
 @OptIn(SharedPaymentTokenSessionPreview::class)
 internal data class InterceptorTestScenario(
-    val ephemeralKeySecret: String? = null,
+    val savedPaymentMethodAccess: SavedPaymentMethodAccess? = null,
     val stripeRepository: StripeRepository = object : AbsFakeStripeRepository() {},
     val publishableKeyProvider: () -> String = { "pk" },
     val errorReporter: ErrorReporter = FakeErrorReporter(),
@@ -54,7 +55,7 @@ internal fun runInterceptorScenario(
 ) = runTest {
     val interceptor = createIntentConfirmationInterceptor(
         integrationMetadata = integrationMetadata,
-        ephemeralKeySecret = scenario.ephemeralKeySecret,
+        savedPaymentMethodAccess = scenario.savedPaymentMethodAccess,
         stripeRepository = scenario.stripeRepository,
         publishableKeyProvider = scenario.publishableKeyProvider,
         errorReporter = scenario.errorReporter,
