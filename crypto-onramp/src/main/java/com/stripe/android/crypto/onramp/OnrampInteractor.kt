@@ -773,7 +773,6 @@ internal class OnrampInteractor @Inject constructor(
         val status = _state.value.checkoutState?.status
         if (status is Status.RequiresNextAction) return status.onrampSessionId
 
-        // Process death recovery: restore from SavedStateHandle
         val pending = savedStateHandle.get<PendingCheckout>(KEY_PENDING_CHECKOUT) ?: return null
         if (_state.value.cryptoCustomerId == null && pending.cryptoCustomerId != null) {
             _state.update { it.copy(cryptoCustomerId = pending.cryptoCustomerId) }
@@ -833,9 +832,7 @@ internal class OnrampInteractor @Inject constructor(
             clearPendingCheckout()
         }
 
-        _state.update {
-            it.copy(checkoutState = CheckoutState(checkoutStatus))
-        }
+        _state.update { it.copy(checkoutState = CheckoutState(checkoutStatus)) }
     }
 
     private fun savePendingCheckout(onrampSessionId: String) {
