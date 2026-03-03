@@ -186,6 +186,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         HCAPTCHA_FAILURE(
             eventName = "elements.captcha.passive.expected_failure"
         ),
+        INTENT_CONFIRMATION_CHALLENGE_CHALLENGE_CANCELLATION_REQUEST_FAILED(
+            eventName = "intent_confirmation_challenge.challenge_cancellation_request_failed"
+        ),
         TAP_TO_ADD_DISCOVER_READERS_CALL_FAILURE(
             eventName = "elements.tap_to_add.discover_readers_call.failure"
         ),
@@ -288,6 +291,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         INTENT_CONFIRMATION_CHALLENGE_FAILED_TO_PARSE_ERROR_CALLBACK_PARAMS(
             partialEventName = "intent_confirmation_challenge.failed_to_parse_error_callback_params"
+        ),
+        INTENT_CONFIRMATION_CHALLENGE_INTENT_PARAMETERS_UNAVAILABLE(
+            partialEventName = "intent_confirmation_challenge.intent_parameters_unavailable"
         ),
         HCAPTCHA_UNEXPECTED_FAILURE(
             partialEventName = "elements.captcha.passive.unexpected_failure"

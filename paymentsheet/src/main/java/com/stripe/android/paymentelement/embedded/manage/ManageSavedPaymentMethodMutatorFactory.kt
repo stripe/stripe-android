@@ -10,7 +10,7 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.SavedPaymentMethod
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
@@ -22,7 +22,7 @@ import kotlin.coroutines.CoroutineContext
 
 internal class ManageSavedPaymentMethodMutatorFactory @Inject constructor(
     private val eventReporter: EventReporter,
-    private val customerRepository: CustomerRepository,
+    private val savedPaymentMethodRepository: SavedPaymentMethodRepository,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val customerStateHolder: CustomerStateHolder,
     private val manageNavigatorProvider: Provider<ManageNavigator>,
@@ -39,7 +39,7 @@ internal class ManageSavedPaymentMethodMutatorFactory @Inject constructor(
             coroutineScope = viewModelScope,
             workContext = workContext,
             uiContext = uiContext,
-            customerRepository = customerRepository,
+            savedPaymentMethodRepository = savedPaymentMethodRepository,
             selection = selectionHolder.selection,
             setSelection = selectionHolder::set,
             customerStateHolder = customerStateHolder,

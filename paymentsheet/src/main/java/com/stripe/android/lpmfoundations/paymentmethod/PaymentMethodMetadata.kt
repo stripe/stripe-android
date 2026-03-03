@@ -324,7 +324,7 @@ internal data class PaymentMethodMetadata(
         code: PaymentMethodCode
     ): PaymentMethod.AllowRedisplay {
         val isSettingUp = hasIntentToSetup(code) || forceSetupFutureUseBehaviorAndNewMandate
-        return customerMetadata?.permissions?.saveConsent?.allowRedisplay(
+        return customerMetadata?.saveConsent?.allowRedisplay(
             isSetupIntent = isSettingUp,
             customerRequestedSave = customerRequestedSave,
         ) ?: PaymentMethod.AllowRedisplay.UNSPECIFIED

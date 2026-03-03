@@ -28,6 +28,7 @@ import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.AddressFixtures
 import com.stripe.android.model.BankAccountTokenParamsFixtures
 import com.stripe.android.model.BinFixtures
+import com.stripe.android.model.CancelCaptchaChallengeParams
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.CardParamsFixtures
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -163,6 +164,18 @@ internal class StripeApiRepositoryTest {
         val customerRequestUrl = StripeApiRepository.getRetrieveCustomerUrl(customerId)
         assertThat(customerRequestUrl)
             .isEqualTo("https://api.stripe.com/v1/customers/$customerId")
+    }
+
+    @Test
+    fun testGetRetrieveCustomerPaymentMethodUrl() {
+        val customerId = "cus_123abc"
+        val paymentMethodId = "pm_456xyz"
+        val url = StripeApiRepository.getRetrieveCustomerPaymentMethodUrl(
+            customerId,
+            paymentMethodId
+        )
+        assertThat(url)
+            .isEqualTo("https://api.stripe.com/v1/customers/$customerId/payment_methods/$paymentMethodId")
     }
 
     @Test
@@ -655,6 +668,36 @@ internal class StripeApiRepositoryTest {
                 productUsage = productUsage,
                 errorMessage = "apiError",
             )
+        }
+
+    @Test
+    fun confirmPaymentIntent_errorResponseWithRequestIdInLiveMode_throwsWithLocalizedMessageContainingRequestId() =
+        runTest {
+            val clientSecret = "pi_12345_secret_fake"
+            val requestId = "req_abc123"
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenAnswer {
+                    StripeResponse(
+                        code = 400,
+                        body = """{"error":{"type":"api_error","message":"Server error"}}""",
+                        headers = mapOf("Request-Id" to listOf(requestId))
+                    )
+                }
+
+            val confirmPaymentIntentParams =
+                ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    clientSecret
+                )
+
+            val result = create().confirmPaymentIntent(
+                confirmPaymentIntentParams,
+                ApiRequest.Options("pk_live_123")
+            )
+
+            assertThat(result.isFailure).isTrue()
+            assertThat(result.exceptionOrNull()?.message)
+                .isEqualTo("Something went wrong. Request ID: $requestId")
         }
 
     @Test
@@ -1248,6 +1291,53 @@ internal class StripeApiRepositoryTest {
             ).getOrThrow()
         assertThat(paymentMethods)
             .isEmpty()
+    }
+
+    @Test
+    fun retrieveCustomerPaymentMethod_whenSuccess_returnsPaymentMethod() = runTest {
+        val customerId = "cus_EzHwfOXxvAwRIW"
+        val paymentMethodId = "pm_1EVNYJCRMbs6FrXfG8n52JaK"
+        val responseBody = createCustomerPaymentMethodResponseBody(
+            paymentMethodId = paymentMethodId,
+            customerId = customerId,
+        )
+        val stripeResponse = StripeResponse(200, responseBody)
+        val options = ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
+        val url = StripeApiRepository.getRetrieveCustomerPaymentMethodUrl(
+            customerId,
+            paymentMethodId
+        )
+
+        whenever(
+            stripeNetworkClient.executeRequest(
+                argThat<ApiRequest> {
+                    ApiRequestMatcher(
+                        StripeRequest.Method.GET,
+                        url,
+                        options,
+                        null
+                    ).matches(this)
+                }
+            )
+        ).thenReturn(stripeResponse)
+
+        val stripeApiRepository = create()
+        val paymentMethod = stripeApiRepository.retrieveCustomerPaymentMethod(
+            customerId = customerId,
+            paymentMethodId = paymentMethodId,
+            productUsageTokens = setOf("PaymentSheet"),
+            requestOptions = options
+        ).getOrThrow()
+
+        assertThat(paymentMethod.id).isEqualTo(paymentMethodId)
+        assertThat(paymentMethod.customerId).isEqualTo(customerId)
+        assertThat(paymentMethod.type).isEqualTo(PaymentMethod.Type.Card)
+        assertThat(paymentMethod.card?.last4).isEqualTo("4242")
+
+        verifyAnalyticsRequest(
+            PaymentAnalyticsEvent.CustomerRetrievePaymentMethod,
+            "PaymentSheet"
+        )
     }
 
     @Test
@@ -3833,6 +3923,134 @@ internal class StripeApiRepositoryTest {
         assertThat(analyticsParams["event"]).isEqualTo(event.toString())
         assertThat(analyticsParams["product_usage"]).isEqualTo(productUsage)
         assertThat(analyticsParams["error_message"]).isEqualTo(errorMessage)
+    }
+
+    @Test
+    fun cancelPaymentIntentCaptchaChallenge_sendsCorrectRequest() = runTest {
+        val intentId = "pi_123"
+        val clientSecret = "pi_123_secret_456"
+
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(
+                StripeResponse(
+                    200,
+                    PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2_JSON.toString(),
+                    emptyMap()
+                )
+            )
+
+        val params = CancelCaptchaChallengeParams(clientSecret = clientSecret)
+
+        val result = create().cancelPaymentIntentCaptchaChallenge(
+            paymentIntentId = intentId,
+            params = params,
+            requestOptions = DEFAULT_OPTIONS,
+        )
+
+        assertThat(result.isSuccess).isTrue()
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+        val apiRequest = apiRequestArgumentCaptor.firstValue
+        assertThat(apiRequest.url)
+            .isEqualTo("https://api.stripe.com/v1/payment_intents/$intentId/cancel_challenge")
+        assertThat(apiRequest.method).isEqualTo(StripeRequest.Method.POST)
+        assertThat(apiRequest.params?.get("client_secret")).isEqualTo(clientSecret)
+    }
+
+    @Test
+    fun cancelSetupIntentCaptchaChallenge_sendsCorrectRequest() = runTest {
+        val intentId = "seti_123"
+        val clientSecret = "seti_123_secret_456"
+
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(
+                StripeResponse(
+                    200,
+                    SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT_JSON.toString(),
+                    emptyMap()
+                )
+            )
+
+        val params = CancelCaptchaChallengeParams(clientSecret = clientSecret)
+
+        val result = create().cancelSetupIntentCaptchaChallenge(
+            setupIntentId = intentId,
+            params = params,
+            requestOptions = DEFAULT_OPTIONS,
+        )
+
+        assertThat(result.isSuccess).isTrue()
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+        val apiRequest = apiRequestArgumentCaptor.firstValue
+        assertThat(apiRequest.url)
+            .isEqualTo("https://api.stripe.com/v1/setup_intents/$intentId/cancel_challenge")
+        assertThat(apiRequest.method).isEqualTo(StripeRequest.Method.POST)
+        assertThat(apiRequest.params?.get("client_secret")).isEqualTo(clientSecret)
+    }
+
+    @Test
+    fun cancelPaymentIntentCaptchaChallenge_onNetworkFailure_returnsFailure() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenAnswer { throw IOException("Network error") }
+
+        val result = create().cancelPaymentIntentCaptchaChallenge(
+            paymentIntentId = "pi_123",
+            params = CancelCaptchaChallengeParams(clientSecret = "pi_123_secret_456"),
+            requestOptions = DEFAULT_OPTIONS,
+        )
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isInstanceOf(APIConnectionException::class.java)
+    }
+
+    private fun createCustomerPaymentMethodResponseBody(
+        paymentMethodId: String,
+        customerId: String,
+    ): String {
+        return """
+            {
+                "id": "$paymentMethodId",
+                "object": "payment_method",
+                "billing_details": {
+                    "address": {
+                        "city": null,
+                        "country": null,
+                        "line1": null,
+                        "line2": null,
+                        "postal_code": null,
+                        "state": null
+                    },
+                    "email": null,
+                    "name": null,
+                    "phone": null
+                },
+                "card": {
+                    "brand": "visa",
+                    "checks": {
+                        "address_line1_check": null,
+                        "address_postal_code_check": null,
+                        "cvc_check": null
+                    },
+                    "country": "US",
+                    "exp_month": 5,
+                    "exp_year": 2020,
+                    "fingerprint": "atmHgDo9nxHpQJiw",
+                    "funding": "credit",
+                    "generated_from": null,
+                    "last4": "4242",
+                    "three_d_secure_usage": {
+                        "supported": true
+                    },
+                    "wallet": null
+                },
+                "created": 1556736791,
+                "customer": "$customerId",
+                "livemode": false,
+                "metadata": {},
+                "type": "card"
+            }
+        """.trimIndent()
     }
 
     private fun create(productUsage: Set<String> = emptySet()): StripeApiRepository {

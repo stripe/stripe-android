@@ -15,12 +15,18 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.isInstanceOf
+import com.stripe.android.model.CancelCaptchaChallengeParams
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.injectableActivityScenario
 import kotlinx.coroutines.test.TestDispatcher
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -215,7 +221,11 @@ internal class IntentConfirmationChallengeActivityTest {
                     bridgeHandler = bridgeHandler,
                     workContext = testDispatcher,
                     analyticsEventReporter = analyticsReporter,
-                    userAgent = "fake-user-agent"
+                    userAgent = "fake-user-agent",
+                    stripeRepository = object : AbsFakeStripeRepository() {},
+                    errorReporter = FakeErrorReporter(),
+                    requestOptions = ApiRequest.Options("pk_test_123"),
+                    fireAndForgetScope = TestScope(testDispatcher),
                 ) as T
             }
         }
@@ -256,7 +266,19 @@ internal class IntentConfirmationChallengeActivityTest {
                     bridgeHandler = bridgeHandler,
                     workContext = testDispatcher,
                     analyticsEventReporter = FakeIntentConfirmationChallengeAnalyticsEventReporter(),
-                    userAgent = "fake-user-agent"
+                    userAgent = "fake-user-agent",
+                    stripeRepository = object : AbsFakeStripeRepository() {
+                        override suspend fun cancelPaymentIntentCaptchaChallenge(
+                            paymentIntentId: String,
+                            params: CancelCaptchaChallengeParams,
+                            requestOptions: ApiRequest.Options
+                        ): Result<PaymentIntent> {
+                            return Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
+                        }
+                    },
+                    errorReporter = FakeErrorReporter(),
+                    requestOptions = ApiRequest.Options("pk_test_123"),
+                    fireAndForgetScope = TestScope(testDispatcher),
                 ) as T
             }
         }

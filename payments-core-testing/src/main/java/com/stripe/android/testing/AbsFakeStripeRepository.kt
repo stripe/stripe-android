@@ -6,9 +6,8 @@ import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.model.BankStatuses
+import com.stripe.android.model.CancelCaptchaChallengeParams
 import com.stripe.android.model.CardMetadata
-import com.stripe.android.model.CheckoutSessionResponse
-import com.stripe.android.model.ConfirmCheckoutSessionParams
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmationToken
@@ -210,6 +209,15 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         productUsageTokens: Set<String>,
         requestOptions: ApiRequest.Options
     ): Result<List<PaymentMethod>> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun retrieveCustomerPaymentMethod(
+        customerId: String,
+        paymentMethodId: String,
+        productUsageTokens: Set<String>,
+        requestOptions: ApiRequest.Options
+    ): Result<PaymentMethod> {
         TODO("Not yet implemented")
     }
 
@@ -441,21 +449,6 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         TODO("Not yet implemented")
     }
 
-    override suspend fun initCheckoutSession(
-        sessionId: String,
-        options: ApiRequest.Options,
-    ): Result<CheckoutSessionResponse> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun confirmCheckoutSession(
-        checkoutSessionId: String,
-        confirmCheckoutSessionParams: ConfirmCheckoutSessionParams,
-        options: ApiRequest.Options,
-    ): Result<CheckoutSessionResponse> {
-        TODO("Not yet implemented")
-    }
-
     override suspend fun retrieveCardMetadata(
         cardNumber: String,
         requestOptions: ApiRequest.Options
@@ -502,6 +495,22 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         paymentDetailsUpdateParams: ConsumerPaymentDetailsUpdateParams,
         requestOptions: ApiRequest.Options
     ): Result<ConsumerPaymentDetails> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun cancelPaymentIntentCaptchaChallenge(
+        paymentIntentId: String,
+        params: CancelCaptchaChallengeParams,
+        requestOptions: ApiRequest.Options
+    ): Result<PaymentIntent> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun cancelSetupIntentCaptchaChallenge(
+        setupIntentId: String,
+        params: CancelCaptchaChallengeParams,
+        requestOptions: ApiRequest.Options
+    ): Result<SetupIntent> {
         TODO("Not yet implemented")
     }
 }

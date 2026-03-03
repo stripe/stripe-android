@@ -44,6 +44,7 @@ internal class DefaultEmbeddedStateHelperTest {
             )
         }
 
+        confirmationHandler.bootstrapTurbine.awaitItem()
         assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem().appearance)
             .isEqualTo(Embedded(Embedded.RowStyle.FlatWithRadio.default))
     }
@@ -63,6 +64,7 @@ internal class DefaultEmbeddedStateHelperTest {
             )
         }
 
+        confirmationHandler.bootstrapTurbine.awaitItem()
         assertThat(StripeTheme.colorsLightMutable.componentBorder)
             .isEqualTo(
                 Color(
@@ -87,6 +89,7 @@ internal class DefaultEmbeddedStateHelperTest {
         )
         selectionHolder.previousNewSelections.putParcelable("card", PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
 
+        confirmationHandler.bootstrapTurbine.awaitItem()
         assertThat(stateHelper.state).isNotNull()
         assertThat(confirmationStateHolder.state).isNotNull()
         assertThat(customerStateHolder.customer.value).isEqualTo(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
@@ -114,6 +117,7 @@ internal class DefaultEmbeddedStateHelperTest {
             formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
         }
 
+        confirmationHandler.bootstrapTurbine.awaitItem()
         assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem()).isNotNull()
     }
 
@@ -132,6 +136,7 @@ internal class DefaultEmbeddedStateHelperTest {
             formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
         }
 
+        confirmationHandler.bootstrapTurbine.awaitItem()
         assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem()).isNotNull()
     }
 
@@ -151,6 +156,7 @@ internal class DefaultEmbeddedStateHelperTest {
             embeddedViewDisplaysMandateText(false)
         }
 
+        confirmationHandler.bootstrapTurbine.awaitItem()
         assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem()).isNotNull()
     }
 
@@ -191,6 +197,13 @@ internal class DefaultEmbeddedStateHelperTest {
         }
     }
 
+    @Test
+    fun `confirmation handler is bootstrapped when state is set`() = testScenario {
+        setState()
+        assertThat(confirmationHandler.bootstrapTurbine.awaitItem().paymentMethodMetadata).isNotNull()
+        embeddedContentHelper.dataLoadedTurbine.awaitItem()
+    }
+
     private fun testScenario(
         rowSelectionCallback: InternalRowSelectionCallback? = null,
         block: suspend Scenario.() -> Unit,
@@ -200,8 +213,8 @@ internal class DefaultEmbeddedStateHelperTest {
         val customerStateHolder = DefaultCustomerStateHolder(
             savedStateHandle = savedStateHandle,
             selection = selectionHolder.selection,
-            customerMetadataPermissions = stateFlowOf(
-                PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.permissions
+            customerMetadata = stateFlowOf(
+                PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
             ),
         )
         val confirmationStateHolder = EmbeddedConfirmationStateHolder(
@@ -210,13 +223,14 @@ internal class DefaultEmbeddedStateHelperTest {
             coroutineScope = CoroutineScope(Dispatchers.Unconfined),
         )
         val embeddedContentHelper = FakeEmbeddedContentHelper()
+        val confirmationHandler = FakeConfirmationHandler()
         val stateHelper = DefaultEmbeddedStateHelper(
             selectionHolder = selectionHolder,
             customerStateHolder = customerStateHolder,
             confirmationStateHolder = confirmationStateHolder,
             embeddedContentHelper = embeddedContentHelper,
             internalRowSelectionCallback = { rowSelectionCallback },
-            confirmationHandler = FakeConfirmationHandler(),
+            confirmationHandler = confirmationHandler,
         )
 
         Scenario(
@@ -225,9 +239,11 @@ internal class DefaultEmbeddedStateHelperTest {
             selectionHolder = selectionHolder,
             embeddedContentHelper = embeddedContentHelper,
             stateHelper = stateHelper,
+            confirmationHandler = confirmationHandler,
         ).block()
 
         embeddedContentHelper.validate()
+        confirmationHandler.validate()
     }
 
     private class Scenario(
@@ -236,6 +252,7 @@ internal class DefaultEmbeddedStateHelperTest {
         val selectionHolder: EmbeddedSelectionHolder,
         val embeddedContentHelper: FakeEmbeddedContentHelper,
         val stateHelper: EmbeddedStateHelper,
+        val confirmationHandler: FakeConfirmationHandler,
     ) {
         fun setState(
             paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),

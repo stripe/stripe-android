@@ -162,7 +162,7 @@ internal class PaymentSheetPlaygroundViewModel(
     private suspend fun setCheckout(state: PlaygroundState): Boolean {
         val paymentState = state.asPaymentState()
         if (paymentState?.initializationType == InitializationType.CheckoutSession) {
-            Checkout.configure(paymentState.clientSecret).fold(
+            Checkout.configure(getApplication(), paymentState.clientSecret).fold(
                 onSuccess = { value ->
                     checkout = value
                 },

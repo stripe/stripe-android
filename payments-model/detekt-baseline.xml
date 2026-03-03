@@ -2,24 +2,24 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>MagicNumber:BankAccount.kt$BankAccount$3</ID>
-    <ID>MagicNumber:Card.kt$Card$4</ID>
-    <ID>MagicNumber:CardBrand.kt$CardBrand$3</ID>
-    <ID>MagicNumber:CardBrand.kt$CardBrand.AmericanExpress$3</ID>
-    <ID>MagicNumber:CardBrand.kt$CardBrand.AmericanExpress$4</ID>
-    <ID>MagicNumber:CardBrand.kt$CardBrand.CartesBancaires$3</ID>
-    <ID>MagicNumber:CardBrand.kt$CardBrand.DinersClub$14</ID>
-    <ID>MagicNumber:CardBrand.kt$CardBrand.Interac$3</ID>
-    <ID>MagicNumber:CardBrand.kt$CardBrand.Interac$4</ID>
-    <ID>MagicNumber:CardBrand.kt$CardBrand.Interac$5</ID>
-    <ID>MagicNumber:CardBrand.kt$CardBrand.Interac$6</ID>
-    <ID>MagicNumber:CardBrand.kt$CardBrand.JCB$3</ID>
-    <ID>MagicNumber:CardBrand.kt$CardBrand.Unknown$3</ID>
-    <ID>MagicNumber:CardBrand.kt$CardBrand.Unknown$4</ID>
-    <ID>MagicNumber:CardJsonParser.kt$CardJsonParser$12</ID>
-    <ID>MagicNumber:CardUtils.kt$CardUtils$10</ID>
-    <ID>MagicNumber:CardUtils.kt$CardUtils$9</ID>
-    <ID>TooManyFunctions:ConsumersApiService.kt$ConsumersApiService</ID>
-    <ID>TooManyFunctions:ConsumersApiService.kt$ConsumersApiServiceImpl : ConsumersApiService</ID>
+    <ID>MagicNumber:BankAccount.kt:BankAccount$3</ID>
+    <ID>MagicNumber:Card.kt:Card$4</ID>
+    <ID>MagicNumber:CardBrand.kt:CardBrand$3</ID>
+    <ID>MagicNumber:CardBrand.kt:CardBrand.AmericanExpress$3</ID>
+    <ID>MagicNumber:CardBrand.kt:CardBrand.AmericanExpress$4</ID>
+    <ID>MagicNumber:CardBrand.kt:CardBrand.CartesBancaires$3</ID>
+    <ID>MagicNumber:CardBrand.kt:CardBrand.DinersClub$14</ID>
+    <ID>MagicNumber:CardBrand.kt:CardBrand.Interac$3</ID>
+    <ID>MagicNumber:CardBrand.kt:CardBrand.Interac$4</ID>
+    <ID>MagicNumber:CardBrand.kt:CardBrand.Interac$5</ID>
+    <ID>MagicNumber:CardBrand.kt:CardBrand.Interac$6</ID>
+    <ID>MagicNumber:CardBrand.kt:CardBrand.JCB$3</ID>
+    <ID>MagicNumber:CardBrand.kt:CardBrand.Unknown$3</ID>
+    <ID>MagicNumber:CardBrand.kt:CardBrand.Unknown$4</ID>
+    <ID>MagicNumber:CardJsonParser.kt:CardJsonParser$12</ID>
+    <ID>MagicNumber:CardUtils.kt:CardUtils$10</ID>
+    <ID>MagicNumber:CardUtils.kt:CardUtils$9</ID>
+    <ID>TooManyFunctions:ConsumersApiService.kt:ConsumersApiService</ID>
+    <ID>TooManyFunctions:ConsumersApiService.kt:ConsumersApiServiceImpl : ConsumersApiService</ID>
   </CurrentIssues>
 </SmellBaseline>

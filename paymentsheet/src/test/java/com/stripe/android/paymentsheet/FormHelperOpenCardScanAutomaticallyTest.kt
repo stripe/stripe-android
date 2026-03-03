@@ -33,9 +33,9 @@ import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.elements.CardDetailsSectionController
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentElementLoader
+import com.stripe.android.utils.FakeSavedPaymentMethodRepository
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
@@ -148,7 +148,9 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
             PaymentOptionsViewModel(
                 args = args,
                 eventReporter = FakeEventReporter(),
-                customerRepository = FakeCustomerRepository(customer?.paymentMethods ?: emptyList()),
+                savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(
+                    customer?.paymentMethods ?: emptyList()
+                ),
                 workContext = testDispatcher,
                 savedStateHandle = thisSavedStateHandle,
                 linkHandler = linkHandler,
@@ -187,7 +189,9 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                 args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
                 eventReporter = FakeEventReporter(),
                 paymentElementLoader = paymentElementLoader,
-                customerRepository = FakeCustomerRepository(customer?.paymentMethods ?: emptyList()),
+                savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(
+                    customer?.paymentMethods ?: emptyList()
+                ),
                 logger = Logger.noop(),
                 workContext = testDispatcher,
                 savedStateHandle = thisSavedStateHandle,
