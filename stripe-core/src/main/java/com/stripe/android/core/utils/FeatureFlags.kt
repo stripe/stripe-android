@@ -21,7 +21,7 @@ object FeatureFlags {
     val newCbcSelector = FeatureFlag("Use new Card Brand Choice selector")
 
     init {
-        newCbcSelector.setEnabled(true)
+        //newCbcSelector.setEnabled(true)
     }
 }
 
