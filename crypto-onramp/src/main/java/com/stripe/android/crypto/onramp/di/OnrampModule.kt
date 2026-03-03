@@ -12,6 +12,8 @@ import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.StripeNetworkClientModule
 import com.stripe.android.core.networking.StripeNetworkClient
+import com.stripe.android.crypto.onramp.DEFAULT_ONRAMP_INSTANCE_KEY
+import com.stripe.android.crypto.onramp.OnrampCallbackReferences
 import com.stripe.android.crypto.onramp.model.OnrampSessionClientSecretProvider
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsService
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsServiceImpl
@@ -89,6 +91,12 @@ internal class OnrampModule {
     fun provideCheckoutHandler(
         onrampCallbacks: OnrampCallbacks
     ): OnrampSessionClientSecretProvider {
-        return onrampCallbacks.build().onrampSessionClientSecretProvider
+        return OnrampSessionClientSecretProvider { sessionId ->
+            val provider = OnrampCallbackReferences[DEFAULT_ONRAMP_INSTANCE_KEY]
+                ?.onrampSessionClientSecretProvider
+                ?: onrampCallbacks.build().onrampSessionClientSecretProvider
+
+            provider.getClientSecret(sessionId)
+        }
     }
 }
