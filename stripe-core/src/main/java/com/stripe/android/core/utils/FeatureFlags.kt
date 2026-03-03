@@ -19,6 +19,10 @@ object FeatureFlags {
     val enableTapToAdd = FeatureFlag("Enable Tap to Add")
     val enableKlarnaFormRemoval = FeatureFlag("Remove forms from Klarna")
     val newCbcSelector = FeatureFlag("Use new Card Brand Choice selector")
+
+    init {
+        newCbcSelector.setEnabled(true)
+    }
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
