@@ -99,7 +99,6 @@ private fun CardBrandChoiceItem(
     isSelected: Boolean,
     onItemSelected: (item: TextFieldIcon.CardBrandChoice.Item) -> Unit
 ) {
-
     val backgroundColor = if (isSelected) {
         MaterialTheme.stripeColors.componentBorder.copy()
     } else {
