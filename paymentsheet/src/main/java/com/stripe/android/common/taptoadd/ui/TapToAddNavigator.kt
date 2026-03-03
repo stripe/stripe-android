@@ -94,18 +94,18 @@ internal class TapToAddNavigator(
             }
         }
 
-        data class CardAdded(
-            val interactor: TapToAddCardAddedInteractor,
+        data class Completed(
+            val interactor: TapToAddCompletedInteractor,
         ) : Screen {
             override val isCentered: Boolean = false
             override val cancelButton: CancelButton = CancelButton.Invisible
 
             @Composable
             override fun Content() {
-                TapToAddCardAddedScreen(
+                TapToAddCompletedScreen(
                     cardBrand = interactor.cardBrand,
                     last4 = interactor.last4,
-                    onComplete = interactor::onShown,
+                    label = interactor.label,
                 )
             }
         }
@@ -122,9 +122,6 @@ internal class TapToAddNavigator(
 
                 TapToAddConfirmationScreen(
                     state = state,
-                    onComplete = {
-                        interactor.performAction(TapToAddConfirmationInteractor.Action.ShownSuccess)
-                    },
                     onPrimaryButtonPress = {
                         interactor.performAction(TapToAddConfirmationInteractor.Action.PrimaryButtonPressed)
                     }

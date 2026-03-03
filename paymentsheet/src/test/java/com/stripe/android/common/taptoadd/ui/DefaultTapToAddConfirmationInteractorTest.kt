@@ -192,16 +192,6 @@ internal class DefaultTapToAddConfirmationInteractorTest {
     }
 
     @Test
-    fun `ShownSuccess calls onComplete`() = runScenario(
-        paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
-        tapToAddMode = TapToAddMode.Continue,
-    ) {
-        interactor.performAction(TapToAddConfirmationInteractor.Action.ShownSuccess)
-
-        assertThat(onCompleteCalls.awaitItem()).isNotNull()
-    }
-
-    @Test
     fun `state updates to Processing when confirmation is in progress`() = runScenario(
         paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
         tapToAddMode = TapToAddMode.Complete,
@@ -223,7 +213,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
     }
 
     @Test
-    fun `state updates to Complete when confirmation succeeds`() = runScenario(
+    fun `state calls complete when confirmation succeeds`() = runScenario(
         paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
         tapToAddMode = TapToAddMode.Complete,
     ) {
@@ -238,13 +228,15 @@ internal class DefaultTapToAddConfirmationInteractorTest {
             )
 
             assertThat(awaitItem().primaryButton.state)
-                .isEqualTo(TapToAddConfirmationInteractor.State.PrimaryButton.State.Complete)
+                .isEqualTo(TapToAddConfirmationInteractor.State.PrimaryButton.State.Processing)
 
             val paymentSuccessEventCall = eventReporter.paymentSuccessCalls.awaitItem()
 
             assertThat(paymentSuccessEventCall.paymentSelection)
                 .isEqualTo(PaymentSelection.Saved(paymentMethod))
             assertThat(paymentSuccessEventCall.intentId).isEqualTo(intent.id)
+
+            assertThat(onCompleteCalls.awaitItem()).isEqualTo(Unit)
         }
     }
 
@@ -381,6 +373,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
 
             assertThat(awaitItem().form.enabled).isFalse()
             assertThat(eventReporter.paymentSuccessCalls.awaitItem()).isNotNull()
+            assertThat(onCompleteCalls.awaitItem()).isEqualTo(Unit)
         }
     }
 

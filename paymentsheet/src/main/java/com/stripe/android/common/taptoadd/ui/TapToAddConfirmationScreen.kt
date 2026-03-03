@@ -18,7 +18,6 @@ import com.stripe.android.uicore.strings.resolve
 internal fun TapToAddConfirmationScreen(
     state: TapToAddConfirmationInteractor.State,
     onPrimaryButtonPress: () -> Unit,
-    onComplete: () -> Unit,
 ) {
     TapToAddCardLayout {
         TapToAddCard(state.cardBrand, state.last4)
@@ -58,10 +57,8 @@ internal fun TapToAddConfirmationScreen(
                         PrimaryButtonProcessingState.Idle(null)
                     TapToAddConfirmationInteractor.State.PrimaryButton.State.Processing ->
                         PrimaryButtonProcessingState.Processing
-                    TapToAddConfirmationInteractor.State.PrimaryButton.State.Complete ->
-                        PrimaryButtonProcessingState.Completed
                 },
-                onProcessingCompleted = onComplete,
+                onProcessingCompleted = {},
                 onClick = onPrimaryButtonPress,
             )
         }

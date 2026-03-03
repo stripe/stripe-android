@@ -1,20 +1,21 @@
 package com.stripe.android.common.taptoadd.ui
 
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.screenshottesting.PaparazziRule
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.junit.Rule
 import org.junit.Test
 import kotlin.String
-import kotlin.properties.Delegates
 
 class TapToAddLayoutScreenshotTest {
     @get:Rule
@@ -24,27 +25,24 @@ class TapToAddLayoutScreenshotTest {
     )
 
     @Test
-    fun sharedTransitionFromCardAddedToConfirmation() {
+    fun sharedTransitionFromConfirmationToCompleted() {
         paparazziRule.gif(
-            end = 4500L
+            end = 2500L
         ) {
             TapToAddTheme {
-                val screen by remember {
-                    var state by Delegates.notNull<MutableState<TapToAddNavigator.Screen>>()
-
-                    state = mutableStateOf(
-                        TapToAddNavigator.Screen.CardAdded(
-                            interactor = FakeTapToAddCardAddedInteractor(
-                                onShown = {
-                                    state.value = TapToAddNavigator.Screen.Confirmation(
-                                        interactor = FakeTapToAddConfirmationInteractor(),
-                                    )
-                                }
-                            )
+                var screen by remember {
+                    mutableStateOf<TapToAddNavigator.Screen>(
+                        TapToAddNavigator.Screen.Confirmation(
+                            interactor = FakeTapToAddConfirmationInteractor(),
                         )
                     )
+                }
 
-                    state
+                LaunchedEffect(Unit) {
+                    delay(1000L)
+                    screen = TapToAddNavigator.Screen.Completed(
+                        interactor = FakeTapToAddCompletedInteractor(),
+                    )
                 }
 
                 TapToAddLayout(
@@ -92,14 +90,6 @@ class TapToAddLayoutScreenshotTest {
     fun confirmationProcessing() {
         confirmationScreenshotTest(
             primaryButtonState = TapToAddConfirmationInteractor.State.PrimaryButton.State.Processing,
-            error = null,
-        )
-    }
-
-    @Test
-    fun confirmationComplete() {
-        confirmationScreenshotTest(
-            primaryButtonState = TapToAddConfirmationInteractor.State.PrimaryButton.State.Complete,
             error = null,
         )
     }
@@ -155,16 +145,11 @@ class TapToAddLayoutScreenshotTest {
 
     private object FakeTapToAddCollectingInteractor : TapToAddCollectingInteractor
 
-    private class FakeTapToAddCardAddedInteractor(
-        private val onShown: () -> Unit,
-    ) : TapToAddCardAddedInteractor {
-        override val cardBrand: CardBrand = CardBrand.Visa
-        override val last4: String = "4242"
-
-        override fun onShown() {
-            onShown.invoke()
-        }
-    }
+    private class FakeTapToAddCompletedInteractor(
+        override val cardBrand: CardBrand = CardBrand.Visa,
+        override val last4: String = "4242",
+        override val label: ResolvableString = "Paid $50.99".resolvableString,
+    ) : TapToAddCompletedInteractor
 
     private class FakeTapToAddConfirmationInteractor(
         cardBrand: CardBrand = CardBrand.Visa,
