@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.Colors
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -27,7 +26,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntOffset
@@ -55,74 +53,43 @@ fun CardBrandChoiceSelector(
 ) {
     var showPopup by remember { mutableStateOf(!hasMadeSelection) }
 
-    Box {
-        Box(
+    Box(
+        Modifier
+            .padding(end = SELECTOR_END_PADDING)
+            .border(
+                width = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
+                color = MaterialTheme.stripeColors.componentBorder,
+                shape = MaterialTheme.stripeShapes.roundedCornerShape
+            )
+            .clip(MaterialTheme.stripeShapes.roundedCornerShape)
+    ) {
+        Row(
             Modifier
-                .padding(end = SELECTOR_END_PADDING)
-                .border(
-                    width = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
-                    color = MaterialTheme.stripeColors.componentBorder,
-                    shape = MaterialTheme.stripeShapes.roundedCornerShape
-                )
-                .clip(MaterialTheme.stripeShapes.roundedCornerShape)
+                .height(IntrinsicSize.Min)
         ) {
-            Row(
-                Modifier
-                    .height(IntrinsicSize.Min)
-            ) {
-                items.forEachIndexed { index, item ->
-                    CardBrandChoiceItem(
-                        item = item,
-                        isSelected = item == currentItem,
-                        onItemSelected = {
-                            showPopup = false
-                            onItemSelected(item)
-                        }
-                    )
-                    if (index != items.lastIndex) {
-                        Divider(
-                            modifier = Modifier
-                                .width(1.dp)
-                                .fillMaxHeight(1f),
-                            color = MaterialTheme.stripeColors.componentBorder
-                        )
+            items.forEachIndexed { index, item ->
+                CardBrandChoiceItem(
+                    item = item,
+                    isSelected = item == currentItem,
+                    onItemSelected = {
+                        showPopup = false
+                        onItemSelected(item)
                     }
+                )
+                if (index != items.lastIndex) {
+                    Divider(
+                        modifier = Modifier
+                            .width(1.dp)
+                            .fillMaxHeight(1f),
+                        color = MaterialTheme.stripeColors.componentBorder
+                    )
                 }
             }
         }
+    }
 
-        if (showPopup && hasFocus) {
-            Popup(
-                popupPositionProvider = object : PopupPositionProvider {
-                    override fun calculatePosition(
-                        anchorBounds: IntRect,
-                        windowSize: IntSize,
-                        layoutDirection: LayoutDirection,
-                        popupContentSize: IntSize
-                    ): IntOffset = IntOffset(
-                        x = anchorBounds.left + (anchorBounds.width - popupContentSize.width) / 2,
-                        y = anchorBounds.bottom
-                    )
-                }
-            ) {
-                Surface(
-                    elevation = 4.dp,
-                    shape = MaterialTheme.stripeShapes.roundedCornerShape,
-                    modifier = Modifier
-                        .offset(
-                            x = (-SELECTOR_END_PADDING)
-                        )
-                        .background(color = MaterialTheme.stripeColors.component)
-                ) {
-                    Text(
-                        text = popupMessage.resolve(),
-                        color = MaterialTheme.stripeColors.subtitle,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                        style = MaterialTheme.typography.caption
-                    )
-                }
-            }
-        }
+    if (showPopup && hasFocus) {
+        ChooseCardBrandPopup(popupMessage)
     }
 }
 
@@ -161,6 +128,42 @@ private fun CardBrandChoiceItem(
             Image(
                 painter = painterResource(id = item.icon),
                 contentDescription = item.label.resolve(),
+            )
+        }
+    }
+}
+
+@Composable
+private fun ChooseCardBrandPopup(
+    popupMessage: ResolvableString
+) {
+    Popup(
+        popupPositionProvider = object : PopupPositionProvider {
+            override fun calculatePosition(
+                anchorBounds: IntRect,
+                windowSize: IntSize,
+                layoutDirection: LayoutDirection,
+                popupContentSize: IntSize
+            ): IntOffset = IntOffset(
+                x = anchorBounds.left + (anchorBounds.width - popupContentSize.width) / 2,
+                y = anchorBounds.bottom
+            )
+        }
+    ) {
+        Surface(
+            elevation = 4.dp,
+            shape = MaterialTheme.stripeShapes.roundedCornerShape,
+            modifier = Modifier
+                .offset(
+                    x = (-SELECTOR_END_PADDING)
+                )
+                .background(color = MaterialTheme.stripeColors.component)
+        ) {
+            Text(
+                text = popupMessage.resolve(),
+                color = MaterialTheme.stripeColors.subtitle,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                style = MaterialTheme.typography.caption
             )
         }
     }
