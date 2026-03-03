@@ -85,6 +85,21 @@ internal class DefaultIntentConfirmationChallengeAnalyticsEventsReporterTest {
     }
 
     @Test
+    fun testOnCancel() = runScenario { eventsReporter, fakeAnalyticsRequestExecutor ->
+        eventsReporter.onStart()
+        ShadowSystemClock.advanceBy(12, TimeUnit.MILLISECONDS)
+
+        eventsReporter.onCancel()
+
+        val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
+
+        assertThat(loggedRequests).hasSize(2)
+        val loggedParams = loggedRequests.last().params
+        assertThat(loggedParams).containsEntry("event", "elements.intent_confirmation_challenge.cancel")
+        assertThat(loggedParams).containsEntry("duration", 12f)
+    }
+
+    @Test
     fun testOnWebViewLoaded() = runScenario { eventsReporter, fakeAnalyticsRequestExecutor ->
         eventsReporter.onStart()
         ShadowSystemClock.advanceBy(8, TimeUnit.MILLISECONDS)

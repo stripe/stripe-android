@@ -33,6 +33,12 @@ internal sealed interface IntentConfirmationChallengeAnalyticsEvent : AnalyticsE
         override val eventName = "elements.intent_confirmation_challenge.error"
     }
 
+    class Cancel(val duration: Float) : IntentConfirmationChallengeAnalyticsEvent {
+        override val params: Map<String, Any?>
+            get() = mapOf(FIELD_DURATION to duration)
+        override val eventName = "elements.intent_confirmation_challenge.cancel"
+    }
+
     class WebViewLoaded(val duration: Float) : IntentConfirmationChallengeAnalyticsEvent {
         override val params: Map<String, Any?>
             get() = mapOf(FIELD_DURATION to duration)

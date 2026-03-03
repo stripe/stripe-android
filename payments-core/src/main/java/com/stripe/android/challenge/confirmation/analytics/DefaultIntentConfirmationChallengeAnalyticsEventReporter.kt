@@ -40,6 +40,11 @@ internal class DefaultIntentConfirmationChallengeAnalyticsEventReporter @Inject 
         )
     }
 
+    override fun onCancel() {
+        val duration = durationProvider.end(DurationProvider.Key.IntentConfirmationChallenge)
+        fireEvent(IntentConfirmationChallengeAnalyticsEvent.Cancel(durationInMs(duration)))
+    }
+
     override fun onWebViewLoaded() {
         val duration = durationProvider.end(DurationProvider.Key.IntentConfirmationChallengeWebViewLoaded)
         fireEvent(IntentConfirmationChallengeAnalyticsEvent.WebViewLoaded(durationInMs(duration)))
