@@ -89,19 +89,8 @@ internal class DefaultTapToAddCollectionHandler(
     override suspend fun collect(
         metadata: PaymentMethodMetadata
     ): TapToAddCollectionHandler.CollectionState = runCatching {
-        val customerInfo = (
-            metadata.customerMetadata?.savedPaymentMethodAccess
-                as? SavedPaymentMethodAccess.Customer
-            )?.info
-
-        if (customerInfo == null) {
-            val exception = IllegalStateException("Attempted to collect with tap to add without a customer")
-
-            return@runCatching TapToAddCollectionHandler.CollectionState.FailedCollection(
-                error = exception,
-                displayMessage = exception.stripeErrorMessage(),
-            )
-        }
+        val customerInfo = resolveCustomerInfo(metadata)
+            ?: return@runCatching failedCollection(metadata)
 
         if (!connectionManager.isConnected) {
             connectionManager.connect()
@@ -159,6 +148,30 @@ internal class DefaultTapToAddCollectionHandler(
         val paymentMethod = fetchPaymentMethod(confirmedIntent, customerInfo)
 
         return TapToAddCollectionHandler.CollectionState.Collected(paymentMethod)
+    }
+
+    private fun resolveCustomerInfo(
+        metadata: PaymentMethodMetadata,
+    ): CustomerRepository.CustomerInfo? {
+        return when (val access = metadata.customerMetadata?.savedPaymentMethodAccess) {
+            is SavedPaymentMethodAccess.Customer -> access.info
+            is SavedPaymentMethodAccess.CheckoutSession, null -> null
+        }
+    }
+
+    private fun failedCollection(
+        metadata: PaymentMethodMetadata,
+    ): TapToAddCollectionHandler.CollectionState.FailedCollection {
+        val message = when (metadata.customerMetadata?.savedPaymentMethodAccess) {
+            is SavedPaymentMethodAccess.CheckoutSession ->
+                "Attempted to collect with tap to add using CheckoutSession"
+            else -> "Attempted to collect with tap to add without a customer"
+        }
+        val error = IllegalStateException(message)
+        return TapToAddCollectionHandler.CollectionState.FailedCollection(
+            error = error,
+            displayMessage = error.stripeErrorMessage(),
+        )
     }
 
     private fun setUxConfiguration() {

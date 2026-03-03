@@ -19,6 +19,7 @@ import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.confirmation.intent.CallbackNotFoundException
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CreateIntentResult
+import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodAccess
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeErrorReporter
@@ -187,6 +188,27 @@ class TapToAddCollectionHandlerTest {
         assertThat(failed.error).isInstanceOf(IllegalStateException::class.java)
         assertThat(failed.error.message)
             .isEqualTo("Attempted to collect with tap to add without a customer")
+    }
+
+    @Test
+    fun `handler returns FailedCollection when using CheckoutSession`() = runScenario {
+        val metadataWithCheckoutSession = DEFAULT_METADATA.copy(
+            customerMetadata = DEFAULT_METADATA.customerMetadata?.copy(
+                savedPaymentMethodAccess = SavedPaymentMethodAccess.CheckoutSession(
+                    sessionId = "cs_123",
+                ),
+            ),
+        )
+
+        val result = handler.collect(metadataWithCheckoutSession)
+
+        assertThat(result).isInstanceOf<TapToAddCollectionHandler.CollectionState.FailedCollection>()
+
+        val failed = result as TapToAddCollectionHandler.CollectionState.FailedCollection
+
+        assertThat(failed.error).isInstanceOf(IllegalStateException::class.java)
+        assertThat(failed.error.message)
+            .isEqualTo("Attempted to collect with tap to add using CheckoutSession")
     }
 
     @Test
