@@ -77,9 +77,10 @@ internal class OnrampInteractor @Inject constructor(
             OnrampState(
                 configurationState = configurationState,
                 cryptoCustomerId = configurationState.cryptoCustomerId ?: currentState.cryptoCustomerId,
-                // Preserve active checkout state across reconfiguration (e.g. ViewModel recreation)
+                collectingPaymentMethodType = currentState.collectingPaymentMethodType,
                 checkoutState = currentState.checkoutState,
                 platformKeyCache = currentState.platformKeyCache,
+                selectedPaymentSource = currentState.selectedPaymentSource,
             )
         }
 
