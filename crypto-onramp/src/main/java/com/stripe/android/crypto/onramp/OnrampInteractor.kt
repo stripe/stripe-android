@@ -47,11 +47,13 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
+import android.os.Parcelable
 import androidx.lifecycle.SavedStateHandle
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -764,13 +766,11 @@ internal class OnrampInteractor @Inject constructor(
         if (status is Status.RequiresNextAction) return status.onrampSessionId
 
         // Process death recovery: restore from SavedStateHandle
-        val savedSessionId = savedStateHandle.get<String>(KEY_PENDING_CHECKOUT_SESSION_ID) ?: return null
-        if (_state.value.cryptoCustomerId == null) {
-            savedStateHandle.get<String>(KEY_CHECKOUT_CRYPTO_CUSTOMER_ID)?.let { savedId ->
-                _state.update { it.copy(cryptoCustomerId = savedId) }
-            }
+        val pending = savedStateHandle.get<PendingCheckout>(KEY_PENDING_CHECKOUT) ?: return null
+        if (_state.value.cryptoCustomerId == null && pending.cryptoCustomerId != null) {
+            _state.update { it.copy(cryptoCustomerId = pending.cryptoCustomerId) }
         }
-        return savedSessionId
+        return pending.onrampSessionId
     }
 
     /**
@@ -831,13 +831,14 @@ internal class OnrampInteractor @Inject constructor(
     }
 
     private fun savePendingCheckout(onrampSessionId: String) {
-        savedStateHandle[KEY_PENDING_CHECKOUT_SESSION_ID] = onrampSessionId
-        savedStateHandle[KEY_CHECKOUT_CRYPTO_CUSTOMER_ID] = _state.value.cryptoCustomerId
+        savedStateHandle[KEY_PENDING_CHECKOUT] = PendingCheckout(
+            onrampSessionId = onrampSessionId,
+            cryptoCustomerId = _state.value.cryptoCustomerId,
+        )
     }
 
     internal fun clearPendingCheckout() {
-        savedStateHandle.remove<String>(KEY_PENDING_CHECKOUT_SESSION_ID)
-        savedStateHandle.remove<String>(KEY_CHECKOUT_CRYPTO_CUSTOMER_ID)
+        savedStateHandle.remove<PendingCheckout>(KEY_PENDING_CHECKOUT)
     }
 
     /**
@@ -925,8 +926,13 @@ internal class OnrampInteractor @Inject constructor(
     }
 }
 
-private const val KEY_PENDING_CHECKOUT_SESSION_ID = "onramp_pending_checkout_session_id"
-private const val KEY_CHECKOUT_CRYPTO_CUSTOMER_ID = "onramp_checkout_crypto_customer_id"
+private const val KEY_PENDING_CHECKOUT = "onramp_pending_checkout"
+
+@Parcelize
+internal data class PendingCheckout(
+    val onrampSessionId: String,
+    val cryptoCustomerId: String?,
+) : Parcelable
 
 internal data class OnrampState(
     val configurationState: OnrampConfiguration.State? = null,
