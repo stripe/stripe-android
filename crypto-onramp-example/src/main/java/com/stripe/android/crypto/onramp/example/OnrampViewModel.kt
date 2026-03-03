@@ -54,7 +54,7 @@ import kotlinx.serialization.json.Json
 @Suppress("TooManyFunctions", "LargeClass")
 internal class OnrampViewModel(
     private val application: Application,
-    savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) {
 
     internal val callbacks = OnrampCallbacks()
@@ -69,19 +69,14 @@ internal class OnrampViewModel(
     val onrampCoordinator: OnrampCoordinator =
         OnrampCoordinator
             .Builder()
-            .build(
-                application,
-                savedStateHandle,
-                callbacks,
-                )
+            .build(application, savedStateHandle, callbacks)
 
     private val testBackendRepository = TestBackendRepository()
 
-    private val _uiState = MutableStateFlow(
+    private val savedUiStateSnapshot get(): OnrampUiStateSnapshot? =
         savedStateHandle.get<OnrampUiStateSnapshot>(KEY_UI_SNAPSHOT)
-            ?.toUiState()
-            ?: OnrampUiState()
-    )
+
+    private val _uiState = MutableStateFlow(savedUiStateSnapshot?.toUiState()?: OnrampUiState())
     val uiState: StateFlow<OnrampUiState> = _uiState.asStateFlow()
 
     private val _message = MutableStateFlow<String?>(null)
@@ -160,9 +155,7 @@ internal class OnrampViewModel(
 
             onrampCoordinator.configure(configuration = configuration)
 
-            val restored = savedStateHandle.get<OnrampUiStateSnapshot>(KEY_UI_SNAPSHOT) != null
-
-            if (!restored) {
+            if (savedUiStateSnapshot == null) {
                 loadUserData()?.let { data ->
                     _uiState.update {
                         it.copy(email = data.email, authToken = data.token, screen = Screen.SeamlessSignIn)
