@@ -14,10 +14,12 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.analytics.ErrorReporter.ExpectedErrorEvent
+import com.stripe.android.payments.core.analytics.ErrorReporter.UnexpectedErrorEvent
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -162,7 +164,7 @@ internal class IntentConfirmationChallengeViewModelTest {
     }
 
     @Test
-    fun `when closeClicked is called and intent id is null, errorReporter reports and result emits Failed`() {
+    fun `when closeClicked is called and intent id is null, result emits Canceled and errorReporter reports`() {
         val fakeErrorReporter = FakeErrorReporter()
         val argsWithNullId = IntentConfirmationChallengeArgs(
             publishableKey = "pk_test_123",
@@ -174,43 +176,47 @@ internal class IntentConfirmationChallengeViewModelTest {
                 viewModel.closeClicked()
 
                 val result = awaitItem()
-                assertThat(result).isInstanceOf(IntentConfirmationChallengeActivityResult.Failed::class.java)
-                val failedResult = result as IntentConfirmationChallengeActivityResult.Failed
-                assertThat(failedResult.error).isInstanceOf(IllegalArgumentException::class.java)
-                assertThat(failedResult.error).hasMessageThat().isEqualTo("Intent parameters are unavailable")
+                assertThat(result).isInstanceOf(IntentConfirmationChallengeActivityResult.Canceled::class.java)
+                val canceledResult = result as IntentConfirmationChallengeActivityResult.Canceled
+                assertThat(canceledResult.clientSecret).isEqualTo(argsWithNullId.intent.clientSecret)
 
                 ensureAllEventsConsumed()
             }
 
             val errorCall = fakeErrorReporter.awaitCall()
             assertThat(errorCall.errorEvent).isEqualTo(
-                ErrorReporter.UnexpectedErrorEvent.INTENT_CONFIRMATION_CHALLENGE_INTENT_PARAMETERS_UNAVAILABLE
+                UnexpectedErrorEvent.INTENT_CONFIRMATION_CHALLENGE_INTENT_PARAMETERS_UNAVAILABLE
             )
             fakeErrorReporter.ensureAllEventsConsumed()
         }
     }
 
     @Test
-    fun `when closeClicked is called and verify fails, result emits Failed`() {
-        val expectedError = IOException("Network error")
+    fun `when closeClicked is called and cancel fails, result emits Canceled and error is reported`() {
+        val fakeErrorReporter = FakeErrorReporter()
         val fakeStripeRepository = FakeStripeRepository(
-            cancelResult = Result.failure(expectedError)
+            cancelResult = Result.failure(Throwable("Network error"))
         )
-        testScenario(stripeRepository = fakeStripeRepository) {
+        testScenario(stripeRepository = fakeStripeRepository, errorReporter = fakeErrorReporter) {
             viewModel.result.test {
                 viewModel.closeClicked()
 
                 val result = awaitItem()
-                assertThat(result).isInstanceOf(IntentConfirmationChallengeActivityResult.Failed::class.java)
-                val failedResult = result as IntentConfirmationChallengeActivityResult.Failed
-                assertThat(failedResult.clientSecret).isEqualTo(TEST_ARGS.intent.clientSecret)
-                assertThat(failedResult.error).isEqualTo(expectedError)
+                assertThat(result).isInstanceOf(IntentConfirmationChallengeActivityResult.Canceled::class.java)
+                val canceledResult = result as IntentConfirmationChallengeActivityResult.Canceled
+                assertThat(canceledResult.clientSecret).isEqualTo(TEST_ARGS.intent.clientSecret)
 
                 ensureAllEventsConsumed()
             }
 
             fakeStripeRepository.awaitCall()
             fakeStripeRepository.ensureAllEventsConsumed()
+
+            val errorCall = fakeErrorReporter.awaitCall()
+            assertThat(errorCall.errorEvent)
+                .isEqualTo(ExpectedErrorEvent.INTENT_CONFIRMATION_CHALLENGE_CHALLENGE_CANCELLATION_REQUEST_FAILED)
+            assertThat(errorCall.stripeException?.message).isEqualTo("Network error")
+            fakeErrorReporter.ensureAllEventsConsumed()
         }
     }
 
@@ -278,6 +284,7 @@ internal class IntentConfirmationChallengeViewModelTest {
         stripeRepository = stripeRepository,
         errorReporter = errorReporter,
         requestOptions = REQUEST_OPTIONS,
+        fireAndForgetScope = TestScope(testDispatcher)
     )
 
     private class FakeStripeRepository(

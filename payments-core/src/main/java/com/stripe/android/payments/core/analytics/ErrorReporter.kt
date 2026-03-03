@@ -186,6 +186,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         HCAPTCHA_FAILURE(
             eventName = "elements.captcha.passive.expected_failure"
         ),
+        INTENT_CONFIRMATION_CHALLENGE_CHALLENGE_CANCELLATION_REQUEST_FAILED(
+            eventName = "intent_confirmation_challenge.challenge_cancellation_request_failed"
+        ),
         TAP_TO_ADD_DISCOVER_READERS_CALL_FAILURE(
             eventName = "elements.tap_to_add.discover_readers_call.failure"
         ),

@@ -23,6 +23,9 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -77,6 +80,11 @@ internal interface IntentConfirmationChallengeModule {
         @Provides
         @Named(SDK_USER_AGENT)
         fun providesSdkUserAgent(): String = RequestHeadersFactory.getUserAgent()
+
+        @OptIn(DelicateCoroutinesApi::class)
+        @Provides
+        @FireAndForgetScope
+        fun providesCoroutineScope(): CoroutineScope = GlobalScope
     }
 }
 
