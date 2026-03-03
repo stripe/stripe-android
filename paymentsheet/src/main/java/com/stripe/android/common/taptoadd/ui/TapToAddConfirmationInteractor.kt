@@ -52,8 +52,7 @@ internal interface TapToAddConfirmationInteractor {
         ) {
             enum class State {
                 Idle,
-                Processing,
-                Complete
+                Processing
             }
         }
     }
@@ -62,7 +61,6 @@ internal interface TapToAddConfirmationInteractor {
 
     sealed interface Action {
         data object PrimaryButtonPressed : Action
-        data object ShownSuccess : Action
     }
 
     interface Factory {
@@ -79,7 +77,7 @@ internal class DefaultTapToAddConfirmationInteractor(
     private val linkFormHelper: SavedPaymentMethodLinkFormHelper,
     private val eventReporter: EventReporter,
     private val onContinue: (paymentSelection: PaymentSelection.Saved) -> Unit,
-    private val onComplete: () -> Unit,
+    private val onComplete: (paymentMethod: PaymentMethod) -> Unit,
 ) : TapToAddConfirmationInteractor {
     private val selection = linkFormHelper.state.mapAsStateFlow {
         PaymentSelection.Saved(paymentMethod = paymentMethod)
@@ -102,6 +100,10 @@ internal class DefaultTapToAddConfirmationInteractor(
                         result = confirmationState.result,
                         paymentSelection = selection.value,
                     )
+
+                    if (confirmationState.result is ConfirmationHandler.Result.Succeeded) {
+                        onComplete(paymentMethod)
+                    }
                 }
 
                 _state.update { state ->
@@ -127,7 +129,6 @@ internal class DefaultTapToAddConfirmationInteractor(
                     TapToAddMode.Complete -> onPrimaryButtonWithCompleteMode()
                 }
             }
-            TapToAddConfirmationInteractor.Action.ShownSuccess -> onComplete()
         }
     }
 
@@ -213,7 +214,7 @@ internal class DefaultTapToAddConfirmationInteractor(
                 TapToAddConfirmationInteractor.State.PrimaryButton.State.Processing
             is ConfirmationHandler.State.Complete -> {
                 if (confirmationState.result is ConfirmationHandler.Result.Succeeded) {
-                    TapToAddConfirmationInteractor.State.PrimaryButton.State.Complete
+                    TapToAddConfirmationInteractor.State.PrimaryButton.State.Processing
                 } else {
                     TapToAddConfirmationInteractor.State.PrimaryButton.State.Idle
                 }
@@ -253,6 +254,7 @@ internal class DefaultTapToAddConfirmationInteractor(
         private val linkFormHelper: SavedPaymentMethodLinkFormHelper,
         private val confirmationHandler: ConfirmationHandler,
         private val eventReporter: EventReporter,
+        private val tapToAddCompletedInteractorFactory: TapToAddCompletedInteractor.Factory,
         private val tapToAddNavigator: Provider<TapToAddNavigator>,
     ) : TapToAddConfirmationInteractor.Factory {
         override fun create(paymentMethod: PaymentMethod): TapToAddConfirmationInteractor {
@@ -264,8 +266,14 @@ internal class DefaultTapToAddConfirmationInteractor(
                 eventReporter = eventReporter,
                 coroutineScope = viewModelScope,
                 linkFormHelper = linkFormHelper,
-                onComplete = {
-                    tapToAddNavigator.get().performAction(TapToAddNavigator.Action.Complete)
+                onComplete = { paymentMethod ->
+                    tapToAddNavigator.get().performAction(
+                        TapToAddNavigator.Action.NavigateTo(
+                            screen = TapToAddNavigator.Screen.Completed(
+                                interactor = tapToAddCompletedInteractorFactory.create(paymentMethod)
+                            ),
+                        ),
+                    )
                 },
                 onContinue = { paymentSelection ->
                     tapToAddNavigator.get().performAction(TapToAddNavigator.Action.Continue(paymentSelection))
