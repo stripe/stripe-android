@@ -1596,7 +1596,7 @@ internal class PlaygroundTestDriver(
             composeTestRule
                 .onAllNodesWithTag("consent_cta")
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isNotEmpty()
+                .size == 1
         }
 
         clickButtonWithTag("consent_cta")
@@ -1605,7 +1605,7 @@ internal class PlaygroundTestDriver(
 
         // Verifies bank in web view so Compose hierarchy can detach. Button should be available
         // after web view verification.
-        clickButtonWithTag("prepane_cta", composeCanDetach = true)
+        clickButtonWithTag("connect_account_button", composeCanDetach = true)
 
         clickButtonWithTag("skip_cta")
         clickButtonWithTag("done_button")
@@ -1626,8 +1626,11 @@ internal class PlaygroundTestDriver(
         clickButtonWithTag("consent_cta")
         clickButtonWithTag("existing_email-button")
         clickButtonWithTag("test_mode_fill_button")
+
+        // TODO: Replace with institution ID tag when available
+        clickButton("Success")
+
         clickButtonWithTag("link_account_picker_cta")
-        clickButtonWithTag("prepane_cta")
         clickButtonWithTag("done_button")
     }
 
