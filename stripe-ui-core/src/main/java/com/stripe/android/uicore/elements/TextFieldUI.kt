@@ -549,6 +549,8 @@ private fun CardBrandChoice(
         modifier = Modifier
             .focusProperties { canFocus = false }
             .testTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
+            .padding(10.dp),
+        contentAlignment = Alignment.Center
     ) {
         if (icon.items.size > 1) {
             CardBrandChoiceSelector(

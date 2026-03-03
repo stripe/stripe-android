@@ -55,7 +55,6 @@ fun CardBrandChoiceSelector(
 
     Box(
         Modifier
-            .padding(end = SELECTOR_END_PADDING)
             .border(
                 width = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
                 color = MaterialTheme.stripeColors.componentBorder,

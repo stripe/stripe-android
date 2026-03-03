@@ -193,7 +193,7 @@ internal class CardNumberControllerTest {
             assertThat(awaitItem() as TextFieldIcon.CardBrandChoice)
                 .isEqualTo(
                     TextFieldIcon.CardBrandChoice(
-                        message = R.string.stripe_card_brand_choice_choose_card_brand.resolvableString,
+                        message = R.string.stripe_card_brand_choice_selection_header.resolvableString,
                         currentItem = TextFieldIcon.CardBrandChoice.Item(
                             id = CardBrand.Unknown.code,
                             label = R.string.stripe_card_brand_choice_no_selection.resolvableString,
@@ -260,7 +260,7 @@ internal class CardNumberControllerTest {
             assertThat(awaitItem() as TextFieldIcon.CardBrandChoice)
                 .isEqualTo(
                     TextFieldIcon.CardBrandChoice(
-                        message = R.string.stripe_card_brand_choice_choose_card_brand.resolvableString,
+                        message = R.string.stripe_card_brand_choice_selection_header.resolvableString,
                         currentItem = TextFieldIcon.CardBrandChoice.Item(
                             id = CardBrand.CartesBancaires.code,
                             label = "Cartes Bancaires".resolvableString,
@@ -308,7 +308,7 @@ internal class CardNumberControllerTest {
             assertThat(awaitItem() as TextFieldIcon.CardBrandChoice)
                 .isEqualTo(
                     TextFieldIcon.CardBrandChoice(
-                        message = R.string.stripe_card_brand_choice_choose_card_brand.resolvableString,
+                        message = R.string.stripe_card_brand_choice_selection_header.resolvableString,
                         currentItem = TextFieldIcon.CardBrandChoice.Item(
                             id = CardBrand.CartesBancaires.code,
                             label = "Cartes Bancaires".resolvableString,
@@ -359,7 +359,7 @@ internal class CardNumberControllerTest {
             assertThat(awaitItem() as TextFieldIcon.CardBrandChoice)
                 .isEqualTo(
                     TextFieldIcon.CardBrandChoice(
-                        message = R.string.stripe_card_brand_choice_choose_card_brand.resolvableString,
+                        message = R.string.stripe_card_brand_choice_selection_header.resolvableString,
                         currentItem = TextFieldIcon.CardBrandChoice.Item(
                             id = CardBrand.CartesBancaires.code,
                             label = "Cartes Bancaires".resolvableString,
