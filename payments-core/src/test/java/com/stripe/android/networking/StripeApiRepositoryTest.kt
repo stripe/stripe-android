@@ -167,6 +167,18 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
+    fun testGetRetrieveCustomerPaymentMethodUrl() {
+        val customerId = "cus_123abc"
+        val paymentMethodId = "pm_456xyz"
+        val url = StripeApiRepository.getRetrieveCustomerPaymentMethodUrl(
+            customerId,
+            paymentMethodId
+        )
+        assertThat(url)
+            .isEqualTo("https://api.stripe.com/v1/customers/$customerId/payment_methods/$paymentMethodId")
+    }
+
+    @Test
     fun testGetAddCustomerSourceUrl() {
         val customerId = "cus_123abc"
         val addSourceUrl = StripeApiRepository.getAddCustomerSourceUrl(customerId)
@@ -1279,6 +1291,53 @@ internal class StripeApiRepositoryTest {
             ).getOrThrow()
         assertThat(paymentMethods)
             .isEmpty()
+    }
+
+    @Test
+    fun retrieveCustomerPaymentMethod_whenSuccess_returnsPaymentMethod() = runTest {
+        val customerId = "cus_EzHwfOXxvAwRIW"
+        val paymentMethodId = "pm_1EVNYJCRMbs6FrXfG8n52JaK"
+        val responseBody = createCustomerPaymentMethodResponseBody(
+            paymentMethodId = paymentMethodId,
+            customerId = customerId,
+        )
+        val stripeResponse = StripeResponse(200, responseBody)
+        val options = ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
+        val url = StripeApiRepository.getRetrieveCustomerPaymentMethodUrl(
+            customerId,
+            paymentMethodId
+        )
+
+        whenever(
+            stripeNetworkClient.executeRequest(
+                argThat<ApiRequest> {
+                    ApiRequestMatcher(
+                        StripeRequest.Method.GET,
+                        url,
+                        options,
+                        null
+                    ).matches(this)
+                }
+            )
+        ).thenReturn(stripeResponse)
+
+        val stripeApiRepository = create()
+        val paymentMethod = stripeApiRepository.retrieveCustomerPaymentMethod(
+            customerId = customerId,
+            paymentMethodId = paymentMethodId,
+            productUsageTokens = setOf("PaymentSheet"),
+            requestOptions = options
+        ).getOrThrow()
+
+        assertThat(paymentMethod.id).isEqualTo(paymentMethodId)
+        assertThat(paymentMethod.customerId).isEqualTo(customerId)
+        assertThat(paymentMethod.type).isEqualTo(PaymentMethod.Type.Card)
+        assertThat(paymentMethod.card?.last4).isEqualTo("4242")
+
+        verifyAnalyticsRequest(
+            PaymentAnalyticsEvent.CustomerRetrievePaymentMethod,
+            "PaymentSheet"
+        )
     }
 
     @Test
@@ -3943,6 +4002,55 @@ internal class StripeApiRepositoryTest {
 
         assertThat(result.isFailure).isTrue()
         assertThat(result.exceptionOrNull()).isInstanceOf(APIConnectionException::class.java)
+    }
+
+    private fun createCustomerPaymentMethodResponseBody(
+        paymentMethodId: String,
+        customerId: String,
+    ): String {
+        return """
+            {
+                "id": "$paymentMethodId",
+                "object": "payment_method",
+                "billing_details": {
+                    "address": {
+                        "city": null,
+                        "country": null,
+                        "line1": null,
+                        "line2": null,
+                        "postal_code": null,
+                        "state": null
+                    },
+                    "email": null,
+                    "name": null,
+                    "phone": null
+                },
+                "card": {
+                    "brand": "visa",
+                    "checks": {
+                        "address_line1_check": null,
+                        "address_postal_code_check": null,
+                        "cvc_check": null
+                    },
+                    "country": "US",
+                    "exp_month": 5,
+                    "exp_year": 2020,
+                    "fingerprint": "atmHgDo9nxHpQJiw",
+                    "funding": "credit",
+                    "generated_from": null,
+                    "last4": "4242",
+                    "three_d_secure_usage": {
+                        "supported": true
+                    },
+                    "wallet": null
+                },
+                "created": 1556736791,
+                "customer": "$customerId",
+                "livemode": false,
+                "metadata": {},
+                "type": "card"
+            }
+        """.trimIndent()
     }
 
     private fun create(productUsage: Set<String> = emptySet()): StripeApiRepository {
