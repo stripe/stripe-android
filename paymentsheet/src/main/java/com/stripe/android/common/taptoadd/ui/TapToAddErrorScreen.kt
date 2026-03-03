@@ -1,7 +1,7 @@
 package com.stripe.android.common.taptoadd.ui
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.MaterialTheme
@@ -20,36 +20,39 @@ import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.core.R as StripeCoreR
 
 @Composable
-internal fun TapToAddErrorScreen(
+internal fun ColumnScope.TapToAddErrorScreen(
     message: ResolvableString,
 ) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Image(
-            painter = painterResource(R.drawable.stripe_ic_warning_symbol),
-            contentDescription = null,
-            colorFilter = ColorFilter.tint(
-                color = MaterialTheme.colors.primaryVariant,
-            ),
-        )
+    Spacer(Modifier.weight(1f))
 
-        Spacer(Modifier.size(50.dp))
+    Image(
+        modifier = Modifier.align(Alignment.CenterHorizontally),
+        painter = painterResource(R.drawable.stripe_ic_warning_symbol),
+        contentDescription = null,
+        colorFilter = ColorFilter.tint(
+            color = MaterialTheme.colors.primaryVariant,
+        ),
+    )
 
-        Text(
-            text = stringResource(StripeCoreR.string.stripe_error),
-            color = MaterialTheme.colors.onBackground,
-            style = MaterialTheme.typography.h4,
-            fontWeight = FontWeight.W800,
-        )
+    Spacer(Modifier.size(50.dp))
 
-        Spacer(Modifier.size(10.dp))
+    Text(
+        modifier = Modifier.align(Alignment.CenterHorizontally),
+        text = stringResource(StripeCoreR.string.stripe_error),
+        color = MaterialTheme.colors.onBackground,
+        style = MaterialTheme.typography.h5,
+        fontWeight = FontWeight.W800,
+    )
 
-        Text(
-            text = message.resolve(),
-            color = MaterialTheme.colors.onBackground,
-            style = MaterialTheme.typography.h4,
-            fontWeight = FontWeight.W400
-        )
-    }
+    Spacer(Modifier.size(10.dp))
+
+    Text(
+        modifier = Modifier.align(Alignment.CenterHorizontally),
+        text = message.resolve(),
+        color = MaterialTheme.colors.onBackground,
+        style = MaterialTheme.typography.h5,
+        fontWeight = FontWeight.W400
+    )
+
+    Spacer(Modifier.weight(1f))
 }
