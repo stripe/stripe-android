@@ -462,6 +462,7 @@ internal class OnrampInteractor @Inject constructor(
     }
 
     suspend fun logOut(): OnrampLogOutResult {
+        savedStateHandle.remove<String>(KEY_CONSUMER_SESSION_SECRET)
         return when (val result = linkController.logOut()) {
             is LinkController.LogOutResult.Success -> {
                 analyticsService?.track(OnrampAnalyticsEvent.LinkLogout)
@@ -681,6 +682,7 @@ internal class OnrampInteractor @Inject constructor(
     private fun consumerSessionClientSecret(): String? =
         _state.value.linkControllerState?.internalLinkAccount?.consumerSessionClientSecret
             ?: linkController.state(application).value.internalLinkAccount?.consumerSessionClientSecret
+            ?: savedStateHandle.get<String>(KEY_CONSUMER_SESSION_SECRET)
 
     fun onLinkControllerState(linkState: LinkController.State) {
         if (analyticsService?.elementsSessionId != linkState.elementsSessionId) {
@@ -689,6 +691,11 @@ internal class OnrampInteractor @Inject constructor(
             analyticsService?.track(OnrampAnalyticsEvent.SessionCreated)
         }
         _state.value = _state.value.copy(linkControllerState = linkState)
+
+        // Persist for activity restoration
+        linkState.internalLinkAccount?.consumerSessionClientSecret?.let {
+            savedStateHandle[KEY_CONSUMER_SESSION_SECRET] = it
+        }
     }
 
     fun onAuthorize() {
@@ -928,6 +935,7 @@ internal class OnrampInteractor @Inject constructor(
 }
 
 private const val KEY_PENDING_CHECKOUT = "onramp_pending_checkout"
+private const val KEY_CONSUMER_SESSION_SECRET = "onramp_consumer_session_secret"
 
 @Parcelize
 internal data class PendingCheckout(
