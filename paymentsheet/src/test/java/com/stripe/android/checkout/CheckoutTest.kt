@@ -86,7 +86,6 @@ class CheckoutTest {
         block: suspend (Checkout) -> Unit,
     ) {
         val state = Checkout.State(
-            checkoutSessionClientSecret = "cs_test_abc123_secret_xyz",
             checkoutSessionResponse = checkoutSessionResponse,
         )
         val checkout = Checkout.createWithState(state)
