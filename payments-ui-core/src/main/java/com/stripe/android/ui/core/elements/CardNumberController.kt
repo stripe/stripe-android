@@ -286,7 +286,7 @@ internal class DefaultCardNumberController(
         _hasFocus.value = newHasFocus
     }
 
-    override fun onDropdownItemClicked(item: TextFieldIcon.Dropdown.Item) {
+    override fun onDropdownItemClicked(item: TextFieldIcon.Selector.Item) {
         mostRecentUserSelectedBrand.value = CardBrand.fromCode(item.id)
     }
 
@@ -431,8 +431,8 @@ internal class DefaultCardNumberController(
     private fun createDropdownIcon(
         brands: List<CardBrand>,
         chosen: CardBrand
-    ): TextFieldIcon.Dropdown {
-        val noSelection = TextFieldIcon.Dropdown.Item(
+    ): TextFieldIcon.Selector {
+        val noSelection = TextFieldIcon.Selector.Item(
             id = CardBrand.Unknown.code,
             label = PaymentsCoreR.string.stripe_card_brand_choice_no_selection.resolvableString,
             icon = CardBrand.Unknown.icon
@@ -440,7 +440,7 @@ internal class DefaultCardNumberController(
 
         val selected = if (brands.size == 1) {
             val onlyAvailableBrand = brands[0]
-            TextFieldIcon.Dropdown.Item(
+            TextFieldIcon.Selector.Item(
                 id = onlyAvailableBrand.code,
                 label = onlyAvailableBrand.displayName.resolvableString,
                 icon = onlyAvailableBrand.icon
@@ -448,7 +448,7 @@ internal class DefaultCardNumberController(
         } else {
             when (chosen) {
                 CardBrand.Unknown -> null
-                else -> TextFieldIcon.Dropdown.Item(
+                else -> TextFieldIcon.Selector.Item(
                     id = chosen.code,
                     label = chosen.displayName.resolvableString,
                     icon = chosen.icon
@@ -458,7 +458,7 @@ internal class DefaultCardNumberController(
 
         val items = brands.map { brand ->
             val enabled = cardBrandFilter.isAccepted(brand)
-            TextFieldIcon.Dropdown.Item(
+            TextFieldIcon.Selector.Item(
                 id = brand.code,
                 label = if (enabled) {
                     brand.displayName.resolvableString
@@ -473,7 +473,8 @@ internal class DefaultCardNumberController(
             )
         }
 
-        return TextFieldIcon.Dropdown(
+        // fix this?
+        return TextFieldIcon.Selector(
             title = PaymentsCoreR.string.stripe_card_brand_choice_selection_header.resolvableString,
             currentItem = selected ?: noSelection,
             items = items,
