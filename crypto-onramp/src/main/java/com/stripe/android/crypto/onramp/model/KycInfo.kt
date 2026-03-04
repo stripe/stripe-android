@@ -22,7 +22,7 @@ class KycInfo(
     internal val firstName: String,
     internal val lastName: String,
     internal val idNumber: String?,
-    internal val dateOfBirth: DateOfBirth,
+    internal val dateOfBirth: DateOfBirth?,
     internal val address: PaymentSheet.Address
 )
 

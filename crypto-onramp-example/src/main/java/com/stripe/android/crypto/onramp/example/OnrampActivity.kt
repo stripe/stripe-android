@@ -924,6 +924,9 @@ private fun AuthenticatedOperationsScreen(
         var firstName by remember { mutableStateOf("") }
         var lastName by remember { mutableStateOf("") }
         var ssn by remember { mutableStateOf("000000000") }
+        var dobDay by remember { mutableStateOf("") }
+        var dobMonth by remember { mutableStateOf("") }
+        var dobYear by remember { mutableStateOf("") }
 
         KYCScreen(
             firstName = firstName,
@@ -932,6 +935,12 @@ private fun AuthenticatedOperationsScreen(
             onLastNameChange = { lastName = it },
             ssn = ssn,
             onSsnChange = { ssn = it },
+            dobDay = dobDay,
+            onDobDayChange = { dobDay = it },
+            dobMonth = dobMonth,
+            onDobMonthChange = { dobMonth = it },
+            dobYear = dobYear,
+            onDobYearChange = { dobYear = it },
             onCollectKYC = { kycInfo -> onCollectKYC(kycInfo) }
         )
 
@@ -1064,6 +1073,12 @@ private fun KYCScreen(
     onLastNameChange: (String) -> Unit,
     ssn: String,
     onSsnChange: (String) -> Unit,
+    dobDay: String,
+    onDobDayChange: (String) -> Unit,
+    dobMonth: String,
+    onDobMonthChange: (String) -> Unit,
+    dobYear: String,
+    onDobYearChange: (String) -> Unit,
     onCollectKYC: (KycInfo) -> Unit
 ) {
     Column {
@@ -1077,14 +1092,27 @@ private fun KYCScreen(
         KYCTextField(lastName, "Last Name", onLastNameChange)
         KYCTextField(ssn, "SSN", onSsnChange)
 
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            KYCTextField(dobMonth, "Month", onDobMonthChange, Modifier.weight(1f), KeyboardType.Number)
+            KYCTextField(dobDay, "Day", onDobDayChange, Modifier.weight(1f), KeyboardType.Number)
+            KYCTextField(dobYear, "Year", onDobYearChange, Modifier.weight(2f), KeyboardType.Number)
+        }
+
         Button(
             onClick = {
+                val dateOfBirth = dobDay.toIntOrNull()?.let { day ->
+                    dobMonth.toIntOrNull()?.let { month ->
+                        dobYear.toIntOrNull()?.let { year ->
+                            DateOfBirth(day = day, month = month, year = year)
+                        }
+                    }
+                }
                 onCollectKYC(
                     KycInfo(
                         firstName = firstName,
                         lastName = lastName,
                         idNumber = ssn,
-                        dateOfBirth = DateOfBirth(1, month = 1, year = 1990),
+                        dateOfBirth = dateOfBirth,
                         address = PaymentSheet.Address(
                             city = "New York",
                             country = "US",
@@ -1108,18 +1136,18 @@ private fun KYCScreen(
 private fun KYCTextField(
     value: String,
     label: String,
-    onChange: (String) -> Unit
+    onChange: (String) -> Unit,
+    modifier: Modifier = Modifier.fillMaxWidth(),
+    keyboardType: KeyboardType = KeyboardType.Text,
 ) {
     OutlinedTextField(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 24.dp),
+        modifier = modifier.padding(bottom = 24.dp),
         value = value,
         onValueChange = onChange,
         label = { Text(label) },
         singleLine = true,
         enabled = true,
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next, keyboardType = keyboardType)
     )
 }
 

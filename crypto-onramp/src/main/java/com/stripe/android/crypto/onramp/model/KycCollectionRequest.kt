@@ -22,7 +22,7 @@ internal data class KycCollectionRequest(
     val idType: String?,
     @SerialName("dob")
     @Serializable(with = DateOfBirthSerializer::class)
-    val dateOfBirth: DateOfBirth,
+    val dateOfBirth: DateOfBirth?,
     @SerialName("city")
     val city: String?,
     @SerialName("country")
@@ -50,7 +50,7 @@ internal data class KycCollectionRequest(
                 firstName = kycInfo.firstName,
                 lastName = kycInfo.lastName,
                 idNumber = kycInfo.idNumber,
-                idType = SOCIAL_SECURITY_NUMBER,
+                idType = SOCIAL_SECURITY_NUMBER.takeIf { kycInfo.idNumber != null },
                 dateOfBirth = kycInfo.dateOfBirth,
                 city = kycInfo.address.city,
                 country = kycInfo.address.country,
