@@ -1,10 +1,12 @@
 package com.stripe.android.common.spms
 
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.ui.core.elements.CvcElement
 import com.stripe.android.uicore.elements.FormElement
@@ -59,7 +61,10 @@ internal class DefaultCvcFormHelper(
     }
 
     override val formElement: FormElement? = cvcElement?.let {
-        SectionElement.wrap(it)
+        SectionElement.wrap(
+            sectionFieldElement = it,
+            label = R.string.stripe_paymentsheet_confirm_your_cvc.resolvableString
+        )
     }
 
     override val state: StateFlow<CvcFormHelper.State> = cvcController.formFieldValue.mapAsStateFlow { cvcInput ->
