@@ -49,7 +49,11 @@ class CheckoutPlaygroundActivity : AppCompatActivity() {
         }
     }
 
-    private val viewModel: CheckoutPlaygroundViewModel by viewModels()
+    private val viewModel: CheckoutPlaygroundViewModel by viewModels {
+        @Suppress("DEPRECATION")
+        val checkoutState: Checkout.State = requireNotNull(intent.getParcelableExtra(CHECKOUT_STATE_KEY))
+        CheckoutPlaygroundViewModel.factory(checkoutState)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
