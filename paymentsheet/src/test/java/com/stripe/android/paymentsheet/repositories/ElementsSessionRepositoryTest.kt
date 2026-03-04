@@ -29,6 +29,7 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import androidx.test.core.app.ApplicationProvider
 import java.util.Locale
 import java.util.UUID
 import kotlin.test.Test
@@ -133,6 +134,7 @@ internal class ElementsSessionRepositoryTest {
         )
 
         val session = RealElementsSessionRepository(
+            ApplicationProvider.getApplicationContext(),
             stripeNetworkClient,
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
@@ -168,6 +170,7 @@ internal class ElementsSessionRepositoryTest {
         )
 
         val session = RealElementsSessionRepository(
+            ApplicationProvider.getApplicationContext(),
             stripeNetworkClient,
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
@@ -244,6 +247,7 @@ internal class ElementsSessionRepositoryTest {
         val expectedPaymentMethodTypes = listOf("card", "amazon_pay")
 
         val session = RealElementsSessionRepository(
+            ApplicationProvider.getApplicationContext(),
             stripeNetworkClient,
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
@@ -278,6 +282,7 @@ internal class ElementsSessionRepositoryTest {
         )
 
         val repository = RealElementsSessionRepository(
+            ApplicationProvider.getApplicationContext(),
             stripeNetworkClient,
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
@@ -313,6 +318,7 @@ internal class ElementsSessionRepositoryTest {
         )
 
         val repository = RealElementsSessionRepository(
+            ApplicationProvider.getApplicationContext(),
             stripeNetworkClient,
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
@@ -348,6 +354,7 @@ internal class ElementsSessionRepositoryTest {
         )
 
         val repository = RealElementsSessionRepository(
+            ApplicationProvider.getApplicationContext(),
             stripeNetworkClient,
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
@@ -380,6 +387,7 @@ internal class ElementsSessionRepositoryTest {
         )
 
         val repository = RealElementsSessionRepository(
+            ApplicationProvider.getApplicationContext(),
             stripeNetworkClient,
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
@@ -429,6 +437,7 @@ internal class ElementsSessionRepositoryTest {
         )
 
         val repository = RealElementsSessionRepository(
+            ApplicationProvider.getApplicationContext(),
             stripeNetworkClient,
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
@@ -472,6 +481,7 @@ internal class ElementsSessionRepositoryTest {
         )
 
         val repository = RealElementsSessionRepository(
+            ApplicationProvider.getApplicationContext(),
             stripeNetworkClient,
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
@@ -1007,6 +1017,7 @@ internal class ElementsSessionRepositoryTest {
     private fun createRepository(
         publishableKey: String = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
     ) = RealElementsSessionRepository(
+        ApplicationProvider.getApplicationContext(),
         stripeNetworkClient,
         stripeRepository,
         { PaymentConfiguration(publishableKey) },
