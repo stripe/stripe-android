@@ -78,7 +78,7 @@ internal class DefaultCardNumberController(
     workContext: CoroutineContext,
     staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
     override val initialValue: String?,
-    private val cardBrandChoiceConfig: CardBrandChoiceConfig = CardBrandChoiceConfig.Ineligible,
+    cardBrandChoiceConfig: CardBrandChoiceConfig = CardBrandChoiceConfig.Ineligible,
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
     private val cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
     private val coroutineScope: CoroutineScope = CoroutineScope(uiContext),
@@ -503,14 +503,7 @@ internal class DefaultCardNumberController(
 
         val animatedIcons = cardBrands.map { cardBrand ->
             TextFieldIcon.Trailing(cardBrand.icon, isTintable = false)
-        }.drop(STATIC_ICON_COUNT).toMutableList()
-
-        if (cardBrandChoiceConfig is CardBrandChoiceConfig.Eligible) {
-            animatedIcons.add(
-                0,
-                TextFieldIcon.Trailing(CardBrand.CartesBancaires.icon, isTintable = false)
-            )
-        }
+        }.drop(STATIC_ICON_COUNT)
 
         return TextFieldIcon.MultiTrailing(
             staticIcons = staticIcons,
