@@ -27,6 +27,7 @@ import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
 import com.stripe.android.testing.FakeLogger
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -164,7 +165,7 @@ class LogLinkGlobalHoldbackExposureTest {
     }
 
     @Test
-    fun `invoke should log exposure with returning user when user is returning`() = runTest {
+    fun `invoke should log exposure with returning user when link enabled and user needs verification`() = runTest {
         val elementsSession = createElementsSession(
             experimentsData = ElementsSession.ExperimentsData(
                 arbId = "test_arb_id",
@@ -176,12 +177,76 @@ class LogLinkGlobalHoldbackExposureTest {
         val state = createElementsState(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 linkState = LinkState(
-                    // preset link configuration with existing email.
                     configuration = TestFactory.LINK_CONFIGURATION,
                     loginState = LinkState.LoginState.NeedsVerification,
                     signupMode = null
                 )
             )
+        )
+
+        // Set lookup to fail — if the code incorrectly makes an API call,
+        // the test will fail. Link is enabled, so isReturningUser should be
+        // derived from loginState (NeedsVerification != LoggedOut → true).
+        linkRepository.lookupConsumerWithoutBackendLoggingResult =
+            Result.failure(AssertionError("Lookup should not be called when Link is enabled"))
+
+        logLinkHoldbackExperiment(
+            experimentAssignments = listOf(LINK_GLOBAL_HOLD_BACK),
+            elementsSession = elementsSession,
+            state = state
+        )
+
+        val exposureCall = eventReporter.experimentExposureCalls.awaitItem()
+        val experiment = exposureCall.experiment
+        assertTrue(experiment is LoggableExperiment.LinkHoldback)
+        assertThat(experiment.group).isEqualTo("holdback")
+        assertThat(experiment.isReturningLinkUser).isTrue()
+    }
+
+    @Test
+    fun `invoke should not log exposure and log error when link disabled and lookup fails`() = runTest {
+        val elementsSession = createElementsSession(
+            experimentsData = ElementsSession.ExperimentsData(
+                arbId = "test_arb_id",
+                experimentAssignments = mapOf(
+                    LINK_GLOBAL_HOLD_BACK to "holdback"
+                )
+            ),
+        )
+        // Link disabled (no linkState), but email available via config.
+        val state = createElementsState(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(linkState = null),
+            defaultBillingDetails = PaymentSheet.BillingDetails(email = "test@example.com"),
+        )
+
+        linkRepository.lookupConsumerWithoutBackendLoggingResult = Result.failure<ConsumerSessionLookup>(
+            IllegalArgumentException("Test exception")
+        )
+
+        logLinkHoldbackExperiment(
+            experimentAssignments = listOf(LINK_GLOBAL_HOLD_BACK),
+            elementsSession = elementsSession,
+            state = state
+        )
+
+        eventReporter.experimentExposureCalls.expectNoEvents()
+        assertThat(logger.errorLogs.last().first).isEqualTo("Failed to log Global holdback exposure")
+    }
+
+    @Test
+    fun `invoke should log exposure with returning user when link disabled and lookup succeeds`() = runTest {
+        val elementsSession = createElementsSession(
+            experimentsData = ElementsSession.ExperimentsData(
+                arbId = "test_arb_id",
+                experimentAssignments = mapOf(
+                    LINK_GLOBAL_HOLD_BACK to "holdback"
+                )
+            ),
+        )
+        // Link disabled (no linkState), but email available via config.
+        val state = createElementsState(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(linkState = null),
+            defaultBillingDetails = PaymentSheet.BillingDetails(email = "test@example.com"),
         )
 
         linkRepository.lookupConsumerWithoutBackendLoggingResult = Result.success(
@@ -200,7 +265,7 @@ class LogLinkGlobalHoldbackExposureTest {
         )
 
         val lookupCall = linkRepository.awaitLookupWithoutBackendLogging()
-        assertEquals(lookupCall.email, TestFactory.LINK_CONFIGURATION.customerInfo.email!!)
+        assertEquals("test@example.com", lookupCall.email)
 
         val exposureCall = eventReporter.experimentExposureCalls.awaitItem()
         val experiment = exposureCall.experiment
@@ -210,7 +275,7 @@ class LogLinkGlobalHoldbackExposureTest {
     }
 
     @Test
-    fun `invoke should not log exposure and log local error if lookup fails`() = runTest {
+    fun `invoke should log exposure with non-returning user when link enabled and user is logged out`() = runTest {
         val elementsSession = createElementsSession(
             experimentsData = ElementsSession.ExperimentsData(
                 arbId = "test_arb_id",
@@ -222,67 +287,24 @@ class LogLinkGlobalHoldbackExposureTest {
         val state = createElementsState(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 linkState = LinkState(
-                    // preset link configuration with existing email.
                     configuration = TestFactory.LINK_CONFIGURATION,
-                    loginState = LinkState.LoginState.NeedsVerification,
+                    loginState = LinkState.LoginState.LoggedOut,
                     signupMode = null
                 )
             )
         )
 
-        linkRepository.lookupConsumerWithoutBackendLoggingResult = Result.failure<ConsumerSessionLookup>(
-            IllegalArgumentException("Test exception")
-        )
+        // Set lookup to fail — if the code incorrectly makes an API call,
+        // the test will fail. Link is enabled, so isReturningUser should be
+        // derived from loginState (LoggedOut → false).
+        linkRepository.lookupConsumerWithoutBackendLoggingResult =
+            Result.failure(AssertionError("Lookup should not be called when Link is enabled"))
 
         logLinkHoldbackExperiment(
             experimentAssignments = listOf(LINK_GLOBAL_HOLD_BACK),
             elementsSession = elementsSession,
             state = state
         )
-
-        eventReporter.experimentExposureCalls.expectNoEvents()
-        assertThat(logger.errorLogs.last().first).isEqualTo("Failed to log Global holdback exposure")
-    }
-
-    @Test
-    fun `invoke should log exposure with non-returning user when user is not returning`() = runTest {
-        val elementsSession = createElementsSession(
-            experimentsData = ElementsSession.ExperimentsData(
-                arbId = "test_arb_id",
-                experimentAssignments = mapOf(
-                    LINK_GLOBAL_HOLD_BACK to "holdback"
-                )
-            ),
-        )
-        val state = createElementsState(
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                linkState = LinkState(
-                    // preset link configuration with existing email.
-                    configuration = TestFactory.LINK_CONFIGURATION,
-                    loginState = LinkState.LoginState.NeedsVerification,
-                    signupMode = null
-                )
-            )
-        )
-
-        linkRepository.lookupConsumerWithoutBackendLoggingResult = Result.success(
-            ConsumerSessionLookup(
-                // simulate a non-returning user
-                exists = false,
-                consumerSession = CONSUMER_SESSION,
-                errorMessage = null,
-                publishableKey = PUBLISHABLE_KEY
-            )
-        )
-
-        logLinkHoldbackExperiment(
-            experimentAssignments = listOf(LINK_GLOBAL_HOLD_BACK),
-            elementsSession = elementsSession,
-            state = state
-        )
-
-        val lookupCall = linkRepository.awaitLookupWithoutBackendLogging()
-        assertEquals(lookupCall.email, TestFactory.LINK_CONFIGURATION.customerInfo.email!!)
 
         val exposureCall = eventReporter.experimentExposureCalls.awaitItem()
         assertTrue(exposureCall.experiment is LoggableExperiment.LinkHoldback)
@@ -491,9 +513,12 @@ class LogLinkGlobalHoldbackExposureTest {
         )
 
     private fun createElementsState(
-        paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create()
+        paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        defaultBillingDetails: PaymentSheet.BillingDetails? = null,
     ): PaymentElementLoader.State {
-        val configuration = CommonConfigurationFactory.create()
+        val configuration = CommonConfigurationFactory.create(
+            defaultBillingDetails = defaultBillingDetails,
+        )
         return PaymentElementLoader.State(
             config = configuration,
             customer = null,
