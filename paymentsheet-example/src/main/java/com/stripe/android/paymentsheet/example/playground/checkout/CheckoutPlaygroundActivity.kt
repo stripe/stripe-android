@@ -80,9 +80,9 @@ class CheckoutPlaygroundActivity : AppCompatActivity() {
     }
 
     override fun finish() {
-        super.finish()
-
         setResult(RESULT_OK, Intent().putExtra(CHECKOUT_STATE_KEY, checkout.state))
+
+        super.finish()
     }
 }
 
