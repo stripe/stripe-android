@@ -60,7 +60,10 @@ class CheckoutPlaygroundActivity : AppCompatActivity() {
         enableEdgeToEdge()
 
         setContent {
-            CheckoutScreen(viewModel.checkout, viewModel)
+            CheckoutScreen(
+                checkout = viewModel.checkout,
+                applyPromotionCode = viewModel::applyPromotionCode
+            )
         }
     }
 
@@ -72,7 +75,7 @@ class CheckoutPlaygroundActivity : AppCompatActivity() {
 }
 
 @Composable
-private fun CheckoutScreen(checkout: Checkout, viewModel: CheckoutPlaygroundViewModel) {
+private fun CheckoutScreen(checkout: Checkout, applyPromotionCode: (String) -> Unit) {
     val checkoutSession by checkout.checkoutSession.collectAsState()
     var promotionCode by rememberSaveable { mutableStateOf("") }
 
@@ -91,7 +94,7 @@ private fun CheckoutScreen(checkout: Checkout, viewModel: CheckoutPlaygroundView
                     modifier = Modifier.weight(1f),
                 )
                 Button(
-                    onClick = { viewModel.applyPromotionCode(promotionCode) },
+                    onClick = { applyPromotionCode(promotionCode) },
                 ) {
                     Text("Apply")
                 }
