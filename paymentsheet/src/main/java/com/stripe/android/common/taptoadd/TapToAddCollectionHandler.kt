@@ -7,8 +7,6 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
-import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.paymentsheet.repositories.toCustomerInfo
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.TapToAddPreview
@@ -90,8 +88,18 @@ internal class DefaultTapToAddCollectionHandler(
     override suspend fun collect(
         metadata: PaymentMethodMetadata
     ): TapToAddCollectionHandler.CollectionState = runCatching {
-        val customerInfo = when (val customerMetadata = metadata.customerMetadata) {
-            is CustomerMetadata.LegacyEphemeralKey, is CustomerMetadata.Session -> customerMetadata.toCustomerInfo()
+        val customerMetadata = metadata.customerMetadata
+        val customerId: String
+        val ephemeralKeySecret: String
+        when (customerMetadata) {
+            is CustomerMetadata.LegacyEphemeralKey -> {
+                customerId = customerMetadata.id
+                ephemeralKeySecret = customerMetadata.ephemeralKeySecret
+            }
+            is CustomerMetadata.Session -> {
+                customerId = customerMetadata.id
+                ephemeralKeySecret = customerMetadata.ephemeralKeySecret
+            }
             is CustomerMetadata.CheckoutSession -> return@runCatching failedCollection(
                 "Tap to add is not supported for CheckoutSession"
             )
@@ -122,7 +130,7 @@ internal class DefaultTapToAddCollectionHandler(
         when (val result = callback.createCardPresentSetupIntent()) {
             is CreateIntentResult.Success -> {
                 setUxConfiguration()
-                collectWithIntent(result.clientSecret, metadata, customerInfo)
+                collectWithIntent(result.clientSecret, metadata, customerId, ephemeralKeySecret)
             }
             is CreateIntentResult.Failure -> {
                 TapToAddCollectionHandler.CollectionState.FailedCollection(
@@ -148,12 +156,13 @@ internal class DefaultTapToAddCollectionHandler(
     private suspend fun collectWithIntent(
         clientSecret: String,
         metadata: PaymentMethodMetadata,
-        customerInfo: CustomerRepository.CustomerInfo,
+        customerId: String,
+        ephemeralKeySecret: String,
     ): TapToAddCollectionHandler.CollectionState {
         val setupIntent = retrieveSetupIntent(clientSecret)
         val setupIntentWithAttachedPaymentMethod = collectPaymentMethod(setupIntent, metadata)
         val confirmedIntent = confirmSetupIntent(setupIntentWithAttachedPaymentMethod)
-        val paymentMethod = fetchPaymentMethod(confirmedIntent, customerInfo)
+        val paymentMethod = fetchPaymentMethod(confirmedIntent, customerId, ephemeralKeySecret)
 
         return TapToAddCollectionHandler.CollectionState.Collected(paymentMethod)
     }
@@ -249,7 +258,8 @@ internal class DefaultTapToAddCollectionHandler(
 
     private suspend fun fetchPaymentMethod(
         intent: SetupIntent,
-        customerInfo: CustomerRepository.CustomerInfo,
+        customerId: String,
+        ephemeralKeySecret: String,
     ): PaymentMethod {
         val paymentMethodDetails = intent.latestAttempt?.paymentMethodDetails
         val presentDetails = paymentMethodDetails?.cardPresentDetails
@@ -268,11 +278,11 @@ internal class DefaultTapToAddCollectionHandler(
             }
 
         return stripeRepository.retrieveCustomerPaymentMethod(
-            customerId = customerInfo.id,
+            customerId = customerId,
             paymentMethodId = generatedCardId,
             productUsageTokens = productUsage,
             requestOptions = ApiRequest.Options(
-                apiKey = customerInfo.ephemeralKeySecret,
+                apiKey = ephemeralKeySecret,
                 stripeAccount = paymentConfiguration.get().stripeAccountId,
             ),
         ).getOrThrow()

@@ -75,9 +75,18 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
         is CustomerMetadata.CheckoutSession -> {
             Result.failure(NotImplementedError("Checkout sessions do not support updating payment methods"))
         }
-        is CustomerMetadata.LegacyEphemeralKey, is CustomerMetadata.Session -> {
+        is CustomerMetadata.LegacyEphemeralKey -> {
             customerRepository.updatePaymentMethod(
-                customerInfo = customerMetadata.toCustomerInfo(),
+                customerId = customerMetadata.id,
+                ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
+                paymentMethodId = paymentMethodId,
+                params = params,
+            )
+        }
+        is CustomerMetadata.Session -> {
+            customerRepository.updatePaymentMethod(
+                customerId = customerMetadata.id,
+                ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
                 paymentMethodId = paymentMethodId,
                 params = params,
             )
@@ -91,25 +100,19 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
         is CustomerMetadata.CheckoutSession -> {
             Result.failure(NotImplementedError("Checkout sessions do not support setting default payment methods"))
         }
-        is CustomerMetadata.LegacyEphemeralKey, is CustomerMetadata.Session -> {
+        is CustomerMetadata.LegacyEphemeralKey -> {
             customerRepository.setDefaultPaymentMethod(
-                customerInfo = customerMetadata.toCustomerInfo(),
+                customerId = customerMetadata.id,
+                ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
+                paymentMethodId = paymentMethodId,
+            )
+        }
+        is CustomerMetadata.Session -> {
+            customerRepository.setDefaultPaymentMethod(
+                customerId = customerMetadata.id,
+                ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
                 paymentMethodId = paymentMethodId,
             )
         }
     }
-}
-
-internal fun CustomerMetadata.toCustomerInfo(): CustomerRepository.CustomerInfo = when (this) {
-    is CustomerMetadata.LegacyEphemeralKey -> CustomerRepository.CustomerInfo(
-        id = id,
-        ephemeralKeySecret = ephemeralKeySecret,
-        customerSessionClientSecret = null,
-    )
-    is CustomerMetadata.Session -> CustomerRepository.CustomerInfo(
-        id = id,
-        ephemeralKeySecret = ephemeralKeySecret,
-        customerSessionClientSecret = customerSessionClientSecret,
-    )
-    is CustomerMetadata.CheckoutSession -> error("CheckoutSession does not have a CustomerInfo")
 }

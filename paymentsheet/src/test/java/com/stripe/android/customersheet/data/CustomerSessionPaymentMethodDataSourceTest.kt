@@ -101,8 +101,8 @@ class CustomerSessionPaymentMethodDataSourceTest {
         val detachRequest = customerRepository.detachRequests.awaitItem()
 
         assertThat(detachRequest.paymentMethodId).isEqualTo("pm_1")
-        assertThat(detachRequest.customerInfo.id).isEqualTo("cus_1")
-        assertThat(detachRequest.customerInfo.ephemeralKeySecret).isEqualTo("ek_123")
+        assertThat(detachRequest.customerId).isEqualTo("cus_1")
+        assertThat(detachRequest.ephemeralKeySecret).isEqualTo("ek_123")
         assertThat(detachRequest.canRemoveDuplicates).isTrue()
 
         assertThat(result).isInstanceOf<CustomerSheetDataResult.Success<PaymentMethod>>()
@@ -193,8 +193,8 @@ class CustomerSessionPaymentMethodDataSourceTest {
         val detachRequest = customerRepository.updateRequests.awaitItem()
 
         assertThat(detachRequest.paymentMethodId).isEqualTo("pm_1")
-        assertThat(detachRequest.customerInfo.id).isEqualTo("cus_1")
-        assertThat(detachRequest.customerInfo.ephemeralKeySecret).isEqualTo("ek_123")
+        assertThat(detachRequest.customerId).isEqualTo("cus_1")
+        assertThat(detachRequest.ephemeralKeySecret).isEqualTo("ek_123")
         assertThat(detachRequest.params).isEqualTo(updateParams)
 
         assertThat(result).isInstanceOf<CustomerSheetDataResult.Success<PaymentMethod>>()

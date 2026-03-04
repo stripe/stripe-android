@@ -12,14 +12,16 @@ import javax.inject.Inject
  *
  * @param customerRepository The repository to fetch customer information.
  * @param configuration The common configuration containing default billing details.
- * @param customer The customer information to retrieve the email from.
+ * @param customerId The customer ID to retrieve the email for.
+ * @param ephemeralKeySecret The ephemeral key secret to authenticate the request.
  * @return The customer's email if available, otherwise null.
  */
 internal interface RetrieveCustomerEmail {
 
     suspend operator fun invoke(
         configuration: CommonConfiguration,
-        customer: CustomerRepository.CustomerInfo?
+        customerId: String?,
+        ephemeralKeySecret: String?,
     ): String?
 }
 
@@ -29,9 +31,17 @@ internal class DefaultRetrieveCustomerEmail @Inject constructor(
 
     override suspend operator fun invoke(
         configuration: CommonConfiguration,
-        customer: CustomerRepository.CustomerInfo?
+        customerId: String?,
+        ephemeralKeySecret: String?,
     ): String? {
         return configuration.defaultBillingDetails?.email
-            ?: customer?.let { customerRepository.retrieveCustomer(it) }?.email
+            ?: if (customerId != null && ephemeralKeySecret != null) {
+                customerRepository.retrieveCustomer(
+                    customerId = customerId,
+                    ephemeralKeySecret = ephemeralKeySecret,
+                )?.email
+            } else {
+                null
+            }
     }
 }

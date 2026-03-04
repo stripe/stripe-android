@@ -85,12 +85,9 @@ internal class StripeCustomerAdapter @Inject internal constructor(
     ): CustomerAdapter.Result<PaymentMethod> {
         return getCustomerEphemeralKey().map { customerEphemeralKey ->
             customerRepository.attachPaymentMethod(
-                customerInfo = CustomerRepository.CustomerInfo(
-                    id = customerEphemeralKey.customerId,
-                    ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
-                    customerSessionClientSecret = null,
-                ),
-                paymentMethodId = paymentMethodId
+                customerId = customerEphemeralKey.customerId,
+                ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
+                paymentMethodId = paymentMethodId,
             ).getOrElse {
                 return CustomerAdapter.Result.failure(
                     cause = it,
@@ -124,13 +121,10 @@ internal class StripeCustomerAdapter @Inject internal constructor(
     ): CustomerAdapter.Result<PaymentMethod> {
         return getCustomerEphemeralKey().mapCatching { customerEphemeralKey ->
             customerRepository.updatePaymentMethod(
-                customerInfo = CustomerRepository.CustomerInfo(
-                    id = customerEphemeralKey.customerId,
-                    ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
-                    customerSessionClientSecret = null,
-                ),
+                customerId = customerEphemeralKey.customerId,
+                ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
                 paymentMethodId = paymentMethodId,
-                params = params
+                params = params,
             ).getOrElse {
                 return CustomerAdapter.Result.failure(
                     cause = it,

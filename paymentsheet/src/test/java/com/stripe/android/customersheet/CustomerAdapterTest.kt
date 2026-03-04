@@ -191,7 +191,7 @@ class CustomerAdapterTest {
     fun `retrievePaymentMethods filters with paymentMethodTypes`() = runTest {
         val customerRepository = mock<CustomerRepository>()
 
-        whenever(customerRepository.getPaymentMethods(any(), any(), any())).thenReturn(Result.success(emptyList()))
+        whenever(customerRepository.getPaymentMethods(any(), any(), any(), any())).thenReturn(Result.success(emptyList()))
 
         val adapter = createAdapter(
             customerRepository = customerRepository,
@@ -199,7 +199,8 @@ class CustomerAdapterTest {
         )
         adapter.retrievePaymentMethods()
         verify(customerRepository).getPaymentMethods(
-            customerInfo = any(),
+            customerId = any(),
+            ephemeralKeySecret = any(),
             types = eq(
                 listOf(
                     PaymentMethod.Type.Card,
@@ -248,7 +249,8 @@ class CustomerAdapterTest {
         adapter.retrievePaymentMethods()
 
         verify(customerRepository).getPaymentMethods(
-            customerInfo = any(),
+            customerId = any(),
+            ephemeralKeySecret = any(),
             types = eq(
                 listOf(
                     PaymentMethod.Type.Card,

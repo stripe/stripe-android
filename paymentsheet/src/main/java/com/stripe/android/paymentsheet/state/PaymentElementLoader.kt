@@ -311,7 +311,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             createLinkState(
                 elementsSession = elementsSession,
                 configuration = configuration,
-                customer = customerInfo?.toCustomerInfo(),
+                customerId = customerInfo?.customerIdOrNull(),
+                ephemeralKeySecret = customerInfo?.ephemeralKeySecretOrNull(),
                 initializationMode = initializationMode,
                 clientAttributionMetadata = clientAttributionMetadata,
             )
