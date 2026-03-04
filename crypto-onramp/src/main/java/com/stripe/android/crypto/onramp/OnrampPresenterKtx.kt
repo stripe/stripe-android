@@ -14,8 +14,4 @@ internal object OnrampCallbackReferences {
     operator fun set(key: String, callbacks: OnrampCallbacks.State) {
         instanceCallbackMap[key] = callbacks
     }
-
-    fun remove(key: String) {
-        instanceCallbackMap.remove(key)
-    }
 }
