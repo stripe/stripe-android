@@ -69,7 +69,6 @@ class DelegateDrawable(
         delegate.isFilterBitmap = filter
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     override fun isFilterBitmap(): Boolean {
         return delegate.isFilterBitmap
     }
