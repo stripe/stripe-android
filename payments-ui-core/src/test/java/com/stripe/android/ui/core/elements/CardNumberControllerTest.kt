@@ -140,6 +140,37 @@ internal class CardNumberControllerTest {
     }
 
     @Test
+    fun `trailingIcon should prepend CartesBancaires when field is empty and cbc eligible`() = runTest {
+        val cardNumberController = createController(
+            cardBrandChoiceConfig = CardBrandChoiceConfig.Eligible(
+                preferredBrands = listOf(),
+                initialBrand = null
+            )
+        )
+        cardNumberController.trailingIcon.test {
+            cardNumberController.onValueChange("")
+            idleLooper()
+            assertThat(awaitItem() as TextFieldIcon.MultiTrailing)
+                .isEqualTo(
+                    TextFieldIcon.MultiTrailing(
+                        staticIcons = listOf(
+                            TextFieldIcon.Trailing(CardBrand.Visa.icon, isTintable = false),
+                            TextFieldIcon.Trailing(CardBrand.MasterCard.icon, isTintable = false),
+                            TextFieldIcon.Trailing(CardBrand.AmericanExpress.icon, isTintable = false)
+                        ),
+                        animatedIcons = listOf(
+                            TextFieldIcon.Trailing(CardBrand.CartesBancaires.icon, isTintable = false),
+                            TextFieldIcon.Trailing(CardBrand.Discover.icon, isTintable = false),
+                            TextFieldIcon.Trailing(CardBrand.JCB.icon, isTintable = false),
+                            TextFieldIcon.Trailing(CardBrand.DinersClub.icon, isTintable = false),
+                            TextFieldIcon.Trailing(CardBrand.UnionPay.icon, isTintable = false)
+                        )
+                    )
+                )
+        }
+    }
+
+    @Test
     fun `trailingIcon should have trailing icon when field matches bin`() = runTest {
         val cardNumberController = createController()
 
@@ -258,30 +289,7 @@ internal class CardNumberControllerTest {
             idleLooper()
             skipItems(3)
             assertThat(awaitItem() as TextFieldIcon.CardBrandChoice)
-                .isEqualTo(
-                    TextFieldIcon.CardBrandChoice(
-                        message = R.string.stripe_card_brand_choice_selection_header.resolvableString,
-                        currentItem = TextFieldIcon.CardBrandChoice.Item(
-                            id = CardBrand.CartesBancaires.code,
-                            label = "Cartes Bancaires".resolvableString,
-                            icon = CardBrand.CartesBancaires.icon
-                        ),
-                        items = listOf(
-                            TextFieldIcon.CardBrandChoice.Item(
-                                id = CardBrand.CartesBancaires.code,
-                                label = "Cartes Bancaires".resolvableString,
-                                icon = CardBrand.CartesBancaires.icon
-                            ),
-                            TextFieldIcon.CardBrandChoice.Item(
-                                id = CardBrand.Visa.code,
-                                label = "Visa".resolvableString,
-                                icon = CardBrand.Visa.icon
-                            ),
-                        ),
-                        hide = false,
-                        hasMadeSelection = true
-                    )
-                )
+                .isEqualTo(cartesBancaireChoice)
         }
     }
 
@@ -306,30 +314,7 @@ internal class CardNumberControllerTest {
             idleLooper()
             skipItems(3)
             assertThat(awaitItem() as TextFieldIcon.CardBrandChoice)
-                .isEqualTo(
-                    TextFieldIcon.CardBrandChoice(
-                        message = R.string.stripe_card_brand_choice_selection_header.resolvableString,
-                        currentItem = TextFieldIcon.CardBrandChoice.Item(
-                            id = CardBrand.CartesBancaires.code,
-                            label = "Cartes Bancaires".resolvableString,
-                            icon = CardBrand.CartesBancaires.icon
-                        ),
-                        items = listOf(
-                            TextFieldIcon.CardBrandChoice.Item(
-                                id = CardBrand.CartesBancaires.code,
-                                label = "Cartes Bancaires".resolvableString,
-                                icon = CardBrand.CartesBancaires.icon
-                            ),
-                            TextFieldIcon.CardBrandChoice.Item(
-                                id = CardBrand.Visa.code,
-                                label = "Visa".resolvableString,
-                                icon = CardBrand.Visa.icon
-                            ),
-                        ),
-                        hide = false,
-                        hasMadeSelection = true
-                    )
-                )
+                .isEqualTo(cartesBancaireChoice)
         }
     }
 
@@ -357,30 +342,7 @@ internal class CardNumberControllerTest {
             skipItems(1)
             idleLooper()
             assertThat(awaitItem() as TextFieldIcon.CardBrandChoice)
-                .isEqualTo(
-                    TextFieldIcon.CardBrandChoice(
-                        message = R.string.stripe_card_brand_choice_selection_header.resolvableString,
-                        currentItem = TextFieldIcon.CardBrandChoice.Item(
-                            id = CardBrand.CartesBancaires.code,
-                            label = "Cartes Bancaires".resolvableString,
-                            icon = CardBrand.CartesBancaires.icon
-                        ),
-                        items = listOf(
-                            TextFieldIcon.CardBrandChoice.Item(
-                                id = CardBrand.CartesBancaires.code,
-                                label = "Cartes Bancaires".resolvableString,
-                                icon = CardBrand.CartesBancaires.icon
-                            ),
-                            TextFieldIcon.CardBrandChoice.Item(
-                                id = CardBrand.Visa.code,
-                                label = "Visa".resolvableString,
-                                icon = CardBrand.Visa.icon
-                            ),
-                        ),
-                        hide = false,
-                        hasMadeSelection = true
-                    )
-                )
+                .isEqualTo(cartesBancaireChoice)
         }
     }
 
@@ -767,6 +729,28 @@ internal class CardNumberControllerTest {
 
     private companion object {
         const val TEST_TAG = "CardNumberElement"
+        val cartesBancaireChoice = TextFieldIcon.CardBrandChoice(
+            message = R.string.stripe_card_brand_choice_selection_header.resolvableString,
+            currentItem = TextFieldIcon.CardBrandChoice.Item(
+                id = CardBrand.CartesBancaires.code,
+                label = "Cartes Bancaires".resolvableString,
+                icon = CardBrand.CartesBancaires.icon
+            ),
+            items = listOf(
+                TextFieldIcon.CardBrandChoice.Item(
+                    id = CardBrand.CartesBancaires.code,
+                    label = "Cartes Bancaires".resolvableString,
+                    icon = CardBrand.CartesBancaires.icon
+                ),
+                TextFieldIcon.CardBrandChoice.Item(
+                    id = CardBrand.Visa.code,
+                    label = "Visa".resolvableString,
+                    icon = CardBrand.Visa.icon
+                ),
+            ),
+            hide = false,
+            hasMadeSelection = true
+        )
     }
 }
 
