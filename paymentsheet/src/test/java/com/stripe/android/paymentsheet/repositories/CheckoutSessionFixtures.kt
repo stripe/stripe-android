@@ -425,14 +425,38 @@ internal object CheckoutSessionFixtures {
                 "discount_amounts": [
                     {
                         "amount": 500,
-                        "discount": {
-                            "name": "SUMMER10"
+                        "coupon": {
+                            "object": "coupon",
+                            "name": "SUMMER10",
+                            "amount_off": null,
+                            "currency": null,
+                            "duration": "once",
+                            "duration_in_months": null,
+                            "has_applies_to_products": false,
+                            "percent_off": 10.0
+                        },
+                        "currency": "usd",
+                        "promotion_code": {
+                            "object": "promotion_code",
+                            "code": "SUMMER10"
                         }
                     },
                     {
                         "amount": 250,
-                        "discount": {
-                            "name": "LOYALTY5"
+                        "coupon": {
+                            "object": "coupon",
+                            "name": "LOYALTY5",
+                            "amount_off": null,
+                            "currency": null,
+                            "duration": "once",
+                            "duration_in_months": null,
+                            "has_applies_to_products": false,
+                            "percent_off": 5.0
+                        },
+                        "currency": "usd",
+                        "promotion_code": {
+                            "object": "promotion_code",
+                            "code": "LOYALTY5"
                         }
                     }
                 ],

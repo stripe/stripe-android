@@ -249,7 +249,7 @@ internal class CheckoutSessionResponseJsonParser(
         return (0 until array.length()).mapNotNull { i ->
             val obj = array.optJSONObject(i) ?: return@mapNotNull null
             val amount = obj.optLong(FIELD_AMOUNT, -1).takeIf { it >= 0 } ?: return@mapNotNull null
-            val displayName = obj.optJSONObject(FIELD_DISCOUNT)?.optString(FIELD_NAME)
+            val displayName = obj.optJSONObject(FIELD_COUPON)?.optString(FIELD_NAME)
                 ?.takeIf { it.isNotEmpty() } ?: return@mapNotNull null
             CheckoutSessionResponse.DiscountAmount(amount = amount, displayName = displayName)
         }
@@ -353,7 +353,7 @@ internal class CheckoutSessionResponseJsonParser(
         private const val FIELD_AMOUNT = "amount"
         private const val FIELD_APPLIED_BALANCE = "applied_balance"
         private const val FIELD_DISCOUNT_AMOUNTS = "discount_amounts"
-        private const val FIELD_DISCOUNT = "discount"
+        private const val FIELD_COUPON = "coupon"
         private const val FIELD_NAME = "name"
         private const val FIELD_TAX_AMOUNTS = "tax_amounts"
         private const val FIELD_INCLUSIVE = "inclusive"

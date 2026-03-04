@@ -479,4 +479,52 @@ class CheckoutSessionResponseJsonParserTest {
         assertThat(result).isNotNull()
         assertThat(result?.totalSummary).isNull()
     }
+
+    @Test
+    fun `parse discount amounts from coupon field`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_abc123",
+                "currency": "usd",
+                "total_summary": {
+                    "due": 4099,
+                    "subtotal": 5099,
+                    "total": 4099
+                },
+                "line_item_group": {
+                    "due": 4099,
+                    "subtotal": 5099,
+                    "total": 4099,
+                    "discount_amounts": [
+                        {
+                            "amount": 1000,
+                            "coupon": {
+                                "object": "coupon",
+                                "name": "10OFF",
+                                "amount_off": 1000,
+                                "currency": "usd",
+                                "duration": "once"
+                            },
+                            "currency": "usd",
+                            "promotion_code": {
+                                "object": "promotion_code",
+                                "code": "10OFF"
+                            }
+                        }
+                    ]
+                }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.amount).isEqualTo(4099L)
+        val totalSummary = result?.totalSummary
+        assertThat(totalSummary).isNotNull()
+        assertThat(totalSummary?.discountAmounts).hasSize(1)
+        assertThat(totalSummary?.discountAmounts?.get(0)?.amount).isEqualTo(1000L)
+        assertThat(totalSummary?.discountAmounts?.get(0)?.displayName).isEqualTo("10OFF")
+    }
 }
