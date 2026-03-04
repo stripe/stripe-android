@@ -81,6 +81,7 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
     }
 
     fun closeClicked() {
+        analyticsEventReporter.onCancel()
         viewModelScope.launch {
             _result.emit(
                 IntentConfirmationChallengeActivityResult.Canceled(args.intent.clientSecret)

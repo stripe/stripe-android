@@ -30,6 +30,10 @@ internal class FakeIntentConfirmationChallengeAnalyticsEventReporter :
         )
     }
 
+    override fun onCancel() {
+        _calls.add(Call.Cancel)
+    }
+
     override fun onWebViewLoaded() {
         _calls.add(Call.WebViewLoaded)
     }
@@ -46,6 +50,7 @@ internal class FakeIntentConfirmationChallengeAnalyticsEventReporter :
             val errorCode: String?,
             val fromBridge: Boolean
         ) : Call
+        data object Cancel : Call
         data object WebViewLoaded : Call
     }
 }

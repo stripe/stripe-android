@@ -11,5 +11,7 @@ internal interface IntentConfirmationChallengeAnalyticsEventReporter {
         fromBridge: Boolean
     )
 
+    fun onCancel()
+
     fun onWebViewLoaded()
 }
