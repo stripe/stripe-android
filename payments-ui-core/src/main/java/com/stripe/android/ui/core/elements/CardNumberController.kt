@@ -288,12 +288,7 @@ internal class DefaultCardNumberController(
     }
 
     override fun onCardBrandChoiceItemClicked(item: TextFieldIcon.CardBrandChoice.Item) {
-        val newChoice = CardBrand.fromCode(item.id)
-        if (mostRecentUserSelectedBrand.value == newChoice) {
-            mostRecentUserSelectedBrand.value = null
-        } else {
-            mostRecentUserSelectedBrand.value = newChoice
-        }
+        mostRecentUserSelectedBrand.value = CardBrand.fromCode(item.id)
     }
 
     override fun onValidationStateChanged(isValidating: Boolean) {

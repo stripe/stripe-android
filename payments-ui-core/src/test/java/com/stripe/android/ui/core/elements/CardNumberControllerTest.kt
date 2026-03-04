@@ -288,45 +288,6 @@ internal class CardNumberControllerTest {
     }
 
     @Test
-    fun `on reselect item, card brand should be set to no selection`() = runTest {
-        val cardNumberController = createController(
-            cardBrandChoiceConfig = CardBrandChoiceConfig.Eligible(
-                preferredBrands = listOf(),
-                initialBrand = null
-            )
-        )
-
-        cardNumberController.trailingIcon.test {
-            cardNumberController.onValueChange("4000002500001001")
-            cardNumberController.onCardBrandChoiceItemClicked(
-                TextFieldIcon.CardBrandChoice.Item(
-                    id = CardBrand.CartesBancaires.code,
-                    label = "Cartes Bancaires".resolvableString,
-                    icon = PaymentModelR.drawable.stripe_ic_cartes_bancaires
-                )
-            )
-            idleLooper()
-            skipItems(3)
-            assertThat(awaitItem() as TextFieldIcon.CardBrandChoice)
-                .isEqualTo(cartesBancaireSelection)
-
-            cardNumberController.onCardBrandChoiceItemClicked(
-                TextFieldIcon.CardBrandChoice.Item(
-                    id = CardBrand.CartesBancaires.code,
-                    label = "Cartes Bancaires".resolvableString,
-                    icon = PaymentModelR.drawable.stripe_ic_cartes_bancaires
-                )
-            )
-
-            idleLooper()
-
-            val item = awaitItem()
-            assertThat(item as TextFieldIcon.CardBrandChoice)
-                .isEqualTo(unknownSelection)
-        }
-    }
-
-    @Test
     fun `on number updated after update to number with no brands, user choice should be re-used if possible`() = runTest {
         val cardNumberController = createController(
             cardBrandChoiceConfig = CardBrandChoiceConfig.Eligible(
