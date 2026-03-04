@@ -65,13 +65,11 @@ internal class CustomerSessionPaymentMethodDataSource @Inject constructor(
         return withContext(workContext) {
             elementsSessionManager.fetchCustomerSessionEphemeralKey().mapCatching { ephemeralKey ->
                 customerRepository.detachPaymentMethod(
-                    customerInfo = CustomerRepository.CustomerInfo(
-                        id = ephemeralKey.customerId,
-                        ephemeralKeySecret = ephemeralKey.ephemeralKey,
-                        customerSessionClientSecret = ephemeralKey.customerSessionClientSecret,
-                    ),
-                    canRemoveDuplicates = true,
+                    customerId = ephemeralKey.customerId,
+                    ephemeralKeySecret = ephemeralKey.ephemeralKey,
+                    customerSessionClientSecret = ephemeralKey.customerSessionClientSecret,
                     paymentMethodId = paymentMethodId,
+                    canRemoveDuplicates = true,
                 ).getOrThrow()
             }.toCustomerSheetDataResult()
         }

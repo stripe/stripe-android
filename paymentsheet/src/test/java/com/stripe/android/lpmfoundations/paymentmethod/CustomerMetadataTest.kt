@@ -188,7 +188,7 @@ internal class CustomerMetadataTest {
             customer = customer,
             id = "cus_test",
             ephemeralKeySecret = "ek_test",
-            customerSessionClientSecret = null,
+            customerSessionClientSecret = "css_test",
             isPaymentMethodSetAsDefaultEnabled = false,
         )
 
@@ -374,7 +374,7 @@ internal class CustomerMetadataTest {
             customer = customer,
             id = "cus_test",
             ephemeralKeySecret = "ek_test",
-            customerSessionClientSecret = null,
+            customerSessionClientSecret = "css_test",
             isPaymentMethodSetAsDefaultEnabled = false,
         )
 

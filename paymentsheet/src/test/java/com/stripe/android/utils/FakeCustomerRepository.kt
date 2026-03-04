@@ -52,6 +52,21 @@ internal open class FakeCustomerRepository(
         silentlyFail: Boolean,
     ): Result<List<PaymentMethod>> = onGetPaymentMethods()
 
+    override suspend fun getPaymentMethods(
+        customerId: String,
+        ephemeralKeySecret: String,
+        types: List<PaymentMethod.Type>,
+        silentlyFail: Boolean,
+    ): Result<List<PaymentMethod>> = getPaymentMethods(
+        customerInfo = CustomerRepository.CustomerInfo(
+            id = customerId,
+            ephemeralKeySecret = ephemeralKeySecret,
+            customerSessionClientSecret = null,
+        ),
+        types = types,
+        silentlyFail = silentlyFail,
+    )
+
     override suspend fun detachPaymentMethod(
         customerInfo: CustomerRepository.CustomerInfo,
         paymentMethodId: String,
@@ -67,6 +82,37 @@ internal open class FakeCustomerRepository(
 
         return onDetachPaymentMethod(paymentMethodId)
     }
+
+    override suspend fun detachPaymentMethod(
+        customerId: String,
+        ephemeralKeySecret: String,
+        paymentMethodId: String,
+        canRemoveDuplicates: Boolean,
+    ): Result<PaymentMethod> = detachPaymentMethod(
+        customerInfo = CustomerRepository.CustomerInfo(
+            id = customerId,
+            ephemeralKeySecret = ephemeralKeySecret,
+            customerSessionClientSecret = null,
+        ),
+        paymentMethodId = paymentMethodId,
+        canRemoveDuplicates = canRemoveDuplicates,
+    )
+
+    override suspend fun detachPaymentMethod(
+        customerId: String,
+        ephemeralKeySecret: String,
+        customerSessionClientSecret: String,
+        paymentMethodId: String,
+        canRemoveDuplicates: Boolean,
+    ): Result<PaymentMethod> = detachPaymentMethod(
+        customerInfo = CustomerRepository.CustomerInfo(
+            id = customerId,
+            ephemeralKeySecret = ephemeralKeySecret,
+            customerSessionClientSecret = customerSessionClientSecret,
+        ),
+        paymentMethodId = paymentMethodId,
+        canRemoveDuplicates = canRemoveDuplicates,
+    )
 
     override suspend fun attachPaymentMethod(
         customerInfo: CustomerRepository.CustomerInfo,

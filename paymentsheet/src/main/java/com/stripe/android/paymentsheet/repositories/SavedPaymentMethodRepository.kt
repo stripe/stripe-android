@@ -48,9 +48,19 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
                 PaymentMethod.Builder().setId(paymentMethodId).build()
             }
         }
-        is CustomerMetadata.LegacyEphemeralKey, is CustomerMetadata.Session -> {
+        is CustomerMetadata.LegacyEphemeralKey -> {
             customerRepository.detachPaymentMethod(
-                customerInfo = customerMetadata.toCustomerInfo(),
+                customerId = customerMetadata.id,
+                ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
+                paymentMethodId = paymentMethodId,
+                canRemoveDuplicates = canRemoveDuplicates,
+            )
+        }
+        is CustomerMetadata.Session -> {
+            customerRepository.detachPaymentMethod(
+                customerId = customerMetadata.id,
+                ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
+                customerSessionClientSecret = customerMetadata.customerSessionClientSecret,
                 paymentMethodId = paymentMethodId,
                 canRemoveDuplicates = canRemoveDuplicates,
             )

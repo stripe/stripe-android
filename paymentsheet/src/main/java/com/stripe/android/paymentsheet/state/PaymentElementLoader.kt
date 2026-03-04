@@ -607,15 +607,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     ): List<PaymentMethod> {
         val paymentMethodTypes = metadata.supportedSavedPaymentMethodTypes()
 
-        val customerSession = (customerConfig.accessType as? PaymentSheet.CustomerAccessType.CustomerSession)
-        val customerSessionClientSecret = customerSession?.customerSessionClientSecret
-
         val paymentMethods = customerRepository.getPaymentMethods(
-            customerInfo = CustomerRepository.CustomerInfo(
-                id = customerConfig.id,
-                ephemeralKeySecret = customerConfig.ephemeralKeySecret,
-                customerSessionClientSecret = customerSessionClientSecret,
-            ),
+            customerId = customerConfig.id,
+            ephemeralKeySecret = customerConfig.ephemeralKeySecret,
             types = paymentMethodTypes,
             silentlyFail = metadata.stripeIntent.isLiveMode,
         ).getOrThrow()
