@@ -52,7 +52,7 @@ internal class DefaultTapToAddCollectingInteractor(
         @ViewModelScope private val coroutineScope: CoroutineScope,
         private val tapToAddCollectionHandler: TapToAddCollectionHandler,
         private val paymentMethodHolder: TapToAddPaymentMethodHolder,
-        private val tapToAddCardAddedInteractorFactory: TapToAddCardAddedInteractor.Factory,
+        private val tapToAddConfirmationInteractorFactory: TapToAddConfirmationInteractor.Factory,
         private val navigator: Provider<TapToAddNavigator>,
     ) : TapToAddCollectingInteractor.Factory {
         override fun create(): TapToAddCollectingInteractor {
@@ -65,8 +65,8 @@ internal class DefaultTapToAddCollectingInteractor(
 
                     navigator.get().performAction(
                         action = TapToAddNavigator.Action.NavigateTo(
-                            screen = TapToAddNavigator.Screen.CardAdded(
-                                interactor = tapToAddCardAddedInteractorFactory.create(paymentMethod),
+                            screen = TapToAddNavigator.Screen.Confirmation(
+                                interactor = tapToAddConfirmationInteractorFactory.create(paymentMethod),
                             ),
                         ),
                     )

@@ -26,7 +26,7 @@ class Checkout private constructor(
         ): Result<Checkout> {
             val component = DaggerCheckoutComponent.factory().create(context.applicationContext)
             return component.checkoutSessionLoader.load(checkoutSessionClientSecret).map { response ->
-                Checkout(State(checkoutSessionClientSecret, response))
+                Checkout(State(response))
             }
         }
 
@@ -42,7 +42,6 @@ class Checkout private constructor(
     @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class State internal constructor(
-        internal val checkoutSessionClientSecret: String,
         internal val checkoutSessionResponse: CheckoutSessionResponse,
     ) : Parcelable
 

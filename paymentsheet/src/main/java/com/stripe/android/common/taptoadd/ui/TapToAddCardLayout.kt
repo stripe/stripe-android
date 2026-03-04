@@ -1,22 +1,42 @@
 package com.stripe.android.common.taptoadd.ui
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.stripe.android.model.CardBrand
 
 @Composable
-internal fun TapToAddCardLayout(
+internal fun ColumnScope.TapToAddCardLayout(
+    cardBrand: CardBrand,
+    last4: String?,
+    title: String,
     content: @Composable () -> Unit,
 ) {
-    Column(
-        modifier = Modifier.fillMaxSize().padding(
-            top = LocalTapToAddMaxContentHeight.current * 0.08f
-        ),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        content()
-    }
+    Spacer(Modifier.size(LocalTapToAddMaxContentHeight.current * SCREEN_POSITION_MULTIPLIER))
+
+    TapToAddCard(
+        cardBrand = cardBrand,
+        last4 = last4,
+    )
+
+    Spacer(Modifier.size(20.dp))
+
+    Text(
+        text = title,
+        color = MaterialTheme.colors.onSurface,
+        style = MaterialTheme.typography.h4,
+    )
+
+    Spacer(Modifier.size(20.dp))
+
+    Spacer(Modifier.weight(1f))
+
+    content()
 }
+
+private const val SCREEN_POSITION_MULTIPLIER = 0.03f

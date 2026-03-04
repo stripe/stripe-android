@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.repositories
 
-import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntent
@@ -16,9 +15,8 @@ import kotlinx.parcelize.Parcelize
  * customer data, and other configuration needed by PaymentSheet.
  * For confirm responses, [paymentIntent] contains the confirmed payment intent.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
-data class CheckoutSessionResponse(
+internal data class CheckoutSessionResponse(
     /**
      * The checkout session ID (e.g., "cs_xxx").
      */
@@ -64,7 +62,6 @@ data class CheckoutSessionResponse(
      * configuration, which is set when creating the checkout session.
      */
     @Parcelize
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class SavedPaymentMethodsOfferSave(
         /**
          * Whether the save checkbox should be shown to the user.
@@ -78,7 +75,6 @@ data class CheckoutSessionResponse(
         /**
          * Represents the initial checked state of the save checkbox.
          */
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         enum class Status {
             /**
              * Checkbox should be pre-checked (user has previously agreed to save).
@@ -100,7 +96,6 @@ data class CheckoutSessionResponse(
      * checkout session is created.
      */
     @Parcelize
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Customer(
         /**
          * The customer ID (e.g., "cus_xxx").
@@ -118,7 +113,6 @@ data class CheckoutSessionResponse(
     ) : StripeModel
 
     @Parcelize
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class TotalSummaryResponse(
         val subtotal: Long,
         val totalDueToday: Long,
@@ -130,14 +124,12 @@ data class CheckoutSessionResponse(
     ) : StripeModel
 
     @Parcelize
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class DiscountAmount(
         val amount: Long,
         val displayName: String,
     ) : StripeModel
 
     @Parcelize
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class TaxAmount(
         val amount: Long,
         val inclusive: Boolean,
@@ -146,7 +138,6 @@ data class CheckoutSessionResponse(
     ) : StripeModel
 
     @Parcelize
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class ShippingRate(
         val amount: Long,
         val displayName: String,

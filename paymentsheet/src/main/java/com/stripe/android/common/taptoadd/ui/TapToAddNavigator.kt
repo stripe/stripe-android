@@ -1,5 +1,6 @@
 package com.stripe.android.common.taptoadd.ui
 
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import com.stripe.android.common.taptoadd.TapToAddResult
@@ -75,56 +76,54 @@ internal class TapToAddNavigator(
         }
     }
 
-    sealed interface Screen {
-        val isCentered: Boolean
-        val cancelButton: CancelButton
+    sealed class Screen {
+        abstract val cancelButton: CancelButton
 
         @Composable
-        fun Content()
+        protected abstract fun ColumnScope.Content()
+
+        @Composable
+        fun ScreenContent(scope: ColumnScope) {
+            scope.Content()
+        }
 
         data class Collecting(
             val interactor: TapToAddCollectingInteractor,
-        ) : Screen {
-            override val isCentered: Boolean = true
+        ) : Screen() {
             override val cancelButton: CancelButton = CancelButton.None
 
             @Composable
-            override fun Content() {
+            override fun ColumnScope.Content() {
                 TapToAddCollectingScreen()
             }
         }
 
-        data class CardAdded(
-            val interactor: TapToAddCardAddedInteractor,
-        ) : Screen {
-            override val isCentered: Boolean = false
+        data class Completed(
+            val interactor: TapToAddCompletedInteractor,
+        ) : Screen() {
             override val cancelButton: CancelButton = CancelButton.Invisible
 
             @Composable
-            override fun Content() {
-                TapToAddCardAddedScreen(
+            override fun ColumnScope.Content() {
+                TapToAddCompletedScreen(
                     cardBrand = interactor.cardBrand,
                     last4 = interactor.last4,
-                    onComplete = interactor::onShown,
+                    label = interactor.label,
                 )
             }
         }
 
         data class Confirmation(
             val interactor: TapToAddConfirmationInteractor,
-        ) : Screen {
-            override val isCentered: Boolean = false
+        ) : Screen() {
             override val cancelButton: CancelButton = CancelButton.Visible
 
             @Composable
-            override fun Content() {
+            override fun ColumnScope.Content() {
                 val state by interactor.state.collectAsState()
 
                 TapToAddConfirmationScreen(
                     state = state,
-                    onComplete = {
-                        interactor.performAction(TapToAddConfirmationInteractor.Action.ShownSuccess)
-                    },
                     onPrimaryButtonPress = {
                         interactor.performAction(TapToAddConfirmationInteractor.Action.PrimaryButtonPressed)
                     }
@@ -134,12 +133,11 @@ internal class TapToAddNavigator(
 
         data class Error(
             val message: ResolvableString,
-        ) : Screen {
-            override val isCentered: Boolean = true
+        ) : Screen() {
             override val cancelButton: CancelButton = CancelButton.Visible
 
             @Composable
-            override fun Content() {
+            override fun ColumnScope.Content() {
                 TapToAddErrorScreen(message)
             }
         }

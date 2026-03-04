@@ -13,7 +13,9 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.challenge.confirmation.analytics.IntentConfirmationChallengeAnalyticsEventReporter
 import com.stripe.android.challenge.confirmation.di.DaggerIntentConfirmationChallengeComponent
+import com.stripe.android.challenge.confirmation.di.FireAndForgetScope
 import com.stripe.android.challenge.confirmation.di.SDK_USER_AGENT
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.CancelCaptchaChallengeParams
@@ -21,7 +23,9 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.analytics.ErrorReporter.ExpectedErrorEvent
 import com.stripe.android.payments.core.analytics.ErrorReporter.UnexpectedErrorEvent
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -40,6 +44,7 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
     private val stripeRepository: StripeRepository,
     private val errorReporter: ErrorReporter,
     private val requestOptions: ApiRequest.Options,
+    @FireAndForgetScope private val fireAndForgetScope: CoroutineScope
 ) : ViewModel(), DefaultLifecycleObserver {
 
     private val _bridgeReady = MutableSharedFlow<Unit>()
@@ -77,54 +82,51 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
 
     fun closeClicked() {
         viewModelScope.launch {
-            val intentId = args.intent.id
-            val clientSecret = args.intent.clientSecret
+            _result.emit(
+                IntentConfirmationChallengeActivityResult.Canceled(args.intent.clientSecret)
+            )
 
-            if (intentId == null || clientSecret == null) {
-                errorReporter.report(
-                    errorEvent = UnexpectedErrorEvent.INTENT_CONFIRMATION_CHALLENGE_INTENT_PARAMETERS_UNAVAILABLE,
-                )
-                _result.emit(
-                    IntentConfirmationChallengeActivityResult.Failed(
-                        clientSecret = clientSecret,
-                        error = IllegalArgumentException("Intent parameters are unavailable")
-                    )
-                )
-                return@launch
+            fireAndForgetScope.launch {
+                cancelChallenge()
             }
-            val params = CancelCaptchaChallengeParams(clientSecret)
+        }
+    }
 
-            val cancellationResult = when (args.intent) {
-                is PaymentIntent -> {
-                    stripeRepository.cancelPaymentIntentCaptchaChallenge(
-                        paymentIntentId = intentId,
-                        params = params,
-                        requestOptions = requestOptions,
-                    )
-                }
-                is SetupIntent -> {
-                    stripeRepository.cancelSetupIntentCaptchaChallenge(
-                        setupIntentId = intentId,
-                        params = params,
-                        requestOptions = requestOptions,
-                    )
-                }
+    private suspend fun cancelChallenge() {
+        val intentId = args.intent.id
+        val clientSecret = args.intent.clientSecret
+
+        if (intentId == null || clientSecret == null) {
+            errorReporter.report(
+                errorEvent = UnexpectedErrorEvent.INTENT_CONFIRMATION_CHALLENGE_INTENT_PARAMETERS_UNAVAILABLE,
+            )
+            return
+        }
+        val params = CancelCaptchaChallengeParams(clientSecret)
+
+        val cancellationResult = when (args.intent) {
+            is PaymentIntent -> {
+                stripeRepository.cancelPaymentIntentCaptchaChallenge(
+                    paymentIntentId = intentId,
+                    params = params,
+                    requestOptions = requestOptions,
+                )
             }
+            is SetupIntent -> {
+                stripeRepository.cancelSetupIntentCaptchaChallenge(
+                    setupIntentId = intentId,
+                    params = params,
+                    requestOptions = requestOptions,
+                )
+            }
+        }
 
-            cancellationResult.fold(
-                onSuccess = { intent ->
-                    _result.emit(
-                        IntentConfirmationChallengeActivityResult.Canceled(intent.clientSecret)
-                    )
-                },
-                onFailure = { error ->
-                    _result.emit(
-                        IntentConfirmationChallengeActivityResult.Failed(
-                            clientSecret = args.intent.clientSecret,
-                            error = error,
-                        )
-                    )
-                }
+        // Even upon failing to cancel, there is no recovery action to be taken by the client
+        // It will however be logged by the API for the merchant
+        cancellationResult.onFailure { error ->
+            errorReporter.report(
+                errorEvent = ExpectedErrorEvent.INTENT_CONFIRMATION_CHALLENGE_CHALLENGE_CANCELLATION_REQUEST_FAILED,
+                stripeException = StripeException.create(error)
             )
         }
     }

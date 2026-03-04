@@ -881,6 +881,33 @@ class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     /**
+     * Retrieve a single [PaymentMethod] for a customer.
+     *
+     * Analytics event: [PaymentAnalyticsEvent.CustomerRetrievePaymentMethod]
+     */
+    override suspend fun retrieveCustomerPaymentMethod(
+        customerId: String,
+        paymentMethodId: String,
+        productUsageTokens: Set<String>,
+        requestOptions: ApiRequest.Options
+    ): Result<PaymentMethod> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createGet(
+                url = getRetrieveCustomerPaymentMethodUrl(customerId, paymentMethodId),
+                options = requestOptions,
+            ),
+            jsonParser = PaymentMethodJsonParser(),
+        ) {
+            fireAnalyticsRequest(
+                paymentAnalyticsRequestFactory.createRequest(
+                    PaymentAnalyticsEvent.CustomerRetrievePaymentMethod,
+                    productUsageTokens = productUsageTokens
+                )
+            )
+        }
+    }
+
+    /**
      * Analytics event: [PaymentAnalyticsEvent.CustomerSetDefaultSource]
      */
     override suspend fun setDefaultCustomerSource(
@@ -2246,6 +2273,18 @@ class StripeApiRepository @JvmOverloads internal constructor(
         @JvmSynthetic
         internal fun getRetrieveCustomerUrl(customerId: String): String {
             return getApiUrl("customers/%s", customerId)
+        }
+
+        /**
+         * @return `https://api.stripe.com/v1/customers/:id/payment_methods/:id`
+         */
+        @VisibleForTesting
+        @JvmSynthetic
+        internal fun getRetrieveCustomerPaymentMethodUrl(
+            customerId: String,
+            paymentMethodId: String
+        ): String {
+            return getApiUrl("customers/%s/payment_methods/%s", customerId, paymentMethodId)
         }
 
         /**

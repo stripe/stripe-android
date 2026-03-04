@@ -36,7 +36,7 @@ import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.link.utils.errorMessage
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
-import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
+import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodAccess
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.model.CardBrand
@@ -144,12 +144,10 @@ import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
-import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
-import org.mockito.kotlin.spy
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
@@ -207,12 +205,10 @@ internal class PaymentSheetViewModelTest {
         Dispatchers.setMain(testDispatcher)
         val paymentMethods = listOf(CARD_WITH_NETWORKS_PAYMENT_METHOD)
 
-        val savedPaymentMethodRepository = spy(
-            FakeSavedPaymentMethodRepository(
-                onUpdatePaymentMethod = {
-                    Result.success(paymentMethods.first())
-                }
-            )
+        val savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(
+            onUpdatePaymentMethod = {
+                Result.success(paymentMethods.first())
+            }
         )
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
@@ -254,18 +250,12 @@ internal class PaymentSheetViewModelTest {
             assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
         }
 
-        val customerMetadataCaptor = argumentCaptor<CustomerMetadata>()
-
-        verify(savedPaymentMethodRepository).updatePaymentMethod(
-            customerMetadataCaptor.capture(),
-            any(),
-            any()
-        )
-
-        with(customerMetadataCaptor.firstValue) {
-            assertThat(id).isEqualTo("cus_123")
-            assertThat(ephemeralKeySecret).isEqualTo("ek_123")
-            assertThat(customerSessionClientSecret).isNull()
+        val updateRequest = savedPaymentMethodRepository.updateRequests.awaitItem()
+        assertThat(updateRequest.access).isInstanceOf(SavedPaymentMethodAccess.Customer::class.java)
+        with(updateRequest.access as SavedPaymentMethodAccess.Customer) {
+            assertThat(info.id).isEqualTo("cus_123")
+            assertThat(info.ephemeralKeySecret).isEqualTo("ek_123")
+            assertThat(info.customerSessionClientSecret).isNull()
         }
     }
 
@@ -286,12 +276,10 @@ internal class PaymentSheetViewModelTest {
             )
         )
 
-        val savedPaymentMethodRepository = spy(
-            FakeSavedPaymentMethodRepository(
-                onUpdatePaymentMethod = {
-                    Result.success(updatedPaymentMethod)
-                }
-            )
+        val savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(
+            onUpdatePaymentMethod = {
+                Result.success(updatedPaymentMethod)
+            }
         )
         val viewModel = createViewModel(
             customer = EMPTY_CUSTOMER_STATE.copy(paymentMethods = paymentMethods),
@@ -330,19 +318,11 @@ internal class PaymentSheetViewModelTest {
         eventReporter.updatePaymentMethodSucceededCalls.ensureAllEventsConsumed()
         assertThat(updatePaymentMethodSucceededCall.selectedBrand).isEqualTo(CardBrand.Visa)
 
-        val idCaptor = argumentCaptor<String>()
-        val paramsCaptor = argumentCaptor<PaymentMethodUpdateParams>()
-
-        verify(savedPaymentMethodRepository).updatePaymentMethod(
-            any(),
-            idCaptor.capture(),
-            paramsCaptor.capture()
-        )
-
-        assertThat(idCaptor.firstValue).isEqualTo(firstPaymentMethod.id)
+        val updateRequest = savedPaymentMethodRepository.updateRequests.awaitItem()
+        assertThat(updateRequest.paymentMethodId).isEqualTo(firstPaymentMethod.id)
 
         assertThat(
-            paramsCaptor.firstValue.toParamMap()
+            updateRequest.params.toParamMap()
         ).isEqualTo(
             PaymentMethodUpdateParams.createCard(
                 networks = PaymentMethodUpdateParams.Card.Networks(
@@ -367,12 +347,10 @@ internal class PaymentSheetViewModelTest {
 
         val firstPaymentMethod = paymentMethods.first()
 
-        val savedPaymentMethodRepository = spy(
-            FakeSavedPaymentMethodRepository(
-                onUpdatePaymentMethod = {
-                    Result.failure(Exception("No network found!"))
-                }
-            )
+        val savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(
+            onUpdatePaymentMethod = {
+                Result.failure(Exception("No network found!"))
+            }
         )
         val viewModel = createViewModel(
             customer = EMPTY_CUSTOMER_STATE.copy(paymentMethods = paymentMethods),
@@ -2901,7 +2879,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `on 'modifyPaymentMethod' with no customer available, should not attempt update`() = runTest {
-        val savedPaymentMethodRepository = spy(FakeSavedPaymentMethodRepository())
+        val savedPaymentMethodRepository = FakeSavedPaymentMethodRepository()
 
         val viewModel = createViewModel(
             customer = null,
@@ -2923,7 +2901,7 @@ internal class PaymentSheetViewModelTest {
                 val interactor = currentScreen.interactor
                 interactor.cardParamsUpdateAction(CardBrand.Visa)
 
-                verify(savedPaymentMethodRepository, never()).updatePaymentMethod(any(), any(), any())
+                savedPaymentMethodRepository.validate()
             }
         }
     }

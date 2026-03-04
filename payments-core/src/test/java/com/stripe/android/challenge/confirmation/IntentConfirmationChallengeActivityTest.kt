@@ -26,6 +26,7 @@ import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.injectableActivityScenario
 import kotlinx.coroutines.test.TestDispatcher
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -223,7 +224,8 @@ internal class IntentConfirmationChallengeActivityTest {
                     userAgent = "fake-user-agent",
                     stripeRepository = object : AbsFakeStripeRepository() {},
                     errorReporter = FakeErrorReporter(),
-                    requestOptions = ApiRequest.Options("pk_test_123")
+                    requestOptions = ApiRequest.Options("pk_test_123"),
+                    fireAndForgetScope = TestScope(testDispatcher),
                 ) as T
             }
         }
@@ -276,6 +278,7 @@ internal class IntentConfirmationChallengeActivityTest {
                     },
                     errorReporter = FakeErrorReporter(),
                     requestOptions = ApiRequest.Options("pk_test_123"),
+                    fireAndForgetScope = TestScope(testDispatcher),
                 ) as T
             }
         }

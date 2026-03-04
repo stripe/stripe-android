@@ -6,7 +6,6 @@ import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.PaymentMethodRemovePermission
-import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
@@ -19,6 +18,8 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodAccess
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -915,16 +916,12 @@ class SavedPaymentMethodMutatorTest {
             assertThat(repository.detachRequests.awaitItem()).isEqualTo(
                 FakeSavedPaymentMethodRepository.DetachRequest(
                     paymentMethodId = paymentMethod.id,
-                    customerMetadata = CustomerMetadata(
-                        id = "cus_123",
-                        ephemeralKeySecret = "ek_123",
-                        customerSessionClientSecret = customerSessionClientSecret,
-                        isPaymentMethodSetAsDefaultEnabled = false,
-                        removePaymentMethod = PaymentMethodRemovePermission.Full,
-                        saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
-                        canRemoveLastPaymentMethod = true,
-                        canRemoveDuplicates = shouldRemoveDuplicates,
-                        canUpdateFullPaymentMethodDetails = false,
+                    access = SavedPaymentMethodAccess.Customer(
+                        info = CustomerRepository.CustomerInfo(
+                            id = "cus_123",
+                            ephemeralKeySecret = "ek_123",
+                            customerSessionClientSecret = customerSessionClientSecret,
+                        ),
                     ),
                     canRemoveDuplicates = shouldRemoveDuplicates,
                 )
