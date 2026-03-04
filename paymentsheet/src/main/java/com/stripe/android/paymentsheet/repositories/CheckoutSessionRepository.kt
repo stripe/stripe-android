@@ -127,7 +127,10 @@ internal class DefaultCheckoutSessionRepository @Inject constructor(
             request = apiRequestFactory.createPost(
                 url = updateUrl(sessionId),
                 options = options,
-                params = mapOf("promotion_code" to promotionCode),
+                params = mapOf(
+                    "promotion_code" to promotionCode,
+                    "elements_session_client[is_aggregation_expected]" to "true",
+                ),
             ),
             responseJsonParser = CheckoutSessionResponseJsonParser(
                 isLiveMode = options.apiKeyIsLiveMode,
