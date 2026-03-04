@@ -273,7 +273,7 @@ internal class CardNumberControllerTest {
 
         cardNumberController.trailingIcon.test {
             cardNumberController.onValueChange("4000002500001001")
-            cardNumberController.onDropdownItemClicked(
+            cardNumberController.onCardBrandChoiceItemClicked(
                 TextFieldIcon.CardBrandChoice.Item(
                     id = CardBrand.CartesBancaires.code,
                     label = "Cartes Bancaires".resolvableString,
@@ -298,7 +298,7 @@ internal class CardNumberControllerTest {
 
         cardNumberController.trailingIcon.test {
             cardNumberController.onValueChange("4000002500001001")
-            cardNumberController.onDropdownItemClicked(
+            cardNumberController.onCardBrandChoiceItemClicked(
                 TextFieldIcon.CardBrandChoice.Item(
                     id = CardBrand.CartesBancaires.code,
                     label = "Cartes Bancaires".resolvableString,
@@ -310,7 +310,7 @@ internal class CardNumberControllerTest {
             assertThat(awaitItem() as TextFieldIcon.CardBrandChoice)
                 .isEqualTo(cartesBancaireSelection)
 
-            cardNumberController.onDropdownItemClicked(
+            cardNumberController.onCardBrandChoiceItemClicked(
                 TextFieldIcon.CardBrandChoice.Item(
                     id = CardBrand.CartesBancaires.code,
                     label = "Cartes Bancaires".resolvableString,
@@ -337,7 +337,7 @@ internal class CardNumberControllerTest {
 
         cardNumberController.trailingIcon.test {
             cardNumberController.onValueChange("4000002500001001")
-            cardNumberController.onDropdownItemClicked(
+            cardNumberController.onCardBrandChoiceItemClicked(
                 TextFieldIcon.CardBrandChoice.Item(
                     id = CardBrand.CartesBancaires.code,
                     label = "Cartes Bancaires".resolvableString,

@@ -198,7 +198,7 @@ fun TextField(
                 }
             }
         },
-        onDropdownItemClicked = textFieldController::onDropdownItemClicked,
+        onCardBrandChoiceItemClicked = textFieldController::onCardBrandChoiceItemClicked,
         modifier = modifier
             .onPreviewKeyEvent(
                 value = value,
@@ -263,7 +263,7 @@ internal fun TextFieldUi(
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions(),
     onValueChange: (value: TextFieldValue) -> Unit = {},
-    onDropdownItemClicked: (item: TextFieldIcon.CardBrandChoice.Item) -> Unit = {},
+    onCardBrandChoiceItemClicked: (item: TextFieldIcon.CardBrandChoice.Item) -> Unit = {},
     hasFocus: Boolean
 ) {
     val displayState = when (shouldShowValidationMessage) {
@@ -306,7 +306,7 @@ internal fun TextFieldUi(
             },
             trailingIcon = trailingIcon?.let { icon ->
                 {
-                    icon.Composable(loading, onDropdownItemClicked, hasFocus)
+                    icon.Composable(loading, onCardBrandChoiceItemClicked, hasFocus)
                 }
             },
             isError = shouldShowValidationMessage,
@@ -548,7 +548,6 @@ private fun CardBrandChoice(
     Box(
         modifier = Modifier
             .focusProperties { canFocus = false }
-            .testTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
             .padding(10.dp),
         contentAlignment = Alignment.Center
     ) {

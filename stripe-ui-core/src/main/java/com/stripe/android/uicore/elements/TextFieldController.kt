@@ -25,7 +25,7 @@ import kotlinx.coroutines.flow.asStateFlow
 interface TextFieldController : InputController, SectionFieldComposable, SectionFieldValidationController {
     fun onValueChange(displayFormatted: String): TextFieldState?
     fun onFocusChange(newHasFocus: Boolean)
-    fun onDropdownItemClicked(item: TextFieldIcon.CardBrandChoice.Item) {}
+    fun onCardBrandChoiceItemClicked(item: TextFieldIcon.CardBrandChoice.Item) {}
 
     val initialValue: String?
     val autofillType: ContentType?

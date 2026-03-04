@@ -287,7 +287,7 @@ internal class DefaultCardNumberController(
         _hasFocus.value = newHasFocus
     }
 
-    override fun onDropdownItemClicked(item: TextFieldIcon.CardBrandChoice.Item) {
+    override fun onCardBrandChoiceItemClicked(item: TextFieldIcon.CardBrandChoice.Item) {
         val newChoice = CardBrand.fromCode(item.id)
         if (mostRecentUserSelectedBrand.value == newChoice) {
             mostRecentUserSelectedBrand.value = null
