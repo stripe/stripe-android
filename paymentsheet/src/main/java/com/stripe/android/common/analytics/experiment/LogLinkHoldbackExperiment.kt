@@ -99,8 +99,8 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
         val isSpmEnabled: Boolean = elementsSession.isSpmEnabled(linkEnabled)
 
         experimentAssignments.forEach { experimentAssignment ->
-            val experimentGroup = elementsSession.experimentsData
-                ?.experimentAssignments?.get(experimentAssignment) ?: "control"
+            val experimentGroup = experimentsData
+                .experimentAssignments[experimentAssignment] ?: "control"
             eventReporter.onExperimentExposure(
                 experiment = LinkHoldback(
                     arbId = experimentsData.arbId,

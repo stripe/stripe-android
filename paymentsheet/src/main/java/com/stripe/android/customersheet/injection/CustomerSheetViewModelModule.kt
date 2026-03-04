@@ -8,6 +8,7 @@ import com.stripe.android.BuildConfig
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.StripeNetworkClientModule
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
@@ -40,7 +41,7 @@ import kotlinx.coroutines.Dispatchers
 import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 
-@Module(includes = [PaymentConfigurationModule::class])
+@Module(includes = [PaymentConfigurationModule::class, StripeNetworkClientModule::class])
 internal interface CustomerSheetViewModelModule {
     @Binds
     fun bindsUserFacingLogger(impl: RealUserFacingLogger): UserFacingLogger
