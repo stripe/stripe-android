@@ -912,20 +912,34 @@ class SavedPaymentMethodMutatorTest {
 
             assertThat(postPaymentMethodRemovedTurbine.awaitItem()).isEqualTo(Unit)
 
+            val expectedCustomerMetadata: CustomerMetadata = if (customerSessionClientSecret != null) {
+                CustomerMetadata.Session(
+                    id = "cus_123",
+                    ephemeralKeySecret = "ek_123",
+                    customerSessionClientSecret = customerSessionClientSecret,
+                    isPaymentMethodSetAsDefaultEnabled = false,
+                    removePaymentMethod = PaymentMethodRemovePermission.Full,
+                    saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
+                    canRemoveLastPaymentMethod = true,
+                    canRemoveDuplicates = shouldRemoveDuplicates,
+                    canUpdateFullPaymentMethodDetails = false,
+                )
+            } else {
+                CustomerMetadata.LegacyEphemeralKey(
+                    id = "cus_123",
+                    ephemeralKeySecret = "ek_123",
+                    isPaymentMethodSetAsDefaultEnabled = false,
+                    removePaymentMethod = PaymentMethodRemovePermission.Full,
+                    saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
+                    canRemoveLastPaymentMethod = true,
+                    canRemoveDuplicates = shouldRemoveDuplicates,
+                    canUpdateFullPaymentMethodDetails = false,
+                )
+            }
             assertThat(repository.detachRequests.awaitItem()).isEqualTo(
                 FakeSavedPaymentMethodRepository.DetachRequest(
                     paymentMethodId = paymentMethod.id,
-                    customerMetadata = CustomerMetadata.Customer(
-                        id = "cus_123",
-                        ephemeralKeySecret = "ek_123",
-                        customerSessionClientSecret = customerSessionClientSecret,
-                        isPaymentMethodSetAsDefaultEnabled = false,
-                        removePaymentMethod = PaymentMethodRemovePermission.Full,
-                        saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
-                        canRemoveLastPaymentMethod = true,
-                        canRemoveDuplicates = shouldRemoveDuplicates,
-                        canUpdateFullPaymentMethodDetails = false,
-                    ),
+                    customerMetadata = expectedCustomerMetadata,
                     canRemoveDuplicates = shouldRemoveDuplicates,
                 )
             )

@@ -87,15 +87,28 @@ internal object PaymentMethodMetadataFactory {
             defaultBillingDetails = defaultBillingDetails,
             shippingDetails = shippingDetails,
             customerMetadata = if (hasCustomerConfiguration) {
-                PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.copy(
-                    customerSessionClientSecret = customerSessionClientSecret,
-                    isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
-                    removePaymentMethod = removePaymentMethod,
-                    saveConsent = saveConsent,
-                    canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
-                    canRemoveDuplicates = canRemoveDuplicates,
-                    canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
-                )
+                if (customerSessionClientSecret != null) {
+                    CustomerMetadata.Session(
+                        id = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.id,
+                        ephemeralKeySecret = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.ephemeralKeySecret,
+                        customerSessionClientSecret = customerSessionClientSecret,
+                        isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
+                        removePaymentMethod = removePaymentMethod,
+                        saveConsent = saveConsent,
+                        canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
+                        canRemoveDuplicates = canRemoveDuplicates,
+                        canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
+                    )
+                } else {
+                    PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.copy(
+                        isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
+                        removePaymentMethod = removePaymentMethod,
+                        saveConsent = saveConsent,
+                        canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
+                        canRemoveDuplicates = canRemoveDuplicates,
+                        canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
+                    )
+                }
             } else {
                 null
             },

@@ -48,7 +48,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
                 PaymentMethod.Builder().setId(paymentMethodId).build()
             }
         }
-        is CustomerMetadata.Customer -> {
+        is CustomerMetadata.LegacyEphemeralKey, is CustomerMetadata.Session -> {
             customerRepository.detachPaymentMethod(
                 customerInfo = customerMetadata.toCustomerInfo(),
                 paymentMethodId = paymentMethodId,
@@ -65,7 +65,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
         is CustomerMetadata.CheckoutSession -> {
             Result.failure(NotImplementedError("Checkout sessions do not support updating payment methods"))
         }
-        is CustomerMetadata.Customer -> {
+        is CustomerMetadata.LegacyEphemeralKey, is CustomerMetadata.Session -> {
             customerRepository.updatePaymentMethod(
                 customerInfo = customerMetadata.toCustomerInfo(),
                 paymentMethodId = paymentMethodId,
@@ -81,7 +81,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
         is CustomerMetadata.CheckoutSession -> {
             Result.failure(NotImplementedError("Checkout sessions do not support setting default payment methods"))
         }
-        is CustomerMetadata.Customer -> {
+        is CustomerMetadata.LegacyEphemeralKey, is CustomerMetadata.Session -> {
             customerRepository.setDefaultPaymentMethod(
                 customerInfo = customerMetadata.toCustomerInfo(),
                 paymentMethodId = paymentMethodId,
@@ -90,10 +90,16 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
     }
 }
 
-internal fun CustomerMetadata.Customer.toCustomerInfo(): CustomerRepository.CustomerInfo {
-    return CustomerRepository.CustomerInfo(
+internal fun CustomerMetadata.toCustomerInfo(): CustomerRepository.CustomerInfo = when (this) {
+    is CustomerMetadata.LegacyEphemeralKey -> CustomerRepository.CustomerInfo(
+        id = id,
+        ephemeralKeySecret = ephemeralKeySecret,
+        customerSessionClientSecret = null,
+    )
+    is CustomerMetadata.Session -> CustomerRepository.CustomerInfo(
         id = id,
         ephemeralKeySecret = ephemeralKeySecret,
         customerSessionClientSecret = customerSessionClientSecret,
     )
+    is CustomerMetadata.CheckoutSession -> error("CheckoutSession does not have a CustomerInfo")
 }

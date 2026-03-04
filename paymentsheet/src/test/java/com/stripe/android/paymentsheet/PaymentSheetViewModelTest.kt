@@ -251,11 +251,10 @@ internal class PaymentSheetViewModelTest {
         }
 
         val updateRequest = savedPaymentMethodRepository.updateRequests.awaitItem()
-        assertThat(updateRequest.customerMetadata).isInstanceOf(CustomerMetadata.Customer::class.java)
-        with(updateRequest.customerMetadata as CustomerMetadata.Customer) {
+        assertThat(updateRequest.customerMetadata).isInstanceOf(CustomerMetadata.LegacyEphemeralKey::class.java)
+        with(updateRequest.customerMetadata as CustomerMetadata.LegacyEphemeralKey) {
             assertThat(id).isEqualTo("cus_123")
             assertThat(ephemeralKeySecret).isEqualTo("ek_123")
-            assertThat(customerSessionClientSecret).isNull()
         }
     }
 

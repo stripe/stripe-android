@@ -23,10 +23,22 @@ internal sealed class CustomerMetadata : Parcelable {
             removePaymentMethod == PaymentMethodRemovePermission.Partial
 
     @Parcelize
-    data class Customer(
+    data class LegacyEphemeralKey(
         val id: String,
         val ephemeralKeySecret: String,
-        val customerSessionClientSecret: String?,
+        override val removePaymentMethod: PaymentMethodRemovePermission,
+        override val saveConsent: PaymentMethodSaveConsentBehavior,
+        override val canRemoveLastPaymentMethod: Boolean,
+        override val canRemoveDuplicates: Boolean,
+        override val canUpdateFullPaymentMethodDetails: Boolean,
+        override val isPaymentMethodSetAsDefaultEnabled: Boolean,
+    ) : CustomerMetadata()
+
+    @Parcelize
+    data class Session(
+        val id: String,
+        val ephemeralKeySecret: String,
+        val customerSessionClientSecret: String,
         override val removePaymentMethod: PaymentMethodRemovePermission,
         override val saveConsent: PaymentMethodSaveConsentBehavior,
         override val canRemoveLastPaymentMethod: Boolean,
@@ -54,7 +66,7 @@ internal sealed class CustomerMetadata : Parcelable {
             ephemeralKeySecret: String,
             customerSessionClientSecret: String?,
             isPaymentMethodSetAsDefaultEnabled: Boolean,
-        ): Customer {
+        ): Session {
             val mobilePaymentElementComponent = customer.session.components.mobilePaymentElement
             val removePaymentMethod = when (mobilePaymentElementComponent) {
                 is MobilePaymentElement.Enabled -> {
@@ -90,10 +102,12 @@ internal sealed class CustomerMetadata : Parcelable {
                 }
             }
 
-            return Customer(
+            return Session(
                 id = id,
                 ephemeralKeySecret = ephemeralKeySecret,
-                customerSessionClientSecret = customerSessionClientSecret,
+                customerSessionClientSecret = requireNotNull(customerSessionClientSecret) {
+                    "customerSessionClientSecret is required for customer session"
+                },
                 isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
                 removePaymentMethod = removePaymentMethod,
                 saveConsent = saveConsent,
@@ -110,11 +124,10 @@ internal sealed class CustomerMetadata : Parcelable {
             id: String,
             ephemeralKeySecret: String,
             isPaymentMethodSetAsDefaultEnabled: Boolean,
-        ): Customer {
-            return Customer(
+        ): LegacyEphemeralKey {
+            return LegacyEphemeralKey(
                 id = id,
                 ephemeralKeySecret = ephemeralKeySecret,
-                customerSessionClientSecret = null,
                 isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
                 /*
                  * Un-scoped legacy ephemeral keys have full permissions to remove/save/modify. This should
@@ -149,19 +162,33 @@ internal sealed class CustomerMetadata : Parcelable {
             ephemeralKeySecret: String,
             customerSessionClientSecret: String?,
             isPaymentMethodSetAsDefaultEnabled: Boolean,
-        ): Customer {
-            return Customer(
-                id = id,
-                ephemeralKeySecret = ephemeralKeySecret,
-                customerSessionClientSecret = customerSessionClientSecret,
-                isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
-                removePaymentMethod = customerSheetSession.permissions.removePaymentMethod,
-                saveConsent = customerSheetSession.paymentMethodSaveConsentBehavior,
-                canRemoveLastPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod,
-                canRemoveDuplicates = true,
-                canUpdateFullPaymentMethodDetails =
-                    customerSheetSession.permissions.canUpdateFullPaymentMethodDetails,
-            )
+        ): CustomerMetadata {
+            return if (customerSessionClientSecret != null) {
+                Session(
+                    id = id,
+                    ephemeralKeySecret = ephemeralKeySecret,
+                    customerSessionClientSecret = customerSessionClientSecret,
+                    isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
+                    removePaymentMethod = customerSheetSession.permissions.removePaymentMethod,
+                    saveConsent = customerSheetSession.paymentMethodSaveConsentBehavior,
+                    canRemoveLastPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod,
+                    canRemoveDuplicates = true,
+                    canUpdateFullPaymentMethodDetails =
+                        customerSheetSession.permissions.canUpdateFullPaymentMethodDetails,
+                )
+            } else {
+                LegacyEphemeralKey(
+                    id = id,
+                    ephemeralKeySecret = ephemeralKeySecret,
+                    isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
+                    removePaymentMethod = customerSheetSession.permissions.removePaymentMethod,
+                    saveConsent = customerSheetSession.paymentMethodSaveConsentBehavior,
+                    canRemoveLastPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod,
+                    canRemoveDuplicates = true,
+                    canUpdateFullPaymentMethodDetails =
+                        customerSheetSession.permissions.canUpdateFullPaymentMethodDetails,
+                )
+            }
         }
     }
 }

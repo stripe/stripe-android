@@ -1395,10 +1395,9 @@ class ConfirmationTokenConfirmationInterceptorTest {
     }
 
     private companion object {
-        val DEFAULT_CUSTOMER_METADATA = CustomerMetadata.Customer(
+        val DEFAULT_CUSTOMER_METADATA = CustomerMetadata.LegacyEphemeralKey(
             id = "cus_1",
             ephemeralKeySecret = "ek_test_123",
-            customerSessionClientSecret = null,
             isPaymentMethodSetAsDefaultEnabled = false,
             removePaymentMethod = PaymentMethodRemovePermission.Full,
             saveConsent = PaymentMethodSaveConsentBehavior.Legacy,

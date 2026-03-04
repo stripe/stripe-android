@@ -91,7 +91,7 @@ internal class DefaultTapToAddCollectionHandler(
         metadata: PaymentMethodMetadata
     ): TapToAddCollectionHandler.CollectionState = runCatching {
         val customerInfo = when (val customerMetadata = metadata.customerMetadata) {
-            is CustomerMetadata.Customer -> customerMetadata.toCustomerInfo()
+            is CustomerMetadata.LegacyEphemeralKey, is CustomerMetadata.Session -> customerMetadata.toCustomerInfo()
             is CustomerMetadata.CheckoutSession -> return@runCatching failedCollection(
                 "Tap to add is not supported for CheckoutSession"
             )

@@ -170,7 +170,7 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
     private suspend fun PaymentElementLoader.State.getEmail(): String? =
         paymentMethodMetadata.linkState?.configuration?.customerInfo?.email
             ?: when (val customerMetadata = paymentMethodMetadata.customerMetadata) {
-                is CustomerMetadata.Customer -> retrieveCustomerEmail(
+                is CustomerMetadata.LegacyEphemeralKey, is CustomerMetadata.Session -> retrieveCustomerEmail(
                     configuration = config,
                     customer = customerMetadata.toCustomerInfo()
                 )

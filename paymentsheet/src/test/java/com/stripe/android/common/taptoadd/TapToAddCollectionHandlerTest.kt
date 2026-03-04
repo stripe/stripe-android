@@ -192,7 +192,7 @@ class TapToAddCollectionHandlerTest {
 
     @Test
     fun `handler returns FailedCollection when using CheckoutSession`() = runScenario {
-        val existingCustomerMetadata = DEFAULT_METADATA.customerMetadata as CustomerMetadata.Customer
+        val existingCustomerMetadata = DEFAULT_METADATA.customerMetadata as CustomerMetadata.LegacyEphemeralKey
         val metadataWithCheckoutSession = DEFAULT_METADATA.copy(
             customerMetadata = CustomerMetadata.CheckoutSession(
                 sessionId = "cs_123",
