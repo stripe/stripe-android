@@ -223,7 +223,7 @@ internal class CustomerSheetTest {
     }
 
     @Test
-    fun testSuccessfulCardSaveWithCardBrandChoiceOld(
+    fun testSuccessfulCardSaveWithCardBrandChoice_Dropdown(
         @TestParameter(valuesProvider = CustomerSheetTestTypeProvider::class)
         customerSheetTestType: CustomerSheetTestType,
     ) = runCustomerSheetTest(
@@ -274,7 +274,7 @@ internal class CustomerSheetTest {
     }
 
     @Test
-    fun testSuccessfulCardSaveWithCardBrandChoice(
+    fun testSuccessfulCardSaveWithCardBrandChoice_Selector(
         @TestParameter(valuesProvider = CustomerSheetTestTypeProvider::class)
         customerSheetTestType: CustomerSheetTestType,
     ) = runCustomerSheetTest(
