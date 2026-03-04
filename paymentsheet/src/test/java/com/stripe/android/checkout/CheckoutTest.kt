@@ -5,6 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
@@ -12,6 +13,7 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.testing.PaymentConfigurationTestRule
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -61,6 +63,79 @@ class CheckoutTest {
     }
 
     @Test
+    fun `applyPromotionCode updates checkoutSession on success`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_abc123"),
+                bodyPart("promotion_code", "10OFF"),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-apply-discount.json")
+            }
+
+            checkout.checkoutSession.test {
+                assertThat(awaitItem().totalSummary).isNull()
+
+                backgroundScope.launch { checkout.applyPromotionCode("10OFF") }
+
+                val updated = awaitItem()
+                val totalSummary = updated.totalSummary
+                assertThat(totalSummary).isNotNull()
+                assertThat(totalSummary!!.discountAmounts).hasSize(1)
+                assertThat(totalSummary.discountAmounts[0].displayName).isEqualTo("10OFF")
+            }
+        }
+    }
+
+    @Test
+    fun `applyPromotionCode returns failure on error response`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_abc123"),
+            ) { response ->
+                response.setResponseCode(400)
+                response.setBody("""{"error": {"message": "Invalid promotion code"}}""")
+            }
+
+            checkout.checkoutSession.test {
+                val initial = awaitItem()
+
+                val result = checkout.applyPromotionCode("INVALID")
+                assertThat(result.isFailure).isTrue()
+
+                expectNoEvents()
+                assertThat(checkout.checkoutSession.value).isEqualTo(initial)
+            }
+        }
+    }
+
+    @Test
+    fun `applyPromotionCode trims whitespace from promotion code`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_abc123"),
+                bodyPart("promotion_code", "10OFF"),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-apply-discount.json")
+            }
+
+            checkout.checkoutSession.test {
+                assertThat(awaitItem().totalSummary).isNull()
+
+                backgroundScope.launch { checkout.applyPromotionCode("  10OFF  ") }
+
+                val updated = awaitItem()
+                assertThat(updated.totalSummary).isNotNull()
+            }
+        }
+    }
+
+    @Test
     fun `configure returns failure when network request fails`() = runConfigureScenario(
         clientSecret = "cs_test_abc123_secret_xyz",
         networkSetup = {
@@ -88,7 +163,7 @@ class CheckoutTest {
         val state = Checkout.State(
             checkoutSessionResponse = checkoutSessionResponse,
         )
-        val checkout = Checkout.createWithState(state)
+        val checkout = Checkout.createWithState(applicationContext, state)
         block(checkout)
     }
 

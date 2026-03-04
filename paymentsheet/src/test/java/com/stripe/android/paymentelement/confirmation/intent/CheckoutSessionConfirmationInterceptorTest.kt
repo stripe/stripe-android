@@ -417,5 +417,12 @@ class CheckoutSessionConfirmationInterceptorTest {
         ): Result<CheckoutSessionResponse> {
             error("Not expected in this test")
         }
+
+        override suspend fun applyPromotionCode(
+            sessionId: String,
+            promotionCode: String,
+        ): Result<CheckoutSessionResponse> {
+            error("Not expected in this test")
+        }
     }
 }

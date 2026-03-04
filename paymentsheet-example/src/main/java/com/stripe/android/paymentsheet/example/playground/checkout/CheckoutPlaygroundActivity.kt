@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -32,13 +33,12 @@ import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkout.CheckoutSession
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
+import com.stripe.android.paymentsheet.example.playground.checkout.CheckoutPlaygroundViewModel.Companion.CHECKOUT_STATE_KEY
 import com.stripe.android.paymentsheet.example.samples.ui.PADDING
 import com.stripe.android.uicore.format.CurrencyFormatter
 
 class CheckoutPlaygroundActivity : AppCompatActivity() {
     companion object {
-        const val CHECKOUT_STATE_KEY = "CHECKOUT_STATE_KEY"
-
         fun create(
             context: Context,
             checkoutState: Checkout.State,
@@ -49,48 +49,35 @@ class CheckoutPlaygroundActivity : AppCompatActivity() {
         }
     }
 
-    private lateinit var checkout: Checkout
-
-    @Suppress("DEPRECATION")
-    private fun getCheckoutState(savedInstanceState: Bundle?): Checkout.State? {
-        return savedInstanceState?.getParcelable<Checkout.State?>(CHECKOUT_STATE_KEY)
-            ?: intent.getParcelableExtra<Checkout.State?>(CHECKOUT_STATE_KEY)
+    private val viewModel: CheckoutPlaygroundViewModel by viewModels {
+        @Suppress("DEPRECATION")
+        val checkoutState: Checkout.State = requireNotNull(intent.getParcelableExtra(CHECKOUT_STATE_KEY))
+        CheckoutPlaygroundViewModel.factory(checkoutState)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        val checkoutState = getCheckoutState(savedInstanceState)
-        if (checkoutState == null) {
-            finish()
-            return
-        }
-
-        checkout = Checkout.createWithState(checkoutState)
-
         setContent {
-            CheckoutScreen(checkout)
+            CheckoutScreen(
+                checkout = viewModel.checkout,
+                applyPromotionCode = viewModel::applyPromotionCode,
+            )
         }
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putParcelable(CHECKOUT_STATE_KEY, checkout.state)
     }
 
     override fun finish() {
-        setResult(RESULT_OK, Intent().putExtra(CHECKOUT_STATE_KEY, checkout.state))
+        setResult(RESULT_OK, Intent().putExtra(CHECKOUT_STATE_KEY, viewModel.checkout.state))
 
         super.finish()
     }
 }
 
 @Composable
-fun CheckoutScreen(checkout: Checkout) {
+private fun CheckoutScreen(checkout: Checkout, applyPromotionCode: (String) -> Unit) {
     val checkoutSession by checkout.checkoutSession.collectAsState()
-
-    var discountCode by rememberSaveable { mutableStateOf("") }
+    var promotionCode by rememberSaveable { mutableStateOf("") }
 
     PlaygroundTheme(
         content = {
@@ -100,13 +87,15 @@ fun CheckoutScreen(checkout: Checkout) {
                 horizontalArrangement = Arrangement.spacedBy(PADDING),
             ) {
                 OutlinedTextField(
-                    value = discountCode,
-                    onValueChange = { discountCode = it },
-                    label = { Text("Discount code") },
+                    value = promotionCode,
+                    onValueChange = { promotionCode = it },
+                    label = { Text("Promotion code") },
                     singleLine = true,
                     modifier = Modifier.weight(1f),
                 )
-                Button(onClick = { }) {
+                Button(
+                    onClick = { applyPromotionCode(promotionCode) },
+                ) {
                     Text("Apply")
                 }
             }

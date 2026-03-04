@@ -28,6 +28,11 @@ internal interface CheckoutSessionRepository {
         sessionId: String,
         paymentMethodId: String,
     ): Result<CheckoutSessionResponse>
+
+    suspend fun applyPromotionCode(
+        sessionId: String,
+        promotionCode: String,
+    ): Result<CheckoutSessionResponse>
 }
 
 internal class DefaultCheckoutSessionRepository @Inject constructor(
@@ -103,6 +108,28 @@ internal class DefaultCheckoutSessionRepository @Inject constructor(
                 options = options,
                 params = mapOf(
                     "payment_method_to_detach" to paymentMethodId,
+                ),
+            ),
+            responseJsonParser = CheckoutSessionResponseJsonParser(
+                isLiveMode = options.apiKeyIsLiveMode,
+            ),
+        )
+    }
+
+    override suspend fun applyPromotionCode(
+        sessionId: String,
+        promotionCode: String,
+    ): Result<CheckoutSessionResponse> {
+        val options = createOptions()
+        return executeRequestWithResultParser(
+            stripeErrorJsonParser = stripeErrorJsonParser,
+            stripeNetworkClient = stripeNetworkClient,
+            request = apiRequestFactory.createPost(
+                url = updateUrl(sessionId),
+                options = options,
+                params = mapOf(
+                    "promotion_code" to promotionCode,
+                    "elements_session_client[is_aggregation_expected]" to "true",
                 ),
             ),
             responseJsonParser = CheckoutSessionResponseJsonParser(

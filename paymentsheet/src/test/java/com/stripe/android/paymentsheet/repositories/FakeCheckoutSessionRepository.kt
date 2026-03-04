@@ -7,6 +7,7 @@ internal class FakeCheckoutSessionRepository(
     var initResult: Result<CheckoutSessionResponse> = Result.failure(NotImplementedError()),
     var confirmResult: Result<CheckoutSessionResponse> = Result.failure(NotImplementedError()),
     var detachResult: Result<CheckoutSessionResponse> = Result.failure(NotImplementedError()),
+    var applyPromotionCodeResult: Result<CheckoutSessionResponse> = Result.failure(NotImplementedError()),
 ) : CheckoutSessionRepository {
 
     private val _initRequests = Turbine<String>()
@@ -39,6 +40,11 @@ internal class FakeCheckoutSessionRepository(
         )
         return detachResult
     }
+
+    override suspend fun applyPromotionCode(
+        sessionId: String,
+        promotionCode: String,
+    ): Result<CheckoutSessionResponse> = applyPromotionCodeResult
 
     data class DetachRequest(
         val sessionId: String,
