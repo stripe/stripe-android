@@ -253,9 +253,9 @@ internal class PaymentSheetViewModelTest {
         val updateRequest = savedPaymentMethodRepository.updateRequests.awaitItem()
         assertThat(updateRequest.access).isInstanceOf(SavedPaymentMethodAccess.Customer::class.java)
         with(updateRequest.access as SavedPaymentMethodAccess.Customer) {
-            assertThat(info.id).isEqualTo("cus_123")
-            assertThat(info.ephemeralKeySecret).isEqualTo("ek_123")
-            assertThat(info.customerSessionClientSecret).isNull()
+            assertThat(id).isEqualTo("cus_123")
+            assertThat(ephemeralKeySecret).isEqualTo("ek_123")
+            assertThat(customerSessionClientSecret).isNull()
         }
     }
 

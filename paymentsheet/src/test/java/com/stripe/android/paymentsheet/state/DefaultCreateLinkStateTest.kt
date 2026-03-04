@@ -69,7 +69,8 @@ internal class DefaultCreateLinkStateTest {
         createLinkState(
             elementsSession = elementsSession,
             configuration = configuration,
-            customer = null,
+            customerId = null,
+            ephemeralKeySecret = null,
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value
             ),

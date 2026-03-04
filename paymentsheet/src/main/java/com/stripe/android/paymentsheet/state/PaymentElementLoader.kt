@@ -310,7 +310,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             createLinkState(
                 elementsSession = elementsSession,
                 configuration = configuration,
-                customer = customerInfo?.toCustomerInfo(),
+                customerId = customerInfo?.customerIdOrNull(),
+                ephemeralKeySecret = customerInfo?.ephemeralKeySecretOrNull(),
                 initializationMode = initializationMode,
                 clientAttributionMetadata = clientAttributionMetadata,
             )
@@ -609,11 +610,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val customerSessionClientSecret = customerSession?.customerSessionClientSecret
 
         val paymentMethods = customerRepository.getPaymentMethods(
-            customerInfo = CustomerRepository.CustomerInfo(
-                id = customerConfig.id,
-                ephemeralKeySecret = customerConfig.ephemeralKeySecret,
-                customerSessionClientSecret = customerSessionClientSecret,
-            ),
+            customerId = customerConfig.id,
+            ephemeralKeySecret = customerConfig.ephemeralKeySecret,
             types = paymentMethodTypes,
             silentlyFail = metadata.stripeIntent.isLiveMode,
         ).getOrThrow()

@@ -721,7 +721,8 @@ internal class DefaultPaymentElementLoaderTest {
     fun `load() with customer should fetch only supported payment method types`() =
         runScenario {
             val customerRepository = mock<CustomerRepository> {
-                whenever(it.getPaymentMethods(any(), any(), any())).thenReturn(Result.success(emptyList()))
+                whenever(it.getPaymentMethods(any<String>(), any(), any(), any()))
+                    .thenReturn(Result.success(emptyList()))
             }
 
             val paymentMethodTypes = listOf(
@@ -748,6 +749,7 @@ internal class DefaultPaymentElementLoaderTest {
             )
 
             verify(customerRepository).getPaymentMethods(
+                any<String>(),
                 any(),
                 capture(paymentMethodTypeCaptor),
                 any(),
@@ -763,7 +765,8 @@ internal class DefaultPaymentElementLoaderTest {
     fun `when allowsDelayedPaymentMethods is false then delayed payment methods are filtered out`() =
         runScenario {
             val customerRepository = mock<CustomerRepository> {
-                whenever(it.getPaymentMethods(any(), any(), any())).thenReturn(Result.success(emptyList()))
+                whenever(it.getPaymentMethods(any<String>(), any(), any(), any()))
+                    .thenReturn(Result.success(emptyList()))
             }
 
             val loader = createPaymentElementLoader(
@@ -788,6 +791,7 @@ internal class DefaultPaymentElementLoaderTest {
             )
 
             verify(customerRepository).getPaymentMethods(
+                any<String>(),
                 any(),
                 capture(paymentMethodTypeCaptor),
                 any(),
@@ -894,9 +898,10 @@ internal class DefaultPaymentElementLoaderTest {
         val result = createPaymentElementLoader(
             customerRepo = object : FakeCustomerRepository() {
                 override suspend fun getPaymentMethods(
-                    customerInfo: CustomerRepository.CustomerInfo,
+                    customerId: String,
+                    ephemeralKeySecret: String,
                     types: List<PaymentMethod.Type>,
-                    silentlyFail: Boolean
+                    silentlyFail: Boolean,
                 ): Result<List<PaymentMethod>> {
                     requestPaymentMethodTypes = types
                     return Result.success(
@@ -3257,11 +3262,8 @@ internal class DefaultPaymentElementLoaderTest {
             )
 
             verify(customerRepository).retrieveCustomer(
-                CustomerRepository.CustomerInfo(
-                    id = "cus_1",
-                    ephemeralKeySecret = "ek_123",
-                    customerSessionClientSecret = "cuss_1",
-                )
+                customerId = "cus_1",
+                ephemeralKeySecret = "ek_123",
             )
 
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()

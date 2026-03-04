@@ -11,7 +11,9 @@ import javax.inject.Inject
  */
 internal sealed interface SavedPaymentMethodAccess {
     data class Customer(
-        val info: CustomerRepository.CustomerInfo,
+        val id: String,
+        val ephemeralKeySecret: String,
+        val customerSessionClientSecret: String?,
     ) : SavedPaymentMethodAccess
 
     data class CheckoutSession(
@@ -62,11 +64,22 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
             }
         }
         is SavedPaymentMethodAccess.Customer -> {
-            customerRepository.detachPaymentMethod(
-                customerInfo = access.info,
-                paymentMethodId = paymentMethodId,
-                canRemoveDuplicates = canRemoveDuplicates,
-            )
+            if (access.customerSessionClientSecret != null) {
+                customerRepository.detachPaymentMethod(
+                    customerId = access.id,
+                    ephemeralKeySecret = access.ephemeralKeySecret,
+                    customerSessionClientSecret = access.customerSessionClientSecret,
+                    paymentMethodId = paymentMethodId,
+                    canRemoveDuplicates = canRemoveDuplicates,
+                )
+            } else {
+                customerRepository.detachPaymentMethod(
+                    customerId = access.id,
+                    ephemeralKeySecret = access.ephemeralKeySecret,
+                    paymentMethodId = paymentMethodId,
+                    canRemoveDuplicates = canRemoveDuplicates,
+                )
+            }
         }
     }
 
@@ -80,7 +93,8 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
         }
         is SavedPaymentMethodAccess.Customer -> {
             customerRepository.updatePaymentMethod(
-                customerInfo = access.info,
+                customerId = access.id,
+                ephemeralKeySecret = access.ephemeralKeySecret,
                 paymentMethodId = paymentMethodId,
                 params = params,
             )
@@ -96,7 +110,8 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
         }
         is SavedPaymentMethodAccess.Customer -> {
             customerRepository.setDefaultPaymentMethod(
-                customerInfo = access.info,
+                customerId = access.id,
+                ephemeralKeySecret = access.ephemeralKeySecret,
                 paymentMethodId = paymentMethodId,
             )
         }
