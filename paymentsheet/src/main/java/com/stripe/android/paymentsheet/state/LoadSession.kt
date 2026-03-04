@@ -7,7 +7,6 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
-import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import javax.inject.Inject
 
@@ -144,17 +143,14 @@ internal sealed interface CustomerInfo {
     ) : CustomerInfo
 }
 
-internal fun CustomerInfo.toCustomerInfo(): CustomerRepository.CustomerInfo? = when (this) {
-    is CustomerInfo.CustomerSession -> CustomerRepository.CustomerInfo(
-        id = id,
-        ephemeralKeySecret = ephemeralKeySecret,
-        customerSessionClientSecret = customerSessionClientSecret,
-    )
-    is CustomerInfo.Legacy -> CustomerRepository.CustomerInfo(
-        id = id,
-        ephemeralKeySecret = ephemeralKeySecret,
-        customerSessionClientSecret = null,
-    )
-    // Checkout sessions don't use ephemeral keys for customer API calls.
+internal fun CustomerInfo.customerIdOrNull(): String? = when (this) {
+    is CustomerInfo.CustomerSession -> id
+    is CustomerInfo.Legacy -> id
+    is CustomerInfo.CheckoutSession -> null
+}
+
+internal fun CustomerInfo.ephemeralKeySecretOrNull(): String? = when (this) {
+    is CustomerInfo.CustomerSession -> ephemeralKeySecret
+    is CustomerInfo.Legacy -> ephemeralKeySecret
     is CustomerInfo.CheckoutSession -> null
 }

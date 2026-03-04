@@ -10,7 +10,6 @@ import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
-import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodAccess
 import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
@@ -468,11 +467,9 @@ private fun PaymentMethodMetadata.toAccess(): SavedPaymentMethodAccess? {
             sessionId = integration.id,
         )
         else -> SavedPaymentMethodAccess.Customer(
-            info = CustomerRepository.CustomerInfo(
-                id = cm.id,
-                ephemeralKeySecret = cm.ephemeralKeySecret,
-                customerSessionClientSecret = cm.customerSessionClientSecret,
-            ),
+            id = cm.id,
+            ephemeralKeySecret = cm.ephemeralKeySecret,
+            customerSessionClientSecret = cm.customerSessionClientSecret,
         )
     }
 }

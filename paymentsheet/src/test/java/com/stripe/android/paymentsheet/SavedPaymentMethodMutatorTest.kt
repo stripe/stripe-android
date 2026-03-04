@@ -18,7 +18,6 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
-import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodAccess
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.testing.PaymentMethodFactory
@@ -917,11 +916,9 @@ class SavedPaymentMethodMutatorTest {
                 FakeSavedPaymentMethodRepository.DetachRequest(
                     paymentMethodId = paymentMethod.id,
                     access = SavedPaymentMethodAccess.Customer(
-                        info = CustomerRepository.CustomerInfo(
-                            id = "cus_123",
-                            ephemeralKeySecret = "ek_123",
-                            customerSessionClientSecret = customerSessionClientSecret,
-                        ),
+                        id = "cus_123",
+                        ephemeralKeySecret = "ek_123",
+                        customerSessionClientSecret = customerSessionClientSecret,
                     ),
                     canRemoveDuplicates = shouldRemoveDuplicates,
                 )

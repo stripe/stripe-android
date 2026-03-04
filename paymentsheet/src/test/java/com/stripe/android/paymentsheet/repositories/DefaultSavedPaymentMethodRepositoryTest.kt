@@ -102,11 +102,9 @@ class DefaultSavedPaymentMethodRepositoryTest {
         )
 
         private val CUSTOMER_ACCESS = SavedPaymentMethodAccess.Customer(
-            info = CustomerRepository.CustomerInfo(
-                id = "cus_456",
-                ephemeralKeySecret = "ek_456",
-                customerSessionClientSecret = "css_456",
-            ),
+            id = "cus_456",
+            ephemeralKeySecret = "ek_456",
+            customerSessionClientSecret = "css_456",
         )
     }
 }
