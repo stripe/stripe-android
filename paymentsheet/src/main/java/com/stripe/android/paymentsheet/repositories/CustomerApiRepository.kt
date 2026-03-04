@@ -110,22 +110,16 @@ internal class CustomerApiRepository @Inject constructor(
         paymentMethodId: String,
         canRemoveDuplicates: Boolean,
     ): Result<PaymentMethod> {
+        val detachSingle = detachSingleLegacy(ephemeralKeySecret)
         val result = if (canRemoveDuplicates) {
             detachPaymentMethodAndDuplicates(
                 customerId = customerId,
                 ephemeralKeySecret = ephemeralKeySecret,
-                customerSessionClientSecret = null,
                 paymentMethodId = paymentMethodId,
+                detachSingle = detachSingle,
             )
         } else {
-            stripeRepository.detachPaymentMethod(
-                productUsageTokens = productUsageTokens,
-                paymentMethodId = paymentMethodId,
-                requestOptions = ApiRequest.Options(
-                    apiKey = ephemeralKeySecret,
-                    stripeAccount = lazyPaymentConfig.get().stripeAccountId,
-                )
-            )
+            detachSingle(paymentMethodId)
         }
 
         return result.onFailure {
@@ -140,23 +134,16 @@ internal class CustomerApiRepository @Inject constructor(
         paymentMethodId: String,
         canRemoveDuplicates: Boolean,
     ): Result<PaymentMethod> {
+        val detachSingle = detachSingleSession(ephemeralKeySecret, customerSessionClientSecret)
         val result = if (canRemoveDuplicates) {
             detachPaymentMethodAndDuplicates(
                 customerId = customerId,
                 ephemeralKeySecret = ephemeralKeySecret,
-                customerSessionClientSecret = customerSessionClientSecret,
                 paymentMethodId = paymentMethodId,
+                detachSingle = detachSingle,
             )
         } else {
-            stripeRepository.detachPaymentMethod(
-                customerSessionClientSecret = customerSessionClientSecret,
-                productUsageTokens = productUsageTokens,
-                paymentMethodId = paymentMethodId,
-                requestOptions = ApiRequest.Options(
-                    apiKey = ephemeralKeySecret,
-                    stripeAccount = lazyPaymentConfig.get().stripeAccountId,
-                )
-            )
+            detachSingle(paymentMethodId)
         }
 
         return result.onFailure {
@@ -263,8 +250,8 @@ internal class CustomerApiRepository @Inject constructor(
     private suspend fun CustomerRepository.detachPaymentMethodAndDuplicates(
         customerId: String,
         ephemeralKeySecret: String,
-        customerSessionClientSecret: String?,
         paymentMethodId: String,
+        detachSingle: suspend (String) -> Result<PaymentMethod>,
     ): Result<PaymentMethod> = with(CoroutineScope(workContext)) {
         val paymentMethods = getPaymentMethods(
             customerId = customerId,
@@ -283,12 +270,7 @@ internal class CustomerApiRepository @Inject constructor(
              * If we don't find the requested payment method in the retrieved list, attempt remove it anyways. It
              * could be that the payment method is not a card but a saved US Bank Account or SEPA Debit PM.
              */
-            return@with detachSinglePaymentMethod(
-                customerId = customerId,
-                ephemeralKeySecret = ephemeralKeySecret,
-                customerSessionClientSecret = customerSessionClientSecret,
-                paymentMethodId = paymentMethodId,
-            )
+            return@with detachSingle(paymentMethodId)
         }
 
         /*
@@ -308,12 +290,7 @@ internal class CustomerApiRepository @Inject constructor(
          */
         val paymentMethodAsyncRemovals = paymentMethodsToRemove.map { paymentMethod ->
             async {
-                detachSinglePaymentMethod(
-                    customerId = customerId,
-                    ephemeralKeySecret = ephemeralKeySecret,
-                    customerSessionClientSecret = customerSessionClientSecret,
-                    paymentMethodId = paymentMethod.id,
-                ).onFailure { exception ->
+                detachSingle(paymentMethod.id).onFailure { exception ->
                     failureResults.add(
                         DuplicatePaymentMethodDetachFailureException.DuplicateDetachFailure(
                             paymentMethodId = paymentMethod.id,
@@ -331,39 +308,34 @@ internal class CustomerApiRepository @Inject constructor(
         }
 
         // Remove the original payment method
-        return detachSinglePaymentMethod(
-            customerId = customerId,
-            ephemeralKeySecret = ephemeralKeySecret,
-            customerSessionClientSecret = customerSessionClientSecret,
+        return detachSingle(paymentMethodId)
+    }
+
+    private fun detachSingleLegacy(
+        ephemeralKeySecret: String,
+    ): suspend (String) -> Result<PaymentMethod> = { paymentMethodId ->
+        stripeRepository.detachPaymentMethod(
+            productUsageTokens = productUsageTokens,
             paymentMethodId = paymentMethodId,
+            requestOptions = ApiRequest.Options(
+                apiKey = ephemeralKeySecret,
+                stripeAccount = lazyPaymentConfig.get().stripeAccountId,
+            )
         )
     }
 
-    /**
-     * Detaches a single payment method, dispatching to the correct endpoint based on whether
-     * a customer session client secret is present.
-     */
-    private suspend fun detachSinglePaymentMethod(
-        customerId: String,
+    private fun detachSingleSession(
         ephemeralKeySecret: String,
-        customerSessionClientSecret: String?,
-        paymentMethodId: String,
-    ): Result<PaymentMethod> {
-        return if (customerSessionClientSecret != null) {
-            detachPaymentMethod(
-                customerId = customerId,
-                ephemeralKeySecret = ephemeralKeySecret,
-                customerSessionClientSecret = customerSessionClientSecret,
-                paymentMethodId = paymentMethodId,
-                canRemoveDuplicates = false,
+        customerSessionClientSecret: String,
+    ): suspend (String) -> Result<PaymentMethod> = { paymentMethodId ->
+        stripeRepository.detachPaymentMethod(
+            customerSessionClientSecret = customerSessionClientSecret,
+            productUsageTokens = productUsageTokens,
+            paymentMethodId = paymentMethodId,
+            requestOptions = ApiRequest.Options(
+                apiKey = ephemeralKeySecret,
+                stripeAccount = lazyPaymentConfig.get().stripeAccountId,
             )
-        } else {
-            detachPaymentMethod(
-                customerId = customerId,
-                ephemeralKeySecret = ephemeralKeySecret,
-                paymentMethodId = paymentMethodId,
-                canRemoveDuplicates = false,
-            )
-        }
+        )
     }
 }

@@ -88,25 +88,10 @@ internal class DefaultTapToAddCollectionHandler(
     override suspend fun collect(
         metadata: PaymentMethodMetadata
     ): TapToAddCollectionHandler.CollectionState = runCatching {
-        val customerMetadata = metadata.customerMetadata
-        val customerId: String
-        val ephemeralKeySecret: String
-        when (customerMetadata) {
-            is CustomerMetadata.LegacyEphemeralKey -> {
-                customerId = customerMetadata.id
-                ephemeralKeySecret = customerMetadata.ephemeralKeySecret
-            }
-            is CustomerMetadata.Session -> {
-                customerId = customerMetadata.id
-                ephemeralKeySecret = customerMetadata.ephemeralKeySecret
-            }
-            is CustomerMetadata.CheckoutSession -> return@runCatching failedCollection(
-                "Tap to add is not supported for CheckoutSession"
+        val (customerId, ephemeralKeySecret) = extractCustomerCredentials(metadata.customerMetadata)
+            ?: return@runCatching failedCollection(
+                customerCredentialsErrorMessage(metadata.customerMetadata)
             )
-            null -> return@runCatching failedCollection(
-                "Attempted to collect with tap to add without a customer"
-            )
-        }
 
         if (!connectionManager.isConnected) {
             connectionManager.connect()
@@ -165,6 +150,21 @@ internal class DefaultTapToAddCollectionHandler(
         val paymentMethod = fetchPaymentMethod(confirmedIntent, customerId, ephemeralKeySecret)
 
         return TapToAddCollectionHandler.CollectionState.Collected(paymentMethod)
+    }
+
+    private fun extractCustomerCredentials(
+        customerMetadata: CustomerMetadata?,
+    ): Pair<String, String>? = when (customerMetadata) {
+        is CustomerMetadata.LegacyEphemeralKey -> customerMetadata.id to customerMetadata.ephemeralKeySecret
+        is CustomerMetadata.Session -> customerMetadata.id to customerMetadata.ephemeralKeySecret
+        is CustomerMetadata.CheckoutSession, null -> null
+    }
+
+    private fun customerCredentialsErrorMessage(
+        customerMetadata: CustomerMetadata?,
+    ): String = when (customerMetadata) {
+        is CustomerMetadata.CheckoutSession -> "Tap to add is not supported for CheckoutSession"
+        else -> "Attempted to collect with tap to add without a customer"
     }
 
     private fun failedCollection(

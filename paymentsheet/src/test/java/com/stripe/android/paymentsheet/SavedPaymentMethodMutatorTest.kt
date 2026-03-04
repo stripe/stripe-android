@@ -879,6 +879,7 @@ class SavedPaymentMethodMutatorTest {
         }
     }
 
+    @Suppress("LongMethod")
     private fun removeDuplicatesTest(shouldRemoveDuplicates: Boolean) {
         val repository = FakeSavedPaymentMethodRepository()
 

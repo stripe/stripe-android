@@ -678,7 +678,8 @@ internal class DefaultPaymentElementLoaderTest {
     fun `load() with customer should fetch only supported payment method types`() =
         runScenario {
             val customerRepository = mock<CustomerRepository> {
-                whenever(it.getPaymentMethods(any<String>(), any(), any(), any())).thenReturn(Result.success(emptyList()))
+                whenever(it.getPaymentMethods(any<String>(), any(), any(), any()))
+                    .thenReturn(Result.success(emptyList()))
             }
 
             val paymentMethodTypes = listOf(
@@ -721,7 +722,8 @@ internal class DefaultPaymentElementLoaderTest {
     fun `when allowsDelayedPaymentMethods is false then delayed payment methods are filtered out`() =
         runScenario {
             val customerRepository = mock<CustomerRepository> {
-                whenever(it.getPaymentMethods(any<String>(), any(), any(), any())).thenReturn(Result.success(emptyList()))
+                whenever(it.getPaymentMethods(any<String>(), any(), any(), any()))
+                    .thenReturn(Result.success(emptyList()))
             }
 
             val loader = createPaymentElementLoader(

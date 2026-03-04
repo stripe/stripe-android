@@ -67,26 +67,15 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
                 throw IllegalStateException("No intent confirmation interceptor for CryptoOnramp.")
             }
             is IntegrationMetadata.DeferredIntent.WithConfirmationToken -> {
-                if (customerMetadata is CustomerMetadata.CheckoutSession) {
-                    throw IllegalStateException(
+                val (customerId, ephemeralKeySecret) = when (customerMetadata) {
+                    is CustomerMetadata.LegacyEphemeralKey ->
+                        customerMetadata.id to customerMetadata.ephemeralKeySecret
+                    is CustomerMetadata.Session ->
+                        customerMetadata.id to customerMetadata.ephemeralKeySecret
+                    is CustomerMetadata.CheckoutSession -> throw IllegalStateException(
                         "Checkout session cannot be used with confirmation token"
                     )
-                }
-                val customerId: String?
-                val ephemeralKeySecret: String?
-                when (customerMetadata) {
-                    is CustomerMetadata.LegacyEphemeralKey -> {
-                        customerId = customerMetadata.id
-                        ephemeralKeySecret = customerMetadata.ephemeralKeySecret
-                    }
-                    is CustomerMetadata.Session -> {
-                        customerId = customerMetadata.id
-                        ephemeralKeySecret = customerMetadata.ephemeralKeySecret
-                    }
-                    else -> {
-                        customerId = null
-                        ephemeralKeySecret = null
-                    }
+                    null -> null to null
                 }
                 confirmationTokenConfirmationInterceptorFactory.create(
                     intentConfiguration = integrationMetadata.intentConfiguration,

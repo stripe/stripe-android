@@ -26,6 +26,7 @@ import com.stripe.android.ui.core.elements.LpmSerializer
 import com.stripe.android.ui.core.elements.SharedDataSpec
 
 internal object PaymentMethodMetadataFactory {
+    @Suppress("LongMethod")
     fun create(
         stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
