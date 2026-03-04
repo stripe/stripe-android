@@ -41,7 +41,6 @@ import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationI
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
@@ -1397,11 +1396,9 @@ class ConfirmationTokenConfirmationInterceptorTest {
 
     private companion object {
         val DEFAULT_CUSTOMER_METADATA = CustomerMetadata.Customer(
-            info = CustomerRepository.CustomerInfo(
-                id = "cus_1",
-                ephemeralKeySecret = "ek_test_123",
-                customerSessionClientSecret = null,
-            ),
+            id = "cus_1",
+            ephemeralKeySecret = "ek_test_123",
+            customerSessionClientSecret = null,
             isPaymentMethodSetAsDefaultEnabled = false,
             removePaymentMethod = PaymentMethodRemovePermission.Full,
             saveConsent = PaymentMethodSaveConsentBehavior.Legacy,

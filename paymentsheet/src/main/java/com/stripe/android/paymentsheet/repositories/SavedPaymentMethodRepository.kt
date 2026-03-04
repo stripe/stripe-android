@@ -50,7 +50,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
         }
         is CustomerMetadata.Customer -> {
             customerRepository.detachPaymentMethod(
-                customerInfo = customerMetadata.info,
+                customerInfo = customerMetadata.toCustomerInfo(),
                 paymentMethodId = paymentMethodId,
                 canRemoveDuplicates = canRemoveDuplicates,
             )
@@ -67,7 +67,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
         }
         is CustomerMetadata.Customer -> {
             customerRepository.updatePaymentMethod(
-                customerInfo = customerMetadata.info,
+                customerInfo = customerMetadata.toCustomerInfo(),
                 paymentMethodId = paymentMethodId,
                 params = params,
             )
@@ -83,9 +83,17 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
         }
         is CustomerMetadata.Customer -> {
             customerRepository.setDefaultPaymentMethod(
-                customerInfo = customerMetadata.info,
+                customerInfo = customerMetadata.toCustomerInfo(),
                 paymentMethodId = paymentMethodId,
             )
         }
     }
+}
+
+internal fun CustomerMetadata.Customer.toCustomerInfo(): CustomerRepository.CustomerInfo {
+    return CustomerRepository.CustomerInfo(
+        id = id,
+        ephemeralKeySecret = ephemeralKeySecret,
+        customerSessionClientSecret = customerSessionClientSecret,
+    )
 }

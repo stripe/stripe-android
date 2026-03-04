@@ -18,6 +18,7 @@ import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_ENABLE_LINK_SPM
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.LinkDisabledApiRepository
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
+import com.stripe.android.paymentsheet.repositories.toCustomerInfo
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
 import kotlinx.coroutines.CoroutineScope
@@ -171,7 +172,7 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
             ?: when (val customerMetadata = paymentMethodMetadata.customerMetadata) {
                 is CustomerMetadata.Customer -> retrieveCustomerEmail(
                     configuration = config,
-                    customer = customerMetadata.info
+                    customer = customerMetadata.toCustomerInfo()
                 )
                 is CustomerMetadata.CheckoutSession, null -> null
             }

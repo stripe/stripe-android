@@ -7,7 +7,6 @@ import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.data.CustomerSheetSession
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.Customer.Components.MobilePaymentElement
-import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -25,7 +24,20 @@ internal sealed class CustomerMetadata : Parcelable {
 
     @Parcelize
     data class Customer(
-        val info: CustomerRepository.CustomerInfo,
+        val id: String,
+        val ephemeralKeySecret: String,
+        val customerSessionClientSecret: String?,
+        override val removePaymentMethod: PaymentMethodRemovePermission,
+        override val saveConsent: PaymentMethodSaveConsentBehavior,
+        override val canRemoveLastPaymentMethod: Boolean,
+        override val canRemoveDuplicates: Boolean,
+        override val canUpdateFullPaymentMethodDetails: Boolean,
+        override val isPaymentMethodSetAsDefaultEnabled: Boolean,
+    ) : CustomerMetadata()
+
+    @Parcelize
+    data class CheckoutSession(
+        val sessionId: String,
         override val removePaymentMethod: PaymentMethodRemovePermission,
         override val saveConsent: PaymentMethodSaveConsentBehavior,
         override val canRemoveLastPaymentMethod: Boolean,
@@ -79,11 +91,9 @@ internal sealed class CustomerMetadata : Parcelable {
             }
 
             return Customer(
-                info = CustomerRepository.CustomerInfo(
-                    id = id,
-                    ephemeralKeySecret = ephemeralKeySecret,
-                    customerSessionClientSecret = customerSessionClientSecret,
-                ),
+                id = id,
+                ephemeralKeySecret = ephemeralKeySecret,
+                customerSessionClientSecret = customerSessionClientSecret,
                 isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
                 removePaymentMethod = removePaymentMethod,
                 saveConsent = saveConsent,
@@ -102,11 +112,9 @@ internal sealed class CustomerMetadata : Parcelable {
             isPaymentMethodSetAsDefaultEnabled: Boolean,
         ): Customer {
             return Customer(
-                info = CustomerRepository.CustomerInfo(
-                    id = id,
-                    ephemeralKeySecret = ephemeralKeySecret,
-                    customerSessionClientSecret = null,
-                ),
+                id = id,
+                ephemeralKeySecret = ephemeralKeySecret,
+                customerSessionClientSecret = null,
                 isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
                 /*
                  * Un-scoped legacy ephemeral keys have full permissions to remove/save/modify. This should
@@ -143,11 +151,9 @@ internal sealed class CustomerMetadata : Parcelable {
             isPaymentMethodSetAsDefaultEnabled: Boolean,
         ): Customer {
             return Customer(
-                info = CustomerRepository.CustomerInfo(
-                    id = id,
-                    ephemeralKeySecret = ephemeralKeySecret,
-                    customerSessionClientSecret = customerSessionClientSecret,
-                ),
+                id = id,
+                ephemeralKeySecret = ephemeralKeySecret,
+                customerSessionClientSecret = customerSessionClientSecret,
                 isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
                 removePaymentMethod = customerSheetSession.permissions.removePaymentMethod,
                 saveConsent = customerSheetSession.paymentMethodSaveConsentBehavior,
@@ -158,15 +164,4 @@ internal sealed class CustomerMetadata : Parcelable {
             )
         }
     }
-
-    @Parcelize
-    data class CheckoutSession(
-        val sessionId: String,
-        override val removePaymentMethod: PaymentMethodRemovePermission,
-        override val saveConsent: PaymentMethodSaveConsentBehavior,
-        override val canRemoveLastPaymentMethod: Boolean,
-        override val canRemoveDuplicates: Boolean,
-        override val canUpdateFullPaymentMethodDetails: Boolean,
-        override val isPaymentMethodSetAsDefaultEnabled: Boolean,
-    ) : CustomerMetadata()
 }

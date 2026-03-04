@@ -8,6 +8,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.repositories.toCustomerInfo
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.TapToAddPreview
@@ -90,7 +91,7 @@ internal class DefaultTapToAddCollectionHandler(
         metadata: PaymentMethodMetadata
     ): TapToAddCollectionHandler.CollectionState = runCatching {
         val customerInfo = when (val customerMetadata = metadata.customerMetadata) {
-            is CustomerMetadata.Customer -> customerMetadata.info
+            is CustomerMetadata.Customer -> customerMetadata.toCustomerInfo()
             is CustomerMetadata.CheckoutSession -> return@runCatching failedCollection(
                 "Tap to add is not supported for CheckoutSession"
             )

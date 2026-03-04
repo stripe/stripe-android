@@ -111,11 +111,9 @@ class DefaultSavedPaymentMethodRepositoryTest {
         )
 
         private val CUSTOMER_METADATA = CustomerMetadata.Customer(
-            info = CustomerRepository.CustomerInfo(
-                id = "cus_456",
-                ephemeralKeySecret = "ek_456",
-                customerSessionClientSecret = "css_456",
-            ),
+            id = "cus_456",
+            ephemeralKeySecret = "ek_456",
+            customerSessionClientSecret = "css_456",
             isPaymentMethodSetAsDefaultEnabled = false,
             removePaymentMethod = PaymentMethodRemovePermission.Full,
             saveConsent = PaymentMethodSaveConsentBehavior.Legacy,

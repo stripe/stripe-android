@@ -72,13 +72,13 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
                         "Checkout session cannot be used with confirmation token"
                     )
                 }
-                val customerInfo = (customerMetadata as? CustomerMetadata.Customer)?.info
+                val customer = customerMetadata as? CustomerMetadata.Customer
                 confirmationTokenConfirmationInterceptorFactory.create(
                     intentConfiguration = integrationMetadata.intentConfiguration,
                     createIntentCallback = deferredIntentCallbackRetriever
                         .waitForConfirmationTokenCallback(),
-                    customerId = customerInfo?.id,
-                    ephemeralKeySecret = customerInfo?.ephemeralKeySecret,
+                    customerId = customer?.id,
+                    ephemeralKeySecret = customer?.ephemeralKeySecret,
                     clientAttributionMetadata = clientAttributionMetadata,
                 )
             }

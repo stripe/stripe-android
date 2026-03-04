@@ -19,7 +19,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
-import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.LinkStateResult
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
@@ -89,11 +88,7 @@ internal object PaymentMethodMetadataFactory {
             shippingDetails = shippingDetails,
             customerMetadata = if (hasCustomerConfiguration) {
                 PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.copy(
-                    info = CustomerRepository.CustomerInfo(
-                        id = "cus_123",
-                        ephemeralKeySecret = "ek_123",
-                        customerSessionClientSecret = customerSessionClientSecret,
-                    ),
+                    customerSessionClientSecret = customerSessionClientSecret,
                     isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
                     removePaymentMethod = removePaymentMethod,
                     saveConsent = saveConsent,

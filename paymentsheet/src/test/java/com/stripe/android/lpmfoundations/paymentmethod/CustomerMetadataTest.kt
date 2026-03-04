@@ -10,9 +10,9 @@ import com.stripe.android.customersheet.CustomerSheetFixtures
 import com.stripe.android.customersheet.data.CustomerSheetSession
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.model.SavedSelection
 import org.junit.Test
 
 internal class CustomerMetadataTest {
@@ -286,26 +286,6 @@ internal class CustomerMetadataTest {
         )
     }
 
-    private fun createElementsSessionCustomer(
-        mobilePaymentElement: ElementsSession.Customer.Components.MobilePaymentElement,
-    ): ElementsSession.Customer {
-        return ElementsSession.Customer(
-            paymentMethods = emptyList(),
-            defaultPaymentMethod = null,
-            session = ElementsSession.Customer.Session(
-                id = "cuss_1",
-                liveMode = false,
-                apiKey = "ek_test",
-                apiKeyExpiry = 9999999,
-                customerId = "cus_test",
-                components = ElementsSession.Customer.Components(
-                    mobilePaymentElement = mobilePaymentElement,
-                    customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
-                ),
-            ),
-        )
-    }
-
     private fun legacyEphemeralKeyTestingScenario(
         allowsRemovalOfLastSavedPaymentMethod: Boolean,
         block: (CustomerMetadata) -> Unit
@@ -399,6 +379,26 @@ internal class CustomerMetadataTest {
         )
 
         block(result)
+    }
+
+    private fun createElementsSessionCustomer(
+        mobilePaymentElement: ElementsSession.Customer.Components.MobilePaymentElement,
+    ): ElementsSession.Customer {
+        return ElementsSession.Customer(
+            paymentMethods = emptyList(),
+            defaultPaymentMethod = null,
+            session = ElementsSession.Customer.Session(
+                id = "cuss_1",
+                liveMode = false,
+                apiKey = "ek_test",
+                apiKeyExpiry = 9999999,
+                customerId = "cus_test",
+                components = ElementsSession.Customer.Components(
+                    mobilePaymentElement = mobilePaymentElement,
+                    customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
+                ),
+            ),
+        )
     }
 
     private fun createConfiguration(
