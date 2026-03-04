@@ -62,7 +62,7 @@ class CheckoutPlaygroundActivity : AppCompatActivity() {
         setContent {
             CheckoutScreen(
                 checkout = viewModel.checkout,
-                applyPromotionCode = viewModel::applyPromotionCode
+                applyPromotionCode = viewModel::applyPromotionCode,
             )
         }
     }
