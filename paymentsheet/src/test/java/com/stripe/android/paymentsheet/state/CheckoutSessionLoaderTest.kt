@@ -24,6 +24,7 @@ internal class CheckoutSessionLoaderTest {
 
         assertThat(result.customerInfo).isInstanceOf<CustomerInfo.CheckoutSession>()
         val checkoutCustomer = result.customerInfo as CustomerInfo.CheckoutSession
+        assertThat(checkoutCustomer.sessionId).isEqualTo("cs_test_123")
         assertThat(checkoutCustomer.customer.id).isEqualTo("cus_test_123")
     }
 

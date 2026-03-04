@@ -31,6 +31,7 @@ internal class CheckoutSessionLoader @Inject constructor() {
 
         val customerInfo = checkoutSession.customer?.let { customer ->
             CustomerInfo.CheckoutSession(
+                sessionId = checkoutSession.id,
                 customer = customer,
                 offerSave = checkoutSession.savedPaymentMethodsOfferSave,
             )
@@ -138,6 +139,7 @@ internal sealed interface CustomerInfo {
      * Checkout sessions don't use ephemeral keys — customer is associated server-side.
      */
     data class CheckoutSession(
+        val sessionId: String,
         val customer: CheckoutSessionResponse.Customer,
         val offerSave: CheckoutSessionResponse.SavedPaymentMethodsOfferSave?,
     ) : CustomerInfo

@@ -467,7 +467,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             configuration = configuration,
             elementsSession = elementsSession,
             customerInfo = customerInfo,
-            integrationMetadata = integrationMetadata,
         )
 
         val analyticsMetadata = analyticsMetadataFactory.create(
@@ -500,7 +499,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         configuration: CommonConfiguration,
         elementsSession: ElementsSession,
         customerInfo: CustomerInfo?,
-        integrationMetadata: IntegrationMetadata,
     ): CustomerMetadata? {
         return when (customerInfo) {
             is CustomerInfo.CustomerSession -> {
@@ -523,10 +521,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 )
             }
             is CustomerInfo.CheckoutSession -> {
-                val sessionId = (integrationMetadata as? IntegrationMetadata.CheckoutSession)?.id
-                    ?: return null
                 CustomerMetadata.CheckoutSession(
-                    sessionId = sessionId,
+                    sessionId = customerInfo.sessionId,
                     isPaymentMethodSetAsDefaultEnabled = false,
                     removePaymentMethod = if (customerInfo.customer.canDetachPaymentMethod) {
                         PaymentMethodRemovePermission.Full
