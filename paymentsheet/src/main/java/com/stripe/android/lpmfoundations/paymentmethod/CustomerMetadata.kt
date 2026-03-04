@@ -64,7 +64,7 @@ internal sealed class CustomerMetadata : Parcelable {
             customer: ElementsSession.Customer,
             id: String,
             ephemeralKeySecret: String,
-            customerSessionClientSecret: String?,
+            customerSessionClientSecret: String,
             isPaymentMethodSetAsDefaultEnabled: Boolean,
         ): Session {
             val mobilePaymentElementComponent = customer.session.components.mobilePaymentElement
@@ -105,9 +105,7 @@ internal sealed class CustomerMetadata : Parcelable {
             return Session(
                 id = id,
                 ephemeralKeySecret = ephemeralKeySecret,
-                customerSessionClientSecret = requireNotNull(customerSessionClientSecret) {
-                    "customerSessionClientSecret is required for customer session"
-                },
+                customerSessionClientSecret = customerSessionClientSecret,
                 isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
                 removePaymentMethod = removePaymentMethod,
                 saveConsent = saveConsent,
