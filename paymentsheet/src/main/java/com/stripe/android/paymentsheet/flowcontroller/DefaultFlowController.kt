@@ -131,6 +131,8 @@ internal class DefaultFlowController @Inject internal constructor(
         }
 
     init {
+        viewModel.confirmationCollectionJob?.cancel()
+
         confirmationHandler.register(activityResultCaller, lifecycleOwner)
 
         paymentOptionActivityLauncher = activityResultCaller.registerForActivityResult(
@@ -167,7 +169,7 @@ internal class DefaultFlowController @Inject internal constructor(
             }
         )
 
-        lifecycleOwner.lifecycleScope.launch {
+        viewModel.confirmationCollectionJob = lifecycleOwner.lifecycleScope.launch {
             confirmationHandler.state.collect { state ->
                 when (state) {
                     is ConfirmationHandler.State.Idle,

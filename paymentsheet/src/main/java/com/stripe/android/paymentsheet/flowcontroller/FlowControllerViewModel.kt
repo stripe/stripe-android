@@ -12,6 +12,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -34,6 +35,8 @@ internal class FlowControllerViewModel(
                 paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
                 flowControllerViewModel = this,
             )
+
+    var confirmationCollectionJob: Job? = null
 
     var walletButtonsRendered: Boolean = false
 
