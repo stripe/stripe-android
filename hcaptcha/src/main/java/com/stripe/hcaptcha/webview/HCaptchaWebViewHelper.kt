@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
-import android.os.Build
 import android.os.Handler
 import android.util.Log
 import android.view.View
@@ -141,9 +140,7 @@ internal class HCaptchaWebViewHelper(
 
         override fun onReceivedError(view: WebView, request: WebResourceRequest?, error: WebResourceError?) {
             super.onReceivedError(view, request, error)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                Log.d(LOG_TAG, "[webview] onReceivedError \"${error?.description}\" (${error?.errorCode})")
-            }
+            Log.d(LOG_TAG, "[webview] onReceivedError \"${error?.description}\" (${error?.errorCode})")
         }
     }
 
