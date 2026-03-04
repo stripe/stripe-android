@@ -5,18 +5,24 @@ package com.stripe.android.paymentsheet.example.playground.checkout
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
@@ -29,6 +35,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkout.CheckoutSession
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -36,6 +43,7 @@ import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
 import com.stripe.android.paymentsheet.example.playground.checkout.CheckoutPlaygroundViewModel.Companion.CHECKOUT_STATE_KEY
 import com.stripe.android.paymentsheet.example.samples.ui.PADDING
 import com.stripe.android.uicore.format.CurrencyFormatter
+import kotlinx.coroutines.flow.StateFlow
 
 class CheckoutPlaygroundActivity : AppCompatActivity() {
     companion object {
@@ -62,6 +70,7 @@ class CheckoutPlaygroundActivity : AppCompatActivity() {
         setContent {
             CheckoutScreen(
                 checkout = viewModel.checkout,
+                isLoading = viewModel.isLoading,
                 applyPromotionCode = viewModel::applyPromotionCode,
             )
         }
@@ -75,35 +84,55 @@ class CheckoutPlaygroundActivity : AppCompatActivity() {
 }
 
 @Composable
-private fun CheckoutScreen(checkout: Checkout, applyPromotionCode: (String) -> Unit) {
+private fun CheckoutScreen(
+    checkout: Checkout,
+    isLoading: StateFlow<Boolean>,
+    applyPromotionCode: (String) -> Unit,
+) {
     val checkoutSession by checkout.checkoutSession.collectAsState()
+    val loading by isLoading.collectAsState()
     var promotionCode by rememberSaveable { mutableStateOf("") }
 
-    PlaygroundTheme(
-        content = {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(PADDING),
-            ) {
-                OutlinedTextField(
-                    value = promotionCode,
-                    onValueChange = { promotionCode = it },
-                    label = { Text("Promotion code") },
-                    singleLine = true,
-                    modifier = Modifier.weight(1f),
-                )
-                Button(
-                    onClick = { applyPromotionCode(promotionCode) },
+    BackHandler(enabled = loading) { }
+
+    Box {
+        PlaygroundTheme(
+            content = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(PADDING),
                 ) {
-                    Text("Apply")
+                    OutlinedTextField(
+                        value = promotionCode,
+                        onValueChange = { promotionCode = it },
+                        label = { Text("Promotion code") },
+                        singleLine = true,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Button(
+                        onClick = { applyPromotionCode(promotionCode) },
+                    ) {
+                        Text("Apply")
+                    }
                 }
+            },
+            bottomBarContent = {
+                TotalSummary(checkoutSession)
+            },
+        )
+        if (loading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.3f))
+                    .clickable(enabled = false, onClick = {}),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator()
             }
-        },
-        bottomBarContent = {
-            TotalSummary(checkoutSession)
-        },
-    )
+        }
+    }
 }
 
 @Composable
