@@ -16,6 +16,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.link.LinkFormElement
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
@@ -27,9 +28,13 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
+import com.stripe.android.ui.core.elements.CvcElement
+import com.stripe.android.uicore.elements.SectionElement
+import com.stripe.android.common.spms.CvcFormHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import com.stripe.android.ui.core.R as StripeUiCoreR
@@ -319,6 +324,88 @@ internal class DefaultTapToAddConfirmationInteractorTest {
     }
 
     @Test
+    fun `primary button disabled when cvc form state is Incomplete`() = runScenario(
+        paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
+        cvcFormHelper = FakeCvcFormHelper(
+            initialState = CvcFormHelper.State.Incomplete,
+        ),
+    ) {
+        interactor.state.test {
+            val state = awaitItem()
+            assertThat(state.primaryButton.enabled).isFalse()
+        }
+    }
+
+    @Test
+    fun `primary button enabled when cvc form state is Unused`() = runScenario(
+        paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
+        cvcFormHelper = FakeCvcFormHelper(
+            initialState = CvcFormHelper.State.Unused,
+        ),
+    ) {
+        interactor.state.test {
+            val state = awaitItem()
+            assertThat(state.primaryButton.enabled).isTrue()
+        }
+    }
+
+    @Test
+    fun `primary button enabled when cvc form state is Complete`() = runScenario(
+        paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
+        cvcFormHelper = FakeCvcFormHelper(
+            initialState = CvcFormHelper.State.Complete(cvc = "123"),
+        ),
+    ) {
+        interactor.state.test {
+            val state = awaitItem()
+            assertThat(state.primaryButton.enabled).isTrue()
+        }
+    }
+
+    @Test
+    fun `Complete mode with complete cvc form includes cvc in payment method options`() =
+        runScenario(
+            paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
+            tapToAddMode = TapToAddMode.Complete,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(isTapToAddSupported = true),
+            cvcFormHelper = FakeCvcFormHelper(
+                initialState = CvcFormHelper.State.Complete(cvc = "123"),
+            ),
+        ) {
+            interactor.performAction(TapToAddConfirmationInteractor.Action.PrimaryButtonPressed)
+
+            val args = confirmationHandlerScenario.startTurbine.awaitItem()
+
+            assertThat(args.confirmationOption).isInstanceOf<PaymentMethodConfirmationOption.Saved>()
+
+            val confirmationOption = args.confirmationOption as PaymentMethodConfirmationOption.Saved
+
+            assertThat(confirmationOption.paymentMethod).isEqualTo(paymentMethod)
+            assertThat(confirmationOption.optionsParams).isEqualTo(
+                PaymentMethodOptionsParams.Card(cvc = "123")
+            )
+        }
+
+    @Test
+    fun `Continue mode with complete cvc form includes cvc in payment selection`() =
+        runScenario(
+            paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
+            tapToAddMode = TapToAddMode.Continue,
+            cvcFormHelper = FakeCvcFormHelper(
+                initialState = CvcFormHelper.State.Complete(cvc = "456"),
+            ),
+        ) {
+            interactor.performAction(TapToAddConfirmationInteractor.Action.PrimaryButtonPressed)
+
+            val receivedSelection = onContinueCalls.awaitItem()
+
+            assertThat(receivedSelection.paymentMethod).isEqualTo(paymentMethod)
+            assertThat(receivedSelection.paymentMethodOptionsParams).isEqualTo(
+                PaymentMethodOptionsParams.Card(cvc = "456")
+            )
+        }
+
+    @Test
     fun `form elements are empty when link form helper has no link form element`() = runScenario(
         paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
         tapToAddMode = TapToAddMode.Complete,
@@ -405,6 +492,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
             PaymentMethodMetadataFactory.create(isTapToAddSupported = true),
         initialConfirmationState: ConfirmationHandler.State = ConfirmationHandler.State.Idle,
         linkFormHelper: SavedPaymentMethodLinkFormHelper = FakeSavedPaymentMethodLinkFormHelper(),
+        cvcFormHelper: CvcFormHelper = FakeCvcFormHelper(),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val eventReporter = FakeEventReporter()
@@ -422,6 +510,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
                 confirmationHandler = handler,
                 eventReporter = eventReporter,
                 linkFormHelper = linkFormHelper,
+                cvcFormHelper = cvcFormHelper,
                 onContinue = {
                     onContinueCalls.add(it)
                 },
@@ -464,5 +553,13 @@ internal class DefaultTapToAddConfirmationInteractorTest {
     ) : SavedPaymentMethodLinkFormHelper {
         private val _state = MutableStateFlow(initialState)
         override val state: StateFlow<SavedPaymentMethodLinkFormHelper.State> = _state.asStateFlow()
+    }
+
+    private class FakeCvcFormHelper(
+        initialState: CvcFormHelper.State = CvcFormHelper.State.Unused,
+        override val formElement: SectionElement? = null,
+    ) : CvcFormHelper {
+        private val _state = MutableStateFlow(initialState)
+        override val state: StateFlow<CvcFormHelper.State> = _state.asStateFlow()
     }
 }
