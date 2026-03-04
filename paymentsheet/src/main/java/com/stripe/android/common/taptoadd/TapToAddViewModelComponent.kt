@@ -6,6 +6,8 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.di.ApplicationIdModule
+import com.stripe.android.common.spms.CvcFormHelper
+import com.stripe.android.common.spms.DefaultCvcFormHelper
 import com.stripe.android.common.spms.DefaultLinkFormElementFactory
 import com.stripe.android.common.spms.DefaultSavedPaymentMethodLinkFormHelper
 import com.stripe.android.common.spms.LinkFormElementFactory
@@ -236,6 +238,11 @@ internal interface TapToAddLinkModule {
     fun bindsLinkFormHelper(
         linkFormHelper: DefaultSavedPaymentMethodLinkFormHelper
     ): SavedPaymentMethodLinkFormHelper
+
+    @Binds
+    fun bindsCvcFormHelperFactory(
+        cvcFormHelperFactory: DefaultCvcFormHelper.Factory,
+    ): CvcFormHelper.Factory
 
     companion object {
         @Provides
