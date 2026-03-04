@@ -1,6 +1,5 @@
 package com.stripe.android.uicore.elements
 
-import androidx.annotation.RestrictTo
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -43,9 +42,8 @@ import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Composable
-fun CardBrandChoiceSelector(
+internal fun CardBrandChoiceSelector(
     currentItem: TextFieldIcon.CardBrandChoice.Item,
     items: List<TextFieldIcon.CardBrandChoice.Item>,
     onItemSelected: (item: TextFieldIcon.CardBrandChoice.Item) -> Unit,
