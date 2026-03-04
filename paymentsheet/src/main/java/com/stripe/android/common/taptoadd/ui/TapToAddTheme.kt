@@ -66,7 +66,7 @@ private object TapToAddThemeDefaults {
             onBackground = Color(0xFFE3E3E3),
             surface = Color.Black,
             onSurface = Color(0xFFE3E3E3),
-            error = Color.Red,
+            error = Color(0xFFF30000),
         ),
     )
 }
