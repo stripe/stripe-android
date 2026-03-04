@@ -25,7 +25,6 @@ internal interface OnrampPresenterComponent {
             @BindsInstance activity: ComponentActivity,
             @BindsInstance lifecycleOwner: LifecycleOwner,
             @BindsInstance activityResultRegistryOwner: ActivityResultRegistryOwner,
-            @BindsInstance onrampCallbackIdentifier: String,
         ): OnrampPresenterComponent
     }
 }

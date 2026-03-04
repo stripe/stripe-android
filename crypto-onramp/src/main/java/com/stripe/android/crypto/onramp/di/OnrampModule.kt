@@ -87,13 +87,18 @@ internal class OnrampModule {
     }
 
     @Provides
-    fun provideCheckoutHandler(): OnrampSessionClientSecretProvider {
+    fun provideCheckoutHandler(
+        onrampCallbackIdentifier: String
+    ): OnrampSessionClientSecretProvider {
         return OnrampSessionClientSecretProvider { sessionId ->
-            val provider = OnrampCallbackReferences[DEFAULT_ONRAMP_INSTANCE_KEY]
+            val provider = OnrampCallbackReferences[onrampCallbackIdentifier]
                 ?.onrampSessionClientSecretProvider
-                ?: error("OnrampCallbackReferences not registered for key: $DEFAULT_ONRAMP_INSTANCE_KEY")
+                ?: error("OnrampCallbackReferences not registered for key: $onrampCallbackIdentifier")
 
             provider.getClientSecret(sessionId)
         }
     }
+
+    @Provides
+    fun provideOnrampCallbackIdentifier(): String = DEFAULT_ONRAMP_INSTANCE_KEY
 }

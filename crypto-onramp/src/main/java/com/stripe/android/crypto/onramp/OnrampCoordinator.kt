@@ -145,7 +145,6 @@ class OnrampCoordinator @Inject internal constructor(
                 activity = activity,
                 lifecycleOwner = activity,
                 activityResultRegistryOwner = activity,
-                onrampCallbackIdentifier = DEFAULT_ONRAMP_INSTANCE_KEY
             )
             .presenter
     }
@@ -225,14 +224,16 @@ class OnrampCoordinator @Inject internal constructor(
             savedStateHandle: SavedStateHandle,
             onrampCallbacks: OnrampCallbacks
         ): OnrampCoordinator {
-            // Register callbacks eagerly so they're available for activity result
-            // redelivery at onStart(), before Compose's first frame.
-            OnrampCallbackReferences[DEFAULT_ONRAMP_INSTANCE_KEY] = onrampCallbacks.build()
-
             val onrampComponent = OnrampComponentHolder.getOrCreate(
                 application = application,
                 savedStateHandle = savedStateHandle,
             )
+
+            // Register callbacks eagerly so they're available for activity result
+            // redelivery at onStart(), before Compose's first frame.
+            OnrampCallbackReferences[onrampComponent.onrampCallbackIdentifier] =
+                onrampCallbacks.build()
+
             return onrampComponent.onrampCoordinator
         }
     }

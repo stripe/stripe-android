@@ -23,6 +23,7 @@ import javax.inject.Singleton
 )
 internal interface OnrampComponent {
     val onrampCoordinator: OnrampCoordinator
+    val onrampCallbackIdentifier: String
 
     @Component.Factory
     interface Factory {

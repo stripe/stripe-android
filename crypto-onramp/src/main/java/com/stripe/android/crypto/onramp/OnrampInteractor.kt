@@ -462,7 +462,6 @@ internal class OnrampInteractor @Inject constructor(
     }
 
     suspend fun logOut(): OnrampLogOutResult {
-        savedStateHandle.remove<String>(KEY_CONSUMER_SESSION_SECRET)
         return when (val result = linkController.logOut()) {
             is LinkController.LogOutResult.Success -> {
                 analyticsService?.track(OnrampAnalyticsEvent.LinkLogout)
@@ -682,7 +681,6 @@ internal class OnrampInteractor @Inject constructor(
     private fun consumerSessionClientSecret(): String? =
         _state.value.linkControllerState?.internalLinkAccount?.consumerSessionClientSecret
             ?: linkController.state(application).value.internalLinkAccount?.consumerSessionClientSecret
-            ?: savedStateHandle.get<String>(KEY_CONSUMER_SESSION_SECRET)
 
     fun onLinkControllerState(linkState: LinkController.State) {
         if (analyticsService?.elementsSessionId != linkState.elementsSessionId) {
@@ -691,11 +689,6 @@ internal class OnrampInteractor @Inject constructor(
             analyticsService?.track(OnrampAnalyticsEvent.SessionCreated)
         }
         _state.value = _state.value.copy(linkControllerState = linkState)
-
-        // Persist for activity restoration
-        linkState.internalLinkAccount?.consumerSessionClientSecret?.let {
-            savedStateHandle[KEY_CONSUMER_SESSION_SECRET] = it
-        }
     }
 
     fun onAuthorize() {
@@ -770,14 +763,18 @@ internal class OnrampInteractor @Inject constructor(
      * SavedStateHandle for process death recovery.
      */
     private fun resolveOnrampSessionId(): String? {
-        val status = _state.value.checkoutState?.status
-        if (status is Status.RequiresNextAction) return status.onrampSessionId
-
-        val pending = savedStateHandle.get<PendingCheckout>(KEY_PENDING_CHECKOUT) ?: return null
-        if (_state.value.cryptoCustomerId == null && pending.cryptoCustomerId != null) {
-            _state.update { it.copy(cryptoCustomerId = pending.cryptoCustomerId) }
+        when (val status = _state.value.checkoutState?.status) {
+            is Status.Completed -> return null // Completed sessions should not be continued
+            is Status.Processing -> return status.onrampSessionId
+            is Status.RequiresNextAction -> return status.onrampSessionId
+            null -> {
+                val pending = savedStateHandle.get<PendingCheckout>(KEY_PENDING_CHECKOUT) ?: return null
+                if (_state.value.cryptoCustomerId == null && pending.cryptoCustomerId != null) {
+                    _state.update { it.copy(cryptoCustomerId = pending.cryptoCustomerId) }
+                }
+                return pending.onrampSessionId
+            }
         }
-        return pending.onrampSessionId
     }
 
     /**
@@ -932,10 +929,9 @@ internal class OnrampInteractor @Inject constructor(
 }
 
 private const val KEY_PENDING_CHECKOUT = "onramp_pending_checkout"
-private const val KEY_CONSUMER_SESSION_SECRET = "onramp_consumer_session_secret"
 
 @Parcelize
-internal data class PendingCheckout(
+private data class PendingCheckout(
     val onrampSessionId: String,
     val cryptoCustomerId: String?,
 ) : Parcelable
