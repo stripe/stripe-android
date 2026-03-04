@@ -8,6 +8,9 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.checkout.Checkout
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 @OptIn(CheckoutSessionPreview::class)
@@ -20,9 +23,14 @@ internal class CheckoutPlaygroundViewModel(
         state = checkoutState,
     )
 
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
     fun applyPromotionCode(promotionCode: String) {
         viewModelScope.launch {
+            _isLoading.value = true
             checkout.applyPromotionCode(promotionCode)
+            _isLoading.value = false
         }
     }
 
