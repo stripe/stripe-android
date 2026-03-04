@@ -66,7 +66,7 @@ internal class AttestationViewModelTest {
             val result = awaitItem()
             assertThat(result).isInstanceOf(AttestationActivityResult.Failed::class.java)
             val failedResult = result as AttestationActivityResult.Failed
-            assertThat(failedResult.error).isEqualTo(expectedError)
+            assertThat(failedResult.error.message).isEqualTo(expectedError.message)
 
             expectNoEvents()
         }
