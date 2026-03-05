@@ -60,6 +60,7 @@ internal class CompleteLinkFlowTest {
         assertThat(calls[0].paymentDetails).isEqualTo(consumerPaymentDetails)
         assertThat(calls[0].linkAccount).isEqualTo(linkAccount)
         assertThat(calls[0].cvc).isEqualTo(cvc)
+        assertThat(calls[0].invokedFromNewPmCreation).isFalse()
 
         // Verify result
         val completedResult = result as Result.Completed
@@ -203,6 +204,7 @@ internal class CompleteLinkFlowTest {
         assertThat(confirmCalls[0].paymentDetails).isEqualTo(linkPaymentDetails)
         assertThat(confirmCalls[0].linkAccount).isEqualTo(linkAccount)
         assertThat(confirmCalls[0].cvc).isEqualTo(cvc)
+        assertThat(confirmCalls[0].invokedFromNewPmCreation).isFalse()
 
         // Verify result
         assertThat(result).isInstanceOf(Result.Completed::class.java)
@@ -264,6 +266,58 @@ internal class CompleteLinkFlowTest {
         assertThat(linkConfirmationHandler.confirmWithLinkPaymentDetailsCall[0].cvc).isNull()
 
         // Verify result is successful
+        assertThat(result).isInstanceOf(Result.Completed::class.java)
+    }
+
+    @Test
+    fun `invoke passes invokedFromNewPmCreation true for ConsumerPaymentDetails`() = runTest {
+        val linkConfirmationHandler = FakeLinkConfirmationHandler().apply {
+            confirmResult = LinkConfirmationResult.Succeeded
+        }
+        val linkAccountManager = FakeLinkAccountManager()
+
+        val completeLinkFlow = DefaultCompleteLinkFlow(
+            linkConfirmationHandler = linkConfirmationHandler,
+            linkAccountManager = linkAccountManager,
+            dismissalCoordinator = RealLinkDismissalCoordinator(),
+            linkLaunchMode = LinkLaunchMode.Full
+        )
+
+        val result = completeLinkFlow(
+            selectedPaymentDetails = consumerPaymentMethod,
+            linkAccount = linkAccount,
+            invokedFromNewPmCreation = true
+        )
+
+        val calls = linkConfirmationHandler.calls
+        assertThat(calls).hasSize(1)
+        assertThat(calls[0].invokedFromNewPmCreation).isTrue()
+        assertThat(result).isInstanceOf(Result.Completed::class.java)
+    }
+
+    @Test
+    fun `invoke passes invokedFromNewPmCreation true for LinkPaymentDetails`() = runTest {
+        val linkConfirmationHandler = FakeLinkConfirmationHandler().apply {
+            confirmWithLinkPaymentDetailsResult = LinkConfirmationResult.Succeeded
+        }
+        val linkAccountManager = FakeLinkAccountManager()
+
+        val completeLinkFlow = DefaultCompleteLinkFlow(
+            linkConfirmationHandler = linkConfirmationHandler,
+            linkAccountManager = linkAccountManager,
+            dismissalCoordinator = RealLinkDismissalCoordinator(),
+            linkLaunchMode = LinkLaunchMode.Full
+        )
+
+        val result = completeLinkFlow(
+            selectedPaymentDetails = linkPaymentMethod,
+            linkAccount = linkAccount,
+            invokedFromNewPmCreation = true
+        )
+
+        val confirmCalls = linkConfirmationHandler.confirmWithLinkPaymentDetailsCall
+        assertThat(confirmCalls).hasSize(1)
+        assertThat(confirmCalls[0].invokedFromNewPmCreation).isTrue()
         assertThat(result).isInstanceOf(Result.Completed::class.java)
     }
 }

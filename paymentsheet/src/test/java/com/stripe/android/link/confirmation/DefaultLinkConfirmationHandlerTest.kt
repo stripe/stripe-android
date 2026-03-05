@@ -35,6 +35,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
+@Suppress("LargeClass")
 internal class DefaultLinkConfirmationHandlerTest {
     private val dispatcher = UnconfinedTestDispatcher()
 
@@ -67,7 +68,8 @@ internal class DefaultLinkConfirmationHandlerTest {
             paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
             linkAccount = TestFactory.LINK_ACCOUNT,
             cvc = CVC,
-            billingPhone = null
+            billingPhone = null,
+            invokedFromNewPmCreation = false
         )
 
         assertThat(result).isEqualTo(Result.Succeeded)
@@ -107,7 +109,8 @@ internal class DefaultLinkConfirmationHandlerTest {
             paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
             linkAccount = TestFactory.LINK_ACCOUNT,
             cvc = null,
-            billingPhone = null
+            billingPhone = null,
+            invokedFromNewPmCreation = false
         )
 
         assertThat(result).isEqualTo(Result.Succeeded)
@@ -150,7 +153,8 @@ internal class DefaultLinkConfirmationHandlerTest {
             paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
             linkAccount = TestFactory.LINK_ACCOUNT,
             cvc = CVC,
-            billingPhone = null
+            billingPhone = null,
+            invokedFromNewPmCreation = false
         )
 
         assertThat(result).isEqualTo(Result.Failed(errorMessage))
@@ -173,7 +177,8 @@ internal class DefaultLinkConfirmationHandlerTest {
             paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
             linkAccount = TestFactory.LINK_ACCOUNT,
             cvc = CVC,
-            billingPhone = null
+            billingPhone = null,
+            invokedFromNewPmCreation = false
         )
 
         assertThat(result).isEqualTo(Result.Canceled)
@@ -194,7 +199,8 @@ internal class DefaultLinkConfirmationHandlerTest {
             paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
             linkAccount = TestFactory.LINK_ACCOUNT,
             cvc = CVC,
-            billingPhone = null
+            billingPhone = null,
+            invokedFromNewPmCreation = false
         )
 
         assertThat(result).isEqualTo(Result.Failed(R.string.stripe_something_went_wrong.resolvableString))
@@ -221,7 +227,8 @@ internal class DefaultLinkConfirmationHandlerTest {
             paymentDetails = TestFactory.LINK_NEW_PAYMENT_DETAILS,
             linkAccount = TestFactory.LINK_ACCOUNT,
             cvc = CVC,
-            billingPhone = null
+            billingPhone = null,
+            invokedFromNewPmCreation = false
         )
 
         assertThat(result).isEqualTo(Result.Succeeded)
@@ -260,7 +267,8 @@ internal class DefaultLinkConfirmationHandlerTest {
             paymentDetails = savedPaymentDetails,
             linkAccount = TestFactory.LINK_ACCOUNT,
             cvc = CVC,
-            billingPhone = null
+            billingPhone = null,
+            invokedFromNewPmCreation = false
         )
 
         assertThat(result).isEqualTo(Result.Succeeded)
@@ -291,7 +299,8 @@ internal class DefaultLinkConfirmationHandlerTest {
             paymentDetails = savedPaymentDetailsWithBilling,
             linkAccount = TestFactory.LINK_ACCOUNT,
             cvc = CVC,
-            billingPhone = null
+            billingPhone = null,
+            invokedFromNewPmCreation = false
         )
 
         assertThat(result).isEqualTo(Result.Succeeded)
@@ -321,7 +330,8 @@ internal class DefaultLinkConfirmationHandlerTest {
             paymentDetails = TestFactory.LINK_PASSTHROUGH_PAYMENT_DETAILS,
             linkAccount = TestFactory.LINK_ACCOUNT,
             cvc = CVC,
-            billingPhone = null
+            billingPhone = null,
+            invokedFromNewPmCreation = false
         )
 
         assertThat(result).isEqualTo(Result.Succeeded)
@@ -352,7 +362,8 @@ internal class DefaultLinkConfirmationHandlerTest {
                 paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
                 linkAccount = TestFactory.LINK_ACCOUNT,
                 cvc = CVC,
-                billingPhone = null
+                billingPhone = null,
+                invokedFromNewPmCreation = false
             )
 
             assertThat(result).isEqualTo(Result.Succeeded)
@@ -389,7 +400,8 @@ internal class DefaultLinkConfirmationHandlerTest {
             paymentDetails = bankAccount,
             linkAccount = TestFactory.LINK_ACCOUNT,
             cvc = null,
-            billingPhone = null
+            billingPhone = null,
+            invokedFromNewPmCreation = false
         )
 
         assertThat(result).isEqualTo(Result.Succeeded)
@@ -430,7 +442,8 @@ internal class DefaultLinkConfirmationHandlerTest {
                 paymentDetails = bankAccount,
                 linkAccount = TestFactory.LINK_ACCOUNT,
                 cvc = null,
-                billingPhone = null
+                billingPhone = null,
+                invokedFromNewPmCreation = false
             )
 
             assertThat(result).isEqualTo(Result.Succeeded)
@@ -465,7 +478,8 @@ internal class DefaultLinkConfirmationHandlerTest {
                 paymentDetails = passthroughDetails,
                 linkAccount = TestFactory.LINK_ACCOUNT,
                 cvc = null,
-                billingPhone = null
+                billingPhone = null,
+                invokedFromNewPmCreation = false
             )
 
             assertThat(result).isEqualTo(Result.Succeeded)
@@ -512,6 +526,7 @@ internal class DefaultLinkConfirmationHandlerTest {
                 linkAccount = TestFactory.LINK_ACCOUNT,
                 cvc = null,
                 billingPhone = "+15555555555",
+                invokedFromNewPmCreation = false
             )
 
             assertThat(result).isEqualTo(Result.Succeeded)
@@ -558,7 +573,8 @@ internal class DefaultLinkConfirmationHandlerTest {
                 paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
                 linkAccount = TestFactory.LINK_ACCOUNT,
                 cvc = CVC,
-                billingPhone = null
+                billingPhone = null,
+                invokedFromNewPmCreation = false
             )
 
             assertThat(result).isEqualTo(Result.Succeeded)
@@ -600,7 +616,8 @@ internal class DefaultLinkConfirmationHandlerTest {
                 paymentDetails = savedPaymentDetails,
                 linkAccount = TestFactory.LINK_ACCOUNT,
                 cvc = CVC,
-                billingPhone = null
+                billingPhone = null,
+                invokedFromNewPmCreation = false
             )
 
             assertThat(result).isEqualTo(Result.Succeeded)
@@ -611,6 +628,48 @@ internal class DefaultLinkConfirmationHandlerTest {
                 passiveCaptchaParams = null
             )
         }
+
+    @Test
+    fun `confirm with saved LinkPaymentDetails passes invokedFromNewPmCreation true`() =
+        testInvokedFromNewPmCreationPropagation(invokedFromNewPmCreation = true)
+
+    @Test
+    fun `confirm with saved LinkPaymentDetails passes invokedFromNewPmCreation false`() =
+        testInvokedFromNewPmCreationPropagation(invokedFromNewPmCreation = false)
+
+    private fun testInvokedFromNewPmCreationPropagation(
+        invokedFromNewPmCreation: Boolean
+    ) = runTest(dispatcher) {
+        val configuration = TestFactory.LINK_CONFIGURATION
+        val confirmationHandler = FakeConfirmationHandler()
+        val handler = createHandler(
+            confirmationHandler = confirmationHandler,
+            configuration = configuration
+        )
+
+        confirmationHandler.awaitResultTurbine.add(
+            item = ConfirmationHandler.Result.Succeeded(
+                intent = configuration.stripeIntent,
+            )
+        )
+
+        val savedPaymentDetails = TestFactory.LINK_PASSTHROUGH_PAYMENT_DETAILS
+        val result = handler.confirm(
+            paymentDetails = savedPaymentDetails,
+            linkAccount = TestFactory.LINK_ACCOUNT,
+            cvc = CVC,
+            billingPhone = null,
+            invokedFromNewPmCreation = invokedFromNewPmCreation
+        )
+
+        assertThat(result).isEqualTo(Result.Succeeded)
+        confirmationHandler.startTurbine.awaitItem().assertSavedConfirmationArgs(
+            configuration = configuration,
+            paymentDetails = TestFactory.LINK_PASSTHROUGH_PAYMENT_DETAILS,
+            cvc = CVC,
+            newPMTransformedForConfirmation = invokedFromNewPmCreation
+        )
+    }
 
     private fun ConfirmationHandler.Args.assertConfirmationArgs(
         configuration: LinkConfiguration,
@@ -631,6 +690,7 @@ internal class DefaultLinkConfirmationHandlerTest {
                 billingDetails = billingDetails,
                 allowRedisplay = allowRedisplay,
                 clientAttributionMetadata = configuration.clientAttributionMetadata,
+                originalPaymentMethodCode = paymentDetails.type,
             )
         )
         assertThat(paymentMethodMetadata.passiveCaptchaParams).isEqualTo(passiveCaptchaParams)
@@ -641,11 +701,13 @@ internal class DefaultLinkConfirmationHandlerTest {
         configuration: LinkConfiguration,
         paymentDetails: LinkPaymentDetails.Passthrough,
         cvc: String?,
-        passiveCaptchaParams: PassiveCaptchaParams? = PASSIVE_CAPTCHA_PARAMS
+        passiveCaptchaParams: PassiveCaptchaParams? = PASSIVE_CAPTCHA_PARAMS,
+        newPMTransformedForConfirmation: Boolean = false
     ) {
         assertThat(intent).isEqualTo(configuration.stripeIntent)
         val option = confirmationOption as PaymentMethodConfirmationOption.Saved
         assertThat(option.paymentMethod.id).isEqualTo(paymentDetails.paymentDetails.paymentMethodId)
+        assertThat(option.newPMTransformedForConfirmation).isEqualTo(newPMTransformedForConfirmation)
         assertThat(paymentMethodMetadata.passiveCaptchaParams).isEqualTo(passiveCaptchaParams)
 
         val optionsCard = option.optionsParams as? PaymentMethodOptionsParams.Card
