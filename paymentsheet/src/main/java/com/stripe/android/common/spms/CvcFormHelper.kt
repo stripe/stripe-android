@@ -1,5 +1,6 @@
 package com.stripe.android.common.spms
 
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -79,7 +80,7 @@ internal class DefaultCvcFormHelper(
 
         if (!requiresCvcRecollection) {
             CvcFormHelper.State.Unused
-        } else if (cvcInput.isComplete && cvcValue != null) {
+        } else if (cvcInput.isComplete && !cvcValue.isNullOrEmpty()) {
             CvcFormHelper.State.Complete(cvcValue)
         } else {
             CvcFormHelper.State.Incomplete
@@ -101,7 +102,8 @@ internal class DefaultCvcFormHelper(
         }
     }
 
-    private companion object {
+    @VisibleForTesting
+    internal companion object {
         const val CVC_VALUE_KEY = "STRIPE_SPM_CVC_VALUE"
     }
 }
