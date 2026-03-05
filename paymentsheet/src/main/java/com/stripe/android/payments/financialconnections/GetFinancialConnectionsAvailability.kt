@@ -1,11 +1,9 @@
 package com.stripe.android.payments.financialconnections
 
-import androidx.annotation.RestrictTo
 import com.stripe.android.core.utils.FeatureFlags.financialConnectionsFullSdkUnavailable
 import com.stripe.android.model.ElementsSession
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-object GetFinancialConnectionsAvailability {
+internal object GetFinancialConnectionsAvailability {
 
     operator fun invoke(
         elementsSession: ElementsSession?,

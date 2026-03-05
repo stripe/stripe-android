@@ -1,6 +1,5 @@
 package com.stripe.android.model.parsers
 
-import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeJsonUtils.optString
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArrayToList
@@ -8,8 +7,7 @@ import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.SetupIntent
 import org.json.JSONObject
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class DeferredSetupIntentJsonParser(
+internal class DeferredSetupIntentJsonParser(
     private val elementsSessionId: String?,
     private val setupMode: DeferredIntentParams.Mode.Setup,
     private val isLiveMode: Boolean,

@@ -1,29 +1,24 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
-import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.StripeModel
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 
 @Parcelize
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class DeferredIntentParams(
+internal data class DeferredIntentParams(
     val mode: Mode,
     val paymentMethodTypes: List<String>,
     val paymentMethodConfigurationId: String?,
     val onBehalfOf: String?,
 ) : StripeModel {
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    @Parcelize
     sealed interface Mode : Parcelable {
         val code: String
         val currency: String?
         val setupFutureUsage: StripeIntent.Usage?
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
         data class Payment(
             val amount: Long,
@@ -35,7 +30,6 @@ data class DeferredIntentParams(
             override val code: String get() = "payment"
         }
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
         data class Setup(
             override val currency: String?,
@@ -62,7 +56,6 @@ data class DeferredIntentParams(
         }
     }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         fun parseModeFromJson(deferredIntentParamsJson: JSONObject): Mode? {
             return when (deferredIntentParamsJson.optString("mode")) {
