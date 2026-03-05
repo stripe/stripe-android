@@ -38,7 +38,7 @@ internal interface TapToAddCollectCvcInteractor {
         )
 
         data class Form(
-            val elements: List<FormElement>,
+            val cvcElement: FormElement,
             val enabled: Boolean,
         )
     }
@@ -72,7 +72,7 @@ internal class DefaultTapToAddCollectCvcInteractor(
                 enabled = cvcFormHelper.state.value is CvcFormHelper.State.Complete,
             ),
             form = TapToAddCollectCvcInteractor.State.Form(
-                elements = listOf(cvcFormHelper.formElement),
+                cvcElement = cvcFormHelper.formElement,
                 enabled = true,
             )
         )
