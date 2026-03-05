@@ -55,6 +55,34 @@ class TapToAddLayoutScreenshotTest {
     }
 
     @Test
+    fun sharedTransitionFromCollectCvcToConfirmation() {
+        paparazziRule.gif(
+            end = 2500L
+        ) {
+            TapToAddTheme {
+                var screen by remember {
+                    mutableStateOf<TapToAddNavigator.Screen>(
+                        TapToAddNavigator.Screen.CollectCvc(
+                            interactor = FakeTapToAddCollectCvcInteractor(),
+                        )
+                    )
+                }
+
+                LaunchedEffect(Unit) {
+                    delay(1000L)
+                    screen = TapToAddNavigator.Screen.Confirmation(
+                        interactor = FakeTapToAddConfirmationInteractor(),
+                    )
+                }
+
+                TapToAddLayout(
+                    screen = screen,
+                ) { }
+            }
+        }
+    }
+
+    @Test
     fun collecting() {
         paparazziRule.snapshot {
             TapToAddTheme {
@@ -146,6 +174,31 @@ class TapToAddLayoutScreenshotTest {
     }
 
     private object FakeTapToAddCollectingInteractor : TapToAddCollectingInteractor
+
+    private class FakeTapToAddCollectCvcInteractor(
+        cardBrand: CardBrand = CardBrand.Visa,
+        last4: String? = "4242",
+    ) : TapToAddCollectCvcInteractor {
+        override val state: StateFlow<TapToAddCollectCvcInteractor.State> = MutableStateFlow(
+            TapToAddCollectCvcInteractor.State(
+                cardBrand = cardBrand,
+                last4 = last4,
+                title = "Pay $50.99".resolvableString,
+                primaryButton = TapToAddCollectCvcInteractor.State.PrimaryButton(
+                    label = "Continue".resolvableString,
+                    enabled = true,
+                ),
+                form = TapToAddCollectCvcInteractor.State.Form(
+                    elements = emptyList(),
+                    enabled = true,
+                ),
+            )
+        )
+
+        override fun performAction(action: TapToAddCollectCvcInteractor.Action) {
+            // No-op
+        }
+    }
 
     private class FakeTapToAddCompletedInteractor(
         override val cardBrand: CardBrand = CardBrand.Visa,
