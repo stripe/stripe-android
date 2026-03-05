@@ -4,25 +4,24 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.getDayIcon
-import com.stripe.android.uicore.StripeTheme
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -57,37 +56,64 @@ private fun Card(
     last4: String?,
     modifier: Modifier = Modifier,
 ) {
+    val knownCardArt = when (cardBrand) {
+        CardBrand.Visa -> R.drawable.stripe_tta_card_art_visa
+        CardBrand.JCB -> R.drawable.stripe_tta_card_art_jcb
+        CardBrand.Discover -> R.drawable.stripe_tta_card_art_discover
+        else -> null
+    }
+
+    val textColor = when (cardBrand) {
+        CardBrand.Visa -> Color.White
+        CardBrand.JCB -> Color.White
+        CardBrand.Discover -> Color.Black
+        else -> null
+    }
+
+    val textPaddingModifier = when (cardBrand) {
+        CardBrand.Discover,
+        CardBrand.Visa -> Modifier.padding(
+            horizontal = 20.dp,
+            vertical = 10.dp,
+        )
+        else -> Modifier.padding(
+            horizontal = 20.dp,
+            vertical = 30.dp,
+        )
+    }
+
     Box(
         modifier = modifier
             .width(IntrinsicSize.Min)
             .height(IntrinsicSize.Max)
     ) {
         Image(
-            painter = painterResource(R.drawable.stripe_tta_card_background),
+            painter = painterResource(knownCardArt ?: R.drawable.stripe_tta_card_background),
             contentDescription = null,
         )
 
-        Row(
-            modifier = Modifier
-                .padding(horizontal = 20.dp)
-                .align(Alignment.BottomCenter),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            last4?.let {
-                Text(
-                    text = "···· $last4",
-                    color = Color.Black,
-                    style = MaterialTheme.typography.h4.copy(
-                        fontSize = StripeTheme.typographyMutable.xLargeFontSize,
-                        fontWeight = FontWeight.Normal
-                    ),
-                )
-            }
+        last4?.let {
+            Text(
+                text = "···· $last4",
+                color = textColor ?: Color.Black,
+                style = TextStyle(
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.W500,
+                    fontFamily = FontFamily.Monospace,
+                ),
+                modifier = textPaddingModifier.align(Alignment.BottomStart),
+            )
+        }
 
-            Spacer(Modifier.weight(1f))
-
+        if (knownCardArt == null) {
             Image(
-                modifier = Modifier.size(70.dp),
+                modifier = Modifier
+                    .padding(
+                        horizontal = 20.dp,
+                        vertical = 10.dp,
+                    )
+                    .size(70.dp)
+                    .align(Alignment.BottomEnd),
                 painter = painterResource(cardBrand.getDayIcon()),
                 contentDescription = null,
             )
