@@ -1,25 +1,10 @@
 package com.stripe.android.paymentsheet.repositories
 
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
 import javax.inject.Inject
-
-/**
- * Carries the routing context that [DefaultSavedPaymentMethodRepository] needs to decide
- * which backend to delegate to.
- */
-internal sealed interface SavedPaymentMethodAccess {
-    data class Customer(
-        val id: String,
-        val ephemeralKeySecret: String,
-        val customerSessionClientSecret: String?,
-    ) : SavedPaymentMethodAccess
-
-    data class CheckoutSession(
-        val sessionId: String,
-    ) : SavedPaymentMethodAccess
-}
 
 /**
  * Repository for managing saved payment methods. This abstracts over the underlying
@@ -28,19 +13,19 @@ internal sealed interface SavedPaymentMethodAccess {
  */
 internal interface SavedPaymentMethodRepository {
     suspend fun detachPaymentMethod(
-        access: SavedPaymentMethodAccess,
+        customerMetadata: CustomerMetadata,
         paymentMethodId: String,
         canRemoveDuplicates: Boolean,
     ): Result<PaymentMethod>
 
     suspend fun updatePaymentMethod(
-        access: SavedPaymentMethodAccess,
+        customerMetadata: CustomerMetadata,
         paymentMethodId: String,
         params: PaymentMethodUpdateParams,
     ): Result<PaymentMethod>
 
     suspend fun setDefaultPaymentMethod(
-        access: SavedPaymentMethodAccess,
+        customerMetadata: CustomerMetadata,
         paymentMethodId: String?,
     ): Result<Customer>
 }
@@ -51,50 +36,57 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
 ) : SavedPaymentMethodRepository {
 
     override suspend fun detachPaymentMethod(
-        access: SavedPaymentMethodAccess,
+        customerMetadata: CustomerMetadata,
         paymentMethodId: String,
         canRemoveDuplicates: Boolean,
-    ): Result<PaymentMethod> = when (access) {
-        is SavedPaymentMethodAccess.CheckoutSession -> {
+    ): Result<PaymentMethod> = when (customerMetadata) {
+        is CustomerMetadata.CheckoutSession -> {
             checkoutSessionRepository.detachPaymentMethod(
-                sessionId = access.sessionId,
+                sessionId = customerMetadata.sessionId,
                 paymentMethodId = paymentMethodId,
             ).map {
                 PaymentMethod.Builder().setId(paymentMethodId).build()
             }
         }
-        is SavedPaymentMethodAccess.Customer -> {
-            if (access.customerSessionClientSecret != null) {
-                customerRepository.detachPaymentMethod(
-                    customerId = access.id,
-                    ephemeralKeySecret = access.ephemeralKeySecret,
-                    customerSessionClientSecret = access.customerSessionClientSecret,
-                    paymentMethodId = paymentMethodId,
-                    canRemoveDuplicates = canRemoveDuplicates,
-                )
-            } else {
-                customerRepository.detachPaymentMethod(
-                    customerId = access.id,
-                    ephemeralKeySecret = access.ephemeralKeySecret,
-                    paymentMethodId = paymentMethodId,
-                    canRemoveDuplicates = canRemoveDuplicates,
-                )
-            }
+        is CustomerMetadata.Session -> {
+            customerRepository.detachPaymentMethod(
+                customerId = customerMetadata.id,
+                ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
+                customerSessionClientSecret = customerMetadata.customerSessionClientSecret,
+                paymentMethodId = paymentMethodId,
+                canRemoveDuplicates = canRemoveDuplicates,
+            )
+        }
+        is CustomerMetadata.LegacyEphemeralKey -> {
+            customerRepository.detachPaymentMethod(
+                customerId = customerMetadata.id,
+                ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
+                paymentMethodId = paymentMethodId,
+                canRemoveDuplicates = canRemoveDuplicates,
+            )
         }
     }
 
     override suspend fun updatePaymentMethod(
-        access: SavedPaymentMethodAccess,
+        customerMetadata: CustomerMetadata,
         paymentMethodId: String,
         params: PaymentMethodUpdateParams,
-    ): Result<PaymentMethod> = when (access) {
-        is SavedPaymentMethodAccess.CheckoutSession -> {
+    ): Result<PaymentMethod> = when (customerMetadata) {
+        is CustomerMetadata.CheckoutSession -> {
             Result.failure(NotImplementedError("Checkout sessions do not support updating payment methods"))
         }
-        is SavedPaymentMethodAccess.Customer -> {
+        is CustomerMetadata.Session -> {
             customerRepository.updatePaymentMethod(
-                customerId = access.id,
-                ephemeralKeySecret = access.ephemeralKeySecret,
+                customerId = customerMetadata.id,
+                ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
+                paymentMethodId = paymentMethodId,
+                params = params,
+            )
+        }
+        is CustomerMetadata.LegacyEphemeralKey -> {
+            customerRepository.updatePaymentMethod(
+                customerId = customerMetadata.id,
+                ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
                 paymentMethodId = paymentMethodId,
                 params = params,
             )
@@ -102,16 +94,23 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
     }
 
     override suspend fun setDefaultPaymentMethod(
-        access: SavedPaymentMethodAccess,
+        customerMetadata: CustomerMetadata,
         paymentMethodId: String?,
-    ): Result<Customer> = when (access) {
-        is SavedPaymentMethodAccess.CheckoutSession -> {
+    ): Result<Customer> = when (customerMetadata) {
+        is CustomerMetadata.CheckoutSession -> {
             Result.failure(NotImplementedError("Checkout sessions do not support setting default payment methods"))
         }
-        is SavedPaymentMethodAccess.Customer -> {
+        is CustomerMetadata.Session -> {
             customerRepository.setDefaultPaymentMethod(
-                customerId = access.id,
-                ephemeralKeySecret = access.ephemeralKeySecret,
+                customerId = customerMetadata.id,
+                ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
+                paymentMethodId = paymentMethodId,
+            )
+        }
+        is CustomerMetadata.LegacyEphemeralKey -> {
+            customerRepository.setDefaultPaymentMethod(
+                customerId = customerMetadata.id,
+                ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
                 paymentMethodId = paymentMethodId,
             )
         }

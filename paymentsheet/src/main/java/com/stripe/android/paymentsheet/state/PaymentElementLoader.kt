@@ -520,11 +520,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 )
             }
             is CustomerInfo.CheckoutSession -> {
-                CustomerMetadata(
-                    id = customerInfo.customer.id,
-                    // Checkout sessions don't use ephemeral keys or customer sessions.
-                    ephemeralKeySecret = "",
-                    customerSessionClientSecret = null,
+                CustomerMetadata.CheckoutSession(
+                    sessionId = customerInfo.sessionId,
+                    customerId = customerInfo.customer.id,
                     isPaymentMethodSetAsDefaultEnabled = false,
                     removePaymentMethod = if (customerInfo.customer.canDetachPaymentMethod) {
                         PaymentMethodRemovePermission.Full

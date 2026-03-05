@@ -9,6 +9,8 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.repositories.LinkRepository
+import com.stripe.android.lpmfoundations.paymentmethod.customerIdOrNull
+import com.stripe.android.lpmfoundations.paymentmethod.ephemeralKeySecretOrNull
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.Customer.Components.MobilePaymentElement
 import com.stripe.android.model.ElementsSession.Customer.Components.MobilePaymentElement.Enabled
@@ -180,7 +182,7 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
     private suspend fun PaymentElementLoader.State.getEmail(): String? =
         paymentMethodMetadata.linkState?.configuration?.customerInfo?.email ?: retrieveCustomerEmail(
             configuration = config,
-            customerId = paymentMethodMetadata.customerMetadata?.id,
-            ephemeralKeySecret = paymentMethodMetadata.customerMetadata?.ephemeralKeySecret,
+            customerId = paymentMethodMetadata.customerMetadata?.customerIdOrNull(),
+            ephemeralKeySecret = paymentMethodMetadata.customerMetadata?.ephemeralKeySecretOrNull(),
         )
 }

@@ -7,6 +7,8 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.customerIdOrNull
+import com.stripe.android.lpmfoundations.paymentmethod.ephemeralKeySecretOrNull
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.TapToAddPreview
@@ -256,12 +258,17 @@ internal class DefaultTapToAddCollectionHandler(
                 )
             }
 
+        val customerId = customerMetadata.customerIdOrNull()
+            ?: error("Tap to add requires a customer with credentials")
+        val ephemeralKeySecret = customerMetadata.ephemeralKeySecretOrNull()
+            ?: error("Tap to add requires a customer with credentials")
+
         return stripeRepository.retrieveCustomerPaymentMethod(
-            customerId = customerMetadata.id,
+            customerId = customerId,
             paymentMethodId = generatedCardId,
             productUsageTokens = productUsage,
             requestOptions = ApiRequest.Options(
-                apiKey = customerMetadata.ephemeralKeySecret,
+                apiKey = ephemeralKeySecret,
                 stripeAccount = paymentConfiguration.get().stripeAccountId,
             ),
         ).getOrThrow()
