@@ -290,13 +290,12 @@ internal class AttestationConfirmationDefinitionTest {
     @Test
     fun `'toResult' should return 'NextStep' unchanged for Failed result with New option`() {
         val definition = createAttestationConfirmationDefinition()
-        val exception = RuntimeException("Attestation failed")
 
         val result = definition.toResult(
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_NEW,
             confirmationArgs = CONFIRMATION_PARAMETERS,
             launcherArgs = launcherArgs,
-            result = AttestationActivityResult.Failed(exception),
+            result = AttestationActivityResult.Failed,
         )
 
         assertThat(result).isInstanceOf<ConfirmationDefinition.Result.NextStep>()
@@ -344,12 +343,11 @@ internal class AttestationConfirmationDefinitionTest {
     @Test
     fun `'toResult' should return 'NextStep' unchanged for Failed result with Saved option`() {
         val definition = createAttestationConfirmationDefinition()
-        val exception = RuntimeException("Attestation failed")
 
         val result = definition.toResult(
             confirmationOption = PAYMENT_METHOD_CONFIRMATION_OPTION_SAVED,
             confirmationArgs = CONFIRMATION_PARAMETERS,
-            result = AttestationActivityResult.Failed(exception),
+            result = AttestationActivityResult.Failed,
             launcherArgs = launcherArgs,
         )
 

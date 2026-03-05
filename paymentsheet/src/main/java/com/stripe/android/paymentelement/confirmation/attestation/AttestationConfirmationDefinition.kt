@@ -18,6 +18,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.IsEligibleForConfirmationChallenge
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.analytics.ErrorReporter.UnexpectedErrorEvent
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.CoroutineScope
@@ -58,7 +59,7 @@ internal class AttestationConfirmationDefinition @Inject constructor(
                 }.onFailure { error ->
                     attestationAnalyticsEventsReporter.prepareFailed(error)
                     errorReporter.report(
-                        ErrorReporter.UnexpectedErrorEvent.INTENT_CONFIRMATION_HANDLER_ATTESTATION_FAILED_TO_PREPARE,
+                        UnexpectedErrorEvent.INTENT_CONFIRMATION_HANDLER_ATTESTATION_FAILED_TO_PREPARE,
                         stripeException = StripeException.create(error)
                     )
                 }
@@ -91,6 +92,15 @@ internal class AttestationConfirmationDefinition @Inject constructor(
             is AttestationActivityResult.Success -> {
                 ConfirmationDefinition.Result.NextStep(
                     confirmationOption = confirmationOption.attachToken(result.token),
+                    arguments = confirmationArgs
+                )
+            }
+            AttestationActivityResult.NoResult -> {
+                errorReporter.report(
+                    errorEvent = UnexpectedErrorEvent.INTENT_CONFIRMATION_CHALLENGE_INTENT_NO_ATTESTATION_RESULT
+                )
+                ConfirmationDefinition.Result.NextStep(
+                    confirmationOption = confirmationOption.attachToken(null),
                     arguments = confirmationArgs
                 )
             }
@@ -129,7 +139,7 @@ internal class AttestationConfirmationDefinition @Inject constructor(
 
         val error = IllegalArgumentException("Attestation is not enabled on intent confirmation")
         errorReporter.report(
-            ErrorReporter.UnexpectedErrorEvent.INTENT_CONFIRMATION_HANDLER_ATTESTATION_INVOKED_WHEN_DISABLED,
+            UnexpectedErrorEvent.INTENT_CONFIRMATION_HANDLER_ATTESTATION_INVOKED_WHEN_DISABLED,
             stripeException = StripeException.create(error)
         )
 
