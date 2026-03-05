@@ -39,7 +39,7 @@ internal class NextActionDataParserTest {
     }
 
     @Test
-    fun `parse with captcha_vendor_name null defaults to hcaptcha`() {
+    fun `parse with captcha_vendor_name null results in null`() {
         val nextActionJson = JSONObject(
             """
             {
@@ -57,11 +57,11 @@ internal class NextActionDataParserTest {
         val nextActionData = NextActionDataParser().parse(nextActionJson)
 
         val challenge = nextActionData as StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge
-        assertThat(challenge.stripeJs.captchaVendorName).isEqualTo("hcaptcha")
+        assertThat(challenge.stripeJs.captchaVendorName).isNull()
     }
 
     @Test
-    fun `parse with stripe_js missing defaults to hcaptcha`() {
+    fun `parse with stripe_js missing results in null`() {
         val nextActionJson = JSONObject(
             """
             {
@@ -76,7 +76,7 @@ internal class NextActionDataParserTest {
         val nextActionData = NextActionDataParser().parse(nextActionJson)
 
         val challenge = nextActionData as StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge
-        assertThat(challenge.stripeJs.captchaVendorName).isEqualTo("hcaptcha")
+        assertThat(challenge.stripeJs.captchaVendorName).isNull()
     }
 
     @Test

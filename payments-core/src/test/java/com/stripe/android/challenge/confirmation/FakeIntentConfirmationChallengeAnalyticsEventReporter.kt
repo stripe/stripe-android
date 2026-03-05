@@ -8,11 +8,11 @@ internal class FakeIntentConfirmationChallengeAnalyticsEventReporter :
     private val _calls = mutableListOf<Call>()
     val calls: List<Call> get() = _calls
 
-    override fun onStart(captchaVendorName: String) {
+    override fun onStart(captchaVendorName: String?) {
         _calls.add(Call.Start(captchaVendorName))
     }
 
-    override fun onSuccess(captchaVendorName: String) {
+    override fun onSuccess(captchaVendorName: String?) {
         _calls.add(Call.Success(captchaVendorName))
     }
 
@@ -20,7 +20,7 @@ internal class FakeIntentConfirmationChallengeAnalyticsEventReporter :
         errorType: String?,
         errorCode: String?,
         fromBridge: Boolean,
-        captchaVendorName: String
+        captchaVendorName: String?
     ) {
         _calls.add(
             Call.Error(
@@ -32,11 +32,11 @@ internal class FakeIntentConfirmationChallengeAnalyticsEventReporter :
         )
     }
 
-    override fun onCancel(captchaVendorName: String) {
+    override fun onCancel(captchaVendorName: String?) {
         _calls.add(Call.Cancel(captchaVendorName))
     }
 
-    override fun onWebViewLoaded(captchaVendorName: String) {
+    override fun onWebViewLoaded(captchaVendorName: String?) {
         _calls.add(Call.WebViewLoaded(captchaVendorName))
     }
 
@@ -45,15 +45,15 @@ internal class FakeIntentConfirmationChallengeAnalyticsEventReporter :
     }
 
     sealed interface Call {
-        data class Start(val captchaVendorName: String) : Call
-        data class Success(val captchaVendorName: String) : Call
+        data class Start(val captchaVendorName: String?) : Call
+        data class Success(val captchaVendorName: String?) : Call
         data class Error(
             val errorType: String?,
             val errorCode: String?,
             val fromBridge: Boolean,
-            val captchaVendorName: String
+            val captchaVendorName: String?
         ) : Call
-        data class Cancel(val captchaVendorName: String) : Call
-        data class WebViewLoaded(val captchaVendorName: String) : Call
+        data class Cancel(val captchaVendorName: String?) : Call
+        data class WebViewLoaded(val captchaVendorName: String?) : Call
     }
 }

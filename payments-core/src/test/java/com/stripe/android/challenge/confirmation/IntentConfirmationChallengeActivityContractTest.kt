@@ -36,9 +36,9 @@ internal class IntentConfirmationChallengeActivityContractTest {
         }
 
     @Test
-    fun `createIntent falls back to hcaptcha when nextActionData is not IntentConfirmationChallenge`() =
+    fun `createIntent returns null captchaVendorName when nextActionData is not IntentConfirmationChallenge`() =
         runCreateIntentScenario(captchaVendorName = null) { args ->
-            assertThat(args?.captchaVendorName).isEqualTo("hcaptcha")
+            assertThat(args?.captchaVendorName).isNull()
         }
 
     @Test
