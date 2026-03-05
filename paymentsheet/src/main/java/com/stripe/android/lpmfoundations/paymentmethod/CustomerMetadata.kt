@@ -193,15 +193,3 @@ internal sealed class CustomerMetadata : Parcelable {
         }
     }
 }
-
-internal fun CustomerMetadata.customerIdOrNull(): String? = when (this) {
-    is CustomerMetadata.LegacyEphemeralKey -> id
-    is CustomerMetadata.Session -> id
-    is CustomerMetadata.CheckoutSession -> null
-}
-
-internal fun CustomerMetadata.ephemeralKeySecretOrNull(): String? = when (this) {
-    is CustomerMetadata.LegacyEphemeralKey -> ephemeralKeySecret
-    is CustomerMetadata.Session -> ephemeralKeySecret
-    is CustomerMetadata.CheckoutSession -> null
-}

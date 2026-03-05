@@ -4,8 +4,6 @@ import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.customerIdOrNull
-import com.stripe.android.lpmfoundations.paymentmethod.ephemeralKeySecretOrNull
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
@@ -68,11 +66,17 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
                 throw IllegalStateException("No intent confirmation interceptor for CryptoOnramp.")
             }
             is IntegrationMetadata.DeferredIntent.WithConfirmationToken -> {
+                val (customerId, ephemeralKeySecret) = when (customerMetadata) {
+                    is CustomerMetadata.LegacyEphemeralKey -> customerMetadata.id to customerMetadata.ephemeralKeySecret
+                    is CustomerMetadata.Session -> customerMetadata.id to customerMetadata.ephemeralKeySecret
+                    is CustomerMetadata.CheckoutSession -> error("CheckoutSession is not yet supported")
+                    null -> null to null
+                }
                 confirmationTokenConfirmationInterceptorFactory.create(
                     intentConfiguration = integrationMetadata.intentConfiguration,
                     createIntentCallback = deferredIntentCallbackRetriever.waitForConfirmationTokenCallback(),
-                    customerId = customerMetadata?.customerIdOrNull(),
-                    ephemeralKeySecret = customerMetadata?.ephemeralKeySecretOrNull(),
+                    customerId = customerId,
+                    ephemeralKeySecret = ephemeralKeySecret,
                     clientAttributionMetadata = clientAttributionMetadata,
                 )
             }

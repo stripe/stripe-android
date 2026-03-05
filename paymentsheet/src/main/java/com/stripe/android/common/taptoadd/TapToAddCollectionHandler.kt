@@ -7,8 +7,6 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.customerIdOrNull
-import com.stripe.android.lpmfoundations.paymentmethod.ephemeralKeySecretOrNull
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.TapToAddPreview
@@ -258,10 +256,11 @@ internal class DefaultTapToAddCollectionHandler(
                 )
             }
 
-        val customerId = customerMetadata.customerIdOrNull()
-            ?: error("Tap to add requires a customer with credentials")
-        val ephemeralKeySecret = customerMetadata.ephemeralKeySecretOrNull()
-            ?: error("Tap to add requires a customer with credentials")
+        val (customerId, ephemeralKeySecret) = when (customerMetadata) {
+            is CustomerMetadata.LegacyEphemeralKey -> customerMetadata.id to customerMetadata.ephemeralKeySecret
+            is CustomerMetadata.Session -> customerMetadata.id to customerMetadata.ephemeralKeySecret
+            is CustomerMetadata.CheckoutSession -> error("Tap to add is not supported for CheckoutSession")
+        }
 
         return stripeRepository.retrieveCustomerPaymentMethod(
             customerId = customerId,
