@@ -42,6 +42,7 @@ internal class CheckoutSessionResponseJsonParser(
             json.optJSONObject(FIELD_SAVED_PAYMENT_METHODS_OFFER_SAVE)
         )
         val totalSummary = parseTotalSummaryResponse(json)
+        val lineItems = parseLineItems(json.optJSONObject(FIELD_LINE_ITEM_GROUP))
 
         return CheckoutSessionResponse(
             id = sessionId,
@@ -52,6 +53,7 @@ internal class CheckoutSessionResponseJsonParser(
             customer = customer,
             savedPaymentMethodsOfferSave = savedPaymentMethodsOfferSave,
             totalSummary = totalSummary,
+            lineItems = lineItems,
         )
     }
 
@@ -331,6 +333,29 @@ internal class CheckoutSessionResponseJsonParser(
         }
     }
 
+    private fun parseLineItems(
+        lineItemGroup: JSONObject?,
+    ): List<CheckoutSessionResponse.LineItem> {
+        val array = lineItemGroup?.optJSONArray(FIELD_LINE_ITEMS) ?: return emptyList()
+        return (0 until array.length()).mapNotNull { i ->
+            val obj = array.optJSONObject(i) ?: return@mapNotNull null
+            val id = obj.optString(FIELD_ID).takeIf { it.isNotEmpty() } ?: return@mapNotNull null
+            val name = obj.optString(FIELD_NAME).takeIf { it.isNotEmpty() } ?: return@mapNotNull null
+            val quantity = obj.optInt(FIELD_QUANTITY, -1).takeIf { it > 0 } ?: return@mapNotNull null
+            val subtotal = obj.optLong(FIELD_SUBTOTAL, -1).takeIf { it >= 0 } ?: return@mapNotNull null
+            val total = obj.optLong(FIELD_TOTAL, -1).takeIf { it >= 0 } ?: return@mapNotNull null
+            val unitAmount = if (quantity > 0) total / quantity else null
+            CheckoutSessionResponse.LineItem(
+                id = id,
+                name = name,
+                quantity = quantity,
+                unitAmount = unitAmount,
+                subtotal = subtotal,
+                total = total,
+            )
+        }
+    }
+
     private companion object {
         private const val FIELD_SESSION_ID = "session_id"
         private const val FIELD_CURRENCY = "currency"
@@ -364,5 +389,8 @@ internal class CheckoutSessionResponseJsonParser(
         private const val FIELD_SHIPPING = "shipping"
         private const val FIELD_SHIPPING_OPTION = "shipping_option"
         private const val FIELD_DELIVERY_ESTIMATE = "delivery_estimate"
+        private const val FIELD_LINE_ITEMS = "line_items"
+        private const val FIELD_ID = "id"
+        private const val FIELD_QUANTITY = "quantity"
     }
 }

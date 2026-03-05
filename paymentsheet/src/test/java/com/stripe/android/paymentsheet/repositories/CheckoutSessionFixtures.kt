@@ -520,6 +520,48 @@ internal object CheckoutSessionFixtures {
     )
 
     /**
+     * Init response with multiple line items.
+     */
+    val CHECKOUT_SESSION_WITH_MULTIPLE_LINE_ITEMS_JSON = JSONObject(
+        """
+        {
+            "session_id": "cs_test_abc123",
+            "currency": "usd",
+            "total_summary": {
+                "due": 4497,
+                "subtotal": 4497,
+                "total": 4497
+            },
+            "line_item_group": {
+                "currency": "usd",
+                "total": 4497,
+                "subtotal": 4497,
+                "due": 4497,
+                "line_items": [
+                    {
+                        "id": "li_item1",
+                        "object": "item",
+                        "name": "Llama Figure",
+                        "quantity": 2,
+                        "subtotal": 1998,
+                        "total": 1998
+                    },
+                    {
+                        "id": "li_item2",
+                        "object": "item",
+                        "name": "Alpaca Plushie",
+                        "quantity": 1,
+                        "subtotal": 2499,
+                        "total": 2499
+                    }
+                ]
+            },
+            "elements_session": $MINIMAL_ELEMENTS_SESSION_JSON
+        }
+        """.trimIndent()
+    )
+
+    /**
      * Init response with shipping from shipping.shipping_option fallback path.
      */
     val CHECKOUT_SESSION_WITH_SHIPPING_OPTION_JSON = JSONObject(
