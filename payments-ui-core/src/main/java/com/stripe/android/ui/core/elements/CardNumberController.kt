@@ -482,10 +482,8 @@ internal class DefaultCardNumberController(
             )
         }
 
-        val title = PaymentsCoreR.string.stripe_card_brand_choice_selection_header.resolvableString
-
         return TextFieldIcon.Dropdown(
-            title = title,
+            title = PaymentsCoreR.string.stripe_card_brand_choice_selection_header.resolvableString,
             currentItem = selected ?: noSelection,
             items = items,
             hide = brands.size < 2,
