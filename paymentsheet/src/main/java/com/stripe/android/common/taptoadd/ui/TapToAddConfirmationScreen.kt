@@ -47,7 +47,7 @@ internal fun ColumnScope.TapToAddConfirmationScreen(
             PrimaryButton(
                 label = label.resolve(),
                 locked = locked,
-                enabled = enabled,
+                enabled = true,
                 processingState = when (this.state) {
                     TapToAddConfirmationInteractor.State.PrimaryButton.State.Idle ->
                         PrimaryButtonProcessingState.Idle(null)
