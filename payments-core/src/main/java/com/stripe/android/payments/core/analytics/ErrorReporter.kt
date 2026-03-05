@@ -299,7 +299,7 @@ interface ErrorReporter : FraudDetectionErrorReporter {
             partialEventName = "intent_confirmation_challenge.intent_parameters_unavailable"
         ),
         INTENT_CONFIRMATION_CHALLENGE_INTENT_NO_ATTESTATION_RESULT(
-            partialEventName = "intent_confirmation_challenge.no_attestation_result"
+            partialEventName = "intent_confirmation_challenge.attestation.no_attestation_result"
         ),
         HCAPTCHA_UNEXPECTED_FAILURE(
             partialEventName = "elements.captcha.passive.unexpected_failure"
