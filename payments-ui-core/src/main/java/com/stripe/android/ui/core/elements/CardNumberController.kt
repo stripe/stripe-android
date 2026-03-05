@@ -486,7 +486,7 @@ internal class DefaultCardNumberController(
             title = PaymentsCoreR.string.stripe_card_brand_choice_selection_header.resolvableString,
             currentItem = selected ?: noSelection,
             items = items,
-            hide = brands.size < 2,
+            hide = brands.size < 2
         )
     }
 

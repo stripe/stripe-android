@@ -462,7 +462,7 @@ fun TrailingIcon(
 private fun TrailingDropdown(
     icon: TextFieldIcon.Dropdown,
     loading: Boolean,
-    onDropdownItemClicked: (item: TextFieldIcon.Dropdown.Item) -> Unit,
+    onDropdownItemClicked: (item: TextFieldIcon.Dropdown.Item) -> Unit
 ) {
     var expanded by remember {
         mutableStateOf(false)
