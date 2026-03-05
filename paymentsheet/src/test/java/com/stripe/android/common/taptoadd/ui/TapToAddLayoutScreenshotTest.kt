@@ -10,6 +10,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.SystemAppearance
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,6 +21,7 @@ import kotlin.String
 class TapToAddLayoutScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(
+        SystemAppearance.entries,
         boxModifier = Modifier,
         includeStripeTheme = false,
     )

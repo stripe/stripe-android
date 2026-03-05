@@ -15,12 +15,14 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.getDayIcon
+import com.stripe.android.uicore.StripeTheme
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -74,8 +76,9 @@ private fun Card(
             last4?.let {
                 Text(
                     text = "···· $last4",
-                    color = MaterialTheme.colors.surface,
+                    color = Color.Black,
                     style = MaterialTheme.typography.h4.copy(
+                        fontSize = StripeTheme.typographyMutable.xLargeFontSize,
                         fontWeight = FontWeight.Normal
                     ),
                 )

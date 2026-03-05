@@ -24,7 +24,7 @@ internal fun ColumnScope.TapToAddCardLayout(
         last4 = last4,
     )
 
-    Spacer(Modifier.size(20.dp))
+    Spacer(Modifier.size(35.dp))
 
     Text(
         text = title,
@@ -32,7 +32,7 @@ internal fun ColumnScope.TapToAddCardLayout(
         style = MaterialTheme.typography.h4,
     )
 
-    Spacer(Modifier.size(20.dp))
+    Spacer(Modifier.size(35.dp))
 
     Spacer(Modifier.weight(1f))
 
