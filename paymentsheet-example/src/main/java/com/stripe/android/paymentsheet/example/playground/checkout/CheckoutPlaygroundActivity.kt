@@ -101,6 +101,7 @@ private fun CheckoutScreen(
     Box {
         PlaygroundTheme(
             content = {
+                LineItemsSection(checkoutSession)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
@@ -135,6 +136,34 @@ private fun CheckoutScreen(
                 CircularProgressIndicator()
             }
         }
+    }
+}
+
+@Composable
+private fun LineItemsSection(session: CheckoutSession) {
+    val lineItems = session.lineItems
+    val currency = session.currency
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "Items",
+            style = MaterialTheme.typography.h6,
+        )
+
+        Spacer(modifier = Modifier.height(PADDING))
+
+        for (item in lineItems) {
+            val quantityLabel = if (item.quantity > 1) " x${item.quantity}" else ""
+            val unitPrice = item.unitAmount?.let { formatAmount(it, currency) }
+            val lineTotal = formatAmount(item.total, currency)
+            SummaryRow(
+                label = "${item.name}$quantityLabel",
+                amount = lineTotal,
+                subtext = if (item.quantity > 1 && unitPrice != null) "$unitPrice each" else null,
+            )
+        }
+
+        Divider(modifier = Modifier.padding(vertical = PADDING))
     }
 }
 

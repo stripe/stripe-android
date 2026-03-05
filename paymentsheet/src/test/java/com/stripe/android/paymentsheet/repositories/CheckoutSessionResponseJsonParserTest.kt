@@ -53,6 +53,65 @@ class CheckoutSessionResponseJsonParserTest {
     }
 
     @Test
+    fun `parse checkout session response includes line items`() {
+        val result = CheckoutSessionResponseJsonParser(
+            isLiveMode = false,
+        ).parse(CheckoutSessionFixtures.CHECKOUT_SESSION_RESPONSE_JSON)
+
+        assertThat(result).isNotNull()
+        val lineItems = result!!.lineItems
+        assertThat(lineItems).hasSize(1)
+        assertThat(lineItems[0].id).isEqualTo("li_1SrjAuLu5o3P18ZpVBMMs98l")
+        assertThat(lineItems[0].name).isEqualTo("Llama Figure")
+        assertThat(lineItems[0].quantity).isEqualTo(1)
+        assertThat(lineItems[0].subtotal).isEqualTo(999L)
+        assertThat(lineItems[0].total).isEqualTo(999L)
+        assertThat(lineItems[0].unitAmount).isEqualTo(999L)
+    }
+
+    @Test
+    fun `parse multiple line items`() {
+        val result = CheckoutSessionResponseJsonParser(
+            isLiveMode = false,
+        ).parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_MULTIPLE_LINE_ITEMS_JSON)
+
+        assertThat(result).isNotNull()
+        val lineItems = result!!.lineItems
+        assertThat(lineItems).hasSize(2)
+
+        assertThat(lineItems[0].id).isEqualTo("li_item1")
+        assertThat(lineItems[0].name).isEqualTo("Llama Figure")
+        assertThat(lineItems[0].quantity).isEqualTo(2)
+        assertThat(lineItems[0].subtotal).isEqualTo(1998L)
+        assertThat(lineItems[0].total).isEqualTo(1998L)
+        assertThat(lineItems[0].unitAmount).isEqualTo(999L)
+
+        assertThat(lineItems[1].id).isEqualTo("li_item2")
+        assertThat(lineItems[1].name).isEqualTo("Alpaca Plushie")
+        assertThat(lineItems[1].quantity).isEqualTo(1)
+        assertThat(lineItems[1].subtotal).isEqualTo(2499L)
+        assertThat(lineItems[1].total).isEqualTo(2499L)
+        assertThat(lineItems[1].unitAmount).isEqualTo(2499L)
+    }
+
+    @Test
+    fun `parse returns empty line items when no line_item_group`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "currency": "usd",
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result!!.lineItems).isEmpty()
+    }
+
+    @Test
     fun `parse returns null when session_id is missing`() {
         val json = JSONObject(
             """
