@@ -192,7 +192,11 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
                 ephemeralKeySecret = metadata.ephemeralKeySecret,
             )
             is CustomerMetadata.CheckoutSession -> error("CheckoutSession is not yet supported")
-            null -> null
+            null -> retrieveCustomerEmail(
+                configuration = config,
+                customerId = null,
+                ephemeralKeySecret = null,
+            )
         }
     }
 }
