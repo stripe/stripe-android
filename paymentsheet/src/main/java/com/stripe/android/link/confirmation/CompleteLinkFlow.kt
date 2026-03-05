@@ -28,7 +28,8 @@ internal interface CompleteLinkFlow {
      */
     suspend operator fun invoke(
         selectedPaymentDetails: LinkPaymentMethod,
-        linkAccount: LinkAccount
+        linkAccount: LinkAccount,
+        invokedFromNewPmCreation: Boolean = false
     ): Result
 
     sealed interface Result {
@@ -59,7 +60,8 @@ internal class DefaultCompleteLinkFlow @Inject constructor(
 
     override suspend operator fun invoke(
         selectedPaymentDetails: LinkPaymentMethod,
-        linkAccount: LinkAccount
+        linkAccount: LinkAccount,
+        invokedFromNewPmCreation: Boolean
     ): Result {
         return completeLinkFlow(
             linkLaunchMode = linkLaunchMode,
@@ -69,13 +71,15 @@ internal class DefaultCompleteLinkFlow @Inject constructor(
                         paymentDetails = selectedPaymentDetails.details,
                         linkAccount = linkAccount,
                         cvc = selectedPaymentDetails.collectedCvc,
-                        billingPhone = selectedPaymentDetails.billingPhone
+                        billingPhone = selectedPaymentDetails.billingPhone,
+                        invokedFromNewPmCreation = invokedFromNewPmCreation
                     )
                     is LinkPaymentMethod.LinkPaymentDetails -> linkConfirmationHandler.confirm(
                         paymentDetails = selectedPaymentDetails.linkPaymentDetails,
                         linkAccount = linkAccount,
                         cvc = selectedPaymentDetails.collectedCvc,
-                        billingPhone = selectedPaymentDetails.billingPhone
+                        billingPhone = selectedPaymentDetails.billingPhone,
+                        invokedFromNewPmCreation = invokedFromNewPmCreation
                     )
                 }
             },

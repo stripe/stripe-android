@@ -39,7 +39,8 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         paymentDetails: ConsumerPaymentDetails.PaymentDetails,
         linkAccount: LinkAccount,
         cvc: String?,
-        billingPhone: String?
+        billingPhone: String?,
+        invokedFromNewPmCreation: Boolean
     ): Result {
         return confirm {
             newConfirmationArgs(
@@ -56,7 +57,8 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         paymentDetails: LinkPaymentDetails,
         linkAccount: LinkAccount,
         cvc: String?,
-        billingPhone: String?
+        billingPhone: String?,
+        invokedFromNewPmCreation: Boolean
     ): Result {
         return confirm {
             confirmationArgs(
@@ -65,6 +67,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                 cvc = cvc,
                 billingPhone = billingPhone,
                 paymentMethodMetadata = paymentMethodMetadata,
+                invokedFromNewPmCreation = invokedFromNewPmCreation,
             )
         }
     }
@@ -110,6 +113,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         cvc: String?,
         billingPhone: String?,
         paymentMethodMetadata: PaymentMethodMetadata,
+        invokedFromNewPmCreation: Boolean
     ): ConfirmationHandler.Args {
         return when (paymentDetails) {
             is LinkPaymentDetails.New -> {
@@ -126,6 +130,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                     paymentMethod = paymentDetails.paymentMethod,
                     cvc = cvc,
                     paymentMethodMetadata = paymentMethodMetadata,
+                    invokedFromNewPmCreation = invokedFromNewPmCreation,
                 )
             }
             is LinkPaymentDetails.Saved -> {
@@ -133,6 +138,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                     paymentMethod = paymentDetails.paymentMethod,
                     cvc = cvc,
                     paymentMethodMetadata = paymentMethodMetadata,
+                    invokedFromNewPmCreation = invokedFromNewPmCreation,
                 )
             }
         }
@@ -200,6 +206,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         paymentMethod: PaymentMethod,
         cvc: String?,
         paymentMethodMetadata: PaymentMethodMetadata,
+        invokedFromNewPmCreation: Boolean
     ): ConfirmationHandler.Args {
         return ConfirmationHandler.Args(
             confirmationOption = PaymentMethodConfirmationOption.Saved(
@@ -210,6 +217,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                         configuration.passthroughModeEnabled.not()
                     }
                 ),
+                newPMTransformedForConfirmation = invokedFromNewPmCreation
             ),
             paymentMethodMetadata = paymentMethodMetadata,
         )
@@ -262,6 +270,7 @@ internal fun createPaymentMethodCreateParams(
         extraParams = cvc?.let { mapOf("card" to mapOf("cvc" to cvc)) },
         allowRedisplay = allowRedisplay,
         clientAttributionMetadata = clientAttributionMetadata,
+        originalPaymentMethodCode = selectedPaymentDetails.type
     )
 }
 

@@ -11,14 +11,16 @@ internal interface LinkConfirmationHandler {
         paymentDetails: ConsumerPaymentDetails.PaymentDetails,
         linkAccount: LinkAccount,
         cvc: String?,
-        billingPhone: String?
+        billingPhone: String?,
+        invokedFromNewPmCreation: Boolean
     ): Result
 
     suspend fun confirm(
         paymentDetails: LinkPaymentDetails,
         linkAccount: LinkAccount,
         cvc: String?,
-        billingPhone: String?
+        billingPhone: String?,
+        invokedFromNewPmCreation: Boolean
     ): Result
 
     fun interface Factory {

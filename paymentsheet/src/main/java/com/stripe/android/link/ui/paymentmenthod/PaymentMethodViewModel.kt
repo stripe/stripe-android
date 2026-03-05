@@ -145,7 +145,8 @@ internal class PaymentMethodViewModel @Inject constructor(
                 collectedCvc = cvc,
                 billingPhone = billingPhone
             ),
-            linkAccount = linkAccount
+            linkAccount = linkAccount,
+            invokedFromNewPmCreation = true
         )
         when (result) {
             is Result.Canceled -> Unit

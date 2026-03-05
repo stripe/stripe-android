@@ -382,7 +382,8 @@ internal class WalletViewModel(
                 collectedCvc = cvc,
                 billingPhone = linkPaymentMethod?.billingPhone ?: linkAccount.unredactedPhoneNumber
             ),
-            linkAccount = linkAccount
+            linkAccount = linkAccount,
+            invokedFromNewPmCreation = false
         )
 
         when (result) {

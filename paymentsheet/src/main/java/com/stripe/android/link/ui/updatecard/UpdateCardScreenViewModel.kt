@@ -123,7 +123,8 @@ internal class UpdateCardScreenViewModel @Inject constructor(
                                 collectedCvc = state.value.billingDetailsUpdateFlow?.cvc,
                                 billingPhone = paymentUpdateParams.billingDetails?.phone,
                             ),
-                            linkAccount = account
+                            linkAccount = account,
+                            invokedFromNewPmCreation = false
                         )
 
                         _state.update { it.copy(processing = false) }
