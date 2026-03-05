@@ -189,7 +189,6 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
                     val stripeJs = json.optJSONObject(FIELD_STRIPE_JS)
                     val captchaVendorName = stripeJs?.let { optString(it, FIELD_CAPTCHA_VENDOR_NAME) }
                         ?.takeIf { it.isNotEmpty() }
-                        ?: DEFAULT_CAPTCHA_VENDOR_NAME
                     StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge(
                         stripeJs = StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge.StripeJs(
                             captchaVendorName = captchaVendorName
@@ -242,7 +241,6 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
 
             private const val FIELD_STRIPE_JS = "stripe_js"
             private const val FIELD_CAPTCHA_VENDOR_NAME = "captcha_vendor_name"
-            private const val DEFAULT_CAPTCHA_VENDOR_NAME = "hcaptcha"
         }
     }
 

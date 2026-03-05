@@ -16,7 +16,6 @@ internal class IntentConfirmationChallengeActivityContract :
         val nextActionData = input.intent.nextActionData
             as? StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge
         val captchaVendorName = nextActionData?.stripeJs?.captchaVendorName
-            ?: StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge.FALLBACK_VENDOR_NAME
 
         return IntentConfirmationChallengeActivity.createIntent(
             context,

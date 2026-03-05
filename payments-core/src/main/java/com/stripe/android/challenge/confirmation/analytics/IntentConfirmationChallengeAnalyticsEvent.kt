@@ -5,7 +5,7 @@ import com.stripe.android.core.networking.AnalyticsEvent
 internal sealed interface IntentConfirmationChallengeAnalyticsEvent : AnalyticsEvent {
     val params: Map<String, Any?>
 
-    class Start(val captchaVendorName: String) : IntentConfirmationChallengeAnalyticsEvent {
+    class Start(val captchaVendorName: String?) : IntentConfirmationChallengeAnalyticsEvent {
         override val params: Map<String, Any?>
             get() = mapOf(FIELD_CAPTCHA_VENDOR_NAME to captchaVendorName)
         override val eventName = "elements.intent_confirmation_challenge.start"
@@ -13,7 +13,7 @@ internal sealed interface IntentConfirmationChallengeAnalyticsEvent : AnalyticsE
 
     class Success(
         val duration: Float,
-        val captchaVendorName: String
+        val captchaVendorName: String?
     ) : IntentConfirmationChallengeAnalyticsEvent {
         override val params: Map<String, Any?>
             get() = mapOf(
@@ -28,7 +28,7 @@ internal sealed interface IntentConfirmationChallengeAnalyticsEvent : AnalyticsE
         val errorType: String?,
         val errorCode: String?,
         val fromBridge: Boolean,
-        val captchaVendorName: String
+        val captchaVendorName: String?
     ) : IntentConfirmationChallengeAnalyticsEvent {
         override val params: Map<String, Any?>
             get() = mapOf(
@@ -43,7 +43,7 @@ internal sealed interface IntentConfirmationChallengeAnalyticsEvent : AnalyticsE
 
     class Cancel(
         val duration: Float,
-        val captchaVendorName: String
+        val captchaVendorName: String?
     ) : IntentConfirmationChallengeAnalyticsEvent {
         override val params: Map<String, Any?>
             get() = mapOf(
@@ -55,7 +55,7 @@ internal sealed interface IntentConfirmationChallengeAnalyticsEvent : AnalyticsE
 
     class WebViewLoaded(
         val duration: Float,
-        val captchaVendorName: String
+        val captchaVendorName: String?
     ) : IntentConfirmationChallengeAnalyticsEvent {
         override val params: Map<String, Any?>
             get() = mapOf(

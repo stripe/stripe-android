@@ -9,5 +9,5 @@ internal data class IntentConfirmationChallengeArgs(
     val publishableKey: String,
     val productUsage: List<String>,
     val intent: StripeIntent,
-    val captchaVendorName: String
+    val captchaVendorName: String?
 ) : Parcelable
