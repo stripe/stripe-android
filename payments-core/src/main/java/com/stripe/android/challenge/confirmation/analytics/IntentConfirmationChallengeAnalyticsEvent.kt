@@ -11,7 +11,10 @@ internal sealed interface IntentConfirmationChallengeAnalyticsEvent : AnalyticsE
         override val eventName = "elements.intent_confirmation_challenge.start"
     }
 
-    class Success(val duration: Float, val captchaVendorName: String) : IntentConfirmationChallengeAnalyticsEvent {
+    class Success(
+        val duration: Float,
+        val captchaVendorName: String
+    ) : IntentConfirmationChallengeAnalyticsEvent {
         override val params: Map<String, Any?>
             get() = mapOf(
                 FIELD_DURATION to duration,
@@ -38,7 +41,10 @@ internal sealed interface IntentConfirmationChallengeAnalyticsEvent : AnalyticsE
         override val eventName = "elements.intent_confirmation_challenge.error"
     }
 
-    class Cancel(val duration: Float, val captchaVendorName: String) : IntentConfirmationChallengeAnalyticsEvent {
+    class Cancel(
+        val duration: Float,
+        val captchaVendorName: String
+    ) : IntentConfirmationChallengeAnalyticsEvent {
         override val params: Map<String, Any?>
             get() = mapOf(
                 FIELD_DURATION to duration,
@@ -47,7 +53,10 @@ internal sealed interface IntentConfirmationChallengeAnalyticsEvent : AnalyticsE
         override val eventName = "elements.intent_confirmation_challenge.cancel"
     }
 
-    class WebViewLoaded(val duration: Float, val captchaVendorName: String) : IntentConfirmationChallengeAnalyticsEvent {
+    class WebViewLoaded(
+        val duration: Float,
+        val captchaVendorName: String
+    ) : IntentConfirmationChallengeAnalyticsEvent {
         override val params: Map<String, Any?>
             get() = mapOf(
                 FIELD_DURATION to duration,

@@ -19,7 +19,7 @@ internal class NextActionDataParserTest {
                 "use_stripe_sdk": {
                     "type": "intent_confirmation_challenge",
                     "stripe_js": {
-                        "captcha_vendor_name": "hcaptcha"
+                        "captcha_vendor_name": "arkose"
                     }
                 }
             }
@@ -32,7 +32,7 @@ internal class NextActionDataParserTest {
             .isEqualTo(
                 StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge(
                     stripeJs = StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge.StripeJs(
-                        captchaVendorName = "hcaptcha"
+                        captchaVendorName = "arkose"
                     )
                 )
             )
@@ -77,50 +77,6 @@ internal class NextActionDataParserTest {
 
         val challenge = nextActionData as StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge
         assertThat(challenge.stripeJs.captchaVendorName).isEqualTo("hcaptcha")
-    }
-
-    @Test
-    fun `parse with human_security vendor name parses correctly`() {
-        val nextActionJson = JSONObject(
-            """
-            {
-                "type": "use_stripe_sdk",
-                "use_stripe_sdk": {
-                    "type": "intent_confirmation_challenge",
-                    "stripe_js": {
-                        "captcha_vendor_name": "human_security"
-                    }
-                }
-            }
-            """.trimIndent()
-        )
-
-        val nextActionData = NextActionDataParser().parse(nextActionJson)
-
-        val challenge = nextActionData as StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge
-        assertThat(challenge.stripeJs.captchaVendorName).isEqualTo("human_security")
-    }
-
-    @Test
-    fun `parse with arkose vendor name parses correctly`() {
-        val nextActionJson = JSONObject(
-            """
-            {
-                "type": "use_stripe_sdk",
-                "use_stripe_sdk": {
-                    "type": "intent_confirmation_challenge",
-                    "stripe_js": {
-                        "captcha_vendor_name": "arkose"
-                    }
-                }
-            }
-            """.trimIndent()
-        )
-
-        val nextActionData = NextActionDataParser().parse(nextActionJson)
-
-        val challenge = nextActionData as StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge
-        assertThat(challenge.stripeJs.captchaVendorName).isEqualTo("arkose")
     }
 
     @Test

@@ -15,7 +15,8 @@ internal class IntentConfirmationChallengeActivityContract :
     override fun createIntent(context: Context, input: Args): Intent {
         val captchaVendorName = (input.intent.nextActionData
             as? StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge)
-            ?.stripeJs?.captchaVendorName ?: "hcaptcha"
+            ?.stripeJs?.captchaVendorName
+            ?: StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge.FALLBACK_VENDOR_NAME
 
         return IntentConfirmationChallengeActivity.createIntent(
             context,
@@ -30,7 +31,11 @@ internal class IntentConfirmationChallengeActivityContract :
 
     override fun parseResult(resultCode: Int, intent: Intent?): IntentConfirmationChallengeActivityResult {
         val result = intent?.extras?.let {
-            BundleCompat.getParcelable(it, EXTRA_RESULT, IntentConfirmationChallengeActivityResult::class.java)
+            BundleCompat.getParcelable(
+                it,
+                EXTRA_RESULT,
+                IntentConfirmationChallengeActivityResult::class.java
+            )
         }
         return result ?: IntentConfirmationChallengeActivityResult.Failed(
             clientSecret = null,

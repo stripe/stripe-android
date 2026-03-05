@@ -37,7 +37,8 @@ internal interface IntentConfirmationChallengeNextActionStarter {
                         productUsage = args.productUsage.toList(),
                         captchaVendorName = (args.intent.nextActionData
                             as? StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge)
-                            ?.stripeJs?.captchaVendorName ?: "hcaptcha",
+                            ?.stripeJs?.captchaVendorName
+                            ?: StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge.FALLBACK_VENDOR_NAME,
                     )
                 ),
                 requestCode = StripePaymentController.getRequestCode(args.intent)

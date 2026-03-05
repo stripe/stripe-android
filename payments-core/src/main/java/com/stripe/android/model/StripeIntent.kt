@@ -337,6 +337,11 @@ sealed interface StripeIntent : StripeModel {
                 data class StripeJs(
                     val captchaVendorName: String
                 ) : Parcelable
+
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                companion object {
+                    const val FALLBACK_VENDOR_NAME = "hcaptcha"
+                }
             }
         }
 
