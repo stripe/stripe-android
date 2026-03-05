@@ -18,7 +18,7 @@ import com.stripe.android.paymentsheet.utils.buyButtonLabel
 import com.stripe.android.paymentsheet.utils.continueButtonLabel
 import com.stripe.android.paymentsheet.utils.reportPaymentResult
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -84,12 +84,11 @@ internal class DefaultTapToAddConfirmationInteractor(
     private val onContinue: (paymentSelection: PaymentSelection.Saved) -> Unit,
     private val onComplete: (paymentMethod: PaymentMethod) -> Unit,
 ) : TapToAddConfirmationInteractor {
-    private val selection = combineAsStateFlow(listOf(linkFormHelper.state)) { states ->
-        val linkState = states.single()
+    private val selection = linkFormHelper.state.mapAsStateFlow {
         PaymentSelection.Saved(
             paymentMethod = paymentMethod,
             paymentMethodOptionsParams = paymentMethodOptionsParams,
-        ).withLinkState(linkState)
+        ).withLinkState(it)
     }
 
     private val _state = MutableStateFlow(
@@ -123,7 +122,7 @@ internal class DefaultTapToAddConfirmationInteractor(
         coroutineScope.launch {
             linkFormHelper.state.collectLatest { linkState ->
                 _state.update { state ->
-                    state.withInputState(linkState)
+                    state.withLinkState(linkState)
                 }
             }
         }
@@ -178,12 +177,14 @@ internal class DefaultTapToAddConfirmationInteractor(
                 state = TapToAddConfirmationInteractor.State.PrimaryButton.State.Idle,
             ),
             form = TapToAddConfirmationInteractor.State.Form(
-                elements = listOfNotNull(linkFormHelper.formElement),
+                elements = linkFormHelper.formElement?.let {
+                    listOf(it)
+                } ?: emptyList(),
                 enabled = true,
             ),
             error = null,
         )
-            .withInputState(initialLinkState)
+            .withLinkState(initialLinkState)
             .withConfirmationState(initialConfirmationState)
     }
 
@@ -200,12 +201,12 @@ internal class DefaultTapToAddConfirmationInteractor(
         }
     }
 
-    private fun TapToAddConfirmationInteractor.State.withInputState(
+    private fun TapToAddConfirmationInteractor.State.withLinkState(
         linkState: SavedPaymentMethodLinkFormHelper.State,
     ): TapToAddConfirmationInteractor.State {
         return copy(
             primaryButton = primaryButton.copy(
-                enabled = linkState !is SavedPaymentMethodLinkFormHelper.State.Incomplete
+                enabled = linkState !is SavedPaymentMethodLinkFormHelper.State.Incomplete,
             ),
         )
     }
