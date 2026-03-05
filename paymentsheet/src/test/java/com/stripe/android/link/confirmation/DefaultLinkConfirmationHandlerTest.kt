@@ -68,8 +68,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
             linkAccount = TestFactory.LINK_ACCOUNT,
             cvc = CVC,
-            billingPhone = null,
-            invokedFromNewPmCreation = false
+            billingPhone = null
         )
 
         assertThat(result).isEqualTo(Result.Succeeded)
@@ -109,8 +108,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
             linkAccount = TestFactory.LINK_ACCOUNT,
             cvc = null,
-            billingPhone = null,
-            invokedFromNewPmCreation = false
+            billingPhone = null
         )
 
         assertThat(result).isEqualTo(Result.Succeeded)
@@ -153,8 +151,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
             linkAccount = TestFactory.LINK_ACCOUNT,
             cvc = CVC,
-            billingPhone = null,
-            invokedFromNewPmCreation = false
+            billingPhone = null
         )
 
         assertThat(result).isEqualTo(Result.Failed(errorMessage))
@@ -177,8 +174,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
             linkAccount = TestFactory.LINK_ACCOUNT,
             cvc = CVC,
-            billingPhone = null,
-            invokedFromNewPmCreation = false
+            billingPhone = null
         )
 
         assertThat(result).isEqualTo(Result.Canceled)
@@ -199,8 +195,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
             linkAccount = TestFactory.LINK_ACCOUNT,
             cvc = CVC,
-            billingPhone = null,
-            invokedFromNewPmCreation = false
+            billingPhone = null
         )
 
         assertThat(result).isEqualTo(Result.Failed(R.string.stripe_something_went_wrong.resolvableString))
@@ -362,8 +357,7 @@ internal class DefaultLinkConfirmationHandlerTest {
                 paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
                 linkAccount = TestFactory.LINK_ACCOUNT,
                 cvc = CVC,
-                billingPhone = null,
-                invokedFromNewPmCreation = false
+                billingPhone = null
             )
 
             assertThat(result).isEqualTo(Result.Succeeded)
@@ -400,8 +394,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             paymentDetails = bankAccount,
             linkAccount = TestFactory.LINK_ACCOUNT,
             cvc = null,
-            billingPhone = null,
-            invokedFromNewPmCreation = false
+            billingPhone = null
         )
 
         assertThat(result).isEqualTo(Result.Succeeded)
@@ -442,8 +435,7 @@ internal class DefaultLinkConfirmationHandlerTest {
                 paymentDetails = bankAccount,
                 linkAccount = TestFactory.LINK_ACCOUNT,
                 cvc = null,
-                billingPhone = null,
-                invokedFromNewPmCreation = false
+                billingPhone = null
             )
 
             assertThat(result).isEqualTo(Result.Succeeded)
@@ -478,8 +470,7 @@ internal class DefaultLinkConfirmationHandlerTest {
                 paymentDetails = passthroughDetails,
                 linkAccount = TestFactory.LINK_ACCOUNT,
                 cvc = null,
-                billingPhone = null,
-                invokedFromNewPmCreation = false
+                billingPhone = null
             )
 
             assertThat(result).isEqualTo(Result.Succeeded)
@@ -526,7 +517,6 @@ internal class DefaultLinkConfirmationHandlerTest {
                 linkAccount = TestFactory.LINK_ACCOUNT,
                 cvc = null,
                 billingPhone = "+15555555555",
-                invokedFromNewPmCreation = false
             )
 
             assertThat(result).isEqualTo(Result.Succeeded)
@@ -573,8 +563,7 @@ internal class DefaultLinkConfirmationHandlerTest {
                 paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
                 linkAccount = TestFactory.LINK_ACCOUNT,
                 cvc = CVC,
-                billingPhone = null,
-                invokedFromNewPmCreation = false
+                billingPhone = null
             )
 
             assertThat(result).isEqualTo(Result.Succeeded)

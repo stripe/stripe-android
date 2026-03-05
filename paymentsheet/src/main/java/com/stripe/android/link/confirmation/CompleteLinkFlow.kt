@@ -72,7 +72,6 @@ internal class DefaultCompleteLinkFlow @Inject constructor(
                         linkAccount = linkAccount,
                         cvc = selectedPaymentDetails.collectedCvc,
                         billingPhone = selectedPaymentDetails.billingPhone,
-                        invokedFromNewPmCreation = invokedFromNewPmCreation
                     )
                     is LinkPaymentMethod.LinkPaymentDetails -> linkConfirmationHandler.confirm(
                         paymentDetails = selectedPaymentDetails.linkPaymentDetails,

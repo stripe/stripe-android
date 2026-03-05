@@ -40,7 +40,6 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         linkAccount: LinkAccount,
         cvc: String?,
         billingPhone: String?,
-        invokedFromNewPmCreation: Boolean
     ): Result {
         return confirm {
             newConfirmationArgs(

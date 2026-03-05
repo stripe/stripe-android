@@ -12,7 +12,6 @@ internal interface LinkConfirmationHandler {
         linkAccount: LinkAccount,
         cvc: String?,
         billingPhone: String?,
-        invokedFromNewPmCreation: Boolean
     ): Result
 
     suspend fun confirm(

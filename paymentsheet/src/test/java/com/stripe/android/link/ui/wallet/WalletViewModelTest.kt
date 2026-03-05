@@ -431,8 +431,7 @@ class WalletViewModelTest {
             FakeLinkConfirmationHandler.Call(
                 paymentDetails = updatedCard,
                 linkAccount = TestFactory.LINK_ACCOUNT,
-                cvc = "123",
-                invokedFromNewPmCreation = false
+                cvc = "123"
             )
         )
     }
@@ -495,8 +494,7 @@ class WalletViewModelTest {
             FakeLinkConfirmationHandler.Call(
                 paymentDetails = validCard,
                 linkAccount = TestFactory.LINK_ACCOUNT,
-                cvc = null,
-                invokedFromNewPmCreation = false
+                cvc = null
             )
         )
     }
@@ -531,8 +529,7 @@ class WalletViewModelTest {
             FakeLinkConfirmationHandler.Call(
                 paymentDetails = validCard,
                 cvc = null,
-                linkAccount = TestFactory.LINK_ACCOUNT,
-                invokedFromNewPmCreation = false
+                linkAccount = TestFactory.LINK_ACCOUNT
             )
         )
 

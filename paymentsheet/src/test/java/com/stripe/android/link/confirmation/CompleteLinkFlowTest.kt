@@ -60,7 +60,6 @@ internal class CompleteLinkFlowTest {
         assertThat(calls[0].paymentDetails).isEqualTo(consumerPaymentDetails)
         assertThat(calls[0].linkAccount).isEqualTo(linkAccount)
         assertThat(calls[0].cvc).isEqualTo(cvc)
-        assertThat(calls[0].invokedFromNewPmCreation).isFalse()
 
         // Verify result
         val completedResult = result as Result.Completed
@@ -291,7 +290,6 @@ internal class CompleteLinkFlowTest {
 
         val calls = linkConfirmationHandler.calls
         assertThat(calls).hasSize(1)
-        assertThat(calls[0].invokedFromNewPmCreation).isTrue()
         assertThat(result).isInstanceOf(Result.Completed::class.java)
     }
 
