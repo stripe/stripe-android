@@ -553,9 +553,12 @@ internal class DefaultCardNumberController(
             TextFieldIcon.Trailing(cardBrand.icon, isTintable = false)
         }.take(STATIC_ICON_COUNT)
 
-        val animatedIcons = cardBrands.map { cardBrand ->
-            TextFieldIcon.Trailing(cardBrand.icon, isTintable = false)
-        }.drop(STATIC_ICON_COUNT)
+        val animatedIcons = buildList {
+            if (isEligibleForCardBrandChoice && FeatureFlags.newCbcSelector.isEnabled) {
+                add(TextFieldIcon.Trailing(CardBrand.CartesBancaires.icon, isTintable = false))
+            }
+            addAll(cardBrands.drop(STATIC_ICON_COUNT).map { TextFieldIcon.Trailing(it.icon, isTintable = false) })
+        }
 
         return TextFieldIcon.MultiTrailing(
             staticIcons = staticIcons,
