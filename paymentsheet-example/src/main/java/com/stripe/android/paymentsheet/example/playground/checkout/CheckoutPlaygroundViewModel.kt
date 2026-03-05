@@ -34,6 +34,10 @@ internal class CheckoutPlaygroundViewModel(
         checkout.removePromotionCode()
     }
 
+    fun refresh() = performWhileLoading {
+        checkout.refresh()
+    }
+
     private fun performWhileLoading(block: suspend () -> Unit) {
         viewModelScope.launch {
             _isLoading.value = true

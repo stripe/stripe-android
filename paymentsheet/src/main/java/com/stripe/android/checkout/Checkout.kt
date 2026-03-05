@@ -66,6 +66,13 @@ class Checkout private constructor(
             .updateState()
     }
 
+    suspend fun refresh(): Result<CheckoutSession> {
+        val sessionId = state.checkoutSessionResponse.id
+        return component.checkoutSessionRepository
+            .init(sessionId)
+            .updateState()
+    }
+
     private fun Result<CheckoutSessionResponse>.updateState(): Result<CheckoutSession> {
         return map { response ->
             state = State(response)

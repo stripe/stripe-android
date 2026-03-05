@@ -76,9 +76,10 @@ class CheckoutTest {
             checkout.checkoutSession.test {
                 assertThat(awaitItem().totalSummary).isNull()
 
-                checkout.applyPromotionCode("10OFF")
+                val result = checkout.applyPromotionCode("10OFF")
 
                 val updated = awaitItem()
+                assertThat(result.getOrThrow()).isEqualTo(updated)
                 val totalSummary = updated.totalSummary
                 assertThat(totalSummary).isNotNull()
                 assertThat(totalSummary!!.discountAmounts).hasSize(1)
@@ -126,9 +127,10 @@ class CheckoutTest {
             checkout.checkoutSession.test {
                 assertThat(awaitItem().totalSummary).isNull()
 
-                checkout.applyPromotionCode("  10OFF  ")
+                val result = checkout.applyPromotionCode("  10OFF  ")
 
                 val updated = awaitItem()
+                assertThat(result.getOrThrow()).isEqualTo(updated)
                 assertThat(updated.totalSummary).isNotNull()
             }
         }
@@ -149,9 +151,10 @@ class CheckoutTest {
             checkout.checkoutSession.test {
                 assertThat(awaitItem().totalSummary).isNull()
 
-                checkout.removePromotionCode()
+                val result = checkout.removePromotionCode()
 
                 val updated = awaitItem()
+                assertThat(result.getOrThrow()).isEqualTo(updated)
                 assertThat(updated.totalSummary).isNotNull()
             }
         }
@@ -173,6 +176,53 @@ class CheckoutTest {
                 val initial = awaitItem()
 
                 val result = checkout.removePromotionCode()
+                assertThat(result.isFailure).isTrue()
+
+                expectNoEvents()
+                assertThat(checkout.checkoutSession.value).isEqualTo(initial)
+            }
+        }
+    }
+
+    @Test
+    fun `refresh updates checkoutSession on success`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_abc123/init"),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-apply-discount.json")
+            }
+
+            checkout.checkoutSession.test {
+                assertThat(awaitItem().totalSummary).isNull()
+
+                val result = checkout.refresh()
+
+                val updated = awaitItem()
+                assertThat(result.getOrThrow()).isEqualTo(updated)
+                assertThat(updated.totalSummary).isNotNull()
+            }
+        }
+    }
+
+    @Test
+    fun `refresh returns failure on error response`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_abc123/init"),
+            ) { response ->
+                response.setResponseCode(500)
+                response.setBody("""{"error": {"message": "Internal server error"}}""")
+            }
+
+            checkout.checkoutSession.test {
+                val initial = awaitItem()
+
+                val result = checkout.refresh()
                 assertThat(result.isFailure).isTrue()
 
                 expectNoEvents()
