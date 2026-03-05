@@ -15,6 +15,7 @@ import com.stripe.android.attestation.analytics.FakeAttestationAnalyticsEventsRe
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.FakeIntegrityRequestManager
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.injectableActivityScenario
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -65,8 +66,6 @@ internal class AttestationActivityTest {
 
         val result = extractActivityResult(scenario)
         assertThat(result).isInstanceOf<AttestationActivityResult.Failed>()
-        val failedResult = result as AttestationActivityResult.Failed
-        assertThat(failedResult.error.message).isEqualTo(testError.message)
 
         scenario.close()
     }
@@ -160,7 +159,8 @@ internal class AttestationActivityTest {
                 return AttestationViewModel(
                     integrityRequestManager = integrityRequestManager,
                     workContext = testDispatcher,
-                    attestationAnalyticsEventsReporter = eventsReporter
+                    attestationAnalyticsEventsReporter = eventsReporter,
+                    errorReporter = FakeErrorReporter()
                 ) as T
             }
         }

@@ -5,6 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.attestation.analytics.FakeAttestationAnalyticsEventsReporter
 import com.stripe.android.link.FakeIntegrityRequestManager
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -65,8 +66,6 @@ internal class AttestationViewModelTest {
         viewModel.result.test {
             val result = awaitItem()
             assertThat(result).isInstanceOf(AttestationActivityResult.Failed::class.java)
-            val failedResult = result as AttestationActivityResult.Failed
-            assertThat(failedResult.error.message).isEqualTo(expectedError.message)
 
             expectNoEvents()
         }
@@ -87,6 +86,7 @@ internal class AttestationViewModelTest {
     ) = AttestationViewModel(
         integrityRequestManager = integrityRequestManager,
         workContext = testDispatcher,
-        attestationAnalyticsEventsReporter = attestationAnalyticsEventsReporter
+        attestationAnalyticsEventsReporter = attestationAnalyticsEventsReporter,
+        errorReporter = FakeErrorReporter()
     )
 }

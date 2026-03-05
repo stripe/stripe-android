@@ -189,6 +189,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         INTENT_CONFIRMATION_CHALLENGE_CHALLENGE_CANCELLATION_REQUEST_FAILED(
             eventName = "intent_confirmation_challenge.challenge_cancellation_request_failed"
         ),
+        INTENT_CONFIRMATION_HANDLER_ATTESTATION_REQUEST_TOKEN_FAILED(
+            eventName = "intent_confirmation_handler.attestation.request_token_failed"
+        ),
         TAP_TO_ADD_DISCOVER_READERS_CALL_FAILURE(
             eventName = "elements.tap_to_add.discover_readers_call.failure"
         ),
@@ -294,6 +297,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         INTENT_CONFIRMATION_CHALLENGE_INTENT_PARAMETERS_UNAVAILABLE(
             partialEventName = "intent_confirmation_challenge.intent_parameters_unavailable"
+        ),
+        INTENT_CONFIRMATION_CHALLENGE_INTENT_NO_ATTESTATION_RESULT(
+            partialEventName = "intent_confirmation_challenge.no_attestation_result"
         ),
         HCAPTCHA_UNEXPECTED_FAILURE(
             partialEventName = "elements.captcha.passive.unexpected_failure"

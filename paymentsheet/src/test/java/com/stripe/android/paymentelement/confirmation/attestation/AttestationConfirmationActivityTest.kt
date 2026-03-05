@@ -95,10 +95,9 @@ internal class AttestationConfirmationActivityTest {
 
     @Test
     fun `on attestation failure with New option, should proceed without token`() = test {
-        val testError = Exception("Attestation failed")
         val paymentMethod = PaymentMethodFactory.card()
 
-        intendingAttestationToBeLaunched(AttestationActivityResult.Failed(testError))
+        intendingAttestationToBeLaunched(AttestationActivityResult.Failed)
         intendingPaymentConfirmationToBeLaunched(
             InternalPaymentResult.Completed(PAYMENT_INTENT.copy(paymentMethod = paymentMethod))
         )
