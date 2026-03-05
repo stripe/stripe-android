@@ -74,6 +74,7 @@ class CheckoutPlaygroundActivity : AppCompatActivity() {
                 isLoading = viewModel.isLoading,
                 applyPromotionCode = viewModel::applyPromotionCode,
                 removePromotionCode = viewModel::removePromotionCode,
+                refresh = viewModel::refresh,
             )
         }
     }
@@ -91,6 +92,7 @@ private fun CheckoutScreen(
     isLoading: StateFlow<Boolean>,
     applyPromotionCode: (String) -> Unit,
     removePromotionCode: () -> Unit,
+    refresh: () -> Unit,
 ) {
     val checkoutSession by checkout.checkoutSession.collectAsState()
     val loading by isLoading.collectAsState()
@@ -118,6 +120,11 @@ private fun CheckoutScreen(
                     ) {
                         Text("Apply")
                     }
+                }
+                Button(
+                    onClick = refresh,
+                ) {
+                    Text("Refresh")
                 }
             },
             bottomBarContent = {
