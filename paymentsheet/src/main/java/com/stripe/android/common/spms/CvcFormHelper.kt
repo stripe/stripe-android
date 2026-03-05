@@ -18,7 +18,7 @@ import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
-interface CvcFormHelper {
+internal interface CvcFormHelper {
     val state: StateFlow<State>
     val formElement: FormElement?
 
