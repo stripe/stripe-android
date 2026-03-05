@@ -8,6 +8,7 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.PaymentOptionSelection
 import com.stripe.android.model.CardBrand
@@ -81,7 +82,7 @@ internal class CustomerSessionCustomerSheetTest {
     }
 
     @Test
-    fun testSuccessfulCardSaveWithCardBrandChoice() = runCustomerSheetTest(
+    fun testSuccessfulCardSaveWithCardBrandChoice_Dropdown() = runCustomerSheetTest(
         networkRule = networkRule,
         integrationType = integrationType,
         customerSheetTestType = CustomerSheetTestType.CustomerSession,
@@ -93,6 +94,7 @@ internal class CustomerSessionCustomerSheetTest {
             )
         }
     ) { context ->
+        FeatureFlags.newCbcSelector.setEnabled(false)
         enqueueElementsSession(
             cards = listOf(),
             isCbcEligible = true,
@@ -109,6 +111,55 @@ internal class CustomerSessionCustomerSheetTest {
             cardNumber = TEST_CBC_CARD_NUMBER
         )
         page.changeCardBrandChoice()
+
+        enqueueCbcPaymentMethodCreation()
+        enqueueSetupIntentConfirmation()
+
+        enqueueElementsSession(
+            cards = listOf(
+                PaymentMethodFactory.card(id = "pm_12345").update(
+                    last4 = "1001",
+                    addCbcNetworks = true,
+                    brand = CardBrand.CartesBancaires,
+                )
+            ),
+            isCbcEligible = true,
+        )
+
+        page.clickSaveButton()
+        page.clickConfirmButton()
+    }
+
+    @Test
+    fun testSuccessfulCardSaveWithCardBrandChoice_Selector() = runCustomerSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        customerSheetTestType = CustomerSheetTestType.CustomerSession,
+        resultCallback = { result ->
+            verifySelected(
+                expectedLast4 = "1001",
+                expectedBrand = CardBrand.CartesBancaires,
+                result = result,
+            )
+        }
+    ) { context ->
+        FeatureFlags.newCbcSelector.setEnabled(true)
+        enqueueElementsSession(
+            cards = listOf(),
+            isCbcEligible = true,
+        )
+
+        context.presentCustomerSheet()
+
+        /*
+         * This card is overridden to use a test card compatible with CbcTestCardDelegate to skip
+         * checking card account ranges network operation which run only if account ranges aren't
+         * stores in memory.
+         */
+        page.fillOutCardDetails(
+            cardNumber = TEST_CBC_CARD_NUMBER
+        )
+        page.selectCartesBancaire()
 
         enqueueCbcPaymentMethodCreation()
         enqueueSetupIntentConfirmation()

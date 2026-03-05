@@ -4,6 +4,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.closeSoftKeyboard
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.networktesting.NetworkRule
@@ -232,11 +233,12 @@ internal class LinkTest {
         }
 
     @Test
-    fun testSuccessfulCardPaymentWithLinkSignUpAndCardBrandChoice() = runProductIntegrationTest(
+    fun testSuccessfulCardPaymentWithLinkSignUpAndCardBrandChoice_Dropdown() = runProductIntegrationTest(
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
+        FeatureFlags.newCbcSelector.setEnabled(false)
         networkRule.enqueue(
             host("api.stripe.com"),
             method("GET"),
@@ -248,6 +250,92 @@ internal class LinkTest {
         testContext.launch()
 
         page.fillOutCardDetailsWithCardBrandChoice()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-lookup-success.json")
+        }
+
+        page.clickOnLinkCheckbox()
+        page.fillOutLinkEmail()
+        page.fillOutLinkPhone()
+        page.fillOutLinkName()
+
+        closeSoftKeyboard()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/accounts/sign_up"),
+        ) { response ->
+            response.testBodyFromFile("consumer-accounts-signup-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/payment_details"),
+            /*
+             * Ensures card number is included
+             */
+            bodyPart(urlEncode("card[number]"), "4000002500001001"),
+            /*
+             * Ensures card expiration month is included
+             */
+            bodyPart(urlEncode("card[exp_month]"), "12"),
+            /*
+             * Ensures we are passing the full expiration year and not the
+             * 2-digit shorthand (should send "2034", not "34")
+             */
+            bodyPart(urlEncode("card[exp_year]"), "2034"),
+            /*
+             * Ensures card brand choice is passed properly.
+             */
+            bodyPart(urlEncode("card[preferred_network]"), "cartes_bancaires"),
+            topLevelClientAttributionMetadataParams(),
+        ) { response ->
+            response.testBodyFromFile("consumer-payment-details-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            linkInformation(),
+            topLevelClientAttributionMetadataParams(),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/log_out"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-logout-success.json")
+        }
+
+        page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "1001")
+    }
+
+    @Test
+    fun testSuccessfulCardPaymentWithLinkSignUpAndCardBrandChoice_Selector() = runProductIntegrationTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        FeatureFlags.newCbcSelector.setEnabled(true)
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method_with_cbc.json")
+        }
+
+        testContext.launch()
+
+        page.fillOutCardDetailsWithCardBrandChoiceSelector()
 
         networkRule.enqueue(
             method("POST"),
@@ -530,11 +618,12 @@ internal class LinkTest {
         }
 
     @Test
-    fun testSuccessfulCardPaymentWithLinkSignUpPassthroughModeAndCardBrandChoice() = runProductIntegrationTest(
+    fun testSuccessfulCardPaymentWithLinkSignUpPassthroughModeAndCardBrandChoice_Dropdown() = runProductIntegrationTest(
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
+        FeatureFlags.newCbcSelector.setEnabled(false)
         networkRule.enqueue(
             host("api.stripe.com"),
             method("GET"),
@@ -546,6 +635,109 @@ internal class LinkTest {
         testContext.launch()
 
         page.fillOutCardDetailsWithCardBrandChoice()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-lookup-success.json")
+        }
+
+        page.clickOnLinkCheckbox()
+        page.fillOutLinkEmail()
+        page.fillOutLinkPhone()
+        page.fillOutLinkName()
+
+        closeSoftKeyboard()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/accounts/sign_up"),
+        ) { response ->
+            response.testBodyFromFile("consumer-accounts-signup-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/payment_details"),
+            /*
+             * Make sure card number is included
+             */
+            bodyPart(urlEncode("card[number]"), "4000002500001001"),
+            /*
+             * Make sure card expiration month is included
+             */
+            bodyPart(urlEncode("card[exp_month]"), "12"),
+            /*
+             * Ensures we are passing the full expiration year and not the
+             * 2-digit shorthand (should send "2034", not "34")
+             */
+            bodyPart(urlEncode("card[exp_year]"), "2034"),
+            /*
+             * Ensures card brand choice is passed properly.
+             */
+            bodyPart(urlEncode("card[preferred_network]"), "cartes_bancaires"),
+            /*
+             * In passthrough mode, this needs to be true
+             */
+            bodyPart("active", "true"),
+            /*
+             * In passthrough mode, should use the publishable key from base configuration
+             */
+            header("Authorization", "Bearer pk_test_123"),
+            topLevelClientAttributionMetadataParams(),
+        ) { response ->
+            response.testBodyFromFile("consumer-payment-details-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/payment_details/share"),
+            topLevelClientAttributionMetadataParams(),
+        ) { response ->
+            response.testBodyFromFile("consumer-payment-details-share-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            bodyPart("payment_method", "pm_1234"),
+            not(linkInformation()),
+            topLevelClientAttributionMetadataParams(),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/log_out"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-logout-success.json")
+        }
+
+        page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "1001")
+    }
+
+    @Test
+    fun testSuccessfulCardPaymentWithLinkSignUpPassthroughModeAndCardBrandChoice_Selector() = runProductIntegrationTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        FeatureFlags.newCbcSelector.setEnabled(true)
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_pm_with_link_ps_mode_and_cbc.json")
+        }
+
+        testContext.launch()
+
+        page.fillOutCardDetailsWithCardBrandChoiceSelector()
 
         networkRule.enqueue(
             method("POST"),
