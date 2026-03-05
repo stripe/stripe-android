@@ -6,15 +6,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import com.stripe.android.ui.core.FormUI
 import com.stripe.android.uicore.strings.resolve
 
 @Composable
-internal fun ColumnScope.TapToAddConfirmationScreen(
-    state: TapToAddConfirmationInteractor.State,
+internal fun ColumnScope.TapToAddCollectCvcScreen(
+    state: TapToAddCollectCvcInteractor.State,
     onPrimaryButtonPress: () -> Unit,
 ) {
     TapToAddCardLayout(
@@ -23,37 +22,22 @@ internal fun ColumnScope.TapToAddConfirmationScreen(
         title = state.title.resolve(),
     ) {
         with(state.form) {
-            if (elements.isNotEmpty()) {
-                FormUI(
-                    elements = elements,
-                    hiddenIdentifiers = emptySet(),
-                    lastTextFieldIdentifier = null,
-                    enabled = enabled,
-                )
-
-                Spacer(Modifier.size(10.dp))
-            }
-        }
-
-        state.error?.let { error ->
-            ErrorMessage(
-                error = error.resolve(),
+            FormUI(
+                elements = elements,
+                hiddenIdentifiers = emptySet(),
+                lastTextFieldIdentifier = null,
+                enabled = enabled,
             )
-
-            Spacer(Modifier.size(10.dp))
         }
+
+        Spacer(Modifier.size(10.dp))
 
         with(state.primaryButton) {
             PrimaryButton(
                 label = label.resolve(),
-                locked = locked,
+                locked = false,
                 enabled = enabled,
-                processingState = when (this.state) {
-                    TapToAddConfirmationInteractor.State.PrimaryButton.State.Idle ->
-                        PrimaryButtonProcessingState.Idle(null)
-                    TapToAddConfirmationInteractor.State.PrimaryButton.State.Processing ->
-                        PrimaryButtonProcessingState.Processing
-                },
+                processingState = PrimaryButtonProcessingState.Idle(null),
                 onProcessingCompleted = {},
                 onClick = onPrimaryButtonPress,
             )

@@ -16,6 +16,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.link.LinkFormElement
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
@@ -319,6 +320,45 @@ internal class DefaultTapToAddConfirmationInteractorTest {
     }
 
     @Test
+    fun `Complete mode includes provided payment method options in confirmation option`() =
+        runScenario(
+            paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
+            tapToAddMode = TapToAddMode.Complete,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(isTapToAddSupported = true),
+            paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(cvc = "123"),
+        ) {
+            interactor.performAction(TapToAddConfirmationInteractor.Action.PrimaryButtonPressed)
+
+            val args = confirmationHandlerScenario.startTurbine.awaitItem()
+
+            assertThat(args.confirmationOption).isInstanceOf<PaymentMethodConfirmationOption.Saved>()
+
+            val confirmationOption = args.confirmationOption as PaymentMethodConfirmationOption.Saved
+
+            assertThat(confirmationOption.paymentMethod).isEqualTo(paymentMethod)
+            assertThat(confirmationOption.optionsParams).isEqualTo(
+                PaymentMethodOptionsParams.Card(cvc = "123")
+            )
+        }
+
+    @Test
+    fun `Continue mode includes provided payment method options in payment selection`() =
+        runScenario(
+            paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
+            tapToAddMode = TapToAddMode.Continue,
+            paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(cvc = "456"),
+        ) {
+            interactor.performAction(TapToAddConfirmationInteractor.Action.PrimaryButtonPressed)
+
+            val receivedSelection = onContinueCalls.awaitItem()
+
+            assertThat(receivedSelection.paymentMethod).isEqualTo(paymentMethod)
+            assertThat(receivedSelection.paymentMethodOptionsParams).isEqualTo(
+                PaymentMethodOptionsParams.Card(cvc = "456")
+            )
+        }
+
+    @Test
     fun `form elements are empty when link form helper has no link form element`() = runScenario(
         paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
         tapToAddMode = TapToAddMode.Complete,
@@ -403,6 +443,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
         tapToAddMode: TapToAddMode = TapToAddMode.Complete,
         paymentMethodMetadata: PaymentMethodMetadata =
             PaymentMethodMetadataFactory.create(isTapToAddSupported = true),
+        paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
         initialConfirmationState: ConfirmationHandler.State = ConfirmationHandler.State.Idle,
         linkFormHelper: SavedPaymentMethodLinkFormHelper = FakeSavedPaymentMethodLinkFormHelper(),
         block: suspend Scenario.() -> Unit,
@@ -418,6 +459,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
                 coroutineScope = backgroundScope,
                 tapToAddMode = tapToAddMode,
                 paymentMethod = paymentMethod,
+                paymentMethodOptionsParams = paymentMethodOptionsParams,
                 paymentMethodMetadata = paymentMethodMetadata,
                 confirmationHandler = handler,
                 eventReporter = eventReporter,

@@ -9,6 +9,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -64,7 +65,10 @@ internal interface TapToAddConfirmationInteractor {
     }
 
     interface Factory {
-        fun create(paymentMethod: PaymentMethod): TapToAddConfirmationInteractor
+        fun create(
+            paymentMethod: PaymentMethod,
+            paymentMethodOptionsParams: PaymentMethodOptionsParams?,
+        ): TapToAddConfirmationInteractor
     }
 }
 
@@ -72,6 +76,7 @@ internal class DefaultTapToAddConfirmationInteractor(
     private val coroutineScope: CoroutineScope,
     private val tapToAddMode: TapToAddMode,
     private val paymentMethod: PaymentMethod,
+    private val paymentMethodOptionsParams: PaymentMethodOptionsParams?,
     private val paymentMethodMetadata: PaymentMethodMetadata,
     private val confirmationHandler: ConfirmationHandler,
     private val linkFormHelper: SavedPaymentMethodLinkFormHelper,
@@ -80,8 +85,10 @@ internal class DefaultTapToAddConfirmationInteractor(
     private val onComplete: (paymentMethod: PaymentMethod) -> Unit,
 ) : TapToAddConfirmationInteractor {
     private val selection = linkFormHelper.state.mapAsStateFlow {
-        PaymentSelection.Saved(paymentMethod = paymentMethod)
-            .withLinkState(it)
+        PaymentSelection.Saved(
+            paymentMethod = paymentMethod,
+            paymentMethodOptionsParams = paymentMethodOptionsParams,
+        ).withLinkState(it)
     }
 
     private val _state = MutableStateFlow(
@@ -257,11 +264,15 @@ internal class DefaultTapToAddConfirmationInteractor(
         private val tapToAddCompletedInteractorFactory: TapToAddCompletedInteractor.Factory,
         private val tapToAddNavigator: Provider<TapToAddNavigator>,
     ) : TapToAddConfirmationInteractor.Factory {
-        override fun create(paymentMethod: PaymentMethod): TapToAddConfirmationInteractor {
+        override fun create(
+            paymentMethod: PaymentMethod,
+            paymentMethodOptionsParams: PaymentMethodOptionsParams?,
+        ): TapToAddConfirmationInteractor {
             return DefaultTapToAddConfirmationInteractor(
                 tapToAddMode = tapToAddMode,
                 paymentMethodMetadata = paymentMethodMetadata,
                 paymentMethod = paymentMethod,
+                paymentMethodOptionsParams = paymentMethodOptionsParams,
                 confirmationHandler = confirmationHandler,
                 eventReporter = eventReporter,
                 coroutineScope = viewModelScope,

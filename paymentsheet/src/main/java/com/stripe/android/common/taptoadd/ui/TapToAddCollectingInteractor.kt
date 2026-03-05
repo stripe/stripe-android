@@ -57,6 +57,7 @@ internal class DefaultTapToAddCollectingInteractor(
         @ViewModelScope private val coroutineScope: CoroutineScope,
         private val tapToAddCollectionHandler: TapToAddCollectionHandler,
         private val paymentMethodHolder: TapToAddPaymentMethodHolder,
+        private val tapToAddCollectCvcInteractorFactory: TapToAddCollectCvcInteractor.Factory,
         private val tapToAddConfirmationInteractorFactory: TapToAddConfirmationInteractor.Factory,
         private val navigator: Provider<TapToAddNavigator>,
         @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
@@ -71,10 +72,19 @@ internal class DefaultTapToAddCollectingInteractor(
 
                     navigator.get().performAction(
                         action = TapToAddNavigator.Action.NavigateTo(
-                            screen = TapToAddNavigator.Screen.Confirmation(
-                                interactor = tapToAddConfirmationInteractorFactory.create(paymentMethod),
-                            ),
-                        ),
+                            screen = if (requiresTapToAddCvcCollection(paymentMethodMetadata, paymentMethod)) {
+                                TapToAddNavigator.Screen.CollectCvc(
+                                    interactor = tapToAddCollectCvcInteractorFactory.create(paymentMethod)
+                                )
+                            } else {
+                                TapToAddNavigator.Screen.Confirmation(
+                                    interactor = tapToAddConfirmationInteractorFactory.create(
+                                        paymentMethod = paymentMethod,
+                                        paymentMethodOptionsParams = null,
+                                    ),
+                                )
+                            }
+                        )
                     )
                 },
                 onFailedCollection = { message ->
