@@ -68,7 +68,6 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.uicore.BuildConfig
 import com.stripe.android.uicore.LocalInstrumentationTest
 import com.stripe.android.uicore.LocalTextFieldInsets
@@ -198,7 +197,8 @@ fun TextField(
                 }
             }
         },
-        onCardBrandChoiceItemClicked = textFieldController::onCardBrandChoiceItemClicked,
+        onDropdownItemClicked = textFieldController::onDropdownItemClicked,
+        onSelectorItemClicked = textFieldController::onSelectorItemClicked,
         modifier = modifier
             .onPreviewKeyEvent(
                 value = value,
@@ -263,7 +263,8 @@ internal fun TextFieldUi(
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions(),
     onValueChange: (value: TextFieldValue) -> Unit = {},
-    onCardBrandChoiceItemClicked: (item: TextFieldIcon.CardBrandChoice.Item) -> Unit = {},
+    onDropdownItemClicked: (item: TextFieldIcon.Dropdown.Item) -> Unit = {},
+    onSelectorItemClicked: (item: TextFieldIcon.Selector.Item) -> Unit = {},
     hasFocus: Boolean
 ) {
     val displayState = when (shouldShowValidationMessage) {
@@ -306,7 +307,7 @@ internal fun TextFieldUi(
             },
             trailingIcon = trailingIcon?.let { icon ->
                 {
-                    icon.Composable(loading, onCardBrandChoiceItemClicked, hasFocus)
+                    icon.Composable(loading, onDropdownItemClicked, onSelectorItemClicked, hasFocus)
                 }
             },
             isError = shouldShowValidationMessage,
@@ -324,7 +325,8 @@ internal fun TextFieldUi(
 @Composable
 private fun TextFieldIcon.Composable(
     loading: Boolean,
-    onDropdownItemClicked: (item: TextFieldIcon.CardBrandChoice.Item) -> Unit,
+    onDropdownItemClicked: (item: TextFieldIcon.Dropdown.Item) -> Unit,
+    onSelectorItemClicked: (item: TextFieldIcon.Selector.Item) -> Unit,
     hasFocus: Boolean
 ) {
     Row {
@@ -342,21 +344,21 @@ private fun TextFieldIcon.Composable(
                 }
             }
 
-            is TextFieldIcon.CardBrandChoice -> {
-                if (FeatureFlags.newCbcSelector.isEnabled) {
-                    CardBrandChoice(
-                        icon = this@Composable,
-                        loading = loading,
-                        onDropdownItemClicked = onDropdownItemClicked,
-                        hasFocus = hasFocus
-                    )
-                } else {
-                    TrailingDropdown(
-                        icon = this@Composable,
-                        loading = loading,
-                        onDropdownItemClicked = onDropdownItemClicked
-                    )
-                }
+            is TextFieldIcon.Dropdown -> {
+                TrailingDropdown(
+                    icon = this@Composable,
+                    loading = loading,
+                    onDropdownItemClicked = onDropdownItemClicked
+                )
+            }
+
+            is TextFieldIcon.Selector -> {
+                CardBrandChoice(
+                    icon = this@Composable,
+                    loading = loading,
+                    onSelectorItemClicked = onSelectorItemClicked,
+                    hasFocus = hasFocus
+                )
             }
         }
     }
@@ -458,9 +460,9 @@ fun TrailingIcon(
 
 @Composable
 private fun TrailingDropdown(
-    icon: TextFieldIcon.CardBrandChoice,
+    icon: TextFieldIcon.Dropdown,
     loading: Boolean,
-    onDropdownItemClicked: (item: TextFieldIcon.CardBrandChoice.Item) -> Unit,
+    onDropdownItemClicked: (item: TextFieldIcon.Dropdown.Item) -> Unit,
 ) {
     var expanded by remember {
         mutableStateOf(false)
@@ -505,7 +507,7 @@ private fun TrailingDropdown(
 
         SingleChoiceDropdown(
             expanded = expanded,
-            title = icon.message,
+            title = icon.title,
             currentChoice = icon.currentItem,
             choices = icon.items,
             headerTextColor = MaterialTheme.stripeColors.subtitle,
@@ -540,9 +542,9 @@ private fun Modifier.onPreviewKeyEvent(
 
 @Composable
 private fun CardBrandChoice(
-    icon: TextFieldIcon.CardBrandChoice,
+    icon: TextFieldIcon.Selector,
     loading: Boolean,
-    onDropdownItemClicked: (item: TextFieldIcon.CardBrandChoice.Item) -> Unit,
+    onSelectorItemClicked: (item: TextFieldIcon.Selector.Item) -> Unit,
     hasFocus: Boolean
 ) {
     Box(
@@ -555,7 +557,7 @@ private fun CardBrandChoice(
             CardBrandChoiceSelector(
                 currentItem = icon.currentItem,
                 items = icon.items,
-                onItemSelected = onDropdownItemClicked,
+                onItemSelected = onSelectorItemClicked,
                 hasFocus = hasFocus,
                 popupMessage = icon.message,
                 hasMadeSelection = icon.hasMadeSelection

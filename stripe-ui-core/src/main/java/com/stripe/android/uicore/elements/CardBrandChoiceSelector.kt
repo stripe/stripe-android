@@ -44,9 +44,9 @@ import com.stripe.android.uicore.stripeShapes
 
 @Composable
 internal fun CardBrandChoiceSelector(
-    currentItem: TextFieldIcon.CardBrandChoice.Item,
-    items: List<TextFieldIcon.CardBrandChoice.Item>,
-    onItemSelected: (item: TextFieldIcon.CardBrandChoice.Item) -> Unit,
+    currentItem: TextFieldIcon.Selector.Item,
+    items: List<TextFieldIcon.Selector.Item>,
+    onItemSelected: (item: TextFieldIcon.Selector.Item) -> Unit,
     hasFocus: Boolean,
     popupMessage: ResolvableString,
     hasMadeSelection: Boolean
@@ -94,9 +94,9 @@ internal fun CardBrandChoiceSelector(
 
 @Composable
 private fun CardBrandChoiceItem(
-    item: TextFieldIcon.CardBrandChoice.Item,
+    item: TextFieldIcon.Selector.Item,
     isSelected: Boolean,
-    onItemSelected: (item: TextFieldIcon.CardBrandChoice.Item) -> Unit
+    onItemSelected: (item: TextFieldIcon.Selector.Item) -> Unit
 ) {
     val backgroundColor = if (isSelected) {
         MaterialTheme.stripeColors.componentBorder.copy()

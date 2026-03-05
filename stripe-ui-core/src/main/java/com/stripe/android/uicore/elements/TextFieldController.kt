@@ -25,7 +25,8 @@ import kotlinx.coroutines.flow.asStateFlow
 interface TextFieldController : InputController, SectionFieldComposable, SectionFieldValidationController {
     fun onValueChange(displayFormatted: String): TextFieldState?
     fun onFocusChange(newHasFocus: Boolean)
-    fun onCardBrandChoiceItemClicked(item: TextFieldIcon.CardBrandChoice.Item) {}
+    fun onDropdownItemClicked(item: TextFieldIcon.Dropdown.Item) {}
+    fun onSelectorItemClicked(item: TextFieldIcon.Selector.Item) {}
 
     val initialValue: String?
     val autofillType: ContentType?
@@ -93,7 +94,23 @@ sealed class TextFieldIcon {
     ) : TextFieldIcon()
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-    data class CardBrandChoice(
+    data class Dropdown(
+        val title: ResolvableString,
+        val hide: Boolean,
+        val currentItem: Item,
+        val items: List<Item>
+    ) : TextFieldIcon() {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+        data class Item(
+            val id: String,
+            override val label: ResolvableString,
+            override val icon: Int,
+            override val enabled: Boolean = true
+        ) : SingleChoiceDropdownItem
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+    data class Selector(
         val message: ResolvableString,
         val hide: Boolean,
         val currentItem: Item,
@@ -103,10 +120,10 @@ sealed class TextFieldIcon {
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
         data class Item(
             val id: String,
-            override val label: ResolvableString,
-            override val icon: Int,
-            override val enabled: Boolean = true
-        ) : SingleChoiceDropdownItem
+            val label: ResolvableString,
+            val icon: Int,
+            val enabled: Boolean = true
+        )
     }
 }
 
