@@ -1,6 +1,5 @@
 package com.stripe.android.common.taptoadd.ui
 
-import com.stripe.android.common.spms.CvcFormHelper
 import com.stripe.android.common.spms.SavedPaymentMethodLinkFormHelper
 import com.stripe.android.common.spms.withLinkState
 import com.stripe.android.common.taptoadd.TapToAddMode
@@ -66,7 +65,10 @@ internal interface TapToAddConfirmationInteractor {
     }
 
     interface Factory {
-        fun create(paymentMethod: PaymentMethod): TapToAddConfirmationInteractor
+        fun create(
+            paymentMethod: PaymentMethod,
+            paymentMethodOptionsParams: PaymentMethodOptionsParams?,
+        ): TapToAddConfirmationInteractor
     }
 }
 
@@ -74,21 +76,19 @@ internal class DefaultTapToAddConfirmationInteractor(
     private val coroutineScope: CoroutineScope,
     private val tapToAddMode: TapToAddMode,
     private val paymentMethod: PaymentMethod,
+    private val paymentMethodOptionsParams: PaymentMethodOptionsParams?,
     private val paymentMethodMetadata: PaymentMethodMetadata,
     private val confirmationHandler: ConfirmationHandler,
     private val linkFormHelper: SavedPaymentMethodLinkFormHelper,
-    private val cvcFormHelper: CvcFormHelper,
     private val eventReporter: EventReporter,
     private val onContinue: (paymentSelection: PaymentSelection.Saved) -> Unit,
     private val onComplete: (paymentMethod: PaymentMethod) -> Unit,
 ) : TapToAddConfirmationInteractor {
-    private val selection = combineAsStateFlow(
-        linkFormHelper.state,
-        cvcFormHelper.state,
-    ) { linkState, cvcState ->
+    private val selection = combineAsStateFlow(listOf(linkFormHelper.state)) { states ->
+        val linkState = states.single()
         PaymentSelection.Saved(
             paymentMethod = paymentMethod,
-            paymentMethodOptionsParams = getPaymentMethodOptions(cvcState),
+            paymentMethodOptionsParams = paymentMethodOptionsParams,
         ).withLinkState(linkState)
     }
 
@@ -123,15 +123,7 @@ internal class DefaultTapToAddConfirmationInteractor(
         coroutineScope.launch {
             linkFormHelper.state.collectLatest { linkState ->
                 _state.update { state ->
-                    state.withInputState(linkState, cvcFormHelper.state.value)
-                }
-            }
-        }
-
-        coroutineScope.launch {
-            cvcFormHelper.state.collectLatest { cvcState ->
-                _state.update { state ->
-                    state.withInputState(linkFormHelper.state.value, cvcState)
+                    state.withInputState(linkState)
                 }
             }
         }
@@ -186,15 +178,12 @@ internal class DefaultTapToAddConfirmationInteractor(
                 state = TapToAddConfirmationInteractor.State.PrimaryButton.State.Idle,
             ),
             form = TapToAddConfirmationInteractor.State.Form(
-                elements = buildList {
-                    cvcFormHelper.formElement?.let { add(it) }
-                    linkFormHelper.formElement?.let { add(it) }
-                },
+                elements = listOfNotNull(linkFormHelper.formElement),
                 enabled = true,
             ),
             error = null,
         )
-            .withInputState(initialLinkState, cvcFormHelper.state.value)
+            .withInputState(initialLinkState)
             .withConfirmationState(initialConfirmationState)
     }
 
@@ -213,22 +202,12 @@ internal class DefaultTapToAddConfirmationInteractor(
 
     private fun TapToAddConfirmationInteractor.State.withInputState(
         linkState: SavedPaymentMethodLinkFormHelper.State,
-        cvcState: CvcFormHelper.State,
     ): TapToAddConfirmationInteractor.State {
         return copy(
             primaryButton = primaryButton.copy(
-                enabled = (linkState !is SavedPaymentMethodLinkFormHelper.State.Incomplete) &&
-                    (cvcState !is CvcFormHelper.State.Incomplete)
+                enabled = linkState !is SavedPaymentMethodLinkFormHelper.State.Incomplete
             ),
         )
-    }
-
-    private fun getPaymentMethodOptions(cvcState: CvcFormHelper.State): PaymentMethodOptionsParams.Card? {
-        return when (cvcState) {
-            is CvcFormHelper.State.Complete -> PaymentMethodOptionsParams.Card(cvc = cvcState.cvc)
-            CvcFormHelper.State.Incomplete,
-            CvcFormHelper.State.Unused -> null
-        }
     }
 
     private fun TapToAddConfirmationInteractor.State.withConfirmationState(
@@ -279,22 +258,24 @@ internal class DefaultTapToAddConfirmationInteractor(
         private val tapToAddMode: TapToAddMode,
         private val paymentMethodMetadata: PaymentMethodMetadata,
         private val linkFormHelper: SavedPaymentMethodLinkFormHelper,
-        private val cvcFormHelperFactory: CvcFormHelper.Factory,
         private val confirmationHandler: ConfirmationHandler,
         private val eventReporter: EventReporter,
         private val tapToAddCompletedInteractorFactory: TapToAddCompletedInteractor.Factory,
         private val tapToAddNavigator: Provider<TapToAddNavigator>,
     ) : TapToAddConfirmationInteractor.Factory {
-        override fun create(paymentMethod: PaymentMethod): TapToAddConfirmationInteractor {
+        override fun create(
+            paymentMethod: PaymentMethod,
+            paymentMethodOptionsParams: PaymentMethodOptionsParams?,
+        ): TapToAddConfirmationInteractor {
             return DefaultTapToAddConfirmationInteractor(
                 tapToAddMode = tapToAddMode,
                 paymentMethodMetadata = paymentMethodMetadata,
                 paymentMethod = paymentMethod,
+                paymentMethodOptionsParams = paymentMethodOptionsParams,
                 confirmationHandler = confirmationHandler,
                 eventReporter = eventReporter,
                 coroutineScope = viewModelScope,
                 linkFormHelper = linkFormHelper,
-                cvcFormHelper = cvcFormHelperFactory.create(paymentMethod),
                 onComplete = { paymentMethod ->
                     tapToAddNavigator.get().performAction(
                         TapToAddNavigator.Action.NavigateTo(

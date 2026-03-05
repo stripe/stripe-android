@@ -6,6 +6,9 @@ import androidx.compose.runtime.getValue
 import com.stripe.android.common.taptoadd.TapToAddResult
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.NavigationHandler
 import com.stripe.android.uicore.utils.collectAsState
@@ -45,6 +48,32 @@ internal class TapToAddNavigator(
 
     private val _result = MutableSharedFlow<TapToAddResult>(replay = 1)
     val result: SharedFlow<TapToAddResult> = _result.asSharedFlow()
+
+    fun navigateToPostCollectionScreen(
+        paymentMethod: PaymentMethod,
+        paymentMethodMetadata: PaymentMethodMetadata,
+        collectCvcInteractorFactory: TapToAddCollectCvcInteractor.Factory,
+        confirmationInteractorFactory: TapToAddConfirmationInteractor.Factory,
+        paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
+    ) {
+        val screen = if (
+            paymentMethodOptionsParams == null &&
+            requiresTapToAddCvcCollection(paymentMethodMetadata, paymentMethod)
+        ) {
+            Screen.CollectCvc(
+                interactor = collectCvcInteractorFactory.create(paymentMethod)
+            )
+        } else {
+            Screen.Confirmation(
+                interactor = confirmationInteractorFactory.create(
+                    paymentMethod = paymentMethod,
+                    paymentMethodOptionsParams = paymentMethodOptionsParams,
+                )
+            )
+        }
+
+        performAction(Action.NavigateTo(screen))
+    }
 
     fun performAction(action: Action) {
         when (action) {
@@ -109,6 +138,24 @@ internal class TapToAddNavigator(
                     cardBrand = interactor.cardBrand,
                     last4 = interactor.last4,
                     label = interactor.label,
+                )
+            }
+        }
+
+        data class CollectCvc(
+            val interactor: TapToAddCollectCvcInteractor,
+        ) : Screen() {
+            override val cancelButton: CancelButton = CancelButton.Visible
+
+            @Composable
+            override fun ColumnScope.Content() {
+                val state by interactor.state.collectAsState()
+
+                TapToAddCollectCvcScreen(
+                    state = state,
+                    onPrimaryButtonPress = {
+                        interactor.performAction(TapToAddCollectCvcInteractor.Action.PrimaryButtonPressed)
+                    }
                 )
             }
         }

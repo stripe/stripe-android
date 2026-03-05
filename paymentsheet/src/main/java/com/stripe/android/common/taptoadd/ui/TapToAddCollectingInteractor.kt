@@ -52,6 +52,7 @@ internal class DefaultTapToAddCollectingInteractor(
         @ViewModelScope private val coroutineScope: CoroutineScope,
         private val tapToAddCollectionHandler: TapToAddCollectionHandler,
         private val paymentMethodHolder: TapToAddPaymentMethodHolder,
+        private val tapToAddCollectCvcInteractorFactory: TapToAddCollectCvcInteractor.Factory,
         private val tapToAddConfirmationInteractorFactory: TapToAddConfirmationInteractor.Factory,
         private val navigator: Provider<TapToAddNavigator>,
     ) : TapToAddCollectingInteractor.Factory {
@@ -63,12 +64,21 @@ internal class DefaultTapToAddCollectingInteractor(
                 onCollected = { paymentMethod ->
                     paymentMethodHolder.setPaymentMethod(paymentMethod)
 
+                    val postCollectionScreen = if (requiresTapToAddCvcCollection(paymentMethodMetadata, paymentMethod)) {
+                        TapToAddNavigator.Screen.CollectCvc(
+                            interactor = tapToAddCollectCvcInteractorFactory.create(paymentMethod)
+                        )
+                    } else {
+                        TapToAddNavigator.Screen.Confirmation(
+                            interactor = tapToAddConfirmationInteractorFactory.create(
+                                paymentMethod = paymentMethod,
+                                paymentMethodOptionsParams = null,
+                            )
+                        )
+                    }
+
                     navigator.get().performAction(
-                        action = TapToAddNavigator.Action.NavigateTo(
-                            screen = TapToAddNavigator.Screen.Confirmation(
-                                interactor = tapToAddConfirmationInteractorFactory.create(paymentMethod),
-                            ),
-                        ),
+                        action = TapToAddNavigator.Action.NavigateTo(postCollectionScreen)
                     )
                 },
                 onFailedCollection = { message ->

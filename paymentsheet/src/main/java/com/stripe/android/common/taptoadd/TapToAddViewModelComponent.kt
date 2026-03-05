@@ -14,10 +14,12 @@ import com.stripe.android.common.spms.LinkFormElementFactory
 import com.stripe.android.common.spms.SavedPaymentMethodLinkFormHelper
 import com.stripe.android.common.taptoadd.ui.DefaultTapToAddCompletedInteractor
 import com.stripe.android.common.taptoadd.ui.DefaultTapToAddCollectingInteractor
+import com.stripe.android.common.taptoadd.ui.DefaultTapToAddCollectCvcInteractor
 import com.stripe.android.common.taptoadd.ui.DefaultTapToAddConfirmationInteractor
 import com.stripe.android.common.taptoadd.ui.DefaultTapToAddPaymentMethodHolder
 import com.stripe.android.common.taptoadd.ui.TapToAddCompletedInteractor
 import com.stripe.android.common.taptoadd.ui.TapToAddCollectingInteractor
+import com.stripe.android.common.taptoadd.ui.TapToAddCollectCvcInteractor
 import com.stripe.android.common.taptoadd.ui.TapToAddConfirmationInteractor
 import com.stripe.android.common.taptoadd.ui.TapToAddPaymentMethodHolder
 import com.stripe.android.common.taptoadd.ui.createTapToAddUxConfiguration
@@ -150,6 +152,11 @@ internal interface TapToAddViewModelModule {
     fun bindsTapToAddCollectingInteractorFactory(
         tapToAddCollectingInteractorFactory: DefaultTapToAddCollectingInteractor.Factory
     ): TapToAddCollectingInteractor.Factory
+
+    @Binds
+    fun bindsTapToAddCollectCvcInteractorFactory(
+        tapToAddCollectCvcInteractorFactory: DefaultTapToAddCollectCvcInteractor.Factory
+    ): TapToAddCollectCvcInteractor.Factory
 
     @Binds
     fun bindsTapToAddCardAddedInteractorFactory(
