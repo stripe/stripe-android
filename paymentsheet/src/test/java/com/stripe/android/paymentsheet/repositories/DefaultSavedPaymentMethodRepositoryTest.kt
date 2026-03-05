@@ -111,7 +111,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
             canUpdateFullPaymentMethodDetails = false,
         )
 
-        private val SESSION_METADATA = CustomerMetadata.Session(
+        private val SESSION_METADATA = CustomerMetadata.CustomerSession(
             id = "cus_456",
             ephemeralKeySecret = "ek_456",
             customerSessionClientSecret = "css_456",

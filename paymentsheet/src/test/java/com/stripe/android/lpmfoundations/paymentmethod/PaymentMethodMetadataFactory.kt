@@ -89,7 +89,7 @@ internal object PaymentMethodMetadataFactory {
             shippingDetails = shippingDetails,
             customerMetadata = if (hasCustomerConfiguration) {
                 if (customerSessionClientSecret != null) {
-                    CustomerMetadata.Session(
+                    CustomerMetadata.CustomerSession(
                         id = "cus_123",
                         ephemeralKeySecret = "ek_123",
                         customerSessionClientSecret = customerSessionClientSecret,

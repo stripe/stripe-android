@@ -33,7 +33,7 @@ internal sealed class CustomerMetadata : Parcelable {
     ) : CustomerMetadata()
 
     @Parcelize
-    data class Session(
+    data class CustomerSession(
         val id: String,
         val ephemeralKeySecret: String,
         val customerSessionClientSecret: String,
@@ -65,7 +65,7 @@ internal sealed class CustomerMetadata : Parcelable {
             ephemeralKeySecret: String,
             customerSessionClientSecret: String,
             isPaymentMethodSetAsDefaultEnabled: Boolean,
-        ): Session {
+        ): CustomerSession {
             val mobilePaymentElementComponent = customer.session.components.mobilePaymentElement
             val removePaymentMethod = when (mobilePaymentElementComponent) {
                 is ElementsSession.Customer.Components.MobilePaymentElement.Enabled -> {
@@ -101,7 +101,7 @@ internal sealed class CustomerMetadata : Parcelable {
                 }
             }
 
-            return Session(
+            return CustomerSession(
                 id = id,
                 ephemeralKeySecret = ephemeralKeySecret,
                 customerSessionClientSecret = customerSessionClientSecret,

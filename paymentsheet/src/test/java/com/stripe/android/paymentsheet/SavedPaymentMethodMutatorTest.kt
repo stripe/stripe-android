@@ -914,7 +914,7 @@ class SavedPaymentMethodMutatorTest {
             assertThat(postPaymentMethodRemovedTurbine.awaitItem()).isEqualTo(Unit)
 
             val expectedCustomerMetadata: CustomerMetadata = if (customerSessionClientSecret != null) {
-                CustomerMetadata.Session(
+                CustomerMetadata.CustomerSession(
                     id = "cus_123",
                     ephemeralKeySecret = "ek_123",
                     customerSessionClientSecret = customerSessionClientSecret,

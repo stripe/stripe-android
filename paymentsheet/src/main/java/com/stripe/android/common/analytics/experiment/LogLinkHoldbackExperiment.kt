@@ -186,7 +186,7 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
                 customerId = metadata.id,
                 ephemeralKeySecret = metadata.ephemeralKeySecret,
             )
-            is CustomerMetadata.Session -> retrieveCustomerEmail(
+            is CustomerMetadata.CustomerSession -> retrieveCustomerEmail(
                 configuration = config,
                 customerId = metadata.id,
                 ephemeralKeySecret = metadata.ephemeralKeySecret,

@@ -819,7 +819,7 @@ class DefaultAnalyticsMetadataFactoryTest {
 
     private fun createCustomerMetadata(
         isPaymentMethodSetAsDefaultEnabled: Boolean
-    ): CustomerMetadata = CustomerMetadata.Session(
+    ): CustomerMetadata = CustomerMetadata.CustomerSession(
         id = "cus_1234",
         ephemeralKeySecret = "ek_123",
         customerSessionClientSecret = "cuss_132_secret_123",

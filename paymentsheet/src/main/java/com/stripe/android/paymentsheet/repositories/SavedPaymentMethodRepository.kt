@@ -48,7 +48,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
                 PaymentMethod.Builder().setId(paymentMethodId).build()
             }
         }
-        is CustomerMetadata.Session -> {
+        is CustomerMetadata.CustomerSession -> {
             customerRepository.detachPaymentMethod(
                 customerId = customerMetadata.id,
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
@@ -75,7 +75,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
         is CustomerMetadata.CheckoutSession -> {
             Result.failure(NotImplementedError("Checkout sessions do not support updating payment methods"))
         }
-        is CustomerMetadata.Session -> {
+        is CustomerMetadata.CustomerSession -> {
             customerRepository.updatePaymentMethod(
                 customerId = customerMetadata.id,
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
@@ -100,7 +100,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
         is CustomerMetadata.CheckoutSession -> {
             Result.failure(NotImplementedError("Checkout sessions do not support setting default payment methods"))
         }
-        is CustomerMetadata.Session -> {
+        is CustomerMetadata.CustomerSession -> {
             customerRepository.setDefaultPaymentMethod(
                 customerId = customerMetadata.id,
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,

@@ -258,7 +258,7 @@ internal class DefaultTapToAddCollectionHandler(
 
         val (customerId, ephemeralKeySecret) = when (customerMetadata) {
             is CustomerMetadata.LegacyEphemeralKey -> customerMetadata.id to customerMetadata.ephemeralKeySecret
-            is CustomerMetadata.Session -> customerMetadata.id to customerMetadata.ephemeralKeySecret
+            is CustomerMetadata.CustomerSession -> customerMetadata.id to customerMetadata.ephemeralKeySecret
             is CustomerMetadata.CheckoutSession -> error("Tap to add is not supported for CheckoutSession")
         }
 

@@ -30,7 +30,7 @@ internal object PaymentMethodMetadataFixtures {
         paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
     )
 
-    internal val CUSTOMER_SESSIONS_CUSTOMER_METADATA = CustomerMetadata.Session(
+    internal val CUSTOMER_SESSIONS_CUSTOMER_METADATA = CustomerMetadata.CustomerSession(
         id = "cus_123",
         ephemeralKeySecret = "ek_123",
         customerSessionClientSecret = "cuss_123",

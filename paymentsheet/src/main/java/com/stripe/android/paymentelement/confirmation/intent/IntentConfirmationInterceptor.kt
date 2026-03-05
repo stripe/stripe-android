@@ -68,7 +68,7 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
             is IntegrationMetadata.DeferredIntent.WithConfirmationToken -> {
                 val (customerId, ephemeralKeySecret) = when (customerMetadata) {
                     is CustomerMetadata.LegacyEphemeralKey -> customerMetadata.id to customerMetadata.ephemeralKeySecret
-                    is CustomerMetadata.Session -> customerMetadata.id to customerMetadata.ephemeralKeySecret
+                    is CustomerMetadata.CustomerSession -> customerMetadata.id to customerMetadata.ephemeralKeySecret
                     is CustomerMetadata.CheckoutSession -> error("CheckoutSession is not yet supported")
                     null -> null to null
                 }
