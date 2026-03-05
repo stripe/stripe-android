@@ -17,5 +17,4 @@ import androidx.annotation.RestrictTo
     AnnotationTarget.PROPERTY,
     AnnotationTarget.TYPEALIAS
 )
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 annotation class CheckoutSessionPreview

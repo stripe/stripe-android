@@ -480,7 +480,6 @@ class PaymentSheet internal constructor(
      * @param configuration An optional [PaymentSheet] configuration.
      */
     @CheckoutSessionPreview
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun presentWithCheckout(
         checkout: Checkout,
         configuration: Configuration,
