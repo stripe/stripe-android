@@ -10,7 +10,10 @@ import com.stripe.android.common.taptoadd.ui.createTapToAddUxConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
+import com.stripe.android.common.model.PaymentMethodRemovePermission
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.StripeRepository
@@ -187,6 +190,58 @@ class TapToAddCollectionHandlerTest {
         assertThat(failed.error).isInstanceOf(IllegalStateException::class.java)
         assertThat(failed.error.message)
             .isEqualTo("Attempted to collect with tap to add without a customer")
+    }
+
+    @Test
+    fun `handler returns FailedCollection when metadata has checkout session customer`() {
+        val checkoutSessionMetadata = PaymentMethodMetadataFactory.create(
+            isTapToAddSupported = true,
+            hasCustomerConfiguration = true,
+        ).copy(
+            customerMetadata = CustomerMetadata.CheckoutSession(
+                sessionId = "cs_123",
+                customerId = "cus_123",
+                isPaymentMethodSetAsDefaultEnabled = false,
+                removePaymentMethod = PaymentMethodRemovePermission.Full,
+                saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
+                canRemoveLastPaymentMethod = false,
+                canRemoveDuplicates = false,
+                canUpdateFullPaymentMethodDetails = false,
+            )
+        )
+
+        runScenario(
+            isConnected = true,
+            callbackResult = Result.success(
+                CreateCardPresentSetupIntentCallback {
+                    CreateIntentResult.Success("si_123_secret")
+                }
+            ),
+        ) {
+            val result = testScope.backgroundScope.async {
+                handler.collect(checkoutSessionMetadata)
+            }
+
+            assertThat(retrieverScenario.waitForCallbackCalls.awaitItem()).isNotNull()
+            assertThat(terminalScenario.setTapToPayUxConfigurationCalls.awaitItem()).isNotNull()
+
+            val retrievedSetupIntent = checkRetrieveSetupIntent("si_123_secret")
+            val collectedIntent = checkCollectCall(retrievedSetupIntent)
+            val paymentMethod = createTerminalPaymentMethod(id = "pm_4563", last4 = "7294", brand = "mastercard")
+            checkConfirmCall(
+                useInterac = false,
+                collectedSetupIntent = collectedIntent,
+                paymentMethod = paymentMethod,
+            )
+
+            val collectionResult = result.await()
+            assertThat(collectionResult)
+                .isInstanceOf(TapToAddCollectionHandler.CollectionState.FailedCollection::class.java)
+
+            val failed = collectionResult as TapToAddCollectionHandler.CollectionState.FailedCollection
+            assertThat(failed.error).isInstanceOf(IllegalStateException::class.java)
+            assertThat(failed.error.message).isEqualTo("Tap to add is not supported for CheckoutSession")
+        }
     }
 
     @Test

@@ -167,7 +167,7 @@ internal sealed class CustomerMetadata : Parcelable {
                 customerSheetSession.permissions.canUpdateFullPaymentMethodDetails
 
             return if (customerSessionClientSecret != null) {
-                Session(
+                CustomerSession(
                     id = id,
                     ephemeralKeySecret = ephemeralKeySecret,
                     customerSessionClientSecret = customerSessionClientSecret,
