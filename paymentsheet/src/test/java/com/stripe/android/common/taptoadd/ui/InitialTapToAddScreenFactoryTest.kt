@@ -38,11 +38,9 @@ internal class InitialTapToAddScreenFactoryTest {
         ) {
             val screen = screenFactory.createInitialScreen()
 
-            val (paymentMethodPassedToFactory, paymentMethodOptionsPassedToFactory) =
-                confirmationInteractorFactory.createCalls.awaitItem()
+            val paymentMethodPassedToFactory = confirmationInteractorFactory.createCalls.awaitItem()
 
             assertThat(paymentMethodPassedToFactory).isEqualTo(paymentMethod)
-            assertThat(paymentMethodOptionsPassedToFactory).isNull()
             assertThat(screen).isInstanceOf<TapToAddNavigator.Screen.Confirmation>()
 
             val confirmationScreen = screen as TapToAddNavigator.Screen.Confirmation
@@ -116,14 +114,14 @@ internal class InitialTapToAddScreenFactoryTest {
         }
 
         class Factory : TapToAddConfirmationInteractor.Factory {
-            private val _createCalls = Turbine<Pair<PaymentMethod, PaymentMethodOptionsParams?>>()
-            val createCalls: ReceiveTurbine<Pair<PaymentMethod, PaymentMethodOptionsParams?>> = _createCalls
+            private val _createCalls = Turbine<PaymentMethod>()
+            val createCalls: ReceiveTurbine<PaymentMethod> = _createCalls
 
             override fun create(
                 paymentMethod: PaymentMethod,
                 paymentMethodOptionsParams: PaymentMethodOptionsParams?,
             ): TapToAddConfirmationInteractor {
-                _createCalls.add(paymentMethod to paymentMethodOptionsParams)
+                _createCalls.add(paymentMethod)
 
                 return FakeTapToAddConfirmationInteractor
             }
