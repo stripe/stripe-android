@@ -23,7 +23,7 @@ internal fun ColumnScope.TapToAddCollectCvcScreen(
     ) {
         with(state.form) {
             FormUI(
-                elements = elements,
+                elements = listOf(cvcElement),
                 hiddenIdentifiers = emptySet(),
                 lastTextFieldIdentifier = null,
                 enabled = enabled,
