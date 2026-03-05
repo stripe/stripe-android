@@ -44,7 +44,7 @@ internal class DefaultTapToAddCollectCvcInteractorTest {
         assertThat(state.primaryButton.label)
             .isEqualTo(StripeUiCoreR.string.stripe_continue_button_label.resolvableString)
         assertThat(state.primaryButton.enabled).isFalse()
-        assertThat(state.form.cvcElement).isEqualTo(fakeCvcFormHelper.formElement)
+        assertThat(state.form.elements).containsExactly(fakeCvcFormHelper.formElement)
         assertThat(state.form.enabled).isTrue()
     }
 
