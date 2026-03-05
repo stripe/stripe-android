@@ -43,7 +43,7 @@ import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
 
 @Composable
-internal fun CardBrandChoiceSelector(
+internal fun Selector(
     currentItem: TextFieldIcon.Selector.Item,
     items: List<TextFieldIcon.Selector.Item>,
     onItemSelected: (item: TextFieldIcon.Selector.Item) -> Unit,
@@ -67,7 +67,7 @@ internal fun CardBrandChoiceSelector(
                 .height(IntrinsicSize.Min)
         ) {
             items.forEachIndexed { index, item ->
-                CardBrandChoiceItem(
+                SelectorItem(
                     item = item,
                     isSelected = item == currentItem,
                     onItemSelected = {
@@ -88,12 +88,12 @@ internal fun CardBrandChoiceSelector(
     }
 
     if (showPopup && hasFocus) {
-        ChooseCardBrandPopup(popupMessage)
+        SelectorPopup(popupMessage)
     }
 }
 
 @Composable
-private fun CardBrandChoiceItem(
+private fun SelectorItem(
     item: TextFieldIcon.Selector.Item,
     isSelected: Boolean,
     onItemSelected: (item: TextFieldIcon.Selector.Item) -> Unit
@@ -134,7 +134,7 @@ private fun CardBrandChoiceItem(
 }
 
 @Composable
-private fun ChooseCardBrandPopup(
+private fun SelectorPopup(
     popupMessage: ResolvableString
 ) {
     Popup(

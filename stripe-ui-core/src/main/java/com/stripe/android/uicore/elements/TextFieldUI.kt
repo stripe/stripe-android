@@ -353,7 +353,7 @@ private fun TextFieldIcon.Composable(
             }
 
             is TextFieldIcon.Selector -> {
-                CardBrandChoice(
+                TrailingSelector(
                     icon = this@Composable,
                     loading = loading,
                     onSelectorItemClicked = onSelectorItemClicked,
@@ -541,7 +541,7 @@ private fun Modifier.onPreviewKeyEvent(
 }
 
 @Composable
-private fun CardBrandChoice(
+private fun TrailingSelector(
     icon: TextFieldIcon.Selector,
     loading: Boolean,
     onSelectorItemClicked: (item: TextFieldIcon.Selector.Item) -> Unit,
@@ -554,7 +554,7 @@ private fun CardBrandChoice(
         contentAlignment = Alignment.Center
     ) {
         if (icon.items.size > 1) {
-            CardBrandChoiceSelector(
+            Selector(
                 currentItem = icon.currentItem,
                 items = icon.items,
                 onItemSelected = onSelectorItemClicked,
