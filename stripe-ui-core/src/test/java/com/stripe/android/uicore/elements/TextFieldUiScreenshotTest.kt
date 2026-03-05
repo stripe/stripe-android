@@ -149,22 +149,21 @@ class TextFieldUiScreenshotTest {
                 shouldShowValidationMessage = false,
                 validationMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = TextFieldIcon.Selector(
-                    message = "Select an option".resolvableString,
+                trailingIcon = TextFieldIcon.Dropdown(
+                    title = "Select an option".resolvableString,
                     hide = false,
-                    currentItem = TextFieldIcon.Selector.Item(
+                    currentItem = TextFieldIcon.Dropdown.Item(
                         id = "visa",
                         label = "Visa".resolvableString,
                         icon = R.drawable.stripe_ic_card_visa
                     ),
                     items = listOf(
-                        TextFieldIcon.Selector.Item(
+                        TextFieldIcon.Dropdown.Item(
                             id = "visa",
                             label = "Visa".resolvableString,
                             icon = R.drawable.stripe_ic_card_visa
                         )
-                    ),
-                    hasMadeSelection = false
+                    )
                 ),
                 hasFocus = false
             )
@@ -183,22 +182,21 @@ class TextFieldUiScreenshotTest {
                 shouldShowValidationMessage = false,
                 validationMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = TextFieldIcon.Selector(
-                    message = "Select an option".resolvableString,
+                trailingIcon = TextFieldIcon.Dropdown(
+                    title = "Select an option".resolvableString,
                     hide = true,
-                    currentItem = TextFieldIcon.Selector.Item(
+                    currentItem = TextFieldIcon.Dropdown.Item(
                         id = "visa",
                         label = "Visa".resolvableString,
                         icon = R.drawable.stripe_ic_card_visa
                     ),
                     items = listOf(
-                        TextFieldIcon.Selector.Item(
+                        TextFieldIcon.Dropdown.Item(
                             id = "visa",
                             label = "Visa".resolvableString,
                             icon = R.drawable.stripe_ic_card_visa
                         )
-                    ),
-                    hasMadeSelection = false
+                    )
                 ),
                 hasFocus = false
             )
