@@ -13,6 +13,7 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.analytics.FakeLinkAnalyticsHelper
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.ClientAttributionMetadata
@@ -53,8 +54,7 @@ import javax.inject.Provider
 @OptIn(SharedPaymentTokenSessionPreview::class)
 internal suspend fun createIntentConfirmationInterceptor(
     integrationMetadata: IntegrationMetadata,
-    customerId: String? = null,
-    ephemeralKeySecret: String? = null,
+    customerMetadata: CustomerMetadata? = null,
     stripeRepository: StripeRepository = object : AbsFakeStripeRepository() {},
     publishableKeyProvider: () -> String = { "pk" },
     errorReporter: ErrorReporter = FakeErrorReporter(),
@@ -143,10 +143,12 @@ internal suspend fun createIntentConfirmationInterceptor(
         checkoutSessionConfirmationInterceptorFactory = object : CheckoutSessionConfirmationInterceptor.Factory {
             override fun create(
                 checkoutSessionId: String,
+                customerMetadata: CustomerMetadata?,
                 clientAttributionMetadata: ClientAttributionMetadata,
             ): CheckoutSessionConfirmationInterceptor {
                 return CheckoutSessionConfirmationInterceptor(
                     checkoutSessionId = checkoutSessionId,
+                    customerMetadata = customerMetadata,
                     clientAttributionMetadata = clientAttributionMetadata,
                     context = ApplicationProvider.getApplicationContext(),
                     stripeRepository = stripeRepository,
@@ -157,8 +159,7 @@ internal suspend fun createIntentConfirmationInterceptor(
         },
     ).create(
         integrationMetadata = integrationMetadata,
-        customerId = customerId,
-        ephemeralKeySecret = ephemeralKeySecret,
+        customerMetadata = customerMetadata,
         clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
     )
 }
