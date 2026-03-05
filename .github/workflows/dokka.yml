@@ -16,7 +16,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/stripe_setup
       - name: Generate Dokka Documentation
         run: ./gradlew :dokkaGenerate
