@@ -3,6 +3,8 @@ package com.stripe.android.paymentelement.confirmation.intent
 import android.content.Context
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
@@ -33,6 +35,7 @@ import dagger.assisted.AssistedInject
  */
 internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructor(
     @Assisted private val checkoutSessionId: String,
+    @Assisted private val customerMetadata: CustomerMetadata?,
     @Assisted private val clientAttributionMetadata: ClientAttributionMetadata,
     context: Context,
     private val stripeRepository: StripeRepository,
@@ -41,6 +44,8 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
 ) : IntentConfirmationInterceptor {
 
     private val returnUrl: String = DefaultReturnUrl.create(context).value
+    private val isSaveEnabled: Boolean =
+        customerMetadata?.saveConsent is PaymentMethodSaveConsentBehavior.Enabled
 
     override suspend fun intercept(
         intent: StripeIntent,
@@ -54,7 +59,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             onSuccess = { paymentMethod ->
                 confirmCheckoutSession(
                     paymentMethod = paymentMethod,
-                    savePaymentMethod = confirmationOption.shouldSave,
+                    savePaymentMethod = confirmationOption.shouldSave.takeIf { isSaveEnabled },
                 )
             },
             onFailure = { error ->
@@ -149,6 +154,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
     interface Factory {
         fun create(
             checkoutSessionId: String,
+            customerMetadata: CustomerMetadata?,
             clientAttributionMetadata: ClientAttributionMetadata,
         ): CheckoutSessionConfirmationInterceptor
     }
