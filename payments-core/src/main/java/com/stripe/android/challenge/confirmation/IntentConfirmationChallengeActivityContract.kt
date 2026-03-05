@@ -13,9 +13,9 @@ internal class IntentConfirmationChallengeActivityContract :
         >() {
 
     override fun createIntent(context: Context, input: Args): Intent {
-        val captchaVendorName = (input.intent.nextActionData
-            as? StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge)
-            ?.stripeJs?.captchaVendorName
+        val nextActionData = input.intent.nextActionData
+            as? StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge
+        val captchaVendorName = nextActionData?.stripeJs?.captchaVendorName
             ?: StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge.FALLBACK_VENDOR_NAME
 
         return IntentConfirmationChallengeActivity.createIntent(

@@ -65,7 +65,10 @@ internal class IntentConfirmationChallengeActivityContractTest {
 
         val result = contract.parseResult(
             Activity.RESULT_OK,
-            Intent().putExtras(bundleOf(IntentConfirmationChallengeActivityContract.EXTRA_RESULT to expected))
+            Intent()
+                .putExtras(
+                    bundleOf(IntentConfirmationChallengeActivityContract.EXTRA_RESULT to expected)
+                )
         )
 
         assertThat(result).isEqualTo(expected)
@@ -77,7 +80,10 @@ internal class IntentConfirmationChallengeActivityContractTest {
 
         val result = contract.parseResult(
             Activity.RESULT_OK,
-            Intent().putExtras(bundleOf(IntentConfirmationChallengeActivityContract.EXTRA_RESULT to expected))
+            Intent()
+                .putExtras(
+                    bundleOf(IntentConfirmationChallengeActivityContract.EXTRA_RESULT to expected)
+                )
         )
 
         assertThat(result).isEqualTo(expected)
@@ -92,7 +98,10 @@ internal class IntentConfirmationChallengeActivityContractTest {
 
         val result = contract.parseResult(
             Activity.RESULT_OK,
-            Intent().putExtras(bundleOf(IntentConfirmationChallengeActivityContract.EXTRA_RESULT to expected))
+            Intent()
+                .putExtras(
+                    bundleOf(IntentConfirmationChallengeActivityContract.EXTRA_RESULT to expected)
+                )
         )
 
         assertThat(result).isInstanceOf(IntentConfirmationChallengeActivityResult.Failed::class.java)

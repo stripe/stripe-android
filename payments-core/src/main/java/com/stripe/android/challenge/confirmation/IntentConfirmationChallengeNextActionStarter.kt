@@ -28,6 +28,8 @@ internal interface IntentConfirmationChallengeNextActionStarter {
         private val host: AuthActivityStarterHost
     ) : IntentConfirmationChallengeNextActionStarter {
         override fun start(args: IntentConfirmationChallengeActivityContract.Args) {
+            val nextActionData = args.intent.nextActionData
+                as? StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge
             host.startActivityForResult(
                 target = IntentConfirmationChallengeActivity::class.java,
                 extras = IntentConfirmationChallengeActivity.getBundle(
@@ -35,9 +37,7 @@ internal interface IntentConfirmationChallengeNextActionStarter {
                         publishableKey = args.publishableKey,
                         intent = args.intent,
                         productUsage = args.productUsage.toList(),
-                        captchaVendorName = (args.intent.nextActionData
-                            as? StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge)
-                            ?.stripeJs?.captchaVendorName
+                        captchaVendorName = nextActionData?.stripeJs?.captchaVendorName
                             ?: StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge.FALLBACK_VENDOR_NAME,
                     )
                 ),
