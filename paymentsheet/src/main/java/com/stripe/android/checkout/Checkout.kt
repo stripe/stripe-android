@@ -56,11 +56,22 @@ class Checkout private constructor(
         val sessionId = state.checkoutSessionResponse.id
         return component.checkoutSessionRepository
             .applyPromotionCode(sessionId, promotionCode.trim())
-            .map { response ->
-                state = State(response)
-                val checkoutSession = response.asCheckoutSession()
-                _checkoutSession.value = checkoutSession
-                checkoutSession
-            }
+            .updateState()
+    }
+
+    suspend fun removePromotionCode(): Result<CheckoutSession> {
+        val sessionId = state.checkoutSessionResponse.id
+        return component.checkoutSessionRepository
+            .applyPromotionCode(sessionId, "")
+            .updateState()
+    }
+
+    private fun Result<CheckoutSessionResponse>.updateState(): Result<CheckoutSession> {
+        return map { response ->
+            state = State(response)
+            val checkoutSession = response.asCheckoutSession()
+            _checkoutSession.value = checkoutSession
+            checkoutSession
+        }
     }
 }

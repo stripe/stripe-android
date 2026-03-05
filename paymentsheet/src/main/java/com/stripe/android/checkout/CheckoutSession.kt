@@ -67,34 +67,46 @@ internal fun CheckoutSessionResponse.asCheckoutSession(): CheckoutSession {
     return CheckoutSession(
         id = id,
         currency = currency,
-        totalSummary = totalSummary?.let { summary ->
-            CheckoutSession.TotalSummary(
-                subtotal = summary.subtotal,
-                totalDueToday = summary.totalDueToday,
-                totalAmountDue = summary.totalAmountDue,
-                discountAmounts = summary.discountAmounts.map { discount ->
-                    CheckoutSession.DiscountAmount(
-                        amount = discount.amount,
-                        displayName = discount.displayName,
-                    )
-                },
-                taxAmounts = summary.taxAmounts.map { tax ->
-                    CheckoutSession.TaxAmount(
-                        amount = tax.amount,
-                        inclusive = tax.inclusive,
-                        displayName = tax.displayName,
-                        percentage = tax.percentage,
-                    )
-                },
-                shippingRate = summary.shippingRate?.let { shipping ->
-                    CheckoutSession.ShippingRate(
-                        amount = shipping.amount,
-                        displayName = shipping.displayName,
-                        deliveryEstimate = shipping.deliveryEstimate,
-                    )
-                },
-                appliedBalance = summary.appliedBalance,
-            )
-        },
+        totalSummary = totalSummary?.asTotalSummary(),
+    )
+}
+
+@OptIn(CheckoutSessionPreview::class)
+private fun CheckoutSessionResponse.TotalSummaryResponse.asTotalSummary(): CheckoutSession.TotalSummary {
+    return CheckoutSession.TotalSummary(
+        subtotal = subtotal,
+        totalDueToday = totalDueToday,
+        totalAmountDue = totalAmountDue,
+        discountAmounts = discountAmounts.map { it.asDiscountAmount() },
+        taxAmounts = taxAmounts.map { it.asTaxAmount() },
+        shippingRate = shippingRate?.asShippingRate(),
+        appliedBalance = appliedBalance,
+    )
+}
+
+@OptIn(CheckoutSessionPreview::class)
+private fun CheckoutSessionResponse.DiscountAmount.asDiscountAmount(): CheckoutSession.DiscountAmount {
+    return CheckoutSession.DiscountAmount(
+        amount = amount,
+        displayName = displayName,
+    )
+}
+
+@OptIn(CheckoutSessionPreview::class)
+private fun CheckoutSessionResponse.TaxAmount.asTaxAmount(): CheckoutSession.TaxAmount {
+    return CheckoutSession.TaxAmount(
+        amount = amount,
+        inclusive = inclusive,
+        displayName = displayName,
+        percentage = percentage,
+    )
+}
+
+@OptIn(CheckoutSessionPreview::class)
+private fun CheckoutSessionResponse.ShippingRate.asShippingRate(): CheckoutSession.ShippingRate {
+    return CheckoutSession.ShippingRate(
+        amount = amount,
+        displayName = displayName,
+        deliveryEstimate = deliveryEstimate,
     )
 }

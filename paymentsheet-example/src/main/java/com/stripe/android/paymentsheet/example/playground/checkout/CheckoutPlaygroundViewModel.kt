@@ -26,10 +26,18 @@ internal class CheckoutPlaygroundViewModel(
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    fun applyPromotionCode(promotionCode: String) {
+    fun applyPromotionCode(promotionCode: String) = performWhileLoading {
+        checkout.applyPromotionCode(promotionCode)
+    }
+
+    fun removePromotionCode() = performWhileLoading {
+        checkout.removePromotionCode()
+    }
+
+    private fun performWhileLoading(block: suspend () -> Unit) {
         viewModelScope.launch {
             _isLoading.value = true
-            checkout.applyPromotionCode(promotionCode)
+            block()
             _isLoading.value = false
         }
     }

@@ -13,7 +13,6 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.testing.PaymentConfigurationTestRule
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -77,7 +76,7 @@ class CheckoutTest {
             checkout.checkoutSession.test {
                 assertThat(awaitItem().totalSummary).isNull()
 
-                backgroundScope.launch { checkout.applyPromotionCode("10OFF") }
+                checkout.applyPromotionCode("10OFF")
 
                 val updated = awaitItem()
                 val totalSummary = updated.totalSummary
@@ -127,10 +126,57 @@ class CheckoutTest {
             checkout.checkoutSession.test {
                 assertThat(awaitItem().totalSummary).isNull()
 
-                backgroundScope.launch { checkout.applyPromotionCode("  10OFF  ") }
+                checkout.applyPromotionCode("  10OFF  ")
 
                 val updated = awaitItem()
                 assertThat(updated.totalSummary).isNotNull()
+            }
+        }
+    }
+
+    @Test
+    fun `removePromotionCode updates checkoutSession on success`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_abc123"),
+                bodyPart("promotion_code", ""),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-apply-discount.json")
+            }
+
+            checkout.checkoutSession.test {
+                assertThat(awaitItem().totalSummary).isNull()
+
+                checkout.removePromotionCode()
+
+                val updated = awaitItem()
+                assertThat(updated.totalSummary).isNotNull()
+            }
+        }
+    }
+
+    @Test
+    fun `removePromotionCode returns failure on error response`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_abc123"),
+            ) { response ->
+                response.setResponseCode(400)
+                response.setBody("""{"error": {"message": "Failed to remove promotion code"}}""")
+            }
+
+            checkout.checkoutSession.test {
+                val initial = awaitItem()
+
+                val result = checkout.removePromotionCode()
+                assertThat(result.isFailure).isTrue()
+
+                expectNoEvents()
+                assertThat(checkout.checkoutSession.value).isEqualTo(initial)
             }
         }
     }

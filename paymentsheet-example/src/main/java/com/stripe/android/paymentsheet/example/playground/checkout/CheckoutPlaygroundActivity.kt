@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
@@ -72,6 +73,7 @@ class CheckoutPlaygroundActivity : AppCompatActivity() {
                 checkout = viewModel.checkout,
                 isLoading = viewModel.isLoading,
                 applyPromotionCode = viewModel::applyPromotionCode,
+                removePromotionCode = viewModel::removePromotionCode,
             )
         }
     }
@@ -88,6 +90,7 @@ private fun CheckoutScreen(
     checkout: Checkout,
     isLoading: StateFlow<Boolean>,
     applyPromotionCode: (String) -> Unit,
+    removePromotionCode: () -> Unit,
 ) {
     val checkoutSession by checkout.checkoutSession.collectAsState()
     val loading by isLoading.collectAsState()
@@ -118,7 +121,7 @@ private fun CheckoutScreen(
                 }
             },
             bottomBarContent = {
-                TotalSummary(checkoutSession)
+                TotalSummary(checkoutSession, removePromotionCode)
             },
         )
         if (loading) {
@@ -136,7 +139,7 @@ private fun CheckoutScreen(
 }
 
 @Composable
-private fun TotalSummary(session: CheckoutSession) {
+private fun TotalSummary(session: CheckoutSession, removePromotionCode: () -> Unit) {
     val summary = session.totalSummary
     val currency = session.currency
 
@@ -165,7 +168,7 @@ private fun TotalSummary(session: CheckoutSession) {
             bold = true,
         )
 
-        DiscountRows(summary.discountAmounts, currency)
+        DiscountRows(summary.discountAmounts, currency, removePromotionCode)
         summary.shippingRate?.let { ShippingRow(it, currency) }
         TaxRows(summary.taxAmounts, currency)
         if (appliedBalance != null && appliedBalance != 0L) {
@@ -217,12 +220,28 @@ private fun SummaryRow(
 }
 
 @Composable
-private fun DiscountRows(discounts: List<CheckoutSession.DiscountAmount>, currency: String) {
+private fun DiscountRows(
+    discounts: List<CheckoutSession.DiscountAmount>,
+    currency: String,
+    removePromotionCode: () -> Unit,
+) {
     for (discount in discounts) {
-        SummaryRow(
-            label = discount.displayName,
-            amount = "-${formatAmount(discount.amount, currency)}",
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Row(
+                modifier = Modifier.weight(1f),
+            ) {
+                SummaryRow(
+                    label = discount.displayName,
+                    amount = "-${formatAmount(discount.amount, currency)}",
+                )
+            }
+            IconButton(onClick = removePromotionCode) {
+                Text("✕")
+            }
+        }
     }
 }
 
