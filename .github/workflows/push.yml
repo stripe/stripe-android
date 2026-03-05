@@ -14,7 +14,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/stripe_setup
       - name: Upload Identity example release bundle to Emerge
         run: ./gradlew :identity-example:emergeUploadTheme1ReleaseAab
@@ -26,7 +26,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/stripe_setup
       - name: Upload Financial Connections example release bundle to Emerge
         run: ./gradlew :financial-connections-example:emergeUploadReleaseAab
@@ -36,7 +36,7 @@ jobs:
       - name: Assemble Release
         run: ./gradlew :financial-connections-example:assembleRelease
       - name: Firebase App Distribution
-        uses: wzieba/Firebase-Distribution-Github-Action@a41b2f7ab3f7c2631b6a73fb2f660b517cef45a9
+        uses: wzieba/Firebase-Distribution-Github-Action@bd494989dd4bec0343f78adee87fe66e48279ad6
         with:
           appId: "1:527113280969:android:3c57e90cbb8c0397d95c18"
           serviceCredentialsFileContent: ${{ secrets.FINANCIAL_CONNECTIONS_GOOGLE_CLOUD_KEY }}
@@ -47,7 +47,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/stripe_setup
       - name: Upload Payment Sheet example release bundle to Emerge
         run: ./gradlew :paymentsheet-example:emergeUploadBaseReleaseAab
@@ -57,7 +57,7 @@ jobs:
       - name: Assemble Release
         run: ./gradlew :paymentsheet-example:assembleBaseRelease
       - name: Firebase App Distribution
-        uses: wzieba/Firebase-Distribution-Github-Action@a41b2f7ab3f7c2631b6a73fb2f660b517cef45a9
+        uses: wzieba/Firebase-Distribution-Github-Action@bd494989dd4bec0343f78adee87fe66e48279ad6
         with:
           appId: "1:577365562050:android:5b7e92d18f8ca8d1e9a15b"
           serviceCredentialsFileContent: ${{ secrets.PAYMENTS_GOOGLE_CLOUD_KEY }}
