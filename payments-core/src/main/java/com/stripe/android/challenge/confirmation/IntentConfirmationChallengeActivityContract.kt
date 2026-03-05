@@ -13,12 +13,17 @@ internal class IntentConfirmationChallengeActivityContract :
         >() {
 
     override fun createIntent(context: Context, input: Args): Intent {
+        val captchaVendorName = (input.intent.nextActionData
+            as? StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge)
+            ?.stripeJs?.captchaVendorName ?: "hcaptcha"
+
         return IntentConfirmationChallengeActivity.createIntent(
             context,
             IntentConfirmationChallengeArgs(
                 input.publishableKey,
                 input.productUsage.toList(),
-                input.intent
+                input.intent,
+                captchaVendorName
             )
         )
     }

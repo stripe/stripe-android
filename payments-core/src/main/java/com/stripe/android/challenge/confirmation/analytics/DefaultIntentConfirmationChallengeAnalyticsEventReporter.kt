@@ -13,21 +13,22 @@ internal class DefaultIntentConfirmationChallengeAnalyticsEventReporter @Inject 
     private val durationProvider: DurationProvider,
 ) : IntentConfirmationChallengeAnalyticsEventReporter {
 
-    override fun onStart() {
+    override fun onStart(captchaVendorName: String) {
         durationProvider.start(DurationProvider.Key.IntentConfirmationChallenge)
         durationProvider.start(DurationProvider.Key.IntentConfirmationChallengeWebViewLoaded)
-        fireEvent(IntentConfirmationChallengeAnalyticsEvent.Start())
+        fireEvent(IntentConfirmationChallengeAnalyticsEvent.Start(captchaVendorName))
     }
 
-    override fun onSuccess() {
+    override fun onSuccess(captchaVendorName: String) {
         val duration = durationProvider.end(DurationProvider.Key.IntentConfirmationChallenge)
-        fireEvent(IntentConfirmationChallengeAnalyticsEvent.Success(durationInMs(duration)))
+        fireEvent(IntentConfirmationChallengeAnalyticsEvent.Success(durationInMs(duration), captchaVendorName))
     }
 
     override fun onError(
         errorType: String?,
         errorCode: String?,
-        fromBridge: Boolean
+        fromBridge: Boolean,
+        captchaVendorName: String
     ) {
         val duration = durationProvider.end(DurationProvider.Key.IntentConfirmationChallenge)
         fireEvent(
@@ -36,18 +37,19 @@ internal class DefaultIntentConfirmationChallengeAnalyticsEventReporter @Inject 
                 errorType = errorType,
                 errorCode = errorCode,
                 fromBridge = fromBridge,
+                captchaVendorName = captchaVendorName,
             )
         )
     }
 
-    override fun onCancel() {
+    override fun onCancel(captchaVendorName: String) {
         val duration = durationProvider.end(DurationProvider.Key.IntentConfirmationChallenge)
-        fireEvent(IntentConfirmationChallengeAnalyticsEvent.Cancel(durationInMs(duration)))
+        fireEvent(IntentConfirmationChallengeAnalyticsEvent.Cancel(durationInMs(duration), captchaVendorName))
     }
 
-    override fun onWebViewLoaded() {
+    override fun onWebViewLoaded(captchaVendorName: String) {
         val duration = durationProvider.end(DurationProvider.Key.IntentConfirmationChallengeWebViewLoaded)
-        fireEvent(IntentConfirmationChallengeAnalyticsEvent.WebViewLoaded(durationInMs(duration)))
+        fireEvent(IntentConfirmationChallengeAnalyticsEvent.WebViewLoaded(durationInMs(duration), captchaVendorName))
     }
 
     private fun fireEvent(event: IntentConfirmationChallengeAnalyticsEvent) {

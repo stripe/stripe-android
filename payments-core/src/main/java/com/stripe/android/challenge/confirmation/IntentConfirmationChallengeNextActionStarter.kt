@@ -2,6 +2,7 @@ package com.stripe.android.challenge.confirmation
 
 import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.StripePaymentController
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.view.AuthActivityStarterHost
 
 internal interface IntentConfirmationChallengeNextActionStarter {
@@ -34,6 +35,9 @@ internal interface IntentConfirmationChallengeNextActionStarter {
                         publishableKey = args.publishableKey,
                         intent = args.intent,
                         productUsage = args.productUsage.toList(),
+                        captchaVendorName = (args.intent.nextActionData
+                            as? StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge)
+                            ?.stripeJs?.captchaVendorName ?: "hcaptcha",
                     )
                 ),
                 requestCode = StripePaymentController.getRequestCode(args.intent)

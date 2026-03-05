@@ -17,7 +17,10 @@ internal class NextActionDataParserTest {
             {
                 "type": "use_stripe_sdk",
                 "use_stripe_sdk": {
-                    "type": "intent_confirmation_challenge"
+                    "type": "intent_confirmation_challenge",
+                    "stripe_js": {
+                        "captcha_vendor_name": "hcaptcha"
+                    }
                 }
             }
             """.trimIndent()
@@ -26,7 +29,98 @@ internal class NextActionDataParserTest {
         val nextActionData = NextActionDataParser().parse(nextActionJson)
 
         assertThat(nextActionData)
-            .isEqualTo(StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge)
+            .isEqualTo(
+                StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge(
+                    stripeJs = StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge.StripeJs(
+                        captchaVendorName = "hcaptcha"
+                    )
+                )
+            )
+    }
+
+    @Test
+    fun `parse with captcha_vendor_name null defaults to hcaptcha`() {
+        val nextActionJson = JSONObject(
+            """
+            {
+                "type": "use_stripe_sdk",
+                "use_stripe_sdk": {
+                    "type": "intent_confirmation_challenge",
+                    "stripe_js": {
+                        "captcha_vendor_name": null
+                    }
+                }
+            }
+            """.trimIndent()
+        )
+
+        val nextActionData = NextActionDataParser().parse(nextActionJson)
+
+        val challenge = nextActionData as StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge
+        assertThat(challenge.stripeJs.captchaVendorName).isEqualTo("hcaptcha")
+    }
+
+    @Test
+    fun `parse with stripe_js missing defaults to hcaptcha`() {
+        val nextActionJson = JSONObject(
+            """
+            {
+                "type": "use_stripe_sdk",
+                "use_stripe_sdk": {
+                    "type": "intent_confirmation_challenge"
+                }
+            }
+            """.trimIndent()
+        )
+
+        val nextActionData = NextActionDataParser().parse(nextActionJson)
+
+        val challenge = nextActionData as StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge
+        assertThat(challenge.stripeJs.captchaVendorName).isEqualTo("hcaptcha")
+    }
+
+    @Test
+    fun `parse with human_security vendor name parses correctly`() {
+        val nextActionJson = JSONObject(
+            """
+            {
+                "type": "use_stripe_sdk",
+                "use_stripe_sdk": {
+                    "type": "intent_confirmation_challenge",
+                    "stripe_js": {
+                        "captcha_vendor_name": "human_security"
+                    }
+                }
+            }
+            """.trimIndent()
+        )
+
+        val nextActionData = NextActionDataParser().parse(nextActionJson)
+
+        val challenge = nextActionData as StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge
+        assertThat(challenge.stripeJs.captchaVendorName).isEqualTo("human_security")
+    }
+
+    @Test
+    fun `parse with arkose vendor name parses correctly`() {
+        val nextActionJson = JSONObject(
+            """
+            {
+                "type": "use_stripe_sdk",
+                "use_stripe_sdk": {
+                    "type": "intent_confirmation_challenge",
+                    "stripe_js": {
+                        "captcha_vendor_name": "arkose"
+                    }
+                }
+            }
+            """.trimIndent()
+        )
+
+        val nextActionData = NextActionDataParser().parse(nextActionJson)
+
+        val challenge = nextActionData as StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge
+        assertThat(challenge.stripeJs.captchaVendorName).isEqualTo("arkose")
     }
 
     @Test
