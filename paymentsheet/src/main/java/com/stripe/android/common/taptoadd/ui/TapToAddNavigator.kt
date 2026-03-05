@@ -26,11 +26,11 @@ internal class TapToAddNavigator(
 ) {
     @Inject constructor(
         @ViewModelScope coroutineScope: CoroutineScope,
-        tapToAddScreenFactory: TapToAddScreenFactory,
+        initialTapToAddScreenFactory: InitialTapToAddScreenFactory,
         paymentMethodHolder: TapToAddPaymentMethodHolder,
     ) : this(
         coroutineScope = coroutineScope,
-        initialScreen = tapToAddScreenFactory.createInitialScreen(),
+        initialScreen = initialTapToAddScreenFactory.createInitialScreen(),
         paymentMethodHolder = paymentMethodHolder,
     )
 
