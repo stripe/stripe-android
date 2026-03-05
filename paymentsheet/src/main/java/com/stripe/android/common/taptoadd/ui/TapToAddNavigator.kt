@@ -113,6 +113,24 @@ internal class TapToAddNavigator(
             }
         }
 
+        data class CollectCvc(
+            val interactor: TapToAddCollectCvcInteractor,
+        ) : Screen() {
+            override val cancelButton: CancelButton = CancelButton.Visible
+
+            @Composable
+            override fun ColumnScope.Content() {
+                val state by interactor.state.collectAsState()
+
+                TapToAddCollectCvcScreen(
+                    state = state,
+                    onPrimaryButtonPress = {
+                        interactor.performAction(TapToAddCollectCvcInteractor.Action.PrimaryButtonPressed)
+                    }
+                )
+            }
+        }
+
         data class Confirmation(
             val interactor: TapToAddConfirmationInteractor,
         ) : Screen() {

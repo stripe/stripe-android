@@ -283,7 +283,6 @@ internal class DefaultCreateLinkState @Inject constructor(
         configuration.link.collectMissingBillingDetailsForExistingPaymentMethods,
         allowUserEmailEdits = configuration.link.allowUserEmailEdits,
         allowLogOut = configuration.link.allowLogOut,
-        skipWalletInFlowController = elementsSession.linkMobileSkipWalletInFlowController,
         customerId = elementsSession.customer?.session?.customerId,
         linkAppearance = configuration.linkAppearance,
         saveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),

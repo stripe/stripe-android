@@ -132,16 +132,47 @@ class AsCheckoutSessionTest {
         assertThat(session.totalSummary!!.appliedBalance).isNull()
     }
 
+    @Test
+    fun `maps lineItems`() {
+        val session = createResponse(
+            lineItems = listOf(
+                CheckoutSessionResponse.LineItem(
+                    id = "li_1",
+                    name = "Llama Figure",
+                    quantity = 2,
+                    unitAmount = 999L,
+                    subtotal = 1998L,
+                    total = 1998L,
+                ),
+            ),
+        ).asCheckoutSession()
+        val items = session.lineItems
+        assertThat(items).hasSize(1)
+        assertThat(items[0].name).isEqualTo("Llama Figure")
+        assertThat(items[0].quantity).isEqualTo(2)
+        assertThat(items[0].unitAmount).isEqualTo(999L)
+        assertThat(items[0].subtotal).isEqualTo(1998L)
+        assertThat(items[0].total).isEqualTo(1998L)
+    }
+
+    @Test
+    fun `empty lineItems maps to empty list`() {
+        val session = createResponse().asCheckoutSession()
+        assertThat(session.lineItems).isEmpty()
+    }
+
     private fun createResponse(
         id: String = "cs_test_abc123",
         currency: String = "usd",
         totalSummary: TotalSummaryResponse? = null,
+        lineItems: List<CheckoutSessionResponse.LineItem> = emptyList(),
     ): CheckoutSessionResponse {
         return CheckoutSessionResponse(
             id = id,
             amount = 1000L,
             currency = currency,
             totalSummary = totalSummary,
+            lineItems = lineItems,
         )
     }
 
