@@ -97,6 +97,22 @@ class DefaultSavedPaymentMethodRepositoryTest {
     }
 
     @Test
+    fun `update routes to customer repository when customer is LegacyEphemeralKey`() = runScenario(
+        customerMetadata = LEGACY_METADATA,
+    ) {
+        val result = repository.updatePaymentMethod(
+            customerMetadata = customerMetadata,
+            paymentMethodId = "pm_123",
+            params = PaymentMethodUpdateParams.createCard(),
+        )
+
+        assertThat(result.isSuccess).isTrue()
+
+        val updateRequest = customerRepository.updateRequests.awaitItem()
+        assertThat(updateRequest.paymentMethodId).isEqualTo("pm_123")
+    }
+
+    @Test
     fun `setDefault routes to customer repository when customer is CustomerSession`() = runScenario(
         customerMetadata = SESSION_METADATA,
     ) {
@@ -122,6 +138,21 @@ class DefaultSavedPaymentMethodRepositoryTest {
 
         assertThat(result.isFailure).isTrue()
         assertThat(result.exceptionOrNull()).isInstanceOf(NotImplementedError::class.java)
+    }
+
+    @Test
+    fun `setDefault routes to customer repository when customer is LegacyEphemeralKey`() = runScenario(
+        customerMetadata = LEGACY_METADATA,
+    ) {
+        val result = repository.setDefaultPaymentMethod(
+            customerMetadata = customerMetadata,
+            paymentMethodId = "pm_123",
+        )
+
+        assertThat(result.isSuccess).isTrue()
+
+        val setDefaultRequest = customerRepository.setDefaultPaymentMethodRequests.awaitItem()
+        assertThat(setDefaultRequest.paymentMethodId).isEqualTo("pm_123")
     }
 
     @Test
