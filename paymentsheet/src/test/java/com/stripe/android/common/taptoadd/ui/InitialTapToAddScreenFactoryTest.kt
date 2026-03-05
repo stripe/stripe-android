@@ -4,6 +4,9 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.testing.PaymentMethodFactory
@@ -48,30 +51,59 @@ internal class InitialTapToAddScreenFactoryTest {
         }
     }
 
+    @Test
+    fun `createInitialScreen returns CollectCvc screen when holder contains a payment method and requires CVC`() {
+        val paymentMethod = PaymentMethodFactory.card(random = true)
+
+        scenarioTest(
+            paymentMethod = paymentMethod,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION,
+            )
+        ) {
+            val screen = screenFactory.createInitialScreen()
+
+            val paymentMethodPassedToFactory = collectCvcInteractorFactory.createCalls.awaitItem()
+
+            assertThat(paymentMethodPassedToFactory).isEqualTo(paymentMethod)
+            assertThat(screen).isInstanceOf<TapToAddNavigator.Screen.CollectCvc>()
+
+            val collectCvcScreen = screen as TapToAddNavigator.Screen.CollectCvc
+
+            assertThat(collectCvcScreen.interactor).isEqualTo(FakeTapToAddCollectCvcInteractor)
+        }
+    }
+
     private fun scenarioTest(
         paymentMethod: PaymentMethod?,
+        paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val paymentMethodHolder = FakePaymentMethodHolder(paymentMethod)
         val collectingInteractorFactory = FakeTapToAddCollectingInteractor.Factory()
+        val collectCvcInteractorFactory = FakeTapToAddCollectCvcInteractor.Factory()
         val confirmationInteractorFactory = FakeTapToAddConfirmationInteractor.Factory()
 
         val screenFactory = InitialTapToAddScreenFactory(
+            paymentMethodHolder = paymentMethodHolder,
             collectingInteractorFactory = collectingInteractorFactory,
             confirmationInteractorFactory = confirmationInteractorFactory,
-            paymentMethodHolder = paymentMethodHolder,
+            collectCvcInteractorFactory = collectCvcInteractorFactory,
+            paymentMethodMetadata = paymentMethodMetadata,
         )
 
         block(
             Scenario(
                 collectingInteractorFactory = collectingInteractorFactory,
                 confirmationInteractorFactory = confirmationInteractorFactory,
+                collectCvcInteractorFactory = collectCvcInteractorFactory,
                 screenFactory = screenFactory,
             )
         )
 
         collectingInteractorFactory.validate()
         confirmationInteractorFactory.validate()
+        collectCvcInteractorFactory.validate()
         paymentMethodHolder.validate()
     }
 
@@ -119,9 +151,36 @@ internal class InitialTapToAddScreenFactoryTest {
         }
     }
 
+    private object FakeTapToAddCollectCvcInteractor : TapToAddCollectCvcInteractor {
+        override val state: StateFlow<TapToAddCollectCvcInteractor.State>
+            get() = throw IllegalStateException("Should not be fetched!")
+
+        override fun performAction(action: TapToAddCollectCvcInteractor.Action) {
+            throw IllegalStateException("Should not be called!")
+        }
+
+        class Factory : TapToAddCollectCvcInteractor.Factory {
+            private val _createCalls = Turbine<PaymentMethod>()
+            val createCalls: ReceiveTurbine<PaymentMethod> = _createCalls
+
+            override fun create(
+                paymentMethod: PaymentMethod,
+            ): TapToAddCollectCvcInteractor {
+                _createCalls.add(paymentMethod)
+
+                return FakeTapToAddCollectCvcInteractor
+            }
+
+            fun validate() {
+                _createCalls.ensureAllEventsConsumed()
+            }
+        }
+    }
+
     private class Scenario(
         val collectingInteractorFactory: FakeTapToAddCollectingInteractor.Factory,
         val confirmationInteractorFactory: FakeTapToAddConfirmationInteractor.Factory,
+        val collectCvcInteractorFactory: FakeTapToAddCollectCvcInteractor.Factory,
         val screenFactory: InitialTapToAddScreenFactory,
     )
 }
