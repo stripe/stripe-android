@@ -62,7 +62,7 @@ class Checkout private constructor(
     suspend fun removePromotionCode(): Result<CheckoutSession> {
         val sessionId = state.checkoutSessionResponse.id
         return component.checkoutSessionRepository
-            .removePromotionCode(sessionId)
+            .applyPromotionCode(sessionId, "")
             .updateState()
     }
 

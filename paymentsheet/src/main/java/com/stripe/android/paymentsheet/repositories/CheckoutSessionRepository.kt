@@ -33,10 +33,6 @@ internal interface CheckoutSessionRepository {
         sessionId: String,
         promotionCode: String,
     ): Result<CheckoutSessionResponse>
-
-    suspend fun removePromotionCode(
-        sessionId: String,
-    ): Result<CheckoutSessionResponse>
 }
 
 internal class DefaultCheckoutSessionRepository @Inject constructor(
@@ -133,27 +129,6 @@ internal class DefaultCheckoutSessionRepository @Inject constructor(
                 options = options,
                 params = mapOf(
                     "promotion_code" to promotionCode,
-                    "elements_session_client[is_aggregation_expected]" to "true",
-                ),
-            ),
-            responseJsonParser = CheckoutSessionResponseJsonParser(
-                isLiveMode = options.apiKeyIsLiveMode,
-            ),
-        )
-    }
-
-    override suspend fun removePromotionCode(
-        sessionId: String,
-    ): Result<CheckoutSessionResponse> {
-        val options = createOptions()
-        return executeRequestWithResultParser(
-            stripeErrorJsonParser = stripeErrorJsonParser,
-            stripeNetworkClient = stripeNetworkClient,
-            request = apiRequestFactory.createPost(
-                url = updateUrl(sessionId),
-                options = options,
-                params = mapOf(
-                    "promotion_code" to "",
                     "elements_session_client[is_aggregation_expected]" to "true",
                 ),
             ),
