@@ -42,13 +42,19 @@ internal class DefaultCvcFormHelper(
     private val paymentMethod: PaymentMethod,
 ) : CvcFormHelper {
 
-    // TODO: save input state using savedStateHandle.
     private val requiresCvcRecollection: Boolean =
         paymentMethod.type == PaymentMethod.Type.Card &&
             (paymentMethodMetadata.stripeIntent as? PaymentIntent)?.requireCvcRecollection == true
 
+    private var storedCvcValue: String?
+        get() = savedStateHandle[CVC_VALUE_KEY]
+        set(value) {
+            savedStateHandle[CVC_VALUE_KEY] = value
+        }
+
     private val cvcController = CvcController(
-        cardBrandFlow = stateFlowOf(paymentMethod.card?.brand ?: CardBrand.Unknown)
+        cardBrandFlow = stateFlowOf(paymentMethod.card?.brand ?: CardBrand.Unknown),
+        initialValue = storedCvcValue,
     )
 
     private val cvcElement = if (requiresCvcRecollection) {
@@ -68,11 +74,13 @@ internal class DefaultCvcFormHelper(
     }
 
     override val state: StateFlow<CvcFormHelper.State> = cvcController.formFieldValue.mapAsStateFlow { cvcInput ->
-        val cvcInputValue = cvcInput.value
+        val cvcValue = cvcInput.value
+        storedCvcValue = cvcValue
+
         if (!requiresCvcRecollection) {
             CvcFormHelper.State.Unused
-        } else if (cvcInput.isComplete && cvcInputValue != null) {
-            CvcFormHelper.State.Complete(cvcInputValue)
+        } else if (cvcInput.isComplete && cvcValue != null) {
+            CvcFormHelper.State.Complete(cvcValue)
         } else {
             CvcFormHelper.State.Incomplete
         }
@@ -91,5 +99,9 @@ internal class DefaultCvcFormHelper(
                 paymentMethod = paymentMethod,
             )
         }
+    }
+
+    private companion object {
+        const val CVC_VALUE_KEY = "STRIPE_SPM_CVC_VALUE"
     }
 }
