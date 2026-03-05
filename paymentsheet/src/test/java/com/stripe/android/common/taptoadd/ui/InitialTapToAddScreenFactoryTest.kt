@@ -53,7 +53,7 @@ internal class InitialTapToAddScreenFactoryTest {
         val collectingInteractorFactory = FakeTapToAddCollectingInteractor.Factory()
         val confirmationInteractorFactory = FakeTapToAddConfirmationInteractor.Factory()
 
-        val screenFactory = InitialTapToAddScreenFactory(
+        val screenFactory = TapToAddScreenFactory(
             collectingInteractorFactory = collectingInteractorFactory,
             confirmationInteractorFactory = confirmationInteractorFactory,
             paymentMethodHolder = paymentMethodHolder,
@@ -116,6 +116,6 @@ internal class InitialTapToAddScreenFactoryTest {
     private class Scenario(
         val collectingInteractorFactory: FakeTapToAddCollectingInteractor.Factory,
         val confirmationInteractorFactory: FakeTapToAddConfirmationInteractor.Factory,
-        val screenFactory: InitialTapToAddScreenFactory,
+        val screenFactory: TapToAddScreenFactory,
     )
 }
