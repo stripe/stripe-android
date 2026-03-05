@@ -36,7 +36,8 @@ class TextFieldUiScreenshotTest {
                 shouldShowValidationMessage = false,
                 validationMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = null
+                trailingIcon = null,
+                hasFocus = false
             )
         }
     }
@@ -53,7 +54,8 @@ class TextFieldUiScreenshotTest {
                 shouldShowValidationMessage = false,
                 validationMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = null
+                trailingIcon = null,
+                hasFocus = false
             )
         }
     }
@@ -70,7 +72,8 @@ class TextFieldUiScreenshotTest {
                 shouldShowValidationMessage = true,
                 validationMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = null
+                trailingIcon = null,
+                hasFocus = false
             )
         }
     }
@@ -89,7 +92,8 @@ class TextFieldUiScreenshotTest {
                     message = R.string.stripe_address_zip_incomplete
                 ),
                 showOptionalLabel = false,
-                trailingIcon = null
+                trailingIcon = null,
+                hasFocus = false
             )
         }
     }
@@ -106,7 +110,8 @@ class TextFieldUiScreenshotTest {
                 shouldShowValidationMessage = false,
                 validationMessage = null,
                 showOptionalLabel = true,
-                trailingIcon = null
+                trailingIcon = null,
+                hasFocus = false
             )
         }
     }
@@ -126,7 +131,8 @@ class TextFieldUiScreenshotTest {
                 trailingIcon = TextFieldIcon.Trailing(
                     idRes = R.drawable.stripe_ic_search,
                     isTintable = true,
-                )
+                ),
+                hasFocus = false
             )
         }
     }
@@ -143,22 +149,24 @@ class TextFieldUiScreenshotTest {
                 shouldShowValidationMessage = false,
                 validationMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = TextFieldIcon.Dropdown(
-                    title = "Select an option".resolvableString,
+                trailingIcon = TextFieldIcon.CardBrandChoice(
+                    message = "Select an option".resolvableString,
                     hide = false,
-                    currentItem = TextFieldIcon.Dropdown.Item(
+                    currentItem = TextFieldIcon.CardBrandChoice.Item(
                         id = "visa",
                         label = "Visa".resolvableString,
                         icon = R.drawable.stripe_ic_card_visa
                     ),
                     items = listOf(
-                        TextFieldIcon.Dropdown.Item(
+                        TextFieldIcon.CardBrandChoice.Item(
                             id = "visa",
                             label = "Visa".resolvableString,
                             icon = R.drawable.stripe_ic_card_visa
                         )
-                    )
-                )
+                    ),
+                    hasMadeSelection = false
+                ),
+                hasFocus = false
             )
         }
     }
@@ -175,22 +183,24 @@ class TextFieldUiScreenshotTest {
                 shouldShowValidationMessage = false,
                 validationMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = TextFieldIcon.Dropdown(
-                    title = "Select an option".resolvableString,
+                trailingIcon = TextFieldIcon.CardBrandChoice(
+                    message = "Select an option".resolvableString,
                     hide = true,
-                    currentItem = TextFieldIcon.Dropdown.Item(
+                    currentItem = TextFieldIcon.CardBrandChoice.Item(
                         id = "visa",
                         label = "Visa".resolvableString,
                         icon = R.drawable.stripe_ic_card_visa
                     ),
                     items = listOf(
-                        TextFieldIcon.Dropdown.Item(
+                        TextFieldIcon.CardBrandChoice.Item(
                             id = "visa",
                             label = "Visa".resolvableString,
                             icon = R.drawable.stripe_ic_card_visa
                         )
-                    )
-                )
+                    ),
+                    hasMadeSelection = false
+                ),
+                hasFocus = false
             )
         }
     }
@@ -207,7 +217,8 @@ class TextFieldUiScreenshotTest {
                 shouldShowValidationMessage = false,
                 validationMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = null
+                trailingIcon = null,
+                hasFocus = false
             )
         }
     }
@@ -224,7 +235,8 @@ class TextFieldUiScreenshotTest {
                 shouldShowValidationMessage = false,
                 validationMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = null
+                trailingIcon = null,
+                hasFocus = false
             )
         }
     }
@@ -241,7 +253,8 @@ class TextFieldUiScreenshotTest {
                 shouldShowValidationMessage = false,
                 validationMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = null
+                trailingIcon = null,
+                hasFocus = false
             )
         }
     }
@@ -258,7 +271,8 @@ class TextFieldUiScreenshotTest {
                 shouldShowValidationMessage = false,
                 validationMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = null
+                trailingIcon = null,
+                hasFocus = false
             )
         }
     }

@@ -25,7 +25,7 @@ import kotlinx.coroutines.flow.asStateFlow
 interface TextFieldController : InputController, SectionFieldComposable, SectionFieldValidationController {
     fun onValueChange(displayFormatted: String): TextFieldState?
     fun onFocusChange(newHasFocus: Boolean)
-    fun onDropdownItemClicked(item: TextFieldIcon.Dropdown.Item) {}
+    fun onCardBrandChoiceItemClicked(item: TextFieldIcon.CardBrandChoice.Item) {}
 
     val initialValue: String?
     val autofillType: ContentType?
@@ -93,11 +93,12 @@ sealed class TextFieldIcon {
     ) : TextFieldIcon()
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-    data class Dropdown(
-        val title: ResolvableString,
+    data class CardBrandChoice(
+        val message: ResolvableString,
         val hide: Boolean,
         val currentItem: Item,
-        val items: List<Item>
+        val items: List<Item>,
+        val hasMadeSelection: Boolean
     ) : TextFieldIcon() {
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
         data class Item(

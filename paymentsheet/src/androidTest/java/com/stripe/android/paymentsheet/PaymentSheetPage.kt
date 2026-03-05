@@ -199,6 +199,20 @@ internal class PaymentSheetPage(
         }
     }
 
+    fun fillOutCardDetailsWithCardBrandChoiceSelector(fillOutZipCode: Boolean = true) {
+        waitForText("Card number")
+
+        replaceText("Card number", "4000002500001001")
+        fillExpirationDate("12/34")
+        replaceText("CVC", "123")
+
+        clickViewWithContentDescription("Cartes Bancaires")
+
+        if (fillOutZipCode) {
+            replaceText("ZIP Code", "12345")
+        }
+    }
+
     fun clickPrimaryButton() {
         composeTestRule.waitUntil(5_000) {
             composeTestRule
