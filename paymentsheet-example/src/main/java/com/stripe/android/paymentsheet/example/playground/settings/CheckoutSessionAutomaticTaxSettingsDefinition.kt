@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet.example.playground.settings
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 
 internal object CheckoutSessionAutomaticTaxSettingsDefinition : BooleanSettingsDefinition(
-    defaultValue = true,
+    defaultValue = false,
     displayName = "Automatic Tax",
     key = "checkout_session_automatic_tax"
 ) {
