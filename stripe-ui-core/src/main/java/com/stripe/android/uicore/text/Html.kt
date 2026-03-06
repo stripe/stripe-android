@@ -14,7 +14,6 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
@@ -81,7 +80,6 @@ sealed class EmbeddableImage {
 private fun rememberDrawableImages(
     drawableImageLoader: Map<String, EmbeddableImage.Drawable>,
     imageAlign: PlaceholderVerticalAlign,
-    textStyle: TextStyle,
 ): Map<String, InlineTextContent> {
     return drawableImageLoader.entries.associate { (key, value) ->
         val painter = painterResource(value.id)
@@ -100,9 +98,7 @@ private fun rememberDrawableImages(
             ),
             children = {
                 Image(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .aspectRatio(aspectRatio),
+                    modifier = Modifier.fillMaxSize(),
                     painter = painter,
                     contentDescription = stringResource(
                         value.contentDescription
@@ -305,7 +301,6 @@ fun HtmlWithCustomOnClick(
             it is EmbeddableImage.Drawable
         } as Map<String, EmbeddableImage.Drawable>,
         imageAlign = imageAlign,
-        textStyle = style,
     )
 
     @Suppress("UNCHECKED_CAST")
