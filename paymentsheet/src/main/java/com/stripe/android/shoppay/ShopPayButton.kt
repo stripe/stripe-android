@@ -16,6 +16,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.PrimaryButtonTheme
@@ -38,6 +39,7 @@ internal fun ShopPayButton(
             .defaultMinSize(minHeight = PrimaryButtonTheme.shape.height)
             .semantics {
                 contentDescription = buttonDescription
+                testTag = SHOP_PAY_BUTTON_TEST_TAG
             },
         enabled = true,
         shape = RoundedCornerShape(
@@ -61,3 +63,5 @@ internal fun ShopPayButton(
         )
     }
 }
+
+private const val SHOP_PAY_BUTTON_TEST_TAG = "ShopPayButton"
