@@ -291,20 +291,20 @@ internal class CardDetailsEditUITest {
 
     @Test
     fun modifiableCard_cbcDropdownIsShown() {
+        FeatureFlags.newCbcSelector.setEnabled(false)
         runScenario(
             card = PaymentMethodFixtures.CARD_WITH_NETWORKS
         ) {
-            FeatureFlags.newCbcSelector.setEnabled(false)
             composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).assertExists()
         }
     }
 
     @Test
     fun modifiableCard_cbcSelectorIsShown() {
+        FeatureFlags.newCbcSelector.setEnabled(true)
         runScenario(
             card = PaymentMethodFixtures.CARD_WITH_NETWORKS
         ) {
-            FeatureFlags.newCbcSelector.setEnabled(true)
             composeRule.onNodeWithTag("${SELECTOR_ITEM_TEST_TAG}_visa").assertExists()
             composeRule.onNodeWithTag("${SELECTOR_ITEM_TEST_TAG}_cartes_bancaires").assertExists()
         }

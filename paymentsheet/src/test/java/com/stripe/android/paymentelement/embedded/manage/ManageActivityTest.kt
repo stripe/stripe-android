@@ -132,7 +132,7 @@ internal class ManageActivityTest {
 
     @Test
     fun `updating card brand updates it in the list and returns a result with the new card brand`() = launch {
-        FeatureFlags.newCbcSelector.setEnabled(true)
+        FeatureFlags.newCbcSelector.setEnabled(false)
         managePage.waitUntilVisible()
         managePage.assertCardIsVisible(cbcCardId, "cartes_bancaries")
         managePage.clickEdit()
@@ -221,31 +221,35 @@ internal class ManageActivityTest {
     }
 
     @Test
-    fun `updating card brand returns a result with the new card brand`() = launch(
-        paymentMethods = listOf(cbcCardDetails.createPaymentMethod()),
-    ) {
-        FeatureFlags.newCbcSelector.setEnabled(false)
-        networkRule.setupPaymentMethodUpdateResponse(paymentMethodDetails = cbcCardDetails, cardBrand = "visa")
-        editPage.waitUntilVisible()
-        editPage.setCardBrand("Visa")
-        editPage.update()
-        editPage.waitUntilMissing()
-        val updatedCbcCard = completedResultPaymentMethods().single()
-        assertThat(updatedCbcCard.card?.displayBrand).isEqualTo("visa")
+    fun `updating card brand returns a result with the new card brand`() {
+        launch(
+            paymentMethods = listOf(cbcCardDetails.createPaymentMethod()),
+        ) {
+            FeatureFlags.newCbcSelector.setEnabled(false)
+            networkRule.setupPaymentMethodUpdateResponse(paymentMethodDetails = cbcCardDetails, cardBrand = "visa")
+            editPage.waitUntilVisible()
+            editPage.setCardBrand("Visa")
+            editPage.update()
+            editPage.waitUntilMissing()
+            val updatedCbcCard = completedResultPaymentMethods().single()
+            assertThat(updatedCbcCard.card?.displayBrand).isEqualTo("visa")
+        }
     }
 
     @Test
-    fun `selector updating card brand returns a result with the new card brand`() = launch(
-        paymentMethods = listOf(cbcCardDetails.createPaymentMethod()),
-    ) {
+    fun `selector updating card brand returns a result with the new card brand`() {
         FeatureFlags.newCbcSelector.setEnabled(true)
-        networkRule.setupPaymentMethodUpdateResponse(paymentMethodDetails = cbcCardDetails, cardBrand = "visa")
-        editPage.waitUntilVisible()
-        editPage.setCardBrandWithSelector("Visa")
-        editPage.update()
-        editPage.waitUntilMissing()
-        val updatedCbcCard = completedResultPaymentMethods().single()
-        assertThat(updatedCbcCard.card?.displayBrand).isEqualTo("visa")
+        launch(
+            paymentMethods = listOf(cbcCardDetails.createPaymentMethod()),
+        ) {
+            networkRule.setupPaymentMethodUpdateResponse(paymentMethodDetails = cbcCardDetails, cardBrand = "visa")
+            editPage.waitUntilVisible()
+            editPage.setCardBrandWithSelector("Visa")
+            editPage.update()
+            editPage.waitUntilMissing()
+            val updatedCbcCard = completedResultPaymentMethods().single()
+            assertThat(updatedCbcCard.card?.displayBrand).isEqualTo("visa")
+        }
     }
 
     private fun launch(
