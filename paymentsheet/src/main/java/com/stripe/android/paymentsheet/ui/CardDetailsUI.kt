@@ -293,7 +293,7 @@ private fun CardBrandChoiceSelector(
 private fun TextFieldIcon.Selector.Item.toCardBrandChoice(): CardBrandChoice {
     return CardBrandChoice(
         brand = CardBrand.fromCode(this.id),
-        enabled = true
+        enabled = enabled
     )
 }
 
