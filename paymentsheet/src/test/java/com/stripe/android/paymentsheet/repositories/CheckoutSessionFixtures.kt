@@ -5,6 +5,7 @@ import org.json.JSONObject
 /**
  * Fixtures for checkout session responses from `/v1/payment_pages/{id}/init` API.
  */
+@Suppress("LargeClass")
 internal object CheckoutSessionFixtures {
 
     val CHECKOUT_SESSION_RESPONSE_JSON = JSONObject(
@@ -471,6 +472,7 @@ internal object CheckoutSessionFixtures {
                     }
                 ],
                 "shipping_rate": {
+                    "id": "shr_standard",
                     "amount": 500,
                     "display_name": "Standard Shipping",
                     "delivery_estimate": "5-7 business days"
@@ -582,6 +584,7 @@ internal object CheckoutSessionFixtures {
             },
             "shipping": {
                 "shipping_option": {
+                    "id": "shr_express",
                     "amount": 500,
                     "display_name": "Express Shipping",
                     "delivery_estimate": {
@@ -596,6 +599,62 @@ internal object CheckoutSessionFixtures {
                     }
                 }
             },
+            "elements_session": $MINIMAL_ELEMENTS_SESSION_JSON
+        }
+        """.trimIndent()
+    )
+
+    /**
+     * Init response with shipping_options array at the root level.
+     */
+    val CHECKOUT_SESSION_WITH_SHIPPING_OPTIONS_JSON = JSONObject(
+        """
+        {
+            "session_id": "cs_test_abc123",
+            "currency": "usd",
+            "shipping_rate": "shr_standard",
+            "total_summary": {
+                "due": 1500,
+                "subtotal": 1000,
+                "total": 1500
+            },
+            "line_item_group": {
+                "currency": "usd",
+                "total": 1500,
+                "subtotal": 1000,
+                "due": 1500,
+                "shipping_rate": {
+                    "id": "shr_standard",
+                    "amount": 500,
+                    "display_name": "Standard Shipping"
+                }
+            },
+            "shipping_options": [
+                {
+                    "shipping_rate": {
+                        "id": "shr_standard",
+                        "amount": 500,
+                        "display_name": "Standard Shipping",
+                        "currency": "usd"
+                    }
+                },
+                {
+                    "shipping_rate": {
+                        "id": "shr_express",
+                        "amount": 1500,
+                        "display_name": "Express Shipping",
+                        "currency": "usd"
+                    }
+                },
+                {
+                    "shipping_rate": {
+                        "id": "shr_free",
+                        "amount": 0,
+                        "display_name": "Free Shipping",
+                        "currency": "usd"
+                    }
+                }
+            ],
             "elements_session": $MINIMAL_ELEMENTS_SESSION_JSON
         }
         """.trimIndent()

@@ -434,6 +434,7 @@ class CheckoutSessionResponseJsonParserTest {
 
         // Shipping
         assertThat(totalSummary?.shippingRate).isNotNull()
+        assertThat(totalSummary?.shippingRate?.id).isEqualTo("shr_standard")
         assertThat(totalSummary?.shippingRate?.amount).isEqualTo(500L)
         assertThat(totalSummary?.shippingRate?.displayName).isEqualTo("Standard Shipping")
         assertThat(totalSummary?.shippingRate?.deliveryEstimate).isEqualTo("5-7 business days")
@@ -465,6 +466,7 @@ class CheckoutSessionResponseJsonParserTest {
         val totalSummary = result?.totalSummary
         assertThat(totalSummary).isNotNull()
         assertThat(totalSummary?.shippingRate).isNotNull()
+        assertThat(totalSummary?.shippingRate?.id).isEqualTo("shr_express")
         assertThat(totalSummary?.shippingRate?.amount).isEqualTo(500L)
         assertThat(totalSummary?.shippingRate?.displayName).isEqualTo("Express Shipping")
         assertThat(totalSummary?.shippingRate?.deliveryEstimate).isEqualTo("1-3 business days")
@@ -585,5 +587,37 @@ class CheckoutSessionResponseJsonParserTest {
         assertThat(totalSummary?.discountAmounts).hasSize(1)
         assertThat(totalSummary?.discountAmounts?.get(0)?.amount).isEqualTo(1000L)
         assertThat(totalSummary?.discountAmounts?.get(0)?.displayName).isEqualTo("10OFF")
+    }
+
+    @Test
+    fun `parse shipping options from root level`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_SHIPPING_OPTIONS_JSON)
+
+        assertThat(result).isNotNull()
+        val shippingOptions = result!!.shippingOptions
+        assertThat(shippingOptions).hasSize(3)
+
+        assertThat(shippingOptions[0].id).isEqualTo("shr_standard")
+        assertThat(shippingOptions[0].amount).isEqualTo(500L)
+        assertThat(shippingOptions[0].displayName).isEqualTo("Standard Shipping")
+        assertThat(shippingOptions[0].deliveryEstimate).isNull()
+
+        assertThat(shippingOptions[1].id).isEqualTo("shr_express")
+        assertThat(shippingOptions[1].amount).isEqualTo(1500L)
+        assertThat(shippingOptions[1].displayName).isEqualTo("Express Shipping")
+
+        assertThat(shippingOptions[2].id).isEqualTo("shr_free")
+        assertThat(shippingOptions[2].amount).isEqualTo(0L)
+        assertThat(shippingOptions[2].displayName).isEqualTo("Free Shipping")
+    }
+
+    @Test
+    fun `parse returns empty shipping options when not present`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_RESPONSE_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result!!.shippingOptions).isEmpty()
     }
 }

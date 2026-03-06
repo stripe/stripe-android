@@ -96,6 +96,7 @@ class AsCheckoutSessionTest {
         val session = createResponse(
             totalSummary = createTotalSummary(
                 shippingRate = CheckoutSessionResponse.ShippingRate(
+                    id = "shr_standard",
                     amount = 500L,
                     displayName = "Standard Shipping",
                     deliveryEstimate = "5-7 business days",
@@ -103,6 +104,7 @@ class AsCheckoutSessionTest {
             ),
         ).asCheckoutSession()
         val shipping = session.totalSummary!!.shippingRate!!
+        assertThat(shipping.id).isEqualTo("shr_standard")
         assertThat(shipping.amount).isEqualTo(500L)
         assertThat(shipping.displayName).isEqualTo("Standard Shipping")
         assertThat(shipping.deliveryEstimate).isEqualTo("5-7 business days")
@@ -162,11 +164,48 @@ class AsCheckoutSessionTest {
         assertThat(session.lineItems).isEmpty()
     }
 
+    @Test
+    fun `maps shippingOptions`() {
+        val session = createResponse(
+            shippingOptions = listOf(
+                CheckoutSessionResponse.ShippingRate(
+                    id = "shr_standard",
+                    amount = 500L,
+                    displayName = "Standard Shipping",
+                    deliveryEstimate = null,
+                ),
+                CheckoutSessionResponse.ShippingRate(
+                    id = "shr_express",
+                    amount = 1500L,
+                    displayName = "Express Shipping",
+                    deliveryEstimate = "1-3 business days",
+                ),
+            ),
+        ).asCheckoutSession()
+        val options = session.shippingOptions
+        assertThat(options).hasSize(2)
+        assertThat(options[0].id).isEqualTo("shr_standard")
+        assertThat(options[0].amount).isEqualTo(500L)
+        assertThat(options[0].displayName).isEqualTo("Standard Shipping")
+        assertThat(options[0].deliveryEstimate).isNull()
+        assertThat(options[1].id).isEqualTo("shr_express")
+        assertThat(options[1].amount).isEqualTo(1500L)
+        assertThat(options[1].displayName).isEqualTo("Express Shipping")
+        assertThat(options[1].deliveryEstimate).isEqualTo("1-3 business days")
+    }
+
+    @Test
+    fun `empty shippingOptions maps to empty list`() {
+        val session = createResponse().asCheckoutSession()
+        assertThat(session.shippingOptions).isEmpty()
+    }
+
     private fun createResponse(
         id: String = "cs_test_abc123",
         currency: String = "usd",
         totalSummary: TotalSummaryResponse? = null,
         lineItems: List<CheckoutSessionResponse.LineItem> = emptyList(),
+        shippingOptions: List<CheckoutSessionResponse.ShippingRate> = emptyList(),
     ): CheckoutSessionResponse {
         return CheckoutSessionResponse(
             id = id,
@@ -174,6 +213,7 @@ class AsCheckoutSessionTest {
             currency = currency,
             totalSummary = totalSummary,
             lineItems = lineItems,
+            shippingOptions = shippingOptions,
         )
     }
 

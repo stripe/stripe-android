@@ -73,6 +73,13 @@ class Checkout private constructor(
             .updateState()
     }
 
+    suspend fun selectShippingRate(shippingRateId: String): Result<CheckoutSession> {
+        val sessionId = state.checkoutSessionResponse.id
+        return component.checkoutSessionRepository
+            .selectShippingRate(sessionId, shippingRateId)
+            .updateState()
+    }
+
     suspend fun refresh(): Result<CheckoutSession> {
         val sessionId = state.checkoutSessionResponse.id
         return component.checkoutSessionRepository
