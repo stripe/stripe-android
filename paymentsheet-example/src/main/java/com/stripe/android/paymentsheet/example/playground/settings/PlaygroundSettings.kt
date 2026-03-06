@@ -477,6 +477,7 @@ internal class PlaygroundSettings private constructor(
             CheckoutSessionRemoveSettingsDefinition,
             CheckoutSessionAdjustableQuantitySettingsDefinition,
             CheckoutSessionAutomaticTaxSettingsDefinition,
+            CheckoutSessionDisplayShippingRatesSettingsDefinition,
             AllowPromotionCodesSettingsDefinition,
             CustomerSheetPaymentMethodModeDefinition,
             CustomerSessionSettingsDefinition,

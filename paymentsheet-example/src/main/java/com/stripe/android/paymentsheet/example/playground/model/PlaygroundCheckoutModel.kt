@@ -75,6 +75,8 @@ class CheckoutRequest private constructor(
     val adjustableQuantity: Boolean?,
     @SerialName("automatic_tax")
     val automaticTax: Boolean?,
+    @SerialName("display_shipping_rates")
+    val displayShippingRates: Boolean?,
 ) {
     @Serializable
     enum class CustomerKeyType {
@@ -124,6 +126,7 @@ class CheckoutRequest private constructor(
         private var allowPromotionCodes: Boolean? = null
         private var adjustableQuantity: Boolean? = null
         private var automaticTax: Boolean? = null
+        private var displayShippingRates: Boolean? = null
 
         fun initialization(initialization: String?) = apply {
             this.initialization = initialization
@@ -261,6 +264,10 @@ class CheckoutRequest private constructor(
             this.automaticTax = automaticTax
         }
 
+        fun displayShippingRates(displayShippingRates: Boolean?) = apply {
+            this.displayShippingRates = displayShippingRates
+        }
+
         fun build(): CheckoutRequest {
             return CheckoutRequest(
                 initialization = initialization,
@@ -300,6 +307,7 @@ class CheckoutRequest private constructor(
                 allowPromotionCodes = allowPromotionCodes,
                 adjustableQuantity = adjustableQuantity,
                 automaticTax = automaticTax,
+                displayShippingRates = displayShippingRates,
             )
         }
     }
