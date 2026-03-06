@@ -101,6 +101,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                                 ?.sharePaymentDetailsImmediatelyAfterCreation != false
                         if (shouldShare) {
                             linkAccountManager.shareCardPaymentDetails(linkPaymentDetails).getOrThrow()
+                                .copy(createdFromNewPaymentMethod = true)
                         } else {
                             linkPaymentDetails
                         }
@@ -145,8 +146,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                 collectedCvc = cvc,
                 billingPhone = billingPhone
             ),
-            linkAccount = linkAccount,
-            invokedFromNewPmCreation = true
+            linkAccount = linkAccount
         )
         when (result) {
             is Result.Canceled -> Unit

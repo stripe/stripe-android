@@ -14,13 +14,13 @@ internal class FakeLinkConfirmationHandler : LinkConfirmationHandler {
         paymentDetails: ConsumerPaymentDetails.PaymentDetails,
         linkAccount: LinkAccount,
         cvc: String?,
-        billingPhone: String?,
+        billingPhone: String?
     ): Result {
         calls.add(
             element = Call(
                 paymentDetails = paymentDetails,
                 linkAccount = linkAccount,
-                cvc = cvc,
+                cvc = cvc
             )
         )
         return confirmResult
@@ -30,15 +30,13 @@ internal class FakeLinkConfirmationHandler : LinkConfirmationHandler {
         paymentDetails: LinkPaymentDetails,
         linkAccount: LinkAccount,
         cvc: String?,
-        billingPhone: String?,
-        invokedFromNewPmCreation: Boolean
+        billingPhone: String?
     ): Result {
         confirmWithLinkPaymentDetailsCall.add(
             element = ConfirmWithLinkPaymentDetailsCall(
                 paymentDetails = paymentDetails,
                 linkAccount = linkAccount,
-                cvc = cvc,
-                invokedFromNewPmCreation = invokedFromNewPmCreation
+                cvc = cvc
             )
         )
         return confirmWithLinkPaymentDetailsResult
@@ -47,13 +45,12 @@ internal class FakeLinkConfirmationHandler : LinkConfirmationHandler {
     data class Call(
         val paymentDetails: ConsumerPaymentDetails.PaymentDetails,
         val linkAccount: LinkAccount,
-        val cvc: String?,
+        val cvc: String?
     )
 
     data class ConfirmWithLinkPaymentDetailsCall(
         val paymentDetails: LinkPaymentDetails,
         val linkAccount: LinkAccount,
-        val cvc: String?,
-        val invokedFromNewPmCreation: Boolean
+        val cvc: String?
     )
 }

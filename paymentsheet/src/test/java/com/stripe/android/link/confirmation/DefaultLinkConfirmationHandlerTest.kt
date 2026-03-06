@@ -35,7 +35,6 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
-@Suppress("LargeClass")
 internal class DefaultLinkConfirmationHandlerTest {
     private val dispatcher = UnconfinedTestDispatcher()
 
@@ -222,8 +221,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             paymentDetails = TestFactory.LINK_NEW_PAYMENT_DETAILS,
             linkAccount = TestFactory.LINK_ACCOUNT,
             cvc = CVC,
-            billingPhone = null,
-            invokedFromNewPmCreation = false
+            billingPhone = null
         )
 
         assertThat(result).isEqualTo(Result.Succeeded)
@@ -262,8 +260,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             paymentDetails = savedPaymentDetails,
             linkAccount = TestFactory.LINK_ACCOUNT,
             cvc = CVC,
-            billingPhone = null,
-            invokedFromNewPmCreation = false
+            billingPhone = null
         )
 
         assertThat(result).isEqualTo(Result.Succeeded)
@@ -294,8 +291,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             paymentDetails = savedPaymentDetailsWithBilling,
             linkAccount = TestFactory.LINK_ACCOUNT,
             cvc = CVC,
-            billingPhone = null,
-            invokedFromNewPmCreation = false
+            billingPhone = null
         )
 
         assertThat(result).isEqualTo(Result.Succeeded)
@@ -325,8 +321,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             paymentDetails = TestFactory.LINK_PASSTHROUGH_PAYMENT_DETAILS,
             linkAccount = TestFactory.LINK_ACCOUNT,
             cvc = CVC,
-            billingPhone = null,
-            invokedFromNewPmCreation = false
+            billingPhone = null
         )
 
         assertThat(result).isEqualTo(Result.Succeeded)
@@ -605,8 +600,7 @@ internal class DefaultLinkConfirmationHandlerTest {
                 paymentDetails = savedPaymentDetails,
                 linkAccount = TestFactory.LINK_ACCOUNT,
                 cvc = CVC,
-                billingPhone = null,
-                invokedFromNewPmCreation = false
+                billingPhone = null
             )
 
             assertThat(result).isEqualTo(Result.Succeeded)
@@ -619,15 +613,15 @@ internal class DefaultLinkConfirmationHandlerTest {
         }
 
     @Test
-    fun `confirm with saved LinkPaymentDetails passes invokedFromNewPmCreation true`() =
-        testInvokedFromNewPmCreationPropagation(invokedFromNewPmCreation = true)
+    fun `confirm with Passthrough createdFromNewPaymentMethod true sets newPMTransformedForConfirmation`() =
+        testCreatedFromNewPaymentMethodPropagation(createdFromNewPaymentMethod = true)
 
     @Test
-    fun `confirm with saved LinkPaymentDetails passes invokedFromNewPmCreation false`() =
-        testInvokedFromNewPmCreationPropagation(invokedFromNewPmCreation = false)
+    fun `confirm with Passthrough createdFromNewPaymentMethod false sets newPMTransformedForConfirmation`() =
+        testCreatedFromNewPaymentMethodPropagation(createdFromNewPaymentMethod = false)
 
-    private fun testInvokedFromNewPmCreationPropagation(
-        invokedFromNewPmCreation: Boolean
+    private fun testCreatedFromNewPaymentMethodPropagation(
+        createdFromNewPaymentMethod: Boolean
     ) = runTest(dispatcher) {
         val configuration = TestFactory.LINK_CONFIGURATION
         val confirmationHandler = FakeConfirmationHandler()
@@ -642,21 +636,22 @@ internal class DefaultLinkConfirmationHandlerTest {
             )
         )
 
-        val savedPaymentDetails = TestFactory.LINK_PASSTHROUGH_PAYMENT_DETAILS
+        val savedPaymentDetails = TestFactory.LINK_PASSTHROUGH_PAYMENT_DETAILS.copy(
+            createdFromNewPaymentMethod = createdFromNewPaymentMethod
+        )
         val result = handler.confirm(
             paymentDetails = savedPaymentDetails,
             linkAccount = TestFactory.LINK_ACCOUNT,
             cvc = CVC,
-            billingPhone = null,
-            invokedFromNewPmCreation = invokedFromNewPmCreation
+            billingPhone = null
         )
 
         assertThat(result).isEqualTo(Result.Succeeded)
         confirmationHandler.startTurbine.awaitItem().assertSavedConfirmationArgs(
             configuration = configuration,
-            paymentDetails = TestFactory.LINK_PASSTHROUGH_PAYMENT_DETAILS,
+            paymentDetails = savedPaymentDetails,
             cvc = CVC,
-            newPMTransformedForConfirmation = invokedFromNewPmCreation
+            newPMTransformedForConfirmation = createdFromNewPaymentMethod
         )
     }
 
