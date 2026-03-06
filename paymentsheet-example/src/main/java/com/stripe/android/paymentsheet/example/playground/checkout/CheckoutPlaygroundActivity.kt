@@ -74,6 +74,7 @@ class CheckoutPlaygroundActivity : AppCompatActivity() {
                 isLoading = viewModel.isLoading,
                 applyPromotionCode = viewModel::applyPromotionCode,
                 removePromotionCode = viewModel::removePromotionCode,
+                updateLineItemQuantity = viewModel::updateLineItemQuantity,
                 refresh = viewModel::refresh,
             )
         }
@@ -92,6 +93,7 @@ private fun CheckoutScreen(
     isLoading: StateFlow<Boolean>,
     applyPromotionCode: (String) -> Unit,
     removePromotionCode: () -> Unit,
+    updateLineItemQuantity: (String, Int) -> Unit,
     refresh: () -> Unit,
 ) {
     val checkoutSession by checkout.checkoutSession.collectAsState()
@@ -103,7 +105,7 @@ private fun CheckoutScreen(
     Box {
         PlaygroundTheme(
             content = {
-                LineItemsSection(checkoutSession)
+                LineItemsSection(checkoutSession, updateLineItemQuantity)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
@@ -147,7 +149,10 @@ private fun CheckoutScreen(
 }
 
 @Composable
-private fun LineItemsSection(session: CheckoutSession) {
+private fun LineItemsSection(
+    session: CheckoutSession,
+    updateLineItemQuantity: (String, Int) -> Unit,
+) {
     val lineItems = session.lineItems
     val currency = session.currency
 
@@ -160,14 +165,50 @@ private fun LineItemsSection(session: CheckoutSession) {
         Spacer(modifier = Modifier.height(PADDING))
 
         for (item in lineItems) {
-            val quantityLabel = if (item.quantity > 1) " x${item.quantity}" else ""
             val unitPrice = item.unitAmount?.let { formatAmount(it, currency) }
             val lineTotal = formatAmount(item.total, currency)
-            SummaryRow(
-                label = "${item.name}$quantityLabel",
-                amount = lineTotal,
-                subtext = if (item.quantity > 1 && unitPrice != null) "$unitPrice each" else null,
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = PADDING / 2),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = item.name,
+                        style = MaterialTheme.typography.body2,
+                    )
+                    if (unitPrice != null) {
+                        Text(
+                            text = "$unitPrice each",
+                            style = MaterialTheme.typography.caption,
+                            color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+                        )
+                    }
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(
+                        onClick = { updateLineItemQuantity(item.id, item.quantity - 1) },
+                        enabled = item.quantity > 1,
+                    ) {
+                        Text("-")
+                    }
+                    Text(
+                        text = "${item.quantity}",
+                        style = MaterialTheme.typography.body2,
+                    )
+                    IconButton(
+                        onClick = { updateLineItemQuantity(item.id, item.quantity + 1) },
+                    ) {
+                        Text("+")
+                    }
+                }
+                Text(
+                    text = lineTotal,
+                    style = MaterialTheme.typography.body2,
+                )
+            }
         }
 
         Divider(modifier = Modifier.padding(vertical = PADDING))
