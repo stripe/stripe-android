@@ -34,6 +34,8 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.Section
 import com.stripe.android.uicore.elements.SectionFieldElement
 import com.stripe.android.uicore.elements.SectionFieldElementUI
+import com.stripe.android.uicore.elements.Selector
+import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
 import com.stripe.android.uicore.utils.collectAsState
@@ -209,10 +211,15 @@ private fun CardNumberField(
         },
         trailingIcon = {
             if (shouldShowCardBrandDropdown) {
-                CardBrandDropdown(
-                    selectedBrand = selectedBrand,
-                    availableBrands = availableNetworks,
-                    onBrandChoiceChanged = onBrandChoiceChanged,
+                Selector(
+                    currentItem = selectedBrand.toItem(),
+                    items = availableNetworks.map { it.toItem() },
+                    onItemSelected = {
+                        onBrandChoiceChanged.invoke(it.toCardBrandChoice())
+                    },
+                    hasFocus = true,
+                    popupMessage = "".resolvableString,
+                    hasMadeSelection = true
                 )
             } else {
                 PaymentMethodIconFromResource(
@@ -223,6 +230,21 @@ private fun CardNumberField(
                 )
             }
         }
+    )
+}
+
+private fun TextFieldIcon.Selector.Item.toCardBrandChoice(): CardBrandChoice {
+    return CardBrandChoice(
+        brand = CardBrand.fromCode(this.id),
+        enabled = true
+    )
+}
+
+private fun CardBrandChoice.toItem(): TextFieldIcon.Selector.Item {
+    return TextFieldIcon.Selector.Item(
+        id = brand.code,
+        label = brand.displayName.resolvableString,
+        icon = icon
     )
 }
 

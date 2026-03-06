@@ -1,5 +1,6 @@
 package com.stripe.android.uicore.elements
 
+import androidx.annotation.RestrictTo
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -42,8 +43,9 @@ import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Composable
-internal fun Selector(
+fun Selector(
     currentItem: TextFieldIcon.Selector.Item,
     items: List<TextFieldIcon.Selector.Item>,
     onItemSelected: (item: TextFieldIcon.Selector.Item) -> Unit,
