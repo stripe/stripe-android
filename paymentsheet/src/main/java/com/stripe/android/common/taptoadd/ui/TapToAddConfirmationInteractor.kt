@@ -5,6 +5,7 @@ import com.stripe.android.common.spms.withLinkState
 import com.stripe.android.common.taptoadd.TapToAddMode
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
@@ -12,6 +13,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.utils.buyButtonLabel
@@ -169,9 +171,9 @@ internal class DefaultTapToAddConfirmationInteractor(
         return TapToAddConfirmationInteractor.State(
             cardBrand = paymentMethod.card?.brand ?: CardBrand.Unknown,
             last4 = paymentMethod.card?.last4,
-            title = createLabel(useAmount = true),
+            title = createTitle(),
             primaryButton = TapToAddConfirmationInteractor.State.PrimaryButton(
-                label = createLabel(useAmount = false),
+                label = createButtonLabel(),
                 locked = tapToAddMode == TapToAddMode.Complete,
                 enabled = true,
                 state = TapToAddConfirmationInteractor.State.PrimaryButton.State.Idle,
@@ -188,10 +190,21 @@ internal class DefaultTapToAddConfirmationInteractor(
             .withConfirmationState(initialConfirmationState)
     }
 
-    private fun createLabel(useAmount: Boolean): ResolvableString {
+    private fun createTitle(): ResolvableString {
         return when (tapToAddMode) {
             TapToAddMode.Complete -> buyButtonLabel(
-                amount = paymentMethodMetadata.amount().takeIf { useAmount },
+                amount = paymentMethodMetadata.amount(),
+                primaryButtonLabel = null,
+                isForPaymentIntent = paymentMethodMetadata.stripeIntent is PaymentIntent
+            )
+            TapToAddMode.Continue -> R.string.stripe_tap_to_add_card_added_title.resolvableString
+        }
+    }
+
+    private fun createButtonLabel(): ResolvableString {
+        return when (tapToAddMode) {
+            TapToAddMode.Complete -> buyButtonLabel(
+                amount = null,
                 primaryButtonLabel = null,
                 isForPaymentIntent = paymentMethodMetadata.stripeIntent is PaymentIntent
             )

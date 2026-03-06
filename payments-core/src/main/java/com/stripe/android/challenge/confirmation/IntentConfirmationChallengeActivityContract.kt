@@ -13,19 +13,28 @@ internal class IntentConfirmationChallengeActivityContract :
         >() {
 
     override fun createIntent(context: Context, input: Args): Intent {
+        val nextActionData = input.intent.nextActionData
+            as? StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge
+        val captchaVendorName = nextActionData?.stripeJs?.captchaVendorName
+
         return IntentConfirmationChallengeActivity.createIntent(
             context,
             IntentConfirmationChallengeArgs(
                 input.publishableKey,
                 input.productUsage.toList(),
-                input.intent
+                input.intent,
+                captchaVendorName
             )
         )
     }
 
     override fun parseResult(resultCode: Int, intent: Intent?): IntentConfirmationChallengeActivityResult {
         val result = intent?.extras?.let {
-            BundleCompat.getParcelable(it, EXTRA_RESULT, IntentConfirmationChallengeActivityResult::class.java)
+            BundleCompat.getParcelable(
+                it,
+                EXTRA_RESULT,
+                IntentConfirmationChallengeActivityResult::class.java
+            )
         }
         return result ?: IntentConfirmationChallengeActivityResult.Failed(
             clientSecret = null,

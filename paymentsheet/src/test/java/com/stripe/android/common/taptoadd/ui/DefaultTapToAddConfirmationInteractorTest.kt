@@ -87,7 +87,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
         interactor.state.test {
             val state = awaitItem()
             assertThat(state.title)
-                .isEqualTo(StripeUiCoreR.string.stripe_continue_button_label.resolvableString)
+                .isEqualTo(R.string.stripe_tap_to_add_card_added_title.resolvableString)
             assertThat(state.primaryButton.label)
                 .isEqualTo(StripeUiCoreR.string.stripe_continue_button_label.resolvableString)
             assertThat(state.primaryButton.locked).isFalse()
