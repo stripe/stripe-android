@@ -1,5 +1,6 @@
 package com.stripe.android.uicore.elements
 
+import androidx.annotation.RestrictTo
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -28,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
@@ -42,13 +44,14 @@ import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Composable
-internal fun Selector(
+fun Selector(
     currentItem: TextFieldIcon.Selector.Item,
     items: List<TextFieldIcon.Selector.Item>,
     onItemSelected: (item: TextFieldIcon.Selector.Item) -> Unit,
     hasFocus: Boolean,
-    popupMessage: ResolvableString,
+    popupMessage: ResolvableString?,
     hasMadeSelection: Boolean
 ) {
     var showPopup by remember { mutableStateOf(!hasMadeSelection) }
@@ -87,7 +90,7 @@ internal fun Selector(
         }
     }
 
-    if (showPopup && hasFocus) {
+    if (showPopup && hasFocus && popupMessage != null) {
         SelectorPopup(popupMessage)
     }
 }
@@ -111,7 +114,8 @@ private fun SelectorItem(
             )
             .background(color = backgroundColor)
             .padding(6.dp)
-            .animateContentSize(),
+            .animateContentSize()
+            .testTag("${SELECTOR_ITEM_TEST_TAG}_${item.id}")
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically
@@ -166,3 +170,6 @@ private fun SelectorPopup(
         }
     }
 }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val SELECTOR_ITEM_TEST_TAG = "selector_item"
