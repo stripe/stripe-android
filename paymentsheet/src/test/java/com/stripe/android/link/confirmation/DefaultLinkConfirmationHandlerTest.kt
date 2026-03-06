@@ -612,6 +612,49 @@ internal class DefaultLinkConfirmationHandlerTest {
             )
         }
 
+    @Test
+    fun `confirm with Passthrough createdFromNewPaymentMethod true sets newPMTransformedForConfirmation`() =
+        testCreatedFromNewPaymentMethodPropagation(createdFromNewPaymentMethod = true)
+
+    @Test
+    fun `confirm with Passthrough createdFromNewPaymentMethod false sets newPMTransformedForConfirmation`() =
+        testCreatedFromNewPaymentMethodPropagation(createdFromNewPaymentMethod = false)
+
+    private fun testCreatedFromNewPaymentMethodPropagation(
+        createdFromNewPaymentMethod: Boolean
+    ) = runTest(dispatcher) {
+        val configuration = TestFactory.LINK_CONFIGURATION
+        val confirmationHandler = FakeConfirmationHandler()
+        val handler = createHandler(
+            confirmationHandler = confirmationHandler,
+            configuration = configuration
+        )
+
+        confirmationHandler.awaitResultTurbine.add(
+            item = ConfirmationHandler.Result.Succeeded(
+                intent = configuration.stripeIntent,
+            )
+        )
+
+        val savedPaymentDetails = TestFactory.LINK_PASSTHROUGH_PAYMENT_DETAILS.copy(
+            createdFromNewPaymentMethod = createdFromNewPaymentMethod
+        )
+        val result = handler.confirm(
+            paymentDetails = savedPaymentDetails,
+            linkAccount = TestFactory.LINK_ACCOUNT,
+            cvc = CVC,
+            billingPhone = null
+        )
+
+        assertThat(result).isEqualTo(Result.Succeeded)
+        confirmationHandler.startTurbine.awaitItem().assertSavedConfirmationArgs(
+            configuration = configuration,
+            paymentDetails = savedPaymentDetails,
+            cvc = CVC,
+            newPMTransformedForConfirmation = createdFromNewPaymentMethod
+        )
+    }
+
     private fun ConfirmationHandler.Args.assertConfirmationArgs(
         configuration: LinkConfiguration,
         paymentDetails: ConsumerPaymentDetails.PaymentDetails,
@@ -631,6 +674,7 @@ internal class DefaultLinkConfirmationHandlerTest {
                 billingDetails = billingDetails,
                 allowRedisplay = allowRedisplay,
                 clientAttributionMetadata = configuration.clientAttributionMetadata,
+                originalPaymentMethodCode = paymentDetails.type,
             )
         )
         assertThat(paymentMethodMetadata.passiveCaptchaParams).isEqualTo(passiveCaptchaParams)
@@ -641,11 +685,13 @@ internal class DefaultLinkConfirmationHandlerTest {
         configuration: LinkConfiguration,
         paymentDetails: LinkPaymentDetails.Passthrough,
         cvc: String?,
-        passiveCaptchaParams: PassiveCaptchaParams? = PASSIVE_CAPTCHA_PARAMS
+        passiveCaptchaParams: PassiveCaptchaParams? = PASSIVE_CAPTCHA_PARAMS,
+        newPMTransformedForConfirmation: Boolean = false
     ) {
         assertThat(intent).isEqualTo(configuration.stripeIntent)
         val option = confirmationOption as PaymentMethodConfirmationOption.Saved
         assertThat(option.paymentMethod.id).isEqualTo(paymentDetails.paymentDetails.paymentMethodId)
+        assertThat(option.newPMTransformedForConfirmation).isEqualTo(newPMTransformedForConfirmation)
         assertThat(paymentMethodMetadata.passiveCaptchaParams).isEqualTo(passiveCaptchaParams)
 
         val optionsCard = option.optionsParams as? PaymentMethodOptionsParams.Card
