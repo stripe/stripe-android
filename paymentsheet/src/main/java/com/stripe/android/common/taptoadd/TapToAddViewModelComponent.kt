@@ -125,6 +125,7 @@ internal interface TapToAddViewModelComponent {
         CheckoutSessionRepositoryModule::class,
     ]
 )
+@Suppress("TooManyFunctions")
 internal interface TapToAddViewModelModule {
     @Binds
     fun bindsErrorReporter(errorReporter: RealErrorReporter): ErrorReporter
