@@ -61,6 +61,11 @@ import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepositoryModule
+import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
+import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.repositories.DefaultSavedPaymentMethodRepository
+import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.stripeterminal.external.models.TapToPayUxConfiguration
 import dagger.Binds
 import dagger.BindsInstance
@@ -117,11 +122,22 @@ internal interface TapToAddViewModelComponent {
     ],
     includes = [
         TapToAddLinkModule::class,
+        CheckoutSessionRepositoryModule::class,
     ]
 )
 internal interface TapToAddViewModelModule {
     @Binds
     fun bindsErrorReporter(errorReporter: RealErrorReporter): ErrorReporter
+
+    @Binds
+    fun bindsCustomerRepository(
+        repository: CustomerApiRepository
+    ): CustomerRepository
+
+    @Binds
+    fun bindsSavedPaymentMethodRepository(
+        repository: DefaultSavedPaymentMethodRepository
+    ): SavedPaymentMethodRepository
 
     @Binds
     fun bindsPrefsRepositoryFactory(

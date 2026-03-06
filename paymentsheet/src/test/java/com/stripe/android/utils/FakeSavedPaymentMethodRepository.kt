@@ -21,6 +21,9 @@ internal class FakeSavedPaymentMethodRepository(
     private val onSetDefaultPaymentMethod: () -> Result<Customer> = {
         Result.failure(NotImplementedError())
     },
+    private val onRetrievePaymentMethod: (paymentMethodId: String) -> Result<PaymentMethod> = {
+        Result.failure(NotImplementedError())
+    },
 ) : SavedPaymentMethodRepository {
     private val _detachRequests = Turbine<DetachRequest>()
     val detachRequests: ReceiveTurbine<DetachRequest> = _detachRequests
@@ -74,10 +77,28 @@ internal class FakeSavedPaymentMethodRepository(
         return onSetDefaultPaymentMethod()
     }
 
+    private val _retrievePaymentMethodRequests = Turbine<RetrievePaymentMethodRequest>()
+    val retrievePaymentMethodRequests: ReceiveTurbine<RetrievePaymentMethodRequest> =
+        _retrievePaymentMethodRequests
+
+    override suspend fun retrievePaymentMethod(
+        customerMetadata: CustomerMetadata,
+        paymentMethodId: String,
+    ): Result<PaymentMethod> {
+        _retrievePaymentMethodRequests.add(
+            RetrievePaymentMethodRequest(
+                paymentMethodId = paymentMethodId,
+                customerMetadata = customerMetadata,
+            )
+        )
+        return onRetrievePaymentMethod(paymentMethodId)
+    }
+
     fun validate() {
         _detachRequests.ensureAllEventsConsumed()
         _updateRequests.ensureAllEventsConsumed()
         _setDefaultPaymentMethodRequests.ensureAllEventsConsumed()
+        _retrievePaymentMethodRequests.ensureAllEventsConsumed()
     }
 
     data class DetachRequest(
@@ -94,6 +115,11 @@ internal class FakeSavedPaymentMethodRepository(
 
     data class SetDefaultRequest(
         val paymentMethodId: String?,
+        val customerMetadata: CustomerMetadata,
+    )
+
+    data class RetrievePaymentMethodRequest(
+        val paymentMethodId: String,
         val customerMetadata: CustomerMetadata,
     )
 }

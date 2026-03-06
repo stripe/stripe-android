@@ -223,6 +223,23 @@ internal class CustomerApiRepository @Inject constructor(
         )
     )
 
+    override suspend fun retrievePaymentMethod(
+        customerId: String,
+        ephemeralKeySecret: String,
+        paymentMethodId: String,
+    ): Result<PaymentMethod> =
+        stripeRepository.retrieveCustomerPaymentMethod(
+            customerId = customerId,
+            paymentMethodId = paymentMethodId,
+            productUsageTokens = productUsageTokens,
+            requestOptions = ApiRequest.Options(
+                apiKey = ephemeralKeySecret,
+                stripeAccount = lazyPaymentConfig.get().stripeAccountId,
+            ),
+        ).onFailure {
+            logger.error("Failed to retrieve payment method $paymentMethodId.", it)
+        }
+
     private fun filterPaymentMethods(allPaymentMethods: List<PaymentMethod>): List<PaymentMethod> {
         val paymentMethods = mutableListOf<PaymentMethod>()
 

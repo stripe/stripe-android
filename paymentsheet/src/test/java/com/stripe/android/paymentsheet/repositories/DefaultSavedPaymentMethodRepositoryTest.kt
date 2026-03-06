@@ -156,6 +156,51 @@ class DefaultSavedPaymentMethodRepositoryTest {
     }
 
     @Test
+    fun `retrievePaymentMethod routes to customer repository when customer is CustomerSession`() = runScenario(
+        customerMetadata = SESSION_METADATA,
+        retrievePaymentMethodResult = Result.success(
+            PaymentMethod.Builder().setId("pm_123").build()
+        ),
+    ) {
+        val result = repository.retrievePaymentMethod(
+            customerMetadata = customerMetadata,
+            paymentMethodId = "pm_123",
+        )
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrThrow().id).isEqualTo("pm_123")
+    }
+
+    @Test
+    fun `retrievePaymentMethod routes to customer repository when customer is LegacyEphemeralKey`() = runScenario(
+        customerMetadata = LEGACY_METADATA,
+        retrievePaymentMethodResult = Result.success(
+            PaymentMethod.Builder().setId("pm_456").build()
+        ),
+    ) {
+        val result = repository.retrievePaymentMethod(
+            customerMetadata = customerMetadata,
+            paymentMethodId = "pm_456",
+        )
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrThrow().id).isEqualTo("pm_456")
+    }
+
+    @Test
+    fun `retrievePaymentMethod fails for checkout session`() = runScenario(
+        customerMetadata = CHECKOUT_SESSION_METADATA,
+    ) {
+        val result = repository.retrievePaymentMethod(
+            customerMetadata = customerMetadata,
+            paymentMethodId = "pm_123",
+        )
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isInstanceOf(NotImplementedError::class.java)
+    }
+
+    @Test
     fun `detach propagates failure from checkout session repository`() = runScenario(
         checkoutSessionDetachResult = Result.failure(RuntimeException("Detach failed")),
         customerMetadata = CHECKOUT_SESSION_METADATA,
@@ -173,6 +218,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
     private fun runScenario(
         customerMetadata: CustomerMetadata = SESSION_METADATA,
         checkoutSessionDetachResult: Result<CheckoutSessionResponse> = Result.failure(NotImplementedError()),
+        retrievePaymentMethodResult: Result<PaymentMethod> = Result.failure(NotImplementedError()),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val customerRepository = FakeCustomerRepository(
@@ -185,6 +231,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
                 // The Customer value is never inspected in these tests.
                 Result.success(mock())
             },
+            onRetrievePaymentMethod = { _ -> retrievePaymentMethodResult },
         )
         val checkoutSessionRepository = FakeCheckoutSessionRepository(
             detachResult = checkoutSessionDetachResult,

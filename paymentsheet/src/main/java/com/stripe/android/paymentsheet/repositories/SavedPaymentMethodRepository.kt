@@ -28,6 +28,11 @@ internal interface SavedPaymentMethodRepository {
         customerMetadata: CustomerMetadata,
         paymentMethodId: String?,
     ): Result<Customer>
+
+    suspend fun retrievePaymentMethod(
+        customerMetadata: CustomerMetadata,
+        paymentMethodId: String,
+    ): Result<PaymentMethod>
 }
 
 internal class DefaultSavedPaymentMethodRepository @Inject constructor(
@@ -109,6 +114,31 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
         }
         is CustomerMetadata.LegacyEphemeralKey -> {
             customerRepository.setDefaultPaymentMethod(
+                customerId = customerMetadata.id,
+                ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
+                paymentMethodId = paymentMethodId,
+            )
+        }
+    }
+
+    override suspend fun retrievePaymentMethod(
+        customerMetadata: CustomerMetadata,
+        paymentMethodId: String,
+    ): Result<PaymentMethod> = when (customerMetadata) {
+        is CustomerMetadata.CheckoutSession -> {
+            Result.failure(
+                NotImplementedError("Checkout sessions do not support retrieving individual payment methods")
+            )
+        }
+        is CustomerMetadata.CustomerSession -> {
+            customerRepository.retrievePaymentMethod(
+                customerId = customerMetadata.id,
+                ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
+                paymentMethodId = paymentMethodId,
+            )
+        }
+        is CustomerMetadata.LegacyEphemeralKey -> {
+            customerRepository.retrievePaymentMethod(
                 customerId = customerMetadata.id,
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
                 paymentMethodId = paymentMethodId,
