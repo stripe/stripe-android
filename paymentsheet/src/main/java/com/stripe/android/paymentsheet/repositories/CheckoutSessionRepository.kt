@@ -63,137 +63,90 @@ internal class DefaultCheckoutSessionRepository @Inject constructor(
         stripeAccount = stripeAccountIdProvider(),
     )
 
-    override suspend fun init(
-        sessionId: String,
+    private suspend fun executePost(
+        url: String,
+        params: Map<String, *>,
     ): Result<CheckoutSessionResponse> {
         val options = createOptions()
         return executeRequestWithResultParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
             stripeNetworkClient = stripeNetworkClient,
             request = apiRequestFactory.createPost(
-                url = initUrl(sessionId),
+                url = url,
                 options = options,
-                params = mapOf(
-                    "browser_locale" to Locale.getDefault().toLanguageTag(),
-                    "browser_timezone" to TimeZone.getDefault().id,
-                    "eid" to UUID.randomUUID().toString(),
-                    "redirect_type" to "embedded",
-                    "elements_session_client[is_aggregation_expected]" to "true",
-                ),
+                params = params,
             ),
             responseJsonParser = CheckoutSessionResponseJsonParser(
                 isLiveMode = options.apiKeyIsLiveMode,
             ),
         )
     }
+
+    override suspend fun init(
+        sessionId: String,
+    ): Result<CheckoutSessionResponse> = executePost(
+        url = initUrl(sessionId),
+        params = mapOf(
+            "browser_locale" to Locale.getDefault().toLanguageTag(),
+            "browser_timezone" to TimeZone.getDefault().id,
+            "eid" to UUID.randomUUID().toString(),
+            "redirect_type" to "embedded",
+            "elements_session_client[is_aggregation_expected]" to "true",
+        ),
+    )
 
     override suspend fun confirm(
         id: String,
         params: ConfirmCheckoutSessionParams,
-    ): Result<CheckoutSessionResponse> {
-        val options = createOptions()
-        return executeRequestWithResultParser(
-            stripeErrorJsonParser = stripeErrorJsonParser,
-            stripeNetworkClient = stripeNetworkClient,
-            request = apiRequestFactory.createPost(
-                url = confirmUrl(id),
-                options = options,
-                params = params.toParamMap(),
-            ),
-            responseJsonParser = CheckoutSessionResponseJsonParser(
-                isLiveMode = options.apiKeyIsLiveMode,
-            ),
-        )
-    }
+    ): Result<CheckoutSessionResponse> = executePost(
+        url = confirmUrl(id),
+        params = params.toParamMap(),
+    )
 
     override suspend fun detachPaymentMethod(
         sessionId: String,
         paymentMethodId: String,
-    ): Result<CheckoutSessionResponse> {
-        val options = createOptions()
-        return executeRequestWithResultParser(
-            stripeErrorJsonParser = stripeErrorJsonParser,
-            stripeNetworkClient = stripeNetworkClient,
-            request = apiRequestFactory.createPost(
-                url = updateUrl(sessionId),
-                options = options,
-                params = mapOf(
-                    "payment_method_to_detach" to paymentMethodId,
-                ),
-            ),
-            responseJsonParser = CheckoutSessionResponseJsonParser(
-                isLiveMode = options.apiKeyIsLiveMode,
-            ),
-        )
-    }
+    ): Result<CheckoutSessionResponse> = executePost(
+        url = updateUrl(sessionId),
+        params = mapOf(
+            "payment_method_to_detach" to paymentMethodId,
+        ),
+    )
 
     override suspend fun applyPromotionCode(
         sessionId: String,
         promotionCode: String,
-    ): Result<CheckoutSessionResponse> {
-        val options = createOptions()
-        return executeRequestWithResultParser(
-            stripeErrorJsonParser = stripeErrorJsonParser,
-            stripeNetworkClient = stripeNetworkClient,
-            request = apiRequestFactory.createPost(
-                url = updateUrl(sessionId),
-                options = options,
-                params = mapOf(
-                    "promotion_code" to promotionCode,
-                    "elements_session_client[is_aggregation_expected]" to "true",
-                ),
-            ),
-            responseJsonParser = CheckoutSessionResponseJsonParser(
-                isLiveMode = options.apiKeyIsLiveMode,
-            ),
-        )
-    }
+    ): Result<CheckoutSessionResponse> = executePost(
+        url = updateUrl(sessionId),
+        params = mapOf(
+            "promotion_code" to promotionCode,
+            "elements_session_client[is_aggregation_expected]" to "true",
+        ),
+    )
 
     override suspend fun updateLineItemQuantity(
         sessionId: String,
         lineItemId: String,
         quantity: Int,
-    ): Result<CheckoutSessionResponse> {
-        val options = createOptions()
-        return executeRequestWithResultParser(
-            stripeErrorJsonParser = stripeErrorJsonParser,
-            stripeNetworkClient = stripeNetworkClient,
-            request = apiRequestFactory.createPost(
-                url = updateUrl(sessionId),
-                options = options,
-                params = mapOf(
-                    "updated_line_item_quantity[line_item_id]" to lineItemId,
-                    "updated_line_item_quantity[quantity]" to quantity.toString(),
-                    "updated_line_item_quantity[fail_update_on_discount_error]" to "true",
-                ),
-            ),
-            responseJsonParser = CheckoutSessionResponseJsonParser(
-                isLiveMode = options.apiKeyIsLiveMode,
-            ),
-        )
-    }
+    ): Result<CheckoutSessionResponse> = executePost(
+        url = updateUrl(sessionId),
+        params = mapOf(
+            "updated_line_item_quantity[line_item_id]" to lineItemId,
+            "updated_line_item_quantity[quantity]" to quantity.toString(),
+            "updated_line_item_quantity[fail_update_on_discount_error]" to "true",
+        ),
+    )
 
     override suspend fun selectShippingRate(
         sessionId: String,
         shippingRateId: String,
-    ): Result<CheckoutSessionResponse> {
-        val options = createOptions()
-        return executeRequestWithResultParser(
-            stripeErrorJsonParser = stripeErrorJsonParser,
-            stripeNetworkClient = stripeNetworkClient,
-            request = apiRequestFactory.createPost(
-                url = updateUrl(sessionId),
-                options = options,
-                params = mapOf(
-                    "shipping_rate" to shippingRateId,
-                    "elements_session_client[is_aggregation_expected]" to "true",
-                ),
-            ),
-            responseJsonParser = CheckoutSessionResponseJsonParser(
-                isLiveMode = options.apiKeyIsLiveMode,
-            ),
-        )
-    }
+    ): Result<CheckoutSessionResponse> = executePost(
+        url = updateUrl(sessionId),
+        params = mapOf(
+            "shipping_rate" to shippingRateId,
+            "elements_session_client[is_aggregation_expected]" to "true",
+        ),
+    )
 
     private companion object {
         private fun initUrl(sessionId: String): String =
