@@ -69,8 +69,7 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
                 confirmationTokenConfirmationInterceptorFactory.create(
                     intentConfiguration = integrationMetadata.intentConfiguration,
                     createIntentCallback = deferredIntentCallbackRetriever.waitForConfirmationTokenCallback(),
-                    customerId = customerMetadata?.id,
-                    ephemeralKeySecret = customerMetadata?.ephemeralKeySecret,
+                    customerMetadata = customerMetadata,
                     clientAttributionMetadata = clientAttributionMetadata,
                 )
             }

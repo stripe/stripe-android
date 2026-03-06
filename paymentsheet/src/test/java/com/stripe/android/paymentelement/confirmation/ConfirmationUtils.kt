@@ -109,15 +109,13 @@ internal suspend fun createIntentConfirmationInterceptor(
             override fun create(
                 intentConfiguration: PaymentSheet.IntentConfiguration,
                 createIntentCallback: CreateIntentWithConfirmationTokenCallback,
-                customerId: String?,
-                ephemeralKeySecret: String?,
+                customerMetadata: CustomerMetadata?,
                 clientAttributionMetadata: ClientAttributionMetadata,
             ): ConfirmationTokenConfirmationInterceptor {
                 return ConfirmationTokenConfirmationInterceptor(
                     intentConfiguration = intentConfiguration,
-                    customerId = customerId,
                     createIntentCallback = createIntentCallback,
-                    ephemeralKeySecret = ephemeralKeySecret,
+                    customerMetadata = customerMetadata,
                     context = ApplicationProvider.getApplicationContext(),
                     stripeRepository = stripeRepository,
                     requestOptions = requestOptions,

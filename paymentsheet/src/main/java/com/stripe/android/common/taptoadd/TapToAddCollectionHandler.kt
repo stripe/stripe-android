@@ -1,21 +1,19 @@
 package com.stripe.android.common.taptoadd
 
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R as StripeR
 import com.stripe.android.common.exception.stripeErrorMessage
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.confirmation.intent.CallbackNotFoundException
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.stripeterminal.external.callable.Callback
 import com.stripe.stripeterminal.external.callable.Cancelable
 import com.stripe.stripeterminal.external.callable.SetupIntentCallback
@@ -27,7 +25,6 @@ import com.stripe.stripeterminal.external.models.TerminalErrorCode
 import com.stripe.stripeterminal.external.models.TerminalException
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.suspendCancellableCoroutine
-import javax.inject.Provider
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.suspendCoroutine
 
@@ -50,9 +47,7 @@ internal interface TapToAddCollectionHandler {
         fun create(
             isStripeTerminalSdkAvailable: IsStripeTerminalSdkAvailable,
             terminalWrapper: TerminalWrapper,
-            stripeRepository: StripeRepository,
-            paymentConfiguration: Provider<PaymentConfiguration>,
-            productUsage: Set<String>,
+            savedPaymentMethodRepository: SavedPaymentMethodRepository,
             connectionManager: TapToAddConnectionManager,
             tapToPayUxConfiguration: TapToPayUxConfiguration,
             errorReporter: ErrorReporter,
@@ -62,11 +57,9 @@ internal interface TapToAddCollectionHandler {
                 DefaultTapToAddCollectionHandler(
                     terminalWrapper = terminalWrapper,
                     connectionManager = connectionManager,
-                    stripeRepository = stripeRepository,
+                    savedPaymentMethodRepository = savedPaymentMethodRepository,
                     tapToPayUxConfiguration = tapToPayUxConfiguration,
                     errorReporter = errorReporter,
-                    productUsage = productUsage,
-                    paymentConfiguration = paymentConfiguration,
                     createCardPresentSetupIntentCallbackRetriever = createCardPresentSetupIntentCallbackRetriever,
                 )
             } else {
@@ -79,12 +72,10 @@ internal interface TapToAddCollectionHandler {
 @OptIn(TapToAddPreview::class)
 internal class DefaultTapToAddCollectionHandler(
     private val terminalWrapper: TerminalWrapper,
-    private val stripeRepository: StripeRepository,
+    private val savedPaymentMethodRepository: SavedPaymentMethodRepository,
     private val connectionManager: TapToAddConnectionManager,
     private val errorReporter: ErrorReporter,
     private val tapToPayUxConfiguration: TapToPayUxConfiguration,
-    private val productUsage: Set<String>,
-    private val paymentConfiguration: Provider<PaymentConfiguration>,
     private val createCardPresentSetupIntentCallbackRetriever: CreateCardPresentSetupIntentCallbackRetriever,
 ) : TapToAddCollectionHandler {
     override suspend fun collect(
@@ -275,14 +266,9 @@ internal class DefaultTapToAddCollectionHandler(
                 )
             }
 
-        return stripeRepository.retrieveCustomerPaymentMethod(
-            customerId = customerMetadata.id,
+        return savedPaymentMethodRepository.retrievePaymentMethod(
+            customerMetadata = customerMetadata,
             paymentMethodId = generatedCardId,
-            productUsageTokens = productUsage,
-            requestOptions = ApiRequest.Options(
-                apiKey = customerMetadata.ephemeralKeySecret,
-                stripeAccount = paymentConfiguration.get().stripeAccountId,
-            ),
         ).getOrThrow()
     }
 

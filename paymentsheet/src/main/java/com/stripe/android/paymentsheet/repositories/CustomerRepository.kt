@@ -70,4 +70,10 @@ internal interface CustomerRepository {
         ephemeralKeySecret: String,
         paymentMethodId: String?,
     ): Result<Customer>
+
+    suspend fun retrievePaymentMethod(
+        customerId: String,
+        ephemeralKeySecret: String,
+        paymentMethodId: String,
+    ): Result<PaymentMethod>
 }

@@ -29,7 +29,10 @@ internal open class FakeCustomerRepository(
     },
     private val onSetDefaultPaymentMethod: () -> Result<Customer> = {
         Result.failure(NotImplementedError())
-    }
+    },
+    private val onRetrievePaymentMethod: (paymentMethodId: String) -> Result<PaymentMethod> = {
+        Result.failure(NotImplementedError())
+    },
 ) : CustomerRepository {
     private val _detachRequests = Turbine<DetachRequest>()
     val detachRequests: ReceiveTurbine<DetachRequest> = _detachRequests
@@ -131,6 +134,12 @@ internal open class FakeCustomerRepository(
 
         return onSetDefaultPaymentMethod()
     }
+
+    override suspend fun retrievePaymentMethod(
+        customerId: String,
+        ephemeralKeySecret: String,
+        paymentMethodId: String,
+    ): Result<PaymentMethod> = onRetrievePaymentMethod(paymentMethodId)
 
     data class DetachRequest(
         val paymentMethodId: String,

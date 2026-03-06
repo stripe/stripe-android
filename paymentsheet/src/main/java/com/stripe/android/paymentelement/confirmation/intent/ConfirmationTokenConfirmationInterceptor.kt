@@ -6,6 +6,7 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.UserFacingLogger
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.mandateDataForDeferredIntent
 import com.stripe.android.model.AndroidVerificationObject
 import com.stripe.android.model.ClientAttributionMetadata
@@ -39,14 +40,33 @@ import dagger.assisted.AssistedInject
 internal class ConfirmationTokenConfirmationInterceptor @AssistedInject constructor(
     @Assisted private val intentConfiguration: PaymentSheet.IntentConfiguration,
     @Assisted private val createIntentCallback: CreateIntentWithConfirmationTokenCallback,
-    @Assisted(CUSTOMER_ID) private val customerId: String?,
-    @Assisted(EPHEMERAL_KEY_SECRET) private val ephemeralKeySecret: String?,
+    @Assisted private val customerMetadata: CustomerMetadata?,
     @Assisted private val clientAttributionMetadata: ClientAttributionMetadata,
     private val context: Context,
     private val stripeRepository: StripeRepository,
     private val requestOptions: ApiRequest.Options,
     private val userFacingLogger: UserFacingLogger,
 ) : IntentConfirmationInterceptor {
+    init {
+        require(customerMetadata !is CustomerMetadata.CheckoutSession) {
+            "CheckoutSession is not yet supported for confirmation tokens"
+        }
+    }
+
+    private val customerId: String? = when (customerMetadata) {
+        is CustomerMetadata.LegacyEphemeralKey -> customerMetadata.id
+        is CustomerMetadata.CustomerSession -> customerMetadata.id
+        is CustomerMetadata.CheckoutSession,
+        null -> null
+    }
+
+    private val ephemeralKeySecret: String? = when (customerMetadata) {
+        is CustomerMetadata.LegacyEphemeralKey -> customerMetadata.ephemeralKeySecret
+        is CustomerMetadata.CustomerSession -> customerMetadata.ephemeralKeySecret
+        is CustomerMetadata.CheckoutSession,
+        null -> null
+    }
+
     private val confirmActionHelper: ConfirmActionHelper = ConfirmActionHelper(requestOptions.apiKeyIsLiveMode)
 
     override suspend fun intercept(
@@ -302,16 +322,12 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
         fun create(
             intentConfiguration: PaymentSheet.IntentConfiguration,
             createIntentCallback: CreateIntentWithConfirmationTokenCallback,
-            @Assisted(CUSTOMER_ID) customerId: String?,
-            @Assisted(EPHEMERAL_KEY_SECRET) ephemeralKeySecret: String?,
+            customerMetadata: CustomerMetadata?,
             @Assisted clientAttributionMetadata: ClientAttributionMetadata,
         ): ConfirmationTokenConfirmationInterceptor
     }
 
     companion object {
-        private const val CUSTOMER_ID = "customerId"
-        private const val EPHEMERAL_KEY_SECRET = "ephemeralKeySecret"
-
         private const val ERROR_MISSING_EPHEMERAL_KEY_SECRET =
             "Ephemeral key secret is required to confirm with saved payment method"
     }

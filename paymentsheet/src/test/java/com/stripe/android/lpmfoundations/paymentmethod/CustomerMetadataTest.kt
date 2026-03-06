@@ -189,7 +189,7 @@ internal class CustomerMetadataTest {
             customer = customer,
             id = "cus_test",
             ephemeralKeySecret = "ek_test",
-            customerSessionClientSecret = null,
+            customerSessionClientSecret = "cuss_test",
             isPaymentMethodSetAsDefaultEnabled = false,
         )
         assertThat(result.saveConsent).isEqualTo(
@@ -375,7 +375,7 @@ internal class CustomerMetadataTest {
             customer = customer,
             id = "cus_test",
             ephemeralKeySecret = "ek_test",
-            customerSessionClientSecret = null,
+            customerSessionClientSecret = "cuss_test",
             isPaymentMethodSetAsDefaultEnabled = false,
         )
 
