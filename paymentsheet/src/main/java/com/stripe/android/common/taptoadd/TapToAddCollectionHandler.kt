@@ -1,12 +1,14 @@
 package com.stripe.android.common.taptoadd
 
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.R as StripeR
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.TapToAddPreview
@@ -154,7 +156,7 @@ internal class DefaultTapToAddCollectionHandler(
         val confirmedIntent = confirmSetupIntent(setupIntentWithAttachedPaymentMethod)
         val paymentMethod = fetchPaymentMethod(confirmedIntent, customerMetadata)
 
-        return TapToAddCollectionHandler.CollectionState.Collected(paymentMethod)
+        return validatePaymentMethod(paymentMethod, metadata)
     }
 
     private fun setUxConfiguration() {
@@ -185,6 +187,23 @@ internal class DefaultTapToAddCollectionHandler(
         )
 
         continuation.handleCancellation(cancellable)
+    }
+
+    private fun validatePaymentMethod(
+        paymentMethod: PaymentMethod,
+        metadata: PaymentMethodMetadata,
+    ): TapToAddCollectionHandler.CollectionState {
+        if (!metadata.cardBrandFilter.isAccepted(paymentMethod)) {
+            return TapToAddCollectionHandler.CollectionState.FailedCollection(
+                error = IllegalStateException("Payment method is not supported by card brand filter!"),
+                displayMessage = resolvableString(
+                    StripeR.string.stripe_disallowed_card_brand,
+                    paymentMethod.card?.brand ?: CardBrand.Unknown,
+                )
+            )
+        }
+
+        return TapToAddCollectionHandler.CollectionState.Collected(paymentMethod)
     }
 
     private suspend fun confirmSetupIntent(
