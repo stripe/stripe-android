@@ -75,6 +75,7 @@ class CheckoutPlaygroundActivity : AppCompatActivity() {
                 applyPromotionCode = viewModel::applyPromotionCode,
                 removePromotionCode = viewModel::removePromotionCode,
                 updateLineItemQuantity = viewModel::updateLineItemQuantity,
+                selectShippingRate = viewModel::selectShippingRate,
                 refresh = viewModel::refresh,
             )
         }
@@ -94,6 +95,7 @@ private fun CheckoutScreen(
     applyPromotionCode: (String) -> Unit,
     removePromotionCode: () -> Unit,
     updateLineItemQuantity: (String, Int) -> Unit,
+    selectShippingRate: (String) -> Unit,
     refresh: () -> Unit,
 ) {
     val checkoutSession by checkout.checkoutSession.collectAsState()
@@ -106,6 +108,7 @@ private fun CheckoutScreen(
         PlaygroundTheme(
             content = {
                 LineItemsSection(checkoutSession, updateLineItemQuantity)
+                ShippingOptionsSection(checkoutSession, selectShippingRate)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
@@ -207,6 +210,74 @@ private fun LineItemsSection(
                 Text(
                     text = lineTotal,
                     style = MaterialTheme.typography.body2,
+                )
+            }
+        }
+
+        Divider(modifier = Modifier.padding(vertical = PADDING))
+    }
+}
+
+@Composable
+private fun ShippingOptionsSection(session: CheckoutSession, selectShippingRate: (String) -> Unit) {
+    val shippingOptions = session.shippingOptions
+    if (shippingOptions.isEmpty()) return
+
+    val selectedId = session.totalSummary?.shippingRate?.id
+    val currency = session.currency
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "Shipping",
+            style = MaterialTheme.typography.h6,
+        )
+
+        Spacer(modifier = Modifier.height(PADDING))
+
+        for (option in shippingOptions) {
+            val isSelected = option.id == selectedId
+            val amountText = if (option.amount == 0L) "Free" else formatAmount(option.amount, currency)
+            val subtext = option.deliveryEstimate
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { selectShippingRate(option.id) }
+                    .background(
+                        if (isSelected) {
+                            MaterialTheme.colors.primary.copy(alpha = 0.1f)
+                        } else {
+                            Color.Transparent
+                        }
+                    )
+                    .padding(vertical = PADDING / 2),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = option.displayName,
+                        style = if (isSelected) {
+                            MaterialTheme.typography.subtitle1
+                        } else {
+                            MaterialTheme.typography.body2
+                        },
+                    )
+                    if (subtext != null) {
+                        Text(
+                            text = subtext,
+                            style = MaterialTheme.typography.caption,
+                            color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+                        )
+                    }
+                }
+                Text(
+                    text = amountText,
+                    style = if (isSelected) {
+                        MaterialTheme.typography.subtitle1
+                    } else {
+                        MaterialTheme.typography.body2
+                    },
                 )
             }
         }

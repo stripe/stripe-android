@@ -371,5 +371,12 @@ class CheckoutSessionConfirmationInterceptorTest {
         ): Result<CheckoutSessionResponse> {
             error("Not expected in this test")
         }
+
+        override suspend fun selectShippingRate(
+            sessionId: String,
+            shippingRateId: String,
+        ): Result<CheckoutSessionResponse> {
+            error("Not expected in this test")
+        }
     }
 }

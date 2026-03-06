@@ -39,6 +39,11 @@ internal interface CheckoutSessionRepository {
         lineItemId: String,
         quantity: Int,
     ): Result<CheckoutSessionResponse>
+
+    suspend fun selectShippingRate(
+        sessionId: String,
+        shippingRateId: String,
+    ): Result<CheckoutSessionResponse>
 }
 
 internal class DefaultCheckoutSessionRepository @Inject constructor(
@@ -160,6 +165,28 @@ internal class DefaultCheckoutSessionRepository @Inject constructor(
                     "updated_line_item_quantity[line_item_id]" to lineItemId,
                     "updated_line_item_quantity[quantity]" to quantity.toString(),
                     "updated_line_item_quantity[fail_update_on_discount_error]" to "true",
+                ),
+            ),
+            responseJsonParser = CheckoutSessionResponseJsonParser(
+                isLiveMode = options.apiKeyIsLiveMode,
+            ),
+        )
+    }
+
+    override suspend fun selectShippingRate(
+        sessionId: String,
+        shippingRateId: String,
+    ): Result<CheckoutSessionResponse> {
+        val options = createOptions()
+        return executeRequestWithResultParser(
+            stripeErrorJsonParser = stripeErrorJsonParser,
+            stripeNetworkClient = stripeNetworkClient,
+            request = apiRequestFactory.createPost(
+                url = updateUrl(sessionId),
+                options = options,
+                params = mapOf(
+                    "shipping_rate" to shippingRateId,
+                    "elements_session_client[is_aggregation_expected]" to "true",
                 ),
             ),
             responseJsonParser = CheckoutSessionResponseJsonParser(

@@ -285,6 +285,64 @@ class CheckoutTest {
     }
 
     @Test
+    fun `selectShippingRate updates checkoutSession on success`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_abc123"),
+                bodyPart("shipping_rate", "shr_express"),
+                bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-select-shipping-rate.json")
+            }
+
+            checkout.checkoutSession.test {
+                assertThat(awaitItem().shippingOptions).isEmpty()
+
+                val result = checkout.selectShippingRate("shr_express")
+
+                val updated = awaitItem()
+                assertThat(result.getOrThrow()).isEqualTo(updated)
+                val totalSummary = updated.totalSummary
+                assertThat(totalSummary).isNotNull()
+                val shippingRate = requireNotNull(totalSummary!!.shippingRate)
+                assertThat(shippingRate).isNotNull()
+                assertThat(shippingRate.id).isEqualTo("shr_express")
+                assertThat(shippingRate.amount).isEqualTo(1500L)
+                assertThat(shippingRate.displayName).isEqualTo("Express Shipping")
+                assertThat(updated.shippingOptions).hasSize(2)
+                assertThat(updated.shippingOptions[0].id).isEqualTo("shr_standard")
+                assertThat(updated.shippingOptions[1].id).isEqualTo("shr_express")
+            }
+        }
+    }
+
+    @Test
+    fun `selectShippingRate returns failure on error response`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_abc123"),
+            ) { response ->
+                response.setResponseCode(400)
+                response.setBody("""{"error": {"message": "Invalid shipping rate"}}""")
+            }
+
+            checkout.checkoutSession.test {
+                val initial = awaitItem()
+
+                val result = checkout.selectShippingRate("shr_invalid")
+                assertThat(result.isFailure).isTrue()
+
+                expectNoEvents()
+                assertThat(checkout.checkoutSession.value).isEqualTo(initial)
+            }
+        }
+    }
+
+    @Test
     fun `configure returns failure when network request fails`() = runConfigureScenario(
         clientSecret = "cs_test_abc123_secret_xyz",
         networkSetup = {

@@ -38,6 +38,10 @@ internal class CheckoutPlaygroundViewModel(
         checkout.removePromotionCode()
     }
 
+    fun selectShippingRate(shippingRateId: String) = performWhileLoading {
+        checkout.selectShippingRate(shippingRateId)
+    }
+
     fun refresh() = performWhileLoading {
         checkout.refresh()
     }
