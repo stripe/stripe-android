@@ -132,7 +132,6 @@ internal class ManageActivityTest {
 
     @Test
     fun `updating card brand updates it in the list and returns a result with the new card brand`() = launch {
-        FeatureFlags.newCbcSelector.setEnabled(false)
         managePage.waitUntilVisible()
         managePage.assertCardIsVisible(cbcCardId, "cartes_bancaries")
         managePage.clickEdit()
@@ -151,8 +150,9 @@ internal class ManageActivityTest {
     }
 
     @Test
-    fun `updating card brand updates in list and returns a result with the new card brand selector`() = launch {
-        FeatureFlags.newCbcSelector.setEnabled(true)
+    fun `updating card brand updates in list and returns a result with the new card brand selector`() = launch(
+        newCbcSelectorEnabled = true
+    ) {
         managePage.waitUntilVisible()
         managePage.assertCardIsVisible(cbcCardId, "cartes_bancaries")
         managePage.clickEdit()
@@ -172,7 +172,6 @@ internal class ManageActivityTest {
 
     @Test
     fun `updating card brand prevents sheet from being closed`() = launch {
-        FeatureFlags.newCbcSelector.setEnabled(false)
         managePage.waitUntilVisible()
         managePage.assertCardIsVisible(cbcCardId, "cartes_bancaries")
         managePage.clickEdit()
@@ -196,8 +195,9 @@ internal class ManageActivityTest {
     }
 
     @Test
-    fun `selector updating card brand prevents sheet from being closed`() = launch {
-        FeatureFlags.newCbcSelector.setEnabled(true)
+    fun `selector updating card brand prevents sheet from being closed`() = launch(
+        newCbcSelectorEnabled = true
+    ) {
         managePage.waitUntilVisible()
         managePage.assertCardIsVisible(cbcCardId, "cartes_bancaries")
         managePage.clickEdit()
@@ -225,7 +225,6 @@ internal class ManageActivityTest {
         launch(
             paymentMethods = listOf(cbcCardDetails.createPaymentMethod()),
         ) {
-            FeatureFlags.newCbcSelector.setEnabled(false)
             networkRule.setupPaymentMethodUpdateResponse(paymentMethodDetails = cbcCardDetails, cardBrand = "visa")
             editPage.waitUntilVisible()
             editPage.setCardBrand("Visa")
@@ -238,9 +237,9 @@ internal class ManageActivityTest {
 
     @Test
     fun `selector updating card brand returns a result with the new card brand`() {
-        FeatureFlags.newCbcSelector.setEnabled(true)
         launch(
             paymentMethods = listOf(cbcCardDetails.createPaymentMethod()),
+            newCbcSelectorEnabled = true
         ) {
             networkRule.setupPaymentMethodUpdateResponse(paymentMethodDetails = cbcCardDetails, cardBrand = "visa")
             editPage.waitUntilVisible()
@@ -264,8 +263,10 @@ internal class ManageActivityTest {
         ),
         paymentMethods: List<PaymentMethod> = defaultPaymentMethods(),
         selection: PaymentSelection? = null,
+        newCbcSelectorEnabled: Boolean = false,
         block: Scenario.() -> Unit,
     ) {
+        FeatureFlags.newCbcSelector.setEnabled(newCbcSelectorEnabled)
         ActivityScenario.launchActivityForResult<ManageActivity>(
             ManageContract.createIntent(
                 context = applicationContext,
