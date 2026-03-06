@@ -240,22 +240,6 @@ private fun CardNumberField(
     )
 }
 
-private fun TextFieldIcon.Selector.Item.toCardBrandChoice(): CardBrandChoice {
-    return CardBrandChoice(
-        brand = CardBrand.fromCode(this.id),
-        enabled = true
-    )
-}
-
-private fun CardBrandChoice.toItem(): TextFieldIcon.Selector.Item {
-    return TextFieldIcon.Selector.Item(
-        id = brand.code,
-        label = brand.displayName.resolvableString,
-        icon = icon,
-        enabled = enabled
-    )
-}
-
 @Composable
 private fun CvcField(cardBrand: CardBrand, modifier: Modifier) {
     val cvc = buildString {
@@ -300,10 +284,26 @@ private fun CardBrandChoiceSelector(
                 onBrandChoiceChanged.invoke(it.toCardBrandChoice())
             },
             hasFocus = true,
-            popupMessage = "".resolvableString,
+            popupMessage = null,
             hasMadeSelection = true
         )
     }
+}
+
+private fun TextFieldIcon.Selector.Item.toCardBrandChoice(): CardBrandChoice {
+    return CardBrandChoice(
+        brand = CardBrand.fromCode(this.id),
+        enabled = true
+    )
+}
+
+private fun CardBrandChoice.toItem(): TextFieldIcon.Selector.Item {
+    return TextFieldIcon.Selector.Item(
+        id = brand.code,
+        label = brand.displayName.resolvableString,
+        icon = icon,
+        enabled = enabled
+    )
 }
 
 internal const val CARD_EDIT_UI_ERROR_MESSAGE = "card_edit_ui_error_message"

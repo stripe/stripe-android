@@ -51,7 +51,7 @@ fun Selector(
     items: List<TextFieldIcon.Selector.Item>,
     onItemSelected: (item: TextFieldIcon.Selector.Item) -> Unit,
     hasFocus: Boolean,
-    popupMessage: ResolvableString,
+    popupMessage: ResolvableString?,
     hasMadeSelection: Boolean
 ) {
     var showPopup by remember { mutableStateOf(!hasMadeSelection) }
@@ -90,7 +90,7 @@ fun Selector(
         }
     }
 
-    if (showPopup && hasFocus) {
+    if (showPopup && hasFocus && popupMessage != null) {
         SelectorPopup(popupMessage)
     }
 }
