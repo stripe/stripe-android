@@ -10,6 +10,7 @@ import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.testing.PaymentConfigurationTestRule
@@ -223,6 +224,116 @@ class CheckoutTest {
                 val initial = awaitItem()
 
                 val result = checkout.refresh()
+                assertThat(result.isFailure).isTrue()
+
+                expectNoEvents()
+                assertThat(checkout.checkoutSession.value).isEqualTo(initial)
+            }
+        }
+    }
+
+    @Test
+    fun `updateLineItemQuantity updates checkoutSession on success`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_abc123"),
+                bodyPart(urlEncode("updated_line_item_quantity[line_item_id]"), "li_1"),
+                bodyPart(urlEncode("updated_line_item_quantity[quantity]"), "3"),
+                bodyPart(urlEncode("updated_line_item_quantity[fail_update_on_discount_error]"), "true"),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-update-quantity.json")
+            }
+
+            checkout.checkoutSession.test {
+                assertThat(awaitItem().lineItems).isEmpty()
+
+                val result = checkout.updateLineItemQuantity("li_1", 3)
+
+                val updated = awaitItem()
+                assertThat(result.getOrThrow()).isEqualTo(updated)
+                assertThat(updated.lineItems).hasSize(1)
+                assertThat(updated.lineItems[0].id).isEqualTo("li_1")
+                assertThat(updated.lineItems[0].quantity).isEqualTo(3)
+            }
+        }
+    }
+
+    @Test
+    fun `updateLineItemQuantity returns failure on error response`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_abc123"),
+            ) { response ->
+                response.setResponseCode(400)
+                response.setBody("""{"error": {"message": "Invalid quantity"}}""")
+            }
+
+            checkout.checkoutSession.test {
+                val initial = awaitItem()
+
+                val result = checkout.updateLineItemQuantity("li_1", -1)
+                assertThat(result.isFailure).isTrue()
+
+                expectNoEvents()
+                assertThat(checkout.checkoutSession.value).isEqualTo(initial)
+            }
+        }
+    }
+
+    @Test
+    fun `selectShippingRate updates checkoutSession on success`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_abc123"),
+                bodyPart("shipping_rate", "shr_express"),
+                bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-select-shipping-rate.json")
+            }
+
+            checkout.checkoutSession.test {
+                assertThat(awaitItem().shippingOptions).isEmpty()
+
+                val result = checkout.selectShippingRate("shr_express")
+
+                val updated = awaitItem()
+                assertThat(result.getOrThrow()).isEqualTo(updated)
+                val totalSummary = updated.totalSummary
+                assertThat(totalSummary).isNotNull()
+                val shippingRate = requireNotNull(totalSummary!!.shippingRate)
+                assertThat(shippingRate).isNotNull()
+                assertThat(shippingRate.id).isEqualTo("shr_express")
+                assertThat(shippingRate.amount).isEqualTo(1500L)
+                assertThat(shippingRate.displayName).isEqualTo("Express Shipping")
+                assertThat(updated.shippingOptions).hasSize(2)
+                assertThat(updated.shippingOptions[0].id).isEqualTo("shr_standard")
+                assertThat(updated.shippingOptions[1].id).isEqualTo("shr_express")
+            }
+        }
+    }
+
+    @Test
+    fun `selectShippingRate returns failure on error response`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_abc123"),
+            ) { response ->
+                response.setResponseCode(400)
+                response.setBody("""{"error": {"message": "Invalid shipping rate"}}""")
+            }
+
+            checkout.checkoutSession.test {
+                val initial = awaitItem()
+
+                val result = checkout.selectShippingRate("shr_invalid")
                 assertThat(result.isFailure).isTrue()
 
                 expectNoEvents()

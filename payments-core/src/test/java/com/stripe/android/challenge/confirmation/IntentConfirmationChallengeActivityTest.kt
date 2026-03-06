@@ -241,7 +241,7 @@ internal class IntentConfirmationChallengeActivityTest {
         advanceUntilIdle()
 
         assertThat(analyticsReporter.calls.first()).isEqualTo(
-            FakeIntentConfirmationChallengeAnalyticsEventReporter.Call.Start
+            FakeIntentConfirmationChallengeAnalyticsEventReporter.Call.Start("hcaptcha")
         )
 
         scenario.close()
@@ -251,7 +251,8 @@ internal class IntentConfirmationChallengeActivityTest {
         return IntentConfirmationChallengeArgs(
             publishableKey = "pk_test_123",
             intent = PaymentIntentFixtures.PI_SUCCEEDED,
-            productUsage = listOf("PaymentSheet")
+            productUsage = listOf("PaymentSheet"),
+            captchaVendorName = "hcaptcha"
         )
     }
 

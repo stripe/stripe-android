@@ -71,6 +71,10 @@ class CheckoutRequest private constructor(
     val checkoutSessionPaymentMethodRemove: FeatureState?,
     @SerialName("allow_promotion_codes")
     val allowPromotionCodes: Boolean?,
+    @SerialName("adjustable_quantity")
+    val adjustableQuantity: Boolean?,
+    @SerialName("automatic_tax")
+    val automaticTax: Boolean?,
 ) {
     @Serializable
     enum class CustomerKeyType {
@@ -118,6 +122,8 @@ class CheckoutRequest private constructor(
         private var checkoutSessionPaymentMethodSave: FeatureState? = null
         private var checkoutSessionPaymentMethodRemove: FeatureState? = null
         private var allowPromotionCodes: Boolean? = null
+        private var adjustableQuantity: Boolean? = null
+        private var automaticTax: Boolean? = null
 
         fun initialization(initialization: String?) = apply {
             this.initialization = initialization
@@ -247,6 +253,14 @@ class CheckoutRequest private constructor(
             this.allowPromotionCodes = allowPromotionCodes
         }
 
+        fun adjustableQuantity(adjustableQuantity: Boolean?) = apply {
+            this.adjustableQuantity = adjustableQuantity
+        }
+
+        fun automaticTax(automaticTax: Boolean?) = apply {
+            this.automaticTax = automaticTax
+        }
+
         fun build(): CheckoutRequest {
             return CheckoutRequest(
                 initialization = initialization,
@@ -284,6 +298,8 @@ class CheckoutRequest private constructor(
                 checkoutSessionPaymentMethodSave = checkoutSessionPaymentMethodSave,
                 checkoutSessionPaymentMethodRemove = checkoutSessionPaymentMethodRemove,
                 allowPromotionCodes = allowPromotionCodes,
+                adjustableQuantity = adjustableQuantity,
+                automaticTax = automaticTax,
             )
         }
     }

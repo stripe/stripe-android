@@ -74,6 +74,8 @@ class CheckoutPlaygroundActivity : AppCompatActivity() {
                 isLoading = viewModel.isLoading,
                 applyPromotionCode = viewModel::applyPromotionCode,
                 removePromotionCode = viewModel::removePromotionCode,
+                updateLineItemQuantity = viewModel::updateLineItemQuantity,
+                selectShippingRate = viewModel::selectShippingRate,
                 refresh = viewModel::refresh,
             )
         }
@@ -92,6 +94,8 @@ private fun CheckoutScreen(
     isLoading: StateFlow<Boolean>,
     applyPromotionCode: (String) -> Unit,
     removePromotionCode: () -> Unit,
+    updateLineItemQuantity: (String, Int) -> Unit,
+    selectShippingRate: (String) -> Unit,
     refresh: () -> Unit,
 ) {
     val checkoutSession by checkout.checkoutSession.collectAsState()
@@ -103,7 +107,8 @@ private fun CheckoutScreen(
     Box {
         PlaygroundTheme(
             content = {
-                LineItemsSection(checkoutSession)
+                LineItemsSection(checkoutSession, updateLineItemQuantity)
+                ShippingOptionsSection(checkoutSession, selectShippingRate)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
@@ -147,7 +152,10 @@ private fun CheckoutScreen(
 }
 
 @Composable
-private fun LineItemsSection(session: CheckoutSession) {
+private fun LineItemsSection(
+    session: CheckoutSession,
+    updateLineItemQuantity: (String, Int) -> Unit,
+) {
     val lineItems = session.lineItems
     val currency = session.currency
 
@@ -160,14 +168,118 @@ private fun LineItemsSection(session: CheckoutSession) {
         Spacer(modifier = Modifier.height(PADDING))
 
         for (item in lineItems) {
-            val quantityLabel = if (item.quantity > 1) " x${item.quantity}" else ""
             val unitPrice = item.unitAmount?.let { formatAmount(it, currency) }
             val lineTotal = formatAmount(item.total, currency)
-            SummaryRow(
-                label = "${item.name}$quantityLabel",
-                amount = lineTotal,
-                subtext = if (item.quantity > 1 && unitPrice != null) "$unitPrice each" else null,
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = PADDING / 2),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = item.name,
+                        style = MaterialTheme.typography.body2,
+                    )
+                    if (unitPrice != null) {
+                        Text(
+                            text = "$unitPrice each",
+                            style = MaterialTheme.typography.caption,
+                            color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+                        )
+                    }
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(
+                        onClick = { updateLineItemQuantity(item.id, item.quantity - 1) },
+                        enabled = item.quantity > 1,
+                    ) {
+                        Text("-")
+                    }
+                    Text(
+                        text = "${item.quantity}",
+                        style = MaterialTheme.typography.body2,
+                    )
+                    IconButton(
+                        onClick = { updateLineItemQuantity(item.id, item.quantity + 1) },
+                    ) {
+                        Text("+")
+                    }
+                }
+                Text(
+                    text = lineTotal,
+                    style = MaterialTheme.typography.body2,
+                )
+            }
+        }
+
+        Divider(modifier = Modifier.padding(vertical = PADDING))
+    }
+}
+
+@Composable
+private fun ShippingOptionsSection(session: CheckoutSession, selectShippingRate: (String) -> Unit) {
+    val shippingOptions = session.shippingOptions
+    if (shippingOptions.isEmpty()) return
+
+    val selectedId = session.totalSummary?.shippingRate?.id
+    val currency = session.currency
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "Shipping",
+            style = MaterialTheme.typography.h6,
+        )
+
+        Spacer(modifier = Modifier.height(PADDING))
+
+        for (option in shippingOptions) {
+            val isSelected = option.id == selectedId
+            val amountText = if (option.amount == 0L) "Free" else formatAmount(option.amount, currency)
+            val subtext = option.deliveryEstimate
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { selectShippingRate(option.id) }
+                    .background(
+                        if (isSelected) {
+                            MaterialTheme.colors.primary.copy(alpha = 0.1f)
+                        } else {
+                            Color.Transparent
+                        }
+                    )
+                    .padding(vertical = PADDING / 2),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = option.displayName,
+                        style = if (isSelected) {
+                            MaterialTheme.typography.subtitle1
+                        } else {
+                            MaterialTheme.typography.body2
+                        },
+                    )
+                    if (subtext != null) {
+                        Text(
+                            text = subtext,
+                            style = MaterialTheme.typography.caption,
+                            color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+                        )
+                    }
+                }
+                Text(
+                    text = amountText,
+                    style = if (isSelected) {
+                        MaterialTheme.typography.subtitle1
+                    } else {
+                        MaterialTheme.typography.body2
+                    },
+                )
+            }
         }
 
         Divider(modifier = Modifier.padding(vertical = PADDING))

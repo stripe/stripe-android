@@ -8,6 +8,8 @@ internal class FakeCheckoutSessionRepository(
     var confirmResult: Result<CheckoutSessionResponse> = Result.failure(NotImplementedError()),
     var detachResult: Result<CheckoutSessionResponse> = Result.failure(NotImplementedError()),
     var applyPromotionCodeResult: Result<CheckoutSessionResponse> = Result.failure(NotImplementedError()),
+    var updateLineItemQuantityResult: Result<CheckoutSessionResponse> = Result.failure(NotImplementedError()),
+    var selectShippingRateResult: Result<CheckoutSessionResponse> = Result.failure(NotImplementedError()),
 ) : CheckoutSessionRepository {
 
     private val _initRequests = Turbine<String>()
@@ -45,6 +47,19 @@ internal class FakeCheckoutSessionRepository(
         sessionId: String,
         promotionCode: String,
     ): Result<CheckoutSessionResponse> = applyPromotionCodeResult
+
+    override suspend fun updateLineItemQuantity(
+        sessionId: String,
+        lineItemId: String,
+        quantity: Int,
+    ): Result<CheckoutSessionResponse> {
+        return updateLineItemQuantityResult
+    }
+
+    override suspend fun selectShippingRate(
+        sessionId: String,
+        shippingRateId: String,
+    ): Result<CheckoutSessionResponse> = selectShippingRateResult
 
     data class DetachRequest(
         val sessionId: String,

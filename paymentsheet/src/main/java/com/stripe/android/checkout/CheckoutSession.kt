@@ -16,6 +16,7 @@ class CheckoutSession internal constructor(
     val currency: String,
     val totalSummary: TotalSummary?,
     val lineItems: List<LineItem>,
+    val shippingOptions: List<ShippingRate>,
 ) : Parcelable {
 
     @Poko
@@ -57,6 +58,7 @@ class CheckoutSession internal constructor(
     @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class ShippingRate internal constructor(
+        val id: String,
         val amount: Long,
         val displayName: String,
         val deliveryEstimate: String?,
@@ -67,6 +69,7 @@ class CheckoutSession internal constructor(
     @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class LineItem internal constructor(
+        val id: String,
         val name: String,
         val quantity: Int,
         val unitAmount: Long?,
@@ -82,6 +85,7 @@ internal fun CheckoutSessionResponse.asCheckoutSession(): CheckoutSession {
         currency = currency,
         totalSummary = totalSummary?.asTotalSummary(),
         lineItems = lineItems.map { it.asLineItem() },
+        shippingOptions = shippingOptions.map { it.asShippingRate() },
     )
 }
 
@@ -119,6 +123,7 @@ private fun CheckoutSessionResponse.TaxAmount.asTaxAmount(): CheckoutSession.Tax
 @OptIn(CheckoutSessionPreview::class)
 private fun CheckoutSessionResponse.ShippingRate.asShippingRate(): CheckoutSession.ShippingRate {
     return CheckoutSession.ShippingRate(
+        id = id,
         amount = amount,
         displayName = displayName,
         deliveryEstimate = deliveryEstimate,
@@ -128,6 +133,7 @@ private fun CheckoutSessionResponse.ShippingRate.asShippingRate(): CheckoutSessi
 @OptIn(CheckoutSessionPreview::class)
 private fun CheckoutSessionResponse.LineItem.asLineItem(): CheckoutSession.LineItem {
     return CheckoutSession.LineItem(
+        id = id,
         name = name,
         quantity = quantity,
         unitAmount = unitAmount,

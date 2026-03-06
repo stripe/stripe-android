@@ -43,6 +43,7 @@ internal class CheckoutSessionResponseJsonParser(
         )
         val totalSummary = parseTotalSummaryResponse(json)
         val lineItems = parseLineItems(json.optJSONObject(FIELD_LINE_ITEM_GROUP))
+        val shippingOptions = parseShippingOptions(json)
 
         return CheckoutSessionResponse(
             id = sessionId,
@@ -54,6 +55,7 @@ internal class CheckoutSessionResponseJsonParser(
             savedPaymentMethodsOfferSave = savedPaymentMethodsOfferSave,
             totalSummary = totalSummary,
             lineItems = lineItems,
+            shippingOptions = shippingOptions,
         )
     }
 
@@ -298,14 +300,25 @@ internal class CheckoutSessionResponseJsonParser(
     }
 
     private fun parseShippingRateFromJson(json: JSONObject): CheckoutSessionResponse.ShippingRate? {
+        val id = json.optString(FIELD_ID).takeIf { it.isNotEmpty() } ?: return null
         val amount = json.optLong(FIELD_AMOUNT, -1).takeIf { it >= 0 } ?: return null
         val displayName = json.optString(FIELD_DISPLAY_NAME).takeIf { it.isNotEmpty() } ?: return null
         val deliveryEstimate = parseDeliveryEstimate(json)
         return CheckoutSessionResponse.ShippingRate(
+            id = id,
             amount = amount,
             displayName = displayName,
             deliveryEstimate = deliveryEstimate,
         )
+    }
+
+    private fun parseShippingOptions(json: JSONObject): List<CheckoutSessionResponse.ShippingRate> {
+        val array = json.optJSONArray(FIELD_SHIPPING_OPTIONS) ?: return emptyList()
+        return (0 until array.length()).mapNotNull { i ->
+            val obj = array.optJSONObject(i) ?: return@mapNotNull null
+            val shippingRateJson = obj.optJSONObject(FIELD_SHIPPING_RATE) ?: return@mapNotNull null
+            parseShippingRateFromJson(shippingRateJson)
+        }
     }
 
     private fun parseDeliveryEstimate(json: JSONObject): String? {
@@ -388,6 +401,7 @@ internal class CheckoutSessionResponseJsonParser(
         private const val FIELD_SHIPPING_RATE = "shipping_rate"
         private const val FIELD_SHIPPING = "shipping"
         private const val FIELD_SHIPPING_OPTION = "shipping_option"
+        private const val FIELD_SHIPPING_OPTIONS = "shipping_options"
         private const val FIELD_DELIVERY_ESTIMATE = "delivery_estimate"
         private const val FIELD_LINE_ITEMS = "line_items"
         private const val FIELD_ID = "id"

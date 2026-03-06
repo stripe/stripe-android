@@ -3,6 +3,9 @@ package com.stripe.android.common.taptoadd
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.CardBrandFilter
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.taptoadd.ui.createTapToAddUxConfiguration
 import com.stripe.android.core.strings.resolvableString
@@ -11,15 +14,19 @@ import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
 import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.confirmation.intent.CallbackNotFoundException
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CreateIntentResult
+import com.stripe.android.R as StripeR
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.testing.FakeErrorReporter
@@ -458,6 +465,44 @@ class TapToAddCollectionHandlerTest {
     }
 
     @Test
+    fun `handler returns FailedCollection when collected card brand is disallowed by filter`() =
+        testCardBrandChoiceFilterFlow(
+            cardBrandFilter = PaymentSheetCardBrandFilter(
+                PaymentSheet.CardBrandAcceptance.disallowed(
+                    listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Mastercard),
+                ),
+            ),
+        ) { result ->
+            assertThat(result)
+                .isInstanceOf(TapToAddCollectionHandler.CollectionState.FailedCollection::class.java)
+            val failed = result as TapToAddCollectionHandler.CollectionState.FailedCollection
+            assertThat(failed.error).isInstanceOf(IllegalStateException::class.java)
+            assertThat(failed.error.message)
+                .isEqualTo("Payment method is not supported by card brand filter!")
+            assertThat(failed.displayMessage).isEqualTo(
+                resolvableString(
+                    StripeR.string.stripe_disallowed_card_brand,
+                    CardBrand.MasterCard,
+                ),
+            )
+        }
+
+    @Test
+    fun `handler returns Collected when collected card brand is allowed by filter`() =
+        testCardBrandChoiceFilterFlow(
+            cardBrandFilter = PaymentSheetCardBrandFilter(
+                PaymentSheet.CardBrandAcceptance.allowed(
+                    listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Mastercard),
+                ),
+            ),
+        ) { result ->
+            assertThat(result)
+                .isInstanceOf(TapToAddCollectionHandler.CollectionState.Collected::class.java)
+            val collected = result as TapToAddCollectionHandler.CollectionState.Collected
+            assertThat(collected.paymentMethod.card?.brand).isEqualTo(CardBrand.MasterCard)
+        }
+
+    @Test
     fun `handler cancels collectSetupIntentPaymentMethod when coroutine is cancelled`() = runScenario(
         isConnected = true,
         callbackResult = Result.success(
@@ -508,6 +553,52 @@ class TapToAddCollectionHandlerTest {
         job.cancel()
 
         verify(confirmSetupIntentCall.cancelable, timeout(1000)).cancel(any())
+    }
+
+    private fun testCardBrandChoiceFilterFlow(
+        cardBrandFilter: CardBrandFilter,
+        block: suspend Scenario.(result: TapToAddCollectionHandler.CollectionState) -> Unit
+    ) = runScenario(
+        isConnected = true,
+        retrievePaymentMethodResult = Result.success(
+            PaymentMethodFactory.card(id = "pm_4563")
+                .copy(
+                    card = PaymentMethodFactory.card(id = "pm_4563").card?.copy(
+                        last4 = "7294",
+                        brand = CardBrand.MasterCard,
+                    ),
+                )
+        ),
+        callbackResult = Result.success(
+            CreateCardPresentSetupIntentCallback {
+                CreateIntentResult.Success("si_123_secret")
+            }
+        ),
+    ) {
+        val metadata = PaymentMethodMetadataFactory.create(
+            isTapToAddSupported = true,
+            hasCustomerConfiguration = true,
+            cardBrandFilter = cardBrandFilter,
+        )
+
+        val result = testScope.backgroundScope.async {
+            handler.collect(metadata)
+        }
+
+        assertThat(retrieverScenario.waitForCallbackCalls.awaitItem()).isNotNull()
+        assertThat(terminalScenario.setTapToPayUxConfigurationCalls.awaitItem()).isNotNull()
+
+        val retrievedSetupIntent = checkRetrieveSetupIntent("si_123_secret")
+        val collectedIntent = checkCollectCall(retrievedSetupIntent)
+        val paymentMethod = createTerminalPaymentMethod(id = "pm_4563", last4 = "7294", brand = "mastercard")
+
+        checkConfirmCall(
+            useInterac = false,
+            collectedSetupIntent = collectedIntent,
+            paymentMethod = paymentMethod,
+        )
+
+        block(result.await())
     }
 
     private fun testSuccessfulFlow(

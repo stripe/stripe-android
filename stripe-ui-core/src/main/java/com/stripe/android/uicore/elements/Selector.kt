@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.ContentAlpha
@@ -24,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
@@ -63,8 +63,8 @@ internal fun Selector(
             .clip(MaterialTheme.stripeShapes.roundedCornerShape)
     ) {
         Row(
-            Modifier
-                .height(IntrinsicSize.Min)
+            modifier = Modifier.height(IntrinsicSize.Min),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             items.forEachIndexed { index, item ->
                 SelectorItem(
@@ -111,9 +111,11 @@ private fun SelectorItem(
             )
             .background(color = backgroundColor)
             .padding(6.dp)
-            .animateContentSize()
+            .animateContentSize(),
     ) {
-        Row {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             if (isSelected) {
                 Icon(
                     painter = painterResource(R.drawable.stripe_ic_checkmark),
@@ -145,28 +147,22 @@ private fun SelectorPopup(
                 layoutDirection: LayoutDirection,
                 popupContentSize: IntSize
             ): IntOffset = IntOffset(
-                x = anchorBounds.left + (anchorBounds.width - popupContentSize.width) / 2,
-                y = anchorBounds.bottom
+                x = anchorBounds.right - popupContentSize.width,
+                y = anchorBounds.bottom + 10
             )
         }
     ) {
         Surface(
             elevation = 4.dp,
             shape = MaterialTheme.stripeShapes.roundedCornerShape,
-            modifier = Modifier
-                .offset(
-                    x = (-SELECTOR_END_PADDING)
-                )
-                .background(color = MaterialTheme.stripeColors.component)
+            color = MaterialTheme.stripeColors.component
         ) {
             Text(
                 text = popupMessage.resolve(),
-                color = MaterialTheme.stripeColors.subtitle,
+                color = MaterialTheme.stripeColors.onComponent,
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                 style = MaterialTheme.typography.caption
             )
         }
     }
 }
-
-private val SELECTOR_END_PADDING = 10.dp
