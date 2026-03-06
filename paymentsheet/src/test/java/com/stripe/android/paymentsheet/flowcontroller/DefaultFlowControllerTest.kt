@@ -449,7 +449,7 @@ internal class DefaultFlowControllerTest {
         val expectedArgs = PaymentOptionContract.Args(
             state = PaymentSheetState.Full(
                 customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
-                config = PaymentSheet.Configuration("com.stripe.android.paymentsheet.test").asCommonConfiguration(),
+                config = PaymentSheet.Configuration("com.stripe.android.paymentsheet.example").asCommonConfiguration(),
                 paymentSelection = null,
                 validationError = null,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(
@@ -457,7 +457,7 @@ internal class DefaultFlowControllerTest {
                     allowsDelayedPaymentMethods = false
                 ),
             ),
-            configuration = PaymentSheet.Configuration("com.stripe.android.paymentsheet.test"),
+            configuration = PaymentSheet.Configuration("com.stripe.android.paymentsheet.example"),
             enableLogging = ENABLE_LOGGING,
             productUsage = PRODUCT_USAGE,
             linkAccountInfo = LinkAccountUpdate.Value(null),
