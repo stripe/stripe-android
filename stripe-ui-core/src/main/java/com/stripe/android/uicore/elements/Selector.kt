@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
@@ -113,7 +114,8 @@ private fun SelectorItem(
             )
             .background(color = backgroundColor)
             .padding(6.dp)
-            .animateContentSize(),
+            .animateContentSize()
+            .testTag("${SELECTOR_ITEM_TEST_TAG}_${item.id}")
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically
@@ -168,3 +170,6 @@ private fun SelectorPopup(
         }
     }
 }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val SELECTOR_ITEM_TEST_TAG = "selector_item"

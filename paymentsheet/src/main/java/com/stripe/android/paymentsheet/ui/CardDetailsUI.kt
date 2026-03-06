@@ -2,11 +2,13 @@ package com.stripe.android.paymentsheet.ui
 
 import android.content.res.Resources
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material.Divider
@@ -19,6 +21,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -27,6 +30,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.R
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.ui.EditCardDetailsInteractor.ViewAction
 import com.stripe.android.uicore.elements.FieldValidationMessage
@@ -211,16 +215,19 @@ private fun CardNumberField(
         },
         trailingIcon = {
             if (shouldShowCardBrandDropdown) {
-                Selector(
-                    currentItem = selectedBrand.toItem(),
-                    items = availableNetworks.map { it.toItem() },
-                    onItemSelected = {
-                        onBrandChoiceChanged.invoke(it.toCardBrandChoice())
-                    },
-                    hasFocus = true,
-                    popupMessage = "".resolvableString,
-                    hasMadeSelection = true
-                )
+                if (FeatureFlags.newCbcSelector.isEnabled) {
+                    CardBrandChoiceSelector(
+                        selectedBrand = selectedBrand,
+                        availableNetworks = availableNetworks,
+                        onBrandChoiceChanged = onBrandChoiceChanged
+                    )
+                } else {
+                    CardBrandDropdown(
+                        selectedBrand = selectedBrand,
+                        availableBrands = availableNetworks,
+                        onBrandChoiceChanged = onBrandChoiceChanged,
+                    )
+                }
             } else {
                 PaymentMethodIconFromResource(
                     iconRes = savedPaymentMethodIcon,
@@ -244,7 +251,8 @@ private fun CardBrandChoice.toItem(): TextFieldIcon.Selector.Item {
     return TextFieldIcon.Selector.Item(
         id = brand.code,
         label = brand.displayName.resolvableString,
-        icon = icon
+        icon = icon,
+        enabled = enabled
     )
 }
 
@@ -271,6 +279,31 @@ private fun CvcField(cardBrand: CardBrand, modifier: Modifier) {
             )
         },
     )
+}
+
+@Composable
+private fun CardBrandChoiceSelector(
+    selectedBrand: CardBrandChoice,
+    availableNetworks: List<CardBrandChoice>,
+    onBrandChoiceChanged: (CardBrandChoice) -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .focusProperties { canFocus = false }
+            .padding(10.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Selector(
+            currentItem = selectedBrand.toItem(),
+            items = availableNetworks.map { it.toItem() },
+            onItemSelected = {
+                onBrandChoiceChanged.invoke(it.toCardBrandChoice())
+            },
+            hasFocus = true,
+            popupMessage = "".resolvableString,
+            hasMadeSelection = true
+        )
+    }
 }
 
 internal const val CARD_EDIT_UI_ERROR_MESSAGE = "card_edit_ui_error_message"
