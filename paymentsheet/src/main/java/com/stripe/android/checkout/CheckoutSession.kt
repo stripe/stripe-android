@@ -67,6 +67,7 @@ class CheckoutSession internal constructor(
     @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class LineItem internal constructor(
+        val id: String,
         val name: String,
         val quantity: Int,
         val unitAmount: Long?,
@@ -128,6 +129,7 @@ private fun CheckoutSessionResponse.ShippingRate.asShippingRate(): CheckoutSessi
 @OptIn(CheckoutSessionPreview::class)
 private fun CheckoutSessionResponse.LineItem.asLineItem(): CheckoutSession.LineItem {
     return CheckoutSession.LineItem(
+        id = id,
         name = name,
         quantity = quantity,
         unitAmount = unitAmount,

@@ -30,6 +30,10 @@ internal class CheckoutPlaygroundViewModel(
         checkout.applyPromotionCode(promotionCode)
     }
 
+    fun updateLineItemQuantity(lineItemId: String, quantity: Int) = performWhileLoading {
+        checkout.updateLineItemQuantity(lineItemId, quantity)
+    }
+
     fun removePromotionCode() = performWhileLoading {
         checkout.removePromotionCode()
     }

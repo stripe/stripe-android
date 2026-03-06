@@ -148,6 +148,7 @@ class AsCheckoutSessionTest {
         ).asCheckoutSession()
         val items = session.lineItems
         assertThat(items).hasSize(1)
+        assertThat(items[0].id).isEqualTo("li_1")
         assertThat(items[0].name).isEqualTo("Llama Figure")
         assertThat(items[0].quantity).isEqualTo(2)
         assertThat(items[0].unitAmount).isEqualTo(999L)

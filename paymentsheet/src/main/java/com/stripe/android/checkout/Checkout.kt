@@ -59,6 +59,13 @@ class Checkout private constructor(
             .updateState()
     }
 
+    suspend fun updateLineItemQuantity(lineItemId: String, quantity: Int): Result<CheckoutSession> {
+        val sessionId = state.checkoutSessionResponse.id
+        return component.checkoutSessionRepository
+            .updateLineItemQuantity(sessionId, lineItemId, quantity)
+            .updateState()
+    }
+
     suspend fun removePromotionCode(): Result<CheckoutSession> {
         val sessionId = state.checkoutSessionResponse.id
         return component.checkoutSessionRepository
