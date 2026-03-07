@@ -1426,6 +1426,21 @@ constructor(
             )
         }
 
+        @JvmStatic
+        @JvmOverloads
+        fun createWero(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.Wero,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun createLink(
             paymentDetailsId: String,
