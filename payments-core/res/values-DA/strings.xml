@@ -102,6 +102,8 @@
   <string name="stripe_becs_widget_name_required">Dit navn er påkrævet.</string>
   <!-- Button title to cancel action in an alert -->
   <string name="stripe_cancel">Annuller</string>
+  <!-- String to prompt user to select card brand. -->
+  <string name="stripe_card_brand_choice_choose_card_brand">Vælg et kortbrand</string>
   <!-- Title for a dropdown option when selecting a card brand -->
   <string name="stripe_card_brand_choice_no_selection">Intet valg</string>
   <!-- Title for a dropdown where the customer can select a card brand -->
@@ -182,6 +184,8 @@
   <string name="stripe_remove">Fjern</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="stripe_removed">Slettet %s</string>
+  <!-- A request error from Stripe has occurred due to a valid issue or merchant integration problem that has a request ID -->
+  <string name="stripe_request_error">Noget gik galt. Anmodnings-id: %1$s</string>
   <string name="stripe_secure_checkout">Sikker Checkout</string>
   <string name="stripe_title_add_a_card">Tilføj et kort</string>
   <!-- Screen title telling users they should add an address -->
