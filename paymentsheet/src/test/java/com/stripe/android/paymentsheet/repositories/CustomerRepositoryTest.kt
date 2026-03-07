@@ -345,7 +345,6 @@ internal class CustomerRepositoryTest {
                 customerId = "customer_id",
                 ephemeralKeySecret = "ephemeral_key",
                 paymentMethodId = "payment_method_id",
-                canRemoveDuplicates = false,
             )
 
             assertThat(result.getOrNull()).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
@@ -362,34 +361,35 @@ internal class CustomerRepositoryTest {
                 customerId = "customer_id",
                 ephemeralKeySecret = "ephemeral_key",
                 paymentMethodId = "payment_method_id",
-                canRemoveDuplicates = false,
             )
 
             assertThat(result.isFailure).isTrue()
         }
 
     @Test
-    fun `detachPaymentMethod() should call elements endpoint when customerSessionClientSecret exists`() =
+    fun `detachPaymentMethodAndDuplicates() should call elements endpoint when customerSessionClientSecret exists`() =
         runTest {
+            givenGetPaymentMethodsReturns(
+                Result.success(emptyList())
+            )
             givenElementsDetachPaymentMethodReturns(
                 Result.success(
                     PaymentMethodFixtures.CARD_PAYMENT_METHOD
                 )
             )
 
-            val result = repository.detachPaymentMethod(
+            val result = repository.detachPaymentMethodAndDuplicates(
                 customerId = "customer_id",
                 ephemeralKeySecret = "ephemeral_key",
                 customerSessionClientSecret = "cuss_123",
                 paymentMethodId = "payment_method_id",
-                canRemoveDuplicates = false,
             )
 
             assertThat(result.getOrNull()).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         }
 
     @Test
-    fun `detachPaymentMethod() with 'canRemoveDuplicates' as 'true' should remove duplicate payment methods and remove provided payment method ID last`() =
+    fun `detachPaymentMethodAndDuplicates() should remove duplicate payment methods and remove provided payment method ID last`() =
         runTest {
             val paymentMethodsToRemove = createCardsWithSameFingerprint()
             val removedPaymentMethods = mutableListOf<PaymentMethod>()
@@ -403,11 +403,11 @@ internal class CustomerRepositoryTest {
 
             val paymentMethodToRemove = paymentMethodsToRemove.first()
 
-            repository.detachPaymentMethod(
+            repository.detachPaymentMethodAndDuplicates(
                 customerId = FAKE_CUSTOMER_ID,
                 ephemeralKeySecret = FAKE_EPHEMERAL_KEY,
+                customerSessionClientSecret = FAKE_CUSTOMER_SESSION_CLIENT_SECRET,
                 paymentMethodId = paymentMethodToRemove.id,
-                canRemoveDuplicates = true,
             )
 
             assertThat(removedPaymentMethods).containsExactlyElementsIn(paymentMethodsToRemove)
@@ -415,7 +415,7 @@ internal class CustomerRepositoryTest {
         }
 
     @Test
-    fun `detachPaymentMethod() with 'canRemoveDuplicates' as 'true' still removes payment method even if not found`() =
+    fun `detachPaymentMethodAndDuplicates() still removes payment method even if not found`() =
         runTest {
             val usBankAccount = PaymentMethodFactory.usBankAccount()
 
@@ -429,18 +429,18 @@ internal class CustomerRepositoryTest {
                 )
             )
 
-            repository.detachPaymentMethod(
+            repository.detachPaymentMethodAndDuplicates(
                 customerId = FAKE_CUSTOMER_ID,
                 ephemeralKeySecret = FAKE_EPHEMERAL_KEY,
+                customerSessionClientSecret = FAKE_CUSTOMER_SESSION_CLIENT_SECRET,
                 paymentMethodId = usBankAccount.id,
-                canRemoveDuplicates = true,
             )
 
             assertThat(removedPaymentMethods).containsExactlyElementsIn(listOf(usBankAccount))
         }
 
     @Test
-    fun `detachPaymentMethod() with 'canRemoveDuplicates' as 'false' should not remove duplicate payment methods`() =
+    fun `detachPaymentMethod() should not remove duplicate payment methods`() =
         runTest {
             val paymentMethods = createCardsWithSameFingerprint()
             val removedPaymentMethods = mutableListOf<PaymentMethod>()
@@ -458,7 +458,6 @@ internal class CustomerRepositoryTest {
                 customerId = FAKE_CUSTOMER_ID,
                 ephemeralKeySecret = FAKE_EPHEMERAL_KEY,
                 paymentMethodId = paymentMethodToRemove.id,
-                canRemoveDuplicates = false,
             )
 
             val duplicates = paymentMethods.filter { paymentMethod ->
@@ -469,7 +468,7 @@ internal class CustomerRepositoryTest {
         }
 
     @Test
-    fun `detachPaymentMethod() with removing duplicates enabled should return failure if duplicate failure occurs`() =
+    fun `detachPaymentMethodAndDuplicates() should return failure if duplicate failure occurs`() =
         runTest {
             val paymentMethods = createCardsWithSameFingerprint()
             val removedPaymentMethods = mutableListOf<PaymentMethod>()
@@ -484,11 +483,11 @@ internal class CustomerRepositoryTest {
                 )
             )
 
-            val result = repository.detachPaymentMethod(
+            val result = repository.detachPaymentMethodAndDuplicates(
                 customerId = FAKE_CUSTOMER_ID,
                 ephemeralKeySecret = FAKE_EPHEMERAL_KEY,
+                customerSessionClientSecret = FAKE_CUSTOMER_SESSION_CLIENT_SECRET,
                 paymentMethodId = paymentMethods.first().id,
-                canRemoveDuplicates = true,
             )
 
             assertThat(result.isFailure).isTrue()
@@ -689,11 +688,7 @@ internal class CustomerRepositoryTest {
         val paymentMethodsToFailRemoval: List<PaymentMethod> = listOf(),
         val paymentMethodsToRetrieve: List<PaymentMethod> = paymentMethodsToAttemptRemoval
     ) : AbsFakeStripeRepository() {
-        override suspend fun detachPaymentMethod(
-            productUsageTokens: Set<String>,
-            paymentMethodId: String,
-            requestOptions: ApiRequest.Options
-        ): Result<PaymentMethod> {
+        private fun doDetach(paymentMethodId: String): Result<PaymentMethod> {
             if (paymentMethodsToFailRemoval.any { it.id == paymentMethodId }) {
                 return Result.failure(
                     exception = IllegalStateException("Failed to remove!")
@@ -709,6 +704,19 @@ internal class CustomerRepositoryTest {
             return Result.success(paymentMethod)
         }
 
+        override suspend fun detachPaymentMethod(
+            productUsageTokens: Set<String>,
+            paymentMethodId: String,
+            requestOptions: ApiRequest.Options
+        ): Result<PaymentMethod> = doDetach(paymentMethodId)
+
+        override suspend fun detachPaymentMethod(
+            customerSessionClientSecret: String,
+            productUsageTokens: Set<String>,
+            paymentMethodId: String,
+            requestOptions: ApiRequest.Options
+        ): Result<PaymentMethod> = doDetach(paymentMethodId)
+
         override suspend fun getPaymentMethods(
             listPaymentMethodsParams: ListPaymentMethodsParams,
             productUsageTokens: Set<String>,
@@ -721,5 +729,6 @@ internal class CustomerRepositoryTest {
     private companion object {
         const val FAKE_CUSTOMER_ID = "customer_id"
         const val FAKE_EPHEMERAL_KEY = "ek_123"
+        const val FAKE_CUSTOMER_SESSION_CLIENT_SECRET = "cuss_123"
     }
 }

@@ -13,7 +13,6 @@ internal sealed class CustomerMetadata : Parcelable {
     abstract val removePaymentMethod: PaymentMethodRemovePermission
     abstract val saveConsent: PaymentMethodSaveConsentBehavior
     abstract val canRemoveLastPaymentMethod: Boolean
-    abstract val canRemoveDuplicates: Boolean
     abstract val canUpdateFullPaymentMethodDetails: Boolean
 
     val canRemovePaymentMethods: Boolean
@@ -28,7 +27,6 @@ internal sealed class CustomerMetadata : Parcelable {
         override val removePaymentMethod: PaymentMethodRemovePermission,
         override val saveConsent: PaymentMethodSaveConsentBehavior,
         override val canRemoveLastPaymentMethod: Boolean,
-        override val canRemoveDuplicates: Boolean,
         override val canUpdateFullPaymentMethodDetails: Boolean,
     ) : CustomerMetadata()
 
@@ -41,7 +39,6 @@ internal sealed class CustomerMetadata : Parcelable {
         override val removePaymentMethod: PaymentMethodRemovePermission,
         override val saveConsent: PaymentMethodSaveConsentBehavior,
         override val canRemoveLastPaymentMethod: Boolean,
-        override val canRemoveDuplicates: Boolean,
         override val canUpdateFullPaymentMethodDetails: Boolean,
     ) : CustomerMetadata()
 
@@ -53,7 +50,6 @@ internal sealed class CustomerMetadata : Parcelable {
         override val removePaymentMethod: PaymentMethodRemovePermission,
         override val saveConsent: PaymentMethodSaveConsentBehavior,
         override val canRemoveLastPaymentMethod: Boolean,
-        override val canRemoveDuplicates: Boolean,
         override val canUpdateFullPaymentMethodDetails: Boolean,
     ) : CustomerMetadata()
 
@@ -109,8 +105,6 @@ internal sealed class CustomerMetadata : Parcelable {
                 removePaymentMethod = removePaymentMethod,
                 saveConsent = saveConsent,
                 canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
-                // Should always remove duplicates when using `customer_session`
-                canRemoveDuplicates = true,
                 // Should always be enabled when using `customer_session`
                 canUpdateFullPaymentMethodDetails = true,
             )
@@ -143,11 +137,6 @@ internal sealed class CustomerMetadata : Parcelable {
                  * sessions.
                  */
                 canRemoveLastPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod,
-                /*
-                 * Removing duplicates is not applicable here since we don't filter out duplicates for for
-                 * un-scoped ephemeral keys.
-                 */
-                canRemoveDuplicates = false,
                 canUpdateFullPaymentMethodDetails = false,
             )
         }
@@ -175,7 +164,6 @@ internal sealed class CustomerMetadata : Parcelable {
                     removePaymentMethod = removePaymentMethod,
                     saveConsent = saveConsent,
                     canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
-                    canRemoveDuplicates = true,
                     canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
                 )
             } else {
@@ -186,7 +174,6 @@ internal sealed class CustomerMetadata : Parcelable {
                     removePaymentMethod = removePaymentMethod,
                     saveConsent = saveConsent,
                     canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
-                    canRemoveDuplicates = true,
                     canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
                 )
             }

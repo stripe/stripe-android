@@ -108,44 +108,32 @@ internal class CustomerApiRepository @Inject constructor(
         customerId: String,
         ephemeralKeySecret: String,
         paymentMethodId: String,
-        canRemoveDuplicates: Boolean,
     ): Result<PaymentMethod> {
-        val requestOptions = ApiRequest.Options(
-            apiKey = ephemeralKeySecret,
-            stripeAccount = lazyPaymentConfig.get().stripeAccountId,
-        )
-
-        val detachOne: suspend (String) -> Result<PaymentMethod> = { pmId ->
-            stripeRepository.detachPaymentMethod(
-                productUsageTokens = productUsageTokens,
-                paymentMethodId = pmId,
-                requestOptions = requestOptions,
-            )
-        }
-
-        val result = if (canRemoveDuplicates) {
-            detachPaymentMethodAndDuplicates(
-                customerId = customerId,
-                ephemeralKeySecret = ephemeralKeySecret,
-                paymentMethodId = paymentMethodId,
-                detachOne = detachOne,
-            )
-        } else {
-            detachOne(paymentMethodId)
-        }
-
-        return result.onFailure {
+        return stripeRepository.detachPaymentMethod(
+            productUsageTokens = productUsageTokens,
+            paymentMethodId = paymentMethodId,
+            requestOptions = ApiRequest.Options(
+                apiKey = ephemeralKeySecret,
+                stripeAccount = lazyPaymentConfig.get().stripeAccountId,
+            ),
+        ).onFailure {
             logger.error("Failed to detach payment method $paymentMethodId.", it)
         }
     }
 
-    override suspend fun detachPaymentMethod(
+    /**
+     * Removes the provided saved payment method alongside any duplicate stored payment methods. This logic removes
+     * all the duplicates first before attempting to remove the requested payment method. We will only return
+     * the result of the requested payment method since it is the main payment method that we are trying to remove.
+     *
+     * This function should eventually be replaced by an endpoint that does this logic in the backend.
+     */
+    override suspend fun detachPaymentMethodAndDuplicates(
         customerId: String,
         ephemeralKeySecret: String,
         customerSessionClientSecret: String,
         paymentMethodId: String,
-        canRemoveDuplicates: Boolean,
-    ): Result<PaymentMethod> {
+    ): Result<PaymentMethod> = with(CoroutineScope(workContext)) {
         val requestOptions = ApiRequest.Options(
             apiKey = ephemeralKeySecret,
             stripeAccount = lazyPaymentConfig.get().stripeAccountId,
@@ -160,18 +148,62 @@ internal class CustomerApiRepository @Inject constructor(
             )
         }
 
-        val result = if (canRemoveDuplicates) {
-            detachPaymentMethodAndDuplicates(
-                customerId = customerId,
-                ephemeralKeySecret = ephemeralKeySecret,
-                paymentMethodId = paymentMethodId,
-                detachOne = detachOne,
-            )
-        } else {
-            detachOne(paymentMethodId)
+        val paymentMethods = getPaymentMethods(
+            customerId = customerId,
+            ephemeralKeySecret = ephemeralKeySecret,
+            // We only support removing duplicate cards.
+            types = listOf(PaymentMethod.Type.Card),
+            silentlyFail = false,
+        ).getOrElse {
+            return Result.failure(it)
         }
 
-        return result.onFailure {
+        val requestedPaymentMethodToRemove = paymentMethods.find { paymentMethod ->
+            paymentMethod.id == paymentMethodId
+        } ?: run {
+            /*
+             * If we don't find the requested payment method in the retrieved list, attempt remove it anyways. It
+             * could be that the payment method is not a card but a saved US Bank Account or SEPA Debit PM.
+             */
+            return@with detachOne(paymentMethodId)
+        }
+
+        /*
+         * Find all duplicate payment methods except for the original payment method we are attempting to remove. The
+         * original payment method will be removed last.
+         */
+        val paymentMethodsToRemove = paymentMethods.filter { paymentMethod ->
+            paymentMethod.type == PaymentMethod.Type.Card &&
+                paymentMethod.card?.fingerprint == requestedPaymentMethodToRemove.card?.fingerprint &&
+                paymentMethod.id != paymentMethodId
+        }
+
+        val failureResults = mutableListOf<DuplicatePaymentMethodDetachFailureException.DuplicateDetachFailure>()
+
+        /*
+         * Removes all the payment methods asynchronously, improving the overall performance of this function.
+         */
+        val paymentMethodAsyncRemovals = paymentMethodsToRemove.map { paymentMethod ->
+            async {
+                detachOne(paymentMethod.id).onFailure { exception ->
+                    failureResults.add(
+                        DuplicatePaymentMethodDetachFailureException.DuplicateDetachFailure(
+                            paymentMethodId = paymentMethod.id,
+                            exception = exception,
+                        )
+                    )
+                }
+            }
+        }
+
+        paymentMethodAsyncRemovals.awaitAll()
+
+        if (failureResults.isNotEmpty()) {
+            return Result.failure(DuplicatePaymentMethodDetachFailureException(failureResults))
+        }
+
+        // Remove the original payment method
+        detachOne(paymentMethodId).onFailure {
             logger.error("Failed to detach payment method $paymentMethodId.", it)
         }
     }
@@ -273,83 +305,5 @@ internal class CustomerApiRepository @Inject constructor(
 
             "${card?.last4}-${card?.expiryMonth}-${card?.expiryYear}-${card?.brand?.code}"
         }
-    }
-
-    /**
-     * Removes the provided saved payment method alongside any duplicate stored payment methods. This logic removes
-     * removes all the duplicates first before attempting to remove the requested payment method. We will only return
-     * the result of the requested payment method since it is the main payment method that we are trying to remove.
-     *
-     * This function should eventually be replaced by an endpoint that does this logic in the backend.
-     *
-     * @param customerId the customer's ID
-     * @param ephemeralKeySecret the ephemeral key secret
-     * @param paymentMethodId the id of the payment method to remove and to compare with for stored duplicates
-     * @param detachOne a function that detaches a single payment method by its ID
-     *
-     * @return a result containing the requested payment method to remove
-     */
-    private suspend fun detachPaymentMethodAndDuplicates(
-        customerId: String,
-        ephemeralKeySecret: String,
-        paymentMethodId: String,
-        detachOne: suspend (String) -> Result<PaymentMethod>,
-    ): Result<PaymentMethod> = with(CoroutineScope(workContext)) {
-        val paymentMethods = getPaymentMethods(
-            customerId = customerId,
-            ephemeralKeySecret = ephemeralKeySecret,
-            // We only support removing duplicate cards.
-            types = listOf(PaymentMethod.Type.Card),
-            silentlyFail = false,
-        ).getOrElse {
-            return Result.failure(it)
-        }
-
-        val requestedPaymentMethodToRemove = paymentMethods.find { paymentMethod ->
-            paymentMethod.id == paymentMethodId
-        } ?: run {
-            /*
-             * If we don't find the requested payment method in the retrieved list, attempt remove it anyways. It
-             * could be that the payment method is not a card but a saved US Bank Account or SEPA Debit PM.
-             */
-            return@with detachOne(paymentMethodId)
-        }
-
-        /*
-         * Find all duplicate payment methods except for the original payment method we are attempting to remove. The
-         * original payment method will be removed last.
-         */
-        val paymentMethodsToRemove = paymentMethods.filter { paymentMethod ->
-            paymentMethod.type == PaymentMethod.Type.Card &&
-                paymentMethod.card?.fingerprint == requestedPaymentMethodToRemove.card?.fingerprint &&
-                paymentMethod.id != paymentMethodId
-        }
-
-        val failureResults = mutableListOf<DuplicatePaymentMethodDetachFailureException.DuplicateDetachFailure>()
-
-        /*
-         * Removes all the payment methods asynchronously, improving the overall performance of this function.
-         */
-        val paymentMethodAsyncRemovals = paymentMethodsToRemove.map { paymentMethod ->
-            async {
-                detachOne(paymentMethod.id).onFailure { exception ->
-                    failureResults.add(
-                        DuplicatePaymentMethodDetachFailureException.DuplicateDetachFailure(
-                            paymentMethodId = paymentMethod.id,
-                            exception = exception,
-                        )
-                    )
-                }
-            }
-        }
-
-        paymentMethodAsyncRemovals.awaitAll()
-
-        if (failureResults.isNotEmpty()) {
-            return Result.failure(DuplicatePaymentMethodDetachFailureException(failureResults))
-        }
-
-        // Remove the original payment method
-        return detachOne(paymentMethodId)
     }
 }

@@ -6,10 +6,10 @@ import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
-import org.mockito.kotlin.mock
 import com.stripe.android.utils.FakeCustomerRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import org.mockito.kotlin.mock
 
 class DefaultSavedPaymentMethodRepositoryTest {
 
@@ -21,7 +21,6 @@ class DefaultSavedPaymentMethodRepositoryTest {
         val result = repository.detachPaymentMethod(
             customerMetadata = customerMetadata,
             paymentMethodId = "pm_123",
-            canRemoveDuplicates = false,
         )
 
         assertThat(result.isSuccess).isTrue()
@@ -39,14 +38,13 @@ class DefaultSavedPaymentMethodRepositoryTest {
         val result = repository.detachPaymentMethod(
             customerMetadata = customerMetadata,
             paymentMethodId = "pm_123",
-            canRemoveDuplicates = true,
         )
 
         assertThat(result.isSuccess).isTrue()
 
         val detachRequest = customerRepository.detachRequests.awaitItem()
         assertThat(detachRequest.paymentMethodId).isEqualTo("pm_123")
-        assertThat(detachRequest.canRemoveDuplicates).isTrue()
+        assertThat(detachRequest.customerSessionClientSecret).isEqualTo("css_456")
     }
 
     @Test
@@ -56,14 +54,13 @@ class DefaultSavedPaymentMethodRepositoryTest {
         val result = repository.detachPaymentMethod(
             customerMetadata = customerMetadata,
             paymentMethodId = "pm_123",
-            canRemoveDuplicates = false,
         )
 
         assertThat(result.isSuccess).isTrue()
 
         val detachRequest = customerRepository.detachRequests.awaitItem()
         assertThat(detachRequest.paymentMethodId).isEqualTo("pm_123")
-        assertThat(detachRequest.canRemoveDuplicates).isFalse()
+        assertThat(detachRequest.customerSessionClientSecret).isNull()
     }
 
     @Test
@@ -208,7 +205,6 @@ class DefaultSavedPaymentMethodRepositoryTest {
         val result = repository.detachPaymentMethod(
             customerMetadata = customerMetadata,
             paymentMethodId = "pm_123",
-            canRemoveDuplicates = false,
         )
 
         assertThat(result.isFailure).isTrue()
@@ -270,7 +266,6 @@ class DefaultSavedPaymentMethodRepositoryTest {
             removePaymentMethod = PaymentMethodRemovePermission.Full,
             saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
             canRemoveLastPaymentMethod = false,
-            canRemoveDuplicates = false,
             canUpdateFullPaymentMethodDetails = false,
         )
 
@@ -282,7 +277,6 @@ class DefaultSavedPaymentMethodRepositoryTest {
             removePaymentMethod = PaymentMethodRemovePermission.Full,
             saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
             canRemoveLastPaymentMethod = true,
-            canRemoveDuplicates = true,
             canUpdateFullPaymentMethodDetails = false,
         )
 
@@ -293,7 +287,6 @@ class DefaultSavedPaymentMethodRepositoryTest {
             removePaymentMethod = PaymentMethodRemovePermission.Full,
             saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
             canRemoveLastPaymentMethod = true,
-            canRemoveDuplicates = true,
             canUpdateFullPaymentMethodDetails = false,
         )
     }

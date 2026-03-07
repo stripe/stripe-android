@@ -30,23 +30,24 @@ internal interface CustomerRepository {
 
     /**
      * Detach a payment method from the Customer using a legacy ephemeral key.
+     * Only detaches the specified payment method — no duplicate removal is needed because
+     * legacy ephemeral keys don't filter out duplicates at display time.
      */
     suspend fun detachPaymentMethod(
         customerId: String,
         ephemeralKeySecret: String,
         paymentMethodId: String,
-        canRemoveDuplicates: Boolean,
     ): Result<PaymentMethod>
 
     /**
      * Detach a payment method from the Customer using a customer session.
+     * Also removes any duplicate payment methods with the same card fingerprint.
      */
-    suspend fun detachPaymentMethod(
+    suspend fun detachPaymentMethodAndDuplicates(
         customerId: String,
         ephemeralKeySecret: String,
         customerSessionClientSecret: String,
         paymentMethodId: String,
-        canRemoveDuplicates: Boolean,
     ): Result<PaymentMethod>
 
     /**

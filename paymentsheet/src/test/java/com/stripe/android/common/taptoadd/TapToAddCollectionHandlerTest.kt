@@ -203,7 +203,6 @@ class TapToAddCollectionHandlerTest {
                 removePaymentMethod = PaymentMethodRemovePermission.Full,
                 saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
                 canRemoveLastPaymentMethod = false,
-                canRemoveDuplicates = false,
                 canUpdateFullPaymentMethodDetails = false,
             )
         )
@@ -1006,7 +1005,6 @@ private class FakeTapToAddSavedPaymentMethodRepository(
     override suspend fun detachPaymentMethod(
         customerMetadata: CustomerMetadata,
         paymentMethodId: String,
-        canRemoveDuplicates: Boolean,
     ): Result<PaymentMethod> = Result.failure(NotImplementedError())
 
     override suspend fun updatePaymentMethod(

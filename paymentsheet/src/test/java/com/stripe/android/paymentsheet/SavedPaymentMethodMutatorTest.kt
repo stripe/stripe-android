@@ -18,8 +18,6 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
-import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
-import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -59,7 +57,6 @@ class SavedPaymentMethodMutatorTest {
             removePaymentMethod = PaymentMethodRemovePermission.Full,
             saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
             canRemoveLastPaymentMethod = true,
-            canRemoveDuplicates = false,
             canUpdateFullPaymentMethodDetails = false,
         )
     ) {
@@ -82,7 +79,6 @@ class SavedPaymentMethodMutatorTest {
             removePaymentMethod = PaymentMethodRemovePermission.Full,
             saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
             canRemoveLastPaymentMethod = false,
-            canRemoveDuplicates = false,
             canUpdateFullPaymentMethodDetails = false,
         )
     ) {
@@ -207,7 +203,6 @@ class SavedPaymentMethodMutatorTest {
             removePaymentMethod = PaymentMethodRemovePermission.Full,
             saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
             canRemoveLastPaymentMethod = true,
-            canRemoveDuplicates = false,
             canUpdateFullPaymentMethodDetails = false,
         )
     ) {
@@ -235,7 +230,6 @@ class SavedPaymentMethodMutatorTest {
         paymentMethodMetadata =
         PaymentMethodMetadataFactory.create(
             hasCustomerConfiguration = true,
-            canRemoveDuplicates = true,
             removePaymentMethod = PaymentMethodRemovePermission.Full,
             saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
             canRemoveLastPaymentMethod = true,
@@ -262,7 +256,6 @@ class SavedPaymentMethodMutatorTest {
     fun `updatePaymentMethod should be called correctly when 1 PM & cannot remove last PM`() = runScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             hasCustomerConfiguration = true,
-            canRemoveDuplicates = true,
             removePaymentMethod = PaymentMethodRemovePermission.Full,
             saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
             canRemoveLastPaymentMethod = false,
@@ -318,16 +311,6 @@ class SavedPaymentMethodMutatorTest {
             assertThat(savedPaymentMethodRepository.detachRequests.awaitItem().paymentMethodId)
                 .isEqualTo(card.id)
         }
-    }
-
-    @Test
-    fun `On detach without remove duplicate permissions, should not attempt to remove duplicates in repository`() {
-        removeDuplicatesTest(shouldRemoveDuplicates = false)
-    }
-
-    @Test
-    fun `On detach with remove duplicate permissions, should attempt to remove duplicates in repository`() {
-        removeDuplicatesTest(shouldRemoveDuplicates = true)
     }
 
     @Test
@@ -876,75 +859,6 @@ class SavedPaymentMethodMutatorTest {
             customerStateHolder.setDefaultPaymentMethod(paymentMethods[1])
 
             assertThat(savedPaymentMethodMutator.defaultPaymentMethodId.value).isEqualTo(paymentMethods[1].id)
-        }
-    }
-
-    @Suppress("LongMethod")
-    private fun removeDuplicatesTest(shouldRemoveDuplicates: Boolean) {
-        val repository = FakeSavedPaymentMethodRepository()
-
-        val customerSessionClientSecret = if (shouldRemoveDuplicates) {
-            "customer_session_client_secret"
-        } else {
-            null
-        }
-        runScenario(
-            savedPaymentMethodRepository = repository,
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                hasCustomerConfiguration = true,
-                removePaymentMethod = PaymentMethodRemovePermission.Full,
-                saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
-                canRemoveLastPaymentMethod = true,
-                canRemoveDuplicates = shouldRemoveDuplicates,
-                canUpdateFullPaymentMethodDetails = false,
-                customerSessionClientSecret = customerSessionClientSecret,
-            )
-        ) {
-            customerStateHolder.setCustomerState(
-                CustomerState(
-                    paymentMethods = listOf(),
-                    defaultPaymentMethodId = null,
-                )
-            )
-
-            val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-
-            savedPaymentMethodMutator.removePaymentMethod(paymentMethod)
-
-            assertThat(postPaymentMethodRemovedTurbine.awaitItem()).isEqualTo(Unit)
-
-            val expectedCustomerMetadata: CustomerMetadata = if (customerSessionClientSecret != null) {
-                CustomerMetadata.CustomerSession(
-                    id = "cus_123",
-                    ephemeralKeySecret = "ek_123",
-                    customerSessionClientSecret = customerSessionClientSecret,
-                    isPaymentMethodSetAsDefaultEnabled = false,
-                    removePaymentMethod = PaymentMethodRemovePermission.Full,
-                    saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
-                    canRemoveLastPaymentMethod = true,
-                    canRemoveDuplicates = shouldRemoveDuplicates,
-                    canUpdateFullPaymentMethodDetails = false,
-                )
-            } else {
-                CustomerMetadata.LegacyEphemeralKey(
-                    id = "cus_123",
-                    ephemeralKeySecret = "ek_123",
-                    isPaymentMethodSetAsDefaultEnabled = false,
-                    removePaymentMethod = PaymentMethodRemovePermission.Full,
-                    saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
-                    canRemoveLastPaymentMethod = true,
-                    canRemoveDuplicates = shouldRemoveDuplicates,
-                    canUpdateFullPaymentMethodDetails = false,
-                )
-            }
-
-            assertThat(repository.detachRequests.awaitItem()).isEqualTo(
-                FakeSavedPaymentMethodRepository.DetachRequest(
-                    paymentMethodId = paymentMethod.id,
-                    customerMetadata = expectedCustomerMetadata,
-                    canRemoveDuplicates = shouldRemoveDuplicates,
-                )
-            )
         }
     }
 

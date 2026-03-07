@@ -61,33 +61,29 @@ internal open class FakeCustomerRepository(
         customerId: String,
         ephemeralKeySecret: String,
         paymentMethodId: String,
-        canRemoveDuplicates: Boolean,
     ): Result<PaymentMethod> {
         _detachRequests.add(
             DetachRequest(
                 paymentMethodId = paymentMethodId,
                 customerId = customerId,
                 ephemeralKeySecret = ephemeralKeySecret,
-                canRemoveDuplicates = canRemoveDuplicates,
             )
         )
 
         return onDetachPaymentMethod(paymentMethodId)
     }
 
-    override suspend fun detachPaymentMethod(
+    override suspend fun detachPaymentMethodAndDuplicates(
         customerId: String,
         ephemeralKeySecret: String,
         customerSessionClientSecret: String,
         paymentMethodId: String,
-        canRemoveDuplicates: Boolean,
     ): Result<PaymentMethod> {
         _detachRequests.add(
             DetachRequest(
                 paymentMethodId = paymentMethodId,
                 customerId = customerId,
                 ephemeralKeySecret = ephemeralKeySecret,
-                canRemoveDuplicates = canRemoveDuplicates,
                 customerSessionClientSecret = customerSessionClientSecret,
             )
         )
@@ -145,7 +141,6 @@ internal open class FakeCustomerRepository(
         val paymentMethodId: String,
         val customerId: String,
         val ephemeralKeySecret: String,
-        val canRemoveDuplicates: Boolean,
         val customerSessionClientSecret: String? = null,
     )
 

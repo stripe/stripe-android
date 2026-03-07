@@ -104,7 +104,6 @@ class CustomerSessionPaymentMethodDataSourceTest {
         assertThat(detachRequest.customerId).isEqualTo("cus_1")
         assertThat(detachRequest.ephemeralKeySecret).isEqualTo("ek_123")
         assertThat(detachRequest.customerSessionClientSecret).isEqualTo("cuss_123")
-        assertThat(detachRequest.canRemoveDuplicates).isTrue()
 
         assertThat(result).isInstanceOf<CustomerSheetDataResult.Success<PaymentMethod>>()
 
