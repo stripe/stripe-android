@@ -16,7 +16,6 @@ internal object PaymentMethodMetadataFixtures {
         removePaymentMethod = PaymentMethodRemovePermission.Full,
         saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
         canRemoveLastPaymentMethod = true,
-        canRemoveDuplicates = true,
         canUpdateFullPaymentMethodDetails = false,
     )
 
@@ -38,7 +37,6 @@ internal object PaymentMethodMetadataFixtures {
         removePaymentMethod = PaymentMethodRemovePermission.Full,
         saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
         canRemoveLastPaymentMethod = true,
-        canRemoveDuplicates = true,
         canUpdateFullPaymentMethodDetails = false,
     )
 
@@ -48,7 +46,6 @@ internal object PaymentMethodMetadataFixtures {
         removePaymentMethod: PaymentMethodRemovePermission = PaymentMethodRemovePermission.Full,
         saveConsent: PaymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
         canRemoveLastPaymentMethod: Boolean = true,
-        canRemoveDuplicates: Boolean = true,
         canUpdateFullPaymentMethodDetails: Boolean = false,
     ): CustomerMetadata? {
         return if (hasCustomerConfiguration) {
@@ -57,7 +54,6 @@ internal object PaymentMethodMetadataFixtures {
                 removePaymentMethod = removePaymentMethod,
                 saveConsent = saveConsent,
                 canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
-                canRemoveDuplicates = canRemoveDuplicates,
                 canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
             )
         } else {
@@ -71,7 +67,6 @@ internal object PaymentMethodMetadataFixtures {
         removePaymentMethod: PaymentMethodRemovePermission = PaymentMethodRemovePermission.Full,
         saveConsent: PaymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
         canRemoveLastPaymentMethod: Boolean = true,
-        canRemoveDuplicates: Boolean = true,
         canUpdateFullPaymentMethodDetails: Boolean = false,
     ): StateFlow<CustomerMetadata?> {
         return stateFlowOf(
@@ -81,7 +76,6 @@ internal object PaymentMethodMetadataFixtures {
                 removePaymentMethod = removePaymentMethod,
                 saveConsent = saveConsent,
                 canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
-                canRemoveDuplicates = canRemoveDuplicates,
                 canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
             )
         )

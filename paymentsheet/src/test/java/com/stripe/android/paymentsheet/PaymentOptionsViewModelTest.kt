@@ -811,7 +811,7 @@ internal class PaymentOptionsViewModelTest {
         val paymentMethodToRemove = cards.first()
 
         whenever(
-            savedPaymentMethodRepository.detachPaymentMethod(any(), eq(paymentMethodToRemove.id), eq(false))
+            savedPaymentMethodRepository.detachPaymentMethod(any(), eq(paymentMethodToRemove.id))
         ).thenReturn(
             Result.success(paymentMethodToRemove)
         )

@@ -37,13 +37,11 @@ internal class FakeSavedPaymentMethodRepository(
     override suspend fun detachPaymentMethod(
         customerMetadata: CustomerMetadata,
         paymentMethodId: String,
-        canRemoveDuplicates: Boolean,
     ): Result<PaymentMethod> {
         _detachRequests.add(
             DetachRequest(
                 paymentMethodId = paymentMethodId,
                 customerMetadata = customerMetadata,
-                canRemoveDuplicates = canRemoveDuplicates,
             )
         )
         return onDetachPaymentMethod(paymentMethodId)
@@ -104,7 +102,6 @@ internal class FakeSavedPaymentMethodRepository(
     data class DetachRequest(
         val paymentMethodId: String,
         val customerMetadata: CustomerMetadata,
-        val canRemoveDuplicates: Boolean,
     )
 
     data class UpdateRequest(

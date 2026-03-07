@@ -153,7 +153,6 @@ internal class DefaultPaymentElementLoaderTest {
                     cardFundingFilter = PaymentSheetCardFundingFilter(ConfigurationDefaults.allowedCardFundingTypes),
                     hasCustomerConfiguration = true,
                     financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
-                    canRemoveDuplicates = false,
                     removePaymentMethod = PaymentMethodRemovePermission.Full,
                     saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
                     canRemoveLastPaymentMethod = true,
@@ -2700,8 +2699,6 @@ internal class DefaultPaymentElementLoaderTest {
                 .isEqualTo(PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null))
             assertThat(state.paymentMethodMetadata.customerMetadata?.canRemoveLastPaymentMethod)
                 .isEqualTo(true)
-            assertThat(state.paymentMethodMetadata.customerMetadata?.canRemoveDuplicates)
-                .isEqualTo(true)
             assertThat(state.paymentMethodMetadata.customerMetadata?.canUpdateFullPaymentMethodDetails)
                 .isEqualTo(true)
 
@@ -2750,8 +2747,6 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(state.paymentMethodMetadata.customerMetadata?.saveConsent)
                 .isEqualTo(PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null))
             assertThat(state.paymentMethodMetadata.customerMetadata?.canRemoveLastPaymentMethod)
-                .isEqualTo(true)
-            assertThat(state.paymentMethodMetadata.customerMetadata?.canRemoveDuplicates)
                 .isEqualTo(true)
             assertThat(state.paymentMethodMetadata.customerMetadata?.canUpdateFullPaymentMethodDetails)
                 .isEqualTo(true)
@@ -2802,8 +2797,6 @@ internal class DefaultPaymentElementLoaderTest {
                 .isEqualTo(PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null))
             assertThat(state.paymentMethodMetadata.customerMetadata?.canRemoveLastPaymentMethod)
                 .isEqualTo(true)
-            assertThat(state.paymentMethodMetadata.customerMetadata?.canRemoveDuplicates)
-                .isEqualTo(true)
             assertThat(state.paymentMethodMetadata.customerMetadata?.canUpdateFullPaymentMethodDetails)
                 .isEqualTo(true)
 
@@ -2852,8 +2845,6 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(state.paymentMethodMetadata.customerMetadata?.saveConsent)
                 .isEqualTo(PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null))
             assertThat(state.paymentMethodMetadata.customerMetadata?.canRemoveLastPaymentMethod)
-                .isEqualTo(true)
-            assertThat(state.paymentMethodMetadata.customerMetadata?.canRemoveDuplicates)
                 .isEqualTo(true)
             assertThat(state.paymentMethodMetadata.customerMetadata?.canUpdateFullPaymentMethodDetails)
                 .isEqualTo(true)
@@ -2904,8 +2895,6 @@ internal class DefaultPaymentElementLoaderTest {
                 .isEqualTo(PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null))
             assertThat(state.paymentMethodMetadata.customerMetadata?.canRemoveLastPaymentMethod)
                 .isEqualTo(true)
-            assertThat(state.paymentMethodMetadata.customerMetadata?.canRemoveDuplicates)
-                .isEqualTo(true)
             assertThat(state.paymentMethodMetadata.customerMetadata?.canUpdateFullPaymentMethodDetails)
                 .isEqualTo(true)
 
@@ -2938,8 +2927,6 @@ internal class DefaultPaymentElementLoaderTest {
                 .isEqualTo(PaymentMethodSaveConsentBehavior.Legacy)
             assertThat(state.paymentMethodMetadata.customerMetadata?.canRemoveLastPaymentMethod)
                 .isEqualTo(true)
-            assertThat(state.paymentMethodMetadata.customerMetadata?.canRemoveDuplicates)
-                .isEqualTo(false)
             assertThat(state.paymentMethodMetadata.customerMetadata?.canUpdateFullPaymentMethodDetails)
                 .isEqualTo(false)
 

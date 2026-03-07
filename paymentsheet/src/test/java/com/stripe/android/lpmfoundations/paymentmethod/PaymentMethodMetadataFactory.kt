@@ -57,7 +57,6 @@ internal object PaymentMethodMetadataFactory {
         saveConsent: PaymentMethodSaveConsentBehavior =
             PaymentMethodSaveConsentBehavior.Legacy,
         canRemoveLastPaymentMethod: Boolean = true,
-        canRemoveDuplicates: Boolean = true,
         canUpdateFullPaymentMethodDetails: Boolean = false,
         customerSessionClientSecret: String? = null,
         termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay> = emptyMap(),
@@ -97,7 +96,6 @@ internal object PaymentMethodMetadataFactory {
                         removePaymentMethod = removePaymentMethod,
                         saveConsent = saveConsent,
                         canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
-                        canRemoveDuplicates = canRemoveDuplicates,
                         canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
                     )
                 } else {
@@ -108,7 +106,6 @@ internal object PaymentMethodMetadataFactory {
                         removePaymentMethod = removePaymentMethod,
                         saveConsent = saveConsent,
                         canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
-                        canRemoveDuplicates = canRemoveDuplicates,
                         canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
                     )
                 }
