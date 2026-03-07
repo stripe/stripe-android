@@ -15,7 +15,6 @@ internal interface SavedPaymentMethodRepository {
     suspend fun detachPaymentMethod(
         customerMetadata: CustomerMetadata,
         paymentMethodId: String,
-        canRemoveDuplicates: Boolean,
     ): Result<PaymentMethod>
 
     suspend fun updatePaymentMethod(
@@ -43,7 +42,6 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
     override suspend fun detachPaymentMethod(
         customerMetadata: CustomerMetadata,
         paymentMethodId: String,
-        canRemoveDuplicates: Boolean,
     ): Result<PaymentMethod> = when (customerMetadata) {
         is CustomerMetadata.CheckoutSession -> {
             checkoutSessionRepository.detachPaymentMethod(
@@ -54,12 +52,11 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
             }
         }
         is CustomerMetadata.CustomerSession -> {
-            customerRepository.detachPaymentMethod(
+            customerRepository.detachPaymentMethodAndDuplicates(
                 customerId = customerMetadata.id,
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
                 customerSessionClientSecret = customerMetadata.customerSessionClientSecret,
                 paymentMethodId = paymentMethodId,
-                canRemoveDuplicates = canRemoveDuplicates,
             )
         }
         is CustomerMetadata.LegacyEphemeralKey -> {
@@ -67,7 +64,6 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
                 customerId = customerMetadata.id,
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
                 paymentMethodId = paymentMethodId,
-                canRemoveDuplicates = canRemoveDuplicates,
             )
         }
     }

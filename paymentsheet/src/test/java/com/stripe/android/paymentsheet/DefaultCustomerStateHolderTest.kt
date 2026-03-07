@@ -384,7 +384,6 @@ internal class DefaultCustomerStateHolderTest {
                 removePaymentMethod = paymentMethodRemovePermission,
                 saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
                 canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
-                canRemoveDuplicates = true,
                 canUpdateFullPaymentMethodDetails = false,
             )
         )

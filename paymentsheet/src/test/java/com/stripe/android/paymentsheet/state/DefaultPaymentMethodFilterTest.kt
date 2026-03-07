@@ -216,7 +216,6 @@ class DefaultPaymentMethodFilterTest {
                     removePaymentMethod = PaymentMethodRemovePermission.Full,
                     saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
                     canRemoveLastPaymentMethod = false,
-                    canRemoveDuplicates = false,
                     canUpdateFullPaymentMethodDetails = false,
                 ),
                 remoteDefaultPaymentMethodId = remoteDefaultPaymentMethodId,

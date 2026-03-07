@@ -189,7 +189,6 @@ internal class ManageActivityTest {
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
             cbcEligibility = CardBrandChoiceEligibility.Eligible(preferredNetworks = listOf()),
             hasCustomerConfiguration = true,
-            canRemoveDuplicates = false,
             removePaymentMethod = PaymentMethodRemovePermission.Full,
             saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
             canRemoveLastPaymentMethod = true,

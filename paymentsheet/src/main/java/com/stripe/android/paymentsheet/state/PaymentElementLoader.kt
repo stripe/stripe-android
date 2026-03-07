@@ -535,7 +535,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     saveConsent = customerInfo.offerSave?.toSaveConsentBehavior()
                         ?: PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
                     canRemoveLastPaymentMethod = false,
-                    canRemoveDuplicates = false,
                     canUpdateFullPaymentMethodDetails = false,
                 )
             }

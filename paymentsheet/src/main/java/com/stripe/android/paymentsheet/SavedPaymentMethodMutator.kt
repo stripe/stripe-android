@@ -142,7 +142,6 @@ internal class SavedPaymentMethodMutator(
             )
         )
 
-        val canRemoveDuplicates = customerStateHolder.canRemoveDuplicate.value
         val currentSelection = (selection.value as? PaymentSelection.Saved)?.paymentMethod
         val didRemoveSelectedItem = currentSelection?.id == paymentMethodId
 
@@ -157,7 +156,6 @@ internal class SavedPaymentMethodMutator(
         return savedPaymentMethodRepository.detachPaymentMethod(
             customerMetadata = customerMetadata,
             paymentMethodId = paymentMethodId,
-            canRemoveDuplicates = canRemoveDuplicates,
         )
     }
 

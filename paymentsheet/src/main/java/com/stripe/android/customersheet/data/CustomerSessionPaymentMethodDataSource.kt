@@ -61,12 +61,11 @@ internal class CustomerSessionPaymentMethodDataSource @Inject constructor(
     override suspend fun detachPaymentMethod(paymentMethodId: String): CustomerSheetDataResult<PaymentMethod> {
         return withContext(workContext) {
             elementsSessionManager.fetchCustomerSessionEphemeralKey().mapCatching { ephemeralKey ->
-                customerRepository.detachPaymentMethod(
+                customerRepository.detachPaymentMethodAndDuplicates(
                     customerId = ephemeralKey.customerId,
                     ephemeralKeySecret = ephemeralKey.ephemeralKey,
                     customerSessionClientSecret = ephemeralKey.customerSessionClientSecret,
                     paymentMethodId = paymentMethodId,
-                    canRemoveDuplicates = true,
                 ).getOrThrow()
             }.toCustomerSheetDataResult()
         }
