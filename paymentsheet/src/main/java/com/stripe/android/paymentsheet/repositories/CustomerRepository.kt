@@ -30,7 +30,8 @@ internal interface CustomerRepository {
 
     /**
      * Detach a payment method from the Customer using a legacy ephemeral key.
-     * Only detaches the specified payment method (no duplicate removal).
+     * Only detaches the specified payment method — no duplicate removal is needed because
+     * legacy ephemeral keys don't filter out duplicates at display time.
      */
     suspend fun detachPaymentMethod(
         customerId: String,

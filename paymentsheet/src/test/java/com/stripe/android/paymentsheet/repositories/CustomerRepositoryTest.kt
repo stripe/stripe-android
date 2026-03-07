@@ -369,6 +369,9 @@ internal class CustomerRepositoryTest {
     @Test
     fun `detachPaymentMethodAndDuplicates() should call elements endpoint when customerSessionClientSecret exists`() =
         runTest {
+            givenGetPaymentMethodsReturns(
+                Result.success(emptyList())
+            )
             givenElementsDetachPaymentMethodReturns(
                 Result.success(
                     PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -685,11 +688,7 @@ internal class CustomerRepositoryTest {
         val paymentMethodsToFailRemoval: List<PaymentMethod> = listOf(),
         val paymentMethodsToRetrieve: List<PaymentMethod> = paymentMethodsToAttemptRemoval
     ) : AbsFakeStripeRepository() {
-        override suspend fun detachPaymentMethod(
-            productUsageTokens: Set<String>,
-            paymentMethodId: String,
-            requestOptions: ApiRequest.Options
-        ): Result<PaymentMethod> {
+        private fun doDetach(paymentMethodId: String): Result<PaymentMethod> {
             if (paymentMethodsToFailRemoval.any { it.id == paymentMethodId }) {
                 return Result.failure(
                     exception = IllegalStateException("Failed to remove!")
@@ -704,6 +703,19 @@ internal class CustomerRepositoryTest {
 
             return Result.success(paymentMethod)
         }
+
+        override suspend fun detachPaymentMethod(
+            productUsageTokens: Set<String>,
+            paymentMethodId: String,
+            requestOptions: ApiRequest.Options
+        ): Result<PaymentMethod> = doDetach(paymentMethodId)
+
+        override suspend fun detachPaymentMethod(
+            customerSessionClientSecret: String,
+            productUsageTokens: Set<String>,
+            paymentMethodId: String,
+            requestOptions: ApiRequest.Options
+        ): Result<PaymentMethod> = doDetach(paymentMethodId)
 
         override suspend fun getPaymentMethods(
             listPaymentMethodsParams: ListPaymentMethodsParams,
