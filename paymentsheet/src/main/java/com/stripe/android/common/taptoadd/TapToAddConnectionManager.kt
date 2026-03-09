@@ -2,12 +2,12 @@ package com.stripe.android.common.taptoadd
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import androidx.annotation.RestrictTo
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.stripeterminal.external.callable.Callback
@@ -150,6 +150,7 @@ internal class DefaultTapToAddConnectionManager(
         workScope.launch {
             val canContinue = connectionStartLock.withLock {
                 if (!isSupported || isConnected || connectionTask?.isActive == true) {
+
                     false
                 } else {
                     connectionTask = CompletableDeferred()
@@ -168,6 +169,8 @@ internal class DefaultTapToAddConnectionManager(
                     error = exception,
                     errorEvent = ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_LOCATION_PERMISSIONS_FAILURE,
                 )
+
+                Log.d("TAP_TO_ADD_CONNECT", "${exception.cause}")
             }
         }
     }
@@ -209,6 +212,8 @@ internal class DefaultTapToAddConnectionManager(
                 errorEvent = ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_NO_READER_FOUND,
             )
 
+            Log.d("TAP_TO_ADD_CONNECT", "No reader found!")
+
             return
         }
 
@@ -217,6 +222,7 @@ internal class DefaultTapToAddConnectionManager(
                 error = IllegalStateException("No location specified!"),
                 errorEvent = null,
             )
+            Log.d("TAP_TO_ADD_CONNECT", "No location!")
 
             return
         }
@@ -253,6 +259,7 @@ internal class DefaultTapToAddConnectionManager(
         error: Throwable,
         errorEvent: ErrorReporter.ErrorEvent?,
     ) {
+        Log.d("TAP_TO_ADD_CONNECT", "Tap to add failed with error: $error")
         val additionalParams = mutableMapOf<String, String>()
 
         if (error is TerminalException) {
