@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import androidx.annotation.RestrictTo
 import androidx.core.content.ContextCompat
+import com.stripe.android.R
 import com.stripe.android.core.utils.flatMapCatching
 import com.stripe.android.crypto.onramp.CheckoutState.Status
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsEvent
@@ -577,10 +578,61 @@ internal class OnrampInteractor @Inject constructor(
             OnrampCollectPaymentMethodResult.Cancelled()
     }
 
-    fun handleGooglePayPaymentResult(
+    suspend fun handleGooglePayPaymentResult(
         result: GooglePayPaymentMethodLauncher.Result
     ): OnrampCollectPaymentMethodResult = when (result) {
         is GooglePayPaymentMethodLauncher.Result.Completed -> {
+            val secret = consumerSessionClientSecret()
+            if (secret != null) {
+                cryptoApiRepository.retrieveKycInfo(secret)
+                    .fold(
+                        onSuccess = { result ->
+                        },
+                        onFailure = { error ->
+                            // name, phone, email, billing address
+                            val name = result.paymentMethod.billingDetails?.name
+                            val address = result.paymentMethod.billingDetails?.address
+
+                            val kycAddress = PaymentSheet.Address(
+                                city = address?.city,
+                                country = address?.country,
+                                line1 = address?.line1,
+                                line2 = address?.line2,
+                                postalCode = address?.postalCode,
+                                state = address?.state
+                            )
+                            cryptoApiRepository.collectKycData(
+                                KycInfo(
+                                    firstName = name,
+                                    lastName = name,
+                                    idNumber = null,
+                                    dateOfBirth = null,
+                                    address = kycAddress
+                                ),
+                                consumerSessionClientSecret = secret
+                            )
+
+                            OnrampAnalyticsEvent.ErrorOccurred(
+                                operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.CollectPaymentMethod,
+                                error = error,
+                            )
+
+                            OnrampCollectPaymentMethodResult.Failed(error)
+                        }
+                    )
+
+            } else {
+                val error = MissingConsumerSecretException()
+                analyticsService?.track(
+                    OnrampAnalyticsEvent.ErrorOccurred(
+                        operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.CollectPaymentMethod,
+                        error = error,
+                    )
+                )
+
+                OnrampCollectPaymentMethodResult.Failed(error)
+            }
+
             analyticsService?.track(
                 OnrampAnalyticsEvent.CollectPaymentMethodCompleted(
                     paymentMethodType = PaymentMethodType.GooglePay
@@ -600,7 +652,7 @@ internal class OnrampInteractor @Inject constructor(
                     imageLoader = {
                         ContextCompat.getDrawable(
                             application,
-                            com.stripe.android.R.drawable.stripe_google_pay_mark
+                            R.drawable.stripe_google_pay_mark
                         )!!
                     },
                     label = "Google Pay",
