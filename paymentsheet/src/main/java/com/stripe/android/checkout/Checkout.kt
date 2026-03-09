@@ -6,7 +6,6 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.checkout.injection.CheckoutComponent
 import com.stripe.android.checkout.injection.DaggerCheckoutComponent
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -81,10 +80,10 @@ class Checkout private constructor(
             .updateState()
     }
 
-    suspend fun updateShippingAddress(address: PaymentSheet.Address): Result<CheckoutSession> {
+    suspend fun updateShippingAddress(address: Address): Result<CheckoutSession> {
         val sessionId = state.checkoutSessionResponse.id
         return component.checkoutSessionRepository
-            .updateShippingAddress(sessionId, address)
+            .updateShippingAddress(sessionId, address.build())
             .updateState()
     }
 

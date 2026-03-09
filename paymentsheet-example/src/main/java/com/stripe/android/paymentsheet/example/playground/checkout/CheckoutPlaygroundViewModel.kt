@@ -8,7 +8,8 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.checkout.Checkout
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.checkout.Address
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,6 +28,9 @@ internal class CheckoutPlaygroundViewModel(
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
+    private val _lastAddressDetails = MutableStateFlow<AddressDetails?>(null)
+    val lastAddressDetails: StateFlow<AddressDetails?> = _lastAddressDetails.asStateFlow()
+
     fun applyPromotionCode(promotionCode: String) = performWhileLoading {
         checkout.applyPromotionCode(promotionCode)
     }
@@ -43,8 +47,26 @@ internal class CheckoutPlaygroundViewModel(
         checkout.selectShippingRate(shippingRateId)
     }
 
-    fun updateShippingAddress(address: PaymentSheet.Address) = performWhileLoading {
+    fun updateShippingAddress(addressDetails: AddressDetails) = performWhileLoading {
+        val address = Address()
+            .city(addressDetails.address?.city)
+            .country(addressDetails.address?.country)
+            .line1(addressDetails.address?.line1)
+            .line2(addressDetails.address?.line2)
+            .postalCode(addressDetails.address?.postalCode)
+            .state(addressDetails.address?.state)
         checkout.updateShippingAddress(address)
+        _lastAddressDetails.value = addressDetails
+    }
+
+    fun updatePostalCode(postalCode: String) = performWhileLoading {
+        val address = Address().postalCode(postalCode).country("US")
+        checkout.updateShippingAddress(address)
+    }
+
+    fun clearShippingAddress() = performWhileLoading {
+        checkout.updateShippingAddress(Address())
+        _lastAddressDetails.value = null
     }
 
     fun refresh() = performWhileLoading {
