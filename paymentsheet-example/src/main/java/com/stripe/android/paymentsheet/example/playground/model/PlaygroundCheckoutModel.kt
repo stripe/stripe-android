@@ -63,6 +63,8 @@ class CheckoutRequest private constructor(
     val customSecretKey: String?,
     @SerialName("custom_publishable_key")
     val customPublishableKey: String?,
+    @SerialName("custom_location_id")
+    val customLocationId: String?,
     @SerialName("use_checkout_session")
     val useCheckoutSession: Boolean?,
     @SerialName("checkout_session_payment_method_save")
@@ -120,6 +122,7 @@ class CheckoutRequest private constructor(
         private var customStripeApi: String? = null
         private var customSecretKey: String? = null
         private var customPublishableKey: String? = null
+        private var customLocationId: String? = null
         private var useCheckoutSession: Boolean? = null
         private var checkoutSessionPaymentMethodSave: FeatureState? = null
         private var checkoutSessionPaymentMethodRemove: FeatureState? = null
@@ -236,6 +239,10 @@ class CheckoutRequest private constructor(
             this.customPublishableKey = customPublishableKey
         }
 
+        fun customLocationId(customLocationId: String?) = apply {
+            this.customLocationId = customLocationId
+        }
+
         fun useCheckoutSession(useCheckoutSession: Boolean?) = apply {
             this.useCheckoutSession = useCheckoutSession
         }
@@ -297,6 +304,7 @@ class CheckoutRequest private constructor(
                 customStripeApi = customStripeApi,
                 customSecretKey = customSecretKey,
                 customPublishableKey = customPublishableKey,
+                customLocationId = customLocationId,
                 useCheckoutSession = useCheckoutSession,
                 checkoutSessionPaymentMethodSave = checkoutSessionPaymentMethodSave,
                 checkoutSessionPaymentMethodRemove = checkoutSessionPaymentMethodRemove,

@@ -79,6 +79,7 @@ internal object MerchantSettingsDefinition :
         if (value != Merchant.Custom) {
             playgroundSettings[CustomSecretKeyDefinition] = ""
             playgroundSettings[CustomPublishableKeyDefinition] = ""
+            playgroundSettings[CustomPublishableKeyDefinition] = ""
         }
     }
 
