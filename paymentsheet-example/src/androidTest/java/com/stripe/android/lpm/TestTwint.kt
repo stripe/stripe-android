@@ -31,4 +31,22 @@ internal class TestTwint : BasePlaygroundTest() {
             testParameters = testParameters,
         )
     }
+
+    @Test
+    fun testTwintWithSfu() {
+        testDriver.confirmNewOrGuestComplete(
+            testParameters = testParameters.copyPlaygroundSettings { settings ->
+                settings[CheckoutModeSettingsDefinition] = CheckoutMode.PAYMENT_WITH_SETUP
+            },
+        )
+    }
+
+    @Test
+    fun testTwintWithSetupIntent() {
+        testDriver.confirmNewOrGuestComplete(
+            testParameters = testParameters.copyPlaygroundSettings { settings ->
+                settings[CheckoutModeSettingsDefinition] = CheckoutMode.PAYMENT_WITH_SETUP
+            },
+        )
+    }
 }

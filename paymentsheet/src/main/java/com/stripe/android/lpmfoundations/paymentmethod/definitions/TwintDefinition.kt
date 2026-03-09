@@ -15,11 +15,9 @@ internal object TwintDefinition : PaymentMethodDefinition {
 
     override fun requirementsToBeUsedAsNewPaymentMethod(
         hasIntentToSetup: Boolean
-    ): Set<AddPaymentMethodRequirement> = setOf(
-        AddPaymentMethodRequirement.UnsupportedForSetup,
-    )
+    ): Set<AddPaymentMethodRequirement> = setOf()
 
-    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
+    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = metadata.hasIntentToSetup(type.code)
 
     override fun uiDefinitionFactory(
         metadata: PaymentMethodMetadata
@@ -33,4 +31,19 @@ private object TwintUiDefinitionFactory : UiDefinitionFactory.Simple() {
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_twint,
         iconResourceNight = null,
     )
+
+    override fun buildFormElements(
+        metadata: PaymentMethodMetadata,
+        arguments: UiDefinitionFactory.Arguments,
+        builder: FormElementsBuilder,
+    ) {
+        if (TwintDefinition.requiresMandate(metadata)) {
+            builder.footer(
+                MandateTextElement(
+                    stringResId = R.string.stripe_twint_mandate,
+                    args = listOf(arguments.merchantName)
+                )
+            )
+        }
+    }
 }
