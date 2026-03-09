@@ -12,7 +12,6 @@ import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.confirmation.intent.CallbackNotFoundException
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CreateIntentResult
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.stripeterminal.external.callable.Callback
 import com.stripe.stripeterminal.external.callable.Cancelable
@@ -114,7 +113,7 @@ internal class DefaultTapToAddCollectionHandler(
         when (val result = callback.createCardPresentSetupIntent()) {
             is CreateIntentResult.Success -> {
                 setUxConfiguration()
-                collectWithIntent(result.clientSecret, customerMetadata)
+                collectWithIntent(result.clientSecret, metadata, customerMetadata)
             }
             is CreateIntentResult.Failure -> {
                 TapToAddCollectionHandler.CollectionState.FailedCollection(
@@ -139,6 +138,7 @@ internal class DefaultTapToAddCollectionHandler(
 
     private suspend fun collectWithIntent(
         clientSecret: String,
+        metadata: PaymentMethodMetadata,
         customerMetadata: CustomerMetadata,
     ): TapToAddCollectionHandler.CollectionState {
         val setupIntent = retrieveSetupIntent(clientSecret)
