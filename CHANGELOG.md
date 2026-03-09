@@ -30,6 +30,9 @@ Dependencies updated in [12373](https://github.com/stripe/stripe-android/pull/12
 - Bumped WorkManager from 2.9.0 to 2.11.1.
 - Bumped Material from 1.12.0 to 1.13.0.
 
+### PaymentSheet
+* [Added] Added support for Wero payments (private preview).
+
 ## 22.8.1 - 2026-02-17
 
 ### Identity
