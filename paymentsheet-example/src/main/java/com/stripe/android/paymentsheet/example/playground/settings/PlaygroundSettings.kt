@@ -498,6 +498,7 @@ internal class PlaygroundSettings private constructor(
             MerchantSettingsDefinition,
             CustomSecretKeyDefinition,
             CustomPublishableKeyDefinition,
+            CustomLocationIdDefinition,
             CurrencySettingsDefinition,
             AmountSettingsDefinition,
             GooglePaySettingsDefinition,
