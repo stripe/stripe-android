@@ -38,6 +38,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.TwintDefiniti
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.UpiDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.UsBankAccountDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.WeChatPayDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.WeroDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ZipDefinition
 
 internal object PaymentMethodRegistry {
@@ -81,6 +82,7 @@ internal object PaymentMethodRegistry {
         UpiDefinition,
         UsBankAccountDefinition,
         WeChatPayDefinition,
+        WeroDefinition,
         ZipDefinition,
     )
 
