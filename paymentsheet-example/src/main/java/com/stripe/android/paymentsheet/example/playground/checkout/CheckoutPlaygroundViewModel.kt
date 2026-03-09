@@ -8,6 +8,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.checkout.Checkout
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.checkout.Address
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -40,6 +41,11 @@ internal class CheckoutPlaygroundViewModel(
 
     fun selectShippingRate(shippingRateId: String) = performWhileLoading {
         checkout.selectShippingRate(shippingRateId)
+    }
+
+    fun updatePostalCode(postalCode: String) = performWhileLoading {
+        val address = Address().postalCode(postalCode).country("US")
+        checkout.updateShippingAddress(address)
     }
 
     fun refresh() = performWhileLoading {

@@ -80,6 +80,13 @@ class Checkout private constructor(
             .updateState()
     }
 
+    suspend fun updateShippingAddress(address: Address): Result<CheckoutSession> {
+        val sessionId = state.checkoutSessionResponse.id
+        return component.checkoutSessionRepository
+            .updateShippingAddress(sessionId, address.build())
+            .updateState()
+    }
+
     suspend fun refresh(): Result<CheckoutSession> {
         val sessionId = state.checkoutSessionResponse.id
         return component.checkoutSessionRepository

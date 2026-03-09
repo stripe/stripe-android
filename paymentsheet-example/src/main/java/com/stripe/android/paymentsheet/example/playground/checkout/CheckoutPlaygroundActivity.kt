@@ -76,6 +76,7 @@ class CheckoutPlaygroundActivity : AppCompatActivity() {
                 removePromotionCode = viewModel::removePromotionCode,
                 updateLineItemQuantity = viewModel::updateLineItemQuantity,
                 selectShippingRate = viewModel::selectShippingRate,
+                updatePostalCode = viewModel::updatePostalCode,
                 refresh = viewModel::refresh,
             )
         }
@@ -96,6 +97,7 @@ private fun CheckoutScreen(
     removePromotionCode: () -> Unit,
     updateLineItemQuantity: (String, Int) -> Unit,
     selectShippingRate: (String) -> Unit,
+    updatePostalCode: (String) -> Unit,
     refresh: () -> Unit,
 ) {
     val checkoutSession by checkout.checkoutSession.collectAsState()
@@ -108,6 +110,7 @@ private fun CheckoutScreen(
         PlaygroundTheme(
             content = {
                 LineItemsSection(checkoutSession, updateLineItemQuantity)
+                ShippingAddressSection(updatePostalCode)
                 ShippingOptionsSection(checkoutSession, selectShippingRate)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -211,6 +214,43 @@ private fun LineItemsSection(
                     text = lineTotal,
                     style = MaterialTheme.typography.body2,
                 )
+            }
+        }
+
+        Divider(modifier = Modifier.padding(vertical = PADDING))
+    }
+}
+
+@Composable
+private fun ShippingAddressSection(
+    updatePostalCode: (String) -> Unit,
+) {
+    var postalCode by rememberSaveable { mutableStateOf("") }
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "Shipping Address",
+            style = MaterialTheme.typography.h6,
+        )
+
+        Spacer(modifier = Modifier.height(PADDING))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(PADDING),
+        ) {
+            OutlinedTextField(
+                value = postalCode,
+                onValueChange = { postalCode = it },
+                label = { Text("Postal code") },
+                singleLine = true,
+                modifier = Modifier.weight(1f),
+            )
+            Button(
+                onClick = { updatePostalCode(postalCode) },
+            ) {
+                Text("Apply")
             }
         }
 
