@@ -37,9 +37,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkout.CheckoutSession
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
+import com.stripe.android.paymentsheet.addresselement.rememberAddressLauncher
 import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
 import com.stripe.android.paymentsheet.example.playground.checkout.CheckoutPlaygroundViewModel.Companion.CHECKOUT_STATE_KEY
 import com.stripe.android.paymentsheet.example.samples.ui.PADDING
@@ -69,6 +72,12 @@ class CheckoutPlaygroundActivity : AppCompatActivity() {
         enableEdgeToEdge()
 
         setContent {
+            val addressLauncher = rememberAddressLauncher { result ->
+                if (result is AddressLauncherResult.Succeeded) {
+                    result.address.address?.let { viewModel.updateShippingAddress(it) }
+                }
+            }
+
             CheckoutScreen(
                 checkout = viewModel.checkout,
                 isLoading = viewModel.isLoading,
@@ -76,6 +85,10 @@ class CheckoutPlaygroundActivity : AppCompatActivity() {
                 removePromotionCode = viewModel::removePromotionCode,
                 updateLineItemQuantity = viewModel::updateLineItemQuantity,
                 selectShippingRate = viewModel::selectShippingRate,
+                updateShippingAddress = {
+                    val publishableKey = PaymentConfiguration.getInstance(applicationContext).publishableKey
+                    addressLauncher.present(publishableKey)
+                },
                 refresh = viewModel::refresh,
             )
         }
@@ -96,6 +109,7 @@ private fun CheckoutScreen(
     removePromotionCode: () -> Unit,
     updateLineItemQuantity: (String, Int) -> Unit,
     selectShippingRate: (String) -> Unit,
+    updateShippingAddress: () -> Unit,
     refresh: () -> Unit,
 ) {
     val checkoutSession by checkout.checkoutSession.collectAsState()
@@ -108,6 +122,11 @@ private fun CheckoutScreen(
         PlaygroundTheme(
             content = {
                 LineItemsSection(checkoutSession, updateLineItemQuantity)
+                Button(
+                    onClick = updateShippingAddress,
+                ) {
+                    Text("Update Shipping Address")
+                }
                 ShippingOptionsSection(checkoutSession, selectShippingRate)
                 Row(
                     modifier = Modifier.fillMaxWidth(),

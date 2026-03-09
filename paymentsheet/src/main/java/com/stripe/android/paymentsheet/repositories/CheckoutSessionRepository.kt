@@ -8,6 +8,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.executeRequestWithResultParser
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.paymentsheet.PaymentSheet
 import java.util.Locale
 import java.util.TimeZone
 import java.util.UUID
@@ -43,6 +44,11 @@ internal interface CheckoutSessionRepository {
     suspend fun selectShippingRate(
         sessionId: String,
         shippingRateId: String,
+    ): Result<CheckoutSessionResponse>
+
+    suspend fun updateShippingAddress(
+        sessionId: String,
+        address: PaymentSheet.Address,
     ): Result<CheckoutSessionResponse>
 }
 
@@ -146,6 +152,21 @@ internal class DefaultCheckoutSessionRepository @Inject constructor(
             "shipping_rate" to shippingRateId,
             "elements_session_client[is_aggregation_expected]" to "true",
         ),
+    )
+
+    override suspend fun updateShippingAddress(
+        sessionId: String,
+        address: PaymentSheet.Address,
+    ): Result<CheckoutSessionResponse> = executePost(
+        url = updateUrl(sessionId),
+        params = buildMap {
+            address.country?.let { put("tax_region[country]", it) }
+            address.line1?.let { put("tax_region[line1]", it) }
+            address.line2?.let { put("tax_region[line2]", it) }
+            address.city?.let { put("tax_region[city]", it) }
+            address.state?.let { put("tax_region[state]", it) }
+            address.postalCode?.let { put("tax_region[postal_code]", it) }
+        },
     )
 
     private companion object {
