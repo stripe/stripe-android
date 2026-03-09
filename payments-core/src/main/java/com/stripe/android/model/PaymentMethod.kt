@@ -905,7 +905,10 @@ constructor(
         val networks: Networks? = null,
         @JvmField
         @field:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        val displayBrand: String? = null
+        val displayBrand: String? = null,
+        @JvmField
+        @field:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val cardArt: CardArt? = null
     ) : TypeData() {
         override val type: Type get() = Type.Card
 
@@ -922,7 +925,8 @@ constructor(
             threeDSecureUsage: ThreeDSecureUsage? = this.threeDSecureUsage,
             wallet: Wallet? = this.wallet,
             networks: Networks? = this.networks,
-            displayBrand: String? = this.displayBrand
+            displayBrand: String? = this.displayBrand,
+            cardArt: CardArt? = this.cardArt
         ): Card {
             return Card(
                 brand = brand,
@@ -936,7 +940,8 @@ constructor(
                 threeDSecureUsage = threeDSecureUsage,
                 wallet = wallet,
                 networks = networks,
-                displayBrand = displayBrand
+                displayBrand = displayBrand,
+                cardArt = cardArt
             )
         }
 
@@ -1009,6 +1014,26 @@ constructor(
                     preferred = preferred
                 )
             }
+        }
+
+        @Parcelize
+        @Poko
+        class CardArt
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        constructor(
+            @JvmField val artImage: ArtImage?,
+            @JvmField val programName: String?,
+            @JvmField val status: String?
+        ) : StripeModel {
+
+            @Parcelize
+            @Poko
+            class ArtImage
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            constructor(
+                @JvmField val url: String,
+                @JvmField val format: String?
+            ) : StripeModel
         }
     }
 

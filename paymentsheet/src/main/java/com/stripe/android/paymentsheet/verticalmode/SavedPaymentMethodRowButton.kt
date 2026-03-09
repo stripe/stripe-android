@@ -10,10 +10,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.uicore.image.LocalStripeImageLoader
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
@@ -27,6 +29,7 @@ import com.stripe.android.paymentsheet.utils.testMetadata
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconHeight
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconWidth
 import com.stripe.android.uicore.DefaultStripeTheme
+import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.strings.resolve
 
 @Composable
@@ -52,16 +55,7 @@ internal fun SavedPaymentMethodRowButton(
         isEnabled = isEnabled,
         isSelected = isSelected,
         iconContent = {
-            val displayBrand = displayableSavedPaymentMethod.paymentMethod.card?.displayBrand
-            PaymentMethodIconFromResource(
-                iconRes = displayableSavedPaymentMethod.paymentMethod.getSavedPaymentMethodIcon(forVerticalMode = true),
-                colorFilter = null,
-                alignment = Alignment.Center,
-                modifier = Modifier
-                    .height(iconHeight)
-                    .width(iconWidth)
-                    .testMetadata(displayBrand)
-            )
+            SavedPaymentMethodIcon(displayableSavedPaymentMethod)
         },
         title = paymentMethodTitle.resolve(),
         subtitle = displayableSavedPaymentMethod.paymentMethod.getSublabel()?.resolve(),
@@ -75,6 +69,58 @@ internal fun SavedPaymentMethodRowButton(
         trailingContent = trailingContent,
         appearance = appearance,
         shouldShowDefaultBadge = displayableSavedPaymentMethod.shouldShowDefaultBadge
+    )
+}
+
+@Composable
+private fun SavedPaymentMethodIcon(
+    displayableSavedPaymentMethod: DisplayableSavedPaymentMethod
+) {
+    val displayBrand = displayableSavedPaymentMethod.paymentMethod.card?.displayBrand
+    val cardArtImage = displayableSavedPaymentMethod.paymentMethod.card?.cardArt?.artImage
+    if (cardArtImage != null) {
+        StripeImage(
+            url = cardArtImage.url,
+            imageLoader = LocalStripeImageLoader.current,
+            contentDescription = "card art",
+            modifier = Modifier
+                .height(iconHeight)
+                .width(iconWidth)
+                .testMetadata("card_art"),
+            contentScale = ContentScale.FillWidth,
+            errorContent = {
+                PaymentMethodIconFromResource(
+                    iconRes = displayableSavedPaymentMethod.paymentMethod.getSavedPaymentMethodIcon(forVerticalMode = true),
+                    colorFilter = null,
+                    alignment = Alignment.Center,
+                    modifier = Modifier
+                        .height(iconHeight)
+                        .width(iconWidth)
+                        .testMetadata(displayBrand)
+                )
+            },
+            loadingContent = {
+                PaymentMethodIconFromResource(
+                    iconRes = displayableSavedPaymentMethod.paymentMethod.getSavedPaymentMethodIcon(forVerticalMode = true),
+                    colorFilter = null,
+                    alignment = Alignment.Center,
+                    modifier = Modifier
+                        .height(iconHeight)
+                        .width(iconWidth)
+                        .testMetadata(displayBrand)
+                )
+            }
+        )
+        return
+    }
+    PaymentMethodIconFromResource(
+        iconRes = displayableSavedPaymentMethod.paymentMethod.getSavedPaymentMethodIcon(forVerticalMode = true),
+        colorFilter = null,
+        alignment = Alignment.Center,
+        modifier = Modifier
+            .height(iconHeight)
+            .width(iconWidth)
+            .testMetadata(displayBrand)
     )
 }
 

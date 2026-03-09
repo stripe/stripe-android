@@ -429,6 +429,7 @@ private fun SavedPaymentMethodTab(
             iconRes = paymentMethod.paymentMethod.getSavedPaymentMethodIcon(
                 showNightIcon = !MaterialTheme.stripeColors.component.shouldUseDarkDynamicColor()
             ),
+            cardArtUrl = paymentMethod.paymentMethod.card?.cardArt?.artImage?.url,
             labelIcon = labelIcon,
             shouldTintLabelIcon = paymentMethod.paymentMethod.shouldTintLabelIcon,
             labelText = labelText,

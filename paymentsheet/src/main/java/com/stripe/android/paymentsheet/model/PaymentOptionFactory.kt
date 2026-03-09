@@ -1,9 +1,14 @@
 package com.stripe.android.paymentsheet.model
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.uicore.image.StripeImageLoader
 import javax.inject.Inject
+import androidx.core.graphics.drawable.toDrawable
+import androidx.core.graphics.scale
 
 internal class PaymentOptionFactory @Inject constructor(
     private val iconLoader: PaymentSelection.IconLoader,
@@ -13,6 +18,7 @@ internal class PaymentOptionFactory @Inject constructor(
         val drawableResourceId = selection.drawableResourceId
         val lightThemeIconUrl = selection.lightThemeIconUrl
         val darkThemeIconUrl = selection.darkThemeIconUrl
+        val cardArtUrl = (selection as? PaymentSelection.Saved)?.paymentMethod?.card?.cardArt?.artImage?.url
 
         return PaymentOption(
             drawableResourceId = drawableResourceId,
@@ -22,12 +28,22 @@ internal class PaymentOptionFactory @Inject constructor(
             billingDetails = selection.billingDetails?.toPaymentSheetBillingDetails(),
             _shippingDetails = selection.shippingDetails,
             imageLoader = {
-                iconLoader.load(
+                val icon = iconLoader.load(
                     drawableResourceId = drawableResourceId,
                     drawableResourceIdNight = drawableResourceId,
                     lightThemeIconUrl = lightThemeIconUrl,
                     darkThemeIconUrl = darkThemeIconUrl,
                 )
+                val artDrawable = cardArtUrl?.let {
+                    val imageLoader = StripeImageLoader(context)
+                    imageLoader.load(it)
+                }?.map { bitmap ->
+                    bitmap?.let {
+                        val scaledBitmap = it.scale(icon.intrinsicWidth, icon.intrinsicHeight)
+                        scaledBitmap.toDrawable(context.resources)
+                    }
+                }?.getOrNull()
+                artDrawable ?: icon
             },
         )
     }

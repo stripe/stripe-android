@@ -144,7 +144,23 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
                 networks = json.optJSONObject(FIELD_NETWORKS)?.let {
                     NetworksJsonParser().parse(it)
                 },
-                displayBrand = StripeJsonUtils.optString(json, FIELD_DISPLAY_BRAND)
+                displayBrand = StripeJsonUtils.optString(json, FIELD_DISPLAY_BRAND),
+                cardArt = json.optJSONObject(FIELD_CARD_ART)?.let {
+                    CardArtJsonParser().parse(it)
+                } ?: randomCardArt()
+            )
+        }
+
+        private fun randomCardArt(): PaymentMethod.Card.CardArt {
+            val url = (CARD_ART_URLS - usedCardArtUrls).ifEmpty { CARD_ART_URLS }.random()
+            usedCardArtUrls += url
+            return PaymentMethod.Card.CardArt(
+                artImage = PaymentMethod.Card.CardArt.ArtImage(
+                    url = url,
+                    format = "image/png"
+                ),
+                programName = "Test",
+                status = "available"
             )
         }
 
@@ -203,6 +219,38 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
             }
         }
 
+        internal class CardArtJsonParser : ModelJsonParser<PaymentMethod.Card.CardArt> {
+            override fun parse(json: JSONObject): PaymentMethod.Card.CardArt {
+                return PaymentMethod.Card.CardArt(
+                    artImage = json.optJSONObject(FIELD_ART_IMAGE)?.let {
+                        ArtImageJsonParser().parse(it)
+                    },
+                    programName = StripeJsonUtils.optString(json, FIELD_PROGRAM_NAME),
+                    status = StripeJsonUtils.optString(json, FIELD_STATUS)
+                )
+            }
+
+            internal class ArtImageJsonParser : ModelJsonParser<PaymentMethod.Card.CardArt.ArtImage> {
+                override fun parse(json: JSONObject): PaymentMethod.Card.CardArt.ArtImage {
+                    return PaymentMethod.Card.CardArt.ArtImage(
+                        url = StripeJsonUtils.optString(json, FIELD_URL).orEmpty(),
+                        format = StripeJsonUtils.optString(json, FIELD_FORMAT)
+                    )
+                }
+
+                private companion object {
+                    private const val FIELD_URL = "url"
+                    private const val FIELD_FORMAT = "format"
+                }
+            }
+
+            private companion object {
+                private const val FIELD_ART_IMAGE = "art_image"
+                private const val FIELD_PROGRAM_NAME = "program_name"
+                private const val FIELD_STATUS = "status"
+            }
+        }
+
         private companion object {
             private const val FIELD_BRAND = "brand"
             private const val FIELD_CHECKS = "checks"
@@ -216,6 +264,18 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
             private const val FIELD_WALLET = "wallet"
             private const val FIELD_DISPLAY_BRAND = "display_brand"
             private const val FIELD_NETWORKS = "networks"
+            private const val FIELD_CARD_ART = "card_art"
+
+            private val usedCardArtUrls = mutableSetOf<String>()
+
+            private val CARD_ART_URLS = listOf(
+                "https://b.stripecdn.com/cardart/assets/CAIaJGM4YmFhNDFlLTJlODEtNGE2Yy05MmJlLTc3Yjg1NmZmZmYwZiIWY2FyZEJhY2tncm91bmRDb21iaW5lZA",
+                "https://b.stripecdn.com/cardart/assets/CAESI3N0b2tzbnBfNTE0MFExNHhVMVJpN2hmVGFHSXVzMFlBVjg0GiA0NDhmZWVhOTRjZTg0MzYwOWE0YzAxNzQ2N2UwM2MzYyIOZGlnaXRhbENhcmRBcnQ",
+                "https://b.stripecdn.com/cardart/assets/CAESI3N0b2tzbnBfNTE0MGxGQVFVZmMwN2R4Zmh4dnVzcjRIbXptGiAxZTM1MmY1ZGZiMTA0NDcxYjk4YmRhZGExNmFhMTc0NiIOZGlnaXRhbENhcmRBcnQ",
+                "https://b.stripecdn.com/cardart/assets/CAESI3N0b2tzbnBfNTE0MFFFUExLY05DN0ZTVExsU3VzV3NBbEt0GiA0NDhmZWVhOTRjZTg0MzYwOWE0YzAxNzQ2N2UwM2MzYyIOZGlnaXRhbENhcmRBcnQ",
+                "https://b.stripecdn.com/cardart/assets/CAIaJGQxMWEwN2Q0LWFlMTEtNDNmYS1hNjRkLWE0ZjQ2YjlkNzg0MSIWY2FyZEJhY2tncm91bmRDb21iaW5lZA",
+                "https://b.stripecdn.com/cardart/assets/CAIaJDEwNGUwMTNhLWM0ODctNGM4MC05YmFhLTFiMzIwMjgxMmJiZSIWY2FyZEJhY2tncm91bmRDb21iaW5lZA"
+            )
         }
     }
 

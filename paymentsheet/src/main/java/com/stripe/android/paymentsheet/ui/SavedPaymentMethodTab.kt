@@ -32,6 +32,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.FixedScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -46,6 +47,8 @@ import com.stripe.android.uicore.IconStyle
 import com.stripe.android.uicore.LocalIconStyle
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.SectionCard
+import com.stripe.android.uicore.image.LocalStripeImageLoader
+import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
 
 @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
@@ -76,6 +79,7 @@ internal fun SavedPaymentMethodTab(
     isClickable: Boolean = isEnabled,
     iconRes: Int,
     iconTint: Color? = null,
+    cardArtUrl: String? = null,
     @DrawableRes labelIcon: Int? = null,
     shouldTintLabelIcon: Boolean = true,
     labelText: String = "",
@@ -115,6 +119,7 @@ internal fun SavedPaymentMethodTab(
                     isSelected = isSelected,
                     iconRes = iconRes,
                     iconTint = iconTint,
+                    cardArtUrl = cardArtUrl,
                 )
 
                 LpmSelectorText(
@@ -170,6 +175,7 @@ private fun SavedPaymentMethodCard(
     isSelected: Boolean,
     iconRes: Int,
     iconTint: Color?,
+    cardArtUrl: String? = null,
     modifier: Modifier = Modifier,
 ) {
     SectionCard(
@@ -185,16 +191,39 @@ private fun SavedPaymentMethodCard(
             modifier = Modifier
                 .fillMaxSize()
         ) {
-            Image(
-                painter = painterResource(iconRes),
-                contentDescription = null,
-                colorFilter = iconTint?.let { ColorFilter.tint(it) },
-                modifier = Modifier
-                    .height(40.dp)
-                    .width(56.dp)
-            )
+            if (cardArtUrl != null) {
+                StripeImage(
+                    url = cardArtUrl,
+                    imageLoader = LocalStripeImageLoader.current,
+                    contentDescription = "card art",
+                    modifier = Modifier
+                        .height(40.dp)
+                        .width(56.dp),
+                    contentScale = ContentScale.FillWidth,
+                    errorContent = {
+                        FallbackIcon(iconRes = iconRes, iconTint = iconTint)
+                    },
+                    loadingContent = {
+                        FallbackIcon(iconRes = iconRes, iconTint = iconTint)
+                    }
+                )
+            } else {
+                FallbackIcon(iconRes = iconRes, iconTint = iconTint)
+            }
         }
     }
+}
+
+@Composable
+private fun FallbackIcon(iconRes: Int, iconTint: Color?) {
+    Image(
+        painter = painterResource(iconRes),
+        contentDescription = null,
+        colorFilter = iconTint?.let { ColorFilter.tint(it) },
+        modifier = Modifier
+            .height(40.dp)
+            .width(56.dp)
+    )
 }
 
 @Composable
