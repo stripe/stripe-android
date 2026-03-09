@@ -1,5 +1,7 @@
 package com.stripe.android.common.taptoadd.ui
 
+import android.content.ContentValues.TAG
+import android.util.Log
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.taptoadd.TapToAddCollectionHandler
 import com.stripe.android.core.Logger
@@ -41,7 +43,7 @@ internal class DefaultTapToAddCollectingInteractor(
                 onCollected(collectionState.paymentMethod)
             }
             is TapToAddCollectionHandler.CollectionState.FailedCollection -> {
-                logger.debug("Tap to add collection failed with error: ${collectionState.error}")
+                Log.w(TAG,"Tap to add collection failed with error: ${collectionState.error}")
                 onFailedCollection(
                     collectionState.displayMessage ?: collectionState.error.stripeErrorMessage()
                 )
