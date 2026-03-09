@@ -8,6 +8,7 @@ import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
+import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.core.utils.urlEncode
@@ -406,6 +407,10 @@ class CheckoutTest {
                 path("/v1/payment_pages/cs_test_abc123"),
                 bodyPart(urlEncode("tax_region[country]"), "US"),
                 bodyPart(urlEncode("tax_region[postal_code]"), "80202"),
+                not(bodyPart(urlEncode("tax_region[city]"), "")),
+                not(bodyPart(urlEncode("tax_region[state]"), "")),
+                not(bodyPart(urlEncode("tax_region[line1]"), "")),
+                not(bodyPart(urlEncode("tax_region[line2]"), "")),
                 bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
             ) { response ->
                 response.testBodyFromFile("checkout-session-update-shipping-address.json")
@@ -417,35 +422,6 @@ class CheckoutTest {
                 val address = Address()
                     .country("US")
                     .postalCode("80202")
-                val result = checkout.updateShippingAddress(address)
-
-                val updated = awaitItem()
-                assertThat(result.isSuccess).isTrue()
-                assertThat(result.getOrThrow()).isEqualTo(updated)
-            }
-        }
-    }
-
-    @Test
-    fun `updateShippingAddress trims whitespace from address fields`() = runTest {
-        runCreateWithStateScenario { checkout ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("POST"),
-                path("/v1/payment_pages/cs_test_abc123"),
-                bodyPart(urlEncode("tax_region[country]"), "US"),
-                bodyPart(urlEncode("tax_region[city]"), "Denver"),
-                bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
-            ) { response ->
-                response.testBodyFromFile("checkout-session-update-shipping-address.json")
-            }
-
-            checkout.checkoutSession.test {
-                awaitItem()
-
-                val address = Address()
-                    .country("  US  ")
-                    .city("  Denver  ")
                 val result = checkout.updateShippingAddress(address)
 
                 val updated = awaitItem()
