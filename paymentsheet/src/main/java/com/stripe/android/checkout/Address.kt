@@ -49,7 +49,9 @@ class Address {
     internal fun build(): State {
         return State(
             city = city?.trim(),
-            country = country?.trim(),
+            country = requireNotNull(country?.trim()) {
+                "Country is required."
+            },
             line1 = line1?.trim(),
             line2 = line2?.trim(),
             postalCode = postalCode?.trim(),
