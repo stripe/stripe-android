@@ -116,7 +116,7 @@ class CheckoutRequest private constructor(
         private var paymentMethodOptionsSetupFutureUsage: Map<String, String>? = null
         private var overridePaymentMethodOptionsSetupFutureUsage: Map<String, String>? = null
         private var isConfirmationToken: Boolean? = null
-        private var allowsTapToAdd: Boolean? = null
+        private val allowsTapToAdd: Boolean = true
         private var customStripeApi: String? = null
         private var customSecretKey: String? = null
         private var customPublishableKey: String? = null
@@ -218,10 +218,6 @@ class CheckoutRequest private constructor(
 
         fun isConfirmationToken(isConfirmationToken: Boolean?) = apply {
             this.isConfirmationToken = isConfirmationToken
-        }
-
-        fun allowsTapToAdd(allowsTapToAdd: Boolean?) = apply {
-            this.allowsTapToAdd = allowsTapToAdd
         }
 
         fun onBehalfOf(onBehalfOf: String?) = apply {
