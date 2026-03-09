@@ -24,8 +24,6 @@ internal class CustomerMetadataTest {
         ) { result ->
             assertThat(result.canRemovePaymentMethods).isFalse()
             assertThat(result.canRemoveLastPaymentMethod).isFalse()
-            // Always true for `customer_session`
-            assertThat(result.canRemoveDuplicates).isTrue()
         }
     }
 
@@ -39,8 +37,6 @@ internal class CustomerMetadataTest {
             assertThat(result.removePaymentMethod).isEqualTo(PaymentMethodRemovePermission.Full)
             assertThat(result.canRemovePaymentMethods).isTrue()
             assertThat(result.canRemoveLastPaymentMethod).isTrue()
-            // Always true for `customer_session`
-            assertThat(result.canRemoveDuplicates).isTrue()
         }
     }
 
@@ -54,8 +50,6 @@ internal class CustomerMetadataTest {
             assertThat(result.removePaymentMethod).isEqualTo(PaymentMethodRemovePermission.Partial)
             assertThat(result.canRemovePaymentMethods).isTrue()
             assertThat(result.canRemoveLastPaymentMethod).isTrue()
-            // Always true for `customer_session`
-            assertThat(result.canRemoveDuplicates).isTrue()
         }
     }
 
@@ -69,8 +63,6 @@ internal class CustomerMetadataTest {
             assertThat(result.removePaymentMethod).isEqualTo(PaymentMethodRemovePermission.None)
             assertThat(result.canRemovePaymentMethods).isFalse()
             assertThat(result.canRemoveLastPaymentMethod).isTrue()
-            // Always true for `customer_session`
-            assertThat(result.canRemoveDuplicates).isTrue()
         }
     }
 
@@ -189,7 +181,7 @@ internal class CustomerMetadataTest {
             customer = customer,
             id = "cus_test",
             ephemeralKeySecret = "ek_test",
-            customerSessionClientSecret = null,
+            customerSessionClientSecret = "cuss_test",
             isPaymentMethodSetAsDefaultEnabled = false,
         )
         assertThat(result.saveConsent).isEqualTo(
@@ -375,7 +367,7 @@ internal class CustomerMetadataTest {
             customer = customer,
             id = "cus_test",
             ephemeralKeySecret = "ek_test",
-            customerSessionClientSecret = null,
+            customerSessionClientSecret = "cuss_test",
             isPaymentMethodSetAsDefaultEnabled = false,
         )
 

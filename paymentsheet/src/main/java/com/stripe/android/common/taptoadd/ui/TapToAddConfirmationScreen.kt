@@ -35,6 +35,14 @@ internal fun ColumnScope.TapToAddConfirmationScreen(
             }
         }
 
+        state.error?.let { error ->
+            ErrorMessage(
+                error = error.resolve(),
+            )
+
+            Spacer(Modifier.size(10.dp))
+        }
+
         with(state.primaryButton) {
             PrimaryButton(
                 label = label.resolve(),
@@ -52,11 +60,5 @@ internal fun ColumnScope.TapToAddConfirmationScreen(
         }
 
         Spacer(Modifier.size(10.dp))
-
-        state.error?.let { error ->
-            ErrorMessage(
-                error = error.resolve(),
-            )
-        }
     }
 }

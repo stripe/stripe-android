@@ -310,7 +310,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             createLinkState(
                 elementsSession = elementsSession,
                 configuration = configuration,
-                customer = customerInfo?.toCustomerInfo(),
+                customerId = customerInfo?.customerIdOrNull(),
+                ephemeralKeySecret = customerInfo?.ephemeralKeySecretOrNull(),
                 initializationMode = initializationMode,
                 clientAttributionMetadata = clientAttributionMetadata,
             )
@@ -519,11 +520,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 )
             }
             is CustomerInfo.CheckoutSession -> {
-                CustomerMetadata(
-                    id = customerInfo.customer.id,
-                    // Checkout sessions don't use ephemeral keys or customer sessions.
-                    ephemeralKeySecret = "",
-                    customerSessionClientSecret = null,
+                CustomerMetadata.CheckoutSession(
+                    sessionId = customerInfo.sessionId,
+                    customerId = customerInfo.customer.id,
                     isPaymentMethodSetAsDefaultEnabled = false,
                     removePaymentMethod = if (customerInfo.customer.canDetachPaymentMethod) {
                         PaymentMethodRemovePermission.Full
@@ -536,7 +535,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     saveConsent = customerInfo.offerSave?.toSaveConsentBehavior()
                         ?: PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
                     canRemoveLastPaymentMethod = false,
-                    canRemoveDuplicates = false,
                     canUpdateFullPaymentMethodDetails = false,
                 )
             }
@@ -609,11 +607,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val customerSessionClientSecret = customerSession?.customerSessionClientSecret
 
         val paymentMethods = customerRepository.getPaymentMethods(
-            customerInfo = CustomerRepository.CustomerInfo(
-                id = customerConfig.id,
-                ephemeralKeySecret = customerConfig.ephemeralKeySecret,
-                customerSessionClientSecret = customerSessionClientSecret,
-            ),
+            customerId = customerConfig.id,
+            ephemeralKeySecret = customerConfig.ephemeralKeySecret,
             types = paymentMethodTypes,
             silentlyFail = metadata.stripeIntent.isLiveMode,
         ).getOrThrow()

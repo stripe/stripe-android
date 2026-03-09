@@ -3,6 +3,7 @@ package com.stripe.android.checkout
 import android.content.Context
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import com.stripe.android.checkout.injection.CheckoutComponent
 import com.stripe.android.checkout.injection.DaggerCheckoutComponent
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -15,7 +16,8 @@ import kotlinx.parcelize.Parcelize
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class Checkout private constructor(
-    var state: State
+    var state: State,
+    private val component: CheckoutComponent,
 ) {
     @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -26,14 +28,16 @@ class Checkout private constructor(
         ): Result<Checkout> {
             val component = DaggerCheckoutComponent.factory().create(context.applicationContext)
             return component.checkoutSessionLoader.load(checkoutSessionClientSecret).map { response ->
-                Checkout(State(response))
+                Checkout(State(response), component)
             }
         }
 
         fun createWithState(
+            context: Context,
             state: State,
         ): Checkout {
-            return Checkout(state)
+            val component = DaggerCheckoutComponent.factory().create(context.applicationContext)
+            return Checkout(state, component)
         }
     }
 
@@ -47,4 +51,48 @@ class Checkout private constructor(
 
     private val _checkoutSession = MutableStateFlow(state.checkoutSessionResponse.asCheckoutSession())
     val checkoutSession: StateFlow<CheckoutSession> = _checkoutSession.asStateFlow()
+
+    suspend fun applyPromotionCode(promotionCode: String): Result<CheckoutSession> {
+        val sessionId = state.checkoutSessionResponse.id
+        return component.checkoutSessionRepository
+            .applyPromotionCode(sessionId, promotionCode.trim())
+            .updateState()
+    }
+
+    suspend fun updateLineItemQuantity(lineItemId: String, quantity: Int): Result<CheckoutSession> {
+        val sessionId = state.checkoutSessionResponse.id
+        return component.checkoutSessionRepository
+            .updateLineItemQuantity(sessionId, lineItemId, quantity)
+            .updateState()
+    }
+
+    suspend fun removePromotionCode(): Result<CheckoutSession> {
+        val sessionId = state.checkoutSessionResponse.id
+        return component.checkoutSessionRepository
+            .applyPromotionCode(sessionId, "")
+            .updateState()
+    }
+
+    suspend fun selectShippingRate(shippingRateId: String): Result<CheckoutSession> {
+        val sessionId = state.checkoutSessionResponse.id
+        return component.checkoutSessionRepository
+            .selectShippingRate(sessionId, shippingRateId)
+            .updateState()
+    }
+
+    suspend fun refresh(): Result<CheckoutSession> {
+        val sessionId = state.checkoutSessionResponse.id
+        return component.checkoutSessionRepository
+            .init(sessionId)
+            .updateState()
+    }
+
+    private fun Result<CheckoutSessionResponse>.updateState(): Result<CheckoutSession> {
+        return map { response ->
+            state = State(response)
+            val checkoutSession = response.asCheckoutSession()
+            _checkoutSession.value = checkoutSession
+            checkoutSession
+        }
+    }
 }

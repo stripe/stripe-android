@@ -53,6 +53,65 @@ class CheckoutSessionResponseJsonParserTest {
     }
 
     @Test
+    fun `parse checkout session response includes line items`() {
+        val result = CheckoutSessionResponseJsonParser(
+            isLiveMode = false,
+        ).parse(CheckoutSessionFixtures.CHECKOUT_SESSION_RESPONSE_JSON)
+
+        assertThat(result).isNotNull()
+        val lineItems = result!!.lineItems
+        assertThat(lineItems).hasSize(1)
+        assertThat(lineItems[0].id).isEqualTo("li_1SrjAuLu5o3P18ZpVBMMs98l")
+        assertThat(lineItems[0].name).isEqualTo("Llama Figure")
+        assertThat(lineItems[0].quantity).isEqualTo(1)
+        assertThat(lineItems[0].subtotal).isEqualTo(999L)
+        assertThat(lineItems[0].total).isEqualTo(999L)
+        assertThat(lineItems[0].unitAmount).isEqualTo(999L)
+    }
+
+    @Test
+    fun `parse multiple line items`() {
+        val result = CheckoutSessionResponseJsonParser(
+            isLiveMode = false,
+        ).parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_MULTIPLE_LINE_ITEMS_JSON)
+
+        assertThat(result).isNotNull()
+        val lineItems = result!!.lineItems
+        assertThat(lineItems).hasSize(2)
+
+        assertThat(lineItems[0].id).isEqualTo("li_item1")
+        assertThat(lineItems[0].name).isEqualTo("Llama Figure")
+        assertThat(lineItems[0].quantity).isEqualTo(2)
+        assertThat(lineItems[0].subtotal).isEqualTo(1998L)
+        assertThat(lineItems[0].total).isEqualTo(1998L)
+        assertThat(lineItems[0].unitAmount).isEqualTo(999L)
+
+        assertThat(lineItems[1].id).isEqualTo("li_item2")
+        assertThat(lineItems[1].name).isEqualTo("Alpaca Plushie")
+        assertThat(lineItems[1].quantity).isEqualTo(1)
+        assertThat(lineItems[1].subtotal).isEqualTo(2499L)
+        assertThat(lineItems[1].total).isEqualTo(2499L)
+        assertThat(lineItems[1].unitAmount).isEqualTo(2499L)
+    }
+
+    @Test
+    fun `parse returns empty line items when no line_item_group`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "currency": "usd",
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result!!.lineItems).isEmpty()
+    }
+
+    @Test
     fun `parse returns null when session_id is missing`() {
         val json = JSONObject(
             """
@@ -375,6 +434,7 @@ class CheckoutSessionResponseJsonParserTest {
 
         // Shipping
         assertThat(totalSummary?.shippingRate).isNotNull()
+        assertThat(totalSummary?.shippingRate?.id).isEqualTo("shr_standard")
         assertThat(totalSummary?.shippingRate?.amount).isEqualTo(500L)
         assertThat(totalSummary?.shippingRate?.displayName).isEqualTo("Standard Shipping")
         assertThat(totalSummary?.shippingRate?.deliveryEstimate).isEqualTo("5-7 business days")
@@ -406,6 +466,7 @@ class CheckoutSessionResponseJsonParserTest {
         val totalSummary = result?.totalSummary
         assertThat(totalSummary).isNotNull()
         assertThat(totalSummary?.shippingRate).isNotNull()
+        assertThat(totalSummary?.shippingRate?.id).isEqualTo("shr_express")
         assertThat(totalSummary?.shippingRate?.amount).isEqualTo(500L)
         assertThat(totalSummary?.shippingRate?.displayName).isEqualTo("Express Shipping")
         assertThat(totalSummary?.shippingRate?.deliveryEstimate).isEqualTo("1-3 business days")
@@ -478,5 +539,85 @@ class CheckoutSessionResponseJsonParserTest {
 
         assertThat(result).isNotNull()
         assertThat(result?.totalSummary).isNull()
+    }
+
+    @Test
+    fun `parse discount amounts from coupon field`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_abc123",
+                "currency": "usd",
+                "total_summary": {
+                    "due": 4099,
+                    "subtotal": 5099,
+                    "total": 4099
+                },
+                "line_item_group": {
+                    "due": 4099,
+                    "subtotal": 5099,
+                    "total": 4099,
+                    "discount_amounts": [
+                        {
+                            "amount": 1000,
+                            "coupon": {
+                                "object": "coupon",
+                                "name": "10OFF",
+                                "amount_off": 1000,
+                                "currency": "usd",
+                                "duration": "once"
+                            },
+                            "currency": "usd",
+                            "promotion_code": {
+                                "object": "promotion_code",
+                                "code": "10OFF"
+                            }
+                        }
+                    ]
+                }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.amount).isEqualTo(4099L)
+        val totalSummary = result?.totalSummary
+        assertThat(totalSummary).isNotNull()
+        assertThat(totalSummary?.discountAmounts).hasSize(1)
+        assertThat(totalSummary?.discountAmounts?.get(0)?.amount).isEqualTo(1000L)
+        assertThat(totalSummary?.discountAmounts?.get(0)?.displayName).isEqualTo("10OFF")
+    }
+
+    @Test
+    fun `parse shipping options from root level`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_SHIPPING_OPTIONS_JSON)
+
+        assertThat(result).isNotNull()
+        val shippingOptions = result!!.shippingOptions
+        assertThat(shippingOptions).hasSize(3)
+
+        assertThat(shippingOptions[0].id).isEqualTo("shr_standard")
+        assertThat(shippingOptions[0].amount).isEqualTo(500L)
+        assertThat(shippingOptions[0].displayName).isEqualTo("Standard Shipping")
+        assertThat(shippingOptions[0].deliveryEstimate).isNull()
+
+        assertThat(shippingOptions[1].id).isEqualTo("shr_express")
+        assertThat(shippingOptions[1].amount).isEqualTo(1500L)
+        assertThat(shippingOptions[1].displayName).isEqualTo("Express Shipping")
+
+        assertThat(shippingOptions[2].id).isEqualTo("shr_free")
+        assertThat(shippingOptions[2].amount).isEqualTo(0L)
+        assertThat(shippingOptions[2].displayName).isEqualTo("Free Shipping")
+    }
+
+    @Test
+    fun `parse returns empty shipping options when not present`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_RESPONSE_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result!!.shippingOptions).isEmpty()
     }
 }

@@ -40,7 +40,6 @@ internal data class LinkConfiguration(
     val allowUserEmailEdits: Boolean,
     val allowLogOut: Boolean,
     val enableDisplayableDefaultValuesInEce: Boolean,
-    val skipWalletInFlowController: Boolean,
     val linkAppearance: LinkAppearance.State?,
     val linkSignUpOptInFeatureEnabled: Boolean,
     val linkSignUpOptInInitialValue: Boolean,

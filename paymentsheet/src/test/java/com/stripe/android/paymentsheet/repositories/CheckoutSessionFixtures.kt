@@ -5,6 +5,7 @@ import org.json.JSONObject
 /**
  * Fixtures for checkout session responses from `/v1/payment_pages/{id}/init` API.
  */
+@Suppress("LargeClass")
 internal object CheckoutSessionFixtures {
 
     val CHECKOUT_SESSION_RESPONSE_JSON = JSONObject(
@@ -425,14 +426,38 @@ internal object CheckoutSessionFixtures {
                 "discount_amounts": [
                     {
                         "amount": 500,
-                        "discount": {
-                            "name": "SUMMER10"
+                        "coupon": {
+                            "object": "coupon",
+                            "name": "SUMMER10",
+                            "amount_off": null,
+                            "currency": null,
+                            "duration": "once",
+                            "duration_in_months": null,
+                            "has_applies_to_products": false,
+                            "percent_off": 10.0
+                        },
+                        "currency": "usd",
+                        "promotion_code": {
+                            "object": "promotion_code",
+                            "code": "SUMMER10"
                         }
                     },
                     {
                         "amount": 250,
-                        "discount": {
-                            "name": "LOYALTY5"
+                        "coupon": {
+                            "object": "coupon",
+                            "name": "LOYALTY5",
+                            "amount_off": null,
+                            "currency": null,
+                            "duration": "once",
+                            "duration_in_months": null,
+                            "has_applies_to_products": false,
+                            "percent_off": 5.0
+                        },
+                        "currency": "usd",
+                        "promotion_code": {
+                            "object": "promotion_code",
+                            "code": "LOYALTY5"
                         }
                     }
                 ],
@@ -447,6 +472,7 @@ internal object CheckoutSessionFixtures {
                     }
                 ],
                 "shipping_rate": {
+                    "id": "shr_standard",
                     "amount": 500,
                     "display_name": "Standard Shipping",
                     "delivery_estimate": "5-7 business days"
@@ -496,6 +522,48 @@ internal object CheckoutSessionFixtures {
     )
 
     /**
+     * Init response with multiple line items.
+     */
+    val CHECKOUT_SESSION_WITH_MULTIPLE_LINE_ITEMS_JSON = JSONObject(
+        """
+        {
+            "session_id": "cs_test_abc123",
+            "currency": "usd",
+            "total_summary": {
+                "due": 4497,
+                "subtotal": 4497,
+                "total": 4497
+            },
+            "line_item_group": {
+                "currency": "usd",
+                "total": 4497,
+                "subtotal": 4497,
+                "due": 4497,
+                "line_items": [
+                    {
+                        "id": "li_item1",
+                        "object": "item",
+                        "name": "Llama Figure",
+                        "quantity": 2,
+                        "subtotal": 1998,
+                        "total": 1998
+                    },
+                    {
+                        "id": "li_item2",
+                        "object": "item",
+                        "name": "Alpaca Plushie",
+                        "quantity": 1,
+                        "subtotal": 2499,
+                        "total": 2499
+                    }
+                ]
+            },
+            "elements_session": $MINIMAL_ELEMENTS_SESSION_JSON
+        }
+        """.trimIndent()
+    )
+
+    /**
      * Init response with shipping from shipping.shipping_option fallback path.
      */
     val CHECKOUT_SESSION_WITH_SHIPPING_OPTION_JSON = JSONObject(
@@ -516,6 +584,7 @@ internal object CheckoutSessionFixtures {
             },
             "shipping": {
                 "shipping_option": {
+                    "id": "shr_express",
                     "amount": 500,
                     "display_name": "Express Shipping",
                     "delivery_estimate": {
@@ -530,6 +599,62 @@ internal object CheckoutSessionFixtures {
                     }
                 }
             },
+            "elements_session": $MINIMAL_ELEMENTS_SESSION_JSON
+        }
+        """.trimIndent()
+    )
+
+    /**
+     * Init response with shipping_options array at the root level.
+     */
+    val CHECKOUT_SESSION_WITH_SHIPPING_OPTIONS_JSON = JSONObject(
+        """
+        {
+            "session_id": "cs_test_abc123",
+            "currency": "usd",
+            "shipping_rate": "shr_standard",
+            "total_summary": {
+                "due": 1500,
+                "subtotal": 1000,
+                "total": 1500
+            },
+            "line_item_group": {
+                "currency": "usd",
+                "total": 1500,
+                "subtotal": 1000,
+                "due": 1500,
+                "shipping_rate": {
+                    "id": "shr_standard",
+                    "amount": 500,
+                    "display_name": "Standard Shipping"
+                }
+            },
+            "shipping_options": [
+                {
+                    "shipping_rate": {
+                        "id": "shr_standard",
+                        "amount": 500,
+                        "display_name": "Standard Shipping",
+                        "currency": "usd"
+                    }
+                },
+                {
+                    "shipping_rate": {
+                        "id": "shr_express",
+                        "amount": 1500,
+                        "display_name": "Express Shipping",
+                        "currency": "usd"
+                    }
+                },
+                {
+                    "shipping_rate": {
+                        "id": "shr_free",
+                        "amount": 0,
+                        "display_name": "Free Shipping",
+                        "currency": "usd"
+                    }
+                }
+            ],
             "elements_session": $MINIMAL_ELEMENTS_SESSION_JSON
         }
         """.trimIndent()

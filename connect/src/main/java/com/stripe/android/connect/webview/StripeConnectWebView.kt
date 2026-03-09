@@ -10,7 +10,6 @@ import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Rect
 import android.net.Uri
-import android.os.Build
 import android.view.ViewTreeObserver
 import android.webkit.JavascriptInterface
 import android.webkit.JsResult
@@ -369,17 +368,10 @@ internal class StripeConnectWebView private constructor(
         }
 
         override fun onReceivedError(view: WebView, request: WebResourceRequest, error: WebResourceError) {
-            // for some reason errorCode and description are only available in API 23+,
-            // so we simply ignore the description for older devices
-            val errorMessage = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                error.description.toString()
-            } else {
-                null
-            }
             delegate.onReceivedError(
                 requestUrl = request.url.toString(),
                 httpStatusCode = null,
-                errorMessage = errorMessage,
+                errorMessage = error.description.toString(),
                 isMainPageLoad = request.isForMainFrame
             )
         }

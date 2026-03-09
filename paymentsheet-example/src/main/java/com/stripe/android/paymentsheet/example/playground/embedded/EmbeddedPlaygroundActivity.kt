@@ -368,7 +368,7 @@ internal class EmbeddedPlaygroundActivity :
     @Suppress("DEPRECATION")
     private fun getCheckout(): Checkout? {
         return intent.getParcelableExtra<Checkout.State?>(CHECKOUT_STATE_KEY)
-            ?.let { Checkout.createWithState(it) }
+            ?.let { Checkout.createWithState(this, it) }
     }
 
     @Suppress("DEPRECATION")

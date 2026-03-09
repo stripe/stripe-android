@@ -60,7 +60,7 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
     }
 
     override fun onStart(owner: LifecycleOwner) {
-        analyticsEventReporter.onStart()
+        analyticsEventReporter.onStart(captchaVendorName = args.captchaVendorName)
         super.onStart(owner)
     }
 
@@ -69,6 +69,7 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
             errorType = error.webViewErrorType,
             errorCode = error.errorCode.toString(),
             fromBridge = false,
+            captchaVendorName = args.captchaVendorName,
         )
         viewModelScope.launch {
             _result.emit(
@@ -81,6 +82,7 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
     }
 
     fun closeClicked() {
+        analyticsEventReporter.onCancel(captchaVendorName = args.captchaVendorName)
         viewModelScope.launch {
             _result.emit(
                 IntentConfirmationChallengeActivityResult.Canceled(args.intent.clientSecret)
@@ -135,11 +137,11 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
         bridgeHandler.event.collectLatest { event ->
             when (event) {
                 is ConfirmationChallengeBridgeEvent.Ready -> {
-                    analyticsEventReporter.onWebViewLoaded()
+                    analyticsEventReporter.onWebViewLoaded(captchaVendorName = args.captchaVendorName)
                     _bridgeReady.emit(Unit)
                 }
                 is ConfirmationChallengeBridgeEvent.Success -> {
-                    analyticsEventReporter.onSuccess()
+                    analyticsEventReporter.onSuccess(captchaVendorName = args.captchaVendorName)
                     _result.emit(
                         IntentConfirmationChallengeActivityResult.Success(
                             clientSecret = event.clientSecret
@@ -150,7 +152,8 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
                     analyticsEventReporter.onError(
                         errorType = event.error.type,
                         errorCode = event.error.code,
-                        fromBridge = true
+                        fromBridge = true,
+                        captchaVendorName = args.captchaVendorName
                     )
                     _result.emit(
                         IntentConfirmationChallengeActivityResult.Failed(

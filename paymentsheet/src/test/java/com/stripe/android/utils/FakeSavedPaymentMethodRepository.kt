@@ -2,10 +2,10 @@ package com.stripe.android.utils
 
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
-import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodAccess
 import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 
 internal class FakeSavedPaymentMethodRepository(
@@ -21,6 +21,9 @@ internal class FakeSavedPaymentMethodRepository(
     private val onSetDefaultPaymentMethod: () -> Result<Customer> = {
         Result.failure(NotImplementedError())
     },
+    private val onRetrievePaymentMethod: (paymentMethodId: String) -> Result<PaymentMethod> = {
+        Result.failure(NotImplementedError())
+    },
 ) : SavedPaymentMethodRepository {
     private val _detachRequests = Turbine<DetachRequest>()
     val detachRequests: ReceiveTurbine<DetachRequest> = _detachRequests
@@ -32,29 +35,27 @@ internal class FakeSavedPaymentMethodRepository(
     val setDefaultPaymentMethodRequests: ReceiveTurbine<SetDefaultRequest> = _setDefaultPaymentMethodRequests
 
     override suspend fun detachPaymentMethod(
-        access: SavedPaymentMethodAccess,
+        customerMetadata: CustomerMetadata,
         paymentMethodId: String,
-        canRemoveDuplicates: Boolean,
     ): Result<PaymentMethod> {
         _detachRequests.add(
             DetachRequest(
                 paymentMethodId = paymentMethodId,
-                access = access,
-                canRemoveDuplicates = canRemoveDuplicates,
+                customerMetadata = customerMetadata,
             )
         )
         return onDetachPaymentMethod(paymentMethodId)
     }
 
     override suspend fun updatePaymentMethod(
-        access: SavedPaymentMethodAccess,
+        customerMetadata: CustomerMetadata,
         paymentMethodId: String,
         params: PaymentMethodUpdateParams,
     ): Result<PaymentMethod> {
         _updateRequests.add(
             UpdateRequest(
                 paymentMethodId = paymentMethodId,
-                access = access,
+                customerMetadata = customerMetadata,
                 params = params,
             )
         )
@@ -62,38 +63,60 @@ internal class FakeSavedPaymentMethodRepository(
     }
 
     override suspend fun setDefaultPaymentMethod(
-        access: SavedPaymentMethodAccess,
+        customerMetadata: CustomerMetadata,
         paymentMethodId: String?,
     ): Result<Customer> {
         _setDefaultPaymentMethodRequests.add(
             SetDefaultRequest(
                 paymentMethodId = paymentMethodId,
-                access = access,
+                customerMetadata = customerMetadata,
             )
         )
         return onSetDefaultPaymentMethod()
+    }
+
+    private val _retrievePaymentMethodRequests = Turbine<RetrievePaymentMethodRequest>()
+    val retrievePaymentMethodRequests: ReceiveTurbine<RetrievePaymentMethodRequest> =
+        _retrievePaymentMethodRequests
+
+    override suspend fun retrievePaymentMethod(
+        customerMetadata: CustomerMetadata,
+        paymentMethodId: String,
+    ): Result<PaymentMethod> {
+        _retrievePaymentMethodRequests.add(
+            RetrievePaymentMethodRequest(
+                paymentMethodId = paymentMethodId,
+                customerMetadata = customerMetadata,
+            )
+        )
+        return onRetrievePaymentMethod(paymentMethodId)
     }
 
     fun validate() {
         _detachRequests.ensureAllEventsConsumed()
         _updateRequests.ensureAllEventsConsumed()
         _setDefaultPaymentMethodRequests.ensureAllEventsConsumed()
+        _retrievePaymentMethodRequests.ensureAllEventsConsumed()
     }
 
     data class DetachRequest(
         val paymentMethodId: String,
-        val access: SavedPaymentMethodAccess,
-        val canRemoveDuplicates: Boolean,
+        val customerMetadata: CustomerMetadata,
     )
 
     data class UpdateRequest(
         val paymentMethodId: String,
-        val access: SavedPaymentMethodAccess,
+        val customerMetadata: CustomerMetadata,
         val params: PaymentMethodUpdateParams,
     )
 
     data class SetDefaultRequest(
         val paymentMethodId: String?,
-        val access: SavedPaymentMethodAccess,
+        val customerMetadata: CustomerMetadata,
+    )
+
+    data class RetrievePaymentMethodRequest(
+        val paymentMethodId: String,
+        val customerMetadata: CustomerMetadata,
     )
 }

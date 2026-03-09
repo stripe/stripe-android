@@ -26,6 +26,7 @@ interface TextFieldController : InputController, SectionFieldComposable, Section
     fun onValueChange(displayFormatted: String): TextFieldState?
     fun onFocusChange(newHasFocus: Boolean)
     fun onDropdownItemClicked(item: TextFieldIcon.Dropdown.Item) {}
+    fun onSelectorItemClicked(item: TextFieldIcon.Selector.Item) {}
 
     val initialValue: String?
     val autofillType: ContentType?
@@ -106,6 +107,23 @@ sealed class TextFieldIcon {
             override val icon: Int,
             override val enabled: Boolean = true
         ) : SingleChoiceDropdownItem
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+    data class Selector(
+        val message: ResolvableString,
+        val hide: Boolean,
+        val currentItem: Item,
+        val items: List<Item>,
+        val hasMadeSelection: Boolean
+    ) : TextFieldIcon() {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+        data class Item(
+            val id: String,
+            val label: ResolvableString,
+            val icon: Int,
+            val enabled: Boolean = true
+        )
     }
 }
 

@@ -8,21 +8,50 @@ import com.stripe.android.customersheet.data.CustomerSheetSession
 import com.stripe.android.model.ElementsSession
 import kotlinx.parcelize.Parcelize
 
-@Parcelize
-internal data class CustomerMetadata(
-    val id: String,
-    val ephemeralKeySecret: String,
-    val customerSessionClientSecret: String?,
-    val isPaymentMethodSetAsDefaultEnabled: Boolean,
-    val removePaymentMethod: PaymentMethodRemovePermission,
-    val saveConsent: PaymentMethodSaveConsentBehavior,
-    val canRemoveLastPaymentMethod: Boolean,
-    val canRemoveDuplicates: Boolean,
-    val canUpdateFullPaymentMethodDetails: Boolean,
-) : Parcelable {
+internal sealed class CustomerMetadata : Parcelable {
+    abstract val isPaymentMethodSetAsDefaultEnabled: Boolean
+    abstract val removePaymentMethod: PaymentMethodRemovePermission
+    abstract val saveConsent: PaymentMethodSaveConsentBehavior
+    abstract val canRemoveLastPaymentMethod: Boolean
+    abstract val canUpdateFullPaymentMethodDetails: Boolean
+
     val canRemovePaymentMethods: Boolean
         get() = removePaymentMethod == PaymentMethodRemovePermission.Full ||
             removePaymentMethod == PaymentMethodRemovePermission.Partial
+
+    @Parcelize
+    data class LegacyEphemeralKey(
+        val id: String,
+        val ephemeralKeySecret: String,
+        override val isPaymentMethodSetAsDefaultEnabled: Boolean,
+        override val removePaymentMethod: PaymentMethodRemovePermission,
+        override val saveConsent: PaymentMethodSaveConsentBehavior,
+        override val canRemoveLastPaymentMethod: Boolean,
+        override val canUpdateFullPaymentMethodDetails: Boolean,
+    ) : CustomerMetadata()
+
+    @Parcelize
+    data class CustomerSession(
+        val id: String,
+        val ephemeralKeySecret: String,
+        val customerSessionClientSecret: String,
+        override val isPaymentMethodSetAsDefaultEnabled: Boolean,
+        override val removePaymentMethod: PaymentMethodRemovePermission,
+        override val saveConsent: PaymentMethodSaveConsentBehavior,
+        override val canRemoveLastPaymentMethod: Boolean,
+        override val canUpdateFullPaymentMethodDetails: Boolean,
+    ) : CustomerMetadata()
+
+    @Parcelize
+    data class CheckoutSession(
+        val sessionId: String,
+        val customerId: String,
+        override val isPaymentMethodSetAsDefaultEnabled: Boolean,
+        override val removePaymentMethod: PaymentMethodRemovePermission,
+        override val saveConsent: PaymentMethodSaveConsentBehavior,
+        override val canRemoveLastPaymentMethod: Boolean,
+        override val canUpdateFullPaymentMethodDetails: Boolean,
+    ) : CustomerMetadata()
 
     companion object {
         internal fun createForPaymentSheetCustomerSession(
@@ -30,9 +59,9 @@ internal data class CustomerMetadata(
             customer: ElementsSession.Customer,
             id: String,
             ephemeralKeySecret: String,
-            customerSessionClientSecret: String?,
+            customerSessionClientSecret: String,
             isPaymentMethodSetAsDefaultEnabled: Boolean,
-        ): CustomerMetadata {
+        ): CustomerSession {
             val mobilePaymentElementComponent = customer.session.components.mobilePaymentElement
             val removePaymentMethod = when (mobilePaymentElementComponent) {
                 is ElementsSession.Customer.Components.MobilePaymentElement.Enabled -> {
@@ -68,7 +97,7 @@ internal data class CustomerMetadata(
                 }
             }
 
-            return CustomerMetadata(
+            return CustomerSession(
                 id = id,
                 ephemeralKeySecret = ephemeralKeySecret,
                 customerSessionClientSecret = customerSessionClientSecret,
@@ -76,8 +105,6 @@ internal data class CustomerMetadata(
                 removePaymentMethod = removePaymentMethod,
                 saveConsent = saveConsent,
                 canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
-                // Should always remove duplicates when using `customer_session`
-                canRemoveDuplicates = true,
                 // Should always be enabled when using `customer_session`
                 canUpdateFullPaymentMethodDetails = true,
             )
@@ -88,11 +115,10 @@ internal data class CustomerMetadata(
             id: String,
             ephemeralKeySecret: String,
             isPaymentMethodSetAsDefaultEnabled: Boolean,
-        ): CustomerMetadata {
-            return CustomerMetadata(
+        ): LegacyEphemeralKey {
+            return LegacyEphemeralKey(
                 id = id,
                 ephemeralKeySecret = ephemeralKeySecret,
-                customerSessionClientSecret = null,
                 isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
                 /*
                  * Un-scoped legacy ephemeral keys have full permissions to remove/save/modify. This should
@@ -111,11 +137,6 @@ internal data class CustomerMetadata(
                  * sessions.
                  */
                 canRemoveLastPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod,
-                /*
-                 * Removing duplicates is not applicable here since we don't filter out duplicates for for
-                 * un-scoped ephemeral keys.
-                 */
-                canRemoveDuplicates = false,
                 canUpdateFullPaymentMethodDetails = false,
             )
         }
@@ -128,18 +149,34 @@ internal data class CustomerMetadata(
             customerSessionClientSecret: String?,
             isPaymentMethodSetAsDefaultEnabled: Boolean,
         ): CustomerMetadata {
-            return CustomerMetadata(
-                id = id,
-                ephemeralKeySecret = ephemeralKeySecret,
-                customerSessionClientSecret = customerSessionClientSecret,
-                isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
-                removePaymentMethod = customerSheetSession.permissions.removePaymentMethod,
-                saveConsent = customerSheetSession.paymentMethodSaveConsentBehavior,
-                canRemoveLastPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod,
-                canRemoveDuplicates = true,
-                canUpdateFullPaymentMethodDetails =
-                customerSheetSession.permissions.canUpdateFullPaymentMethodDetails,
-            )
+            val removePaymentMethod = customerSheetSession.permissions.removePaymentMethod
+            val saveConsent = customerSheetSession.paymentMethodSaveConsentBehavior
+            val canRemoveLastPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod
+            val canUpdateFullPaymentMethodDetails =
+                customerSheetSession.permissions.canUpdateFullPaymentMethodDetails
+
+            return if (customerSessionClientSecret != null) {
+                CustomerSession(
+                    id = id,
+                    ephemeralKeySecret = ephemeralKeySecret,
+                    customerSessionClientSecret = customerSessionClientSecret,
+                    isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
+                    removePaymentMethod = removePaymentMethod,
+                    saveConsent = saveConsent,
+                    canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
+                    canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
+                )
+            } else {
+                LegacyEphemeralKey(
+                    id = id,
+                    ephemeralKeySecret = ephemeralKeySecret,
+                    isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
+                    removePaymentMethod = removePaymentMethod,
+                    saveConsent = saveConsent,
+                    canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
+                    canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
+                )
+            }
         }
     }
 }

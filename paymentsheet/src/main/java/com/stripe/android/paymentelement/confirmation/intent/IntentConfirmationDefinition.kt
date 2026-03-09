@@ -41,9 +41,8 @@ internal class IntentConfirmationDefinition(
         val interceptor: IntentConfirmationInterceptor
         try {
             interceptor = intentConfirmationInterceptorFactory.create(
-                integrationMetadata = confirmationArgs.paymentMethodMetadata.integrationMetadata,
-                customerId = paymentMethodMetadata.customerMetadata?.id,
-                ephemeralKeySecret = paymentMethodMetadata.customerMetadata?.ephemeralKeySecret,
+                integrationMetadata = paymentMethodMetadata.integrationMetadata,
+                customerMetadata = paymentMethodMetadata.customerMetadata,
                 clientAttributionMetadata = paymentMethodMetadata.clientAttributionMetadata,
             )
         } catch (e: CallbackNotFoundException) {

@@ -53,6 +53,8 @@ internal data class CheckoutSessionResponse(
      */
     val savedPaymentMethodsOfferSave: SavedPaymentMethodsOfferSave? = null,
     val totalSummary: TotalSummaryResponse? = null,
+    val lineItems: List<LineItem> = emptyList(),
+    val shippingOptions: List<ShippingRate> = emptyList(),
 ) : StripeModel {
 
     /**
@@ -139,8 +141,19 @@ internal data class CheckoutSessionResponse(
 
     @Parcelize
     data class ShippingRate(
+        val id: String,
         val amount: Long,
         val displayName: String,
         val deliveryEstimate: String?,
+    ) : StripeModel
+
+    @Parcelize
+    data class LineItem(
+        val id: String,
+        val name: String,
+        val quantity: Int,
+        val unitAmount: Long?,
+        val subtotal: Long,
+        val total: Long,
     ) : StripeModel
 }

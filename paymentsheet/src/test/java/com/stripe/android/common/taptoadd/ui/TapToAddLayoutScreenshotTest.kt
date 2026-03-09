@@ -9,7 +9,14 @@ import androidx.compose.ui.Modifier
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
+import com.stripe.android.ui.core.elements.CvcController
+import com.stripe.android.ui.core.elements.CvcElement
+import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.SectionElement
+import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.SystemAppearance
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,6 +27,7 @@ import kotlin.String
 class TapToAddLayoutScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(
+        SystemAppearance.entries,
         boxModifier = Modifier,
         includeStripeTheme = false,
     )
@@ -58,6 +66,17 @@ class TapToAddLayoutScreenshotTest {
             TapToAddTheme {
                 TapToAddLayout(
                     screen = TapToAddNavigator.Screen.Collecting(FakeTapToAddCollectingInteractor),
+                ) {}
+            }
+        }
+    }
+
+    @Test
+    fun collectCvc() {
+        paparazziRule.snapshot {
+            TapToAddTheme {
+                TapToAddLayout(
+                    screen = TapToAddNavigator.Screen.CollectCvc(FakeTapToAddCollectCvcInteractor()),
                 ) {}
             }
         }
@@ -144,6 +163,48 @@ class TapToAddLayoutScreenshotTest {
     }
 
     private object FakeTapToAddCollectingInteractor : TapToAddCollectingInteractor
+
+    private class FakeTapToAddCollectCvcInteractor(
+        cardBrand: CardBrand = CardBrand.Visa,
+        last4: String? = "4242",
+        primaryButtonEnabled: Boolean = false,
+    ) : TapToAddCollectCvcInteractor {
+        override val state: StateFlow<TapToAddCollectCvcInteractor.State> = MutableStateFlow(
+            TapToAddCollectCvcInteractor.State(
+                cardBrand = cardBrand,
+                last4 = last4,
+                title = "Continue".resolvableString,
+                primaryButton = TapToAddCollectCvcInteractor.State.PrimaryButton(
+                    label = "Continue".resolvableString,
+                    enabled = primaryButtonEnabled,
+                ),
+                form = TapToAddCollectCvcInteractor.State.Form(
+                    elements = listOf(createCvcElement(cardBrand = cardBrand)),
+                    enabled = true,
+                )
+            )
+        )
+
+        override fun performAction(action: TapToAddCollectCvcInteractor.Action) {
+            // No-op
+        }
+
+        private fun createCvcElement(cardBrand: CardBrand): FormElement {
+            val cvcController = CvcController(
+                cardBrandFlow = stateFlowOf(cardBrand),
+                initialValue = null,
+            )
+            val cvcElement = CvcElement(
+                _identifier = IdentifierSpec.CardCvc,
+                controller = cvcController,
+            )
+
+            return SectionElement.wrap(
+                sectionFieldElement = cvcElement,
+                label = "Confirm your CVC".resolvableString,
+            )
+        }
+    }
 
     private class FakeTapToAddCompletedInteractor(
         override val cardBrand: CardBrand = CardBrand.Visa,

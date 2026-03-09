@@ -24,7 +24,6 @@ import com.stripe.android.paymentelement.confirmation.utils.sellerBusinessName
 import com.stripe.android.payments.financialconnections.GetFinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
@@ -32,7 +31,8 @@ internal interface CreateLinkState {
     suspend operator fun invoke(
         elementsSession: ElementsSession,
         configuration: CommonConfiguration,
-        customer: CustomerRepository.CustomerInfo?,
+        customerId: String?,
+        ephemeralKeySecret: String?,
         initializationMode: PaymentElementLoader.InitializationMode,
         clientAttributionMetadata: ClientAttributionMetadata,
     ): LinkStateResult
@@ -70,7 +70,8 @@ internal class DefaultCreateLinkState @Inject constructor(
     override suspend fun invoke(
         elementsSession: ElementsSession,
         configuration: CommonConfiguration,
-        customer: CustomerRepository.CustomerInfo?,
+        customerId: String?,
+        ephemeralKeySecret: String?,
         initializationMode: PaymentElementLoader.InitializationMode,
         clientAttributionMetadata: ClientAttributionMetadata,
     ): LinkStateResult {
@@ -86,7 +87,8 @@ internal class DefaultCreateLinkState @Inject constructor(
 
         val linkConfiguration = createLinkConfigurationWithoutValidation(
             configuration = configuration,
-            customer = customer,
+            customerId = customerId,
+            ephemeralKeySecret = ephemeralKeySecret,
             elementsSession = elementsSession,
             initializationMode = initializationMode,
             clientAttributionMetadata = clientAttributionMetadata,
@@ -201,7 +203,8 @@ internal class DefaultCreateLinkState @Inject constructor(
     // Validation is done in getLinkDisabledReasons.
     private suspend fun createLinkConfigurationWithoutValidation(
         configuration: CommonConfiguration,
-        customer: CustomerRepository.CustomerInfo?,
+        customerId: String?,
+        ephemeralKeySecret: String?,
         elementsSession: ElementsSession,
         initializationMode: PaymentElementLoader.InitializationMode,
         clientAttributionMetadata: ClientAttributionMetadata,
@@ -214,7 +217,8 @@ internal class DefaultCreateLinkState @Inject constructor(
         val customerPhone = getCustomerPhone(shippingDetails, configuration)
         val customerEmail = retrieveCustomerEmail(
             configuration = configuration,
-            customer = customer
+            customerId = customerId,
+            ephemeralKeySecret = ephemeralKeySecret,
         )
         val customerInfo = LinkConfiguration.CustomerInfo(
             name = configuration.defaultBillingDetails?.name,
@@ -279,7 +283,6 @@ internal class DefaultCreateLinkState @Inject constructor(
         configuration.link.collectMissingBillingDetailsForExistingPaymentMethods,
         allowUserEmailEdits = configuration.link.allowUserEmailEdits,
         allowLogOut = configuration.link.allowLogOut,
-        skipWalletInFlowController = elementsSession.linkMobileSkipWalletInFlowController,
         customerId = elementsSession.customer?.session?.customerId,
         linkAppearance = configuration.linkAppearance,
         saveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),

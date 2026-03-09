@@ -9,6 +9,8 @@ import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.analytics.RealErrorReporter
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -22,6 +24,9 @@ internal abstract class AttestationModule {
     abstract fun bindsAnalyticsRequestFactory(
         paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory
     ): AnalyticsRequestFactory
+
+    @Binds
+    abstract fun bindsErrorReporter(errorReporter: RealErrorReporter): ErrorReporter
 
     companion object {
         @Provides

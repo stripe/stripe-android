@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.intent
 
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -30,8 +31,7 @@ internal interface IntentConfirmationInterceptor {
     interface Factory {
         suspend fun create(
             integrationMetadata: IntegrationMetadata,
-            customerId: String?,
-            ephemeralKeySecret: String?,
+            customerMetadata: CustomerMetadata?,
             clientAttributionMetadata: ClientAttributionMetadata,
         ): IntentConfirmationInterceptor
     }
@@ -52,8 +52,7 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
 ) : IntentConfirmationInterceptor.Factory {
     override suspend fun create(
         integrationMetadata: IntegrationMetadata,
-        customerId: String?,
-        ephemeralKeySecret: String?,
+        customerMetadata: CustomerMetadata?,
         clientAttributionMetadata: ClientAttributionMetadata,
     ): IntentConfirmationInterceptor {
         return when (integrationMetadata) {
@@ -70,8 +69,7 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
                 confirmationTokenConfirmationInterceptorFactory.create(
                     intentConfiguration = integrationMetadata.intentConfiguration,
                     createIntentCallback = deferredIntentCallbackRetriever.waitForConfirmationTokenCallback(),
-                    customerId = customerId,
-                    ephemeralKeySecret = ephemeralKeySecret,
+                    customerMetadata = customerMetadata,
                     clientAttributionMetadata = clientAttributionMetadata,
                 )
             }
@@ -97,6 +95,7 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
             is IntegrationMetadata.CheckoutSession -> {
                 checkoutSessionConfirmationInterceptorFactory.create(
                     checkoutSessionId = integrationMetadata.id,
+                    customerMetadata = customerMetadata,
                     clientAttributionMetadata = clientAttributionMetadata,
                 )
             }

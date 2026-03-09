@@ -109,7 +109,6 @@ internal object LinkTestUtils {
             linkAppearance = null,
             linkSignUpOptInFeatureEnabled = false,
             linkSignUpOptInInitialValue = false,
-            skipWalletInFlowController = false,
             customerId = null,
             saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             forceSetupFutureUseBehaviorAndNewMandate = false,

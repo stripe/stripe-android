@@ -10,14 +10,14 @@ jobs:
       contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.base_ref }}
       - uses: ./.github/actions/stripe_setup
       - name: Build base branch
         run: ./gradlew :identity-example:assembleRelease && mv identity-example/build/outputs/apk/theme1/release/identity-example-theme1-release.apk identity-example/build/outputs/apk/theme1/release/identity-example-release-base.apk
       - name: Upload APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: identity-base-apk
           path: identity-example/build/outputs/apk/theme1/release/identity-example-release-base.apk
@@ -29,12 +29,12 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/stripe_setup
       - name: Build PR branch
         run: ./gradlew :identity-example:assembleRelease && mv identity-example/build/outputs/apk/theme1/release/identity-example-theme1-release.apk identity-example/build/outputs/apk/theme1/release/identity-example-release-pr.apk
       - name: Upload APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: identity-pr-apk
           path: identity-example/build/outputs/apk/theme1/release/identity-example-release-pr.apk
@@ -46,9 +46,9 @@ jobs:
     permissions:
       pull-requests: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Download APKs
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: apk
           pattern: identity-*-apk
@@ -62,13 +62,13 @@ jobs:
 
       # Post comment with output
 
-      - uses: peter-evans/find-comment@d2dae40ed151c634e4189471272b57e76ec19ba8
+      - uses: peter-evans/find-comment@b30e6a3c0ed37e7c023ccd3f1db5c6c0b0c23aad
         id: find_comment
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body-includes: Diffuse output
 
-      - uses: peter-evans/create-or-update-comment@a35cf36e5301d70b76f316e867e7788a55a31dae
+      - uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9
         if: ${{ steps.diffuse.outputs.diff-raw != null || steps.find_comment.outputs.comment-id != null }}
         with:
           body: |
@@ -81,7 +81,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload diffuse output
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: diffuse-output
           path: ${{ steps.diffuse.outputs.diff-file }}
@@ -92,7 +92,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/stripe_setup
       - name: Upload release bundle to Emerge
         run: ./gradlew :identity-example:emergeUploadTheme1ReleaseAab

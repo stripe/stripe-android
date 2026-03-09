@@ -1,0 +1,34 @@
+{
+  "session_id": "cs_test_abc123",
+  "currency": "usd",
+  "total_summary": {
+    "due": 4099,
+    "subtotal": 5099,
+    "total": 4099
+  },
+  "line_item_group": {
+    "due": 4099,
+    "subtotal": 5099,
+    "total": 4099,
+    "discount_amounts": [
+      {
+        "amount": 1000,
+        "coupon": {
+          "object": "coupon",
+          "name": "10OFF",
+          "amount_off": 1000,
+          "currency": "usd",
+          "duration": "once",
+          "duration_in_months": null,
+          "has_applies_to_products": false,
+          "percent_off": null
+        },
+        "currency": "usd",
+        "promotion_code": {
+          "object": "promotion_code",
+          "code": "10OFF"
+        }
+      }
+    ]
+  }
+}

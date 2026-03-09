@@ -39,7 +39,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         paymentDetails: ConsumerPaymentDetails.PaymentDetails,
         linkAccount: LinkAccount,
         cvc: String?,
-        billingPhone: String?
+        billingPhone: String?,
     ): Result {
         return confirm {
             newConfirmationArgs(
@@ -126,6 +126,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                     paymentMethod = paymentDetails.paymentMethod,
                     cvc = cvc,
                     paymentMethodMetadata = paymentMethodMetadata,
+                    newPMTransformedForConfirmation = paymentDetails.createdFromNewPaymentMethod,
                 )
             }
             is LinkPaymentDetails.Saved -> {
@@ -133,6 +134,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                     paymentMethod = paymentDetails.paymentMethod,
                     cvc = cvc,
                     paymentMethodMetadata = paymentMethodMetadata,
+                    newPMTransformedForConfirmation = false,
                 )
             }
         }
@@ -200,6 +202,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         paymentMethod: PaymentMethod,
         cvc: String?,
         paymentMethodMetadata: PaymentMethodMetadata,
+        newPMTransformedForConfirmation: Boolean
     ): ConfirmationHandler.Args {
         return ConfirmationHandler.Args(
             confirmationOption = PaymentMethodConfirmationOption.Saved(
@@ -210,6 +213,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                         configuration.passthroughModeEnabled.not()
                     }
                 ),
+                newPMTransformedForConfirmation = newPMTransformedForConfirmation
             ),
             paymentMethodMetadata = paymentMethodMetadata,
         )
@@ -262,6 +266,7 @@ internal fun createPaymentMethodCreateParams(
         extraParams = cvc?.let { mapOf("card" to mapOf("cvc" to cvc)) },
         allowRedisplay = allowRedisplay,
         clientAttributionMetadata = clientAttributionMetadata,
+        originalPaymentMethodCode = selectedPaymentDetails.type
     )
 }
 

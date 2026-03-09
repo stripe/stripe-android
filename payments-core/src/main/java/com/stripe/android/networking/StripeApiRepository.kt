@@ -62,8 +62,6 @@ import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.Customer
-import com.stripe.android.model.ElementsSession
-import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.MobileCardElementConfig
@@ -89,7 +87,6 @@ import com.stripe.android.model.parsers.ConsumerPaymentDetailsShareJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionJsonParser
 import com.stripe.android.model.parsers.ConsumerShippingAddressesParser
 import com.stripe.android.model.parsers.CustomerJsonParser
-import com.stripe.android.model.parsers.ElementsSessionJsonParser
 import com.stripe.android.model.parsers.FinancialConnectionsSessionJsonParser
 import com.stripe.android.model.parsers.FpxBankStatusesJsonParser
 import com.stripe.android.model.parsers.IssuingCardPinJsonParser
@@ -1561,17 +1558,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
         return getApiUrl("elements/payment_methods/%s/detach", paymentMethodId)
     }
 
-    override suspend fun retrieveElementsSession(
-        params: ElementsSessionParams,
-        options: ApiRequest.Options,
-    ): Result<ElementsSession> {
-        return retrieveElementsSession(
-            params = params,
-            options = options,
-            analyticsEvent = null,
-        )
-    }
-
     override suspend fun retrieveCardMetadata(
         cardNumber: String,
         requestOptions: ApiRequest.Options
@@ -1728,51 +1714,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
             ),
             jsonParser = SetupIntentJsonParser(),
         )
-    }
-
-    private suspend fun retrieveElementsSession(
-        params: ElementsSessionParams,
-        options: ApiRequest.Options,
-        analyticsEvent: PaymentAnalyticsEvent?,
-    ): Result<ElementsSession> {
-        fireFraudDetectionDataRequest()
-
-        val parser = ElementsSessionJsonParser(
-            params = params,
-            isLiveMode = options.apiKeyIsLiveMode
-        )
-
-        val requestParams = buildMap {
-            this["type"] = params.type
-            this["mobile_app_id"] = params.appId
-            params.clientSecret?.let { this["client_secret"] = it }
-            params.locale.let { this["locale"] = it }
-            params.customerSessionClientSecret?.let { this["customer_session_client_secret"] = it }
-            params.legacyCustomerEphemeralKey?.let { this["legacy_customer_ephemeral_key"] = it }
-            params.externalPaymentMethods.takeIf { it.isNotEmpty() }?.let { this["external_payment_methods"] = it }
-            params.customPaymentMethods.takeIf { it.isNotEmpty() }?.let { this["custom_payment_methods"] = it }
-            params.mobileSessionId?.takeIf { it.isNotEmpty() }?.let { this["mobile_session_id"] = it }
-            params.savedPaymentMethodSelectionId?.let { this["client_default_payment_method"] = it }
-            params.sellerDetails?.let { this.putAll(it.toQueryParams()) }
-            putAll(params.link.toQueryParams())
-            params.countryOverride?.let { this["country_override"] = it }
-            (params as? ElementsSessionParams.DeferredIntentType)?.let { type ->
-                this.putAll(type.deferredIntentParams.toQueryParams())
-            }
-        }
-
-        return fetchStripeModelResult(
-            apiRequest = apiRequestFactory.createGet(
-                url = getApiUrl("elements/sessions"),
-                options = options,
-                params = requestParams + createExpandParam(params.expandFields),
-            ),
-            jsonParser = parser,
-        ) {
-            analyticsEvent?.let {
-                fireAnalyticsRequest(paymentAnalyticsRequestFactory.createRequest(analyticsEvent))
-            }
-        }
     }
 
     @Throws(

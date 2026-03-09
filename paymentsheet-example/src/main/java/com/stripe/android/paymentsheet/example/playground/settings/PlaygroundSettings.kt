@@ -475,6 +475,9 @@ internal class PlaygroundSettings private constructor(
             InitializationTypeSettingsDefinition,
             CheckoutSessionSaveSettingsDefinition,
             CheckoutSessionRemoveSettingsDefinition,
+            CheckoutSessionAdjustableQuantitySettingsDefinition,
+            CheckoutSessionAutomaticTaxSettingsDefinition,
+            CheckoutSessionDisplayShippingRatesSettingsDefinition,
             AllowPromotionCodesSettingsDefinition,
             CustomerSheetPaymentMethodModeDefinition,
             CustomerSessionSettingsDefinition,
@@ -564,6 +567,7 @@ internal class PlaygroundSettings private constructor(
             AttestationOnIntentConfirmationDefinition,
             EnableTapToAddSettingsDefinition,
             CustomStripeApiDefinition,
+            FeatureFlagSettingsDefinition(FeatureFlags.newCbcSelector)
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(
