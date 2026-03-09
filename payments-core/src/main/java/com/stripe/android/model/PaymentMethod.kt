@@ -525,6 +525,14 @@ constructor(
             requiresMandate = false,
             hasDelayedSettlement = false,
             requiresMandateForPaymentIntent = false,
+        ),
+        Wero(
+            "wero",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false,
+            requiresMandateForPaymentIntent = false,
         );
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet

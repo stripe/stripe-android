@@ -29,7 +29,7 @@ internal class TapToAddCardDetailsActionTest {
                 action.Content(enabled = true)
             }
 
-            composeTestRule.onNodeWithText("Tap to add card").performClick()
+            composeTestRule.onNodeWithText("Tap to add").performClick()
 
             assertThat(collectCalls.awaitItem()).isEqualTo(paymentMethodMetadata)
         }
@@ -48,7 +48,7 @@ internal class TapToAddCardDetailsActionTest {
                 action.Content(enabled = false)
             }
 
-            composeTestRule.onNodeWithText("Tap to add card").performClick()
+            composeTestRule.onNodeWithText("Tap to add").performClick()
 
             // No collect calls should have been made
             collectCalls.expectNoEvents()
