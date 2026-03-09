@@ -17,7 +17,7 @@ class Address {
         this.city = city
     }
 
-    fun country(country: String?) = apply {
+    fun country(country: String) = apply {
         this.country = country
     }
 
