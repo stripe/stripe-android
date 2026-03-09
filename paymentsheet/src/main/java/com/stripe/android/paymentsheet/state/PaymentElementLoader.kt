@@ -534,7 +534,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     // falling back to intent-level SFU behavior.
                     saveConsent = customerInfo.offerSave?.toSaveConsentBehavior()
                         ?: PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
-                    canRemoveLastPaymentMethod = false,
                     canUpdateFullPaymentMethodDetails = false,
                 )
             }

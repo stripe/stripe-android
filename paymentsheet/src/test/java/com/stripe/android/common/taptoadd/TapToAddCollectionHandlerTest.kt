@@ -202,7 +202,6 @@ class TapToAddCollectionHandlerTest {
                 isPaymentMethodSetAsDefaultEnabled = false,
                 removePaymentMethod = PaymentMethodRemovePermission.Full,
                 saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
-                canRemoveLastPaymentMethod = false,
                 canUpdateFullPaymentMethodDetails = false,
             )
         )

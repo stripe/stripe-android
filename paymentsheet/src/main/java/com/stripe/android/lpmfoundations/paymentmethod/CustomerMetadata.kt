@@ -49,9 +49,11 @@ internal sealed class CustomerMetadata : Parcelable {
         override val isPaymentMethodSetAsDefaultEnabled: Boolean,
         override val removePaymentMethod: PaymentMethodRemovePermission,
         override val saveConsent: PaymentMethodSaveConsentBehavior,
-        override val canRemoveLastPaymentMethod: Boolean,
         override val canUpdateFullPaymentMethodDetails: Boolean,
-    ) : CustomerMetadata()
+    ) : CustomerMetadata() {
+        // CheckoutSession has no removeLast concept — users can always remove every PM.
+        override val canRemoveLastPaymentMethod: Boolean get() = true
+    }
 
     companion object {
         internal fun createForPaymentSheetCustomerSession(

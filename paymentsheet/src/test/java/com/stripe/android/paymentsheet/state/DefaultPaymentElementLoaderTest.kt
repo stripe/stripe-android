@@ -2974,6 +2974,10 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(state.paymentMethodMetadata.customerMetadata?.removePaymentMethod)
                 .isEqualTo(expectedPermission)
 
+            // CheckoutSession has no removeLast concept — always allows removing every PM.
+            assertThat(state.paymentMethodMetadata.customerMetadata?.canRemoveLastPaymentMethod)
+                .isEqualTo(true)
+
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
         }
