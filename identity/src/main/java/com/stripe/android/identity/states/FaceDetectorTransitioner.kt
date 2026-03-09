@@ -1,5 +1,6 @@
 package com.stripe.android.identity.states
 
+import android.os.SystemClock
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.camera.framework.util.FrameSaver
@@ -15,6 +16,7 @@ import com.stripe.android.identity.states.IdentityScanState.Satisfied
 import com.stripe.android.identity.states.IdentityScanState.Unsatisfied
 import com.stripe.android.identity.utils.roundToMaxDecimals
 import kotlin.math.abs
+import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sqrt
 import kotlin.time.ComparableTimeMark
@@ -53,11 +55,23 @@ internal class FaceDetectorTransitioner(
     var timeoutAt: ComparableTimeMark =
         TimeSource.Monotonic.markNow() + selfieCapturePage.autoCaptureTimeout.milliseconds
 
+    private val motionBlurDetector = MotionBlurDetector(
+        minIou = selfieCapturePage.models.faceDetectorIou,
+        minDurationMs = DEFAULT_MOTION_BLUR_MIN_DURATION_MS,
+    )
+
     @VisibleForTesting
     fun resetAndReturn(): FaceDetectorTransitioner {
         timeoutAt = TimeSource.Monotonic.markNow() + selfieCapturePage.autoCaptureTimeout.milliseconds
+        motionBlurDetector.reset()
         return this
     }
+
+    internal data class SelfieFrame(
+        val input: AnalyzerInput,
+        val output: FaceDetectorOutput,
+        val bestFrameScore: Float,
+    )
 
     internal val filteredFrames: List<Pair<AnalyzerInput, FaceDetectorOutput>>
         get() {
@@ -68,14 +82,18 @@ internal class FaceDetectorTransitioner(
                 "Not enough frames saved, frames saved: ${savedFrames.size}"
             }
 
-            // return the first, the best(based on resultScore) and the last frame collected
-            return mutableListOf(
-                savedFrames.last,
-                requireNotNull(
-                    savedFrames.subList(1, savedFrames.size - 1)
-                        .maxByOrNull { it.second.resultScore }
-                ) { "Couldn't find best frame" },
-                savedFrames.first
+            // Return the first, the best (based on bestFrameScore), and the last frame collected.
+            val firstFrame = savedFrames.last
+            val lastFrame = savedFrames.first
+            val bestFrame = requireNotNull(
+                savedFrames.subList(1, savedFrames.size - 1)
+                    .maxByOrNull { it.bestFrameScore }
+            ) { "Couldn't find best frame" }
+
+            return listOf(
+                firstFrame.input to firstFrame.output,
+                bestFrame.input to bestFrame.output,
+                lastFrame.input to lastFrame.output,
             )
         }
 
@@ -95,26 +113,26 @@ internal class FaceDetectorTransitioner(
                 "Not enough frames saved, score variance not calculated"
             }
             val mean =
-                savedFrames.fold(0f) { acc, pair ->
-                    acc + pair.second.resultScore
+                savedFrames.fold(0f) { acc, frame ->
+                    acc + frame.output.resultScore
                 }.div(numFrames.toFloat())
 
             return sqrt(
-                savedFrames.fold(0f) { acc, pair ->
-                    acc + (pair.second.resultScore - mean).pow(2)
+                savedFrames.fold(0f) { acc, frame ->
+                    acc + (frame.output.resultScore - mean).pow(2)
                 }.div(numFrames.toFloat())
             ).roundToMaxDecimals(2)
         }
 
     internal class SelfieFrameSaver :
-        FrameSaver<String, Pair<AnalyzerInput, FaceDetectorOutput>, AnalyzerOutput>() {
+        FrameSaver<String, SelfieFrame, FaceDetectorOutput>() {
         // Don't limit max number of saved frames, let the transitioner decide when to stop saving
         // new frames.
         override fun getMaxSavedFrames(savedFrameIdentifier: String) = Int.MAX_VALUE
 
         override fun getSaveFrameIdentifier(
-            frame: Pair<AnalyzerInput, FaceDetectorOutput>,
-            metaData: AnalyzerOutput
+            frame: SelfieFrame,
+            metaData: FaceDetectorOutput
         ) = SELFIES
 
         fun selfieCollected(): Int = getSavedFrames()[SELFIES]?.size ?: 0
@@ -129,16 +147,24 @@ internal class FaceDetectorTransitioner(
             "Unexpected output type: $analyzerOutput"
         }
         selfieFrameSaver.reset()
+
+        val nowTimestampMs = SystemClock.elapsedRealtime()
+        val motionBlurResult = determineMotionBlurResult(analyzerOutput, nowTimestampMs)
+
         return when {
             timeoutAt.hasPassedNow() -> {
                 Log.d(TAG, "Timeout in Initial state: $initialState")
                 IdentityScanState.TimeOut(initialState.type, this)
             }
 
-            isFaceValid(analyzerOutput) -> {
+            isFaceValid(analyzerOutput, motionBlurResult) -> {
                 Log.d(TAG, "Valid face found, transition to Found")
                 selfieFrameSaver.saveFrame(
-                    (analyzerInput to analyzerOutput),
+                    SelfieFrame(
+                        input = analyzerInput,
+                        output = analyzerOutput,
+                        bestFrameScore = calculateBestFrameScore(analyzerOutput, motionBlurResult),
+                    ),
                     analyzerOutput
                 )
                 Found(initialState.type, this)
@@ -157,6 +183,10 @@ internal class FaceDetectorTransitioner(
         analyzerOutput: AnalyzerOutput
     ): IdentityScanState {
         require(analyzerOutput is FaceDetectorOutput) { "Unexpected output type: $analyzerOutput" }
+
+        val nowTimestampMs = SystemClock.elapsedRealtime()
+        val motionBlurResult = determineMotionBlurResult(analyzerOutput, nowTimestampMs)
+
         return when {
             timeoutAt.hasPassedNow() -> {
                 Log.d(TAG, "Timeout in Found state: $foundState")
@@ -172,8 +202,15 @@ internal class FaceDetectorTransitioner(
                 foundState
             }
 
-            isFaceValid(analyzerOutput) -> {
-                selfieFrameSaver.saveFrame((analyzerInput to analyzerOutput), analyzerOutput)
+            isFaceValid(analyzerOutput, motionBlurResult) -> {
+                selfieFrameSaver.saveFrame(
+                    SelfieFrame(
+                        input = analyzerInput,
+                        output = analyzerOutput,
+                        bestFrameScore = calculateBestFrameScore(analyzerOutput, motionBlurResult),
+                    ),
+                    analyzerOutput
+                )
                 if (selfieFrameSaver.selfieCollected() >= selfieCapturePage.numSamples) {
                     Log.d(
                         TAG,
@@ -233,11 +270,72 @@ internal class FaceDetectorTransitioner(
         return Initial(unsatisfiedState.type, this.resetAndReturn())
     }
 
-    private fun isFaceValid(analyzerOutput: FaceDetectorOutput) =
+    private fun determineMotionBlurResult(
+        analyzerOutput: FaceDetectorOutput,
+        nowTimestampMs: Long,
+    ): MotionBlurDetector.Output? {
+        // Avoid feeding noisy bounding boxes to the detector when the face isn't confidently detected.
+        return if (isFaceScoreOverThreshold(analyzerOutput.resultScore)) {
+            motionBlurDetector.determineMotionBlur(analyzerOutput.boundingBox, nowTimestampMs)
+        } else {
+            null
+        }
+    }
+
+    private fun isFaceValid(
+        analyzerOutput: FaceDetectorOutput,
+        motionBlurResult: MotionBlurDetector.Output?,
+    ) =
         isFaceCentered(analyzerOutput.boundingBox) &&
             isFaceAwayFromEdges(analyzerOutput.boundingBox) &&
             isFaceCoverageOK(analyzerOutput.boundingBox) &&
-            isFaceScoreOverThreshold(analyzerOutput.resultScore)
+            isFaceScoreOverThreshold(analyzerOutput.resultScore) &&
+            // Match iOS: treat frames as invalid only when motion blur is explicitly detected.
+            motionBlurResult?.hasMotionBlur != true
+
+    private fun calculateBestFrameScore(
+        analyzerOutput: FaceDetectorOutput,
+        motionBlurResult: MotionBlurDetector.Output?,
+    ): Float {
+        val faceScore = analyzerOutput.resultScore.coerceIn(0f, 1f)
+        val centeringScore = calculateCenteringScore(analyzerOutput.boundingBox)
+        val coverageScore = calculateCoverageScore(analyzerOutput.boundingBox)
+        val stabilityScore = when (motionBlurResult?.hasMotionBlur) {
+            true -> 0f
+            false -> 1f
+            null -> DEFAULT_UNKNOWN_STABILITY_SCORE
+        }
+
+        // Matches iOS: each component is weighted evenly.
+        return (
+            faceScore +
+                centeringScore +
+                coverageScore +
+                stabilityScore
+            ) / 4f
+    }
+
+    private fun calculateCenteringScore(boundingBox: BoundingBox): Float {
+        // Mirrors iOS: euclidean distance from center, normalized to [0, 1].
+        val midX = boundingBox.left + (boundingBox.width / 2f)
+        val midY = boundingBox.top + (boundingBox.height / 2f)
+
+        val dx = abs(midX - 0.5f)
+        val dy = abs(midY - 0.5f)
+        val distanceFromCenter = sqrt((dx * dx) + (dy * dy))
+        val maxDistanceFromCenter = sqrt(0.5f)
+        val normalizedDistance = min(1f, distanceFromCenter / maxDistanceFromCenter)
+
+        return 1f - normalizedDistance
+    }
+
+    private fun calculateCoverageScore(boundingBox: BoundingBox): Float {
+        // Mirrors iOS: prefer coverage close to a fixed target.
+        val coverage = boundingBox.width * boundingBox.height
+        val delta = abs(coverage - BEST_FRAME_TARGET_COVERAGE)
+        val normalizedDelta = min(1f, delta / BEST_FRAME_MAX_COVERAGE_DELTA)
+        return 1f - normalizedDelta
+    }
 
     /**
      * Check face is centered by making sure center of face is
@@ -288,5 +386,12 @@ internal class FaceDetectorTransitioner(
         const val VALUE_LAST = "last"
         const val VALUE_BEST = "best"
         const val DEFAULT_STAY_IN_FOUND_DURATION = 2000
+
+        private const val DEFAULT_MOTION_BLUR_MIN_DURATION_MS = 100L
+        private const val DEFAULT_UNKNOWN_STABILITY_SCORE = 0.5f
+
+        // Mirrors iOS FaceScannerOutput.BestFrame
+        private const val BEST_FRAME_TARGET_COVERAGE = 0.16f
+        private const val BEST_FRAME_MAX_COVERAGE_DELTA = 0.16f
     }
 }
