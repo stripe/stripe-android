@@ -29,10 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.stripe.android.checkout.Checkout
-import com.stripe.android.common.taptoadd.TerminalConnectionTokenCallbackHolder
-import com.stripe.android.common.taptoadd.TerminalLocationHolder
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.AnalyticEventCallback
@@ -126,8 +123,6 @@ internal class EmbeddedPlaygroundActivity :
         val embeddedViewDisplaysMandateText =
             initialPlaygroundState.snapshot[EmbeddedViewDisplaysMandateSettingDefinition]
         setContent {
-            SetupTapToAddAlpha()
-
             embeddedPaymentElement = rememberEmbeddedPaymentElement(embeddedBuilder)
 
             var loadingState: LoadingState by remember { mutableStateOf(LoadingState.Loading) }
@@ -269,26 +264,6 @@ internal class EmbeddedPlaygroundActivity :
                 configure()
             },
         )
-    }
-
-    @Composable
-    private fun SetupTapToAddAlpha() {
-        val lifecycleOwner = LocalLifecycleOwner.current
-
-        DisposableEffect(playgroundState, lifecycleOwner) {
-            TerminalConnectionTokenCallbackHolder.set(
-                lifecycleOwner = lifecycleOwner,
-                callback = {
-                    viewModel.createConnectionToken(playgroundState, applicationContext)
-                }
-            )
-
-            TerminalLocationHolder.locationId = playgroundState.terminalLocationId
-
-            onDispose {
-                TerminalLocationHolder.locationId = null
-            }
-        }
     }
 
     @Composable

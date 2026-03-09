@@ -3,8 +3,7 @@ package com.stripe.android.common.taptoadd
 import android.annotation.SuppressLint
 import android.content.Context
 import androidx.annotation.RestrictTo
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleOwner
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentelement.TapToAddPreview
@@ -17,10 +16,10 @@ import com.stripe.stripeterminal.external.callable.ReaderCallback
 import com.stripe.stripeterminal.external.callable.TapToPayReaderListener
 import com.stripe.stripeterminal.external.callable.TerminalListener
 import com.stripe.stripeterminal.external.models.ConnectionConfiguration
-import com.stripe.stripeterminal.external.models.ConnectionTokenException
 import com.stripe.stripeterminal.external.models.DeviceType
 import com.stripe.stripeterminal.external.models.DiscoveryConfiguration
 import com.stripe.stripeterminal.external.models.Reader
+import com.stripe.stripeterminal.external.models.TapUseCase
 import com.stripe.stripeterminal.external.models.TerminalErrorCode
 import com.stripe.stripeterminal.external.models.TerminalException
 import kotlinx.coroutines.CompletableDeferred
@@ -57,6 +56,7 @@ internal interface TapToAddConnectionManager {
             terminalWrapper: TerminalWrapper,
             errorReporter: ErrorReporter,
             applicationContext: Context,
+            paymentConfiguration: PaymentConfiguration,
             workContext: CoroutineContext,
             isSimulated: Boolean,
         ): TapToAddConnectionManager {
@@ -64,6 +64,7 @@ internal interface TapToAddConnectionManager {
                 DefaultTapToAddConnectionManager(
                     applicationContext = applicationContext,
                     workContext = workContext,
+                    paymentConfiguration = paymentConfiguration,
                     errorReporter = errorReporter,
                     terminalWrapper = terminalWrapper,
                     isSimulated = isSimulated,
@@ -79,6 +80,7 @@ internal interface TapToAddConnectionManager {
 internal class DefaultTapToAddConnectionManager(
     applicationContext: Context,
     workContext: CoroutineContext,
+    private val paymentConfiguration: PaymentConfiguration,
     private val errorReporter: ErrorReporter,
     private val terminalWrapper: TerminalWrapper,
     isSimulated: Boolean,
@@ -106,35 +108,7 @@ internal class DefaultTapToAddConnectionManager(
                 context = applicationContext,
                 tokenProvider = object : ConnectionTokenProvider {
                     override fun fetchConnectionToken(callback: ConnectionTokenCallback) {
-                        workScope.launch {
-                            val createConnectionTokenCallback = TerminalConnectionTokenCallbackHolder.get()
-                                ?: run {
-                                    val message = "No connection token callback was initialized!"
-
-                                    callback.onFailure(
-                                        ConnectionTokenException(
-                                            message = message,
-                                            cause = IllegalStateException(message)
-                                        )
-                                    )
-
-                                    return@launch
-                                }
-
-                            when (val result = createConnectionTokenCallback.createConnectionToken()) {
-                                is CreateConnectionTokenResult.Success -> {
-                                    callback.onSuccess(result.connectionToken)
-                                }
-                                is CreateConnectionTokenResult.Failure -> {
-                                    callback.onFailure(
-                                        ConnectionTokenException(
-                                            message = result.message,
-                                            cause = result.cause,
-                                        )
-                                    )
-                                }
-                            }
-                        }
+                        callback.onSuccess(paymentConfiguration.publishableKey)
                     }
                 },
                 listener = this,
@@ -215,15 +189,10 @@ internal class DefaultTapToAddConnectionManager(
             return
         }
 
-        val locationId = TerminalLocationHolder.locationId ?: run {
-            connectionTask?.completeExceptionally(IllegalStateException("No location specified!"))
-            return
-        }
-
         terminal().connectReader(
             reader = reader,
             config = ConnectionConfiguration.TapToPayConnectionConfiguration(
-                locationId = locationId,
+                useCase = TapUseCase.Verify(),
                 autoReconnectOnUnexpectedDisconnect = true,
                 tapToPayReaderListener = this@DefaultTapToAddConnectionManager,
             ),
@@ -281,12 +250,6 @@ internal class UnsupportedTapToAddConnectionManager : TapToAddConnectionManager 
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @TapToAddPreview
-fun interface CreateConnectionTokenCallback {
-    suspend fun createConnectionToken(): CreateConnectionTokenResult
-}
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@TapToAddPreview
 sealed interface CreateConnectionTokenResult {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Success(
@@ -298,30 +261,4 @@ sealed interface CreateConnectionTokenResult {
         internal val cause: Exception,
         internal val message: String,
     ) : CreateConnectionTokenResult
-}
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@TapToAddPreview
-object TerminalConnectionTokenCallbackHolder {
-    private var createConnectionTokenCallback: CreateConnectionTokenCallback? = null
-
-    fun get() = createConnectionTokenCallback
-
-    fun set(callback: CreateConnectionTokenCallback, lifecycleOwner: LifecycleOwner) {
-        createConnectionTokenCallback = callback
-
-        lifecycleOwner.lifecycle.addObserver(
-            object : DefaultLifecycleObserver {
-                override fun onDestroy(owner: LifecycleOwner) {
-                    createConnectionTokenCallback = null
-                }
-            }
-        )
-    }
-}
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@TapToAddPreview
-object TerminalLocationHolder {
-    var locationId: String? = null
 }
