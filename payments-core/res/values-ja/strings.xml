@@ -102,6 +102,8 @@
   <string name="stripe_becs_widget_name_required">名前を入力してください。</string>
   <!-- Button title to cancel action in an alert -->
   <string name="stripe_cancel">キャンセル</string>
+  <!-- String to prompt user to select card brand. -->
+  <string name="stripe_card_brand_choice_choose_card_brand">クレジットカードブランドを選択</string>
   <!-- Title for a dropdown option when selecting a card brand -->
   <string name="stripe_card_brand_choice_no_selection">選択なし</string>
   <!-- Title for a dropdown where the customer can select a card brand -->
@@ -182,6 +184,8 @@
   <string name="stripe_remove">削除</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="stripe_removed">%s が削除されました</string>
+  <!-- A request error from Stripe has occurred due to a valid issue or merchant integration problem that has a request ID -->
+  <string name="stripe_request_error">問題が発生しました。リクエスト ID: %1$s</string>
   <string name="stripe_secure_checkout">安全なチェックアウト</string>
   <string name="stripe_title_add_a_card">カードを追加</string>
   <!-- Screen title telling users they should add an address -->
