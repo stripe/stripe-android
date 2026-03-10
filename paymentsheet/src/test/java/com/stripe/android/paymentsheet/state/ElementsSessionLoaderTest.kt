@@ -6,7 +6,6 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.utils.FakeElementsSessionRepository
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -23,9 +22,8 @@ internal class ElementsSessionLoaderTest {
             savedPaymentMethodSelection = null,
         )
 
-        assertThat(result.elementsSession.stripeIntent)
+        assertThat(result.stripeIntent)
             .isEqualTo(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
-        assertThat(result.customerInfo).isNull()
     }
 
     @Test
@@ -59,7 +57,6 @@ internal class ElementsSessionLoaderTest {
         )
         val loader = ElementsSessionLoader(
             elementsSessionRepository = elementsSessionRepository,
-            errorReporter = FakeErrorReporter(),
         )
         Scenario(
             loader = loader,
