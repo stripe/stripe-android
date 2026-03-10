@@ -40,9 +40,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkout.CheckoutSession
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.addresselement.AddressLauncher
+import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
+import com.stripe.android.paymentsheet.addresselement.rememberAddressLauncher
 import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
 import com.stripe.android.paymentsheet.example.playground.checkout.CheckoutPlaygroundViewModel.Companion.CHECKOUT_STATE_KEY
 import com.stripe.android.paymentsheet.example.samples.ui.PADDING
@@ -72,6 +78,12 @@ class CheckoutPlaygroundActivity : AppCompatActivity() {
         enableEdgeToEdge()
 
         setContent {
+            val addressLauncher = rememberAddressLauncher { result ->
+                if (result is AddressLauncherResult.Succeeded) {
+                    viewModel.updateShippingAddress(result.address)
+                }
+            }
+
             CheckoutScreen(
                 checkout = viewModel.checkout,
                 isLoading = viewModel.isLoading,
@@ -81,7 +93,16 @@ class CheckoutPlaygroundActivity : AppCompatActivity() {
                 removePromotionCode = viewModel::removePromotionCode,
                 updateLineItemQuantity = viewModel::updateLineItemQuantity,
                 selectShippingRate = viewModel::selectShippingRate,
+                lastAddressDetails = viewModel.lastAddressDetails,
+                clearShippingAddress = viewModel::clearShippingAddress,
                 updatePostalCode = viewModel::updatePostalCode,
+                updateShippingAddress = {
+                    val publishableKey = PaymentConfiguration.getInstance(applicationContext).publishableKey
+                    val configuration = AddressLauncher.Configuration(
+                        address = viewModel.lastAddressDetails.value,
+                    )
+                    addressLauncher.present(publishableKey, configuration)
+                },
                 refresh = viewModel::refresh,
             )
         }
@@ -104,7 +125,10 @@ private fun CheckoutScreen(
     removePromotionCode: () -> Unit,
     updateLineItemQuantity: (String, Int) -> Unit,
     selectShippingRate: (String) -> Unit,
+    lastAddressDetails: StateFlow<AddressDetails?>,
+    clearShippingAddress: () -> Unit,
     updatePostalCode: (String) -> Unit,
+    updateShippingAddress: () -> Unit,
     refresh: () -> Unit,
 ) {
     val checkoutSession by checkout.checkoutSession.collectAsState()
@@ -126,7 +150,12 @@ private fun CheckoutScreen(
         PlaygroundTheme(
             content = {
                 LineItemsSection(checkoutSession, updateLineItemQuantity)
-                ShippingAddressSection(updatePostalCode)
+                ShippingAddressSection(
+                    lastAddressDetails = lastAddressDetails,
+                    clearShippingAddress = clearShippingAddress,
+                    updatePostalCode = updatePostalCode,
+                    updateShippingAddress = updateShippingAddress,
+                )
                 ShippingOptionsSection(checkoutSession, selectShippingRate)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -239,9 +268,12 @@ private fun LineItemsSection(
 
 @Composable
 private fun ShippingAddressSection(
+    lastAddressDetails: StateFlow<AddressDetails?>,
+    clearShippingAddress: () -> Unit,
     updatePostalCode: (String) -> Unit,
+    updateShippingAddress: () -> Unit,
 ) {
-    var postalCode by rememberSaveable { mutableStateOf("") }
+    val addressDetails by lastAddressDetails.collectAsState()
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
@@ -251,26 +283,115 @@ private fun ShippingAddressSection(
 
         Spacer(modifier = Modifier.height(PADDING))
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(PADDING),
-        ) {
-            OutlinedTextField(
-                value = postalCode,
-                onValueChange = { postalCode = it },
-                label = { Text("Postal code") },
-                singleLine = true,
-                modifier = Modifier.weight(1f),
-            )
-            Button(
-                onClick = { updatePostalCode(postalCode) },
-            ) {
-                Text("Apply")
+        AddressSummary(addressDetails?.address)
+
+        Spacer(modifier = Modifier.height(PADDING))
+
+        var useFullAddress by rememberSaveable { mutableStateOf(false) }
+        var postalCode by rememberSaveable { mutableStateOf("") }
+        AddressModePicker(
+            useFullAddress = useFullAddress,
+            onPostalCodeMode = {
+                useFullAddress = false
+                postalCode = ""
+                clearShippingAddress()
+            },
+            onFullAddressMode = {
+                useFullAddress = true
+                postalCode = ""
+                clearShippingAddress()
+            },
+        )
+
+        Spacer(modifier = Modifier.height(PADDING))
+
+        if (useFullAddress) {
+            Button(onClick = updateShippingAddress) {
+                Text(if (addressDetails != null) "Edit Shipping Address" else "Add Shipping Address")
             }
+        } else {
+            PostalCodeInput(
+                postalCode = postalCode,
+                onPostalCodeChange = { postalCode = it },
+                onApply = { updatePostalCode(postalCode) },
+            )
         }
 
         Divider(modifier = Modifier.padding(vertical = PADDING))
+    }
+}
+
+@Composable
+private fun AddressSummary(address: PaymentSheet.Address?) {
+    if (address != null) {
+        address.line1?.takeIf { it.isNotEmpty() }?.let { Text(text = it, style = MaterialTheme.typography.body2) }
+        address.line2?.takeIf { it.isNotEmpty() }?.let { Text(text = it, style = MaterialTheme.typography.body2) }
+        val cityStateZip = listOfNotNull(address.city, address.state, address.postalCode)
+            .filter { it.isNotEmpty() }
+            .joinToString(", ")
+        if (cityStateZip.isNotEmpty()) {
+            Text(text = cityStateZip, style = MaterialTheme.typography.body2)
+        }
+        address.country?.let { Text(text = it, style = MaterialTheme.typography.body2) }
+    } else {
+        Text(
+            text = "No address set",
+            style = MaterialTheme.typography.body2,
+            color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+        )
+    }
+}
+
+@Composable
+private fun AddressModePicker(
+    useFullAddress: Boolean,
+    onPostalCodeMode: () -> Unit,
+    onFullAddressMode: () -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(PADDING),
+    ) {
+        Button(
+            onClick = onPostalCodeMode,
+            enabled = useFullAddress,
+            modifier = Modifier.weight(1f),
+        ) {
+            Text("Postal Code")
+        }
+        Button(
+            onClick = onFullAddressMode,
+            enabled = !useFullAddress,
+            modifier = Modifier.weight(1f),
+        ) {
+            Text("Full Address")
+        }
+    }
+}
+
+@Composable
+private fun PostalCodeInput(
+    postalCode: String,
+    onPostalCodeChange: (String) -> Unit,
+    onApply: () -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(PADDING),
+    ) {
+        OutlinedTextField(
+            value = postalCode,
+            onValueChange = onPostalCodeChange,
+            label = { Text("Postal code") },
+            singleLine = true,
+            modifier = Modifier.weight(1f),
+        )
+        Button(
+            onClick = onApply,
+        ) {
+            Text("Apply")
+        }
     }
 }
 
