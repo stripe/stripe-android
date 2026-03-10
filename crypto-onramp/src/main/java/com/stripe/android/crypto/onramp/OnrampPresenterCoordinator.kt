@@ -101,6 +101,10 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
                     verifyKycResultLauncher.unregister()
+
+                    if (activity.isFinishing) {
+                        OnrampCallbackReferences.remove(onrampCallbackIdentifier)
+                    }
                 }
             }
         )
