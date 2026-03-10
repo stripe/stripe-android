@@ -28,7 +28,9 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
+import android.widget.Toast
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkout.CheckoutSession
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -72,6 +75,8 @@ class CheckoutPlaygroundActivity : AppCompatActivity() {
             CheckoutScreen(
                 checkout = viewModel.checkout,
                 isLoading = viewModel.isLoading,
+                errorMessage = viewModel.errorMessage,
+                clearErrorMessage = viewModel::clearErrorMessage,
                 applyPromotionCode = viewModel::applyPromotionCode,
                 removePromotionCode = viewModel::removePromotionCode,
                 updateLineItemQuantity = viewModel::updateLineItemQuantity,
@@ -93,6 +98,8 @@ class CheckoutPlaygroundActivity : AppCompatActivity() {
 private fun CheckoutScreen(
     checkout: Checkout,
     isLoading: StateFlow<Boolean>,
+    errorMessage: StateFlow<String?>,
+    clearErrorMessage: () -> Unit,
     applyPromotionCode: (String) -> Unit,
     removePromotionCode: () -> Unit,
     updateLineItemQuantity: (String, Int) -> Unit,
@@ -102,7 +109,16 @@ private fun CheckoutScreen(
 ) {
     val checkoutSession by checkout.checkoutSession.collectAsState()
     val loading by isLoading.collectAsState()
+    val error by errorMessage.collectAsState()
     var promotionCode by rememberSaveable { mutableStateOf("") }
+
+    val context = LocalContext.current
+    LaunchedEffect(error) {
+        error?.let {
+            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+            clearErrorMessage()
+        }
+    }
 
     BackHandler(enabled = loading) { }
 
