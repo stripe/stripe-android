@@ -586,12 +586,18 @@ internal class OnrampInteractor @Inject constructor(
             if (secret != null) {
                 cryptoApiRepository.retrieveKycInfo(secret)
                     .fold(
-                        onSuccess = { result ->
+                        onSuccess = { _ ->
+                            handleGooglePayPaymentMethod(result.paymentMethod) {
+                                OnrampCollectPaymentMethodResult.Completed(it)
+                            }
                         },
                         onFailure = { error ->
-                            // name, phone, email, billing address
-                            val name = result.paymentMethod.billingDetails?.name
                             val address = result.paymentMethod.billingDetails?.address
+
+                            val fullName = result.paymentMethod.billingDetails?.name.orEmpty().trim()
+                            val parts = fullName.split("\\s+".toRegex())
+                            val firstName = parts.firstOrNull().orEmpty()
+                            val lastName = parts.drop(1).joinToString(" ")
 
                             val kycAddress = PaymentSheet.Address(
                                 city = address?.city,
@@ -601,26 +607,35 @@ internal class OnrampInteractor @Inject constructor(
                                 postalCode = address?.postalCode,
                                 state = address?.state
                             )
+
                             cryptoApiRepository.collectKycData(
                                 KycInfo(
-                                    firstName = name,
-                                    lastName = name,
+                                    firstName = firstName,
+                                    lastName = lastName,
                                     idNumber = null,
                                     dateOfBirth = null,
                                     address = kycAddress
                                 ),
                                 consumerSessionClientSecret = secret
-                            )
+                            ).fold(
+                                onSuccess = {
+                                    handleGooglePayPaymentMethod(result.paymentMethod) {
+                                        OnrampCollectPaymentMethodResult.Completed(it)
+                                    }
+                                },
+                                onFailure = {
+                                    OnrampAnalyticsEvent.ErrorOccurred(
+                                        operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.CollectPaymentMethod,
+                                        error = error,
+                                    )
 
-                            OnrampAnalyticsEvent.ErrorOccurred(
-                                operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.CollectPaymentMethod,
-                                error = error,
+                                    handleGooglePayPaymentMethod(result.paymentMethod) {
+                                        OnrampCollectPaymentMethodResult.KYCRequired(it)
+                                    }
+                                }
                             )
-
-                            OnrampCollectPaymentMethodResult.Failed(error)
                         }
                     )
-
             } else {
                 val error = MissingConsumerSecretException()
                 analyticsService?.track(
@@ -632,34 +647,6 @@ internal class OnrampInteractor @Inject constructor(
 
                 OnrampCollectPaymentMethodResult.Failed(error)
             }
-
-            analyticsService?.track(
-                OnrampAnalyticsEvent.CollectPaymentMethodCompleted(
-                    paymentMethodType = PaymentMethodType.GooglePay
-                )
-            )
-
-            _state.update { state ->
-                state.copy(
-                    selectedPaymentSource = SelectedPaymentSource.GooglePay(
-                        result.paymentMethod.id
-                    )
-                )
-            }
-
-            OnrampCollectPaymentMethodResult.Completed(
-                displayData = PaymentMethodDisplayData(
-                    imageLoader = {
-                        ContextCompat.getDrawable(
-                            application,
-                            R.drawable.stripe_google_pay_mark
-                        )!!
-                    },
-                    label = "Google Pay",
-                    sublabel = result.paymentMethod.card?.last4,
-                    type = PaymentMethodDisplayData.Type.GooglePay
-                )
-            )
         }
         is GooglePayPaymentMethodLauncher.Result.Failed -> {
             analyticsService?.track(
@@ -672,6 +659,41 @@ internal class OnrampInteractor @Inject constructor(
         }
         is GooglePayPaymentMethodLauncher.Result.Canceled ->
             OnrampCollectPaymentMethodResult.Cancelled()
+    }
+
+    private fun handleGooglePayPaymentMethod(
+        paymentMethod: PaymentMethod,
+        buildResult: (PaymentMethodDisplayData) -> OnrampCollectPaymentMethodResult,
+    ): OnrampCollectPaymentMethodResult {
+        analyticsService?.track(
+            OnrampAnalyticsEvent.CollectPaymentMethodCompleted(
+                paymentMethodType = PaymentMethodType.GooglePay
+            )
+        )
+
+        _state.update { state ->
+            state.copy(
+                selectedPaymentSource = SelectedPaymentSource.GooglePay(
+                    paymentMethod.id
+                )
+            )
+        }
+
+        return buildResult(googlePayDisplayData(paymentMethod))
+    }
+
+    private fun googlePayDisplayData(paymentMethod: PaymentMethod): PaymentMethodDisplayData {
+        return PaymentMethodDisplayData(
+            imageLoader = {
+                ContextCompat.getDrawable(
+                    application,
+                    R.drawable.stripe_google_pay_mark
+                )!!
+            },
+            label = "Google Pay",
+            sublabel = paymentMethod.card?.last4,
+            type = PaymentMethodDisplayData.Type.GooglePay
+        )
     }
 
     suspend fun handleVerifyKycResult(
