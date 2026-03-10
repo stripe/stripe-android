@@ -484,7 +484,7 @@ constructor(
             code = "twint",
             isReusable = false,
             isVoucher = false,
-            requiresMandate = false,
+            requiresMandate = true,
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
             // We are intentionally polling for Twint even though it uses the redirect trampoline.
