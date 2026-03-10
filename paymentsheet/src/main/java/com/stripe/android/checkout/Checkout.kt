@@ -52,46 +52,43 @@ class Checkout private constructor(
     private val _checkoutSession = MutableStateFlow(state.checkoutSessionResponse.asCheckoutSession())
     val checkoutSession: StateFlow<CheckoutSession> = _checkoutSession.asStateFlow()
 
-    suspend fun applyPromotionCode(promotionCode: String): Result<CheckoutSession> {
-        val sessionId = state.checkoutSessionResponse.id
-        return component.checkoutSessionRepository
-            .applyPromotionCode(sessionId, promotionCode.trim())
-            .updateState()
+    suspend fun applyPromotionCode(
+        promotionCode: String,
+    ): Result<CheckoutSession> = withSessionId { sessionId ->
+        component.checkoutSessionRepository.applyPromotionCode(sessionId, promotionCode.trim())
     }
 
-    suspend fun updateLineItemQuantity(lineItemId: String, quantity: Int): Result<CheckoutSession> {
-        val sessionId = state.checkoutSessionResponse.id
-        return component.checkoutSessionRepository
-            .updateLineItemQuantity(sessionId, lineItemId, quantity)
-            .updateState()
+    suspend fun updateLineItemQuantity(
+        lineItemId: String,
+        quantity: Int,
+    ): Result<CheckoutSession> = withSessionId { sessionId ->
+        component.checkoutSessionRepository.updateLineItemQuantity(sessionId, lineItemId, quantity)
     }
 
-    suspend fun removePromotionCode(): Result<CheckoutSession> {
-        val sessionId = state.checkoutSessionResponse.id
-        return component.checkoutSessionRepository
-            .applyPromotionCode(sessionId, "")
-            .updateState()
+    suspend fun removePromotionCode(): Result<CheckoutSession> = withSessionId { sessionId ->
+        component.checkoutSessionRepository.applyPromotionCode(sessionId, "")
     }
 
-    suspend fun selectShippingRate(shippingRateId: String): Result<CheckoutSession> {
-        val sessionId = state.checkoutSessionResponse.id
-        return component.checkoutSessionRepository
-            .selectShippingRate(sessionId, shippingRateId)
-            .updateState()
+    suspend fun selectShippingRate(
+        shippingRateId: String,
+    ): Result<CheckoutSession> = withSessionId { sessionId ->
+        component.checkoutSessionRepository.selectShippingRate(sessionId, shippingRateId)
     }
 
-    suspend fun updateShippingAddress(address: Address): Result<CheckoutSession> {
-        val sessionId = state.checkoutSessionResponse.id
-        return component.checkoutSessionRepository
-            .updateShippingAddress(sessionId, address.build())
-            .updateState()
+    suspend fun updateShippingAddress(
+        address: Address,
+    ): Result<CheckoutSession> = withSessionId { sessionId ->
+        component.checkoutSessionRepository.updateShippingAddress(sessionId, address.build())
     }
 
-    suspend fun refresh(): Result<CheckoutSession> {
-        val sessionId = state.checkoutSessionResponse.id
-        return component.checkoutSessionRepository
-            .init(sessionId)
-            .updateState()
+    suspend fun refresh(): Result<CheckoutSession> = withSessionId { sessionId ->
+        component.checkoutSessionRepository.init(sessionId)
+    }
+
+    private suspend fun withSessionId(
+        block: suspend (sessionId: String) -> Result<CheckoutSessionResponse>
+    ): Result<CheckoutSession> {
+        return block(state.checkoutSessionResponse.id).updateState()
     }
 
     private fun Result<CheckoutSessionResponse>.updateState(): Result<CheckoutSession> {
