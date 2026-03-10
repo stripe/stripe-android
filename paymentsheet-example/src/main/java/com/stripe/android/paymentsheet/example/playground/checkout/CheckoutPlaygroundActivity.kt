@@ -157,24 +157,7 @@ private fun CheckoutScreen(
                     updateShippingAddress = updateShippingAddress,
                 )
                 ShippingOptionsSection(checkoutSession, selectShippingRate)
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(PADDING),
-                ) {
-                    OutlinedTextField(
-                        value = promotionCode,
-                        onValueChange = { promotionCode = it },
-                        label = { Text("Promotion code") },
-                        singleLine = true,
-                        modifier = Modifier.weight(1f),
-                    )
-                    Button(
-                        onClick = { applyPromotionCode(promotionCode) },
-                    ) {
-                        Text("Apply")
-                    }
-                }
+                PromotionCodeInput(promotionCode, { promotionCode = it }, applyPromotionCode)
                 Button(
                     onClick = refresh,
                 ) {
@@ -195,6 +178,32 @@ private fun CheckoutScreen(
             ) {
                 CircularProgressIndicator()
             }
+        }
+    }
+}
+
+@Composable
+private fun PromotionCodeInput(
+    promotionCode: String,
+    onPromotionCodeChange: (String) -> Unit,
+    applyPromotionCode: (String) -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(PADDING),
+    ) {
+        OutlinedTextField(
+            value = promotionCode,
+            onValueChange = onPromotionCodeChange,
+            label = { Text("Promotion code") },
+            singleLine = true,
+            modifier = Modifier.weight(1f),
+        )
+        Button(
+            onClick = { applyPromotionCode(promotionCode) },
+        ) {
+            Text("Apply")
         }
     }
 }

@@ -57,7 +57,8 @@ internal class CheckoutPlaygroundViewModel(
     }
 
     fun updateShippingAddress(addressDetails: AddressDetails) = performWhileLoading {
-        val country = addressDetails.address?.country ?: return@performWhileLoading
+        val country = addressDetails.address?.country
+            ?: return@performWhileLoading Result.failure(IllegalStateException("Country is required"))
         val address = Address()
             .city(addressDetails.address?.city)
             .country(country)
@@ -65,8 +66,9 @@ internal class CheckoutPlaygroundViewModel(
             .line2(addressDetails.address?.line2)
             .postalCode(addressDetails.address?.postalCode)
             .state(addressDetails.address?.state)
-        checkout.updateShippingAddress(address)
-        _lastAddressDetails.value = addressDetails
+        checkout.updateShippingAddress(address).also {
+            _lastAddressDetails.value = addressDetails
+        }
     }
 
     fun updatePostalCode(postalCode: String) = performWhileLoading {
@@ -75,8 +77,9 @@ internal class CheckoutPlaygroundViewModel(
     }
 
     fun clearShippingAddress() = performWhileLoading {
-        checkout.updateShippingAddress(Address().country("US"))
-        _lastAddressDetails.value = null
+        checkout.updateShippingAddress(Address().country("US")).also {
+            _lastAddressDetails.value = null
+        }
     }
 
     fun refresh() = performWhileLoading {
