@@ -12,6 +12,7 @@ import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.core.utils.urlEncode
+import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.testing.PaymentConfigurationTestRule
@@ -407,10 +408,10 @@ class CheckoutTest {
                 path("/v1/payment_pages/cs_test_abc123"),
                 bodyPart(urlEncode("tax_region[country]"), "US"),
                 bodyPart(urlEncode("tax_region[postal_code]"), "80202"),
-                not(bodyPart(urlEncode("tax_region[city]"), "")),
-                not(bodyPart(urlEncode("tax_region[state]"), "")),
-                not(bodyPart(urlEncode("tax_region[line1]"), "")),
-                not(bodyPart(urlEncode("tax_region[line2]"), "")),
+                not(hasBodyPart(urlEncode("tax_region[city]"))),
+                not(hasBodyPart(urlEncode("tax_region[state]"))),
+                not(hasBodyPart(urlEncode("tax_region[line1]"))),
+                not(hasBodyPart(urlEncode("tax_region[line2]"))),
                 bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
             ) { response ->
                 response.testBodyFromFile("checkout-session-update-shipping-address.json")
