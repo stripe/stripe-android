@@ -187,7 +187,10 @@ internal interface PaymentElementLoader {
             }
 
             override fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata {
-                return IntegrationMetadata.CheckoutSession(checkoutSessionResponse.id)
+                return IntegrationMetadata.CheckoutSession(
+                    id = checkoutSessionResponse.id,
+                    customerEmail = checkoutSessionResponse.customer?.email,
+                )
             }
         }
     }
@@ -316,6 +319,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 configuration = configuration,
                 customerId = customerInfo?.customerIdOrNull(),
                 ephemeralKeySecret = customerInfo?.ephemeralKeySecretOrNull(),
+                customerEmail = customerInfo?.customerEmailOrNull(),
                 initializationMode = initializationMode,
                 clientAttributionMetadata = clientAttributionMetadata,
             )

@@ -156,3 +156,9 @@ internal fun CustomerInfo.ephemeralKeySecretOrNull(): String? = when (this) {
     is CustomerInfo.Legacy -> ephemeralKeySecret
     is CustomerInfo.CheckoutSession -> null
 }
+
+internal fun CustomerInfo.customerEmailOrNull(): String? = when (this) {
+    is CustomerInfo.CheckoutSession -> customer.email
+    is CustomerInfo.CustomerSession -> null
+    is CustomerInfo.Legacy -> null
+}

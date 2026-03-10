@@ -33,6 +33,7 @@ internal interface CreateLinkState {
         configuration: CommonConfiguration,
         customerId: String?,
         ephemeralKeySecret: String?,
+        customerEmail: String?,
         initializationMode: PaymentElementLoader.InitializationMode,
         clientAttributionMetadata: ClientAttributionMetadata,
     ): LinkStateResult
@@ -72,6 +73,7 @@ internal class DefaultCreateLinkState @Inject constructor(
         configuration: CommonConfiguration,
         customerId: String?,
         ephemeralKeySecret: String?,
+        customerEmail: String?,
         initializationMode: PaymentElementLoader.InitializationMode,
         clientAttributionMetadata: ClientAttributionMetadata,
     ): LinkStateResult {
@@ -89,6 +91,7 @@ internal class DefaultCreateLinkState @Inject constructor(
             configuration = configuration,
             customerId = customerId,
             ephemeralKeySecret = ephemeralKeySecret,
+            customerEmail = customerEmail,
             elementsSession = elementsSession,
             initializationMode = initializationMode,
             clientAttributionMetadata = clientAttributionMetadata,
@@ -205,6 +208,7 @@ internal class DefaultCreateLinkState @Inject constructor(
         configuration: CommonConfiguration,
         customerId: String?,
         ephemeralKeySecret: String?,
+        customerEmail: String?,
         elementsSession: ElementsSession,
         initializationMode: PaymentElementLoader.InitializationMode,
         clientAttributionMetadata: ClientAttributionMetadata,
@@ -215,14 +219,15 @@ internal class DefaultCreateLinkState @Inject constructor(
         )
         val shippingDetails = configuration.shippingDetails
         val customerPhone = getCustomerPhone(shippingDetails, configuration)
-        val customerEmail = retrieveCustomerEmail(
+        // Priority: merchant-configured email > customer API email > checkout session customer email
+        val resolvedEmail = retrieveCustomerEmail(
             configuration = configuration,
             customerId = customerId,
             ephemeralKeySecret = ephemeralKeySecret,
-        )
+        ) ?: customerEmail
         val customerInfo = LinkConfiguration.CustomerInfo(
             name = configuration.defaultBillingDetails?.name,
-            email = customerEmail,
+            email = resolvedEmail,
             phone = customerPhone,
             billingCountryCode = configuration.defaultBillingDetails?.address?.country,
         )

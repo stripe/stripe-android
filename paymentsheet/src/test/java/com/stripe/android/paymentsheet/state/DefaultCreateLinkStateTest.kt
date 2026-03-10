@@ -71,6 +71,7 @@ internal class DefaultCreateLinkStateTest {
             configuration = configuration,
             customerId = null,
             ephemeralKeySecret = null,
+            customerEmail = null,
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value
             ),

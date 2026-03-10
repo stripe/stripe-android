@@ -252,6 +252,7 @@ class CheckoutSessionResponseJsonParserTest {
         val customer = result?.customer
         assertThat(customer).isNotNull()
         assertThat(customer?.id).isEqualTo("cus_test_customer")
+        assertThat(customer?.email).isEqualTo("test@example.com")
 
         // Verify payment methods are parsed
         val paymentMethods = customer?.paymentMethods
@@ -274,7 +275,30 @@ class CheckoutSessionResponseJsonParserTest {
         assertThat(result).isNotNull()
         assertThat(result?.customer).isNotNull()
         assertThat(result?.customer?.id).isEqualTo("cus_test_empty_customer")
+        assertThat(result?.customer?.email).isNull()
         assertThat(result?.customer?.paymentMethods).isEmpty()
+    }
+
+    @Test
+    fun `parse init response with customer with null email returns null email`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_NULL_EMAIL_CUSTOMER_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.customer).isNotNull()
+        assertThat(result?.customer?.id).isEqualTo("cus_test_null_email")
+        assertThat(result?.customer?.email).isNull()
+    }
+
+    @Test
+    fun `parse init response with customer with empty string email returns null email`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_EMPTY_EMAIL_CUSTOMER_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.customer).isNotNull()
+        assertThat(result?.customer?.id).isEqualTo("cus_test_empty_email")
+        assertThat(result?.customer?.email).isNull()
     }
 
     @Test

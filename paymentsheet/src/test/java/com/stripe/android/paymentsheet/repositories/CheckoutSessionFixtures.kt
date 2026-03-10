@@ -275,6 +275,7 @@ internal object CheckoutSessionFixtures {
             },
             "customer": {
                 "id": "cus_test_customer",
+                "email": "test@example.com",
                 "payment_methods": [
                     {
                         "id": "pm_card_visa",
@@ -322,6 +323,42 @@ internal object CheckoutSessionFixtures {
             },
             "customer": {
                 "id": "cus_test_empty_customer",
+                "payment_methods": []
+            },
+            "elements_session": $MINIMAL_ELEMENTS_SESSION_JSON
+        }
+        """.trimIndent()
+    )
+
+    val CHECKOUT_SESSION_WITH_NULL_EMAIL_CUSTOMER_JSON = JSONObject(
+        """
+        {
+            "session_id": "cs_test_abc123",
+            "currency": "usd",
+            "total_summary": {
+                "due": 1000
+            },
+            "customer": {
+                "id": "cus_test_null_email",
+                "email": null,
+                "payment_methods": []
+            },
+            "elements_session": $MINIMAL_ELEMENTS_SESSION_JSON
+        }
+        """.trimIndent()
+    )
+
+    val CHECKOUT_SESSION_WITH_EMPTY_EMAIL_CUSTOMER_JSON = JSONObject(
+        """
+        {
+            "session_id": "cs_test_abc123",
+            "currency": "usd",
+            "total_summary": {
+                "due": 1000
+            },
+            "customer": {
+                "id": "cus_test_empty_email",
+                "email": "",
                 "payment_methods": []
             },
             "elements_session": $MINIMAL_ELEMENTS_SESSION_JSON

@@ -104,6 +104,10 @@ internal data class CheckoutSessionResponse(
          */
         val id: String,
         /**
+         * The customer's email address.
+         */
+        val email: String? = null,
+        /**
          * The customer's saved payment methods.
          */
         val paymentMethods: List<PaymentMethod>,
