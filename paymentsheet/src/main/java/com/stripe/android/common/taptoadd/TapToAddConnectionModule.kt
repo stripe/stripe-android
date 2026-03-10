@@ -1,6 +1,7 @@
 package com.stripe.android.common.taptoadd
 
 import android.content.Context
+import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.BuildConfig
@@ -27,6 +28,7 @@ internal interface TapToAddConnectionModule {
             isStripeTerminalSdkAvailable: IsStripeTerminalSdkAvailable,
             terminalWrapper: TerminalWrapper,
             errorReporter: ErrorReporter,
+            logger: Logger,
             applicationContext: Context,
             @IOContext workContext: CoroutineContext
         ): TapToAddConnectionManager {
@@ -36,6 +38,7 @@ internal interface TapToAddConnectionModule {
                 terminalWrapper = terminalWrapper,
                 errorReporter = errorReporter,
                 isSimulated = BuildConfig.DEBUG,
+                logger = logger,
                 workContext = workContext,
             )
         }
