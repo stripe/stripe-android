@@ -1,14 +1,16 @@
 package com.stripe.android.paymentsheet.example.playground.checkout
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.stripe.android.checkout.Checkout
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.checkout.Address
+import com.stripe.android.checkout.Checkout
+import com.stripe.android.checkout.CheckoutSession
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,6 +28,13 @@ internal class CheckoutPlaygroundViewModel(
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+
+    fun clearErrorMessage() {
+        _errorMessage.value = null
+    }
 
     fun applyPromotionCode(promotionCode: String) = performWhileLoading {
         checkout.applyPromotionCode(promotionCode)
@@ -52,10 +61,13 @@ internal class CheckoutPlaygroundViewModel(
         checkout.refresh()
     }
 
-    private fun performWhileLoading(block: suspend () -> Unit) {
+    private fun performWhileLoading(block: suspend () -> Result<CheckoutSession>) {
         viewModelScope.launch {
             _isLoading.value = true
-            block()
+            block().onFailure { exception ->
+                Log.e("CheckoutPlaygroundViewModel", "Failed to perform request", exception)
+                _errorMessage.value = exception.message
+            }
             _isLoading.value = false
         }
     }
