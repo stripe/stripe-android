@@ -462,51 +462,6 @@ class CheckoutTest {
     @Test
     fun `concurrent calls to withSessionId are serialized`() = runTest {
         runCreateWithStateScenario { checkout ->
-            val applyPromoResponseJson = """
-                {
-                    "session_id": "cs_test_after_promo",
-                    "currency": "usd",
-                    "total_summary": {
-                        "due": 4099,
-                        "subtotal": 5099,
-                        "total": 4099
-                    },
-                    "line_item_group": {
-                        "due": 4099,
-                        "subtotal": 5099,
-                        "total": 4099,
-                        "discount_amounts": [
-                            {
-                                "amount": 1000,
-                                "coupon": { "name": "10OFF" }
-                            }
-                        ]
-                    }
-                }
-            """.trimIndent()
-
-            val updateAddressResponseJson = """
-                {
-                    "session_id": "cs_test_after_address",
-                    "currency": "usd",
-                    "total_summary": {
-                        "due": 4599,
-                        "subtotal": 5099,
-                        "total": 4599
-                    },
-                    "line_item_group": {
-                        "due": 4599,
-                        "subtotal": 5099,
-                        "total": 4599,
-                        "shipping_rate": {
-                            "id": "shr_express",
-                            "amount": 500,
-                            "display_name": "Express Shipping"
-                        }
-                    }
-                }
-            """.trimIndent()
-
             // First call: applyPromotionCode hits the initial session ID with promotion_code param.
             networkRule.enqueue(
                 host("api.stripe.com"),
@@ -515,7 +470,7 @@ class CheckoutTest {
                 bodyPart("promotion_code", "10OFF"),
             ) { response ->
                 response.setBodyDelay(200, TimeUnit.MILLISECONDS)
-                response.setBody(applyPromoResponseJson)
+                response.testBodyFromFile("checkout-session-concurrent-apply-promo.json")
             }
 
             // Second call: updateShippingAddress must use the session ID from the first response,
@@ -528,7 +483,7 @@ class CheckoutTest {
                 bodyPart(urlEncode("tax_region[postal_code]"), "80202"),
                 bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
             ) { response ->
-                response.setBody(updateAddressResponseJson)
+                response.testBodyFromFile("checkout-session-concurrent-update-address.json")
             }
 
             checkout.checkoutSession.test {
