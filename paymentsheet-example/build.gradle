@@ -16,6 +16,10 @@ def getGooglePlacesApiKey() {
     return findProperty('STRIPE_PAYMENTSHEET_EXAMPLE_GOOGLE_PLACES_API_KEY') ?: ""
 }
 
+def getProxyIpAddress() {
+    return findProperty('STRIPE_PAYMENTSHEET_EXAMPLE_PROXY_IP_ADDRESS') ?: ""
+}
+
 def getSentryDsn() {
     if (gradle.ext.isCi || gradle.ext.isBrowserstackBuild) {
         return findProperty('STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN') ?: ""
@@ -63,6 +67,7 @@ android {
         buildConfigField "boolean", "IS_RUNNING_IN_CI", "$gradle.ext.isCi"
         buildConfigField "boolean", "IS_BROWSERSTACK_BUILD", "$gradle.ext.isBrowserstackBuild"
         buildConfigField "boolean", "DIRECTLY_TO_PLAYGROUND", "${directlyToPlayground()}"
+        buildConfigField "String", "PROXY_IP_ADDRESS", "\"${getProxyIpAddress()}\""
 
         manifestPlaceholders = [
                 BACKEND_URL: getBackendUrl(),
