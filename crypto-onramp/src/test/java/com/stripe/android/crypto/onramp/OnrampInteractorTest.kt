@@ -2,6 +2,7 @@ package com.stripe.android.crypto.onramp
 
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
+import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsEvent
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsService
@@ -70,7 +71,7 @@ class OnrampInteractorTest {
         cryptoApiRepository = cryptoApiRepository,
         analyticsServiceFactory = analyticsServiceFactory,
         checkoutHandler = OnrampSessionClientSecretProvider { "test_secret" },
-        savedStateHandle = androidx.lifecycle.SavedStateHandle()
+        savedStateHandle = SavedStateHandle()
     )
 
     @Test
