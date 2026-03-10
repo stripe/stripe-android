@@ -45,6 +45,74 @@ internal class DefaultCreateLinkStateTest {
         )
     }
 
+    @Test
+    fun `customerEmail is used as fallback when retrieveCustomerEmail returns null`() = runTest {
+        val createLinkState = createLinkStateFactory()
+
+        val result = createLinkState(
+            elementsSession = createElementsSession(),
+            configuration = PaymentSheetFixtures.CONFIG_MINIMUM.asCommonConfiguration(),
+            customerId = null,
+            ephemeralKeySecret = null,
+            customerEmail = "checkout@example.com",
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value
+            ),
+            clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
+        )
+
+        val linkState = result as LinkState
+        assertThat(linkState.configuration.customerInfo.email).isEqualTo("checkout@example.com")
+    }
+
+    @Test
+    fun `merchant default email takes priority over customerEmail`() = runTest {
+        val createLinkState = createLinkStateFactory()
+
+        val configuration = PaymentSheetFixtures.CONFIG_MINIMUM
+            .newBuilder()
+            .defaultBillingDetails(
+                PaymentSheet.BillingDetails(email = "merchant@example.com")
+            )
+            .build()
+            .asCommonConfiguration()
+
+        val result = createLinkState(
+            elementsSession = createElementsSession(),
+            configuration = configuration,
+            customerId = null,
+            ephemeralKeySecret = null,
+            customerEmail = "checkout@example.com",
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value
+            ),
+            clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
+        )
+
+        val linkState = result as LinkState
+        assertThat(linkState.configuration.customerInfo.email).isEqualTo("merchant@example.com")
+    }
+
+    @Test
+    fun `customerEmail is null when no email sources are available`() = runTest {
+        val createLinkState = createLinkStateFactory()
+
+        val result = createLinkState(
+            elementsSession = createElementsSession(),
+            configuration = PaymentSheetFixtures.CONFIG_MINIMUM.asCommonConfiguration(),
+            customerId = null,
+            ephemeralKeySecret = null,
+            customerEmail = null,
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value
+            ),
+            clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
+        )
+
+        val linkState = result as LinkState
+        assertThat(linkState.configuration.customerInfo.email).isNull()
+    }
+
     @OptIn(CardFundingFilteringPrivatePreview::class)
     private suspend fun testCardFundingFilterFactory(
         cardFundingTypes: List<PaymentSheet.CardFundingType>,
@@ -52,7 +120,7 @@ internal class DefaultCreateLinkStateTest {
         expectedFundingTypes: List<PaymentSheet.CardFundingType>
     ) {
         val cardFundingFilterFactory = FakeCardFundingFilterFactory()
-        val createLinkState = createLinkStateFactory(cardFundingFilterFactory)
+        val createLinkState = createLinkStateFactory(cardFundingFilterFactory = cardFundingFilterFactory)
 
         val configuration = PaymentSheetFixtures.CONFIG_MINIMUM
             .newBuilder()
@@ -75,18 +143,14 @@ internal class DefaultCreateLinkStateTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value
             ),
-            clientAttributionMetadata = ClientAttributionMetadata(
-                elementsSessionConfigId = FakeElementsSessionRepository.DEFAULT_ELEMENTS_SESSION_CONFIG_ID,
-                paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
-                paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified
-            )
+            clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
         )
 
         assertThat(cardFundingFilterFactory.invokedWith).isEqualTo(expectedFundingTypes)
     }
 
     private fun createLinkStateFactory(
-        cardFundingFilterFactory: PaymentSheetCardFundingFilterFactory,
+        cardFundingFilterFactory: PaymentSheetCardFundingFilterFactory = FakeCardFundingFilterFactory(),
     ): DefaultCreateLinkState {
         return DefaultCreateLinkState(
             accountStatusProvider = { AccountStatus.SignedOut },
@@ -98,7 +162,7 @@ internal class DefaultCreateLinkStateTest {
     }
 
     private fun createElementsSession(
-        flags: Map<ElementsSession.Flag, Boolean>
+        flags: Map<ElementsSession.Flag, Boolean> = emptyMap(),
     ): ElementsSession {
         return ElementsSession(
             linkSettings = null,
@@ -130,5 +194,13 @@ internal class DefaultCreateLinkStateTest {
             invokedWith = params
             return PaymentSheetCardFundingFilter(params)
         }
+    }
+
+    private companion object {
+        val DEFAULT_CLIENT_ATTRIBUTION_METADATA = ClientAttributionMetadata(
+            elementsSessionConfigId = FakeElementsSessionRepository.DEFAULT_ELEMENTS_SESSION_CONFIG_ID,
+            paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
+            paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
+        )
     }
 }

@@ -4,11 +4,9 @@ import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.common.exception.stripeErrorMessage
-import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -56,17 +54,12 @@ internal class IntentConfirmationDefinition(
         }
         val shippingValues = paymentMethodMetadata.shippingDetails?.toConfirmPaymentIntentShipping()
         return when (confirmationOption) {
-            is PaymentMethodConfirmationOption.New -> {
-                val option = ensureCheckoutSessionBillingEmail(
-                    confirmationOption,
-                    paymentMethodMetadata.integrationMetadata,
-                )
+            is PaymentMethodConfirmationOption.New ->
                 interceptor.intercept(
                     intent = confirmationArgs.intent,
-                    confirmationOption = option,
+                    confirmationOption = confirmationOption,
                     shippingValues = shippingValues,
                 )
-            }
             is PaymentMethodConfirmationOption.Saved ->
                 interceptor.intercept(
                     intent = confirmationArgs.intent,
@@ -138,31 +131,6 @@ internal class IntentConfirmationDefinition(
                 launcher.confirm(confirmStripeIntentParams)
             }
         }
-    }
-
-    /**
-     * Ensures checkout session PMs have a billing email.
-     *
-     * The checkout session confirm API requires `billing_details.email` on the payment method.
-     * Link PMs get this set in [com.stripe.android.link.repositories.LinkApiRepository], but
-     * non-Link PMs (e.g. cards) may not have it if the form doesn't collect email. This injects
-     * the customer email from the checkout session init response as a fallback.
-     */
-    private fun ensureCheckoutSessionBillingEmail(
-        confirmationOption: PaymentMethodConfirmationOption.New,
-        integrationMetadata: IntegrationMetadata,
-    ): PaymentMethodConfirmationOption.New {
-        val customerEmail = (integrationMetadata as? IntegrationMetadata.CheckoutSession)?.customerEmail
-            ?: return confirmationOption
-        if (!confirmationOption.createParams.billingDetails?.email.isNullOrBlank()) return confirmationOption
-
-        val updatedBillingDetails = (confirmationOption.createParams.billingDetails?.toBuilder()
-            ?: PaymentMethod.BillingDetails.Builder())
-            .setEmail(customerEmail)
-            .build()
-        return confirmationOption.copy(
-            createParams = confirmationOption.createParams.copy(billingDetails = updatedBillingDetails),
-        )
     }
 
     sealed interface Args : Parcelable {
