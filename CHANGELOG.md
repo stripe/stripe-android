@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 23.0.1 - 2026-03-10
+
 ## 23.0.0 - 2026-03-09
 
 Dependencies updated in [12373](https://github.com/stripe/stripe-android/pull/12373), [12410](https://github.com/stripe/stripe-android/pull/12410), [12419](https://github.com/stripe/stripe-android/pull/12419), [12433](https://github.com/stripe/stripe-android/pull/12433), and [12486](https://github.com/stripe/stripe-android/pull/12486):
