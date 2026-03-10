@@ -24,6 +24,10 @@ def getSentryDsn() {
     }
 }
 
+def usesCleartextTraffic() {
+    return findProperty('STRIPE_PAYMENTSHEET_EXAMPLE_USES_CLEARTEXT_TRAFFIC') ?: "false"
+}
+
 def directlyToPlayground() {
     return project.hasProperty("DIRECTLY_TO_PLAYGROUND") && project.DIRECTLY_TO_PLAYGROUND.contains("true")
 }
@@ -64,6 +68,7 @@ android {
                 BACKEND_URL: getBackendUrl(),
                 GOOGLE_PLACES_API_KEY: getGooglePlacesApiKey(),
                 SENTRY_DSN: getSentryDsn(),
+                USES_CLEARTEXT_TRAFFIC: usesCleartextTraffic(),
         ]
     }
     buildFeatures {
