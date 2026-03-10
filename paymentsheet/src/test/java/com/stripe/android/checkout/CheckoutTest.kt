@@ -16,7 +16,10 @@ import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.testing.PaymentConfigurationTestRule
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.test.runTest
+import java.util.concurrent.TimeUnit
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
@@ -452,6 +455,114 @@ class CheckoutTest {
 
                 expectNoEvents()
                 assertThat(checkout.checkoutSession.value).isEqualTo(initial)
+            }
+        }
+    }
+
+    @Test
+    fun `concurrent calls to withSessionId are serialized`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            val applyPromoResponseJson = """
+                {
+                    "session_id": "cs_test_after_promo",
+                    "currency": "usd",
+                    "total_summary": {
+                        "due": 4099,
+                        "subtotal": 5099,
+                        "total": 4099
+                    },
+                    "line_item_group": {
+                        "due": 4099,
+                        "subtotal": 5099,
+                        "total": 4099,
+                        "discount_amounts": [
+                            {
+                                "amount": 1000,
+                                "coupon": { "name": "10OFF" }
+                            }
+                        ]
+                    }
+                }
+            """.trimIndent()
+
+            val updateAddressResponseJson = """
+                {
+                    "session_id": "cs_test_after_address",
+                    "currency": "usd",
+                    "total_summary": {
+                        "due": 4599,
+                        "subtotal": 5099,
+                        "total": 4599
+                    },
+                    "line_item_group": {
+                        "due": 4599,
+                        "subtotal": 5099,
+                        "total": 4599,
+                        "shipping_rate": {
+                            "id": "shr_express",
+                            "amount": 500,
+                            "display_name": "Express Shipping"
+                        }
+                    }
+                }
+            """.trimIndent()
+
+            // First call: applyPromotionCode hits the initial session ID with promotion_code param.
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_abc123"),
+                bodyPart("promotion_code", "10OFF"),
+            ) { response ->
+                response.setBodyDelay(200, TimeUnit.MILLISECONDS)
+                response.setBody(applyPromoResponseJson)
+            }
+
+            // Second call: updateShippingAddress must use the session ID from the first response,
+            // proving the mutex serialized the calls.
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_after_promo"),
+                bodyPart(urlEncode("tax_region[country]"), "US"),
+                bodyPart(urlEncode("tax_region[postal_code]"), "80202"),
+                bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
+            ) { response ->
+                response.setBody(updateAddressResponseJson)
+            }
+
+            checkout.checkoutSession.test {
+                val initial = awaitItem()
+                assertThat(initial.id).isEqualTo("cs_test_abc123")
+                assertThat(initial.totalSummary).isNull()
+
+                val address = Address()
+                    .country("US")
+                    .postalCode("80202")
+
+                val results = listOf(
+                    async { checkout.applyPromotionCode("10OFF") },
+                    async { checkout.updateShippingAddress(address) },
+                ).awaitAll()
+
+                assertThat(results[0].isSuccess).isTrue()
+                assertThat(results[1].isSuccess).isTrue()
+
+                val afterPromo = awaitItem()
+                assertThat(afterPromo.id).isEqualTo("cs_test_after_promo")
+                val promoSummary = requireNotNull(afterPromo.totalSummary)
+                assertThat(promoSummary.totalDueToday).isEqualTo(4099)
+                assertThat(promoSummary.discountAmounts).hasSize(1)
+                assertThat(promoSummary.discountAmounts[0].displayName).isEqualTo("10OFF")
+
+                val afterAddress = awaitItem()
+                assertThat(afterAddress.id).isEqualTo("cs_test_after_address")
+                val addressSummary = requireNotNull(afterAddress.totalSummary)
+                assertThat(addressSummary.totalDueToday).isEqualTo(4599)
+                val shippingRate = requireNotNull(addressSummary.shippingRate)
+                assertThat(shippingRate.id).isEqualTo("shr_express")
+                assertThat(shippingRate.amount).isEqualTo(500)
+                assertThat(shippingRate.displayName).isEqualTo("Express Shipping")
             }
         }
     }
