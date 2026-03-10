@@ -81,7 +81,7 @@ afterEvaluate { project ->
 
                 pom.withXml {
                     final dependenciesNode = asNode().appendNode("dependencies")
-                    ext.addDependency = { dep, scope ->
+                    def addDependency = { dep, scope ->
                         logger.lifecycle("updating dep $dep")
                         if (dep.group == null || dep.version == null || dep.name == null || dep.name == "unspecified") {
                             return // invalid dependencies should be ignored
@@ -89,8 +89,13 @@ afterEvaluate { project ->
 
                         final depGroup = dep.group
                         // If it's a project dependency, use the artifactId, otherwise use its name.
-                        final depName = dep.hasProperty("dependencyProject") && dep.dependencyProject.hasProperty("artifactId") ?
-                                dep.dependencyProject.artifactId : dep.name
+                        def depName = dep.name
+                        if (dep instanceof org.gradle.api.artifacts.ProjectDependency) {
+                            final depProject = rootProject.allprojects.find { it.name == dep.name }
+                            if (depProject != null && depProject.hasProperty("artifactId")) {
+                                depName = depProject.artifactId
+                            }
+                        }
 
                         final jitpackEnabled = System.getenv("JITPACK")
                         final defaultVersion =
