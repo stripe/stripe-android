@@ -1,0 +1,25 @@
+name: Attach release APK
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  attach-apk:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.release.tag_name }}
+      - uses: ./.github/actions/stripe_setup
+      - name: Build paymentsheet-example APK
+        run: ./gradlew :paymentsheet-example:assembleBaseRelease
+      - name: Attach APK to release
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          gh release upload "$GITHUB_REF_NAME" \
+            paymentsheet-example/build/outputs/apk/base/release/paymentsheet-example-base-release.apk#"paymentsheet-example-release-${VERSION}.apk"
+        env:
+          GH_TOKEN: ${{ github.token }}
