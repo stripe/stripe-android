@@ -605,6 +605,57 @@ internal object CheckoutSessionFixtures {
     )
 
     /**
+     * Init response with multiple tax_amounts, some with amount 0.
+     * Only the non-zero tax entry (Sales Tax) should be parsed.
+     */
+    val CHECKOUT_SESSION_WITH_MIXED_TAX_AMOUNTS_JSON = JSONObject(
+        """
+        {
+            "session_id": "cs_test_abc123",
+            "currency": "usd",
+            "total_summary": {
+                "due": 5294,
+                "subtotal": 5000,
+                "total": 5294
+            },
+            "line_item_group": {
+                "currency": "usd",
+                "total": 5294,
+                "subtotal": 5000,
+                "due": 5294,
+                "tax_amounts": [
+                    {
+                        "amount": 294,
+                        "inclusive": false,
+                        "tax_rate": {
+                            "display_name": "Sales Tax",
+                            "percentage": 6.875
+                        }
+                    },
+                    {
+                        "amount": 0,
+                        "inclusive": false,
+                        "tax_rate": {
+                            "display_name": "County Tax",
+                            "percentage": 0.0
+                        }
+                    },
+                    {
+                        "amount": 0,
+                        "inclusive": false,
+                        "tax_rate": {
+                            "display_name": "Retail Delivery Fee",
+                            "percentage": 0.0
+                        }
+                    }
+                ]
+            },
+            "elements_session": $MINIMAL_ELEMENTS_SESSION_JSON
+        }
+        """.trimIndent()
+    )
+
+    /**
      * Init response with shipping_options array at the root level.
      */
     val CHECKOUT_SESSION_WITH_SHIPPING_OPTIONS_JSON = JSONObject(

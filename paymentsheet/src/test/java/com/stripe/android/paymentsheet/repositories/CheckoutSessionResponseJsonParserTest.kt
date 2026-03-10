@@ -492,6 +492,22 @@ class CheckoutSessionResponseJsonParserTest {
     }
 
     @Test
+    fun `parse filters out zero-amount tax entries`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_MIXED_TAX_AMOUNTS_JSON)
+
+        assertThat(result).isNotNull()
+        val totalSummary = result?.totalSummary
+        assertThat(totalSummary).isNotNull()
+
+        // Only the non-zero tax amount (Sales Tax at 294) should be included
+        assertThat(totalSummary?.taxAmounts).hasSize(1)
+        assertThat(totalSummary?.taxAmounts?.get(0)?.amount).isEqualTo(294L)
+        assertThat(totalSummary?.taxAmounts?.get(0)?.displayName).isEqualTo("Sales Tax")
+        assertThat(totalSummary?.taxAmounts?.get(0)?.percentage).isEqualTo(6.875)
+    }
+
+    @Test
     fun `parse with empty discount and tax arrays`() {
         val json = JSONObject(
             """

@@ -265,7 +265,7 @@ internal class CheckoutSessionResponseJsonParser(
         val array = lineItemGroup?.optJSONArray(FIELD_TAX_AMOUNTS) ?: return emptyList()
         return (0 until array.length()).mapNotNull { i ->
             val obj = array.optJSONObject(i) ?: return@mapNotNull null
-            val amount = obj.optLong(FIELD_AMOUNT, -1).takeIf { it >= 0 } ?: return@mapNotNull null
+            val amount = obj.optLong(FIELD_AMOUNT, -1).takeIf { it > 0 } ?: return@mapNotNull null
             val inclusive = obj.optBoolean(FIELD_INCLUSIVE, false)
             val taxRate = obj.optJSONObject(FIELD_TAX_RATE) ?: return@mapNotNull null
             val displayName = taxRate.optString(FIELD_DISPLAY_NAME).takeIf { it.isNotEmpty() }
