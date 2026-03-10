@@ -12,7 +12,6 @@ import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.confirmation.intent.CallbackNotFoundException
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CreateIntentResult
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.stripeterminal.external.callable.Callback
 import com.stripe.stripeterminal.external.callable.Cancelable
@@ -143,7 +142,7 @@ internal class DefaultTapToAddCollectionHandler(
         customerMetadata: CustomerMetadata,
     ): TapToAddCollectionHandler.CollectionState {
         val setupIntent = retrieveSetupIntent(clientSecret)
-        val setupIntentWithAttachedPaymentMethod = collectPaymentMethod(setupIntent, metadata)
+        val setupIntentWithAttachedPaymentMethod = collectPaymentMethod(setupIntent)
         val confirmedIntent = confirmSetupIntent(setupIntentWithAttachedPaymentMethod)
         val paymentMethod = fetchPaymentMethod(confirmedIntent, customerMetadata)
 
@@ -163,16 +162,10 @@ internal class DefaultTapToAddCollectionHandler(
 
     private suspend fun collectPaymentMethod(
         intent: SetupIntent,
-        metadata: PaymentMethodMetadata,
     ) = suspendCancellableCoroutine { continuation ->
-        val allowRedisplay = metadata.allowRedisplay(
-            code = PaymentMethod.Type.Card.code,
-            customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse,
-        )
-
         val cancellable = terminal().collectSetupIntentPaymentMethod(
             intent = intent,
-            allowRedisplay = allowRedisplay.toTerminalAllowRedisplay(),
+            allowRedisplay = AllowRedisplay.ALWAYS,
             config = SetupIntentConfiguration.Builder().build(),
             callback = continuation.createSetupIntentCallback(),
         )

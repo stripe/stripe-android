@@ -733,12 +733,11 @@ class TapToAddCollectionHandlerTest {
 
     private suspend fun Scenario.checkCollectCall(
         retrievedSetupIntent: SetupIntent,
-        expectedAllowRedisplay: AllowRedisplay = AllowRedisplay.UNSPECIFIED,
     ): SetupIntent {
         val collectedIntent = mock<SetupIntent>()
         val collectPaymentMethodCall = terminalScenario.collectPaymentMethodCalls.awaitItem()
         assertThat(collectPaymentMethodCall.intent).isEqualTo(retrievedSetupIntent)
-        assertThat(collectPaymentMethodCall.allowRedisplay).isEqualTo(expectedAllowRedisplay)
+        assertThat(collectPaymentMethodCall.allowRedisplay).isEqualTo(AllowRedisplay.ALWAYS)
         assertThat(collectPaymentMethodCall.config)
             .isEqualTo(
                 SetupIntentConfiguration.Builder()
