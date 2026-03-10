@@ -44,19 +44,22 @@ internal fun ColumnScope.TapToAddConfirmationScreen(
         }
 
         with(state.primaryButton) {
-            PrimaryButton(
-                label = label.resolve(),
-                locked = locked,
-                enabled = enabled,
-                processingState = when (this.state) {
-                    TapToAddConfirmationInteractor.State.PrimaryButton.State.Idle ->
-                        PrimaryButtonProcessingState.Idle(null)
-                    TapToAddConfirmationInteractor.State.PrimaryButton.State.Processing ->
-                        PrimaryButtonProcessingState.Processing
-                },
-                onProcessingCompleted = {},
-                onClick = onPrimaryButtonPress,
-            )
+            TapToAddSharedPrimaryButton { modifier ->
+                PrimaryButton(
+                    label = label.resolve(),
+                    locked = locked,
+                    enabled = enabled,
+                    modifier = modifier,
+                    processingState = when (this.state) {
+                        TapToAddConfirmationInteractor.State.PrimaryButton.State.Idle ->
+                            PrimaryButtonProcessingState.Idle(null)
+                        TapToAddConfirmationInteractor.State.PrimaryButton.State.Processing ->
+                            PrimaryButtonProcessingState.Processing
+                    },
+                    onProcessingCompleted = {},
+                    onClick = onPrimaryButtonPress,
+                )
+            }
         }
 
         Spacer(Modifier.size(10.dp))
