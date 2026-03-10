@@ -31,9 +31,6 @@ internal interface CreateLinkState {
     suspend operator fun invoke(
         elementsSession: ElementsSession,
         configuration: CommonConfiguration,
-        customerId: String?,
-        ephemeralKeySecret: String?,
-        customerEmail: String?,
         initializationMode: PaymentElementLoader.InitializationMode,
         clientAttributionMetadata: ClientAttributionMetadata,
     ): LinkStateResult
@@ -71,9 +68,6 @@ internal class DefaultCreateLinkState @Inject constructor(
     override suspend fun invoke(
         elementsSession: ElementsSession,
         configuration: CommonConfiguration,
-        customerId: String?,
-        ephemeralKeySecret: String?,
-        customerEmail: String?,
         initializationMode: PaymentElementLoader.InitializationMode,
         clientAttributionMetadata: ClientAttributionMetadata,
     ): LinkStateResult {
@@ -89,9 +83,6 @@ internal class DefaultCreateLinkState @Inject constructor(
 
         val linkConfiguration = createLinkConfigurationWithoutValidation(
             configuration = configuration,
-            customerId = customerId,
-            ephemeralKeySecret = ephemeralKeySecret,
-            customerEmail = customerEmail,
             elementsSession = elementsSession,
             initializationMode = initializationMode,
             clientAttributionMetadata = clientAttributionMetadata,
@@ -206,9 +197,6 @@ internal class DefaultCreateLinkState @Inject constructor(
     // Validation is done in getLinkDisabledReasons.
     private suspend fun createLinkConfigurationWithoutValidation(
         configuration: CommonConfiguration,
-        customerId: String?,
-        ephemeralKeySecret: String?,
-        customerEmail: String?,
         elementsSession: ElementsSession,
         initializationMode: PaymentElementLoader.InitializationMode,
         clientAttributionMetadata: ClientAttributionMetadata,
@@ -219,12 +207,8 @@ internal class DefaultCreateLinkState @Inject constructor(
         )
         val shippingDetails = configuration.shippingDetails
         val customerPhone = getCustomerPhone(shippingDetails, configuration)
-        // Priority: merchant-configured email > customer API email > checkout session customer email
-        val resolvedEmail = retrieveCustomerEmail(
-            configuration = configuration,
-            customerId = customerId,
-            ephemeralKeySecret = ephemeralKeySecret,
-        ) ?: customerEmail
+
+        val resolvedEmail = resolveEmail(initializationMode, configuration, elementsSession)
         val customerInfo = LinkConfiguration.CustomerInfo(
             name = configuration.defaultBillingDetails?.name,
             email = resolvedEmail,
@@ -328,6 +312,40 @@ internal class DefaultCreateLinkState @Inject constructor(
             PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
         } else {
             DefaultCardBrandFilter
+        }
+    }
+
+    /**
+     * Resolves the customer email for Link.
+     *
+     * Priority: merchant-configured default email > customer API email / checkout customer email.
+     */
+    private suspend fun resolveEmail(
+        initializationMode: PaymentElementLoader.InitializationMode,
+        configuration: CommonConfiguration,
+        elementsSession: ElementsSession,
+    ): String? = when (initializationMode) {
+        is PaymentElementLoader.InitializationMode.CheckoutSession -> {
+            configuration.defaultBillingDetails?.email
+                ?: initializationMode.checkoutSessionResponse.customer?.email
+        }
+        else -> when (val accessType = configuration.customer?.accessType) {
+            is PaymentSheet.CustomerAccessType.CustomerSession -> {
+                val session = elementsSession.customer?.session
+                retrieveCustomerEmail(
+                    configuration = configuration,
+                    customerId = session?.customerId,
+                    ephemeralKeySecret = session?.apiKey,
+                )
+            }
+            is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey -> {
+                retrieveCustomerEmail(
+                    configuration = configuration,
+                    customerId = configuration.customer.id,
+                    ephemeralKeySecret = accessType.ephemeralKeySecret,
+                )
+            }
+            else -> configuration.defaultBillingDetails?.email
         }
     }
 }

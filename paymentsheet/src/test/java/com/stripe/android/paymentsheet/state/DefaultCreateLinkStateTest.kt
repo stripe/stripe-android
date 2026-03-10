@@ -17,6 +17,8 @@ import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.paymentsheet.CardFundingFilteringPrivatePreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeElementsSessionRepository
 import kotlinx.coroutines.test.runTest
@@ -46,17 +48,16 @@ internal class DefaultCreateLinkStateTest {
     }
 
     @Test
-    fun `customerEmail is used as fallback when retrieveCustomerEmail returns null`() = runTest {
+    fun `checkout customer email is used as fallback when retrieveCustomerEmail returns null`() = runTest {
         val createLinkState = createLinkStateFactory()
 
+        val elementsSession = createElementsSession()
         val result = createLinkState(
-            elementsSession = createElementsSession(),
+            elementsSession = elementsSession,
             configuration = PaymentSheetFixtures.CONFIG_MINIMUM.asCommonConfiguration(),
-            customerId = null,
-            ephemeralKeySecret = null,
-            customerEmail = "checkout@example.com",
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value
+            initializationMode = checkoutSessionInitMode(
+                elementsSession = elementsSession,
+                customerEmail = "checkout@example.com",
             ),
             clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
         )
@@ -66,7 +67,7 @@ internal class DefaultCreateLinkStateTest {
     }
 
     @Test
-    fun `merchant default email takes priority over customerEmail`() = runTest {
+    fun `merchant default email takes priority over checkout customer email`() = runTest {
         val createLinkState = createLinkStateFactory()
 
         val configuration = PaymentSheetFixtures.CONFIG_MINIMUM
@@ -77,14 +78,13 @@ internal class DefaultCreateLinkStateTest {
             .build()
             .asCommonConfiguration()
 
+        val elementsSession = createElementsSession()
         val result = createLinkState(
-            elementsSession = createElementsSession(),
+            elementsSession = elementsSession,
             configuration = configuration,
-            customerId = null,
-            ephemeralKeySecret = null,
-            customerEmail = "checkout@example.com",
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value
+            initializationMode = checkoutSessionInitMode(
+                elementsSession = elementsSession,
+                customerEmail = "checkout@example.com",
             ),
             clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
         )
@@ -100,9 +100,6 @@ internal class DefaultCreateLinkStateTest {
         val result = createLinkState(
             elementsSession = createElementsSession(),
             configuration = PaymentSheetFixtures.CONFIG_MINIMUM.asCommonConfiguration(),
-            customerId = null,
-            ephemeralKeySecret = null,
-            customerEmail = null,
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value
             ),
@@ -137,9 +134,6 @@ internal class DefaultCreateLinkStateTest {
         createLinkState(
             elementsSession = elementsSession,
             configuration = configuration,
-            customerId = null,
-            ephemeralKeySecret = null,
-            customerEmail = null,
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value
             ),
@@ -158,6 +152,26 @@ internal class DefaultCreateLinkStateTest {
             linkStore = LinkStore(ApplicationProvider.getApplicationContext()),
             linkGateFactory = FakeLinkGate.Factory(FakeLinkGate()),
             cardFundingFilterFactory = cardFundingFilterFactory
+        )
+    }
+
+    private fun checkoutSessionInitMode(
+        elementsSession: ElementsSession,
+        customerEmail: String?,
+    ): PaymentElementLoader.InitializationMode.CheckoutSession {
+        return PaymentElementLoader.InitializationMode.CheckoutSession(
+            checkoutSessionResponse = CheckoutSessionResponse(
+                id = "cs_test_123",
+                amount = 5099,
+                currency = "usd",
+                elementsSession = elementsSession,
+                customer = CheckoutSessionResponse.Customer(
+                    id = "cus_test_123",
+                    email = customerEmail,
+                    paymentMethods = PaymentMethodFactory.cards(1),
+                    canDetachPaymentMethod = true,
+                ),
+            ),
         )
     }
 
