@@ -259,7 +259,11 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val configuration = integrationConfiguration.commonConfiguration
         // Validate configuration before loading
         initializationMode.validate()
-        configuration.validate(paymentConfiguration.get().isLiveMode(), paymentElementCallbackIdentifier)
+        configuration.validate(
+            initializationMode = initializationMode,
+            isLiveMode = paymentConfiguration.get().isLiveMode(),
+            callbackIdentifier = paymentElementCallbackIdentifier,
+        )
 
         eventReporter.onLoadStarted(metadata.initializedViaCompose)
         tapToAddConnectionManager.connect()
