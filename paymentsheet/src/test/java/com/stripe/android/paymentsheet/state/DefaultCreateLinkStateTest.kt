@@ -52,7 +52,7 @@ internal class DefaultCreateLinkStateTest {
         expectedFundingTypes: List<PaymentSheet.CardFundingType>
     ) {
         val cardFundingFilterFactory = FakeCardFundingFilterFactory()
-        val createLinkState = createLinkStateFactory(cardFundingFilterFactory)
+        val createLinkState = createLinkStateFactory(cardFundingFilterFactory = cardFundingFilterFactory)
 
         val configuration = PaymentSheetFixtures.CONFIG_MINIMUM
             .newBuilder()
@@ -69,23 +69,16 @@ internal class DefaultCreateLinkStateTest {
         createLinkState(
             elementsSession = elementsSession,
             configuration = configuration,
-            customerId = null,
-            ephemeralKeySecret = null,
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value
-            ),
-            clientAttributionMetadata = ClientAttributionMetadata(
-                elementsSessionConfigId = FakeElementsSessionRepository.DEFAULT_ELEMENTS_SESSION_CONFIG_ID,
-                paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
-                paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified
-            )
+            initializationMode = PAYMENT_INTENT_INIT_MODE,
+            customerMetadata = null,
+            clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
         )
 
         assertThat(cardFundingFilterFactory.invokedWith).isEqualTo(expectedFundingTypes)
     }
 
     private fun createLinkStateFactory(
-        cardFundingFilterFactory: PaymentSheetCardFundingFilterFactory,
+        cardFundingFilterFactory: PaymentSheetCardFundingFilterFactory = FakeCardFundingFilterFactory(),
     ): DefaultCreateLinkState {
         return DefaultCreateLinkState(
             accountStatusProvider = { AccountStatus.SignedOut },
@@ -97,7 +90,7 @@ internal class DefaultCreateLinkStateTest {
     }
 
     private fun createElementsSession(
-        flags: Map<ElementsSession.Flag, Boolean>
+        flags: Map<ElementsSession.Flag, Boolean> = emptyMap(),
     ): ElementsSession {
         return ElementsSession(
             linkSettings = null,
@@ -129,5 +122,17 @@ internal class DefaultCreateLinkStateTest {
             invokedWith = params
             return PaymentSheetCardFundingFilter(params)
         }
+    }
+
+    private companion object {
+        val PAYMENT_INTENT_INIT_MODE = PaymentElementLoader.InitializationMode.PaymentIntent(
+            clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value
+        )
+
+        val DEFAULT_CLIENT_ATTRIBUTION_METADATA = ClientAttributionMetadata(
+            elementsSessionConfigId = FakeElementsSessionRepository.DEFAULT_ELEMENTS_SESSION_CONFIG_ID,
+            paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
+            paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
+        )
     }
 }

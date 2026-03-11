@@ -4,6 +4,7 @@ import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
@@ -286,7 +287,7 @@ internal class PaymentSheetConfirmationTokenTest {
     private fun clientContext(isLiveMode: Boolean, isPayment: Boolean = true): RequestMatcher {
         // The client_context param is only sent in test mode when creating a confirmation token
         return if (isLiveMode) {
-            not(bodyPart(urlEncode("client_context[mode]"), ".+".toRegex()))
+            not(hasBodyPart(urlEncode("client_context[mode]")))
         } else {
             // we only verify client context is not null here
             bodyPart(
@@ -307,12 +308,7 @@ internal class PaymentSheetConfirmationTokenTest {
                 "123"
             )
         } else {
-            not(
-                bodyPart(
-                    urlEncode("payment_method_options[card][cvc]"),
-                    ".+".toRegex()
-                )
-            )
+            not(hasBodyPart(urlEncode("payment_method_options[card][cvc]")))
         }
     }
 
@@ -333,19 +329,9 @@ internal class PaymentSheetConfirmationTokenTest {
             )
         } else {
             RequestMatchers.composite(
-                not(
-                    bodyPart(
-                        urlEncode("mandate_data[customer_acceptance][type]"),
-                        ".+".toRegex()
-                    )
-                ),
+                not(hasBodyPart(urlEncode("mandate_data[customer_acceptance][type]"))),
                 if (isPayment) {
-                    not(
-                        bodyPart(
-                            urlEncode("setup_future_usage"),
-                            ".+".toRegex()
-                        )
-                    )
+                    not(hasBodyPart(urlEncode("setup_future_usage")))
                 } else {
                     bodyPart(
                         urlEncode("setup_future_usage"),

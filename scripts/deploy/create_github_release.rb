@@ -14,7 +14,6 @@ def create_github_release
     execute_or_fail("git checkout #{@deploy_branch}")
     execute_or_fail("git pull")
 
-    build_example_release_apk
     tag_release
 
     begin
@@ -27,7 +26,6 @@ def create_github_release
         )
 
         @release_url = release_response.url
-        upload_example_apk_to_release(@release_url)
 
         rputs "Created new release"
         open_url(release_response.html_url)
@@ -111,24 +109,6 @@ private def changelog_entries_for_version
     end
 
     raise ArgumentError.new("Version #{@version} not found in changelog. Have you finished merging the version bump PR?")
-end
-
-private def build_example_release_apk
-    gnupg_env do |env|
-        Subprocess.check_call(
-            ['./gradlew', ':paymentsheet-example:assembleBaseRelease'],
-            env: env
-        )
-    end
-end
-
-private def upload_example_apk_to_release(release_url)
-    octokit_client.upload_asset(
-        release_url,
-        "../stripe-android/paymentsheet-example/build/outputs/apk/base/release/paymentsheet-example-base-release.apk",
-        name: "paymentsheet-example-release-#{@version}.apk",
-        content_type: "application/vnd.android.package-archive"
-    )
 end
 
 private def octokit_client

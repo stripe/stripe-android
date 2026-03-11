@@ -18,6 +18,8 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.checkout.Address
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
@@ -375,6 +377,14 @@ class CheckoutSessionConfirmationInterceptorTest {
         override suspend fun selectShippingRate(
             sessionId: String,
             shippingRateId: String,
+        ): Result<CheckoutSessionResponse> {
+            error("Not expected in this test")
+        }
+
+        @OptIn(CheckoutSessionPreview::class)
+        override suspend fun updateShippingAddress(
+            sessionId: String,
+            address: Address.State,
         ): Result<CheckoutSessionResponse> {
             error("Not expected in this test")
         }

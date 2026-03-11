@@ -61,6 +61,34 @@ class TapToAddLayoutScreenshotTest {
     }
 
     @Test
+    fun sharedTransitionFromCollectCvcToConfirmation() {
+        paparazziRule.gif(
+            end = 2500L
+        ) {
+            TapToAddTheme {
+                var screen by remember {
+                    mutableStateOf<TapToAddNavigator.Screen>(
+                        TapToAddNavigator.Screen.CollectCvc(
+                            interactor = FakeTapToAddCollectCvcInteractor(),
+                        )
+                    )
+                }
+
+                LaunchedEffect(Unit) {
+                    delay(1000L)
+                    screen = TapToAddNavigator.Screen.Confirmation(
+                        interactor = FakeTapToAddConfirmationInteractor(),
+                    )
+                }
+
+                TapToAddLayout(
+                    screen = screen,
+                ) { }
+            }
+        }
+    }
+
+    @Test
     fun collecting() {
         paparazziRule.snapshot {
             TapToAddTheme {

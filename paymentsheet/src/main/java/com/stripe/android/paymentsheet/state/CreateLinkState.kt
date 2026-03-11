@@ -11,6 +11,7 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.toLoginState
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
 import com.stripe.android.lpmfoundations.paymentmethod.toPaymentSheetSaveConsentBehavior
@@ -31,9 +32,8 @@ internal interface CreateLinkState {
     suspend operator fun invoke(
         elementsSession: ElementsSession,
         configuration: CommonConfiguration,
-        customerId: String?,
-        ephemeralKeySecret: String?,
         initializationMode: PaymentElementLoader.InitializationMode,
+        customerMetadata: CustomerMetadata?,
         clientAttributionMetadata: ClientAttributionMetadata,
     ): LinkStateResult
 }
@@ -70,9 +70,8 @@ internal class DefaultCreateLinkState @Inject constructor(
     override suspend fun invoke(
         elementsSession: ElementsSession,
         configuration: CommonConfiguration,
-        customerId: String?,
-        ephemeralKeySecret: String?,
         initializationMode: PaymentElementLoader.InitializationMode,
+        customerMetadata: CustomerMetadata?,
         clientAttributionMetadata: ClientAttributionMetadata,
     ): LinkStateResult {
         val linkDisabledReasons = getLinkDisabledReasons(
@@ -87,10 +86,9 @@ internal class DefaultCreateLinkState @Inject constructor(
 
         val linkConfiguration = createLinkConfigurationWithoutValidation(
             configuration = configuration,
-            customerId = customerId,
-            ephemeralKeySecret = ephemeralKeySecret,
             elementsSession = elementsSession,
             initializationMode = initializationMode,
+            customerMetadata = customerMetadata,
             clientAttributionMetadata = clientAttributionMetadata,
         )
         val accountStatus = accountStatusProvider(linkConfiguration)
@@ -203,10 +201,9 @@ internal class DefaultCreateLinkState @Inject constructor(
     // Validation is done in getLinkDisabledReasons.
     private suspend fun createLinkConfigurationWithoutValidation(
         configuration: CommonConfiguration,
-        customerId: String?,
-        ephemeralKeySecret: String?,
         elementsSession: ElementsSession,
         initializationMode: PaymentElementLoader.InitializationMode,
+        customerMetadata: CustomerMetadata?,
         clientAttributionMetadata: ClientAttributionMetadata,
     ): LinkConfiguration {
         val cardBrandFilter = getCardBrandFilter(
@@ -215,14 +212,11 @@ internal class DefaultCreateLinkState @Inject constructor(
         )
         val shippingDetails = configuration.shippingDetails
         val customerPhone = getCustomerPhone(shippingDetails, configuration)
-        val customerEmail = retrieveCustomerEmail(
-            configuration = configuration,
-            customerId = customerId,
-            ephemeralKeySecret = ephemeralKeySecret,
-        )
+
+        val resolvedEmail = retrieveCustomerEmail(configuration, customerMetadata)
         val customerInfo = LinkConfiguration.CustomerInfo(
             name = configuration.defaultBillingDetails?.name,
-            email = customerEmail,
+            email = resolvedEmail,
             phone = customerPhone,
             billingCountryCode = configuration.defaultBillingDetails?.address?.country,
         )

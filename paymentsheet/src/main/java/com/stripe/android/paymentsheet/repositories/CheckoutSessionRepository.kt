@@ -8,12 +8,15 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.executeRequestWithResultParser
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.checkout.Address
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import java.util.Locale
 import java.util.TimeZone
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Named
 
+@OptIn(CheckoutSessionPreview::class)
 internal interface CheckoutSessionRepository {
     suspend fun init(
         sessionId: String,
@@ -44,8 +47,14 @@ internal interface CheckoutSessionRepository {
         sessionId: String,
         shippingRateId: String,
     ): Result<CheckoutSessionResponse>
+
+    suspend fun updateShippingAddress(
+        sessionId: String,
+        address: Address.State,
+    ): Result<CheckoutSessionResponse>
 }
 
+@OptIn(CheckoutSessionPreview::class)
 internal class DefaultCheckoutSessionRepository @Inject constructor(
     private val stripeNetworkClient: StripeNetworkClient,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
@@ -148,6 +157,22 @@ internal class DefaultCheckoutSessionRepository @Inject constructor(
         ),
     )
 
+    override suspend fun updateShippingAddress(
+        sessionId: String,
+        address: Address.State,
+    ): Result<CheckoutSessionResponse> = executePost(
+        url = updateUrl(sessionId),
+        params = buildMap {
+            putIfNotEmpty("tax_region[country]", address.country)
+            putIfNotEmpty("tax_region[line1]", address.line1)
+            putIfNotEmpty("tax_region[line2]", address.line2)
+            putIfNotEmpty("tax_region[city]", address.city)
+            putIfNotEmpty("tax_region[state]", address.state)
+            putIfNotEmpty("tax_region[postal_code]", address.postalCode)
+            put("elements_session_client[is_aggregation_expected]", "true")
+        },
+    )
+
     private companion object {
         private fun initUrl(sessionId: String): String =
             "${ApiRequest.API_HOST}/v1/payment_pages/$sessionId/init"
@@ -157,5 +182,11 @@ internal class DefaultCheckoutSessionRepository @Inject constructor(
 
         private fun updateUrl(sessionId: String): String =
             "${ApiRequest.API_HOST}/v1/payment_pages/$sessionId"
+    }
+}
+
+private fun MutableMap<String, Any>.putIfNotEmpty(key: String, value: String?) {
+    if (!value.isNullOrEmpty()) {
+        put(key, value)
     }
 }
