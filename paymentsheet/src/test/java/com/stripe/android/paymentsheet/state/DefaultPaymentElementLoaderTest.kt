@@ -74,6 +74,7 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.PaymentIntentInTerminalState
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
+import com.stripe.android.testing.CustomerFactory
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
@@ -741,8 +742,6 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `load() with customer should fetch only supported payment method types`() =
         runScenario {
-            val customerRepository = FakeCustomerRepository()
-
             val paymentMethodTypes = listOf(
                 "card", // valid and supported
                 "fpx", // valid but not supported
@@ -753,7 +752,6 @@ internal class DefaultPaymentElementLoaderTest {
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodTypes = paymentMethodTypes
                 ),
-                customerRepo = customerRepository
             )
 
             loader.load(
@@ -776,8 +774,6 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `when allowsDelayedPaymentMethods is false then delayed payment methods are filtered out`() =
         runScenario {
-            val customerRepository = FakeCustomerRepository()
-
             val loader = createPaymentElementLoader(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodTypes = listOf(
@@ -786,7 +782,6 @@ internal class DefaultPaymentElementLoaderTest {
                         PaymentMethod.Type.AuBecsDebit.code
                     )
                 ),
-                customerRepo = customerRepository
             )
 
             loader.load(
@@ -1512,13 +1507,12 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Falls back to customer email if billing address email not provided`() = runScenario {
+    fun `Falls back to customer email if billing address email not provided`() = runScenario(
+        customerRepo = FakeCustomerRepository(
+            customer = CustomerFactory.create(email = "email@stripe.com"),
+        ),
+    ) {
         val loader = createPaymentElementLoader(
-            customerRepo = FakeCustomerRepository(
-                customer = mock {
-                    on { email } doReturn "email@stripe.com"
-                }
-            ),
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 setupFutureUsage = StripeIntent.Usage.OffSession,
             )
@@ -1536,6 +1530,12 @@ internal class DefaultPaymentElementLoaderTest {
                 initializedViaCompose = false,
             ),
         ).getOrThrow()
+
+        customerRepository.getPaymentMethodsRequests.awaitItem()
+
+        val request = customerRepository.retrieveCustomerRequests.awaitItem()
+        assertThat(request.customerId).isEqualTo("id")
+        assertThat(request.ephemeralKeySecret).isEqualTo("ek_123")
 
         assertThat(result.paymentMethodMetadata.linkState?.configuration?.customerInfo?.email)
             .isEqualTo("email@stripe.com")
@@ -3203,17 +3203,14 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `When using 'CustomerSession' & no default billing details, customer email for Link config is fetched using 'elements_session' ephemeral key`() =
-        runScenario {
-            val customerRepository = FakeCustomerRepository(
+        runScenario(
+            customerRepo = FakeCustomerRepository(
                 onRetrieveCustomer = {
-                    mock {
-                        on { email } doReturn "email@stripe.com"
-                    }
+                    CustomerFactory.create(email = "email@stripe.com")
                 }
-            )
-
+            ),
+        ) {
             val loader = createPaymentElementLoader(
-                customerRepo = customerRepository,
                 customer = ElementsSession.Customer(
                     paymentMethods = PaymentMethodFactory.cards(1),
                     session = ElementsSession.Customer.Session(
@@ -4380,6 +4377,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     private fun runScenario(
+        customerRepo: FakeCustomerRepository = FakeCustomerRepository(paymentMethods = PAYMENT_METHODS),
         block: suspend Scenario.() -> Unit
     ) {
         val testDispatcher = UnconfinedTestDispatcher()
@@ -4390,11 +4388,13 @@ internal class DefaultPaymentElementLoaderTest {
             testDispatcher = testDispatcher,
             eventReporter = eventReporter,
             prefsRepository = prefsRepository,
+            customerRepository = customerRepo,
         ).apply {
             runTest {
                 block()
             }
             eventReporter.validate()
+            customerRepository.ensureAllEventsConsumed()
         }
     }
 
@@ -4407,12 +4407,13 @@ internal class DefaultPaymentElementLoaderTest {
         val testDispatcher: TestDispatcher,
         val eventReporter: FakeLoadingEventReporter,
         val prefsRepository: FakePrefsRepository,
+        val customerRepository: FakeCustomerRepository,
     )
 
     private fun Scenario.createPaymentElementLoader(
         isGooglePayReady: Boolean = true,
         stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-        customerRepo: CustomerRepository = FakeCustomerRepository(paymentMethods = PAYMENT_METHODS),
+        customerRepo: CustomerRepository = customerRepository,
         linkAccountState: AccountStatus = AccountStatus.Verified(consentPresentation = null),
         error: Throwable? = null,
         linkSettings: ElementsSession.LinkSettings? = null,
