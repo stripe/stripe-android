@@ -11,6 +11,7 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.toLoginState
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
 import com.stripe.android.lpmfoundations.paymentmethod.toPaymentSheetSaveConsentBehavior
@@ -32,6 +33,7 @@ internal interface CreateLinkState {
         elementsSession: ElementsSession,
         configuration: CommonConfiguration,
         initializationMode: PaymentElementLoader.InitializationMode,
+        customerMetadata: CustomerMetadata?,
         clientAttributionMetadata: ClientAttributionMetadata,
     ): LinkStateResult
 }
@@ -69,6 +71,7 @@ internal class DefaultCreateLinkState @Inject constructor(
         elementsSession: ElementsSession,
         configuration: CommonConfiguration,
         initializationMode: PaymentElementLoader.InitializationMode,
+        customerMetadata: CustomerMetadata?,
         clientAttributionMetadata: ClientAttributionMetadata,
     ): LinkStateResult {
         val linkDisabledReasons = getLinkDisabledReasons(
@@ -85,6 +88,7 @@ internal class DefaultCreateLinkState @Inject constructor(
             configuration = configuration,
             elementsSession = elementsSession,
             initializationMode = initializationMode,
+            customerMetadata = customerMetadata,
             clientAttributionMetadata = clientAttributionMetadata,
         )
         val accountStatus = accountStatusProvider(linkConfiguration)
@@ -199,6 +203,7 @@ internal class DefaultCreateLinkState @Inject constructor(
         configuration: CommonConfiguration,
         elementsSession: ElementsSession,
         initializationMode: PaymentElementLoader.InitializationMode,
+        customerMetadata: CustomerMetadata?,
         clientAttributionMetadata: ClientAttributionMetadata,
     ): LinkConfiguration {
         val cardBrandFilter = getCardBrandFilter(
@@ -208,7 +213,7 @@ internal class DefaultCreateLinkState @Inject constructor(
         val shippingDetails = configuration.shippingDetails
         val customerPhone = getCustomerPhone(shippingDetails, configuration)
 
-        val resolvedEmail = resolveEmail(initializationMode, configuration, elementsSession)
+        val resolvedEmail = retrieveCustomerEmail(configuration, customerMetadata)
         val customerInfo = LinkConfiguration.CustomerInfo(
             name = configuration.defaultBillingDetails?.name,
             email = resolvedEmail,

@@ -11,6 +11,7 @@ import com.stripe.android.checkout.Address
 import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkout.CheckoutSession
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -36,6 +37,9 @@ internal class CheckoutPlaygroundViewModel(
         _errorMessage.value = null
     }
 
+    private val _lastAddressDetails = MutableStateFlow<AddressDetails?>(null)
+    val lastAddressDetails: StateFlow<AddressDetails?> = _lastAddressDetails.asStateFlow()
+
     fun applyPromotionCode(promotionCode: String) = performWhileLoading {
         checkout.applyPromotionCode(promotionCode)
     }
@@ -52,9 +56,30 @@ internal class CheckoutPlaygroundViewModel(
         checkout.selectShippingRate(shippingRateId)
     }
 
+    fun updateShippingAddress(addressDetails: AddressDetails) = performWhileLoading {
+        val country = addressDetails.address?.country
+            ?: return@performWhileLoading Result.failure(IllegalStateException("Country is required"))
+        val address = Address()
+            .city(addressDetails.address?.city)
+            .country(country)
+            .line1(addressDetails.address?.line1)
+            .line2(addressDetails.address?.line2)
+            .postalCode(addressDetails.address?.postalCode)
+            .state(addressDetails.address?.state)
+        checkout.updateShippingAddress(address).also {
+            _lastAddressDetails.value = addressDetails
+        }
+    }
+
     fun updatePostalCode(postalCode: String) = performWhileLoading {
         val address = Address().postalCode(postalCode).country("US")
         checkout.updateShippingAddress(address)
+    }
+
+    fun clearShippingAddress() = performWhileLoading {
+        checkout.updateShippingAddress(Address().country("US")).also {
+            _lastAddressDetails.value = null
+        }
     }
 
     fun refresh() = performWhileLoading {

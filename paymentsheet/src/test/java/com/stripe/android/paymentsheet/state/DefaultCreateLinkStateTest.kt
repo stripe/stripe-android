@@ -134,9 +134,8 @@ internal class DefaultCreateLinkStateTest {
         createLinkState(
             elementsSession = elementsSession,
             configuration = configuration,
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value
-            ),
+            initializationMode = PAYMENT_INTENT_INIT_MODE,
+            customerMetadata = null,
             clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
         )
 
@@ -211,6 +210,11 @@ internal class DefaultCreateLinkStateTest {
     }
 
     private companion object {
+        val PAYMENT_INTENT_INIT_MODE = PaymentElementLoader.InitializationMode.PaymentIntent(
+            clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value
+        )
+
+
         val DEFAULT_CLIENT_ATTRIBUTION_METADATA = ClientAttributionMetadata(
             elementsSessionConfigId = FakeElementsSessionRepository.DEFAULT_ELEMENTS_SESSION_CONFIG_ID,
             paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,

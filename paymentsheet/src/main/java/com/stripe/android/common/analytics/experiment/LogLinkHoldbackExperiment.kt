@@ -9,7 +9,6 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.repositories.LinkRepository
-import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.Customer.Components.MobilePaymentElement
 import com.stripe.android.model.ElementsSession.Customer.Components.MobilePaymentElement.Enabled
@@ -180,23 +179,9 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
 
     private suspend fun PaymentElementLoader.State.getEmail(): String? {
         paymentMethodMetadata.linkState?.configuration?.customerInfo?.email?.let { return it }
-        return when (val metadata = paymentMethodMetadata.customerMetadata) {
-            is CustomerMetadata.LegacyEphemeralKey -> retrieveCustomerEmail(
-                configuration = config,
-                customerId = metadata.id,
-                ephemeralKeySecret = metadata.ephemeralKeySecret,
-            )
-            is CustomerMetadata.CustomerSession -> retrieveCustomerEmail(
-                configuration = config,
-                customerId = metadata.id,
-                ephemeralKeySecret = metadata.ephemeralKeySecret,
-            )
-            is CustomerMetadata.CheckoutSession -> error("CheckoutSession is not yet supported")
-            null -> retrieveCustomerEmail(
-                configuration = config,
-                customerId = null,
-                ephemeralKeySecret = null,
-            )
-        }
+        return retrieveCustomerEmail(
+            configuration = config,
+            customerMetadata = paymentMethodMetadata.customerMetadata,
+        )
     }
 }

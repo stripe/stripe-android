@@ -312,11 +312,18 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             params = configuration.allowedCardFundingTypes(elementsSession.enableCardFundFiltering)
         )
 
+        val customerMetadata = getCustomerMetadata(
+            initializationMode = initializationMode,
+            configuration = configuration,
+            elementsSession = elementsSession,
+        )
+
         val linkState = async {
             createLinkState(
                 elementsSession = elementsSession,
                 configuration = configuration,
                 initializationMode = initializationMode,
+                customerMetadata = customerMetadata,
                 clientAttributionMetadata = clientAttributionMetadata,
             )
         }
@@ -335,6 +342,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 isGooglePayReady = isGooglePayReady,
                 isGooglePaySupported = isGooglePaySupported,
                 initializationMode = initializationMode,
+                customerMetadata = customerMetadata,
                 clientAttributionMetadata = clientAttributionMetadata,
             )
         }
@@ -344,6 +352,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 initializationMode = initializationMode,
                 configuration = configuration,
                 elementsSession = elementsSession,
+                customerMetadata = customerMetadata,
                 metadata = paymentMethodMetadata.await(),
                 savedSelection = savedSelection,
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
@@ -442,6 +451,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         isGooglePayReady: Boolean,
         isGooglePaySupported: Boolean,
         initializationMode: PaymentElementLoader.InitializationMode,
+        customerMetadata: CustomerMetadata?,
         clientAttributionMetadata: ClientAttributionMetadata,
     ): PaymentMethodMetadata {
         val sharedDataSpecsResult = lpmRepository.getSharedDataSpecs(
@@ -464,11 +474,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
         logCustomPaymentMethodErrors(elementsSession.customPaymentMethods)
 
-        val customerMetadata = getCustomerMetadata(
-            initializationMode = initializationMode,
-            configuration = configuration,
-            elementsSession = elementsSession,
-        )
         val integrationMetadata = initializationMode.integrationMetadata(
             paymentElementCallbacks = PaymentElementCallbackReferences[paymentElementCallbackIdentifier]
         )
@@ -576,22 +581,23 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         initializationMode: PaymentElementLoader.InitializationMode,
         configuration: CommonConfiguration,
         elementsSession: ElementsSession,
+        customerMetadata: CustomerMetadata?,
         metadata: PaymentMethodMetadata,
         savedSelection: Deferred<SavedSelection>,
         cardBrandFilter: PaymentSheetCardBrandFilter,
         cardFundingFilter: CardFundingFilter,
     ): CustomerState? {
-        val customerState = when {
-            initializationMode is PaymentElementLoader.InitializationMode.CheckoutSession -> {
-                val customer = initializationMode.checkoutSessionResponse.customer
-                customer?.let {
+        val customerState = when (customerMetadata) {
+            is CustomerMetadata.CheckoutSession -> {
+                val checkoutInit = initializationMode as PaymentElementLoader.InitializationMode.CheckoutSession
+                checkoutInit.checkoutSessionResponse.customer?.let {
                     CustomerState.createForCheckoutSession(
                         customer = it,
                         supportedSavedPaymentMethodTypes = metadata.supportedSavedPaymentMethodTypes(),
                     )
                 }
             }
-            configuration.customer?.accessType is PaymentSheet.CustomerAccessType.CustomerSession -> {
+            is CustomerMetadata.CustomerSession -> {
                 elementsSession.customer?.let { customer ->
                     CustomerState.createForCustomerSession(
                         customer = customer,
@@ -599,15 +605,16 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     )
                 }
             }
-            configuration.customer?.accessType is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey -> {
+            is CustomerMetadata.LegacyEphemeralKey -> {
+                val customerConfig = configuration.customer ?: return null
                 CustomerState.createForLegacyEphemeralKey(
                     paymentMethods = retrieveCustomerPaymentMethods(
                         metadata = metadata,
-                        customerConfig = configuration.customer,
+                        customerConfig = customerConfig,
                     )
                 )
             }
-            else -> null
+            null -> null
         }
 
         return customerState?.let { state ->
