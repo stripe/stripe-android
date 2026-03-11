@@ -4392,6 +4392,13 @@ internal class DefaultPaymentElementLoaderTest {
         ).apply {
             runTest {
                 block()
+                // These read operations are side effects of loading (fetching payment methods
+                // for legacy customers, fetching customer email for Link). Tests that care about
+                // these interactions consume them explicitly via awaitItem(). We ignore any
+                // remaining events so ensureAllEventsConsumed() only checks mutation operations
+                // (detach, update, setDefault) which should always be explicitly verified.
+                customerRepository.getPaymentMethodsRequests.cancelAndIgnoreRemainingEvents()
+                customerRepository.retrieveCustomerRequests.cancelAndIgnoreRemainingEvents()
             }
             eventReporter.validate()
             customerRepository.ensureAllEventsConsumed()
