@@ -30,6 +30,12 @@ internal data class CheckoutSessionResponse(
      */
     val currency: String,
     /**
+     * The customer's email address from the checkout session.
+     * Always available at the top level as `customer_email`, regardless of whether
+     * a customer object exists (guest checkout) or not.
+     */
+    val customerEmail: String? = null,
+    /**
      * The embedded ElementsSession containing payment method preferences, Link settings,
      * customer data, and other configuration needed by PaymentSheet.
      * Only populated in responses from the init API.

@@ -273,6 +273,7 @@ internal object CheckoutSessionFixtures {
             "total_summary": {
                 "due": 1000
             },
+            "customer_email": "customer@example.com",
             "customer": {
                 "id": "cus_test_customer",
                 "email": "test@example.com",
@@ -377,6 +378,23 @@ internal object CheckoutSessionFixtures {
             "total_summary": {
                 "due": 1000
             },
+            "elements_session": $MINIMAL_ELEMENTS_SESSION_JSON
+        }
+        """.trimIndent()
+    )
+
+    /**
+     * Guest checkout: no customer object but customer_email is present at top level.
+     */
+    val CHECKOUT_SESSION_GUEST_WITH_EMAIL_JSON = JSONObject(
+        """
+        {
+            "session_id": "cs_test_guest123",
+            "currency": "usd",
+            "total_summary": {
+                "due": 1000
+            },
+            "customer_email": "guest@example.com",
             "elements_session": $MINIMAL_ELEMENTS_SESSION_JSON
         }
         """.trimIndent()

@@ -30,6 +30,7 @@ internal class CheckoutSessionResponseJsonParser(
         val sessionId = json.optString(FIELD_SESSION_ID).takeIf { it.isNotEmpty() } ?: return null
         val amount = extractDueAmount(json) ?: return null
         val currency = json.optString(FIELD_CURRENCY).takeIf { it.isNotEmpty() } ?: return null
+        val customerEmail = json.optString(FIELD_CUSTOMER_EMAIL).takeIf { it.isNotEmpty() }
         val paymentIntent = json.optJSONObject(FIELD_PAYMENT_INTENT)?.let {
             PaymentIntentJsonParser().parse(it)
         }
@@ -50,6 +51,7 @@ internal class CheckoutSessionResponseJsonParser(
             id = sessionId,
             amount = amount,
             currency = currency,
+            customerEmail = customerEmail,
             elementsSession = elementsSession,
             paymentIntent = paymentIntent,
             customer = customer,
@@ -376,6 +378,7 @@ internal class CheckoutSessionResponseJsonParser(
     private companion object {
         private const val FIELD_SESSION_ID = "session_id"
         private const val FIELD_CURRENCY = "currency"
+        private const val FIELD_CUSTOMER_EMAIL = "customer_email"
         private const val FIELD_ELEMENTS_SESSION = "elements_session"
         private const val FIELD_TOTAL_SUMMARY = "total_summary"
         private const val FIELD_DUE = "due"
