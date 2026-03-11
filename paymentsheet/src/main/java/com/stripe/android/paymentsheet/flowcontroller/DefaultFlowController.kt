@@ -629,6 +629,7 @@ internal class DefaultFlowController @Inject internal constructor(
                         intentId = result.intent.id,
                     )
                 }
+                configurationHandler.clearPreviousConfigurationRequest()
 
                 onPaymentResult(
                     paymentResult = PaymentResult.Completed,
