@@ -381,10 +381,7 @@ internal class DefaultCustomerStateHolderTest {
     ) {
         val customerMetadata: StateFlow<CustomerMetadata?> = stateFlowOf(
             DEFAULT_CUSTOMER_METADATA.copy(
-                removePaymentMethod = paymentMethodRemovePermission,
-                saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
                 canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
-                canUpdateFullPaymentMethodDetails = false,
             )
         )
 

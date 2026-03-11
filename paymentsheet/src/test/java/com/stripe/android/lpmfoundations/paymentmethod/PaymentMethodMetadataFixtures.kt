@@ -13,10 +13,7 @@ internal object PaymentMethodMetadataFixtures {
         id = "cus_123",
         ephemeralKeySecret = "ek_123",
         isPaymentMethodSetAsDefaultEnabled = false,
-        removePaymentMethod = PaymentMethodRemovePermission.Full,
-        saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
         canRemoveLastPaymentMethod = true,
-        canUpdateFullPaymentMethodDetails = false,
     )
 
     internal val DEFAULT_CUSTOMER_INTEGRATION_METADATA = IntegrationMetadata.CustomerSheet(
@@ -37,7 +34,6 @@ internal object PaymentMethodMetadataFixtures {
         removePaymentMethod = PaymentMethodRemovePermission.Full,
         saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
         canRemoveLastPaymentMethod = true,
-        canUpdateFullPaymentMethodDetails = false,
     )
 
     internal fun getDefaultCustomerMetadata(
@@ -51,10 +47,7 @@ internal object PaymentMethodMetadataFixtures {
         return if (hasCustomerConfiguration) {
             DEFAULT_CUSTOMER_METADATA.copy(
                 isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
-                removePaymentMethod = removePaymentMethod,
-                saveConsent = saveConsent,
                 canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
-                canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
             )
         } else {
             null

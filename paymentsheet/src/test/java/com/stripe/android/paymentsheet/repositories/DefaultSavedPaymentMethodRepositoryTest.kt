@@ -277,17 +277,13 @@ class DefaultSavedPaymentMethodRepositoryTest {
             removePaymentMethod = PaymentMethodRemovePermission.Full,
             saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
             canRemoveLastPaymentMethod = true,
-            canUpdateFullPaymentMethodDetails = false,
         )
 
         private val LEGACY_METADATA = CustomerMetadata.LegacyEphemeralKey(
             id = "cus_789",
             ephemeralKeySecret = "ek_789",
             isPaymentMethodSetAsDefaultEnabled = false,
-            removePaymentMethod = PaymentMethodRemovePermission.Full,
-            saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
             canRemoveLastPaymentMethod = true,
-            canUpdateFullPaymentMethodDetails = false,
         )
     }
 }
