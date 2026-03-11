@@ -357,6 +357,14 @@ class PaymentSheetConfigurationKtxTest {
                 id = "cs_test_123",
                 amount = 5099,
                 currency = "usd",
+                customerEmail = null,
+                elementsSession = null,
+                paymentIntent = null,
+                customer = null,
+                savedPaymentMethodsOfferSave = null,
+                totalSummary = null,
+                lineItems = emptyList(),
+                shippingOptions = emptyList(),
             ),
         )
 
@@ -384,6 +392,14 @@ class PaymentSheetConfigurationKtxTest {
                 id = "cs_test_123",
                 amount = 5099,
                 currency = "usd",
+                customerEmail = null,
+                elementsSession = null,
+                paymentIntent = null,
+                customer = null,
+                savedPaymentMethodsOfferSave = null,
+                totalSummary = null,
+                lineItems = emptyList(),
+                shippingOptions = emptyList(),
             ),
         )
 

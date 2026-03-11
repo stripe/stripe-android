@@ -257,6 +257,14 @@ class DefaultSavedPaymentMethodRepositoryTest {
             id = "cs_123",
             amount = 1000,
             currency = "usd",
+            customerEmail = null,
+            elementsSession = null,
+            paymentIntent = null,
+            customer = null,
+            savedPaymentMethodsOfferSave = null,
+            totalSummary = null,
+            lineItems = emptyList(),
+            shippingOptions = emptyList(),
         )
 
         private val CHECKOUT_SESSION_METADATA = CustomerMetadata.CheckoutSession(

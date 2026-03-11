@@ -4636,6 +4636,7 @@ internal class DefaultPaymentElementLoaderTest {
             id = "cs_test_123",
             amount = 5099,
             currency = "usd",
+            customerEmail = null,
             elementsSession = ElementsSession(
                 linkSettings = null,
                 paymentMethodSpecs = null,
@@ -4657,11 +4658,16 @@ internal class DefaultPaymentElementLoaderTest {
                 accountId = "acct_123",
                 merchantId = "acct_123",
             ),
+            paymentIntent = null,
             customer = CheckoutSessionResponse.Customer(
                 id = "cus_test_123",
                 paymentMethods = PaymentMethodFactory.cards(2),
                 canDetachPaymentMethod = canDetachPaymentMethod,
             ),
+            savedPaymentMethodsOfferSave = null,
+            totalSummary = null,
+            lineItems = emptyList(),
+            shippingOptions = emptyList(),
         )
     }
 
