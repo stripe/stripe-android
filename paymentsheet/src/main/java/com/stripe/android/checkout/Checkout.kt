@@ -49,6 +49,7 @@ class Checkout private constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class State internal constructor(
         internal val checkoutSessionResponse: CheckoutSessionResponse,
+        internal val shippingName: String? = null,
     ) : Parcelable
 
     private val mutex = Mutex()
@@ -80,7 +81,10 @@ class Checkout private constructor(
 
     suspend fun updateShippingAddress(
         address: Address,
-    ): Result<CheckoutSession> = withSessionId { sessionId ->
+        name: String? = null,
+    ): Result<CheckoutSession> = withSessionId(
+        setState = { State(it, shippingName = name ?: state.shippingName) },
+    ) { sessionId ->
         component.checkoutSessionRepository.updateShippingAddress(sessionId, address.build())
     }
 
@@ -89,17 +93,20 @@ class Checkout private constructor(
     }
 
     private suspend fun withSessionId(
-        block: suspend (sessionId: String) -> Result<CheckoutSessionResponse>
+        setState: (CheckoutSessionResponse) -> State = { State(it, shippingName = state.shippingName) },
+        block: suspend (sessionId: String) -> Result<CheckoutSessionResponse>,
     ): Result<CheckoutSession> {
         // Run network requests with a mutex to ensure events are processed in order.
         return mutex.withLock {
-            block(state.checkoutSessionResponse.id).updateState()
+            block(state.checkoutSessionResponse.id).updateState(setState)
         }
     }
 
-    private fun Result<CheckoutSessionResponse>.updateState(): Result<CheckoutSession> {
+    private fun Result<CheckoutSessionResponse>.updateState(
+        setState: (CheckoutSessionResponse) -> State,
+    ): Result<CheckoutSession> {
         return map { response ->
-            state = State(response)
+            state = setState(response)
             val checkoutSession = response.asCheckoutSession()
             _checkoutSession.value = checkoutSession
             checkoutSession
