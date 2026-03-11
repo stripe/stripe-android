@@ -215,6 +215,40 @@ class CheckoutSessionConfirmationInterceptorTest {
     }
 
     @Test
+    fun `intercept with both intents prefers paymentIntent`() = runScenario(
+        confirmCheckoutSessionResult = Result.success(
+            createCheckoutSessionResponse(
+                paymentIntent = PaymentIntentFactory.create(status = StripeIntent.Status.Succeeded),
+                setupIntent = SetupIntentFactory.create(status = StripeIntent.Status.Succeeded),
+            )
+        ),
+    ) {
+        val result = interceptNewPm()
+
+        assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>>()
+
+        val completeAction = result as ConfirmationDefinition.Action.Complete
+        assertThat(completeAction.intent).isEqualTo(
+            PaymentIntentFactory.create(status = StripeIntent.Status.Succeeded)
+        )
+    }
+
+    @Test
+    fun `intercept passes null expectedAmount for setup mode`() = runScenario(
+        expectedAmount = null,
+        confirmCheckoutSessionResult = Result.success(
+            createCheckoutSessionResponse(
+                setupIntent = SetupIntentFactory.create(status = StripeIntent.Status.Succeeded)
+            )
+        ),
+    ) {
+        interceptNewPm()
+
+        val params = confirmCheckoutSessionCalls.awaitItem().toParamMap()
+        assertThat(params).doesNotContainKey("expected_amount")
+    }
+
+    @Test
     fun `intercept with new payment method passes shouldSave true when save is enabled and checkbox checked`() =
         runScenario(
             customerMetadata = SAVE_ENABLED_CUSTOMER_METADATA,
@@ -269,6 +303,7 @@ class CheckoutSessionConfirmationInterceptorTest {
                 paymentIntent = PaymentIntentFactory.create(status = StripeIntent.Status.Succeeded),
             )
         ),
+        expectedAmount: Long? = 1000L,
         customerMetadata: CustomerMetadata? = null,
         block: suspend Scenario.() -> Unit,
     ) {
@@ -285,7 +320,7 @@ class CheckoutSessionConfirmationInterceptorTest {
 
         val interceptor = CheckoutSessionConfirmationInterceptor(
             checkoutSessionId = "cs_test_123",
-            expectedAmount = 1000L,
+            expectedAmount = expectedAmount,
             customerMetadata = customerMetadata,
             clientAttributionMetadata = ClientAttributionMetadata(
                 elementsSessionConfigId = "test_session_id",

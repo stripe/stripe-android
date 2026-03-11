@@ -528,6 +528,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 saveConsent = initializationMode.checkoutSessionResponse.savedPaymentMethodsOfferSave
                     ?.toSaveConsentBehavior()
                     ?: PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
+                // Checkout sessions don't yet support removing the last payment method or
+                // updating full payment method details (e.g. billing address on card).
                 canRemoveLastPaymentMethod = false,
                 canUpdateFullPaymentMethodDetails = false,
             )

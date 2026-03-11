@@ -715,6 +715,25 @@ class CheckoutSessionResponseJsonParserTest {
     }
 
     @Test
+    fun `parse setup mode with non-null amount still succeeds`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "currency": "usd",
+                "mode": "setup",
+                "total_summary": { "due": 0, "subtotal": 0, "total": 0 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.mode).isEqualTo(CheckoutSessionResponse.Mode.SETUP)
+        assertThat(result?.amount).isEqualTo(0L)
+    }
+
+    @Test
     fun `parse returns null for unknown mode without amount`() {
         val json = JSONObject(
             """

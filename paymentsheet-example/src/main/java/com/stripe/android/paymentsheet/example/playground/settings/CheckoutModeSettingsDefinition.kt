@@ -53,7 +53,7 @@ internal enum class CheckoutMode(override val value: String) : ValueEnum {
             playgroundState: PlaygroundState.Payment
         ): PaymentSheet.IntentConfiguration.Mode {
             return PaymentSheet.IntentConfiguration.Mode.Payment(
-                amount = requireNotNull(playgroundState.amount),
+                amount = requireNotNull(playgroundState.amount) { "Payment mode requires a non-null amount" },
                 currency = playgroundState.currencyCode.value,
                 paymentMethodOptions = playgroundState.paymentMethodOptionsSetupFutureUsage
             )
@@ -64,7 +64,7 @@ internal enum class CheckoutMode(override val value: String) : ValueEnum {
             playgroundState: PlaygroundState.Payment
         ): PaymentSheet.IntentConfiguration.Mode {
             return PaymentSheet.IntentConfiguration.Mode.Payment(
-                amount = requireNotNull(playgroundState.amount),
+                amount = requireNotNull(playgroundState.amount) { "Payment mode requires a non-null amount" },
                 currency = playgroundState.currencyCode.value,
                 setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
                 paymentMethodOptions = playgroundState.paymentMethodOptionsSetupFutureUsage
