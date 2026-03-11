@@ -613,6 +613,25 @@ class CheckoutSessionResponseJsonParserTest {
     }
 
     @Test
+    fun `parse customer_email from top level when customer is null (guest checkout)`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_GUEST_WITH_EMAIL_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.customerEmail).isEqualTo("guest@example.com")
+        assertThat(result?.customer).isNull()
+    }
+
+    @Test
+    fun `customerEmail is null when customer_email is not present in JSON`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITHOUT_CUSTOMER_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.customerEmail).isNull()
+    }
+
+    @Test
     fun `parse returns empty shipping options when not present`() {
         val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
             .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_RESPONSE_JSON)
