@@ -88,13 +88,8 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.mockito.ArgumentCaptor
-import org.mockito.kotlin.any
-import org.mockito.kotlin.capture
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.spy
-import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import kotlin.test.AfterTest
 import kotlin.test.Test
@@ -746,10 +741,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `load() with customer should fetch only supported payment method types`() =
         runScenario {
-            val customerRepository = mock<CustomerRepository> {
-                whenever(it.getPaymentMethods(any<String>(), any(), any(), any()))
-                    .thenReturn(Result.success(emptyList()))
-            }
+            val customerRepository = FakeCustomerRepository()
 
             val paymentMethodTypes = listOf(
                 "card", // valid and supported
@@ -774,14 +766,8 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
             )
 
-            verify(customerRepository).getPaymentMethods(
-                any<String>(),
-                any(),
-                capture(paymentMethodTypeCaptor),
-                any(),
-            )
-            assertThat(paymentMethodTypeCaptor.allValues.flatten())
-                .containsExactly(PaymentMethod.Type.Card)
+            val request = customerRepository.getPaymentMethodsRequests.awaitItem()
+            assertThat(request.types).containsExactly(PaymentMethod.Type.Card)
 
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
@@ -790,10 +776,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `when allowsDelayedPaymentMethods is false then delayed payment methods are filtered out`() =
         runScenario {
-            val customerRepository = mock<CustomerRepository> {
-                whenever(it.getPaymentMethods(any<String>(), any(), any(), any()))
-                    .thenReturn(Result.success(emptyList()))
-            }
+            val customerRepository = FakeCustomerRepository()
 
             val loader = createPaymentElementLoader(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -816,14 +799,8 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
             )
 
-            verify(customerRepository).getPaymentMethods(
-                any<String>(),
-                any(),
-                capture(paymentMethodTypeCaptor),
-                any(),
-            )
-            assertThat(paymentMethodTypeCaptor.value)
-                .containsExactly(PaymentMethod.Type.Card)
+            val request = customerRepository.getPaymentMethodsRequests.awaitItem()
+            assertThat(request.types).containsExactly(PaymentMethod.Type.Card)
 
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
@@ -3227,14 +3204,12 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `When using 'CustomerSession' & no default billing details, customer email for Link config is fetched using 'elements_session' ephemeral key`() =
         runScenario {
-            val customerRepository = spy(
-                FakeCustomerRepository(
-                    onRetrieveCustomer = {
-                        mock {
-                            on { email } doReturn "email@stripe.com"
-                        }
+            val customerRepository = FakeCustomerRepository(
+                onRetrieveCustomer = {
+                    mock {
+                        on { email } doReturn "email@stripe.com"
                     }
-                )
+                }
             )
 
             val loader = createPaymentElementLoader(
@@ -3270,10 +3245,9 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
             )
 
-            verify(customerRepository).retrieveCustomer(
-                customerId = "cus_1",
-                ephemeralKeySecret = "ek_123",
-            )
+            val request = customerRepository.retrieveCustomerRequests.awaitItem()
+            assertThat(request.customerId).isEqualTo("cus_1")
+            assertThat(request.ephemeralKeySecret).isEqualTo("ek_123")
 
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
@@ -4412,15 +4386,10 @@ internal class DefaultPaymentElementLoaderTest {
         val eventReporter = FakeLoadingEventReporter()
         val prefsRepository = FakePrefsRepository()
 
-        @Suppress("UNCHECKED_CAST")
-        val paymentMethodTypeCaptor = ArgumentCaptor.forClass(List::class.java)
-            as ArgumentCaptor<List<PaymentMethod.Type>>
-
         Scenario(
             testDispatcher = testDispatcher,
             eventReporter = eventReporter,
             prefsRepository = prefsRepository,
-            paymentMethodTypeCaptor = paymentMethodTypeCaptor,
         ).apply {
             runTest {
                 block()
@@ -4438,7 +4407,6 @@ internal class DefaultPaymentElementLoaderTest {
         val testDispatcher: TestDispatcher,
         val eventReporter: FakeLoadingEventReporter,
         val prefsRepository: FakePrefsRepository,
-        val paymentMethodTypeCaptor: ArgumentCaptor<List<PaymentMethod.Type>>,
     )
 
     private fun Scenario.createPaymentElementLoader(

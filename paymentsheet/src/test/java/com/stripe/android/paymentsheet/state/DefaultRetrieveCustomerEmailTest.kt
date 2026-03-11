@@ -103,7 +103,8 @@ internal class DefaultRetrieveCustomerEmailTest {
             retrieveCalls.add(RetrieveCall(customerId, ephemeralKeySecret))
         }
 
-        fun ensureAllEventsConsumed() {
+        override fun ensureAllEventsConsumed() {
+            super.ensureAllEventsConsumed()
             retrieveCalls.ensureAllEventsConsumed()
         }
     }
