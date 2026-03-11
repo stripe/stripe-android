@@ -319,38 +319,4 @@ internal class DefaultCreateLinkState @Inject constructor(
             DefaultCardBrandFilter
         }
     }
-
-    /**
-     * Resolves the customer email for Link.
-     *
-     * Priority: merchant-configured default email > customer API email / checkout customer email.
-     */
-    private suspend fun resolveEmail(
-        initializationMode: PaymentElementLoader.InitializationMode,
-        configuration: CommonConfiguration,
-        elementsSession: ElementsSession,
-    ): String? = when (initializationMode) {
-        is PaymentElementLoader.InitializationMode.CheckoutSession -> {
-            configuration.defaultBillingDetails?.email
-                ?: initializationMode.checkoutSessionResponse.customer?.email
-        }
-        else -> when (val accessType = configuration.customer?.accessType) {
-            is PaymentSheet.CustomerAccessType.CustomerSession -> {
-                val session = elementsSession.customer?.session
-                retrieveCustomerEmail(
-                    configuration = configuration,
-                    customerId = session?.customerId,
-                    ephemeralKeySecret = session?.apiKey,
-                )
-            }
-            is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey -> {
-                retrieveCustomerEmail(
-                    configuration = configuration,
-                    customerId = configuration.customer.id,
-                    ephemeralKeySecret = accessType.ephemeralKeySecret,
-                )
-            }
-            else -> configuration.defaultBillingDetails?.email
-        }
-    }
 }

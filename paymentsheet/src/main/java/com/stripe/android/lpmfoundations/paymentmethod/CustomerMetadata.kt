@@ -46,6 +46,7 @@ internal sealed class CustomerMetadata : Parcelable {
     data class CheckoutSession(
         val sessionId: String,
         val customerId: String,
+        val customerEmail: String? = null,
         override val isPaymentMethodSetAsDefaultEnabled: Boolean,
         override val removePaymentMethod: PaymentMethodRemovePermission,
         override val saveConsent: PaymentMethodSaveConsentBehavior,

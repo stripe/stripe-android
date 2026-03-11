@@ -7,6 +7,9 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.common.model.PaymentMethodRemovePermission
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
 import com.stripe.android.model.ClientAttributionMetadata
@@ -59,6 +62,7 @@ internal class DefaultCreateLinkStateTest {
                 elementsSession = elementsSession,
                 customerEmail = "checkout@example.com",
             ),
+            customerMetadata = checkoutSessionMetadata(customerEmail = "checkout@example.com"),
             clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
         )
 
@@ -86,6 +90,7 @@ internal class DefaultCreateLinkStateTest {
                 elementsSession = elementsSession,
                 customerEmail = "checkout@example.com",
             ),
+            customerMetadata = checkoutSessionMetadata(customerEmail = "checkout@example.com"),
             clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
         )
 
@@ -100,9 +105,8 @@ internal class DefaultCreateLinkStateTest {
         val result = createLinkState(
             elementsSession = createElementsSession(),
             configuration = PaymentSheetFixtures.CONFIG_MINIMUM.asCommonConfiguration(),
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value
-            ),
+            initializationMode = PAYMENT_INTENT_INIT_MODE,
+            customerMetadata = null,
             clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
         )
 
@@ -151,6 +155,21 @@ internal class DefaultCreateLinkStateTest {
             linkStore = LinkStore(ApplicationProvider.getApplicationContext()),
             linkGateFactory = FakeLinkGate.Factory(FakeLinkGate()),
             cardFundingFilterFactory = cardFundingFilterFactory
+        )
+    }
+
+    private fun checkoutSessionMetadata(
+        customerEmail: String? = null,
+    ): CustomerMetadata.CheckoutSession {
+        return CustomerMetadata.CheckoutSession(
+            sessionId = "cs_test_123",
+            customerId = "cus_test_123",
+            customerEmail = customerEmail,
+            isPaymentMethodSetAsDefaultEnabled = false,
+            removePaymentMethod = PaymentMethodRemovePermission.None,
+            saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
+            canRemoveLastPaymentMethod = false,
+            canUpdateFullPaymentMethodDetails = false,
         )
     }
 
@@ -213,7 +232,6 @@ internal class DefaultCreateLinkStateTest {
         val PAYMENT_INTENT_INIT_MODE = PaymentElementLoader.InitializationMode.PaymentIntent(
             clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value
         )
-
 
         val DEFAULT_CLIENT_ATTRIBUTION_METADATA = ClientAttributionMetadata(
             elementsSessionConfigId = FakeElementsSessionRepository.DEFAULT_ELEMENTS_SESSION_CONFIG_ID,

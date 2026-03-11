@@ -46,11 +46,27 @@ internal class DefaultRetrieveCustomerEmailTest {
     }
 
     @Test
-    fun `checkout session returns default billing email without calling repository`() = runScenario(
+    fun `checkout session returns default billing email over customer email`() = runScenario(
         configuration = CONFIG_WITH_DEFAULT_EMAIL,
-        customerMetadata = CHECKOUT_SESSION_METADATA,
+        customerMetadata = CHECKOUT_SESSION_METADATA_WITH_EMAIL,
     ) {
         assertThat(result).isEqualTo("default@example.com")
+    }
+
+    @Test
+    fun `checkout session returns customer email when no default email`() = runScenario(
+        configuration = CONFIG_WITHOUT_EMAIL,
+        customerMetadata = CHECKOUT_SESSION_METADATA_WITH_EMAIL,
+    ) {
+        assertThat(result).isEqualTo("checkout@example.com")
+    }
+
+    @Test
+    fun `checkout session returns null when no email sources available`() = runScenario(
+        configuration = CONFIG_WITHOUT_EMAIL,
+        customerMetadata = CHECKOUT_SESSION_METADATA,
+    ) {
+        assertThat(result).isNull()
     }
 
     @Test
@@ -149,6 +165,10 @@ internal class DefaultRetrieveCustomerEmailTest {
             saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
             canRemoveLastPaymentMethod = false,
             canUpdateFullPaymentMethodDetails = false,
+        )
+
+        val CHECKOUT_SESSION_METADATA_WITH_EMAIL = CHECKOUT_SESSION_METADATA.copy(
+            customerEmail = "checkout@example.com",
         )
     }
 }
