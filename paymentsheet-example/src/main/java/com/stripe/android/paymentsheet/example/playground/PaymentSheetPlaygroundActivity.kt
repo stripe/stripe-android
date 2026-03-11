@@ -97,6 +97,8 @@ import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSe
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import com.stripe.android.uicore.R as StripeUiCoreR
@@ -626,8 +628,9 @@ internal class PaymentSheetPlaygroundActivity :
 
         LaunchedEffect(playgroundState) {
             if (isTwoStep) {
-                val configureResult = configure(playgroundState)
-                hasConfigured = configureResult is EmbeddedPaymentElement.ConfigureResult.Succeeded
+                configure(playgroundState).collect { configureResult ->
+                    hasConfigured = configureResult is EmbeddedPaymentElement.ConfigureResult.Succeeded
+                }
             }
         }
 
@@ -763,16 +766,18 @@ internal class PaymentSheetPlaygroundActivity :
 
     private suspend fun configure(
         playgroundState: PlaygroundState.Payment,
-    ): EmbeddedPaymentElement.ConfigureResult {
+    ): Flow<EmbeddedPaymentElement.ConfigureResult> {
         return if (playgroundState.initializationType == InitializationType.CheckoutSession) {
             embeddedPaymentElement.configure(
                 checkout = requireNotNull(viewModel.checkout),
                 configuration = playgroundState.embeddedConfiguration(),
             )
         } else {
-            embeddedPaymentElement.configure(
-                intentConfiguration = playgroundState.intentConfiguration(),
-                configuration = playgroundState.embeddedConfiguration(),
+            flowOf(
+                embeddedPaymentElement.configure(
+                    intentConfiguration = playgroundState.intentConfiguration(),
+                    configuration = playgroundState.embeddedConfiguration(),
+                )
             )
         }
     }

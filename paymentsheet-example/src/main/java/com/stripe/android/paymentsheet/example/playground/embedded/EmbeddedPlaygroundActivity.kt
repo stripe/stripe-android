@@ -64,6 +64,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.WalletButtons
 import com.stripe.android.paymentsheet.example.playground.settings.WalletButtonsSettingsDefinition
 import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSelector
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 
 @OptIn(
@@ -136,22 +137,26 @@ internal class EmbeddedPlaygroundActivity :
 
             fun configure() = coroutineScope.launch {
                 loadingState = LoadingState.Loading
-                val result = if (playgroundState.initializationType == InitializationType.CheckoutSession) {
+                val resultFlow = if (playgroundState.initializationType == InitializationType.CheckoutSession) {
                     embeddedPaymentElement.configure(
                         checkout = requireNotNull(checkout),
                         configuration = playgroundState.embeddedConfiguration(),
                     )
                 } else {
-                    embeddedPaymentElement.configure(
-                        intentConfiguration = playgroundState.intentConfiguration(),
-                        configuration = playgroundState.embeddedConfiguration(),
+                    flowOf(
+                        embeddedPaymentElement.configure(
+                            intentConfiguration = playgroundState.intentConfiguration(),
+                            configuration = playgroundState.embeddedConfiguration(),
+                        )
                     )
                 }
-                loadingState = when (result) {
-                    is EmbeddedPaymentElement.ConfigureResult.Failed -> {
-                        LoadingState.Failed(result.error.message ?: "Unknown error")
+                resultFlow.collect { result ->
+                    loadingState = when (result) {
+                        is EmbeddedPaymentElement.ConfigureResult.Failed -> {
+                            LoadingState.Failed(result.error.message ?: "Unknown error")
+                        }
+                        is EmbeddedPaymentElement.ConfigureResult.Succeeded -> LoadingState.Complete
                     }
-                    is EmbeddedPaymentElement.ConfigureResult.Succeeded -> LoadingState.Complete
                 }
             }
 

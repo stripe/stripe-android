@@ -45,7 +45,9 @@ import com.stripe.android.paymentsheet.utils.applicationIsTaskOwner
 import com.stripe.android.uicore.image.rememberDrawablePainter
 import com.stripe.android.uicore.utils.collectAsState
 import dev.drewhamilton.poko.Poko
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
@@ -99,11 +101,13 @@ class EmbeddedPaymentElement @Inject internal constructor(
     suspend fun configure(
         checkout: Checkout,
         configuration: Configuration,
-    ): ConfigureResult {
-        val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
-            checkoutSessionResponse = checkout.state.checkoutSessionResponse
-        )
-        return configurationCoordinator.configure(configuration, initializationMode)
+    ): Flow<ConfigureResult> {
+        return checkout.checkoutSession.map {
+            val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                checkoutSessionResponse = checkout.state.checkoutSessionResponse
+            )
+            configurationCoordinator.configure(configuration, initializationMode)
+        }
     }
 
     /**
