@@ -1199,7 +1199,8 @@ class PaymentSheet internal constructor(
             ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class,
             WalletButtonsPreview::class,
             ShopPayPreview::class,
-            CardFundingFilteringPrivatePreview::class
+            CardFundingFilteringPrivatePreview::class,
+            AddressAutocompletePreview::class
         )
         internal fun newBuilder(): Builder = Builder(merchantDisplayName)
             .customer(customer)
@@ -1216,13 +1217,17 @@ class PaymentSheet internal constructor(
             .externalPaymentMethods(externalPaymentMethods)
             .paymentMethodLayout(paymentMethodLayout)
             .cardBrandAcceptance(cardBrandAcceptance)
-            .allowedCardFundingTypes(CardFundingType.entries)
+            .allowedCardFundingTypes(allowedCardFundingTypes)
             .customPaymentMethods(customPaymentMethods)
             .link(link)
             .walletButtons(walletButtons)
+            .termsDisplay(termsDisplay)
+            .opensCardScannerAutomatically(opensCardScannerAutomatically)
             .apply {
                 primaryButtonLabel?.let { primaryButtonLabel(it) }
                 shopPayConfiguration?.let { shopPayConfiguration(it) }
+                googlePlacesApiKey?.let { googlePlacesApiKey(it) }
+                userOverrideCountry?.let { userOverrideCountry(it) }
             }
     }
 
