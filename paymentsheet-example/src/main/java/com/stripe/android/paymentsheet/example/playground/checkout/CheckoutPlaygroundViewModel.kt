@@ -2,8 +2,10 @@ package com.stripe.android.paymentsheet.example.playground.checkout
 
 import android.app.Application
 import android.util.Log
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -19,13 +21,9 @@ import kotlinx.coroutines.launch
 
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutPlaygroundViewModel(
-    application: Application,
-    checkoutState: Checkout.State,
-) : AndroidViewModel(application) {
-    val checkout: Checkout = Checkout.createWithState(
-        context = application,
-        state = checkoutState,
-    )
+    val checkout: Checkout,
+    private val savedStateHandle: SavedStateHandle,
+) : ViewModel() {
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -89,7 +87,9 @@ internal class CheckoutPlaygroundViewModel(
     private fun performWhileLoading(block: suspend () -> Result<CheckoutSession>) {
         viewModelScope.launch {
             _isLoading.value = true
-            block().onFailure { exception ->
+            block().onSuccess {
+                savedStateHandle[CHECKOUT_STATE_KEY] = checkout.state
+            }.onFailure { exception ->
                 Log.e("CheckoutPlaygroundViewModel", "Failed to perform request", exception)
                 _errorMessage.value = exception.message
             }
@@ -102,9 +102,15 @@ internal class CheckoutPlaygroundViewModel(
 
         fun factory(checkoutState: Checkout.State) = viewModelFactory {
             initializer {
+                val savedStateHandle = createSavedStateHandle()
+                val restoredState = savedStateHandle.get<Checkout.State>(CHECKOUT_STATE_KEY)
+                    ?: checkoutState
                 CheckoutPlaygroundViewModel(
-                    application = this[APPLICATION_KEY] as Application,
-                    checkoutState = checkoutState,
+                    checkout = Checkout.createWithState(
+                        context = this[APPLICATION_KEY] as Application,
+                        state = restoredState,
+                    ),
+                    savedStateHandle = savedStateHandle,
                 )
             }
         }
