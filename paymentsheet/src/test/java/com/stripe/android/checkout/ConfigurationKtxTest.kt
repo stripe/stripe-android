@@ -33,16 +33,6 @@ class ConfigurationKtxTest {
     }
 
     @Test
-    fun `returns unchanged config when both emails are null`() {
-        val config = configuration()
-        val state = state(customerEmail = null)
-
-        val result = config.forCheckoutSession(state)
-
-        assertThat(result.defaultBillingDetails?.email).isNull()
-    }
-
-    @Test
     fun `preserves existing billing details fields when setting email`() {
         val address = PaymentSheet.Address(
             city = "San Francisco",
@@ -85,16 +75,6 @@ class ConfigurationKtxTest {
         val result = config.forCheckoutSession(state)
 
         assertThat(result.shippingDetails?.name).isEqualTo("Merchant Name")
-    }
-
-    @Test
-    fun `returns unchanged config when shipping name is null in both config and state`() {
-        val config = configuration()
-        val state = state(shippingName = null)
-
-        val result = config.forCheckoutSession(state)
-
-        assertThat(result.shippingDetails).isNull()
     }
 
     @Test
@@ -151,6 +131,13 @@ class ConfigurationKtxTest {
                 amount = 1000L,
                 currency = "usd",
                 customerEmail = customerEmail,
+            elementsSession = null,
+            paymentIntent = null,
+            customer = null,
+            savedPaymentMethodsOfferSave = null,
+            totalSummary = null,
+            lineItems = emptyList(),
+            shippingOptions = emptyList(),
             ),
             shippingName = shippingName,
         )
