@@ -190,7 +190,9 @@ internal interface PaymentElementLoader {
             override fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata {
                 return IntegrationMetadata.CheckoutSession(
                     id = checkoutSessionResponse.id,
-                    expectedAmount = checkoutSessionResponse.amount,
+                    expectedAmount = checkoutSessionResponse.amount.takeIf {
+                        checkoutSessionResponse.mode == CheckoutSessionResponse.Mode.PAYMENT
+                    },
                 )
             }
         }
