@@ -28,9 +28,11 @@ internal sealed class CustomerMetadata : Parcelable {
     ) : CustomerMetadata() {
         // Un-scoped legacy ephemeral keys have full permissions to remove/save/modify.
         override val removePaymentMethod: PaymentMethodRemovePermission get() = PaymentMethodRemovePermission.Full
+
         // Legacy ephemeral keys don't have server-side save consent configuration, so we use
         // the legacy behavior which shows the save checkbox based on the setup intent usage.
         override val saveConsent: PaymentMethodSaveConsentBehavior get() = PaymentMethodSaveConsentBehavior.Legacy
+
         // Legacy ephemeral keys don't support updating full payment method details.
         override val canUpdateFullPaymentMethodDetails: Boolean get() = false
     }

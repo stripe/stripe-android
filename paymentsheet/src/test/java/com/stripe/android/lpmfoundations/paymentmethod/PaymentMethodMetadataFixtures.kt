@@ -42,15 +42,27 @@ internal object PaymentMethodMetadataFixtures {
         removePaymentMethod: PaymentMethodRemovePermission = PaymentMethodRemovePermission.Full,
         saveConsent: PaymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
         canRemoveLastPaymentMethod: Boolean = true,
-        canUpdateFullPaymentMethodDetails: Boolean = false,
     ): CustomerMetadata? {
-        return if (hasCustomerConfiguration) {
+        if (!hasCustomerConfiguration) return null
+
+        // Use CustomerSession when caller provides non-default saveConsent/removePaymentMethod,
+        // since LegacyEphemeralKey hardcodes these values.
+        val needsCustomerSession =
+            saveConsent != PaymentMethodSaveConsentBehavior.Legacy ||
+                removePaymentMethod != PaymentMethodRemovePermission.Full
+
+        return if (needsCustomerSession) {
+            CUSTOMER_SESSIONS_CUSTOMER_METADATA.copy(
+                isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
+                removePaymentMethod = removePaymentMethod,
+                saveConsent = saveConsent,
+                canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
+            )
+        } else {
             DEFAULT_CUSTOMER_METADATA.copy(
                 isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
                 canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
             )
-        } else {
-            null
         }
     }
 
@@ -60,7 +72,6 @@ internal object PaymentMethodMetadataFixtures {
         removePaymentMethod: PaymentMethodRemovePermission = PaymentMethodRemovePermission.Full,
         saveConsent: PaymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
         canRemoveLastPaymentMethod: Boolean = true,
-        canUpdateFullPaymentMethodDetails: Boolean = false,
     ): StateFlow<CustomerMetadata?> {
         return stateFlowOf(
             getDefaultCustomerMetadata(
@@ -69,7 +80,6 @@ internal object PaymentMethodMetadataFixtures {
                 removePaymentMethod = removePaymentMethod,
                 saveConsent = saveConsent,
                 canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
-                canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
             )
         )
     }

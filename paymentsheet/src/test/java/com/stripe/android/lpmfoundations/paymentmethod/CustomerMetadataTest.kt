@@ -229,24 +229,9 @@ internal class CustomerMetadataTest {
     }
 
     @Test
-    fun `'createForCustomerSheet' should have payment method remove permissions of 'Partial'`() {
-        val customerSheetSession = createCustomerSheetSession(PaymentMethodRemovePermission.Partial)
-
-        val result = CustomerMetadata.createForCustomerSheet(
-            configuration = createCustomerSheetConfiguration(),
-            customerSheetSession = customerSheetSession,
-            id = "cus_test",
-            ephemeralKeySecret = "ek_test",
-            customerSessionClientSecret = null,
-            isPaymentMethodSetAsDefaultEnabled = false,
-        )
-
-        assertThat(result.removePaymentMethod).isEqualTo(PaymentMethodRemovePermission.Partial)
-        assertThat(result.canRemovePaymentMethods).isTrue()
-    }
-
-    @Test
-    fun `'createForCustomerSheet' should have payment method remove permissions of 'None'`() {
+    fun `'createForCustomerSheet' with legacy ephemeral key always has 'Full' remove permissions`() {
+        // LegacyEphemeralKey hardcodes removePaymentMethod = Full regardless of the
+        // customerSheetSession permissions, since un-scoped keys always have full access.
         val customerSheetSession = createCustomerSheetSession(PaymentMethodRemovePermission.None)
 
         val result = CustomerMetadata.createForCustomerSheet(
@@ -258,8 +243,8 @@ internal class CustomerMetadataTest {
             isPaymentMethodSetAsDefaultEnabled = false,
         )
 
-        assertThat(result.removePaymentMethod).isEqualTo(PaymentMethodRemovePermission.None)
-        assertThat(result.canRemovePaymentMethods).isFalse()
+        assertThat(result.removePaymentMethod).isEqualTo(PaymentMethodRemovePermission.Full)
+        assertThat(result.canRemovePaymentMethods).isTrue()
     }
 
     private fun createEnabledMobilePaymentElement(
