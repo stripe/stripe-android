@@ -567,7 +567,8 @@ internal class PlaygroundSettings private constructor(
             PassiveCaptchaDefinition,
             AttestationOnIntentConfirmationDefinition,
             CustomStripeApiDefinition,
-            FeatureFlagSettingsDefinition(FeatureFlags.newCbcSelector)
+            FeatureFlagSettingsDefinition(FeatureFlags.newCbcSelector),
+            CaptureMethodSettingsDefinition,
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(
