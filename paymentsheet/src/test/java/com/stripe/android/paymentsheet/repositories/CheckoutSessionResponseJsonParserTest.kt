@@ -639,4 +639,93 @@ class CheckoutSessionResponseJsonParserTest {
         assertThat(result).isNotNull()
         assertThat(result!!.shippingOptions).isEmpty()
     }
+
+    @Test
+    fun `parse payment mode session has mode PAYMENT`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_RESPONSE_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.mode).isEqualTo(CheckoutSessionResponse.Mode.PAYMENT)
+    }
+
+    @Test
+    fun `parse setup mode init response`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_SETUP_MODE_RESPONSE_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.id).isEqualTo("cs_test_setup_abc123")
+        assertThat(result?.mode).isEqualTo(CheckoutSessionResponse.Mode.SETUP)
+        assertThat(result?.amount).isNull()
+        assertThat(result?.currency).isEqualTo("usd")
+        assertThat(result?.paymentIntent).isNull()
+        assertThat(result?.setupIntent).isNull()
+        assertThat(result?.elementsSession).isNotNull()
+    }
+
+    @Test
+    fun `parse setup mode confirm response with succeeded setup intent`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_SETUP_CONFIRM_SUCCEEDED_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.id).isEqualTo("cs_test_setup_abc123")
+        assertThat(result?.mode).isEqualTo(CheckoutSessionResponse.Mode.SETUP)
+        assertThat(result?.amount).isNull()
+
+        assertThat(result?.paymentIntent).isNull()
+        val setupIntent = result?.setupIntent
+        assertThat(setupIntent).isNotNull()
+        assertThat(setupIntent?.id).isEqualTo("seti_1QWK2VIyGgrkZxL71xfPBWG5")
+        assertThat(setupIntent?.status).isEqualTo(StripeIntent.Status.Succeeded)
+        assertThat(setupIntent?.isConfirmed).isTrue()
+    }
+
+    @Test
+    fun `parse setup mode confirm response with requires_action setup intent`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_SETUP_CONFIRM_REQUIRES_ACTION_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.mode).isEqualTo(CheckoutSessionResponse.Mode.SETUP)
+
+        val setupIntent = result?.setupIntent
+        assertThat(setupIntent).isNotNull()
+        assertThat(setupIntent?.id).isEqualTo("seti_1QWK2VIyGgrkZxL71xfPBWG5")
+        assertThat(setupIntent?.status).isEqualTo(StripeIntent.Status.RequiresAction)
+        assertThat(setupIntent?.requiresAction()).isTrue()
+        assertThat(setupIntent?.nextActionType).isEqualTo(StripeIntent.NextActionType.RedirectToUrl)
+    }
+
+    @Test
+    fun `parse returns null for non-setup mode without amount`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "currency": "usd",
+                "mode": "payment"
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun `parse returns null for unknown mode without amount`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "currency": "usd"
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+
+        assertThat(result).isNull()
+    }
 }

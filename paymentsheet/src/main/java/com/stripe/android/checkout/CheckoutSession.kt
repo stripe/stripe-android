@@ -11,10 +11,19 @@ import dev.drewhamilton.poko.Poko
 class CheckoutSession internal constructor(
     val id: String,
     val currency: String,
+    val mode: Mode,
     val totalSummary: TotalSummary?,
     val lineItems: List<LineItem>,
     val shippingOptions: List<ShippingRate>,
 ) {
+
+    @CheckoutSessionPreview
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    enum class Mode {
+        PAYMENT,
+        SETUP,
+        UNKNOWN,
+    }
 
     @Poko
     @CheckoutSessionPreview
@@ -75,10 +84,20 @@ internal fun CheckoutSessionResponse.asCheckoutSession(): CheckoutSession {
     return CheckoutSession(
         id = id,
         currency = currency,
+        mode = mode.asPublicMode(),
         totalSummary = totalSummary?.asTotalSummary(),
         lineItems = lineItems.map { it.asLineItem() },
         shippingOptions = shippingOptions.map { it.asShippingRate() },
     )
+}
+
+@OptIn(CheckoutSessionPreview::class)
+private fun CheckoutSessionResponse.Mode.asPublicMode(): CheckoutSession.Mode {
+    return when (this) {
+        CheckoutSessionResponse.Mode.PAYMENT -> CheckoutSession.Mode.PAYMENT
+        CheckoutSessionResponse.Mode.SETUP -> CheckoutSession.Mode.SETUP
+        CheckoutSessionResponse.Mode.UNKNOWN -> CheckoutSession.Mode.UNKNOWN
+    }
 }
 
 @OptIn(CheckoutSessionPreview::class)

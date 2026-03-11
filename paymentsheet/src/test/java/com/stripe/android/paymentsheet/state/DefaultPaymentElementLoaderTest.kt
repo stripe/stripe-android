@@ -1720,7 +1720,7 @@ internal class DefaultPaymentElementLoaderTest {
             checkoutSessionResponse = createCheckoutSessionResponse(canDetachPaymentMethod = true),
         )
         assertThat(checkoutSession.integrationMetadata(null))
-            .isEqualTo(IntegrationMetadata.CheckoutSession("cs_test_123"))
+            .isEqualTo(IntegrationMetadata.CheckoutSession("cs_test_123", expectedAmount = 5099))
     }
 
     @Test

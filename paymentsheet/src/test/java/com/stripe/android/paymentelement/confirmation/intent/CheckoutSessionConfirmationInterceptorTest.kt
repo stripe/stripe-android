@@ -17,6 +17,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodSelectionFlow
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.checkout.Address
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -29,6 +30,7 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.ConfirmCheckoutSessionParams
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.PaymentIntentFactory
+import com.stripe.android.testing.SetupIntentFactory
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -109,7 +111,7 @@ class CheckoutSessionConfirmationInterceptorTest {
     }
 
     @Test
-    fun `intercept fails when confirm response has no payment intent`() = runScenario(
+    fun `intercept fails when confirm response has no intent`() = runScenario(
         confirmCheckoutSessionResult = Result.success(createCheckoutSessionResponse(paymentIntent = null)),
     ) {
         val result = interceptNewPm()
@@ -177,6 +179,42 @@ class CheckoutSessionConfirmationInterceptorTest {
     }
 
     @Test
+    fun `intercept with succeeded setup intent returns Complete action`() = runScenario(
+        confirmCheckoutSessionResult = Result.success(
+            createCheckoutSessionResponse(
+                setupIntent = SetupIntentFactory.create(status = StripeIntent.Status.Succeeded)
+            )
+        ),
+    ) {
+        val result = interceptNewPm()
+
+        assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>>()
+
+        val completeAction = result as ConfirmationDefinition.Action.Complete
+        assertThat(completeAction.intent).isEqualTo(
+            SetupIntentFactory.create(status = StripeIntent.Status.Succeeded)
+        )
+        assertThat(completeAction.completedFullPaymentFlow).isTrue()
+    }
+
+    @Test
+    fun `intercept with requires_action setup intent returns Launch action`() = runScenario(
+        confirmCheckoutSessionResult = Result.success(
+            createCheckoutSessionResponse(
+                setupIntent = SetupIntentFactory.create(status = StripeIntent.Status.RequiresAction)
+            )
+        ),
+    ) {
+        val result = interceptNewPm()
+
+        assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Launch<IntentConfirmationDefinition.Args>>()
+
+        val launchAction = result as ConfirmationDefinition.Action.Launch
+        assertThat(launchAction.launcherArguments).isInstanceOf<IntentConfirmationDefinition.Args.NextAction>()
+        assertThat(launchAction.receivesResultInProcess).isFalse()
+    }
+
+    @Test
     fun `intercept with new payment method passes shouldSave true when save is enabled and checkbox checked`() =
         runScenario(
             customerMetadata = SAVE_ENABLED_CUSTOMER_METADATA,
@@ -227,7 +265,9 @@ class CheckoutSessionConfirmationInterceptorTest {
     private fun runScenario(
         createPaymentMethodResult: Result<PaymentMethod> = Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         confirmCheckoutSessionResult: Result<CheckoutSessionResponse> = Result.success(
-            createCheckoutSessionResponse(PaymentIntentFactory.create(status = StripeIntent.Status.Succeeded))
+            createCheckoutSessionResponse(
+                paymentIntent = PaymentIntentFactory.create(status = StripeIntent.Status.Succeeded),
+            )
         ),
         customerMetadata: CustomerMetadata? = null,
         block: suspend Scenario.() -> Unit,
@@ -245,6 +285,7 @@ class CheckoutSessionConfirmationInterceptorTest {
 
         val interceptor = CheckoutSessionConfirmationInterceptor(
             checkoutSessionId = "cs_test_123",
+            expectedAmount = 1000L,
             customerMetadata = customerMetadata,
             clientAttributionMetadata = ClientAttributionMetadata(
                 elementsSessionConfigId = "test_session_id",
@@ -287,13 +328,17 @@ class CheckoutSessionConfirmationInterceptorTest {
             )
     }
 
-    private fun createCheckoutSessionResponse(paymentIntent: PaymentIntent?): CheckoutSessionResponse {
+    private fun createCheckoutSessionResponse(
+        paymentIntent: PaymentIntent? = null,
+        setupIntent: SetupIntent? = null,
+    ): CheckoutSessionResponse {
         return CheckoutSessionResponse(
             id = "cs_test_123",
             amount = 1000L,
             currency = "usd",
             elementsSession = null,
             paymentIntent = paymentIntent,
+            setupIntent = setupIntent,
         )
     }
 

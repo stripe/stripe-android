@@ -141,11 +141,13 @@ internal suspend fun createIntentConfirmationInterceptor(
         checkoutSessionConfirmationInterceptorFactory = object : CheckoutSessionConfirmationInterceptor.Factory {
             override fun create(
                 checkoutSessionId: String,
+                expectedAmount: Long?,
                 customerMetadata: CustomerMetadata?,
                 clientAttributionMetadata: ClientAttributionMetadata,
             ): CheckoutSessionConfirmationInterceptor {
                 return CheckoutSessionConfirmationInterceptor(
                     checkoutSessionId = checkoutSessionId,
+                    expectedAmount = expectedAmount,
                     customerMetadata = customerMetadata,
                     clientAttributionMetadata = clientAttributionMetadata,
                     context = ApplicationProvider.getApplicationContext(),

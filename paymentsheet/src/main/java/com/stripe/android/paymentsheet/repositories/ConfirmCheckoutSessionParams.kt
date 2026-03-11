@@ -11,6 +11,7 @@ internal data class ConfirmCheckoutSessionParams(
     private val clientAttributionMetadata: ClientAttributionMetadata,
     private val returnUrl: String,
     private val savePaymentMethod: Boolean?,
+    private val expectedAmount: Long? = null,
 ) {
     fun toParamMap(): Map<String, Any> {
         return buildMap {
@@ -20,6 +21,13 @@ internal data class ConfirmCheckoutSessionParams(
             if (savePaymentMethod != null) {
                 put("save_payment_method", savePaymentMethod)
             }
+            if (expectedAmount != null) {
+                put("expected_amount", expectedAmount)
+            }
+            put("expand[0]", "payment_intent")
+            put("expand[1]", "payment_intent.payment_method")
+            put("expand[2]", "setup_intent")
+            put("expand[3]", "setup_intent.payment_method")
         }
     }
 }

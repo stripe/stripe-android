@@ -4,16 +4,17 @@ import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.SetupIntent
 import kotlinx.parcelize.Parcelize
 
 /**
  * Response from checkout session APIs:
  * - Init API (`/v1/payment_pages/{cs_id}/init`) - returns [elementsSession]
- * - Confirm API (`/v1/payment_pages/{cs_id}/confirm`) - returns [paymentIntent]
+ * - Confirm API (`/v1/payment_pages/{cs_id}/confirm`) - returns [paymentIntent] or [setupIntent]
  *
  * For init responses, [elementsSession] contains payment method preferences, Link settings,
  * customer data, and other configuration needed by PaymentSheet.
- * For confirm responses, [paymentIntent] contains the confirmed payment intent.
+ * For confirm responses, [paymentIntent] or [setupIntent] contains the confirmed intent.
  */
 @Parcelize
 internal data class CheckoutSessionResponse(
@@ -23,12 +24,17 @@ internal data class CheckoutSessionResponse(
     val id: String,
     /**
      * The payment amount in the smallest currency unit (e.g., cents for USD).
+     * Null for setup mode checkout sessions, which have no amount.
      */
-    val amount: Long,
+    val amount: Long?,
     /**
      * The three-letter ISO currency code (e.g., "usd").
      */
     val currency: String,
+    /**
+     * The checkout session mode: payment or setup.
+     */
+    val mode: Mode = Mode.PAYMENT,
     /**
      * The customer's email address from the checkout session.
      * Always available at the top level as `customer_email`, regardless of whether
@@ -43,9 +49,14 @@ internal data class CheckoutSessionResponse(
     val elementsSession: ElementsSession? = null,
     /**
      * The PaymentIntent created/confirmed during checkout session confirmation.
-     * Only populated in responses from the confirm API.
+     * Only populated in confirm responses for payment mode.
      */
     val paymentIntent: PaymentIntent? = null,
+    /**
+     * The SetupIntent created/confirmed during checkout session confirmation.
+     * Only populated in confirm responses for setup mode.
+     */
+    val setupIntent: SetupIntent? = null,
     /**
      * Customer data from the checkout session init response.
      * This is parsed from the top-level "customer" field in the init response.
@@ -162,4 +173,10 @@ internal data class CheckoutSessionResponse(
         val subtotal: Long,
         val total: Long,
     ) : StripeModel
+
+    enum class Mode {
+        PAYMENT,
+        SETUP,
+        UNKNOWN,
+    }
 }

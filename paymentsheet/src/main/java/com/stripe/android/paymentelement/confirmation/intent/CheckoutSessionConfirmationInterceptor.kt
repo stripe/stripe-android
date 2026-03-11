@@ -35,6 +35,7 @@ import dagger.assisted.AssistedInject
  */
 internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructor(
     @Assisted private val checkoutSessionId: String,
+    @Assisted private val expectedAmount: Long?,
     @Assisted private val customerMetadata: CustomerMetadata?,
     @Assisted private val clientAttributionMetadata: ClientAttributionMetadata,
     context: Context,
@@ -103,30 +104,35 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                 clientAttributionMetadata = clientAttributionMetadata,
                 returnUrl = returnUrl,
                 savePaymentMethod = savePaymentMethod,
+                expectedAmount = expectedAmount,
             ),
         ).fold(
             onSuccess = { response ->
-                val exception = IllegalStateException("No PaymentIntent in checkout session confirm response")
-                val paymentIntent = response.paymentIntent
-                    ?: return@fold ConfirmationDefinition.Action.Fail(
-                        cause = exception,
-                        message = exception.stripeErrorMessage(),
-                        errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-                    )
+                val intent: StripeIntent = response.paymentIntent ?: response.setupIntent
+                    ?: run {
+                        val exception = IllegalStateException(
+                            "No PaymentIntent or SetupIntent in checkout session confirm response"
+                        )
+                        return@fold ConfirmationDefinition.Action.Fail(
+                            cause = exception,
+                            message = exception.stripeErrorMessage(),
+                            errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                        )
+                    }
 
                 when {
-                    paymentIntent.isConfirmed -> {
+                    intent.isConfirmed -> {
                         ConfirmationDefinition.Action.Complete(
-                            intent = paymentIntent,
+                            intent = intent,
                             metadata = MutableConfirmationMetadata().apply {
                                 set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Server)
                             },
                             completedFullPaymentFlow = true,
                         )
                     }
-                    paymentIntent.requiresAction() -> {
+                    intent.requiresAction() -> {
                         ConfirmationDefinition.Action.Launch(
-                            launcherArguments = Args.NextAction(paymentIntent, DeferredIntentConfirmationType.Server),
+                            launcherArguments = Args.NextAction(intent, DeferredIntentConfirmationType.Server),
                             receivesResultInProcess = false,
                         )
                     }
@@ -154,6 +160,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
     interface Factory {
         fun create(
             checkoutSessionId: String,
+            expectedAmount: Long?,
             customerMetadata: CustomerMetadata?,
             clientAttributionMetadata: ClientAttributionMetadata,
         ): CheckoutSessionConfirmationInterceptor
