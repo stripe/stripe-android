@@ -135,7 +135,7 @@ class CheckoutRequest private constructor(
         private var automaticTax: Boolean? = null
         private var displayShippingRates: Boolean? = null
         private var customerEmail: String? = null
-        private var useManualCapture: Boolean? = null
+        private val useManualCapture: Boolean = true
 
         fun initialization(initialization: String?) = apply {
             this.initialization = initialization
