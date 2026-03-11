@@ -199,10 +199,8 @@ class TapToAddCollectionHandlerTest {
             customerMetadata = CustomerMetadata.CheckoutSession(
                 sessionId = "cs_123",
                 customerId = "cus_123",
-                isPaymentMethodSetAsDefaultEnabled = false,
                 removePaymentMethod = PaymentMethodRemovePermission.Full,
                 saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
-                canUpdateFullPaymentMethodDetails = false,
             )
         )
 
