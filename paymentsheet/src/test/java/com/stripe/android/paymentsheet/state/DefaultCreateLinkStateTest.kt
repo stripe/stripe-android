@@ -182,10 +182,10 @@ internal class DefaultCreateLinkStateTest {
                 id = "cs_test_123",
                 amount = 5099,
                 currency = "usd",
+                customerEmail = customerEmail,
                 elementsSession = elementsSession,
                 customer = CheckoutSessionResponse.Customer(
                     id = "cus_test_123",
-                    email = customerEmail,
                     paymentMethods = PaymentMethodFactory.cards(1),
                     canDetachPaymentMethod = true,
                 ),

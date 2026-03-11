@@ -147,7 +147,6 @@ internal class CheckoutSessionResponseJsonParser(
      * {
      *   "customer": {
      *     "id": "cus_xxx",
-     *     "email": "user@example.com",
      *     "payment_methods": [...],
      *     "can_detach_payment_method": true
      *   }
@@ -160,7 +159,6 @@ internal class CheckoutSessionResponseJsonParser(
         }
 
         val customerId = StripeJsonUtils.optString(json, FIELD_CUSTOMER_ID) ?: return null
-        val email = StripeJsonUtils.optString(json, FIELD_EMAIL)
         val paymentMethodsJson = json.optJSONArray(FIELD_PAYMENT_METHODS)
         val paymentMethods = paymentMethodsJson?.let { pmsJson ->
             (0 until pmsJson.length()).mapNotNull { index ->
@@ -171,7 +169,6 @@ internal class CheckoutSessionResponseJsonParser(
 
         return CheckoutSessionResponse.Customer(
             id = customerId,
-            email = email,
             paymentMethods = paymentMethods,
             canDetachPaymentMethod = canDetachPaymentMethod,
         )
@@ -386,7 +383,6 @@ internal class CheckoutSessionResponseJsonParser(
         private const val FIELD_SERVER_BUILT_ELEMENTS_SESSION_PARAMS = "server_built_elements_session_params"
         private const val FIELD_CUSTOMER = "customer"
         private const val FIELD_CUSTOMER_ID = "id"
-        private const val FIELD_EMAIL = "email"
         private const val FIELD_PAYMENT_METHODS = "payment_methods"
         private const val FIELD_CAN_DETACH_PAYMENT_METHOD = "can_detach_payment_method"
         private const val FIELD_SAVED_PAYMENT_METHODS_OFFER_SAVE =

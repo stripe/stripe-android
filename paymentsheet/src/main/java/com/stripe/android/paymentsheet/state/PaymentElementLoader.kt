@@ -190,7 +190,7 @@ internal interface PaymentElementLoader {
             override fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata {
                 return IntegrationMetadata.CheckoutSession(
                     id = checkoutSessionResponse.id,
-                    customerEmail = checkoutSessionResponse.customer?.email,
+                    customerEmail = checkoutSessionResponse.customerEmail,
                 )
             }
         }
@@ -514,7 +514,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             return CustomerMetadata.CheckoutSession(
                 sessionId = initializationMode.checkoutSessionResponse.id,
                 customerId = customer.id,
-                customerEmail = customer.email,
+                customerEmail = initializationMode.checkoutSessionResponse.customerEmail,
                 isPaymentMethodSetAsDefaultEnabled = false,
                 removePaymentMethod = if (customer.canDetachPaymentMethod) {
                     PaymentMethodRemovePermission.Full
