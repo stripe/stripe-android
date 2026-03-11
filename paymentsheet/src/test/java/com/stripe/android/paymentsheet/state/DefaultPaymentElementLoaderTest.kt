@@ -265,6 +265,33 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
+    fun `load with CheckoutSession mode and non-null customer returns failure`() = runScenario {
+        val result = createPaymentElementLoader().load(
+            initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                checkoutSessionResponse = createCheckoutSessionResponse(canDetachPaymentMethod = true),
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration(
+                merchantDisplayName = "Some name",
+                customer = PaymentSheet.CustomerConfiguration(
+                    id = "cus_123",
+                    ephemeralKeySecret = "ek_123",
+                ),
+            ),
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
+        )
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()?.message).isEqualTo(
+            "configuration.customer must not be set when using CheckoutSession initialization mode. " +
+                "Customer information is provided by the checkout session."
+        )
+
+        assertThat(eventReporter.loadFailedTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
     fun `load without customer should return expected result`() = runScenario {
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
@@ -2974,6 +3001,10 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(state.paymentMethodMetadata.customerMetadata?.removePaymentMethod)
                 .isEqualTo(expectedPermission)
 
+            // CheckoutSession has no removeLast concept — always allows removing every PM.
+            assertThat(state.paymentMethodMetadata.customerMetadata?.canRemoveLastPaymentMethod)
+                .isEqualTo(true)
+
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
         }
@@ -4495,7 +4526,6 @@ internal class DefaultPaymentElementLoaderTest {
             checkoutSessionLoader = CheckoutSessionLoader(),
             elementsSessionLoader = ElementsSessionLoader(
                 elementsSessionRepository = elementsSessionRepository,
-                errorReporter = errorReporter,
             ),
         )
     }

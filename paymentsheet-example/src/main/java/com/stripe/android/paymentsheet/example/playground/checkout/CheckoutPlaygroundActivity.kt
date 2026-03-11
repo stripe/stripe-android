@@ -28,7 +28,9 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
+import android.widget.Toast
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,9 +39,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkout.CheckoutSession
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.addresselement.AddressLauncher
+import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
+import com.stripe.android.paymentsheet.addresselement.rememberAddressLauncher
 import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
 import com.stripe.android.paymentsheet.example.playground.checkout.CheckoutPlaygroundViewModel.Companion.CHECKOUT_STATE_KEY
 import com.stripe.android.paymentsheet.example.samples.ui.PADDING
@@ -69,22 +78,34 @@ class CheckoutPlaygroundActivity : AppCompatActivity() {
         enableEdgeToEdge()
 
         setContent {
+            val addressLauncher = rememberAddressLauncher { result ->
+                if (result is AddressLauncherResult.Succeeded) {
+                    viewModel.updateShippingAddress(result.address)
+                }
+            }
+
             CheckoutScreen(
                 checkout = viewModel.checkout,
                 isLoading = viewModel.isLoading,
+                errorMessage = viewModel.errorMessage,
+                clearErrorMessage = viewModel::clearErrorMessage,
                 applyPromotionCode = viewModel::applyPromotionCode,
                 removePromotionCode = viewModel::removePromotionCode,
                 updateLineItemQuantity = viewModel::updateLineItemQuantity,
                 selectShippingRate = viewModel::selectShippingRate,
+                lastAddressDetails = viewModel.lastAddressDetails,
+                clearShippingAddress = viewModel::clearShippingAddress,
+                updatePostalCode = viewModel::updatePostalCode,
+                updateShippingAddress = {
+                    val publishableKey = PaymentConfiguration.getInstance(applicationContext).publishableKey
+                    val configuration = AddressLauncher.Configuration(
+                        address = viewModel.lastAddressDetails.value,
+                    )
+                    addressLauncher.present(publishableKey, configuration)
+                },
                 refresh = viewModel::refresh,
             )
         }
-    }
-
-    override fun finish() {
-        setResult(RESULT_OK, Intent().putExtra(CHECKOUT_STATE_KEY, viewModel.checkout.state))
-
-        super.finish()
     }
 }
 
@@ -92,15 +113,30 @@ class CheckoutPlaygroundActivity : AppCompatActivity() {
 private fun CheckoutScreen(
     checkout: Checkout,
     isLoading: StateFlow<Boolean>,
+    errorMessage: StateFlow<String?>,
+    clearErrorMessage: () -> Unit,
     applyPromotionCode: (String) -> Unit,
     removePromotionCode: () -> Unit,
     updateLineItemQuantity: (String, Int) -> Unit,
     selectShippingRate: (String) -> Unit,
+    lastAddressDetails: StateFlow<AddressDetails?>,
+    clearShippingAddress: () -> Unit,
+    updatePostalCode: (String) -> Unit,
+    updateShippingAddress: () -> Unit,
     refresh: () -> Unit,
 ) {
     val checkoutSession by checkout.checkoutSession.collectAsState()
     val loading by isLoading.collectAsState()
+    val error by errorMessage.collectAsState()
     var promotionCode by rememberSaveable { mutableStateOf("") }
+
+    val context = LocalContext.current
+    LaunchedEffect(error) {
+        error?.let {
+            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+            clearErrorMessage()
+        }
+    }
 
     BackHandler(enabled = loading) { }
 
@@ -108,25 +144,14 @@ private fun CheckoutScreen(
         PlaygroundTheme(
             content = {
                 LineItemsSection(checkoutSession, updateLineItemQuantity)
+                ShippingAddressSection(
+                    lastAddressDetails = lastAddressDetails,
+                    clearShippingAddress = clearShippingAddress,
+                    updatePostalCode = updatePostalCode,
+                    updateShippingAddress = updateShippingAddress,
+                )
                 ShippingOptionsSection(checkoutSession, selectShippingRate)
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(PADDING),
-                ) {
-                    OutlinedTextField(
-                        value = promotionCode,
-                        onValueChange = { promotionCode = it },
-                        label = { Text("Promotion code") },
-                        singleLine = true,
-                        modifier = Modifier.weight(1f),
-                    )
-                    Button(
-                        onClick = { applyPromotionCode(promotionCode) },
-                    ) {
-                        Text("Apply")
-                    }
-                }
+                PromotionCodeInput(promotionCode, { promotionCode = it }, applyPromotionCode)
                 Button(
                     onClick = refresh,
                 ) {
@@ -147,6 +172,32 @@ private fun CheckoutScreen(
             ) {
                 CircularProgressIndicator()
             }
+        }
+    }
+}
+
+@Composable
+private fun PromotionCodeInput(
+    promotionCode: String,
+    onPromotionCodeChange: (String) -> Unit,
+    applyPromotionCode: (String) -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(PADDING),
+    ) {
+        OutlinedTextField(
+            value = promotionCode,
+            onValueChange = onPromotionCodeChange,
+            label = { Text("Promotion code") },
+            singleLine = true,
+            modifier = Modifier.weight(1f),
+        )
+        Button(
+            onClick = { applyPromotionCode(promotionCode) },
+        ) {
+            Text("Apply")
         }
     }
 }
@@ -215,6 +266,135 @@ private fun LineItemsSection(
         }
 
         Divider(modifier = Modifier.padding(vertical = PADDING))
+    }
+}
+
+@Composable
+private fun ShippingAddressSection(
+    lastAddressDetails: StateFlow<AddressDetails?>,
+    clearShippingAddress: () -> Unit,
+    updatePostalCode: (String) -> Unit,
+    updateShippingAddress: () -> Unit,
+) {
+    val addressDetails by lastAddressDetails.collectAsState()
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "Shipping Address",
+            style = MaterialTheme.typography.h6,
+        )
+
+        Spacer(modifier = Modifier.height(PADDING))
+
+        AddressSummary(addressDetails?.address)
+
+        Spacer(modifier = Modifier.height(PADDING))
+
+        var useFullAddress by rememberSaveable { mutableStateOf(false) }
+        var postalCode by rememberSaveable { mutableStateOf("") }
+        AddressModePicker(
+            useFullAddress = useFullAddress,
+            onPostalCodeMode = {
+                useFullAddress = false
+                postalCode = ""
+                clearShippingAddress()
+            },
+            onFullAddressMode = {
+                useFullAddress = true
+                postalCode = ""
+                clearShippingAddress()
+            },
+        )
+
+        Spacer(modifier = Modifier.height(PADDING))
+
+        if (useFullAddress) {
+            Button(onClick = updateShippingAddress) {
+                Text(if (addressDetails != null) "Edit Shipping Address" else "Add Shipping Address")
+            }
+        } else {
+            PostalCodeInput(
+                postalCode = postalCode,
+                onPostalCodeChange = { postalCode = it },
+                onApply = { updatePostalCode(postalCode) },
+            )
+        }
+
+        Divider(modifier = Modifier.padding(vertical = PADDING))
+    }
+}
+
+@Composable
+private fun AddressSummary(address: PaymentSheet.Address?) {
+    if (address != null) {
+        address.line1?.takeIf { it.isNotEmpty() }?.let { Text(text = it, style = MaterialTheme.typography.body2) }
+        address.line2?.takeIf { it.isNotEmpty() }?.let { Text(text = it, style = MaterialTheme.typography.body2) }
+        val cityStateZip = listOfNotNull(address.city, address.state, address.postalCode)
+            .filter { it.isNotEmpty() }
+            .joinToString(", ")
+        if (cityStateZip.isNotEmpty()) {
+            Text(text = cityStateZip, style = MaterialTheme.typography.body2)
+        }
+        address.country?.let { Text(text = it, style = MaterialTheme.typography.body2) }
+    } else {
+        Text(
+            text = "No address set",
+            style = MaterialTheme.typography.body2,
+            color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+        )
+    }
+}
+
+@Composable
+private fun AddressModePicker(
+    useFullAddress: Boolean,
+    onPostalCodeMode: () -> Unit,
+    onFullAddressMode: () -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(PADDING),
+    ) {
+        Button(
+            onClick = onPostalCodeMode,
+            enabled = useFullAddress,
+            modifier = Modifier.weight(1f),
+        ) {
+            Text("Postal Code")
+        }
+        Button(
+            onClick = onFullAddressMode,
+            enabled = !useFullAddress,
+            modifier = Modifier.weight(1f),
+        ) {
+            Text("Full Address")
+        }
+    }
+}
+
+@Composable
+private fun PostalCodeInput(
+    postalCode: String,
+    onPostalCodeChange: (String) -> Unit,
+    onApply: () -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(PADDING),
+    ) {
+        OutlinedTextField(
+            value = postalCode,
+            onValueChange = onPostalCodeChange,
+            label = { Text("Postal code") },
+            singleLine = true,
+            modifier = Modifier.weight(1f),
+        )
+        Button(
+            onClick = onApply,
+        ) {
+            Text("Apply")
+        }
     }
 }
 

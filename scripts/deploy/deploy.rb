@@ -8,7 +8,6 @@ require_relative 'create_github_release'
 require_relative 'permissions_check'
 require_relative 'publish_to_sonatype'
 require_relative 'translations'
-require_relative 'update_dokka'
 require_relative 'update_pay_server_docs'
 require_relative 'update_version_numbers'
 require_relative 'validate_version_number'
@@ -82,7 +81,6 @@ steps = [
     method(:create_github_release),
 
     # Do docs updates
-    method(:generate_dokka),
     method(:update_pay_server_docs),
 ]
 
@@ -94,6 +92,5 @@ if (@is_dry_run)
 
     delete_github_release()
     revert_version_bump_changes()
-    revert_dokka_changes()
     delete_pay_server_branch()
 end

@@ -242,8 +242,11 @@ class CustomerSheet internal constructor(
                 .headerTextForSelectionScreen(headerTextForSelectionScreen)
                 .defaultBillingDetails(defaultBillingDetails)
                 .billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
+                .preferredNetworks(preferredNetworks)
                 .allowsRemovalOfLastSavedPaymentMethod(allowsRemovalOfLastSavedPaymentMethod)
                 .paymentMethodOrder(paymentMethodOrder)
+                .cardBrandAcceptance(cardBrandAcceptance)
+                .opensCardScannerAutomatically(opensCardScannerAutomatically)
         }
 
         @Suppress("TooManyFunctions")

@@ -1,5 +1,9 @@
 # Migration Guide
 
+## Migrating from versions < 23.0.0
+- The SDK now requires Android 6.0+ (API level 23+)
+- The SDK now targets `compileSdkVersion` and `targetSdkVersion` 36
+
 ## Migrating from versions < 22.0.0
 SDK v22 introduces breaking changes organized into four categories:
 

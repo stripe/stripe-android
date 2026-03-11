@@ -102,6 +102,8 @@
   <string name="stripe_becs_widget_name_required">Privaloma nurodyti vardą, pavardę.</string>
   <!-- Button title to cancel action in an alert -->
   <string name="stripe_cancel">Atšaukti</string>
+  <!-- String to prompt user to select card brand. -->
+  <string name="stripe_card_brand_choice_choose_card_brand">Pasirinkite kortelės prekių ženklą</string>
   <!-- Title for a dropdown option when selecting a card brand -->
   <string name="stripe_card_brand_choice_no_selection">Nėra pasirinkimo</string>
   <!-- Title for a dropdown where the customer can select a card brand -->
@@ -182,6 +184,8 @@
   <string name="stripe_remove">Pašalinti</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="stripe_removed">%s pašalintas</string>
+  <!-- A request error from Stripe has occurred due to a valid issue or merchant integration problem that has a request ID -->
+  <string name="stripe_request_error">Kažkas nutiko ne taip. Užklausos ID: %1$s</string>
   <string name="stripe_secure_checkout">Saugus pirkimo užbaigimas</string>
   <string name="stripe_title_add_a_card">Pridėti kortelę</string>
   <!-- Screen title telling users they should add an address -->

@@ -491,6 +491,7 @@ internal class PlaygroundSettings private constructor(
             CustomerSessionOverrideRedisplaySettingsDefinition,
             CustomerSessionOnBehalfOfSettingsDefinition,
             CustomerSettingsDefinition,
+            CustomerEmailSettingsDefinition,
             CheckoutModeSettingsDefinition,
             UserCountryOverrideSettingsDefinition,
             LinkSettingsDefinition,
@@ -567,7 +568,8 @@ internal class PlaygroundSettings private constructor(
             AttestationOnIntentConfirmationDefinition,
             EnableTapToAddSettingsDefinition,
             CustomStripeApiDefinition,
-            FeatureFlagSettingsDefinition(FeatureFlags.newCbcSelector)
+            FeatureFlagSettingsDefinition(FeatureFlags.newCbcSelector),
+            CaptureMethodSettingsDefinition,
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(
