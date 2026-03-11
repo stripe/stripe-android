@@ -31,6 +31,6 @@ Multi-module Android library for payment processing and financial services.
 
 **Testing**
 - JUnit + Truth assertions + Robolectric
-- **Fakes over mocks** — see skills `write-tests` and `create-fake` for patterns
+- **Fakes over mocks** — MUST invoke `write-tests` skill before writing any test, MUST invoke `create-fake` skill before creating any fake
 - Turbine for Flow testing and call tracking in fakes
 - Compose UI tests with `createComposeRule()`
