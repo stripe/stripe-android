@@ -1,21 +1,39 @@
 package com.stripe.android.checkout
 
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
 
+@OptIn(CheckoutSessionPreview::class)
 internal fun PaymentSheet.Configuration.forCheckoutSession(
-    checkoutSessionResponse: CheckoutSessionResponse,
+    state: Checkout.State,
 ): PaymentSheet.Configuration {
-    if (defaultBillingDetails?.email != null) return this
-    val customerEmail = checkoutSessionResponse.customerEmail ?: return this
-    return newBuilder()
-        .defaultBillingDetails(
-            PaymentSheet.BillingDetails(
-                address = defaultBillingDetails?.address,
-                email = customerEmail,
-                name = defaultBillingDetails?.name,
-                phone = defaultBillingDetails?.phone,
+    val response = state.checkoutSessionResponse
+    val shouldSetEmail = defaultBillingDetails?.email == null && response.customerEmail != null
+    val shouldSetName = shippingDetails?.name == null && state.shippingName != null
+
+    if (!shouldSetEmail && !shouldSetName) return this
+
+    return newBuilder().apply {
+        if (shouldSetEmail) {
+            defaultBillingDetails(
+                PaymentSheet.BillingDetails(
+                    address = defaultBillingDetails?.address,
+                    email = response.customerEmail,
+                    name = defaultBillingDetails?.name,
+                    phone = defaultBillingDetails?.phone,
+                )
             )
-        )
-        .build()
+        }
+        if (shouldSetName) {
+            shippingDetails(
+                AddressDetails(
+                    name = state.shippingName,
+                    address = shippingDetails?.address,
+                    phoneNumber = shippingDetails?.phoneNumber,
+                    isCheckboxSelected = shippingDetails?.isCheckboxSelected,
+                )
+            )
+        }
+    }.build()
 }
