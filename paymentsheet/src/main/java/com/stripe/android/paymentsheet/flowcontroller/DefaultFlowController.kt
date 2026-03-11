@@ -629,7 +629,6 @@ internal class DefaultFlowController @Inject internal constructor(
                         intentId = result.intent.id,
                     )
                 }
-                configurationHandler.clearPreviousConfigurationRequest()
 
                 onPaymentResult(
                     paymentResult = PaymentResult.Completed,
@@ -697,6 +696,7 @@ internal class DefaultFlowController @Inject internal constructor(
         if (paymentResult is PaymentResult.Completed && shouldResetOnCompleted) {
             viewModel.paymentSelection = null
             viewModel.state = null
+            viewModel.previousConfigureRequest = null
         }
 
         viewModelScope.launch {

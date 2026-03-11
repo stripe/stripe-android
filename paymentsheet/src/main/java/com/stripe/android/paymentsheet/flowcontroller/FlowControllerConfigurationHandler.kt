@@ -124,10 +124,6 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
         job.set(null)
     }
 
-    fun clearPreviousConfigurationRequest() {
-        viewModel.previousConfigureRequest = null
-    }
-
     data class ConfigureRequest(
         val initializationMode: PaymentElementLoader.InitializationMode,
         val configuration: PaymentSheet.Configuration,
