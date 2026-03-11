@@ -14,6 +14,14 @@ class CheckoutSessionLoaderTest {
             id = "cs_test_abc123",
             amount = 1000L,
             currency = "usd",
+            customerEmail = null,
+            elementsSession = null,
+            paymentIntent = null,
+            customer = null,
+            savedPaymentMethodsOfferSave = null,
+            totalSummary = null,
+            lineItems = emptyList(),
+            shippingOptions = emptyList(),
         )
         val repository = FakeCheckoutSessionRepository(
             initResult = Result.success(expectedResponse),
