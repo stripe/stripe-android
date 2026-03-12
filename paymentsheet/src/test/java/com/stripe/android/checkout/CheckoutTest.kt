@@ -38,6 +38,7 @@ class CheckoutTest {
     val ruleChain: RuleChain = RuleChain
         .outerRule(networkRule)
         .around(PaymentConfigurationTestRule(applicationContext))
+        .around(CheckoutInstancesTestRule())
 
     @Test
     fun `createWithState produces Checkout with correct checkoutSession id`() = runTest {
@@ -545,7 +546,10 @@ class CheckoutTest {
         block: suspend (Checkout) -> Unit,
     ) {
         val state = Checkout.State(
-            InternalState(checkoutSessionResponse),
+            InternalState(
+                key = "CheckoutTest",
+                checkoutSessionResponse = checkoutSessionResponse,
+            ),
         )
         val checkout = Checkout.createWithState(applicationContext, state)
         block(checkout)

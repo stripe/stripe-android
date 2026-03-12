@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.parcelize.Parcelize
+import java.util.UUID
 
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -30,7 +31,13 @@ class Checkout private constructor(
         ): Result<Checkout> {
             val component = DaggerCheckoutComponent.factory().create(context.applicationContext)
             return component.checkoutSessionLoader.load(checkoutSessionClientSecret).map { response ->
-                Checkout(InternalState(response), component)
+                Checkout(
+                    internalState = InternalState(
+                        key = UUID.randomUUID().toString(),
+                        checkoutSessionResponse = response,
+                    ),
+                    component,
+                )
             }
         }
 
@@ -39,7 +46,10 @@ class Checkout private constructor(
             state: State,
         ): Checkout {
             val component = DaggerCheckoutComponent.factory().create(context.applicationContext)
-            return Checkout(state.internalState, component)
+            return Checkout(
+                internalState = state.internalState,
+                component = component,
+            )
         }
     }
 
@@ -63,6 +73,10 @@ class Checkout private constructor(
     private val mutex = Mutex()
     private val _checkoutSession = MutableStateFlow(internalState.checkoutSessionResponse.asCheckoutSession())
     val checkoutSession: StateFlow<CheckoutSession> = _checkoutSession.asStateFlow()
+
+    init {
+        CheckoutInstances.add(internalState.key, this)
+    }
 
     suspend fun applyPromotionCode(
         promotionCode: String,
