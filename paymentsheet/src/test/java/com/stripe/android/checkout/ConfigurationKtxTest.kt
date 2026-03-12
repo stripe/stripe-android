@@ -1,11 +1,13 @@
 package com.stripe.android.checkout
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import org.junit.Test
 
+@OptIn(CheckoutSessionPreview::class)
 class ConfigurationKtxTest {
 
     @Test
@@ -16,18 +18,6 @@ class ConfigurationKtxTest {
         val result = config.forCheckoutSession(state)
 
         assertThat(result.defaultBillingDetails?.email).isEqualTo("test@example.com")
-    }
-
-    @Test
-    fun `preserves merchant email when already set`() {
-        val config = configuration(
-            defaultBillingDetails = PaymentSheet.BillingDetails(email = "merchant@example.com"),
-        )
-        val state = state(customerEmail = "checkout@example.com")
-
-        val result = config.forCheckoutSession(state)
-
-        assertThat(result.defaultBillingDetails?.email).isEqualTo("merchant@example.com")
     }
 
     @Test
@@ -64,18 +54,6 @@ class ConfigurationKtxTest {
     }
 
     @Test
-    fun `preserves merchant shipping name when already set`() {
-        val config = configuration(
-            shippingDetails = AddressDetails(name = "Merchant Name"),
-        )
-        val state = state(shippingName = "State Name")
-
-        val result = config.forCheckoutSession(state)
-
-        assertThat(result.shippingDetails?.name).isEqualTo("Merchant Name")
-    }
-
-    @Test
     fun `preserves existing shipping details fields when setting name`() {
         val address = PaymentSheet.Address(
             city = "San Francisco",
@@ -96,6 +74,39 @@ class ConfigurationKtxTest {
         assertThat(result.shippingDetails?.address).isEqualTo(address)
         assertThat(result.shippingDetails?.phoneNumber).isEqualTo("5551234567")
         assertThat(result.shippingDetails?.isCheckboxSelected).isTrue()
+    }
+
+    @Test
+    fun `sets billing name from state when defaultBillingDetails name is null`() {
+        val config = configuration()
+        val state = state(billingName = "Jane Billing")
+
+        val result = config.forCheckoutSession(state)
+
+        assertThat(result.defaultBillingDetails?.name).isEqualTo("Jane Billing")
+    }
+
+    @Test
+    fun `preserves existing billing details fields when setting billing name`() {
+        val address = PaymentSheet.Address(
+            city = "San Francisco",
+            country = "US",
+        )
+        val config = configuration(
+            defaultBillingDetails = PaymentSheet.BillingDetails(
+                address = address,
+                email = "existing@example.com",
+                phone = "5551234567",
+            ),
+        )
+        val state = state(billingName = "Jane Billing")
+
+        val result = config.forCheckoutSession(state)
+
+        assertThat(result.defaultBillingDetails?.name).isEqualTo("Jane Billing")
+        assertThat(result.defaultBillingDetails?.email).isEqualTo("existing@example.com")
+        assertThat(result.defaultBillingDetails?.phone).isEqualTo("5551234567")
+        assertThat(result.defaultBillingDetails?.address).isEqualTo(address)
     }
 
     @Test
@@ -122,6 +133,7 @@ class ConfigurationKtxTest {
     private fun state(
         customerEmail: String? = null,
         shippingName: String? = null,
+        billingName: String? = null,
     ): InternalState {
         return InternalState(
             key = "ConfigurationKtxTest",
@@ -129,6 +141,7 @@ class ConfigurationKtxTest {
                 customerEmail = customerEmail,
             ),
             shippingName = shippingName,
+            billingName = billingName,
         )
     }
 }

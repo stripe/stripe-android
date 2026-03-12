@@ -105,13 +105,21 @@ class Checkout private constructor(
         name: String? = null,
         address: Address,
     ): Result<CheckoutSession> = withSessionId(
-        additionalStateMutations = {
-            copy(
-                shippingName = name ?: internalState.shippingName
-            )
-        },
+        additionalStateMutations = { copy(shippingName = name) },
     ) { sessionId ->
-        component.checkoutSessionRepository.updateShippingAddress(sessionId, address.build())
+        component.checkoutSessionRepository.updateTaxRegion(sessionId, address.build())
+    }
+
+    suspend fun updateBillingAddress(
+        name: String? = null,
+        address: Address,
+    ): Result<CheckoutSession> {
+        val built = address.build()
+        return withSessionId(
+            additionalStateMutations = { copy(billingName = name) },
+        ) { sessionId ->
+            component.checkoutSessionRepository.updateTaxRegion(sessionId, built)
+        }
     }
 
     suspend fun refresh(): Result<CheckoutSession> = withSessionId { sessionId ->

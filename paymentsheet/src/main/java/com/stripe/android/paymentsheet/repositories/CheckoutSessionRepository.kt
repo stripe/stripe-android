@@ -48,7 +48,7 @@ internal interface CheckoutSessionRepository {
         shippingRateId: String,
     ): Result<CheckoutSessionResponse>
 
-    suspend fun updateShippingAddress(
+    suspend fun updateTaxRegion(
         sessionId: String,
         address: Address.State,
     ): Result<CheckoutSessionResponse>
@@ -157,7 +157,7 @@ internal class DefaultCheckoutSessionRepository @Inject constructor(
         ),
     )
 
-    override suspend fun updateShippingAddress(
+    override suspend fun updateTaxRegion(
         sessionId: String,
         address: Address.State,
     ): Result<CheckoutSessionResponse> = executePost(
