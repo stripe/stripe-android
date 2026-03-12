@@ -177,6 +177,7 @@ internal class FaceDetectorTransitioner(
         }
     }
 
+    @Suppress("LongMethod")
     override suspend fun transitionFromFound(
         foundState: Found,
         analyzerInput: AnalyzerInput,
