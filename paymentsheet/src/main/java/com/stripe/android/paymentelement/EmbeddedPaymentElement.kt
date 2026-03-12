@@ -601,6 +601,36 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 userOverrideCountry = userOverrideCountry,
             )
         }
+
+        @OptIn(
+            ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class,
+            CardFundingFilteringPrivatePreview::class,
+        )
+        internal fun newBuilder(): Builder = Builder(merchantDisplayName)
+            .customer(customer)
+            .googlePay(googlePay)
+            .defaultBillingDetails(defaultBillingDetails)
+            .shippingDetails(shippingDetails)
+            .allowsDelayedPaymentMethods(allowsDelayedPaymentMethods)
+            .allowsPaymentMethodsRequiringShippingAddress(allowsPaymentMethodsRequiringShippingAddress)
+            .appearance(appearance)
+            .billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
+            .preferredNetworks(preferredNetworks)
+            .allowsRemovalOfLastSavedPaymentMethod(allowsRemovalOfLastSavedPaymentMethod)
+            .paymentMethodOrder(paymentMethodOrder)
+            .externalPaymentMethods(externalPaymentMethods)
+            .cardBrandAcceptance(cardBrandAcceptance)
+            .allowedCardFundingTypes(allowedCardFundingTypes)
+            .customPaymentMethods(customPaymentMethods)
+            .embeddedViewDisplaysMandateText(embeddedViewDisplaysMandateText)
+            .link(link)
+            .formSheetAction(formSheetAction)
+            .termsDisplay(termsDisplay)
+            .opensCardScannerAutomatically(opensCardScannerAutomatically)
+            .userOverrideCountry(userOverrideCountry)
+            .apply {
+                primaryButtonLabel?.let { primaryButtonLabel(it) }
+            }
     }
 
     /**
