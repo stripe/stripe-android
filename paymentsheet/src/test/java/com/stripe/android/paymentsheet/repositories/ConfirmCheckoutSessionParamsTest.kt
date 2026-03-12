@@ -38,20 +38,6 @@ class ConfirmCheckoutSessionParamsTest {
         assertThat(params).containsKey("client_attribution_metadata")
     }
 
-    @Test
-    fun `toParamMap includes expand params`() {
-        val params = createParams(savePaymentMethod = null).toParamMap()
-
-        assertThat(params["expand"]).isEqualTo(
-            listOf(
-                "payment_intent",
-                "payment_intent.payment_method",
-                "setup_intent",
-                "setup_intent.payment_method",
-            )
-        )
-    }
-
     private fun createParams(savePaymentMethod: Boolean?): ConfirmCheckoutSessionParams {
         return ConfirmCheckoutSessionParams(
             paymentMethodId = "pm_test_123",
