@@ -7,6 +7,7 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 internal data class InternalState(
+    val key: String,
     val checkoutSessionResponse: CheckoutSessionResponse,
     val shippingName: String? = null,
 ) : Parcelable {

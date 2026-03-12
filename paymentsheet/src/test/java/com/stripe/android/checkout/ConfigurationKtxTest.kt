@@ -124,6 +124,7 @@ class ConfigurationKtxTest {
         shippingName: String? = null,
     ): InternalState {
         return InternalState(
+            key = "ConfigurationKtxTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 customerEmail = customerEmail,
             ),
