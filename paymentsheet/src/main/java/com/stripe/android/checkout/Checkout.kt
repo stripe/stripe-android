@@ -126,6 +126,11 @@ class Checkout private constructor(
         component.checkoutSessionRepository.init(sessionId)
     }
 
+    internal fun updateWithResponse(response: CheckoutSessionResponse) {
+        internalState = internalState.copy(checkoutSessionResponse = response)
+        _checkoutSession.value = response.asCheckoutSession()
+    }
+
     private suspend fun withSessionId(
         additionalStateMutations: InternalState.() -> InternalState = { this },
         block: suspend (sessionId: String) -> Result<CheckoutSessionResponse>,

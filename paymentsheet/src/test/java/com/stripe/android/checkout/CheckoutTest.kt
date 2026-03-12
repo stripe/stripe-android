@@ -627,6 +627,70 @@ class CheckoutTest {
     }
 
     @Test
+    fun `updateWithResponse updates checkoutSession flow`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            checkout.checkoutSession.test {
+                val initial = awaitItem()
+                assertThat(initial.id).isEqualTo("cs_test_abc123")
+                assertThat(initial.totalSummary).isNull()
+
+                val updatedResponse = CheckoutSessionResponseFactory.create(
+                    id = "cs_test_updated",
+                    totalSummary = CheckoutSessionResponse.TotalSummaryResponse(
+                        subtotal = 2000L,
+                        totalDueToday = 2000L,
+                        totalAmountDue = 2000L,
+                        discountAmounts = emptyList(),
+                        taxAmounts = emptyList(),
+                        shippingRate = null,
+                        appliedBalance = null,
+                    ),
+                )
+                checkout.updateWithResponse(updatedResponse)
+
+                val updated = awaitItem()
+                assertThat(updated.id).isEqualTo("cs_test_updated")
+                assertThat(updated.totalSummary).isNotNull()
+                assertThat(updated.totalSummary!!.subtotal).isEqualTo(2000L)
+            }
+        }
+    }
+
+    @Test
+    fun `updateWithResponse updates internalState`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            assertThat(checkout.internalState.checkoutSessionResponse.id).isEqualTo("cs_test_abc123")
+
+            val updatedResponse = CheckoutSessionResponseFactory.create(id = "cs_test_updated")
+            checkout.updateWithResponse(updatedResponse)
+
+            assertThat(checkout.internalState.checkoutSessionResponse.id).isEqualTo("cs_test_updated")
+            assertThat(checkout.internalState.checkoutSessionResponse).isEqualTo(updatedResponse)
+        }
+    }
+
+    @Test
+    fun `updateWithResponse preserves non-response internalState fields`() = runTest {
+        val initialResponse = CheckoutSessionResponseFactory.create()
+        val state = Checkout.State(
+            InternalState(
+                key = "CheckoutTest",
+                checkoutSessionResponse = initialResponse,
+                shippingName = "Jane Doe",
+                billingName = "John Doe",
+            ),
+        )
+        val checkout = Checkout.createWithState(applicationContext, state)
+
+        val updatedResponse = CheckoutSessionResponseFactory.create(id = "cs_test_updated")
+        checkout.updateWithResponse(updatedResponse)
+
+        assertThat(checkout.internalState.shippingName).isEqualTo("Jane Doe")
+        assertThat(checkout.internalState.billingName).isEqualTo("John Doe")
+        assertThat(checkout.internalState.checkoutSessionResponse.id).isEqualTo("cs_test_updated")
+    }
+
+    @Test
     fun `configure returns failure when network request fails`() = runConfigureScenario(
         clientSecret = "cs_test_abc123_secret_xyz",
         networkSetup = {

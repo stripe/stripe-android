@@ -14,6 +14,7 @@ internal data class InternalState(
 ) : Parcelable {
     val initializationMode: PaymentElementLoader.InitializationMode.CheckoutSession
         get() = PaymentElementLoader.InitializationMode.CheckoutSession(
+            instancesKey = key,
             checkoutSessionResponse = checkoutSessionResponse,
         )
 }
