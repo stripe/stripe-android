@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -34,7 +34,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -220,16 +219,14 @@ private fun DocumentCaptureScreen(
                 text = stringResource(id = feedback),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(100.dp)
+                    .heightIn(min = 100.dp)
                     .padding(
                         top = dimensionResource(id = R.dimen.stripe_item_vertical_margin),
                         bottom = 48.dp
                     )
                     .semantics {
                         testTag = SCAN_MESSAGE_TAG
-                    },
-                maxLines = 3,
-                overflow = TextOverflow.Ellipsis
+                    }
             )
 
             CameraViewFinder(
