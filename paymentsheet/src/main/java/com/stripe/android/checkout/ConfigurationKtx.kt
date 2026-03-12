@@ -1,12 +1,9 @@
 package com.stripe.android.checkout
 
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
-
-@OptIn(CheckoutSessionPreview::class)
 internal fun PaymentSheet.Configuration.forCheckoutSession(
-    state: Checkout.State,
+    state: InternalState,
 ): PaymentSheet.Configuration {
     val response = state.checkoutSessionResponse
     val shouldSetEmail = defaultBillingDetails?.email == null && response.customerEmail != null

@@ -64,18 +64,18 @@ internal class CheckoutPlaygroundViewModel(
             .line2(addressDetails.address?.line2)
             .postalCode(addressDetails.address?.postalCode)
             .state(addressDetails.address?.state)
-        checkout.updateShippingAddress(address).also {
+        checkout.updateShippingAddress(address = address).also {
             _lastAddressDetails.value = addressDetails
         }
     }
 
     fun updatePostalCode(postalCode: String) = performWhileLoading {
         val address = Address().postalCode(postalCode).country("US")
-        checkout.updateShippingAddress(address)
+        checkout.updateShippingAddress(address = address)
     }
 
     fun clearShippingAddress() = performWhileLoading {
-        checkout.updateShippingAddress(Address().country("US")).also {
+        checkout.updateShippingAddress(address = Address().country("US")).also {
             _lastAddressDetails.value = null
         }
     }
