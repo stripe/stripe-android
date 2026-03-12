@@ -15,6 +15,7 @@ import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -540,21 +541,7 @@ class CheckoutTest {
     }
 
     private suspend fun runCreateWithStateScenario(
-        checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponse(
-            id = "cs_test_abc123",
-            amount = 1000L,
-            currency = "usd",
-            mode = CheckoutSessionResponse.Mode.PAYMENT,
-            customerEmail = null,
-            elementsSession = null,
-            paymentIntent = null,
-            setupIntent = null,
-            customer = null,
-            savedPaymentMethodsOfferSave = null,
-            totalSummary = null,
-            lineItems = emptyList(),
-            shippingOptions = emptyList(),
-        ),
+        checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
         block: suspend (Checkout) -> Unit,
     ) {
         val state = Checkout.State(

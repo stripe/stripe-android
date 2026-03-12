@@ -4,7 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import org.junit.Test
 
 @OptIn(CheckoutSessionPreview::class)
@@ -126,20 +126,8 @@ class ConfigurationKtxTest {
         shippingName: String? = null,
     ): Checkout.State {
         return Checkout.State(
-            checkoutSessionResponse = CheckoutSessionResponse(
-                id = "cs_test_abc123",
-                amount = 1000L,
-                currency = "usd",
-                mode = CheckoutSessionResponse.Mode.PAYMENT,
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 customerEmail = customerEmail,
-            elementsSession = null,
-            paymentIntent = null,
-            setupIntent = null,
-            customer = null,
-            savedPaymentMethodsOfferSave = null,
-            totalSummary = null,
-            lineItems = emptyList(),
-            shippingOptions = emptyList(),
             ),
             shippingName = shippingName,
         )

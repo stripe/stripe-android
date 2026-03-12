@@ -70,6 +70,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.toSavedSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.PaymentIntentInTerminalState
@@ -4608,12 +4609,9 @@ internal class DefaultPaymentElementLoaderTest {
     private fun createCheckoutSessionResponse(
         canDetachPaymentMethod: Boolean,
     ): CheckoutSessionResponse {
-        return CheckoutSessionResponse(
+        return CheckoutSessionResponseFactory.create(
             id = "cs_test_123",
             amount = 5099,
-            currency = "usd",
-            mode = CheckoutSessionResponse.Mode.PAYMENT,
-            customerEmail = null,
             elementsSession = ElementsSession(
                 linkSettings = null,
                 paymentMethodSpecs = null,
@@ -4635,17 +4633,11 @@ internal class DefaultPaymentElementLoaderTest {
                 accountId = "acct_123",
                 merchantId = "acct_123",
             ),
-            paymentIntent = null,
-            setupIntent = null,
             customer = CheckoutSessionResponse.Customer(
                 id = "cus_test_123",
                 paymentMethods = PaymentMethodFactory.cards(2),
                 canDetachPaymentMethod = canDetachPaymentMethod,
             ),
-            savedPaymentMethodsOfferSave = null,
-            totalSummary = null,
-            lineItems = emptyList(),
-            shippingOptions = emptyList(),
         )
     }
 
