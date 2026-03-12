@@ -22,12 +22,15 @@ internal data class ConfirmCheckoutSessionParams(
             }
             // Request full intent objects. Both are sent unconditionally (matching iOS behavior)
             // — the server ignores expands for the intent type that doesn't apply to the session mode.
-            put("expand", listOf(
-                "payment_intent",
-                "payment_intent.payment_method",
-                "setup_intent",
-                "setup_intent.payment_method",
-            ))
+            put(
+                "expand",
+                listOf(
+                    "payment_intent",
+                    "payment_intent.payment_method",
+                    "setup_intent",
+                    "setup_intent.payment_method",
+                )
+            )
         }
     }
 }
