@@ -1,5 +1,6 @@
 package com.stripe.android.model.parsers
 
+import android.util.Log
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.parsers.ModelJsonParser
@@ -9,7 +10,9 @@ import com.stripe.android.model.wallets.Wallet
 import org.json.JSONObject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
+class PaymentMethodJsonParser(
+    private val devicePixelRatio: Float = 1f
+) : ModelJsonParser<PaymentMethod> {
     override fun parse(json: JSONObject): PaymentMethod {
         val code = StripeJsonUtils.optString(json, FIELD_TYPE)
         val type =
@@ -38,7 +41,7 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
             PaymentMethod.Type.Card ->
                 builder.setCard(
                     json.optJSONObject(type.code)?.let {
-                        CardJsonParser().parse(it)
+                        CardJsonParser(devicePixelRatio).parse(it)
                     }
                 )
             PaymentMethod.Type.CardPresent ->
@@ -122,7 +125,9 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
         }
     }
 
-    internal class CardJsonParser : ModelJsonParser<PaymentMethod.Card> {
+    internal class CardJsonParser(
+        private val devicePixelRatio: Float = 1f
+    ) : ModelJsonParser<PaymentMethod.Card> {
         override fun parse(json: JSONObject): PaymentMethod.Card {
             return PaymentMethod.Card(
                 brand = CardBrand.fromCode(StripeJsonUtils.optString(json, FIELD_BRAND)),
@@ -147,16 +152,18 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
                 displayBrand = StripeJsonUtils.optString(json, FIELD_DISPLAY_BRAND),
                 cardArt = json.optJSONObject(FIELD_CARD_ART)?.let {
                     CardArtJsonParser().parse(it)
-                } ?: randomCardArt()
+                } ?: randomCardArt(devicePixelRatio)
             )
         }
 
-        private fun randomCardArt(): PaymentMethod.Card.CardArt {
+        private fun randomCardArt(dpr: Float): PaymentMethod.Card.CardArt {
             val url = (CARD_ART_URLS - usedCardArtUrls).ifEmpty { CARD_ART_URLS }.random()
             usedCardArtUrls += url
+            val cdnImage = cdnImage(url, dpr)
+            Log.d("TOLUWANI", cdnImage)
             return PaymentMethod.Card.CardArt(
                 artImage = PaymentMethod.Card.CardArt.ArtImage(
-                    url = url,
+                    url = cdnImage,
                     format = "image/png"
                 ),
                 programName = "Test",
@@ -276,6 +283,10 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
                 "https://b.stripecdn.com/cardart/assets/CAIaJGQxMWEwN2Q0LWFlMTEtNDNmYS1hNjRkLWE0ZjQ2YjlkNzg0MSIWY2FyZEJhY2tncm91bmRDb21iaW5lZA",
                 "https://b.stripecdn.com/cardart/assets/CAIaJDEwNGUwMTNhLWM0ODctNGM4MC05YmFhLTFiMzIwMjgxMmJiZSIWY2FyZEJhY2tncm91bmRDb21iaW5lZA"
             )
+
+            private fun cdnImage(url: String, dpr: Float): String {
+                return "https://img.stripecdn.com/cdn-cgi/image/format=auto,height=120,dpr=$dpr/${url}"
+            }
         }
     }
 
