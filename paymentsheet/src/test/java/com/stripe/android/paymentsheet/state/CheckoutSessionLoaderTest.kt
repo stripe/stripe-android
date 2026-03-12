@@ -1,10 +1,10 @@
 package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.isInstanceOf
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
@@ -15,23 +15,7 @@ internal class CheckoutSessionLoaderTest {
     fun `returns elements session from checkout response`() {
         val result = createLoader()(initMode(CHECKOUT_SESSION_RESPONSE))
 
-        assertThat(result.elementsSession).isEqualTo(CHECKOUT_SESSION_RESPONSE.elementsSession)
-    }
-
-    @Test
-    fun `returns CheckoutSession customer info when customer present`() {
-        val result = createLoader()(initMode(CHECKOUT_SESSION_RESPONSE))
-
-        assertThat(result.customerInfo).isInstanceOf<CustomerInfo.CheckoutSession>()
-        val checkoutCustomer = result.customerInfo as CustomerInfo.CheckoutSession
-        assertThat(checkoutCustomer.customer.id).isEqualTo("cus_test_123")
-    }
-
-    @Test
-    fun `returns null customer info when checkout response has no customer`() {
-        val result = createLoader()(initMode(CHECKOUT_SESSION_RESPONSE.copy(customer = null)))
-
-        assertThat(result.customerInfo).isNull()
+        assertThat(result).isEqualTo(CHECKOUT_SESSION_RESPONSE.elementsSession)
     }
 
     @Test
@@ -54,10 +38,9 @@ internal class CheckoutSessionLoaderTest {
     }
 
     private companion object {
-        private val CHECKOUT_SESSION_RESPONSE = CheckoutSessionResponse(
+        private val CHECKOUT_SESSION_RESPONSE = CheckoutSessionResponseFactory.create(
             id = "cs_test_123",
             amount = 5099,
-            currency = "usd",
             elementsSession = ElementsSession(
                 linkSettings = null,
                 paymentMethodSpecs = null,

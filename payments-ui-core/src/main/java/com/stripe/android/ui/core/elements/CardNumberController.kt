@@ -24,6 +24,7 @@ import com.stripe.android.cards.DefaultStaticCardAccountRanges
 import com.stripe.android.cards.StaticCardAccountRanges
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.networking.PaymentAnalyticsEvent
@@ -290,6 +291,15 @@ internal class DefaultCardNumberController(
         mostRecentUserSelectedBrand.value = CardBrand.fromCode(item.id)
     }
 
+    override fun onSelectorItemClicked(item: TextFieldIcon.Selector.Item) {
+        val newChoice = CardBrand.fromCode(item.id)
+        if (newChoice == mostRecentUserSelectedBrand.value) {
+            mostRecentUserSelectedBrand.value = null
+        } else {
+            mostRecentUserSelectedBrand.value = newChoice
+        }
+    }
+
     override fun onValidationStateChanged(isValidating: Boolean) {
         _isValidating.value = isValidating
     }
@@ -417,7 +427,11 @@ internal class DefaultCardNumberController(
     ): TextFieldIcon? {
         return when {
             isEligibleForCardBrandChoice && number.isNotEmpty() -> {
-                createDropdownIcon(brands, chosen)
+                if (FeatureFlags.newCbcSelector.isEnabled) {
+                    createSelectorIcon(brands, chosen)
+                } else {
+                    createDropdownIcon(brands, chosen)
+                }
             }
             accountRange != null -> {
                 TextFieldIcon.Trailing(accountRange.brand.icon, isTintable = false)
@@ -481,6 +495,62 @@ internal class DefaultCardNumberController(
         )
     }
 
+    private fun createSelectorIcon(
+        brands: List<CardBrand>,
+        chosen: CardBrand
+    ): TextFieldIcon.Selector {
+        val noSelection = TextFieldIcon.Selector.Item(
+            id = CardBrand.Unknown.code,
+            label = PaymentsCoreR.string.stripe_card_brand_choice_no_selection.resolvableString,
+            icon = CardBrand.Unknown.icon
+        )
+
+        val selected = if (brands.size == 1) {
+            val onlyAvailableBrand = brands[0]
+            TextFieldIcon.Selector.Item(
+                id = onlyAvailableBrand.code,
+                label = onlyAvailableBrand.displayName.resolvableString,
+                icon = onlyAvailableBrand.icon
+            )
+        } else {
+            when (chosen) {
+                CardBrand.Unknown -> null
+                else -> TextFieldIcon.Selector.Item(
+                    id = chosen.code,
+                    label = chosen.displayName.resolvableString,
+                    icon = chosen.icon
+                )
+            }
+        }
+
+        val items = brands.map { brand ->
+            val enabled = cardBrandFilter.isAccepted(brand)
+            TextFieldIcon.Selector.Item(
+                id = brand.code,
+                label = if (enabled) {
+                    brand.displayName.resolvableString
+                } else {
+                    resolvableString(
+                        R.string.stripe_card_brand_not_accepted_with_brand,
+                        brand.displayName
+                    )
+                },
+                icon = brand.icon,
+                enabled = enabled
+            )
+        }
+
+        val title = PaymentsCoreR.string.stripe_card_brand_choice_choose_card_brand.resolvableString
+
+        return TextFieldIcon.Selector(
+            message = title,
+            currentItem = selected ?: noSelection,
+            items = items,
+            hide = brands.size < 2,
+            hasMadeSelection = selected != null
+        )
+    }
+
     private fun createMultiTrailingIcon(number: String): TextFieldIcon.MultiTrailing {
         val cardBrands = CardBrand.getCardBrands(number).filter { cardBrandFilter.isAccepted(it) }
 
@@ -488,9 +558,12 @@ internal class DefaultCardNumberController(
             TextFieldIcon.Trailing(cardBrand.icon, isTintable = false)
         }.take(STATIC_ICON_COUNT)
 
-        val animatedIcons = cardBrands.map { cardBrand ->
-            TextFieldIcon.Trailing(cardBrand.icon, isTintable = false)
-        }.drop(STATIC_ICON_COUNT)
+        val animatedIcons = buildList {
+            if (isEligibleForCardBrandChoice && FeatureFlags.newCbcSelector.isEnabled) {
+                add(TextFieldIcon.Trailing(CardBrand.CartesBancaires.icon, isTintable = false))
+            }
+            addAll(cardBrands.drop(STATIC_ICON_COUNT).map { TextFieldIcon.Trailing(it.icon, isTintable = false) })
+        }
 
         return TextFieldIcon.MultiTrailing(
             staticIcons = staticIcons,

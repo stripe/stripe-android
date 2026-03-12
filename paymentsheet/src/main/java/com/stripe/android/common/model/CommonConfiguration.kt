@@ -13,6 +13,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferen
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.TermsDisplay
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -48,8 +49,13 @@ internal data class CommonConfiguration(
         return ConfigurationDefaults.allowedCardFundingTypes
     }
 
-    fun validate(isLiveMode: Boolean, @PaymentElementCallbackIdentifier callbackIdentifier: String) {
+    fun validate(
+        initializationMode: PaymentElementLoader.InitializationMode,
+        isLiveMode: Boolean,
+        @PaymentElementCallbackIdentifier callbackIdentifier: String,
+    ) {
         customerAndMerchantValidate()
+        checkoutSessionValidate(initializationMode)
         externalPaymentMethodsValidate(isLiveMode)
         confirmationTokenValidate(isLiveMode, callbackIdentifier)
 
@@ -74,6 +80,15 @@ internal data class CommonConfiguration(
                         " the Customer ID cannot be an empty string."
                 )
             }
+        }
+    }
+
+    private fun checkoutSessionValidate(initializationMode: PaymentElementLoader.InitializationMode) {
+        if (initializationMode is PaymentElementLoader.InitializationMode.CheckoutSession && customer != null) {
+            throw IllegalArgumentException(
+                "configuration.customer must not be set when using CheckoutSession initialization mode. " +
+                    "Customer information is provided by the checkout session."
+            )
         }
     }
 

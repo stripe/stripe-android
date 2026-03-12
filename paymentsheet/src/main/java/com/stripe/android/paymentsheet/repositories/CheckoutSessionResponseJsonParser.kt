@@ -8,6 +8,7 @@ import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.parsers.ElementsSessionJsonParser
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
+import com.stripe.android.model.parsers.SetupIntentJsonParser
 import org.json.JSONObject
 
 /**
@@ -27,10 +28,15 @@ internal class CheckoutSessionResponseJsonParser(
 
     override fun parse(json: JSONObject): CheckoutSessionResponse? {
         val sessionId = json.optString(FIELD_SESSION_ID).takeIf { it.isNotEmpty() } ?: return null
+        val mode = parseMode(json.optString(FIELD_MODE))
         val amount = extractDueAmount(json) ?: return null
         val currency = json.optString(FIELD_CURRENCY).takeIf { it.isNotEmpty() } ?: return null
+        val customerEmail = json.optString(FIELD_CUSTOMER_EMAIL).takeIf { it.isNotEmpty() }
         val paymentIntent = json.optJSONObject(FIELD_PAYMENT_INTENT)?.let {
             PaymentIntentJsonParser().parse(it)
+        }
+        val setupIntent = json.optJSONObject(FIELD_SETUP_INTENT)?.let {
+            SetupIntentJsonParser().parse(it)
         }
 
         val elementsSession = parseElementsSession(
@@ -42,17 +48,32 @@ internal class CheckoutSessionResponseJsonParser(
             json.optJSONObject(FIELD_SAVED_PAYMENT_METHODS_OFFER_SAVE)
         )
         val totalSummary = parseTotalSummaryResponse(json)
+        val lineItems = parseLineItems(json.optJSONObject(FIELD_LINE_ITEM_GROUP))
+        val shippingOptions = parseShippingOptions(json)
 
         return CheckoutSessionResponse(
             id = sessionId,
             amount = amount,
             currency = currency,
+            mode = mode,
+            customerEmail = customerEmail,
             elementsSession = elementsSession,
             paymentIntent = paymentIntent,
+            setupIntent = setupIntent,
             customer = customer,
             savedPaymentMethodsOfferSave = savedPaymentMethodsOfferSave,
             totalSummary = totalSummary,
+            lineItems = lineItems,
+            shippingOptions = shippingOptions,
         )
+    }
+
+    private fun parseMode(modeString: String): CheckoutSessionResponse.Mode {
+        return when (modeString) {
+            "payment" -> CheckoutSessionResponse.Mode.PAYMENT
+            "setup" -> CheckoutSessionResponse.Mode.SETUP
+            else -> CheckoutSessionResponse.Mode.UNKNOWN
+        }
     }
 
     private fun parseElementsSessionParams(
@@ -296,14 +317,25 @@ internal class CheckoutSessionResponseJsonParser(
     }
 
     private fun parseShippingRateFromJson(json: JSONObject): CheckoutSessionResponse.ShippingRate? {
+        val id = json.optString(FIELD_ID).takeIf { it.isNotEmpty() } ?: return null
         val amount = json.optLong(FIELD_AMOUNT, -1).takeIf { it >= 0 } ?: return null
         val displayName = json.optString(FIELD_DISPLAY_NAME).takeIf { it.isNotEmpty() } ?: return null
         val deliveryEstimate = parseDeliveryEstimate(json)
         return CheckoutSessionResponse.ShippingRate(
+            id = id,
             amount = amount,
             displayName = displayName,
             deliveryEstimate = deliveryEstimate,
         )
+    }
+
+    private fun parseShippingOptions(json: JSONObject): List<CheckoutSessionResponse.ShippingRate> {
+        val array = json.optJSONArray(FIELD_SHIPPING_OPTIONS) ?: return emptyList()
+        return (0 until array.length()).mapNotNull { i ->
+            val obj = array.optJSONObject(i) ?: return@mapNotNull null
+            val shippingRateJson = obj.optJSONObject(FIELD_SHIPPING_RATE) ?: return@mapNotNull null
+            parseShippingRateFromJson(shippingRateJson)
+        }
     }
 
     private fun parseDeliveryEstimate(json: JSONObject): String? {
@@ -331,13 +363,39 @@ internal class CheckoutSessionResponseJsonParser(
         }
     }
 
+    private fun parseLineItems(
+        lineItemGroup: JSONObject?,
+    ): List<CheckoutSessionResponse.LineItem> {
+        val array = lineItemGroup?.optJSONArray(FIELD_LINE_ITEMS) ?: return emptyList()
+        return (0 until array.length()).mapNotNull { i ->
+            val obj = array.optJSONObject(i) ?: return@mapNotNull null
+            val id = obj.optString(FIELD_ID).takeIf { it.isNotEmpty() } ?: return@mapNotNull null
+            val name = obj.optString(FIELD_NAME).takeIf { it.isNotEmpty() } ?: return@mapNotNull null
+            val quantity = obj.optInt(FIELD_QUANTITY, -1).takeIf { it > 0 } ?: return@mapNotNull null
+            val subtotal = obj.optLong(FIELD_SUBTOTAL, -1).takeIf { it >= 0 } ?: return@mapNotNull null
+            val total = obj.optLong(FIELD_TOTAL, -1).takeIf { it >= 0 } ?: return@mapNotNull null
+            val unitAmount = if (quantity > 0) total / quantity else null
+            CheckoutSessionResponse.LineItem(
+                id = id,
+                name = name,
+                quantity = quantity,
+                unitAmount = unitAmount,
+                subtotal = subtotal,
+                total = total,
+            )
+        }
+    }
+
     private companion object {
         private const val FIELD_SESSION_ID = "session_id"
+        private const val FIELD_MODE = "mode"
         private const val FIELD_CURRENCY = "currency"
+        private const val FIELD_CUSTOMER_EMAIL = "customer_email"
         private const val FIELD_ELEMENTS_SESSION = "elements_session"
         private const val FIELD_TOTAL_SUMMARY = "total_summary"
         private const val FIELD_DUE = "due"
         private const val FIELD_PAYMENT_INTENT = "payment_intent"
+        private const val FIELD_SETUP_INTENT = "setup_intent"
         private const val FIELD_SERVER_BUILT_ELEMENTS_SESSION_PARAMS = "server_built_elements_session_params"
         private const val FIELD_CUSTOMER = "customer"
         private const val FIELD_CUSTOMER_ID = "id"
@@ -363,6 +421,10 @@ internal class CheckoutSessionResponseJsonParser(
         private const val FIELD_SHIPPING_RATE = "shipping_rate"
         private const val FIELD_SHIPPING = "shipping"
         private const val FIELD_SHIPPING_OPTION = "shipping_option"
+        private const val FIELD_SHIPPING_OPTIONS = "shipping_options"
         private const val FIELD_DELIVERY_ESTIMATE = "delivery_estimate"
+        private const val FIELD_LINE_ITEMS = "line_items"
+        private const val FIELD_ID = "id"
+        private const val FIELD_QUANTITY = "quantity"
     }
 }

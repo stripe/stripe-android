@@ -208,7 +208,7 @@ class DefaultPaymentMethodFilterTest {
             paymentMethods = paymentMethods,
             params = PaymentMethodFilter.FilterParams(
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-                customerMetadata = CustomerMetadata(
+                customerMetadata = CustomerMetadata.CustomerSession(
                     id = "cus_1",
                     ephemeralKeySecret = "ek_123",
                     customerSessionClientSecret = "cuss_123",
@@ -216,7 +216,6 @@ class DefaultPaymentMethodFilterTest {
                     removePaymentMethod = PaymentMethodRemovePermission.Full,
                     saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
                     canRemoveLastPaymentMethod = false,
-                    canRemoveDuplicates = false,
                     canUpdateFullPaymentMethodDetails = false,
                 ),
                 remoteDefaultPaymentMethodId = remoteDefaultPaymentMethodId,

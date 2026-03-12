@@ -23,7 +23,10 @@ fi
 # Download Java from Adoptium (Eclipse Temurin)
 JAVA_DIR="$HOME/java-${JAVA_VERSION}"
 
-if [ ! -d "$JAVA_DIR" ]; then
+# Check for actual java binary, not just directory (directory may exist from a failed download)
+if [ ! -f "$JAVA_DIR/bin/java" ] && [ ! -f "$JAVA_DIR/Contents/Home/bin/java" ]; then
+  # Clean up any leftover directory from a previous failed attempt
+  rm -rf "$JAVA_DIR"
   echo "Downloading Java ${JAVA_VERSION} for ${OS}-${ARCH}..."
 
   # Construct download URL for Adoptium

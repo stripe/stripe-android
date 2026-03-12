@@ -475,6 +475,9 @@ internal class PlaygroundSettings private constructor(
             InitializationTypeSettingsDefinition,
             CheckoutSessionSaveSettingsDefinition,
             CheckoutSessionRemoveSettingsDefinition,
+            CheckoutSessionAdjustableQuantitySettingsDefinition,
+            CheckoutSessionAutomaticTaxSettingsDefinition,
+            CheckoutSessionDisplayShippingRatesSettingsDefinition,
             AllowPromotionCodesSettingsDefinition,
             CustomerSheetPaymentMethodModeDefinition,
             CustomerSessionSettingsDefinition,
@@ -488,6 +491,7 @@ internal class PlaygroundSettings private constructor(
             CustomerSessionOverrideRedisplaySettingsDefinition,
             CustomerSessionOnBehalfOfSettingsDefinition,
             CustomerSettingsDefinition,
+            CustomerEmailSettingsDefinition,
             CheckoutModeSettingsDefinition,
             UserCountryOverrideSettingsDefinition,
             LinkSettingsDefinition,
@@ -564,6 +568,8 @@ internal class PlaygroundSettings private constructor(
             AttestationOnIntentConfirmationDefinition,
             EnableTapToAddSettingsDefinition,
             CustomStripeApiDefinition,
+            FeatureFlagSettingsDefinition(FeatureFlags.newCbcSelector),
+            CaptureMethodSettingsDefinition,
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(

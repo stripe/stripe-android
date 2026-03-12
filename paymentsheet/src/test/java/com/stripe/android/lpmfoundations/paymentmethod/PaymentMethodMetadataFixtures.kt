@@ -9,15 +9,13 @@ import kotlinx.coroutines.flow.StateFlow
 
 internal object PaymentMethodMetadataFixtures {
 
-    internal val DEFAULT_CUSTOMER_METADATA = CustomerMetadata(
+    internal val DEFAULT_CUSTOMER_METADATA = CustomerMetadata.LegacyEphemeralKey(
         id = "cus_123",
         ephemeralKeySecret = "ek_123",
-        customerSessionClientSecret = null,
         isPaymentMethodSetAsDefaultEnabled = false,
         removePaymentMethod = PaymentMethodRemovePermission.Full,
         saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
         canRemoveLastPaymentMethod = true,
-        canRemoveDuplicates = true,
         canUpdateFullPaymentMethodDetails = false,
     )
 
@@ -31,8 +29,15 @@ internal object PaymentMethodMetadataFixtures {
         paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
     )
 
-    internal val CUSTOMER_SESSIONS_CUSTOMER_METADATA = DEFAULT_CUSTOMER_METADATA.copy(
+    internal val CUSTOMER_SESSIONS_CUSTOMER_METADATA = CustomerMetadata.CustomerSession(
+        id = "cus_123",
+        ephemeralKeySecret = "ek_123",
         customerSessionClientSecret = "cuss_123",
+        isPaymentMethodSetAsDefaultEnabled = false,
+        removePaymentMethod = PaymentMethodRemovePermission.Full,
+        saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
+        canRemoveLastPaymentMethod = true,
+        canUpdateFullPaymentMethodDetails = false,
     )
 
     internal fun getDefaultCustomerMetadata(
@@ -41,7 +46,6 @@ internal object PaymentMethodMetadataFixtures {
         removePaymentMethod: PaymentMethodRemovePermission = PaymentMethodRemovePermission.Full,
         saveConsent: PaymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
         canRemoveLastPaymentMethod: Boolean = true,
-        canRemoveDuplicates: Boolean = true,
         canUpdateFullPaymentMethodDetails: Boolean = false,
     ): CustomerMetadata? {
         return if (hasCustomerConfiguration) {
@@ -50,7 +54,6 @@ internal object PaymentMethodMetadataFixtures {
                 removePaymentMethod = removePaymentMethod,
                 saveConsent = saveConsent,
                 canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
-                canRemoveDuplicates = canRemoveDuplicates,
                 canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
             )
         } else {
@@ -64,7 +67,6 @@ internal object PaymentMethodMetadataFixtures {
         removePaymentMethod: PaymentMethodRemovePermission = PaymentMethodRemovePermission.Full,
         saveConsent: PaymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
         canRemoveLastPaymentMethod: Boolean = true,
-        canRemoveDuplicates: Boolean = true,
         canUpdateFullPaymentMethodDetails: Boolean = false,
     ): StateFlow<CustomerMetadata?> {
         return stateFlowOf(
@@ -74,7 +76,6 @@ internal object PaymentMethodMetadataFixtures {
                 removePaymentMethod = removePaymentMethod,
                 saveConsent = saveConsent,
                 canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
-                canRemoveDuplicates = canRemoveDuplicates,
                 canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
             )
         )

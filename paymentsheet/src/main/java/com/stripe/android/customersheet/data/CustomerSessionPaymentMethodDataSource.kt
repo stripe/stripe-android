@@ -38,11 +38,8 @@ internal class CustomerSessionPaymentMethodDataSource @Inject constructor(
         return withContext(workContext) {
             elementsSessionManager.fetchCustomerSessionEphemeralKey().mapCatching { ephemeralKey ->
                 customerRepository.updatePaymentMethod(
-                    customerInfo = CustomerRepository.CustomerInfo(
-                        id = ephemeralKey.customerId,
-                        ephemeralKeySecret = ephemeralKey.ephemeralKey,
-                        customerSessionClientSecret = ephemeralKey.customerSessionClientSecret,
-                    ),
+                    customerId = ephemeralKey.customerId,
+                    ephemeralKeySecret = ephemeralKey.ephemeralKey,
                     paymentMethodId = paymentMethodId,
                     params = params,
                 ).getOrThrow()
@@ -64,13 +61,10 @@ internal class CustomerSessionPaymentMethodDataSource @Inject constructor(
     override suspend fun detachPaymentMethod(paymentMethodId: String): CustomerSheetDataResult<PaymentMethod> {
         return withContext(workContext) {
             elementsSessionManager.fetchCustomerSessionEphemeralKey().mapCatching { ephemeralKey ->
-                customerRepository.detachPaymentMethod(
-                    customerInfo = CustomerRepository.CustomerInfo(
-                        id = ephemeralKey.customerId,
-                        ephemeralKeySecret = ephemeralKey.ephemeralKey,
-                        customerSessionClientSecret = ephemeralKey.customerSessionClientSecret,
-                    ),
-                    canRemoveDuplicates = true,
+                customerRepository.detachPaymentMethodAndDuplicates(
+                    customerId = ephemeralKey.customerId,
+                    ephemeralKeySecret = ephemeralKey.ephemeralKey,
+                    customerSessionClientSecret = ephemeralKey.customerSessionClientSecret,
                     paymentMethodId = paymentMethodId,
                 ).getOrThrow()
             }.toCustomerSheetDataResult()

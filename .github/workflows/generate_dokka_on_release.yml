@@ -1,0 +1,71 @@
+name: Generate Dokka on Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  generate-dokka:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Check if latest release
+        run: |
+          LATEST_TAG=$(gh release list --repo "$GITHUB_REPOSITORY" --limit 100 --json tagName --jq '.[].tagName' | sort -V | tail -n 1)
+          CURRENT_TAG="${{ github.event.release.tag_name }}"
+          if [ "$CURRENT_TAG" != "$LATEST_TAG" ]; then
+            echo "Skipping: $CURRENT_TAG is not the latest release ($LATEST_TAG)"
+            exit 1
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - uses: ./.github/actions/stripe_setup
+
+      - name: Generate Dokka documentation
+        run: |
+          rm -rf docs/
+          ./gradlew :dokkaGenerate
+
+      - name: Check for changes
+        id: check-changes
+        run: |
+          if git diff --quiet && [ -z "$(git ls-files --others --exclude-standard docs/)" ]; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate GitHub App token
+        if: steps.check-changes.outputs.has_changes == 'true'
+        id: generate-app-token
+        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf
+        with:
+          app-id: ${{ secrets.ANDROID_TRANSLATIONS_APP_ID }}
+          private-key: ${{ secrets.ANDROID_TRANSLATIONS_APP_PRIVATE_KEY }}
+
+      - name: Create Pull Request
+        if: steps.check-changes.outputs.has_changes == 'true'
+        uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0
+        id: create-pull-request
+        with:
+          token: ${{ steps.generate-app-token.outputs.token }}
+          commit-message: Generate dokka for ${{ github.event.release.tag_name }}
+          author: ${{ secrets.ANDROID_TRANSLATIONS_APP_AUTHOR }}
+          committer: ${{ secrets.ANDROID_TRANSLATIONS_APP_AUTHOR }}
+          title: Generate dokka for ${{ github.event.release.tag_name }}
+          body: Generated dokka documentation for ${{ github.event.release.tag_name }}.
+          branch: generateDokkaFor${{ github.event.release.tag_name }}
+          base: master
+          add-paths: docs/
+
+      - name: Enable Auto-Merge
+        if: ${{ steps.create-pull-request.outputs.pull-request-url }}
+        run: gh pr merge --squash --auto ${{ steps.create-pull-request.outputs.pull-request-url }}
+        env:
+          GH_TOKEN: ${{ github.token }}

@@ -185,7 +185,16 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
                     optString(json, FIELD_THREE_D_SECURE_2_INTENT),
                     optString(json, FIELD_PUBLISHABLE_KEY)
                 )
-                TYPE_INTENT_CONFIRMATION_CHALLENGE -> StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge
+                TYPE_INTENT_CONFIRMATION_CHALLENGE -> {
+                    val stripeJs = json.optJSONObject(FIELD_STRIPE_JS)
+                    val captchaVendorName = stripeJs?.let { optString(it, FIELD_CAPTCHA_VENDOR_NAME) }
+                        ?.takeIf { it.isNotEmpty() }
+                    StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge(
+                        stripeJs = StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge.StripeJs(
+                            captchaVendorName = captchaVendorName
+                        )
+                    )
+                }
                 else -> null
             }
         }
@@ -229,6 +238,9 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
 
             private const val FIELD_THREE_D_SECURE_2_INTENT = "three_d_secure_2_intent"
             private const val FIELD_PUBLISHABLE_KEY = "publishable_key"
+
+            private const val FIELD_STRIPE_JS = "stripe_js"
+            private const val FIELD_CAPTCHA_VENDOR_NAME = "captcha_vendor_name"
         }
     }
 

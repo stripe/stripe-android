@@ -5,12 +5,15 @@ import com.stripe.android.common.spms.withLinkState
 import com.stripe.android.common.taptoadd.TapToAddMode
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.utils.buyButtonLabel
@@ -64,7 +67,10 @@ internal interface TapToAddConfirmationInteractor {
     }
 
     interface Factory {
-        fun create(paymentMethod: PaymentMethod): TapToAddConfirmationInteractor
+        fun create(
+            paymentMethod: PaymentMethod,
+            paymentMethodOptionsParams: PaymentMethodOptionsParams?,
+        ): TapToAddConfirmationInteractor
     }
 }
 
@@ -72,6 +78,7 @@ internal class DefaultTapToAddConfirmationInteractor(
     private val coroutineScope: CoroutineScope,
     private val tapToAddMode: TapToAddMode,
     private val paymentMethod: PaymentMethod,
+    private val paymentMethodOptionsParams: PaymentMethodOptionsParams?,
     private val paymentMethodMetadata: PaymentMethodMetadata,
     private val confirmationHandler: ConfirmationHandler,
     private val linkFormHelper: SavedPaymentMethodLinkFormHelper,
@@ -80,8 +87,10 @@ internal class DefaultTapToAddConfirmationInteractor(
     private val onComplete: (paymentMethod: PaymentMethod) -> Unit,
 ) : TapToAddConfirmationInteractor {
     private val selection = linkFormHelper.state.mapAsStateFlow {
-        PaymentSelection.Saved(paymentMethod = paymentMethod)
-            .withLinkState(it)
+        PaymentSelection.Saved(
+            paymentMethod = paymentMethod,
+            paymentMethodOptionsParams = paymentMethodOptionsParams,
+        ).withLinkState(it)
     }
 
     private val _state = MutableStateFlow(
@@ -162,9 +171,9 @@ internal class DefaultTapToAddConfirmationInteractor(
         return TapToAddConfirmationInteractor.State(
             cardBrand = paymentMethod.card?.brand ?: CardBrand.Unknown,
             last4 = paymentMethod.card?.last4,
-            title = createLabel(useAmount = true),
+            title = createTitle(),
             primaryButton = TapToAddConfirmationInteractor.State.PrimaryButton(
-                label = createLabel(useAmount = false),
+                label = createButtonLabel(),
                 locked = tapToAddMode == TapToAddMode.Complete,
                 enabled = true,
                 state = TapToAddConfirmationInteractor.State.PrimaryButton.State.Idle,
@@ -181,10 +190,21 @@ internal class DefaultTapToAddConfirmationInteractor(
             .withConfirmationState(initialConfirmationState)
     }
 
-    private fun createLabel(useAmount: Boolean): ResolvableString {
+    private fun createTitle(): ResolvableString {
         return when (tapToAddMode) {
             TapToAddMode.Complete -> buyButtonLabel(
-                amount = paymentMethodMetadata.amount().takeIf { useAmount },
+                amount = paymentMethodMetadata.amount(),
+                primaryButtonLabel = null,
+                isForPaymentIntent = paymentMethodMetadata.stripeIntent is PaymentIntent
+            )
+            TapToAddMode.Continue -> R.string.stripe_tap_to_add_card_added_title.resolvableString
+        }
+    }
+
+    private fun createButtonLabel(): ResolvableString {
+        return when (tapToAddMode) {
+            TapToAddMode.Complete -> buyButtonLabel(
+                amount = null,
                 primaryButtonLabel = null,
                 isForPaymentIntent = paymentMethodMetadata.stripeIntent is PaymentIntent
             )
@@ -257,11 +277,15 @@ internal class DefaultTapToAddConfirmationInteractor(
         private val tapToAddCompletedInteractorFactory: TapToAddCompletedInteractor.Factory,
         private val tapToAddNavigator: Provider<TapToAddNavigator>,
     ) : TapToAddConfirmationInteractor.Factory {
-        override fun create(paymentMethod: PaymentMethod): TapToAddConfirmationInteractor {
+        override fun create(
+            paymentMethod: PaymentMethod,
+            paymentMethodOptionsParams: PaymentMethodOptionsParams?,
+        ): TapToAddConfirmationInteractor {
             return DefaultTapToAddConfirmationInteractor(
                 tapToAddMode = tapToAddMode,
                 paymentMethodMetadata = paymentMethodMetadata,
                 paymentMethod = paymentMethod,
+                paymentMethodOptionsParams = paymentMethodOptionsParams,
                 confirmationHandler = confirmationHandler,
                 eventReporter = eventReporter,
                 coroutineScope = viewModelScope,

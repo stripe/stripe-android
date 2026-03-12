@@ -24,8 +24,7 @@ internal class AttestationActivityContract :
         val result = intent?.extras?.let {
             BundleCompat.getParcelable(it, EXTRA_RESULT, AttestationActivityResult::class.java)
         }
-        return result
-            ?: AttestationActivityResult.Failed(IllegalStateException("No result received from AttestationActivity"))
+        return result ?: AttestationActivityResult.NoResult
     }
 
     @Parcelize

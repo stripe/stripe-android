@@ -10,6 +10,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.AndroidVerificationObject
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmationToken
@@ -517,7 +518,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         runInterceptorScenario(
             integrationMetadata = defaultIntegrationMetadata,
             scenario = InterceptorTestScenario(
-                ephemeralKeySecret = "ek_test_123",
+                customerMetadata = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA,
                 stripeRepository = object : AbsFakeStripeRepository() {
                     override suspend fun createConfirmationToken(
                         confirmationTokenParams: ConfirmationTokenParams,
@@ -568,7 +569,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         )
 
         val interceptor = createIntentConfirmationInterceptor(
-            ephemeralKeySecret = "ek_test_123",
+            customerMetadata = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA,
             integrationMetadata = defaultIntegrationMetadata,
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun createConfirmationToken(
@@ -747,7 +748,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         val observedParams = mutableListOf<ConfirmationTokenParams>()
 
         val interceptor = createIntentConfirmationInterceptor(
-            ephemeralKeySecret = "ek_test_123",
+            customerMetadata = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA,
             integrationMetadata = defaultIntegrationMetadata,
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun createConfirmationToken(
@@ -793,7 +794,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         val observedParams = mutableListOf<ConfirmationTokenParams>()
 
         val interceptor = createIntentConfirmationInterceptor(
-            ephemeralKeySecret = "ek_test_123",
+            customerMetadata = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA,
             integrationMetadata = defaultIntegrationMetadata,
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun createConfirmationToken(
@@ -839,7 +840,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         val observedParams = mutableListOf<ConfirmationTokenParams>()
 
         val interceptor = createIntentConfirmationInterceptor(
-            ephemeralKeySecret = "ek_test_123",
+            customerMetadata = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA,
             integrationMetadata = IntegrationMetadata.DeferredIntent.WithConfirmationToken(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
@@ -893,7 +894,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         val observedParams = mutableListOf<ConfirmationTokenParams>()
 
         val interceptor = createIntentConfirmationInterceptor(
-            ephemeralKeySecret = "ek_test_123",
+            customerMetadata = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA,
             integrationMetadata = IntegrationMetadata.DeferredIntent.WithConfirmationToken(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
@@ -947,7 +948,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         val observedParams = mutableListOf<ConfirmationTokenParams>()
 
         val interceptor = createIntentConfirmationInterceptor(
-            ephemeralKeySecret = "ek_test_123",
+            customerMetadata = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA,
             publishableKeyProvider = { "pk_test_123" },
             integrationMetadata = IntegrationMetadata.DeferredIntent.WithConfirmationToken(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
@@ -1234,7 +1235,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         runInterceptorScenario(
             integrationMetadata = integrationMetadata,
             scenario = InterceptorTestScenario(
-                ephemeralKeySecret = "ek_test_123",
+                customerMetadata = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA,
                 publishableKeyProvider = { if (isLiveMode) "pk_live_123" else "pk_test_123" },
                 stripeRepository = createFakeStripeRepositoryForConfirmationToken(
                     observedParams,

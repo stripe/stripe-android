@@ -14,6 +14,6 @@ internal class CheckoutPlaygroundContract : ActivityResultContract<Checkout.Stat
 
     override fun parseResult(resultCode: Int, intent: Intent?): Checkout.State? {
         @Suppress("DEPRECATION")
-        return intent?.getParcelableExtra(CheckoutPlaygroundActivity.CHECKOUT_STATE_KEY)
+        return intent?.getParcelableExtra(CheckoutPlaygroundViewModel.CHECKOUT_STATE_KEY)
     }
 }

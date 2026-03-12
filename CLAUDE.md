@@ -1,101 +1,36 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
 ## Commands
 
-**Build and Test**
 - `./gradlew build` - Build all modules
-- `./gradlew test` - Run unit tests for all modules
-- `./gradlew testDebugUnitTest` - Run debug unit tests only
-- `./gradlew connectedAndroidTest` - Run instrumentation tests (requires device)
-- `./gradlew :payments:test` - Run tests for a specific module
-- `./gradlew :example:assembleDebug` - Build example app
-- `./gradlew :paymentsheet-example:assembleBaseDebug` - Build PaymentSheet example app
+- `./gradlew test` - Run all unit tests
+- `./gradlew testDebugUnitTest` - Debug unit tests only
+- `./gradlew :MODULE:testDebugUnitTest` - Single module (e.g. `:payments-core`, `:paymentsheet`)
+- `./gradlew connectedAndroidTest` - Instrumentation tests (requires device)
+- `./gradlew detekt` - Static analysis
+- `./gradlew :dokkaGenerate` - API docs (outputs to docs/)
 
-**Code Quality**
-- `./gradlew detekt` - Run static analysis with Detekt
+**GitHub Issues** — use `gh` CLI with `GH_HOST=github.com` prefix (`export` for reads, inline for writes). Always use `--state all` when searching. Check existing issues before investigating user reports.
 
-**Documentation**
-- `./gradlew :dokkaGenerate` - Generate API documentation (outputs to docs/)
-
-**Testing Individual Modules**
-- Use module names from settings.gradle: `:payments-core`, `:paymentsheet`, `:financial-connections`, `:identity`, `:connect`, etc.
-- Example: `./gradlew :payments-core:testDebugUnitTest`
-
-**GitHub Issue Management**
-- **Read-only operations**: Use `export GH_HOST=github.com &&` prefix to avoid permission prompts
-  - `export GH_HOST=github.com && gh issue list --repo stripe/stripe-android --limit 20` - List recent issues
-  - `export GH_HOST=github.com && gh issue view <issue_number> --repo stripe/stripe-android` - View specific issue
-  - `export GH_HOST=github.com && gh issue view <issue_number> --repo stripe/stripe-android --comments` - View issue with comments
-  - `export GH_HOST=github.com && gh issue list --repo stripe/stripe-android --state all --search "keyword" --limit 30` - Search ALL issues (open/closed) by keyword
-- **Write operations**: Use `GH_HOST=github.com` prefix (keep permission prompts for safety)
-  - `GH_HOST=github.com gh issue create --repo stripe/stripe-android` - Create new issue
-  - `GH_HOST=github.com gh issue edit <issue_number> --repo stripe/stripe-android` - Edit issue
-  - `GH_HOST=github.com gh pr create --repo stripe/stripe-android` - Create pull request
-- Always use `--state all` when searching to include closed/resolved issues
-- Always check GitHub issues for similar problems before investigating user reports
-- Use GitHub CLI to distinguish between SDK bugs vs integration issues
-
-**Internal Tools**
-- Jira boards: MOBILESDK and RUN_MOBILESDK
-- Trailhead space: mobile-sdk
+**Internal Tools** — Jira: MOBILESDK, RUN_MOBILESDK | Trailhead space: mobile-sdk
 
 ## Architecture
 
-This is the **Stripe Android SDK**, a multi-module Android library for payment processing and financial services.
+Multi-module Android library for payment processing and financial services.
 
-**Core Architecture**
-- **payments-core**: Core payment functionality, API models, and Stripe API client
-- **payments**: High-level payment APIs and utilities (depends on payments-core)
-- **paymentsheet**: Pre-built payment UI components (PaymentSheet, FlowController)
-- **payments-ui-core**: Shared UI components and styling
-- **stripe-core**: Fundamental utilities shared across all modules
-- **payments-model**: Data models for payment objects
-
-**Specialized Modules**
-- **financial-connections**: Bank account linking and financial data
-- **identity**: Identity verification features
-- **connect**: Stripe Connect marketplace functionality
-- **3ds2sdk**: 3D Secure 2.0 authentication
-
-**Development Infrastructure**
-- **example**: Main example/demo application
-- **paymentsheet-example**: PaymentSheet-specific examples
-- **payments-core-testing**: Testing utilities for payments-core
-- **lint**: Custom Android lint rules
-- **screenshot-testing**: UI screenshot test utilities
+**Core**: `payments-core` (API models, Stripe client) → `payments` (high-level APIs) → `paymentsheet` (pre-built UI)
+**Shared**: `stripe-core` (utilities), `payments-model` (data models), `payments-ui-core` (shared UI)
+**Specialized**: `financial-connections`, `identity`, `connect`, `3ds2sdk`
+**Infra**: `example`, `paymentsheet-example`, `payments-core-testing`, `lint`, `screenshot-testing`
 
 **Key Patterns**
-- Modules follow Android library conventions with consumer ProGuard rules
-- Heavy use of Kotlin coroutines for async operations
-- Jetpack Compose UI components alongside traditional Android Views
-- Dependency injection with Dagger/Hilt in some modules
-- API compatibility validation with binary-compatibility-validator
+- Kotlin coroutines for async; Jetpack Compose + traditional Views
+- Dagger/Hilt DI in some modules; binary-compatibility-validator for API compat
+- Gradle with shared deps (dependencies.gradle), AGP 8.13.x, Kotlin 2.3.x
+- Detekt for static analysis, Paparazzi for screenshot testing
 
-**Build System**
-- Multi-module Gradle project with shared dependency management (dependencies.gradle)
-- Android Gradle Plugin 8.13.x with Kotlin 2.3.x
-- Build configurations in build-configuration/ directory
-- Detekt for static analysis
-- Paparazzi for screenshot testing
-- Custom deployment and versioning scripts in scripts/
-
-**Testing Strategy**
-- Unit tests with JUnit, **fakes** (preferred over mocks), and Truth assertions  
-- Use **Turbine** for Flow testing and for call tracking/verification in fakes
-- Instrumentation tests using Espresso and AndroidX Test
-- Robolectric for Android unit tests  
-- Screenshot testing with Paparazzi and custom screenshot-testing module
-- Compose UI tests with createComposeRule()
-
-**Testing Patterns**
-- Prefer **fakes over mocks** - create `FakeClassName` implementations when possible
-- Use mocks or indirect testing only when necessary
-- Prefer **`runScenario` pattern** to reduce test boilerplate — define a private `runScenario` function per test class that encapsulates fixture setup, exposing dependencies via lambda parameters or a `Scenario` data class receiver
-  - Simple tests: lambda parameters `runScenario { sut, fakeDep1, fakeDep2 -> ... }`
-  - Stateful/coroutine tests: `Scenario` data class + `runTest` integration
-  - Configurable tests: add parameters with defaults for behavioral variations
-- Flow testing: `flow.test { assertThat(awaitItem()).isEqualTo(expected) }`
-- Compose testing: `composeTestRule.onNodeWithText("text").assertIsDisplayed()`
-- Truth assertions: `assertThat(actual).isEqualTo(expected)`
+**Testing**
+- JUnit + Truth assertions + Robolectric
+- **Fakes over mocks** — MUST invoke `write-tests` skill before writing any test, MUST invoke `create-fake` skill before creating any fake
+- Turbine for Flow testing and call tracking in fakes
+- Compose UI tests with `createComposeRule()`

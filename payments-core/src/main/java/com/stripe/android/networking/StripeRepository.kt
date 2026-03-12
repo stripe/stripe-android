@@ -146,6 +146,12 @@ interface StripeRepository {
         options: ApiRequest.Options,
     ): Result<Customer>
 
+    suspend fun retrieveSavedPaymentMethodFromCardPresentPaymentMethod(
+        cardPresentPaymentMethodId: String,
+        customerId: String,
+        options: ApiRequest.Options,
+    ): Result<PaymentMethod>
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun createToken(
         tokenParams: TokenParams,

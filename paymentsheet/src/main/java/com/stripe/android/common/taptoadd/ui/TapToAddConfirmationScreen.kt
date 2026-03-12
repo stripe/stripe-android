@@ -35,28 +35,33 @@ internal fun ColumnScope.TapToAddConfirmationScreen(
             }
         }
 
-        with(state.primaryButton) {
-            PrimaryButton(
-                label = label.resolve(),
-                locked = locked,
-                enabled = true,
-                processingState = when (this.state) {
-                    TapToAddConfirmationInteractor.State.PrimaryButton.State.Idle ->
-                        PrimaryButtonProcessingState.Idle(null)
-                    TapToAddConfirmationInteractor.State.PrimaryButton.State.Processing ->
-                        PrimaryButtonProcessingState.Processing
-                },
-                onProcessingCompleted = {},
-                onClick = onPrimaryButtonPress,
-            )
-        }
-
-        Spacer(Modifier.size(10.dp))
-
         state.error?.let { error ->
             ErrorMessage(
                 error = error.resolve(),
             )
+
+            Spacer(Modifier.size(10.dp))
         }
+
+        with(state.primaryButton) {
+            TapToAddSharedPrimaryButton { modifier ->
+                PrimaryButton(
+                    label = label.resolve(),
+                    locked = locked,
+                    enabled = enabled,
+                    modifier = modifier,
+                    processingState = when (this.state) {
+                        TapToAddConfirmationInteractor.State.PrimaryButton.State.Idle ->
+                            PrimaryButtonProcessingState.Idle(null)
+                        TapToAddConfirmationInteractor.State.PrimaryButton.State.Processing ->
+                            PrimaryButtonProcessingState.Processing
+                    },
+                    onProcessingCompleted = {},
+                    onClick = onPrimaryButtonPress,
+                )
+            }
+        }
+
+        Spacer(Modifier.size(10.dp))
     }
 }

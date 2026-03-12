@@ -5,6 +5,7 @@ import org.json.JSONObject
 /**
  * Fixtures for checkout session responses from `/v1/payment_pages/{id}/init` API.
  */
+@Suppress("LargeClass")
 internal object CheckoutSessionFixtures {
 
     val CHECKOUT_SESSION_RESPONSE_JSON = JSONObject(
@@ -272,6 +273,7 @@ internal object CheckoutSessionFixtures {
             "total_summary": {
                 "due": 1000
             },
+            "customer_email": "customer@example.com",
             "customer": {
                 "id": "cus_test_customer",
                 "payment_methods": [
@@ -339,6 +341,23 @@ internal object CheckoutSessionFixtures {
             "total_summary": {
                 "due": 1000
             },
+            "elements_session": $MINIMAL_ELEMENTS_SESSION_JSON
+        }
+        """.trimIndent()
+    )
+
+    /**
+     * Guest checkout: no customer object but customer_email is present at top level.
+     */
+    val CHECKOUT_SESSION_GUEST_WITH_EMAIL_JSON = JSONObject(
+        """
+        {
+            "session_id": "cs_test_guest123",
+            "currency": "usd",
+            "total_summary": {
+                "due": 1000
+            },
+            "customer_email": "guest@example.com",
             "elements_session": $MINIMAL_ELEMENTS_SESSION_JSON
         }
         """.trimIndent()
@@ -471,6 +490,7 @@ internal object CheckoutSessionFixtures {
                     }
                 ],
                 "shipping_rate": {
+                    "id": "shr_standard",
                     "amount": 500,
                     "display_name": "Standard Shipping",
                     "delivery_estimate": "5-7 business days"
@@ -520,6 +540,48 @@ internal object CheckoutSessionFixtures {
     )
 
     /**
+     * Init response with multiple line items.
+     */
+    val CHECKOUT_SESSION_WITH_MULTIPLE_LINE_ITEMS_JSON = JSONObject(
+        """
+        {
+            "session_id": "cs_test_abc123",
+            "currency": "usd",
+            "total_summary": {
+                "due": 4497,
+                "subtotal": 4497,
+                "total": 4497
+            },
+            "line_item_group": {
+                "currency": "usd",
+                "total": 4497,
+                "subtotal": 4497,
+                "due": 4497,
+                "line_items": [
+                    {
+                        "id": "li_item1",
+                        "object": "item",
+                        "name": "Llama Figure",
+                        "quantity": 2,
+                        "subtotal": 1998,
+                        "total": 1998
+                    },
+                    {
+                        "id": "li_item2",
+                        "object": "item",
+                        "name": "Alpaca Plushie",
+                        "quantity": 1,
+                        "subtotal": 2499,
+                        "total": 2499
+                    }
+                ]
+            },
+            "elements_session": $MINIMAL_ELEMENTS_SESSION_JSON
+        }
+        """.trimIndent()
+    )
+
+    /**
      * Init response with shipping from shipping.shipping_option fallback path.
      */
     val CHECKOUT_SESSION_WITH_SHIPPING_OPTION_JSON = JSONObject(
@@ -540,6 +602,7 @@ internal object CheckoutSessionFixtures {
             },
             "shipping": {
                 "shipping_option": {
+                    "id": "shr_express",
                     "amount": 500,
                     "display_name": "Express Shipping",
                     "delivery_estimate": {
@@ -554,6 +617,158 @@ internal object CheckoutSessionFixtures {
                     }
                 }
             },
+            "elements_session": $MINIMAL_ELEMENTS_SESSION_JSON
+        }
+        """.trimIndent()
+    )
+
+    /**
+     * Init response for a setup-mode checkout session (no amount, no total_summary).
+     */
+    val CHECKOUT_SESSION_SETUP_MODE_RESPONSE_JSON = JSONObject(
+        """
+        {
+          "session_id": "cs_test_setup_abc123",
+          "object": "checkout.session",
+          "currency": "usd",
+          "mode": "setup",
+          "status": "open",
+          "livemode": false,
+          "total_summary": {
+            "due": 0,
+            "subtotal": 0,
+            "total": 0
+          },
+          "elements_session": $MINIMAL_ELEMENTS_SESSION_JSON,
+          "server_built_elements_session_params": {
+            "type": "deferred_intent",
+            "locale": "en-US",
+            "deferred_intent": {
+              "mode": "setup",
+              "setup_future_usage": "off_session",
+              "payment_method_types": ["card"]
+            }
+          }
+        }
+        """.trimIndent()
+    )
+
+    /**
+     * Confirm response for a setup-mode checkout session with a succeeded SetupIntent.
+     */
+    val CHECKOUT_SESSION_SETUP_CONFIRM_SUCCEEDED_JSON = JSONObject(
+        """
+        {
+            "session_id": "cs_test_setup_abc123",
+            "currency": "usd",
+            "mode": "setup",
+            "total_summary": {
+                "due": 0,
+                "subtotal": 0,
+                "total": 0
+            },
+            "setup_intent": {
+                "id": "seti_1QWK2VIyGgrkZxL71xfPBWG5",
+                "object": "setup_intent",
+                "status": "succeeded",
+                "client_secret": "seti_1QWK2VIyGgrkZxL71xfPBWG5_secret_abc123",
+                "payment_method": "pm_1234",
+                "payment_method_types": ["card"],
+                "livemode": false,
+                "created": 1734000000,
+                "usage": "off_session"
+            }
+        }
+        """.trimIndent()
+    )
+
+    /**
+     * Confirm response for a setup-mode checkout session with a SetupIntent that requires action.
+     */
+    val CHECKOUT_SESSION_SETUP_CONFIRM_REQUIRES_ACTION_JSON = JSONObject(
+        """
+        {
+            "session_id": "cs_test_setup_abc123",
+            "currency": "usd",
+            "mode": "setup",
+            "total_summary": {
+                "due": 0,
+                "subtotal": 0,
+                "total": 0
+            },
+            "setup_intent": {
+                "id": "seti_1QWK2VIyGgrkZxL71xfPBWG5",
+                "object": "setup_intent",
+                "status": "requires_action",
+                "client_secret": "seti_1QWK2VIyGgrkZxL71xfPBWG5_secret_abc123",
+                "payment_method": "pm_1234",
+                "payment_method_types": ["card"],
+                "livemode": false,
+                "created": 1734000000,
+                "usage": "off_session",
+                "next_action": {
+                    "redirect_to_url": {
+                        "return_url": "stripesdk://payment_return_url",
+                        "url": "https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecaz6CRMbs6FrXfuYKBRSUG/src_client_secret_test"
+                    },
+                    "type": "redirect_to_url"
+                }
+            }
+        }
+        """.trimIndent()
+    )
+
+    /**
+     * Init response with shipping_options array at the root level.
+     */
+    val CHECKOUT_SESSION_WITH_SHIPPING_OPTIONS_JSON = JSONObject(
+        """
+        {
+            "session_id": "cs_test_abc123",
+            "currency": "usd",
+            "shipping_rate": "shr_standard",
+            "total_summary": {
+                "due": 1500,
+                "subtotal": 1000,
+                "total": 1500
+            },
+            "line_item_group": {
+                "currency": "usd",
+                "total": 1500,
+                "subtotal": 1000,
+                "due": 1500,
+                "shipping_rate": {
+                    "id": "shr_standard",
+                    "amount": 500,
+                    "display_name": "Standard Shipping"
+                }
+            },
+            "shipping_options": [
+                {
+                    "shipping_rate": {
+                        "id": "shr_standard",
+                        "amount": 500,
+                        "display_name": "Standard Shipping",
+                        "currency": "usd"
+                    }
+                },
+                {
+                    "shipping_rate": {
+                        "id": "shr_express",
+                        "amount": 1500,
+                        "display_name": "Express Shipping",
+                        "currency": "usd"
+                    }
+                },
+                {
+                    "shipping_rate": {
+                        "id": "shr_free",
+                        "amount": 0,
+                        "display_name": "Free Shipping",
+                        "currency": "usd"
+                    }
+                }
+            ],
             "elements_session": $MINIMAL_ELEMENTS_SESSION_JSON
         }
         """.trimIndent()

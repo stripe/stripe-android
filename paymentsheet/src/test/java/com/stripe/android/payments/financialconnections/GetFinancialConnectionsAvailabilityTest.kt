@@ -101,7 +101,7 @@ class GetFinancialConnectionsAvailabilityTest {
         )
     }
 
-    fun createSession(flags: Map<ElementsSession.Flag, Boolean>): ElementsSession {
+    private fun createSession(flags: Map<ElementsSession.Flag, Boolean>): ElementsSession {
         return mock<ElementsSession> {
             on { this.flags } doReturn flags
         }

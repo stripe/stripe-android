@@ -9,6 +9,7 @@ import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.testing.FakeLogger
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.stripeterminal.Terminal
 import com.stripe.stripeterminal.external.callable.Callback
@@ -224,27 +225,32 @@ class DefaultTapToAddConnectionManagerTest {
     }
 
     @Test
-    fun `connect reports error on expected discovery call permission failure`() = test(
-        terminalInstance = mock {
-            mockSupportedReaderResult(ReaderSupportResult.Supported)
-            mockReaderCall()
-            mockDiscoverFailure(SecurityException("Permission failure!"))
+    fun `connect reports error on expected discovery call permission failure`() {
+        val exception = SecurityException("Permission failure!")
+
+        test(
+            terminalInstance = mock {
+                mockSupportedReaderResult(ReaderSupportResult.Supported)
+                mockReaderCall()
+                mockDiscoverFailure(exception)
+            }
+        ) {
+            manager.connect()
+
+            verify(terminalInstance).discoverReaders(
+                any<DiscoveryConfiguration.TapToPayDiscoveryConfiguration>(),
+                any<DiscoveryListener>(),
+                any<Callback>(),
+            )
+
+            val errorReportCall = errorReporter.awaitCall()
+
+            assertThat(logger.warningLogs).containsExactly("TapToAddConnectionError: $exception")
+            assertThat(errorReportCall.errorEvent)
+                .isEqualTo(ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_LOCATION_PERMISSIONS_FAILURE)
+            assertThat(errorReportCall.stripeException?.message).isEqualTo("Permission failure!")
+            assertThat(errorReportCall.additionalNonPiiParams).isEmpty()
         }
-    ) {
-        manager.connect()
-
-        verify(terminalInstance).discoverReaders(
-            any<DiscoveryConfiguration.TapToPayDiscoveryConfiguration>(),
-            any<DiscoveryListener>(),
-            any<Callback>(),
-        )
-
-        val errorReportCall = errorReporter.awaitCall()
-
-        assertThat(errorReportCall.errorEvent)
-            .isEqualTo(ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_LOCATION_PERMISSIONS_FAILURE)
-        assertThat(errorReportCall.stripeException?.message).isEqualTo("Permission failure!")
-        assertThat(errorReportCall.additionalNonPiiParams).isEmpty()
     }
 
     @Test
@@ -317,6 +323,9 @@ class DefaultTapToAddConnectionManagerTest {
 
         assertThat(errorReportCall.errorEvent)
             .isEqualTo(ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_NO_READER_FOUND)
+        assertThat(logger.warningLogs).containsExactly(
+            "TapToAddConnectionError: java.lang.IllegalStateException: No reader found!"
+        )
     }
 
     @Test
@@ -383,6 +392,7 @@ class DefaultTapToAddConnectionManagerTest {
         assertThat(successReportCall.errorEvent)
             .isEqualTo(ErrorReporter.ExpectedErrorEvent.TAP_TO_ADD_DISCOVER_READERS_CALL_FAILURE)
         assertThat(successReportCall.stripeException?.cause).isEqualTo(exception)
+        assertThat(logger.warningLogs).containsExactly("TapToAddConnectionError: $exception")
     }
 
     @Test
@@ -445,6 +455,8 @@ class DefaultTapToAddConnectionManagerTest {
             assertThat(errorCall.errorEvent)
                 .isEqualTo(ErrorReporter.ExpectedErrorEvent.TAP_TO_ADD_CONNECT_READER_CALL_FAILURE)
             assertThat(errorCall.stripeException?.cause).isEqualTo(exception)
+            assertThat(logger.warningLogs)
+                .containsExactly("TapToAddConnectionError: $exception")
         }
     }
 
@@ -691,6 +703,7 @@ class DefaultTapToAddConnectionManagerTest {
         block: suspend Scenario.() -> Unit
     ) = runTest {
         val errorReporter = FakeErrorReporter()
+        val logger = FakeLogger()
 
         TestTerminalWrapper.test(
             isInitialized = isInitialized,
@@ -703,11 +716,13 @@ class DefaultTapToAddConnectionManagerTest {
                         workContext = testDispatcher,
                         terminalWrapper = wrapper,
                         errorReporter = errorReporter,
+                        logger = logger,
                         isSimulated = isSimulated,
                     ),
                     terminalInstance = terminalInstance,
                     errorReporter = errorReporter,
                     testScope = this@runTest,
+                    logger = logger,
                     wrapperScenario = this
                 )
             )
@@ -726,6 +741,7 @@ class DefaultTapToAddConnectionManagerTest {
     private class Scenario(
         val testScope: TestScope,
         val manager: TapToAddConnectionManager,
+        val logger: FakeLogger,
         val terminalInstance: Terminal,
         val errorReporter: FakeErrorReporter,
         val wrapperScenario: TestTerminalWrapper.Scenario
