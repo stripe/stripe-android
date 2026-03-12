@@ -2,6 +2,7 @@ package com.stripe.android.crypto.onramp
 
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
+import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsEvent
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsService
@@ -29,6 +30,7 @@ import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
+import com.stripe.android.crypto.onramp.model.OnrampSessionClientSecretProvider
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationResponse
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.crypto.onramp.ui.KycRefreshScreenAction
@@ -67,7 +69,9 @@ class OnrampInteractorTest {
         application = RuntimeEnvironment.getApplication(),
         linkController = linkController,
         cryptoApiRepository = cryptoApiRepository,
-        analyticsServiceFactory = analyticsServiceFactory
+        analyticsServiceFactory = analyticsServiceFactory,
+        checkoutHandler = OnrampSessionClientSecretProvider { "test_secret" },
+        savedStateHandle = SavedStateHandle()
     )
 
     @Test
