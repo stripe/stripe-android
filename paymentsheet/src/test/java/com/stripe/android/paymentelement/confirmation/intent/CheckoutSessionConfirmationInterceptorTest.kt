@@ -26,6 +26,7 @@ import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadat
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.repositories.ConfirmCheckoutSessionParams
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.PaymentIntentFactory
@@ -288,20 +289,9 @@ class CheckoutSessionConfirmationInterceptorTest {
     }
 
     private fun createCheckoutSessionResponse(paymentIntent: PaymentIntent?): CheckoutSessionResponse {
-        return CheckoutSessionResponse(
+        return CheckoutSessionResponseFactory.create(
             id = "cs_test_123",
-            amount = 1000L,
-            currency = "usd",
-            mode = CheckoutSessionResponse.Mode.PAYMENT,
-            customerEmail = null,
-            elementsSession = null,
             paymentIntent = paymentIntent,
-            setupIntent = null,
-            customer = null,
-            savedPaymentMethodsOfferSave = null,
-            totalSummary = null,
-            lineItems = emptyList(),
-            shippingOptions = emptyList(),
         )
     }
 

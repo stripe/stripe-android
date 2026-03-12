@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse.TotalSummaryResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import org.junit.Test
 
 @OptIn(CheckoutSessionPreview::class)
@@ -208,17 +209,10 @@ class AsCheckoutSessionTest {
         lineItems: List<CheckoutSessionResponse.LineItem> = emptyList(),
         shippingOptions: List<CheckoutSessionResponse.ShippingRate> = emptyList(),
     ): CheckoutSessionResponse {
-        return CheckoutSessionResponse(
+        return CheckoutSessionResponseFactory.create(
             id = id,
-            amount = 1000L,
             currency = currency,
-            mode = CheckoutSessionResponse.Mode.PAYMENT,
             customerEmail = customerEmail,
-            elementsSession = null,
-            paymentIntent = null,
-            setupIntent = null,
-            customer = null,
-            savedPaymentMethodsOfferSave = null,
             totalSummary = totalSummary,
             lineItems = lineItems,
             shippingOptions = shippingOptions,
