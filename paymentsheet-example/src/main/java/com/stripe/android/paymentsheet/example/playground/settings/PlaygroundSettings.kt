@@ -564,7 +564,6 @@ internal class PlaygroundSettings private constructor(
                 listOf(PlaygroundConfigurationData.IntegrationType.LinkController)
             ),
             TermsDisplaySettingsDefinition,
-            PassiveCaptchaDefinition,
             AttestationOnIntentConfirmationDefinition,
             EnableTapToAddSettingsDefinition,
             CustomStripeApiDefinition,

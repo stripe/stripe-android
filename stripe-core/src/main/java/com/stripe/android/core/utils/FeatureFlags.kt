@@ -13,7 +13,6 @@ object FeatureFlags {
     val forceEnableNativeFinancialConnections = FeatureFlag("Force enable FC Native")
     val showInlineOtpInWalletButtons = FeatureFlag("Show Inline Signup in Wallet Buttons")
     val forceEnableLinkPaymentSelectionHint = FeatureFlag("Link: Force enable payment selection hint")
-    val enablePassiveCaptcha = FeatureFlag("Enable Passive Captcha")
     val forceLinkWebAuth = FeatureFlag("Link: Force web auth")
     val enableAttestationOnIntentConfirmation = FeatureFlag("Enable Attestation on Intent Confirmation")
     val enableTapToAdd = FeatureFlag("Enable Tap to Add")
