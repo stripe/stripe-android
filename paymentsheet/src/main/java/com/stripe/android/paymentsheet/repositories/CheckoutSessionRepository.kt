@@ -100,7 +100,6 @@ internal class DefaultCheckoutSessionRepository @Inject constructor(
             "browser_timezone" to TimeZone.getDefault().id,
             "eid" to UUID.randomUUID().toString(),
             "redirect_type" to "embedded",
-            "elements_session_client[is_aggregation_expected]" to "true",
         ),
     )
 
@@ -129,7 +128,6 @@ internal class DefaultCheckoutSessionRepository @Inject constructor(
         url = updateUrl(sessionId),
         params = mapOf(
             "promotion_code" to promotionCode,
-            "elements_session_client[is_aggregation_expected]" to "true",
         ),
     )
 
@@ -153,7 +151,6 @@ internal class DefaultCheckoutSessionRepository @Inject constructor(
         url = updateUrl(sessionId),
         params = mapOf(
             "shipping_rate" to shippingRateId,
-            "elements_session_client[is_aggregation_expected]" to "true",
         ),
     )
 
@@ -169,7 +166,6 @@ internal class DefaultCheckoutSessionRepository @Inject constructor(
             putIfNotEmpty("tax_region[city]", address.city)
             putIfNotEmpty("tax_region[state]", address.state)
             putIfNotEmpty("tax_region[postal_code]", address.postalCode)
-            put("elements_session_client[is_aggregation_expected]", "true")
         },
     )
 

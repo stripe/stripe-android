@@ -297,7 +297,6 @@ class CheckoutTest {
                 method("POST"),
                 path("/v1/payment_pages/cs_test_abc123"),
                 bodyPart("shipping_rate", "shr_express"),
-                bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
             ) { response ->
                 response.testBodyFromFile("checkout-session-select-shipping-rate.json")
             }
@@ -334,7 +333,6 @@ class CheckoutTest {
                 bodyPart(urlEncode("tax_region[city]"), "Denver"),
                 bodyPart(urlEncode("tax_region[state]"), "CO"),
                 bodyPart(urlEncode("tax_region[postal_code]"), "80202"),
-                bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
             ) { response ->
                 response.testBodyFromFile("checkout-session-update-shipping-address.json")
             }
@@ -415,7 +413,6 @@ class CheckoutTest {
                 not(hasBodyPart(urlEncode("tax_region[state]"))),
                 not(hasBodyPart(urlEncode("tax_region[line1]"))),
                 not(hasBodyPart(urlEncode("tax_region[line2]"))),
-                bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
             ) { response ->
                 response.testBodyFromFile("checkout-session-update-shipping-address.json")
             }
@@ -481,7 +478,6 @@ class CheckoutTest {
                 path("/v1/payment_pages/cs_test_after_promo"),
                 bodyPart(urlEncode("tax_region[country]"), "US"),
                 bodyPart(urlEncode("tax_region[postal_code]"), "80202"),
-                bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
             ) { response ->
                 response.testBodyFromFile("checkout-session-concurrent-update-address.json")
             }
