@@ -465,7 +465,7 @@ class LinkApiRepositoryTest {
                 PaymentMethodCreateParams.createLink(
                     paymentDetails.paymentDetails.first().id,
                     consumerSessionSecret,
-                    billingDetails = PaymentMethod.BillingDetails(email = email),
+                    billingDetails = cardPaymentMethodCreateParams.billingDetails,
                     extraParams = mapOf("card" to mapOf("cvc" to "123")),
                     clientAttributionMetadata = clientAttributionMetadata,
                     originalPaymentMethodCode = "card",
