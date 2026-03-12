@@ -1,18 +1,20 @@
 package com.stripe.android.common.taptoadd
 
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R as StripeR
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.confirmation.intent.CallbackNotFoundException
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CreateIntentResult
-import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.stripeterminal.external.callable.Callback
 import com.stripe.stripeterminal.external.callable.Cancelable
 import com.stripe.stripeterminal.external.callable.SetupIntentCallback
@@ -46,7 +48,8 @@ internal interface TapToAddCollectionHandler {
         fun create(
             isStripeTerminalSdkAvailable: IsStripeTerminalSdkAvailable,
             terminalWrapper: TerminalWrapper,
-            savedPaymentMethodRepository: SavedPaymentMethodRepository,
+            stripeRepository: StripeRepository,
+            paymentConfiguration: PaymentConfiguration,
             connectionManager: TapToAddConnectionManager,
             tapToPayUxConfiguration: TapToPayUxConfiguration,
             errorReporter: ErrorReporter,
@@ -56,7 +59,8 @@ internal interface TapToAddCollectionHandler {
                 DefaultTapToAddCollectionHandler(
                     terminalWrapper = terminalWrapper,
                     connectionManager = connectionManager,
-                    savedPaymentMethodRepository = savedPaymentMethodRepository,
+                    stripeRepository = stripeRepository,
+                    paymentConfiguration = paymentConfiguration,
                     tapToPayUxConfiguration = tapToPayUxConfiguration,
                     errorReporter = errorReporter,
                     createCardPresentSetupIntentCallbackRetriever = createCardPresentSetupIntentCallbackRetriever,
@@ -71,7 +75,8 @@ internal interface TapToAddCollectionHandler {
 @OptIn(TapToAddPreview::class)
 internal class DefaultTapToAddCollectionHandler(
     private val terminalWrapper: TerminalWrapper,
-    private val savedPaymentMethodRepository: SavedPaymentMethodRepository,
+    private val stripeRepository: StripeRepository,
+    private val paymentConfiguration: PaymentConfiguration,
     private val connectionManager: TapToAddConnectionManager,
     private val errorReporter: ErrorReporter,
     private val tapToPayUxConfiguration: TapToPayUxConfiguration,
@@ -243,10 +248,7 @@ internal class DefaultTapToAddCollectionHandler(
         intent: SetupIntent,
         customerMetadata: CustomerMetadata,
     ): PaymentMethod {
-        val paymentMethodDetails = intent.latestAttempt?.paymentMethodDetails
-        val presentDetails = paymentMethodDetails?.cardPresentDetails
-            ?: paymentMethodDetails?.interacPresentDetails
-        val generatedCardId = presentDetails?.generatedCard
+        val paymentMethodId = intent.paymentMethodId
             ?: run {
                 errorReporter.report(
                     ErrorReporter
@@ -255,13 +257,25 @@ internal class DefaultTapToAddCollectionHandler(
                 )
 
                 throw IllegalStateException(
-                    "No generated card payment method after collecting through tap!"
+                    "No card payment method after collecting through tap!"
                 )
             }
 
-        return savedPaymentMethodRepository.retrievePaymentMethod(
-            customerMetadata = customerMetadata,
-            paymentMethodId = generatedCardId,
+        val (customerId, ephemeralKeySecret) = when (customerMetadata) {
+            is CustomerMetadata.CustomerSession -> customerMetadata.id to customerMetadata.ephemeralKeySecret
+            is CustomerMetadata.LegacyEphemeralKey -> customerMetadata.id to customerMetadata.ephemeralKeySecret
+            is CustomerMetadata.CheckoutSession -> {
+                throw NotImplementedError("Checkout sessions do not support retrieving individual payment methods!")
+            }
+        }
+
+        return stripeRepository.retrieveSavedPaymentMethodFromCardPresentPaymentMethod(
+            cardPresentPaymentMethodId = paymentMethodId,
+            customerId = customerId,
+            options = ApiRequest.Options(
+                apiKey = ephemeralKeySecret,
+                stripeAccount = paymentConfiguration.stripeAccountId,
+            )
         ).getOrThrow()
     }
 
