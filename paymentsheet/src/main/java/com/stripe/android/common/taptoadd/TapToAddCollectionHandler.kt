@@ -19,8 +19,8 @@ import com.stripe.stripeterminal.external.callable.Callback
 import com.stripe.stripeterminal.external.callable.Cancelable
 import com.stripe.stripeterminal.external.callable.SetupIntentCallback
 import com.stripe.stripeterminal.external.models.AllowRedisplay
+import com.stripe.stripeterminal.external.models.CollectSetupIntentConfiguration
 import com.stripe.stripeterminal.external.models.SetupIntent
-import com.stripe.stripeterminal.external.models.SetupIntentConfiguration
 import com.stripe.stripeterminal.external.models.TapToPayUxConfiguration
 import com.stripe.stripeterminal.external.models.TerminalErrorCode
 import com.stripe.stripeterminal.external.models.TerminalException
@@ -171,7 +171,7 @@ internal class DefaultTapToAddCollectionHandler(
         val cancellable = terminal().collectSetupIntentPaymentMethod(
             intent = intent,
             allowRedisplay = AllowRedisplay.ALWAYS,
-            config = SetupIntentConfiguration.Builder().build(),
+            config = CollectSetupIntentConfiguration.Builder().build(),
             callback = continuation.createSetupIntentCallback(),
         )
 
