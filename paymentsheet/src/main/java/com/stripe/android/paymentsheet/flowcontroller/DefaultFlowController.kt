@@ -237,9 +237,7 @@ internal class DefaultFlowController @Inject internal constructor(
         callback: PaymentSheet.FlowController.ConfigCallback
     ) {
         configure(
-            mode = PaymentElementLoader.InitializationMode.CheckoutSession(
-                checkoutSessionResponse = checkout.internalState.checkoutSessionResponse,
-            ),
+            mode = checkout.internalState.initializationMode,
             configuration = configuration.forCheckoutSession(checkout.internalState),
             callback = callback,
         )

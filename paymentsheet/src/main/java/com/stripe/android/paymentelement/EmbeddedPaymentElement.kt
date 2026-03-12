@@ -100,10 +100,10 @@ class EmbeddedPaymentElement @Inject internal constructor(
         checkout: Checkout,
         configuration: Configuration,
     ): ConfigureResult {
-        val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
-            checkoutSessionResponse = checkout.internalState.checkoutSessionResponse,
+        return configurationCoordinator.configure(
+            configuration = configuration,
+            initializationMode = checkout.internalState.initializationMode
         )
-        return configurationCoordinator.configure(configuration, initializationMode)
     }
 
     /**
