@@ -293,6 +293,7 @@ internal class FaceDetectorTransitioner(
             // Match iOS: treat frames as invalid only when motion blur is explicitly detected.
             motionBlurResult?.hasMotionBlur != true
 
+    @Suppress("MagicNumber")
     private fun calculateBestFrameScore(
         analyzerOutput: FaceDetectorOutput,
         motionBlurResult: MotionBlurDetector.Output?,
@@ -315,6 +316,7 @@ internal class FaceDetectorTransitioner(
             ) / 4f
     }
 
+    @Suppress("MagicNumber")
     private fun calculateCenteringScore(boundingBox: BoundingBox): Float {
         // Mirrors iOS: euclidean distance from center, normalized to [0, 1].
         val midX = boundingBox.left + (boundingBox.width / 2f)
