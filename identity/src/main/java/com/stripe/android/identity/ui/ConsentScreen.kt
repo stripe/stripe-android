@@ -33,6 +33,8 @@ import androidx.navigation.NavController
 import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONSENT
 import com.stripe.android.identity.navigation.ConsentDestination
+import com.stripe.android.identity.navigation.OTPDestination
+import com.stripe.android.identity.navigation.navigateTo
 import com.stripe.android.identity.navigation.navigateToErrorScreenWithDefaultValues
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.CollectedDataParam
@@ -97,7 +99,10 @@ internal fun ConsentScreen(
                         CollectedDataParam(
                             biometricConsent = true
                         ),
-                        ConsentDestination.ROUTE.route
+                        ConsentDestination.ROUTE.route,
+                        onMissingPhoneOtp = {
+                            navController.navigateTo(OTPDestination)
+                        }
                     )
                 }
             },
@@ -108,7 +113,10 @@ internal fun ConsentScreen(
                         CollectedDataParam(
                             biometricConsent = false
                         ),
-                        ConsentDestination.ROUTE.route
+                        ConsentDestination.ROUTE.route,
+                        onMissingPhoneOtp = {
+                            navController.navigateTo(OTPDestination)
+                        }
                     )
                 }
             }
