@@ -14,14 +14,14 @@ internal fun PaymentSheet.Configuration.forCheckoutSession(
         defaultBillingDetails(
             PaymentSheet.BillingDetails(
                 address = defaultBillingDetails?.address,
-                email = response.customerEmail ?: defaultBillingDetails?.email,
-                name = state.billingName ?: defaultBillingDetails?.name,
+                email = defaultBillingDetails?.email ?: response.customerEmail,
+                name = defaultBillingDetails?.name ?: state.billingName,
                 phone = defaultBillingDetails?.phone,
             )
         )
         shippingDetails(
             AddressDetails(
-                name = state.shippingName,
+                name = shippingDetails?.name ?: state.shippingName,
                 address = shippingDetails?.address,
                 phoneNumber = shippingDetails?.phoneNumber,
                 isCheckboxSelected = shippingDetails?.isCheckboxSelected,

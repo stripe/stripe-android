@@ -21,6 +21,18 @@ class ConfigurationKtxTest {
     }
 
     @Test
+    fun `preserves merchant email when already set`() {
+        val config = configuration(
+            defaultBillingDetails = PaymentSheet.BillingDetails(email = "merchant@example.com"),
+        )
+        val state = state(customerEmail = "checkout@example.com")
+
+        val result = config.forCheckoutSession(state)
+
+        assertThat(result.defaultBillingDetails?.email).isEqualTo("merchant@example.com")
+    }
+
+    @Test
     fun `preserves existing billing details fields when setting email`() {
         val address = PaymentSheet.Address(
             city = "San Francisco",
@@ -110,14 +122,56 @@ class ConfigurationKtxTest {
     }
 
     @Test
-    fun `sets both email and shipping name simultaneously`() {
+    fun `preserves merchant shipping name when already set`() {
+        val config = configuration(
+            shippingDetails = AddressDetails(name = "Merchant Shipping"),
+        )
+        val state = state(shippingName = "State Shipping")
+
+        val result = config.forCheckoutSession(state)
+
+        assertThat(result.shippingDetails?.name).isEqualTo("Merchant Shipping")
+    }
+
+    @Test
+    fun `preserves merchant billing name when already set`() {
+        val config = configuration(
+            defaultBillingDetails = PaymentSheet.BillingDetails(name = "Merchant Billing"),
+        )
+        val state = state(billingName = "State Billing")
+
+        val result = config.forCheckoutSession(state)
+
+        assertThat(result.defaultBillingDetails?.name).isEqualTo("Merchant Billing")
+    }
+
+    @Test
+    fun `sets email and billing name and shipping name simultaneously`() {
         val config = configuration()
-        val state = state(customerEmail = "test@example.com", shippingName = "John Doe")
+        val state = state(
+            customerEmail = "test@example.com",
+            billingName = "Jane Billing",
+            shippingName = "John Shipping",
+        )
 
         val result = config.forCheckoutSession(state)
 
         assertThat(result.defaultBillingDetails?.email).isEqualTo("test@example.com")
-        assertThat(result.shippingDetails?.name).isEqualTo("John Doe")
+        assertThat(result.defaultBillingDetails?.name).isEqualTo("Jane Billing")
+        assertThat(result.shippingDetails?.name).isEqualTo("John Shipping")
+    }
+
+    @Test
+    fun `preserves other configuration properties`() {
+        val config = PaymentSheet.Configuration.Builder("Test Merchant")
+            .primaryButtonLabel("Pay now")
+            .build()
+        val state = state()
+
+        val result = config.forCheckoutSession(state)
+
+        assertThat(result.merchantDisplayName).isEqualTo("Test Merchant")
+        assertThat(result.primaryButtonLabel).isEqualTo("Pay now")
     }
 
     private fun configuration(
