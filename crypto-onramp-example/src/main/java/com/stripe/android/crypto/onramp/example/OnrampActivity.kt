@@ -1051,9 +1051,9 @@ private fun KYCScreen(
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var ssn by remember { mutableStateOf("000000000") }
-    var dobDay by remember { mutableStateOf("") }
-    var dobMonth by remember { mutableStateOf("") }
-    var dobYear by remember { mutableStateOf("") }
+    var dobDay by remember { mutableStateOf("1") }
+    var dobMonth by remember { mutableStateOf("1") }
+    var dobYear by remember { mutableStateOf("1990") }
 
     Column {
         Text(
