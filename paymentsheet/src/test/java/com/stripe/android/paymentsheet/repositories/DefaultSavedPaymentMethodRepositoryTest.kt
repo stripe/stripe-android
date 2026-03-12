@@ -253,20 +253,15 @@ class DefaultSavedPaymentMethodRepositoryTest {
     )
 
     companion object {
-        private val FAKE_CHECKOUT_SESSION_RESPONSE = CheckoutSessionResponse(
+        private val FAKE_CHECKOUT_SESSION_RESPONSE = CheckoutSessionResponseFactory.create(
             id = "cs_123",
-            amount = 1000,
-            currency = "usd",
         )
 
         private val CHECKOUT_SESSION_METADATA = CustomerMetadata.CheckoutSession(
             sessionId = "cs_123",
             customerId = "cus_123",
-            isPaymentMethodSetAsDefaultEnabled = false,
             removePaymentMethod = PaymentMethodRemovePermission.Full,
             saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
-            canRemoveLastPaymentMethod = false,
-            canUpdateFullPaymentMethodDetails = false,
         )
 
         private val SESSION_METADATA = CustomerMetadata.CustomerSession(

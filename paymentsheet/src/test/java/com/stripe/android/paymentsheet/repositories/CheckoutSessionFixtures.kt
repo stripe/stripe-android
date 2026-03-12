@@ -623,6 +623,102 @@ internal object CheckoutSessionFixtures {
     )
 
     /**
+     * Init response for a setup-mode checkout session (no amount, no total_summary).
+     */
+    val CHECKOUT_SESSION_SETUP_MODE_RESPONSE_JSON = JSONObject(
+        """
+        {
+          "session_id": "cs_test_setup_abc123",
+          "object": "checkout.session",
+          "currency": "usd",
+          "mode": "setup",
+          "status": "open",
+          "livemode": false,
+          "total_summary": {
+            "due": 0,
+            "subtotal": 0,
+            "total": 0
+          },
+          "elements_session": $MINIMAL_ELEMENTS_SESSION_JSON,
+          "server_built_elements_session_params": {
+            "type": "deferred_intent",
+            "locale": "en-US",
+            "deferred_intent": {
+              "mode": "setup",
+              "setup_future_usage": "off_session",
+              "payment_method_types": ["card"]
+            }
+          }
+        }
+        """.trimIndent()
+    )
+
+    /**
+     * Confirm response for a setup-mode checkout session with a succeeded SetupIntent.
+     */
+    val CHECKOUT_SESSION_SETUP_CONFIRM_SUCCEEDED_JSON = JSONObject(
+        """
+        {
+            "session_id": "cs_test_setup_abc123",
+            "currency": "usd",
+            "mode": "setup",
+            "total_summary": {
+                "due": 0,
+                "subtotal": 0,
+                "total": 0
+            },
+            "setup_intent": {
+                "id": "seti_1QWK2VIyGgrkZxL71xfPBWG5",
+                "object": "setup_intent",
+                "status": "succeeded",
+                "client_secret": "seti_1QWK2VIyGgrkZxL71xfPBWG5_secret_abc123",
+                "payment_method": "pm_1234",
+                "payment_method_types": ["card"],
+                "livemode": false,
+                "created": 1734000000,
+                "usage": "off_session"
+            }
+        }
+        """.trimIndent()
+    )
+
+    /**
+     * Confirm response for a setup-mode checkout session with a SetupIntent that requires action.
+     */
+    val CHECKOUT_SESSION_SETUP_CONFIRM_REQUIRES_ACTION_JSON = JSONObject(
+        """
+        {
+            "session_id": "cs_test_setup_abc123",
+            "currency": "usd",
+            "mode": "setup",
+            "total_summary": {
+                "due": 0,
+                "subtotal": 0,
+                "total": 0
+            },
+            "setup_intent": {
+                "id": "seti_1QWK2VIyGgrkZxL71xfPBWG5",
+                "object": "setup_intent",
+                "status": "requires_action",
+                "client_secret": "seti_1QWK2VIyGgrkZxL71xfPBWG5_secret_abc123",
+                "payment_method": "pm_1234",
+                "payment_method_types": ["card"],
+                "livemode": false,
+                "created": 1734000000,
+                "usage": "off_session",
+                "next_action": {
+                    "redirect_to_url": {
+                        "return_url": "stripesdk://payment_return_url",
+                        "url": "https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecaz6CRMbs6FrXfuYKBRSUG/src_client_secret_test"
+                    },
+                    "type": "redirect_to_url"
+                }
+            }
+        }
+        """.trimIndent()
+    )
+
+    /**
      * Init response with shipping_options array at the root level.
      */
     val CHECKOUT_SESSION_WITH_SHIPPING_OPTIONS_JSON = JSONObject(

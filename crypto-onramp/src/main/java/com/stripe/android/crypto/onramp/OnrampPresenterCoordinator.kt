@@ -43,10 +43,12 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     linkController: LinkController,
     lifecycleOwner: LifecycleOwner,
     private val activity: ComponentActivity,
-    onrampCallbacks: OnrampCallbacks,
     private val coroutineScope: CoroutineScope,
+    private val onrampCallbackIdentifier: String
 ) {
-    private val onrampCallbacksState = onrampCallbacks.build()
+    private val onrampCallbacksState: OnrampCallbacks.State
+        get() = OnrampCallbackReferences[onrampCallbackIdentifier]
+            ?: error("OnrampCallbackReferences not registered for key: $onrampCallbackIdentifier")
     private val linkControllerState = linkController.state(activity)
 
     private val linkPresenter = linkController.createPresenter(
@@ -86,7 +88,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
     private val verifyKycResultLauncher: ActivityResultLauncher<VerifyKycActivityArgs> =
         activity.activityResultRegistry.register(
-            key = "OnrampPresenterCoordinator_VerifyKycResultLauncher",
+            key = "OnrampPresenterCoordinator_VerifyKycResultLauncher($onrampCallbackIdentifier)",
             contract = VerifyKycInfoActivityContract(),
             callback = ::handleVerifyKycResult
         )
@@ -113,6 +115,10 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                 override fun onDestroy(owner: LifecycleOwner) {
                     googlePayActivityResultLauncher.unregister()
                     verifyKycResultLauncher.unregister()
+
+                    if (activity.isFinishing) {
+                        OnrampCallbackReferences.remove(onrampCallbackIdentifier)
+                    }
                 }
             }
         )
@@ -209,7 +215,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         onrampSessionId: String
     ) {
         coroutineScope.launch {
-            interactor.startCheckout(onrampSessionId, onrampCallbacksState.onrampSessionClientSecretProvider)
+            interactor.startCheckout(onrampSessionId)
         }
     }
 
@@ -261,12 +267,14 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             }
             is InternalPaymentResult.Canceled -> {
                 // User canceled the next action
+                interactor.clearPendingCheckout()
                 onrampCallbacksState.checkoutCallback.onResult(
                     OnrampCheckoutResult.Canceled()
                 )
             }
             is InternalPaymentResult.Failed -> {
                 // Next action failed
+                interactor.clearPendingCheckout()
                 onrampCallbacksState.checkoutCallback.onResult(
                     OnrampCheckoutResult.Failed(paymentResult.throwable)
                 )

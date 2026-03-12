@@ -33,6 +33,7 @@ import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
+import com.stripe.android.crypto.onramp.model.OnrampSessionClientSecretProvider
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.crypto.onramp.ui.KycRefreshScreenAction
@@ -46,10 +47,13 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
+import android.os.Parcelable
+import androidx.lifecycle.SavedStateHandle
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -60,6 +64,8 @@ internal class OnrampInteractor @Inject constructor(
     private val linkController: LinkController,
     private val cryptoApiRepository: CryptoApiRepository,
     private val analyticsServiceFactory: OnrampAnalyticsService.Factory,
+    private val checkoutHandler: OnrampSessionClientSecretProvider,
+    private val savedStateHandle: SavedStateHandle
 ) {
     private val _state = MutableStateFlow(OnrampState())
     val state: StateFlow<OnrampState> = _state.asStateFlow()
@@ -67,10 +73,16 @@ internal class OnrampInteractor @Inject constructor(
     private var analyticsService: OnrampAnalyticsService? = null
 
     suspend fun configure(configurationState: OnrampConfiguration.State): OnrampConfigurationResult {
-        _state.value = OnrampState(
-            configurationState = configurationState,
-            cryptoCustomerId = configurationState.cryptoCustomerId
-        )
+        _state.update { currentState ->
+            OnrampState(
+                configurationState = configurationState,
+                cryptoCustomerId = configurationState.cryptoCustomerId ?: currentState.cryptoCustomerId,
+                collectingPaymentMethodType = currentState.collectingPaymentMethodType,
+                checkoutState = currentState.checkoutState,
+                platformKeyCache = currentState.platformKeyCache,
+                selectedPaymentSource = currentState.selectedPaymentSource,
+            )
+        }
 
         // We are *not* calling `PaymentConfiguration.init()` here because we're relying on
         // `LinkController.configure()` to do it.
@@ -704,25 +716,14 @@ internal class OnrampInteractor @Inject constructor(
      * through the state StateFlow. The coordinator should observe the checkoutState and react accordingly.
      *
      * @param onrampSessionId The onramp session identifier.
-     * @param checkoutHandler An async closure that calls your backend to perform a checkout.
      */
-    suspend fun startCheckout(
-        onrampSessionId: String,
-        checkoutHandler: suspend (String) -> String
-    ) {
-        if (_state.value.checkoutState?.status?.inProgress == true) {
-            // Checkout is already in progress - ignore duplicate calls
-            return
-        }
+    suspend fun startCheckout(onrampSessionId: String) {
+        if (_state.value.checkoutState?.status?.inProgress == true) return
+
+        savePendingCheckout(onrampSessionId)
+
         _state.update {
-            it.copy(
-                checkoutState = CheckoutState(
-                    status = Status.Processing(
-                        onrampSessionId = onrampSessionId,
-                        checkoutHandler = checkoutHandler
-                    )
-                )
-            )
+            it.copy(checkoutState = CheckoutState(Status.Processing(onrampSessionId)))
         }
         analyticsService?.track(
             OnrampAnalyticsEvent.CheckoutStarted(
@@ -730,47 +731,48 @@ internal class OnrampInteractor @Inject constructor(
                 paymentMethodType = _state.value.collectingPaymentMethodType
             )
         )
-        performCheckoutInternal(
-            onrampSessionId = onrampSessionId,
-            checkoutHandler = checkoutHandler,
-            isContinuation = false,
-        )
+        performCheckoutInternal(onrampSessionId, isContinuation = false)
     }
 
     /**
      * Continues the checkout flow after PaymentLauncher completes a next action.
-     * This should be called by the coordinator when PaymentLauncher finishes successfully.
+     * Reads the session ID from in-memory state, or falls back to SavedStateHandle
+     * if the process was killed and restored.
      */
     suspend fun continueCheckout() {
-        val currentCheckoutState = _state.value.checkoutState
-        when (val status = currentCheckoutState?.status) {
-            is Status.RequiresNextAction -> {
-                // Continue processing with the existing session info
-                _state.update {
-                    it.copy(
-                        checkoutState = CheckoutState(
-                            status = Status.Processing(
-                                onrampSessionId = status.onrampSessionId,
-                                checkoutHandler = status.checkoutHandler
-                            )
-                        )
+        val onrampSessionId = resolveOnrampSessionId()
+        if (onrampSessionId == null) {
+            _state.update {
+                it.copy(
+                    checkoutState = CheckoutState(
+                        Status.Completed(OnrampCheckoutResult.Failed(PaymentFailedException()))
                     )
-                }
-                performCheckoutInternal(
-                    onrampSessionId = status.onrampSessionId,
-                    checkoutHandler = status.checkoutHandler,
-                    isContinuation = true,
                 )
             }
-            else -> {
-                // No valid session to continue - this shouldn't happen
-                _state.update {
-                    it.copy(
-                        checkoutState = CheckoutState(
-                            status = Status.Completed(OnrampCheckoutResult.Failed(PaymentFailedException()))
-                        )
-                    )
+            return
+        }
+
+        _state.update {
+            it.copy(checkoutState = CheckoutState(Status.Processing(onrampSessionId)))
+        }
+        performCheckoutInternal(onrampSessionId, isContinuation = true)
+    }
+
+    /**
+     * Resolves the onramp session ID from in-memory state, falling back to
+     * SavedStateHandle for process death recovery.
+     */
+    private fun resolveOnrampSessionId(): String? {
+        when (val status = _state.value.checkoutState?.status) {
+            is Status.Completed -> return null // Completed sessions should not be continued
+            is Status.Processing -> return status.onrampSessionId
+            is Status.RequiresNextAction -> return status.onrampSessionId
+            null -> {
+                val pending = savedStateHandle.get<PendingCheckout>(KEY_PENDING_CHECKOUT) ?: return null
+                if (_state.value.cryptoCustomerId == null && pending.cryptoCustomerId != null) {
+                    _state.update { it.copy(cryptoCustomerId = pending.cryptoCustomerId) }
                 }
+                return pending.onrampSessionId
             }
         }
     }
@@ -781,14 +783,13 @@ internal class OnrampInteractor @Inject constructor(
     @Suppress("LongMethod")
     private suspend fun performCheckoutInternal(
         onrampSessionId: String,
-        checkoutHandler: suspend (String) -> String,
         isContinuation: Boolean,
     ) {
         val checkoutStatus = getOrFetchPlatformKey()
             .flatMapCatching { platformApiKey ->
                 retrievePaymentIntent(
                     onrampSessionId = onrampSessionId,
-                    onrampSessionClientSecret = checkoutHandler(onrampSessionId),
+                    onrampSessionClientSecret = checkoutHandler.getClientSecret(onrampSessionId),
                     platformApiKey = platformApiKey
                 ).map { platformApiKey to it }
             }
@@ -810,7 +811,6 @@ internal class OnrampInteractor @Inject constructor(
                         ?: Status.RequiresNextAction(
                             platformKey = platformApiKey,
                             onrampSessionId = onrampSessionId,
-                            checkoutHandler = checkoutHandler,
                             paymentIntent = paymentIntent
                         )
                 },
@@ -824,7 +824,23 @@ internal class OnrampInteractor @Inject constructor(
                     Status.Completed(OnrampCheckoutResult.Failed(error))
                 }
             )
+			
+        if (checkoutStatus is Status.Completed) {
+            clearPendingCheckout()
+        }
+
         _state.update { it.copy(checkoutState = CheckoutState(checkoutStatus)) }
+    }
+
+    private fun savePendingCheckout(onrampSessionId: String) {
+        savedStateHandle[KEY_PENDING_CHECKOUT] = PendingCheckout(
+            onrampSessionId = onrampSessionId,
+            cryptoCustomerId = _state.value.cryptoCustomerId,
+        )
+    }
+
+    internal fun clearPendingCheckout() {
+        savedStateHandle.remove<PendingCheckout>(KEY_PENDING_CHECKOUT)
     }
 
     /**
@@ -911,6 +927,14 @@ internal class OnrampInteractor @Inject constructor(
             }
     }
 }
+
+private const val KEY_PENDING_CHECKOUT = "onramp_pending_checkout"
+
+@Parcelize
+private data class PendingCheckout(
+    val onrampSessionId: String,
+    val cryptoCustomerId: String?,
+) : Parcelable
 
 internal data class OnrampState(
     val configurationState: OnrampConfiguration.State? = null,

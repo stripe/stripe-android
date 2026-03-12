@@ -34,6 +34,12 @@ internal open class FakeCustomerRepository(
         Result.failure(NotImplementedError())
     },
 ) : CustomerRepository {
+    private val _retrieveCustomerRequests = Turbine<RetrieveCustomerRequest>()
+    val retrieveCustomerRequests: ReceiveTurbine<RetrieveCustomerRequest> = _retrieveCustomerRequests
+
+    private val _getPaymentMethodsRequests = Turbine<GetPaymentMethodsRequest>()
+    val getPaymentMethodsRequests: ReceiveTurbine<GetPaymentMethodsRequest> = _getPaymentMethodsRequests
+
     private val _detachRequests = Turbine<DetachRequest>()
     val detachRequests: ReceiveTurbine<DetachRequest> = _detachRequests
 
@@ -43,19 +49,45 @@ internal open class FakeCustomerRepository(
     private val _setDefaultPaymentMethodRequests = Turbine<SetDefaultRequest>()
     val setDefaultPaymentMethodRequests: ReceiveTurbine<SetDefaultRequest> = _setDefaultPaymentMethodRequests
 
-    var error: Throwable? = null
+    open fun ensureAllEventsConsumed() {
+        _retrieveCustomerRequests.ensureAllEventsConsumed()
+        _getPaymentMethodsRequests.ensureAllEventsConsumed()
+        _detachRequests.ensureAllEventsConsumed()
+        _updateRequests.ensureAllEventsConsumed()
+        _setDefaultPaymentMethodRequests.ensureAllEventsConsumed()
+    }
 
     override suspend fun retrieveCustomer(
         customerId: String,
         ephemeralKeySecret: String,
-    ): Customer? = onRetrieveCustomer()
+    ): Customer? {
+        _retrieveCustomerRequests.add(
+            RetrieveCustomerRequest(
+                customerId = customerId,
+                ephemeralKeySecret = ephemeralKeySecret,
+            )
+        )
+
+        return onRetrieveCustomer()
+    }
 
     override suspend fun getPaymentMethods(
         customerId: String,
         ephemeralKeySecret: String,
         types: List<PaymentMethod.Type>,
         silentlyFail: Boolean,
-    ): Result<List<PaymentMethod>> = onGetPaymentMethods()
+    ): Result<List<PaymentMethod>> {
+        _getPaymentMethodsRequests.add(
+            GetPaymentMethodsRequest(
+                customerId = customerId,
+                ephemeralKeySecret = ephemeralKeySecret,
+                types = types,
+                silentlyFail = silentlyFail,
+            )
+        )
+
+        return onGetPaymentMethods()
+    }
 
     override suspend fun detachPaymentMethod(
         customerId: String,
@@ -136,6 +168,18 @@ internal open class FakeCustomerRepository(
         ephemeralKeySecret: String,
         paymentMethodId: String,
     ): Result<PaymentMethod> = onRetrievePaymentMethod(paymentMethodId)
+
+    data class RetrieveCustomerRequest(
+        val customerId: String,
+        val ephemeralKeySecret: String,
+    )
+
+    data class GetPaymentMethodsRequest(
+        val customerId: String,
+        val ephemeralKeySecret: String,
+        val types: List<PaymentMethod.Type>,
+        val silentlyFail: Boolean,
+    )
 
     data class DetachRequest(
         val paymentMethodId: String,

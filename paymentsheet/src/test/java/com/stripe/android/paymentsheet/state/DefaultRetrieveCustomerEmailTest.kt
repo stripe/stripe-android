@@ -103,7 +103,8 @@ internal class DefaultRetrieveCustomerEmailTest {
             retrieveCalls.add(RetrieveCall(customerId, ephemeralKeySecret))
         }
 
-        fun ensureAllEventsConsumed() {
+        override fun ensureAllEventsConsumed() {
+            super.ensureAllEventsConsumed()
             retrieveCalls.ensureAllEventsConsumed()
         }
     }
@@ -144,11 +145,8 @@ internal class DefaultRetrieveCustomerEmailTest {
         val CHECKOUT_SESSION_METADATA = CustomerMetadata.CheckoutSession(
             sessionId = "cs_test_123",
             customerId = "cus_test_123",
-            isPaymentMethodSetAsDefaultEnabled = false,
             removePaymentMethod = PaymentMethodRemovePermission.None,
             saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
-            canRemoveLastPaymentMethod = false,
-            canUpdateFullPaymentMethodDetails = false,
         )
     }
 }

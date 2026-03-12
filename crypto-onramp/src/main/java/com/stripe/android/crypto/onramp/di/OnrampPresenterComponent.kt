@@ -24,7 +24,7 @@ internal interface OnrampPresenterComponent {
         fun build(
             @BindsInstance activity: ComponentActivity,
             @BindsInstance lifecycleOwner: LifecycleOwner,
-            @BindsInstance activityResultRegistryOwner: ActivityResultRegistryOwner
+            @BindsInstance activityResultRegistryOwner: ActivityResultRegistryOwner,
         ): OnrampPresenterComponent
     }
 }
