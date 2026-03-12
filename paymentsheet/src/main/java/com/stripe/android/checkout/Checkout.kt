@@ -18,7 +18,7 @@ import kotlinx.parcelize.Parcelize
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class Checkout private constructor(
-    var state: State,
+    internalState: InternalState,
     private val component: CheckoutComponent,
 ) {
     @CheckoutSessionPreview
@@ -30,7 +30,7 @@ class Checkout private constructor(
         ): Result<Checkout> {
             val component = DaggerCheckoutComponent.factory().create(context.applicationContext)
             return component.checkoutSessionLoader.load(checkoutSessionClientSecret).map { response ->
-                Checkout(State(response), component)
+                Checkout(InternalState(response), component)
             }
         }
 
@@ -39,7 +39,7 @@ class Checkout private constructor(
             state: State,
         ): Checkout {
             val component = DaggerCheckoutComponent.factory().create(context.applicationContext)
-            return Checkout(state, component)
+            return Checkout(state.internalState, component)
         }
     }
 
@@ -48,12 +48,20 @@ class Checkout private constructor(
     @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class State internal constructor(
-        internal val checkoutSessionResponse: CheckoutSessionResponse,
-        internal val shippingName: String? = null,
+        internal val internalState: InternalState,
     ) : Parcelable
 
+    internal var internalState: InternalState = internalState
+        private set
+
+    var state: State
+        get() = State(internalState)
+        set(value) {
+            internalState = value.internalState
+        }
+
     private val mutex = Mutex()
-    private val _checkoutSession = MutableStateFlow(state.checkoutSessionResponse.asCheckoutSession())
+    private val _checkoutSession = MutableStateFlow(internalState.checkoutSessionResponse.asCheckoutSession())
     val checkoutSession: StateFlow<CheckoutSession> = _checkoutSession.asStateFlow()
 
     suspend fun applyPromotionCode(
@@ -80,10 +88,14 @@ class Checkout private constructor(
     }
 
     suspend fun updateShippingAddress(
-        address: Address,
         name: String? = null,
+        address: Address,
     ): Result<CheckoutSession> = withSessionId(
-        setState = { State(it, shippingName = name ?: state.shippingName) },
+        additionalStateMutations = {
+            copy(
+                shippingName = name ?: internalState.shippingName
+            )
+        },
     ) { sessionId ->
         component.checkoutSessionRepository.updateShippingAddress(sessionId, address.build())
     }
@@ -93,23 +105,17 @@ class Checkout private constructor(
     }
 
     private suspend fun withSessionId(
-        setState: (CheckoutSessionResponse) -> State = { State(it, shippingName = state.shippingName) },
+        additionalStateMutations: InternalState.() -> InternalState = { this },
         block: suspend (sessionId: String) -> Result<CheckoutSessionResponse>,
     ): Result<CheckoutSession> {
         // Run network requests with a mutex to ensure events are processed in order.
         return mutex.withLock {
-            block(state.checkoutSessionResponse.id).updateState(setState)
-        }
-    }
-
-    private fun Result<CheckoutSessionResponse>.updateState(
-        setState: (CheckoutSessionResponse) -> State,
-    ): Result<CheckoutSession> {
-        return map { response ->
-            state = setState(response)
-            val checkoutSession = response.asCheckoutSession()
-            _checkoutSession.value = checkoutSession
-            checkoutSession
+            block(internalState.checkoutSessionResponse.id).map { response ->
+                internalState = internalState.copy(checkoutSessionResponse = response).additionalStateMutations()
+                val checkoutSession = response.asCheckoutSession()
+                _checkoutSession.value = checkoutSession
+                checkoutSession
+            }
         }
     }
 }

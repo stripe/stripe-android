@@ -4,15 +4,15 @@ import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
-import com.stripe.android.core.utils.urlEncode
-import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
@@ -20,12 +20,12 @@ import com.stripe.android.testing.PaymentConfigurationTestRule
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.test.runTest
-import java.util.concurrent.TimeUnit
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.util.concurrent.TimeUnit
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
@@ -352,7 +352,7 @@ class CheckoutTest {
                     .line2("Apt 4")
                     .postalCode("80202")
                     .state("CO")
-                val result = checkout.updateShippingAddress(address)
+                val result = checkout.updateShippingAddress(address = address)
 
                 val updated = awaitItem()
                 assertThat(result.getOrThrow()).isEqualTo(updated)
@@ -394,7 +394,7 @@ class CheckoutTest {
 
                 val address = Address()
                     .country("XX")
-                val result = checkout.updateShippingAddress(address)
+                val result = checkout.updateShippingAddress(address = address)
                 assertThat(result.isFailure).isTrue()
 
                 expectNoEvents()
@@ -427,7 +427,7 @@ class CheckoutTest {
                 val address = Address()
                     .country("US")
                     .postalCode("80202")
-                val result = checkout.updateShippingAddress(address)
+                val result = checkout.updateShippingAddress(address = address)
 
                 val updated = awaitItem()
                 assertThat(result.isSuccess).isTrue()
@@ -498,7 +498,7 @@ class CheckoutTest {
 
                 val results = listOf(
                     async { checkout.applyPromotionCode("10OFF") },
-                    async { checkout.updateShippingAddress(address) },
+                    async { checkout.updateShippingAddress(address = address) },
                 ).awaitAll()
 
                 assertThat(results[0].isSuccess).isTrue()
@@ -545,7 +545,7 @@ class CheckoutTest {
         block: suspend (Checkout) -> Unit,
     ) {
         val state = Checkout.State(
-            checkoutSessionResponse = checkoutSessionResponse,
+            InternalState(checkoutSessionResponse),
         )
         val checkout = Checkout.createWithState(applicationContext, state)
         block(checkout)

@@ -1,13 +1,11 @@
 package com.stripe.android.checkout
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import org.junit.Test
 
-@OptIn(CheckoutSessionPreview::class)
 class ConfigurationKtxTest {
 
     @Test
@@ -124,8 +122,8 @@ class ConfigurationKtxTest {
     private fun state(
         customerEmail: String? = null,
         shippingName: String? = null,
-    ): Checkout.State {
-        return Checkout.State(
+    ): InternalState {
+        return InternalState(
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 customerEmail = customerEmail,
             ),

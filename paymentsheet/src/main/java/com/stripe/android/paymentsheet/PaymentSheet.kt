@@ -487,8 +487,10 @@ class PaymentSheet internal constructor(
         configuration: Configuration,
     ) {
         paymentSheetLauncher.present(
-            mode = InitializationMode.CheckoutSession(checkout.state.checkoutSessionResponse),
-            configuration = configuration.forCheckoutSession(checkout.state),
+            mode = InitializationMode.CheckoutSession(
+                checkoutSessionResponse = checkout.internalState.checkoutSessionResponse,
+            ),
+            configuration = configuration.forCheckoutSession(checkout.internalState),
         )
     }
 
