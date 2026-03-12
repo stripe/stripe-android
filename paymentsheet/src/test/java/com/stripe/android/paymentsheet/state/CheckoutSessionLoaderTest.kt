@@ -41,6 +41,7 @@ internal class CheckoutSessionLoaderTest {
             id = "cs_test_123",
             amount = 5099,
             currency = "usd",
+            mode = CheckoutSessionResponse.Mode.PAYMENT,
             customerEmail = null,
             elementsSession = ElementsSession(
                 linkSettings = null,
@@ -64,6 +65,7 @@ internal class CheckoutSessionLoaderTest {
                 merchantId = "acct_123",
             ),
             paymentIntent = null,
+            setupIntent = null,
             customer = CheckoutSessionResponse.Customer(
                 id = "cus_test_123",
                 paymentMethods = PaymentMethodFactory.cards(2),
