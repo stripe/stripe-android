@@ -383,7 +383,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         }
 
         @OptIn(CheckoutSessionPreview::class)
-        override suspend fun updateShippingAddress(
+        override suspend fun updateTaxRegion(
             sessionId: String,
             address: Address.State,
         ): Result<CheckoutSessionResponse> {

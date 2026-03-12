@@ -78,9 +78,15 @@ class CheckoutPlaygroundActivity : AppCompatActivity() {
         enableEdgeToEdge()
 
         setContent {
-            val addressLauncher = rememberAddressLauncher { result ->
+            val shippingAddressLauncher = rememberAddressLauncher { result ->
                 if (result is AddressLauncherResult.Succeeded) {
                     viewModel.updateShippingAddress(result.address)
+                }
+            }
+
+            val billingAddressLauncher = rememberAddressLauncher { result ->
+                if (result is AddressLauncherResult.Succeeded) {
+                    viewModel.updateBillingAddress(result.address)
                 }
             }
 
@@ -101,7 +107,16 @@ class CheckoutPlaygroundActivity : AppCompatActivity() {
                     val configuration = AddressLauncher.Configuration(
                         address = viewModel.lastAddressDetails.value,
                     )
-                    addressLauncher.present(publishableKey, configuration)
+                    shippingAddressLauncher.present(publishableKey, configuration)
+                },
+                lastBillingAddressDetails = viewModel.lastBillingAddressDetails,
+                clearBillingAddress = viewModel::clearBillingAddress,
+                updateBillingAddress = {
+                    val publishableKey = PaymentConfiguration.getInstance(applicationContext).publishableKey
+                    val configuration = AddressLauncher.Configuration(
+                        address = viewModel.lastBillingAddressDetails.value,
+                    )
+                    billingAddressLauncher.present(publishableKey, configuration)
                 },
                 refresh = viewModel::refresh,
             )
@@ -123,6 +138,9 @@ private fun CheckoutScreen(
     clearShippingAddress: () -> Unit,
     updatePostalCode: (String) -> Unit,
     updateShippingAddress: () -> Unit,
+    lastBillingAddressDetails: StateFlow<AddressDetails?>,
+    clearBillingAddress: () -> Unit,
+    updateBillingAddress: () -> Unit,
     refresh: () -> Unit,
 ) {
     val checkoutSession by checkout.checkoutSession.collectAsState()
@@ -149,6 +167,11 @@ private fun CheckoutScreen(
                     clearShippingAddress = clearShippingAddress,
                     updatePostalCode = updatePostalCode,
                     updateShippingAddress = updateShippingAddress,
+                )
+                BillingAddressSection(
+                    lastBillingAddressDetails = lastBillingAddressDetails,
+                    clearBillingAddress = clearBillingAddress,
+                    updateBillingAddress = updateBillingAddress,
                 )
                 ShippingOptionsSection(checkoutSession, selectShippingRate)
                 PromotionCodeInput(promotionCode, { promotionCode = it }, applyPromotionCode)
@@ -318,6 +341,51 @@ private fun ShippingAddressSection(
                 onPostalCodeChange = { postalCode = it },
                 onApply = { updatePostalCode(postalCode) },
             )
+        }
+
+        Divider(modifier = Modifier.padding(vertical = PADDING))
+    }
+}
+
+@Composable
+private fun BillingAddressSection(
+    lastBillingAddressDetails: StateFlow<AddressDetails?>,
+    clearBillingAddress: () -> Unit,
+    updateBillingAddress: () -> Unit,
+) {
+    val addressDetails by lastBillingAddressDetails.collectAsState()
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "Billing Address",
+            style = MaterialTheme.typography.h6,
+        )
+
+        Spacer(modifier = Modifier.height(PADDING))
+
+        AddressSummary(addressDetails?.address)
+
+        if (addressDetails?.name != null) {
+            Text(
+                text = "Name: ${addressDetails?.name}",
+                style = MaterialTheme.typography.body2,
+            )
+        }
+
+        Spacer(modifier = Modifier.height(PADDING))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(PADDING),
+        ) {
+            Button(onClick = updateBillingAddress) {
+                Text(if (addressDetails != null) "Edit Billing Address" else "Add Billing Address")
+            }
+            if (addressDetails != null) {
+                Button(onClick = clearBillingAddress) {
+                    Text("Clear")
+                }
+            }
         }
 
         Divider(modifier = Modifier.padding(vertical = PADDING))

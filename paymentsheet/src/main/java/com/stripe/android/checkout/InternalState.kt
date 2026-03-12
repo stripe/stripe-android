@@ -10,6 +10,7 @@ internal data class InternalState(
     val key: String,
     val checkoutSessionResponse: CheckoutSessionResponse,
     val shippingName: String? = null,
+    val billingName: String? = null,
 ) : Parcelable {
     val initializationMode: PaymentElementLoader.InitializationMode.CheckoutSession
         get() = PaymentElementLoader.InitializationMode.CheckoutSession(
