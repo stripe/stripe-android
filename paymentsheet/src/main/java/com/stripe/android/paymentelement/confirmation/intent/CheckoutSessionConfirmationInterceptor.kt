@@ -4,6 +4,7 @@ import android.content.Context
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -34,7 +35,7 @@ import dagger.assisted.AssistedInject
  * and existing payment method IDs.
  */
 internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructor(
-    @Assisted private val checkoutSessionId: String,
+    @Assisted private val integrationMetadata: IntegrationMetadata.CheckoutSession,
     @Assisted private val customerMetadata: CustomerMetadata?,
     @Assisted private val clientAttributionMetadata: ClientAttributionMetadata,
     context: Context,
@@ -97,7 +98,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         savePaymentMethod: Boolean?,
     ): ConfirmationDefinition.Action<Args> {
         return checkoutSessionRepository.confirm(
-            id = checkoutSessionId,
+            id = integrationMetadata.id,
             params = ConfirmCheckoutSessionParams(
                 paymentMethodId = paymentMethod.id,
                 clientAttributionMetadata = clientAttributionMetadata,
@@ -153,7 +154,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
     @AssistedFactory
     interface Factory {
         fun create(
-            checkoutSessionId: String,
+            integrationMetadata: IntegrationMetadata.CheckoutSession,
             customerMetadata: CustomerMetadata?,
             clientAttributionMetadata: ClientAttributionMetadata,
         ): CheckoutSessionConfirmationInterceptor

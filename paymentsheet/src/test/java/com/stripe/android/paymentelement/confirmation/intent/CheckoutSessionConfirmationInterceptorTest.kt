@@ -4,11 +4,13 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.Address
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
-import com.stripe.android.isInstanceOf
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentCreationFlow
@@ -18,7 +20,6 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.checkout.Address
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -245,7 +246,9 @@ class CheckoutSessionConfirmationInterceptorTest {
         )
 
         val interceptor = CheckoutSessionConfirmationInterceptor(
-            checkoutSessionId = "cs_test_123",
+            integrationMetadata = IntegrationMetadata.CheckoutSession(
+                id = "cs_test_123",
+            ),
             customerMetadata = customerMetadata,
             clientAttributionMetadata = ClientAttributionMetadata(
                 elementsSessionConfigId = "test_session_id",
