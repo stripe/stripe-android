@@ -33,6 +33,64 @@ internal class PaymentSheetCheckoutSessionTest {
     )
 
     /**
+     * Test a successful card setup flow with checkout session (setup mode).
+     *
+     * Flow:
+     * 1. Present PaymentSheet with checkout session client secret
+     * 2. Initialize checkout session in setup mode (POST /v1/payment_pages/{cs_id}/init)
+     * 3. Fill out card details
+     * 4. Create payment method (POST /v1/payment_methods)
+     * 5. Confirm checkout session — returns setup_intent (POST /v1/payment_pages/{cs_id}/confirm)
+     * 6. Verify setup completed successfully
+     */
+    @Test
+    fun testSuccessfulCardSetupWithCheckoutSession() = runPaymentSheetTest(
+        networkRule = networkRule,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("POST"),
+            path("/v1/payment_pages/cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh/init"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-init-setup.json")
+        }
+
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val checkout = Checkout.configure(
+            context = context,
+            checkoutSessionClientSecret = "cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh_secret_example",
+        ).getOrThrow()
+
+        testContext.presentPaymentSheet {
+            presentWithCheckout(
+                checkout = checkout,
+                configuration = defaultConfiguration,
+            )
+        }
+
+        page.fillOutCardDetails()
+
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("POST"),
+            path("/v1/payment_methods"),
+        ) { response ->
+            response.testBodyFromFile("payment-methods-create.json")
+        }
+
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("POST"),
+            path("/v1/payment_pages/cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh/confirm"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm-setup.json")
+        }
+
+        page.clickPrimaryButton()
+    }
+
+    /**
      * Test a successful card payment flow with checkout session.
      *
      * Flow:
