@@ -46,27 +46,11 @@ internal class DefaultRetrieveCustomerEmailTest {
     }
 
     @Test
-    fun `checkout session returns default billing email over customer email`() = runScenario(
+    fun `checkout session returns default billing email without calling repository`() = runScenario(
         configuration = CONFIG_WITH_DEFAULT_EMAIL,
-        customerMetadata = CHECKOUT_SESSION_METADATA_WITH_EMAIL,
-    ) {
-        assertThat(result).isEqualTo("default@example.com")
-    }
-
-    @Test
-    fun `checkout session returns customer email when no default email`() = runScenario(
-        configuration = CONFIG_WITHOUT_EMAIL,
-        customerMetadata = CHECKOUT_SESSION_METADATA_WITH_EMAIL,
-    ) {
-        assertThat(result).isEqualTo("checkout@example.com")
-    }
-
-    @Test
-    fun `checkout session returns null when no email sources available`() = runScenario(
-        configuration = CONFIG_WITHOUT_EMAIL,
         customerMetadata = CHECKOUT_SESSION_METADATA,
     ) {
-        assertThat(result).isNull()
+        assertThat(result).isEqualTo("default@example.com")
     }
 
     @Test
@@ -119,7 +103,8 @@ internal class DefaultRetrieveCustomerEmailTest {
             retrieveCalls.add(RetrieveCall(customerId, ephemeralKeySecret))
         }
 
-        fun ensureAllEventsConsumed() {
+        override fun ensureAllEventsConsumed() {
+            super.ensureAllEventsConsumed()
             retrieveCalls.ensureAllEventsConsumed()
         }
     }
@@ -160,15 +145,8 @@ internal class DefaultRetrieveCustomerEmailTest {
         val CHECKOUT_SESSION_METADATA = CustomerMetadata.CheckoutSession(
             sessionId = "cs_test_123",
             customerId = "cus_test_123",
-            isPaymentMethodSetAsDefaultEnabled = false,
             removePaymentMethod = PaymentMethodRemovePermission.None,
             saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
-            canRemoveLastPaymentMethod = false,
-            canUpdateFullPaymentMethodDetails = false,
-        )
-
-        val CHECKOUT_SESSION_METADATA_WITH_EMAIL = CHECKOUT_SESSION_METADATA.copy(
-            customerEmail = "checkout@example.com",
         )
     }
 }

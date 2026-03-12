@@ -257,16 +257,21 @@ class DefaultSavedPaymentMethodRepositoryTest {
             id = "cs_123",
             amount = 1000,
             currency = "usd",
+            customerEmail = null,
+            elementsSession = null,
+            paymentIntent = null,
+            customer = null,
+            savedPaymentMethodsOfferSave = null,
+            totalSummary = null,
+            lineItems = emptyList(),
+            shippingOptions = emptyList(),
         )
 
         private val CHECKOUT_SESSION_METADATA = CustomerMetadata.CheckoutSession(
             sessionId = "cs_123",
             customerId = "cus_123",
-            isPaymentMethodSetAsDefaultEnabled = false,
             removePaymentMethod = PaymentMethodRemovePermission.Full,
             saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
-            canRemoveLastPaymentMethod = false,
-            canUpdateFullPaymentMethodDetails = false,
         )
 
         private val SESSION_METADATA = CustomerMetadata.CustomerSession(

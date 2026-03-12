@@ -34,33 +34,33 @@ internal data class CheckoutSessionResponse(
      * Always available at the top level as `customer_email`, regardless of whether
      * a customer object exists (guest checkout) or not.
      */
-    val customerEmail: String? = null,
+    val customerEmail: String?,
     /**
      * The embedded ElementsSession containing payment method preferences, Link settings,
      * customer data, and other configuration needed by PaymentSheet.
      * Only populated in responses from the init API.
      */
-    val elementsSession: ElementsSession? = null,
+    val elementsSession: ElementsSession?,
     /**
      * The PaymentIntent created/confirmed during checkout session confirmation.
      * Only populated in responses from the confirm API.
      */
-    val paymentIntent: PaymentIntent? = null,
+    val paymentIntent: PaymentIntent?,
     /**
      * Customer data from the checkout session init response.
      * This is parsed from the top-level "customer" field in the init response.
      * For checkout sessions, customer is associated server-side when the session is created,
      * so we get customer data directly in the init response rather than through customer session auth.
      */
-    val customer: Customer? = null,
+    val customer: Customer?,
     /**
      * Server-side flag controlling the "Save for future use" checkbox.
      * Parsed from `customer_managed_saved_payment_methods_offer_save` in the init response.
      */
-    val savedPaymentMethodsOfferSave: SavedPaymentMethodsOfferSave? = null,
-    val totalSummary: TotalSummaryResponse? = null,
-    val lineItems: List<LineItem> = emptyList(),
-    val shippingOptions: List<ShippingRate> = emptyList(),
+    val savedPaymentMethodsOfferSave: SavedPaymentMethodsOfferSave?,
+    val totalSummary: TotalSummaryResponse?,
+    val lineItems: List<LineItem>,
+    val shippingOptions: List<ShippingRate>,
 ) : StripeModel {
 
     /**

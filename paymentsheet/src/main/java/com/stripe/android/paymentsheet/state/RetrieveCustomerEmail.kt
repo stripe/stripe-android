@@ -10,8 +10,7 @@ import javax.inject.Inject
  *
  * For [CustomerMetadata.CustomerSession] and [CustomerMetadata.LegacyEphemeralKey], checks the
  * default billing email first, then fetches from the [CustomerRepository].
- * For [CustomerMetadata.CheckoutSession], checks default billing email, then the checkout customer email.
- * For null, returns the default billing email only.
+ * For [CustomerMetadata.CheckoutSession] and null, returns the default billing email only.
  */
 internal interface RetrieveCustomerEmail {
 
@@ -43,9 +42,7 @@ internal class DefaultRetrieveCustomerEmail @Inject constructor(
                     ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
                 )
             }
-            is CustomerMetadata.CheckoutSession -> {
-                defaultEmail ?: customerMetadata.customerEmail
-            }
+            is CustomerMetadata.CheckoutSession,
             null -> defaultEmail
         }
     }

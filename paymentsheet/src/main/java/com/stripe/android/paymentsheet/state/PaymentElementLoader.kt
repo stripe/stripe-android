@@ -188,10 +188,7 @@ internal interface PaymentElementLoader {
             }
 
             override fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata {
-                return IntegrationMetadata.CheckoutSession(
-                    id = checkoutSessionResponse.id,
-                    customerEmail = checkoutSessionResponse.customerEmail,
-                )
+                return IntegrationMetadata.CheckoutSession(checkoutSessionResponse.id)
             }
         }
     }
@@ -514,8 +511,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             return CustomerMetadata.CheckoutSession(
                 sessionId = initializationMode.checkoutSessionResponse.id,
                 customerId = customer.id,
-                customerEmail = initializationMode.checkoutSessionResponse.customerEmail,
-                isPaymentMethodSetAsDefaultEnabled = false,
                 removePaymentMethod = if (customer.canDetachPaymentMethod) {
                     PaymentMethodRemovePermission.Full
                 } else {
@@ -527,8 +522,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 saveConsent = initializationMode.checkoutSessionResponse.savedPaymentMethodsOfferSave
                     ?.toSaveConsentBehavior()
                     ?: PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
-                canRemoveLastPaymentMethod = false,
-                canUpdateFullPaymentMethodDetails = false,
             )
         }
 
@@ -567,7 +560,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     isPaymentMethodSetAsDefaultEnabled = getDefaultPaymentMethodsEnabled(elementsSession),
                 )
             }
-            else -> null
+            null -> null
         }
     }
 
