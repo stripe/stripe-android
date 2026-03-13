@@ -33,6 +33,7 @@ internal class CheckoutSessionLoaderTest {
         response: CheckoutSessionResponse,
     ): PaymentElementLoader.InitializationMode.CheckoutSession {
         return PaymentElementLoader.InitializationMode.CheckoutSession(
+            instancesKey = "CheckoutSessionLoaderTest",
             checkoutSessionResponse = response,
         )
     }

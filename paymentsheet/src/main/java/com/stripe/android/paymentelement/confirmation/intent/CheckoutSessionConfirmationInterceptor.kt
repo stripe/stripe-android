@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation.intent
 
 import android.content.Context
+import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
@@ -11,6 +12,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
@@ -34,6 +36,7 @@ import dagger.assisted.AssistedInject
  * The `/v1/payment_pages/{checkoutSessionId}/confirm` API accepts both newly created
  * and existing payment method IDs.
  */
+@OptIn(CheckoutSessionPreview::class)
 internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructor(
     @Assisted private val integrationMetadata: IntegrationMetadata.CheckoutSession,
     @Assisted private val customerMetadata: CustomerMetadata?,
@@ -107,6 +110,10 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             ),
         ).fold(
             onSuccess = { response ->
+                CheckoutInstances[integrationMetadata.instancesKey].forEach { checkout ->
+                    checkout.updateWithResponse(response)
+                }
+
                 val intent: StripeIntent = response.paymentIntent ?: response.setupIntent
                     ?: run {
                         val exception = IllegalStateException(
