@@ -104,6 +104,10 @@ internal class CheckoutPlaygroundViewModel(
         }
     }
 
+    fun updateTaxId(type: String, value: String) = performWhileLoading {
+        checkout.updateTaxId(type, value)
+    }
+
     fun refresh() = performWhileLoading {
         checkout.refresh()
     }

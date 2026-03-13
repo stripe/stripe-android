@@ -540,6 +540,82 @@ class CheckoutTest {
     }
 
     @Test
+    fun `updateTaxId sends type and value and updates checkoutSession on success`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_abc123"),
+                bodyPart(urlEncode("tax_id_collection[tax_id][type]"), "us_ein"),
+                bodyPart(urlEncode("tax_id_collection[tax_id][value]"), "123456789"),
+                bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-apply-discount.json")
+            }
+
+            checkout.checkoutSession.test {
+                assertThat(awaitItem().totalSummary).isNull()
+
+                val result = checkout.updateTaxId("us_ein", "123456789")
+
+                val updated = awaitItem()
+                assertThat(result.getOrThrow()).isEqualTo(updated)
+                assertThat(updated.totalSummary).isNotNull()
+            }
+        }
+    }
+
+    @Test
+    fun `updateTaxId returns failure on error response`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_abc123"),
+            ) { response ->
+                response.setResponseCode(400)
+                response.setBody("""{"error": {"message": "Invalid tax ID"}}""")
+            }
+
+            checkout.checkoutSession.test {
+                val initial = awaitItem()
+
+                val result = checkout.updateTaxId("invalid", "000")
+                assertThat(result.isFailure).isTrue()
+
+                expectNoEvents()
+                assertThat(checkout.checkoutSession.value).isEqualTo(initial)
+            }
+        }
+    }
+
+    @Test
+    fun `updateTaxId trims whitespace from type and value`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_abc123"),
+                bodyPart(urlEncode("tax_id_collection[tax_id][type]"), "us_ein"),
+                bodyPart(urlEncode("tax_id_collection[tax_id][value]"), "123456789"),
+                bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-apply-discount.json")
+            }
+
+            checkout.checkoutSession.test {
+                assertThat(awaitItem().totalSummary).isNull()
+
+                val result = checkout.updateTaxId("  us_ein  ", "  123456789  ")
+
+                val updated = awaitItem()
+                assertThat(result.getOrThrow()).isEqualTo(updated)
+                assertThat(updated.totalSummary).isNotNull()
+            }
+        }
+    }
+
+    @Test
     fun `selectShippingRate returns failure on error response`() = runTest {
         runCreateWithStateScenario { checkout ->
             networkRule.enqueue(

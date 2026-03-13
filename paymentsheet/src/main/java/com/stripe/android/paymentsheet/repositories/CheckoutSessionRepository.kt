@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.repositories
 
 import com.stripe.android.Stripe
+import com.stripe.android.checkout.Address
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
@@ -8,7 +9,6 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.executeRequestWithResultParser
 import com.stripe.android.core.version.StripeSdkVersion
-import com.stripe.android.checkout.Address
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import java.util.Locale
 import java.util.TimeZone
@@ -51,6 +51,12 @@ internal interface CheckoutSessionRepository {
     suspend fun updateTaxRegion(
         sessionId: String,
         address: Address.State,
+    ): Result<CheckoutSessionResponse>
+
+    suspend fun updateTaxId(
+        sessionId: String,
+        type: String,
+        value: String,
     ): Result<CheckoutSessionResponse>
 }
 
@@ -171,6 +177,19 @@ internal class DefaultCheckoutSessionRepository @Inject constructor(
             putIfNotEmpty("tax_region[postal_code]", address.postalCode)
             put("elements_session_client[is_aggregation_expected]", "true")
         },
+    )
+
+    override suspend fun updateTaxId(
+        sessionId: String,
+        type: String,
+        value: String,
+    ): Result<CheckoutSessionResponse> = executePost(
+        url = updateUrl(sessionId),
+        params = mapOf(
+            "tax_id_collection[tax_id][type]" to type,
+            "tax_id_collection[tax_id][value]" to value,
+            "elements_session_client[is_aggregation_expected]" to "true",
+        ),
     )
 
     private companion object {
