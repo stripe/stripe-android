@@ -707,7 +707,7 @@ class DefaultTapToAddConnectionManagerTest {
                         errorReporter = errorReporter,
                         logger = logger,
                         isSimulated = isSimulated,
-                        paymentConfiguration = PaymentConfiguration(publishableKey = "pk_test")
+                        paymentConfiguration = { PaymentConfiguration(publishableKey = "pk_test") }
                     ),
                     terminalInstance = terminalInstance,
                     errorReporter = errorReporter,

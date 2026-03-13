@@ -28,6 +28,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 internal interface TapToAddConnectionManager {
@@ -58,7 +59,7 @@ internal interface TapToAddConnectionManager {
             errorReporter: ErrorReporter,
             applicationContext: Context,
             logger: Logger,
-            paymentConfiguration: PaymentConfiguration,
+            paymentConfiguration: Provider<PaymentConfiguration>,
             workContext: CoroutineContext,
             isSimulated: Boolean,
         ): TapToAddConnectionManager {
@@ -83,7 +84,7 @@ internal interface TapToAddConnectionManager {
 internal class DefaultTapToAddConnectionManager(
     applicationContext: Context,
     workContext: CoroutineContext,
-    private val paymentConfiguration: PaymentConfiguration,
+    private val paymentConfiguration: Provider<PaymentConfiguration>,
     private val errorReporter: ErrorReporter,
     private val terminalWrapper: TerminalWrapper,
     private val logger: Logger,
@@ -112,7 +113,7 @@ internal class DefaultTapToAddConnectionManager(
                 context = applicationContext,
                 tokenProvider = object : ConnectionTokenProvider {
                     override fun fetchConnectionToken(callback: ConnectionTokenCallback) {
-                        callback.onSuccess(paymentConfiguration.publishableKey)
+                        callback.onSuccess(paymentConfiguration.get().publishableKey)
                     }
                 },
                 listener = this,

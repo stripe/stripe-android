@@ -9,6 +9,7 @@ import com.stripe.android.paymentsheet.BuildConfig
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 @Module
@@ -31,7 +32,7 @@ internal interface TapToAddConnectionModule {
             errorReporter: ErrorReporter,
             logger: Logger,
             applicationContext: Context,
-            paymentConfiguration: PaymentConfiguration,
+            paymentConfiguration: Provider<PaymentConfiguration>,
             @IOContext workContext: CoroutineContext
         ): TapToAddConnectionManager {
             return TapToAddConnectionManager.create(
