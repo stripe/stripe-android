@@ -1,7 +1,6 @@
 package com.stripe.android.common.taptoadd
 
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.R as StripeR
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.ResolvableString
@@ -28,6 +27,7 @@ import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.suspendCoroutine
+import com.stripe.android.R as StripeR
 
 internal interface TapToAddCollectionHandler {
     suspend fun collect(metadata: PaymentMethodMetadata): CollectionState
