@@ -8,14 +8,15 @@ android {
 
 dependencies {
     api project(':ml-core:base')
-    implementation project(":stripecardscan-tflite")
+    implementation libs.tensorflowLitePlayServices
+    api libs.tensorflowLitePlayServicesSupport
     implementation libs.androidx.annotation
 }
 
 ext {
     artifactId = "ml-core-cardscan"
     artifactName = "ml-core-cardscan"
-    artifactDescrption = "the machine learning module with cardscan specific tflite runtime"
+    artifactDescrption = "the machine learning module with cardscan specific LiteRT Play Services runtime"
 }
 
 apply from: "${rootDir}/deploy/deploy.gradle"
