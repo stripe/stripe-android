@@ -5,6 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
@@ -568,6 +569,7 @@ class CardDefinitionTest {
 
     @Test
     fun `createFormElements shouldAutomaticallyLaunchCardScan in CardDetailsSectionController`() {
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
         val formElements = CardDefinition.formElements(
             metadata = PaymentMethodMetadataFactory.create(
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -585,10 +587,13 @@ class CardDefinitionTest {
         assertThat(
             (formElements[0].controller as CardDetailsSectionController).shouldAutomaticallyLaunchCardScan()
         ).isTrue()
+
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
     }
 
     @Test
     fun `createFormElements should not automaticallyLaunchCardScan when config is false`() {
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
         val formElements = CardDefinition.formElements(
             metadata = PaymentMethodMetadataFactory.create(
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -606,10 +611,13 @@ class CardDefinitionTest {
         assertThat(
             (formElements[0].controller as CardDetailsSectionController).shouldAutomaticallyLaunchCardScan()
         ).isFalse()
+
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
     }
 
     @Test
     fun `createFormElements should not automaticallyLaunchCardScan when has automaticallyLaunchedCardScan`() {
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(true)
         val formElements = CardDefinition.formElements(
             metadata = PaymentMethodMetadataFactory.create(
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -627,6 +635,8 @@ class CardDefinitionTest {
         assertThat(
             (formElements[0].controller as CardDetailsSectionController).shouldAutomaticallyLaunchCardScan()
         ).isFalse()
+
+        FeatureFlags.cardScanGooglePayMigration.setEnabled(false)
     }
 
     @Test

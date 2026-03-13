@@ -30,6 +30,11 @@ import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel
 import com.stripe.android.paymentsheet.state.WalletsState
+import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.ui.core.IsStripeCardScanAvailable
+import com.stripe.android.utils.AnalyticEventCallbackRule
+import com.stripe.android.utils.FakeDurationProvider
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -1013,6 +1018,7 @@ class DefaultEventReporterTest {
             durationProvider = durationProvider,
             analyticEventCallbackProvider = analyticEventCallbackProvider,
             workContext = testDispatcher,
+            isStripeCardScanAvailable = FakeIsStripeCardScanAvailable(),
             logger = logger,
             paymentMethodMetadataProvider = { paymentMethodMetadataStack.pop() },
         )
@@ -1083,5 +1089,11 @@ class DefaultEventReporterTest {
 
         data class StartCall(val key: DurationProvider.Key, val reset: Boolean)
         data class EndCall(val key: DurationProvider.Key, val duration: Duration)
+    }
+
+    private class FakeIsStripeCardScanAvailable(
+        private val value: Boolean = true
+    ) : IsStripeCardScanAvailable {
+        override fun invoke() = value
     }
 }

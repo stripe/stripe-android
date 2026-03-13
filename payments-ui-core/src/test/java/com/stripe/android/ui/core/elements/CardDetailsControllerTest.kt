@@ -1,6 +1,6 @@
 package com.stripe.android.ui.core.elements
 
-import android.content.Context
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
@@ -9,6 +9,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
+import com.stripe.android.stripecardscan.R
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.cardscan.CardScanResult
 import com.stripe.android.ui.core.cardscan.ScannedCard
@@ -33,7 +34,8 @@ class CardDetailsControllerTest {
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
 
-    private val context: Context = ApplicationProvider.getApplicationContext()
+    private val context =
+        ContextThemeWrapper(ApplicationProvider.getApplicationContext(), R.style.StripeCardScanDefaultTheme)
 
     @Test
     fun `Validation message uses comparator to determine which message to show`() = runTest {

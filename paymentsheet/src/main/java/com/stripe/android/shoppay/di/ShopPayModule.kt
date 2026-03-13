@@ -41,6 +41,7 @@ import com.stripe.android.shoppay.bridge.ShippingCalculationRequestJsonParser
 import com.stripe.android.shoppay.bridge.ShippingRateChangeRequest
 import com.stripe.android.shoppay.bridge.ShippingRateChangeRequestJsonParser
 import com.stripe.android.shoppay.bridge.ShopPayBridgeHandler
+import com.stripe.android.ui.core.IsStripeCardScanAvailable
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -157,5 +158,12 @@ internal interface ShopPayModule {
         @Provides
         @PaymentElementCallbackIdentifier
         fun providePaymentElementCallbackIdentifier(args: ShopPayArgs): String = args.paymentElementCallbackIdentifier
+
+        @Provides
+        fun provideIsStripeCardScanAvailable(): IsStripeCardScanAvailable {
+            return object : IsStripeCardScanAvailable {
+                override fun invoke() = false
+            }
+        }
     }
 }

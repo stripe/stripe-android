@@ -1,6 +1,5 @@
 package com.stripe.android.ui.core.elements
 
-import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -37,26 +36,24 @@ fun CardDetailsSectionElementUI(
     lastTextFieldIdentifier: IdentifierSpec?,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
-    val options = rememberActivityOptions()
+    val options = ActivityOptionsCompat.makeCustomAnimation(
+        LocalContext.current,
+        AnimationConstants.FADE_IN,
+        AnimationConstants.FADE_OUT,
+    )
 
-    // Only create launcher if ActivityResultRegistry is available (e.g., not in screenshot tests)
-    val activityResultRegistryOwner = LocalActivityResultRegistryOwner.current
-    val cardScanLauncher = if (activityResultRegistryOwner != null) {
+    if (controller.shouldAutomaticallyLaunchCardScan()) {
+        val context = LocalContext.current
         val eventsReporter = LocalCardScanEventsReporter.current
-        rememberCardScanGoogleLauncher(
+        val cardScanGoogleLauncher = rememberCardScanGoogleLauncher(
             context = context,
             options = options,
             eventsReporter = eventsReporter,
         ) { controller.onCardScanResult(it) }
-    } else {
-        null
-    }
 
-    if (controller.shouldAutomaticallyLaunchCardScan() && cardScanLauncher != null) {
         SideEffect {
             controller.setHasAutomaticallyLaunchedCardScan()
-            cardScanLauncher.launch(context)
+            cardScanGoogleLauncher.launch(context)
         }
     }
 
@@ -74,12 +71,11 @@ fun CardDetailsSectionElementUI(
                         heading()
                     }
             )
-            controller.cardDetailsAction?.Content(enabled) ?: run {
-                ScanCardButtonUI(
-                    enabled = enabled,
-                    cardScanGoogleLauncher = cardScanLauncher
-                )
-            }
+            ScanCardButtonUI(
+                enabled = enabled,
+                launchOptions = options,
+                controller = controller
+            )
         }
         SectionElementUI(
             modifier = Modifier.padding(top = 8.dp),
@@ -94,19 +90,6 @@ fun CardDetailsSectionElementUI(
             ),
             hiddenIdentifiers = hiddenIdentifiers,
             lastTextFieldIdentifier = lastTextFieldIdentifier
-        )
-    }
-}
-
-@Composable
-private fun rememberActivityOptions(): ActivityOptionsCompat {
-    val context = LocalContext.current
-
-    return remember(context) {
-        ActivityOptionsCompat.makeCustomAnimation(
-            context,
-            AnimationConstants.FADE_IN,
-            AnimationConstants.FADE_OUT,
         )
     }
 }

@@ -205,6 +205,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         AUTH_WEB_VIEW_BLANK_CLIENT_SECRET(
             partialEventName = "payments.auth_web_view.blank_client_secret"
         ),
+        MISSING_CARDSCAN_DEPENDENCY(
+            partialEventName = "payments.missing_cardscan_dependency"
+        ),
         MISSING_HOSTED_VOUCHER_URL(
             partialEventName = "payments.missing_hosted_voucher_url"
         ),

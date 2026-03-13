@@ -12,6 +12,7 @@ import com.stripe.android.paymentelement.confirmation.injection.PaymentElementCo
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.PaymentSheetContract
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
+import com.stripe.android.ui.core.di.CardScanModule
 import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
@@ -30,6 +31,7 @@ import javax.inject.Singleton
         ResourceRepositoryModule::class,
         ApplicationIdModule::class,
         MobileSessionIdModule::class,
+        CardScanModule::class,
         LinkHoldbackExposureModule::class,
         PaymentSheetViewModelModule::class,
         PaymentElementConfirmationModule::class,

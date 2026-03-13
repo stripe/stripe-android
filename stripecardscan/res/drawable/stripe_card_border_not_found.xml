@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:name="vector"
+    android:width="200dp"
+    android:height="126dp"
+    android:viewportWidth="200"
+    android:viewportHeight="126">
+    <path
+        android:name="card_border"
+        android:pathData="
+            M 2.5,20.5
+            L 2.5,7.5
+            a 5,5,0,0,1,5,-5
+            L 192.5,2.5
+            a 5,5,0,0,1,5,5
+            L 197.5,118.5
+            a 5,5,0,0,1,-5,5
+            L 7.5,123.5
+            a 5,5,0,0,1,-5,-5
+            Z"
+        android:strokeColor="@color/stripeNotFoundOutline"
+        android:strokeWidth="@integer/stripeNotFoundOutlineWidth"/>
+</vector>

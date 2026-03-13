@@ -32,6 +32,7 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.addresselement.AutocompleteLauncher
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.ui.core.di.CardScanModule
 import com.stripe.android.uicore.navigation.NavigationManager
 import dagger.BindsInstance
 import dagger.Component
@@ -50,6 +51,7 @@ internal annotation class NativeLinkScope
         DefaultConfirmationModule::class,
         DefaultIntentConfirmationModule::class,
         LinkPassthroughConfirmationModule::class,
+        CardScanModule::class
     ]
 )
 internal interface NativeLinkComponent {

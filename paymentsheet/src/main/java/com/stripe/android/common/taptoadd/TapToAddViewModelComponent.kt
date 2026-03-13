@@ -91,6 +91,7 @@ import javax.inject.Singleton
         PaymentElementRequestSurfaceModule::class,
         TapToAddViewModelModule::class,
         TapToAddModule::class,
+        com.stripe.android.ui.core.di.CardScanModule::class,
     ]
 )
 @Singleton

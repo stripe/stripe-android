@@ -34,8 +34,6 @@ import com.stripe.android.link.ui.paymentmenthod.PaymentMethodViewModel
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
-import com.stripe.android.testing.NoOpCardScanEventsReporter
-import com.stripe.android.ui.core.cardscan.LocalCardScanEventsReporter
 import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -129,7 +127,6 @@ internal class PaymentMethodScreenTest {
     private fun screen(viewModel: PaymentMethodViewModel) {
         composeTestRule.setContent {
             CompositionLocalProvider(
-                LocalCardScanEventsReporter provides NoOpCardScanEventsReporter,
                 LocalCardNumberCompletedEventReporter provides { },
                 LocalCardBrandDisallowedReporter provides { }
             ) {
