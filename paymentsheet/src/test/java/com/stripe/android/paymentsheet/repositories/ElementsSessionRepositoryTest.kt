@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.repositories
 
 import androidx.core.os.LocaleListCompat
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.LinkDisallowFundingSourceCreationPreview
@@ -29,7 +30,6 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import androidx.test.core.app.ApplicationProvider
 import java.util.Locale
 import java.util.UUID
 import kotlin.test.Test

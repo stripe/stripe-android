@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.repositories
 
 import com.stripe.android.Stripe
+import com.stripe.android.checkout.Address
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
@@ -8,7 +9,6 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.executeRequestWithResultParser
 import com.stripe.android.core.version.StripeSdkVersion
-import com.stripe.android.checkout.Address
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import java.util.Locale
 import java.util.TimeZone
