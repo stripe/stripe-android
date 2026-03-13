@@ -97,43 +97,58 @@ class Camera1Adapter(
         }
     }
 
-    private fun isFlashSupported(camera: Camera) = camera
-        .parameters
-        ?.supportedFlashModes
-        ?.contains(Camera.Parameters.FLASH_MODE_TORCH) == true
+    private fun isFlashSupported(camera: Camera) = try {
+        camera
+            .parameters
+            ?.supportedFlashModes
+            ?.contains(Camera.Parameters.FLASH_MODE_TORCH) == true
+    } catch (t: Throwable) {
+        false
+    }
 
     override fun setTorchState(on: Boolean) {
         mCamera?.apply {
-            if (isFlashSupported(this)) {
-                val parameters = parameters
-                if (on) {
-                    parameters.flashMode = Camera.Parameters.FLASH_MODE_TORCH
-                } else {
-                    parameters.flashMode = Camera.Parameters.FLASH_MODE_OFF
+            try {
+                if (isFlashSupported(this)) {
+                    val parameters = parameters
+                    if (on) {
+                        parameters.flashMode = Camera.Parameters.FLASH_MODE_TORCH
+                    } else {
+                        parameters.flashMode = Camera.Parameters.FLASH_MODE_OFF
+                    }
+                    setCameraParameters(this, parameters)
+                    startCameraPreview()
                 }
-                setCameraParameters(this, parameters)
-                startCameraPreview()
+            } catch (t: Throwable) {
+                Log.w(logTag, "Error setting torch state", t)
             }
         }
     }
 
-    override fun isTorchOn(): Boolean =
+    override fun isTorchOn(): Boolean = try {
         mCamera?.parameters?.flashMode == Camera.Parameters.FLASH_MODE_TORCH
+    } catch (t: Throwable) {
+        false
+    }
 
     override fun setFocus(point: PointF) {
         mCamera?.apply {
-            val params = parameters
-            if (params.maxNumFocusAreas > 0) {
-                val focusRect = Rect(
-                    point.x.toInt() - 150,
-                    point.y.toInt() - 150,
-                    point.x.toInt() + 150,
-                    point.y.toInt() + 150
-                )
-                val cameraFocusAreas: MutableList<Camera.Area> = ArrayList()
-                cameraFocusAreas.add(Camera.Area(focusRect, 1000))
-                params.focusAreas = cameraFocusAreas
-                setCameraParameters(this, params)
+            try {
+                val params = parameters
+                if (params.maxNumFocusAreas > 0) {
+                    val focusRect = Rect(
+                        point.x.toInt() - 150,
+                        point.y.toInt() - 150,
+                        point.x.toInt() + 150,
+                        point.y.toInt() + 150
+                    )
+                    val cameraFocusAreas: MutableList<Camera.Area> = ArrayList()
+                    cameraFocusAreas.add(Camera.Area(focusRect, 1000))
+                    params.focusAreas = cameraFocusAreas
+                    setCameraParameters(this, params)
+                }
+            } catch (t: Throwable) {
+                Log.w(logTag, "Error setting focus", t)
             }
         }
     }
@@ -442,16 +457,20 @@ class Camera1Adapter(
         init {
             holder.addCallback(this)
             mCamera?.apply {
-                val params = parameters
-                val focusModes = params.supportedFocusModes
-                if (focusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
-                    params.focusMode = Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE
-                } else if (focusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO)) {
-                    params.focusMode = Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO
-                }
+                try {
+                    val params = parameters
+                    val focusModes = params.supportedFocusModes
+                    if (focusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
+                        params.focusMode = Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE
+                    } else if (focusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO)) {
+                        params.focusMode = Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO
+                    }
 
-                params.setRecordingHint(true)
-                setCameraParameters(this, params)
+                    params.setRecordingHint(true)
+                    setCameraParameters(this, params)
+                } catch (t: Throwable) {
+                    Log.w(logTag, "Error setting initial camera parameters", t)
+                }
             }
         }
 
