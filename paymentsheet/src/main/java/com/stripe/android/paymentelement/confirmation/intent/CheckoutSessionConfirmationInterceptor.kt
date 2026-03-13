@@ -20,6 +20,7 @@ import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationD
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.ConfirmCheckoutSessionParams
+import com.stripe.android.paymentsheet.repositories.ConfirmCheckoutSessionPaymentParams
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -101,15 +102,23 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         paymentMethod: PaymentMethod,
         savePaymentMethod: Boolean?,
     ): ConfirmationDefinition.Action<Args> {
-        return checkoutSessionRepository.confirm(
-            id = integrationMetadata.id,
-            params = ConfirmCheckoutSessionParams(
+        val params = when (intent) {
+            is PaymentIntent -> ConfirmCheckoutSessionPaymentParams(
                 paymentMethodId = paymentMethod.id,
                 clientAttributionMetadata = clientAttributionMetadata,
                 returnUrl = returnUrl,
+                expectedAmount = intent.amount ?: 0L,
                 savePaymentMethod = savePaymentMethod,
-                expectedAmount = (intent as? PaymentIntent)?.amount,
-            ),
+            )
+            else -> ConfirmCheckoutSessionParams(
+                paymentMethodId = paymentMethod.id,
+                clientAttributionMetadata = clientAttributionMetadata,
+                returnUrl = returnUrl,
+            )
+        }
+        return checkoutSessionRepository.confirm(
+            id = integrationMetadata.id,
+            params = params,
         ).fold(
             onSuccess = { response ->
                 val intent: StripeIntent = response.paymentIntent ?: response.setupIntent
