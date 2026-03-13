@@ -930,7 +930,7 @@
 |    |    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.22 -> 2.3.10 (c)
 |    |    |    |    |    +--- org.jetbrains.kotlin:kotlin-reflect:1.8.22 -> 1.9.25 (c)
 |    |    |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22 -> 1.9.24 (c)
-|    |    |    |    +--- com.google.errorprone:error_prone_annotations:2.15.0 -> 2.36.0
+|    |    |    |    +--- com.google.errorprone:error_prone_annotations:2.15.0 -> 2.41.0
 |    |    |    |    +--- androidx.activity:activity:1.8.0 -> 1.12.4 (*)
 |    |    |    |    +--- androidx.annotation:annotation:1.2.0 -> 1.9.1 (*)
 |    |    |    |    +--- androidx.annotation:annotation-experimental:1.0.0 -> 1.4.1 (*)
@@ -1370,14 +1370,14 @@
 |    +--- com.google.android.gms:play-services-tasks:18.2.0 (*)
 |    +--- com.google.android.material:material:1.12.0 -> 1.13.0 (*)
 |    +--- com.google.auto.value:auto-value-annotations:1.6.2
-|    +--- com.google.code.gson:gson:2.10 -> 2.12.1
-|    |    \--- com.google.errorprone:error_prone_annotations:2.36.0
+|    +--- com.google.code.gson:gson:2.10 -> 2.13.2
+|    |    \--- com.google.errorprone:error_prone_annotations:2.41.0
 |    +--- com.google.guava:guava:33.3.0-android
 |    |    +--- com.google.guava:failureaccess:1.0.2
 |    |    +--- com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava
 |    |    +--- com.google.code.findbugs:jsr305:3.0.2
 |    |    +--- org.checkerframework:checker-qual:3.43.0
-|    |    \--- com.google.errorprone:error_prone_annotations:2.28.0 -> 2.36.0
+|    |    \--- com.google.errorprone:error_prone_annotations:2.28.0 -> 2.41.0
 |    +--- com.squareup.okhttp:okhttp:2.7.2
 |    |    \--- com.squareup.okio:okio:1.6.0 -> 3.16.4 (*)
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.2.0 -> 2.3.10 (*)
@@ -1405,9 +1405,9 @@
 |    \--- io.sentry:sentry-android-replay:8.33.0
 |         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.24 (*)
 |         \--- io.sentry:sentry:8.33.0
-+--- com.stripe:stripeterminal-core:4.7.3
++--- com.stripe:stripeterminal-core:5.3.0
 |    +--- androidx.annotation:annotation:1.9.1 (*)
-|    +--- com.stripe:stripeterminal-external:4.7.3
+|    +--- com.stripe:stripeterminal-external:5.3.0
 |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.9.25 -> 2.3.10 (*)
 |    |    +--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.9.25 -> 2.3.10 (*)
 |    |    +--- androidx.annotation:annotation:1.9.1 (*)
@@ -1416,12 +1416,12 @@
 |    |         \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.21 -> 1.9.24 (*)
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.9.25 -> 2.3.10 (*)
 |    +--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.9.25 -> 2.3.10 (*)
-|    \--- com.stripe:stripeterminal-internal-common:4.7.3
+|    \--- com.stripe:stripeterminal-internal-common:5.3.0
 |         +--- org.jetbrains.kotlin:kotlin-stdlib:1.9.25 -> 2.3.10 (*)
 |         +--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.9.25 -> 2.3.10 (*)
 |         +--- androidx.annotation:annotation:1.9.1 (*)
 |         +--- androidx.core:core-ktx:1.13.1 -> 1.17.0 (*)
-|         +--- com.google.dagger:dagger:2.53 -> 2.58 (*)
+|         +--- com.google.dagger:dagger:2.53.1 -> 2.58 (*)
 |         +--- org.jetbrains.kotlin:kotlin-reflect:1.9.25
 |         |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.25 -> 2.3.10 (*)
 |         +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1 -> 1.10.2 (*)
@@ -1434,7 +1434,7 @@
 |         |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.10.2 (*)
 |         |    |    +--- org.reactivestreams:reactive-streams:1.0.3 -> 1.0.4
 |         |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:2.1.0 -> 2.3.10 (*)
-|         |    +--- io.reactivex.rxjava3:rxjava:3.0.2 -> 3.1.10
+|         |    +--- io.reactivex.rxjava3:rxjava:3.0.2 -> 3.1.12
 |         |    |    \--- org.reactivestreams:reactive-streams:1.0.4
 |         |    \--- org.jetbrains.kotlin:kotlin-stdlib:2.1.0 -> 2.3.10 (*)
 |         +--- com.squareup.moshi:moshi:1.15.2 (*)
@@ -1579,33 +1579,13 @@
 |         |         +--- com.squareup.okio:okio:3.7.0 -> 3.16.4 (*)
 |         |         +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1 -> 1.10.2 (*)
 |         |         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.22 -> 2.3.10 (*)
-|         +--- org.jetbrains.kotlinx:kotlinx-datetime:0.6.2
-|         |    \--- org.jetbrains.kotlinx:kotlinx-datetime-jvm:0.6.2
-|         |         \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.21 -> 2.3.10 (*)
-|         +--- com.google.code.gson:gson:2.12.1 (*)
+|         +--- com.google.code.gson:gson:2.13.2 (*)
 |         +--- com.squareup.okhttp3:okhttp:4.12.0 (*)
 |         +--- com.squareup.okhttp3:okhttp-tls:4.12.0
 |         |    +--- com.squareup.okhttp3:okhttp:4.12.0 (*)
 |         |    +--- com.squareup.okio:okio:3.6.0 -> 3.16.4 (*)
 |         |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.21 -> 1.9.24 (*)
 |         +--- com.squareup.tape2:tape:2.0.0-beta1
-|         +--- app.cash.sqldelight:android-driver:2.0.2
-|         |    +--- androidx.sqlite:sqlite-framework:2.4.0
-|         |    |    +--- androidx.annotation:annotation:1.2.0 -> 1.9.1 (*)
-|         |    |    +--- androidx.sqlite:sqlite:2.4.0
-|         |    |    |    +--- androidx.annotation:annotation:1.0.0 -> 1.9.1 (*)
-|         |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 -> 2.3.10 (*)
-|         |    |    |    +--- io.sentry:sentry-android-sqlite:8.33.0
-|         |    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.24 (*)
-|         |    |    |    |    \--- io.sentry:sentry:8.33.0
-|         |    |    |    \--- androidx.sqlite:sqlite-framework:2.4.0 (c)
-|         |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 -> 2.3.10 (*)
-|         |    |    \--- androidx.sqlite:sqlite:2.4.0 (c)
-|         |    +--- app.cash.sqldelight:runtime:2.0.2
-|         |    |    \--- app.cash.sqldelight:runtime-jvm:2.0.2
-|         |    |         \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.23 -> 2.3.10 (*)
-|         |    +--- androidx.sqlite:sqlite:2.4.0 (*)
-|         |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.23 -> 2.3.10 (*)
 |         +--- androidx.security:security-crypto:1.1.0-alpha03
 |         |    +--- androidx.annotation:annotation:1.1.0 -> 1.9.1 (*)
 |         |    +--- com.google.crypto.tink:tink-android:1.5.0
@@ -1619,8 +1599,18 @@
 |         |    |    +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22 -> 1.9.24 (*)
 |         |    |    +--- androidx.room:room-ktx:2.6.1 (c)
 |         |    |    \--- androidx.room:room-runtime:2.6.1 (c)
-|         |    +--- androidx.sqlite:sqlite:2.4.0 (*)
-|         |    +--- androidx.sqlite:sqlite-framework:2.4.0 (*)
+|         |    +--- androidx.sqlite:sqlite:2.4.0
+|         |    |    +--- androidx.annotation:annotation:1.0.0 -> 1.9.1 (*)
+|         |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 -> 2.3.10 (*)
+|         |    |    +--- io.sentry:sentry-android-sqlite:8.33.0
+|         |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.24 (*)
+|         |    |    |    \--- io.sentry:sentry:8.33.0
+|         |    |    \--- androidx.sqlite:sqlite-framework:2.4.0 (c)
+|         |    +--- androidx.sqlite:sqlite-framework:2.4.0
+|         |    |    +--- androidx.annotation:annotation:1.2.0 -> 1.9.1 (*)
+|         |    |    +--- androidx.sqlite:sqlite:2.4.0 (*)
+|         |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 -> 2.3.10 (*)
+|         |    |    \--- androidx.sqlite:sqlite:2.4.0 (c)
 |         |    +--- androidx.room:room-common:2.6.1 (c)
 |         |    \--- androidx.room:room-ktx:2.6.1 (c)
 |         +--- androidx.room:room-ktx:2.6.1
@@ -1641,30 +1631,38 @@
 |         |    +--- com.squareup.moshi:moshi:1.15.0 -> 1.15.2 (*)
 |         |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.10 -> 1.9.24 (*)
 |         +--- com.squareup.wire:wire-runtime:4.9.11 (*)
-|         \--- com.stripe:stripeterminal-external:4.7.3 (*)
-\--- com.stripe:stripeterminal-taptopay:4.7.3
+|         +--- com.stripe:stripeterminal-external:5.3.0 (*)
+|         +--- androidx.sqlite:sqlite:2.4.0 (*)
+|         \--- androidx.sqlite:sqlite-framework:2.4.0 (*)
+\--- com.stripe:stripeterminal-taptopay:5.3.0
      +--- androidx.databinding:viewbinding:8.8.2 -> 8.13.2 (*)
      +--- org.jetbrains.kotlin:kotlin-stdlib:1.9.25 -> 2.3.10 (*)
      +--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.9.25 -> 2.3.10 (*)
      +--- androidx.annotation:annotation:1.9.1 (*)
-     +--- androidx.constraintlayout:constraintlayout:2.1.4 -> 2.2.1 (*)
+     +--- androidx.appcompat:appcompat:1.7.1 (*)
+     +--- androidx.constraintlayout:constraintlayout:2.2.1 (*)
      +--- androidx.core:core-ktx:1.13.1 -> 1.17.0 (*)
-     +--- androidx.fragment:fragment-ktx:1.8.7 -> 1.8.9 (*)
+     +--- androidx.fragment:fragment-ktx:1.8.9 (*)
+     +--- androidx.gridlayout:gridlayout:1.1.0
+     |    +--- androidx.annotation:annotation:1.8.1 -> 1.9.1 (*)
+     |    +--- androidx.core:core:1.3.0 -> 1.17.0 (*)
+     |    \--- org.jspecify:jspecify:1.0.0
+     +--- androidx.recyclerview:recyclerview:1.4.0 (*)
      +--- androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7 -> 2.10.0 (*)
      +--- androidx.lifecycle:lifecycle-process:2.8.7 -> 2.10.0 (*)
      +--- com.scottyab:rootbeer-lib:0.1.1
      +--- com.google.android.play:integrity:1.1.0 -> 1.4.0 (*)
-     +--- com.google.android.material:material:1.12.0 -> 1.13.0 (*)
-     +--- com.google.dagger:dagger:2.53 -> 2.58 (*)
-     +--- com.google.code.gson:gson:2.12.1 (*)
+     +--- com.google.android.material:material:1.13.0 (*)
+     +--- com.google.dagger:dagger:2.53.1 -> 2.58 (*)
+     +--- com.google.code.gson:gson:2.13.2 (*)
      +--- com.squareup.okhttp3:okhttp:4.12.0 (*)
      +--- com.squareup.okhttp3:okhttp-tls:4.12.0 (*)
-     +--- io.reactivex.rxjava3:rxjava:3.1.10 (*)
+     +--- io.reactivex.rxjava3:rxjava:3.1.12 (*)
      +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1 -> 1.10.2 (*)
      +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1 -> 1.10.2 (*)
      +--- com.squareup.wire:wire-moshi-adapter:4.9.11 (*)
-     +--- com.stripe:stripeterminal-external:4.7.3 (*)
-     +--- com.stripe:stripeterminal-internal-common:4.7.3 (*)
+     +--- com.stripe:stripeterminal-external:5.3.0 (*)
+     +--- com.stripe:stripeterminal-internal-common:5.3.0 (*)
      +--- com.fasterxml.jackson.core:jackson-databind:2.16.1
      |    +--- com.fasterxml.jackson.core:jackson-annotations:2.16.1
      |    |    \--- com.fasterxml.jackson:jackson-bom:2.16.1
