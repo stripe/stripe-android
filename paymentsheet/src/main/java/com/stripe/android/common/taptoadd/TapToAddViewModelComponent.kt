@@ -188,7 +188,7 @@ internal interface TapToAddViewModelModule {
     companion object {
         @Provides
         @Named(ENABLE_LOGGING)
-        fun provideEnabledLogging(): Boolean = BuildConfig.DEBUG
+        fun provideEnabledLogging(): Boolean = true
 
         @Provides
         @Singleton

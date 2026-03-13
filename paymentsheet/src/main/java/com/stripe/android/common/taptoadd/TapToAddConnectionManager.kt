@@ -98,7 +98,7 @@ internal class DefaultTapToAddConnectionManager(
 
     override val isSupported: Boolean
         get() {
-            return FeatureFlags.enableTapToAdd.isEnabled && terminal().supportsReadersOfType(
+            return terminal().supportsReadersOfType(
                 deviceType = DeviceType.TAP_TO_PAY_DEVICE,
                 discoveryConfiguration = discoveryConfiguration,
             ).isSupported

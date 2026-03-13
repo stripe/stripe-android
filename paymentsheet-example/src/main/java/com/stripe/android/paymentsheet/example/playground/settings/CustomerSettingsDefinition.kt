@@ -16,10 +16,6 @@ internal object CustomerSettingsDefinition :
         configurationData: PlaygroundConfigurationData
     ): List<PlaygroundSettingDefinition.Displayable.Option<CustomerType>> {
         return buildList {
-            if (configurationData.integrationType.isPaymentFlow()) {
-                add(option("Guest", CustomerType.GUEST))
-            }
-
             add(option("New", CustomerType.NEW))
 
             if (!configurationData.integrationType.isSptFlow()) {
@@ -75,11 +71,10 @@ internal object CustomerSettingsDefinition :
     }
 
     override val key: String = "customer"
-    override val defaultValue: CustomerType = CustomerType.GUEST
+    override val defaultValue: CustomerType = CustomerType.NEW
 
     override fun convertToValue(value: String): CustomerType {
         val hardcodedCustomerTypes = mapOf(
-            CustomerType.GUEST.value to CustomerType.GUEST,
             CustomerType.NEW.value to CustomerType.NEW,
             CustomerType.RETURNING.value to CustomerType.RETURNING,
         )
@@ -98,8 +93,6 @@ internal object CustomerSettingsDefinition :
 }
 
 sealed class CustomerType(val value: String) {
-    object GUEST : CustomerType("guest")
-
     object NEW : CustomerType("new")
 
     object RETURNING : CustomerType("returning")
