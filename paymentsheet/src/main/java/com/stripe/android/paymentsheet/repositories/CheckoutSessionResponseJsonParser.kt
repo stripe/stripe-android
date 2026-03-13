@@ -14,13 +14,17 @@ import org.json.JSONObject
 /**
  * Parser for checkout session API responses:
  * - Init API (`/v1/payment_pages/{cs_id}/init`) - returns elements_session
- * - Confirm API (`/v1/payment_pages/{cs_id}/confirm`) - returns payment_intent
+ * - Confirm API (`/v1/payment_pages/{cs_id}/confirm`) - returns payment_intent or setup_intent
  *
  * The init response contains checkout session metadata (`id`, `amount`, `currency`) and an
- * embedded `elements_session` object. The confirm response contains a `payment_intent` object.
+ * embedded `elements_session` object. The confirm response contains a `payment_intent` or
+ * `setup_intent` object.
  *
- * For confirm responses, this parser extracts the `payment_intent` and creates a minimal
- * response with the payment intent data.
+ * Confirm responses may also contain an `elements_session` (when
+ * `elements_session_client[is_aggregation_expected]` is set). In that case, the
+ * `elements_session` will have a deferred intent stub as its `stripeIntent`. This parser
+ * replaces that deferred intent with the actual confirmed intent from the top-level
+ * `payment_intent` or `setup_intent` field.
  */
 internal class CheckoutSessionResponseJsonParser(
     private val isLiveMode: Boolean,
@@ -39,10 +43,20 @@ internal class CheckoutSessionResponseJsonParser(
             SetupIntentJsonParser().parse(it)
         }
 
-        val elementsSession = parseElementsSession(
+        val parsedElementsSession = parseElementsSession(
             json.optJSONObject(FIELD_SERVER_BUILT_ELEMENTS_SESSION_PARAMS),
             json.optJSONObject(FIELD_ELEMENTS_SESSION),
         )
+        val elementsSession = if (parsedElementsSession != null) {
+            val confirmedIntent = paymentIntent ?: setupIntent
+            if (confirmedIntent != null) {
+                parsedElementsSession.copy(stripeIntent = confirmedIntent)
+            } else {
+                parsedElementsSession
+            }
+        } else {
+            null
+        }
         val customer = parseCustomer(json.optJSONObject(FIELD_CUSTOMER))
         val savedPaymentMethodsOfferSave = parseSavedPaymentMethodsOfferSave(
             json.optJSONObject(FIELD_SAVED_PAYMENT_METHODS_OFFER_SAVE)

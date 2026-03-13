@@ -115,7 +115,7 @@ internal class DefaultCheckoutSessionRepository @Inject constructor(
         params: ConfirmCheckoutSessionParams,
     ): Result<CheckoutSessionResponse> = executePost(
         url = confirmUrl(id),
-        params = params.toParamMap(),
+        params = params.toParamMap().plus(Pair("elements_session_client[is_aggregation_expected]", "true")),
     )
 
     override suspend fun detachPaymentMethod(
