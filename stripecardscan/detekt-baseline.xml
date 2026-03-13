@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>EmptyFunctionBlock:CardScanFragment.kt$CardScanFragment${}</ID>
+    <ID>ForbiddenComment:PaymentCardUtils.kt$* Determine if a PAN is valid. * * TODO: this should use a contract like the following once contracts are no longer experimental: * ``` * contract { returns(true) implies (pan != null) } * ```</ID>
+    <ID>ForbiddenComment:SSD.kt$* The model outputs a particular location or a particular class of each prior before moving on to * the next prior. For instance, the model will output probabilities for background class * corresponding to all priors before outputting the probability of next class for the first prior. * This method serves to rearrange the output if you are using outputs from multiple layers If you * use outputs from single layer use the method defined above * * TODO: simplify this</ID>
+    <ID>ForbiddenComment:ScanActivity.kt$ScanActivity$// TODO: this should be reported as part of scanstats, but is not yet supported</ID>
+    <ID>ForbiddenComment:ScanActivity.kt$ScanActivity$// TODO: this should probably be reported as part of scanstats, but is not yet supported</ID>
+    <ID>ForbiddenComment:ScanFragment.kt$ScanFragment$// TODO: this should be reported as part of scanstats, but is not yet supported</ID>
+    <ID>ForbiddenComment:ScanFragment.kt$ScanFragment$// TODO: this should probably be reported as part of scanstats, but is not yet supported</ID>
+    <ID>ForbiddenComment:Timer.kt$* Measure the amount of time a process takes. * * TODO: use contracts when they are no longer experimental</ID>
+    <ID>ForbiddenComment:Timer.kt$LoggingTimer$// TODO: use contracts when they are no longer experimental</ID>
+    <ID>ForbiddenComment:Timer.kt$NoOpTimer$// TODO: use contracts when they are no longer experimental</ID>
+    <ID>MagicNumber:CombinePriors.kt$12</ID>
+    <ID>MagicNumber:CombinePriors.kt$16</ID>
+    <ID>MagicNumber:CombinePriors.kt$19</ID>
+    <ID>MagicNumber:CombinePriors.kt$24</ID>
+    <ID>MagicNumber:CombinePriors.kt$31</ID>
+    <ID>MagicNumber:CombinePriors.kt$38</ID>
+    <ID>MagicNumber:MLImage.kt$MLImage$0xFF</ID>
+    <ID>MagicNumber:MLImage.kt$MLImage$16</ID>
+    <ID>MagicNumber:MLImage.kt$MLImage$8</ID>
+    <ID>MagicNumber:NonMaximumSuppression.kt$0.00001f</ID>
+    <ID>MagicNumber:NonMaximumSuppression.kt$200</ID>
+    <ID>MagicNumber:PanValidator.kt$LuhnPanValidator$10</ID>
+    <ID>MagicNumber:PanValidator.kt$LuhnPanValidator$9</ID>
+    <ID>MagicNumber:RectForm.kt$1000F</ID>
+    <ID>MagicNumber:RectForm.kt$3</ID>
+    <ID>MagicNumber:ScanActivity.kt$ScanActivity$1500</ID>
+    <ID>MagicNumber:ScanFragment.kt$ScanFragment$1500</ID>
+    <ID>MagicNumber:SizeAndCenter.kt$3</ID>
+    <ID>MatchingDeclarationName:SSD.kt$OcrFeatureMapSizes</ID>
+    <ID>NestedBlockDepth:SSD.kt$internal fun rearrangeOCRArray( locations: Array&lt;FloatArray>, featureMapSizes: OcrFeatureMapSizes, numberOfPriors: Int, locationsPerPrior: Int ): Array&lt;FloatArray></ID>
+    <ID>SwallowedException:Loader.kt$Loader$t: Throwable</ID>
+    <ID>TooGenericExceptionCaught:Loader.kt$Loader$t: Throwable</ID>
+    <ID>TooGenericExceptionCaught:TensorFlowLiteAnalyzer.kt$TFLAnalyzerFactory$t: Throwable</ID>
+    <ID>TooManyFunctions:ArrayExtensions.kt$com.stripe.android.stripecardscan.framework.util.ArrayExtensions.kt</ID>
+    <ID>TooManyFunctions:RectForm.kt$com.stripe.android.stripecardscan.framework.ml.ssd.RectForm.kt</ID>
+    <ID>TooManyFunctions:ScanActivity.kt$ScanActivity : CameraPermissionCheckingActivityCoroutineScope</ID>
+    <ID>TooManyFunctions:ScanFragment.kt$ScanFragment : FragmentCoroutineScope</ID>
+    <ID>TooManyFunctions:SizeAndCenter.kt$com.stripe.android.stripecardscan.framework.ml.ssd.SizeAndCenter.kt</ID>
+  </CurrentIssues>
+</SmellBaseline>
