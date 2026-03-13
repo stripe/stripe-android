@@ -1,10 +1,17 @@
 package com.stripe.android.paymentelement.confirmation.intent
 
+import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
+import app.cash.turbine.test
+import app.cash.turbine.testIn
+import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.Address
+import com.stripe.android.checkout.Checkout
+import com.stripe.android.checkout.CheckoutInstancesTestRule
+import com.stripe.android.checkout.InternalState
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
@@ -31,15 +38,27 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.repositories.ConfirmCheckoutSessionParams
 import com.stripe.android.testing.AbsFakeStripeRepository
+import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.SetupIntentFactory
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
+@OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
 class CheckoutSessionConfirmationInterceptorTest {
+
+    private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
+
+    @get:Rule
+    val ruleChain: RuleChain = RuleChain
+        .outerRule(PaymentConfigurationTestRule(applicationContext))
+        .around(CheckoutInstancesTestRule())
 
     @Test
     fun `intercept with succeeded payment intent returns Complete action`() = runScenario {
@@ -301,6 +320,81 @@ class CheckoutSessionConfirmationInterceptorTest {
         assertThat(params).doesNotContainKey("save_payment_method")
     }
 
+    @Test
+    fun `successful confirm updates multiple Checkout instances`() = runScenario(
+        checkoutInstanceCount = 2
+    ) {
+        val checkout1 = checkoutInstances[0]
+        val checkout2 = checkoutInstances[1]
+        turbineScope {
+            val checkoutSessionTurbine1 = checkout1.checkoutSession.testIn(backgroundScope)
+            val checkoutSessionTurbine2 = checkout2.checkoutSession.testIn(backgroundScope)
+
+            assertThat(checkoutSessionTurbine1.awaitItem().id).isEqualTo("cs_test_abc123")
+            assertThat(checkoutSessionTurbine2.awaitItem().id).isEqualTo("cs_test_abc123")
+
+            interceptNewPm()
+
+            assertThat(checkoutSessionTurbine1.awaitItem().id).isEqualTo("cs_test_123")
+            assertThat(checkoutSessionTurbine2.awaitItem().id).isEqualTo("cs_test_123")
+        }
+    }
+
+    @Test
+    fun `successful confirm with new PM updates registered Checkout instances`() = runScenario(
+        checkoutInstanceCount = 1
+    ) {
+        val checkout = checkoutInstances.single()
+        checkout.checkoutSession.test {
+            assertThat(awaitItem().id).isEqualTo("cs_test_abc123")
+
+            interceptNewPm()
+
+            assertThat(awaitItem().id).isEqualTo("cs_test_123")
+            assertThat(checkout.internalState.checkoutSessionResponse)
+                .isEqualTo(
+                    createCheckoutSessionResponse(
+                        paymentIntent = PaymentIntentFactory.create(status = StripeIntent.Status.Succeeded)
+                    )
+                )
+        }
+    }
+
+    @Test
+    fun `successful confirm with saved PM updates registered Checkout instances`() = runScenario(
+        checkoutInstanceCount = 1
+    ) {
+        val checkout = checkoutInstances.single()
+        checkout.checkoutSession.test {
+            assertThat(awaitItem().id).isEqualTo("cs_test_abc123")
+
+            interceptSavedPm()
+
+            assertThat(awaitItem().id).isEqualTo("cs_test_123")
+            assertThat(checkout.internalState.checkoutSessionResponse)
+                .isEqualTo(
+                    createCheckoutSessionResponse(
+                        paymentIntent = PaymentIntentFactory.create(status = StripeIntent.Status.Succeeded)
+                    )
+                )
+        }
+    }
+
+    @Test
+    fun `failed confirm does not update registered Checkout instances`() = runScenario(
+        confirmCheckoutSessionResult = Result.failure(RuntimeException("Checkout session confirmation failed")),
+        checkoutInstanceCount = 1,
+    ) {
+        val checkout = checkoutInstances.single()
+        checkout.checkoutSession.test {
+            assertThat(awaitItem().id).isEqualTo("cs_test_abc123")
+
+            interceptNewPm()
+
+            ensureAllEventsConsumed()
+        }
+    }
+
     private fun runScenario(
         createPaymentMethodResult: Result<PaymentMethod> = Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         confirmCheckoutSessionResult: Result<CheckoutSessionResponse> = Result.success(
@@ -309,6 +403,7 @@ class CheckoutSessionConfirmationInterceptorTest {
             )
         ),
         customerMetadata: CustomerMetadata? = null,
+        checkoutInstanceCount: Int = 0,
         block: suspend Scenario.() -> Unit,
     ) {
         val confirmCheckoutSessionCalls = Turbine<ConfirmCheckoutSessionParams>()
@@ -325,6 +420,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         val interceptor = CheckoutSessionConfirmationInterceptor(
             integrationMetadata = IntegrationMetadata.CheckoutSession(
                 id = "cs_test_123",
+                instancesKey = INSTANCES_KEY,
             ),
             customerMetadata = customerMetadata,
             clientAttributionMetadata = ClientAttributionMetadata(
@@ -332,18 +428,33 @@ class CheckoutSessionConfirmationInterceptorTest {
                 paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
                 paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
             ),
-            context = ApplicationProvider.getApplicationContext(),
+            context = applicationContext,
             stripeRepository = stripeRepository,
             checkoutSessionRepository = checkoutSessionRepository,
             requestOptions = ApiRequest.Options(apiKey = "pk_test_123"),
         )
 
-        val scenario = Scenario(
-            interceptor = interceptor,
-            confirmCheckoutSessionCalls = confirmCheckoutSessionCalls,
-        )
+        @Suppress("EmptyRange")
+        val checkoutInstances = (0 until checkoutInstanceCount).map {
+            Checkout.createWithState(
+                context = applicationContext,
+                state = Checkout.State(
+                    InternalState(
+                        key = INSTANCES_KEY,
+                        checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+                    ),
+                ),
+            )
+        }
 
         runTest {
+            val scenario = Scenario(
+                interceptor = interceptor,
+                confirmCheckoutSessionCalls = confirmCheckoutSessionCalls,
+                checkoutInstances = checkoutInstances,
+                backgroundScope = backgroundScope,
+            )
+
             scenario.block()
         }
     }
@@ -351,6 +462,8 @@ class CheckoutSessionConfirmationInterceptorTest {
     private data class Scenario(
         val interceptor: CheckoutSessionConfirmationInterceptor,
         val confirmCheckoutSessionCalls: ReceiveTurbine<ConfirmCheckoutSessionParams>,
+        val checkoutInstances: List<Checkout>,
+        val backgroundScope: CoroutineScope,
     ) {
         suspend fun interceptNewPm(
             shouldSave: Boolean = false,
@@ -396,6 +509,8 @@ class CheckoutSessionConfirmationInterceptorTest {
     }
 
     private companion object {
+        const val INSTANCES_KEY = "CheckoutSessionConfirmationInterceptorTest"
+
         val NEW_PM_OPTION = PaymentMethodConfirmationOption.New(
             createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             optionsParams = null,
@@ -470,6 +585,14 @@ class CheckoutSessionConfirmationInterceptorTest {
         override suspend fun updateTaxRegion(
             sessionId: String,
             address: Address.State,
+        ): Result<CheckoutSessionResponse> {
+            error("Not expected in this test")
+        }
+
+        override suspend fun updateTaxId(
+            sessionId: String,
+            type: String,
+            value: String,
         ): Result<CheckoutSessionResponse> {
             error("Not expected in this test")
         }

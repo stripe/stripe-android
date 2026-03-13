@@ -104,10 +104,20 @@ class Checkout private constructor(
     suspend fun updateShippingAddress(
         name: String? = null,
         address: Address,
-    ): Result<CheckoutSession> = withSessionId(
-        additionalStateMutations = { copy(shippingName = name) },
-    ) { sessionId ->
-        component.checkoutSessionRepository.updateTaxRegion(sessionId, address.build())
+    ): Result<CheckoutSession> {
+        val built = address.build()
+        return withSessionId(
+            additionalStateMutations = { copy(shippingName = name, shippingAddress = built) },
+        ) { sessionId ->
+            component.checkoutSessionRepository.updateTaxRegion(sessionId, built)
+        }
+    }
+
+    suspend fun updateTaxId(
+        type: String,
+        value: String,
+    ): Result<CheckoutSession> = withSessionId { sessionId ->
+        component.checkoutSessionRepository.updateTaxId(sessionId, type.trim(), value.trim())
     }
 
     suspend fun updateBillingAddress(
@@ -116,7 +126,7 @@ class Checkout private constructor(
     ): Result<CheckoutSession> {
         val built = address.build()
         return withSessionId(
-            additionalStateMutations = { copy(billingName = name) },
+            additionalStateMutations = { copy(billingName = name, billingAddress = built) },
         ) { sessionId ->
             component.checkoutSessionRepository.updateTaxRegion(sessionId, built)
         }
@@ -124,6 +134,11 @@ class Checkout private constructor(
 
     suspend fun refresh(): Result<CheckoutSession> = withSessionId { sessionId ->
         component.checkoutSessionRepository.init(sessionId)
+    }
+
+    internal fun updateWithResponse(response: CheckoutSessionResponse) {
+        internalState = internalState.copy(checkoutSessionResponse = response)
+        _checkoutSession.value = response.asCheckoutSession()
     }
 
     private suspend fun withSessionId(

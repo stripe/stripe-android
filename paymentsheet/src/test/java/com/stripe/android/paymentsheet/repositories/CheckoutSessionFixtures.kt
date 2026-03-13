@@ -719,6 +719,91 @@ internal object CheckoutSessionFixtures {
     )
 
     /**
+     * Confirm response with both a payment_intent and an elements_session.
+     * The elements_session contains a deferred intent stub that should be replaced
+     * with the confirmed PaymentIntent.
+     */
+    val CHECKOUT_SESSION_CONFIRM_WITH_ELEMENTS_SESSION_JSON = JSONObject(
+        """
+        {
+            "session_id": "cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh",
+            "currency": "usd",
+            "mode": "payment",
+            "total_summary": {
+                "due": 999,
+                "subtotal": 999,
+                "total": 999
+            },
+            "payment_intent": {
+                "id": "pi_3QWK2VIyGgrkZxL71xfPBWG5",
+                "object": "payment_intent",
+                "amount": 999,
+                "currency": "usd",
+                "status": "succeeded",
+                "client_secret": "pi_3QWK2VIyGgrkZxL71xfPBWG5_secret_abc123",
+                "payment_method": "pm_1234",
+                "payment_method_types": ["card"],
+                "livemode": false,
+                "created": 1734000000
+            },
+            "elements_session": $MINIMAL_ELEMENTS_SESSION_JSON,
+            "server_built_elements_session_params": {
+                "type": "deferred_intent",
+                "locale": "en-US",
+                "deferred_intent": {
+                    "mode": "payment",
+                    "amount": 999,
+                    "currency": "usd",
+                    "capture_method": "automatic_async",
+                    "payment_method_types": ["card"]
+                }
+            }
+        }
+        """.trimIndent()
+    )
+
+    /**
+     * Confirm response with both a setup_intent and an elements_session.
+     * The elements_session contains a deferred intent stub that should be replaced
+     * with the confirmed SetupIntent.
+     */
+    val CHECKOUT_SESSION_SETUP_CONFIRM_WITH_ELEMENTS_SESSION_JSON = JSONObject(
+        """
+        {
+            "session_id": "cs_test_setup_abc123",
+            "currency": "usd",
+            "mode": "setup",
+            "total_summary": {
+                "due": 0,
+                "subtotal": 0,
+                "total": 0
+            },
+            "setup_intent": {
+                "id": "seti_1QWK2VIyGgrkZxL71xfPBWG5",
+                "object": "setup_intent",
+                "status": "succeeded",
+                "client_secret": "seti_1QWK2VIyGgrkZxL71xfPBWG5_secret_abc123",
+                "payment_method": "pm_1234",
+                "payment_method_types": ["card"],
+                "livemode": false,
+                "created": 1734000000,
+                "usage": "off_session"
+            },
+            "elements_session": $MINIMAL_ELEMENTS_SESSION_JSON,
+            "server_built_elements_session_params": {
+                "type": "deferred_intent",
+                "locale": "en-US",
+                "deferred_intent": {
+                    "mode": "setup",
+                    "setup_future_usage": "off_session",
+                    "payment_method_types": ["card"]
+                }
+            }
+        }
+        """.trimIndent()
+    )
+
+    /**
      * Init response with shipping_options array at the root level.
      */
     val CHECKOUT_SESSION_WITH_SHIPPING_OPTIONS_JSON = JSONObject(
