@@ -184,10 +184,114 @@ class ConfigurationKtxTest {
             .build()
     }
 
+    @Test
+    fun `sets billing address from state when defaultBillingDetails address is null`() {
+        val config = configuration()
+        val state = state(
+            billingAddress = Address.State(
+                city = "Denver",
+                country = "US",
+                line1 = "123 Main St",
+                line2 = "Apt 4",
+                postalCode = "80202",
+                state = "CO",
+            ),
+        )
+
+        val result = config.forCheckoutSession(state)
+
+        val address = result.defaultBillingDetails?.address
+        assertThat(address).isNotNull()
+        assertThat(address!!.city).isEqualTo("Denver")
+        assertThat(address.country).isEqualTo("US")
+        assertThat(address.line1).isEqualTo("123 Main St")
+        assertThat(address.line2).isEqualTo("Apt 4")
+        assertThat(address.postalCode).isEqualTo("80202")
+        assertThat(address.state).isEqualTo("CO")
+    }
+
+    @Test
+    fun `preserves merchant billing address when already set`() {
+        val merchantAddress = PaymentSheet.Address(
+            city = "San Francisco",
+            country = "US",
+        )
+        val config = configuration(
+            defaultBillingDetails = PaymentSheet.BillingDetails(address = merchantAddress),
+        )
+        val state = state(
+            billingAddress = Address.State(
+                city = "Denver",
+                country = "US",
+                line1 = null,
+                line2 = null,
+                postalCode = null,
+                state = null,
+            ),
+        )
+
+        val result = config.forCheckoutSession(state)
+
+        assertThat(result.defaultBillingDetails?.address).isEqualTo(merchantAddress)
+    }
+
+    @Test
+    fun `sets shipping address from state when shippingDetails address is null`() {
+        val config = configuration()
+        val state = state(
+            shippingAddress = Address.State(
+                city = "Denver",
+                country = "US",
+                line1 = "123 Main St",
+                line2 = "Apt 4",
+                postalCode = "80202",
+                state = "CO",
+            ),
+        )
+
+        val result = config.forCheckoutSession(state)
+
+        val address = result.shippingDetails?.address
+        assertThat(address).isNotNull()
+        assertThat(address!!.city).isEqualTo("Denver")
+        assertThat(address.country).isEqualTo("US")
+        assertThat(address.line1).isEqualTo("123 Main St")
+        assertThat(address.line2).isEqualTo("Apt 4")
+        assertThat(address.postalCode).isEqualTo("80202")
+        assertThat(address.state).isEqualTo("CO")
+    }
+
+    @Test
+    fun `preserves merchant shipping address when already set`() {
+        val merchantAddress = PaymentSheet.Address(
+            city = "San Francisco",
+            country = "US",
+        )
+        val config = configuration(
+            shippingDetails = AddressDetails(address = merchantAddress),
+        )
+        val state = state(
+            shippingAddress = Address.State(
+                city = "Denver",
+                country = "US",
+                line1 = null,
+                line2 = null,
+                postalCode = null,
+                state = null,
+            ),
+        )
+
+        val result = config.forCheckoutSession(state)
+
+        assertThat(result.shippingDetails?.address).isEqualTo(merchantAddress)
+    }
+
     private fun state(
         customerEmail: String? = null,
         shippingName: String? = null,
         billingName: String? = null,
+        shippingAddress: Address.State? = null,
+        billingAddress: Address.State? = null,
     ): InternalState {
         return InternalState(
             key = "ConfigurationKtxTest",
@@ -196,6 +300,8 @@ class ConfigurationKtxTest {
             ),
             shippingName = shippingName,
             billingName = billingName,
+            shippingAddress = shippingAddress,
+            billingAddress = billingAddress,
         )
     }
 }
