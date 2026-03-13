@@ -64,11 +64,12 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             options = requestOptions,
         ).fold(
             onSuccess = { paymentMethod ->
-                confirmCheckoutSession(
+                val params = createConfirmParams(
                     intent = intent,
                     paymentMethod = paymentMethod,
                     savePaymentMethod = confirmationOption.shouldSave.takeIf { isSaveEnabled },
                 )
+                confirmCheckoutSession(params)
             },
             onFailure = { error ->
                 ConfirmationDefinition.Action.Fail(
@@ -86,40 +87,36 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
     ): ConfirmationDefinition.Action<Args> {
         // For saved payment methods, we don't need to create a new PM or save it again.
-        return confirmCheckoutSession(
+        val params = createConfirmParams(
             intent = intent,
             paymentMethod = confirmationOption.paymentMethod,
             savePaymentMethod = null,
         )
+        return confirmCheckoutSession(params)
     }
 
-    /**
-     * Confirms the checkout session with the payment method.
-     *
-     * @param paymentMethod The payment method to confirm with.
-     * @param savePaymentMethod Whether to save the payment method for future use.
-     *        Pass `true` if user checked "Save for future use", `false` otherwise.
-     *        Pass `null` for saved payment methods (already saved).
-     */
-    private suspend fun confirmCheckoutSession(
+    private fun createConfirmParams(
         intent: StripeIntent,
         paymentMethod: PaymentMethod,
         savePaymentMethod: Boolean?,
+    ): ConfirmCheckoutSessionParams = when (intent) {
+        is PaymentIntent -> ConfirmCheckoutSessionPaymentParams(
+            paymentMethodId = paymentMethod.id,
+            clientAttributionMetadata = clientAttributionMetadata,
+            returnUrl = returnUrl,
+            expectedAmount = intent.amount ?: 0L,
+            savePaymentMethod = savePaymentMethod,
+        )
+        is SetupIntent -> ConfirmCheckoutSessionParams(
+            paymentMethodId = paymentMethod.id,
+            clientAttributionMetadata = clientAttributionMetadata,
+            returnUrl = returnUrl,
+        )
+    }
+
+    private suspend fun confirmCheckoutSession(
+        params: ConfirmCheckoutSessionParams,
     ): ConfirmationDefinition.Action<Args> {
-        val params = when (intent) {
-            is PaymentIntent -> ConfirmCheckoutSessionPaymentParams(
-                paymentMethodId = paymentMethod.id,
-                clientAttributionMetadata = clientAttributionMetadata,
-                returnUrl = returnUrl,
-                expectedAmount = intent.amount ?: 0L,
-                savePaymentMethod = savePaymentMethod,
-            )
-            is SetupIntent -> ConfirmCheckoutSessionParams(
-                paymentMethodId = paymentMethod.id,
-                clientAttributionMetadata = clientAttributionMetadata,
-                returnUrl = returnUrl,
-            )
-        }
         return checkoutSessionRepository.confirm(
             id = integrationMetadata.id,
             params = params,
