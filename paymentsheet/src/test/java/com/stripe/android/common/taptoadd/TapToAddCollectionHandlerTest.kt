@@ -33,8 +33,8 @@ import com.stripe.stripeterminal.external.callable.Cancelable
 import com.stripe.stripeterminal.external.callable.SetupIntentCallback
 import com.stripe.stripeterminal.external.models.AllowRedisplay
 import com.stripe.stripeterminal.external.models.CardDetails
+import com.stripe.stripeterminal.external.models.CollectSetupIntentConfiguration
 import com.stripe.stripeterminal.external.models.SetupIntent
-import com.stripe.stripeterminal.external.models.SetupIntentConfiguration
 import com.stripe.stripeterminal.external.models.TapToPayUxConfiguration
 import com.stripe.stripeterminal.external.models.TerminalErrorCode
 import com.stripe.stripeterminal.external.models.TerminalException
@@ -714,10 +714,9 @@ class TapToAddCollectionHandlerTest {
         val collectPaymentMethodCall = terminalScenario.collectPaymentMethodCalls.awaitItem()
         assertThat(collectPaymentMethodCall.intent).isEqualTo(retrievedSetupIntent)
         assertThat(collectPaymentMethodCall.allowRedisplay).isEqualTo(AllowRedisplay.ALWAYS)
-        assertThat(collectPaymentMethodCall.config)
-            .isEqualTo(
-                SetupIntentConfiguration.Builder()
-                    .build()
+        assertThat(collectPaymentMethodCall.config).isEqualTo(
+            CollectSetupIntentConfiguration.Builder()
+                .build()
             )
         collectPaymentMethodCall.callback.onSuccess(collectedIntent)
         return collectedIntent
@@ -799,7 +798,7 @@ class TapToAddCollectionHandlerTest {
             collectSetupIntentPaymentMethod(
                 intent = any<SetupIntent>(),
                 allowRedisplay = any<AllowRedisplay>(),
-                config = any<SetupIntentConfiguration>(),
+                config = any<CollectSetupIntentConfiguration>(),
                 callback = any<SetupIntentCallback>()
             )
         } doAnswer { invocation ->
@@ -809,7 +808,7 @@ class TapToAddCollectionHandlerTest {
             val allowRedisplay = invocation.arguments[1] as? AllowRedisplay
                 ?: fail("Invalid argument: Not an allow redisplay value!")
 
-            val config = invocation.arguments[2] as? SetupIntentConfiguration
+            val config = invocation.arguments[2] as? CollectSetupIntentConfiguration
                 ?: fail("Invalid argument: Not a setup intent config!")
 
             val callback = invocation.arguments[3] as? SetupIntentCallback
@@ -885,7 +884,7 @@ class TapToAddCollectionHandlerTest {
         class CollectPaymentMethodCall(
             val intent: SetupIntent,
             val allowRedisplay: AllowRedisplay,
-            val config: SetupIntentConfiguration,
+            val config: CollectSetupIntentConfiguration,
             val callback: SetupIntentCallback,
             val cancelable: Cancelable,
         )
