@@ -47,6 +47,5 @@ internal sealed class IntegrationMetadata : Parcelable {
     @Parcelize
     data class CheckoutSession(
         val id: String,
-        val key: String,
     ) : IntegrationMetadata()
 }

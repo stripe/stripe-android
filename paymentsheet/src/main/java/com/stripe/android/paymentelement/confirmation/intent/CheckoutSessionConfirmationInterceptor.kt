@@ -8,6 +8,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
@@ -17,10 +18,7 @@ import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadat
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition.Args
 import com.stripe.android.payments.DefaultReturnUrl
-import com.stripe.android.checkout.CheckoutInstances
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.ConfirmCheckoutSessionParams
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -62,6 +60,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         ).fold(
             onSuccess = { paymentMethod ->
                 confirmCheckoutSession(
+                    intent = intent,
                     paymentMethod = paymentMethod,
                     savePaymentMethod = confirmationOption.shouldSave.takeIf { isSaveEnabled },
                 )
@@ -83,6 +82,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
     ): ConfirmationDefinition.Action<Args> {
         // For saved payment methods, we don't need to create a new PM or save it again.
         return confirmCheckoutSession(
+            intent = intent,
             paymentMethod = confirmationOption.paymentMethod,
             savePaymentMethod = null,
         )
@@ -97,10 +97,10 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
      *        Pass `null` for saved payment methods (already saved).
      */
     private suspend fun confirmCheckoutSession(
+        intent: StripeIntent,
         paymentMethod: PaymentMethod,
         savePaymentMethod: Boolean?,
     ): ConfirmationDefinition.Action<Args> {
-        val response = currentCheckoutResponse()
         return checkoutSessionRepository.confirm(
             id = integrationMetadata.id,
             params = ConfirmCheckoutSessionParams(
@@ -108,7 +108,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                 clientAttributionMetadata = clientAttributionMetadata,
                 returnUrl = returnUrl,
                 savePaymentMethod = savePaymentMethod,
-                expectedAmount = response?.expectedAmount(),
+                expectedAmount = (intent as? PaymentIntent)?.amount,
             ),
         ).fold(
             onSuccess = { response ->
@@ -158,12 +158,6 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                 )
             }
         )
-    }
-
-    @OptIn(CheckoutSessionPreview::class)
-    private fun currentCheckoutResponse(): CheckoutSessionResponse? {
-        return CheckoutInstances[integrationMetadata.key]
-            .firstOrNull()?.internalState?.checkoutSessionResponse
     }
 
     @AssistedFactory

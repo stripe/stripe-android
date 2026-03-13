@@ -181,7 +181,6 @@ internal interface PaymentElementLoader {
 
         @Parcelize
         data class CheckoutSession(
-            val key: String,
             val checkoutSessionResponse: CheckoutSessionResponse,
         ) : InitializationMode() {
             override fun validate() {
@@ -189,10 +188,7 @@ internal interface PaymentElementLoader {
             }
 
             override fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata {
-                return IntegrationMetadata.CheckoutSession(
-                    id = checkoutSessionResponse.id,
-                    key = key,
-                )
+                return IntegrationMetadata.CheckoutSession(checkoutSessionResponse.id)
             }
         }
     }
