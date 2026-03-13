@@ -68,6 +68,16 @@ internal class CustomFlowViewModel(
         }
     }
 
+    fun updateState(paymentResult: PaymentSheetResult, status: String?) {
+        _state.update {
+            it.copy(
+                isProcessing = false,
+                status = status,
+                didComplete = paymentResult is PaymentSheetResult.Completed,
+            )
+        }
+    }
+
     fun handlePaymentSheetResult(paymentResult: PaymentSheetResult) {
         val status = when (paymentResult) {
             is PaymentSheetResult.Canceled -> null

@@ -85,7 +85,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val lifecycleOwner: LifecycleOwner,
     private val paymentOptionFactory: PaymentOptionFactory,
     private val paymentOptionResultCallback: PaymentOptionResultCallback,
-    private val paymentResultCallback: PaymentSheetResultCallback,
+    private var paymentResultCallback: PaymentSheetResultCallback,
     activityResultCaller: ActivityResultCaller,
     activityResultRegistryOwner: ActivityResultRegistryOwner,
     // Properties provided through injection
@@ -128,6 +128,7 @@ internal class DefaultFlowController @Inject internal constructor(
         }
 
     init {
+        println("YEET init flowController paymentResultCallback $paymentResultCallback")
         confirmationHandler.register(activityResultCaller, lifecycleOwner)
 
         paymentOptionActivityLauncher = activityResultCaller.registerForActivityResult(
@@ -194,6 +195,7 @@ internal class DefaultFlowController @Inject internal constructor(
         configuration: PaymentSheet.Configuration?,
         callback: PaymentSheet.FlowController.ConfigCallback
     ) {
+        println("YEET configureWithPaymentIntent")
         configure(
             mode = PaymentElementLoader.InitializationMode.PaymentIntent(paymentIntentClientSecret),
             configuration = configuration ?: PaymentSheet.Configuration.default(context),
@@ -206,6 +208,7 @@ internal class DefaultFlowController @Inject internal constructor(
         configuration: PaymentSheet.Configuration?,
         callback: PaymentSheet.FlowController.ConfigCallback
     ) {
+        println("YEET configureWithSetupIntent")
         configure(
             mode = PaymentElementLoader.InitializationMode.SetupIntent(setupIntentClientSecret),
             configuration = configuration ?: PaymentSheet.Configuration.default(context),
@@ -218,6 +221,7 @@ internal class DefaultFlowController @Inject internal constructor(
         configuration: PaymentSheet.Configuration?,
         callback: PaymentSheet.FlowController.ConfigCallback
     ) {
+        println("YEET configureWithIntentConfiguration")
         configure(
             mode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration),
             configuration = configuration ?: PaymentSheet.Configuration.default(context),
@@ -230,6 +234,7 @@ internal class DefaultFlowController @Inject internal constructor(
         configuration: PaymentSheet.Configuration,
         callback: PaymentSheet.FlowController.ConfigCallback
     ) {
+        println("YEET configure")
         configurationHandler.configure(
             scope = viewModelScope,
             initializationMode = mode,
@@ -463,6 +468,7 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     override fun confirm() {
+        println("YEET confirming")
         val state = viewModel.state
 
         if (state == null) {
@@ -679,10 +685,12 @@ internal class DefaultFlowController @Inject internal constructor(
         if (paymentResult is PaymentResult.Completed && shouldResetOnCompleted) {
             viewModel.paymentSelection = null
             viewModel.state = null
+            println("YEET clearing config")
             viewModel.previousConfigureRequest = null
         }
 
         viewModelScope.launch {
+            println("YEET paymentResultCallback $paymentResultCallback")
             paymentResultCallback.onPaymentSheetResult(
                 paymentResult.convertToPaymentSheetResult()
             )
@@ -800,6 +808,8 @@ internal class DefaultFlowController @Inject internal constructor(
 
             val flowControllerStateComponent = flowControllerViewModel.flowControllerStateComponent
 
+            println("YEET DefaultFlowController.getInstance paymentResultCallback $paymentResultCallback")
+
             val flowControllerComponent: FlowControllerComponent =
                 flowControllerStateComponent.flowControllerComponentFactory
                     .create(
@@ -812,6 +822,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     )
             val flowController = flowControllerComponent.flowController
             flowController.flowControllerComponent = flowControllerComponent
+            println("YEET flowController.getInstance created callback ${flowController.paymentResultCallback}")
             return flowController
         }
     }

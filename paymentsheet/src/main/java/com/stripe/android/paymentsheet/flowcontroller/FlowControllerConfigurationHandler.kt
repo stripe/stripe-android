@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
 import com.stripe.android.core.injection.UIContext
+import com.stripe.android.link.utils.errorMessage
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -73,6 +74,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
         val canSkip = viewModel.previousConfigureRequest == configureRequest
 
         if (canSkip) {
+            println("YEET is skipping")
             onConfigured()
             return
         }
@@ -88,6 +90,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
             )
         ).fold(
             onSuccess = { state ->
+                println("YEET configure success")
                 if (state.validationError != null) {
                     onConfigured(state.validationError)
                 } else {
@@ -97,6 +100,11 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
                 }
             },
             onFailure = { error ->
+                println("YEET configure failure")
+                println("YEET ${error.message}")
+                println("YEET ${error.cause}")
+                println("YEET ${error.errorMessage}")
+                println("YEET ${error}")
                 onConfigured(error = error)
             }
         )

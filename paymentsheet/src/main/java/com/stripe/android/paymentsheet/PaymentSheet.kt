@@ -4198,6 +4198,7 @@ class PaymentSheet internal constructor(
              */
             fun build(activity: ComponentActivity): FlowController {
                 initializeCallbacks()
+                println("YEET build paymentResultCallback $resultCallback")
                 return FlowControllerFactory(activity, paymentOptionResultCallback, resultCallback).create()
             }
 
@@ -4208,6 +4209,7 @@ class PaymentSheet internal constructor(
              */
             fun build(fragment: Fragment): FlowController {
                 initializeCallbacks()
+                println("YEET build paymentResultCallback $resultCallback")
                 return FlowControllerFactory(fragment, paymentOptionResultCallback, resultCallback).create()
             }
 
@@ -4219,6 +4221,7 @@ class PaymentSheet internal constructor(
                 /*
                  * Callbacks are initialized & updated internally by the internal composable function
                  */
+                println("YEET build paymentResultCallback $resultCallback")
                 return internalRememberPaymentSheetFlowController(
                     callbacks = callbacksBuilder.build(),
                     paymentOptionResultCallback = paymentOptionResultCallback,
@@ -4269,6 +4272,7 @@ class PaymentSheet internal constructor(
                 paymentOptionCallback: PaymentOptionCallback,
                 paymentResultCallback: PaymentSheetResultCallback
             ): FlowController {
+                println("YEET create paymentResultCallback $paymentResultCallback")
                 return FlowControllerFactory(
                     activity,
                     paymentOptionCallback.toResultCallback(),
@@ -4305,6 +4309,7 @@ class PaymentSheet internal constructor(
                 paymentOptionCallback: PaymentOptionCallback,
                 paymentResultCallback: PaymentSheetResultCallback
             ): FlowController {
+                println("YEET create paymentResultCallback $paymentResultCallback")
                 setFlowControllerCallbacks(
                     PaymentElementCallbacks.Builder()
                         .externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
@@ -4343,6 +4348,7 @@ class PaymentSheet internal constructor(
                 createIntentCallback: CreateIntentCallback,
                 paymentResultCallback: PaymentSheetResultCallback,
             ): FlowController {
+                println("YEET create paymentResultCallback $paymentResultCallback")
                 setFlowControllerCallbacks(
                     PaymentElementCallbacks.Builder()
                         .createIntentCallback(createIntentCallback)
@@ -4387,6 +4393,7 @@ class PaymentSheet internal constructor(
                 createIntentCallback: CreateIntentCallback,
                 paymentResultCallback: PaymentSheetResultCallback,
             ): FlowController {
+                println("YEET create paymentResultCallback $paymentResultCallback")
                 setFlowControllerCallbacks(
                     PaymentElementCallbacks.Builder()
                         .createIntentCallback(createIntentCallback)
@@ -4420,6 +4427,7 @@ class PaymentSheet internal constructor(
                 paymentOptionCallback: PaymentOptionCallback,
                 paymentResultCallback: PaymentSheetResultCallback
             ): FlowController {
+                println("YEET create paymentResultCallback $paymentResultCallback")
                 return FlowControllerFactory(
                     fragment,
                     paymentOptionCallback.toResultCallback(),
@@ -4454,6 +4462,7 @@ class PaymentSheet internal constructor(
                 paymentOptionCallback: PaymentOptionCallback,
                 paymentResultCallback: PaymentSheetResultCallback
             ): FlowController {
+                println("YEET create paymentResultCallback $paymentResultCallback")
                 setFlowControllerCallbacks(
                     PaymentElementCallbacks.Builder()
                         .externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
@@ -4492,6 +4501,7 @@ class PaymentSheet internal constructor(
                 createIntentCallback: CreateIntentCallback,
                 paymentResultCallback: PaymentSheetResultCallback,
             ): FlowController {
+                println("YEET create paymentResultCallback $paymentResultCallback")
                 setFlowControllerCallbacks(
                     PaymentElementCallbacks.Builder()
                         .createIntentCallback(createIntentCallback)
@@ -4536,6 +4546,7 @@ class PaymentSheet internal constructor(
                 externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
                 paymentResultCallback: PaymentSheetResultCallback,
             ): FlowController {
+                println("YEET create paymentResultCallback $paymentResultCallback")
                 setFlowControllerCallbacks(
                     PaymentElementCallbacks.Builder()
                         .createIntentCallback(createIntentCallback)

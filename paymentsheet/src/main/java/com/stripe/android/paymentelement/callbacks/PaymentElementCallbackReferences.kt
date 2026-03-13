@@ -10,7 +10,12 @@ internal object PaymentElementCallbackReferences {
          * If an instance does not have callbacks assigned, we fallback to the default behavior and fetch the
          * first callbacks assigned to a Payment Element instance.
          */
-        return instanceCallbackMap[key] ?: instanceCallbackMap.values.firstOrNull()
+        val r = instanceCallbackMap[key]
+        val fallback = instanceCallbackMap.values.firstOrNull()
+//        println("YEET instanceCallbackMap[key]: $r")
+////        println("YEET key: $key")
+////        println("YEET fallback: $fallback")
+        return r ?: fallback
     }
 
     operator fun set(key: String, callbacks: PaymentElementCallbacks) {

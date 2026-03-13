@@ -47,8 +47,10 @@ internal class FlowControllerFactory(
         paymentResultCallback = paymentResultCallback,
     )
 
-    fun create(): PaymentSheet.FlowController =
-        DefaultFlowController.getInstance(
+    fun create(): PaymentSheet.FlowController {
+
+        println("YEET FlowControllerFactory.create paymentResultCallback $paymentResultCallback")
+        return DefaultFlowController.getInstance(
             viewModelStoreOwner = viewModelStoreOwner,
             lifecycleOwner = lifecycleOwner,
             activityResultCaller = PaymentElementActivityResultCaller(
@@ -62,4 +64,6 @@ internal class FlowControllerFactory(
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             initializedViaCompose = initializedViaCompose,
         )
+
+    }
 }

@@ -20,7 +20,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.google.android.material.snackbar.Snackbar
+import com.stripe.android.paymentsheet.CreateIntentCallback
+import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CompletedPaymentAlertDialog
@@ -29,6 +32,7 @@ import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSe
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 import com.stripe.android.paymentsheet.example.samples.ui.shared.Receipt
 import com.stripe.android.paymentsheet.rememberPaymentSheetFlowController
+import kotlinx.coroutines.flow.update
 
 internal class CustomFlowActivity : AppCompatActivity() {
 
@@ -45,10 +49,11 @@ internal class CustomFlowActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            val flowController = rememberPaymentSheetFlowController(
-                paymentOptionCallback = viewModel::handlePaymentOptionChanged,
-                paymentResultCallback = viewModel::handlePaymentSheetResult,
-            )
+            val uiState by viewModel.state.collectAsState()
+            val callback = CreateIntentCallback { _, _ ->
+                CreateIntentResult.Success(uiState.paymentInfo?.clientSecret ?: "")
+            }
+            var flowController = getFlowController(callback)
 
             PaymentSheetExampleTheme {
                 val uiState by viewModel.state.collectAsState()
@@ -63,7 +68,12 @@ internal class CustomFlowActivity : AppCompatActivity() {
                 uiState.status?.let { status ->
                     if (uiState.didComplete) {
                         CompletedPaymentAlertDialog(
-                            onDismiss = ::finish
+                            onDismiss = {
+                                flowController = getFlowController(callback)
+                                uiState.paymentInfo?.let { paymentInfo ->
+                                    configureFlowController(flowController, paymentInfo)
+                                }
+                            }
                         )
                     } else {
                         LaunchedEffect(status) {
@@ -108,13 +118,33 @@ internal class CustomFlowActivity : AppCompatActivity() {
         }
     }
 
+    private fun getFlowController(callback: CreateIntentCallback): PaymentSheet.FlowController {
+        return PaymentSheet.FlowController.Builder(
+            resultCallback = { paymentResult ->
+                val status = when (paymentResult) {
+                    is PaymentSheetResult.Canceled -> null
+                    is PaymentSheetResult.Completed -> "Success"
+                    is PaymentSheetResult.Failed -> paymentResult.error.message
+                }
+
+                viewModel.updateState(paymentResult, status)
+            },
+            paymentOptionCallback = viewModel::handlePaymentOptionChanged
+        ).createIntentCallback(callback).build(this)
+    }
+
     private fun configureFlowController(
         flowController: PaymentSheet.FlowController,
         paymentInfo: CustomFlowViewState.PaymentInfo,
     ) {
-        flowController.configureWithPaymentIntent(
-            paymentIntentClientSecret = paymentInfo.clientSecret,
-            configuration = paymentInfo.paymentSheetConfig,
+        val intentConfig = PaymentSheet.IntentConfiguration(
+            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                amount = 5000,
+                currency = "eur"
+            )
+        )
+        flowController.configureWithIntentConfiguration(
+            intentConfiguration = intentConfig,
             callback = viewModel::handleFlowControllerConfigured,
         )
     }

@@ -34,7 +34,7 @@
         app:trackThickness="1dp" />
 
     <ImageView
-        android:id="@+id/confirmed_icon"
+        android:id="@+id/confirmed_icon_test"
         android:layout_width="@dimen/stripe_paymentsheet_primary_button_icon_size"
         android:layout_height="@dimen/stripe_paymentsheet_primary_button_icon_size"
         android:src="@drawable/stripe_ic_paymentsheet_googlepay_primary_button_checkmark"

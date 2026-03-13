@@ -1727,9 +1727,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
         analyticsEvent: PaymentAnalyticsEvent?,
     ): Result<ElementsSession> {
         // Unsupported for user key sessions.
-        if (options.apiKeyIsUserKey) {
-            return Result.failure(IllegalArgumentException("Invalid API key"))
-        }
+//        if (options.apiKeyIsUserKey) {
+//            return Result.failure(IllegalArgumentException("Invalid API key"))
+//        }
 
         fireFraudDetectionDataRequest()
 
