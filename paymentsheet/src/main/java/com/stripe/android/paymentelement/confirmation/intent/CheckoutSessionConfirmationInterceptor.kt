@@ -107,27 +107,31 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             ),
         ).fold(
             onSuccess = { response ->
-                val exception = IllegalStateException("No PaymentIntent in checkout session confirm response")
-                val paymentIntent = response.paymentIntent
-                    ?: return@fold ConfirmationDefinition.Action.Fail(
-                        cause = exception,
-                        message = exception.stripeErrorMessage(),
-                        errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-                    )
+                val intent: StripeIntent = response.paymentIntent ?: response.setupIntent
+                    ?: run {
+                        val exception = IllegalStateException(
+                            "No PaymentIntent or SetupIntent in checkout session confirm response"
+                        )
+                        return@fold ConfirmationDefinition.Action.Fail(
+                            cause = exception,
+                            message = exception.stripeErrorMessage(),
+                            errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                        )
+                    }
 
                 when {
-                    paymentIntent.isConfirmed -> {
+                    intent.isConfirmed -> {
                         ConfirmationDefinition.Action.Complete(
-                            intent = paymentIntent,
+                            intent = intent,
                             metadata = MutableConfirmationMetadata().apply {
                                 set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Server)
                             },
                             completedFullPaymentFlow = true,
                         )
                     }
-                    paymentIntent.requiresAction() -> {
+                    intent.requiresAction() -> {
                         ConfirmationDefinition.Action.Launch(
-                            launcherArguments = Args.NextAction(paymentIntent, DeferredIntentConfirmationType.Server),
+                            launcherArguments = Args.NextAction(intent, DeferredIntentConfirmationType.Server),
                             receivesResultInProcess = false,
                         )
                     }
