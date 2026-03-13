@@ -52,7 +52,7 @@ internal sealed class CustomerMetadata : Parcelable {
         // CheckoutSession never supports setting a default payment method.
         override val isPaymentMethodSetAsDefaultEnabled: Boolean get() = false
 
-        // CheckoutSession has no removeLast concept — users can always remove every PM.
+        // When removal is permitted, CheckoutSession doesn't restrict removing the last one.
         override val canRemoveLastPaymentMethod: Boolean get() = true
 
         // CheckoutSession doesn't support updating full payment method details.
