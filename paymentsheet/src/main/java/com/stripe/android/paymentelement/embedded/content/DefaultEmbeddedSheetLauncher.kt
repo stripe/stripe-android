@@ -4,6 +4,8 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import com.stripe.android.checkout.CheckoutInstances
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
@@ -110,6 +112,10 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         embeddedConfirmationState: EmbeddedConfirmationStateHolder.State?,
         customerState: CustomerState?,
     ) {
+        val checkoutSession = paymentMethodMetadata.integrationMetadata as? IntegrationMetadata.CheckoutSession
+        if (checkoutSession != null) {
+            CheckoutInstances.ensureNoMutationInFlight(checkoutSession.instancesKey)
+        }
         if (embeddedConfirmationState == null) {
             errorReporter.report(
                 ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL
@@ -140,6 +146,10 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         customerState: CustomerState,
         selection: PaymentSelection?,
     ) {
+        val checkoutSession = paymentMethodMetadata.integrationMetadata as? IntegrationMetadata.CheckoutSession
+        if (checkoutSession != null) {
+            CheckoutInstances.ensureNoMutationInFlight(checkoutSession.instancesKey)
+        }
         if (sheetStateHolder.sheetIsOpen) return
         sheetStateHolder.sheetIsOpen = true
         val args = ManageContract.Args(

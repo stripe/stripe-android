@@ -86,6 +86,17 @@ class CheckoutInstancesTest {
     }
 
     @Test
+    fun `ensureNoMutationInFlight does not throw for unknown key`() {
+        CheckoutInstances.ensureNoMutationInFlight("unknown-key")
+    }
+
+    @Test
+    fun `ensureNoMutationInFlight does not throw when no mutation in flight`() {
+        createCheckout(key = "key1")
+        CheckoutInstances.ensureNoMutationInFlight("key1")
+    }
+
+    @Test
     fun `multiple keys coexist independently`() {
         val checkout1 = createCheckout(key = "key1")
         val checkout2 = createCheckout(key = "key2")
