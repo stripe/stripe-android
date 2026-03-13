@@ -10,6 +10,7 @@ import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
@@ -110,7 +111,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                 expectedAmount = intent.amount ?: 0L,
                 savePaymentMethod = savePaymentMethod,
             )
-            else -> ConfirmCheckoutSessionParams(
+            is SetupIntent -> ConfirmCheckoutSessionParams(
                 paymentMethodId = paymentMethod.id,
                 clientAttributionMetadata = clientAttributionMetadata,
                 returnUrl = returnUrl,
