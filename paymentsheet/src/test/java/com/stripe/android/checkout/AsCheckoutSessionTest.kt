@@ -23,24 +23,6 @@ class AsCheckoutSessionTest {
     }
 
     @Test
-    fun `maps payment mode`() {
-        val session = createResponse(mode = CheckoutSessionResponse.Mode.PAYMENT).asCheckoutSession()
-        assertThat(session.mode).isEqualTo(CheckoutSession.Mode.PAYMENT)
-    }
-
-    @Test
-    fun `maps setup mode`() {
-        val session = createResponse(mode = CheckoutSessionResponse.Mode.SETUP).asCheckoutSession()
-        assertThat(session.mode).isEqualTo(CheckoutSession.Mode.SETUP)
-    }
-
-    @Test
-    fun `maps unknown mode`() {
-        val session = createResponse(mode = CheckoutSessionResponse.Mode.UNKNOWN).asCheckoutSession()
-        assertThat(session.mode).isEqualTo(CheckoutSession.Mode.UNKNOWN)
-    }
-
-    @Test
     fun `null totalSummary maps to null`() {
         val session = createResponse(totalSummary = null).asCheckoutSession()
         assertThat(session.totalSummary).isNull()
@@ -222,7 +204,6 @@ class AsCheckoutSessionTest {
     private fun createResponse(
         id: String = "cs_test_abc123",
         currency: String = "usd",
-        mode: CheckoutSessionResponse.Mode = CheckoutSessionResponse.Mode.PAYMENT,
         customerEmail: String? = null,
         totalSummary: TotalSummaryResponse? = null,
         lineItems: List<CheckoutSessionResponse.LineItem> = emptyList(),
@@ -231,7 +212,6 @@ class AsCheckoutSessionTest {
         return CheckoutSessionResponseFactory.create(
             id = id,
             currency = currency,
-            mode = mode,
             customerEmail = customerEmail,
             totalSummary = totalSummary,
             lineItems = lineItems,
