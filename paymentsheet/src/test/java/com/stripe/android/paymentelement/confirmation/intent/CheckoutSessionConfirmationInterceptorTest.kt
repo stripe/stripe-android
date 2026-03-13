@@ -569,5 +569,13 @@ class CheckoutSessionConfirmationInterceptorTest {
         ): Result<CheckoutSessionResponse> {
             error("Not expected in this test")
         }
+
+        override suspend fun updateTaxId(
+            sessionId: String,
+            type: String,
+            value: String,
+        ): Result<CheckoutSessionResponse> {
+            error("Not expected in this test")
+        }
     }
 }

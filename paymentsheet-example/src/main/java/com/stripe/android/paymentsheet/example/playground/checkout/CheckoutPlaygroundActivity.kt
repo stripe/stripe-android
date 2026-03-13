@@ -110,6 +110,7 @@ class CheckoutPlaygroundActivity : AppCompatActivity() {
                     shippingAddressLauncher.present(publishableKey, configuration)
                 },
                 lastBillingAddressDetails = viewModel.lastBillingAddressDetails,
+                updateTaxId = viewModel::updateTaxId,
                 clearBillingAddress = viewModel::clearBillingAddress,
                 updateBillingAddress = {
                     val publishableKey = PaymentConfiguration.getInstance(applicationContext).publishableKey
@@ -138,6 +139,7 @@ private fun CheckoutScreen(
     clearShippingAddress: () -> Unit,
     updatePostalCode: (String) -> Unit,
     updateShippingAddress: () -> Unit,
+    updateTaxId: (String, String) -> Unit,
     lastBillingAddressDetails: StateFlow<AddressDetails?>,
     clearBillingAddress: () -> Unit,
     updateBillingAddress: () -> Unit,
@@ -173,6 +175,7 @@ private fun CheckoutScreen(
                     clearBillingAddress = clearBillingAddress,
                     updateBillingAddress = updateBillingAddress,
                 )
+                TaxIdSection(updateTaxId = updateTaxId)
                 ShippingOptionsSection(checkoutSession, selectShippingRate)
                 PromotionCodeInput(promotionCode, { promotionCode = it }, applyPromotionCode)
                 Button(
@@ -463,6 +466,49 @@ private fun PostalCodeInput(
         ) {
             Text("Apply")
         }
+    }
+}
+
+@Composable
+private fun TaxIdSection(updateTaxId: (String, String) -> Unit) {
+    var type by rememberSaveable { mutableStateOf("") }
+    var value by rememberSaveable { mutableStateOf("") }
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "Tax ID",
+            style = MaterialTheme.typography.h6,
+        )
+
+        Spacer(modifier = Modifier.height(PADDING))
+
+        OutlinedTextField(
+            value = type,
+            onValueChange = { type = it },
+            label = { Text("Type") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+        )
+
+        Spacer(modifier = Modifier.height(PADDING))
+
+        OutlinedTextField(
+            value = value,
+            onValueChange = { value = it },
+            label = { Text("Value") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+        )
+
+        Spacer(modifier = Modifier.height(PADDING))
+
+        Button(
+            onClick = { updateTaxId(type, value) },
+        ) {
+            Text("Apply")
+        }
+
+        Divider(modifier = Modifier.padding(vertical = PADDING))
     }
 }
 

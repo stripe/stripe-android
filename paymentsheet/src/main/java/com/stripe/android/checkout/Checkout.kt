@@ -113,6 +113,13 @@ class Checkout private constructor(
         }
     }
 
+    suspend fun updateTaxId(
+        type: String,
+        value: String,
+    ): Result<CheckoutSession> = withSessionId { sessionId ->
+        component.checkoutSessionRepository.updateTaxId(sessionId, type.trim(), value.trim())
+    }
+
     suspend fun updateBillingAddress(
         name: String? = null,
         address: Address,
