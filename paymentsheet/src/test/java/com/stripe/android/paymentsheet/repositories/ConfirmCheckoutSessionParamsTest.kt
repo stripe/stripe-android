@@ -30,6 +30,20 @@ class ConfirmCheckoutSessionParamsTest {
     }
 
     @Test
+    fun `toParamMap includes expectedAmount when non-null`() {
+        val params = createParams(savePaymentMethod = null, expectedAmount = 5099L).toParamMap()
+
+        assertThat(params["expected_amount"]).isEqualTo(5099L)
+    }
+
+    @Test
+    fun `toParamMap omits expectedAmount when null`() {
+        val params = createParams(savePaymentMethod = null, expectedAmount = null).toParamMap()
+
+        assertThat(params).doesNotContainKey("expected_amount")
+    }
+
+    @Test
     fun `toParamMap includes required fields`() {
         val params = createParams(savePaymentMethod = null).toParamMap()
 
@@ -38,7 +52,10 @@ class ConfirmCheckoutSessionParamsTest {
         assertThat(params).containsKey("client_attribution_metadata")
     }
 
-    private fun createParams(savePaymentMethod: Boolean?): ConfirmCheckoutSessionParams {
+    private fun createParams(
+        savePaymentMethod: Boolean?,
+        expectedAmount: Long? = null,
+    ): ConfirmCheckoutSessionParams {
         return ConfirmCheckoutSessionParams(
             paymentMethodId = "pm_test_123",
             clientAttributionMetadata = ClientAttributionMetadata(
@@ -48,6 +65,7 @@ class ConfirmCheckoutSessionParamsTest {
             ),
             returnUrl = "stripesdk://return_url",
             savePaymentMethod = savePaymentMethod,
+            expectedAmount = expectedAmount,
         )
     }
 }

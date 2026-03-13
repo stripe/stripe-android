@@ -17,7 +17,10 @@ import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadat
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition.Args
 import com.stripe.android.payments.DefaultReturnUrl
+import com.stripe.android.checkout.CheckoutInstances
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.ConfirmCheckoutSessionParams
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -97,6 +100,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         paymentMethod: PaymentMethod,
         savePaymentMethod: Boolean?,
     ): ConfirmationDefinition.Action<Args> {
+        val response = currentCheckoutResponse()
         return checkoutSessionRepository.confirm(
             id = integrationMetadata.id,
             params = ConfirmCheckoutSessionParams(
@@ -104,6 +108,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                 clientAttributionMetadata = clientAttributionMetadata,
                 returnUrl = returnUrl,
                 savePaymentMethod = savePaymentMethod,
+                expectedAmount = response?.expectedAmount(),
             ),
         ).fold(
             onSuccess = { response ->
@@ -149,6 +154,12 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                 )
             }
         )
+    }
+
+    @OptIn(CheckoutSessionPreview::class)
+    private fun currentCheckoutResponse(): CheckoutSessionResponse? {
+        return CheckoutInstances[integrationMetadata.key]
+            .firstOrNull()?.internalState?.checkoutSessionResponse
     }
 
     @AssistedFactory

@@ -179,4 +179,11 @@ internal data class CheckoutSessionResponse(
         SETUP,
         UNKNOWN,
     }
+
+    /**
+     * Returns [amount] for payment mode sessions, null for setup mode.
+     */
+    fun expectedAmount(): Long? {
+        return amount.takeIf { mode == Mode.PAYMENT }
+    }
 }

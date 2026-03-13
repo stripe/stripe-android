@@ -265,6 +265,7 @@ internal class DefaultPaymentElementLoaderTest {
     fun `load with CheckoutSession mode and non-null customer returns failure`() = runScenario {
         val result = createPaymentElementLoader().load(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                key = "",
                 checkoutSessionResponse = createCheckoutSessionResponse(canDetachPaymentMethod = true),
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration(
@@ -1680,6 +1681,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `CheckoutSession validate is a no-op`() = runScenario {
         PaymentElementLoader.InitializationMode.CheckoutSession(
+            key = "",
             checkoutSessionResponse = createCheckoutSessionResponse(canDetachPaymentMethod = true),
         ).validate()
     }
@@ -1687,18 +1689,20 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `CheckoutSession id property returns id from response`() = runScenario {
         val checkoutSession = PaymentElementLoader.InitializationMode.CheckoutSession(
+            key = "",
             checkoutSessionResponse = createCheckoutSessionResponse(canDetachPaymentMethod = true),
         )
         assertThat(checkoutSession.checkoutSessionResponse.id).isEqualTo("cs_test_123")
     }
 
     @Test
-    fun `integrationMetadata returns checkout session with id from response`() = runScenario {
+    fun `integrationMetadata returns checkout session with id and key from response`() = runScenario {
         val checkoutSession = PaymentElementLoader.InitializationMode.CheckoutSession(
+            key = "test_key",
             checkoutSessionResponse = createCheckoutSessionResponse(canDetachPaymentMethod = true),
         )
         assertThat(checkoutSession.integrationMetadata(null))
-            .isEqualTo(IntegrationMetadata.CheckoutSession("cs_test_123"))
+            .isEqualTo(IntegrationMetadata.CheckoutSession(id = "cs_test_123", key = "test_key"))
     }
 
     @Test
@@ -2966,6 +2970,7 @@ internal class DefaultPaymentElementLoaderTest {
 
             val state = loader.load(
                 initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                    key = "",
                     checkoutSessionResponse = checkoutSessionResponse,
                 ),
                 paymentSheetConfiguration = PaymentSheet.Configuration(
