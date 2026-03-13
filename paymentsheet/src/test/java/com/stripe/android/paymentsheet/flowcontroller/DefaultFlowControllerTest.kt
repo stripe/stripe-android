@@ -235,6 +235,8 @@ internal class DefaultFlowControllerTest {
         assertThat(viewModel.paymentSelection).isNull()
         assertThat(viewModel.state).isNull()
         assertThat(viewModel.previousConfigureRequest).isNull()
+
+        assertThat(flowController.getPaymentOption()).isNull()
     }
 
     @Test
