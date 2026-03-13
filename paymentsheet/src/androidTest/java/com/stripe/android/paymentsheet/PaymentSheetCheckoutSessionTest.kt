@@ -11,6 +11,7 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
+import com.stripe.android.paymentsheet.utils.assertFailed
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
 import org.junit.Rule
 import org.junit.Test
@@ -91,5 +92,41 @@ internal class PaymentSheetCheckoutSessionTest {
         }
 
         page.clickPrimaryButton()
+    }
+
+    /**
+     * Test that PaymentSheet fails to load when the init response already contains a confirmed
+     * payment intent alongside the elements_session.
+     *
+     * When the parser sees both elements_session and payment_intent, it replaces the deferred
+     * intent stub in elements_session with the confirmed intent. Since the confirmed intent is
+     * in a terminal state (status = "succeeded"), StripeIntentValidator rejects it and
+     * PaymentSheet reports a failure.
+     */
+    @Test
+    fun testFailsToLoadWhenInitResponseContainsConfirmedIntent() = runPaymentSheetTest(
+        networkRule = networkRule,
+        resultCallback = ::assertFailed,
+    ) { testContext ->
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("POST"),
+            path("/v1/payment_pages/cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh/init"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-init-already-confirmed.json")
+        }
+
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val checkout = Checkout.configure(
+            context = context,
+            checkoutSessionClientSecret = "cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh_secret_example",
+        ).getOrThrow()
+
+        testContext.presentPaymentSheet {
+            presentWithCheckout(
+                checkout = checkout,
+                configuration = defaultConfiguration,
+            )
+        }
     }
 }

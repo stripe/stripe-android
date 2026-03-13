@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import org.json.JSONObject
 import org.junit.Test
@@ -688,5 +689,41 @@ class CheckoutSessionResponseJsonParserTest {
         assertThat(setupIntent?.status).isEqualTo(StripeIntent.Status.RequiresAction)
         assertThat(setupIntent?.requiresAction()).isTrue()
         assertThat(setupIntent?.nextActionType).isEqualTo(StripeIntent.NextActionType.RedirectToUrl)
+    }
+
+    @Test
+    fun `parse confirm response with elements_session replaces deferred intent with confirmed PaymentIntent`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_CONFIRM_WITH_ELEMENTS_SESSION_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.paymentIntent).isNotNull()
+        assertThat(result?.paymentIntent?.id).isEqualTo("pi_3QWK2VIyGgrkZxL71xfPBWG5")
+
+        val elementsSession = result?.elementsSession
+        assertThat(elementsSession).isNotNull()
+        assertThat(elementsSession?.stripeIntent).isInstanceOf(PaymentIntent::class.java)
+
+        val stripeIntent = elementsSession?.stripeIntent as PaymentIntent
+        assertThat(stripeIntent.id).isEqualTo("pi_3QWK2VIyGgrkZxL71xfPBWG5")
+        assertThat(stripeIntent.status).isEqualTo(StripeIntent.Status.Succeeded)
+    }
+
+    @Test
+    fun `parse confirm response with elements_session replaces deferred intent with confirmed SetupIntent`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_SETUP_CONFIRM_WITH_ELEMENTS_SESSION_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.setupIntent).isNotNull()
+        assertThat(result?.setupIntent?.id).isEqualTo("seti_1QWK2VIyGgrkZxL71xfPBWG5")
+
+        val elementsSession = result?.elementsSession
+        assertThat(elementsSession).isNotNull()
+        assertThat(elementsSession?.stripeIntent).isInstanceOf(SetupIntent::class.java)
+
+        val stripeIntent = elementsSession?.stripeIntent as SetupIntent
+        assertThat(stripeIntent.id).isEqualTo("seti_1QWK2VIyGgrkZxL71xfPBWG5")
+        assertThat(stripeIntent.status).isEqualTo(StripeIntent.Status.Succeeded)
     }
 }
