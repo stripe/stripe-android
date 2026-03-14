@@ -31,11 +31,15 @@ internal class CardScanActivity : AppCompatActivity() {
             )
         }
 
-        StripeCardScanProxy.create(
+        val proxy = StripeCardScanProxy.create(
             this,
             this::onScanFinished,
             ErrorReporter.createFallbackInstance(applicationContext, setOf("CardScan"))
-        ).present(config)
+        )
+
+        if (savedInstanceState == null) {
+            proxy.present(config)
+        }
     }
 
     private fun onScanFinished(result: CardScanSheetResult) {

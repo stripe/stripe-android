@@ -122,7 +122,11 @@ internal abstract class CardScanFlow(
         mainLoop?.unsubscribe()
         mainLoop = null
 
-        mainLoopAnalyzerPool?.closeAllAnalyzers()
+        // Don't call closeAllAnalyzers() here. The TFLite interpreter.close() frees native
+        // memory, but a coroutine on DefaultDispatcher may still be inside the native
+        // interpreter.run() call. Freeing memory while the native call is in-flight causes
+        // SIGSEGV. Instead, release our reference and let GC clean up after the coroutine
+        // finishes naturally.
         mainLoopAnalyzerPool = null
 
         mainLoopJob?.apply { if (isActive) { cancel() } }

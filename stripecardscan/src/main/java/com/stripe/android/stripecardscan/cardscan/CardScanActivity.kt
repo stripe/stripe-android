@@ -303,7 +303,4 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
         }
     }
 
-    override fun closeScanner() {
-        super.closeScanner()
-    }
 }
