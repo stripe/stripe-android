@@ -26,7 +26,7 @@ interface TextFieldController : InputController, SectionFieldComposable, Section
     fun onValueChange(displayFormatted: String): TextFieldState?
     fun onFocusChange(newHasFocus: Boolean)
     fun onDropdownItemClicked(item: TextFieldIcon.Dropdown.Item) {}
-    fun onSelectorItemClicked(item: TextFieldIcon.Selector.Item) {}
+    fun onSelectorItemClicked(item: TextFieldIcon.Selector.Item?) {}
 
     val initialValue: String?
     val autofillType: ContentType?
