@@ -112,7 +112,7 @@ sealed class TextFieldIcon {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     data class Selector(
         val message: ResolvableString,
-        val hide: Boolean,
+        val showSelector: Boolean,
         val currentItem: Item,
         val items: List<Item>,
         val hasMadeSelection: Boolean
