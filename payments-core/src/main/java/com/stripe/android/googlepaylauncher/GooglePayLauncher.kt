@@ -13,6 +13,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.AcceptanceCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -20,6 +21,7 @@ import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.reactnative.UnregisterSignal
 import com.stripe.android.core.reactnative.registerForReactNativeActivityResult
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.PaymentAnalyticsEvent
@@ -90,6 +92,7 @@ class GooglePayLauncher internal constructor(
                     productUsage = setOf(PRODUCT_USAGE),
                 ),
                 additionalEnabledNetworks = config.additionalEnabledNetworks,
+                cardBrandFilter = AcceptanceCardBrandFilter(config.cardBrandAcceptance),
                 cardFundingFilter = DefaultCardFundingFilter
             )
         },
@@ -133,6 +136,7 @@ class GooglePayLauncher internal constructor(
                     context = context,
                     productUsage = setOf(PRODUCT_USAGE),
                 ),
+                cardBrandFilter = AcceptanceCardBrandFilter(config.cardBrandAcceptance),
                 cardFundingFilter = DefaultCardFundingFilter
             )
         },
@@ -182,6 +186,7 @@ class GooglePayLauncher internal constructor(
                     productUsage = setOf(PRODUCT_USAGE)
                 ),
                 additionalEnabledNetworks = config.additionalEnabledNetworks,
+                cardBrandFilter = AcceptanceCardBrandFilter(config.cardBrandAcceptance),
                 cardFundingFilter = DefaultCardFundingFilter
             )
         },
@@ -311,7 +316,13 @@ class GooglePayLauncher internal constructor(
         /**
          * Set this property to enable other card networks in additional to the default list, such as "INTERAC"
          */
-        internal val additionalEnabledNetworks: List<String> = emptyList()
+        internal val additionalEnabledNetworks: List<String> = emptyList(),
+
+        /**
+         * Allows to select the acceptable card brands
+         * Default: Accepts all brands
+         */
+        var cardBrandAcceptance: CardBrand.CardBrandAcceptance = CardBrand.CardBrandAcceptance.All
     ) : Parcelable {
 
         internal val isJcbEnabled: Boolean
@@ -421,6 +432,7 @@ fun rememberGooglePayLauncher(
                         productUsage = setOf(GooglePayLauncher.PRODUCT_USAGE)
                     ),
                     additionalEnabledNetworks = config.additionalEnabledNetworks,
+                    cardBrandFilter = AcceptanceCardBrandFilter(config.cardBrandAcceptance),
                     cardFundingFilter = DefaultCardFundingFilter
                 )
             },

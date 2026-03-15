@@ -108,8 +108,73 @@ public final class com/stripe/android/model/CardBrand : java/lang/Enum {
 	public final fun isMaxCvc (Ljava/lang/String;)Z
 	public final fun isValidCardNumberLength (Ljava/lang/String;)Z
 	public final fun isValidCvc (Ljava/lang/String;)Z
+	public final fun toBrandCategory ()Lcom/stripe/android/model/CardBrand$CardBrandAcceptance$BrandCategory;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/model/CardBrand;
 	public static fun values ()[Lcom/stripe/android/model/CardBrand;
+}
+
+public abstract class com/stripe/android/model/CardBrand$CardBrandAcceptance : android/os/Parcelable {
+	public static final field Companion Lcom/stripe/android/model/CardBrand$CardBrandAcceptance$Companion;
+	public static final fun all ()Lcom/stripe/android/model/CardBrand$CardBrandAcceptance;
+	public static final fun allowed (Ljava/util/List;)Lcom/stripe/android/model/CardBrand$CardBrandAcceptance;
+	public static final fun disallowed (Ljava/util/List;)Lcom/stripe/android/model/CardBrand$CardBrandAcceptance;
+}
+
+public final class com/stripe/android/model/CardBrand$CardBrandAcceptance$All : com/stripe/android/model/CardBrand$CardBrandAcceptance {
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/model/CardBrand$CardBrandAcceptance$All;
+	public final fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/model/CardBrand$CardBrandAcceptance$Allowed : com/stripe/android/model/CardBrand$CardBrandAcceptance {
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lcom/stripe/android/model/CardBrand$CardBrandAcceptance$Allowed;
+	public static synthetic fun copy$default (Lcom/stripe/android/model/CardBrand$CardBrandAcceptance$Allowed;Ljava/util/List;ILjava/lang/Object;)Lcom/stripe/android/model/CardBrand$CardBrandAcceptance$Allowed;
+	public final fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBrands ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/model/CardBrand$CardBrandAcceptance$BrandCategory : java/lang/Enum, android/os/Parcelable {
+	public static final field Amex Lcom/stripe/android/model/CardBrand$CardBrandAcceptance$BrandCategory;
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field Discover Lcom/stripe/android/model/CardBrand$CardBrandAcceptance$BrandCategory;
+	public static final field Mastercard Lcom/stripe/android/model/CardBrand$CardBrandAcceptance$BrandCategory;
+	public static final field Visa Lcom/stripe/android/model/CardBrand$CardBrandAcceptance$BrandCategory;
+	public final fun describeContents ()I
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/model/CardBrand$CardBrandAcceptance$BrandCategory;
+	public static fun values ()[Lcom/stripe/android/model/CardBrand$CardBrandAcceptance$BrandCategory;
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/model/CardBrand$CardBrandAcceptance$Companion {
+	public final fun all ()Lcom/stripe/android/model/CardBrand$CardBrandAcceptance;
+	public final fun allowed (Ljava/util/List;)Lcom/stripe/android/model/CardBrand$CardBrandAcceptance;
+	public final fun disallowed (Ljava/util/List;)Lcom/stripe/android/model/CardBrand$CardBrandAcceptance;
+}
+
+public final class com/stripe/android/model/CardBrand$CardBrandAcceptance$Disallowed : com/stripe/android/model/CardBrand$CardBrandAcceptance {
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lcom/stripe/android/model/CardBrand$CardBrandAcceptance$Disallowed;
+	public static synthetic fun copy$default (Lcom/stripe/android/model/CardBrand$CardBrandAcceptance$Disallowed;Ljava/util/List;ILjava/lang/Object;)Lcom/stripe/android/model/CardBrand$CardBrandAcceptance$Disallowed;
+	public final fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBrands ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/model/CardBrand$Companion {
