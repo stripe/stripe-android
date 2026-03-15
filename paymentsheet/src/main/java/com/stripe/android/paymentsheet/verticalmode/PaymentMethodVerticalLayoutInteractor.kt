@@ -108,6 +108,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val shouldUpdateVerticalModeSelection: (String?) -> Boolean,
     private val invokeRowSelectionCallback: (() -> Unit)? = null,
     private val displaysMandatesInFormScreen: Boolean,
+    private val shouldTrackIndividualPaymentMethods: Boolean,
     private val onInitiallyDisplayedPaymentMethodVisibilitySnapshot: (List<String>, List<String>) -> Unit,
     dispatcher: CoroutineContext = Dispatchers.Default,
     mainDispatcher: CoroutineContext = Dispatchers.Main.immediate,
@@ -177,6 +178,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     !requiresFormScreen
                 },
                 displaysMandatesInFormScreen = false,
+                shouldTrackIndividualPaymentMethods = true,
                 onInitiallyDisplayedPaymentMethodVisibilitySnapshot = { visiblePaymentMethods, hiddenPaymentMethods ->
                     viewModel.eventReporter.onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
                         visiblePaymentMethods = visiblePaymentMethods,
@@ -559,20 +561,33 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         }
     }
 
-    private val visibilityTracker = PaymentMethodInitialVisibilityTracker(
-        expectedItems = expectedItemsForVisibilityTracking.value,
-        renderedLpmCallback = { visiblePaymentMethods, hiddenPaymentMethods ->
-            onInitiallyDisplayedPaymentMethodVisibilitySnapshot(visiblePaymentMethods, hiddenPaymentMethods)
-        },
-        dispatcher = dispatcher
-    )
+    private val visibilityTracker = if (shouldTrackIndividualPaymentMethods) {
+        PaymentMethodInitialVisibilityTracker(
+            expectedItems = expectedItemsForVisibilityTracking.value,
+            renderedLpmCallback = { visiblePaymentMethods, hiddenPaymentMethods ->
+                onInitiallyDisplayedPaymentMethodVisibilitySnapshot(visiblePaymentMethods, hiddenPaymentMethods)
+            },
+            dispatcher = dispatcher
+        )
+    } else {
+        PaymentMethodLayoutInitialVisibilityTracker(
+            callback = {
+                onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
+                    expectedItemsForVisibilityTracking.value,
+                    emptyList()
+                )
+            }
+        )
+    }
 
     private fun updatePaymentMethodVisibility(itemCode: String, layoutCoordinates: LayoutCoordinates) {
-        if (visibilityTracker.getHasDispatched()) {
+        if (visibilityTracker.hasDispatched) {
             return
         }
 
-        visibilityTracker.updateExpectedItems(expectedItemsForVisibilityTracking.value)
+        if (shouldTrackIndividualPaymentMethods) {
+            visibilityTracker.updateExpectedItems(expectedItemsForVisibilityTracking.value)
+        }
         visibilityTracker.updateVisibility(itemCode, layoutCoordinates)
     }
 
