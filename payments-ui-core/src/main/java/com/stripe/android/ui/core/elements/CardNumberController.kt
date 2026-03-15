@@ -518,7 +518,7 @@ internal class DefaultCardNumberController(
                 else -> TextFieldIcon.Selector.Item(
                     id = chosen.code,
                     label = chosen.displayName.resolvableString,
-                    icon = chosen.icon
+                    icon = chosen.getCardBrandIconUnpadded()
                 )
             }
         }
@@ -535,7 +535,7 @@ internal class DefaultCardNumberController(
                         brand.displayName
                     )
                 },
-                icon = brand.icon,
+                icon = brand.getCardBrandIconUnpadded(),
                 enabled = enabled
             )
         }
