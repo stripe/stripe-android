@@ -320,7 +320,8 @@ class LinkApiRepositoryTest {
                     ),
                     "billing_address" to mapOf(
                         "country_code" to "US",
-                        "postal_code" to "12345"
+                        "postal_code" to "12345",
+                        "name" to "Jenny Rosen",
                     ),
                     "active" to true,
                     "client_attribution_metadata" to
@@ -418,7 +419,8 @@ class LinkApiRepositoryTest {
                         ),
                         "billing_address" to mapOf(
                             "country_code" to "US",
-                            "postal_code" to "12345"
+                            "postal_code" to "12345",
+                            "name" to "Jenny Rosen",
                         ),
                         "active" to true,
                         "client_attribution_metadata" to
@@ -429,6 +431,28 @@ class LinkApiRepositoryTest {
                 requestOptions = eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID)),
             )
         }
+
+    @Test
+    fun `createPaymentDetails for card includes full billing details on Link PM`() = runTest {
+        val fakeConsumersApiService = FakeConsumersApiService()
+        val linkRepository = linkRepository(fakeConsumersApiService)
+
+        val result = linkRepository.createCardPaymentDetails(
+            paymentMethodCreateParams = cardPaymentMethodCreateParams,
+            userEmail = "jenny@example.com",
+            stripeIntent = paymentIntent,
+            consumerSessionClientSecret = "consumer_session_secret",
+            clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+        )
+
+        assertThat(result.isSuccess).isTrue()
+
+        val billingDetails = result.getOrThrow().confirmParams.billingDetails
+        assertThat(billingDetails?.email).isEqualTo("jenny@example.com")
+        assertThat(billingDetails?.name).isEqualTo("Jenny Rosen")
+        assertThat(billingDetails?.address?.country).isEqualTo("US")
+        assertThat(billingDetails?.address?.postalCode).isEqualTo("12345")
+    }
 
     @Suppress("LongMethod")
     @Test
@@ -1021,8 +1045,10 @@ class LinkApiRepositoryTest {
                 IdentifierSpec.CardCvc to FormFieldEntry("123", true),
                 IdentifierSpec.CardExpMonth to FormFieldEntry("12", true),
                 IdentifierSpec.CardExpYear to FormFieldEntry("2050", true),
+                IdentifierSpec.Email to FormFieldEntry("jenny@example.com", true),
+                IdentifierSpec.Name to FormFieldEntry("Jenny Rosen", true),
                 IdentifierSpec.Country to FormFieldEntry("US", true),
-                IdentifierSpec.PostalCode to FormFieldEntry("12345", true)
+                IdentifierSpec.PostalCode to FormFieldEntry("12345", true),
             ),
             "card",
             false,
