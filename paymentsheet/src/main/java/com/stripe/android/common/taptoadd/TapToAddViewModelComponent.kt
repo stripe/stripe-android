@@ -12,16 +12,16 @@ import com.stripe.android.common.spms.DefaultLinkFormElementFactory
 import com.stripe.android.common.spms.DefaultSavedPaymentMethodLinkFormHelper
 import com.stripe.android.common.spms.LinkFormElementFactory
 import com.stripe.android.common.spms.SavedPaymentMethodLinkFormHelper
-import com.stripe.android.common.taptoadd.ui.DefaultTapToAddCompletedInteractor
+import com.stripe.android.common.taptoadd.ui.DefaultTapToAddCardAddedInteractor
 import com.stripe.android.common.taptoadd.ui.DefaultTapToAddCollectingInteractor
-import com.stripe.android.common.taptoadd.ui.DefaultTapToAddCollectCvcInteractor
 import com.stripe.android.common.taptoadd.ui.DefaultTapToAddConfirmationInteractor
-import com.stripe.android.common.taptoadd.ui.DefaultTapToAddPaymentMethodHolder
-import com.stripe.android.common.taptoadd.ui.TapToAddCompletedInteractor
+import com.stripe.android.common.taptoadd.ui.DefaultTapToAddDelayInteractor
+import com.stripe.android.common.taptoadd.ui.DefaultTapToAddStateHolder
+import com.stripe.android.common.taptoadd.ui.TapToAddCardAddedInteractor
 import com.stripe.android.common.taptoadd.ui.TapToAddCollectingInteractor
-import com.stripe.android.common.taptoadd.ui.TapToAddCollectCvcInteractor
 import com.stripe.android.common.taptoadd.ui.TapToAddConfirmationInteractor
-import com.stripe.android.common.taptoadd.ui.TapToAddPaymentMethodHolder
+import com.stripe.android.common.taptoadd.ui.TapToAddDelayInteractor
+import com.stripe.android.common.taptoadd.ui.TapToAddStateHolder
 import com.stripe.android.common.taptoadd.ui.createTapToAddUxConfiguration
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
@@ -158,8 +158,8 @@ internal interface TapToAddViewModelModule {
 
     @Binds
     fun bindsPaymentMethodHolder(
-        tapToAddPaymentMethodHolder: DefaultTapToAddPaymentMethodHolder
-    ): TapToAddPaymentMethodHolder
+        tapToAddPaymentMethodHolder: DefaultTapToAddStateHolder
+    ): TapToAddStateHolder
 
     @Binds
     fun bindsEventReporter(
@@ -172,14 +172,14 @@ internal interface TapToAddViewModelModule {
     ): TapToAddCollectingInteractor.Factory
 
     @Binds
-    fun bindsTapToAddCollectCvcInteractorFactory(
-        tapToAddCollectCvcInteractorFactory: DefaultTapToAddCollectCvcInteractor.Factory
-    ): TapToAddCollectCvcInteractor.Factory
+    fun bindsTapToAddCardAddedInteractorFactory(
+        tapToAddCardAddedInteractorFactory: DefaultTapToAddCardAddedInteractor.Factory
+    ): TapToAddCardAddedInteractor.Factory
 
     @Binds
-    fun bindsTapToAddCardAddedInteractorFactory(
-        tapToAddCardAddedInteractorFactory: DefaultTapToAddCompletedInteractor.Factory
-    ): TapToAddCompletedInteractor.Factory
+    fun bindsTapToAddDelayInteractorFactory(
+        tapToAddDelayInteractorFactory: DefaultTapToAddDelayInteractor.Factory
+    ): TapToAddDelayInteractor.Factory
 
     @Binds
     fun bindsTapToAddConfirmationInteractorFactory(

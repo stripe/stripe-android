@@ -38,6 +38,7 @@ class CheckoutTest {
     val ruleChain: RuleChain = RuleChain
         .outerRule(networkRule)
         .around(PaymentConfigurationTestRule(applicationContext))
+        .around(CheckoutInstancesTestRule())
 
     @Test
     fun `createWithState produces Checkout with correct checkoutSession id`() = runTest {
@@ -437,6 +438,378 @@ class CheckoutTest {
     }
 
     @Test
+    fun `updateBillingAddress sends address fields and updates checkoutSession on success`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_abc123"),
+                bodyPart(urlEncode("tax_region[country]"), "US"),
+                bodyPart(urlEncode("tax_region[city]"), "Denver"),
+                bodyPart(urlEncode("tax_region[state]"), "CO"),
+                bodyPart(urlEncode("tax_region[postal_code]"), "80202"),
+                bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-update-shipping-address.json")
+            }
+
+            checkout.checkoutSession.test {
+                val initial = awaitItem()
+                assertThat(initial.shippingOptions).isEmpty()
+                assertThat(initial.totalSummary?.taxAmounts).isNull()
+
+                val address = Address()
+                    .city("Denver")
+                    .country("US")
+                    .line1("123 Main St")
+                    .line2("Apt 4")
+                    .postalCode("80202")
+                    .state("CO")
+                val result = checkout.updateBillingAddress(address = address)
+
+                val updated = awaitItem()
+                assertThat(result.getOrThrow()).isEqualTo(updated)
+                assertThat(updated.shippingOptions).hasSize(3)
+                val totalSummary = updated.totalSummary
+                assertThat(totalSummary).isNotNull()
+                val shippingRate = requireNotNull(totalSummary!!.shippingRate)
+                assertThat(shippingRate.id).isEqualTo("shr_1T95aTLu5o3P18ZpgwZ8uTrs")
+                assertThat(shippingRate.displayName).isEqualTo("Free Shipping")
+                assertThat(totalSummary.taxAmounts).hasSize(2)
+            }
+        }
+    }
+
+    @Test
+    fun `updateBillingAddress returns failure on error response`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_abc123"),
+            ) { response ->
+                response.setResponseCode(400)
+                response.setBody("""{"error": {"message": "Invalid address"}}""")
+            }
+
+            checkout.checkoutSession.test {
+                val initial = awaitItem()
+
+                val address = Address()
+                    .country("XX")
+                val result = checkout.updateBillingAddress(address = address)
+                assertThat(result.isFailure).isTrue()
+
+                expectNoEvents()
+                assertThat(checkout.checkoutSession.value).isEqualTo(initial)
+            }
+        }
+    }
+
+    @Test
+    fun `updateShippingAddress stores address in internalState`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_abc123"),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-update-shipping-address.json")
+            }
+
+            val address = Address()
+                .city("Denver")
+                .country("US")
+                .line1("123 Main St")
+                .line2("Apt 4")
+                .postalCode("80202")
+                .state("CO")
+            val result = checkout.updateShippingAddress(name = "John", address = address)
+            assertThat(result.isSuccess).isTrue()
+
+            val state = checkout.internalState
+            assertThat(state.shippingName).isEqualTo("John")
+            assertThat(state.shippingAddress).isEqualTo(
+                Address.State(
+                    city = "Denver",
+                    country = "US",
+                    line1 = "123 Main St",
+                    line2 = "Apt 4",
+                    postalCode = "80202",
+                    state = "CO",
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `updateBillingAddress stores address in internalState`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_abc123"),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-update-shipping-address.json")
+            }
+
+            val address = Address()
+                .city("Denver")
+                .country("US")
+                .line1("123 Main St")
+                .line2("Apt 4")
+                .postalCode("80202")
+                .state("CO")
+            val result = checkout.updateBillingAddress(name = "Jane", address = address)
+            assertThat(result.isSuccess).isTrue()
+
+            val state = checkout.internalState
+            assertThat(state.billingName).isEqualTo("Jane")
+            assertThat(state.billingAddress).isEqualTo(
+                Address.State(
+                    city = "Denver",
+                    country = "US",
+                    line1 = "123 Main St",
+                    line2 = "Apt 4",
+                    postalCode = "80202",
+                    state = "CO",
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `updateShippingAddress does not store address in internalState on failure`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_abc123"),
+            ) { response ->
+                response.setResponseCode(400)
+                response.setBody("""{"error": {"message": "Invalid address"}}""")
+            }
+
+            val address = Address()
+                .country("XX")
+            val result = checkout.updateShippingAddress(name = "John", address = address)
+            assertThat(result.isFailure).isTrue()
+
+            assertThat(checkout.internalState.shippingName).isNull()
+            assertThat(checkout.internalState.shippingAddress).isNull()
+        }
+    }
+
+    @Test
+    fun `updateBillingAddress does not store address in internalState on failure`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_abc123"),
+            ) { response ->
+                response.setResponseCode(400)
+                response.setBody("""{"error": {"message": "Invalid address"}}""")
+            }
+
+            val address = Address()
+                .country("XX")
+            val result = checkout.updateBillingAddress(name = "Jane", address = address)
+            assertThat(result.isFailure).isTrue()
+
+            assertThat(checkout.internalState.billingName).isNull()
+            assertThat(checkout.internalState.billingAddress).isNull()
+        }
+    }
+
+    @Test
+    fun `updateShippingAddress stores phoneNumber in internalState`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_abc123"),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-update-shipping-address.json")
+            }
+
+            val address = Address().country("US")
+            val result = checkout.updateShippingAddress(phoneNumber = "5551234567", address = address)
+            assertThat(result.isSuccess).isTrue()
+
+            assertThat(checkout.internalState.shippingPhoneNumber).isEqualTo("5551234567")
+        }
+    }
+
+    @Test
+    fun `updateBillingAddress stores phoneNumber in internalState`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_abc123"),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-update-shipping-address.json")
+            }
+
+            val address = Address().country("US")
+            val result = checkout.updateBillingAddress(phoneNumber = "5559876543", address = address)
+            assertThat(result.isSuccess).isTrue()
+
+            assertThat(checkout.internalState.billingPhoneNumber).isEqualTo("5559876543")
+        }
+    }
+
+    @Test
+    fun `updateShippingAddress does not store phoneNumber in internalState on failure`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_abc123"),
+            ) { response ->
+                response.setResponseCode(400)
+                response.setBody("""{"error": {"message": "Invalid address"}}""")
+            }
+
+            val address = Address().country("XX")
+            val result = checkout.updateShippingAddress(phoneNumber = "5551234567", address = address)
+            assertThat(result.isFailure).isTrue()
+
+            assertThat(checkout.internalState.shippingPhoneNumber).isNull()
+        }
+    }
+
+    @Test
+    fun `updateBillingAddress does not store phoneNumber in internalState on failure`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_abc123"),
+            ) { response ->
+                response.setResponseCode(400)
+                response.setBody("""{"error": {"message": "Invalid address"}}""")
+            }
+
+            val address = Address().country("XX")
+            val result = checkout.updateBillingAddress(phoneNumber = "5559876543", address = address)
+            assertThat(result.isFailure).isTrue()
+
+            assertThat(checkout.internalState.billingPhoneNumber).isNull()
+        }
+    }
+
+    @Test
+    fun `updateBillingAddress omits empty fields from request`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_abc123"),
+                bodyPart(urlEncode("tax_region[country]"), "US"),
+                bodyPart(urlEncode("tax_region[postal_code]"), "80202"),
+                not(hasBodyPart(urlEncode("tax_region[city]"))),
+                not(hasBodyPart(urlEncode("tax_region[state]"))),
+                not(hasBodyPart(urlEncode("tax_region[line1]"))),
+                not(hasBodyPart(urlEncode("tax_region[line2]"))),
+                bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-update-shipping-address.json")
+            }
+
+            checkout.checkoutSession.test {
+                awaitItem()
+
+                val address = Address()
+                    .country("US")
+                    .postalCode("80202")
+                val result = checkout.updateBillingAddress(address = address)
+
+                val updated = awaitItem()
+                assertThat(result.isSuccess).isTrue()
+                assertThat(result.getOrThrow()).isEqualTo(updated)
+            }
+        }
+    }
+
+    @Test
+    fun `updateTaxId sends type and value and updates checkoutSession on success`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_abc123"),
+                bodyPart(urlEncode("tax_id_collection[tax_id][type]"), "us_ein"),
+                bodyPart(urlEncode("tax_id_collection[tax_id][value]"), "123456789"),
+                bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-apply-discount.json")
+            }
+
+            checkout.checkoutSession.test {
+                assertThat(awaitItem().totalSummary).isNull()
+
+                val result = checkout.updateTaxId("us_ein", "123456789")
+
+                val updated = awaitItem()
+                assertThat(result.getOrThrow()).isEqualTo(updated)
+                assertThat(updated.totalSummary).isNotNull()
+            }
+        }
+    }
+
+    @Test
+    fun `updateTaxId returns failure on error response`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_abc123"),
+            ) { response ->
+                response.setResponseCode(400)
+                response.setBody("""{"error": {"message": "Invalid tax ID"}}""")
+            }
+
+            checkout.checkoutSession.test {
+                val initial = awaitItem()
+
+                val result = checkout.updateTaxId("invalid", "000")
+                assertThat(result.isFailure).isTrue()
+
+                expectNoEvents()
+                assertThat(checkout.checkoutSession.value).isEqualTo(initial)
+            }
+        }
+    }
+
+    @Test
+    fun `updateTaxId trims whitespace from type and value`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_abc123"),
+                bodyPart(urlEncode("tax_id_collection[tax_id][type]"), "us_ein"),
+                bodyPart(urlEncode("tax_id_collection[tax_id][value]"), "123456789"),
+                bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-apply-discount.json")
+            }
+
+            checkout.checkoutSession.test {
+                assertThat(awaitItem().totalSummary).isNull()
+
+                val result = checkout.updateTaxId("  us_ein  ", "  123456789  ")
+
+                val updated = awaitItem()
+                assertThat(result.getOrThrow()).isEqualTo(updated)
+                assertThat(updated.totalSummary).isNotNull()
+            }
+        }
+    }
+
+    @Test
     fun `selectShippingRate returns failure on error response`() = runTest {
         runCreateWithStateScenario { checkout ->
             networkRule.enqueue(
@@ -524,6 +897,124 @@ class CheckoutTest {
     }
 
     @Test
+    fun `updateWithResponse updates checkoutSession flow`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            checkout.checkoutSession.test {
+                val initial = awaitItem()
+                assertThat(initial.id).isEqualTo("cs_test_abc123")
+                assertThat(initial.totalSummary).isNull()
+
+                val updatedResponse = CheckoutSessionResponseFactory.create(
+                    id = "cs_test_updated",
+                    totalSummary = CheckoutSessionResponse.TotalSummaryResponse(
+                        subtotal = 2000L,
+                        totalDueToday = 2000L,
+                        totalAmountDue = 2000L,
+                        discountAmounts = emptyList(),
+                        taxAmounts = emptyList(),
+                        shippingRate = null,
+                        appliedBalance = null,
+                    ),
+                )
+                checkout.updateWithResponse(updatedResponse)
+
+                val updated = awaitItem()
+                assertThat(updated.id).isEqualTo("cs_test_updated")
+                assertThat(updated.totalSummary).isNotNull()
+                assertThat(updated.totalSummary!!.subtotal).isEqualTo(2000L)
+            }
+        }
+    }
+
+    @Test
+    fun `updateWithResponse updates internalState`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            assertThat(checkout.internalState.checkoutSessionResponse.id).isEqualTo("cs_test_abc123")
+
+            val updatedResponse = CheckoutSessionResponseFactory.create(id = "cs_test_updated")
+            checkout.updateWithResponse(updatedResponse)
+
+            assertThat(checkout.internalState.checkoutSessionResponse.id).isEqualTo("cs_test_updated")
+            assertThat(checkout.internalState.checkoutSessionResponse).isEqualTo(updatedResponse)
+        }
+    }
+
+    @Test
+    fun `updateWithResponse preserves non-response internalState fields`() = runTest {
+        val initialResponse = CheckoutSessionResponseFactory.create()
+        val state = Checkout.State(
+            InternalState(
+                key = "CheckoutTest",
+                checkoutSessionResponse = initialResponse,
+                shippingName = "Jane Doe",
+                billingName = "John Doe",
+            ),
+        )
+        val checkout = Checkout.createWithState(applicationContext, state)
+
+        val updatedResponse = CheckoutSessionResponseFactory.create(id = "cs_test_updated")
+        checkout.updateWithResponse(updatedResponse)
+
+        assertThat(checkout.internalState.shippingName).isEqualTo("Jane Doe")
+        assertThat(checkout.internalState.billingName).isEqualTo("John Doe")
+        assertThat(checkout.internalState.checkoutSessionResponse.id).isEqualTo("cs_test_updated")
+    }
+
+    @Test
+    fun `ensureNoMutationInFlight throws when mutex is locked`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_abc123"),
+            ) { response ->
+                response.setBodyDelay(5, TimeUnit.SECONDS)
+                response.testBodyFromFile("checkout-session-apply-discount.json")
+            }
+
+            // Start a mutation to lock the mutex.
+            val deferred = async { checkout.applyPromotionCode("10OFF") }
+
+            // Give the coroutine time to acquire the mutex.
+            testScheduler.advanceUntilIdle()
+
+            val error = runCatching { checkout.ensureNoMutationInFlight() }.exceptionOrNull()
+            assertThat(error).isInstanceOf(IllegalStateException::class.java)
+            assertThat(error).hasMessageThat()
+                .isEqualTo("Cannot launch while a checkout session mutation is in flight.")
+
+            deferred.cancel()
+        }
+    }
+
+    @Test
+    fun `setting state throws when mutex is locked`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_abc123"),
+            ) { response ->
+                response.setBodyDelay(5, TimeUnit.SECONDS)
+                response.testBodyFromFile("checkout-session-apply-discount.json")
+            }
+
+            // Start a mutation to lock the mutex.
+            val deferred = async { checkout.applyPromotionCode("10OFF") }
+
+            // Give the coroutine time to acquire the mutex.
+            testScheduler.advanceUntilIdle()
+
+            val error = runCatching { checkout.state = checkout.state }.exceptionOrNull()
+            assertThat(error).isInstanceOf(IllegalStateException::class.java)
+            assertThat(error).hasMessageThat()
+                .isEqualTo("Cannot launch while a checkout session mutation is in flight.")
+
+            deferred.cancel()
+        }
+    }
+
+    @Test
     fun `configure returns failure when network request fails`() = runConfigureScenario(
         clientSecret = "cs_test_abc123_secret_xyz",
         networkSetup = {
@@ -545,7 +1036,10 @@ class CheckoutTest {
         block: suspend (Checkout) -> Unit,
     ) {
         val state = Checkout.State(
-            InternalState(checkoutSessionResponse),
+            InternalState(
+                key = "CheckoutTest",
+                checkoutSessionResponse = checkoutSessionResponse,
+            ),
         )
         val checkout = Checkout.createWithState(applicationContext, state)
         block(checkout)

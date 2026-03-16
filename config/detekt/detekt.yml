@@ -677,7 +677,7 @@ ktlint:
   IfElseWrapping:
     active: false
   ImportOrdering:
-    active: false
+    active: true
   Indentation:
     active: false
   Kdoc:

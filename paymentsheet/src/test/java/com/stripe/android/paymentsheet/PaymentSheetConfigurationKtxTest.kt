@@ -353,6 +353,7 @@ class PaymentSheetConfigurationKtxTest {
     fun `'validate' should fail when using CheckoutSession mode with non-null customer`() {
         val configWithCustomer = configuration.asCommonConfiguration()
         val checkoutSessionMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            instancesKey = "PaymentSheetConfigurationKtxTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 id = "cs_test_123",
                 amount = 5099,
@@ -379,6 +380,7 @@ class PaymentSheetConfigurationKtxTest {
             .build()
             .asCommonConfiguration()
         val checkoutSessionMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            instancesKey = "PaymentSheetConfigurationKtxTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 id = "cs_test_123",
                 amount = 5099,

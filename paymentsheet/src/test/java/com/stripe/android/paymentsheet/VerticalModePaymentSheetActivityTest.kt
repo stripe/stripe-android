@@ -9,7 +9,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.CardBrand
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.host
@@ -251,42 +250,6 @@ internal class VerticalModePaymentSheetActivityTest {
     }
 
     @Test
-    fun `Updating a card brand updates the icon in the list`() = runTest(
-        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
-        networkSetup = {
-            setupElementsSessionsResponse(isCbcEligible = true)
-            networkRule.setupV1PaymentMethodsResponse(
-                card1.copy(addCbcNetworks = true),
-                card2.copy(addCbcNetworks = true)
-            )
-            networkRule.setupPaymentMethodUpdateResponse(paymentMethodDetails = card1, cardBrand = "visa")
-        },
-    ) {
-        FeatureFlags.newCbcSelector.setEnabled(false)
-        verticalModePage.assertHasSavedPaymentMethods()
-        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345", cardBrand = "cartes_bancaries")
-        verticalModePage.assertPrimaryButton(isEnabled())
-
-        verticalModePage.clickViewMore()
-        managePage.waitUntilVisible()
-        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345", cardBrand = "cartes_bancaries")
-        managePage.clickEdit()
-        managePage.clickEdit("pm_12345")
-
-        editPage.assertIsVisible()
-        editPage.setCardBrand("Visa")
-        editPage.update()
-        managePage.waitUntilVisible()
-        managePage.clickDone()
-        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345", cardBrand = "visa")
-        Espresso.pressBack()
-
-        verticalModePage.waitUntilVisible()
-        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345", cardBrand = "visa")
-        verticalModePage.assertPrimaryButton(isEnabled())
-    }
-
-    @Test
     fun `Updating a card brand with selector updates the icon in the list`() = runTest(
         customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
@@ -298,7 +261,6 @@ internal class VerticalModePaymentSheetActivityTest {
             networkRule.setupPaymentMethodUpdateResponse(paymentMethodDetails = card1, cardBrand = "visa")
         },
     ) {
-        FeatureFlags.newCbcSelector.setEnabled(true)
         verticalModePage.assertHasSavedPaymentMethods()
         verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345", cardBrand = "cartes_bancaries")
         verticalModePage.assertPrimaryButton(isEnabled())
@@ -520,43 +482,6 @@ internal class VerticalModePaymentSheetActivityTest {
     }
 
     @Test
-    fun `Disallowed brands are disabled in the CBC dropdown`() = runTest(
-        cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
-            listOf(
-                PaymentSheet.CardBrandAcceptance.BrandCategory.Visa
-            )
-        ),
-        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
-        networkSetup = {
-            setupElementsSessionsResponse(isCbcEligible = true)
-            networkRule.setupV1PaymentMethodsResponse(
-                card1.copy(addCbcNetworks = true, brand = CardBrand.CartesBancaires),
-                card2.copy(addCbcNetworks = true, brand = CardBrand.CartesBancaires)
-            )
-        },
-    ) {
-        FeatureFlags.newCbcSelector.setEnabled(false)
-        verticalModePage.assertHasSavedPaymentMethods()
-        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345", cardBrand = "cartes_bancaries")
-        verticalModePage.assertPrimaryButton(isEnabled())
-        verticalModePage.waitUntilVisible()
-
-        verticalModePage.clickViewMore()
-        managePage.waitUntilVisible()
-        verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345", cardBrand = "cartes_bancaries")
-        managePage.clickEdit()
-        managePage.clickEdit("pm_12345")
-
-        editPage.assertIsVisible()
-
-        // Even though our card is co-branded, Visa should not show up in the dropdown as it is disallowed
-        editPage.assertInDropdownButDisabled("Visa (not accepted)")
-
-        // Cartes Bancaires item should be in the drop down and selectable
-        editPage.assertInDropdownAndEnabled("Cartes Bancaires")
-    }
-
-    @Test
     fun `Disallowed brands are disabled in the CBC selector`() = runTest(
         cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
             listOf(
@@ -572,7 +497,6 @@ internal class VerticalModePaymentSheetActivityTest {
             )
         },
     ) {
-        FeatureFlags.newCbcSelector.setEnabled(true)
         verticalModePage.assertHasSavedPaymentMethods()
         verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345", cardBrand = "cartes_bancaries")
         verticalModePage.assertPrimaryButton(isEnabled())

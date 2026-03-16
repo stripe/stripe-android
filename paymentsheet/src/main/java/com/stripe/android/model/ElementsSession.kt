@@ -68,8 +68,7 @@ internal data class ElementsSession(
     val passiveCaptchaParams: PassiveCaptchaParams?
         get() {
             return passiveCaptcha.takeIf {
-                flags[Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA] == true &&
-                    FeatureFlags.enablePassiveCaptcha.isEnabled
+                flags[Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA] == true
             }
         }
 

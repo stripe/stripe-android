@@ -9,7 +9,6 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.PaymentMethodRemovePermission
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
@@ -131,28 +130,7 @@ internal class ManageActivityTest {
     }
 
     @Test
-    fun `updating card brand updates it in the list and returns a result with the new card brand`() = launch {
-        managePage.waitUntilVisible()
-        managePage.assertCardIsVisible(cbcCardId, "cartes_bancaries")
-        managePage.clickEdit()
-        managePage.clickEdit(cbcCardId)
-
-        networkRule.setupPaymentMethodUpdateResponse(paymentMethodDetails = cbcCardDetails, cardBrand = "visa")
-        editPage.waitUntilVisible()
-        editPage.setCardBrand("Visa")
-        editPage.update()
-        managePage.waitUntilVisible()
-        managePage.clickDone()
-        managePage.assertCardIsVisible(cbcCardId, "visa")
-        Espresso.pressBack()
-        val updatedCbcCard = completedResultPaymentMethods().first { it.id == cbcCardId }
-        assertThat(updatedCbcCard.card?.displayBrand).isEqualTo("visa")
-    }
-
-    @Test
-    fun `updating card brand updates in list and returns a result with the new card brand selector`() = launch(
-        newCbcSelectorEnabled = true
-    ) {
+    fun `updating card brand updates in list and returns a result with the new card brand`() = launch {
         managePage.waitUntilVisible()
         managePage.assertCardIsVisible(cbcCardId, "cartes_bancaries")
         managePage.clickEdit()
@@ -184,32 +162,6 @@ internal class ManageActivityTest {
             countDownLatch = countDownLatch,
         )
         editPage.waitUntilVisible()
-        editPage.setCardBrand("Visa")
-        editPage.update(waitUntilComplete = false)
-        Espresso.pressBack()
-        managePage.assertNotVisible()
-        countDownLatch.countDown()
-        managePage.waitUntilVisible()
-        managePage.clickDone()
-        managePage.assertCardIsVisible(cbcCardId, "visa")
-    }
-
-    @Test
-    fun `selector updating card brand prevents sheet from being closed`() = launch(
-        newCbcSelectorEnabled = true
-    ) {
-        managePage.waitUntilVisible()
-        managePage.assertCardIsVisible(cbcCardId, "cartes_bancaries")
-        managePage.clickEdit()
-        managePage.clickEdit(cbcCardId)
-
-        val countDownLatch = CountDownLatch(1)
-        networkRule.setupPaymentMethodUpdateResponse(
-            paymentMethodDetails = cbcCardDetails,
-            cardBrand = "visa",
-            countDownLatch = countDownLatch,
-        )
-        editPage.waitUntilVisible()
         editPage.setCardBrandWithSelector("Visa")
         editPage.update(waitUntilComplete = false)
         Espresso.pressBack()
@@ -224,22 +176,6 @@ internal class ManageActivityTest {
     fun `updating card brand returns a result with the new card brand`() {
         launch(
             paymentMethods = listOf(cbcCardDetails.createPaymentMethod()),
-        ) {
-            networkRule.setupPaymentMethodUpdateResponse(paymentMethodDetails = cbcCardDetails, cardBrand = "visa")
-            editPage.waitUntilVisible()
-            editPage.setCardBrand("Visa")
-            editPage.update()
-            editPage.waitUntilMissing()
-            val updatedCbcCard = completedResultPaymentMethods().single()
-            assertThat(updatedCbcCard.card?.displayBrand).isEqualTo("visa")
-        }
-    }
-
-    @Test
-    fun `selector updating card brand returns a result with the new card brand`() {
-        launch(
-            paymentMethods = listOf(cbcCardDetails.createPaymentMethod()),
-            newCbcSelectorEnabled = true
         ) {
             networkRule.setupPaymentMethodUpdateResponse(paymentMethodDetails = cbcCardDetails, cardBrand = "visa")
             editPage.waitUntilVisible()
@@ -262,10 +198,8 @@ internal class ManageActivityTest {
         ),
         paymentMethods: List<PaymentMethod> = defaultPaymentMethods(),
         selection: PaymentSelection? = null,
-        newCbcSelectorEnabled: Boolean = false,
         block: Scenario.() -> Unit,
     ) {
-        FeatureFlags.newCbcSelector.setEnabled(newCbcSelectorEnabled)
         ActivityScenario.launchActivityForResult<ManageActivity>(
             ManageContract.createIntent(
                 context = applicationContext,

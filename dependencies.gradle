@@ -70,7 +70,7 @@ ext.versions = [
         showkase                    : '1.0.0-beta18',
         litert                      : '1.4.1',
         testParameterInjector       : '1.20',
-        terminal                    : '4.7.3',
+        terminal                    : '5.3.0',
         truth                       : '1.4.5',
         turbine                     : '1.2.1',
         uiAutomator                 : '2.3.0',

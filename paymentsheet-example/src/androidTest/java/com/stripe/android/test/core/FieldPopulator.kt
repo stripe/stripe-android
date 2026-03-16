@@ -189,7 +189,7 @@ internal class FieldPopulator(
             performTextInput(values.cardCvc)
         }
 
-        selectors.assertCardBrandDropdownExists()
+        selectors.assertCardBrandSelectorExists()
 
         cardBrandDisplayName?.let {
             selectCardBrand(displayName = cardBrandDisplayName)

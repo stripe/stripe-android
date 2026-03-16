@@ -239,6 +239,21 @@ enum class CardBrand(
         return partialPatterns[cardNumber.length] ?: pattern
     }
 
+    @DrawableRes
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun getCardBrandIconUnpadded(): Int = when (this) {
+        Visa -> R.drawable.stripe_ic_visa_unpadded
+        AmericanExpress -> R.drawable.stripe_ic_amex_unpadded
+        Discover -> R.drawable.stripe_ic_discover_unpadded
+        JCB -> R.drawable.stripe_ic_jcb_unpadded
+        DinersClub -> R.drawable.stripe_ic_diners_unpadded
+        MasterCard -> R.drawable.stripe_ic_mastercard_unpadded
+        UnionPay -> R.drawable.stripe_ic_unionpay_unpadded
+        CartesBancaires -> R.drawable.stripe_ic_cartes_bancaires_unpadded
+        Interac -> R.drawable.stripe_ic_interac_unpadded
+        Unknown -> R.drawable.stripe_ic_unknown_brand_unpadded
+    }
+
     companion object {
         /**
          * @param cardNumber a card number
