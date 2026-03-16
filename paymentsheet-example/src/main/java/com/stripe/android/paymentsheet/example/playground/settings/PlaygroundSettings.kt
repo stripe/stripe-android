@@ -573,7 +573,6 @@ internal class PlaygroundSettings private constructor(
                     PlaygroundConfigurationData.IntegrationType.CustomerSheet,
                 )
             ),
-            PassiveCaptchaDefinition,
             AttestationOnIntentConfirmationDefinition,
             EnableTapToAddSettingsDefinition,
             CustomStripeApiDefinition,
