@@ -115,6 +115,8 @@
   <string name="stripe_set_as_default_payment_method">Qiegħed bħala l-metodu tal-pagament standard</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Stabilixxi</string>
+  <!-- Satispay mandate text -->
+  <string name="stripe_twint_mandate">Billi tkompli, tawtorizza %1$s biex awtomatikament tħallas il-Bilanċ tiegħek ta\' Twint b\'mod ripetut skont il-pjan tax-xiri jew l-abbonament tiegħek.</string>
   <!-- Label for UPI ID number field on form -->
   <string name="stripe_upi_id_label">ID UPI</string>
 </resources>

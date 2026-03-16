@@ -113,6 +113,8 @@
   <string name="stripe_set_as_default_payment_method">결제 방식 기본값으로 설정</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">설정</string>
+  <!-- Satispay mandate text -->
+  <string name="stripe_twint_mandate">계속 진행하시면, 귀하는 %1$s이(가) 귀하의 구매 또는 구독 플랜에 따라 정기적으로 Twint 잔액을 자동으로 출금하는 것을 승인하는 것입니다.</string>
   <!-- Label for UPI ID number field on form -->
   <string name="stripe_upi_id_label">UPI ID</string>
 </resources>

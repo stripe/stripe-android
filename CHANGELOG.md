@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+[Changed][12667](https://github.com/stripe/stripe-android/pull/12667) CBC selector UI from a dropdown to a segmented selector following Mastercard requirements.
+
 ## 23.0.1 - 2026-03-10
 
 ### Payments

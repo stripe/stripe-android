@@ -115,6 +115,8 @@
   <string name="stripe_set_as_default_payment_method">Nustatyti kaip numatytąjį mokėjimo būdą</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Nustatyti</string>
+  <!-- Satispay mandate text -->
+  <string name="stripe_twint_mandate">Tęsdami, autorizuojate %1$s pagal jūsų pirkimo arba prenumeratos planą automatiškai ir periodiškai nurašyti lėšas nuo jūsų „Twint“ likučio.</string>
   <!-- Label for UPI ID number field on form -->
   <string name="stripe_upi_id_label">UPI ID</string>
 </resources>

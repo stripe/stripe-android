@@ -1,7 +1,9 @@
 package com.stripe.android.checkout
 
+import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import kotlinx.parcelize.Parcelize
 
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -37,14 +39,15 @@ class Address {
         this.state = state
     }
 
-    internal class State(
+    @Parcelize
+    internal data class State(
         val city: String?,
         val country: String?,
         val line1: String?,
         val line2: String?,
         val postalCode: String?,
         val state: String?,
-    )
+    ) : Parcelable
 
     internal fun build(): State {
         return State(

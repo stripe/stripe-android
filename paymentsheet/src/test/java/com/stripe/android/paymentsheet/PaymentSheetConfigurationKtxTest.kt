@@ -353,6 +353,7 @@ class PaymentSheetConfigurationKtxTest {
     fun `'validate' should fail when using CheckoutSession mode with non-null customer`() {
         val configWithCustomer = configuration.asCommonConfiguration()
         val checkoutSessionMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            instancesKey = "PaymentSheetConfigurationKtxTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 id = "cs_test_123",
                 amount = 5099,
@@ -376,9 +377,11 @@ class PaymentSheetConfigurationKtxTest {
     fun `'validate' should succeed when using CheckoutSession mode with null customer`() {
         val configWithoutCustomer = configuration.newBuilder()
             .customer(null)
+            .defaultBillingDetails(PaymentSheet.BillingDetails(email = "test@example.com"))
             .build()
             .asCommonConfiguration()
         val checkoutSessionMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            instancesKey = "PaymentSheetConfigurationKtxTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 id = "cs_test_123",
                 amount = 5099,
@@ -391,6 +394,34 @@ class PaymentSheetConfigurationKtxTest {
             isLiveMode = false,
             callbackIdentifier = ""
         )
+    }
+
+    @Test
+    fun `'validate' should fail when using CheckoutSession mode with null email`() {
+        val configWithoutEmail = configuration.newBuilder()
+            .customer(null)
+            .defaultBillingDetails(null)
+            .build()
+            .asCommonConfiguration()
+        val checkoutSessionMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            instancesKey = "PaymentSheetConfigurationKtxTest",
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                id = "cs_test_123",
+                amount = 5099,
+            ),
+        )
+
+        assertFailsWith(
+            IllegalArgumentException::class,
+            message = "configuration.defaultBillingDetails.email must be set when using CheckoutSession" +
+                " initialization mode."
+        ) {
+            configWithoutEmail.validate(
+                initializationMode = checkoutSessionMode,
+                isLiveMode = false,
+                callbackIdentifier = ""
+            )
+        }
     }
 
     private companion object {

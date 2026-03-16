@@ -1,36 +1,43 @@
 package com.stripe.android.checkout
 
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+
+@OptIn(CheckoutSessionPreview::class)
 internal fun PaymentSheet.Configuration.forCheckoutSession(
     state: InternalState,
 ): PaymentSheet.Configuration {
     val response = state.checkoutSessionResponse
-    val shouldSetEmail = defaultBillingDetails?.email == null && response.customerEmail != null
-    val shouldSetName = shippingDetails?.name == null && state.shippingName != null
-
-    if (!shouldSetEmail && !shouldSetName) return this
 
     return newBuilder().apply {
-        if (shouldSetEmail) {
-            defaultBillingDetails(
-                PaymentSheet.BillingDetails(
-                    address = defaultBillingDetails?.address,
-                    email = response.customerEmail,
-                    name = defaultBillingDetails?.name,
-                    phone = defaultBillingDetails?.phone,
-                )
+        defaultBillingDetails(
+            PaymentSheet.BillingDetails(
+                address = defaultBillingDetails?.address ?: state.billingAddress?.asPaymentSheetAddress(),
+                email = defaultBillingDetails?.email ?: response.customerEmail,
+                name = defaultBillingDetails?.name ?: state.billingName,
+                phone = defaultBillingDetails?.phone ?: state.billingPhoneNumber,
             )
-        }
-        if (shouldSetName) {
-            shippingDetails(
-                AddressDetails(
-                    name = state.shippingName,
-                    address = shippingDetails?.address,
-                    phoneNumber = shippingDetails?.phoneNumber,
-                    isCheckboxSelected = shippingDetails?.isCheckboxSelected,
-                )
+        )
+        shippingDetails(
+            AddressDetails(
+                name = shippingDetails?.name ?: state.shippingName,
+                address = shippingDetails?.address ?: state.shippingAddress?.asPaymentSheetAddress(),
+                phoneNumber = shippingDetails?.phoneNumber ?: state.shippingPhoneNumber,
+                isCheckboxSelected = shippingDetails?.isCheckboxSelected,
             )
-        }
+        )
     }.build()
+}
+
+@OptIn(CheckoutSessionPreview::class)
+private fun Address.State.asPaymentSheetAddress(): PaymentSheet.Address {
+    return PaymentSheet.Address(
+        city = city,
+        country = country,
+        line1 = line1,
+        line2 = line2,
+        postalCode = postalCode,
+        state = state,
+    )
 }

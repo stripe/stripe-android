@@ -4,15 +4,13 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.common.spms.SavedPaymentMethodLinkFormHelper
-import com.stripe.android.common.taptoadd.TapToAddMode
+import com.stripe.android.common.spms.CvcFormHelper
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.lpmfoundations.paymentmethod.link.LinkFormElement
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -21,7 +19,6 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationOption
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -43,7 +40,6 @@ internal class DefaultTapToAddConfirmationInteractorTest {
             brand = CardBrand.MasterCard,
             addCbcNetworks = false,
         ),
-        tapToAddMode = TapToAddMode.Continue,
     ) {
         interactor.state.test {
             val state = awaitItem()
@@ -55,7 +51,6 @@ internal class DefaultTapToAddConfirmationInteractorTest {
     @Test
     fun `expected initial state in Complete mode`() = runScenario(
         paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
-        tapToAddMode = TapToAddMode.Complete,
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 amount = 5099,
@@ -65,82 +60,37 @@ internal class DefaultTapToAddConfirmationInteractorTest {
     ) {
         interactor.state.test {
             val state = awaitItem()
-            assertThat(state.title).isEqualTo(
+            assertThat(state.primaryButton.label).isEqualTo(
                 resolvableString(
                     StripeUiCoreR.string.stripe_pay_button_amount,
                     "$50.99"
                 )
             )
             assertThat(state.primaryButton.locked).isTrue()
-            assertThat(state.primaryButton.label).isEqualTo(
-                R.string.stripe_paymentsheet_pay_button_label.resolvableString
-            )
+        }
+    }
+
+    @Test
+    fun `expected initial state has primary button locked`() = runScenario(
+        paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
+    ) {
+        interactor.state.test {
+            val state = awaitItem()
             assertThat(state.primaryButton.locked).isTrue()
         }
     }
 
     @Test
-    fun `expected initial state in Continue mode`() = runScenario(
-        paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
-        tapToAddMode = TapToAddMode.Continue,
-    ) {
-        interactor.state.test {
-            val state = awaitItem()
-            assertThat(state.title)
-                .isEqualTo(R.string.stripe_tap_to_add_card_added_title.resolvableString)
-            assertThat(state.primaryButton.label)
-                .isEqualTo(StripeUiCoreR.string.stripe_continue_button_label.resolvableString)
-            assertThat(state.primaryButton.locked).isFalse()
-        }
-    }
-
-    @Test
-    fun `PrimaryButtonPressed in continue mode calls onContinue with saved selection`() = runScenario(
-        paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
-        tapToAddMode = TapToAddMode.Continue,
-    ) {
-        interactor.performAction(TapToAddConfirmationInteractor.Action.PrimaryButtonPressed)
-
-        val receivedSelection = onContinueCalls.awaitItem()
-
-        assertThat(receivedSelection.paymentMethod).isEqualTo(paymentMethod)
-    }
-
-    @Test
-    fun `Continue mode with completed link form returns selection containing input`() =
+    fun `Complete mode with link input and link state in metadata confirms with link option`() =
         runScenario(
             paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
-            tapToAddMode = TapToAddMode.Continue,
-            linkFormHelper = FakeSavedPaymentMethodLinkFormHelper(
-                initialState = SavedPaymentMethodLinkFormHelper.State.Complete(
-                    userInput = UserInput.SignIn(email = "link@test.com"),
-                ),
-            ),
-        ) {
-            interactor.performAction(TapToAddConfirmationInteractor.Action.PrimaryButtonPressed)
-
-            val receivedSelection = onContinueCalls.awaitItem()
-
-            assertThat(receivedSelection.paymentMethod).isEqualTo(paymentMethod)
-            assertThat(receivedSelection.linkInput).isEqualTo(UserInput.SignIn(email = "link@test.com"))
-        }
-
-    @Test
-    fun `Complete mode with complete link form and link state in metadata confirms with link option`() =
-        runScenario(
-            paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
-            tapToAddMode = TapToAddMode.Complete,
+            linkInput = UserInput.SignIn(email = "link@test.com"),
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 isTapToAddSupported = true,
                 linkState = LinkState(
                     configuration = TestFactory.LINK_CONFIGURATION,
                     loginState = LinkState.LoginState.LoggedOut,
                     signupMode = null,
-                ),
-            ),
-            linkFormHelper = FakeSavedPaymentMethodLinkFormHelper(
-                initialState = SavedPaymentMethodLinkFormHelper.State.Complete(
-                    userInput = UserInput.SignIn(email = "link@test.com"),
                 ),
             ),
         ) {
@@ -159,7 +109,6 @@ internal class DefaultTapToAddConfirmationInteractorTest {
     fun `PrimaryButtonPressed in Complete mode when idle starts confirmation process`() = runScenario(
         paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(isTapToAddSupported = true),
-        tapToAddMode = TapToAddMode.Complete,
     ) {
         interactor.performAction(TapToAddConfirmationInteractor.Action.PrimaryButtonPressed)
 
@@ -179,7 +128,6 @@ internal class DefaultTapToAddConfirmationInteractorTest {
 
         runScenario(
             paymentMethod = paymentMethod,
-            tapToAddMode = TapToAddMode.Complete,
             initialConfirmationState = ConfirmationHandler.State.Confirming(
                 PaymentMethodConfirmationOption.Saved(
                     paymentMethod = paymentMethod,
@@ -195,7 +143,6 @@ internal class DefaultTapToAddConfirmationInteractorTest {
     @Test
     fun `state updates to Processing when confirmation is in progress`() = runScenario(
         paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
-        tapToAddMode = TapToAddMode.Complete,
     ) {
         interactor.state.test {
             assertThat(awaitItem().primaryButton.state)
@@ -216,7 +163,6 @@ internal class DefaultTapToAddConfirmationInteractorTest {
     @Test
     fun `state calls complete when confirmation succeeds`() = runScenario(
         paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
-        tapToAddMode = TapToAddMode.Complete,
     ) {
         interactor.state.test {
             assertThat(awaitItem().primaryButton.state)
@@ -229,22 +175,24 @@ internal class DefaultTapToAddConfirmationInteractorTest {
             )
 
             assertThat(awaitItem().primaryButton.state)
-                .isEqualTo(TapToAddConfirmationInteractor.State.PrimaryButton.State.Processing)
+                .isEqualTo(TapToAddConfirmationInteractor.State.PrimaryButton.State.Success)
 
             val paymentSuccessEventCall = eventReporter.paymentSuccessCalls.awaitItem()
 
             assertThat(paymentSuccessEventCall.paymentSelection)
-                .isEqualTo(PaymentSelection.Saved(paymentMethod))
+                .isEqualTo(
+                    PaymentSelection.Saved(
+                        paymentMethod = paymentMethod,
+                        paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(cvc = "123"),
+                    )
+                )
             assertThat(paymentSuccessEventCall.intentId).isEqualTo(intent.id)
-
-            assertThat(onCompleteCalls.awaitItem()).isEqualTo(Unit)
         }
     }
 
     @Test
     fun `state updates to Idle with error when confirmations fails`() = runScenario(
         paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
-        tapToAddMode = TapToAddMode.Complete,
     ) {
         val errorMessage = "Payment failed".resolvableString
         interactor.state.test {
@@ -269,19 +217,21 @@ internal class DefaultTapToAddConfirmationInteractorTest {
             val paymentFailureEventCall = eventReporter.paymentFailureCalls.awaitItem()
 
             assertThat(paymentFailureEventCall.paymentSelection)
-                .isEqualTo(PaymentSelection.Saved(paymentMethod))
+                .isEqualTo(
+                    PaymentSelection.Saved(
+                        paymentMethod = paymentMethod,
+                        paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(cvc = "123"),
+                    )
+                )
             assertThat(paymentFailureEventCall.error)
                 .isEqualTo(PaymentSheetConfirmationError.Stripe(exception))
         }
     }
 
     @Test
-    fun `primary button disabled when link form state is Incomplete`() = runScenario(
+    fun `primary button disabled when cvc form state is Incomplete`() = runScenario(
         paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
-        tapToAddMode = TapToAddMode.Complete,
-        linkFormHelper = FakeSavedPaymentMethodLinkFormHelper(
-            initialState = SavedPaymentMethodLinkFormHelper.State.Incomplete,
-        ),
+        initialCvcState = CvcFormHelper.State.Incomplete,
     ) {
         interactor.state.test {
             val state = awaitItem()
@@ -290,12 +240,9 @@ internal class DefaultTapToAddConfirmationInteractorTest {
     }
 
     @Test
-    fun `primary button enabled when link form state is Unused`() = runScenario(
+    fun `primary button enabled when cvc form state is NotRequired`() = runScenario(
         paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
-        tapToAddMode = TapToAddMode.Complete,
-        linkFormHelper = FakeSavedPaymentMethodLinkFormHelper(
-            initialState = SavedPaymentMethodLinkFormHelper.State.Unused,
-        ),
+        initialCvcState = CvcFormHelper.State.NotRequired,
     ) {
         interactor.state.test {
             val state = awaitItem()
@@ -304,14 +251,9 @@ internal class DefaultTapToAddConfirmationInteractorTest {
     }
 
     @Test
-    fun `primary button enabled when link form state is Complete`() = runScenario(
+    fun `primary button enabled when cvc form state is Complete`() = runScenario(
         paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
-        tapToAddMode = TapToAddMode.Complete,
-        linkFormHelper = FakeSavedPaymentMethodLinkFormHelper(
-            initialState = SavedPaymentMethodLinkFormHelper.State.Complete(
-                userInput = UserInput.SignIn(email = "email@email.com")
-            ),
-        ),
+        initialCvcState = CvcFormHelper.State.Complete("123"),
     ) {
         interactor.state.test {
             val state = awaitItem()
@@ -323,9 +265,8 @@ internal class DefaultTapToAddConfirmationInteractorTest {
     fun `Complete mode includes provided payment method options in confirmation option`() =
         runScenario(
             paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
-            tapToAddMode = TapToAddMode.Complete,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(isTapToAddSupported = true),
-            paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(cvc = "123"),
+            initialCvcState = CvcFormHelper.State.Complete("123"),
         ) {
             interactor.performAction(TapToAddConfirmationInteractor.Action.PrimaryButtonPressed)
 
@@ -342,26 +283,8 @@ internal class DefaultTapToAddConfirmationInteractorTest {
         }
 
     @Test
-    fun `Continue mode includes provided payment method options in payment selection`() =
-        runScenario(
-            paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
-            tapToAddMode = TapToAddMode.Continue,
-            paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(cvc = "456"),
-        ) {
-            interactor.performAction(TapToAddConfirmationInteractor.Action.PrimaryButtonPressed)
-
-            val receivedSelection = onContinueCalls.awaitItem()
-
-            assertThat(receivedSelection.paymentMethod).isEqualTo(paymentMethod)
-            assertThat(receivedSelection.paymentMethodOptionsParams).isEqualTo(
-                PaymentMethodOptionsParams.Card(cvc = "456")
-            )
-        }
-
-    @Test
-    fun `form elements are empty when link form helper has no link form element`() = runScenario(
+    fun `form elements are empty when cvc form helper has no form element`() = runScenario(
         paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
-        tapToAddMode = TapToAddMode.Complete,
     ) {
         interactor.state.test {
             val state = awaitItem()
@@ -372,7 +295,6 @@ internal class DefaultTapToAddConfirmationInteractorTest {
     @Test
     fun `form is enabled when confirmation state is Idle`() = runScenario(
         paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
-        tapToAddMode = TapToAddMode.Complete,
     ) {
         interactor.state.test {
             val state = awaitItem()
@@ -383,7 +305,6 @@ internal class DefaultTapToAddConfirmationInteractorTest {
     @Test
     fun `form is disabled when confirmation state is Confirming`() = runScenario(
         paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
-        tapToAddMode = TapToAddMode.Complete,
     ) {
         interactor.state.test {
             assertThat(awaitItem().form.enabled).isTrue()
@@ -402,7 +323,6 @@ internal class DefaultTapToAddConfirmationInteractorTest {
     @Test
     fun `form is disabled when confirmation succeeds`() = runScenario(
         paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
-        tapToAddMode = TapToAddMode.Complete,
     ) {
         interactor.state.test {
             assertThat(awaitItem().form.enabled).isTrue()
@@ -413,14 +333,12 @@ internal class DefaultTapToAddConfirmationInteractorTest {
 
             assertThat(awaitItem().form.enabled).isFalse()
             assertThat(eventReporter.paymentSuccessCalls.awaitItem()).isNotNull()
-            assertThat(onCompleteCalls.awaitItem()).isEqualTo(Unit)
         }
     }
 
     @Test
     fun `form is enabled when confirmation fails so user can retry`() = runScenario(
         paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
-        tapToAddMode = TapToAddMode.Complete,
     ) {
         interactor.state.test {
             assertThat(awaitItem().form.enabled).isTrue()
@@ -440,33 +358,28 @@ internal class DefaultTapToAddConfirmationInteractorTest {
 
     private fun runScenario(
         paymentMethod: PaymentMethod,
-        tapToAddMode: TapToAddMode = TapToAddMode.Complete,
+        linkInput: UserInput? = null,
         paymentMethodMetadata: PaymentMethodMetadata =
             PaymentMethodMetadataFactory.create(isTapToAddSupported = true),
-        paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
         initialConfirmationState: ConfirmationHandler.State = ConfirmationHandler.State.Idle,
-        linkFormHelper: SavedPaymentMethodLinkFormHelper = FakeSavedPaymentMethodLinkFormHelper(),
+        initialCvcState: CvcFormHelper.State = CvcFormHelper.State.Complete("123"),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val eventReporter = FakeEventReporter()
+        val cvcFormHelper = FakeCvcFormHelper(initialState = initialCvcState)
         FakeConfirmationHandler.test(
             initialState = initialConfirmationState,
         ) {
             val onCompleteCalls = Turbine<Unit>()
-            val onContinueCalls = Turbine<PaymentSelection.Saved>()
 
             val interactor = DefaultTapToAddConfirmationInteractor(
                 coroutineScope = backgroundScope,
-                tapToAddMode = tapToAddMode,
                 paymentMethod = paymentMethod,
-                paymentMethodOptionsParams = paymentMethodOptionsParams,
+                linkInput = linkInput,
                 paymentMethodMetadata = paymentMethodMetadata,
                 confirmationHandler = handler,
+                cvcFormHelper = cvcFormHelper,
                 eventReporter = eventReporter,
-                linkFormHelper = linkFormHelper,
-                onContinue = {
-                    onContinueCalls.add(it)
-                },
                 onComplete = {
                     onCompleteCalls.add(Unit)
                 },
@@ -479,14 +392,12 @@ internal class DefaultTapToAddConfirmationInteractorTest {
                     paymentMethodMetadata = paymentMethodMetadata,
                     confirmationHandlerScenario = this,
                     onCompleteCalls = onCompleteCalls,
-                    onContinueCalls = onContinueCalls,
                     eventReporter = eventReporter,
                 )
             )
 
             eventReporter.validate()
             onCompleteCalls.ensureAllEventsConsumed()
-            onContinueCalls.ensureAllEventsConsumed()
         }
     }
 
@@ -496,15 +407,14 @@ internal class DefaultTapToAddConfirmationInteractorTest {
         val paymentMethodMetadata: PaymentMethodMetadata,
         val confirmationHandlerScenario: FakeConfirmationHandler.Scenario,
         val onCompleteCalls: ReceiveTurbine<Unit>,
-        val onContinueCalls: ReceiveTurbine<PaymentSelection.Saved>,
         val eventReporter: FakeEventReporter,
     )
 
-    private class FakeSavedPaymentMethodLinkFormHelper(
-        initialState: SavedPaymentMethodLinkFormHelper.State = SavedPaymentMethodLinkFormHelper.State.Unused,
-        override val formElement: LinkFormElement? = null,
-    ) : SavedPaymentMethodLinkFormHelper {
+    private class FakeCvcFormHelper(
+        initialState: CvcFormHelper.State,
+    ) : CvcFormHelper {
         private val _state = MutableStateFlow(initialState)
-        override val state: StateFlow<SavedPaymentMethodLinkFormHelper.State> = _state.asStateFlow()
+        override val state: StateFlow<CvcFormHelper.State> = _state.asStateFlow()
+        override val formElement: com.stripe.android.uicore.elements.FormElement? = null
     }
 }

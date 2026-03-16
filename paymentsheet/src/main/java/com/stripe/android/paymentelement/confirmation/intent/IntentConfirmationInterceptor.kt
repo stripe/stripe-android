@@ -94,7 +94,7 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
             }
             is IntegrationMetadata.CheckoutSession -> {
                 checkoutSessionConfirmationInterceptorFactory.create(
-                    checkoutSessionId = integrationMetadata.id,
+                    integrationMetadata = integrationMetadata,
                     customerMetadata = customerMetadata,
                     clientAttributionMetadata = clientAttributionMetadata,
                 )
