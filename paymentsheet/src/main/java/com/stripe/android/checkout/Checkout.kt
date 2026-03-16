@@ -137,6 +137,14 @@ class Checkout private constructor(
         component.checkoutSessionRepository.init(sessionId)
     }
 
+    internal fun ensureNoMutationInFlight() {
+        if (mutex.isLocked) {
+            throw IllegalStateException(
+                "Cannot launch while a checkout session mutation is in flight."
+            )
+        }
+    }
+
     internal fun updateWithResponse(response: CheckoutSessionResponse) {
         internalState = internalState.copy(checkoutSessionResponse = response)
         _checkoutSession.value = response.asCheckoutSession()
