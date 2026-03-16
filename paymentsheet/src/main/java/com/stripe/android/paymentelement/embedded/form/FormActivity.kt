@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -141,8 +142,11 @@ internal class FormActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
 
-        if (isFinishing && ::eventReporter.isInitialized) {
-            eventReporter.onDismiss()
+        if (isFinishing) {
+            CheckoutInstances.markIntegrationDismissed(args?.paymentMethodMetadata)
+            if (::eventReporter.isInitialized) {
+                eventReporter.onDismiss()
+            }
         }
     }
 

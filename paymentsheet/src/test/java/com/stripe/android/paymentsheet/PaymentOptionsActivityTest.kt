@@ -26,20 +26,27 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.checkout.Checkout
+import com.stripe.android.checkout.CheckoutInstances
+import com.stripe.android.checkout.CheckoutInstancesTestRule
+import com.stripe.android.checkout.InternalState
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.gate.FakeLinkGate
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_OPTIONS_CONTRACT_ARGS
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.StripeAndroidPrimaryButtonBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
@@ -56,6 +63,7 @@ import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import com.stripe.android.view.ActivityStarter
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
@@ -68,6 +76,7 @@ import org.mockito.kotlin.verify
 import org.robolectric.annotation.Config
 import kotlin.test.BeforeTest
 
+@OptIn(CheckoutSessionPreview::class)
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
 internal class PaymentOptionsActivityTest {
@@ -78,6 +87,7 @@ internal class PaymentOptionsActivityTest {
     val rule = RuleChain.emptyRuleChain()
         .around(InstantTaskExecutorRule())
         .around(composeTestRule)
+        .around(CheckoutInstancesTestRule())
         .around(RetryRule(3))
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
@@ -445,6 +455,46 @@ internal class PaymentOptionsActivityTest {
                 mandateNode.assertDoesNotExist()
             }
         }
+    }
+
+    @Test
+    fun `onDestroy clears checkout integration launched flag`() {
+        val instancesKey = "test-checkout-key"
+        val checkout = Checkout.createWithState(
+            context,
+            Checkout.State(
+                InternalState(
+                    key = instancesKey,
+                    checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+                ),
+            ),
+        )
+        CheckoutInstances.markIntegrationLaunched(instancesKey)
+
+        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.copy(
+            state = PAYMENT_OPTIONS_CONTRACT_ARGS.state.copy(
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                    integrationMetadata = IntegrationMetadata.CheckoutSession(
+                        id = "cs_test",
+                        instancesKey = instancesKey,
+                    ),
+                ),
+            ),
+        )
+
+        runActivityScenario(args) {
+            it.onActivity {
+                pressBack()
+            }
+            composeTestRule.waitForIdle()
+            idleLooper()
+        }
+
+        // After the activity finishes, the integration launched flag should be cleared.
+        // If it wasn't cleared, this would return a failure with "payment flow is presented" message.
+        val result = runBlocking { checkout.applyPromotionCode("code") }
+        assertThat(result.exceptionOrNull()?.message)
+            .isNotEqualTo("Cannot mutate checkout session while a payment flow is presented.")
     }
 
     private fun runActivityScenario(
