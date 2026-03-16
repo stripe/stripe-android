@@ -11,6 +11,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
@@ -91,6 +92,13 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                     PaymentSheetScreen(viewModel)
                 }
             }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (isFinishing && starterArgs != null) {
+            CheckoutInstances.markIntegrationDismissed(viewModel.paymentMethodMetadata.value)
         }
     }
 

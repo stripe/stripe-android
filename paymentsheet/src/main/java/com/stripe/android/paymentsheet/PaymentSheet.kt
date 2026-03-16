@@ -488,6 +488,7 @@ class PaymentSheet internal constructor(
         configuration: Configuration,
     ) {
         CheckoutInstances.ensureNoMutationInFlight(checkout.internalState.key)
+        CheckoutInstances.markIntegrationLaunched(checkout.internalState.key)
         paymentSheetLauncher.present(
             mode = checkout.internalState.initializationMode,
             configuration = configuration.forCheckoutSession(checkout.internalState),

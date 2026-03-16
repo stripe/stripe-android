@@ -18,6 +18,7 @@ import java.util.UUID
 
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Suppress("TooManyFunctions")
 class Checkout private constructor(
     internalState: InternalState,
     private val component: CheckoutComponent,
@@ -73,6 +74,9 @@ class Checkout private constructor(
         }
 
     private val mutex = Mutex()
+
+    @Volatile
+    private var integrationLaunched = false
     private val _checkoutSession = MutableStateFlow(internalState.checkoutSessionResponse.asCheckoutSession())
     val checkoutSession: StateFlow<CheckoutSession> = _checkoutSession.asStateFlow()
 
@@ -144,6 +148,14 @@ class Checkout private constructor(
         component.checkoutSessionRepository.init(sessionId)
     }
 
+    internal fun markIntegrationLaunched() {
+        integrationLaunched = true
+    }
+
+    internal fun markIntegrationDismissed() {
+        integrationLaunched = false
+    }
+
     internal fun ensureNoMutationInFlight() {
         if (mutex.isLocked) {
             throw IllegalStateException(
@@ -161,6 +173,13 @@ class Checkout private constructor(
         additionalStateMutations: InternalState.() -> InternalState = { this },
         block: suspend (sessionId: String) -> Result<CheckoutSessionResponse>,
     ): Result<CheckoutSession> {
+        if (integrationLaunched) {
+            return Result.failure(
+                IllegalStateException(
+                    "Cannot mutate checkout session while a payment flow is presented."
+                )
+            )
+        }
         // Run network requests with a mutex to ensure events are processed in order.
         return mutex.withLock {
             block(internalState.checkoutSessionResponse.id).map { response ->

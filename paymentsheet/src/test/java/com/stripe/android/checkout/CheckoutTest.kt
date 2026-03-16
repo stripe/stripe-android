@@ -1015,6 +1015,39 @@ class CheckoutTest {
     }
 
     @Test
+    fun `mutation returns failure when integrationLaunched is true`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            checkout.markIntegrationLaunched()
+
+            val result = checkout.applyPromotionCode("10OFF")
+            assertThat(result.isFailure).isTrue()
+            assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
+            assertThat(result.exceptionOrNull()).hasMessageThat()
+                .isEqualTo("Cannot mutate checkout session while a payment flow is presented.")
+        }
+    }
+
+    @Test
+    fun `mutation succeeds after markIntegrationDismissed`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            checkout.markIntegrationLaunched()
+            checkout.markIntegrationDismissed()
+
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_abc123"),
+                bodyPart("promotion_code", "10OFF"),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-apply-discount.json")
+            }
+
+            val result = checkout.applyPromotionCode("10OFF")
+            assertThat(result.isSuccess).isTrue()
+        }
+    }
+
+    @Test
     fun `configure returns failure when network request fails`() = runConfigureScenario(
         clientSecret = "cs_test_abc123_secret_xyz",
         networkSetup = {

@@ -297,6 +297,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 .integrationMetadata as? IntegrationMetadata.CheckoutSession
             if (checkoutSession != null) {
                 CheckoutInstances.ensureNoMutationInFlight(checkoutSession.instancesKey)
+                CheckoutInstances.markIntegrationLaunched(checkoutSession.instancesKey)
             }
 
             val linkConfiguration = state.paymentSheetState.linkConfiguration
