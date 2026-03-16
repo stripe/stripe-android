@@ -557,39 +557,35 @@ internal class CardNumberControllerTest {
                 .isEqualTo(cartesBancaireSelection)
 
             cardNumberController.onSelectorItemClicked(
-                TextFieldIcon.Selector.Item(
-                    id = CardBrand.CartesBancaires.code,
-                    label = "Cartes Bancaires".resolvableString,
-                    icon = PaymentModelR.drawable.stripe_ic_cartes_bancaires
-                )
+                null
             )
 
             val item = awaitItem()
-            assertThat(item as TextFieldIcon.Selector)
-                .isEqualTo(
-                    TextFieldIcon.Selector(
-                        message = R.string.stripe_card_brand_choice_choose_card_brand.resolvableString,
-                        currentItem = TextFieldIcon.Selector.Item(
-                            id = CardBrand.Unknown.code,
-                            label = R.string.stripe_card_brand_choice_no_selection.resolvableString,
-                            icon = CardBrand.Unknown.icon
-                        ),
-                        items = listOf(
-                            TextFieldIcon.Selector.Item(
-                                id = CardBrand.CartesBancaires.code,
-                                label = "Cartes Bancaires".resolvableString,
-                                icon = CardBrand.CartesBancaires.icon
-                            ),
-                            TextFieldIcon.Selector.Item(
-                                id = CardBrand.Visa.code,
-                                label = "Visa".resolvableString,
-                                icon = CardBrand.Visa.icon
-                            ),
-                        ),
-                        showSelector = true,
-                        hasMadeSelection = false
-                    )
-                )
+            assertThat(item as TextFieldIcon.Selector).isEqualTo(unknownSelection)
+
+            assertThat(cardNumberController.selectedCardBrandFlow.value).isEqualTo(CardBrand.Unknown)
+        }
+    }
+
+    @Test
+    fun `on deselect with preferred brand, card brand should be unknown`() = runTest {
+        FeatureFlags.newCbcSelector.setEnabled(true)
+        val cardNumberController = createController(
+            cardBrandChoiceConfig = CardBrandChoiceConfig.Eligible(
+                preferredBrands = listOf(CardBrand.CartesBancaires),
+                initialBrand = null
+            )
+        )
+
+        cardNumberController.trailingIcon.test {
+            cardNumberController.onValueChange("4000002500001001")
+            skipItems(3)
+            assertThat(awaitItem() as TextFieldIcon.Selector).isEqualTo(cartesBancaireSelection)
+            cardNumberController.onSelectorItemClicked(null)
+            idleLooper()
+            assertThat(awaitItem() as TextFieldIcon.Selector).isEqualTo(unknownSelection)
+
+            assertThat(cardNumberController.selectedCardBrandFlow.value).isEqualTo(CardBrand.Unknown)
         }
     }
 
@@ -1124,6 +1120,29 @@ internal class CardNumberControllerTest {
             ),
             showSelector = true,
             hasMadeSelection = true
+        )
+
+        val unknownSelection = TextFieldIcon.Selector(
+            message = R.string.stripe_card_brand_choice_choose_card_brand.resolvableString,
+            currentItem = TextFieldIcon.Selector.Item(
+                id = CardBrand.Unknown.code,
+                label = R.string.stripe_card_brand_choice_no_selection.resolvableString,
+                icon = CardBrand.Unknown.icon
+            ),
+            items = listOf(
+                TextFieldIcon.Selector.Item(
+                    id = CardBrand.CartesBancaires.code,
+                    label = "Cartes Bancaires".resolvableString,
+                    icon = CardBrand.CartesBancaires.icon
+                ),
+                TextFieldIcon.Selector.Item(
+                    id = CardBrand.Visa.code,
+                    label = "Visa".resolvableString,
+                    icon = CardBrand.Visa.icon
+                ),
+            ),
+            showSelector = true,
+            hasMadeSelection = false
         )
     }
 }
