@@ -14,7 +14,7 @@ import com.stripe.android.model.CardBrand
 internal fun ColumnScope.TapToAddCardLayout(
     cardBrand: CardBrand,
     last4: String?,
-    title: String,
+    title: String?,
     content: @Composable () -> Unit,
 ) {
     Spacer(Modifier.size(LocalTapToAddMaxContentHeight.current * SCREEN_POSITION_MULTIPLIER))
@@ -26,13 +26,15 @@ internal fun ColumnScope.TapToAddCardLayout(
 
     Spacer(Modifier.size(35.dp))
 
-    Text(
-        text = title,
-        color = MaterialTheme.colors.onSurface,
-        style = MaterialTheme.typography.h4,
-    )
+    title?.let {
+        Text(
+            text = title,
+            color = MaterialTheme.colors.onSurface,
+            style = MaterialTheme.typography.h4,
+        )
 
-    Spacer(Modifier.size(35.dp))
+        Spacer(Modifier.size(35.dp))
+    }
 
     Spacer(Modifier.weight(1f))
 
