@@ -6,7 +6,7 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.urlEncode
-import com.stripe.android.link.account.LinkStore
+import com.stripe.android.link.account.DefaultLinkStore
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -913,7 +913,7 @@ internal class LinkTest {
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
-        LinkStore(ApplicationProvider.getApplicationContext()).markLinkAsUsed()
+        DefaultLinkStore(ApplicationProvider.getApplicationContext()).markLinkAsUsed()
 
         testContext.launch()
 

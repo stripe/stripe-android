@@ -1,10 +1,8 @@
 package com.stripe.android.paymentsheet.state
 
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.common.model.asCommonConfiguration
-import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
@@ -19,6 +17,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeElementsSessionRepository
+import com.stripe.android.utils.FakeLinkStore
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -83,7 +82,7 @@ internal class DefaultCreateLinkStateTest {
         return DefaultCreateLinkState(
             accountStatusProvider = { AccountStatus.SignedOut },
             retrieveCustomerEmail = DefaultRetrieveCustomerEmail(FakeCustomerRepository()),
-            linkStore = LinkStore(ApplicationProvider.getApplicationContext()),
+            linkStore = FakeLinkStore(),
             linkGateFactory = FakeLinkGate.Factory(FakeLinkGate()),
             cardFundingFilterFactory = cardFundingFilterFactory
         )
