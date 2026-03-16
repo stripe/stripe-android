@@ -54,9 +54,6 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.LinkButtonTestTag
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
-import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.RequestMatchers
-import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentIntent
@@ -65,6 +62,9 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatchers
+import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler

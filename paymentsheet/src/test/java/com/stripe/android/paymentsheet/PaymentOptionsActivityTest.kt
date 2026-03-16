@@ -37,12 +37,12 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.RequestMatchers
-import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatchers
+import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_OPTIONS_CONTRACT_ARGS
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
