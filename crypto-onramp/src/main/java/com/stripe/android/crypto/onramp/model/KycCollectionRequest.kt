@@ -13,9 +13,9 @@ import kotlinx.serialization.Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal data class KycCollectionRequest(
     @SerialName("first_name")
-    val firstName: String,
+    val firstName: String?,
     @SerialName("last_name")
-    val lastName: String,
+    val lastName: String?,
     @SerialName("id_number")
     val idNumber: String?,
     @SerialName("id_type")
@@ -47,10 +47,10 @@ internal data class KycCollectionRequest(
             credentials: CryptoCustomerRequestParams.Credentials
         ): KycCollectionRequest {
             return KycCollectionRequest(
-                firstName = kycInfo.firstName,
-                lastName = kycInfo.lastName,
-                idNumber = kycInfo.idNumber,
-                idType = SOCIAL_SECURITY_NUMBER.takeIf { kycInfo.idNumber != null },
+                firstName = kycInfo.firstName.takeIf { !it.isEmpty() },
+                lastName = kycInfo.lastName.takeIf { !it.isEmpty() },
+                idNumber = kycInfo.idNumber.takeIf { !it.isNullOrEmpty() },
+                idType = SOCIAL_SECURITY_NUMBER.takeIf { !kycInfo.idNumber.isNullOrEmpty() },
                 dateOfBirth = kycInfo.dateOfBirth,
                 city = kycInfo.address.city,
                 country = kycInfo.address.country,
