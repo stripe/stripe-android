@@ -47,17 +47,17 @@ internal data class KycCollectionRequest(
             credentials: CryptoCustomerRequestParams.Credentials
         ): KycCollectionRequest {
             return KycCollectionRequest(
-                firstName = kycInfo.firstName.takeIf { !it.isEmpty() },
-                lastName = kycInfo.lastName.takeIf { !it.isEmpty() },
+                firstName = kycInfo.firstName.takeIf { !it.isNullOrEmpty() },
+                lastName = kycInfo.lastName.takeIf { !it.isNullOrEmpty() },
                 idNumber = kycInfo.idNumber.takeIf { !it.isNullOrEmpty() },
                 idType = SOCIAL_SECURITY_NUMBER.takeIf { !kycInfo.idNumber.isNullOrEmpty() },
                 dateOfBirth = kycInfo.dateOfBirth,
-                city = kycInfo.address.city,
-                country = kycInfo.address.country,
-                line1 = kycInfo.address.line1,
-                line2 = kycInfo.address.line2,
-                postalCode = kycInfo.address.postalCode,
-                state = kycInfo.address.state,
+                city = kycInfo.address?.city,
+                country = kycInfo.address?.country,
+                line1 = kycInfo.address?.line1,
+                line2 = kycInfo.address?.line2,
+                postalCode = kycInfo.address?.postalCode,
+                state = kycInfo.address?.state,
                 credentials = credentials
             )
         }
