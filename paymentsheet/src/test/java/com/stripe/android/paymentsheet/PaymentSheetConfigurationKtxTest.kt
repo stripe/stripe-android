@@ -7,7 +7,7 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.utils.PaymentElementCallbackTestRule
@@ -353,10 +353,9 @@ class PaymentSheetConfigurationKtxTest {
     fun `'validate' should fail when using CheckoutSession mode with non-null customer`() {
         val configWithCustomer = configuration.asCommonConfiguration()
         val checkoutSessionMode = PaymentElementLoader.InitializationMode.CheckoutSession(
-            checkoutSessionResponse = CheckoutSessionResponse(
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 id = "cs_test_123",
                 amount = 5099,
-                currency = "usd",
             ),
         )
 
@@ -380,10 +379,9 @@ class PaymentSheetConfigurationKtxTest {
             .build()
             .asCommonConfiguration()
         val checkoutSessionMode = PaymentElementLoader.InitializationMode.CheckoutSession(
-            checkoutSessionResponse = CheckoutSessionResponse(
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 id = "cs_test_123",
                 amount = 5099,
-                currency = "usd",
             ),
         )
 

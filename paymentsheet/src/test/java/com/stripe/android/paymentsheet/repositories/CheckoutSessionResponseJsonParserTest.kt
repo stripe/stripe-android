@@ -24,6 +24,7 @@ class CheckoutSessionResponseJsonParserTest {
         assertThat(result?.id).isEqualTo("cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh")
         assertThat(result?.amount).isEqualTo(999L)
         assertThat(result?.currency).isEqualTo("usd")
+        assertThat(result?.mode).isEqualTo(CheckoutSessionResponse.Mode.PAYMENT)
 
         // Verify ElementsSession is parsed correctly
         val elementsSession = result?.elementsSession
@@ -638,5 +639,54 @@ class CheckoutSessionResponseJsonParserTest {
 
         assertThat(result).isNotNull()
         assertThat(result!!.shippingOptions).isEmpty()
+    }
+
+    @Test
+    fun `parse setup mode init response`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_SETUP_MODE_RESPONSE_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.id).isEqualTo("cs_test_setup_abc123")
+        assertThat(result?.mode).isEqualTo(CheckoutSessionResponse.Mode.SETUP)
+        assertThat(result?.amount).isEqualTo(0L)
+        assertThat(result?.currency).isEqualTo("usd")
+        assertThat(result?.paymentIntent).isNull()
+        assertThat(result?.setupIntent).isNull()
+        assertThat(result?.elementsSession).isNotNull()
+    }
+
+    @Test
+    fun `parse setup mode confirm response with succeeded setup intent`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_SETUP_CONFIRM_SUCCEEDED_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.id).isEqualTo("cs_test_setup_abc123")
+        assertThat(result?.mode).isEqualTo(CheckoutSessionResponse.Mode.SETUP)
+        assertThat(result?.amount).isEqualTo(0L)
+
+        assertThat(result?.paymentIntent).isNull()
+        val setupIntent = result?.setupIntent
+        assertThat(setupIntent).isNotNull()
+        assertThat(setupIntent?.id).isEqualTo("seti_1QWK2VIyGgrkZxL71xfPBWG5")
+        assertThat(setupIntent?.status).isEqualTo(StripeIntent.Status.Succeeded)
+        assertThat(setupIntent?.isConfirmed).isTrue()
+    }
+
+    @Test
+    fun `parse setup mode confirm response with requires_action setup intent`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_SETUP_CONFIRM_REQUIRES_ACTION_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.mode).isEqualTo(CheckoutSessionResponse.Mode.SETUP)
+
+        val setupIntent = result?.setupIntent
+        assertThat(setupIntent).isNotNull()
+        assertThat(setupIntent?.id).isEqualTo("seti_1QWK2VIyGgrkZxL71xfPBWG5")
+        assertThat(setupIntent?.status).isEqualTo(StripeIntent.Status.RequiresAction)
+        assertThat(setupIntent?.requiresAction()).isTrue()
+        assertThat(setupIntent?.nextActionType).isEqualTo(StripeIntent.NextActionType.RedirectToUrl)
     }
 }
