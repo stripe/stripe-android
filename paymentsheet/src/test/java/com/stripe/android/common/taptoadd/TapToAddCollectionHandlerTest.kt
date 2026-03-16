@@ -6,24 +6,23 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.taptoadd.ui.createTapToAddUxConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
-import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
 import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.confirmation.intent.CallbackNotFoundException
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CreateIntentResult
-import com.stripe.android.R as StripeR
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeErrorReporter
@@ -33,8 +32,8 @@ import com.stripe.stripeterminal.external.callable.Cancelable
 import com.stripe.stripeterminal.external.callable.SetupIntentCallback
 import com.stripe.stripeterminal.external.models.AllowRedisplay
 import com.stripe.stripeterminal.external.models.CardDetails
+import com.stripe.stripeterminal.external.models.CollectSetupIntentConfiguration
 import com.stripe.stripeterminal.external.models.SetupIntent
-import com.stripe.stripeterminal.external.models.SetupIntentConfiguration
 import com.stripe.stripeterminal.external.models.TapToPayUxConfiguration
 import com.stripe.stripeterminal.external.models.TerminalErrorCode
 import com.stripe.stripeterminal.external.models.TerminalException
@@ -54,6 +53,7 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.test.fail
+import com.stripe.android.R as StripeR
 import com.stripe.stripeterminal.external.models.PaymentMethod as TerminalPaymentMethod
 
 @OptIn(TapToAddPreview::class)
@@ -714,10 +714,9 @@ class TapToAddCollectionHandlerTest {
         val collectPaymentMethodCall = terminalScenario.collectPaymentMethodCalls.awaitItem()
         assertThat(collectPaymentMethodCall.intent).isEqualTo(retrievedSetupIntent)
         assertThat(collectPaymentMethodCall.allowRedisplay).isEqualTo(AllowRedisplay.ALWAYS)
-        assertThat(collectPaymentMethodCall.config)
-            .isEqualTo(
-                SetupIntentConfiguration.Builder()
-                    .build()
+        assertThat(collectPaymentMethodCall.config).isEqualTo(
+            CollectSetupIntentConfiguration.Builder()
+                .build()
             )
         collectPaymentMethodCall.callback.onSuccess(collectedIntent)
         return collectedIntent
@@ -799,7 +798,7 @@ class TapToAddCollectionHandlerTest {
             collectSetupIntentPaymentMethod(
                 intent = any<SetupIntent>(),
                 allowRedisplay = any<AllowRedisplay>(),
-                config = any<SetupIntentConfiguration>(),
+                config = any<CollectSetupIntentConfiguration>(),
                 callback = any<SetupIntentCallback>()
             )
         } doAnswer { invocation ->
@@ -809,7 +808,7 @@ class TapToAddCollectionHandlerTest {
             val allowRedisplay = invocation.arguments[1] as? AllowRedisplay
                 ?: fail("Invalid argument: Not an allow redisplay value!")
 
-            val config = invocation.arguments[2] as? SetupIntentConfiguration
+            val config = invocation.arguments[2] as? CollectSetupIntentConfiguration
                 ?: fail("Invalid argument: Not a setup intent config!")
 
             val callback = invocation.arguments[3] as? SetupIntentCallback
@@ -885,7 +884,7 @@ class TapToAddCollectionHandlerTest {
         class CollectPaymentMethodCall(
             val intent: SetupIntent,
             val allowRedisplay: AllowRedisplay,
-            val config: SetupIntentConfiguration,
+            val config: CollectSetupIntentConfiguration,
             val callback: SetupIntentCallback,
             val cancelable: Cancelable,
         )

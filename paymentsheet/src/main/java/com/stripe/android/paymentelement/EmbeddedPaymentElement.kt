@@ -102,7 +102,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
     ): ConfigureResult {
         return configurationCoordinator.configure(
             configuration = configuration,
-            initializationMode = checkout.internalState.initializationMode
+            initializationMode = checkout.internalState.initializationMode,
         )
     }
 

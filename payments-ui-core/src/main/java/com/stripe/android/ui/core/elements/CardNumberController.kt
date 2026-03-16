@@ -291,13 +291,8 @@ internal class DefaultCardNumberController(
         mostRecentUserSelectedBrand.value = CardBrand.fromCode(item.id)
     }
 
-    override fun onSelectorItemClicked(item: TextFieldIcon.Selector.Item) {
-        val newChoice = CardBrand.fromCode(item.id)
-        if (newChoice == mostRecentUserSelectedBrand.value) {
-            mostRecentUserSelectedBrand.value = null
-        } else {
-            mostRecentUserSelectedBrand.value = newChoice
-        }
+    override fun onSelectorItemClicked(item: TextFieldIcon.Selector.Item?) {
+        mostRecentUserSelectedBrand.value = CardBrand.fromCode(item?.id)
     }
 
     override fun onValidationStateChanged(isValidating: Boolean) {
@@ -502,7 +497,7 @@ internal class DefaultCardNumberController(
         val noSelection = TextFieldIcon.Selector.Item(
             id = CardBrand.Unknown.code,
             label = PaymentsCoreR.string.stripe_card_brand_choice_no_selection.resolvableString,
-            icon = CardBrand.Unknown.icon
+            icon = CardBrand.Unknown.getCardBrandIconUnpadded()
         )
 
         val selected = if (brands.size == 1) {
@@ -518,7 +513,7 @@ internal class DefaultCardNumberController(
                 else -> TextFieldIcon.Selector.Item(
                     id = chosen.code,
                     label = chosen.displayName.resolvableString,
-                    icon = chosen.icon
+                    icon = chosen.getCardBrandIconUnpadded()
                 )
             }
         }
@@ -535,7 +530,7 @@ internal class DefaultCardNumberController(
                         brand.displayName
                     )
                 },
-                icon = brand.icon,
+                icon = brand.getCardBrandIconUnpadded(),
                 enabled = enabled
             )
         }
@@ -546,7 +541,7 @@ internal class DefaultCardNumberController(
             message = title,
             currentItem = selected ?: noSelection,
             items = items,
-            hide = brands.size < 2,
+            showSelector = items.count { it.enabled } > 1,
             hasMadeSelection = selected != null
         )
     }
@@ -559,7 +554,10 @@ internal class DefaultCardNumberController(
         }.take(STATIC_ICON_COUNT)
 
         val animatedIcons = buildList {
-            if (isEligibleForCardBrandChoice && FeatureFlags.newCbcSelector.isEnabled) {
+            if (isEligibleForCardBrandChoice && FeatureFlags.newCbcSelector.isEnabled && cardBrandFilter.isAccepted(
+                    CardBrand.CartesBancaires
+                )
+            ) {
                 add(TextFieldIcon.Trailing(CardBrand.CartesBancaires.icon, isTintable = false))
             }
             addAll(cardBrands.drop(STATIC_ICON_COUNT).map { TextFieldIcon.Trailing(it.icon, isTintable = false) })

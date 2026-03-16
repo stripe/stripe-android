@@ -5,6 +5,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -255,8 +256,6 @@ class DefaultTapToAddConnectionManagerTest {
 
     @Test
     fun `connect initiates reader connection after discovering reader`() {
-        TerminalLocationHolder.locationId = "tml_123"
-
         test(
             terminalInstance = mock {
                 mockSupportedReaderResult(ReaderSupportResult.Supported)
@@ -285,8 +284,7 @@ class DefaultTapToAddConnectionManagerTest {
             verify(terminalInstance).connectReader(
                 eq(reader),
                 argWhere { config ->
-                    config.locationId == "tml_123" &&
-                        config is ConnectionConfiguration.TapToPayConnectionConfiguration &&
+                    config is ConnectionConfiguration.TapToPayConnectionConfiguration &&
                         config.autoReconnectOnUnexpectedDisconnect &&
                         config.tapToPayReaderListener == manager
                 },
@@ -397,8 +395,6 @@ class DefaultTapToAddConnectionManagerTest {
 
     @Test
     fun `connect reports success event on successful reader connection`() {
-        TerminalLocationHolder.locationId = "tml_123"
-
         test(
             terminalInstance = mock {
                 mockSupportedReaderResult(ReaderSupportResult.Supported)
@@ -426,8 +422,6 @@ class DefaultTapToAddConnectionManagerTest {
 
     @Test
     fun `connect reports failure event on failed reader connection`() {
-        TerminalLocationHolder.locationId = "tml_123"
-
         test(
             terminalInstance = mock {
                 mockSupportedReaderResult(ReaderSupportResult.Supported)
@@ -489,7 +483,6 @@ class DefaultTapToAddConnectionManagerTest {
 
     @Test
     fun `connect completes successfully on connect if already connected to reader`() {
-        TerminalLocationHolder.locationId = "tml_123"
         val connectedReader = Reader()
         val exception = TerminalException(
             errorCode = TerminalErrorCode.ALREADY_CONNECTED_TO_READER,
@@ -546,8 +539,6 @@ class DefaultTapToAddConnectionManagerTest {
 
     @Test
     fun `await returns success with true when connection completes successfully`() {
-        TerminalLocationHolder.locationId = "tml_123"
-
         test(
             terminalInstance = mock {
                 mockSupportedReaderResult(ReaderSupportResult.Supported)
@@ -581,8 +572,6 @@ class DefaultTapToAddConnectionManagerTest {
 
     @Test
     fun `await returns failure when connection fails`() {
-        TerminalLocationHolder.locationId = "tml_123"
-
         test(
             terminalInstance = mock {
                 mockSupportedReaderResult(ReaderSupportResult.Supported)
@@ -718,6 +707,7 @@ class DefaultTapToAddConnectionManagerTest {
                         errorReporter = errorReporter,
                         logger = logger,
                         isSimulated = isSimulated,
+                        paymentConfiguration = { PaymentConfiguration(publishableKey = "pk_test") }
                     ),
                     terminalInstance = terminalInstance,
                     errorReporter = errorReporter,
@@ -734,7 +724,6 @@ class DefaultTapToAddConnectionManagerTest {
 
         errorReporter.ensureAllEventsConsumed()
 
-        TerminalLocationHolder.locationId = null
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     }
 

@@ -5,6 +5,7 @@ package com.stripe.android.paymentsheet.example.playground.checkout
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -28,7 +29,6 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
-import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -78,9 +78,15 @@ class CheckoutPlaygroundActivity : AppCompatActivity() {
         enableEdgeToEdge()
 
         setContent {
-            val addressLauncher = rememberAddressLauncher { result ->
+            val shippingAddressLauncher = rememberAddressLauncher { result ->
                 if (result is AddressLauncherResult.Succeeded) {
                     viewModel.updateShippingAddress(result.address)
+                }
+            }
+
+            val billingAddressLauncher = rememberAddressLauncher { result ->
+                if (result is AddressLauncherResult.Succeeded) {
+                    viewModel.updateBillingAddress(result.address)
                 }
             }
 
@@ -101,7 +107,17 @@ class CheckoutPlaygroundActivity : AppCompatActivity() {
                     val configuration = AddressLauncher.Configuration(
                         address = viewModel.lastAddressDetails.value,
                     )
-                    addressLauncher.present(publishableKey, configuration)
+                    shippingAddressLauncher.present(publishableKey, configuration)
+                },
+                lastBillingAddressDetails = viewModel.lastBillingAddressDetails,
+                updateTaxId = viewModel::updateTaxId,
+                clearBillingAddress = viewModel::clearBillingAddress,
+                updateBillingAddress = {
+                    val publishableKey = PaymentConfiguration.getInstance(applicationContext).publishableKey
+                    val configuration = AddressLauncher.Configuration(
+                        address = viewModel.lastBillingAddressDetails.value,
+                    )
+                    billingAddressLauncher.present(publishableKey, configuration)
                 },
                 refresh = viewModel::refresh,
             )
@@ -123,6 +139,10 @@ private fun CheckoutScreen(
     clearShippingAddress: () -> Unit,
     updatePostalCode: (String) -> Unit,
     updateShippingAddress: () -> Unit,
+    updateTaxId: (String, String) -> Unit,
+    lastBillingAddressDetails: StateFlow<AddressDetails?>,
+    clearBillingAddress: () -> Unit,
+    updateBillingAddress: () -> Unit,
     refresh: () -> Unit,
 ) {
     val checkoutSession by checkout.checkoutSession.collectAsState()
@@ -150,6 +170,12 @@ private fun CheckoutScreen(
                     updatePostalCode = updatePostalCode,
                     updateShippingAddress = updateShippingAddress,
                 )
+                BillingAddressSection(
+                    lastBillingAddressDetails = lastBillingAddressDetails,
+                    clearBillingAddress = clearBillingAddress,
+                    updateBillingAddress = updateBillingAddress,
+                )
+                TaxIdSection(updateTaxId = updateTaxId)
                 ShippingOptionsSection(checkoutSession, selectShippingRate)
                 PromotionCodeInput(promotionCode, { promotionCode = it }, applyPromotionCode)
                 Button(
@@ -325,6 +351,51 @@ private fun ShippingAddressSection(
 }
 
 @Composable
+private fun BillingAddressSection(
+    lastBillingAddressDetails: StateFlow<AddressDetails?>,
+    clearBillingAddress: () -> Unit,
+    updateBillingAddress: () -> Unit,
+) {
+    val addressDetails by lastBillingAddressDetails.collectAsState()
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "Billing Address",
+            style = MaterialTheme.typography.h6,
+        )
+
+        Spacer(modifier = Modifier.height(PADDING))
+
+        AddressSummary(addressDetails?.address)
+
+        if (addressDetails?.name != null) {
+            Text(
+                text = "Name: ${addressDetails?.name}",
+                style = MaterialTheme.typography.body2,
+            )
+        }
+
+        Spacer(modifier = Modifier.height(PADDING))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(PADDING),
+        ) {
+            Button(onClick = updateBillingAddress) {
+                Text(if (addressDetails != null) "Edit Billing Address" else "Add Billing Address")
+            }
+            if (addressDetails != null) {
+                Button(onClick = clearBillingAddress) {
+                    Text("Clear")
+                }
+            }
+        }
+
+        Divider(modifier = Modifier.padding(vertical = PADDING))
+    }
+}
+
+@Composable
 private fun AddressSummary(address: PaymentSheet.Address?) {
     if (address != null) {
         address.line1?.takeIf { it.isNotEmpty() }?.let { Text(text = it, style = MaterialTheme.typography.body2) }
@@ -395,6 +466,49 @@ private fun PostalCodeInput(
         ) {
             Text("Apply")
         }
+    }
+}
+
+@Composable
+private fun TaxIdSection(updateTaxId: (String, String) -> Unit) {
+    var type by rememberSaveable { mutableStateOf("") }
+    var value by rememberSaveable { mutableStateOf("") }
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "Tax ID",
+            style = MaterialTheme.typography.h6,
+        )
+
+        Spacer(modifier = Modifier.height(PADDING))
+
+        OutlinedTextField(
+            value = type,
+            onValueChange = { type = it },
+            label = { Text("Type") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+        )
+
+        Spacer(modifier = Modifier.height(PADDING))
+
+        OutlinedTextField(
+            value = value,
+            onValueChange = { value = it },
+            label = { Text("Value") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+        )
+
+        Spacer(modifier = Modifier.height(PADDING))
+
+        Button(
+            onClick = { updateTaxId(type, value) },
+        ) {
+            Text("Apply")
+        }
+
+        Divider(modifier = Modifier.padding(vertical = PADDING))
     }
 }
 

@@ -1,7 +1,6 @@
 package com.stripe.android.common.taptoadd
 
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.R as StripeR
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.ResolvableString
@@ -19,8 +18,8 @@ import com.stripe.stripeterminal.external.callable.Callback
 import com.stripe.stripeterminal.external.callable.Cancelable
 import com.stripe.stripeterminal.external.callable.SetupIntentCallback
 import com.stripe.stripeterminal.external.models.AllowRedisplay
+import com.stripe.stripeterminal.external.models.CollectSetupIntentConfiguration
 import com.stripe.stripeterminal.external.models.SetupIntent
-import com.stripe.stripeterminal.external.models.SetupIntentConfiguration
 import com.stripe.stripeterminal.external.models.TapToPayUxConfiguration
 import com.stripe.stripeterminal.external.models.TerminalErrorCode
 import com.stripe.stripeterminal.external.models.TerminalException
@@ -28,6 +27,7 @@ import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.suspendCoroutine
+import com.stripe.android.R as StripeR
 
 internal interface TapToAddCollectionHandler {
     suspend fun collect(metadata: PaymentMethodMetadata): CollectionState
@@ -171,7 +171,7 @@ internal class DefaultTapToAddCollectionHandler(
         val cancellable = terminal().collectSetupIntentPaymentMethod(
             intent = intent,
             allowRedisplay = AllowRedisplay.ALWAYS,
-            config = SetupIntentConfiguration.Builder().build(),
+            config = CollectSetupIntentConfiguration.Builder().build(),
             callback = continuation.createSetupIntentCallback(),
         )
 

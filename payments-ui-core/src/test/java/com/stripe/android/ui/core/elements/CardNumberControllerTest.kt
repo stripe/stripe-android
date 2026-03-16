@@ -174,6 +174,38 @@ internal class CardNumberControllerTest {
     }
 
     @Test
+    fun `trailingIcon should not prepend cartes bancaires when cb not accepted`() = runTest {
+        FeatureFlags.newCbcSelector.setEnabled(true)
+        val cardNumberController = createController(
+            cardBrandChoiceConfig = CardBrandChoiceConfig.Eligible(
+                preferredBrands = listOf(),
+                initialBrand = null
+            ),
+            cardBrandFilter = FakeCardBrandFilter(disallowedBrands = setOf(CardBrand.CartesBancaires))
+        )
+        cardNumberController.trailingIcon.test {
+            cardNumberController.onValueChange("")
+            idleLooper()
+            assertThat(awaitItem() as TextFieldIcon.MultiTrailing)
+                .isEqualTo(
+                    TextFieldIcon.MultiTrailing(
+                        staticIcons = listOf(
+                            TextFieldIcon.Trailing(CardBrand.Visa.icon, isTintable = false),
+                            TextFieldIcon.Trailing(CardBrand.MasterCard.icon, isTintable = false),
+                            TextFieldIcon.Trailing(CardBrand.AmericanExpress.icon, isTintable = false)
+                        ),
+                        animatedIcons = listOf(
+                            TextFieldIcon.Trailing(CardBrand.Discover.icon, isTintable = false),
+                            TextFieldIcon.Trailing(CardBrand.JCB.icon, isTintable = false),
+                            TextFieldIcon.Trailing(CardBrand.DinersClub.icon, isTintable = false),
+                            TextFieldIcon.Trailing(CardBrand.UnionPay.icon, isTintable = false)
+                        )
+                    )
+                )
+        }
+    }
+
+    @Test
     fun `trailingIcon should have trailing icon when field matches bin`() = runTest {
         val cardNumberController = createController()
 
@@ -273,21 +305,21 @@ internal class CardNumberControllerTest {
                         currentItem = TextFieldIcon.Selector.Item(
                             id = CardBrand.Unknown.code,
                             label = R.string.stripe_card_brand_choice_no_selection.resolvableString,
-                            icon = CardBrand.Unknown.icon
+                            icon = CardBrand.Unknown.getCardBrandIconUnpadded()
                         ),
                         items = listOf(
                             TextFieldIcon.Selector.Item(
                                 id = CardBrand.CartesBancaires.code,
                                 label = "Cartes Bancaires".resolvableString,
-                                icon = CardBrand.CartesBancaires.icon
+                                icon = CardBrand.CartesBancaires.getCardBrandIconUnpadded()
                             ),
                             TextFieldIcon.Selector.Item(
                                 id = CardBrand.Visa.code,
                                 label = "Visa".resolvableString,
-                                icon = CardBrand.Visa.icon
+                                icon = CardBrand.Visa.getCardBrandIconUnpadded()
                             ),
                         ),
-                        hide = false,
+                        showSelector = true,
                         hasMadeSelection = false
                     )
                 )
@@ -382,21 +414,21 @@ internal class CardNumberControllerTest {
                         currentItem = TextFieldIcon.Selector.Item(
                             id = CardBrand.CartesBancaires.code,
                             label = "Cartes Bancaires".resolvableString,
-                            icon = CardBrand.CartesBancaires.icon
+                            icon = CardBrand.CartesBancaires.getCardBrandIconUnpadded()
                         ),
                         items = listOf(
                             TextFieldIcon.Selector.Item(
                                 id = CardBrand.CartesBancaires.code,
                                 label = "Cartes Bancaires".resolvableString,
-                                icon = CardBrand.CartesBancaires.icon
+                                icon = CardBrand.CartesBancaires.getCardBrandIconUnpadded()
                             ),
                             TextFieldIcon.Selector.Item(
                                 id = CardBrand.Visa.code,
                                 label = "Visa".resolvableString,
-                                icon = CardBrand.Visa.icon
+                                icon = CardBrand.Visa.getCardBrandIconUnpadded()
                             ),
                         ),
-                        hide = false,
+                        showSelector = true,
                         hasMadeSelection = true
                     )
                 )
@@ -467,7 +499,7 @@ internal class CardNumberControllerTest {
                 TextFieldIcon.Selector.Item(
                     id = CardBrand.CartesBancaires.code,
                     label = "Cartes Bancaires".resolvableString,
-                    icon = PaymentModelR.drawable.stripe_ic_cartes_bancaires
+                    icon = CardBrand.CartesBancaires.getCardBrandIconUnpadded()
                 )
             )
             idleLooper()
@@ -479,21 +511,21 @@ internal class CardNumberControllerTest {
                         currentItem = TextFieldIcon.Selector.Item(
                             id = CardBrand.CartesBancaires.code,
                             label = "Cartes Bancaires".resolvableString,
-                            icon = CardBrand.CartesBancaires.icon
+                            icon = CardBrand.CartesBancaires.getCardBrandIconUnpadded()
                         ),
                         items = listOf(
                             TextFieldIcon.Selector.Item(
                                 id = CardBrand.CartesBancaires.code,
                                 label = "Cartes Bancaires".resolvableString,
-                                icon = CardBrand.CartesBancaires.icon
+                                icon = CardBrand.CartesBancaires.getCardBrandIconUnpadded()
                             ),
                             TextFieldIcon.Selector.Item(
                                 id = CardBrand.Visa.code,
                                 label = "Visa".resolvableString,
-                                icon = CardBrand.Visa.icon
+                                icon = CardBrand.Visa.getCardBrandIconUnpadded()
                             ),
                         ),
-                        hide = false,
+                        showSelector = true,
                         hasMadeSelection = true
                     )
                 )
@@ -516,7 +548,7 @@ internal class CardNumberControllerTest {
                 TextFieldIcon.Selector.Item(
                     id = CardBrand.CartesBancaires.code,
                     label = "Cartes Bancaires".resolvableString,
-                    icon = PaymentModelR.drawable.stripe_ic_cartes_bancaires
+                    icon = CardBrand.CartesBancaires.getCardBrandIconUnpadded()
                 )
             )
             idleLooper()
@@ -525,37 +557,80 @@ internal class CardNumberControllerTest {
                 .isEqualTo(cartesBancaireSelection)
 
             cardNumberController.onSelectorItemClicked(
-                TextFieldIcon.Selector.Item(
-                    id = CardBrand.CartesBancaires.code,
-                    label = "Cartes Bancaires".resolvableString,
-                    icon = PaymentModelR.drawable.stripe_ic_cartes_bancaires
-                )
+                null
             )
 
+            val item = awaitItem()
+            assertThat(item as TextFieldIcon.Selector).isEqualTo(unknownSelection)
+
+            assertThat(cardNumberController.selectedCardBrandFlow.value).isEqualTo(CardBrand.Unknown)
+        }
+    }
+
+    @Test
+    fun `on deselect with preferred brand, card brand should be unknown`() = runTest {
+        FeatureFlags.newCbcSelector.setEnabled(true)
+        val cardNumberController = createController(
+            cardBrandChoiceConfig = CardBrandChoiceConfig.Eligible(
+                preferredBrands = listOf(CardBrand.CartesBancaires),
+                initialBrand = null
+            )
+        )
+
+        cardNumberController.trailingIcon.test {
+            cardNumberController.onValueChange("4000002500001001")
+            skipItems(3)
+            assertThat(awaitItem() as TextFieldIcon.Selector).isEqualTo(cartesBancaireSelection)
+            cardNumberController.onSelectorItemClicked(null)
+            idleLooper()
+            assertThat(awaitItem() as TextFieldIcon.Selector).isEqualTo(unknownSelection)
+
+            assertThat(cardNumberController.selectedCardBrandFlow.value).isEqualTo(CardBrand.Unknown)
+        }
+    }
+
+    @Test
+    fun `TextFieldIcon Selector showSelector false when one allowed brand`() = runTest {
+        FeatureFlags.newCbcSelector.setEnabled(true)
+        val cardNumberController = createController(
+            cardBrandChoiceConfig = CardBrandChoiceConfig.Eligible(
+                preferredBrands = listOf(),
+                initialBrand = null
+            ),
+            cardBrandFilter = FakeCardBrandFilter(disallowedBrands = setOf(CardBrand.CartesBancaires))
+        )
+
+        cardNumberController.trailingIcon.test {
+            cardNumberController.onValueChange("4000002500001001")
+            skipItems(3)
             val item = awaitItem()
             assertThat(item as TextFieldIcon.Selector)
                 .isEqualTo(
                     TextFieldIcon.Selector(
                         message = R.string.stripe_card_brand_choice_choose_card_brand.resolvableString,
                         currentItem = TextFieldIcon.Selector.Item(
-                            id = CardBrand.Unknown.code,
-                            label = R.string.stripe_card_brand_choice_no_selection.resolvableString,
-                            icon = CardBrand.Unknown.icon
+                            id = CardBrand.Visa.code,
+                            label = "Visa".resolvableString,
+                            icon = CardBrand.Visa.getCardBrandIconUnpadded()
                         ),
                         items = listOf(
                             TextFieldIcon.Selector.Item(
                                 id = CardBrand.CartesBancaires.code,
-                                label = "Cartes Bancaires".resolvableString,
-                                icon = CardBrand.CartesBancaires.icon
+                                label = resolvableString(
+                                    com.stripe.android.ui.core.R.string.stripe_card_brand_not_accepted_with_brand,
+                                    CardBrand.CartesBancaires.displayName
+                                ),
+                                icon = CardBrand.CartesBancaires.getCardBrandIconUnpadded(),
+                                enabled = false
                             ),
                             TextFieldIcon.Selector.Item(
                                 id = CardBrand.Visa.code,
                                 label = "Visa".resolvableString,
-                                icon = CardBrand.Visa.icon
+                                icon = CardBrand.Visa.getCardBrandIconUnpadded()
                             ),
                         ),
-                        hide = false,
-                        hasMadeSelection = false
+                        showSelector = false,
+                        hasMadeSelection = true
                     )
                 )
         }
@@ -628,7 +703,7 @@ internal class CardNumberControllerTest {
                 TextFieldIcon.Selector.Item(
                     id = CardBrand.CartesBancaires.code,
                     label = "Cartes Bancaires".resolvableString,
-                    icon = PaymentModelR.drawable.stripe_ic_cartes_bancaires
+                    icon = CardBrand.CartesBancaires.getCardBrandIconUnpadded()
                 )
             )
             cardNumberController.onValueChange("400000250000100")
@@ -1029,22 +1104,45 @@ internal class CardNumberControllerTest {
             currentItem = TextFieldIcon.Selector.Item(
                 id = CardBrand.CartesBancaires.code,
                 label = "Cartes Bancaires".resolvableString,
-                icon = CardBrand.CartesBancaires.icon
+                icon = CardBrand.CartesBancaires.getCardBrandIconUnpadded()
             ),
             items = listOf(
                 TextFieldIcon.Selector.Item(
                     id = CardBrand.CartesBancaires.code,
                     label = "Cartes Bancaires".resolvableString,
-                    icon = CardBrand.CartesBancaires.icon
+                    icon = CardBrand.CartesBancaires.getCardBrandIconUnpadded()
                 ),
                 TextFieldIcon.Selector.Item(
                     id = CardBrand.Visa.code,
                     label = "Visa".resolvableString,
-                    icon = CardBrand.Visa.icon
+                    icon = CardBrand.Visa.getCardBrandIconUnpadded()
                 ),
             ),
-            hide = false,
+            showSelector = true,
             hasMadeSelection = true
+        )
+
+        val unknownSelection = TextFieldIcon.Selector(
+            message = R.string.stripe_card_brand_choice_choose_card_brand.resolvableString,
+            currentItem = TextFieldIcon.Selector.Item(
+                id = CardBrand.Unknown.code,
+                label = R.string.stripe_card_brand_choice_no_selection.resolvableString,
+                icon = CardBrand.Unknown.getCardBrandIconUnpadded()
+            ),
+            items = listOf(
+                TextFieldIcon.Selector.Item(
+                    id = CardBrand.CartesBancaires.code,
+                    label = "Cartes Bancaires".resolvableString,
+                    icon = CardBrand.CartesBancaires.getCardBrandIconUnpadded()
+                ),
+                TextFieldIcon.Selector.Item(
+                    id = CardBrand.Visa.code,
+                    label = "Visa".resolvableString,
+                    icon = CardBrand.Visa.getCardBrandIconUnpadded()
+                ),
+            ),
+            showSelector = true,
+            hasMadeSelection = false
         )
     }
 }

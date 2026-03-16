@@ -20,6 +20,7 @@ import com.stripe.android.model.ElementsSession.ExperimentAssignment.LINK_GLOBAL
 import com.stripe.android.model.ElementsSession.ExperimentAssignment.LINK_GLOBAL_HOLD_BACK_AA
 import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_DISABLE_LINK_GLOBAL_HOLDBACK_LOOKUP
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.state.DefaultRetrieveCustomerEmail
@@ -27,7 +28,6 @@ import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
 import com.stripe.android.testing.FakeLogger
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
