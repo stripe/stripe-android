@@ -1,5 +1,6 @@
 package com.stripe.android.utils
 
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.ClientAttributionMetadata
@@ -32,6 +33,7 @@ internal class FakePaymentElementLoader(
     private val clientAttributionMetadata: ClientAttributionMetadata? = null,
     private val shippingDetails: AddressDetails? = null,
     private val experimentsData: ElementsSession.ExperimentsData? = null,
+    private val integrationMetadata: IntegrationMetadata? = null,
 ) : PaymentElementLoader {
 
     fun updatePaymentMethods(paymentMethods: List<PaymentMethod>) {
@@ -75,7 +77,13 @@ internal class FakePaymentElementLoader(
                         clientAttributionMetadata ?: PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
                         shippingDetails = shippingDetails,
                         experimentsData = experimentsData,
-                    ),
+                    ).let { metadata ->
+                        if (integrationMetadata != null) {
+                            metadata.copy(integrationMetadata = integrationMetadata)
+                        } else {
+                            metadata
+                        }
+                    },
                 )
             )
         }
