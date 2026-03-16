@@ -47,14 +47,6 @@ class EditPage(
             .assertExists()
     }
 
-    fun setCardBrand(cardBrand: String) {
-        composeTestRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
-            .performClick()
-
-        composeTestRule.onNodeWithTag("${TEST_TAG_DROP_DOWN_CHOICE}_$cardBrand")
-            .performClick()
-    }
-
     fun setCardBrandWithSelector(cardBrand: String) {
         composeTestRule.onNodeWithContentDescription(cardBrand)
             .performClick()
