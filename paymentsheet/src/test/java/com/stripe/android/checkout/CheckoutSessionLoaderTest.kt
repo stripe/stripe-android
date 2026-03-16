@@ -1,7 +1,7 @@
 package com.stripe.android.checkout
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.repositories.FakeCheckoutSessionRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -10,19 +10,7 @@ class CheckoutSessionLoaderTest {
 
     @Test
     fun `load extracts session ID and returns response on success`() = runTest {
-        val expectedResponse = CheckoutSessionResponse(
-            id = "cs_test_abc123",
-            amount = 1000L,
-            currency = "usd",
-            customerEmail = null,
-            elementsSession = null,
-            paymentIntent = null,
-            customer = null,
-            savedPaymentMethodsOfferSave = null,
-            totalSummary = null,
-            lineItems = emptyList(),
-            shippingOptions = emptyList(),
-        )
+        val expectedResponse = CheckoutSessionResponseFactory.create()
         val repository = FakeCheckoutSessionRepository(
             initResult = Result.success(expectedResponse),
         )

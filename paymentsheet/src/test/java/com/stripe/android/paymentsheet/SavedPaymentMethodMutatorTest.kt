@@ -6,6 +6,7 @@ import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.PaymentMethodRemovePermission
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
@@ -193,6 +194,39 @@ class SavedPaymentMethodMutatorTest {
             savedPaymentMethodMutator.removePaymentMethod(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
 
             assertThat(calledDetach).isFalse()
+        }
+    }
+
+    @Test
+    fun `removePaymentMethod with CheckoutSession metadata passes CheckoutSession to repository`() {
+        val checkoutSessionMetadata = CustomerMetadata.CheckoutSession(
+            sessionId = "cs_test_123",
+            customerId = "cus_123",
+            removePaymentMethod = PaymentMethodRemovePermission.Full,
+            saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
+        )
+
+        runScenario(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                hasCustomerConfiguration = true,
+            ).copy(customerMetadata = checkoutSessionMetadata),
+        ) {
+            customerStateHolder.setCustomerState(
+                createCustomerState(
+                    paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+                )
+            )
+
+            savedPaymentMethodMutator.removePaymentMethod(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+
+            val detachRequest = savedPaymentMethodRepository.detachRequests.awaitItem()
+            assertThat(detachRequest.paymentMethodId).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_METHOD.id)
+            assertThat(detachRequest.customerMetadata).isInstanceOf(CustomerMetadata.CheckoutSession::class.java)
+            assertThat((detachRequest.customerMetadata as CustomerMetadata.CheckoutSession).sessionId)
+                .isEqualTo("cs_test_123")
+
+            assertThat(postPaymentMethodRemovedTurbine.awaitItem()).isEqualTo(Unit)
+            assertThat(eventReporter.removePaymentMethodCalls.awaitItem().code).isEqualTo("card")
         }
     }
 

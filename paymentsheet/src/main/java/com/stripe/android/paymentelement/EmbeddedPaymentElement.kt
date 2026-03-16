@@ -17,6 +17,7 @@ import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.checkout.Checkout
+import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.core.utils.StatusBarCompat
@@ -100,10 +101,11 @@ class EmbeddedPaymentElement @Inject internal constructor(
         checkout: Checkout,
         configuration: Configuration,
     ): ConfigureResult {
-        val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
-            checkoutSessionResponse = checkout.state.checkoutSessionResponse
+        CheckoutInstances.ensureNoMutationInFlight(checkout.internalState.key)
+        return configurationCoordinator.configure(
+            configuration = configuration,
+            initializationMode = checkout.internalState.initializationMode,
         )
-        return configurationCoordinator.configure(configuration, initializationMode)
     }
 
     /**
@@ -601,6 +603,36 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 userOverrideCountry = userOverrideCountry,
             )
         }
+
+        @OptIn(
+            ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class,
+            CardFundingFilteringPrivatePreview::class,
+        )
+        internal fun newBuilder(): Builder = Builder(merchantDisplayName)
+            .customer(customer)
+            .googlePay(googlePay)
+            .defaultBillingDetails(defaultBillingDetails)
+            .shippingDetails(shippingDetails)
+            .allowsDelayedPaymentMethods(allowsDelayedPaymentMethods)
+            .allowsPaymentMethodsRequiringShippingAddress(allowsPaymentMethodsRequiringShippingAddress)
+            .appearance(appearance)
+            .billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
+            .preferredNetworks(preferredNetworks)
+            .allowsRemovalOfLastSavedPaymentMethod(allowsRemovalOfLastSavedPaymentMethod)
+            .paymentMethodOrder(paymentMethodOrder)
+            .externalPaymentMethods(externalPaymentMethods)
+            .cardBrandAcceptance(cardBrandAcceptance)
+            .allowedCardFundingTypes(allowedCardFundingTypes)
+            .customPaymentMethods(customPaymentMethods)
+            .embeddedViewDisplaysMandateText(embeddedViewDisplaysMandateText)
+            .link(link)
+            .formSheetAction(formSheetAction)
+            .termsDisplay(termsDisplay)
+            .opensCardScannerAutomatically(opensCardScannerAutomatically)
+            .userOverrideCountry(userOverrideCountry)
+            .apply {
+                primaryButtonLabel?.let { primaryButtonLabel(it) }
+            }
     }
 
     /**

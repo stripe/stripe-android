@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
@@ -32,16 +33,15 @@ internal class CheckoutSessionLoaderTest {
         response: CheckoutSessionResponse,
     ): PaymentElementLoader.InitializationMode.CheckoutSession {
         return PaymentElementLoader.InitializationMode.CheckoutSession(
+            instancesKey = "CheckoutSessionLoaderTest",
             checkoutSessionResponse = response,
         )
     }
 
     private companion object {
-        private val CHECKOUT_SESSION_RESPONSE = CheckoutSessionResponse(
+        private val CHECKOUT_SESSION_RESPONSE = CheckoutSessionResponseFactory.create(
             id = "cs_test_123",
             amount = 5099,
-            currency = "usd",
-            customerEmail = null,
             elementsSession = ElementsSession(
                 linkSettings = null,
                 paymentMethodSpecs = null,
@@ -63,16 +63,11 @@ internal class CheckoutSessionLoaderTest {
                 accountId = "acct_123",
                 merchantId = "acct_123",
             ),
-            paymentIntent = null,
             customer = CheckoutSessionResponse.Customer(
                 id = "cus_test_123",
                 paymentMethods = PaymentMethodFactory.cards(2),
                 canDetachPaymentMethod = true,
             ),
-            savedPaymentMethodsOfferSave = null,
-            totalSummary = null,
-            lineItems = emptyList(),
-            shippingOptions = emptyList(),
         )
     }
 }

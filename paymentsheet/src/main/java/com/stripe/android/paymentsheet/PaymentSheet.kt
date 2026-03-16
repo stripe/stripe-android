@@ -19,6 +19,7 @@ import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.checkout.Checkout
+import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.checkout.forCheckoutSession
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.core.reactnative.ReactNativeSdkInternal
@@ -486,9 +487,10 @@ class PaymentSheet internal constructor(
         checkout: Checkout,
         configuration: Configuration,
     ) {
+        CheckoutInstances.ensureNoMutationInFlight(checkout.internalState.key)
         paymentSheetLauncher.present(
-            mode = InitializationMode.CheckoutSession(checkout.state.checkoutSessionResponse),
-            configuration = configuration.forCheckoutSession(checkout.state),
+            mode = checkout.internalState.initializationMode,
+            configuration = configuration.forCheckoutSession(checkout.internalState),
         )
     }
 

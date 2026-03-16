@@ -76,6 +76,12 @@ public final class com/stripe/android/uicore/elements/ComposableSingletons$OTPEl
 	public final fun getLambda$1851972617$stripe_ui_core_release ()Lkotlin/jvm/functions/Function2;
 }
 
+public final class com/stripe/android/uicore/elements/ComposableSingletons$SelectorKt {
+	public static final field INSTANCE Lcom/stripe/android/uicore/elements/ComposableSingletons$SelectorKt;
+	public fun <init> ()V
+	public final fun getLambda$280419630$stripe_ui_core_release ()Lkotlin/jvm/functions/Function3;
+}
+
 public final class com/stripe/android/uicore/elements/ComposableSingletons$TextFieldUIKt {
 	public static final field INSTANCE Lcom/stripe/android/uicore/elements/ComposableSingletons$TextFieldUIKt;
 	public fun <init> ()V

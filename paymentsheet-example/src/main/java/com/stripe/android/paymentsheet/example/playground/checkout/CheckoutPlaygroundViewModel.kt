@@ -38,6 +38,9 @@ internal class CheckoutPlaygroundViewModel(
     private val _lastAddressDetails = MutableStateFlow<AddressDetails?>(null)
     val lastAddressDetails: StateFlow<AddressDetails?> = _lastAddressDetails.asStateFlow()
 
+    private val _lastBillingAddressDetails = MutableStateFlow<AddressDetails?>(null)
+    val lastBillingAddressDetails: StateFlow<AddressDetails?> = _lastBillingAddressDetails.asStateFlow()
+
     fun applyPromotionCode(promotionCode: String) = performWhileLoading {
         checkout.applyPromotionCode(promotionCode)
     }
@@ -64,20 +67,45 @@ internal class CheckoutPlaygroundViewModel(
             .line2(addressDetails.address?.line2)
             .postalCode(addressDetails.address?.postalCode)
             .state(addressDetails.address?.state)
-        checkout.updateShippingAddress(address).also {
+        checkout.updateShippingAddress(address = address).also {
             _lastAddressDetails.value = addressDetails
+        }
+    }
+
+    fun updateBillingAddress(addressDetails: AddressDetails) = performWhileLoading {
+        val country = addressDetails.address?.country
+            ?: return@performWhileLoading Result.failure(IllegalStateException("Country is required"))
+        val address = Address()
+            .city(addressDetails.address?.city)
+            .country(country)
+            .line1(addressDetails.address?.line1)
+            .line2(addressDetails.address?.line2)
+            .postalCode(addressDetails.address?.postalCode)
+            .state(addressDetails.address?.state)
+        checkout.updateBillingAddress(name = addressDetails.name, address = address).also {
+            _lastBillingAddressDetails.value = addressDetails
+        }
+    }
+
+    fun clearBillingAddress() = performWhileLoading {
+        checkout.updateBillingAddress(address = Address().country("US")).also {
+            _lastBillingAddressDetails.value = null
         }
     }
 
     fun updatePostalCode(postalCode: String) = performWhileLoading {
         val address = Address().postalCode(postalCode).country("US")
-        checkout.updateShippingAddress(address)
+        checkout.updateShippingAddress(address = address)
     }
 
     fun clearShippingAddress() = performWhileLoading {
-        checkout.updateShippingAddress(Address().country("US")).also {
+        checkout.updateShippingAddress(address = Address().country("US")).also {
             _lastAddressDetails.value = null
         }
+    }
+
+    fun updateTaxId(type: String, value: String) = performWhileLoading {
+        checkout.updateTaxId(type, value)
     }
 
     fun refresh() = performWhileLoading {

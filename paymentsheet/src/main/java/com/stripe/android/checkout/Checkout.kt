@@ -14,11 +14,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.parcelize.Parcelize
+import java.util.UUID
 
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class Checkout private constructor(
-    var state: State,
+    internalState: InternalState,
     private val component: CheckoutComponent,
 ) {
     @CheckoutSessionPreview
@@ -30,7 +31,13 @@ class Checkout private constructor(
         ): Result<Checkout> {
             val component = DaggerCheckoutComponent.factory().create(context.applicationContext)
             return component.checkoutSessionLoader.load(checkoutSessionClientSecret).map { response ->
-                Checkout(State(response), component)
+                Checkout(
+                    internalState = InternalState(
+                        key = UUID.randomUUID().toString(),
+                        checkoutSessionResponse = response,
+                    ),
+                    component,
+                )
             }
         }
 
@@ -39,7 +46,10 @@ class Checkout private constructor(
             state: State,
         ): Checkout {
             val component = DaggerCheckoutComponent.factory().create(context.applicationContext)
-            return Checkout(state, component)
+            return Checkout(
+                internalState = state.internalState,
+                component = component,
+            )
         }
     }
 
@@ -48,13 +58,27 @@ class Checkout private constructor(
     @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class State internal constructor(
-        internal val checkoutSessionResponse: CheckoutSessionResponse,
-        internal val shippingName: String? = null,
+        internal val internalState: InternalState,
     ) : Parcelable
 
+    @Volatile
+    internal var internalState: InternalState = internalState
+        private set
+
+    var state: State
+        get() = State(internalState)
+        set(value) {
+            ensureNoMutationInFlight()
+            internalState = value.internalState
+        }
+
     private val mutex = Mutex()
-    private val _checkoutSession = MutableStateFlow(state.checkoutSessionResponse.asCheckoutSession())
+    private val _checkoutSession = MutableStateFlow(internalState.checkoutSessionResponse.asCheckoutSession())
     val checkoutSession: StateFlow<CheckoutSession> = _checkoutSession.asStateFlow()
+
+    init {
+        CheckoutInstances.add(internalState.key, this)
+    }
 
     suspend fun applyPromotionCode(
         promotionCode: String,
@@ -80,36 +104,71 @@ class Checkout private constructor(
     }
 
     suspend fun updateShippingAddress(
-        address: Address,
         name: String? = null,
-    ): Result<CheckoutSession> = withSessionId(
-        setState = { State(it, shippingName = name ?: state.shippingName) },
-    ) { sessionId ->
-        component.checkoutSessionRepository.updateShippingAddress(sessionId, address.build())
+        phoneNumber: String? = null,
+        address: Address,
+    ): Result<CheckoutSession> {
+        val built = address.build()
+        return withSessionId(
+            additionalStateMutations = {
+                copy(shippingName = name, shippingPhoneNumber = phoneNumber, shippingAddress = built)
+            },
+        ) { sessionId ->
+            component.checkoutSessionRepository.updateTaxRegion(sessionId, built)
+        }
+    }
+
+    suspend fun updateTaxId(
+        type: String,
+        value: String,
+    ): Result<CheckoutSession> = withSessionId { sessionId ->
+        component.checkoutSessionRepository.updateTaxId(sessionId, type.trim(), value.trim())
+    }
+
+    suspend fun updateBillingAddress(
+        name: String? = null,
+        phoneNumber: String? = null,
+        address: Address,
+    ): Result<CheckoutSession> {
+        val built = address.build()
+        return withSessionId(
+            additionalStateMutations = {
+                copy(billingName = name, billingPhoneNumber = phoneNumber, billingAddress = built)
+            },
+        ) { sessionId ->
+            component.checkoutSessionRepository.updateTaxRegion(sessionId, built)
+        }
     }
 
     suspend fun refresh(): Result<CheckoutSession> = withSessionId { sessionId ->
         component.checkoutSessionRepository.init(sessionId)
     }
 
+    internal fun ensureNoMutationInFlight() {
+        if (mutex.isLocked) {
+            throw IllegalStateException(
+                "Cannot launch while a checkout session mutation is in flight."
+            )
+        }
+    }
+
+    internal fun updateWithResponse(response: CheckoutSessionResponse) {
+        internalState = internalState.copy(checkoutSessionResponse = response)
+        _checkoutSession.value = response.asCheckoutSession()
+    }
+
     private suspend fun withSessionId(
-        setState: (CheckoutSessionResponse) -> State = { State(it, shippingName = state.shippingName) },
+        additionalStateMutations: InternalState.() -> InternalState = { this },
         block: suspend (sessionId: String) -> Result<CheckoutSessionResponse>,
     ): Result<CheckoutSession> {
         // Run network requests with a mutex to ensure events are processed in order.
         return mutex.withLock {
-            block(state.checkoutSessionResponse.id).updateState(setState)
-        }
-    }
-
-    private fun Result<CheckoutSessionResponse>.updateState(
-        setState: (CheckoutSessionResponse) -> State,
-    ): Result<CheckoutSession> {
-        return map { response ->
-            state = setState(response)
-            val checkoutSession = response.asCheckoutSession()
-            _checkoutSession.value = checkoutSession
-            checkoutSession
+            block(internalState.checkoutSessionResponse.id).map { response ->
+                internalState = internalState.copy(checkoutSessionResponse = response).additionalStateMutations()
+                val checkoutSession = response.asCheckoutSession()
+                _checkoutSession.value = checkoutSession
+                checkoutSession
+            }
         }
     }
 }

@@ -70,6 +70,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.toSavedSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.PaymentIntentInTerminalState
@@ -264,6 +265,7 @@ internal class DefaultPaymentElementLoaderTest {
     fun `load with CheckoutSession mode and non-null customer returns failure`() = runScenario {
         val result = createPaymentElementLoader().load(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                instancesKey = "DefaultPaymentElementLoaderTest",
                 checkoutSessionResponse = createCheckoutSessionResponse(canDetachPaymentMethod = true),
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration(
@@ -1679,6 +1681,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `CheckoutSession validate is a no-op`() = runScenario {
         PaymentElementLoader.InitializationMode.CheckoutSession(
+            instancesKey = "DefaultPaymentElementLoaderTest",
             checkoutSessionResponse = createCheckoutSessionResponse(canDetachPaymentMethod = true),
         ).validate()
     }
@@ -1686,6 +1689,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `CheckoutSession id property returns id from response`() = runScenario {
         val checkoutSession = PaymentElementLoader.InitializationMode.CheckoutSession(
+            instancesKey = "DefaultPaymentElementLoaderTest",
             checkoutSessionResponse = createCheckoutSessionResponse(canDetachPaymentMethod = true),
         )
         assertThat(checkoutSession.checkoutSessionResponse.id).isEqualTo("cs_test_123")
@@ -1694,10 +1698,16 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `integrationMetadata returns checkout session with id from response`() = runScenario {
         val checkoutSession = PaymentElementLoader.InitializationMode.CheckoutSession(
+            instancesKey = "DefaultPaymentElementLoaderTest",
             checkoutSessionResponse = createCheckoutSessionResponse(canDetachPaymentMethod = true),
         )
         assertThat(checkoutSession.integrationMetadata(null))
-            .isEqualTo(IntegrationMetadata.CheckoutSession("cs_test_123"))
+            .isEqualTo(
+                IntegrationMetadata.CheckoutSession(
+                    id = "cs_test_123",
+                    instancesKey = "DefaultPaymentElementLoaderTest",
+                )
+            )
     }
 
     @Test
@@ -2965,11 +2975,13 @@ internal class DefaultPaymentElementLoaderTest {
 
             val state = loader.load(
                 initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                    instancesKey = "DefaultPaymentElementLoaderTest",
                     checkoutSessionResponse = checkoutSessionResponse,
                 ),
-                paymentSheetConfiguration = PaymentSheet.Configuration(
+                paymentSheetConfiguration = PaymentSheet.Configuration.Builder(
                     merchantDisplayName = "Merchant, Inc.",
-                ),
+                ).defaultBillingDetails(PaymentSheet.BillingDetails(email = "email@email.com"))
+                    .build(),
                 metadata = PaymentElementLoader.Metadata(
                     initializedViaCompose = false,
                 ),
@@ -2978,7 +2990,7 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(state.paymentMethodMetadata.customerMetadata?.removePaymentMethod)
                 .isEqualTo(expectedPermission)
 
-            // CheckoutSession has no removeLast concept — always allows removing every PM.
+            // When removal is permitted, CheckoutSession doesn't restrict removing the last one.
             assertThat(state.paymentMethodMetadata.customerMetadata?.canRemoveLastPaymentMethod)
                 .isEqualTo(true)
 
@@ -4608,11 +4620,9 @@ internal class DefaultPaymentElementLoaderTest {
     private fun createCheckoutSessionResponse(
         canDetachPaymentMethod: Boolean,
     ): CheckoutSessionResponse {
-        return CheckoutSessionResponse(
+        return CheckoutSessionResponseFactory.create(
             id = "cs_test_123",
             amount = 5099,
-            currency = "usd",
-            customerEmail = null,
             elementsSession = ElementsSession(
                 linkSettings = null,
                 paymentMethodSpecs = null,
@@ -4634,16 +4644,11 @@ internal class DefaultPaymentElementLoaderTest {
                 accountId = "acct_123",
                 merchantId = "acct_123",
             ),
-            paymentIntent = null,
             customer = CheckoutSessionResponse.Customer(
                 id = "cus_test_123",
                 paymentMethods = PaymentMethodFactory.cards(2),
                 canDetachPaymentMethod = canDetachPaymentMethod,
             ),
-            savedPaymentMethodsOfferSave = null,
-            totalSummary = null,
-            lineItems = emptyList(),
-            shippingOptions = emptyList(),
         )
     }
 

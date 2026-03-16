@@ -152,7 +152,8 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         DefaultCardFundingFilter
     )
 
-    internal constructor(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
         context: Context,
         lifecycleScope: CoroutineScope,
         activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,

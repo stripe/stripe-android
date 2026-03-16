@@ -19,7 +19,7 @@ class OnrampCallbacks {
     private var collectPaymentCallback: OnrampCollectPaymentMethodCallback? = null
     private var authorizeCallback: OnrampAuthorizeCallback? = null
     private var checkoutCallback: OnrampCheckoutCallback? = null
-    private var onrampSessionClientSecretProvider: (suspend (String) -> String)? = null
+    private var onrampSessionClientSecretProvider: OnrampSessionClientSecretProvider? = null
     private var googlePayIsReadyCallback: ((Boolean) -> Unit)? = null
 
     /**
@@ -65,7 +65,8 @@ class OnrampCallbacks {
      *     @param The session ID of the current checkout.
      */
     fun onrampSessionClientSecretProvider(callback: suspend (String) -> String) = apply {
-        this.onrampSessionClientSecretProvider = callback
+        this.onrampSessionClientSecretProvider =
+            OnrampSessionClientSecretProvider { id -> callback(id) }
     }
 
     /**
@@ -84,7 +85,7 @@ class OnrampCallbacks {
         val collectPaymentCallback: OnrampCollectPaymentMethodCallback,
         val authorizeCallback: OnrampAuthorizeCallback,
         val checkoutCallback: OnrampCheckoutCallback,
-        val onrampSessionClientSecretProvider: suspend (String) -> String,
+        val onrampSessionClientSecretProvider: OnrampSessionClientSecretProvider,
         val googlePayIsReadyCallback: ((Boolean) -> Unit)?
     )
 

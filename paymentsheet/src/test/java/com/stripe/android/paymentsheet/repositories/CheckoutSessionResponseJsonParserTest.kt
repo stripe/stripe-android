@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import org.json.JSONObject
 import org.junit.Test
@@ -24,6 +25,7 @@ class CheckoutSessionResponseJsonParserTest {
         assertThat(result?.id).isEqualTo("cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh")
         assertThat(result?.amount).isEqualTo(999L)
         assertThat(result?.currency).isEqualTo("usd")
+        assertThat(result?.mode).isEqualTo(CheckoutSessionResponse.Mode.PAYMENT)
 
         // Verify ElementsSession is parsed correctly
         val elementsSession = result?.elementsSession
@@ -638,5 +640,90 @@ class CheckoutSessionResponseJsonParserTest {
 
         assertThat(result).isNotNull()
         assertThat(result!!.shippingOptions).isEmpty()
+    }
+
+    @Test
+    fun `parse setup mode init response`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_SETUP_MODE_RESPONSE_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.id).isEqualTo("cs_test_setup_abc123")
+        assertThat(result?.mode).isEqualTo(CheckoutSessionResponse.Mode.SETUP)
+        assertThat(result?.amount).isEqualTo(0L)
+        assertThat(result?.currency).isEqualTo("usd")
+        assertThat(result?.paymentIntent).isNull()
+        assertThat(result?.setupIntent).isNull()
+        assertThat(result?.elementsSession).isNotNull()
+    }
+
+    @Test
+    fun `parse setup mode confirm response with succeeded setup intent`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_SETUP_CONFIRM_SUCCEEDED_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.id).isEqualTo("cs_test_setup_abc123")
+        assertThat(result?.mode).isEqualTo(CheckoutSessionResponse.Mode.SETUP)
+        assertThat(result?.amount).isEqualTo(0L)
+
+        assertThat(result?.paymentIntent).isNull()
+        val setupIntent = result?.setupIntent
+        assertThat(setupIntent).isNotNull()
+        assertThat(setupIntent?.id).isEqualTo("seti_1QWK2VIyGgrkZxL71xfPBWG5")
+        assertThat(setupIntent?.status).isEqualTo(StripeIntent.Status.Succeeded)
+        assertThat(setupIntent?.isConfirmed).isTrue()
+    }
+
+    @Test
+    fun `parse setup mode confirm response with requires_action setup intent`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_SETUP_CONFIRM_REQUIRES_ACTION_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.mode).isEqualTo(CheckoutSessionResponse.Mode.SETUP)
+
+        val setupIntent = result?.setupIntent
+        assertThat(setupIntent).isNotNull()
+        assertThat(setupIntent?.id).isEqualTo("seti_1QWK2VIyGgrkZxL71xfPBWG5")
+        assertThat(setupIntent?.status).isEqualTo(StripeIntent.Status.RequiresAction)
+        assertThat(setupIntent?.requiresAction()).isTrue()
+        assertThat(setupIntent?.nextActionType).isEqualTo(StripeIntent.NextActionType.RedirectToUrl)
+    }
+
+    @Test
+    fun `parse confirm response with elements_session replaces deferred intent with confirmed PaymentIntent`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_CONFIRM_WITH_ELEMENTS_SESSION_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.paymentIntent).isNotNull()
+        assertThat(result?.paymentIntent?.id).isEqualTo("pi_3QWK2VIyGgrkZxL71xfPBWG5")
+
+        val elementsSession = result?.elementsSession
+        assertThat(elementsSession).isNotNull()
+        assertThat(elementsSession?.stripeIntent).isInstanceOf(PaymentIntent::class.java)
+
+        val stripeIntent = elementsSession?.stripeIntent as PaymentIntent
+        assertThat(stripeIntent.id).isEqualTo("pi_3QWK2VIyGgrkZxL71xfPBWG5")
+        assertThat(stripeIntent.status).isEqualTo(StripeIntent.Status.Succeeded)
+    }
+
+    @Test
+    fun `parse confirm response with elements_session replaces deferred intent with confirmed SetupIntent`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_SETUP_CONFIRM_WITH_ELEMENTS_SESSION_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.setupIntent).isNotNull()
+        assertThat(result?.setupIntent?.id).isEqualTo("seti_1QWK2VIyGgrkZxL71xfPBWG5")
+
+        val elementsSession = result?.elementsSession
+        assertThat(elementsSession).isNotNull()
+        assertThat(elementsSession?.stripeIntent).isInstanceOf(SetupIntent::class.java)
+
+        val stripeIntent = elementsSession?.stripeIntent as SetupIntent
+        assertThat(stripeIntent.id).isEqualTo("seti_1QWK2VIyGgrkZxL71xfPBWG5")
+        assertThat(stripeIntent.status).isEqualTo(StripeIntent.Status.Succeeded)
     }
 }

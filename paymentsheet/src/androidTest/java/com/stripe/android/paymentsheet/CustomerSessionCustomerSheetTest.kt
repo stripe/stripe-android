@@ -82,55 +82,6 @@ internal class CustomerSessionCustomerSheetTest {
     }
 
     @Test
-    fun testSuccessfulCardSaveWithCardBrandChoice_Dropdown() = runCustomerSheetTest(
-        networkRule = networkRule,
-        integrationType = integrationType,
-        customerSheetTestType = CustomerSheetTestType.CustomerSession,
-        resultCallback = { result ->
-            verifySelected(
-                expectedLast4 = "1001",
-                expectedBrand = CardBrand.CartesBancaires,
-                result = result,
-            )
-        }
-    ) { context ->
-        FeatureFlags.newCbcSelector.setEnabled(false)
-        enqueueElementsSession(
-            cards = listOf(),
-            isCbcEligible = true,
-        )
-
-        context.presentCustomerSheet()
-
-        /*
-         * This card is overridden to use a test card compatible with CbcTestCardDelegate to skip
-         * checking card account ranges network operation which run only if account ranges aren't
-         * stores in memory.
-         */
-        page.fillOutCardDetails(
-            cardNumber = TEST_CBC_CARD_NUMBER
-        )
-        page.changeCardBrandChoice()
-
-        enqueueCbcPaymentMethodCreation()
-        enqueueSetupIntentConfirmation()
-
-        enqueueElementsSession(
-            cards = listOf(
-                PaymentMethodFactory.card(id = "pm_12345").update(
-                    last4 = "1001",
-                    addCbcNetworks = true,
-                    brand = CardBrand.CartesBancaires,
-                )
-            ),
-            isCbcEligible = true,
-        )
-
-        page.clickSaveButton()
-        page.clickConfirmButton()
-    }
-
-    @Test
     fun testSuccessfulCardSaveWithCardBrandChoice_Selector() = runCustomerSheetTest(
         networkRule = networkRule,
         integrationType = integrationType,
@@ -143,7 +94,6 @@ internal class CustomerSessionCustomerSheetTest {
             )
         }
     ) { context ->
-        FeatureFlags.newCbcSelector.setEnabled(true)
         enqueueElementsSession(
             cards = listOf(),
             isCbcEligible = true,

@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground.network
 
 import android.content.Context
+import android.util.Log
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.core.requests.suspendable
@@ -33,6 +34,7 @@ internal class PlaygroundRequester(
         }
         when (apiResponse) {
             is Result.Failure -> {
+                Log.e("PaymentSheetPlaygroundViewModel", "Failed to fetch playground", apiResponse.getException())
                 return kotlin.Result.failure(apiResponse.getException())
             }
 

@@ -9,18 +9,23 @@ import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.parsers.ElementsSessionJsonParser
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
+import com.stripe.android.model.parsers.SetupIntentJsonParser
 import org.json.JSONObject
 
 /**
  * Parser for checkout session API responses:
  * - Init API (`/v1/payment_pages/{cs_id}/init`) - returns elements_session
- * - Confirm API (`/v1/payment_pages/{cs_id}/confirm`) - returns payment_intent
+ * - Confirm API (`/v1/payment_pages/{cs_id}/confirm`) - returns payment_intent or setup_intent
  *
  * The init response contains checkout session metadata (`id`, `amount`, `currency`) and an
- * embedded `elements_session` object. The confirm response contains a `payment_intent` object.
+ * embedded `elements_session` object. The confirm response contains a `payment_intent` or
+ * `setup_intent` object.
  *
- * For confirm responses, this parser extracts the `payment_intent` and creates a minimal
- * response with the payment intent data.
+ * Confirm responses may also contain an `elements_session` (when
+ * `elements_session_client[is_aggregation_expected]` is set). In that case, the
+ * `elements_session` will have a deferred intent stub as its `stripeIntent`. This parser
+ * replaces that deferred intent with the actual confirmed intent from the top-level
+ * `payment_intent` or `setup_intent` field.
  */
 internal class CheckoutSessionResponseJsonParser(
     private val isLiveMode: Boolean,
@@ -28,17 +33,31 @@ internal class CheckoutSessionResponseJsonParser(
 
     override fun parse(json: JSONObject): CheckoutSessionResponse? {
         val sessionId = json.optString(FIELD_SESSION_ID).takeIf { it.isNotEmpty() } ?: return null
+        val mode = parseMode(json.optString(FIELD_MODE))
         val amount = extractDueAmount(json) ?: return null
         val currency = json.optString(FIELD_CURRENCY).takeIf { it.isNotEmpty() } ?: return null
         val customerEmail = json.optString(FIELD_CUSTOMER_EMAIL).takeIf { it.isNotEmpty() }
         val paymentIntent = json.optJSONObject(FIELD_PAYMENT_INTENT)?.let {
             PaymentIntentJsonParser().parse(it)
         }
+        val setupIntent = json.optJSONObject(FIELD_SETUP_INTENT)?.let {
+            SetupIntentJsonParser().parse(it)
+        }
 
-        val elementsSession = parseElementsSession(
+        val parsedElementsSession = parseElementsSession(
             json.optJSONObject(FIELD_SERVER_BUILT_ELEMENTS_SESSION_PARAMS),
             json.optJSONObject(FIELD_ELEMENTS_SESSION),
         )
+        val elementsSession = if (parsedElementsSession != null) {
+            val confirmedIntent = paymentIntent ?: setupIntent
+            if (confirmedIntent != null) {
+                parsedElementsSession.copy(stripeIntent = confirmedIntent)
+            } else {
+                parsedElementsSession
+            }
+        } else {
+            null
+        }
         val customer = parseCustomer(json.optJSONObject(FIELD_CUSTOMER))
         val savedPaymentMethodsOfferSave = parseSavedPaymentMethodsOfferSave(
             json.optJSONObject(FIELD_SAVED_PAYMENT_METHODS_OFFER_SAVE)
@@ -51,15 +70,25 @@ internal class CheckoutSessionResponseJsonParser(
             id = sessionId,
             amount = amount,
             currency = currency,
+            mode = mode,
             customerEmail = customerEmail,
             elementsSession = elementsSession,
             paymentIntent = paymentIntent,
+            setupIntent = setupIntent,
             customer = customer,
             savedPaymentMethodsOfferSave = savedPaymentMethodsOfferSave,
             totalSummary = totalSummary,
             lineItems = lineItems,
             shippingOptions = shippingOptions,
         )
+    }
+
+    private fun parseMode(modeString: String): CheckoutSessionResponse.Mode {
+        return when (modeString) {
+            "payment" -> CheckoutSessionResponse.Mode.PAYMENT
+            "setup" -> CheckoutSessionResponse.Mode.SETUP
+            else -> CheckoutSessionResponse.Mode.UNKNOWN
+        }
     }
 
     private fun parseElementsSessionParams(
@@ -374,12 +403,14 @@ internal class CheckoutSessionResponseJsonParser(
 
     private companion object {
         private const val FIELD_SESSION_ID = "session_id"
+        private const val FIELD_MODE = "mode"
         private const val FIELD_CURRENCY = "currency"
         private const val FIELD_CUSTOMER_EMAIL = "customer_email"
         private const val FIELD_ELEMENTS_SESSION = "elements_session"
         private const val FIELD_TOTAL_SUMMARY = "total_summary"
         private const val FIELD_DUE = "due"
         private const val FIELD_PAYMENT_INTENT = "payment_intent"
+        private const val FIELD_SETUP_INTENT = "setup_intent"
         private const val FIELD_SERVER_BUILT_ELEMENTS_SESSION_PARAMS = "server_built_elements_session_params"
         private const val FIELD_CUSTOMER = "customer"
         private const val FIELD_CUSTOMER_ID = "id"
