@@ -162,6 +162,50 @@ class ConfigurationKtxTest {
     }
 
     @Test
+    fun `sets shipping phoneNumber from state when shippingDetails is null`() {
+        val config = configuration()
+        val state = state(shippingPhoneNumber = "5551234567")
+
+        val result = config.forCheckoutSession(state)
+
+        assertThat(result.shippingDetails?.phoneNumber).isEqualTo("5551234567")
+    }
+
+    @Test
+    fun `preserves merchant shipping phoneNumber when already set`() {
+        val config = configuration(
+            shippingDetails = AddressDetails(phoneNumber = "5550000000"),
+        )
+        val state = state(shippingPhoneNumber = "5551234567")
+
+        val result = config.forCheckoutSession(state)
+
+        assertThat(result.shippingDetails?.phoneNumber).isEqualTo("5550000000")
+    }
+
+    @Test
+    fun `sets billing phone from state when defaultBillingDetails is null`() {
+        val config = configuration()
+        val state = state(billingPhoneNumber = "5559876543")
+
+        val result = config.forCheckoutSession(state)
+
+        assertThat(result.defaultBillingDetails?.phone).isEqualTo("5559876543")
+    }
+
+    @Test
+    fun `preserves merchant billing phone when already set`() {
+        val config = configuration(
+            defaultBillingDetails = PaymentSheet.BillingDetails(phone = "5550000000"),
+        )
+        val state = state(billingPhoneNumber = "5559876543")
+
+        val result = config.forCheckoutSession(state)
+
+        assertThat(result.defaultBillingDetails?.phone).isEqualTo("5550000000")
+    }
+
+    @Test
     fun `preserves other configuration properties`() {
         val config = PaymentSheet.Configuration.Builder("Test Merchant")
             .primaryButtonLabel("Pay now")
@@ -290,6 +334,8 @@ class ConfigurationKtxTest {
         customerEmail: String? = null,
         shippingName: String? = null,
         billingName: String? = null,
+        shippingPhoneNumber: String? = null,
+        billingPhoneNumber: String? = null,
         shippingAddress: Address.State? = null,
         billingAddress: Address.State? = null,
     ): InternalState {
@@ -300,6 +346,8 @@ class ConfigurationKtxTest {
             ),
             shippingName = shippingName,
             billingName = billingName,
+            shippingPhoneNumber = shippingPhoneNumber,
+            billingPhoneNumber = billingPhoneNumber,
             shippingAddress = shippingAddress,
             billingAddress = billingAddress,
         )
