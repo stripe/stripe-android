@@ -73,4 +73,76 @@ class MLKitTextRecognizerTest {
         val result = MLKitTextRecognizer.extractCardNumber("3400 000000 00009")
         assertThat(result).isEqualTo("340000000000009")
     }
+
+    @Test
+    @SmallTest
+    fun `extractExpiry with MM slash YY format returns expiry`() {
+        val result = MLKitTextRecognizer.extractExpiry("12/28")
+        assertThat(result).isEqualTo(SSDOcr.ExpiryDate(12, 2028))
+    }
+
+    @Test
+    @SmallTest
+    fun `extractExpiry with MM slash YYYY format returns expiry`() {
+        val result = MLKitTextRecognizer.extractExpiry("12/2028")
+        assertThat(result).isEqualTo(SSDOcr.ExpiryDate(12, 2028))
+    }
+
+    @Test
+    @SmallTest
+    fun `extractExpiry with dash separator returns expiry`() {
+        val result = MLKitTextRecognizer.extractExpiry("03-29")
+        assertThat(result).isEqualTo(SSDOcr.ExpiryDate(3, 2029))
+    }
+
+    @Test
+    @SmallTest
+    fun `extractExpiry with dot separator returns expiry`() {
+        val result = MLKitTextRecognizer.extractExpiry("06.30")
+        assertThat(result).isEqualTo(SSDOcr.ExpiryDate(6, 2030))
+    }
+
+    @Test
+    @SmallTest
+    fun `extractExpiry with surrounding text returns expiry`() {
+        val result = MLKitTextRecognizer.extractExpiry("VALID THRU 12/28 CVV 123")
+        assertThat(result).isEqualTo(SSDOcr.ExpiryDate(12, 2028))
+    }
+
+    @Test
+    @SmallTest
+    fun `extractExpiry with full card text returns expiry`() {
+        val result = MLKitTextRecognizer.extractExpiry(
+            "4847 1860 9511 8770\nVALID THRU\n03/29\nJOHN DOE"
+        )
+        assertThat(result).isEqualTo(SSDOcr.ExpiryDate(3, 2029))
+    }
+
+    @Test
+    @SmallTest
+    fun `extractExpiry with invalid month returns null`() {
+        val result = MLKitTextRecognizer.extractExpiry("13/28")
+        assertThat(result).isNull()
+    }
+
+    @Test
+    @SmallTest
+    fun `extractExpiry with expired date returns null`() {
+        val result = MLKitTextRecognizer.extractExpiry("01/20")
+        assertThat(result).isNull()
+    }
+
+    @Test
+    @SmallTest
+    fun `extractExpiry with no date returns null`() {
+        val result = MLKitTextRecognizer.extractExpiry("Hello World")
+        assertThat(result).isNull()
+    }
+
+    @Test
+    @SmallTest
+    fun `extractExpiry with spaces around separator returns expiry`() {
+        val result = MLKitTextRecognizer.extractExpiry("12 / 28")
+        assertThat(result).isEqualTo(SSDOcr.ExpiryDate(12, 2028))
+    }
 }

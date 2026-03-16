@@ -38,26 +38,37 @@ internal sealed class MainLoopState(timeSource: TimeSource) : MachineState(timeS
         } else {
             OcrFound(
                 timeSource = timeSource,
-                pan = transition.pan
+                pan = transition.pan,
+                initialExpiry = transition.expiry
             )
         }
     }
 
     class OcrFound private constructor(
         timeSource: TimeSource,
-        private val panCounter: ItemCounter<String>
+        private val panCounter: ItemCounter<String>,
+        private val expiryCounts: MutableMap<SSDOcr.ExpiryDate, Int>
     ) : MainLoopState(timeSource) {
 
         internal constructor(
             timeSource: TimeSource,
-            pan: String
+            pan: String,
+            initialExpiry: SSDOcr.ExpiryDate? = null
         ) : this(
             timeSource,
-            ItemCounter(pan)
+            ItemCounter(pan),
+            mutableMapOf<SSDOcr.ExpiryDate, Int>().also { map ->
+                if (initialExpiry != null) {
+                    map[initialExpiry] = 1
+                }
+            }
         )
 
         private val mostLikelyPan: String
             get() = panCounter.getHighestCountItem().second
+
+        internal val mostLikelyExpiry: SSDOcr.ExpiryDate?
+            get() = expiryCounts.maxByOrNull { it.value }?.key
 
         private var lastCardVisible = TimeSource.Monotonic.markNow()
 
@@ -75,13 +86,19 @@ internal sealed class MainLoopState(timeSource: TimeSource) : MachineState(timeS
                 lastCardVisible = TimeSource.Monotonic.markNow()
             }
 
+            val transitionExpiry = transition.expiry
+            if (transitionExpiry != null) {
+                expiryCounts[transitionExpiry] = (expiryCounts[transitionExpiry] ?: 0) + 1
+            }
+
             val pan = mostLikelyPan
 
             return when {
                 isOcrSatisfied() || isTimedOut() ->
                     Finished(
                         timeSource = timeSource,
-                        pan = pan
+                        pan = pan,
+                        expiry = mostLikelyExpiry
                     )
                 isNoCardVisible() ->
                     Initial(timeSource)
@@ -90,7 +107,11 @@ internal sealed class MainLoopState(timeSource: TimeSource) : MachineState(timeS
         }
     }
 
-    class Finished(timeSource: TimeSource, val pan: String) : MainLoopState(timeSource) {
+    class Finished(
+        timeSource: TimeSource,
+        val pan: String,
+        val expiry: SSDOcr.ExpiryDate? = null
+    ) : MainLoopState(timeSource) {
         override suspend fun consumeTransition(
             transition: SSDOcr.Prediction
         ): MainLoopState = this

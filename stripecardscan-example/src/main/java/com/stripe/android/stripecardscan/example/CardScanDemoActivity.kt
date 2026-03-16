@@ -25,8 +25,15 @@ class CardScanDemoActivity : AppCompatActivity() {
 
     private fun onScanFinished(result: CardScanSheetResult) {
         when (result) {
-            is CardScanSheetResult.Completed ->
-                viewBinding.scanResultText.text = result.scannedCard.pan
+            is CardScanSheetResult.Completed -> {
+                val card = result.scannedCard
+                val expiry = if (card.expiryMonth != null && card.expiryYear != null) {
+                    "\nExpiry: %02d/%d".format(card.expiryMonth, card.expiryYear)
+                } else {
+                    ""
+                }
+                viewBinding.scanResultText.text = "PAN: ${card.pan}$expiry"
+            }
             is CardScanSheetResult.Canceled ->
                 viewBinding.scanResultText.text = result.reason.toString()
             is CardScanSheetResult.Failed ->

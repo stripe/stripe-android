@@ -9,5 +9,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 @Deprecated("This is deprecated and will be removed in a future release.")
 data class ScannedCard(
-    val pan: String
+    val pan: String,
+    val expiryMonth: Int? = null,
+    val expiryYear: Int? = null
 ) : Parcelable

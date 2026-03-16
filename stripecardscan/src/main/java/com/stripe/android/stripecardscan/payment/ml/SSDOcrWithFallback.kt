@@ -20,7 +20,8 @@ internal class SSDOcrWithFallback(
         if (primary != null) {
             val result = primary.analyze(data, state)
             if (result.pan != null) {
-                return result
+                val expiry = (fallback as? MLKitTextRecognizer)?.analyzeForExpiryOnly(data)
+                return result.copy(expiry = expiry)
             }
         }
         return fallback.analyze(data, state)

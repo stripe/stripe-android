@@ -106,11 +106,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
                 val intent = Intent()
                     .putExtra(
                         INTENT_PARAM_RESULT,
-                        CardScanSheetResult.Completed(
-                            ScannedCard(
-                                pan = card.pan
-                            )
-                        )
+                        CardScanSheetResult.Completed(card)
                     )
                 setResult(RESULT_OK, intent)
             }
@@ -150,7 +146,13 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
                 launch(Dispatchers.Main) {
                     changeScanState(CardScanState.Correct)
                     cameraAdapter.unbindFromLifecycle(this@CardScanActivity)
-                    resultListener.cardScanComplete(ScannedCard(result.pan))
+                    resultListener.cardScanComplete(
+                        ScannedCard(
+                            pan = result.pan,
+                            expiryMonth = result.expiryMonth,
+                            expiryYear = result.expiryYear
+                        )
+                    )
                     closeScanner()
                 }.let { }
             }

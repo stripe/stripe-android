@@ -100,7 +100,19 @@ internal class SSDOcr private constructor(interpreter: InterpreterWrapper) :
 
     data class Input(val ssdOcrImage: MLImage, val cardBitmap: Bitmap)
 
-    data class Prediction(val pan: String?) {
+    data class ExpiryDate(val month: Int, val year: Int) {
+
+        /**
+         * Force a generic toString method to prevent leaking information about this class'
+         * parameters after R8. Without this method, this `data class` will automatically generate a
+         * toString which retains the original names of the parameters even after obfuscation.
+         */
+        override fun toString(): String {
+            return "ExpiryDate"
+        }
+    }
+
+    data class Prediction(val pan: String?, val expiry: ExpiryDate? = null) {
 
         /**
          * Force a generic toString method to prevent leaking information about this class'

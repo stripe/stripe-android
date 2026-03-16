@@ -29,7 +29,9 @@ internal class MainLoopAggregator(
 ) {
 
     internal data class FinalResult(
-        val pan: String
+        val pan: String,
+        val expiryMonth: Int? = null,
+        val expiryYear: Int? = null
     )
 
     internal data class InterimResult(
@@ -54,7 +56,11 @@ internal class MainLoopAggregator(
         )
 
         return if (currentState is MainLoopState.Finished) {
-            interimResult to FinalResult(currentState.pan)
+            interimResult to FinalResult(
+                pan = currentState.pan,
+                expiryMonth = currentState.expiry?.month,
+                expiryYear = currentState.expiry?.year
+            )
         } else {
             interimResult to null
         }

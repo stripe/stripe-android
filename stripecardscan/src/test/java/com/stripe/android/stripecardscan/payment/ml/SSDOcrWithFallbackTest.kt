@@ -80,6 +80,51 @@ class SSDOcrWithFallbackTest {
         assertThat(fakeFallback.closed).isFalse()
     }
 
+    @Test
+    @SmallTest
+    fun `when primary succeeds expiry is null with non-MLKit fallback`() = runScenario(
+        primaryPrediction = SSDOcr.Prediction("4242424242424242")
+    ) {
+        val result = systemUnderTest.analyze(testInput, Unit)
+
+        assertThat(result.pan).isEqualTo("4242424242424242")
+        assertThat(result.expiry).isNull()
+        assertThat(fakePrimary.analyzeCalls.awaitItem()).isSameInstanceAs(testInput)
+    }
+
+    @Test
+    @SmallTest
+    fun `when fallback returns both PAN and expiry result contains both`() = runScenario(
+        primaryPrediction = SSDOcr.Prediction(null),
+        fallbackPrediction = SSDOcr.Prediction(
+            pan = "4847186095118770",
+            expiry = SSDOcr.ExpiryDate(12, 2028)
+        )
+    ) {
+        val result = systemUnderTest.analyze(testInput, Unit)
+
+        assertThat(result.pan).isEqualTo("4847186095118770")
+        assertThat(result.expiry).isEqualTo(SSDOcr.ExpiryDate(12, 2028))
+        assertThat(fakePrimary.analyzeCalls.awaitItem()).isSameInstanceAs(testInput)
+        assertThat(fakeFallback.analyzeCalls.awaitItem()).isSameInstanceAs(testInput)
+    }
+
+    @Test
+    @SmallTest
+    fun `when no primary full fallback returns both PAN and expiry`() = runScenario(
+        includePrimary = false,
+        fallbackPrediction = SSDOcr.Prediction(
+            pan = "4847186095118770",
+            expiry = SSDOcr.ExpiryDate(3, 2029)
+        )
+    ) {
+        val result = systemUnderTest.analyze(testInput, Unit)
+
+        assertThat(result.pan).isEqualTo("4847186095118770")
+        assertThat(result.expiry).isEqualTo(SSDOcr.ExpiryDate(3, 2029))
+        assertThat(fakeFallback.analyzeCalls.awaitItem()).isSameInstanceAs(testInput)
+    }
+
     private fun runScenario(
         primaryPrediction: SSDOcr.Prediction = SSDOcr.Prediction(null),
         fallbackPrediction: SSDOcr.Prediction = SSDOcr.Prediction(null),

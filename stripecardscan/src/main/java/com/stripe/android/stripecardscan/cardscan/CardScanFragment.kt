@@ -90,11 +90,7 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
                 setFragmentResult(
                     CARD_SCAN_FRAGMENT_REQUEST_KEY,
                     bundleOf(
-                        CARD_SCAN_FRAGMENT_BUNDLE_KEY to CardScanSheetResult.Completed(
-                            ScannedCard(
-                                pan = card.pan
-                            )
-                        )
+                        CARD_SCAN_FRAGMENT_BUNDLE_KEY to CardScanSheetResult.Completed(card)
                     )
                 )
                 closeScanner()
@@ -136,7 +132,13 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
                 launch(Dispatchers.Main) {
                     changeScanState(CardScanState.Correct)
                     activity?.let { cameraAdapter.unbindFromLifecycle(it) }
-                    resultListener.cardScanComplete(ScannedCard(result.pan))
+                    resultListener.cardScanComplete(
+                        ScannedCard(
+                            pan = result.pan,
+                            expiryMonth = result.expiryMonth,
+                            expiryYear = result.expiryYear
+                        )
+                    )
                     closeScanner()
                 }.let { }
             }
