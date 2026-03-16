@@ -305,18 +305,18 @@ internal class CardNumberControllerTest {
                         currentItem = TextFieldIcon.Selector.Item(
                             id = CardBrand.Unknown.code,
                             label = R.string.stripe_card_brand_choice_no_selection.resolvableString,
-                            icon = CardBrand.Unknown.icon
+                            icon = CardBrand.Unknown.getCardBrandIconUnpadded()
                         ),
                         items = listOf(
                             TextFieldIcon.Selector.Item(
                                 id = CardBrand.CartesBancaires.code,
                                 label = "Cartes Bancaires".resolvableString,
-                                icon = CardBrand.CartesBancaires.icon
+                                icon = CardBrand.CartesBancaires.getCardBrandIconUnpadded()
                             ),
                             TextFieldIcon.Selector.Item(
                                 id = CardBrand.Visa.code,
                                 label = "Visa".resolvableString,
-                                icon = CardBrand.Visa.icon
+                                icon = CardBrand.Visa.getCardBrandIconUnpadded()
                             ),
                         ),
                         showSelector = true,
@@ -414,18 +414,18 @@ internal class CardNumberControllerTest {
                         currentItem = TextFieldIcon.Selector.Item(
                             id = CardBrand.CartesBancaires.code,
                             label = "Cartes Bancaires".resolvableString,
-                            icon = CardBrand.CartesBancaires.icon
+                            icon = CardBrand.CartesBancaires.getCardBrandIconUnpadded()
                         ),
                         items = listOf(
                             TextFieldIcon.Selector.Item(
                                 id = CardBrand.CartesBancaires.code,
                                 label = "Cartes Bancaires".resolvableString,
-                                icon = CardBrand.CartesBancaires.icon
+                                icon = CardBrand.CartesBancaires.getCardBrandIconUnpadded()
                             ),
                             TextFieldIcon.Selector.Item(
                                 id = CardBrand.Visa.code,
                                 label = "Visa".resolvableString,
-                                icon = CardBrand.Visa.icon
+                                icon = CardBrand.Visa.getCardBrandIconUnpadded()
                             ),
                         ),
                         showSelector = true,
@@ -499,7 +499,7 @@ internal class CardNumberControllerTest {
                 TextFieldIcon.Selector.Item(
                     id = CardBrand.CartesBancaires.code,
                     label = "Cartes Bancaires".resolvableString,
-                    icon = PaymentModelR.drawable.stripe_ic_cartes_bancaires
+                    icon = CardBrand.CartesBancaires.getCardBrandIconUnpadded()
                 )
             )
             idleLooper()
@@ -511,18 +511,18 @@ internal class CardNumberControllerTest {
                         currentItem = TextFieldIcon.Selector.Item(
                             id = CardBrand.CartesBancaires.code,
                             label = "Cartes Bancaires".resolvableString,
-                            icon = CardBrand.CartesBancaires.icon
+                            icon = CardBrand.CartesBancaires.getCardBrandIconUnpadded()
                         ),
                         items = listOf(
                             TextFieldIcon.Selector.Item(
                                 id = CardBrand.CartesBancaires.code,
                                 label = "Cartes Bancaires".resolvableString,
-                                icon = CardBrand.CartesBancaires.icon
+                                icon = CardBrand.CartesBancaires.getCardBrandIconUnpadded()
                             ),
                             TextFieldIcon.Selector.Item(
                                 id = CardBrand.Visa.code,
                                 label = "Visa".resolvableString,
-                                icon = CardBrand.Visa.icon
+                                icon = CardBrand.Visa.getCardBrandIconUnpadded()
                             ),
                         ),
                         showSelector = true,
@@ -548,7 +548,7 @@ internal class CardNumberControllerTest {
                 TextFieldIcon.Selector.Item(
                     id = CardBrand.CartesBancaires.code,
                     label = "Cartes Bancaires".resolvableString,
-                    icon = PaymentModelR.drawable.stripe_ic_cartes_bancaires
+                    icon = CardBrand.CartesBancaires.getCardBrandIconUnpadded()
                 )
             )
             idleLooper()
@@ -611,7 +611,7 @@ internal class CardNumberControllerTest {
                         currentItem = TextFieldIcon.Selector.Item(
                             id = CardBrand.Visa.code,
                             label = "Visa".resolvableString,
-                            icon = CardBrand.Visa.icon
+                            icon = CardBrand.Visa.getCardBrandIconUnpadded()
                         ),
                         items = listOf(
                             TextFieldIcon.Selector.Item(
@@ -620,13 +620,13 @@ internal class CardNumberControllerTest {
                                     com.stripe.android.ui.core.R.string.stripe_card_brand_not_accepted_with_brand,
                                     CardBrand.CartesBancaires.displayName
                                 ),
-                                icon = CardBrand.CartesBancaires.icon,
+                                icon = CardBrand.CartesBancaires.getCardBrandIconUnpadded(),
                                 enabled = false
                             ),
                             TextFieldIcon.Selector.Item(
                                 id = CardBrand.Visa.code,
                                 label = "Visa".resolvableString,
-                                icon = CardBrand.Visa.icon
+                                icon = CardBrand.Visa.getCardBrandIconUnpadded()
                             ),
                         ),
                         showSelector = false,
@@ -703,7 +703,7 @@ internal class CardNumberControllerTest {
                 TextFieldIcon.Selector.Item(
                     id = CardBrand.CartesBancaires.code,
                     label = "Cartes Bancaires".resolvableString,
-                    icon = PaymentModelR.drawable.stripe_ic_cartes_bancaires
+                    icon = CardBrand.CartesBancaires.getCardBrandIconUnpadded()
                 )
             )
             cardNumberController.onValueChange("400000250000100")
@@ -1104,18 +1104,18 @@ internal class CardNumberControllerTest {
             currentItem = TextFieldIcon.Selector.Item(
                 id = CardBrand.CartesBancaires.code,
                 label = "Cartes Bancaires".resolvableString,
-                icon = CardBrand.CartesBancaires.icon
+                icon = CardBrand.CartesBancaires.getCardBrandIconUnpadded()
             ),
             items = listOf(
                 TextFieldIcon.Selector.Item(
                     id = CardBrand.CartesBancaires.code,
                     label = "Cartes Bancaires".resolvableString,
-                    icon = CardBrand.CartesBancaires.icon
+                    icon = CardBrand.CartesBancaires.getCardBrandIconUnpadded()
                 ),
                 TextFieldIcon.Selector.Item(
                     id = CardBrand.Visa.code,
                     label = "Visa".resolvableString,
-                    icon = CardBrand.Visa.icon
+                    icon = CardBrand.Visa.getCardBrandIconUnpadded()
                 ),
             ),
             showSelector = true,
@@ -1127,18 +1127,18 @@ internal class CardNumberControllerTest {
             currentItem = TextFieldIcon.Selector.Item(
                 id = CardBrand.Unknown.code,
                 label = R.string.stripe_card_brand_choice_no_selection.resolvableString,
-                icon = CardBrand.Unknown.icon
+                icon = CardBrand.Unknown.getCardBrandIconUnpadded()
             ),
             items = listOf(
                 TextFieldIcon.Selector.Item(
                     id = CardBrand.CartesBancaires.code,
                     label = "Cartes Bancaires".resolvableString,
-                    icon = CardBrand.CartesBancaires.icon
+                    icon = CardBrand.CartesBancaires.getCardBrandIconUnpadded()
                 ),
                 TextFieldIcon.Selector.Item(
                     id = CardBrand.Visa.code,
                     label = "Visa".resolvableString,
-                    icon = CardBrand.Visa.icon
+                    icon = CardBrand.Visa.getCardBrandIconUnpadded()
                 ),
             ),
             showSelector = true,

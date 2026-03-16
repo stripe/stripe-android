@@ -497,7 +497,7 @@ internal class DefaultCardNumberController(
         val noSelection = TextFieldIcon.Selector.Item(
             id = CardBrand.Unknown.code,
             label = PaymentsCoreR.string.stripe_card_brand_choice_no_selection.resolvableString,
-            icon = CardBrand.Unknown.icon
+            icon = CardBrand.Unknown.getCardBrandIconUnpadded()
         )
 
         val selected = if (brands.size == 1) {
@@ -513,7 +513,7 @@ internal class DefaultCardNumberController(
                 else -> TextFieldIcon.Selector.Item(
                     id = chosen.code,
                     label = chosen.displayName.resolvableString,
-                    icon = chosen.icon
+                    icon = chosen.getCardBrandIconUnpadded()
                 )
             }
         }
@@ -530,7 +530,7 @@ internal class DefaultCardNumberController(
                         brand.displayName
                     )
                 },
-                icon = brand.icon,
+                icon = brand.getCardBrandIconUnpadded(),
                 enabled = enabled
             )
         }
