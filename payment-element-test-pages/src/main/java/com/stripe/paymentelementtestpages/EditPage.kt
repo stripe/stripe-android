@@ -52,44 +52,12 @@ class EditPage(
             .performClick()
     }
 
-    fun assertInDropdownButDisabled(cardBrand: String) {
-        // Click on the dropdown menu to expand it
-        composeTestRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
-            .performClick()
-
-        // Attempt to find the node with the specified cardBrand,
-        // assert that it is present (displayed) and disabled
-        composeTestRule.onNodeWithTag("${TEST_TAG_DROP_DOWN_CHOICE}_$cardBrand")
-            .assertIsDisplayed()
-            .assertIsNotEnabled()
-
-        // Optionally, close the dropdown menu if it's still open
-        composeTestRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
-            .performClick()
-    }
-
     fun assertInSelectorButDisabled(cardBrand: String) {
         // Attempt to find the node with the specified cardBrand,
         // assert that it is present (displayed) and disabled
         composeTestRule.onNodeWithTag("${SELECTOR_ITEM_TEST_TAG}_$cardBrand")
             .assertIsDisplayed()
             .assertIsNotEnabled()
-    }
-
-    fun assertInDropdownAndEnabled(cardBrand: String) {
-        // Click on the dropdown menu to expand it
-        composeTestRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
-            .performClick()
-
-        // Attempt to find the node with the specified cardBrand,
-        // assert that it is present (displayed) and enabled
-        composeTestRule.onNodeWithTag("${TEST_TAG_DROP_DOWN_CHOICE}_$cardBrand")
-            .assertIsDisplayed()
-            .assertIsEnabled()
-
-        // Optionally, close the dropdown menu if it's still open
-        composeTestRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
-            .performClick()
     }
 
     fun assertInSelectorAndEnabled(cardBrand: String) {
