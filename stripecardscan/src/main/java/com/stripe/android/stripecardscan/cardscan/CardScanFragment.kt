@@ -39,13 +39,19 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlin.math.min
+import androidx.annotation.RestrictTo
 import kotlin.math.roundToInt
 import com.stripe.android.camera.R as CameraR
 
 private val MINIMUM_RESOLUTION = Size(1067, 600) // minimum size of OCR
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val CARD_SCAN_FRAGMENT_REQUEST_KEY = "CardScanRequestKey"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val CARD_SCAN_FRAGMENT_BUNDLE_KEY = "CardScanBundleKey"
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
 
     override val minimumAnalysisResolution = MINIMUM_RESOLUTION

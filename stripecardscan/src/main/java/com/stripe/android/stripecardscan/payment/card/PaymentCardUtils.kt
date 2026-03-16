@@ -3,6 +3,7 @@
 package com.stripe.android.stripecardscan.payment.card
 
 import androidx.annotation.CheckResult
+import androidx.annotation.RestrictTo
 
 /*
  * Payment cards always have a PAN (Primary Account Number) on one side of the card. This PAN
@@ -343,6 +344,7 @@ private fun getIssuerData(issuer: CardIssuer): List<IssuerData> =
 /**
  * Adds support for a new [CardIssuer]
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @CheckResult
 fun supportCardIssuer(
     iins: IntRange,

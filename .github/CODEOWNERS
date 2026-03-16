@@ -10,11 +10,9 @@
 /payments-ui-core/ @stripe/android-payments-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
 /paymentsheet/ @stripe/android-payments-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
 /paymentsheet-example/ @stripe/android-payments-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
-
-# CardScan SDK
-/stripecardscan/ @stripe/android-cardscan-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
-/stripecardscan-example/ @stripe/android-cardscan-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
-/stripecardscan-tflite/ @stripe/android-cardscan-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
+/stripecardscan/ @stripe/android-payments-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
+/stripecardscan-example/ @stripe/android-payments-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
+/stripecardscan-tflite/ @stripe/android-payments-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
 
 # Identity SDK
 /identity/ @stripe/android-identity-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers

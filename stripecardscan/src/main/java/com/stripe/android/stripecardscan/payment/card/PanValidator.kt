@@ -1,8 +1,11 @@
 package com.stripe.android.stripecardscan.payment.card
 
+import androidx.annotation.RestrictTo
+
 /**
  * A class that provides a method to determine if a PAN is valid.
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface PanValidator {
     fun isValidPan(pan: String): Boolean
 
@@ -23,6 +26,7 @@ private class CompositePanValidator(
 /**
  * A [PanValidator] that ensures the PAN is of a valid length.
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object LengthPanValidator : PanValidator {
     override fun isValidPan(pan: String): Boolean {
         val iinData = getIssuerData(pan) ?: return false
@@ -35,6 +39,7 @@ object LengthPanValidator : PanValidator {
  *
  * see https://en.wikipedia.org/wiki/Luhn_algorithm
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object LuhnPanValidator : PanValidator {
     override fun isValidPan(pan: String): Boolean {
         if (pan.isEmpty()) {
