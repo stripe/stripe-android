@@ -24,6 +24,12 @@ internal sealed class MainLoopState(timeSource: TimeSource) : MachineState(timeS
          * numbers.
          */
         const val DESIRED_OCR_AGREEMENT = 3
+
+        /**
+         * The minimum number of identical expiry detections required before accepting an expiry
+         * date. This filters out OCR noise where a misread expiry is seen only once.
+         */
+        const val DESIRED_EXPIRY_AGREEMENT = 2
     }
 
     internal abstract suspend fun consumeTransition(
@@ -68,7 +74,10 @@ internal sealed class MainLoopState(timeSource: TimeSource) : MachineState(timeS
             get() = panCounter.getHighestCountItem().second
 
         internal val mostLikelyExpiry: SSDOcr.ExpiryDate?
-            get() = expiryCounts.maxByOrNull { it.value }?.key
+            get() = expiryCounts.entries
+                .filter { it.value >= DESIRED_EXPIRY_AGREEMENT }
+                .maxByOrNull { it.value }
+                ?.key
 
         private var lastCardVisible = TimeSource.Monotonic.markNow()
 

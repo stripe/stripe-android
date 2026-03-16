@@ -2,7 +2,10 @@ package com.stripe.android.stripecardscan.payment.ml
 
 import androidx.test.filters.SmallTest
 import com.google.common.truth.Truth.assertThat
+import com.google.mlkit.vision.text.Text
 import org.junit.Test
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 class MLKitTextRecognizerTest {
 
@@ -144,5 +147,123 @@ class MLKitTextRecognizerTest {
     fun `extractExpiry with spaces around separator returns expiry`() {
         val result = MLKitTextRecognizer.extractExpiry("12 / 28")
         assertThat(result).isEqualTo(SSDOcr.ExpiryDate(12, 2028))
+    }
+
+    // --- Expiry max future year cap tests ---
+
+    @Test
+    @SmallTest
+    fun `extractExpiry with date too far in future returns null`() {
+        // 12/89 is more than 10 years from now
+        val result = MLKitTextRecognizer.extractExpiry("12/89")
+        assertThat(result).isNull()
+    }
+
+    @Test
+    @SmallTest
+    fun `extractExpiry with date within future range returns expiry`() {
+        val result = MLKitTextRecognizer.extractExpiry("12/28")
+        assertThat(result).isEqualTo(SSDOcr.ExpiryDate(12, 2028))
+    }
+
+    @Test
+    @SmallTest
+    fun `extractExpiry at boundary of future cap returns expiry`() {
+        // Current year is 2026, so 2036 is exactly 10 years out — should be accepted
+        val result = MLKitTextRecognizer.extractExpiry("12/36")
+        assertThat(result).isEqualTo(SSDOcr.ExpiryDate(12, 2036))
+    }
+
+    @Test
+    @SmallTest
+    fun `extractExpiry one year past boundary returns null`() {
+        // Current year is 2026, so 2037 is 11 years out — should be rejected
+        val result = MLKitTextRecognizer.extractExpiry("01/37")
+        assertThat(result).isNull()
+    }
+
+    // --- Consecutive digit-group assembly tests ---
+
+    private fun createMockTextResult(vararg lineTexts: String): Text {
+        val lines = lineTexts.map { lineText ->
+            mock<Text.Line>().also { whenever(it.text).thenReturn(lineText) }
+        }
+        val block = mock<Text.TextBlock>().also {
+            whenever(it.lines).thenReturn(lines)
+        }
+        return mock<Text>().also {
+            whenever(it.textBlocks).thenReturn(listOf(block))
+            whenever(it.text).thenReturn(lineTexts.joinToString("\n"))
+        }
+    }
+
+    private fun createMockTextResultMultiBlock(vararg blockLineTexts: List<String>): Text {
+        val blocks = blockLineTexts.map { lineTexts ->
+            val lines = lineTexts.map { lineText ->
+                mock<Text.Line>().also { whenever(it.text).thenReturn(lineText) }
+            }
+            mock<Text.TextBlock>().also {
+                whenever(it.lines).thenReturn(lines)
+            }
+        }
+        val fullText = blockLineTexts.flatMap { it }.joinToString("\n")
+        return mock<Text>().also {
+            whenever(it.textBlocks).thenReturn(blocks)
+            whenever(it.text).thenReturn(fullText)
+        }
+    }
+
+    @Test
+    @SmallTest
+    fun `extractCardNumberFromGroups assembles 4 groups for Visa`() {
+        val textResult = createMockTextResultMultiBlock(
+            listOf("4847 1860"),
+            listOf("9511 8770")
+        )
+        val result = MLKitTextRecognizer.extractCardNumberFromGroups(textResult)
+        assertThat(result).isEqualTo("4847186095118770")
+    }
+
+    @Test
+    @SmallTest
+    fun `extractCardNumberFromGroups assembles 3 groups for Amex`() {
+        val textResult = createMockTextResultMultiBlock(
+            listOf("3400 000000"),
+            listOf("00009")
+        )
+        val result = MLKitTextRecognizer.extractCardNumberFromGroups(textResult)
+        assertThat(result).isEqualTo("340000000000009")
+    }
+
+    @Test
+    @SmallTest
+    fun `extractCardNumberFromGroups returns null for invalid groups`() {
+        val textResult = createMockTextResultMultiBlock(
+            listOf("1234 5678"),
+            listOf("9012 3456")
+        )
+        val result = MLKitTextRecognizer.extractCardNumberFromGroups(textResult)
+        assertThat(result).isNull()
+    }
+
+    @Test
+    @SmallTest
+    fun `extractCardNumber with Text tries flat string first then falls through to groups`() {
+        // Card split across two blocks — flat text won't have the full number
+        // in a single regex match, but group assembly should find it
+        val textResult = createMockTextResultMultiBlock(
+            listOf("4847 1860"),
+            listOf("9511 8770")
+        )
+        val result = MLKitTextRecognizer.extractCardNumber(textResult)
+        assertThat(result).isEqualTo("4847186095118770")
+    }
+
+    @Test
+    @SmallTest
+    fun `extractCardNumber with Text uses flat string when number is in one block`() {
+        val textResult = createMockTextResult("4847 1860 9511 8770")
+        val result = MLKitTextRecognizer.extractCardNumber(textResult)
+        assertThat(result).isEqualTo("4847186095118770")
     }
 }

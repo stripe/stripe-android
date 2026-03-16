@@ -17,8 +17,8 @@ import com.stripe.android.camera.scanui.ScanFlow
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopAggregator
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopState
 import com.stripe.android.stripecardscan.payment.ml.SSDOcr
-import com.stripe.android.stripecardscan.payment.ml.SSDOcrModelManager
 import com.stripe.android.stripecardscan.payment.ml.SSDOcrWithFallback
+import java.io.Closeable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -49,7 +49,7 @@ internal abstract class CardScanFlow(
         >? = null
 
     private var mainLoopJob: Job? = null
-    private var fallbackFactory: SSDOcrWithFallback.Factory? = null
+    private var fallbackFactory: Closeable? = null
 
     override fun startFlow(
         context: Context,
@@ -70,14 +70,7 @@ internal abstract class CardScanFlow(
             // make this result aggregator pause and reset when the lifecycle pauses.
             it.bindToLifecycle(lifecycleOwner)
 
-            val factory = SSDOcrWithFallback.Factory(
-                context,
-                SSDOcrModelManager.fetchModel(
-                    context,
-                    forImmediateUse = true,
-                    isOptional = false
-                )
-            )
+            val factory = SSDOcrWithFallback.MlKitOnlyFactory()
             fallbackFactory = factory
             val analyzerPool = AnalyzerPool.of(factory)
             mainLoopAnalyzerPool = analyzerPool

@@ -11,7 +11,7 @@ class MainLoopStateTest {
 
     @Test
     @SmallTest
-    fun `Initial passes expiry through to OcrFound`() = runTest {
+    fun `Initial passes expiry through to OcrFound but requires consensus`() = runTest {
         val state = MainLoopState.Initial(TimeSource.Monotonic)
         val expiry = SSDOcr.ExpiryDate(12, 2028)
 
@@ -21,7 +21,8 @@ class MainLoopStateTest {
 
         assertThat(next).isInstanceOf(MainLoopState.OcrFound::class.java)
         val ocrFound = next as MainLoopState.OcrFound
-        assertThat(ocrFound.mostLikelyExpiry).isEqualTo(expiry)
+        // Expiry seen only once — below the minimum consensus of 2
+        assertThat(ocrFound.mostLikelyExpiry).isNull()
     }
 
     @Test
@@ -120,5 +121,53 @@ class MainLoopStateTest {
         )
 
         assertThat(next).isInstanceOf(MainLoopState.Initial::class.java)
+    }
+
+    @Test
+    @SmallTest
+    fun `Finished with expiry seen only once returns null expiry`() = runTest {
+        val state = MainLoopState.Initial(TimeSource.Monotonic)
+        val expiry = SSDOcr.ExpiryDate(6, 2030)
+
+        // First transition with expiry — creates OcrFound with expiry count = 1
+        var current = state.consumeTransition(
+            SSDOcr.Prediction(pan = "4242424242424242", expiry = expiry)
+        )
+        // Two more PAN-only transitions to trigger Finished
+        current = current.consumeTransition(
+            SSDOcr.Prediction(pan = "4242424242424242")
+        )
+        current = current.consumeTransition(
+            SSDOcr.Prediction(pan = "4242424242424242")
+        )
+
+        assertThat(current).isInstanceOf(MainLoopState.Finished::class.java)
+        val finished = current as MainLoopState.Finished
+        // Expiry was only seen once — below consensus threshold of 2
+        assertThat(finished.expiry).isNull()
+    }
+
+    @Test
+    @SmallTest
+    fun `Finished with expiry seen twice returns expiry`() = runTest {
+        val state = MainLoopState.Initial(TimeSource.Monotonic)
+        val expiry = SSDOcr.ExpiryDate(6, 2030)
+
+        // First transition with expiry
+        var current = state.consumeTransition(
+            SSDOcr.Prediction(pan = "4242424242424242", expiry = expiry)
+        )
+        // Second transition with same expiry — meets consensus threshold
+        current = current.consumeTransition(
+            SSDOcr.Prediction(pan = "4242424242424242", expiry = expiry)
+        )
+        // Third PAN to trigger Finished
+        current = current.consumeTransition(
+            SSDOcr.Prediction(pan = "4242424242424242")
+        )
+
+        assertThat(current).isInstanceOf(MainLoopState.Finished::class.java)
+        val finished = current as MainLoopState.Finished
+        assertThat(finished.expiry).isEqualTo(expiry)
     }
 }

@@ -66,4 +66,25 @@ internal class SSDOcrWithFallback(
             private const val DEFAULT_THREADS = 4
         }
     }
+
+    /**
+     * Factory that creates MLKit-only [SSDOcrWithFallback] instances without
+     * loading the custom SSD OCR model. Useful for testing MLKit recognition
+     * in isolation.
+     */
+    class MlKitOnlyFactory :
+        AnalyzerFactory<SSDOcr.Input, Any, SSDOcr.Prediction, SSDOcrWithFallback>, Closeable {
+
+        private val sharedMlKitRecognizer = MLKitTextRecognizer(
+            MLKitTextRecognizer.createTextRecognizer()
+        )
+
+        override suspend fun newInstance(): SSDOcrWithFallback {
+            return SSDOcrWithFallback(primary = null, fallback = sharedMlKitRecognizer)
+        }
+
+        override fun close() {
+            sharedMlKitRecognizer.close()
+        }
+    }
 }
