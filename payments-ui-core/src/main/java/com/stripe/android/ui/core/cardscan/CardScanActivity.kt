@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.BundleCompat
-import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.stripecardscan.cardscan.CardScanConfiguration
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.ui.core.StripeCardScanProxy
@@ -34,7 +33,6 @@ internal class CardScanActivity : AppCompatActivity() {
         StripeCardScanProxy.create(
             this,
             this::onScanFinished,
-            ErrorReporter.createFallbackInstance(applicationContext, setOf("CardScan"))
         ).present(config)
     }
 

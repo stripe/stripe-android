@@ -10,7 +10,6 @@ MODULES=(
   "stripe-core"
   "identity"
   "financial-connections"
-  "stripecardscan"
 )
 
 #

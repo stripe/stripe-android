@@ -6,7 +6,6 @@ import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.cards.CardAccountRangeRepository
-import com.stripe.android.ui.core.DefaultIsStripeCardScanAvailable
 import com.stripe.android.ui.core.cardscan.CardScanResult
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -33,8 +32,6 @@ class CardDetailsSectionController(
         cardBrandFilter,
         cardFundingFilter,
     )
-
-    internal val isStripeCardScanAvailable = DefaultIsStripeCardScanAvailable()
 
     fun shouldAutomaticallyLaunchCardScan(): Boolean {
         return cardDetailsAction == null &&

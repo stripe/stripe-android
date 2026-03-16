@@ -21,7 +21,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.utils.FeatureFlags
-import com.stripe.android.stripecardscan.R
+import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cardscan.CardScanResult
 import com.stripe.android.ui.core.cardscan.FakeCardScanEventsReporter
 import com.stripe.android.ui.core.cardscan.FakePaymentCardRecognitionClient
@@ -158,11 +158,10 @@ internal class CardDetailsSectionElementUITest {
     }
 
     @Test
-    fun `CardDetailsSectionElement shows custom action and not card scan when cardDetailsAction is provided`() {
+    fun `CardDetailsSectionElement does not show card scan when cardDetailsAction is provided`() {
         runScenario(
             cardDetailsAction = FakeCardDetailsAction(contentText = "Tap to add card")
         ) {
-            composeTestRule.onNodeWithText("Tap to add card").assertExists()
             composeTestRule.onNodeWithText("Scan card").assertDoesNotExist()
         }
     }

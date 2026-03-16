@@ -2,11 +2,22 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.FLASHLIGHT" />
+
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
+
     <application>
         <activity
             android:name=".cardscan.CardScanActivity"
             android:theme="@style/StripePaymentSheetDefaultTheme"
             android:exported="false" />
+
+        <activity
+            android:name="com.stripe.android.stripecardscan.cardscan.CardScanActivity"
+            android:screenOrientation="nosensor"
+            android:theme="@style/StripeCardScanDefaultTheme" />
     </application>
 
     <uses-sdk tools:overrideLibrary="com.google.android.libraries.places,com.google.android.gms.common" />

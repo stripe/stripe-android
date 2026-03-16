@@ -9,7 +9,7 @@ dependencies {
     implementation project(":stripe-core")
     implementation project(":payments-core")
     implementation project(":stripe-ui-core")
-    compileOnly project(":stripecardscan")
+    implementation project(":camera-core")
     compileOnly libs.places
 
     implementation libs.androidx.constraintLayout
@@ -19,6 +19,9 @@ dependencies {
     implementation libs.material
     implementation libs.dagger
     ksp libs.daggerCompiler
+
+    implementation libs.androidx.fragment
+    implementation libs.mlKitTextRecognition
 
     implementation libs.compose.ui
     implementation libs.compose.foundation
@@ -37,19 +40,20 @@ dependencies {
     implementation libs.playServicesWallet
 
     testImplementation project(':payments-core-testing')
-    testImplementation project(':stripecardscan')
     testImplementation libs.places
     testImplementation testLibs.androidx.archCore
     testImplementation testLibs.androidx.core
     testImplementation testLibs.androidx.fragment
     testImplementation testLibs.androidx.truth
     testImplementation testLibs.androidx.composeUi
+    testImplementation testLibs.androidx.testRunner
     testImplementation testLibs.hamcrest
     testImplementation testLibs.junit
     testImplementation testLibs.json
     testImplementation testLibs.kotlin.annotations
     testImplementation testLibs.kotlin.coroutines
     testImplementation testLibs.kotlin.junit
+    testImplementation testLibs.kotlin.test
     testImplementation testLibs.mockito.core
     testImplementation testLibs.mockito.inline
     testImplementation testLibs.mockito.kotlin

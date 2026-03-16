@@ -4,16 +4,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleOwner
-import com.stripe.android.TestFactory
 import com.stripe.android.stripecardscan.cardscan.CardScanConfiguration
 import com.stripe.android.stripecardscan.cardscan.CardScanSheet
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
-import com.stripe.android.testing.FakeErrorReporter
 import org.junit.Test
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 class StripeCardScanProxyTest {
@@ -22,7 +18,6 @@ class StripeCardScanProxyTest {
             "com.stripe.android.stripecardscan.cardscan.CardScanSheet"
     }
 
-    private val mockIsStripeCardScanAvailable: IsStripeCardScanAvailable = mock()
     private val mockFragment: Fragment = mock()
     private val mockActivity: AppCompatActivity = mock()
 
@@ -42,67 +37,25 @@ class StripeCardScanProxyTest {
     }
 
     @Test
-    fun `StripeCardScan SDK availability returns null when connections module is not loaded`() {
+    fun `StripeCardScan proxy returns provided proxy for fragment`() {
         assertTrue(
             StripeCardScanProxy.create(
                 fragment = mockFragment,
                 onFinished = {},
-                isStripeCardScanAvailable = mockIsStripeCardScanAvailable,
-                errorReporter = FakeErrorReporter(),
-            ) is UnsupportedStripeCardScanProxy
-        )
-        assertTrue(
-            StripeCardScanProxy.create(
-                activity = mockActivity,
-                onFinished = {},
-                isStripeCardScanAvailable = mockIsStripeCardScanAvailable,
-                errorReporter = FakeErrorReporter(),
-            ) is UnsupportedStripeCardScanProxy
-        )
-    }
-
-    @Test
-    fun `StripeCardScan SDK availability returns sdk when stripecardscan module is loaded`() {
-        whenever(mockIsStripeCardScanAvailable()).thenAnswer { true }
-
-        assertTrue(
-            StripeCardScanProxy.create(
-                fragment = mockFragment,
-                onFinished = {},
-                isStripeCardScanAvailable = mockIsStripeCardScanAvailable,
                 provider = { FakeProxy() },
-                errorReporter = FakeErrorReporter(),
-            ) is FakeProxy
-        )
-        assertTrue(
-            StripeCardScanProxy.create(
-                activity = mockActivity,
-                onFinished = {},
-                isStripeCardScanAvailable = mockIsStripeCardScanAvailable,
-                provider = { FakeProxy() },
-                errorReporter = FakeErrorReporter(),
             ) is FakeProxy
         )
     }
 
     @Test
-    fun `calling present on UnsupportedStripeCardScanProxy throws an exception`() {
-        assertFailsWith<IllegalStateException> {
-            StripeCardScanProxy.create(
-                fragment = mockFragment,
-                onFinished = {},
-                isStripeCardScanAvailable = mockIsStripeCardScanAvailable,
-                errorReporter = FakeErrorReporter(),
-            ).present(TestFactory.cardScanConfiguration)
-        }
-        assertFailsWith<IllegalStateException> {
+    fun `StripeCardScan proxy returns provided proxy for activity`() {
+        assertTrue(
             StripeCardScanProxy.create(
                 activity = mockActivity,
                 onFinished = {},
-                isStripeCardScanAvailable = mockIsStripeCardScanAvailable,
-                errorReporter = FakeErrorReporter(),
-            ).present(TestFactory.cardScanConfiguration)
-        }
+                provider = { FakeProxy() },
+            ) is FakeProxy
+        )
     }
 
     @Test

@@ -41,7 +41,7 @@ internal fun ScanCardButtonUI(
     launchOptions: ActivityOptionsCompat? = null,
     controller: CardDetailsSectionController
 ) {
-    if (controller.isStripeCardScanAvailable() || FeatureFlags.cardScanGooglePayMigration.isEnabled) {
+    if (controller.cardDetailsAction == null) {
         val context = LocalContext.current
         val cardScanLauncher: ManagedActivityResultLauncher<CardScanContract.Args, CardScanSheetResult>?
         val cardScanGoogleLauncher: CardScanGoogleLauncher?

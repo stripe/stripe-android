@@ -17,7 +17,6 @@ import com.google.android.gms.wallet.CreditCardExpirationDate
 import com.google.android.gms.wallet.PaymentCardRecognitionResult
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.utils.FeatureFlags
-import com.stripe.android.ui.core.DefaultIsStripeCardScanAvailable
 import com.stripe.android.ui.core.cardscan.FakeCardScanEventsReporter
 import com.stripe.android.ui.core.cardscan.FakePaymentCardRecognitionClient
 import com.stripe.android.ui.core.cardscan.LocalCardScanEventsReporter
@@ -38,8 +37,7 @@ internal class ScanCardButtonUITest {
     val composeTestRule = createComposeRule()
 
     @Test
-    fun `ScanCardButtonUI should launch legacy launcher when stripe card scan is available`() = runScenario(
-        isStripeCardScanAvailable = true,
+    fun `ScanCardButtonUI should launch legacy launcher when Google migration is disabled`() = runScenario(
         isCardScanGooglePayMigrationEnabled = false,
     ) {
         composeTestRule.onNodeWithText("Scan card").performClick()
@@ -48,7 +46,6 @@ internal class ScanCardButtonUITest {
 
     @Test
     fun `ScanCardButtonUI should launch Google launcher when Google migration is enabled and available`() = runScenario(
-        isStripeCardScanAvailable = true,
         isCardScanGooglePayMigrationEnabled = true,
         isFetchClientSucceed = true,
     ) {
@@ -58,17 +55,8 @@ internal class ScanCardButtonUITest {
 
     @Test
     fun `ScanCardButtonUI hidden when Google migration is enabled but not available`() = runScenario(
-        isStripeCardScanAvailable = true,
         isCardScanGooglePayMigrationEnabled = true,
         isFetchClientSucceed = false,
-    ) {
-        composeTestRule.onNodeWithText("Scan card").assertDoesNotExist()
-    }
-
-    @Test
-    fun `ScanCardButtonUI hidden when card scan is disabled`() = runScenario(
-        isStripeCardScanAvailable = false,
-        isCardScanGooglePayMigrationEnabled = false,
     ) {
         composeTestRule.onNodeWithText("Scan card").assertDoesNotExist()
     }
@@ -76,19 +64,12 @@ internal class ScanCardButtonUITest {
     // Create mock controller for visibility tests
     private fun createMockController(
         cardScanCall: Turbine<String>,
-        isStripeCardScanAvailable: Boolean
     ): CardDetailsSectionController {
         val controller = mock<CardDetailsSectionController>()
-        val mockIsStripeCardScanAvailable = mock<DefaultIsStripeCardScanAvailable>()
         val mockCardDetailsElement = mock<CardDetailsElement>()
         val mockCardDetailsController = mock<CardDetailsController>()
         val mockNumberElement = mock<CardNumberElement>()
         val mockNumberElementController = mock<CardNumberController>()
-
-        whenever(controller.isStripeCardScanAvailable).thenReturn(mockIsStripeCardScanAvailable)
-        whenever(mockIsStripeCardScanAvailable.invoke()).thenReturn(isStripeCardScanAvailable)
-
-        whenever(controller.elementsSessionId).thenReturn("test_session")
 
         whenever(controller.cardDetailsElement).thenReturn(mockCardDetailsElement)
         whenever(mockCardDetailsElement.controller).thenReturn(mockCardDetailsController)
@@ -124,7 +105,6 @@ internal class ScanCardButtonUITest {
     )
 
     private fun runScenario(
-        isStripeCardScanAvailable: Boolean = true,
         isCardScanGooglePayMigrationEnabled: Boolean = true,
         isFetchClientSucceed: Boolean = true,
         block: suspend Scenario.() -> Unit
@@ -164,7 +144,6 @@ internal class ScanCardButtonUITest {
                     enabled = true,
                     controller = createMockController(
                         cardScanCall = cardScanCall,
-                        isStripeCardScanAvailable = isStripeCardScanAvailable
                     )
                 )
             }
