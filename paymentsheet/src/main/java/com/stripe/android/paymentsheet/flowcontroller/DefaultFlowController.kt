@@ -170,6 +170,7 @@ internal class DefaultFlowController @Inject internal constructor(
 
         lifecycleOwner.lifecycleScope.launch {
             confirmationHandler.state.collect { state ->
+                println("Jay delivered confirmationHandler state $state to ${this@DefaultFlowController}")
                 when (state) {
                     is ConfirmationHandler.State.Idle,
                     is ConfirmationHandler.State.Confirming -> Unit
