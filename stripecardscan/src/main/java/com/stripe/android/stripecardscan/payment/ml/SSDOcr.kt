@@ -98,7 +98,7 @@ internal class SSDOcr private constructor(interpreter: InterpreterWrapper) :
         Map<Int, Array<FloatArray>>
         >(interpreter) {
 
-    data class Input(val ssdOcrImage: MLImage)
+    data class Input(val ssdOcrImage: MLImage, val cardBitmap: Bitmap)
 
     data class Prediction(val pan: String?) {
 
@@ -120,11 +120,14 @@ internal class SSDOcr private constructor(interpreter: InterpreterWrapper) :
             cameraPreviewImage: Bitmap,
             previewBounds: Rect,
             cardFinder: Rect
-        ) = Input(
-            cropCameraPreviewToViewFinder(cameraPreviewImage, previewBounds, cardFinder)
+        ): Input {
+            val cardBitmap = cropCameraPreviewToViewFinder(cameraPreviewImage, previewBounds, cardFinder)
                 .scale(Factory.TRAINED_IMAGE_SIZE)
-                .toMLImage(mean = IMAGE_MEAN, std = IMAGE_STD)
-        )
+            return Input(
+                ssdOcrImage = cardBitmap.toMLImage(mean = IMAGE_MEAN, std = IMAGE_STD),
+                cardBitmap = cardBitmap
+            )
+        }
     }
 
     override suspend fun transformData(data: Input): Array<ByteBuffer> =
