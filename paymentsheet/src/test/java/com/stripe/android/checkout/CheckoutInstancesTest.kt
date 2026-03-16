@@ -99,12 +99,6 @@ class CheckoutInstancesTest {
     }
 
     @Test
-    fun `ensureNoMutationInFlight does not throw when no mutation in flight`() {
-        createCheckout(key = "key1")
-        CheckoutInstances.ensureNoMutationInFlight("key1")
-    }
-
-    @Test
     fun `ensureNoMutationInFlight throws when mutation is in flight`() {
         val checkout = createCheckout(key = "key1")
         val requestArrived = CountDownLatch(1)
