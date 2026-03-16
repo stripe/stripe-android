@@ -346,7 +346,7 @@ data class CheckoutResponse(
     @SerialName("terminalLocationId")
     val terminalLocationId: String? = null,
     @SerialName("amount")
-    val amount: Long,
+    val amount: Long? = null,
     @SerialName("paymentMethodTypes")
     val paymentMethodTypes: String? = null,
 ) {

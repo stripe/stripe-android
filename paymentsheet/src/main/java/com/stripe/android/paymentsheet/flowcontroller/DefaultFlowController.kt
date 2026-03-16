@@ -17,6 +17,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.checkout.Checkout
+import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.checkout.forCheckoutSession
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
@@ -35,6 +36,7 @@ import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.toLoginState
 import com.stripe.android.link.utils.determineFallbackPaymentSelectionAfterLinkLogout
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -236,10 +238,9 @@ internal class DefaultFlowController @Inject internal constructor(
         configuration: PaymentSheet.Configuration,
         callback: PaymentSheet.FlowController.ConfigCallback
     ) {
+        CheckoutInstances.ensureNoMutationInFlight(checkout.internalState.key)
         configure(
-            mode = PaymentElementLoader.InitializationMode.CheckoutSession(
-                checkoutSessionResponse = checkout.internalState.checkoutSessionResponse,
-            ),
+            mode = checkout.internalState.initializationMode,
             configuration = configuration.forCheckoutSession(checkout.internalState),
             callback = callback,
         )
@@ -292,6 +293,12 @@ internal class DefaultFlowController @Inject internal constructor(
 
     override fun presentPaymentOptions() {
         withCurrentState { state ->
+            val checkoutSession = state.paymentSheetState.paymentMethodMetadata
+                .integrationMetadata as? IntegrationMetadata.CheckoutSession
+            if (checkoutSession != null) {
+                CheckoutInstances.ensureNoMutationInFlight(checkoutSession.instancesKey)
+            }
+
             val linkConfiguration = state.paymentSheetState.linkConfiguration
             val paymentSelection = viewModel.paymentSelection
             val linkAccountInfo = linkAccountHolder.linkAccountInfo.value

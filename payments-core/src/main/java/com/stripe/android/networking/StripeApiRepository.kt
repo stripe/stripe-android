@@ -648,6 +648,24 @@ class StripeApiRepository @JvmOverloads internal constructor(
         )
     }
 
+    override suspend fun retrieveSavedPaymentMethodFromCardPresentPaymentMethod(
+        cardPresentPaymentMethodId: String,
+        customerId: String,
+        options: ApiRequest.Options
+    ): Result<PaymentMethod> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createGet(
+                url = getSavedPaymentMethodFromCardPresentPaymentMethod(
+                    customerId = customerId,
+                    paymentMethodId = cardPresentPaymentMethodId,
+                ),
+                options = options,
+                params = emptyMap<String, String>()
+            ),
+            jsonParser = PaymentMethodJsonParser()
+        )
+    }
+
     /**
      * Create a [Token] using the input token parameters.
      *
@@ -2335,6 +2353,21 @@ class StripeApiRepository @JvmOverloads internal constructor(
             customerId: String,
         ): String {
             return getApiUrl("elements/customers/$customerId/set_default_payment_method")
+        }
+
+        /**
+         * @return `https://api.stripe.com/v1/elements/customers/:customerId/
+         * saved_payment_method_from_card_present_payment_method/$paymentMethodId`
+         */
+        @VisibleForTesting
+        internal fun getSavedPaymentMethodFromCardPresentPaymentMethod(
+            customerId: String,
+            paymentMethodId: String,
+        ): String {
+            return getApiUrl(
+                "elements/customers/$customerId/" +
+                    "saved_payment_method_from_card_present_payment_method/$paymentMethodId"
+            )
         }
 
         private fun getApiUrl(path: String, vararg args: Any): String {

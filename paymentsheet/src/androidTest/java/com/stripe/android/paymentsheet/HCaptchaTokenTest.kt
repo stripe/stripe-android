@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet
 
 import androidx.test.espresso.Espresso.closeSoftKeyboard
 import androidx.test.espresso.intent.rule.IntentsRule
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -16,7 +15,6 @@ import com.stripe.android.paymentsheet.utils.ProductIntegrationType
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runProductIntegrationTest
-import com.stripe.android.testing.FeatureFlagTestRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
@@ -27,15 +25,10 @@ internal class HCaptchaTokenTest {
     // but it's okay if it takes a bit to happen.
     private val networkRule = NetworkRule(validationTimeout = 5.seconds)
     private val testRules: TestRules = TestRules.create(networkRule = networkRule)
-    private val featureFlagTestRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.enablePassiveCaptcha,
-        isEnabled = true
-    )
 
     @get:Rule
     val rules: RuleChain = RuleChain.emptyRuleChain()
         .around(IntentsRule())
-        .around(featureFlagTestRule)
         .around(testRules)
 
     @Test

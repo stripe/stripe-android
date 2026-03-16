@@ -56,9 +56,8 @@ internal class DefaultTapToAddCollectingInteractor(
         private val paymentMethodMetadata: PaymentMethodMetadata,
         @ViewModelScope private val coroutineScope: CoroutineScope,
         private val tapToAddCollectionHandler: TapToAddCollectionHandler,
-        private val paymentMethodHolder: TapToAddPaymentMethodHolder,
-        private val tapToAddCollectCvcInteractorFactory: TapToAddCollectCvcInteractor.Factory,
-        private val tapToAddConfirmationInteractorFactory: TapToAddConfirmationInteractor.Factory,
+        private val stateHolder: TapToAddStateHolder,
+        private val tapToAddCardAddedInteractorFactory: TapToAddCardAddedInteractor.Factory,
         private val navigator: Provider<TapToAddNavigator>,
         @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     ) : TapToAddCollectingInteractor.Factory {
@@ -68,22 +67,13 @@ internal class DefaultTapToAddCollectingInteractor(
                 coroutineScope = coroutineScope,
                 tapToAddCollectionHandler = tapToAddCollectionHandler,
                 onCollected = { paymentMethod ->
-                    paymentMethodHolder.setPaymentMethod(paymentMethod)
+                    stateHolder.setState(TapToAddStateHolder.State.CardAdded(paymentMethod))
 
                     navigator.get().performAction(
                         action = TapToAddNavigator.Action.NavigateTo(
-                            screen = if (requiresTapToAddCvcCollection(paymentMethodMetadata, paymentMethod)) {
-                                TapToAddNavigator.Screen.CollectCvc(
-                                    interactor = tapToAddCollectCvcInteractorFactory.create(paymentMethod)
-                                )
-                            } else {
-                                TapToAddNavigator.Screen.Confirmation(
-                                    interactor = tapToAddConfirmationInteractorFactory.create(
-                                        paymentMethod = paymentMethod,
-                                        paymentMethodOptionsParams = null,
-                                    ),
-                                )
-                            }
+                            screen = TapToAddNavigator.Screen.CardAdded(
+                                interactor = tapToAddCardAddedInteractorFactory.create(paymentMethod),
+                            ),
                         )
                     )
                 },

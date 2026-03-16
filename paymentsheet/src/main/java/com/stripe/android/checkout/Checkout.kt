@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.parcelize.Parcelize
+import java.util.UUID
 
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -30,7 +31,13 @@ class Checkout private constructor(
         ): Result<Checkout> {
             val component = DaggerCheckoutComponent.factory().create(context.applicationContext)
             return component.checkoutSessionLoader.load(checkoutSessionClientSecret).map { response ->
-                Checkout(InternalState(response), component)
+                Checkout(
+                    internalState = InternalState(
+                        key = UUID.randomUUID().toString(),
+                        checkoutSessionResponse = response,
+                    ),
+                    component,
+                )
             }
         }
 
@@ -39,7 +46,10 @@ class Checkout private constructor(
             state: State,
         ): Checkout {
             val component = DaggerCheckoutComponent.factory().create(context.applicationContext)
-            return Checkout(state.internalState, component)
+            return Checkout(
+                internalState = state.internalState,
+                component = component,
+            )
         }
     }
 
@@ -51,18 +61,24 @@ class Checkout private constructor(
         internal val internalState: InternalState,
     ) : Parcelable
 
+    @Volatile
     internal var internalState: InternalState = internalState
         private set
 
     var state: State
         get() = State(internalState)
         set(value) {
+            ensureNoMutationInFlight()
             internalState = value.internalState
         }
 
     private val mutex = Mutex()
     private val _checkoutSession = MutableStateFlow(internalState.checkoutSessionResponse.asCheckoutSession())
     val checkoutSession: StateFlow<CheckoutSession> = _checkoutSession.asStateFlow()
+
+    init {
+        CheckoutInstances.add(internalState.key, this)
+    }
 
     suspend fun applyPromotionCode(
         promotionCode: String,
@@ -89,19 +105,56 @@ class Checkout private constructor(
 
     suspend fun updateShippingAddress(
         name: String? = null,
+        phoneNumber: String? = null,
         address: Address,
-    ): Result<CheckoutSession> = withSessionId(
-        additionalStateMutations = {
-            copy(
-                shippingName = name ?: internalState.shippingName
-            )
-        },
-    ) { sessionId ->
-        component.checkoutSessionRepository.updateShippingAddress(sessionId, address.build())
+    ): Result<CheckoutSession> {
+        val built = address.build()
+        return withSessionId(
+            additionalStateMutations = {
+                copy(shippingName = name, shippingPhoneNumber = phoneNumber, shippingAddress = built)
+            },
+        ) { sessionId ->
+            component.checkoutSessionRepository.updateTaxRegion(sessionId, built)
+        }
+    }
+
+    suspend fun updateTaxId(
+        type: String,
+        value: String,
+    ): Result<CheckoutSession> = withSessionId { sessionId ->
+        component.checkoutSessionRepository.updateTaxId(sessionId, type.trim(), value.trim())
+    }
+
+    suspend fun updateBillingAddress(
+        name: String? = null,
+        phoneNumber: String? = null,
+        address: Address,
+    ): Result<CheckoutSession> {
+        val built = address.build()
+        return withSessionId(
+            additionalStateMutations = {
+                copy(billingName = name, billingPhoneNumber = phoneNumber, billingAddress = built)
+            },
+        ) { sessionId ->
+            component.checkoutSessionRepository.updateTaxRegion(sessionId, built)
+        }
     }
 
     suspend fun refresh(): Result<CheckoutSession> = withSessionId { sessionId ->
         component.checkoutSessionRepository.init(sessionId)
+    }
+
+    internal fun ensureNoMutationInFlight() {
+        if (mutex.isLocked) {
+            throw IllegalStateException(
+                "Cannot launch while a checkout session mutation is in flight."
+            )
+        }
+    }
+
+    internal fun updateWithResponse(response: CheckoutSessionResponse) {
+        internalState = internalState.copy(checkoutSessionResponse = response)
+        _checkoutSession.value = response.asCheckoutSession()
     }
 
     private suspend fun withSessionId(

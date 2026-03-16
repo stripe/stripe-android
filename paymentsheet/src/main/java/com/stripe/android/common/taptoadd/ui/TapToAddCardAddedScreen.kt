@@ -12,8 +12,8 @@ import com.stripe.android.ui.core.FormUI
 import com.stripe.android.uicore.strings.resolve
 
 @Composable
-internal fun ColumnScope.TapToAddCollectCvcScreen(
-    state: TapToAddCollectCvcInteractor.State,
+internal fun ColumnScope.TapToAddCardAddedScreen(
+    state: TapToAddCardAddedInteractor.State,
     onPrimaryButtonPress: () -> Unit,
 ) {
     TapToAddCardLayout(
@@ -33,17 +33,14 @@ internal fun ColumnScope.TapToAddCollectCvcScreen(
         Spacer(Modifier.size(10.dp))
 
         with(state.primaryButton) {
-            TapToAddSharedPrimaryButton { modifier ->
-                PrimaryButton(
-                    label = label.resolve(),
-                    locked = false,
-                    enabled = enabled,
-                    modifier = modifier,
-                    processingState = PrimaryButtonProcessingState.Idle(null),
-                    onProcessingCompleted = {},
-                    onClick = onPrimaryButtonPress,
-                )
-            }
+            PrimaryButton(
+                label = label.resolve(),
+                locked = false,
+                enabled = enabled,
+                processingState = PrimaryButtonProcessingState.Idle(null),
+                onProcessingCompleted = {},
+                onClick = onPrimaryButtonPress,
+            )
         }
 
         Spacer(Modifier.size(10.dp))

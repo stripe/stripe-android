@@ -358,7 +358,7 @@ workflows:
       - script@1:
           timeout: 1200
           inputs:
-            - content: ./gradlew :crypto-onramp-example:assembleDebug :crypto-onramp-example:assembleDebugAndroidTest
+            - content: ./scripts/retry.sh 3 ./gradlew :crypto-onramp-example:assembleDebug :crypto-onramp-example:assembleDebugAndroidTest
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600

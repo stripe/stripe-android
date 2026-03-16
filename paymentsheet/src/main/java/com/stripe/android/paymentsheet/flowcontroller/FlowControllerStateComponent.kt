@@ -18,7 +18,6 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.LinkHandler
-import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetCommonModule
@@ -60,8 +59,6 @@ internal interface FlowControllerStateComponent {
     val linkInlineInteractor: DefaultLinkInlineInteractor
     val linkAccountHolder: LinkAccountHolder
     val analyticEventCallbackProvider: Provider<AnalyticEventCallback?>
-
-    fun inject(paymentOptionsViewModel: PaymentOptionsViewModel.Factory)
 
     @Component.Factory
     interface Factory {
