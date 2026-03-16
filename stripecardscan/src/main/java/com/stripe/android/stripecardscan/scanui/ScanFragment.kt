@@ -34,6 +34,7 @@ import com.stripe.android.camera.R as CameraR
 private const val PERMISSION_RATIONALE_SHOWN = "permission_rationale_shown"
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Suppress("TooManyFunctions")
 abstract class ScanFragment : Fragment(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
@@ -86,6 +87,7 @@ abstract class ScanFragment : Fragment(), CoroutineScope {
         super.onResume()
         hideSystemUi()
 
+        @Suppress("MagicNumber")
         launch {
             delay(1500)
             hideSystemUi()
@@ -164,7 +166,6 @@ abstract class ScanFragment : Fragment(), CoroutineScope {
     protected open fun toggleFlashlight() {
         isFlashlightOn = !isFlashlightOn
         setFlashlightState(isFlashlightOn)
-        // TODO: this should be reported as part of scanstats, but is not yet supported
     }
 
     /**
@@ -172,7 +173,6 @@ abstract class ScanFragment : Fragment(), CoroutineScope {
      */
     protected open fun toggleCamera() {
         cameraAdapter.changeCamera()
-        // TODO: this should probably be reported as part of scanstats, but is not yet supported
     }
 
     /**
@@ -228,7 +228,6 @@ abstract class ScanFragment : Fragment(), CoroutineScope {
             onFlashSupported(it)
         }
 
-        // TODO: this should probably be reported as part of scanstats, but is not yet supported
         cameraAdapter.withSupportsMultipleCameras {
             onSupportsMultipleCameras(it)
         }

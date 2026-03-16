@@ -10,7 +10,7 @@ import kotlin.time.TimeSource
 /**
  * Measure the amount of time a process takes.
  *
- * TODO: use contracts when they are no longer experimental
+ * Note: use contracts when they are no longer experimental.
  */
 @CheckResult
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -45,7 +45,7 @@ internal sealed class Timer {
 
 private object NoOpTimer : Timer() {
 
-    // TODO: use contracts when they are no longer experimental
+    // Note: use contracts when they are no longer experimental
     override suspend fun <T> measureSuspend(taskName: String?, task: suspend () -> T): T {
         // contract { callsInPlace(task, EXACTLY_ONCE) }
         return task()
@@ -61,7 +61,7 @@ private class LoggingTimer(
     private var executionTotalDuration = Duration.ZERO
     private var updateClock = TimeSource.Monotonic.markNow()
 
-    // TODO: use contracts when they are no longer experimental
+    // Note: use contracts when they are no longer experimental
     override suspend fun <T> measureSuspend(taskName: String?, task: suspend () -> T): T {
         // contract { callsInPlace(task, EXACTLY_ONCE) }
         val (duration, result) = measureTime { task() }

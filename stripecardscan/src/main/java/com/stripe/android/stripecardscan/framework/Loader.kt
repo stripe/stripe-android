@@ -14,6 +14,7 @@ import java.nio.channels.FileChannel
 /**
  * An interface for loading data into a byte buffer.
  */
+@Suppress("TooGenericExceptionCaught")
 internal class Loader(private val context: Context) {
 
     /**
@@ -83,11 +84,12 @@ internal class Loader(private val context: Context) {
             )
             loadedData
         } catch (t: Throwable) {
+            Log.e(LOG_TAG, "Failed to load file", t)
             trackModelLoaded(
                 fetchedData.modelClass,
                 fetchedData.modelVersion,
                 fetchedData.modelFrameworkVersion,
-                true
+                false
             )
             null
         }

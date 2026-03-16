@@ -68,6 +68,7 @@ internal abstract class TFLAnalyzerFactory<
     protected suspend fun createInterpreter(): InterpreterWrapper? =
         createInterpreter(fetchedModel)
 
+    @Suppress("TooGenericExceptionCaught")
     private suspend fun createInterpreter(fetchedModel: FetchedData): InterpreterWrapper? = try {
         loadModel(fetchedModel)?.let { InterpreterWrapperImpl(it, tfOptions) }
     } catch (t: Throwable) {

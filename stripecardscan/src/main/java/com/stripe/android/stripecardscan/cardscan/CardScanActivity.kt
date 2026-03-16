@@ -55,10 +55,13 @@ internal interface CardScanResultListener : ScanResultListener {
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed class CardScanState(isFinal: Boolean) : ScanState(isFinal) {
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data object NotFound : CardScanState(isFinal = false)
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data object Found : CardScanState(isFinal = false)
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data object Correct : CardScanState(isFinal = true)
 }

@@ -275,7 +275,7 @@ internal fun getCardIssuer(pan: String?): CardIssuer =
 /**
  * Determine if a PAN is valid.
  *
- * TODO: this should use a contract like the following once contracts are no longer experimental:
+ * Note: this should use a contract like the following once contracts are no longer experimental:
  * ```
  * contract { returns(true) implies (pan != null) }
  * ```

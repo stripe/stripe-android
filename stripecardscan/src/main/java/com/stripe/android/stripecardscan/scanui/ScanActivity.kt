@@ -12,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import androidx.activity.addCallback
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
@@ -26,7 +27,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
 import kotlin.coroutines.CoroutineContext
 import com.stripe.android.camera.R as CameraR
@@ -64,6 +64,7 @@ internal interface ScanResultListener {
     fun failed(cause: Throwable?)
 }
 
+@Suppress("TooManyFunctions")
 internal abstract class ScanActivity : CameraPermissionCheckingActivity(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
@@ -105,6 +106,7 @@ internal abstract class ScanActivity : CameraPermissionCheckingActivity(), Corou
         super.onResume()
         hideSystemUi()
 
+        @Suppress("MagicNumber")
         launch {
             delay(1500)
             hideSystemUi()
@@ -168,7 +170,6 @@ internal abstract class ScanActivity : CameraPermissionCheckingActivity(), Corou
     protected open fun toggleFlashlight() {
         isFlashlightOn = !isFlashlightOn
         setFlashlightState(isFlashlightOn)
-        // TODO: this should be reported as part of scanstats, but is not yet supported
     }
 
     /**
@@ -176,7 +177,6 @@ internal abstract class ScanActivity : CameraPermissionCheckingActivity(), Corou
      */
     protected open fun toggleCamera() {
         cameraAdapter.changeCamera()
-        // TODO: this should probably be reported as part of scanstats, but is not yet supported
     }
 
     /**
@@ -247,7 +247,6 @@ internal abstract class ScanActivity : CameraPermissionCheckingActivity(), Corou
             onFlashSupported(it)
         }
 
-        // TODO: this should probably be reported as part of scanstats, but is not yet supported
         cameraAdapter.withSupportsMultipleCameras {
             onSupportsMultipleCameras(it)
         }

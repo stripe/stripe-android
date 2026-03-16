@@ -12,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.RestrictTo
 import androidx.core.os.bundleOf
 import androidx.core.view.updateMargins
 import androidx.fragment.app.setFragmentResult
@@ -39,7 +40,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlin.math.min
-import androidx.annotation.RestrictTo
 import kotlin.math.roundToInt
 import com.stripe.android.camera.R as CameraR
 
@@ -276,7 +276,9 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
     /**
      * Called when the flashlight state has changed.
      */
-    override fun onFlashlightStateChanged(flashlightOn: Boolean) {}
+    override fun onFlashlightStateChanged(flashlightOn: Boolean) {
+        // No-op: flash UI not shown in fragment
+    }
 
     override fun displayState(newState: CardScanState, previousState: CardScanState?) {
         when (newState) {

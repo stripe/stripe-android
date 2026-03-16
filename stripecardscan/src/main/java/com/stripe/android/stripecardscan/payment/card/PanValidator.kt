@@ -40,6 +40,7 @@ object LengthPanValidator : PanValidator {
  * see https://en.wikipedia.org/wiki/Luhn_algorithm
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Suppress("MagicNumber")
 object LuhnPanValidator : PanValidator {
     override fun isValidPan(pan: String): Boolean {
         if (pan.isEmpty()) {

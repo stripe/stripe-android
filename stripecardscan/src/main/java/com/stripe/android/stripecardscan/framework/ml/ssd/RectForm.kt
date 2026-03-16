@@ -1,3 +1,5 @@
+@file:Suppress("TooManyFunctions", "MagicNumber")
+
 package com.stripe.android.stripecardscan.framework.ml.ssd
 
 import android.graphics.RectF
