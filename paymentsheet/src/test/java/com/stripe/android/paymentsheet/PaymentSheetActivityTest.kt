@@ -71,7 +71,7 @@ import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.cvcrecollection.FakeCvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.RecordingCvcRecollectionLauncherFactory
-import com.stripe.android.paymentsheet.databinding.StripePrimaryButtonBinding
+import com.stripe.android.paymentsheet.databinding.StripeAndroidPrimaryButtonBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
@@ -643,7 +643,7 @@ internal class PaymentSheetActivityTest {
         scenario.launch(intent).onActivity { activity ->
             viewModel.viewState.value = PaymentSheetViewState.Reset(null)
 
-            val buyBinding = StripePrimaryButtonBinding.bind(activity.buyButton)
+            val buyBinding = StripeAndroidPrimaryButtonBinding.bind(activity.buyButton)
 
             assertThat(buyBinding.confirmedIcon.isVisible)
                 .isFalse()

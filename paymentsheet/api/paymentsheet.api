@@ -2177,6 +2177,16 @@ public final class com/stripe/android/paymentsheet/addresselement/ComposableSing
 	public final fun getLambda$-1578841985$paymentsheet_release ()Lkotlin/jvm/functions/Function4;
 }
 
+public final class com/stripe/android/paymentsheet/databinding/StripeAndroidPrimaryButtonBinding : androidx/viewbinding/ViewBinding {
+	public final field confirmedIcon Landroid/widget/ImageView;
+	public final field confirmingIcon Lcom/google/android/material/progressindicator/CircularProgressIndicator;
+	public final field label Landroidx/compose/ui/platform/ComposeView;
+	public final field lockIcon Landroid/widget/ImageView;
+	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/StripeAndroidPrimaryButtonBinding;
+	public fun getRoot ()Landroid/view/View;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;)Lcom/stripe/android/paymentsheet/databinding/StripeAndroidPrimaryButtonBinding;
+}
+
 public final class com/stripe/android/paymentsheet/databinding/StripeFragmentPrimaryButtonContainerBinding : androidx/viewbinding/ViewBinding {
 	public final field primaryButton Lcom/stripe/android/paymentsheet/ui/PrimaryButton;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/StripeFragmentPrimaryButtonContainerBinding;
@@ -2193,16 +2203,6 @@ public final class com/stripe/android/paymentsheet/databinding/StripeGooglePayBu
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/StripeGooglePayButtonBinding;
 	public fun getRoot ()Landroid/view/View;
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;)Lcom/stripe/android/paymentsheet/databinding/StripeGooglePayButtonBinding;
-}
-
-public final class com/stripe/android/paymentsheet/databinding/StripePrimaryButtonBinding : androidx/viewbinding/ViewBinding {
-	public final field confirmedIcon Landroid/widget/ImageView;
-	public final field confirmingIcon Lcom/google/android/material/progressindicator/CircularProgressIndicator;
-	public final field label Landroidx/compose/ui/platform/ComposeView;
-	public final field lockIcon Landroid/widget/ImageView;
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/StripePrimaryButtonBinding;
-	public fun getRoot ()Landroid/view/View;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;)Lcom/stripe/android/paymentsheet/databinding/StripePrimaryButtonBinding;
 }
 
 public final class com/stripe/android/paymentsheet/model/PaymentOption {
