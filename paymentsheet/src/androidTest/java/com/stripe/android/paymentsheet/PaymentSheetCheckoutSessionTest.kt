@@ -28,10 +28,12 @@ internal class PaymentSheetCheckoutSessionTest {
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 
-    private val defaultConfiguration = PaymentSheet.Configuration(
+    private val defaultConfiguration = PaymentSheet.Configuration.Builder(
         merchantDisplayName = "Checkout Session Test",
-        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
-    )
+    ).paymentMethodLayout(paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal)
+        .defaultBillingDetails(PaymentSheet.BillingDetails(email = "email@email.com"))
+        .link(PaymentSheet.LinkConfiguration.Builder().display(PaymentSheet.LinkConfiguration.Display.Never).build())
+        .build()
 
     /**
      * Test a successful card setup flow with checkout session (setup mode).
