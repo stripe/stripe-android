@@ -24,7 +24,6 @@ import com.stripe.android.cards.DefaultStaticCardAccountRanges
 import com.stripe.android.cards.StaticCardAccountRanges
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.networking.PaymentAnalyticsEvent
@@ -422,11 +421,7 @@ internal class DefaultCardNumberController(
     ): TextFieldIcon? {
         return when {
             isEligibleForCardBrandChoice && number.isNotEmpty() -> {
-                if (FeatureFlags.newCbcSelector.isEnabled) {
-                    createSelectorIcon(brands, chosen)
-                } else {
-                    createDropdownIcon(brands, chosen)
-                }
+                createSelectorIcon(brands, chosen)
             }
             accountRange != null -> {
                 TextFieldIcon.Trailing(accountRange.brand.icon, isTintable = false)
@@ -554,10 +549,7 @@ internal class DefaultCardNumberController(
         }.take(STATIC_ICON_COUNT)
 
         val animatedIcons = buildList {
-            if (isEligibleForCardBrandChoice && FeatureFlags.newCbcSelector.isEnabled && cardBrandFilter.isAccepted(
-                    CardBrand.CartesBancaires
-                )
-            ) {
+            if (isEligibleForCardBrandChoice && cardBrandFilter.isAccepted(CardBrand.CartesBancaires)) {
                 add(TextFieldIcon.Trailing(CardBrand.CartesBancaires.icon, isTintable = false))
             }
             addAll(cardBrands.drop(STATIC_ICON_COUNT).map { TextFieldIcon.Trailing(it.icon, isTintable = false) })

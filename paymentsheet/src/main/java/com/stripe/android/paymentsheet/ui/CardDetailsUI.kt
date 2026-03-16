@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.R
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.ui.EditCardDetailsInteractor.ViewAction
 import com.stripe.android.uicore.elements.FieldValidationMessage
@@ -215,19 +214,11 @@ private fun CardNumberField(
         },
         trailingIcon = {
             if (shouldShowCardBrandDropdown) {
-                if (FeatureFlags.newCbcSelector.isEnabled) {
-                    CardBrandChoiceSelector(
-                        selectedBrand = selectedBrand,
-                        availableNetworks = availableNetworks,
-                        onBrandChoiceChanged = onBrandChoiceChanged
-                    )
-                } else {
-                    CardBrandDropdown(
-                        selectedBrand = selectedBrand,
-                        availableBrands = availableNetworks,
-                        onBrandChoiceChanged = onBrandChoiceChanged,
-                    )
-                }
+                CardBrandChoiceSelector(
+                    selectedBrand = selectedBrand,
+                    availableNetworks = availableNetworks,
+                    onBrandChoiceChanged = onBrandChoiceChanged
+                )
             } else {
                 PaymentMethodIconFromResource(
                     iconRes = savedPaymentMethodIcon,
