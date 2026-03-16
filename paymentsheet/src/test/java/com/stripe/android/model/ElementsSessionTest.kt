@@ -9,12 +9,6 @@ import org.junit.Test
 class ElementsSessionTest {
 
     @get:Rule
-    val enablePassiveCaptchaRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.enablePassiveCaptcha,
-        isEnabled = true
-    )
-
-    @get:Rule
     val enableAttestationOnIntentConfirmationRule = FeatureFlagTestRule(
         featureFlag = FeatureFlags.enableAttestationOnIntentConfirmation,
         isEnabled = true
@@ -63,23 +57,6 @@ class ElementsSessionTest {
         val session = createElementsSession(
             passiveCaptcha = passiveCaptcha,
             flags = emptyMap()
-        )
-
-        assertThat(session.passiveCaptchaParams).isNull()
-    }
-
-    @Test
-    fun `passiveCaptchaParams returns null when feature flag is disabled`() {
-        enablePassiveCaptchaRule.setEnabled(false)
-        val passiveCaptcha = PassiveCaptchaParams(
-            siteKey = "test_site_key",
-            rqData = "test_rq_data",
-            tokenTimeoutSeconds = 30
-        )
-
-        val session = createElementsSession(
-            passiveCaptcha = passiveCaptcha,
-            flags = mapOf(ElementsSession.Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA to true)
         )
 
         assertThat(session.passiveCaptchaParams).isNull()
