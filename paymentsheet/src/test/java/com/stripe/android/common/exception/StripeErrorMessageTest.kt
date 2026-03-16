@@ -12,10 +12,13 @@ import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.exception.CardException
 import com.stripe.android.paymentsheet.R
+import com.stripe.stripeterminal.external.models.TerminalErrorCode
+import com.stripe.stripeterminal.external.models.TerminalException
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.io.IOException
+import kotlin.math.exp
 
 @RunWith(RobolectricTestRunner::class)
 internal class StripeErrorMessageTest {
@@ -80,6 +83,17 @@ internal class StripeErrorMessageTest {
     fun testIllegalStateExceptionWithResolvableString() {
         assertThatResolvableStripeErrorMessage(IllegalStateException("Hi mom"))
             .isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
+    }
+
+    @Test
+    fun terminalException_usesErrorMessage() {
+        val expectedErrorMessage = "Transaction timed out."
+        assertThatResolvableStripeErrorMessage(
+            TerminalException(
+                errorCode = TerminalErrorCode.CARD_READ_TIMED_OUT,
+                errorMessage = expectedErrorMessage
+            )
+        ).isEqualTo(expectedErrorMessage.resolvableString)
     }
 
     private fun assertThatStripeErrorMessage(throwable: Throwable): StringSubject {

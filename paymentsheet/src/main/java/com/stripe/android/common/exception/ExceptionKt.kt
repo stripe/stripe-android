@@ -7,6 +7,7 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.R
+import com.stripe.stripeterminal.external.models.TerminalException
 
 @Suppress("ReturnCount")
 internal fun Throwable?.stripeErrorMessage(context: Context): String {
@@ -32,6 +33,9 @@ internal fun Throwable.stripeErrorMessage(): ResolvableString {
     }
     (this as? StripeException)?.stripeError?.message?.let {
         return it.resolvableString
+    }
+    (this as? TerminalException)?.let {
+        return it.errorMessage.resolvableString
     }
     return R.string.stripe_something_went_wrong.resolvableString
 }
