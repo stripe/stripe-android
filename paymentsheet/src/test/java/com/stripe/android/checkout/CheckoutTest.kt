@@ -623,6 +623,84 @@ class CheckoutTest {
     }
 
     @Test
+    fun `updateShippingAddress stores phoneNumber in internalState`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_abc123"),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-update-shipping-address.json")
+            }
+
+            val address = Address().country("US")
+            val result = checkout.updateShippingAddress(phoneNumber = "5551234567", address = address)
+            assertThat(result.isSuccess).isTrue()
+
+            assertThat(checkout.internalState.shippingPhoneNumber).isEqualTo("5551234567")
+        }
+    }
+
+    @Test
+    fun `updateBillingAddress stores phoneNumber in internalState`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_abc123"),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-update-shipping-address.json")
+            }
+
+            val address = Address().country("US")
+            val result = checkout.updateBillingAddress(phoneNumber = "5559876543", address = address)
+            assertThat(result.isSuccess).isTrue()
+
+            assertThat(checkout.internalState.billingPhoneNumber).isEqualTo("5559876543")
+        }
+    }
+
+    @Test
+    fun `updateShippingAddress does not store phoneNumber in internalState on failure`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_abc123"),
+            ) { response ->
+                response.setResponseCode(400)
+                response.setBody("""{"error": {"message": "Invalid address"}}""")
+            }
+
+            val address = Address().country("XX")
+            val result = checkout.updateShippingAddress(phoneNumber = "5551234567", address = address)
+            assertThat(result.isFailure).isTrue()
+
+            assertThat(checkout.internalState.shippingPhoneNumber).isNull()
+        }
+    }
+
+    @Test
+    fun `updateBillingAddress does not store phoneNumber in internalState on failure`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_abc123"),
+            ) { response ->
+                response.setResponseCode(400)
+                response.setBody("""{"error": {"message": "Invalid address"}}""")
+            }
+
+            val address = Address().country("XX")
+            val result = checkout.updateBillingAddress(phoneNumber = "5559876543", address = address)
+            assertThat(result.isFailure).isTrue()
+
+            assertThat(checkout.internalState.billingPhoneNumber).isNull()
+        }
+    }
+
+    @Test
     fun `updateBillingAddress omits empty fields from request`() = runTest {
         runCreateWithStateScenario { checkout ->
             networkRule.enqueue(

@@ -16,14 +16,14 @@ internal fun PaymentSheet.Configuration.forCheckoutSession(
                 address = defaultBillingDetails?.address ?: state.billingAddress?.asPaymentSheetAddress(),
                 email = defaultBillingDetails?.email ?: response.customerEmail,
                 name = defaultBillingDetails?.name ?: state.billingName,
-                phone = defaultBillingDetails?.phone,
+                phone = defaultBillingDetails?.phone ?: state.billingPhoneNumber,
             )
         )
         shippingDetails(
             AddressDetails(
                 name = shippingDetails?.name ?: state.shippingName,
                 address = shippingDetails?.address ?: state.shippingAddress?.asPaymentSheetAddress(),
-                phoneNumber = shippingDetails?.phoneNumber,
+                phoneNumber = shippingDetails?.phoneNumber ?: state.shippingPhoneNumber,
                 isCheckboxSelected = shippingDetails?.isCheckboxSelected,
             )
         )

@@ -105,11 +105,14 @@ class Checkout private constructor(
 
     suspend fun updateShippingAddress(
         name: String? = null,
+        phoneNumber: String? = null,
         address: Address,
     ): Result<CheckoutSession> {
         val built = address.build()
         return withSessionId(
-            additionalStateMutations = { copy(shippingName = name, shippingAddress = built) },
+            additionalStateMutations = {
+                copy(shippingName = name, shippingPhoneNumber = phoneNumber, shippingAddress = built)
+            },
         ) { sessionId ->
             component.checkoutSessionRepository.updateTaxRegion(sessionId, built)
         }
@@ -124,11 +127,14 @@ class Checkout private constructor(
 
     suspend fun updateBillingAddress(
         name: String? = null,
+        phoneNumber: String? = null,
         address: Address,
     ): Result<CheckoutSession> {
         val built = address.build()
         return withSessionId(
-            additionalStateMutations = { copy(billingName = name, billingAddress = built) },
+            additionalStateMutations = {
+                copy(billingName = name, billingPhoneNumber = phoneNumber, billingAddress = built)
+            },
         ) { sessionId ->
             component.checkoutSessionRepository.updateTaxRegion(sessionId, built)
         }
