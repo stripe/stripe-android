@@ -568,7 +568,6 @@ internal class PlaygroundSettings private constructor(
             AttestationOnIntentConfirmationDefinition,
             EnableTapToAddSettingsDefinition,
             CustomStripeApiDefinition,
-            FeatureFlagSettingsDefinition(FeatureFlags.newCbcSelector),
             CaptureMethodSettingsDefinition,
         )
 
