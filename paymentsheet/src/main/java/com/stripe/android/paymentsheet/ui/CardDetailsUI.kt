@@ -281,7 +281,9 @@ private fun CardBrandChoiceSelector(
             currentItem = selectedBrand.toItem(),
             items = availableNetworks.map { it.toItem() },
             onItemSelected = {
-                onBrandChoiceChanged.invoke(it.toCardBrandChoice())
+                it?.let {
+                    onBrandChoiceChanged.invoke(it.toCardBrandChoice())
+                }
             },
             hasFocus = true,
             popupMessage = null,

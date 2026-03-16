@@ -264,7 +264,7 @@ internal fun TextFieldUi(
     keyboardActions: KeyboardActions = KeyboardActions(),
     onValueChange: (value: TextFieldValue) -> Unit = {},
     onDropdownItemClicked: (item: TextFieldIcon.Dropdown.Item) -> Unit = {},
-    onSelectorItemClicked: (item: TextFieldIcon.Selector.Item) -> Unit = {},
+    onSelectorItemClicked: (item: TextFieldIcon.Selector.Item?) -> Unit = {},
     hasFocus: Boolean
 ) {
     val displayState = when (shouldShowValidationMessage) {
@@ -326,7 +326,7 @@ internal fun TextFieldUi(
 private fun TextFieldIcon.Composable(
     loading: Boolean,
     onDropdownItemClicked: (item: TextFieldIcon.Dropdown.Item) -> Unit,
-    onSelectorItemClicked: (item: TextFieldIcon.Selector.Item) -> Unit,
+    onSelectorItemClicked: (item: TextFieldIcon.Selector.Item?) -> Unit,
     hasFocus: Boolean
 ) {
     Row {
@@ -544,7 +544,7 @@ private fun Modifier.onPreviewKeyEvent(
 private fun TrailingSelector(
     icon: TextFieldIcon.Selector,
     loading: Boolean,
-    onSelectorItemClicked: (item: TextFieldIcon.Selector.Item) -> Unit,
+    onSelectorItemClicked: (item: TextFieldIcon.Selector.Item?) -> Unit,
     hasFocus: Boolean
 ) {
     Box(
@@ -553,7 +553,7 @@ private fun TrailingSelector(
             .padding(10.dp),
         contentAlignment = Alignment.Center
     ) {
-        if (icon.items.size > 1) {
+        if (icon.showSelector) {
             Selector(
                 currentItem = icon.currentItem,
                 items = icon.items,
