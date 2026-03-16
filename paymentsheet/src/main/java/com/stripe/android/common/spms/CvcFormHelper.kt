@@ -2,7 +2,9 @@ package com.stripe.android.common.spms
 
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.common.taptoadd.ui.requiresTapToAddCvcCollection
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.R
@@ -18,9 +20,11 @@ import javax.inject.Inject
 
 internal interface CvcFormHelper {
     val state: StateFlow<State>
-    val formElement: FormElement
+    val formElement: FormElement?
 
     sealed interface State {
+        data object NotRequired : State
+
         data object Incomplete : State
 
         data class Complete(val cvc: String) : State
@@ -35,6 +39,7 @@ internal interface CvcFormHelper {
 
 internal class DefaultCvcFormHelper(
     private val savedStateHandle: SavedStateHandle,
+    private val paymentMethodMetadata: PaymentMethodMetadata,
     private val paymentMethod: PaymentMethod,
 ) : CvcFormHelper {
     private var storedCvcValue: String?
@@ -53,23 +58,34 @@ internal class DefaultCvcFormHelper(
         controller = cvcController
     )
 
-    override val formElement: FormElement = SectionElement.wrap(
-        sectionFieldElement = cvcElement,
-        label = R.string.stripe_paymentsheet_confirm_your_cvc.resolvableString
-    )
+    override val formElement: FormElement? = if (
+        requiresTapToAddCvcCollection(paymentMethodMetadata, paymentMethod)
+    ) {
+        SectionElement.wrap(
+            sectionFieldElement = cvcElement,
+            label = R.string.stripe_paymentsheet_confirm_your_cvc.resolvableString,
+        )
+    } else {
+        null
+    }
 
-    override val state: StateFlow<CvcFormHelper.State> = cvcController.formFieldValue.mapAsStateFlow { cvcInput ->
-        val cvcValue = cvcInput.value
-        storedCvcValue = cvcValue
+    override val state: StateFlow<CvcFormHelper.State> = formElement?.let {
+        cvcController.formFieldValue.mapAsStateFlow { cvcInput ->
+            val cvcValue = cvcInput.value
+            storedCvcValue = cvcValue
 
-        if (cvcInput.isComplete && !cvcValue.isNullOrEmpty()) {
-            CvcFormHelper.State.Complete(cvcValue)
-        } else {
-            CvcFormHelper.State.Incomplete
+            if (cvcInput.isComplete && !cvcValue.isNullOrEmpty()) {
+                CvcFormHelper.State.Complete(cvcValue)
+            } else {
+                CvcFormHelper.State.Incomplete
+            }
         }
+    } ?: run {
+        stateFlowOf(CvcFormHelper.State.NotRequired)
     }
 
     class Factory @Inject constructor(
+        private val paymentMethodMetadata: PaymentMethodMetadata,
         private val savedStateHandle: SavedStateHandle,
     ) : CvcFormHelper.Factory {
         override fun create(
@@ -77,6 +93,7 @@ internal class DefaultCvcFormHelper(
         ): CvcFormHelper {
             return DefaultCvcFormHelper(
                 savedStateHandle = savedStateHandle,
+                paymentMethodMetadata = paymentMethodMetadata,
                 paymentMethod = paymentMethod,
             )
         }
