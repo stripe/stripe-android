@@ -4,15 +4,23 @@ import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatchers.method
+import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.testing.PaymentConfigurationTestRule
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.junit.After
+import org.junit.Assert.assertThrows
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
@@ -94,6 +102,39 @@ class CheckoutInstancesTest {
     fun `ensureNoMutationInFlight does not throw when no mutation in flight`() {
         createCheckout(key = "key1")
         CheckoutInstances.ensureNoMutationInFlight("key1")
+    }
+
+    @Test
+    fun `ensureNoMutationInFlight throws when mutation is in flight`() {
+        val checkout = createCheckout(key = "key1")
+        val requestArrived = CountDownLatch(1)
+        val holdResponse = CountDownLatch(1)
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_pages/cs_test_abc123/init"),
+        ) { response ->
+            requestArrived.countDown()
+            holdResponse.await()
+            response.setBody("{}")
+        }
+
+        runBlocking {
+            val job = launch(Dispatchers.IO) {
+                checkout.refresh()
+            }
+
+            assertThat(requestArrived.await(5, TimeUnit.SECONDS)).isTrue()
+
+            val error = assertThrows(IllegalStateException::class.java) {
+                CheckoutInstances.ensureNoMutationInFlight("key1")
+            }
+            assertThat(error).hasMessageThat()
+                .isEqualTo("Cannot launch while a checkout session mutation is in flight.")
+
+            holdResponse.countDown()
+            job.join()
+        }
     }
 
     @Test

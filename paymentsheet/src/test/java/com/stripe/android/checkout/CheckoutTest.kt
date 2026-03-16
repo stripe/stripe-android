@@ -883,13 +883,6 @@ class CheckoutTest {
     }
 
     @Test
-    fun `ensureNoMutationInFlight does not throw when mutex is not locked`() = runTest {
-        runCreateWithStateScenario { checkout ->
-            checkout.ensureNoMutationInFlight()
-        }
-    }
-
-    @Test
     fun `ensureNoMutationInFlight throws when mutex is locked`() = runTest {
         runCreateWithStateScenario { checkout ->
             networkRule.enqueue(
