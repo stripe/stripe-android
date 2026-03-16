@@ -49,7 +49,7 @@ import com.stripe.android.uicore.stripeShapes
 fun Selector(
     currentItem: TextFieldIcon.Selector.Item,
     items: List<TextFieldIcon.Selector.Item>,
-    onItemSelected: (item: TextFieldIcon.Selector.Item) -> Unit,
+    onItemSelected: (item: TextFieldIcon.Selector.Item?) -> Unit,
     hasFocus: Boolean,
     popupMessage: ResolvableString?,
     hasMadeSelection: Boolean
@@ -75,7 +75,7 @@ fun Selector(
                     isSelected = item == currentItem,
                     onItemSelected = {
                         showPopup = false
-                        onItemSelected(item)
+                        onItemSelected(it)
                     }
                 )
                 if (index != items.lastIndex) {
@@ -99,7 +99,7 @@ fun Selector(
 private fun SelectorItem(
     item: TextFieldIcon.Selector.Item,
     isSelected: Boolean,
-    onItemSelected: (item: TextFieldIcon.Selector.Item) -> Unit
+    onItemSelected: (item: TextFieldIcon.Selector.Item?) -> Unit
 ) {
     val backgroundColor = if (isSelected) {
         MaterialTheme.stripeColors.componentBorder.copy()
@@ -110,7 +110,13 @@ private fun SelectorItem(
         Modifier
             .clickable(
                 enabled = item.enabled,
-                onClick = { onItemSelected(item) }
+                onClick = {
+                    if (isSelected) {
+                        onItemSelected(null)
+                    } else {
+                        onItemSelected(item)
+                    }
+                }
             )
             .background(color = backgroundColor)
             .padding(6.dp)
