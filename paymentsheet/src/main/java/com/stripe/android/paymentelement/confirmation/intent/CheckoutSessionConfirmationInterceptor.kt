@@ -102,7 +102,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             paymentMethodId = paymentMethod.id,
             clientAttributionMetadata = clientAttributionMetadata,
             returnUrl = returnUrl,
-            expectedAmount = intent.amount ?: 0L,
+            expectedAmount = intent.amount,
             savePaymentMethod = savePaymentMethod,
         )
         else -> ConfirmCheckoutSessionParams(
