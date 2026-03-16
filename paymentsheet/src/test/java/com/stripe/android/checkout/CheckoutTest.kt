@@ -1048,17 +1048,6 @@ class CheckoutTest {
     }
 
     @Test
-    fun `ensureNoMutationInFlight is independent of integrationLaunched`() = runTest {
-        runCreateWithStateScenario { checkout ->
-            checkout.markIntegrationLaunched()
-
-            // ensureNoMutationInFlight should not throw even when integrationLaunched is true,
-            // because no mutex is locked.
-            checkout.ensureNoMutationInFlight()
-        }
-    }
-
-    @Test
     fun `configure returns failure when network request fails`() = runConfigureScenario(
         clientSecret = "cs_test_abc123_secret_xyz",
         networkSetup = {

@@ -37,6 +37,9 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatchers
+import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -82,11 +85,13 @@ import kotlin.test.BeforeTest
 internal class PaymentOptionsActivityTest {
 
     private val composeTestRule = createEmptyComposeRule()
+    private val networkRule = NetworkRule()
 
     @get:Rule
     val rule = RuleChain.emptyRuleChain()
         .around(InstantTaskExecutorRule())
         .around(composeTestRule)
+        .around(networkRule)
         .around(CheckoutInstancesTestRule())
         .around(RetryRule(3))
 
@@ -490,11 +495,19 @@ internal class PaymentOptionsActivityTest {
             idleLooper()
         }
 
+        // Enqueue a response so the mutation attempt doesn't fail due to missing network stub.
+        networkRule.enqueue(
+            RequestMatchers.host("api.stripe.com"),
+            RequestMatchers.method("POST"),
+            RequestMatchers.path("/v1/payment_pages/cs_test_abc123"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-apply-discount.json")
+        }
+
         // After the activity finishes, the integration launched flag should be cleared.
         // If it wasn't cleared, this would return a failure with "payment flow is presented" message.
         val result = runBlocking { checkout.applyPromotionCode("code") }
-        assertThat(result.exceptionOrNull()?.message)
-            .isNotEqualTo("Cannot mutate checkout session while a payment flow is presented.")
+        assertThat(result.isSuccess).isTrue()
     }
 
     private fun runActivityScenario(

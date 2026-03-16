@@ -54,6 +54,9 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.LinkButtonTestTag
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
+import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatchers
+import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentIntent
@@ -151,6 +154,9 @@ internal class PaymentSheetActivityTest {
     @get:Rule
     val composeCleanupRule = createComposeCleanupRule()
 
+    @get:Rule
+    val networkRule = NetworkRule()
+
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val testDispatcher = UnconfinedTestDispatcher()
 
@@ -234,9 +240,17 @@ internal class PaymentSheetActivityTest {
             composeTestRule.waitForIdle()
         }
 
+        // Enqueue a response so the mutation attempt doesn't fail due to missing network stub.
+        networkRule.enqueue(
+            RequestMatchers.host("api.stripe.com"),
+            RequestMatchers.method("POST"),
+            RequestMatchers.path("/v1/payment_pages/cs_test_abc123"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-apply-discount.json")
+        }
+
         val result = runBlocking { checkout.applyPromotionCode("code") }
-        assertThat(result.exceptionOrNull()?.message)
-            .isNotEqualTo("Cannot mutate checkout session while a payment flow is presented.")
+        assertThat(result.isSuccess).isTrue()
     }
 
     @Test

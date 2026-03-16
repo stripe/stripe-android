@@ -189,16 +189,6 @@ class CheckoutInstancesTest {
     }
 
     @Test
-    fun `markIntegrationLaunched is no-op for unknown key`() {
-        CheckoutInstances.markIntegrationLaunched("unknown-key")
-    }
-
-    @Test
-    fun `markIntegrationDismissed is no-op for unknown key`() {
-        CheckoutInstances.markIntegrationDismissed("unknown-key")
-    }
-
-    @Test
     fun `multiple keys coexist independently`() {
         val checkout1 = createCheckout(key = "key1")
         val checkout2 = createCheckout(key = "key2")

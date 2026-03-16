@@ -22,6 +22,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers
+import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -235,14 +236,13 @@ internal class ManageActivityTest {
             RequestMatchers.method("POST"),
             RequestMatchers.path("/v1/payment_pages/cs_test_abc123"),
         ) { response ->
-            response.setResponseCode(400)
-            response.setBody("""{"error": {"message": "expected"}}""")
+            response.testBodyFromFile("checkout-session-apply-discount.json")
         }
 
         // If markIntegrationDismissed was not called, this would fail with
         // "Cannot mutate checkout session while a payment flow is presented."
         val result = runBlocking { checkout.applyPromotionCode("code") }
-        assertThat(result.exceptionOrNull()?.message).isEqualTo("expected")
+        assertThat(result.isSuccess).isTrue()
     }
 
     private fun launch(
