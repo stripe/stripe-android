@@ -61,6 +61,7 @@ class Checkout private constructor(
         internal val internalState: InternalState,
     ) : Parcelable
 
+    @Volatile
     internal var internalState: InternalState = internalState
         private set
 
