@@ -21,6 +21,10 @@ internal object CheckoutInstances {
         return live
     }
 
+    fun ensureNoMutationInFlight(key: String) {
+        this[key].forEach { it.ensureNoMutationInFlight() }
+    }
+
     fun add(key: String, checkout: Checkout) {
         val refs = instanceMap.getOrPut(key) { mutableListOf() }
         refs.add(WeakReference(checkout))

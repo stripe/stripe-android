@@ -38,7 +38,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_OPTIONS_CONTRACT_ARGS
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.databinding.StripePrimaryButtonBinding
+import com.stripe.android.paymentsheet.databinding.StripeAndroidPrimaryButtonBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -218,7 +218,7 @@ internal class PaymentOptionsActivityTest {
     fun `Verify Ready state updates the add button label`() {
         runActivityScenario {
             it.onActivity { activity ->
-                val addBinding = StripePrimaryButtonBinding.bind(activity.continueButton)
+                val addBinding = StripeAndroidPrimaryButtonBinding.bind(activity.continueButton)
 
                 assertThat(addBinding.confirmedIcon.isVisible)
                     .isFalse()

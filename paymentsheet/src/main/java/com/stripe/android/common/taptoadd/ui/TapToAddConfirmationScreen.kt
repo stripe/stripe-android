@@ -16,11 +16,12 @@ import com.stripe.android.uicore.strings.resolve
 internal fun ColumnScope.TapToAddConfirmationScreen(
     state: TapToAddConfirmationInteractor.State,
     onPrimaryButtonPress: () -> Unit,
+    onProcessingComplete: () -> Unit,
 ) {
     TapToAddCardLayout(
         cardBrand = state.cardBrand,
         last4 = state.last4,
-        title = state.title.resolve(),
+        title = null,
     ) {
         with(state.form) {
             if (elements.isNotEmpty()) {
@@ -44,22 +45,21 @@ internal fun ColumnScope.TapToAddConfirmationScreen(
         }
 
         with(state.primaryButton) {
-            TapToAddSharedPrimaryButton { modifier ->
-                PrimaryButton(
-                    label = label.resolve(),
-                    locked = locked,
-                    enabled = enabled,
-                    modifier = modifier,
-                    processingState = when (this.state) {
-                        TapToAddConfirmationInteractor.State.PrimaryButton.State.Idle ->
-                            PrimaryButtonProcessingState.Idle(null)
-                        TapToAddConfirmationInteractor.State.PrimaryButton.State.Processing ->
-                            PrimaryButtonProcessingState.Processing
-                    },
-                    onProcessingCompleted = {},
-                    onClick = onPrimaryButtonPress,
-                )
-            }
+            PrimaryButton(
+                label = label.resolve(),
+                locked = locked,
+                enabled = enabled,
+                processingState = when (this@with.state) {
+                    TapToAddConfirmationInteractor.State.PrimaryButton.State.Idle ->
+                        PrimaryButtonProcessingState.Idle(null)
+                    TapToAddConfirmationInteractor.State.PrimaryButton.State.Processing ->
+                        PrimaryButtonProcessingState.Processing
+                    TapToAddConfirmationInteractor.State.PrimaryButton.State.Success ->
+                        PrimaryButtonProcessingState.Completed
+                },
+                onProcessingCompleted = onProcessingComplete,
+                onClick = onPrimaryButtonPress,
+            )
         }
 
         Spacer(Modifier.size(10.dp))

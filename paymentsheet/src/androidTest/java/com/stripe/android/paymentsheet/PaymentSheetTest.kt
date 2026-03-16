@@ -5,7 +5,6 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -309,50 +308,11 @@ internal class PaymentSheetTest {
     }
 
     @Test
-    fun testPaymentIntentWithCardBrandChoiceSuccess_Dropdown() = runPaymentSheetTest(
-        networkRule = networkRule,
-        integrationType = integrationType,
-        resultCallback = ::assertCompleted,
-    ) { testContext ->
-        FeatureFlags.newCbcSelector.setEnabled(false)
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
-            response.testBodyFromFile("elements-sessions-requires_payment_method_with_cbc.json")
-        }
-
-        testContext.presentPaymentSheet {
-            presentWithPaymentIntent(
-                paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = defaultConfiguration,
-            )
-        }
-
-        page.fillOutCardDetailsWithCardBrandChoice()
-
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/payment_intents/pi_example/confirm"),
-            bodyPart(
-                urlEncode("payment_method_data[card][networks][preferred]"),
-                "cartes_bancaires"
-            ),
-        ) { response ->
-            response.testBodyFromFile("payment-intent-confirm.json")
-        }
-
-        page.clickPrimaryButton()
-    }
-
-    @Test
     fun testPaymentIntentWithCardBrandChoiceSuccess_Selector() = runPaymentSheetTest(
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        FeatureFlags.newCbcSelector.setEnabled(true)
         networkRule.enqueue(
             host("api.stripe.com"),
             method("GET"),
@@ -390,7 +350,6 @@ internal class PaymentSheetTest {
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        FeatureFlags.newCbcSelector.setEnabled(true)
         networkRule.enqueue(
             host("api.stripe.com"),
             method("GET"),

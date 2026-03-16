@@ -223,57 +223,6 @@ internal class CustomerSheetTest {
     }
 
     @Test
-    fun testSuccessfulCardSaveWithCardBrandChoice_Dropdown(
-        @TestParameter(valuesProvider = CustomerSheetTestTypeProvider::class)
-        customerSheetTestType: CustomerSheetTestType,
-    ) = runCustomerSheetTest(
-        networkRule = networkRule,
-        integrationType = integrationType,
-        customerSheetTestType = customerSheetTestType,
-        resultCallback = { result ->
-            assertThat(result).isInstanceOf(CustomerSheetResult.Selected::class.java)
-        }
-    ) { context ->
-        FeatureFlags.newCbcSelector.setEnabled(false)
-        networkRule.enqueue(
-            CustomerSheetUtils.retrieveElementsSessionRequest(),
-        ) { response ->
-            response.testBodyFromFile("elements-sessions-requires_payment_method_with_cbc.json")
-        }
-
-        CustomerSheetUtils.enqueueFetchRequests(networkRule = networkRule, withCards = false)
-
-        context.presentCustomerSheet()
-
-        /*
-         * This card is overridden to use a test card compatible with CbcTestCardDelegate to skip
-         * checking card account ranges network operation which run only if account ranges aren't
-         * stores in memory.
-         */
-        page.fillOutCardDetails(
-            cardNumber = TEST_CBC_CARD_NUMBER
-        )
-        page.changeCardBrandChoice()
-
-        networkRule.enqueue(
-            createPaymentMethodsRequest(),
-            cardDetailsParams(cardNumber = TEST_CBC_CARD_NUMBER),
-            cardBrandChoiceParams(),
-        ) { response ->
-            response.testBodyFromFile("payment-methods-create.json")
-        }
-
-        CustomerSheetUtils.enqueueFetchRequests(networkRule = networkRule, withCards = true)
-        CustomerSheetUtils.enqueueAttachRequests(
-            networkRule = networkRule,
-            customerSheetTestType = customerSheetTestType
-        )
-
-        page.clickSaveButton()
-        page.clickConfirmButton()
-    }
-
-    @Test
     fun testSuccessfulCardSaveWithCardBrandChoice_Selector(
         @TestParameter(valuesProvider = CustomerSheetTestTypeProvider::class)
         customerSheetTestType: CustomerSheetTestType,
@@ -285,7 +234,6 @@ internal class CustomerSheetTest {
             assertThat(result).isInstanceOf(CustomerSheetResult.Selected::class.java)
         }
     ) { context ->
-        FeatureFlags.newCbcSelector.setEnabled(true)
         networkRule.enqueue(
             CustomerSheetUtils.retrieveElementsSessionRequest(),
         ) { response ->

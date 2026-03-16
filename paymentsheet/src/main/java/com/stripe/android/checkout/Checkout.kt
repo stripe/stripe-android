@@ -61,6 +61,7 @@ class Checkout private constructor(
         internal val internalState: InternalState,
     ) : Parcelable
 
+    @Volatile
     internal var internalState: InternalState = internalState
         private set
 
@@ -134,6 +135,14 @@ class Checkout private constructor(
 
     suspend fun refresh(): Result<CheckoutSession> = withSessionId { sessionId ->
         component.checkoutSessionRepository.init(sessionId)
+    }
+
+    internal fun ensureNoMutationInFlight() {
+        if (mutex.isLocked) {
+            throw IllegalStateException(
+                "Cannot launch while a checkout session mutation is in flight."
+            )
+        }
     }
 
     internal fun updateWithResponse(response: CheckoutSessionResponse) {
