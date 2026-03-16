@@ -910,6 +910,33 @@ class CheckoutTest {
     }
 
     @Test
+    fun `setting state throws when mutex is locked`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("POST"),
+                path("/v1/payment_pages/cs_test_abc123"),
+            ) { response ->
+                response.setBodyDelay(5, TimeUnit.SECONDS)
+                response.testBodyFromFile("checkout-session-apply-discount.json")
+            }
+
+            // Start a mutation to lock the mutex.
+            val deferred = async { checkout.applyPromotionCode("10OFF") }
+
+            // Give the coroutine time to acquire the mutex.
+            testScheduler.advanceUntilIdle()
+
+            val error = runCatching { checkout.state = checkout.state }.exceptionOrNull()
+            assertThat(error).isInstanceOf(IllegalStateException::class.java)
+            assertThat(error).hasMessageThat()
+                .isEqualTo("Cannot launch while a checkout session mutation is in flight.")
+
+            deferred.cancel()
+        }
+    }
+
+    @Test
     fun `configure returns failure when network request fails`() = runConfigureScenario(
         clientSecret = "cs_test_abc123_secret_xyz",
         networkSetup = {

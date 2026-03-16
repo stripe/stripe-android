@@ -68,6 +68,7 @@ class Checkout private constructor(
     var state: State
         get() = State(internalState)
         set(value) {
+            ensureNoMutationInFlight()
             internalState = value.internalState
         }
 
