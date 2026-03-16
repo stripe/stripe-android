@@ -16,8 +16,8 @@ import com.stripe.android.camera.framework.util.union
 import com.stripe.android.camera.scanui.ScanFlow
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopAggregator
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopState
+import com.stripe.android.stripecardscan.payment.ml.MLKitTextRecognizer
 import com.stripe.android.stripecardscan.payment.ml.SSDOcr
-import com.stripe.android.stripecardscan.payment.ml.SSDOcrWithFallback
 import java.io.Closeable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -70,7 +70,7 @@ internal abstract class CardScanFlow(
             // make this result aggregator pause and reset when the lifecycle pauses.
             it.bindToLifecycle(lifecycleOwner)
 
-            val factory = SSDOcrWithFallback.MlKitOnlyFactory()
+            val factory = MLKitTextRecognizer.Factory()
             fallbackFactory = factory
             val analyzerPool = AnalyzerPool.of(factory)
             mainLoopAnalyzerPool = analyzerPool

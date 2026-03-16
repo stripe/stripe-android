@@ -20,7 +20,6 @@ import com.stripe.android.camera.CameraErrorListener
 import com.stripe.android.camera.CameraPermissionCheckingActivity
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.DefaultCameraErrorListener
-import com.stripe.android.mlcore.impl.InterpreterInitializerImpl
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -251,17 +250,7 @@ internal abstract class ScanActivity : CameraPermissionCheckingActivity(), Corou
             onSupportsMultipleCameras(it)
         }
 
-        lifecycleScope.launch(Dispatchers.IO) {
-            InterpreterInitializerImpl.initialize(
-                context = this@ScanActivity,
-                onSuccess = {
-                    lifecycleScope.launch { onCameraStreamAvailable(cameraAdapter.getImageStream()) }
-                },
-                onFailure = {
-                    scanFailure(it)
-                }
-            )
-        }
+        lifecycleScope.launch { onCameraStreamAvailable(cameraAdapter.getImageStream()) }
     }
 
     /**

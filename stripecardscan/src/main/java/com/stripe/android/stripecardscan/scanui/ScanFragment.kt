@@ -21,7 +21,6 @@ import com.stripe.android.camera.CameraErrorListener
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.DefaultCameraErrorListener
 import com.stripe.android.core.storage.StorageFactory
-import com.stripe.android.mlcore.impl.InterpreterInitializerImpl
 import com.stripe.android.stripecardscan.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -233,17 +232,7 @@ abstract class ScanFragment : Fragment(), CoroutineScope {
             onSupportsMultipleCameras(it)
         }
 
-        lifecycleScope.launch(Dispatchers.IO) {
-            InterpreterInitializerImpl.initialize(
-                context = requireContext(),
-                onSuccess = {
-                    lifecycleScope.launch { onCameraStreamAvailable(cameraAdapter.getImageStream()) }
-                },
-                onFailure = {
-                    scanFailure(it)
-                }
-            )
-        }
+        lifecycleScope.launch { onCameraStreamAvailable(cameraAdapter.getImageStream()) }
     }
 
     /**

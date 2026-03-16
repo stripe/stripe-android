@@ -8,6 +8,7 @@ import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.TextRecognizer
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.stripe.android.camera.framework.Analyzer
+import com.stripe.android.camera.framework.AnalyzerFactory
 import com.stripe.android.stripecardscan.payment.card.isValidPan
 import com.stripe.android.stripecardscan.payment.card.normalizeCardNumber
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -30,8 +31,7 @@ private const val MAX_FUTURE_YEARS = 10
 
 /**
  * An analyzer that uses Google ML Kit Text Recognition to extract card numbers
- * from bitmap images. This serves as a fallback when the primary SSD OCR model
- * fails to detect card numbers.
+ * from bitmap images.
  */
 internal class MLKitTextRecognizer(
     private val textRecognizer: TextRecognizer
@@ -65,6 +65,23 @@ internal class MLKitTextRecognizer(
 
     override fun close() {
         textRecognizer.close()
+    }
+
+    /**
+     * Factory that creates [MLKitTextRecognizer] pool instances. A single
+     * [MLKitTextRecognizer] is shared across the pool because ML Kit's
+     * [TextRecognizer] is thread-safe.
+     */
+    class Factory :
+        AnalyzerFactory<SSDOcr.Input, Any, SSDOcr.Prediction, MLKitTextRecognizer>, Closeable {
+
+        private val shared = MLKitTextRecognizer(createTextRecognizer())
+
+        override suspend fun newInstance(): MLKitTextRecognizer = shared
+
+        override fun close() {
+            shared.close()
+        }
     }
 
     companion object {
