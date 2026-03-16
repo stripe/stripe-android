@@ -1,11 +1,12 @@
 package com.stripe.android.common.taptoadd
 
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
 import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.stripeterminal.external.models.TapToPayUxConfiguration
 import dagger.Binds
 import dagger.Module
@@ -36,7 +37,8 @@ internal interface TapToAddModule {
         fun providesTapToAddCollectionHandler(
             isStripeTerminalSdkAvailable: IsStripeTerminalSdkAvailable,
             connectionManager: TapToAddConnectionManager,
-            savedPaymentMethodRepository: SavedPaymentMethodRepository,
+            stripeRepository: StripeRepository,
+            paymentConfiguration: PaymentConfiguration,
             terminalWrapper: TerminalWrapper,
             tapToPayUxConfiguration: TapToPayUxConfiguration,
             errorReporter: ErrorReporter,
@@ -46,7 +48,8 @@ internal interface TapToAddModule {
                 isStripeTerminalSdkAvailable = isStripeTerminalSdkAvailable,
                 connectionManager = connectionManager,
                 terminalWrapper = terminalWrapper,
-                savedPaymentMethodRepository = savedPaymentMethodRepository,
+                stripeRepository = stripeRepository,
+                paymentConfiguration = paymentConfiguration,
                 tapToPayUxConfiguration = tapToPayUxConfiguration,
                 errorReporter = errorReporter,
                 createCardPresentSetupIntentCallbackRetriever = createCardPresentSetupIntentCallbackRetriever,

@@ -215,6 +215,20 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
+    fun testGetSavedPaymentMethodFromCardPresentPaymentMethodUrl() {
+        val customerId = "cus_123"
+        val paymentMethodId = "pm_456"
+        val url = StripeApiRepository.getSavedPaymentMethodFromCardPresentPaymentMethod(
+            customerId,
+            paymentMethodId
+        )
+        assertThat(url).isEqualTo(
+            "https://api.stripe.com/v1/elements/customers/$customerId/" +
+                "saved_payment_method_from_card_present_payment_method/$paymentMethodId"
+        )
+    }
+
+    @Test
     fun testGetDetachPaymentMethodUrl() {
         val paymentMethodId = "pm_1ETDEa2eZvKYlo2CN5828c52"
         val detachUrl = stripeApiRepository.getDetachPaymentMethodUrl(paymentMethodId)
@@ -1335,6 +1349,48 @@ internal class StripeApiRepositoryTest {
             "PaymentSheet"
         )
     }
+
+    @Test
+    fun retrieveSavedPaymentMethodFromCardPresentPaymentMethod_whenSuccess_returnsPaymentMethod() =
+        runTest {
+            val customerId = "cus_EzHwfOXxvAwRIW"
+            val cardPresentPaymentMethodId = "pm_1EVNYJCRMbs6FrXfG8n52JaK"
+            val responseBody = createCustomerPaymentMethodResponseBody(
+                paymentMethodId = cardPresentPaymentMethodId,
+                customerId = customerId,
+            )
+            val stripeResponse = StripeResponse(200, responseBody)
+            val options = ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
+            val url = StripeApiRepository.getSavedPaymentMethodFromCardPresentPaymentMethod(
+                customerId,
+                cardPresentPaymentMethodId
+            )
+
+            whenever(
+                stripeNetworkClient.executeRequest(
+                    argThat<ApiRequest> {
+                        ApiRequestMatcher(
+                            StripeRequest.Method.GET,
+                            url,
+                            options,
+                            null
+                        ).matches(this)
+                    }
+                )
+            ).thenReturn(stripeResponse)
+
+            val stripeApiRepository = create()
+            val paymentMethod = stripeApiRepository.retrieveSavedPaymentMethodFromCardPresentPaymentMethod(
+                cardPresentPaymentMethodId = cardPresentPaymentMethodId,
+                customerId = customerId,
+                options = options
+            ).getOrThrow()
+
+            assertThat(paymentMethod.id).isEqualTo(cardPresentPaymentMethodId)
+            assertThat(paymentMethod.customerId).isEqualTo(customerId)
+            assertThat(paymentMethod.type).isEqualTo(PaymentMethod.Type.Card)
+            assertThat(paymentMethod.card?.last4).isEqualTo("4242")
+        }
 
     @Test
     fun getFpxBankStatus_withFpxKey() = runTest {

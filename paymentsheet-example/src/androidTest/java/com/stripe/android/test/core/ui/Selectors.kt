@@ -38,6 +38,7 @@ import com.stripe.android.test.core.TestParameters
 import com.stripe.android.ui.core.elements.MANDATE_TEST_TAG
 import com.stripe.android.ui.core.elements.SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
 import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
+import com.stripe.android.uicore.elements.SELECTOR_CLICKABLE_TEST_TAG
 import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.R as StripeR
 import com.stripe.android.core.R as CoreR
@@ -360,15 +361,13 @@ internal class Selectors(
         hasTestTag(CVC_RECOLLECTION_SCREEN_CONFIRM)
     )
 
-    fun assertCardBrandDropdownExists() {
-        composeTestRule.onNode(hasTestTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG))
+    fun assertCardBrandSelectorExists() {
+        composeTestRule.onNode(hasTestTag(SELECTOR_CLICKABLE_TEST_TAG), true)
             .assertExists()
     }
 
-    fun selectCardBrand(displayName: String) {
-        composeTestRule.onNode(hasTestTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG))
-            .performClick()
-        composeTestRule.onNodeWithTextAfterWaiting(displayName)
+    fun selectCardBrand(cardBrand: String) {
+        composeTestRule.onNodeWithContentDescription(cardBrand)
             .performClick()
     }
 

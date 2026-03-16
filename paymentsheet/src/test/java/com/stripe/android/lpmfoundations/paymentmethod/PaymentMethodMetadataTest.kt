@@ -64,12 +64,6 @@ import com.stripe.android.uicore.R as UiCoreR
 internal class PaymentMethodMetadataTest {
 
     @get:Rule
-    val enablePassiveCaptchaRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.enablePassiveCaptcha,
-        isEnabled = true
-    )
-
-    @get:Rule
     val enableAttestationOnIntentConfirmationRule = FeatureFlagTestRule(
         featureFlag = FeatureFlags.enableAttestationOnIntentConfirmation,
         isEnabled = true

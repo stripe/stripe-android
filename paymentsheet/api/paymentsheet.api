@@ -1,10 +1,10 @@
 public abstract interface annotation class com/stripe/android/ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi : java/lang/annotation/Annotation {
 }
 
-public final class com/stripe/android/common/taptoadd/ui/ComposableSingletons$TapToAddCompletedScreenKt {
-	public static final field INSTANCE Lcom/stripe/android/common/taptoadd/ui/ComposableSingletons$TapToAddCompletedScreenKt;
+public final class com/stripe/android/common/taptoadd/ui/ComposableSingletons$TapToAddDelayScreenKt {
+	public static final field INSTANCE Lcom/stripe/android/common/taptoadd/ui/ComposableSingletons$TapToAddDelayScreenKt;
 	public fun <init> ()V
-	public final fun getLambda$1080576812$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-19032602$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/common/ui/ComposableSingletons$InlineContentTemplateBuilderKt {
