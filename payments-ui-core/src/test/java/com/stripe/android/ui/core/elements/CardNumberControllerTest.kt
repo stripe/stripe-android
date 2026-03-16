@@ -174,6 +174,38 @@ internal class CardNumberControllerTest {
     }
 
     @Test
+    fun `trailingIcon should not prepend cartes bancaires when cb not accepted`() = runTest {
+        FeatureFlags.newCbcSelector.setEnabled(true)
+        val cardNumberController = createController(
+            cardBrandChoiceConfig = CardBrandChoiceConfig.Eligible(
+                preferredBrands = listOf(),
+                initialBrand = null
+            ),
+            cardBrandFilter = FakeCardBrandFilter(disallowedBrands = setOf(CardBrand.CartesBancaires))
+        )
+        cardNumberController.trailingIcon.test {
+            cardNumberController.onValueChange("")
+            idleLooper()
+            assertThat(awaitItem() as TextFieldIcon.MultiTrailing)
+                .isEqualTo(
+                    TextFieldIcon.MultiTrailing(
+                        staticIcons = listOf(
+                            TextFieldIcon.Trailing(CardBrand.Visa.icon, isTintable = false),
+                            TextFieldIcon.Trailing(CardBrand.MasterCard.icon, isTintable = false),
+                            TextFieldIcon.Trailing(CardBrand.AmericanExpress.icon, isTintable = false)
+                        ),
+                        animatedIcons = listOf(
+                            TextFieldIcon.Trailing(CardBrand.Discover.icon, isTintable = false),
+                            TextFieldIcon.Trailing(CardBrand.JCB.icon, isTintable = false),
+                            TextFieldIcon.Trailing(CardBrand.DinersClub.icon, isTintable = false),
+                            TextFieldIcon.Trailing(CardBrand.UnionPay.icon, isTintable = false)
+                        )
+                    )
+                )
+        }
+    }
+
+    @Test
     fun `trailingIcon should have trailing icon when field matches bin`() = runTest {
         val cardNumberController = createController()
 
@@ -287,7 +319,7 @@ internal class CardNumberControllerTest {
                                 icon = CardBrand.Visa.icon
                             ),
                         ),
-                        hide = false,
+                        showSelector = true,
                         hasMadeSelection = false
                     )
                 )
@@ -396,7 +428,7 @@ internal class CardNumberControllerTest {
                                 icon = CardBrand.Visa.icon
                             ),
                         ),
-                        hide = false,
+                        showSelector = true,
                         hasMadeSelection = true
                     )
                 )
@@ -493,7 +525,7 @@ internal class CardNumberControllerTest {
                                 icon = CardBrand.Visa.icon
                             ),
                         ),
-                        hide = false,
+                        showSelector = true,
                         hasMadeSelection = true
                     )
                 )
@@ -554,6 +586,53 @@ internal class CardNumberControllerTest {
             assertThat(awaitItem() as TextFieldIcon.Selector).isEqualTo(unknownSelection)
 
             assertThat(cardNumberController.selectedCardBrandFlow.value).isEqualTo(CardBrand.Unknown)
+        }
+    }
+
+    @Test
+    fun `TextFieldIcon Selector showSelector false when one allowed brand`() = runTest {
+        FeatureFlags.newCbcSelector.setEnabled(true)
+        val cardNumberController = createController(
+            cardBrandChoiceConfig = CardBrandChoiceConfig.Eligible(
+                preferredBrands = listOf(),
+                initialBrand = null
+            ),
+            cardBrandFilter = FakeCardBrandFilter(disallowedBrands = setOf(CardBrand.CartesBancaires))
+        )
+
+        cardNumberController.trailingIcon.test {
+            cardNumberController.onValueChange("4000002500001001")
+            skipItems(3)
+            val item = awaitItem()
+            assertThat(item as TextFieldIcon.Selector)
+                .isEqualTo(
+                    TextFieldIcon.Selector(
+                        message = R.string.stripe_card_brand_choice_choose_card_brand.resolvableString,
+                        currentItem = TextFieldIcon.Selector.Item(
+                            id = CardBrand.Visa.code,
+                            label = "Visa".resolvableString,
+                            icon = CardBrand.Visa.icon
+                        ),
+                        items = listOf(
+                            TextFieldIcon.Selector.Item(
+                                id = CardBrand.CartesBancaires.code,
+                                label = resolvableString(
+                                    com.stripe.android.ui.core.R.string.stripe_card_brand_not_accepted_with_brand,
+                                    CardBrand.CartesBancaires.displayName
+                                ),
+                                icon = CardBrand.CartesBancaires.icon,
+                                enabled = false
+                            ),
+                            TextFieldIcon.Selector.Item(
+                                id = CardBrand.Visa.code,
+                                label = "Visa".resolvableString,
+                                icon = CardBrand.Visa.icon
+                            ),
+                        ),
+                        showSelector = false,
+                        hasMadeSelection = true
+                    )
+                )
         }
     }
 
@@ -1039,7 +1118,7 @@ internal class CardNumberControllerTest {
                     icon = CardBrand.Visa.icon
                 ),
             ),
-            hide = false,
+            showSelector = true,
             hasMadeSelection = true
         )
 
@@ -1062,7 +1141,7 @@ internal class CardNumberControllerTest {
                     icon = CardBrand.Visa.icon
                 ),
             ),
-            hide = false,
+            showSelector = true,
             hasMadeSelection = false
         )
     }

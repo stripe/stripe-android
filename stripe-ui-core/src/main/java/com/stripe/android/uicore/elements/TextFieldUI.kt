@@ -553,7 +553,7 @@ private fun TrailingSelector(
             .padding(10.dp),
         contentAlignment = Alignment.Center
     ) {
-        if (icon.items.size > 1) {
+        if (icon.showSelector) {
             Selector(
                 currentItem = icon.currentItem,
                 items = icon.items,

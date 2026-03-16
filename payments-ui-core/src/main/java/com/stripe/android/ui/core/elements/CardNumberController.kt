@@ -541,7 +541,7 @@ internal class DefaultCardNumberController(
             message = title,
             currentItem = selected ?: noSelection,
             items = items,
-            hide = brands.size < 2,
+            showSelector = items.count { it.enabled } > 1,
             hasMadeSelection = selected != null
         )
     }
@@ -554,7 +554,10 @@ internal class DefaultCardNumberController(
         }.take(STATIC_ICON_COUNT)
 
         val animatedIcons = buildList {
-            if (isEligibleForCardBrandChoice && FeatureFlags.newCbcSelector.isEnabled) {
+            if (isEligibleForCardBrandChoice && FeatureFlags.newCbcSelector.isEnabled && cardBrandFilter.isAccepted(
+                    CardBrand.CartesBancaires
+                )
+            ) {
                 add(TextFieldIcon.Trailing(CardBrand.CartesBancaires.icon, isTintable = false))
             }
             addAll(cardBrands.drop(STATIC_ICON_COUNT).map { TextFieldIcon.Trailing(it.icon, isTintable = false) })
