@@ -297,6 +297,22 @@ class CheckoutSessionConfirmationInterceptorTest {
     }
 
     @Test
+    fun `intercept passes expectedAmount from payment intent`() = runScenario {
+        interceptNewPm(intent = PaymentIntentFactory.create(amount = 5099L))
+
+        val params = confirmCheckoutSessionCalls.awaitItem().toParamMap()
+        assertThat(params["expected_amount"]).isEqualTo(5099L)
+    }
+
+    @Test
+    fun `intercept omits expectedAmount for setup intent`() = runScenario {
+        interceptNewPm(intent = SetupIntentFactory.create())
+
+        val params = confirmCheckoutSessionCalls.awaitItem().toParamMap()
+        assertThat(params).doesNotContainKey("expected_amount")
+    }
+
+    @Test
     fun `intercept with saved payment method passes null for savePaymentMethod`() = runScenario {
         interceptSavedPm()
 
@@ -451,15 +467,18 @@ class CheckoutSessionConfirmationInterceptorTest {
     ) {
         suspend fun interceptNewPm(
             shouldSave: Boolean = false,
+            intent: StripeIntent = PaymentIntentFactory.create(),
         ): ConfirmationDefinition.Action<IntentConfirmationDefinition.Args> = interceptor.intercept(
-            intent = PaymentIntentFactory.create(),
+            intent = intent,
             confirmationOption = NEW_PM_OPTION.copy(shouldSave = shouldSave),
             shippingValues = null,
         )
 
-        suspend fun interceptSavedPm(): ConfirmationDefinition.Action<IntentConfirmationDefinition.Args> =
+        suspend fun interceptSavedPm(
+            intent: StripeIntent = PaymentIntentFactory.create(),
+        ): ConfirmationDefinition.Action<IntentConfirmationDefinition.Args> =
             interceptor.intercept(
-                intent = PaymentIntentFactory.create(),
+                intent = intent,
                 confirmationOption = SAVED_PM_OPTION,
                 shippingValues = null,
             )
