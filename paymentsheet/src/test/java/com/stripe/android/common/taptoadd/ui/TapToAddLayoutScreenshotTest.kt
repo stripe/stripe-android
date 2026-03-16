@@ -52,8 +52,8 @@ class TapToAddLayoutScreenshotTest {
                         interactor = FakeTapToAddDelayInteractor(),
                     )
                     delay(1000L)
-                    screen = TapToAddNavigator.Screen.Delay(
-                        interactor = FakeTapToAddDelayInteractor(),
+                    screen = TapToAddNavigator.Screen.Confirmation(
+                        interactor = FakeTapToAddConfirmationInteractor(),
                     )
                 }
 
