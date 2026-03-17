@@ -1,6 +1,9 @@
+@file:OptIn(com.stripe.android.connect.PreviewConnectSDK::class)
+
 package com.stripe.android.connect.appearance
 
 import android.os.Parcelable
+import com.stripe.android.connect.PreviewConnectSDK
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
@@ -13,10 +16,15 @@ class Appearance private constructor(
     internal val spacingUnit: Float?,
     internal val buttonPrimary: Button,
     internal val buttonSecondary: Button,
+    internal val buttonDanger: Button,
     internal val badgeNeutral: Badge,
     internal val badgeSuccess: Badge,
     internal val badgeWarning: Badge,
     internal val badgeDanger: Badge,
+    internal val actionPrimaryText: Action,
+    internal val actionSecondaryText: Action,
+    internal val form: Form,
+    internal val tableRowPaddingY: Float?
 ) : Parcelable {
 
     @SuppressWarnings("TooManyFunctions")
@@ -27,10 +35,15 @@ class Appearance private constructor(
         private var spacingUnit: Float? = null
         private var buttonPrimary: Button = Button.default()
         private var buttonSecondary: Button = Button.default()
+        private var buttonDanger: Button = Button.default()
         private var badgeNeutral: Badge = Badge.default()
         private var badgeSuccess: Badge = Badge.default()
         private var badgeWarning: Badge = Badge.default()
         private var badgeDanger: Badge = Badge.default()
+        private var actionPrimaryText: Action = Action.default()
+        private var actionSecondaryText: Action = Action.default()
+        private var form: Form = Form.default()
+        private var tableRowPaddingY: Float? = null
 
         /**
          * Describes the colors used in embedded components.
@@ -70,6 +83,13 @@ class Appearance private constructor(
             apply { this.buttonSecondary = buttonSecondary }
 
         /**
+         * Describes the danger button appearance settings.
+         */
+        @PreviewConnectSDK
+        fun buttonDanger(buttonDanger: Button): Builder =
+            apply { this.buttonDanger = buttonDanger }
+
+        /**
          * Describes the neutral badge appearance settings.
          */
         fun badgeNeutral(badgeNeutral: Badge): Builder =
@@ -93,6 +113,34 @@ class Appearance private constructor(
         fun badgeDanger(badgeDanger: Badge): Builder =
             apply { this.badgeDanger = badgeDanger }
 
+        /**
+         * Describes the primary action text appearance settings.
+         */
+        @PreviewConnectSDK
+        fun actionPrimaryText(actionPrimaryText: Action): Builder =
+            apply { this.actionPrimaryText = actionPrimaryText }
+
+        /**
+         * Describes the secondary action text appearance settings.
+         */
+        @PreviewConnectSDK
+        fun actionSecondaryText(actionSecondaryText: Action): Builder =
+            apply { this.actionSecondaryText = actionSecondaryText }
+
+        /**
+         * Describes the form appearance settings.
+         */
+        @PreviewConnectSDK
+        fun form(form: Form): Builder =
+            apply { this.form = form }
+
+        /**
+         * Describes the vertical table row padding appearance settings.
+         */
+        @PreviewConnectSDK
+        fun tableRowPaddingY(tableRowPaddingY: Float): Builder =
+            apply { this.tableRowPaddingY = tableRowPaddingY }
+
         fun build(): Appearance {
             return Appearance(
                 colors = colors,
@@ -101,10 +149,15 @@ class Appearance private constructor(
                 spacingUnit = spacingUnit,
                 buttonPrimary = buttonPrimary,
                 buttonSecondary = buttonSecondary,
+                buttonDanger = buttonDanger,
                 badgeNeutral = badgeNeutral,
                 badgeSuccess = badgeSuccess,
                 badgeWarning = badgeWarning,
                 badgeDanger = badgeDanger,
+                actionPrimaryText = actionPrimaryText,
+                actionSecondaryText = actionSecondaryText,
+                form = form,
+                tableRowPaddingY = tableRowPaddingY,
             )
         }
     }

@@ -150,4 +150,37 @@
     <color name="retro_badge_danger_border">#E35F5F</color>
     <color name="retro_badge_danger_text">#FFFFFF</color>
     <color name="retro_offset_background">#FFFFFF</color>
+
+    <!-- New Tokens Theme -->
+    <color name="full_tokens_primary">#5B21B6</color>
+    <color name="full_tokens_background">#FAF5FF</color>
+    <color name="full_tokens_text">#1E1B4B</color>
+    <color name="full_tokens_secondary_text">#6B7280</color>
+    <color name="full_tokens_border">#C4B5FD</color>
+    <color name="full_tokens_danger">#DC2626</color>
+    <color name="full_tokens_button_primary_background">#7C3AED</color>
+    <color name="full_tokens_button_primary_border">#6D28D9</color>
+    <color name="full_tokens_button_primary_text">#FFFFFF</color>
+    <color name="full_tokens_button_secondary_background">#EDE9FE</color>
+    <color name="full_tokens_button_secondary_border">#C4B5FD</color>
+    <color name="full_tokens_button_secondary_text">#5B21B6</color>
+    <color name="full_tokens_button_danger_background">#DC2626</color>
+    <color name="full_tokens_button_danger_border">#B91C1C</color>
+    <color name="full_tokens_button_danger_text">#FFFFFF</color>
+    <color name="full_tokens_action_primary_text">#7C3AED</color>
+    <color name="full_tokens_action_secondary_text">#6B7280</color>
+    <color name="full_tokens_form_placeholder">#9CA3AF</color>
+    <color name="full_tokens_badge_neutral_background">#EDE9FE</color>
+    <color name="full_tokens_badge_neutral_border">#C4B5FD</color>
+    <color name="full_tokens_badge_neutral_text">#5B21B6</color>
+    <color name="full_tokens_badge_success_background">#D1FAE5</color>
+    <color name="full_tokens_badge_success_border">#6EE7B7</color>
+    <color name="full_tokens_badge_success_text">#065F46</color>
+    <color name="full_tokens_badge_warning_background">#FEF3C7</color>
+    <color name="full_tokens_badge_warning_border">#FCD34D</color>
+    <color name="full_tokens_badge_warning_text">#92400E</color>
+    <color name="full_tokens_badge_danger_background">#FEE2E2</color>
+    <color name="full_tokens_badge_danger_border">#FCA5A5</color>
+    <color name="full_tokens_badge_danger_text">#B91C1C</color>
+    <color name="full_tokens_offset_background">#F3E8FF</color>
 </resources>

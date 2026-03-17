@@ -1,3 +1,5 @@
+@file:OptIn(com.stripe.android.connect.PreviewConnectSDK::class)
+
 package com.stripe.android.connect.webview.serialization
 
 import androidx.annotation.ColorInt
@@ -74,6 +76,38 @@ internal data class AppearanceVariablesJs(
      */
     @ColorInt val buttonSecondaryColorText: IntAsRgbHexString?,
     /**
+     * The background color for danger buttons to indicate destructive actions.
+     */
+    @ColorInt val buttonDangerColorBackground: IntAsRgbHexString?,
+    /**
+     * The border color for danger buttons to indicate destructive actions.
+     */
+    @ColorInt val buttonDangerColorBorder: IntAsRgbHexString?,
+    /**
+     * The text color for danger buttons to indicate destructive actions.
+     */
+    @ColorInt val buttonDangerColorText: IntAsRgbHexString?,
+    /**
+     * The vertical padding in px for buttons.
+     */
+    val buttonPaddingY: String?,
+    /**
+     * The horizontal padding in px for buttons.
+     */
+    val buttonPaddingX: String?,
+    /**
+     * The font size in px for the button label typography.
+     */
+    val buttonLabelFontSize: String?,
+    /**
+     * The font weight (between 0-1000) for the button label typography.
+     */
+    val buttonLabelFontWeight: Int?,
+    /**
+     * The text transform for the button label typography.
+     */
+    val buttonLabelTextTransform: TextTransform?,
+    /**
      * The color used for secondary text.
      */
     @ColorInt val colorSecondaryText: IntAsRgbHexString?,
@@ -86,6 +120,10 @@ internal data class AppearanceVariablesJs(
      */
     @ColorInt val actionPrimaryTextDecorationColor: IntAsRgbHexString?,
     /**
+     * The text transform for primary actions and links.
+     */
+    val actionPrimaryTextTransform: TextTransform?,
+    /**
      * The color used for secondary actions and links.
      */
     @ColorInt val actionSecondaryColorText: IntAsRgbHexString?,
@@ -93,6 +131,10 @@ internal data class AppearanceVariablesJs(
      * The color used for text decoration of secondary actions and links.
      */
     @ColorInt val actionSecondaryTextDecorationColor: IntAsRgbHexString?,
+    /**
+     * The text transform for secondary actions and links.
+     */
+    val actionSecondaryTextTransform: TextTransform?,
     /**
      * The background color used to represent neutral state or lack of state in status badges.
      */
@@ -148,6 +190,26 @@ internal data class AppearanceVariablesJs(
      */
     @ColorInt val badgeDangerColorBorder: IntAsRgbHexString?,
     /**
+     * The horizontal padding in px for badges.
+     */
+    val badgePaddingX: String?,
+    /**
+     * The vertical padding in px for badges.
+     */
+    val badgePaddingY: String?,
+    /**
+     * The font size in px for the badge label typography.
+     */
+    val badgeLabelFontSize: String?,
+    /**
+     * The font weight (between 0-1000) for the badge label typography.
+     */
+    val badgeLabelFontWeight: Int?,
+    /**
+     * The text transform for the badge label typography.
+     */
+    val badgeLabelTextTransform: TextTransform?,
+    /**
      * The background color used when highlighting information, like the selected row on a table or particular piece of
      * UI.
      */
@@ -169,6 +231,22 @@ internal data class AppearanceVariablesJs(
      */
     @ColorInt val formAccentColor: IntAsRgbHexString?,
     /**
+     * The color used for placeholder text in form items.
+     */
+    @ColorInt val formPlaceholderTextColor: IntAsRgbHexString?,
+    /**
+     * The horizontal padding in px for form items.
+     */
+    val inputFieldPaddingX: String?,
+    /**
+     * The vertical padding in px for form items.
+     */
+    val inputFieldPaddingY: String?,
+    /**
+     * The vertical padding in px for table rows.
+     */
+    val tableRowPaddingY: String?,
+    /**
      * The border radius in px used for buttons.
      */
     val buttonBorderRadius: String?,
@@ -188,6 +266,7 @@ internal data class AppearanceVariablesJs(
      * The backdrop color when an overlay is opened.
      */
     @ColorInt val overlayBackdropColor: IntAsRgbHexString?,
+
     /**
      * The font size in px for the medium body typography.
      */
@@ -324,11 +403,21 @@ internal fun Appearance.toJs(): AppearanceJs {
             buttonSecondaryColorBackground = buttonSecondary.colorBackground,
             buttonSecondaryColorBorder = buttonSecondary.colorBorder,
             buttonSecondaryColorText = buttonSecondary.colorText,
+            buttonDangerColorBackground = buttonDanger.colorBackground,
+            buttonDangerColorBorder = buttonDanger.colorBorder,
+            buttonDangerColorText = buttonDanger.colorText,
+            buttonPaddingX = buttonPrimary.paddingX.toPx(),
+            buttonPaddingY = buttonPrimary.paddingY.toPx(),
+            buttonLabelFontSize = buttonPrimary.labelTypography?.fontSize.toPx(),
+            buttonLabelFontWeight = buttonPrimary.labelTypography?.fontWeight,
+            buttonLabelTextTransform = buttonPrimary.labelTypography?.textTransform,
             colorSecondaryText = colors.secondaryText,
-            actionPrimaryColorText = colors.actionPrimaryText,
+            actionPrimaryColorText = actionPrimaryText.colorText,
             actionPrimaryTextDecorationColor = null,
-            actionSecondaryColorText = colors.actionSecondaryText,
+            actionPrimaryTextTransform = actionPrimaryText.textTransform,
+            actionSecondaryColorText = actionSecondaryText.colorText,
             actionSecondaryTextDecorationColor = null,
+            actionSecondaryTextTransform = actionSecondaryText.textTransform,
             badgeNeutralColorBackground = badgeNeutral.colorBackground,
             badgeNeutralColorText = badgeNeutral.colorText,
             badgeNeutralColorBorder = badgeNeutral.colorBorder,
@@ -341,11 +430,20 @@ internal fun Appearance.toJs(): AppearanceJs {
             badgeDangerColorBackground = badgeDanger.colorBackground,
             badgeDangerColorText = badgeDanger.colorText,
             badgeDangerColorBorder = badgeDanger.colorBorder,
+            badgePaddingX = badgeNeutral.paddingX.toPx(),
+            badgePaddingY = badgeNeutral.paddingY.toPx(),
+            badgeLabelFontSize = badgeNeutral.labelTypography?.fontSize.toPx(),
+            badgeLabelFontWeight = badgeNeutral.labelTypography?.fontWeight,
+            badgeLabelTextTransform = badgeNeutral.labelTypography?.textTransform,
             offsetBackgroundColor = colors.offsetBackground,
-            formBackgroundColor = colors.formBackground,
+            formBackgroundColor = form.colorBackground,
             colorBorder = colors.border,
-            formHighlightColorBorder = colors.formHighlightBorder,
-            formAccentColor = colors.formAccent,
+            formHighlightColorBorder = form.highlightBorder,
+            formAccentColor = form.accent,
+            formPlaceholderTextColor = form.placeholderTextColor,
+            inputFieldPaddingX = form.inputFieldPaddingX.toPx(),
+            inputFieldPaddingY = form.inputFieldPaddingY.toPx(),
+            tableRowPaddingY = tableRowPaddingY.toPx(),
             buttonBorderRadius = cornerRadius.button.toPx(),
             formBorderRadius = cornerRadius.form.toPx(),
             badgeBorderRadius = cornerRadius.badge.toPx(),

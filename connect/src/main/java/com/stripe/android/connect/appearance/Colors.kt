@@ -7,6 +7,8 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 @Poko
+// Deprecating old version to for parameters that moved to other classes
+@Deprecated("Use builder instead")
 class Colors private constructor(
     @ColorInt internal val primary: Int?,
     @ColorInt internal val background: Int?,
@@ -14,12 +16,12 @@ class Colors private constructor(
     @ColorInt internal val secondaryText: Int?,
     @ColorInt internal val danger: Int?,
     @ColorInt internal val border: Int?,
-    @ColorInt internal val actionPrimaryText: Int?,
-    @ColorInt internal val actionSecondaryText: Int?,
+    @Deprecated("Use Action class instead") @ColorInt internal val actionPrimaryText: Int?,
+    @Deprecated("Use Action class instead") @ColorInt internal val actionSecondaryText: Int?,
     @ColorInt internal val offsetBackground: Int?,
-    @ColorInt internal val formBackground: Int?,
-    @ColorInt internal val formHighlightBorder: Int?,
-    @ColorInt internal val formAccent: Int?
+    @Deprecated("Use Form class instead") @ColorInt internal val formBackground: Int?,
+    @Deprecated("Use Form class instead") @ColorInt internal val formHighlightBorder: Int?,
+    @Deprecated("Use Form class instead") @ColorInt internal val formAccent: Int?
 ) : Parcelable {
 
     @Suppress("TooManyFunctions")
@@ -36,16 +38,21 @@ class Colors private constructor(
 
         @ColorInt private var border: Int? = null
 
+        @Deprecated("Use Action class instead")
         @ColorInt private var actionPrimaryText: Int? = null
 
+        @Deprecated("Use Action class instead")
         @ColorInt private var actionSecondaryText: Int? = null
 
         @ColorInt private var offsetBackground: Int? = null
 
+        @Deprecated("Use Form class instead")
         @ColorInt private var formBackground: Int? = null
 
+        @Deprecated("Use Form class instead")
         @ColorInt private var formHighlightBorder: Int? = null
 
+        @Deprecated("Use Form class instead")
         @ColorInt private var formAccent: Int? = null
 
         /**
@@ -87,12 +94,14 @@ class Colors private constructor(
         /**
          * The color used for primary actions and link text. If null the default will be used.
          */
+        @Deprecated("Use Action class instead")
         fun actionPrimaryText(@ColorInt actionPrimaryText: Int?): Builder =
             apply { this.actionPrimaryText = actionPrimaryText }
 
         /**
          * The color used for secondary actions and link text. If null the default will be used.
          */
+        @Deprecated("Use Action class instead")
         fun actionSecondaryText(@ColorInt actionSecondaryText: Int?): Builder =
             apply { this.actionSecondaryText = actionSecondaryText }
 
@@ -105,12 +114,14 @@ class Colors private constructor(
         /**
          * The background color used for form fields. If null the default will be used.
          */
+        @Deprecated("Use Form class instead")
         fun formBackground(@ColorInt formBackground: Int?): Builder =
             apply { this.formBackground = formBackground }
 
         /**
          * The border color used to highlight form items when focused. If null the default will be used.
          */
+        @Deprecated("Use Form class instead")
         fun formHighlightBorder(@ColorInt formHighlightBorder: Int?): Builder =
             apply { this.formHighlightBorder = formHighlightBorder }
 
@@ -118,6 +129,7 @@ class Colors private constructor(
          * The accent color used for filling form elements like checkboxes or radio buttons.
          * If null the default will be used.
          */
+        @Deprecated("Use Form class instead")
         fun formAccent(@ColorInt formAccent: Int?): Builder =
             apply { this.formAccent = formAccent }
 
