@@ -34,8 +34,16 @@ internal fun Throwable.stripeErrorMessage(): ResolvableString {
     (this as? StripeException)?.stripeError?.message?.let {
         return it.resolvableString
     }
-    (this as? TerminalException)?.let {
-        return it.errorMessage.resolvableString
+    this.getTerminalErrorMessage()?.let {
+        return it
     }
     return R.string.stripe_something_went_wrong.resolvableString
+}
+
+private fun Throwable.getTerminalErrorMessage(): ResolvableString? {
+    return try {
+        (this as? TerminalException)?.errorMessage?.resolvableString
+    } catch (_: NoClassDefFoundError) {
+        null
+    }
 }
