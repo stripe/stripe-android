@@ -60,7 +60,7 @@ sentry {
 android {
     defaultConfig {
         applicationId "com.stripe.android.paymentsheet.example"
-        versionCode 11
+        versionCode 23
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 

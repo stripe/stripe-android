@@ -45,6 +45,7 @@ internal object MerchantSettingsDefinition :
         }.toList() + listOf(
             option(Merchant.US_TAX.name, convertToValue(Merchant.US_TAX.value)),
             option(Merchant.StripeShop.name, convertToValue(Merchant.StripeShop.value)),
+            option(Merchant.StripeShopProd.name, convertToValue(Merchant.StripeShopProd.value)),
             option(Merchant.Custom.name, convertToValue(Merchant.Custom.value))
         )
     }
@@ -102,6 +103,7 @@ internal object MerchantSettingsDefinition :
                 Merchant.StripeShop -> Currency.USD
                 Merchant.US_TAX -> Currency.USD
                 Merchant.Custom -> Currency.USD
+                Merchant.StripeShopProd -> Currency.USD
             }
         }
 }
@@ -122,8 +124,9 @@ enum class Merchant(override val value: String) : ValueEnum {
     IT("IT"),
     TH("TH"),
     StripeShop("stripe_shop_test"),
+    StripeShopProd("stripe_shop_prod"),
+    Custom("custom"),
     US_TAX("us_tax"),
-    Custom("custom")
 }
 
 val Merchant.countryCode: String
@@ -146,5 +149,6 @@ val Merchant.countryCode: String
             Merchant.StripeShop -> "US"
             Merchant.US_TAX -> "US"
             Merchant.Custom -> "US"
+            Merchant.StripeShopProd -> "US"
         }
     }
