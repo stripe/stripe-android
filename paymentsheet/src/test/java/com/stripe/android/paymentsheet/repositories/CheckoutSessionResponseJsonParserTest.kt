@@ -12,6 +12,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
+@Suppress("LargeClass")
 class CheckoutSessionResponseJsonParserTest {
 
     @Test
@@ -622,6 +623,24 @@ class CheckoutSessionResponseJsonParserTest {
         assertThat(result).isNotNull()
         assertThat(result?.customerEmail).isEqualTo("guest@example.com")
         assertThat(result?.customer).isNull()
+    }
+
+    @Test
+    fun `customerEmail is null when customer_email is JSON null`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "currency": "usd",
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 },
+                "customer_email": null
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.customerEmail).isNull()
     }
 
     @Test
