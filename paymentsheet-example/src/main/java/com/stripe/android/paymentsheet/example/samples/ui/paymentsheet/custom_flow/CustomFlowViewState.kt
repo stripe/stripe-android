@@ -15,10 +15,10 @@ data class CustomFlowViewState(
 ) {
 
     val isPaymentMethodButtonEnabled: Boolean
-        get() = !isProcessing && !didComplete
+        get() = !isProcessing
 
     val isBuyButtonEnabled: Boolean
-        get() = !isProcessing && !didComplete && paymentOption != null
+        get() = !isProcessing && paymentOption != null
 
     data class PaymentInfo(
         val clientSecret: String,
