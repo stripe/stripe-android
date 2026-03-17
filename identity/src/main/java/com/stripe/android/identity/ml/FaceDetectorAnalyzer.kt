@@ -7,6 +7,7 @@ import com.stripe.android.camera.framework.image.size
 import com.stripe.android.camera.framework.util.maxAspectRatioInSize
 import com.stripe.android.identity.analytics.ModelPerformanceTracker
 import com.stripe.android.identity.states.IdentityScanState
+import com.stripe.android.identity.utils.UPLOAD_FLOAT_DECIMALS
 import com.stripe.android.identity.utils.roundToMaxDecimals
 import com.stripe.android.mlcore.base.InterpreterOptionsWrapper
 import com.stripe.android.mlcore.base.InterpreterWrapper
@@ -81,7 +82,7 @@ internal class FaceDetectorAnalyzer(
                 width = (boundingBoxes[0][2] - boundingBoxes[0][0]) / INPUT_WIDTH,
                 height = (boundingBoxes[0][3] - boundingBoxes[0][1]) / INPUT_HEIGHT
             ),
-            resultScore = score[0].roundToMaxDecimals(2)
+            resultScore = score[0].roundToMaxDecimals(UPLOAD_FLOAT_DECIMALS)
         )
     }
 

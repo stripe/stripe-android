@@ -13,6 +13,7 @@ import com.stripe.android.identity.states.IdentityScanState.Found
 import com.stripe.android.identity.states.IdentityScanState.Initial
 import com.stripe.android.identity.states.IdentityScanState.Satisfied
 import com.stripe.android.identity.states.IdentityScanState.Unsatisfied
+import com.stripe.android.identity.utils.UPLOAD_FLOAT_DECIMALS
 import com.stripe.android.identity.utils.roundToMaxDecimals
 import kotlin.math.abs
 import kotlin.math.pow
@@ -103,7 +104,7 @@ internal class FaceDetectorTransitioner(
                 savedFrames.fold(0f) { acc, pair ->
                     acc + (pair.second.resultScore - mean).pow(2)
                 }.div(numFrames.toFloat())
-            ).roundToMaxDecimals(2)
+            ).roundToMaxDecimals(UPLOAD_FLOAT_DECIMALS)
         }
 
     internal class SelfieFrameSaver :

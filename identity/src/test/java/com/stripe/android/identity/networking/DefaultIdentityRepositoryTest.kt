@@ -18,6 +18,8 @@ import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.ClearDataParam.Companion.createCollectedDataParamEntry
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.createCollectedDataParamEntry
+import com.stripe.android.identity.networking.models.DocumentUploadParam
+import com.stripe.android.identity.networking.models.FaceUploadParam
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageData
@@ -195,6 +197,58 @@ class DefaultIdentityRepositoryTest {
                     )
                 )
             )
+        }
+    }
+
+    @Test
+    fun `postVerificationPageData rounds float upload params to four decimals`() {
+        val collectedDataParam = CollectedDataParam(
+            idDocumentFront = DocumentUploadParam(
+                passportScore = 0.98765f,
+                highResImage = "front_high_res_image",
+                uploadMethod = DocumentUploadParam.UploadMethod.AUTOCAPTURE,
+                exposureIso = 200.12945f,
+                focalLength = 4.26606f
+            ),
+            face = FaceUploadParam(
+                bestHighResImage = "best_high_res_image",
+                bestLowResImage = "best_low_res_image",
+                firstHighResImage = "first_high_res_image",
+                firstLowResImage = "first_low_res_image",
+                lastHighResImage = "last_high_res_image",
+                lastLowResImage = "last_low_res_image",
+                bestFaceScore = 0.87654f,
+                faceScoreVariance = 0.15446f,
+                numFrames = 3,
+                bestBrightnessValue = 2.34566f,
+                bestFocalLength = 3.45614f,
+                bestExposureIso = 100.12345f
+            )
+        )
+
+        verifyPostVerificationPageData(
+            targetPath = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$TEST_ID/$DATA",
+            apiCall = {
+                identityRepository.postVerificationPageData(
+                    TEST_ID,
+                    TEST_EPHEMERAL_KEY,
+                    collectedDataParam,
+                    ClearDataParam()
+                )
+            }
+        ) { request ->
+            val collectedData = (request as ApiRequest).params?.get("collected_data") as Map<*, *>
+            val idDocumentFront = collectedData["id_document_front"] as Map<*, *>
+            val face = collectedData["face"] as Map<*, *>
+
+            assertThat(idDocumentFront["passport_score"]).isEqualTo("0.9877")
+            assertThat(idDocumentFront["exposure_iso"]).isEqualTo("200.1295")
+            assertThat(idDocumentFront["focal_length"]).isEqualTo("4.2661")
+            assertThat(face["best_face_score"]).isEqualTo("0.8765")
+            assertThat(face["face_score_variance"]).isEqualTo("0.1545")
+            assertThat(face["best_brightness_value"]).isEqualTo("2.3457")
+            assertThat(face["best_focal_length"]).isEqualTo("3.4561")
+            assertThat(face["best_exposure_iso"]).isEqualTo("100.1235")
         }
     }
 

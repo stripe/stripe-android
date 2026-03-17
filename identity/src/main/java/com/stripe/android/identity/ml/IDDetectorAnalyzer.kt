@@ -10,6 +10,7 @@ import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.ModelPerformanceTracker
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.states.LaplacianBlurDetector
+import com.stripe.android.identity.utils.UPLOAD_FLOAT_DECIMALS
 import com.stripe.android.identity.utils.roundToMaxDecimals
 import com.stripe.android.mlcore.base.InterpreterOptionsWrapper
 import com.stripe.android.mlcore.base.InterpreterWrapper
@@ -102,7 +103,7 @@ internal class IDDetectorAnalyzer(
         val bestBoundingBox = boundingBoxes[bestIndex]
 
         val categoriesMapping = LIST_OF_INDICES.map {
-            categories[bestIndex][it].roundToMaxDecimals(2)
+            categories[bestIndex][it].roundToMaxDecimals(UPLOAD_FLOAT_DECIMALS)
         }
 
         return buildLegacyOutput(
