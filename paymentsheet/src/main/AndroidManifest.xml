@@ -53,7 +53,7 @@
             android:theme="@style/StripePaymentSheetDefaultTheme" />
         <activity
             android:name="com.stripe.android.common.taptoadd.TapToAddActivity"
-            android:theme="@style/StripePaymentSheetDefaultTheme" />
+            android:theme="@style/StripePaymentSheetTapToAddTheme" />
 
         <activity
             android:name="com.stripe.android.attestation.AttestationActivity"

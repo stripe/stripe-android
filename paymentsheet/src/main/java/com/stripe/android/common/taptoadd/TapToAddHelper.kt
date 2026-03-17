@@ -1,7 +1,9 @@
 package com.stripe.android.common.taptoadd
 
+import android.content.Context
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
@@ -12,6 +14,7 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.uicore.utils.AnimationConstants
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -47,6 +50,7 @@ internal interface TapToAddHelper {
 }
 
 internal class DefaultTapToAddHelper(
+    private val context: Context,
     private val coroutineScope: CoroutineScope,
     private val productUsage: Set<String>,
     private val paymentElementCallbackIdentifier: String,
@@ -129,12 +133,18 @@ internal class DefaultTapToAddHelper(
                     paymentMethodMetadata = paymentMethodMetadata,
                     paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
                     productUsage = productUsage,
+                ),
+                options = ActivityOptionsCompat.makeCustomAnimation(
+                    context,
+                    AnimationConstants.FADE_IN,
+                    AnimationConstants.FADE_OUT,
                 )
             )
         }
     }
 
     class Factory @Inject constructor(
+        private val context: Context,
         @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
         @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
         private val savedStateHandle: SavedStateHandle,
@@ -148,6 +158,7 @@ internal class DefaultTapToAddHelper(
             linkSignupMode: StateFlow<LinkSignupMode?>,
         ): TapToAddHelper {
             return DefaultTapToAddHelper(
+                context = context,
                 coroutineScope = coroutineScope,
                 productUsage = productUsage,
                 paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
