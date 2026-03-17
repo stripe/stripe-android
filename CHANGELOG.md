@@ -4,7 +4,6 @@
 
 ### Identity
 * [CHANGED] Improved selfie capture quality with motion blur gating, center framing validation, and better best-frame selection.
-
 ## 23.0.2 - 2026-03-16
 
 ### PaymentSheet
