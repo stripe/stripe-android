@@ -43,7 +43,7 @@ import com.stripe.android.paymentsheet.R
 @Composable
 internal fun TapToAddLayout(
     screen: TapToAddNavigator.Screen,
-    onCancel: () -> Unit,
+    onCancel: (TapToAddNavigator.Action) -> Unit,
 ) {
     Box(
         modifier = Modifier.fillMaxSize().background(MaterialTheme.colors.background)
@@ -82,7 +82,9 @@ internal fun TapToAddLayout(
                         ) {
                             CancelButton(
                                 button = screen.cancelButton,
-                                onClick = onCancel,
+                                onClick = {
+                                    onCancel(screen.onCancelAction)
+                                },
                             )
 
                             screen.ScreenContent(this)
