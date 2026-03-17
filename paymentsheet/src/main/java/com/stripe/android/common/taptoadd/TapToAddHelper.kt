@@ -123,7 +123,7 @@ internal class DefaultTapToAddHelper(
     }
 
     override fun startPaymentMethodCollection(paymentMethodMetadata: PaymentMethodMetadata) {
-        if (collecting || !isTapToAddEnabled.value) {
+        if (collecting) {
             return
         }
 

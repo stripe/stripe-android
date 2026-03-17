@@ -121,9 +121,8 @@ internal class DefaultTapToAddCollectionHandler(
 
         when (val result = callback.createCardPresentSetupIntent()) {
             is CreateIntentResult.Success -> {
-                throw IllegalStateException("testing")
-//                setUxConfiguration()
-//                collectWithIntent(result.clientSecret, metadata, customerMetadata)
+                setUxConfiguration()
+                collectWithIntent(result.clientSecret, metadata, customerMetadata)
             }
             is CreateIntentResult.Failure -> {
                 TapToAddCollectionHandler.CollectionState.FailedCollection(
