@@ -12,7 +12,6 @@ import com.stripe.android.camera.framework.util.toRect
 import com.stripe.android.stripecardscan.framework.ResourceFetcher
 import com.stripe.android.stripecardscan.test.R
 import kotlinx.coroutines.runBlocking
-import org.junit.Assume.assumeNoException
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -25,11 +24,7 @@ class SSDOcrTest {
 
     @Before
     fun initializeTfLite() {
-        try {
-            Tasks.await(TfLite.initialize(appContext))
-        } catch (e: Exception) {
-            assumeNoException("TFLite Play Services runtime not available", e)
-        }
+        Tasks.await(TfLite.initialize(appContext))
     }
 
     /**
