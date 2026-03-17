@@ -345,7 +345,7 @@ class TapToAddCollectionHandlerTest {
         assertThat(result.await()).isEqualTo(
             TapToAddCollectionHandler.CollectionState.FailedCollection(
                 error = terminalException,
-                displayMessage = R.string.stripe_something_went_wrong.resolvableString
+                displayMessage = "Failed to retrieve setup intent".resolvableString
             )
         )
     }
@@ -380,7 +380,7 @@ class TapToAddCollectionHandlerTest {
         assertThat(result.await()).isEqualTo(
             TapToAddCollectionHandler.CollectionState.FailedCollection(
                 error = terminalException,
-                displayMessage = R.string.stripe_something_went_wrong.resolvableString
+                displayMessage = "Card declined".resolvableString
             )
         )
     }
@@ -446,7 +446,7 @@ class TapToAddCollectionHandlerTest {
         assertThat(result.await()).isEqualTo(
             TapToAddCollectionHandler.CollectionState.FailedCollection(
                 error = terminalException,
-                displayMessage = R.string.stripe_something_went_wrong.resolvableString
+                displayMessage = "Setup intent confirmation failed".resolvableString
             )
         )
     }
