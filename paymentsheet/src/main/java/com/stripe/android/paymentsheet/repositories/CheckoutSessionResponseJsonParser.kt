@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.repositories
 
+import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArrayToList
 import com.stripe.android.model.DeferredIntentParams
@@ -186,7 +187,7 @@ internal class CheckoutSessionResponseJsonParser(
             return null
         }
 
-        val customerId = json.optString(FIELD_CUSTOMER_ID).takeIf { it.isNotEmpty() } ?: return null
+        val customerId = StripeJsonUtils.optString(json, FIELD_CUSTOMER_ID) ?: return null
         val paymentMethodsJson = json.optJSONArray(FIELD_PAYMENT_METHODS)
         val paymentMethods = paymentMethodsJson?.let { pmsJson ->
             (0 until pmsJson.length()).mapNotNull { index ->

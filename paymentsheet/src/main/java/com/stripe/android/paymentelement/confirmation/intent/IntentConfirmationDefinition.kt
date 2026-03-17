@@ -52,20 +52,19 @@ internal class IntentConfirmationDefinition(
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
             )
         }
+        val shippingValues = paymentMethodMetadata.shippingDetails?.toConfirmPaymentIntentShipping()
         return when (confirmationOption) {
             is PaymentMethodConfirmationOption.New ->
                 interceptor.intercept(
                     intent = confirmationArgs.intent,
                     confirmationOption = confirmationOption,
-                    shippingValues = confirmationArgs.paymentMethodMetadata
-                        .shippingDetails?.toConfirmPaymentIntentShipping(),
+                    shippingValues = shippingValues,
                 )
             is PaymentMethodConfirmationOption.Saved ->
                 interceptor.intercept(
                     intent = confirmationArgs.intent,
                     confirmationOption = confirmationOption,
-                    shippingValues = confirmationArgs.paymentMethodMetadata
-                        .shippingDetails?.toConfirmPaymentIntentShipping(),
+                    shippingValues = shippingValues,
                 )
         }
     }
