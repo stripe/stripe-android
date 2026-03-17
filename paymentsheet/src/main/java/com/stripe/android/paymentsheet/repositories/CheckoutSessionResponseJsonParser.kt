@@ -36,7 +36,7 @@ internal class CheckoutSessionResponseJsonParser(
         val mode = parseMode(json.optString(FIELD_MODE))
         val amount = extractDueAmount(json) ?: return null
         val currency = json.optString(FIELD_CURRENCY).takeIf { it.isNotEmpty() } ?: return null
-        val customerEmail = json.optString(FIELD_CUSTOMER_EMAIL).takeIf { it.isNotEmpty() }
+        val customerEmail = StripeJsonUtils.optString(json, FIELD_CUSTOMER_EMAIL)
         val paymentIntent = json.optJSONObject(FIELD_PAYMENT_INTENT)?.let {
             PaymentIntentJsonParser().parse(it)
         }
