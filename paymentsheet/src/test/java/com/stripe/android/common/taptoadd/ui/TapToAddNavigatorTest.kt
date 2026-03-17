@@ -96,5 +96,20 @@ internal class TapToAddNavigatorTest {
             }
         }
 
+    @Test
+    fun `performAction with CloseWithUnsupportedDevice emits UnsupportedDevice`() = runTest {
+        val initialScreen = TapToAddNavigator.Screen.NotSupportedError
+        val navigator = TapToAddNavigator(
+            coroutineScope = this,
+            stateHolder = FakeStateHolder(state = null),
+            initialScreen = initialScreen,
+        )
+
+        navigator.result.test {
+            navigator.performAction(TapToAddNavigator.Action.CloseWithUnsupportedDevice)
+            assertThat(awaitItem()).isEqualTo(TapToAddResult.UnsupportedDevice)
+        }
+    }
+
     private object FakeTapToAddCollectingInteractor : TapToAddCollectingInteractor
 }

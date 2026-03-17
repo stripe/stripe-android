@@ -83,6 +83,20 @@ internal class DefaultTapToAddCollectingInteractorTest {
         }
     }
 
+    @Test
+    fun `onTapToAddNotSupported is invoked when collection fails because device is unsupported`() {
+        val exception = IllegalStateException("unsupported")
+
+        runScenario(
+            collectResult = TapToAddCollectionHandler.CollectionState.UnsupportedDevice(
+                error = exception,
+            ),
+        ) {
+            assertThat(collectionHandlerScenario.collectCalls.awaitItem()).isNotNull()
+            assertThat(onTapToAddNotSupported.awaitItem()).isNotNull()
+        }
+    }
+
     private fun runScenario(
         metadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(isTapToAddSupported = true),
         collectResult: TapToAddCollectionHandler.CollectionState =
@@ -93,6 +107,7 @@ internal class DefaultTapToAddCollectingInteractorTest {
 
         val onCollected = Turbine<PaymentMethod>()
         val onFailedCollection = Turbine<ResolvableString>()
+        val onTapToAddNotSupported = Turbine<Unit>()
         val onCanceled = Turbine<Unit>()
 
         FakeTapToAddCollectionHandler.test(collectResult) {
@@ -103,11 +118,13 @@ internal class DefaultTapToAddCollectingInteractorTest {
                     tapToAddCollectionHandler = handler,
                     onCollected = { onCollected.add(it) },
                     onFailedCollection = { onFailedCollection.add(it) },
+                    onTapToAddNotSupported = { onTapToAddNotSupported.add(Unit) },
                     onCanceled = { onCanceled.add(Unit) },
                     logger = FakeLogger(),
                 ),
                 onCollected = onCollected,
                 onFailedCollection = onFailedCollection,
+                onTapToAddNotSupported = onTapToAddNotSupported,
                 onCanceled = onCanceled,
                 collectionHandlerScenario = this,
             )
@@ -120,6 +137,7 @@ internal class DefaultTapToAddCollectingInteractorTest {
         val interactor: TapToAddCollectingInteractor,
         val onCollected: ReceiveTurbine<PaymentMethod>,
         val onFailedCollection: ReceiveTurbine<ResolvableString>,
+        val onTapToAddNotSupported: ReceiveTurbine<Unit>,
         val onCanceled: ReceiveTurbine<Unit>,
         val collectionHandlerScenario: FakeTapToAddCollectionHandler.Scenario,
     )

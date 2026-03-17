@@ -214,6 +214,37 @@ class TapToAddHelperTest {
     }
 
     @Test
+    fun `unsupported device result disables tap to add`() = runScenario {
+        helper.register(
+            activityResultCaller = activityResultCallerScenario.activityResultCaller,
+            lifecycleOwner = TestLifecycleOwner(),
+        )
+
+        helper.isTapToAddEnabled.test {
+            assertThat(awaitItem()).isTrue()
+
+            finishTapToAddActivityWithResult(
+                result = TapToAddResult.UnsupportedDevice,
+                helper = helper,
+                activityResultCallerScenario = activityResultCallerScenario,
+                expectedNextStep = null,
+                testScope = testScope,
+            )
+
+            assertThat(awaitItem()).isFalse()
+        }
+    }
+
+    @Test
+    fun `isTapToAddEnabled is restored from SavedStateHandle`() = runScenario(
+        savedStateHandle = SavedStateHandle(mapOf("IS_TAP_TO_ADD_ENABLED" to false)),
+    ) {
+        helper.isTapToAddEnabled.test {
+            assertThat(awaitItem()).isFalse()
+        }
+    }
+
+    @Test
     fun `startPaymentMethodCollection calls launch with expected params`() = runScenario(
         tapToAddMode = TapToAddMode.Continue,
         eventMode = EventReporter.Mode.Embedded,

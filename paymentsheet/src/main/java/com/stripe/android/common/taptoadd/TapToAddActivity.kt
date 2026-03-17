@@ -101,8 +101,8 @@ internal class TapToAddActivity : AppCompatActivity() {
 
                 TapToAddLayout(
                     screen = screen,
-                    onCancel = {
-                        tapToAddNavigator.performAction(TapToAddNavigator.Action.Close)
+                    onCancel = { action ->
+                        tapToAddNavigator.performAction(action)
                     }
                 )
             }

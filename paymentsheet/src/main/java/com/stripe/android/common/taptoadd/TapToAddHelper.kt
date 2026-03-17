@@ -26,6 +26,7 @@ import javax.inject.Named
 
 internal interface TapToAddHelper {
     val nextStep: SharedFlow<TapToAddNextStep>
+    val isTapToAddEnabled: StateFlow<Boolean>
 
     fun register(
         activityResultCaller: ActivityResultCaller,
@@ -61,6 +62,9 @@ internal class DefaultTapToAddHelper(
     private val customerStateHolder: CustomerStateHolder,
     private val linkSignupMode: StateFlow<LinkSignupMode?>,
 ) : TapToAddHelper {
+    override val isTapToAddEnabled: StateFlow<Boolean> =
+        savedStateHandle.getStateFlow(IS_TAP_TO_ADD_ENABLED_KEY, true)
+
     private var collecting: Boolean
         get() = savedStateHandle.get<Boolean>(CURRENTLY_COLLECTING_WITH_TAP_TO_ADD_KEY) == true
         set(value) {
@@ -111,6 +115,10 @@ internal class DefaultTapToAddHelper(
             }
             TapToAddResult.Complete -> TapToAddNextStep.Complete
             is TapToAddResult.Continue -> TapToAddNextStep.Continue(tapToAddResult.paymentSelection)
+            TapToAddResult.UnsupportedDevice -> {
+                savedStateHandle[IS_TAP_TO_ADD_ENABLED_KEY] = false
+                null
+            }
         }
     }
 
@@ -174,5 +182,6 @@ internal class DefaultTapToAddHelper(
 
     private companion object {
         const val CURRENTLY_COLLECTING_WITH_TAP_TO_ADD_KEY = "CURRENTLY_COLLECTING_WITH_TAP_TO_ADD"
+        const val IS_TAP_TO_ADD_ENABLED_KEY = "IS_TAP_TO_ADD_ENABLED"
     }
 }
