@@ -20,6 +20,7 @@ import com.stripe.android.common.taptoadd.ui.TapToAddLayout
 import com.stripe.android.common.taptoadd.ui.TapToAddNavigator
 import com.stripe.android.common.taptoadd.ui.TapToAddTheme
 import com.stripe.android.uicore.utils.collectAsState
+import com.stripe.android.uicore.utils.fadeOut
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -106,5 +107,10 @@ internal class TapToAddActivity : AppCompatActivity() {
                 )
             }
         }
+    }
+
+    override fun finish() {
+        super.finish()
+        fadeOut()
     }
 }
