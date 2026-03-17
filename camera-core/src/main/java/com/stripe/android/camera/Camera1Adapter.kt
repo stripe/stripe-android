@@ -102,32 +102,35 @@ class Camera1Adapter(
             .parameters
             ?.supportedFlashModes
             ?.contains(Camera.Parameters.FLASH_MODE_TORCH) == true
-    } catch (t: Throwable) {
+    } catch (e: RuntimeException) {
         false
     }
 
     override fun setTorchState(on: Boolean) {
         mCamera?.apply {
             try {
-                if (isFlashSupported(this)) {
-                    val parameters = parameters
+                val params = parameters
+                val isFlash = params
+                    ?.supportedFlashModes
+                    ?.contains(Camera.Parameters.FLASH_MODE_TORCH) == true
+                if (isFlash) {
                     if (on) {
-                        parameters.flashMode = Camera.Parameters.FLASH_MODE_TORCH
+                        params.flashMode = Camera.Parameters.FLASH_MODE_TORCH
                     } else {
-                        parameters.flashMode = Camera.Parameters.FLASH_MODE_OFF
+                        params.flashMode = Camera.Parameters.FLASH_MODE_OFF
                     }
-                    setCameraParameters(this, parameters)
+                    setCameraParameters(this, params)
                     startCameraPreview()
                 }
-            } catch (t: Throwable) {
-                Log.w(logTag, "Error setting torch state", t)
+            } catch (e: RuntimeException) {
+                Log.w(logTag, "Error setting torch state", e)
             }
         }
     }
 
     override fun isTorchOn(): Boolean = try {
         mCamera?.parameters?.flashMode == Camera.Parameters.FLASH_MODE_TORCH
-    } catch (t: Throwable) {
+    } catch (e: RuntimeException) {
         false
     }
 
@@ -147,8 +150,8 @@ class Camera1Adapter(
                     params.focusAreas = cameraFocusAreas
                     setCameraParameters(this, params)
                 }
-            } catch (t: Throwable) {
-                Log.w(logTag, "Error setting focus", t)
+            } catch (e: RuntimeException) {
+                Log.w(logTag, "Error setting focus", e)
             }
         }
     }
@@ -320,14 +323,22 @@ class Camera1Adapter(
             setCameraDisplayOrientation(activity)
             setCameraPreviewFrame()
 
+            val previewSize = try {
+                camera.parameters.previewSize
+            } catch (e: RuntimeException) {
+                Log.w(logTag, "Error getting camera parameters during open", e)
+                mainThreadHandler.post { cameraErrorListener.onCameraOpenError(e) }
+                return
+            }
+
             // Create our Preview view and set it as the content of our activity.
             cameraPreview = CameraPreview(activity, this).apply {
                 layoutParams = calculateNewParamOverScreen(
                     previewView.width,
                     previewView.height,
                     // previewSize is always landscape, need to flip height and width
-                    camera.parameters.previewSize.height,
-                    camera.parameters.previewSize.width
+                    previewSize.height,
+                    previewSize.width
                 )
             }.also { cameraPreview ->
                 mainThreadHandler.post {
@@ -345,24 +356,29 @@ class Camera1Adapter(
 
     private fun setCameraPreviewFrame() {
         mCamera?.apply {
-            val format = ImageFormat.NV21
-            val parameters = parameters
-            parameters.previewFormat = format
+            try {
+                val format = ImageFormat.NV21
+                val parameters = parameters
+                parameters.previewFormat = format
 
-            val displayMetrics = DisplayMetrics()
-            activity.windowManager.defaultDisplay.getRealMetrics(displayMetrics)
+                val displayMetrics = DisplayMetrics()
+                activity.windowManager.defaultDisplay.getRealMetrics(displayMetrics)
 
-            val previewWidth = max(previewView.height, previewView.width)
-            val previewHeight = min(previewView.height, previewView.width)
+                val previewWidth = max(previewView.height, previewView.width)
+                val previewHeight = min(previewView.height, previewView.width)
 
-            val height: Int = minimumResolution.height
-            val width = previewWidth * height / previewHeight
+                val height: Int = minimumResolution.height
+                val width = previewWidth * height / previewHeight
 
-            getOptimalPreviewSize(parameters.supportedPreviewSizes, width, height)?.apply {
-                parameters.setPreviewSize(this.width, this.height)
+                getOptimalPreviewSize(parameters.supportedPreviewSizes, width, height)?.apply {
+                    parameters.setPreviewSize(this.width, this.height)
+                }
+
+                setCameraParameters(this, parameters)
+            } catch (e: RuntimeException) {
+                Log.w(logTag, "Error setting camera preview frame", e)
+                mainThreadHandler.post { cameraErrorListener.onCameraOpenError(e) }
             }
-
-            setCameraParameters(this, parameters)
         }
     }
 
@@ -468,8 +484,9 @@ class Camera1Adapter(
 
                     params.setRecordingHint(true)
                     setCameraParameters(this, params)
-                } catch (t: Throwable) {
-                    Log.w(logTag, "Error setting initial camera parameters", t)
+                } catch (e: RuntimeException) {
+                    Log.w(logTag, "Error setting initial camera parameters", e)
+                    mainThreadHandler.post { cameraErrorListener.onCameraOpenError(e) }
                 }
             }
         }
