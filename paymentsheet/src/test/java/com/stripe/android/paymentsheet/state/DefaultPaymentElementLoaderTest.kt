@@ -2978,9 +2978,10 @@ internal class DefaultPaymentElementLoaderTest {
                     instancesKey = "DefaultPaymentElementLoaderTest",
                     checkoutSessionResponse = checkoutSessionResponse,
                 ),
-                paymentSheetConfiguration = PaymentSheet.Configuration(
+                paymentSheetConfiguration = PaymentSheet.Configuration.Builder(
                     merchantDisplayName = "Merchant, Inc.",
-                ),
+                ).defaultBillingDetails(PaymentSheet.BillingDetails(email = "email@email.com"))
+                    .build(),
                 metadata = PaymentElementLoader.Metadata(
                     initializedViaCompose = false,
                 ),

@@ -115,6 +115,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         val checkoutSession = paymentMethodMetadata.integrationMetadata as? IntegrationMetadata.CheckoutSession
         if (checkoutSession != null) {
             CheckoutInstances.ensureNoMutationInFlight(checkoutSession.instancesKey)
+            CheckoutInstances.markIntegrationLaunched(checkoutSession.instancesKey)
         }
         if (embeddedConfirmationState == null) {
             errorReporter.report(
@@ -149,6 +150,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         val checkoutSession = paymentMethodMetadata.integrationMetadata as? IntegrationMetadata.CheckoutSession
         if (checkoutSession != null) {
             CheckoutInstances.ensureNoMutationInFlight(checkoutSession.instancesKey)
+            CheckoutInstances.markIntegrationLaunched(checkoutSession.instancesKey)
         }
         if (sheetStateHolder.sheetIsOpen) return
         sheetStateHolder.sheetIsOpen = true

@@ -115,6 +115,8 @@
   <string name="stripe_set_as_default_payment_method">Angiv som standardbetalingsmetode</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Opsætning</string>
+  <!-- Satispay mandate text -->
+  <string name="stripe_twint_mandate">Ved at fortsætte giver du %1$s tilladelse til automatisk at debitere din Twint-saldo på tilbagevendende basis i overensstemmelse med din købs- eller abonnementsplan.</string>
   <!-- Label for UPI ID number field on form -->
   <string name="stripe_upi_id_label">UPI ID</string>
 </resources>

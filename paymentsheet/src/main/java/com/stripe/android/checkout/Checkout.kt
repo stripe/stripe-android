@@ -18,6 +18,7 @@ import java.util.UUID
 
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Suppress("TooManyFunctions")
 class Checkout private constructor(
     internalState: InternalState,
     private val component: CheckoutComponent,
@@ -68,10 +69,14 @@ class Checkout private constructor(
     var state: State
         get() = State(internalState)
         set(value) {
+            ensureNoMutationInFlight()
             internalState = value.internalState
         }
 
     private val mutex = Mutex()
+
+    @Volatile
+    private var integrationLaunched = false
     private val _checkoutSession = MutableStateFlow(internalState.checkoutSessionResponse.asCheckoutSession())
     val checkoutSession: StateFlow<CheckoutSession> = _checkoutSession.asStateFlow()
 
@@ -104,11 +109,14 @@ class Checkout private constructor(
 
     suspend fun updateShippingAddress(
         name: String? = null,
+        phoneNumber: String? = null,
         address: Address,
     ): Result<CheckoutSession> {
         val built = address.build()
         return withSessionId(
-            additionalStateMutations = { copy(shippingName = name, shippingAddress = built) },
+            additionalStateMutations = {
+                copy(shippingName = name, shippingPhoneNumber = phoneNumber, shippingAddress = built)
+            },
         ) { sessionId ->
             component.checkoutSessionRepository.updateTaxRegion(sessionId, built)
         }
@@ -123,11 +131,14 @@ class Checkout private constructor(
 
     suspend fun updateBillingAddress(
         name: String? = null,
+        phoneNumber: String? = null,
         address: Address,
     ): Result<CheckoutSession> {
         val built = address.build()
         return withSessionId(
-            additionalStateMutations = { copy(billingName = name, billingAddress = built) },
+            additionalStateMutations = {
+                copy(billingName = name, billingPhoneNumber = phoneNumber, billingAddress = built)
+            },
         ) { sessionId ->
             component.checkoutSessionRepository.updateTaxRegion(sessionId, built)
         }
@@ -135,6 +146,14 @@ class Checkout private constructor(
 
     suspend fun refresh(): Result<CheckoutSession> = withSessionId { sessionId ->
         component.checkoutSessionRepository.init(sessionId)
+    }
+
+    internal fun markIntegrationLaunched() {
+        integrationLaunched = true
+    }
+
+    internal fun markIntegrationDismissed() {
+        integrationLaunched = false
     }
 
     internal fun ensureNoMutationInFlight() {
@@ -154,6 +173,13 @@ class Checkout private constructor(
         additionalStateMutations: InternalState.() -> InternalState = { this },
         block: suspend (sessionId: String) -> Result<CheckoutSessionResponse>,
     ): Result<CheckoutSession> {
+        if (integrationLaunched) {
+            return Result.failure(
+                IllegalStateException(
+                    "Cannot mutate checkout session while a payment flow is presented."
+                )
+            )
+        }
         // Run network requests with a mutex to ensure events are processed in order.
         return mutex.withLock {
             block(internalState.checkoutSessionResponse.id).map { response ->

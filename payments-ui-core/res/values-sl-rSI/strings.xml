@@ -115,6 +115,8 @@
   <string name="stripe_set_as_default_payment_method">Nastavi kot privzeti način plačila</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Nastavi</string>
+  <!-- Satispay mandate text -->
+  <string name="stripe_twint_mandate">Z nadaljevanjem pooblaščate podjetje %1$s, da samodejno bremeni vaše stanje Twint na ponavljajoči se osnovi v skladu z vašim nakupom ali naročnino.</string>
   <!-- Label for UPI ID number field on form -->
   <string name="stripe_upi_id_label">UPI ID</string>
 </resources>
