@@ -123,6 +123,12 @@ class CheckoutPlaygroundActivity : AppCompatActivity() {
             )
         }
     }
+
+    override fun finish() {
+        setResult(RESULT_OK, Intent().putExtra(CHECKOUT_STATE_KEY, viewModel.checkout.state))
+
+        super.finish()
+    }
 }
 
 @Composable
