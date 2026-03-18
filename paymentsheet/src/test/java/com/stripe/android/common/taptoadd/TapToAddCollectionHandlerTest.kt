@@ -66,7 +66,7 @@ class TapToAddCollectionHandlerTest {
             terminalWrapper = TestTerminalWrapper.noOp(),
             stripeRepository = FakeTapToAddStripeRepository(Result.failure(NotImplementedError())),
             paymentConfiguration = TEST_PAYMENT_CONFIGURATION,
-            connectionManager = FakeTapToAddConnectionManager.noOp(isSupported = true, isConnected = false),
+            connectionManager = FakeTapToAddConnectionManager.noOp(isSupported = true),
             tapToPayUxConfiguration = tapToPayUxConfiguration,
             errorReporter = FakeErrorReporter(),
             createCardPresentSetupIntentCallbackRetriever = FakeCreateCardPresentSetupIntentCallbackRetriever.noOp(
@@ -84,7 +84,7 @@ class TapToAddCollectionHandlerTest {
             terminalWrapper = TestTerminalWrapper.noOp(),
             stripeRepository = FakeTapToAddStripeRepository(),
             paymentConfiguration = TEST_PAYMENT_CONFIGURATION,
-            connectionManager = FakeTapToAddConnectionManager.noOp(isSupported = true, isConnected = false),
+            connectionManager = FakeTapToAddConnectionManager.noOp(isSupported = true),
             tapToPayUxConfiguration = tapToPayUxConfiguration,
             errorReporter = FakeErrorReporter(),
             createCardPresentSetupIntentCallbackRetriever = FakeCreateCardPresentSetupIntentCallbackRetriever.noOp(
@@ -96,17 +96,13 @@ class TapToAddCollectionHandlerTest {
     }
 
     @Test
-    fun `handler returns FailedCollection when await fails`() {
+    fun `handler returns FailedCollection when connect fails`() {
         val error = IllegalStateException("Failed")
 
         runScenario(
-            isConnected = false,
-            awaitResult = Result.failure(error)
+            connectResult = Result.failure(error)
         ) {
             val result = handler.collect(DEFAULT_METADATA)
-
-            assertThat(managerScenario.connectCalls.awaitItem()).isNotNull()
-            assertThat(managerScenario.awaitCalls.awaitItem()).isNotNull()
 
             assertThat(result).isEqualTo(
                 TapToAddCollectionHandler.CollectionState.FailedCollection(
@@ -125,13 +121,9 @@ class TapToAddCollectionHandlerTest {
         )
 
         runScenario(
-            isConnected = false,
-            awaitResult = Result.failure(error)
+            connectResult = Result.failure(error)
         ) {
             val result = handler.collect(DEFAULT_METADATA)
-
-            assertThat(managerScenario.connectCalls.awaitItem()).isNotNull()
-            assertThat(managerScenario.awaitCalls.awaitItem()).isNotNull()
 
             assertThat(result).isEqualTo(
                 TapToAddCollectionHandler.CollectionState.UnsupportedDevice(
@@ -150,7 +142,6 @@ class TapToAddCollectionHandlerTest {
         )
 
         runScenario(
-            isConnected = true,
             callbackResult = Result.failure(error),
         ) {
             val result = handler.collect(DEFAULT_METADATA)
@@ -171,7 +162,6 @@ class TapToAddCollectionHandlerTest {
         val cause = IllegalStateException("Failed to create intent")
 
         runScenario(
-            isConnected = true,
             callbackResult = Result.success(
                 CreateCardPresentSetupIntentCallback {
                     CreateIntentResult.Failure(cause = cause, displayMessage = "Something went wrong")
@@ -192,7 +182,9 @@ class TapToAddCollectionHandlerTest {
     }
 
     @Test
-    fun `handler returns FailedCollection when metadata has no customer`() = runScenario {
+    fun `handler returns FailedCollection when metadata has no customer`() = runScenario(
+        hasConnectCall = false,
+    ) {
         val metadataWithoutCustomer = PaymentMethodMetadataFactory.create(
             isTapToAddSupported = true,
             hasCustomerConfiguration = false,
@@ -224,7 +216,6 @@ class TapToAddCollectionHandlerTest {
         )
 
         runScenario(
-            isConnected = true,
             callbackResult = Result.success(
                 CreateCardPresentSetupIntentCallback {
                     CreateIntentResult.Success("si_123_secret")
@@ -259,7 +250,6 @@ class TapToAddCollectionHandlerTest {
 
     @Test
     fun `handler returns Collected when flow is successfully completed with card`() = runScenario(
-        isConnected = true,
         retrievePaymentMethodResult = Result.success(
             PaymentMethodFactory.card(id = "pm_4563")
                 .copy(
@@ -308,7 +298,6 @@ class TapToAddCollectionHandlerTest {
     @Test
     fun `handler returns FailedCollection and reports error when no payment method after confirmation`() =
         runScenario(
-            isConnected = true,
             callbackResult = Result.success(
                 CreateCardPresentSetupIntentCallback {
                     CreateIntentResult.Success("si_123_secret")
@@ -344,7 +333,6 @@ class TapToAddCollectionHandlerTest {
 
     @Test
     fun `handler returns FailedCollection when retrieveSetupIntent fails`() = runScenario(
-        isConnected = true,
         callbackResult = Result.success(
             CreateCardPresentSetupIntentCallback {
                 CreateIntentResult.Success("si_123_secret")
@@ -376,7 +364,6 @@ class TapToAddCollectionHandlerTest {
 
     @Test
     fun `handler returns FailedCollection when collectSetupIntentPaymentMethod fails`() = runScenario(
-        isConnected = true,
         callbackResult = Result.success(
             CreateCardPresentSetupIntentCallback {
                 CreateIntentResult.Success("si_123_secret")
@@ -411,7 +398,6 @@ class TapToAddCollectionHandlerTest {
 
     @Test
     fun `handler returns Canceled when collectSetupIntentPaymentMethod fails with CANCELED`() = runScenario(
-        isConnected = true,
         callbackResult = Result.success(
             CreateCardPresentSetupIntentCallback {
                 CreateIntentResult.Success("si_123_secret")
@@ -441,7 +427,6 @@ class TapToAddCollectionHandlerTest {
 
     @Test
     fun `handler returns FailedCollection when confirmSetupIntent fails`() = runScenario(
-        isConnected = true,
         callbackResult = Result.success(
             CreateCardPresentSetupIntentCallback {
                 CreateIntentResult.Success("si_123_secret")
@@ -479,7 +464,6 @@ class TapToAddCollectionHandlerTest {
     fun `handler returns FailedCollection when retrieve payment method fails`() {
         val retrieveError = IllegalStateException("Failed to retrieve payment method")
         runScenario(
-            isConnected = true,
             retrievePaymentMethodResult = Result.failure(retrieveError),
             callbackResult = Result.success(
                 CreateCardPresentSetupIntentCallback {
@@ -552,7 +536,6 @@ class TapToAddCollectionHandlerTest {
 
     @Test
     fun `handler cancels collectSetupIntentPaymentMethod when coroutine is cancelled`() = runScenario(
-        isConnected = true,
         callbackResult = Result.success(
             CreateCardPresentSetupIntentCallback {
                 CreateIntentResult.Success("si_123_secret")
@@ -578,7 +561,6 @@ class TapToAddCollectionHandlerTest {
 
     @Test
     fun `handler cancels confirmSetupIntent when coroutine is cancelled`() = runScenario(
-        isConnected = true,
         callbackResult = Result.success(
             CreateCardPresentSetupIntentCallback {
                 CreateIntentResult.Success("si_123_secret")
@@ -607,7 +589,6 @@ class TapToAddCollectionHandlerTest {
         cardBrandFilter: CardBrandFilter,
         block: suspend Scenario.(result: TapToAddCollectionHandler.CollectionState) -> Unit
     ) = runScenario(
-        isConnected = true,
         retrievePaymentMethodResult = Result.success(
             PaymentMethodFactory.card(id = "pm_4563")
                 .copy(
@@ -649,8 +630,8 @@ class TapToAddCollectionHandlerTest {
     }
 
     private fun runScenario(
-        isConnected: Boolean = true,
-        awaitResult: Result<Boolean> = Result.success(true),
+        hasConnectCall: Boolean = true,
+        connectResult: Result<Unit> = Result.success(Unit),
         callbackResult: Result<CreateCardPresentSetupIntentCallback> =
             Result.success(DEFAULT_CALLBACK),
         retrievePaymentMethodResult: Result<PaymentMethod> =
@@ -664,8 +645,7 @@ class TapToAddCollectionHandlerTest {
         val stripeRepository = FakeTapToAddStripeRepository(retrievePaymentMethodResult)
         FakeTapToAddConnectionManager.test(
             isSupported = true,
-            isConnected = isConnected,
-            awaitResult = awaitResult,
+            connectResult = connectResult,
         ) {
             val managerScenario = this
             FakeCreateCardPresentSetupIntentCallbackRetriever.test(
@@ -691,6 +671,10 @@ class TapToAddCollectionHandlerTest {
                         testScope = this@runTest,
                     )
                 )
+            }
+
+            if (hasConnectCall) {
+                assertThat(managerScenario.connectCalls.awaitItem()).isNotNull()
             }
         }
 

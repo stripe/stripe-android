@@ -10,8 +10,6 @@ import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.model.asCommonConfiguration
-import com.stripe.android.common.taptoadd.FakeTapToAddConnectionManager
-import com.stripe.android.common.taptoadd.TapToAddConnectionManager
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
@@ -516,15 +514,14 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `isTapToAddSupported should be false when tap to add is not supported`() =
         runScenario {
-            FakeTapToAddConnectionManager.test(
+            FakeTapToAddConnectionStarter.test(
                 isSupported = false,
-                isConnected = false,
             ) {
                 val loader = createPaymentElementLoader(
                     stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                     isGooglePayReady = true,
                     customerRepo = FakeCustomerRepository(paymentMethods = emptyList()),
-                    tapToAddConnectionManager = tapToAddConnectionManager,
+                    tapToAddConnectionStarter = connectionStarter,
                 )
 
                 val result = loader.load(
@@ -537,7 +534,7 @@ internal class DefaultPaymentElementLoaderTest {
                     ),
                 ).getOrThrow()
 
-                assertThat(connectCalls.awaitItem()).isNotNull()
+                assertThat(startCalls.awaitItem()).isNotNull()
 
                 assertThat(result.paymentMethodMetadata.isTapToAddSupported).isFalse()
 
@@ -549,15 +546,14 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `isTapToAddSupported should be true when tap to add is supported`() =
         runScenario {
-            FakeTapToAddConnectionManager.test(
+            FakeTapToAddConnectionStarter.test(
                 isSupported = true,
-                isConnected = true,
             ) {
                 val loader = createPaymentElementLoader(
                     stripeIntent = PaymentIntentFactory.create(),
                     isGooglePayReady = true,
                     customerRepo = FakeCustomerRepository(paymentMethods = emptyList()),
-                    tapToAddConnectionManager = tapToAddConnectionManager,
+                    tapToAddConnectionStarter = connectionStarter,
                 )
 
                 val result = loader.load(
@@ -570,7 +566,7 @@ internal class DefaultPaymentElementLoaderTest {
                     ),
                 ).getOrThrow()
 
-                assertThat(connectCalls.awaitItem()).isNotNull()
+                assertThat(startCalls.awaitItem()).isNotNull()
 
                 assertThat(result.paymentMethodMetadata.isTapToAddSupported).isTrue()
 
@@ -582,9 +578,8 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `isTapToAddSupported should be false when elements session has tap to add flag disabled`() =
         runScenario {
-            FakeTapToAddConnectionManager.test(
+            FakeTapToAddConnectionStarter.test(
                 isSupported = true,
-                isConnected = true,
             ) {
                 val elementsSessionRepository = FakeElementsSessionRepository(
                     stripeIntent = PaymentIntentFactory.create(),
@@ -599,7 +594,7 @@ internal class DefaultPaymentElementLoaderTest {
                     stripeIntent = PaymentIntentFactory.create(),
                     isGooglePayReady = true,
                     customerRepo = FakeCustomerRepository(paymentMethods = emptyList()),
-                    tapToAddConnectionManager = tapToAddConnectionManager,
+                    tapToAddConnectionStarter = connectionStarter,
                     elementsSessionRepository = elementsSessionRepository,
                 )
 
@@ -613,7 +608,7 @@ internal class DefaultPaymentElementLoaderTest {
                     ),
                 ).getOrThrow()
 
-                assertThat(connectCalls.awaitItem()).isNotNull()
+                assertThat(startCalls.awaitItem()).isNotNull()
 
                 assertThat(result.paymentMethodMetadata.isTapToAddSupported).isFalse()
 
@@ -4513,10 +4508,8 @@ internal class DefaultPaymentElementLoaderTest {
         ),
         userFacingLogger: FakeUserFacingLogger = FakeUserFacingLogger(),
         integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),
-        tapToAddConnectionManager: TapToAddConnectionManager = FakeTapToAddConnectionManager.noOp(
-            isSupported = false,
-            isConnected = false,
-        ),
+        tapToAddConnectionStarter: TapToAddConnectionStarter =
+            FakeTapToAddConnectionStarter.create(isSupported = false),
         isLiveMode: Boolean = false,
         analyticsMetadataFactory: DefaultPaymentElementLoader.AnalyticsMetadataFactory =
             FakeDefaultPaymentElementLoaderAnalyticsMetadataFactory {
@@ -4557,7 +4550,7 @@ internal class DefaultPaymentElementLoaderTest {
             integrityRequestManager = integrityRequestManager,
             paymentElementCallbackIdentifier = PAYMENT_ELEMENT_CALLBACKS_IDENTIFIER,
             analyticsMetadataFactory = analyticsMetadataFactory,
-            tapToAddConnectionManager = tapToAddConnectionManager,
+            tapToAddConnectionStarter = tapToAddConnectionStarter,
             paymentConfiguration = { PaymentConfiguration(publishableKey = if (isLiveMode) "pk_live" else "pk_test") },
             paymentMethodFilter = paymentMethodFilter,
             cardFundingFilterFactory = PaymentSheetCardFundingFilter.Factory(),

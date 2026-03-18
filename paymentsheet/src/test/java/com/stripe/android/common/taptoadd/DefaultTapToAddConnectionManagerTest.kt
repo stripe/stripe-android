@@ -7,6 +7,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.testing.FakeErrorReporter
@@ -44,6 +45,7 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.assertFailsWith
 
 @OptIn(TapToAddPreview::class)
 @RunWith(RobolectricTestRunner::class)
@@ -147,31 +149,15 @@ class DefaultTapToAddConnectionManagerTest {
     }
 
     @Test
-    fun `isConnected returns true when reader is connected`() = test(
-        terminalInstance = mock {
-            mockReaderCall(Reader())
-        }
-    ) {
-        assertThat(manager.isConnected).isTrue()
-    }
-
-    @Test
-    fun `isConnected returns false when no reader is connected`() = test(
-        terminalInstance = mock {
-            mockReaderCall()
-        }
-    ) {
-        assertThat(manager.isConnected).isFalse()
-    }
-
-    @Test
     fun `connect does nothing when not supported`() = test(
         terminalInstance = mock {
             mockSupportedReaderResult(ReaderSupportResult.NotSupported(IllegalStateException("Not supported!")))
             mockReaderCall()
         }
     ) {
-        manager.connect()
+        assertFailsWith<IllegalStateException> {
+            manager.connect()
+        }
 
         verify(terminalInstance, never()).discoverReaders(any(), any(), any())
     }
@@ -196,13 +182,15 @@ class DefaultTapToAddConnectionManagerTest {
             mockDiscoverCall()
         }
     ) {
-        manager.connect()
+        val connectionJob = testScope.async { manager.connect() }
 
         verify(terminalInstance).discoverReaders(
             any<DiscoveryConfiguration.TapToPayDiscoveryConfiguration>(),
             any<DiscoveryListener>(),
             any<Callback>(),
         )
+
+        connectionJob.cancel()
     }
 
     @Test
@@ -213,16 +201,22 @@ class DefaultTapToAddConnectionManagerTest {
             mockDiscoverCall()
         }
     ) {
-        manager.connect()
-        manager.connect()
-        manager.connect()
-        manager.connect()
+        val jobs = arrayOf(
+            testScope.async { manager.connect() },
+            testScope.async { manager.connect() },
+            testScope.async { manager.connect() },
+            testScope.async { manager.connect() }
+        )
 
         verify(terminalInstance, times(1)).discoverReaders(
             any<DiscoveryConfiguration.TapToPayDiscoveryConfiguration>(),
             any<DiscoveryListener>(),
             any<Callback>(),
         )
+
+        jobs.forEach {
+            it.cancel()
+        }
     }
 
     @Test
@@ -236,7 +230,9 @@ class DefaultTapToAddConnectionManagerTest {
                 mockDiscoverFailure(exception)
             }
         ) {
-            manager.connect()
+            assertFailsWith<SecurityException> {
+                manager.connect()
+            }
 
             verify(terminalInstance).discoverReaders(
                 any<DiscoveryConfiguration.TapToPayDiscoveryConfiguration>(),
@@ -267,7 +263,7 @@ class DefaultTapToAddConnectionManagerTest {
                 )
             }
         ) {
-            manager.connect()
+            val connectionJob = testScope.async { manager.connect() }
 
             val listenerCaptor = argumentCaptor<DiscoveryListener>()
 
@@ -290,6 +286,8 @@ class DefaultTapToAddConnectionManagerTest {
                 },
                 any<ReaderCallback>(),
             )
+
+            connectionJob.cancel()
         }
     }
 
@@ -305,7 +303,11 @@ class DefaultTapToAddConnectionManagerTest {
             )
         }
     ) {
-        manager.connect()
+       val connectionResult = testScope.async {
+            assertFailsWith<IllegalStateException> {
+                manager.connect()
+            }
+        }
 
         val listenerCaptor = argumentCaptor<DiscoveryListener>()
 
@@ -324,6 +326,8 @@ class DefaultTapToAddConnectionManagerTest {
         assertThat(logger.warningLogs).containsExactly(
             "TapToAddConnectionError: java.lang.IllegalStateException: No reader found!"
         )
+
+        assertThat(connectionResult.await()).isInstanceOf<IllegalStateException>()
     }
 
     @Test
@@ -338,7 +342,7 @@ class DefaultTapToAddConnectionManagerTest {
             )
         }
     ) {
-        manager.connect()
+        val connectionJob = testScope.async { manager.connect() }
 
         val callbackCaptor = argumentCaptor<Callback>()
 
@@ -354,6 +358,8 @@ class DefaultTapToAddConnectionManagerTest {
 
         assertThat(successReportCall.errorEvent)
             .isEqualTo(ErrorReporter.SuccessEvent.TAP_TO_ADD_DISCOVER_READERS_CALL_SUCCESS)
+
+        connectionJob.cancel()
     }
 
     @Test
@@ -368,7 +374,9 @@ class DefaultTapToAddConnectionManagerTest {
             )
         }
     ) {
-        manager.connect()
+        val connectionResult = testScope.async {
+            assertFailsWith<TerminalException> { manager.connect() }
+        }
 
         val callbackCaptor = argumentCaptor<Callback>()
 
@@ -391,6 +399,8 @@ class DefaultTapToAddConnectionManagerTest {
             .isEqualTo(ErrorReporter.ExpectedErrorEvent.TAP_TO_ADD_DISCOVER_READERS_CALL_FAILURE)
         assertThat(successReportCall.stripeException?.cause).isEqualTo(exception)
         assertThat(logger.warningLogs).containsExactly("TapToAddConnectionError: $exception")
+
+        assertThat(connectionResult.await()).isEqualTo(exception)
     }
 
     @Test
@@ -406,7 +416,7 @@ class DefaultTapToAddConnectionManagerTest {
                 )
             }
         ) {
-            manager.connect()
+            val connectionResult = testScope.async { manager.connect() }
 
             val reader = Reader()
 
@@ -417,6 +427,8 @@ class DefaultTapToAddConnectionManagerTest {
 
             assertThat(successReportCall.errorEvent)
                 .isEqualTo(ErrorReporter.SuccessEvent.TAP_TO_ADD_CONNECT_READER_CALL_SUCCESS)
+
+            assertThat(connectionResult).isNotNull()
         }
     }
 
@@ -433,7 +445,9 @@ class DefaultTapToAddConnectionManagerTest {
                 )
             }
         ) {
-            manager.connect()
+            val connectionResult = testScope.async {
+                assertFailsWith<TerminalException> { manager.connect() }
+            }
 
             val reader = Reader()
             val exception = TerminalException(
@@ -451,6 +465,8 @@ class DefaultTapToAddConnectionManagerTest {
             assertThat(errorCall.stripeException?.cause).isEqualTo(exception)
             assertThat(logger.warningLogs)
                 .containsExactly("TapToAddConnectionError: $exception")
+
+            assertThat(connectionResult.await()).isEqualTo(exception)
         }
     }
 
@@ -469,15 +485,18 @@ class DefaultTapToAddConnectionManagerTest {
                 mockDiscoverCall()
             }
         ) {
-            manager.connect()
+            val connectionResult = testScope.async { manager.connect() }
 
             whenever(terminalInstance.connectedReader).thenReturn(connectedReader)
 
             captureDiscoveryCallback().onFailure(exception)
 
-            val result = manager.awaitConnection()
-            assertThat(result.isSuccess).isTrue()
-            assertThat(result.getOrNull()).isTrue()
+            assertThat(connectionResult.await()).isNotNull()
+
+            val errorCall = errorReporter.awaitCall()
+
+            assertThat(errorCall.errorEvent)
+                .isEqualTo(ErrorReporter.SuccessEvent.TAP_TO_ADD_DISCOVER_READERS_CALL_SUCCESS)
         }
     }
 
@@ -500,45 +519,24 @@ class DefaultTapToAddConnectionManagerTest {
                 )
             }
         ) {
-            manager.connect()
+            val job = testScope.async { manager.connect() }
 
             whenever(terminalInstance.connectedReader).thenReturn(connectedReader)
 
             captureDiscoveryListener().onUpdateDiscoveredReaders(listOf(connectedReader))
             captureReaderCallback().onFailure(exception)
 
-            val result = manager.awaitConnection()
-            assertThat(result.isSuccess).isTrue()
-            assertThat(result.getOrNull()).isTrue()
+            assertThat(job.await()).isNotNull()
+
+            val errorCall = errorReporter.awaitCall()
+
+            assertThat(errorCall.errorEvent)
+                .isEqualTo(ErrorReporter.SuccessEvent.TAP_TO_ADD_CONNECT_READER_CALL_SUCCESS)
         }
     }
 
     @Test
-    fun `await returns true when if connected`() = test(
-        terminalInstance = mock {
-            mockReaderCall(Reader())
-        }
-    ) {
-        val result = manager.awaitConnection()
-
-        assertThat(result.isSuccess).isTrue()
-        assertThat(result.getOrNull()).isTrue()
-    }
-
-    @Test
-    fun `await returns false when no connection task exists and not connect`() = test(
-        terminalInstance = mock {
-            mockReaderCall(null)
-        }
-    ) {
-        val result = manager.awaitConnection()
-
-        assertThat(result.isSuccess).isTrue()
-        assertThat(result.getOrNull()).isFalse()
-    }
-
-    @Test
-    fun `await returns success with true when connection completes successfully`() {
+    fun `connect completes successfully when discovery and connect succeed`() {
         test(
             terminalInstance = mock {
                 mockSupportedReaderResult(ReaderSupportResult.Supported)
@@ -550,11 +548,7 @@ class DefaultTapToAddConnectionManagerTest {
                 )
             }
         ) {
-            manager.connect()
-
-            val awaitResult = testScope.backgroundScope.async {
-                manager.awaitConnection()
-            }
+            val job = testScope.async { manager.connect() }
 
             val reader = Reader()
 
@@ -563,15 +557,12 @@ class DefaultTapToAddConnectionManagerTest {
 
             assertThat(errorReporter.awaitCall()).isNotNull()
 
-            val result = awaitResult.await()
-
-            assertThat(result.isSuccess).isTrue()
-            assertThat(result.getOrNull()).isTrue()
+            job.await()
         }
     }
 
     @Test
-    fun `await returns failure when connection fails`() {
+    fun `connect throws when connection fails`() {
         test(
             terminalInstance = mock {
                 mockSupportedReaderResult(ReaderSupportResult.Supported)
@@ -583,10 +574,10 @@ class DefaultTapToAddConnectionManagerTest {
                 )
             }
         ) {
-            manager.connect()
-
-            val awaitResult = testScope.backgroundScope.async {
-                manager.awaitConnection()
+            val job = testScope.async {
+                assertFailsWith<TerminalException> {
+                    manager.connect()
+                }
             }
 
             val reader = Reader()
@@ -600,10 +591,7 @@ class DefaultTapToAddConnectionManagerTest {
 
             assertThat(errorReporter.awaitCall()).isNotNull()
 
-            val result = awaitResult.await()
-
-            assertThat(result.isFailure).isTrue()
-            assertThat(result.exceptionOrNull()).isEqualTo(exception)
+            assertThat(job.await()).isEqualTo(exception)
         }
     }
 
@@ -690,7 +678,7 @@ class DefaultTapToAddConnectionManagerTest {
         autoCheckIsInitializedCall: Boolean = true,
         isSimulated: Boolean = true,
         block: suspend Scenario.() -> Unit
-    ) = runTest {
+    ) = runTest(UnconfinedTestDispatcher()) {
         val errorReporter = FakeErrorReporter()
         val logger = FakeLogger()
 
