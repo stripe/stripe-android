@@ -88,6 +88,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.bacs.FakeBacsMandat
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Args
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
@@ -244,7 +245,7 @@ internal class PaymentSheetActivityTest {
         networkRule.enqueue(
             RequestMatchers.host("api.stripe.com"),
             RequestMatchers.method("POST"),
-            RequestMatchers.path("/v1/payment_pages/cs_test_abc123"),
+            RequestMatchers.path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
         ) { response ->
             response.testBodyFromFile("checkout-session-apply-discount.json")
         }

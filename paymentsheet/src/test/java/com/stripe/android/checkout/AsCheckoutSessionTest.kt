@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.paymentsheet.repositories.TotalSummaryResponseFactory
 import org.junit.Test
 
@@ -202,7 +203,7 @@ class AsCheckoutSessionTest {
     }
 
     private fun createResponse(
-        id: String = "cs_test_abc123",
+        id: String = DEFAULT_CHECKOUT_SESSION_ID,
         currency: String = "usd",
         customerEmail: String? = null,
         totalSummary: CheckoutSessionResponse.TotalSummaryResponse? = null,

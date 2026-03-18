@@ -5,8 +5,10 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 
 internal object CheckoutSessionResponseFactory {
+    const val DEFAULT_CHECKOUT_SESSION_ID = "cs_test_abc123"
+
     fun create(
-        id: String = "cs_test_abc123",
+        id: String = DEFAULT_CHECKOUT_SESSION_ID,
         amount: Long = 1000L,
         currency: String = "usd",
         mode: CheckoutSessionResponse.Mode = CheckoutSessionResponse.Mode.PAYMENT,

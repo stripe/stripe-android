@@ -3,7 +3,6 @@ package com.stripe.android.paymentelement.confirmation.intent
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
-import app.cash.turbine.testIn
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.Checkout
@@ -41,6 +40,7 @@ import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadat
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.PaymentIntentFactory
@@ -70,7 +70,7 @@ class CheckoutSessionConfirmationInterceptorTest {
     fun `intercept with succeeded payment intent returns Complete action`() = runScenario {
         networkRule.enqueue(
             method("POST"),
-            path("/v1/payment_pages/cs_test_abc123/confirm"),
+            path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID/confirm"),
         ) { response ->
             response.testBodyFromFile("checkout-session-confirm.json")
         }
@@ -94,7 +94,7 @@ class CheckoutSessionConfirmationInterceptorTest {
     fun `intercept with requires_action payment intent returns Launch action`() = runScenario {
         networkRule.enqueue(
             method("POST"),
-            path("/v1/payment_pages/cs_test_abc123/confirm"),
+            path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID/confirm"),
         ) { response ->
             response.testBodyFromFile(
                 "checkout-session-confirm.json",
@@ -134,7 +134,7 @@ class CheckoutSessionConfirmationInterceptorTest {
     fun `intercept fails when checkout session confirm fails`() = runScenario {
         networkRule.enqueue(
             method("POST"),
-            path("/v1/payment_pages/cs_test_abc123/confirm"),
+            path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID/confirm"),
         ) { response ->
             response.setResponseCode(400)
             response.setBody("""{"error":{"message":"Checkout session confirmation failed"}}""")
@@ -152,7 +152,7 @@ class CheckoutSessionConfirmationInterceptorTest {
     fun `intercept fails when confirm response has no intent`() = runScenario {
         networkRule.enqueue(
             method("POST"),
-            path("/v1/payment_pages/cs_test_abc123/confirm"),
+            path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID/confirm"),
         ) { response ->
             response.testBodyFromFile("checkout-session-init.json")
         }
@@ -170,7 +170,7 @@ class CheckoutSessionConfirmationInterceptorTest {
     fun `intercept with succeeded setup intent returns Complete action`() = runScenario {
         networkRule.enqueue(
             method("POST"),
-            path("/v1/payment_pages/cs_test_abc123/confirm"),
+            path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID/confirm"),
         ) { response ->
             response.testBodyFromFile("checkout-session-confirm-setup.json")
         }
@@ -189,7 +189,7 @@ class CheckoutSessionConfirmationInterceptorTest {
     fun `intercept with both intents prefers paymentIntent`() = runScenario {
         networkRule.enqueue(
             method("POST"),
-            path("/v1/payment_pages/cs_test_abc123/confirm"),
+            path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID/confirm"),
         ) { response ->
             response.testBodyFromFile("checkout-session-confirm-both-intents.json")
         }
@@ -206,7 +206,7 @@ class CheckoutSessionConfirmationInterceptorTest {
     fun `intercept with requires_action setup intent returns Launch action`() = runScenario {
         networkRule.enqueue(
             method("POST"),
-            path("/v1/payment_pages/cs_test_abc123/confirm"),
+            path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID/confirm"),
         ) { response ->
             response.testBodyFromFile(
                 "checkout-session-confirm-setup.json",
@@ -229,7 +229,7 @@ class CheckoutSessionConfirmationInterceptorTest {
     fun `intercept with saved payment method and succeeded payment intent returns Complete action`() = runScenario {
         networkRule.enqueue(
             method("POST"),
-            path("/v1/payment_pages/cs_test_abc123/confirm"),
+            path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID/confirm"),
         ) { response ->
             response.testBodyFromFile("checkout-session-confirm.json")
         }
@@ -254,7 +254,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         runScenario {
             networkRule.enqueue(
                 method("POST"),
-                path("/v1/payment_pages/cs_test_abc123/confirm"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID/confirm"),
             ) { response ->
                 response.testBodyFromFile(
                     "checkout-session-confirm.json",
@@ -277,7 +277,7 @@ class CheckoutSessionConfirmationInterceptorTest {
     fun `intercept with saved payment method fails when checkout session confirm fails`() = runScenario {
         networkRule.enqueue(
             method("POST"),
-            path("/v1/payment_pages/cs_test_abc123/confirm"),
+            path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID/confirm"),
         ) { response ->
             response.setResponseCode(400)
             response.setBody("""{"error":{"message":"Checkout session confirmation failed"}}""")
@@ -298,7 +298,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         ) {
             networkRule.enqueue(
                 method("POST"),
-                path("/v1/payment_pages/cs_test_abc123/confirm"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID/confirm"),
                 bodyPart("save_payment_method", "true"),
             ) { response ->
                 response.testBodyFromFile("checkout-session-confirm.json")
@@ -314,7 +314,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         ) {
             networkRule.enqueue(
                 method("POST"),
-                path("/v1/payment_pages/cs_test_abc123/confirm"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID/confirm"),
                 bodyPart("save_payment_method", "false"),
             ) { response ->
                 response.testBodyFromFile("checkout-session-confirm.json")
@@ -329,7 +329,7 @@ class CheckoutSessionConfirmationInterceptorTest {
     ) {
         networkRule.enqueue(
             method("POST"),
-            path("/v1/payment_pages/cs_test_abc123/confirm"),
+            path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID/confirm"),
             not(hasBodyPart("save_payment_method")),
         ) { response ->
             response.testBodyFromFile("checkout-session-confirm.json")
@@ -342,7 +342,7 @@ class CheckoutSessionConfirmationInterceptorTest {
     fun `intercept with new payment method omits savePaymentMethod for guest`() = runScenario {
         networkRule.enqueue(
             method("POST"),
-            path("/v1/payment_pages/cs_test_abc123/confirm"),
+            path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID/confirm"),
             not(hasBodyPart("save_payment_method")),
         ) { response ->
             response.testBodyFromFile("checkout-session-confirm.json")
@@ -355,7 +355,7 @@ class CheckoutSessionConfirmationInterceptorTest {
     fun `intercept passes expectedAmount from payment intent`() = runScenario {
         networkRule.enqueue(
             method("POST"),
-            path("/v1/payment_pages/cs_test_abc123/confirm"),
+            path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID/confirm"),
             bodyPart("expected_amount", "5099"),
         ) { response ->
             response.testBodyFromFile("checkout-session-confirm.json")
@@ -368,7 +368,7 @@ class CheckoutSessionConfirmationInterceptorTest {
     fun `intercept omits expectedAmount for setup intent`() = runScenario {
         networkRule.enqueue(
             method("POST"),
-            path("/v1/payment_pages/cs_test_abc123/confirm"),
+            path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID/confirm"),
             not(hasBodyPart("expected_amount")),
         ) { response ->
             response.testBodyFromFile("checkout-session-confirm-setup.json")
@@ -381,7 +381,7 @@ class CheckoutSessionConfirmationInterceptorTest {
     fun `intercept with saved payment method passes null for savePaymentMethod`() = runScenario {
         networkRule.enqueue(
             method("POST"),
-            path("/v1/payment_pages/cs_test_abc123/confirm"),
+            path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID/confirm"),
             not(hasBodyPart("save_payment_method")),
         ) { response ->
             response.testBodyFromFile("checkout-session-confirm.json")
@@ -400,20 +400,20 @@ class CheckoutSessionConfirmationInterceptorTest {
             val checkoutSessionTurbine1 = checkout1.checkoutSession.testIn(backgroundScope)
             val checkoutSessionTurbine2 = checkout2.checkoutSession.testIn(backgroundScope)
 
-            assertThat(checkoutSessionTurbine1.awaitItem().id).isEqualTo("cs_test_abc123")
-            assertThat(checkoutSessionTurbine2.awaitItem().id).isEqualTo("cs_test_abc123")
+            assertThat(checkoutSessionTurbine1.awaitItem().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+            assertThat(checkoutSessionTurbine2.awaitItem().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
 
             networkRule.enqueue(
                 method("POST"),
-                path("/v1/payment_pages/cs_test_abc123/confirm"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID/confirm"),
             ) { response ->
                 response.testBodyFromFile("checkout-session-confirm.json")
             }
 
             interceptNewPm()
 
-            assertThat(checkoutSessionTurbine1.awaitItem().id).isEqualTo("cs_test_abc123")
-            assertThat(checkoutSessionTurbine2.awaitItem().id).isEqualTo("cs_test_abc123")
+            assertThat(checkoutSessionTurbine1.awaitItem().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+            assertThat(checkoutSessionTurbine2.awaitItem().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
         }
     }
 
@@ -423,18 +423,18 @@ class CheckoutSessionConfirmationInterceptorTest {
     ) {
         val checkout = checkoutInstances.single()
         checkout.checkoutSession.test {
-            assertThat(awaitItem().id).isEqualTo("cs_test_abc123")
+            assertThat(awaitItem().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
 
             networkRule.enqueue(
                 method("POST"),
-                path("/v1/payment_pages/cs_test_abc123/confirm"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID/confirm"),
             ) { response ->
                 response.testBodyFromFile("checkout-session-confirm.json")
             }
 
             interceptNewPm()
 
-            assertThat(awaitItem().id).isEqualTo("cs_test_abc123")
+            assertThat(awaitItem().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
         }
     }
 
@@ -444,18 +444,18 @@ class CheckoutSessionConfirmationInterceptorTest {
     ) {
         val checkout = checkoutInstances.single()
         checkout.checkoutSession.test {
-            assertThat(awaitItem().id).isEqualTo("cs_test_abc123")
+            assertThat(awaitItem().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
 
             networkRule.enqueue(
                 method("POST"),
-                path("/v1/payment_pages/cs_test_abc123/confirm"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID/confirm"),
             ) { response ->
                 response.testBodyFromFile("checkout-session-confirm.json")
             }
 
             interceptSavedPm()
 
-            assertThat(awaitItem().id).isEqualTo("cs_test_abc123")
+            assertThat(awaitItem().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
         }
     }
 
@@ -465,7 +465,7 @@ class CheckoutSessionConfirmationInterceptorTest {
     ) {
         networkRule.enqueue(
             method("POST"),
-            path("/v1/payment_pages/cs_test_abc123/confirm"),
+            path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID/confirm"),
         ) { response ->
             response.setResponseCode(400)
             response.setBody("""{"error":{"message":"Checkout session confirmation failed"}}""")
@@ -473,7 +473,7 @@ class CheckoutSessionConfirmationInterceptorTest {
 
         val checkout = checkoutInstances.single()
         checkout.checkoutSession.test {
-            assertThat(awaitItem().id).isEqualTo("cs_test_abc123")
+            assertThat(awaitItem().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
 
             interceptNewPm()
 
@@ -499,7 +499,7 @@ class CheckoutSessionConfirmationInterceptorTest {
 
         val interceptor = CheckoutSessionConfirmationInterceptor(
             integrationMetadata = IntegrationMetadata.CheckoutSession(
-                id = "cs_test_abc123",
+                id = DEFAULT_CHECKOUT_SESSION_ID,
                 instancesKey = INSTANCES_KEY,
             ),
             customerMetadata = customerMetadata,
