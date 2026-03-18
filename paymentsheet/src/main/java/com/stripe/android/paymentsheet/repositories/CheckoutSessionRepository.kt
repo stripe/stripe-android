@@ -17,55 +17,11 @@ import javax.inject.Inject
 import javax.inject.Named
 
 @OptIn(CheckoutSessionPreview::class)
-internal interface CheckoutSessionRepository {
-    suspend fun init(
-        sessionId: String,
-    ): Result<CheckoutSessionResponse>
-
-    suspend fun confirm(
-        id: String,
-        params: ConfirmCheckoutSessionParams,
-    ): Result<CheckoutSessionResponse>
-
-    suspend fun detachPaymentMethod(
-        sessionId: String,
-        paymentMethodId: String,
-    ): Result<CheckoutSessionResponse>
-
-    suspend fun applyPromotionCode(
-        sessionId: String,
-        promotionCode: String,
-    ): Result<CheckoutSessionResponse>
-
-    suspend fun updateLineItemQuantity(
-        sessionId: String,
-        lineItemId: String,
-        quantity: Int,
-    ): Result<CheckoutSessionResponse>
-
-    suspend fun selectShippingRate(
-        sessionId: String,
-        shippingRateId: String,
-    ): Result<CheckoutSessionResponse>
-
-    suspend fun updateTaxRegion(
-        sessionId: String,
-        address: Address.State,
-    ): Result<CheckoutSessionResponse>
-
-    suspend fun updateTaxId(
-        sessionId: String,
-        type: String,
-        value: String,
-    ): Result<CheckoutSessionResponse>
-}
-
-@OptIn(CheckoutSessionPreview::class)
-internal class DefaultCheckoutSessionRepository @Inject constructor(
+internal class CheckoutSessionRepository @Inject constructor(
     private val stripeNetworkClient: StripeNetworkClient,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
-) : CheckoutSessionRepository {
+) {
     private val apiRequestFactory = ApiRequest.Factory(
         appInfo = Stripe.appInfo,
         apiVersion = Stripe.API_VERSION,
@@ -97,7 +53,7 @@ internal class DefaultCheckoutSessionRepository @Inject constructor(
         )
     }
 
-    override suspend fun init(
+    suspend fun init(
         sessionId: String,
     ): Result<CheckoutSessionResponse> = executePost(
         url = initUrl(sessionId),
@@ -110,7 +66,7 @@ internal class DefaultCheckoutSessionRepository @Inject constructor(
         ),
     )
 
-    override suspend fun confirm(
+    suspend fun confirm(
         id: String,
         params: ConfirmCheckoutSessionParams,
     ): Result<CheckoutSessionResponse> = executePost(
@@ -118,7 +74,7 @@ internal class DefaultCheckoutSessionRepository @Inject constructor(
         params = params.toParamMap().plus(Pair("elements_session_client[is_aggregation_expected]", "true")),
     )
 
-    override suspend fun detachPaymentMethod(
+    suspend fun detachPaymentMethod(
         sessionId: String,
         paymentMethodId: String,
     ): Result<CheckoutSessionResponse> = executePost(
@@ -128,7 +84,7 @@ internal class DefaultCheckoutSessionRepository @Inject constructor(
         ),
     )
 
-    override suspend fun applyPromotionCode(
+    suspend fun applyPromotionCode(
         sessionId: String,
         promotionCode: String,
     ): Result<CheckoutSessionResponse> = executePost(
@@ -139,7 +95,7 @@ internal class DefaultCheckoutSessionRepository @Inject constructor(
         ),
     )
 
-    override suspend fun updateLineItemQuantity(
+    suspend fun updateLineItemQuantity(
         sessionId: String,
         lineItemId: String,
         quantity: Int,
@@ -152,7 +108,7 @@ internal class DefaultCheckoutSessionRepository @Inject constructor(
         ),
     )
 
-    override suspend fun selectShippingRate(
+    suspend fun selectShippingRate(
         sessionId: String,
         shippingRateId: String,
     ): Result<CheckoutSessionResponse> = executePost(
@@ -163,7 +119,7 @@ internal class DefaultCheckoutSessionRepository @Inject constructor(
         ),
     )
 
-    override suspend fun updateTaxRegion(
+    suspend fun updateTaxRegion(
         sessionId: String,
         address: Address.State,
     ): Result<CheckoutSessionResponse> = executePost(
@@ -179,7 +135,7 @@ internal class DefaultCheckoutSessionRepository @Inject constructor(
         },
     )
 
-    override suspend fun updateTaxId(
+    suspend fun updateTaxId(
         sessionId: String,
         type: String,
         value: String,
