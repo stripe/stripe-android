@@ -2,7 +2,6 @@ package com.stripe.android.challenge.confirmation
 
 import android.content.Context
 import android.content.Intent
-import com.stripe.android.core.Logger
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
@@ -16,6 +15,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.CancelCaptchaChallengeParams

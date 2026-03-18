@@ -3,11 +3,11 @@ package com.stripe.android.challenge.confirmation
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
-import com.stripe.android.core.Logger
 import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.challenge.confirmation.analytics.IntentConfirmationChallengeAnalyticsEventReporter
+import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.CancelCaptchaChallengeParams
 import com.stripe.android.model.PaymentIntent
