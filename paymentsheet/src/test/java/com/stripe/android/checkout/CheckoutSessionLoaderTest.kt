@@ -42,7 +42,7 @@ class CheckoutSessionLoaderTest {
 
         assertThat(result.isSuccess).isTrue()
         assertThat(result.getOrThrow().id)
-            .isEqualTo("cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh")
+            .isEqualTo("cs_test_abc123")
     }
 
     @Test

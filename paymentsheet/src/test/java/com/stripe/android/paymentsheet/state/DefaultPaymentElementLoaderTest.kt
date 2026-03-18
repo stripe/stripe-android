@@ -1697,7 +1697,7 @@ internal class DefaultPaymentElementLoaderTest {
             instancesKey = "DefaultPaymentElementLoaderTest",
             checkoutSessionResponse = createCheckoutSessionResponse(canDetachPaymentMethod = true),
         )
-        assertThat(checkoutSession.checkoutSessionResponse.id).isEqualTo("cs_test_123")
+        assertThat(checkoutSession.checkoutSessionResponse.id).isEqualTo("cs_test_abc123")
     }
 
     @Test
@@ -1709,7 +1709,7 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(checkoutSession.integrationMetadata(null))
             .isEqualTo(
                 IntegrationMetadata.CheckoutSession(
-                    id = "cs_test_123",
+                    id = "cs_test_abc123",
                     instancesKey = "DefaultPaymentElementLoaderTest",
                 )
             )
@@ -4666,7 +4666,7 @@ internal class DefaultPaymentElementLoaderTest {
         canDetachPaymentMethod: Boolean,
     ): CheckoutSessionResponse {
         return CheckoutSessionResponseFactory.create(
-            id = "cs_test_123",
+            id = "cs_test_abc123",
             amount = 5099,
             elementsSession = ElementsSession(
                 linkSettings = null,
