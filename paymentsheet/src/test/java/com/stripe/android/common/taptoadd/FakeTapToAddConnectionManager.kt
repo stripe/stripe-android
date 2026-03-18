@@ -5,13 +5,16 @@ import app.cash.turbine.Turbine
 
 internal class FakeTapToAddConnectionManager private constructor(
     override val isSupported: Boolean,
-    val connectResult: Result<Unit>,
+    connectResults: List<Result<Unit>>,
 ) : TapToAddConnectionManager {
+    private val queuedConnectResults = connectResults.toMutableList()
+
     val connectCalls = Turbine<Unit>()
 
     override suspend fun connect() {
         connectCalls.add(Unit)
-        connectResult.getOrThrow()
+
+        queuedConnectResults.removeFirst().getOrThrow()
     }
 
     class Scenario(
@@ -25,7 +28,15 @@ internal class FakeTapToAddConnectionManager private constructor(
             connectResult: Result<Unit> = Result.success(Unit),
             block: suspend Scenario.() -> Unit
         ) {
-            val tapToAddConnectionManager = FakeTapToAddConnectionManager(isSupported, connectResult)
+           test(isSupported, listOf(connectResult), block)
+        }
+
+        suspend fun test(
+            isSupported: Boolean,
+            connectResults: List<Result<Unit>> = listOf(Result.success(Unit)),
+            block: suspend Scenario.() -> Unit
+        ) {
+            val tapToAddConnectionManager = FakeTapToAddConnectionManager(isSupported, connectResults)
 
             block(
                 Scenario(
@@ -41,7 +52,7 @@ internal class FakeTapToAddConnectionManager private constructor(
             isSupported: Boolean,
             connectResult: Result<Unit> = Result.success(Unit),
         ): FakeTapToAddConnectionManager {
-            return FakeTapToAddConnectionManager(isSupported, connectResult)
+            return FakeTapToAddConnectionManager(isSupported, listOf(connectResult))
         }
     }
 }
