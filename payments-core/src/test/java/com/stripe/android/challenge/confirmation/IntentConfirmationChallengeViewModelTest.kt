@@ -54,7 +54,7 @@ internal class IntentConfirmationChallengeViewModelTest {
         // Verify analytics
         assertThat(analyticsReporter.calls).hasSize(1)
         assertThat(analyticsReporter.calls.last()).isEqualTo(
-            FakeIntentConfirmationChallengeAnalyticsEventReporter.Call.WebViewLoaded
+            FakeIntentConfirmationChallengeAnalyticsEventReporter.Call.WebViewLoaded("hcaptcha")
         )
     }
 
@@ -78,7 +78,7 @@ internal class IntentConfirmationChallengeViewModelTest {
         // Verify analytics
         assertThat(analyticsReporter.calls).hasSize(1)
         assertThat(analyticsReporter.calls.last()).isEqualTo(
-            FakeIntentConfirmationChallengeAnalyticsEventReporter.Call.Success
+            FakeIntentConfirmationChallengeAnalyticsEventReporter.Call.Success("hcaptcha")
         )
     }
 
@@ -106,6 +106,7 @@ internal class IntentConfirmationChallengeViewModelTest {
         assertThat(errorCall.errorType).isNull()
         assertThat(errorCall.errorCode).isNull()
         assertThat(errorCall.fromBridge).isTrue()
+        assertThat(errorCall.captchaVendorName).isEqualTo("hcaptcha")
     }
 
     @Test
@@ -136,6 +137,7 @@ internal class IntentConfirmationChallengeViewModelTest {
         assertThat(errorCall.errorType).isEqualTo("generic_resource_error")
         assertThat(errorCall.errorCode).isEqualTo("-2")
         assertThat(errorCall.fromBridge).isFalse()
+        assertThat(errorCall.captchaVendorName).isEqualTo("hcaptcha")
     }
 
     @Test
@@ -170,6 +172,7 @@ internal class IntentConfirmationChallengeViewModelTest {
             publishableKey = "pk_test_123",
             intent = PaymentIntentFixtures.PI_WITH_NULL_ID,
             productUsage = listOf("PaymentSheet"),
+            captchaVendorName = "hcaptcha",
         )
         testScenario(args = argsWithNullId, errorReporter = fakeErrorReporter) {
             viewModel.result.test {
@@ -230,7 +233,7 @@ internal class IntentConfirmationChallengeViewModelTest {
 
         assertThat(analyticsReporter.calls).hasSize(1)
         assertThat(analyticsReporter.calls.last()).isEqualTo(
-            FakeIntentConfirmationChallengeAnalyticsEventReporter.Call.Cancel
+            FakeIntentConfirmationChallengeAnalyticsEventReporter.Call.Cancel("hcaptcha")
         )
     }
 
@@ -250,7 +253,7 @@ internal class IntentConfirmationChallengeViewModelTest {
 
         assertThat(analyticsReporter.calls).hasSize(1)
         assertThat(analyticsReporter.calls.first()).isEqualTo(
-            FakeIntentConfirmationChallengeAnalyticsEventReporter.Call.Start
+            FakeIntentConfirmationChallengeAnalyticsEventReporter.Call.Start("hcaptcha")
         )
     }
 
@@ -360,6 +363,7 @@ internal class IntentConfirmationChallengeViewModelTest {
             publishableKey = "pk_test_123",
             intent = PaymentIntentFixtures.PI_SUCCEEDED,
             productUsage = listOf("PaymentSheet"),
+            captchaVendorName = "hcaptcha",
         )
     }
 }

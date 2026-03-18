@@ -1,13 +1,10 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
-import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
 import java.util.Locale
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@Parcelize
-sealed interface ElementsSessionParams : Parcelable {
+internal sealed interface ElementsSessionParams : Parcelable {
 
     val type: String
     val clientSecret: String?
@@ -24,7 +21,6 @@ sealed interface ElementsSessionParams : Parcelable {
     val link: Link
     val countryOverride: String?
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class PaymentIntentType(
         override val clientSecret: String,
@@ -50,7 +46,6 @@ sealed interface ElementsSessionParams : Parcelable {
             get() = null
     }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class SetupIntentType(
         override val clientSecret: String,
@@ -76,7 +71,6 @@ sealed interface ElementsSessionParams : Parcelable {
             get() = null
     }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class DeferredIntentType(
         override val locale: String? = Locale.getDefault().toLanguageTag(),
@@ -103,7 +97,6 @@ sealed interface ElementsSessionParams : Parcelable {
             get() = emptyList()
     }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class SellerDetails(
         val networkId: String,
@@ -117,7 +110,6 @@ sealed interface ElementsSessionParams : Parcelable {
         }
     }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class Link(
         val disallowFundingSourceCreation: Set<String> = emptySet(),

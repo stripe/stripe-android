@@ -1,6 +1,5 @@
 package com.stripe.android.model.parsers
 
-import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArrayToList
@@ -16,8 +15,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.util.UUID
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class ElementsSessionJsonParser(
+internal class ElementsSessionJsonParser(
     private val params: ElementsSessionParams,
     private val isLiveMode: Boolean,
     private val timeProvider: () -> Long = {
@@ -200,10 +198,6 @@ class ElementsSessionJsonParser(
         val linkEnableDisplayableDefaultValuesInEce = json?.optBoolean(
             FIELD_LINK_ENABLE_DISPLAYABLE_DEFAULT_VALUES_IN_ECE
         ) == true
-        val linkMobileSkipWalletInFlowController = json?.optBoolean(
-            FIELD_LINK_MOBILE_SKIP_WALLET_IN_FLOW_CONTROLLER
-        ) == true
-
         val linkSignUpOptInFeatureEnabled = json?.optBoolean(FIELD_LINK_SIGN_UP_OPT_IN_FEATURE_ENABLED) == true
         val linkSignUpOptInInitialValue = json?.optBoolean(FIELD_LINK_SIGN_UP_OPT_IN_INITIAL_VALUE) == true
 
@@ -237,7 +231,6 @@ class ElementsSessionJsonParser(
             suppress2faModal = suppressLink2faModal,
             disableLinkRuxInFlowController = disableLinkRuxInFlowController,
             linkEnableDisplayableDefaultValuesInEce = linkEnableDisplayableDefaultValuesInEce,
-            linkMobileSkipWalletInFlowController = linkMobileSkipWalletInFlowController,
             linkSignUpOptInFeatureEnabled = linkSignUpOptInFeatureEnabled,
             linkSignUpOptInInitialValue = linkSignUpOptInInitialValue,
             linkSupportedPaymentMethodsOnboardingEnabled = linkSupportedPaymentMethodsOnboardingEnabled,
@@ -516,8 +509,6 @@ class ElementsSessionJsonParser(
         private const val FIELD_LINK_SUPPRESS_2FA_MODAL = "link_mobile_suppress_2fa_modal"
         private const val FIELD_LINK_ENABLE_DISPLAYABLE_DEFAULT_VALUES_IN_ECE =
             "link_enable_displayable_default_values_in_ece"
-        private const val FIELD_LINK_MOBILE_SKIP_WALLET_IN_FLOW_CONTROLLER =
-            "link_mobile_skip_wallet_in_flow_controller"
         private const val FIELD_LINK_SIGN_UP_OPT_IN_FEATURE_ENABLED = "link_sign_up_opt_in_feature_enabled"
         private const val FIELD_LINK_SIGN_UP_OPT_IN_INITIAL_VALUE = "link_sign_up_opt_in_initial_value"
         private const val FIELD_LINK_SUPPORTED_PAYMENT_METHODS_ONBOARDING_ENABLED =

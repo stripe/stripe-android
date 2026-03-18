@@ -24,9 +24,10 @@ internal sealed class LinkPaymentDetails(
      *   consumer account.
      */
     @Parcelize
-    class Passthrough(
+    data class Passthrough(
         override val paymentDetails: ConsumerPaymentDetails.Passthrough,
         val paymentMethod: PaymentMethod,
+        val createdFromNewPaymentMethod: Boolean = false,
     ) : LinkPaymentDetails(paymentDetails)
 
     /**

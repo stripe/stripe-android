@@ -11,6 +11,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.testing.FakeLogger
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -103,6 +104,7 @@ internal class DefaultTapToAddCollectingInteractorTest {
                     onCollected = { onCollected.add(it) },
                     onFailedCollection = { onFailedCollection.add(it) },
                     onCanceled = { onCanceled.add(Unit) },
+                    logger = FakeLogger(),
                 ),
                 onCollected = onCollected,
                 onFailedCollection = onFailedCollection,

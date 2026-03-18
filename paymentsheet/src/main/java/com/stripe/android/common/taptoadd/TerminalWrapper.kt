@@ -28,9 +28,10 @@ internal class DefaultTerminalWrapper @Inject constructor() : TerminalWrapper {
         tokenProvider: ConnectionTokenProvider,
         listener: TerminalListener,
     ) {
-        Terminal.initTerminal(
+        Terminal.init(
             context = context,
             tokenProvider = tokenProvider,
+            offlineListener = null,
             listener = listener,
         )
     }

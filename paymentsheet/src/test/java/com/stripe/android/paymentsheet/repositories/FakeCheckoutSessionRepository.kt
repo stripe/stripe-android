@@ -2,11 +2,18 @@ package com.stripe.android.paymentsheet.repositories
 
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
+import com.stripe.android.checkout.Address
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 
 internal class FakeCheckoutSessionRepository(
     var initResult: Result<CheckoutSessionResponse> = Result.failure(NotImplementedError()),
     var confirmResult: Result<CheckoutSessionResponse> = Result.failure(NotImplementedError()),
     var detachResult: Result<CheckoutSessionResponse> = Result.failure(NotImplementedError()),
+    var applyPromotionCodeResult: Result<CheckoutSessionResponse> = Result.failure(NotImplementedError()),
+    var updateLineItemQuantityResult: Result<CheckoutSessionResponse> = Result.failure(NotImplementedError()),
+    var selectShippingRateResult: Result<CheckoutSessionResponse> = Result.failure(NotImplementedError()),
+    var updateShippingAddressResult: Result<CheckoutSessionResponse> = Result.failure(NotImplementedError()),
+    var updateTaxIdResult: Result<CheckoutSessionResponse> = Result.failure(NotImplementedError()),
 ) : CheckoutSessionRepository {
 
     private val _initRequests = Turbine<String>()
@@ -39,6 +46,36 @@ internal class FakeCheckoutSessionRepository(
         )
         return detachResult
     }
+
+    override suspend fun applyPromotionCode(
+        sessionId: String,
+        promotionCode: String,
+    ): Result<CheckoutSessionResponse> = applyPromotionCodeResult
+
+    override suspend fun updateLineItemQuantity(
+        sessionId: String,
+        lineItemId: String,
+        quantity: Int,
+    ): Result<CheckoutSessionResponse> {
+        return updateLineItemQuantityResult
+    }
+
+    override suspend fun selectShippingRate(
+        sessionId: String,
+        shippingRateId: String,
+    ): Result<CheckoutSessionResponse> = selectShippingRateResult
+
+    @OptIn(CheckoutSessionPreview::class)
+    override suspend fun updateTaxRegion(
+        sessionId: String,
+        address: Address.State,
+    ): Result<CheckoutSessionResponse> = updateShippingAddressResult
+
+    override suspend fun updateTaxId(
+        sessionId: String,
+        type: String,
+        value: String,
+    ): Result<CheckoutSessionResponse> = updateTaxIdResult
 
     data class DetachRequest(
         val sessionId: String,

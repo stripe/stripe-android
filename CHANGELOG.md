@@ -2,6 +2,13 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 23.0.1 - 2026-03-10
+
+### Payments
+[FIXED][12596](https://github.com/stripe/stripe-android/pull/12596) Correctly resolve project dependency artifactId when generating pom files to ensure accurate dependency metadata.
+
+## 23.0.0 - 2026-03-09
+
 Dependencies updated in [12373](https://github.com/stripe/stripe-android/pull/12373), [12410](https://github.com/stripe/stripe-android/pull/12410), [12419](https://github.com/stripe/stripe-android/pull/12419), [12433](https://github.com/stripe/stripe-android/pull/12433), and [12486](https://github.com/stripe/stripe-android/pull/12486):
 - Bumped `minSdkVersion` to `23`.
 - Bumped `compileSdkVersion` and `targetSdkVersion` to `36`.
@@ -29,6 +36,9 @@ Dependencies updated in [12373](https://github.com/stripe/stripe-android/pull/12
 - Bumped LiteRT from 1.4.0 to 1.4.1.
 - Bumped WorkManager from 2.9.0 to 2.11.1.
 - Bumped Material from 1.12.0 to 1.13.0.
+
+### PaymentSheet
+* [Added] Added support for Wero payments (private preview).
 
 ## 22.8.1 - 2026-02-17
 

@@ -5,10 +5,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.testing.FakeLogger
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.stripeterminal.Terminal
 import com.stripe.stripeterminal.external.callable.Callback
@@ -224,33 +226,36 @@ class DefaultTapToAddConnectionManagerTest {
     }
 
     @Test
-    fun `connect reports error on expected discovery call permission failure`() = test(
-        terminalInstance = mock {
-            mockSupportedReaderResult(ReaderSupportResult.Supported)
-            mockReaderCall()
-            mockDiscoverFailure(SecurityException("Permission failure!"))
+    fun `connect reports error on expected discovery call permission failure`() {
+        val exception = SecurityException("Permission failure!")
+
+        test(
+            terminalInstance = mock {
+                mockSupportedReaderResult(ReaderSupportResult.Supported)
+                mockReaderCall()
+                mockDiscoverFailure(exception)
+            }
+        ) {
+            manager.connect()
+
+            verify(terminalInstance).discoverReaders(
+                any<DiscoveryConfiguration.TapToPayDiscoveryConfiguration>(),
+                any<DiscoveryListener>(),
+                any<Callback>(),
+            )
+
+            val errorReportCall = errorReporter.awaitCall()
+
+            assertThat(logger.warningLogs).containsExactly("TapToAddConnectionError: $exception")
+            assertThat(errorReportCall.errorEvent)
+                .isEqualTo(ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_LOCATION_PERMISSIONS_FAILURE)
+            assertThat(errorReportCall.stripeException?.message).isEqualTo("Permission failure!")
+            assertThat(errorReportCall.additionalNonPiiParams).isEmpty()
         }
-    ) {
-        manager.connect()
-
-        verify(terminalInstance).discoverReaders(
-            any<DiscoveryConfiguration.TapToPayDiscoveryConfiguration>(),
-            any<DiscoveryListener>(),
-            any<Callback>(),
-        )
-
-        val errorReportCall = errorReporter.awaitCall()
-
-        assertThat(errorReportCall.errorEvent)
-            .isEqualTo(ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_LOCATION_PERMISSIONS_FAILURE)
-        assertThat(errorReportCall.stripeException?.message).isEqualTo("Permission failure!")
-        assertThat(errorReportCall.additionalNonPiiParams).isEmpty()
     }
 
     @Test
     fun `connect initiates reader connection after discovering reader`() {
-        TerminalLocationHolder.locationId = "tml_123"
-
         test(
             terminalInstance = mock {
                 mockSupportedReaderResult(ReaderSupportResult.Supported)
@@ -279,8 +284,7 @@ class DefaultTapToAddConnectionManagerTest {
             verify(terminalInstance).connectReader(
                 eq(reader),
                 argWhere { config ->
-                    config.locationId == "tml_123" &&
-                        config is ConnectionConfiguration.TapToPayConnectionConfiguration &&
+                    config is ConnectionConfiguration.TapToPayConnectionConfiguration &&
                         config.autoReconnectOnUnexpectedDisconnect &&
                         config.tapToPayReaderListener == manager
                 },
@@ -317,6 +321,9 @@ class DefaultTapToAddConnectionManagerTest {
 
         assertThat(errorReportCall.errorEvent)
             .isEqualTo(ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_NO_READER_FOUND)
+        assertThat(logger.warningLogs).containsExactly(
+            "TapToAddConnectionError: java.lang.IllegalStateException: No reader found!"
+        )
     }
 
     @Test
@@ -383,12 +390,11 @@ class DefaultTapToAddConnectionManagerTest {
         assertThat(successReportCall.errorEvent)
             .isEqualTo(ErrorReporter.ExpectedErrorEvent.TAP_TO_ADD_DISCOVER_READERS_CALL_FAILURE)
         assertThat(successReportCall.stripeException?.cause).isEqualTo(exception)
+        assertThat(logger.warningLogs).containsExactly("TapToAddConnectionError: $exception")
     }
 
     @Test
     fun `connect reports success event on successful reader connection`() {
-        TerminalLocationHolder.locationId = "tml_123"
-
         test(
             terminalInstance = mock {
                 mockSupportedReaderResult(ReaderSupportResult.Supported)
@@ -416,8 +422,6 @@ class DefaultTapToAddConnectionManagerTest {
 
     @Test
     fun `connect reports failure event on failed reader connection`() {
-        TerminalLocationHolder.locationId = "tml_123"
-
         test(
             terminalInstance = mock {
                 mockSupportedReaderResult(ReaderSupportResult.Supported)
@@ -445,6 +449,8 @@ class DefaultTapToAddConnectionManagerTest {
             assertThat(errorCall.errorEvent)
                 .isEqualTo(ErrorReporter.ExpectedErrorEvent.TAP_TO_ADD_CONNECT_READER_CALL_FAILURE)
             assertThat(errorCall.stripeException?.cause).isEqualTo(exception)
+            assertThat(logger.warningLogs)
+                .containsExactly("TapToAddConnectionError: $exception")
         }
     }
 
@@ -477,7 +483,6 @@ class DefaultTapToAddConnectionManagerTest {
 
     @Test
     fun `connect completes successfully on connect if already connected to reader`() {
-        TerminalLocationHolder.locationId = "tml_123"
         val connectedReader = Reader()
         val exception = TerminalException(
             errorCode = TerminalErrorCode.ALREADY_CONNECTED_TO_READER,
@@ -534,8 +539,6 @@ class DefaultTapToAddConnectionManagerTest {
 
     @Test
     fun `await returns success with true when connection completes successfully`() {
-        TerminalLocationHolder.locationId = "tml_123"
-
         test(
             terminalInstance = mock {
                 mockSupportedReaderResult(ReaderSupportResult.Supported)
@@ -569,8 +572,6 @@ class DefaultTapToAddConnectionManagerTest {
 
     @Test
     fun `await returns failure when connection fails`() {
-        TerminalLocationHolder.locationId = "tml_123"
-
         test(
             terminalInstance = mock {
                 mockSupportedReaderResult(ReaderSupportResult.Supported)
@@ -691,6 +692,7 @@ class DefaultTapToAddConnectionManagerTest {
         block: suspend Scenario.() -> Unit
     ) = runTest {
         val errorReporter = FakeErrorReporter()
+        val logger = FakeLogger()
 
         TestTerminalWrapper.test(
             isInitialized = isInitialized,
@@ -703,11 +705,14 @@ class DefaultTapToAddConnectionManagerTest {
                         workContext = testDispatcher,
                         terminalWrapper = wrapper,
                         errorReporter = errorReporter,
+                        logger = logger,
                         isSimulated = isSimulated,
+                        paymentConfiguration = { PaymentConfiguration(publishableKey = "pk_test") }
                     ),
                     terminalInstance = terminalInstance,
                     errorReporter = errorReporter,
                     testScope = this@runTest,
+                    logger = logger,
                     wrapperScenario = this
                 )
             )
@@ -719,13 +724,13 @@ class DefaultTapToAddConnectionManagerTest {
 
         errorReporter.ensureAllEventsConsumed()
 
-        TerminalLocationHolder.locationId = null
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     }
 
     private class Scenario(
         val testScope: TestScope,
         val manager: TapToAddConnectionManager,
+        val logger: FakeLogger,
         val terminalInstance: Terminal,
         val errorReporter: FakeErrorReporter,
         val wrapperScenario: TestTerminalWrapper.Scenario

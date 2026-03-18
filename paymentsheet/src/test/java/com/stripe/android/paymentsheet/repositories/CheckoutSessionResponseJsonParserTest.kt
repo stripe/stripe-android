@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import org.json.JSONObject
 import org.junit.Test
@@ -24,6 +25,7 @@ class CheckoutSessionResponseJsonParserTest {
         assertThat(result?.id).isEqualTo("cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh")
         assertThat(result?.amount).isEqualTo(999L)
         assertThat(result?.currency).isEqualTo("usd")
+        assertThat(result?.mode).isEqualTo(CheckoutSessionResponse.Mode.PAYMENT)
 
         // Verify ElementsSession is parsed correctly
         val elementsSession = result?.elementsSession
@@ -50,6 +52,65 @@ class CheckoutSessionResponseJsonParserTest {
             "klarna",
             "crypto"
         ).inOrder()
+    }
+
+    @Test
+    fun `parse checkout session response includes line items`() {
+        val result = CheckoutSessionResponseJsonParser(
+            isLiveMode = false,
+        ).parse(CheckoutSessionFixtures.CHECKOUT_SESSION_RESPONSE_JSON)
+
+        assertThat(result).isNotNull()
+        val lineItems = result!!.lineItems
+        assertThat(lineItems).hasSize(1)
+        assertThat(lineItems[0].id).isEqualTo("li_1SrjAuLu5o3P18ZpVBMMs98l")
+        assertThat(lineItems[0].name).isEqualTo("Llama Figure")
+        assertThat(lineItems[0].quantity).isEqualTo(1)
+        assertThat(lineItems[0].subtotal).isEqualTo(999L)
+        assertThat(lineItems[0].total).isEqualTo(999L)
+        assertThat(lineItems[0].unitAmount).isEqualTo(999L)
+    }
+
+    @Test
+    fun `parse multiple line items`() {
+        val result = CheckoutSessionResponseJsonParser(
+            isLiveMode = false,
+        ).parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_MULTIPLE_LINE_ITEMS_JSON)
+
+        assertThat(result).isNotNull()
+        val lineItems = result!!.lineItems
+        assertThat(lineItems).hasSize(2)
+
+        assertThat(lineItems[0].id).isEqualTo("li_item1")
+        assertThat(lineItems[0].name).isEqualTo("Llama Figure")
+        assertThat(lineItems[0].quantity).isEqualTo(2)
+        assertThat(lineItems[0].subtotal).isEqualTo(1998L)
+        assertThat(lineItems[0].total).isEqualTo(1998L)
+        assertThat(lineItems[0].unitAmount).isEqualTo(999L)
+
+        assertThat(lineItems[1].id).isEqualTo("li_item2")
+        assertThat(lineItems[1].name).isEqualTo("Alpaca Plushie")
+        assertThat(lineItems[1].quantity).isEqualTo(1)
+        assertThat(lineItems[1].subtotal).isEqualTo(2499L)
+        assertThat(lineItems[1].total).isEqualTo(2499L)
+        assertThat(lineItems[1].unitAmount).isEqualTo(2499L)
+    }
+
+    @Test
+    fun `parse returns empty line items when no line_item_group`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "currency": "usd",
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result!!.lineItems).isEmpty()
     }
 
     @Test
@@ -375,6 +436,7 @@ class CheckoutSessionResponseJsonParserTest {
 
         // Shipping
         assertThat(totalSummary?.shippingRate).isNotNull()
+        assertThat(totalSummary?.shippingRate?.id).isEqualTo("shr_standard")
         assertThat(totalSummary?.shippingRate?.amount).isEqualTo(500L)
         assertThat(totalSummary?.shippingRate?.displayName).isEqualTo("Standard Shipping")
         assertThat(totalSummary?.shippingRate?.deliveryEstimate).isEqualTo("5-7 business days")
@@ -406,6 +468,7 @@ class CheckoutSessionResponseJsonParserTest {
         val totalSummary = result?.totalSummary
         assertThat(totalSummary).isNotNull()
         assertThat(totalSummary?.shippingRate).isNotNull()
+        assertThat(totalSummary?.shippingRate?.id).isEqualTo("shr_express")
         assertThat(totalSummary?.shippingRate?.amount).isEqualTo(500L)
         assertThat(totalSummary?.shippingRate?.displayName).isEqualTo("Express Shipping")
         assertThat(totalSummary?.shippingRate?.deliveryEstimate).isEqualTo("1-3 business days")
@@ -526,5 +589,141 @@ class CheckoutSessionResponseJsonParserTest {
         assertThat(totalSummary?.discountAmounts).hasSize(1)
         assertThat(totalSummary?.discountAmounts?.get(0)?.amount).isEqualTo(1000L)
         assertThat(totalSummary?.discountAmounts?.get(0)?.displayName).isEqualTo("10OFF")
+    }
+
+    @Test
+    fun `parse shipping options from root level`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_SHIPPING_OPTIONS_JSON)
+
+        assertThat(result).isNotNull()
+        val shippingOptions = result!!.shippingOptions
+        assertThat(shippingOptions).hasSize(3)
+
+        assertThat(shippingOptions[0].id).isEqualTo("shr_standard")
+        assertThat(shippingOptions[0].amount).isEqualTo(500L)
+        assertThat(shippingOptions[0].displayName).isEqualTo("Standard Shipping")
+        assertThat(shippingOptions[0].deliveryEstimate).isNull()
+
+        assertThat(shippingOptions[1].id).isEqualTo("shr_express")
+        assertThat(shippingOptions[1].amount).isEqualTo(1500L)
+        assertThat(shippingOptions[1].displayName).isEqualTo("Express Shipping")
+
+        assertThat(shippingOptions[2].id).isEqualTo("shr_free")
+        assertThat(shippingOptions[2].amount).isEqualTo(0L)
+        assertThat(shippingOptions[2].displayName).isEqualTo("Free Shipping")
+    }
+
+    @Test
+    fun `parse customer_email from top level when customer is null (guest checkout)`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_GUEST_WITH_EMAIL_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.customerEmail).isEqualTo("guest@example.com")
+        assertThat(result?.customer).isNull()
+    }
+
+    @Test
+    fun `customerEmail is null when customer_email is not present in JSON`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITHOUT_CUSTOMER_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.customerEmail).isNull()
+    }
+
+    @Test
+    fun `parse returns empty shipping options when not present`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_RESPONSE_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result!!.shippingOptions).isEmpty()
+    }
+
+    @Test
+    fun `parse setup mode init response`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_SETUP_MODE_RESPONSE_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.id).isEqualTo("cs_test_setup_abc123")
+        assertThat(result?.mode).isEqualTo(CheckoutSessionResponse.Mode.SETUP)
+        assertThat(result?.amount).isEqualTo(0L)
+        assertThat(result?.currency).isEqualTo("usd")
+        assertThat(result?.paymentIntent).isNull()
+        assertThat(result?.setupIntent).isNull()
+        assertThat(result?.elementsSession).isNotNull()
+    }
+
+    @Test
+    fun `parse setup mode confirm response with succeeded setup intent`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_SETUP_CONFIRM_SUCCEEDED_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.id).isEqualTo("cs_test_setup_abc123")
+        assertThat(result?.mode).isEqualTo(CheckoutSessionResponse.Mode.SETUP)
+        assertThat(result?.amount).isEqualTo(0L)
+
+        assertThat(result?.paymentIntent).isNull()
+        val setupIntent = result?.setupIntent
+        assertThat(setupIntent).isNotNull()
+        assertThat(setupIntent?.id).isEqualTo("seti_1QWK2VIyGgrkZxL71xfPBWG5")
+        assertThat(setupIntent?.status).isEqualTo(StripeIntent.Status.Succeeded)
+        assertThat(setupIntent?.isConfirmed).isTrue()
+    }
+
+    @Test
+    fun `parse setup mode confirm response with requires_action setup intent`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_SETUP_CONFIRM_REQUIRES_ACTION_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.mode).isEqualTo(CheckoutSessionResponse.Mode.SETUP)
+
+        val setupIntent = result?.setupIntent
+        assertThat(setupIntent).isNotNull()
+        assertThat(setupIntent?.id).isEqualTo("seti_1QWK2VIyGgrkZxL71xfPBWG5")
+        assertThat(setupIntent?.status).isEqualTo(StripeIntent.Status.RequiresAction)
+        assertThat(setupIntent?.requiresAction()).isTrue()
+        assertThat(setupIntent?.nextActionType).isEqualTo(StripeIntent.NextActionType.RedirectToUrl)
+    }
+
+    @Test
+    fun `parse confirm response with elements_session replaces deferred intent with confirmed PaymentIntent`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_CONFIRM_WITH_ELEMENTS_SESSION_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.paymentIntent).isNotNull()
+        assertThat(result?.paymentIntent?.id).isEqualTo("pi_3QWK2VIyGgrkZxL71xfPBWG5")
+
+        val elementsSession = result?.elementsSession
+        assertThat(elementsSession).isNotNull()
+        assertThat(elementsSession?.stripeIntent).isInstanceOf(PaymentIntent::class.java)
+
+        val stripeIntent = elementsSession?.stripeIntent as PaymentIntent
+        assertThat(stripeIntent.id).isEqualTo("pi_3QWK2VIyGgrkZxL71xfPBWG5")
+        assertThat(stripeIntent.status).isEqualTo(StripeIntent.Status.Succeeded)
+    }
+
+    @Test
+    fun `parse confirm response with elements_session replaces deferred intent with confirmed SetupIntent`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_SETUP_CONFIRM_WITH_ELEMENTS_SESSION_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.setupIntent).isNotNull()
+        assertThat(result?.setupIntent?.id).isEqualTo("seti_1QWK2VIyGgrkZxL71xfPBWG5")
+
+        val elementsSession = result?.elementsSession
+        assertThat(elementsSession).isNotNull()
+        assertThat(elementsSession?.stripeIntent).isInstanceOf(SetupIntent::class.java)
+
+        val stripeIntent = elementsSession?.stripeIntent as SetupIntent
+        assertThat(stripeIntent.id).isEqualTo("seti_1QWK2VIyGgrkZxL71xfPBWG5")
+        assertThat(stripeIntent.status).isEqualTo(StripeIntent.Status.Succeeded)
     }
 }

@@ -3,6 +3,8 @@ package com.stripe.android.crypto.onramp.example
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.Parcel
+import android.os.Parcelable
 import androidx.compose.ui.graphics.Color
 import androidx.core.content.edit
 import androidx.lifecycle.AndroidViewModel
@@ -46,16 +48,19 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.parcelize.Parceler
+import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.TypeParceler
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 @Suppress("TooManyFunctions", "LargeClass")
 internal class OnrampViewModel(
     private val application: Application,
-    savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) {
 
-    private val callbacks = OnrampCallbacks()
+    internal val callbacks = OnrampCallbacks()
         .verifyIdentityCallback(callback = ::onVerifyIdentityResult)
         .verifyKycCallback(callback = ::onVerifyKycResult)
         .checkoutCallback(callback = ::onCheckoutResult)
@@ -71,7 +76,8 @@ internal class OnrampViewModel(
 
     private val testBackendRepository = TestBackendRepository()
 
-    private val _uiState = MutableStateFlow(OnrampUiState())
+    private val savedUIState get() = savedStateHandle.get<OnrampUiState>(KEY_UI_STATE)
+    private val _uiState = MutableStateFlow(savedUIState ?: OnrampUiState())
     val uiState: StateFlow<OnrampUiState> = _uiState.asStateFlow()
 
     private val _message = MutableStateFlow<String?>(null)
@@ -150,10 +156,18 @@ internal class OnrampViewModel(
 
             onrampCoordinator.configure(configuration = configuration)
 
-            loadUserData()?.let { data ->
-                _uiState.update { it.copy(email = data.email, authToken = data.token, screen = Screen.SeamlessSignIn) }
-            } ?: run {
-                _uiState.update { it.copy(screen = Screen.LoginSignup) }
+            if (savedUIState == null) {
+                loadUserData()?.let { data ->
+                    _uiState.update {
+                        it.copy(email = data.email, authToken = data.token, screen = Screen.SeamlessSignIn)
+                    }
+                } ?: run {
+                    _uiState.update { it.copy(screen = Screen.LoginSignup) }
+                }
+            }
+
+            _uiState.collect { state ->
+                savedStateHandle[KEY_UI_STATE] = state
             }
         }
     }
@@ -785,21 +799,24 @@ internal class OnrampViewModel(
     }
 }
 
+@Parcelize
 data class OnrampUiState(
     val screen: Screen = Screen.Loading,
     val email: String = "",
     val linkAuthIntentId: String? = null,
     val consentedLinkAuthIntentIds: List<String> = emptyList(),
+    @TypeParceler<PaymentMethodDisplayData?, NullPaymentMethodDisplayDataParceler>
     val selectedPaymentData: PaymentMethodDisplayData? = null,
     val cryptoPaymentToken: String? = null,
     val walletAddress: String? = null,
     val network: CryptoNetwork? = null,
     val authToken: String? = null,
+    @TypeParceler<OnrampSessionResponse?, NullOnrampSessionResponseParceler>
     val onrampSession: OnrampSessionResponse? = null,
     val loadingMessage: String? = null,
     val settlementSpeed: SettlementSpeed = SettlementSpeed.INSTANT,
     val googlePayIsReady: Boolean = false,
-)
+) : Parcelable
 
 enum class Screen {
     SeamlessSignIn,
@@ -818,8 +835,6 @@ data class CheckoutEvent(
 
 data class AuthorizeEvent(val linkAuthIntentId: String)
 
-data object UpdateAddressEvent
-
 @Serializable
 data class OnrampUserData(
     val email: String,
@@ -827,3 +842,15 @@ data class OnrampUserData(
 )
 
 internal const val ONRAMP_PREFS_NAME = "onramp_prefs"
+
+private const val KEY_UI_STATE = "onramp_ui_state"
+
+private object NullPaymentMethodDisplayDataParceler : Parceler<PaymentMethodDisplayData?> {
+    override fun create(parcel: Parcel): PaymentMethodDisplayData? = null
+    override fun PaymentMethodDisplayData?.write(parcel: Parcel, flags: Int) { /* no-op */ }
+}
+
+private object NullOnrampSessionResponseParceler : Parceler<OnrampSessionResponse?> {
+    override fun create(parcel: Parcel): OnrampSessionResponse? = null
+    override fun OnrampSessionResponse?.write(parcel: Parcel, flags: Int) { /* no-op */ }
+}

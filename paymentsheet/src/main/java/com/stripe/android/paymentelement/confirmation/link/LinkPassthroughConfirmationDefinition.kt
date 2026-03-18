@@ -93,6 +93,7 @@ internal class LinkPassthroughConfirmationDefinition @Inject constructor(
                 paymentMethod = paymentMethod,
                 optionsParams = null,
                 originatedFromWallet = true,
+                newPMTransformedForConfirmation = true
             )
         }
     }

@@ -6,18 +6,22 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.di.ApplicationIdModule
+import com.stripe.android.common.spms.CvcFormHelper
+import com.stripe.android.common.spms.DefaultCvcFormHelper
 import com.stripe.android.common.spms.DefaultLinkFormElementFactory
 import com.stripe.android.common.spms.DefaultSavedPaymentMethodLinkFormHelper
 import com.stripe.android.common.spms.LinkFormElementFactory
 import com.stripe.android.common.spms.SavedPaymentMethodLinkFormHelper
-import com.stripe.android.common.taptoadd.ui.DefaultTapToAddCompletedInteractor
+import com.stripe.android.common.taptoadd.ui.DefaultTapToAddCardAddedInteractor
 import com.stripe.android.common.taptoadd.ui.DefaultTapToAddCollectingInteractor
 import com.stripe.android.common.taptoadd.ui.DefaultTapToAddConfirmationInteractor
-import com.stripe.android.common.taptoadd.ui.DefaultTapToAddPaymentMethodHolder
-import com.stripe.android.common.taptoadd.ui.TapToAddCompletedInteractor
+import com.stripe.android.common.taptoadd.ui.DefaultTapToAddDelayInteractor
+import com.stripe.android.common.taptoadd.ui.DefaultTapToAddStateHolder
+import com.stripe.android.common.taptoadd.ui.TapToAddCardAddedInteractor
 import com.stripe.android.common.taptoadd.ui.TapToAddCollectingInteractor
 import com.stripe.android.common.taptoadd.ui.TapToAddConfirmationInteractor
-import com.stripe.android.common.taptoadd.ui.TapToAddPaymentMethodHolder
+import com.stripe.android.common.taptoadd.ui.TapToAddDelayInteractor
+import com.stripe.android.common.taptoadd.ui.TapToAddStateHolder
 import com.stripe.android.common.taptoadd.ui.createTapToAddUxConfiguration
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
@@ -57,6 +61,11 @@ import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepositoryModule
+import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
+import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.repositories.DefaultSavedPaymentMethodRepository
+import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.stripeterminal.external.models.TapToPayUxConfiguration
 import dagger.Binds
 import dagger.BindsInstance
@@ -113,11 +122,23 @@ internal interface TapToAddViewModelComponent {
     ],
     includes = [
         TapToAddLinkModule::class,
+        CheckoutSessionRepositoryModule::class,
     ]
 )
+@Suppress("TooManyFunctions")
 internal interface TapToAddViewModelModule {
     @Binds
     fun bindsErrorReporter(errorReporter: RealErrorReporter): ErrorReporter
+
+    @Binds
+    fun bindsCustomerRepository(
+        repository: CustomerApiRepository
+    ): CustomerRepository
+
+    @Binds
+    fun bindsSavedPaymentMethodRepository(
+        repository: DefaultSavedPaymentMethodRepository
+    ): SavedPaymentMethodRepository
 
     @Binds
     fun bindsPrefsRepositoryFactory(
@@ -136,8 +157,8 @@ internal interface TapToAddViewModelModule {
 
     @Binds
     fun bindsPaymentMethodHolder(
-        tapToAddPaymentMethodHolder: DefaultTapToAddPaymentMethodHolder
-    ): TapToAddPaymentMethodHolder
+        tapToAddPaymentMethodHolder: DefaultTapToAddStateHolder
+    ): TapToAddStateHolder
 
     @Binds
     fun bindsEventReporter(
@@ -151,8 +172,13 @@ internal interface TapToAddViewModelModule {
 
     @Binds
     fun bindsTapToAddCardAddedInteractorFactory(
-        tapToAddCardAddedInteractorFactory: DefaultTapToAddCompletedInteractor.Factory
-    ): TapToAddCompletedInteractor.Factory
+        tapToAddCardAddedInteractorFactory: DefaultTapToAddCardAddedInteractor.Factory
+    ): TapToAddCardAddedInteractor.Factory
+
+    @Binds
+    fun bindsTapToAddDelayInteractorFactory(
+        tapToAddDelayInteractorFactory: DefaultTapToAddDelayInteractor.Factory
+    ): TapToAddDelayInteractor.Factory
 
     @Binds
     fun bindsTapToAddConfirmationInteractorFactory(
@@ -236,6 +262,11 @@ internal interface TapToAddLinkModule {
     fun bindsLinkFormHelper(
         linkFormHelper: DefaultSavedPaymentMethodLinkFormHelper
     ): SavedPaymentMethodLinkFormHelper
+
+    @Binds
+    fun bindsCvcFormHelperFactory(
+        cvcFormHelperFactory: DefaultCvcFormHelper.Factory,
+    ): CvcFormHelper.Factory
 
     companion object {
         @Provides

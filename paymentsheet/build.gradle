@@ -58,6 +58,7 @@ dependencies {
     debugImplementation libs.compose.uiTooling
     debugImplementation libs.compose.uiTestManifest
 
+    testImplementation project(':checkout-testing')
     testImplementation project(':financial-connections')
     testImplementation project(':network-testing')
     testImplementation project(':payments-core-testing')
@@ -94,6 +95,7 @@ dependencies {
 
     kspTest libs.daggerCompiler
 
+    androidTestImplementation project(':checkout-testing')
     androidTestImplementation project(':network-testing')
     androidTestImplementation project(':payments-core-testing')
     androidTestImplementation project(':payment-element-test-pages')

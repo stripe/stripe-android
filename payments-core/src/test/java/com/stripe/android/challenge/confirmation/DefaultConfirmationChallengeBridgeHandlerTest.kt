@@ -19,6 +19,7 @@ internal class DefaultConfirmationChallengeBridgeHandlerTest {
         publishableKey = "pk_test_123",
         intent = PaymentIntentFixtures.PI_SUCCEEDED,
         productUsage = listOf("PaymentSheet"),
+        captchaVendorName = "hcaptcha",
     )
 
     @Test

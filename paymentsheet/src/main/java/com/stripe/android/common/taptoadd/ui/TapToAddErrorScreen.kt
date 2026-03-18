@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.core.R as StripeCoreR
 
@@ -34,23 +35,25 @@ internal fun ColumnScope.TapToAddErrorScreen(
         ),
     )
 
-    Spacer(Modifier.size(50.dp))
+    Spacer(Modifier.size(25.dp))
 
     Text(
         modifier = Modifier.align(Alignment.CenterHorizontally),
         text = stringResource(StripeCoreR.string.stripe_error),
-        color = MaterialTheme.colors.onBackground,
+        color = MaterialTheme.colors.secondaryVariant,
         style = MaterialTheme.typography.h5,
+        fontSize = StripeTheme.typographyMutable.xLargeFontSize,
         fontWeight = FontWeight.W800,
     )
 
-    Spacer(Modifier.size(10.dp))
+    Spacer(Modifier.size(15.dp))
 
     Text(
         modifier = Modifier.align(Alignment.CenterHorizontally),
         text = message.resolve(),
-        color = MaterialTheme.colors.onBackground,
+        color = MaterialTheme.colors.secondaryVariant,
         style = MaterialTheme.typography.h5,
+        fontSize = StripeTheme.typographyMutable.xLargeFontSize,
         fontWeight = FontWeight.W400
     )
 

@@ -17,9 +17,6 @@ internal class FakeCustomerStateHolder : CustomerStateHolder {
     override val mostRecentlySelectedSavedPaymentMethod: StateFlow<PaymentMethod?>
         get() = stateFlowOf<PaymentMethod?>(null)
 
-    override val canRemoveDuplicate: StateFlow<Boolean>
-        get() = stateFlowOf(false)
-
     override val canRemove: StateFlow<Boolean>
         get() = stateFlowOf(false)
 

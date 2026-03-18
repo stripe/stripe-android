@@ -330,7 +330,15 @@ sealed interface StripeIntent : StripeModel {
 
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @Parcelize
-            data object IntentConfirmationChallenge : SdkData()
+            data class IntentConfirmationChallenge(
+                val stripeJs: StripeJs
+            ) : SdkData() {
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                @Parcelize
+                data class StripeJs(
+                    val captchaVendorName: String?
+                ) : Parcelable
+            }
         }
 
         @Parcelize

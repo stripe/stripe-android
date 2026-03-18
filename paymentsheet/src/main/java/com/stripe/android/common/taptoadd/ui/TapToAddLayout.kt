@@ -10,6 +10,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -107,9 +108,15 @@ private fun CancelButton(
             Spacer(Modifier.size(20.dp))
         }
         TapToAddNavigator.CancelButton.Visible -> {
+            val closeResource = if (isSystemInDarkTheme()) {
+                R.drawable.stripe_ic_paymentsheet_tta_close_dark
+            } else {
+                R.drawable.stripe_ic_paymentsheet_tta_close_light
+            }
+
             Box(Modifier.fillMaxWidth()) {
                 Image(
-                    painter = painterResource(R.drawable.stripe_ic_paymentsheet_tta_close),
+                    painter = painterResource(closeResource),
                     contentDescription = stringResource(com.stripe.android.R.string.stripe_close),
                     modifier = sizeModifier
                         .clickable(

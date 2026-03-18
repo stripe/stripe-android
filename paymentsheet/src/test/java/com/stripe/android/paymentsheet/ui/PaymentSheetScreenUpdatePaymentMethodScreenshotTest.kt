@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.runtime.Composable
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
@@ -30,6 +31,21 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
 
     @Test
     fun updatePaymentMethodScreen_forCbcEligibleCard() {
+        FeatureFlags.newCbcSelector.setEnabled(false)
+        paparazziRule.snapshot {
+            PaymentSheetScreenOnUpdatePaymentMethod(
+                paymentMethod = PaymentMethodFixtures
+                    .CARD_WITH_NETWORKS_PAYMENT_METHOD
+                    .toDisplayableSavedPaymentMethod(),
+                canRemove = true,
+                isModifiablePaymentMethod = true,
+            )
+        }
+    }
+
+    @Test
+    fun updatePaymentMethodScreen_forCbcEligibleCard_Selector() {
+        FeatureFlags.newCbcSelector.setEnabled(true)
         paparazziRule.snapshot {
             PaymentSheetScreenOnUpdatePaymentMethod(
                 paymentMethod = PaymentMethodFixtures
@@ -43,6 +59,21 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
 
     @Test
     fun updatePaymentMethodScreen_forCbcEligibleCard_withoutRemoveButton() {
+        FeatureFlags.newCbcSelector.setEnabled(false)
+        paparazziRule.snapshot {
+            PaymentSheetScreenOnUpdatePaymentMethod(
+                paymentMethod = PaymentMethodFixtures
+                    .CARD_WITH_NETWORKS_PAYMENT_METHOD
+                    .toDisplayableSavedPaymentMethod(),
+                canRemove = false,
+                isModifiablePaymentMethod = true,
+            )
+        }
+    }
+
+    @Test
+    fun updatePaymentMethodScreen_forCbcEligibleCard_withoutRemoveButton_Selector() {
+        FeatureFlags.newCbcSelector.setEnabled(true)
         paparazziRule.snapshot {
             PaymentSheetScreenOnUpdatePaymentMethod(
                 paymentMethod = PaymentMethodFixtures
@@ -120,6 +151,23 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
 
     @Test
     fun updatePaymentMethodScreen_forCard_withEditEnabled_automaticAddressCollection() {
+        FeatureFlags.newCbcSelector.setEnabled(false)
+        paparazziRule.snapshot {
+            PaymentSheetScreenOnUpdatePaymentMethod(
+                paymentMethod = PaymentMethodFixtures
+                    .CARD_WITH_NETWORKS_PAYMENT_METHOD
+                    .toDisplayableSavedPaymentMethod(),
+                canRemove = true,
+                shouldShowSetAsDefaultCheckbox = true,
+                canUpdateFullPaymentMethodDetails = true,
+                addressCollectionMode = AddressCollectionMode.Automatic
+            )
+        }
+    }
+
+    @Test
+    fun updatePaymentMethodScreen_forCard_withEditEnabled_automaticAddressCollection_Selector() {
+        FeatureFlags.newCbcSelector.setEnabled(true)
         paparazziRule.snapshot {
             PaymentSheetScreenOnUpdatePaymentMethod(
                 paymentMethod = PaymentMethodFixtures
@@ -135,6 +183,24 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
 
     @Test
     fun updatePaymentMethodScreen_forCard_withEditEnabled_fullAddressCollection() {
+        FeatureFlags.newCbcSelector.setEnabled(false)
+        paparazziRule.snapshot {
+            PaymentSheetScreenOnUpdatePaymentMethod(
+                paymentMethod = PaymentMethodFixtures
+                    .CARD_WITH_NETWORKS_PAYMENT_METHOD
+                    .toDisplayableSavedPaymentMethod(),
+                isModifiablePaymentMethod = true,
+                canRemove = true,
+                shouldShowSetAsDefaultCheckbox = true,
+                canUpdateFullPaymentMethodDetails = true,
+                addressCollectionMode = AddressCollectionMode.Full,
+            )
+        }
+    }
+
+    @Test
+    fun updatePaymentMethodScreen_forCard_withEditEnabled_fullAddressCollection_Selector() {
+        FeatureFlags.newCbcSelector.setEnabled(true)
         paparazziRule.snapshot {
             PaymentSheetScreenOnUpdatePaymentMethod(
                 paymentMethod = PaymentMethodFixtures
@@ -151,6 +217,24 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
 
     @Test
     fun updatePaymentMethodScreen_forCard_withEditEnabled_noAddressCollection() {
+        FeatureFlags.newCbcSelector.setEnabled(false)
+        paparazziRule.snapshot {
+            PaymentSheetScreenOnUpdatePaymentMethod(
+                paymentMethod = PaymentMethodFixtures
+                    .CARD_WITH_NETWORKS_PAYMENT_METHOD
+                    .toDisplayableSavedPaymentMethod(),
+                isModifiablePaymentMethod = true,
+                canRemove = true,
+                shouldShowSetAsDefaultCheckbox = true,
+                canUpdateFullPaymentMethodDetails = true,
+                addressCollectionMode = AddressCollectionMode.Never,
+            )
+        }
+    }
+
+    @Test
+    fun updatePaymentMethodScreen_forCard_withEditEnabled_noAddressCollection_Selector() {
+        FeatureFlags.newCbcSelector.setEnabled(true)
         paparazziRule.snapshot {
             PaymentSheetScreenOnUpdatePaymentMethod(
                 paymentMethod = PaymentMethodFixtures

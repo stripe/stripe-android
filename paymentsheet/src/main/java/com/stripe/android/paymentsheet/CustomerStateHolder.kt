@@ -19,8 +19,6 @@ internal interface CustomerStateHolder {
 
     val mostRecentlySelectedSavedPaymentMethod: StateFlow<PaymentMethod?>
 
-    val canRemoveDuplicate: StateFlow<Boolean>
-
     val canRemove: StateFlow<Boolean>
 
     val canUpdateFullPaymentMethodDetails: StateFlow<Boolean>

@@ -49,8 +49,7 @@ internal class AttestationActivityContractTest {
     @Test
     fun `parseResult with failed result`() {
         val contract = AttestationActivityContract()
-        val throwable = RuntimeException("Attestation verification failed")
-        val failedResult = AttestationActivityResult.Failed(throwable)
+        val failedResult = AttestationActivityResult.Failed
 
         val result = contract.parseResult(
             Activity.RESULT_OK,
@@ -58,8 +57,6 @@ internal class AttestationActivityContractTest {
         )
 
         assertThat(result).isInstanceOf<AttestationActivityResult.Failed>()
-        val parsedFailedResult = result as AttestationActivityResult.Failed
-        assertThat(parsedFailedResult.error.message).isEqualTo(throwable.message)
     }
 
     @Test
@@ -71,9 +68,7 @@ internal class AttestationActivityContractTest {
             Intent()
         )
 
-        assertThat(result).isInstanceOf<AttestationActivityResult.Failed>()
-        val failedResult = result as AttestationActivityResult.Failed
-        assertThat(failedResult.error.message).isEqualTo("No result received from AttestationActivity")
+        assertThat(result).isInstanceOf<AttestationActivityResult.NoResult>()
     }
 
     @Test
@@ -85,9 +80,7 @@ internal class AttestationActivityContractTest {
             null
         )
 
-        assertThat(result).isInstanceOf<AttestationActivityResult.Failed>()
-        val failedResult = result as AttestationActivityResult.Failed
-        assertThat(failedResult.error.message).isEqualTo("No result received from AttestationActivity")
+        assertThat(result).isInstanceOf<AttestationActivityResult.NoResult>()
     }
 
     private fun intent(result: AttestationActivityResult): Intent {

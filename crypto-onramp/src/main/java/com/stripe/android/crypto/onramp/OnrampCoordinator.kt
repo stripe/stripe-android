@@ -4,8 +4,7 @@ import android.app.Application
 import androidx.activity.ComponentActivity
 import androidx.annotation.RestrictTo
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.crypto.onramp.di.DaggerOnrampComponent
-import com.stripe.android.crypto.onramp.di.OnrampComponent
+import com.stripe.android.crypto.onramp.di.OnrampComponentHolder
 import com.stripe.android.crypto.onramp.di.OnrampPresenterComponent
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
@@ -225,13 +224,16 @@ class OnrampCoordinator @Inject internal constructor(
             savedStateHandle: SavedStateHandle,
             onrampCallbacks: OnrampCallbacks
         ): OnrampCoordinator {
-            val onrampComponent: OnrampComponent =
-                DaggerOnrampComponent.factory()
-                    .build(
-                        application = application,
-                        savedStateHandle = savedStateHandle,
-                        onrampCallbacks = onrampCallbacks
-                    )
+            val onrampComponent = OnrampComponentHolder.getOrCreate(
+                application = application,
+                savedStateHandle = savedStateHandle,
+            )
+
+            // Register callbacks eagerly so they're available for activity result
+            // redelivery at onStart(), before Compose's first frame.
+            OnrampCallbackReferences[onrampComponent.onrampCallbackIdentifier] =
+                onrampCallbacks.build()
+
             return onrampComponent.onrampCoordinator
         }
     }

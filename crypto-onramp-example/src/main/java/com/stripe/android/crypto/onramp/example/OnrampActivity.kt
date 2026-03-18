@@ -921,28 +921,7 @@ private fun AuthenticatedOperationsScreen(
             Text("Register Wallet Address")
         }
 
-        var firstName by remember { mutableStateOf("") }
-        var lastName by remember { mutableStateOf("") }
-        var ssn by remember { mutableStateOf("000000000") }
-        var dobDay by remember { mutableStateOf("") }
-        var dobMonth by remember { mutableStateOf("") }
-        var dobYear by remember { mutableStateOf("") }
-
-        KYCScreen(
-            firstName = firstName,
-            onFirstNameChange = { firstName = it },
-            lastName = lastName,
-            onLastNameChange = { lastName = it },
-            ssn = ssn,
-            onSsnChange = { ssn = it },
-            dobDay = dobDay,
-            onDobDayChange = { dobDay = it },
-            dobMonth = dobMonth,
-            onDobMonthChange = { dobMonth = it },
-            dobYear = dobYear,
-            onDobYearChange = { dobYear = it },
-            onCollectKYC = { kycInfo -> onCollectKYC(kycInfo) }
-        )
+        KYCScreen(onCollectKYC = onCollectKYC)
 
         Button(
             onClick = { onVerifyKyc() },
@@ -1067,20 +1046,15 @@ private fun AuthenticatedOperationsScreen(
 
 @Composable
 private fun KYCScreen(
-    firstName: String,
-    onFirstNameChange: (String) -> Unit,
-    lastName: String,
-    onLastNameChange: (String) -> Unit,
-    ssn: String,
-    onSsnChange: (String) -> Unit,
-    dobDay: String,
-    onDobDayChange: (String) -> Unit,
-    dobMonth: String,
-    onDobMonthChange: (String) -> Unit,
-    dobYear: String,
-    onDobYearChange: (String) -> Unit,
     onCollectKYC: (KycInfo) -> Unit
 ) {
+    var firstName by remember { mutableStateOf("") }
+    var lastName by remember { mutableStateOf("") }
+    var ssn by remember { mutableStateOf("000000000") }
+    var dobDay by remember { mutableStateOf("1") }
+    var dobMonth by remember { mutableStateOf("1") }
+    var dobYear by remember { mutableStateOf("1990") }
+
     Column {
         Text(
             text = "Collect KYC Info",
@@ -1088,25 +1062,26 @@ private fun KYCScreen(
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        KYCTextField(firstName, "First Name", onFirstNameChange)
-        KYCTextField(lastName, "Last Name", onLastNameChange)
-        KYCTextField(ssn, "SSN", onSsnChange)
+        KYCTextField(firstName, "First Name") { firstName = it }
+        KYCTextField(lastName, "Last Name") { lastName = it }
+        KYCTextField(ssn, "SSN") { ssn = it }
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            KYCTextField(dobMonth, "Month", onDobMonthChange, Modifier.weight(1f), KeyboardType.Number)
-            KYCTextField(dobDay, "Day", onDobDayChange, Modifier.weight(1f), KeyboardType.Number)
-            KYCTextField(dobYear, "Year", onDobYearChange, Modifier.weight(2f), KeyboardType.Number)
+            KYCTextField(dobMonth, "Month", Modifier.weight(1f), KeyboardType.Number) { dobMonth = it }
+            KYCTextField(dobDay, "Day", Modifier.weight(1f), KeyboardType.Number) { dobDay = it }
+            KYCTextField(dobYear, "Year", Modifier.weight(2f), KeyboardType.Number) { dobYear = it }
         }
 
         Button(
             onClick = {
-                val dateOfBirth = dobDay.toIntOrNull()?.let { day ->
-                    dobMonth.toIntOrNull()?.let { month ->
-                        dobYear.toIntOrNull()?.let { year ->
-                            DateOfBirth(day = day, month = month, year = year)
-                        }
-                    }
-                }
+                val dateOfBirth = runCatching {
+                    DateOfBirth(
+                        day = dobDay.toInt(),
+                        month = dobMonth.toInt(),
+                        year = dobYear.toInt()
+                    )
+                }.getOrNull()
+
                 onCollectKYC(
                     KycInfo(
                         firstName = firstName,
@@ -1136,9 +1111,9 @@ private fun KYCScreen(
 private fun KYCTextField(
     value: String,
     label: String,
-    onChange: (String) -> Unit,
     modifier: Modifier = Modifier.fillMaxWidth(),
     keyboardType: KeyboardType = KeyboardType.Text,
+    onChange: (String) -> Unit,
 ) {
     OutlinedTextField(
         modifier = modifier.padding(bottom = 24.dp),

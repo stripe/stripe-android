@@ -29,8 +29,17 @@ internal open class FakeCustomerRepository(
     },
     private val onSetDefaultPaymentMethod: () -> Result<Customer> = {
         Result.failure(NotImplementedError())
-    }
+    },
+    private val onRetrievePaymentMethod: (paymentMethodId: String) -> Result<PaymentMethod> = {
+        Result.failure(NotImplementedError())
+    },
 ) : CustomerRepository {
+    private val _retrieveCustomerRequests = Turbine<RetrieveCustomerRequest>()
+    val retrieveCustomerRequests: ReceiveTurbine<RetrieveCustomerRequest> = _retrieveCustomerRequests
+
+    private val _getPaymentMethodsRequests = Turbine<GetPaymentMethodsRequest>()
+    val getPaymentMethodsRequests: ReceiveTurbine<GetPaymentMethodsRequest> = _getPaymentMethodsRequests
+
     private val _detachRequests = Turbine<DetachRequest>()
     val detachRequests: ReceiveTurbine<DetachRequest> = _detachRequests
 
@@ -40,28 +49,74 @@ internal open class FakeCustomerRepository(
     private val _setDefaultPaymentMethodRequests = Turbine<SetDefaultRequest>()
     val setDefaultPaymentMethodRequests: ReceiveTurbine<SetDefaultRequest> = _setDefaultPaymentMethodRequests
 
-    var error: Throwable? = null
+    open fun ensureAllEventsConsumed() {
+        _retrieveCustomerRequests.ensureAllEventsConsumed()
+        _getPaymentMethodsRequests.ensureAllEventsConsumed()
+        _detachRequests.ensureAllEventsConsumed()
+        _updateRequests.ensureAllEventsConsumed()
+        _setDefaultPaymentMethodRequests.ensureAllEventsConsumed()
+    }
 
     override suspend fun retrieveCustomer(
-        customerInfo: CustomerRepository.CustomerInfo
-    ): Customer? = onRetrieveCustomer()
+        customerId: String,
+        ephemeralKeySecret: String,
+    ): Customer? {
+        _retrieveCustomerRequests.add(
+            RetrieveCustomerRequest(
+                customerId = customerId,
+                ephemeralKeySecret = ephemeralKeySecret,
+            )
+        )
+
+        return onRetrieveCustomer()
+    }
 
     override suspend fun getPaymentMethods(
-        customerInfo: CustomerRepository.CustomerInfo,
+        customerId: String,
+        ephemeralKeySecret: String,
         types: List<PaymentMethod.Type>,
         silentlyFail: Boolean,
-    ): Result<List<PaymentMethod>> = onGetPaymentMethods()
+    ): Result<List<PaymentMethod>> {
+        _getPaymentMethodsRequests.add(
+            GetPaymentMethodsRequest(
+                customerId = customerId,
+                ephemeralKeySecret = ephemeralKeySecret,
+                types = types,
+                silentlyFail = silentlyFail,
+            )
+        )
+
+        return onGetPaymentMethods()
+    }
 
     override suspend fun detachPaymentMethod(
-        customerInfo: CustomerRepository.CustomerInfo,
+        customerId: String,
+        ephemeralKeySecret: String,
         paymentMethodId: String,
-        canRemoveDuplicates: Boolean,
     ): Result<PaymentMethod> {
         _detachRequests.add(
             DetachRequest(
                 paymentMethodId = paymentMethodId,
-                customerInfo = customerInfo,
-                canRemoveDuplicates = canRemoveDuplicates,
+                customerId = customerId,
+                ephemeralKeySecret = ephemeralKeySecret,
+            )
+        )
+
+        return onDetachPaymentMethod(paymentMethodId)
+    }
+
+    override suspend fun detachPaymentMethodAndDuplicates(
+        customerId: String,
+        ephemeralKeySecret: String,
+        customerSessionClientSecret: String,
+        paymentMethodId: String,
+    ): Result<PaymentMethod> {
+        _detachRequests.add(
+            DetachRequest(
+                paymentMethodId = paymentMethodId,
+                customerId = customerId,
+                ephemeralKeySecret = ephemeralKeySecret,
+                customerSessionClientSecret = customerSessionClientSecret,
             )
         )
 
@@ -69,19 +124,22 @@ internal open class FakeCustomerRepository(
     }
 
     override suspend fun attachPaymentMethod(
-        customerInfo: CustomerRepository.CustomerInfo,
-        paymentMethodId: String
+        customerId: String,
+        ephemeralKeySecret: String,
+        paymentMethodId: String,
     ): Result<PaymentMethod> = onAttachPaymentMethod()
 
     override suspend fun updatePaymentMethod(
-        customerInfo: CustomerRepository.CustomerInfo,
+        customerId: String,
+        ephemeralKeySecret: String,
         paymentMethodId: String,
-        params: PaymentMethodUpdateParams
+        params: PaymentMethodUpdateParams,
     ): Result<PaymentMethod> {
         _updateRequests.add(
             UpdateRequest(
                 paymentMethodId = paymentMethodId,
-                customerInfo = customerInfo,
+                customerId = customerId,
+                ephemeralKeySecret = ephemeralKeySecret,
                 params = params,
             )
         )
@@ -90,30 +148,56 @@ internal open class FakeCustomerRepository(
     }
 
     override suspend fun setDefaultPaymentMethod(
-        customerInfo: CustomerRepository.CustomerInfo,
-        paymentMethodId: String?
+        customerId: String,
+        ephemeralKeySecret: String,
+        paymentMethodId: String?,
     ): Result<Customer> {
         _setDefaultPaymentMethodRequests.add(
-            SetDefaultRequest(paymentMethodId = paymentMethodId, customerInfo = customerInfo)
+            SetDefaultRequest(
+                paymentMethodId = paymentMethodId,
+                customerId = customerId,
+                ephemeralKeySecret = ephemeralKeySecret,
+            )
         )
 
         return onSetDefaultPaymentMethod()
     }
 
+    override suspend fun retrievePaymentMethod(
+        customerId: String,
+        ephemeralKeySecret: String,
+        paymentMethodId: String,
+    ): Result<PaymentMethod> = onRetrievePaymentMethod(paymentMethodId)
+
+    data class RetrieveCustomerRequest(
+        val customerId: String,
+        val ephemeralKeySecret: String,
+    )
+
+    data class GetPaymentMethodsRequest(
+        val customerId: String,
+        val ephemeralKeySecret: String,
+        val types: List<PaymentMethod.Type>,
+        val silentlyFail: Boolean,
+    )
+
     data class DetachRequest(
         val paymentMethodId: String,
-        val customerInfo: CustomerRepository.CustomerInfo,
-        val canRemoveDuplicates: Boolean,
+        val customerId: String,
+        val ephemeralKeySecret: String,
+        val customerSessionClientSecret: String? = null,
     )
 
     data class UpdateRequest(
         val paymentMethodId: String,
-        val customerInfo: CustomerRepository.CustomerInfo,
+        val customerId: String,
+        val ephemeralKeySecret: String,
         val params: PaymentMethodUpdateParams,
     )
 
     data class SetDefaultRequest(
         val paymentMethodId: String?,
-        val customerInfo: CustomerRepository.CustomerInfo,
+        val customerId: String,
+        val ephemeralKeySecret: String,
     )
 }

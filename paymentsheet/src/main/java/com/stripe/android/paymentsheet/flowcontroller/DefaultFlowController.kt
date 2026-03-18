@@ -17,6 +17,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.checkout.Checkout
+import com.stripe.android.checkout.forCheckoutSession
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -236,8 +237,8 @@ internal class DefaultFlowController @Inject internal constructor(
         callback: PaymentSheet.FlowController.ConfigCallback
     ) {
         configure(
-            mode = PaymentElementLoader.InitializationMode.CheckoutSession(checkout.state.checkoutSessionResponse),
-            configuration = configuration,
+            mode = checkout.internalState.initializationMode,
+            configuration = configuration.forCheckoutSession(checkout.internalState),
             callback = callback,
         )
     }
@@ -696,6 +697,7 @@ internal class DefaultFlowController @Inject internal constructor(
         if (paymentResult is PaymentResult.Completed && shouldResetOnCompleted) {
             viewModel.paymentSelection = null
             viewModel.state = null
+            viewModel.previousConfigureRequest = null
         }
 
         viewModelScope.launch {

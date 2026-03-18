@@ -1,20 +1,19 @@
 package com.stripe.android.common.taptoadd.ui
 
-import com.stripe.android.common.spms.SavedPaymentMethodLinkFormHelper
-import com.stripe.android.common.spms.withLinkState
-import com.stripe.android.common.taptoadd.TapToAddMode
+import com.stripe.android.common.spms.CvcFormHelper
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.utils.buyButtonLabel
-import com.stripe.android.paymentsheet.utils.continueButtonLabel
 import com.stripe.android.paymentsheet.utils.reportPaymentResult
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -34,7 +33,6 @@ internal interface TapToAddConfirmationInteractor {
     data class State(
         val cardBrand: CardBrand,
         val last4: String?,
-        val title: ResolvableString,
         val primaryButton: PrimaryButton,
         val form: Form,
         val error: ResolvableString?,
@@ -52,7 +50,8 @@ internal interface TapToAddConfirmationInteractor {
         ) {
             enum class State {
                 Idle,
-                Processing
+                Processing,
+                Success
             }
         }
     }
@@ -61,32 +60,37 @@ internal interface TapToAddConfirmationInteractor {
 
     sealed interface Action {
         data object PrimaryButtonPressed : Action
+        data object SuccessShown : Action
     }
 
     interface Factory {
-        fun create(paymentMethod: PaymentMethod): TapToAddConfirmationInteractor
+        fun create(
+            paymentMethod: PaymentMethod,
+            linkInput: UserInput?,
+        ): TapToAddConfirmationInteractor
     }
 }
 
 internal class DefaultTapToAddConfirmationInteractor(
     private val coroutineScope: CoroutineScope,
-    private val tapToAddMode: TapToAddMode,
     private val paymentMethod: PaymentMethod,
+    private val linkInput: UserInput?,
     private val paymentMethodMetadata: PaymentMethodMetadata,
     private val confirmationHandler: ConfirmationHandler,
-    private val linkFormHelper: SavedPaymentMethodLinkFormHelper,
+    private val cvcFormHelper: CvcFormHelper,
     private val eventReporter: EventReporter,
-    private val onContinue: (paymentSelection: PaymentSelection.Saved) -> Unit,
-    private val onComplete: (paymentMethod: PaymentMethod) -> Unit,
+    private val onComplete: () -> Unit,
 ) : TapToAddConfirmationInteractor {
-    private val selection = linkFormHelper.state.mapAsStateFlow {
-        PaymentSelection.Saved(paymentMethod = paymentMethod)
-            .withLinkState(it)
+    private val selection = cvcFormHelper.state.mapAsStateFlow { cvcState ->
+        PaymentSelection.Saved(
+            paymentMethod = paymentMethod,
+            linkInput = linkInput
+        ).withCvcState(cvcState)
     }
 
     private val _state = MutableStateFlow(
         createInitialState(
-            initialLinkState = linkFormHelper.state.value,
+            initialCvcState = cvcFormHelper.state.value,
             initialConfirmationState = confirmationHandler.state.value,
         )
     )
@@ -100,10 +104,6 @@ internal class DefaultTapToAddConfirmationInteractor(
                         result = confirmationState.result,
                         paymentSelection = selection.value,
                     )
-
-                    if (confirmationState.result is ConfirmationHandler.Result.Succeeded) {
-                        onComplete(paymentMethod)
-                    }
                 }
 
                 _state.update { state ->
@@ -113,9 +113,9 @@ internal class DefaultTapToAddConfirmationInteractor(
         }
 
         coroutineScope.launch {
-            linkFormHelper.state.collectLatest { linkState ->
-                _state.update { state ->
-                    state.withLinkState(linkState)
+            cvcFormHelper.state.collectLatest { cvcState ->
+                _state.update { viewState ->
+                    viewState.withCvcState(cvcState)
                 }
             }
         }
@@ -123,20 +123,12 @@ internal class DefaultTapToAddConfirmationInteractor(
 
     override fun performAction(action: TapToAddConfirmationInteractor.Action) {
         when (action) {
-            TapToAddConfirmationInteractor.Action.PrimaryButtonPressed -> {
-                when (tapToAddMode) {
-                    TapToAddMode.Continue -> onPrimaryButtonWithContinueMode()
-                    TapToAddMode.Complete -> onPrimaryButtonWithCompleteMode()
-                }
-            }
+            TapToAddConfirmationInteractor.Action.PrimaryButtonPressed -> onPrimaryButtonPressed()
+            TapToAddConfirmationInteractor.Action.SuccessShown -> onComplete()
         }
     }
 
-    private fun onPrimaryButtonWithContinueMode() {
-        onContinue(selection.value)
-    }
-
-    private fun onPrimaryButtonWithCompleteMode() {
+    private fun onPrimaryButtonPressed() {
         if (state.value.primaryButton.state != TapToAddConfirmationInteractor.State.PrimaryButton.State.Idle) {
             return
         }
@@ -156,50 +148,50 @@ internal class DefaultTapToAddConfirmationInteractor(
     }
 
     private fun createInitialState(
-        initialLinkState: SavedPaymentMethodLinkFormHelper.State,
+        initialCvcState: CvcFormHelper.State,
         initialConfirmationState: ConfirmationHandler.State
     ): TapToAddConfirmationInteractor.State {
         return TapToAddConfirmationInteractor.State(
             cardBrand = paymentMethod.card?.brand ?: CardBrand.Unknown,
             last4 = paymentMethod.card?.last4,
-            title = createLabel(useAmount = true),
             primaryButton = TapToAddConfirmationInteractor.State.PrimaryButton(
-                label = createLabel(useAmount = false),
-                locked = tapToAddMode == TapToAddMode.Complete,
+                label = buyButtonLabel(
+                    amount = paymentMethodMetadata.amount(),
+                    primaryButtonLabel = null,
+                    isForPaymentIntent = paymentMethodMetadata.stripeIntent is PaymentIntent
+                ),
+                locked = true,
                 enabled = true,
                 state = TapToAddConfirmationInteractor.State.PrimaryButton.State.Idle,
             ),
             form = TapToAddConfirmationInteractor.State.Form(
-                elements = linkFormHelper.formElement?.let {
-                    listOf(it)
-                } ?: emptyList(),
+                elements = cvcFormHelper.formElement?.let { listOf(it) } ?: emptyList(),
                 enabled = true,
             ),
             error = null,
         )
-            .withLinkState(initialLinkState)
+            .withCvcState(initialCvcState)
             .withConfirmationState(initialConfirmationState)
     }
 
-    private fun createLabel(useAmount: Boolean): ResolvableString {
-        return when (tapToAddMode) {
-            TapToAddMode.Complete -> buyButtonLabel(
-                amount = paymentMethodMetadata.amount().takeIf { useAmount },
-                primaryButtonLabel = null,
-                isForPaymentIntent = paymentMethodMetadata.stripeIntent is PaymentIntent
-            )
-            TapToAddMode.Continue -> continueButtonLabel(
-                primaryButtonLabel = null
-            )
-        }
+    private fun PaymentSelection.Saved.withCvcState(
+        cvcState: CvcFormHelper.State,
+    ): PaymentSelection.Saved {
+        return copy(
+            paymentMethodOptionsParams = when (cvcState) {
+                is CvcFormHelper.State.Complete -> PaymentMethodOptionsParams.Card(cvc = cvcState.cvc)
+                is CvcFormHelper.State.Incomplete,
+                is CvcFormHelper.State.NotRequired -> null
+            }
+        )
     }
 
-    private fun TapToAddConfirmationInteractor.State.withLinkState(
-        linkState: SavedPaymentMethodLinkFormHelper.State,
+    private fun TapToAddConfirmationInteractor.State.withCvcState(
+        cvcState: CvcFormHelper.State,
     ): TapToAddConfirmationInteractor.State {
         return copy(
             primaryButton = primaryButton.copy(
-                enabled = linkState !is SavedPaymentMethodLinkFormHelper.State.Incomplete,
+                enabled = cvcState !is CvcFormHelper.State.Incomplete,
             ),
         )
     }
@@ -214,7 +206,7 @@ internal class DefaultTapToAddConfirmationInteractor(
                 TapToAddConfirmationInteractor.State.PrimaryButton.State.Processing
             is ConfirmationHandler.State.Complete -> {
                 if (confirmationState.result is ConfirmationHandler.Result.Succeeded) {
-                    TapToAddConfirmationInteractor.State.PrimaryButton.State.Processing
+                    TapToAddConfirmationInteractor.State.PrimaryButton.State.Success
                 } else {
                     TapToAddConfirmationInteractor.State.PrimaryButton.State.Idle
                 }
@@ -249,35 +241,29 @@ internal class DefaultTapToAddConfirmationInteractor(
 
     class Factory @Inject constructor(
         @ViewModelScope private val viewModelScope: CoroutineScope,
-        private val tapToAddMode: TapToAddMode,
         private val paymentMethodMetadata: PaymentMethodMetadata,
-        private val linkFormHelper: SavedPaymentMethodLinkFormHelper,
+        private val cvcFormHelperFactory: CvcFormHelper.Factory,
         private val confirmationHandler: ConfirmationHandler,
         private val eventReporter: EventReporter,
-        private val tapToAddCompletedInteractorFactory: TapToAddCompletedInteractor.Factory,
         private val tapToAddNavigator: Provider<TapToAddNavigator>,
     ) : TapToAddConfirmationInteractor.Factory {
-        override fun create(paymentMethod: PaymentMethod): TapToAddConfirmationInteractor {
+        override fun create(
+            paymentMethod: PaymentMethod,
+            linkInput: UserInput?,
+        ): TapToAddConfirmationInteractor {
             return DefaultTapToAddConfirmationInteractor(
-                tapToAddMode = tapToAddMode,
                 paymentMethodMetadata = paymentMethodMetadata,
                 paymentMethod = paymentMethod,
+                linkInput = linkInput,
                 confirmationHandler = confirmationHandler,
                 eventReporter = eventReporter,
                 coroutineScope = viewModelScope,
-                linkFormHelper = linkFormHelper,
-                onComplete = { paymentMethod ->
+                cvcFormHelper = cvcFormHelperFactory.create(paymentMethod),
+                onComplete = {
                     tapToAddNavigator.get().performAction(
-                        TapToAddNavigator.Action.NavigateTo(
-                            screen = TapToAddNavigator.Screen.Completed(
-                                interactor = tapToAddCompletedInteractorFactory.create(paymentMethod)
-                            ),
-                        ),
+                        action = TapToAddNavigator.Action.Complete,
                     )
                 },
-                onContinue = { paymentSelection ->
-                    tapToAddNavigator.get().performAction(TapToAddNavigator.Action.Continue(paymentSelection))
-                }
             )
         }
     }

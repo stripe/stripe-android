@@ -3,8 +3,8 @@ package com.stripe.android.common.taptoadd
 import android.annotation.SuppressLint
 import android.content.Context
 import androidx.annotation.RestrictTo
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleOwner
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentelement.TapToAddPreview
@@ -17,10 +17,10 @@ import com.stripe.stripeterminal.external.callable.ReaderCallback
 import com.stripe.stripeterminal.external.callable.TapToPayReaderListener
 import com.stripe.stripeterminal.external.callable.TerminalListener
 import com.stripe.stripeterminal.external.models.ConnectionConfiguration
-import com.stripe.stripeterminal.external.models.ConnectionTokenException
 import com.stripe.stripeterminal.external.models.DeviceType
 import com.stripe.stripeterminal.external.models.DiscoveryConfiguration
 import com.stripe.stripeterminal.external.models.Reader
+import com.stripe.stripeterminal.external.models.TapUseCase
 import com.stripe.stripeterminal.external.models.TerminalErrorCode
 import com.stripe.stripeterminal.external.models.TerminalException
 import kotlinx.coroutines.CompletableDeferred
@@ -28,6 +28,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 internal interface TapToAddConnectionManager {
@@ -57,6 +58,8 @@ internal interface TapToAddConnectionManager {
             terminalWrapper: TerminalWrapper,
             errorReporter: ErrorReporter,
             applicationContext: Context,
+            logger: Logger,
+            paymentConfiguration: Provider<PaymentConfiguration>,
             workContext: CoroutineContext,
             isSimulated: Boolean,
         ): TapToAddConnectionManager {
@@ -64,8 +67,10 @@ internal interface TapToAddConnectionManager {
                 DefaultTapToAddConnectionManager(
                     applicationContext = applicationContext,
                     workContext = workContext,
+                    paymentConfiguration = paymentConfiguration,
                     errorReporter = errorReporter,
                     terminalWrapper = terminalWrapper,
+                    logger = logger,
                     isSimulated = isSimulated,
                 )
             } else {
@@ -79,8 +84,10 @@ internal interface TapToAddConnectionManager {
 internal class DefaultTapToAddConnectionManager(
     applicationContext: Context,
     workContext: CoroutineContext,
+    private val paymentConfiguration: Provider<PaymentConfiguration>,
     private val errorReporter: ErrorReporter,
     private val terminalWrapper: TerminalWrapper,
+    private val logger: Logger,
     isSimulated: Boolean,
 ) : TapToAddConnectionManager, TerminalListener, TapToPayReaderListener {
     private var connectionTask: CompletableDeferred<Boolean>? = null
@@ -106,35 +113,7 @@ internal class DefaultTapToAddConnectionManager(
                 context = applicationContext,
                 tokenProvider = object : ConnectionTokenProvider {
                     override fun fetchConnectionToken(callback: ConnectionTokenCallback) {
-                        workScope.launch {
-                            val createConnectionTokenCallback = TerminalConnectionTokenCallbackHolder.get()
-                                ?: run {
-                                    val message = "No connection token callback was initialized!"
-
-                                    callback.onFailure(
-                                        ConnectionTokenException(
-                                            message = message,
-                                            cause = IllegalStateException(message)
-                                        )
-                                    )
-
-                                    return@launch
-                                }
-
-                            when (val result = createConnectionTokenCallback.createConnectionToken()) {
-                                is CreateConnectionTokenResult.Success -> {
-                                    callback.onSuccess(result.connectionToken)
-                                }
-                                is CreateConnectionTokenResult.Failure -> {
-                                    callback.onFailure(
-                                        ConnectionTokenException(
-                                            message = result.message,
-                                            cause = result.cause,
-                                        )
-                                    )
-                                }
-                            }
-                        }
+                        callback.onSuccess(paymentConfiguration.get().publishableKey)
                     }
                 },
                 listener = this,
@@ -160,12 +139,10 @@ internal class DefaultTapToAddConnectionManager(
             try {
                 discoverReaders()
             } catch (exception: SecurityException) {
-                errorReporter.report(
-                    ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_LOCATION_PERMISSIONS_FAILURE,
-                    StripeException.create(exception),
+                handleConnectError(
+                    error = exception,
+                    errorEvent = ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_LOCATION_PERMISSIONS_FAILURE,
                 )
-
-                connectionTask?.completeExceptionally(exception)
             }
         }
     }
@@ -202,28 +179,18 @@ internal class DefaultTapToAddConnectionManager(
 
     private fun onUpdatedReaders(readers: List<Reader>) {
         val reader = readers.firstOrNull() ?: run {
-            /*
-             * The Tap to Pay variant should never not return a reader through this callback.
-             * If no readers are found, something has changed in the internal implementation
-             * of Terminal that we should know about
-             */
-            errorReporter.report(
-                ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_NO_READER_FOUND,
+            handleConnectError(
+                error = IllegalStateException("No reader found!"),
+                errorEvent = ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_NO_READER_FOUND,
             )
 
-            connectionTask?.completeExceptionally(IllegalStateException("No reader found!"))
-            return
-        }
-
-        val locationId = TerminalLocationHolder.locationId ?: run {
-            connectionTask?.completeExceptionally(IllegalStateException("No location specified!"))
             return
         }
 
         terminal().connectReader(
             reader = reader,
             config = ConnectionConfiguration.TapToPayConnectionConfiguration(
-                locationId = locationId,
+                useCase = TapUseCase.Verify(),
                 autoReconnectOnUnexpectedDisconnect = true,
                 tapToPayReaderListener = this@DefaultTapToAddConnectionManager,
             ),
@@ -249,20 +216,31 @@ internal class DefaultTapToAddConnectionManager(
     private fun terminal() = terminalWrapper.getInstance()
 
     private fun handleConnectError(
-        error: TerminalException,
-        errorEvent: ErrorReporter.ErrorEvent,
+        error: Throwable,
+        errorEvent: ErrorReporter.ErrorEvent?,
     ) {
-        when (error.errorCode) {
-            TerminalErrorCode.ALREADY_CONNECTED_TO_READER -> connectionTask?.complete(isConnected)
-            else -> {
-                errorReporter.report(
-                    errorEvent,
-                    StripeException.create(error),
-                )
+        val additionalParams = mutableMapOf<String, String>()
 
-                connectionTask?.completeExceptionally(error)
+        if (error is TerminalException) {
+            if (error.errorCode == TerminalErrorCode.ALREADY_CONNECTED_TO_READER) {
+                connectionTask?.complete(isConnected)
+
+                return
             }
+
+            additionalParams[TERMINAL_ERROR_CODE_KEY] = error.errorCode.toLogString()
         }
+
+        errorEvent?.let { event ->
+            errorReporter.report(
+                event,
+                StripeException.create(error),
+            )
+        }
+
+        logger.warning("TapToAddConnectionError: $error")
+
+        connectionTask?.completeExceptionally(error)
     }
 }
 
@@ -281,12 +259,6 @@ internal class UnsupportedTapToAddConnectionManager : TapToAddConnectionManager 
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @TapToAddPreview
-fun interface CreateConnectionTokenCallback {
-    suspend fun createConnectionToken(): CreateConnectionTokenResult
-}
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@TapToAddPreview
 sealed interface CreateConnectionTokenResult {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Success(
@@ -300,28 +272,4 @@ sealed interface CreateConnectionTokenResult {
     ) : CreateConnectionTokenResult
 }
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@TapToAddPreview
-object TerminalConnectionTokenCallbackHolder {
-    private var createConnectionTokenCallback: CreateConnectionTokenCallback? = null
-
-    fun get() = createConnectionTokenCallback
-
-    fun set(callback: CreateConnectionTokenCallback, lifecycleOwner: LifecycleOwner) {
-        createConnectionTokenCallback = callback
-
-        lifecycleOwner.lifecycle.addObserver(
-            object : DefaultLifecycleObserver {
-                override fun onDestroy(owner: LifecycleOwner) {
-                    createConnectionTokenCallback = null
-                }
-            }
-        )
-    }
-}
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@TapToAddPreview
-object TerminalLocationHolder {
-    var locationId: String? = null
-}
+private const val TERMINAL_ERROR_CODE_KEY = "terminalErrorCode"

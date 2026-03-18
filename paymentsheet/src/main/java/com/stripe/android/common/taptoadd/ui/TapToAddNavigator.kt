@@ -21,17 +21,17 @@ import javax.inject.Singleton
 @Singleton
 internal class TapToAddNavigator(
     private val coroutineScope: CoroutineScope,
-    private val paymentMethodHolder: TapToAddPaymentMethodHolder,
+    private val stateHolder: TapToAddStateHolder,
     initialScreen: Screen,
 ) {
     @Inject constructor(
         @ViewModelScope coroutineScope: CoroutineScope,
         initialTapToAddScreenFactory: InitialTapToAddScreenFactory,
-        paymentMethodHolder: TapToAddPaymentMethodHolder,
+        stateHolder: TapToAddStateHolder,
     ) : this(
         coroutineScope = coroutineScope,
         initialScreen = initialTapToAddScreenFactory.createInitialScreen(),
-        paymentMethodHolder = paymentMethodHolder,
+        stateHolder = stateHolder,
     )
 
     private val navigationHandler = NavigationHandler(
@@ -50,9 +50,19 @@ internal class TapToAddNavigator(
         when (action) {
             is Action.Close -> {
                 coroutineScope.launch {
-                    val paymentSelection = paymentMethodHolder.paymentMethod?.let { paymentMethod ->
-                        PaymentSelection.Saved(paymentMethod)
+                    val paymentSelection = when (val state = stateHolder.state) {
+                        is TapToAddStateHolder.State.CardAdded -> {
+                            PaymentSelection.Saved(paymentMethod = state.paymentMethod)
+                        }
+                        is TapToAddStateHolder.State.Confirmation -> {
+                            PaymentSelection.Saved(
+                                paymentMethod = state.paymentMethod,
+                                linkInput = state.linkInput,
+                            )
+                        }
+                        else -> null
                     }
+
                     _result.emit(TapToAddResult.Canceled(paymentSelection = paymentSelection))
                 }
             }
@@ -98,17 +108,34 @@ internal class TapToAddNavigator(
             }
         }
 
-        data class Completed(
-            val interactor: TapToAddCompletedInteractor,
+        data class CardAdded(
+            val interactor: TapToAddCardAddedInteractor,
         ) : Screen() {
-            override val cancelButton: CancelButton = CancelButton.Invisible
+            override val cancelButton: CancelButton = CancelButton.Visible
 
             @Composable
             override fun ColumnScope.Content() {
-                TapToAddCompletedScreen(
+                val state by interactor.state.collectAsState()
+
+                TapToAddCardAddedScreen(
+                    state = state,
+                    onPrimaryButtonPress = {
+                        interactor.performAction(TapToAddCardAddedInteractor.Action.PrimaryButtonPressed)
+                    }
+                )
+            }
+        }
+
+        data class Delay(
+            val interactor: TapToAddDelayInteractor,
+        ) : Screen() {
+            override val cancelButton: CancelButton = CancelButton.Visible
+
+            @Composable
+            override fun ColumnScope.Content() {
+                TapToAddDelayScreen(
                     cardBrand = interactor.cardBrand,
                     last4 = interactor.last4,
-                    label = interactor.label,
                 )
             }
         }
@@ -126,6 +153,9 @@ internal class TapToAddNavigator(
                     state = state,
                     onPrimaryButtonPress = {
                         interactor.performAction(TapToAddConfirmationInteractor.Action.PrimaryButtonPressed)
+                    },
+                    onProcessingComplete = {
+                        interactor.performAction(TapToAddConfirmationInteractor.Action.SuccessShown)
                     }
                 )
             }

@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.verticalmode
 
-import androidx.annotation.RestrictTo
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.common.spms.DefaultLinkFormElementFactory
 import com.stripe.android.common.spms.DefaultSavedPaymentMethodLinkFormHelper
@@ -33,7 +32,6 @@ internal interface SavedPaymentMethodConfirmInteractor {
     }
 }
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal class DefaultSavedPaymentMethodConfirmInteractor(
     val initialSelection: PaymentSelection.Saved,
     val displayName: ResolvableString,

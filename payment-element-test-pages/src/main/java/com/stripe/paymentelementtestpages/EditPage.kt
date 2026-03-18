@@ -6,6 +6,7 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.ComposeTestRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.stripe.android.paymentsheet.ui.REMOVE_BUTTON_LOADING
@@ -15,6 +16,7 @@ import com.stripe.android.paymentsheet.ui.UPDATE_PM_SCREEN_TEST_TAG
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_SET_AS_DEFAULT_CHECKBOX_TEST_TAG
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
 import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
+import com.stripe.android.uicore.elements.SELECTOR_ITEM_TEST_TAG
 import com.stripe.android.uicore.elements.TEST_TAG_DROP_DOWN_CHOICE
 
 @SuppressWarnings("TooManyFunctions")
@@ -53,6 +55,11 @@ class EditPage(
             .performClick()
     }
 
+    fun setCardBrandWithSelector(cardBrand: String) {
+        composeTestRule.onNodeWithContentDescription(cardBrand)
+            .performClick()
+    }
+
     fun assertInDropdownButDisabled(cardBrand: String) {
         // Click on the dropdown menu to expand it
         composeTestRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
@@ -69,6 +76,14 @@ class EditPage(
             .performClick()
     }
 
+    fun assertInSelectorButDisabled(cardBrand: String) {
+        // Attempt to find the node with the specified cardBrand,
+        // assert that it is present (displayed) and disabled
+        composeTestRule.onNodeWithTag("${SELECTOR_ITEM_TEST_TAG}_$cardBrand")
+            .assertIsDisplayed()
+            .assertIsNotEnabled()
+    }
+
     fun assertInDropdownAndEnabled(cardBrand: String) {
         // Click on the dropdown menu to expand it
         composeTestRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
@@ -83,6 +98,14 @@ class EditPage(
         // Optionally, close the dropdown menu if it's still open
         composeTestRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
             .performClick()
+    }
+
+    fun assertInSelectorAndEnabled(cardBrand: String) {
+        // Attempt to find the node with the specified cardBrand,
+        // assert that it is present (displayed) and enabled
+        composeTestRule.onNodeWithTag("${SELECTOR_ITEM_TEST_TAG}_$cardBrand")
+            .assertIsDisplayed()
+            .assertIsEnabled()
     }
 
     fun update(waitUntilComplete: Boolean = true) {

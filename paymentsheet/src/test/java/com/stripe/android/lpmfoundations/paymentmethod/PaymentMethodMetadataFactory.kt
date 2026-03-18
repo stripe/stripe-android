@@ -26,6 +26,7 @@ import com.stripe.android.ui.core.elements.LpmSerializer
 import com.stripe.android.ui.core.elements.SharedDataSpec
 
 internal object PaymentMethodMetadataFactory {
+    @Suppress("LongMethod")
     fun create(
         stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
@@ -56,7 +57,6 @@ internal object PaymentMethodMetadataFactory {
         saveConsent: PaymentMethodSaveConsentBehavior =
             PaymentMethodSaveConsentBehavior.Legacy,
         canRemoveLastPaymentMethod: Boolean = true,
-        canRemoveDuplicates: Boolean = true,
         canUpdateFullPaymentMethodDetails: Boolean = false,
         customerSessionClientSecret: String? = null,
         termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay> = emptyMap(),
@@ -87,15 +87,28 @@ internal object PaymentMethodMetadataFactory {
             defaultBillingDetails = defaultBillingDetails,
             shippingDetails = shippingDetails,
             customerMetadata = if (hasCustomerConfiguration) {
-                PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.copy(
-                    isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
-                    removePaymentMethod = removePaymentMethod,
-                    saveConsent = saveConsent,
-                    canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
-                    canRemoveDuplicates = canRemoveDuplicates,
-                    canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
-                    customerSessionClientSecret = customerSessionClientSecret,
-                )
+                if (customerSessionClientSecret != null) {
+                    CustomerMetadata.CustomerSession(
+                        id = "cus_123",
+                        ephemeralKeySecret = "ek_123",
+                        customerSessionClientSecret = customerSessionClientSecret,
+                        isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
+                        removePaymentMethod = removePaymentMethod,
+                        saveConsent = saveConsent,
+                        canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
+                        canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
+                    )
+                } else {
+                    CustomerMetadata.LegacyEphemeralKey(
+                        id = "cus_123",
+                        ephemeralKeySecret = "ek_123",
+                        isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
+                        removePaymentMethod = removePaymentMethod,
+                        saveConsent = saveConsent,
+                        canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
+                        canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
+                    )
+                }
             } else {
                 null
             },

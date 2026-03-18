@@ -10,6 +10,13 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.SystemAppearance
+import com.stripe.android.ui.core.elements.CvcController
+import com.stripe.android.ui.core.elements.CvcElement
+import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.SectionElement
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,28 +27,33 @@ import kotlin.String
 class TapToAddLayoutScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(
+        SystemAppearance.entries,
         boxModifier = Modifier,
         includeStripeTheme = false,
     )
 
     @Test
-    fun sharedTransitionFromConfirmationToCompleted() {
+    fun sharedTransitionFromCardAddedToDelayToConfirmation() {
         paparazziRule.gif(
-            end = 2500L
+            end = 3500L
         ) {
             TapToAddTheme {
                 var screen by remember {
                     mutableStateOf<TapToAddNavigator.Screen>(
-                        TapToAddNavigator.Screen.Confirmation(
-                            interactor = FakeTapToAddConfirmationInteractor(),
+                        TapToAddNavigator.Screen.CardAdded(
+                            interactor = FakeTapToAddCardAddedInteractor(),
                         )
                     )
                 }
 
                 LaunchedEffect(Unit) {
                     delay(1000L)
-                    screen = TapToAddNavigator.Screen.Completed(
-                        interactor = FakeTapToAddCompletedInteractor(),
+                    screen = TapToAddNavigator.Screen.Delay(
+                        interactor = FakeTapToAddDelayInteractor(),
+                    )
+                    delay(1000L)
+                    screen = TapToAddNavigator.Screen.Confirmation(
+                        interactor = FakeTapToAddConfirmationInteractor(),
                     )
                 }
 
@@ -58,6 +70,17 @@ class TapToAddLayoutScreenshotTest {
             TapToAddTheme {
                 TapToAddLayout(
                     screen = TapToAddNavigator.Screen.Collecting(FakeTapToAddCollectingInteractor),
+                ) {}
+            }
+        }
+    }
+
+    @Test
+    fun cardAdded() {
+        paparazziRule.snapshot {
+            TapToAddTheme {
+                TapToAddLayout(
+                    screen = TapToAddNavigator.Screen.CardAdded(FakeTapToAddCardAddedInteractor()),
                 ) {}
             }
         }
@@ -95,6 +118,31 @@ class TapToAddLayoutScreenshotTest {
     }
 
     @Test
+    fun confirmationSuccess() {
+        confirmationScreenshotTest(
+            primaryButtonState = TapToAddConfirmationInteractor.State.PrimaryButton.State.Success,
+            error = null,
+        )
+    }
+
+    @Test
+    fun confirmationWithCvc() {
+        confirmationScreenshotTest(
+            showCvcElement = true,
+            error = null,
+        )
+    }
+
+    @Test
+    fun confirmationWithCvcFilledIn() {
+        confirmationScreenshotTest(
+            showCvcElement = true,
+            cvcInitialValue = "223",
+            error = null,
+        )
+    }
+
+    @Test
     fun confirmationError() {
         confirmationScreenshotTest(
             primaryButtonState = TapToAddConfirmationInteractor.State.PrimaryButton.State.Idle,
@@ -119,6 +167,8 @@ class TapToAddLayoutScreenshotTest {
     }
 
     private fun confirmationScreenshotTest(
+        showCvcElement: Boolean = false,
+        cvcInitialValue: String? = null,
         cardBrand: CardBrand = CardBrand.Visa,
         last4: String? = "4242",
         locked: Boolean = false,
@@ -131,6 +181,8 @@ class TapToAddLayoutScreenshotTest {
                 TapToAddLayout(
                     screen = TapToAddNavigator.Screen.Confirmation(
                         interactor = FakeTapToAddConfirmationInteractor(
+                            showCvcElement = showCvcElement,
+                            cvcInitialValue = cvcInitialValue,
                             cardBrand = cardBrand,
                             last4 = last4,
                             locked = locked,
@@ -145,13 +197,40 @@ class TapToAddLayoutScreenshotTest {
 
     private object FakeTapToAddCollectingInteractor : TapToAddCollectingInteractor
 
-    private class FakeTapToAddCompletedInteractor(
+    private class FakeTapToAddCardAddedInteractor(
+        cardBrand: CardBrand = CardBrand.Visa,
+        last4: String? = "4242",
+        primaryButtonEnabled: Boolean = false,
+    ) : TapToAddCardAddedInteractor {
+        override val state: StateFlow<TapToAddCardAddedInteractor.State> = MutableStateFlow(
+            TapToAddCardAddedInteractor.State(
+                cardBrand = cardBrand,
+                last4 = last4,
+                title = "Card added".resolvableString,
+                primaryButton = TapToAddCardAddedInteractor.State.PrimaryButton(
+                    label = "Continue".resolvableString,
+                    enabled = primaryButtonEnabled,
+                ),
+                form = TapToAddCardAddedInteractor.State.Form(
+                    elements = emptyList(),
+                    enabled = true,
+                )
+            )
+        )
+
+        override fun performAction(action: TapToAddCardAddedInteractor.Action) {
+            // No-op
+        }
+    }
+
+    private class FakeTapToAddDelayInteractor(
         override val cardBrand: CardBrand = CardBrand.Visa,
-        override val last4: String = "4242",
-        override val label: ResolvableString = "Paid $50.99".resolvableString,
-    ) : TapToAddCompletedInteractor
+        override val last4: String? = "4242",
+    ) : TapToAddDelayInteractor
 
     private class FakeTapToAddConfirmationInteractor(
+        showCvcElement: Boolean = false,
+        cvcInitialValue: String? = null,
         cardBrand: CardBrand = CardBrand.Visa,
         last4: String? = "4242",
         locked: Boolean = true,
@@ -163,7 +242,6 @@ class TapToAddLayoutScreenshotTest {
             TapToAddConfirmationInteractor.State(
                 cardBrand = cardBrand,
                 last4 = last4,
-                title = "Pay $50.99".resolvableString,
                 primaryButton = TapToAddConfirmationInteractor.State.PrimaryButton(
                     label = "Pay".resolvableString,
                     locked = locked,
@@ -171,7 +249,9 @@ class TapToAddLayoutScreenshotTest {
                     enabled = true,
                 ),
                 form = TapToAddConfirmationInteractor.State.Form(
-                    elements = emptyList(),
+                    elements = listOf(createCvcElement(cardBrand, cvcInitialValue)).takeIf {
+                        showCvcElement
+                    } ?: emptyList(),
                     enabled = true,
                 ),
                 error = error,
@@ -180,6 +260,25 @@ class TapToAddLayoutScreenshotTest {
 
         override fun performAction(action: TapToAddConfirmationInteractor.Action) {
             // No-op
+        }
+
+        private fun createCvcElement(
+            cardBrand: CardBrand,
+            initialValue: String?,
+        ): FormElement {
+            val cvcController = CvcController(
+                cardBrandFlow = stateFlowOf(cardBrand),
+                initialValue = initialValue,
+            )
+            val cvcElement = CvcElement(
+                _identifier = IdentifierSpec.CardCvc,
+                controller = cvcController,
+            )
+
+            return SectionElement.wrap(
+                sectionFieldElement = cvcElement,
+                label = "Confirm your CVC".resolvableString,
+            )
         }
     }
 }

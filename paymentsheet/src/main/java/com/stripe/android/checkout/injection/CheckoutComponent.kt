@@ -12,6 +12,7 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.PaymentConfigurationModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.BuildConfig
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
@@ -31,6 +32,7 @@ import javax.inject.Provider
 )
 internal interface CheckoutComponent {
     val checkoutSessionLoader: CheckoutSessionLoader
+    val checkoutSessionRepository: CheckoutSessionRepository
 
     @Component.Factory
     interface Factory {

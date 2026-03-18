@@ -1,5 +1,6 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
+import com.stripe.android.lpmfoundations.luxe.FormElementsBuilder
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
@@ -7,6 +8,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.elements.MandateTextElement
 
 internal object TwintDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.Twint
@@ -15,11 +17,9 @@ internal object TwintDefinition : PaymentMethodDefinition {
 
     override fun requirementsToBeUsedAsNewPaymentMethod(
         hasIntentToSetup: Boolean
-    ): Set<AddPaymentMethodRequirement> = setOf(
-        AddPaymentMethodRequirement.UnsupportedForSetup,
-    )
+    ): Set<AddPaymentMethodRequirement> = setOf()
 
-    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
+    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = metadata.hasIntentToSetup(type.code)
 
     override fun uiDefinitionFactory(
         metadata: PaymentMethodMetadata
@@ -33,4 +33,19 @@ private object TwintUiDefinitionFactory : UiDefinitionFactory.Simple() {
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_twint,
         iconResourceNight = null,
     )
+
+    override fun buildFormElements(
+        metadata: PaymentMethodMetadata,
+        arguments: UiDefinitionFactory.Arguments,
+        builder: FormElementsBuilder,
+    ) {
+        if (TwintDefinition.requiresMandate(metadata)) {
+            builder.footer(
+                MandateTextElement(
+                    stringResId = R.string.stripe_twint_mandate,
+                    args = listOf(arguments.merchantName)
+                )
+            )
+        }
+    }
 }

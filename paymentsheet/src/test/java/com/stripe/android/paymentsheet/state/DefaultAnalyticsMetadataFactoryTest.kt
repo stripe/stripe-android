@@ -819,7 +819,7 @@ class DefaultAnalyticsMetadataFactoryTest {
 
     private fun createCustomerMetadata(
         isPaymentMethodSetAsDefaultEnabled: Boolean
-    ): CustomerMetadata = CustomerMetadata(
+    ): CustomerMetadata = CustomerMetadata.CustomerSession(
         id = "cus_1234",
         ephemeralKeySecret = "ek_123",
         customerSessionClientSecret = "cuss_132_secret_123",
@@ -827,7 +827,6 @@ class DefaultAnalyticsMetadataFactoryTest {
         removePaymentMethod = PaymentMethodRemovePermission.Full,
         saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
         canRemoveLastPaymentMethod = true,
-        canRemoveDuplicates = true,
         canUpdateFullPaymentMethodDetails = true,
     )
 
@@ -877,7 +876,6 @@ class DefaultAnalyticsMetadataFactoryTest {
             suppress2faModal = false,
             disableLinkRuxInFlowController = false,
             linkEnableDisplayableDefaultValuesInEce = false,
-            linkMobileSkipWalletInFlowController = false,
             linkSignUpOptInFeatureEnabled = false,
             linkSignUpOptInInitialValue = false,
             linkSupportedPaymentMethodsOnboardingEnabled = emptyList(),
@@ -923,7 +921,6 @@ class DefaultAnalyticsMetadataFactoryTest {
                 collectMissingBillingDetailsForExistingPaymentMethods = false,
                 allowUserEmailEdits = true,
                 allowLogOut = true,
-                skipWalletInFlowController = false,
                 customerId = null,
                 linkAppearance = null,
                 saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,

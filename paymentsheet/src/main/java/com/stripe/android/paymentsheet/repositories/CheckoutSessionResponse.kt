@@ -4,16 +4,17 @@ import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.SetupIntent
 import kotlinx.parcelize.Parcelize
 
 /**
  * Response from checkout session APIs:
  * - Init API (`/v1/payment_pages/{cs_id}/init`) - returns [elementsSession]
- * - Confirm API (`/v1/payment_pages/{cs_id}/confirm`) - returns [paymentIntent]
+ * - Confirm API (`/v1/payment_pages/{cs_id}/confirm`) - returns [paymentIntent] or [setupIntent]
  *
  * For init responses, [elementsSession] contains payment method preferences, Link settings,
  * customer data, and other configuration needed by PaymentSheet.
- * For confirm responses, [paymentIntent] contains the confirmed payment intent.
+ * For confirm responses, [paymentIntent] or [setupIntent] contains the confirmed intent.
  */
 @Parcelize
 internal data class CheckoutSessionResponse(
@@ -23,6 +24,7 @@ internal data class CheckoutSessionResponse(
     val id: String,
     /**
      * The payment amount in the smallest currency unit (e.g., cents for USD).
+     * 0 for setup mode checkout sessions.
      */
     val amount: Long,
     /**
@@ -30,29 +32,46 @@ internal data class CheckoutSessionResponse(
      */
     val currency: String,
     /**
+     * The checkout session mode: payment or setup.
+     */
+    val mode: Mode,
+    /**
+     * The customer's email address from the checkout session.
+     * Always available at the top level as `customer_email`, regardless of whether
+     * a customer object exists (guest checkout) or not.
+     */
+    val customerEmail: String?,
+    /**
      * The embedded ElementsSession containing payment method preferences, Link settings,
      * customer data, and other configuration needed by PaymentSheet.
      * Only populated in responses from the init API.
      */
-    val elementsSession: ElementsSession? = null,
+    val elementsSession: ElementsSession?,
     /**
      * The PaymentIntent created/confirmed during checkout session confirmation.
-     * Only populated in responses from the confirm API.
+     * Only populated in confirm responses for payment mode.
      */
-    val paymentIntent: PaymentIntent? = null,
+    val paymentIntent: PaymentIntent?,
+    /**
+     * The SetupIntent created/confirmed during checkout session confirmation.
+     * Only populated in confirm responses for setup mode.
+     */
+    val setupIntent: SetupIntent?,
     /**
      * Customer data from the checkout session init response.
      * This is parsed from the top-level "customer" field in the init response.
      * For checkout sessions, customer is associated server-side when the session is created,
      * so we get customer data directly in the init response rather than through customer session auth.
      */
-    val customer: Customer? = null,
+    val customer: Customer?,
     /**
      * Server-side flag controlling the "Save for future use" checkbox.
      * Parsed from `customer_managed_saved_payment_methods_offer_save` in the init response.
      */
-    val savedPaymentMethodsOfferSave: SavedPaymentMethodsOfferSave? = null,
-    val totalSummary: TotalSummaryResponse? = null,
+    val savedPaymentMethodsOfferSave: SavedPaymentMethodsOfferSave?,
+    val totalSummary: TotalSummaryResponse?,
+    val lineItems: List<LineItem>,
+    val shippingOptions: List<ShippingRate>,
 ) : StripeModel {
 
     /**
@@ -139,8 +158,25 @@ internal data class CheckoutSessionResponse(
 
     @Parcelize
     data class ShippingRate(
+        val id: String,
         val amount: Long,
         val displayName: String,
         val deliveryEstimate: String?,
     ) : StripeModel
+
+    @Parcelize
+    data class LineItem(
+        val id: String,
+        val name: String,
+        val quantity: Int,
+        val unitAmount: Long?,
+        val subtotal: Long,
+        val total: Long,
+    ) : StripeModel
+
+    enum class Mode {
+        PAYMENT,
+        SETUP,
+        UNKNOWN,
+    }
 }

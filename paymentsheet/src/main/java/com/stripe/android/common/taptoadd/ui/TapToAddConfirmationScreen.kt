@@ -16,11 +16,12 @@ import com.stripe.android.uicore.strings.resolve
 internal fun ColumnScope.TapToAddConfirmationScreen(
     state: TapToAddConfirmationInteractor.State,
     onPrimaryButtonPress: () -> Unit,
+    onProcessingComplete: () -> Unit,
 ) {
     TapToAddCardLayout(
         cardBrand = state.cardBrand,
         last4 = state.last4,
-        title = state.title.resolve(),
+        title = null,
     ) {
         with(state.form) {
             if (elements.isNotEmpty()) {
@@ -35,28 +36,32 @@ internal fun ColumnScope.TapToAddConfirmationScreen(
             }
         }
 
+        state.error?.let { error ->
+            ErrorMessage(
+                error = error.resolve(),
+            )
+
+            Spacer(Modifier.size(10.dp))
+        }
+
         with(state.primaryButton) {
             PrimaryButton(
                 label = label.resolve(),
                 locked = locked,
-                enabled = true,
-                processingState = when (this.state) {
+                enabled = enabled,
+                processingState = when (this@with.state) {
                     TapToAddConfirmationInteractor.State.PrimaryButton.State.Idle ->
                         PrimaryButtonProcessingState.Idle(null)
                     TapToAddConfirmationInteractor.State.PrimaryButton.State.Processing ->
                         PrimaryButtonProcessingState.Processing
+                    TapToAddConfirmationInteractor.State.PrimaryButton.State.Success ->
+                        PrimaryButtonProcessingState.Completed
                 },
-                onProcessingCompleted = {},
+                onProcessingCompleted = onProcessingComplete,
                 onClick = onPrimaryButtonPress,
             )
         }
 
         Spacer(Modifier.size(10.dp))
-
-        state.error?.let { error ->
-            ErrorMessage(
-                error = error.resolve(),
-            )
-        }
     }
 }

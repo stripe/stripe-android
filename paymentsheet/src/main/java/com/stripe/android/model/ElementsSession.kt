@@ -1,6 +1,5 @@
 package com.stripe.android.model
 
-import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.PaymentMethod.Type.Link
@@ -9,9 +8,8 @@ import java.util.UUID
 
 private val LinkSupportedFundingSources = setOf("card", "bank_account")
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
-data class ElementsSession(
+internal data class ElementsSession(
     val linkSettings: LinkSettings?,
     val paymentMethodSpecs: String?,
     val externalPaymentMethodData: String?,
@@ -67,9 +65,6 @@ data class ElementsSession(
     val linkEnableDisplayableDefaultValuesInEce: Boolean
         get() = linkSettings?.linkEnableDisplayableDefaultValuesInEce ?: false
 
-    val linkMobileSkipWalletInFlowController: Boolean
-        get() = linkSettings?.linkMobileSkipWalletInFlowController ?: false
-
     val passiveCaptchaParams: PassiveCaptchaParams?
         get() {
             return passiveCaptcha.takeIf {
@@ -99,7 +94,6 @@ data class ElementsSession(
     val onBehalfOf: String?
         get() = accountId.takeIf { !it.equals(merchantId) }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class LinkSettings(
         val linkFundingSources: List<String>,
@@ -112,32 +106,27 @@ data class ElementsSession(
         val suppress2faModal: Boolean,
         val disableLinkRuxInFlowController: Boolean,
         val linkEnableDisplayableDefaultValuesInEce: Boolean,
-        val linkMobileSkipWalletInFlowController: Boolean,
         val linkSignUpOptInFeatureEnabled: Boolean,
         val linkSignUpOptInInitialValue: Boolean,
         val linkSupportedPaymentMethodsOnboardingEnabled: List<String>,
     ) : StripeModel
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class ExperimentsData(
         val arbId: String,
         val experimentAssignments: Map<ExperimentAssignment, String>
     ) : StripeModel
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class CardBrandChoice(
         val eligible: Boolean,
         val preferredNetworks: List<String>,
     ) : StripeModel
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     sealed interface CustomPaymentMethod : StripeModel {
         val type: String
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
         data class Available(
             override val type: String,
@@ -145,7 +134,6 @@ data class ElementsSession(
             val logoUrl: String,
         ) : CustomPaymentMethod
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
         data class Unavailable(
             override val type: String,
@@ -153,14 +141,12 @@ data class ElementsSession(
         ) : CustomPaymentMethod
     }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class Customer(
         val paymentMethods: List<PaymentMethod>,
         val defaultPaymentMethod: String?,
         val session: Session,
     ) : StripeModel {
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
         data class Session(
             val id: String,
@@ -171,19 +157,15 @@ data class ElementsSession(
             val components: Components,
         ) : StripeModel
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
         data class Components(
             val mobilePaymentElement: MobilePaymentElement,
             val customerSheet: CustomerSheet,
         ) : StripeModel {
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             sealed interface MobilePaymentElement : StripeModel {
-                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 @Parcelize
                 data object Disabled : MobilePaymentElement
 
-                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 @Parcelize
                 data class Enabled(
                     val isPaymentMethodSaveEnabled: Boolean,
@@ -197,13 +179,10 @@ data class ElementsSession(
                 }
             }
 
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             sealed interface CustomerSheet : StripeModel {
-                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 @Parcelize
                 data object Disabled : CustomerSheet
 
-                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 @Parcelize
                 data class Enabled(
                     val paymentMethodRemove: PaymentMethodRemoveFeature,
@@ -215,14 +194,12 @@ data class ElementsSession(
                 }
             }
 
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             enum class PaymentMethodRemoveFeature {
                 Enabled,
                 Partial,
                 Disabled,
             }
 
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             enum class PaymentMethodRemoveLastFeature {
                 Enabled,
                 Disabled,
@@ -237,7 +214,6 @@ data class ElementsSession(
     /**
      * Flags declared here will be parsed and include in the [ElementsSession] object.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class Flag(val flagValue: String) {
         ELEMENTS_DISABLE_FC_LITE("elements_disable_fc_lite"),
         ELEMENTS_PREFER_FC_LITE("elements_prefer_fc_lite"),
@@ -255,7 +231,6 @@ data class ElementsSession(
     /**
      * Experiments declared here will be parsed and include in the [ElementsSession] object.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class ExperimentAssignment(val experimentValue: String) {
         LINK_GLOBAL_HOLD_BACK("link_global_holdback"),
         LINK_GLOBAL_HOLD_BACK_AA("link_global_holdback_aa"),
@@ -264,7 +239,6 @@ data class ElementsSession(
         OCS_MOBILE_HORIZONTAL_MODE("ocs_mobile_horizontal_mode"),
     }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         fun createFromFallback(
             stripeIntent: StripeIntent,
