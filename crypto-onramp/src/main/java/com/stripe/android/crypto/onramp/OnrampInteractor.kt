@@ -620,32 +620,17 @@ internal class OnrampInteractor @Inject constructor(
                                 state = address?.state
                             )
 
-                            cryptoApiRepository.collectKycData(
-                                KycInfo(
-                                    firstName = firstName,
-                                    lastName = lastName,
-                                    idNumber = null,
-                                    dateOfBirth = null,
-                                    address = kycAddress
-                                ),
-                                consumerSessionClientSecret = secret
-                            ).fold(
-                                onSuccess = {
-                                    handleGooglePayPaymentMethod(result.paymentMethod) {
-                                        OnrampCollectPaymentMethodResult.Completed(it)
-                                    }
-                                },
-                                onFailure = {
-                                    OnrampAnalyticsEvent.ErrorOccurred(
-                                        operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.CollectPaymentMethod,
-                                        error = error,
-                                    )
-
-                                    handleGooglePayPaymentMethod(result.paymentMethod) {
-                                        OnrampCollectPaymentMethodResult.KYCRequired(it)
-                                    }
-                                }
+                            val kycInfo = KycInfo(
+                                firstName = firstName,
+                                lastName = lastName,
+                                idNumber = null,
+                                dateOfBirth = null,
+                                address = kycAddress
                             )
+
+                            handleGooglePayPaymentMethod(result.paymentMethod) {
+                                OnrampCollectPaymentMethodResult.KYCRequired(it, kycInfo)
+                            }
                         }
                     )
             } else {
