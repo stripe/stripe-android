@@ -2,6 +2,7 @@ package com.stripe.android.challenge.confirmation
 
 import android.content.Context
 import android.content.Intent
+import com.stripe.android.core.Logger
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
@@ -226,6 +227,7 @@ internal class IntentConfirmationChallengeActivityTest {
                     errorReporter = FakeErrorReporter(),
                     requestOptions = ApiRequest.Options("pk_test_123"),
                     fireAndForgetScope = TestScope(testDispatcher),
+                    logger = Logger.noop(),
                 ) as T
             }
         }
@@ -280,6 +282,7 @@ internal class IntentConfirmationChallengeActivityTest {
                     errorReporter = FakeErrorReporter(),
                     requestOptions = ApiRequest.Options("pk_test_123"),
                     fireAndForgetScope = TestScope(testDispatcher),
+                    logger = Logger.noop(),
                 ) as T
             }
         }

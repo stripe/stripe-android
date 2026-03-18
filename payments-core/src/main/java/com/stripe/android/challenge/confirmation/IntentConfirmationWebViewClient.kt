@@ -9,11 +9,13 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import com.stripe.android.core.Logger
 
 internal class IntentConfirmationWebViewClient(
     private val hostUrl: String,
     private val errorHandler: WebViewErrorHandler,
-    private val openUri: (Uri) -> Unit
+    private val logger: Logger,
+    private val openUri: (Uri) -> Unit,
 ) : WebViewClient() {
 
     override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
@@ -66,15 +68,20 @@ internal class IntentConfirmationWebViewClient(
     }
 
     override fun onRenderProcessGone(view: WebView?, detail: RenderProcessGoneDetail?): Boolean {
+        val didCrash = detail?.didCrash() ?: true
+        val message = if (didCrash) "render process crashed" else "render process encountered error"
+        logger.error("IntentConfirmationWebViewClient: $message, url=${view?.url}")
         errorHandler(
             WebViewError(
-                message = "render process crashed",
+                message = message,
                 errorCode = null,
                 url = view?.url,
                 webViewErrorType = "render_process_gone"
             )
         )
-        return super.onRenderProcessGone(view, detail)
+        // Return true to indicate we handled the crash. Returning false (the super default)
+        // causes Android to kill the entire app process.
+        return true
     }
 
     private fun urlsMatch(url1: String?, url2: String): Boolean {

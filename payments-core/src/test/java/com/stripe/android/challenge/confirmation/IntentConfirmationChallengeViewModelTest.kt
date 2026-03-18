@@ -3,6 +3,7 @@ package com.stripe.android.challenge.confirmation
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
+import com.stripe.android.core.Logger
 import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
@@ -301,7 +302,8 @@ internal class IntentConfirmationChallengeViewModelTest {
         stripeRepository = stripeRepository,
         errorReporter = errorReporter,
         requestOptions = REQUEST_OPTIONS,
-        fireAndForgetScope = TestScope(testDispatcher)
+        fireAndForgetScope = TestScope(testDispatcher),
+        logger = Logger.noop(),
     )
 
     private class FakeStripeRepository(
