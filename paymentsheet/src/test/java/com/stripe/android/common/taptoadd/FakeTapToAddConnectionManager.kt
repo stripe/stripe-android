@@ -5,53 +5,43 @@ import app.cash.turbine.Turbine
 
 internal class FakeTapToAddConnectionManager private constructor(
     override val isSupported: Boolean,
-    override val isConnected: Boolean,
-    val awaitResult: Result<Boolean>,
+    val connectResult: Result<Unit>,
 ) : TapToAddConnectionManager {
-    private val connectCalls = Turbine<Unit>()
-    private val awaitCalls = Turbine<Unit>()
+    val connectCalls = Turbine<Unit>()
 
-    override fun connect() {
+    override suspend fun connect() {
         connectCalls.add(Unit)
-    }
-
-    override suspend fun awaitConnection(): Result<Boolean> {
-        awaitCalls.add(Unit)
-
-        return awaitResult
+        connectResult.getOrThrow()
     }
 
     class Scenario(
         val connectCalls: ReceiveTurbine<Unit>,
-        val awaitCalls: ReceiveTurbine<Unit>,
         val tapToAddConnectionManager: TapToAddConnectionManager
     )
 
     companion object {
         suspend fun test(
             isSupported: Boolean,
-            isConnected: Boolean,
-            awaitResult: Result<Boolean> = Result.success(false),
+            connectResult: Result<Unit> = Result.success(Unit),
             block: suspend Scenario.() -> Unit
         ) {
-            val tapToAddConnectionManager = FakeTapToAddConnectionManager(isSupported, isConnected, awaitResult)
+            val tapToAddConnectionManager = FakeTapToAddConnectionManager(isSupported, connectResult)
 
             block(
                 Scenario(
                     connectCalls = tapToAddConnectionManager.connectCalls,
-                    awaitCalls = tapToAddConnectionManager.awaitCalls,
                     tapToAddConnectionManager = tapToAddConnectionManager,
                 )
             )
 
             tapToAddConnectionManager.connectCalls.ensureAllEventsConsumed()
-            tapToAddConnectionManager.awaitCalls.ensureAllEventsConsumed()
         }
 
         fun noOp(
             isSupported: Boolean,
-            isConnected: Boolean,
-            awaitResult: Result<Boolean> = Result.success(false),
-        ) = FakeTapToAddConnectionManager(isSupported, isConnected, awaitResult)
+            connectResult: Result<Unit> = Result.success(Unit),
+        ): FakeTapToAddConnectionManager {
+            return FakeTapToAddConnectionManager(isSupported, connectResult)
+        }
     }
 }

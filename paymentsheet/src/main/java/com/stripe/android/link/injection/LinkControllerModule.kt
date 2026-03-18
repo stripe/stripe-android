@@ -17,6 +17,7 @@ import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetCommonModule
+import com.stripe.android.paymentsheet.state.NoOpTapToAddConnectionStarterModule
 import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
 import dagger.Binds
 import dagger.Module
@@ -28,6 +29,7 @@ import javax.inject.Singleton
     includes = [
         StripeRepositoryModule::class,
         ExtendedPaymentElementConfirmationModule::class,
+        NoOpTapToAddConnectionStarterModule::class,
         PaymentSheetCommonModule::class,
         GooglePayLauncherModule::class,
         CoroutineContextModule::class,
