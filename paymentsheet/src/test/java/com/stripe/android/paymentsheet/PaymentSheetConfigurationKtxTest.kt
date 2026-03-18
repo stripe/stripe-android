@@ -355,7 +355,7 @@ class PaymentSheetConfigurationKtxTest {
         val checkoutSessionMode = PaymentElementLoader.InitializationMode.CheckoutSession(
             instancesKey = "PaymentSheetConfigurationKtxTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-                id = "cs_test_123",
+                id = "cs_test_abc123",
                 amount = 5099,
             ),
         )
@@ -383,7 +383,7 @@ class PaymentSheetConfigurationKtxTest {
         val checkoutSessionMode = PaymentElementLoader.InitializationMode.CheckoutSession(
             instancesKey = "PaymentSheetConfigurationKtxTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-                id = "cs_test_123",
+                id = "cs_test_abc123",
                 amount = 5099,
             ),
         )
@@ -406,7 +406,7 @@ class PaymentSheetConfigurationKtxTest {
         val checkoutSessionMode = PaymentElementLoader.InitializationMode.CheckoutSession(
             instancesKey = "PaymentSheetConfigurationKtxTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-                id = "cs_test_123",
+                id = "cs_test_abc123",
                 amount = 5099,
             ),
         )

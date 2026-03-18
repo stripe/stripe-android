@@ -51,12 +51,12 @@ class CheckoutTest {
 
     @Test
     fun `configure returns Checkout with checkoutSession id from network response`() = runConfigureScenario(
-        clientSecret = "cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh_secret_example",
+        clientSecret = "cs_test_abc123_secret_example",
         networkSetup = {
             networkRule.enqueue(
                 host("api.stripe.com"),
                 method("POST"),
-                path("/v1/payment_pages/cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh/init"),
+                path("/v1/payment_pages/cs_test_abc123/init"),
             ) { response ->
                 response.testBodyFromFile("checkout-session-init.json")
             }
@@ -65,7 +65,7 @@ class CheckoutTest {
         val checkout = result.getOrThrow()
         checkout.checkoutSession.test {
             assertThat(awaitItem().id)
-                .isEqualTo("cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh")
+                .isEqualTo("cs_test_abc123")
         }
     }
 

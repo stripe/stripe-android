@@ -1,8 +1,10 @@
 {
-  "session_id": "cs_test_123",
+  "session_id": "cs_test_abc123",
   "currency": "usd",
   "total_summary": {
-    "due": 5099
+    "subtotal": 5099,
+    "due": 5099,
+    "total": 5099
   },
   "payment_intent": {
     "id": "pi_123",
