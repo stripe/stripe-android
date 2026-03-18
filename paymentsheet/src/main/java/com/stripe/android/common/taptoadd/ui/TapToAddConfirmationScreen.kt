@@ -4,7 +4,12 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -18,6 +23,16 @@ internal fun ColumnScope.TapToAddConfirmationScreen(
     onPrimaryButtonPress: () -> Unit,
     onProcessingComplete: () -> Unit,
 ) {
+    val focusRequester = remember {
+        FocusRequester()
+    }
+
+    if (!LocalInspectionMode.current) {
+        LaunchedEffect(Unit) {
+            focusRequester.requestFocus()
+        }
+    }
+
     TapToAddCardLayout(
         cardBrand = state.cardBrand,
         last4 = state.last4,
@@ -26,6 +41,7 @@ internal fun ColumnScope.TapToAddConfirmationScreen(
         with(state.form) {
             if (elements.isNotEmpty()) {
                 FormUI(
+                    modifier = Modifier.focusRequester(focusRequester),
                     elements = elements,
                     hiddenIdentifiers = emptySet(),
                     lastTextFieldIdentifier = null,

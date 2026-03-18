@@ -12,7 +12,7 @@ import app.cash.turbine.Turbine
 class DummyActivityResultCaller private constructor() : ActivityResultCaller {
     private val registeredLaunchers = Turbine<ActivityResultLauncher<*>>()
     private val registerCalls = Turbine<RegisterCall<*, *>>()
-    private val launchCalls = Turbine<Any?>()
+    private val launchCalls = Turbine<LaunchCall>()
     private val unregisteredLaunchers = Turbine<ActivityResultLauncher<*>>()
 
     override fun <I : Any?, O : Any?> registerForActivityResult(
@@ -23,7 +23,7 @@ class DummyActivityResultCaller private constructor() : ActivityResultCaller {
 
         val launcher = object : ActivityResultLauncher<I>() {
             override fun launch(input: I, options: ActivityOptionsCompat?) {
-                launchCalls.add(input)
+                launchCalls.add(LaunchCall(input, options))
             }
 
             override fun unregister() {
@@ -46,7 +46,7 @@ class DummyActivityResultCaller private constructor() : ActivityResultCaller {
     ): ActivityResultLauncher<I> {
         val launcher = object : ActivityResultLauncher<I>() {
             override fun launch(input: I, options: ActivityOptionsCompat?) {
-                launchCalls.add(input)
+                launchCalls.add(LaunchCall(input, options))
             }
 
             override fun unregister() {
@@ -67,11 +67,16 @@ class DummyActivityResultCaller private constructor() : ActivityResultCaller {
         val callback: ActivityResultCallback<O>,
     )
 
+    data class LaunchCall(
+        val arguments: Any?,
+        val activityOptions: ActivityOptionsCompat?
+    )
+
     class Scenario(
         val activityResultCaller: ActivityResultCaller,
         private val registerCalls: ReceiveTurbine<RegisterCall<*, *>>,
         private val unregisteredLaunchers: ReceiveTurbine<ActivityResultLauncher<*>>,
-        private val launchCalls: ReceiveTurbine<Any?>,
+        private val launchCalls: ReceiveTurbine<LaunchCall>,
         private val registeredLaunchers: ReceiveTurbine<ActivityResultLauncher<*>>,
     ) {
         suspend fun awaitNextRegisteredLauncher(): ActivityResultLauncher<*> {
@@ -87,6 +92,10 @@ class DummyActivityResultCaller private constructor() : ActivityResultCaller {
         }
 
         suspend fun awaitLaunchCall(): Any? {
+            return launchCalls.awaitItem().arguments
+        }
+
+        suspend fun awaitLaunchCallWithOptions(): LaunchCall {
             return launchCalls.awaitItem()
         }
     }

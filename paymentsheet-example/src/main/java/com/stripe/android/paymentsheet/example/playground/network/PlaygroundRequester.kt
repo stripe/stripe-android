@@ -24,6 +24,7 @@ internal class PlaygroundRequester(
     applicationContext: Context,
 ) : BasePlaygroundRequester(playgroundSettings, applicationContext) {
     suspend fun fetch(): kotlin.Result<PlaygroundState> {
+        playgroundSettings.setValues()
         val requestBody = playgroundSettings.checkoutRequest()
 
         val apiResponse = withContext(Dispatchers.IO) {
