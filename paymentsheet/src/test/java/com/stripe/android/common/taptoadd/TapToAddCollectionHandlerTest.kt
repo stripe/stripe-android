@@ -118,6 +118,30 @@ class TapToAddCollectionHandlerTest {
     }
 
     @Test
+    fun `handler returns UnsupportedDevice when await fails with unsupported device terminal error`() {
+        val error = TerminalException(
+            errorCode = TerminalErrorCode.TAP_TO_PAY_UNSUPPORTED_DEVICE,
+            errorMessage = "Unsupported device",
+        )
+
+        runScenario(
+            isConnected = false,
+            awaitResult = Result.failure(error)
+        ) {
+            val result = handler.collect(DEFAULT_METADATA)
+
+            assertThat(managerScenario.connectCalls.awaitItem()).isNotNull()
+            assertThat(managerScenario.awaitCalls.awaitItem()).isNotNull()
+
+            assertThat(result).isEqualTo(
+                TapToAddCollectionHandler.CollectionState.UnsupportedDevice(
+                    error = error,
+                )
+            )
+        }
+    }
+
+    @Test
     fun `handler returns FailedCollection when callback retriever throws`() {
         val error = CallbackNotFoundException(
             message = "Callback not found",
@@ -345,7 +369,7 @@ class TapToAddCollectionHandlerTest {
         assertThat(result.await()).isEqualTo(
             TapToAddCollectionHandler.CollectionState.FailedCollection(
                 error = terminalException,
-                displayMessage = R.string.stripe_something_went_wrong.resolvableString
+                displayMessage = "Failed to retrieve setup intent".resolvableString
             )
         )
     }
@@ -380,7 +404,7 @@ class TapToAddCollectionHandlerTest {
         assertThat(result.await()).isEqualTo(
             TapToAddCollectionHandler.CollectionState.FailedCollection(
                 error = terminalException,
-                displayMessage = R.string.stripe_something_went_wrong.resolvableString
+                displayMessage = "Card declined".resolvableString
             )
         )
     }
@@ -446,7 +470,7 @@ class TapToAddCollectionHandlerTest {
         assertThat(result.await()).isEqualTo(
             TapToAddCollectionHandler.CollectionState.FailedCollection(
                 error = terminalException,
-                displayMessage = R.string.stripe_something_went_wrong.resolvableString
+                displayMessage = "Setup intent confirmation failed".resolvableString
             )
         )
     }

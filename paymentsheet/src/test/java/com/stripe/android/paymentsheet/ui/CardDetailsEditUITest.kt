@@ -1,8 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
 import android.os.Build
-import androidx.compose.ui.test.assertContentDescriptionEquals
-import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -10,9 +8,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
-import androidx.compose.ui.test.printToString
 import com.stripe.android.DefaultCardBrandFilter
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -23,7 +19,6 @@ import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
 import com.stripe.android.uicore.elements.SELECTOR_ITEM_TEST_TAG
-import com.stripe.android.uicore.elements.TEST_TAG_DROP_DOWN_CHOICE
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
@@ -290,18 +285,7 @@ internal class CardDetailsEditUITest {
     }
 
     @Test
-    fun modifiableCard_cbcDropdownIsShown() {
-        FeatureFlags.newCbcSelector.setEnabled(false)
-        runScenario(
-            card = PaymentMethodFixtures.CARD_WITH_NETWORKS
-        ) {
-            composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).assertExists()
-        }
-    }
-
-    @Test
     fun modifiableCard_cbcSelectorIsShown() {
-        FeatureFlags.newCbcSelector.setEnabled(true)
         runScenario(
             card = PaymentMethodFixtures.CARD_WITH_NETWORKS
         ) {
@@ -321,61 +305,11 @@ internal class CardDetailsEditUITest {
     }
 
     @Test
-    fun selectingCardBrandFromDropdown_displaysNewCardBrand() {
-        runScenario(
-            card = PaymentMethodFixtures.CARD_WITH_NETWORKS,
-        ) {
-            FeatureFlags.newCbcSelector.setEnabled(false)
-            composeRule.onNodeWithTag(
-                testTag = "${SELECTED_CARD_BRAND_DROPDOWN_TAG}_Cartes Bancaires",
-                useUnmergedTree = true
-            ).assertIsDisplayed()
-
-            println(
-                composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG, useUnmergedTree = true)
-                    .printToString()
-            )
-            composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).performClick()
-
-            composeRule.onNodeWithTag("${TEST_TAG_DROP_DOWN_CHOICE}_Visa").performClick()
-
-            composeRule.onNodeWithTag(
-                testTag = "${SELECTED_CARD_BRAND_DROPDOWN_TAG}_Visa",
-                useUnmergedTree = true
-            ).assertIsDisplayed()
-        }
-    }
-
-    @Test
-    fun selectingCardBrandDropdown_sendsOnBrandChoiceChangedAction() {
-        runScenario(
-            card = PaymentMethodFixtures.CARD_WITH_NETWORKS,
-            addressCollectionMode = AddressCollectionMode.Never
-        ) {
-            FeatureFlags.newCbcSelector.setEnabled(false)
-            composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).performClick()
-
-            composeRule.onNodeWithTag("${TEST_TAG_DROP_DOWN_CHOICE}_Visa").performClick()
-
-            viewActionRecorder.consume(
-                viewAction = EditCardDetailsInteractor.ViewAction.BrandChoiceChanged(
-                    cardBrandChoice = CardBrandChoice(
-                        brand = CardBrand.Visa,
-                        enabled = true
-                    )
-                )
-            )
-        }
-    }
-
-    @Test
     fun selectingCardBrandSelector_sendsOnBrandChoiceChangedAction() {
         runScenario(
             card = PaymentMethodFixtures.CARD_WITH_NETWORKS,
             addressCollectionMode = AddressCollectionMode.Never
         ) {
-            FeatureFlags.newCbcSelector.setEnabled(true)
-
             composeRule.onNodeWithTag("${SELECTOR_ITEM_TEST_TAG}_visa").performClick()
 
             viewActionRecorder.consume(
@@ -428,22 +362,10 @@ internal class CardDetailsEditUITest {
     }
 
     @Test
-    fun `Card drop down has accessibility label`() {
-        runScenario(
-            card = PaymentMethodFixtures.CARD_WITH_NETWORKS
-        ) {
-            FeatureFlags.newCbcSelector.setEnabled(false)
-            composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
-                .assertContentDescriptionEquals("Cartes Bancaires")
-        }
-    }
-
-    @Test
     fun `Card selector has accessibility label`() {
         runScenario(
             card = PaymentMethodFixtures.CARD_WITH_NETWORKS
         ) {
-            FeatureFlags.newCbcSelector.setEnabled(true)
             composeRule.onNodeWithContentDescription("Cartes Bancaires").assertExists()
         }
     }

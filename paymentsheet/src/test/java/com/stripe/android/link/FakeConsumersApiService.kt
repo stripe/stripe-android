@@ -28,6 +28,9 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         consumerSession = TestFactory.CONSUMER_SESSION,
         linkAuthIntent = null
     )
+    var createPaymentDetailsResult = Result.success(
+        ConsumerPaymentDetails(paymentDetails = listOf(TestFactory.CONSUMER_PAYMENT_DETAILS_CARD))
+    )
     var createPaymentDetailsFromPaymentMethodResult = Result.success(
         ConsumerPaymentDetails(paymentDetails = listOf(TestFactory.CONSUMER_PAYMENT_DETAILS_CARD))
     )
@@ -163,7 +166,7 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         requestSurface: String,
         requestOptions: ApiRequest.Options
     ): Result<ConsumerPaymentDetails> {
-        TODO("Not yet implemented")
+        return createPaymentDetailsResult
     }
 
     override suspend fun createPaymentDetails(

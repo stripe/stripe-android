@@ -13,6 +13,8 @@ internal data class InternalState(
     val checkoutSessionResponse: CheckoutSessionResponse,
     val shippingName: String? = null,
     val billingName: String? = null,
+    val shippingPhoneNumber: String? = null,
+    val billingPhoneNumber: String? = null,
     val shippingAddress: Address.State? = null,
     val billingAddress: Address.State? = null,
 ) : Parcelable {

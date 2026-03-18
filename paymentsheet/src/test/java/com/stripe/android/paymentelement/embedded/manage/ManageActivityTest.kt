@@ -8,8 +8,12 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.Checkout
+import com.stripe.android.checkout.CheckoutInstances
+import com.stripe.android.checkout.CheckoutInstancesTestRule
+import com.stripe.android.checkout.InternalState
 import com.stripe.android.common.model.PaymentMethodRemovePermission
-import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
@@ -17,8 +21,12 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatchers
+import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.RetryRule
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -27,6 +35,7 @@ import com.stripe.paymentelementnetwork.setupPaymentMethodDetachResponse
 import com.stripe.paymentelementnetwork.setupPaymentMethodUpdateResponse
 import com.stripe.paymentelementtestpages.EditPage
 import com.stripe.paymentelementtestpages.ManagePage
+import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
@@ -34,6 +43,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.CountDownLatch
 
+@OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
 internal class ManageActivityTest {
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
@@ -57,6 +67,7 @@ internal class ManageActivityTest {
         .around(networkRule)
         .around(PaymentConfigurationTestRule(applicationContext))
         .around(RetryRule(3))
+        .around(CheckoutInstancesTestRule())
 
     @Test
     fun `when launched without args should finish with error result`() {
@@ -131,28 +142,7 @@ internal class ManageActivityTest {
     }
 
     @Test
-    fun `updating card brand updates it in the list and returns a result with the new card brand`() = launch {
-        managePage.waitUntilVisible()
-        managePage.assertCardIsVisible(cbcCardId, "cartes_bancaries")
-        managePage.clickEdit()
-        managePage.clickEdit(cbcCardId)
-
-        networkRule.setupPaymentMethodUpdateResponse(paymentMethodDetails = cbcCardDetails, cardBrand = "visa")
-        editPage.waitUntilVisible()
-        editPage.setCardBrand("Visa")
-        editPage.update()
-        managePage.waitUntilVisible()
-        managePage.clickDone()
-        managePage.assertCardIsVisible(cbcCardId, "visa")
-        Espresso.pressBack()
-        val updatedCbcCard = completedResultPaymentMethods().first { it.id == cbcCardId }
-        assertThat(updatedCbcCard.card?.displayBrand).isEqualTo("visa")
-    }
-
-    @Test
-    fun `updating card brand updates in list and returns a result with the new card brand selector`() = launch(
-        newCbcSelectorEnabled = true
-    ) {
+    fun `updating card brand updates in list and returns a result with the new card brand`() = launch {
         managePage.waitUntilVisible()
         managePage.assertCardIsVisible(cbcCardId, "cartes_bancaries")
         managePage.clickEdit()
@@ -184,32 +174,6 @@ internal class ManageActivityTest {
             countDownLatch = countDownLatch,
         )
         editPage.waitUntilVisible()
-        editPage.setCardBrand("Visa")
-        editPage.update(waitUntilComplete = false)
-        Espresso.pressBack()
-        managePage.assertNotVisible()
-        countDownLatch.countDown()
-        managePage.waitUntilVisible()
-        managePage.clickDone()
-        managePage.assertCardIsVisible(cbcCardId, "visa")
-    }
-
-    @Test
-    fun `selector updating card brand prevents sheet from being closed`() = launch(
-        newCbcSelectorEnabled = true
-    ) {
-        managePage.waitUntilVisible()
-        managePage.assertCardIsVisible(cbcCardId, "cartes_bancaries")
-        managePage.clickEdit()
-        managePage.clickEdit(cbcCardId)
-
-        val countDownLatch = CountDownLatch(1)
-        networkRule.setupPaymentMethodUpdateResponse(
-            paymentMethodDetails = cbcCardDetails,
-            cardBrand = "visa",
-            countDownLatch = countDownLatch,
-        )
-        editPage.waitUntilVisible()
         editPage.setCardBrandWithSelector("Visa")
         editPage.update(waitUntilComplete = false)
         Espresso.pressBack()
@@ -227,7 +191,7 @@ internal class ManageActivityTest {
         ) {
             networkRule.setupPaymentMethodUpdateResponse(paymentMethodDetails = cbcCardDetails, cardBrand = "visa")
             editPage.waitUntilVisible()
-            editPage.setCardBrand("Visa")
+            editPage.setCardBrandWithSelector("Visa")
             editPage.update()
             editPage.waitUntilMissing()
             val updatedCbcCard = completedResultPaymentMethods().single()
@@ -236,19 +200,49 @@ internal class ManageActivityTest {
     }
 
     @Test
-    fun `selector updating card brand returns a result with the new card brand`() {
+    fun `onDestroy clears checkout integration launched flag`() {
+        val instancesKey = "test-checkout-key"
+        val checkout = Checkout.createWithState(
+            applicationContext,
+            Checkout.State(
+                InternalState(
+                    key = instancesKey,
+                    checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+                ),
+            ),
+        )
+        CheckoutInstances.markIntegrationLaunched(instancesKey)
+
         launch(
-            paymentMethods = listOf(cbcCardDetails.createPaymentMethod()),
-            newCbcSelectorEnabled = true
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                cbcEligibility = CardBrandChoiceEligibility.Eligible(preferredNetworks = listOf()),
+                hasCustomerConfiguration = true,
+                removePaymentMethod = PaymentMethodRemovePermission.Full,
+                saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
+                canRemoveLastPaymentMethod = true,
+                canUpdateFullPaymentMethodDetails = false,
+                integrationMetadata = IntegrationMetadata.CheckoutSession(
+                    id = "cs_test",
+                    instancesKey = instancesKey,
+                ),
+            ),
         ) {
-            networkRule.setupPaymentMethodUpdateResponse(paymentMethodDetails = cbcCardDetails, cardBrand = "visa")
-            editPage.waitUntilVisible()
-            editPage.setCardBrandWithSelector("Visa")
-            editPage.update()
-            editPage.waitUntilMissing()
-            val updatedCbcCard = completedResultPaymentMethods().single()
-            assertThat(updatedCbcCard.card?.displayBrand).isEqualTo("visa")
+            Espresso.pressBack()
         }
+
+        // Enqueue a response so the mutation attempt doesn't fail due to missing network stub.
+        networkRule.enqueue(
+            RequestMatchers.host("api.stripe.com"),
+            RequestMatchers.method("POST"),
+            RequestMatchers.path("/v1/payment_pages/cs_test_abc123"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-apply-discount.json")
+        }
+
+        // If markIntegrationDismissed was not called, this would fail with
+        // "Cannot mutate checkout session while a payment flow is presented."
+        val result = runBlocking { checkout.applyPromotionCode("code") }
+        assertThat(result.isSuccess).isTrue()
     }
 
     private fun launch(
@@ -262,10 +256,8 @@ internal class ManageActivityTest {
         ),
         paymentMethods: List<PaymentMethod> = defaultPaymentMethods(),
         selection: PaymentSelection? = null,
-        newCbcSelectorEnabled: Boolean = false,
         block: Scenario.() -> Unit,
     ) {
-        FeatureFlags.newCbcSelector.setEnabled(newCbcSelectorEnabled)
         ActivityScenario.launchActivityForResult<ManageActivity>(
             ManageContract.createIntent(
                 context = applicationContext,

@@ -1,6 +1,8 @@
 package com.stripe.android.checkout
 
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import java.lang.ref.WeakReference
 
@@ -19,6 +21,24 @@ internal object CheckoutInstances {
             refs.addAll(live.map { WeakReference(it) })
         }
         return live
+    }
+
+    fun ensureNoMutationInFlight(key: String) {
+        this[key].forEach { it.ensureNoMutationInFlight() }
+    }
+
+    fun markIntegrationLaunched(key: String) {
+        this[key].forEach { it.markIntegrationLaunched() }
+    }
+
+    fun markIntegrationDismissed(key: String) {
+        this[key].forEach { it.markIntegrationDismissed() }
+    }
+
+    fun markIntegrationDismissed(paymentMethodMetadata: PaymentMethodMetadata?) {
+        val checkoutSession = paymentMethodMetadata
+            ?.integrationMetadata as? IntegrationMetadata.CheckoutSession ?: return
+        markIntegrationDismissed(checkoutSession.instancesKey)
     }
 
     fun add(key: String, checkout: Checkout) {

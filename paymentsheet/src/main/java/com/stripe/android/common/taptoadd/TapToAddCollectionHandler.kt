@@ -40,6 +40,10 @@ internal interface TapToAddCollectionHandler {
             val displayMessage: ResolvableString?,
         ) : CollectionState
 
+        data class UnsupportedDevice(
+            val error: Throwable,
+        ) : CollectionState
+
         data object Canceled : CollectionState
     }
 
@@ -130,13 +134,19 @@ internal class DefaultTapToAddCollectionHandler(
     }.fold(
         onSuccess = { it },
         onFailure = { error ->
-            if (error is TerminalException && error.errorCode == TerminalErrorCode.CANCELED) {
-                TapToAddCollectionHandler.CollectionState.Canceled
-            } else {
-                TapToAddCollectionHandler.CollectionState.FailedCollection(
-                    error = error,
-                    displayMessage = error.stripeErrorMessage()
-                )
+            when (error) {
+                is TerminalException if error.errorCode == TerminalErrorCode.CANCELED -> {
+                    TapToAddCollectionHandler.CollectionState.Canceled
+                }
+                is TerminalException if unsupportedDeviceErrorCodes.contains(error.errorCode) -> {
+                    TapToAddCollectionHandler.CollectionState.UnsupportedDevice(error = error)
+                }
+                else -> {
+                    TapToAddCollectionHandler.CollectionState.FailedCollection(
+                        error = error,
+                        displayMessage = error.stripeErrorMessage()
+                    )
+                }
             }
         }
     )
@@ -290,3 +300,8 @@ internal class UnsupportedTapToAddCollectionHandler : TapToAddCollectionHandler 
         )
     }
 }
+
+private val unsupportedDeviceErrorCodes = listOf(
+    TerminalErrorCode.TAP_TO_PAY_DEVICE_TAMPERED,
+    TerminalErrorCode.TAP_TO_PAY_UNSUPPORTED_DEVICE,
+)

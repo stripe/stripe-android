@@ -4,8 +4,11 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.checkout.Checkout
+import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
+import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -28,10 +31,12 @@ internal class PaymentSheetCheckoutSessionTest {
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 
-    private val defaultConfiguration = PaymentSheet.Configuration(
+    private val defaultConfiguration = PaymentSheet.Configuration.Builder(
         merchantDisplayName = "Checkout Session Test",
-        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
-    )
+    ).paymentMethodLayout(paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal)
+        .defaultBillingDetails(PaymentSheet.BillingDetails(email = "email@email.com"))
+        .link(PaymentSheet.LinkConfiguration.Builder().display(PaymentSheet.LinkConfiguration.Display.Never).build())
+        .build()
 
     /**
      * Test a successful card setup flow with checkout session (setup mode).
@@ -84,6 +89,8 @@ internal class PaymentSheetCheckoutSessionTest {
             host("api.stripe.com"),
             method("POST"),
             path("/v1/payment_pages/cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh/confirm"),
+            not(hasBodyPart("expected_amount")),
+            not(hasBodyPart("save_payment_method")),
         ) { response ->
             response.testBodyFromFile("checkout-session-confirm-setup.json")
         }
@@ -145,6 +152,7 @@ internal class PaymentSheetCheckoutSessionTest {
             host("api.stripe.com"),
             method("POST"),
             path("/v1/payment_pages/cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh/confirm"),
+            bodyPart("expected_amount", "5099"),
         ) { response ->
             response.testBodyFromFile("checkout-session-confirm.json")
         }

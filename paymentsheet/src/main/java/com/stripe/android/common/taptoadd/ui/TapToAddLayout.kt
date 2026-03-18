@@ -43,7 +43,7 @@ import com.stripe.android.paymentsheet.R
 @Composable
 internal fun TapToAddLayout(
     screen: TapToAddNavigator.Screen,
-    onCancel: () -> Unit,
+    onCancel: (TapToAddNavigator.Action) -> Unit,
 ) {
     Box(
         modifier = Modifier.fillMaxSize().background(MaterialTheme.colors.background)
@@ -82,7 +82,9 @@ internal fun TapToAddLayout(
                         ) {
                             CancelButton(
                                 button = screen.cancelButton,
-                                onClick = onCancel,
+                                onClick = {
+                                    onCancel(screen.onCancelAction)
+                                },
                             )
 
                             screen.ScreenContent(this)
@@ -108,30 +110,55 @@ private fun CancelButton(
             Spacer(Modifier.size(20.dp))
         }
         TapToAddNavigator.CancelButton.Visible -> {
-            val closeResource = if (isSystemInDarkTheme()) {
-                R.drawable.stripe_ic_paymentsheet_tta_close_dark
-            } else {
-                R.drawable.stripe_ic_paymentsheet_tta_close_light
-            }
+            val sharedElementScope = LocalSharedElementScope.current
 
-            Box(Modifier.fillMaxWidth()) {
-                Image(
-                    painter = painterResource(closeResource),
-                    contentDescription = stringResource(com.stripe.android.R.string.stripe_close),
-                    modifier = sizeModifier
-                        .clickable(
-                            enabled = true,
-                            role = Role.Button,
-                            onClick = onClick,
-                        )
-                )
+            sharedElementScope?.let {
+                with(sharedElementScope.sharedTransitionScope) {
+                    VisibleCancelButton(
+                        modifier = Modifier
+                            .sharedElement(
+                                sharedContentState = rememberSharedContentState(SHARED_CANCEL_BUTTON_KEY),
+                                animatedVisibilityScope = sharedElementScope.animatedVisibilityScope
+                            )
+                            .then(sizeModifier),
+                        onClick = onClick
+                    )
+                }
+            } ?: run {
+                VisibleCancelButton(sizeModifier, onClick)
             }
-
-            Spacer(Modifier.size(20.dp))
         }
     }
 }
 
+@Composable
+private fun VisibleCancelButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
+    val closeResource = if (isSystemInDarkTheme()) {
+        R.drawable.stripe_ic_paymentsheet_tta_close_dark
+    } else {
+        R.drawable.stripe_ic_paymentsheet_tta_close_light
+    }
+
+    Box(Modifier.fillMaxWidth()) {
+        Image(
+            painter = painterResource(closeResource),
+            contentDescription = stringResource(com.stripe.android.R.string.stripe_close),
+            modifier = modifier
+                .clickable(
+                    enabled = true,
+                    role = Role.Button,
+                    onClick = onClick,
+                )
+        )
+    }
+
+    Spacer(Modifier.size(20.dp))
+}
+
 internal val LocalTapToAddMaxContentHeight = staticCompositionLocalOf { 0.dp }
 
+private const val SHARED_CANCEL_BUTTON_KEY = "STRIPE_TTA_CANCEL_BUTTON"
 private const val ANIMATION_DURATION = 300

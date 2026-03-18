@@ -42,5 +42,8 @@ enum class CryptoNetwork(val value: String) {
     Worldchain("worldchain"),
 
     @SerialName("xrpl")
-    Xrpl("xrpl")
+    Xrpl("xrpl"),
+
+    @SerialName("sui")
+    Sui("sui")
 }

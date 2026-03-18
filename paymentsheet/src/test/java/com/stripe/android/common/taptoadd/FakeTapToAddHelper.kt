@@ -10,6 +10,7 @@ import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -20,6 +21,8 @@ internal class FakeTapToAddHelper : TapToAddHelper {
 
     private val _nextStep = MutableSharedFlow<TapToAddNextStep>()
     override val nextStep: SharedFlow<TapToAddNextStep> = _nextStep.asSharedFlow()
+
+    override val isTapToAddEnabled: StateFlow<Boolean> = MutableStateFlow(true)
 
     suspend fun emitNextStep(nextStep: TapToAddNextStep) {
         _nextStep.emit(nextStep)
