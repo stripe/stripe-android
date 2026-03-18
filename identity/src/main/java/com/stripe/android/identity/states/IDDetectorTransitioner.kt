@@ -156,7 +156,6 @@ internal class IDDetectorTransitioner(
         val nowTimestampMs = SystemClock.elapsedRealtime()
 
         return when {
-
             timeoutAt.hasPassedNow() -> {
                 Log.d(TAG, "Timeout reached during scanning")
                 IdentityScanState.TimeOut(foundState.type, foundState.transitioner)
