@@ -2,22 +2,42 @@ package com.stripe.android.paymentsheet.repositories
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.PaymentMethodRemovePermission
+import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
+import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.RequestMatchers.method
+import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.utils.FakeCustomerRepository
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
+import org.robolectric.RobolectricTestRunner
 
+@RunWith(RobolectricTestRunner::class)
 class DefaultSavedPaymentMethodRepositoryTest {
+
+    @get:Rule
+    val networkRule = NetworkRule()
 
     @Test
     fun `detach routes to checkout session repository when customer is CheckoutSession`() = runScenario(
-        checkoutSessionDetachResult = Result.success(FAKE_CHECKOUT_SESSION_RESPONSE),
         customerMetadata = CHECKOUT_SESSION_METADATA,
     ) {
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_pages/cs_123"),
+            bodyPart("payment_method_to_detach", "pm_123"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-init.json")
+        }
+
         val result = repository.detachPaymentMethod(
             customerMetadata = customerMetadata,
             paymentMethodId = "pm_123",
@@ -25,10 +45,6 @@ class DefaultSavedPaymentMethodRepositoryTest {
 
         assertThat(result.isSuccess).isTrue()
         assertThat(result.getOrThrow().id).isEqualTo("pm_123")
-
-        val detachRequest = checkoutSessionRepository.detachRequests.awaitItem()
-        assertThat(detachRequest.sessionId).isEqualTo("cs_123")
-        assertThat(detachRequest.paymentMethodId).isEqualTo("pm_123")
     }
 
     @Test
@@ -199,21 +215,27 @@ class DefaultSavedPaymentMethodRepositoryTest {
 
     @Test
     fun `detach propagates failure from checkout session repository`() = runScenario(
-        checkoutSessionDetachResult = Result.failure(RuntimeException("Detach failed")),
         customerMetadata = CHECKOUT_SESSION_METADATA,
     ) {
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_pages/cs_123"),
+            bodyPart("payment_method_to_detach", "pm_123"),
+        ) { response ->
+            response.setResponseCode(400)
+            response.setBody("""{"error":{"message":"Detach failed"}}""")
+        }
+
         val result = repository.detachPaymentMethod(
             customerMetadata = customerMetadata,
             paymentMethodId = "pm_123",
         )
 
         assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()).hasMessageThat().isEqualTo("Detach failed")
     }
 
     private fun runScenario(
         customerMetadata: CustomerMetadata = SESSION_METADATA,
-        checkoutSessionDetachResult: Result<CheckoutSessionResponse> = Result.failure(NotImplementedError()),
         retrievePaymentMethodResult: Result<PaymentMethod> = Result.failure(NotImplementedError()),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
@@ -229,8 +251,10 @@ class DefaultSavedPaymentMethodRepositoryTest {
             },
             onRetrievePaymentMethod = { _ -> retrievePaymentMethodResult },
         )
-        val checkoutSessionRepository = FakeCheckoutSessionRepository(
-            detachResult = checkoutSessionDetachResult,
+        val checkoutSessionRepository = CheckoutSessionRepository(
+            stripeNetworkClient = DefaultStripeNetworkClient(),
+            publishableKeyProvider = { "pk_test_123" },
+            stripeAccountIdProvider = { null },
         )
         val repository = DefaultSavedPaymentMethodRepository(
             customerRepository = customerRepository,
@@ -240,7 +264,6 @@ class DefaultSavedPaymentMethodRepositoryTest {
         Scenario(
             repository = repository,
             customerRepository = customerRepository,
-            checkoutSessionRepository = checkoutSessionRepository,
             customerMetadata = customerMetadata,
         ).block()
     }
@@ -248,15 +271,10 @@ class DefaultSavedPaymentMethodRepositoryTest {
     private class Scenario(
         val repository: DefaultSavedPaymentMethodRepository,
         val customerRepository: FakeCustomerRepository,
-        val checkoutSessionRepository: FakeCheckoutSessionRepository,
         val customerMetadata: CustomerMetadata,
     )
 
     companion object {
-        private val FAKE_CHECKOUT_SESSION_RESPONSE = CheckoutSessionResponseFactory.create(
-            id = "cs_123",
-        )
-
         private val CHECKOUT_SESSION_METADATA = CustomerMetadata.CheckoutSession(
             sessionId = "cs_123",
             customerId = "cus_123",

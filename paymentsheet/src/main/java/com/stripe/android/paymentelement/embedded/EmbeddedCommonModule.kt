@@ -5,6 +5,7 @@ import com.stripe.android.common.taptoadd.TapToAddConnectionModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.StripeNetworkClientModule
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DefaultDurationProvider
@@ -29,7 +30,6 @@ import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.LoadingEventReporter
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepositoryModule
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.DefaultSavedPaymentMethodRepository
@@ -52,7 +52,7 @@ import kotlin.coroutines.CoroutineContext
         PaymentsIntegrityModule::class,
         PaymentElementRequestSurfaceModule::class,
         PaymentConfigurationModule::class,
-        CheckoutSessionRepositoryModule::class,
+        StripeNetworkClientModule::class,
     ],
 )
 internal interface EmbeddedCommonModule {
