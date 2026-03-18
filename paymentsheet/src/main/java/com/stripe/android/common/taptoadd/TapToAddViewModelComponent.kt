@@ -66,6 +66,7 @@ import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.DefaultSavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
+import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.stripeterminal.external.models.TapToPayUxConfiguration
 import dagger.Binds
 import dagger.BindsInstance
@@ -166,6 +167,11 @@ internal interface TapToAddViewModelModule {
     ): EventReporter
 
     @Binds
+    fun bindsTapToAddImageRepository(
+        tapToAddImageRepository: DefaultTapToAddImageRepository
+    ): TapToAddImageRepository
+
+    @Binds
     fun bindsTapToAddCollectingInteractorFactory(
         tapToAddCollectingInteractorFactory: DefaultTapToAddCollectingInteractor.Factory
     ): TapToAddCollectingInteractor.Factory
@@ -204,6 +210,12 @@ internal interface TapToAddViewModelModule {
         @Singleton
         fun providesTapToAddUxConfiguration(): TapToPayUxConfiguration {
             return createTapToAddUxConfiguration()
+        }
+
+        @Provides
+        @Singleton
+        fun provideStripeImageLoader(context: Context): StripeImageLoader {
+            return StripeImageLoader(context)
         }
 
         @Provides
