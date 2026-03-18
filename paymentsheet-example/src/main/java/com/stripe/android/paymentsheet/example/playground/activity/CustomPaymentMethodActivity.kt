@@ -6,7 +6,12 @@ import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -43,7 +48,13 @@ class CustomPaymentMethodActivity : AppCompatActivity() {
         setContent {
             PaymentSheetExampleTheme {
                 Column(
-                    modifier = Modifier.padding(10.dp),
+                    modifier = Modifier
+                        .padding(
+                            paddingValues = WindowInsets.systemBars.only(
+                                WindowInsetsSides.Horizontal + WindowInsetsSides.Top
+                            ).asPaddingValues()
+                        )
+                        .padding(10.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Title(customPaymentMethodType = customPaymentMethodType)
