@@ -5,6 +5,8 @@ import android.content.Context
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.networking.ExponentialBackoffRetryDelaySupplier
+import com.stripe.android.core.networking.RetryDelaySupplier
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -23,6 +25,7 @@ import com.stripe.stripeterminal.external.models.TapUseCase
 import com.stripe.stripeterminal.external.models.TerminalErrorCode
 import com.stripe.stripeterminal.external.models.TerminalException
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -54,14 +57,17 @@ internal interface TapToAddConnectionManager {
             isSimulated: Boolean,
         ): TapToAddConnectionManager {
             return if (isStripeTerminalSdkAvailable()) {
-                DefaultTapToAddConnectionManager(
-                    applicationContext = applicationContext,
-                    workContext = workContext,
-                    paymentConfiguration = paymentConfiguration,
-                    errorReporter = errorReporter,
-                    terminalWrapper = terminalWrapper,
-                    logger = logger,
-                    isSimulated = isSimulated,
+                TapToAddRetriableConnectionManager(
+                    tapToAddConnectionManager = DefaultTapToAddConnectionManager(
+                        applicationContext = applicationContext,
+                        workContext = workContext,
+                        paymentConfiguration = paymentConfiguration,
+                        errorReporter = errorReporter,
+                        terminalWrapper = terminalWrapper,
+                        logger = logger,
+                        isSimulated = isSimulated,
+                    ),
+                    retryDelaySupplier = ExponentialBackoffRetryDelaySupplier(),
                 )
             } else {
                 UnsupportedTapToAddConnectionManager()
@@ -298,6 +304,43 @@ internal class UnsupportedTapToAddConnectionManager : TapToAddConnectionManager 
 
     override suspend fun connect() {
         // No-op
+    }
+}
+
+internal class TapToAddRetriableConnectionManager(
+    private val tapToAddConnectionManager: TapToAddConnectionManager,
+    private val retryDelaySupplier: RetryDelaySupplier,
+) : TapToAddConnectionManager by tapToAddConnectionManager {
+    override suspend fun connect() {
+        var retriesRemaining = MAX_RETRIES
+
+        while (true) {
+            runCatching {
+                tapToAddConnectionManager.connect()
+            }.fold(
+                onSuccess = {
+                    break
+                },
+                onFailure = { error ->
+                    if (retriesRemaining == 0) {
+                        throw error
+                    } else {
+                        delay(
+                            retryDelaySupplier.getDelay(
+                                maxRetries = MAX_RETRIES,
+                                remainingRetries = retriesRemaining
+                            )
+                        )
+
+                        retriesRemaining--
+                    }
+                }
+            )
+        }
+    }
+
+    private companion object {
+        private const val MAX_RETRIES = 3
     }
 }
 
