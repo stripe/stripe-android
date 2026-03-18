@@ -4565,6 +4565,7 @@ internal class DefaultPaymentElementLoaderTest {
             elementsSessionLoader = ElementsSessionLoader(
                 elementsSessionRepository = elementsSessionRepository,
             ),
+            createCustomerMetadata = CreateCustomerMetadata(errorReporter),
         )
     }
 
