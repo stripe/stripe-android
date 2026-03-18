@@ -164,6 +164,8 @@ internal class DefaultPaymentElementLoaderTest {
             )
         )
 
+        consumeLoadingEvents()
+
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
@@ -334,6 +336,8 @@ internal class DefaultPaymentElementLoaderTest {
             ).getOrThrow().paymentMethodMetadata.isGooglePayReady
         ).isFalse()
 
+        consumeLoadingEvents()
+
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
@@ -361,6 +365,8 @@ internal class DefaultPaymentElementLoaderTest {
             PaymentSelection.Saved(paymentMethod = PAYMENT_METHODS.first())
         )
 
+        consumeLoadingEvents()
+
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
@@ -385,6 +391,8 @@ internal class DefaultPaymentElementLoaderTest {
         ).getOrThrow()
 
         assertThat(result.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
+
+        consumeLoadingEvents()
 
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
@@ -958,6 +966,8 @@ internal class DefaultPaymentElementLoaderTest {
         ).getOrThrow()
 
         assertThat(result.validationError).isEqualTo(PaymentIntentInTerminalState(Succeeded))
+
+        consumeLoadingEvents()
 
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
@@ -1841,6 +1851,8 @@ internal class DefaultPaymentElementLoaderTest {
             ),
         )
 
+        consumeLoadingEvents()
+
         assertThat(eventReporter.loadStartedTurbine.awaitItem().initializedViaCompose).isFalse()
         val loadSucceededCall = eventReporter.loadSucceededTurbine.awaitItem()
         assertThat(loadSucceededCall.paymentSelection)
@@ -2174,6 +2186,8 @@ internal class DefaultPaymentElementLoaderTest {
 
         assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(AlongsideSaveForFutureUse)
 
+        consumeLoadingEvents()
+
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
@@ -2197,6 +2211,8 @@ internal class DefaultPaymentElementLoaderTest {
 
         assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
 
+        consumeLoadingEvents()
+
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
@@ -2219,6 +2235,8 @@ internal class DefaultPaymentElementLoaderTest {
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(AlongsideSaveForFutureUse)
+
+        consumeLoadingEvents()
 
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
@@ -2248,6 +2266,8 @@ internal class DefaultPaymentElementLoaderTest {
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
+
+        consumeLoadingEvents()
 
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
@@ -2285,6 +2305,8 @@ internal class DefaultPaymentElementLoaderTest {
             // the feature flag should override it to InsteadOfSaveForFutureUse
             assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
 
+            consumeLoadingEvents()
+
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
         }
@@ -2319,6 +2341,8 @@ internal class DefaultPaymentElementLoaderTest {
         // Feature flag should override the hasUsedLink check
         assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(null)
 
+        consumeLoadingEvents()
+
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
@@ -2343,6 +2367,8 @@ internal class DefaultPaymentElementLoaderTest {
 
         // Feature flag should override the disableLinkSignup check
         assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(null)
+
+        consumeLoadingEvents()
 
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
@@ -2410,6 +2436,8 @@ internal class DefaultPaymentElementLoaderTest {
 
         assertThat(customerPaymentMethods).isNotNull()
         assertThat(customerPaymentMethods).containsExactlyElementsIn(paymentMethods)
+
+        consumeLoadingEvents()
 
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
@@ -2716,6 +2744,8 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(state.paymentMethodMetadata.customerMetadata?.canUpdateFullPaymentMethodDetails)
                 .isEqualTo(true)
 
+            consumeLoadingEvents()
+
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
         }
@@ -2764,6 +2794,8 @@ internal class DefaultPaymentElementLoaderTest {
                 .isEqualTo(true)
             assertThat(state.paymentMethodMetadata.customerMetadata?.canUpdateFullPaymentMethodDetails)
                 .isEqualTo(true)
+
+            consumeLoadingEvents()
 
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
@@ -2814,6 +2846,8 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(state.paymentMethodMetadata.customerMetadata?.canUpdateFullPaymentMethodDetails)
                 .isEqualTo(true)
 
+            consumeLoadingEvents()
+
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
         }
@@ -2862,6 +2896,8 @@ internal class DefaultPaymentElementLoaderTest {
                 .isEqualTo(true)
             assertThat(state.paymentMethodMetadata.customerMetadata?.canUpdateFullPaymentMethodDetails)
                 .isEqualTo(true)
+
+            consumeLoadingEvents()
 
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
@@ -2912,6 +2948,8 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(state.paymentMethodMetadata.customerMetadata?.canUpdateFullPaymentMethodDetails)
                 .isEqualTo(true)
 
+            consumeLoadingEvents()
+
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
         }
@@ -2943,6 +2981,8 @@ internal class DefaultPaymentElementLoaderTest {
                 .isEqualTo(true)
             assertThat(state.paymentMethodMetadata.customerMetadata?.canUpdateFullPaymentMethodDetails)
                 .isEqualTo(false)
+
+            consumeLoadingEvents()
 
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
@@ -3212,6 +3252,8 @@ internal class DefaultPaymentElementLoaderTest {
 
             assertThat(result.customer?.paymentMethods)
                 .containsExactlyElementsIn(expectedPaymentMethods)
+
+            consumeLoadingEvents()
 
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
@@ -3573,6 +3615,8 @@ internal class DefaultPaymentElementLoaderTest {
             )
 
             assertThat(repository.lastParams?.savedPaymentMethodSelectionId).isNull()
+
+            consumeLoadingEvents()
 
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
@@ -3989,6 +4033,8 @@ internal class DefaultPaymentElementLoaderTest {
 
         test(requireNotNull(state.paymentMethodMetadata.customerMetadata))
 
+        consumeLoadingEvents()
+
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
@@ -4141,6 +4187,8 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(createCall.linkStateResult).isNotNull()
         analyticsMetadataFactory.validate()
 
+        consumeLoadingEvents()
+
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
@@ -4259,6 +4307,8 @@ internal class DefaultPaymentElementLoaderTest {
                 initializedViaCompose = false,
             ),
         )
+
+        consumeLoadingEvents()
 
         assertThat(eventReporter.loadStartedTurbine.awaitItem().initializedViaCompose).isFalse()
 
@@ -4388,6 +4438,8 @@ internal class DefaultPaymentElementLoaderTest {
             )
         }
 
+        consumeLoadingEvents()
+
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
@@ -4408,13 +4460,6 @@ internal class DefaultPaymentElementLoaderTest {
         ).apply {
             runTest {
                 block()
-                // These read operations are side effects of loading (fetching payment methods
-                // for legacy customers, fetching customer email for Link). Tests that care about
-                // these interactions consume them explicitly via awaitItem(). We ignore any
-                // remaining events so ensureAllEventsConsumed() only checks mutation operations
-                // (detach, update, setDefault) which should always be explicitly verified.
-                customerRepository.getPaymentMethodsRequests.cancelAndIgnoreRemainingEvents()
-                customerRepository.retrieveCustomerRequests.cancelAndIgnoreRemainingEvents()
             }
             eventReporter.validate()
             customerRepository.ensureAllEventsConsumed()
@@ -4432,6 +4477,11 @@ internal class DefaultPaymentElementLoaderTest {
         val prefsRepository: FakePrefsRepository,
         val customerRepository: FakeCustomerRepository,
     )
+
+    private suspend fun Scenario.consumeLoadingEvents() {
+        customerRepository.getPaymentMethodsRequests.cancelAndIgnoreRemainingEvents()
+        customerRepository.retrieveCustomerRequests.cancelAndIgnoreRemainingEvents()
+    }
 
     private fun Scenario.createPaymentElementLoader(
         isGooglePayReady: Boolean = true,
@@ -4610,6 +4660,8 @@ internal class DefaultPaymentElementLoaderTest {
                 initializedViaCompose = false,
             ),
         ).getOrThrow()
+
+        consumeLoadingEvents()
 
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
