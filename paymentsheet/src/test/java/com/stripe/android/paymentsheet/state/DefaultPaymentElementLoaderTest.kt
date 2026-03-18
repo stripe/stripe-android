@@ -4537,7 +4537,6 @@ internal class DefaultPaymentElementLoaderTest {
                     return GooglePayRepository { flowOf(isGooglePayReady) }
                 }
             },
-            customerRepository = customerRepo,
             lpmRepository = LpmRepository(),
             logger = Logger.noop(),
             eventReporter = eventReporter,
@@ -4552,7 +4551,10 @@ internal class DefaultPaymentElementLoaderTest {
             analyticsMetadataFactory = analyticsMetadataFactory,
             tapToAddConnectionStarter = tapToAddConnectionStarter,
             paymentConfiguration = { PaymentConfiguration(publishableKey = if (isLiveMode) "pk_live" else "pk_test") },
-            paymentMethodFilter = paymentMethodFilter,
+            createCustomerState = CreateCustomerState(
+                customerRepository = customerRepo,
+                paymentMethodFilter = paymentMethodFilter,
+            ),
             cardFundingFilterFactory = PaymentSheetCardFundingFilter.Factory(),
             checkoutSessionLoader = CheckoutSessionLoader(),
             elementsSessionLoader = ElementsSessionLoader(
