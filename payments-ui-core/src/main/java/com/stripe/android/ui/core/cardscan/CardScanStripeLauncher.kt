@@ -7,6 +7,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.core.content.IntentCompat
 import com.stripe.android.stripecardscan.cardscan.CardScanConfiguration
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetParams
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
@@ -39,8 +40,9 @@ internal class CardScanStripeLauncher(
     }
 
     internal fun parseActivityResult(intent: Intent?): CardScanResult {
-        val sheetResult: CardScanSheetResult = intent?.getParcelableExtra(INTENT_PARAM_RESULT)
-            ?: CardScanSheetResult.Failed(UnknownScanException("No data in the result intent"))
+        val sheetResult: CardScanSheetResult = intent?.let {
+            IntentCompat.getParcelableExtra(it, INTENT_PARAM_RESULT, CardScanSheetResult::class.java)
+        } ?: CardScanSheetResult.Failed(UnknownScanException("No data in the result intent"))
 
         val scanResult = when (sheetResult) {
             is CardScanSheetResult.Completed -> {

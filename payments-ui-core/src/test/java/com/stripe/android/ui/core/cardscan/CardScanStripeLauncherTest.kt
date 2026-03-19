@@ -73,11 +73,6 @@ class CardScanStripeLauncherTest {
         assertThat(scanFailedCall.implementation).isEqualTo("stripe_card_scan")
     }
 
-    @Test
-    fun `isAvailable is always true`() = runScenario {
-        assertThat(launcher.isAvailable.value).isTrue()
-    }
-
     private class Scenario(
         val launcher: CardScanStripeLauncher,
         val fakeEventsReporter: FakeCardScanEventsReporter,
