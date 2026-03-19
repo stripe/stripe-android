@@ -8,7 +8,6 @@ import androidx.compose.runtime.compositionLocalOf
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class CardScanConfig(
     val isStripeCardScanAllowed: Boolean = false,
-    val elementsSessionId: String? = null,
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

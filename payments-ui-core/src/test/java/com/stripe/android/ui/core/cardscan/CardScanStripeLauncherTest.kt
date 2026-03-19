@@ -84,12 +84,10 @@ class CardScanStripeLauncherTest {
     )
 
     private fun runScenario(
-        elementsSessionId: String? = "ess_test_123",
         block: suspend Scenario.() -> Unit
     ) = runTest {
         val fakeEventsReporter = FakeCardScanEventsReporter()
         val launcher = CardScanStripeLauncher(
-            elementsSessionId = elementsSessionId,
             eventsReporter = fakeEventsReporter,
         )
 

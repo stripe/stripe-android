@@ -83,7 +83,6 @@ import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeElementsSessionRepository
 import com.stripe.android.utils.FakeElementsSessionRepository.Companion.DEFAULT_ELEMENTS_SESSION_CONFIG_ID
-import com.stripe.android.utils.FakeElementsSessionRepository.Companion.DEFAULT_ELEMENTS_SESSION_ID
 import com.stripe.android.utils.FakePaymentMethodFilter
 import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.flow.flowOf
@@ -160,7 +159,6 @@ internal class DefaultPaymentElementLoaderTest {
                         paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
                     ),
                     integrationMetadata = IntegrationMetadata.IntentFirst("pi_1234_secret_1234"),
-                    elementsSessionId = DEFAULT_ELEMENTS_SESSION_ID,
                 ),
             )
         )

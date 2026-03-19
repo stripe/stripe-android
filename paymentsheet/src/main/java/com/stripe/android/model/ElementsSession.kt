@@ -91,7 +91,8 @@ internal data class ElementsSession(
         get() = flags[Flag.ELEMENTS_MOBILE_ANDROID_TAP_TO_ADD_ENABLED] == true
 
     val isStripeCardScanAllowed: Boolean
-        get() = flags[Flag.MOBILE_ALLOW_STRIPECARDSCAN] == true
+        // TODO: revert to flags[Flag.MOBILE_ALLOW_STRIPECARDSCAN] == true once server flag is live
+        get() = true
 
     val onBehalfOf: String?
         get() = accountId.takeIf { !it.equals(merchantId) }

@@ -96,8 +96,6 @@ internal class FormActivity : AppCompatActivity() {
                         cardScanConfig = CardScanConfig(
                             isStripeCardScanAllowed = args?.paymentMethodMetadata
                                 ?.isStripeCardScanAllowed == true,
-                            elementsSessionId = args?.paymentMethodMetadata
-                                ?.elementsSessionId,
                         ),
                         onClick = {
                             confirmationHelper.confirm()

@@ -73,7 +73,6 @@ internal object PaymentMethodMetadataFactory {
         isTapToAddSupported: Boolean = false,
         experimentsData: ElementsSession.ExperimentsData? = null,
         isStripeCardScanAllowed: Boolean = false,
-        elementsSessionId: String? = null,
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -139,7 +138,6 @@ internal object PaymentMethodMetadataFactory {
             isTapToAddSupported = isTapToAddSupported,
             experimentsData = experimentsData,
             isStripeCardScanAllowed = isStripeCardScanAllowed,
-            elementsSessionId = elementsSessionId,
         )
     }
 

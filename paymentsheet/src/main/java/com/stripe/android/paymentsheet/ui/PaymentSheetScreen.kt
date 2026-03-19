@@ -370,7 +370,6 @@ private fun PaymentSheetContent(
                 eventReporter = viewModel.eventReporter,
                 cardScanConfig = CardScanConfig(
                     isStripeCardScanAllowed = metadata?.isStripeCardScanAllowed == true,
-                    elementsSessionId = metadata?.elementsSessionId,
                 ),
             ) {
                 currentScreen.Content(

@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 internal class CardScanStripeLauncher(
-    private val elementsSessionId: String?,
     private val eventsReporter: CardScanEventsReporter,
 ) : CardScanLauncher {
 
@@ -35,7 +34,7 @@ internal class CardScanStripeLauncher(
         _isLaunching = true
         eventsReporter.onCardScanStarted(implementation)
         activityLauncher.launch(
-            CardScanSheetParams(CardScanConfiguration(elementsSessionId = elementsSessionId))
+            CardScanSheetParams(CardScanConfiguration(elementsSessionId = null))
         )
     }
 
@@ -90,13 +89,11 @@ internal class CardScanStripeLauncher(
 
         @Composable
         internal fun rememberCardScanStripeLauncher(
-            elementsSessionId: String?,
             eventsReporter: CardScanEventsReporter,
             onResult: (CardScanResult) -> Unit,
         ): CardScanStripeLauncher {
-            val launcher = remember(elementsSessionId, eventsReporter) {
+            val launcher = remember(eventsReporter) {
                 CardScanStripeLauncher(
-                    elementsSessionId = elementsSessionId,
                     eventsReporter = eventsReporter,
                 )
             }
