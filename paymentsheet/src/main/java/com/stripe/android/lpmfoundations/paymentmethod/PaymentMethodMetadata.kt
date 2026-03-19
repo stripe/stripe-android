@@ -465,7 +465,7 @@ internal data class PaymentMethodMetadata(
                 analyticsMetadata = AnalyticsMetadata(emptyMap()), // This is unused in customer sheet.
                 isTapToAddSupported = false, // This is unused in customer sheet.
                 experimentsData = elementsSession.experimentsData,
-                isStripeCardScanAllowed = false,
+                isStripeCardScanAllowed = elementsSession.isStripeCardScanAllowed,
             )
         }
     }
