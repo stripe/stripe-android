@@ -1292,6 +1292,7 @@ internal class PaymentSheetActivityTest {
         ) { linkHandler, savedStateHandle ->
             PaymentSheetViewModel(
                 args = args,
+                customViewModelScope = CoroutineScope(Dispatchers.Unconfined),
                 eventReporter = eventReporter,
                 paymentElementLoader = FakePaymentElementLoader(
                     stripeIntent = paymentIntent,

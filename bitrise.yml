@@ -45,6 +45,7 @@ stages:
       - run-paymentsheet-end-to-end-tests: { }
       - run-crypto-onramp-example-e2e-tests: { }
       - check-dependencies: { }
+      - verify-publish-pom: { }
   stage-run-connect-e2e-tests:
     workflows:
       - run-connect-e2e-tests: { }
@@ -384,6 +385,17 @@ workflows:
       - script@1:
           inputs:
             - content: ruby scripts/dependencies/check_transitive_dependencies.rb
+  verify-publish-pom:
+    before_run:
+      - prepare_all
+    after_run:
+      - conclude_all
+    steps:
+      - script@1:
+          title: Verify Maven publish POMs
+          timeout: 1800
+          inputs:
+            - content: bash ./scripts/verify_publish_pom.sh
   start_connections_emulator:
     steps:
       - avd-manager@2:

@@ -40,7 +40,7 @@ internal class CheckoutSessionLoaderTest {
 
     private companion object {
         private val CHECKOUT_SESSION_RESPONSE = CheckoutSessionResponseFactory.create(
-            id = "cs_test_123",
+            id = "cs_test_abc123",
             amount = 5099,
             elementsSession = ElementsSession(
                 linkSettings = null,

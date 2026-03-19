@@ -2,11 +2,14 @@ package com.stripe.android.common.taptoadd.ui
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.stripe.android.common.taptoadd.LocalTapToAddImageRepository
+import com.stripe.android.common.taptoadd.TapToAddImageRepository
 import com.stripe.android.uicore.StripeColors
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
@@ -15,13 +18,18 @@ import android.graphics.Color as BaseAndroidColor
 
 @Composable
 internal fun TapToAddTheme(
+    imageRepository: TapToAddImageRepository?,
     content: @Composable () -> Unit,
 ) {
     StripeTheme(
         colors = TapToAddThemeDefaults.colors,
         typography = TapToAddThemeDefaults.typography,
     ) {
-        content()
+        CompositionLocalProvider(
+            LocalTapToAddImageRepository provides imageRepository
+        ) {
+            content()
+        }
     }
 }
 

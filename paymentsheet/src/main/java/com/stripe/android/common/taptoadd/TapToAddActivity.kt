@@ -42,6 +42,9 @@ internal class TapToAddActivity : AppCompatActivity() {
     @Inject
     lateinit var tapToAddRegistrar: TapToAddRegistrar
 
+    @Inject
+    lateinit var tapToAddImageRepository: TapToAddImageRepository
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -82,7 +85,7 @@ internal class TapToAddActivity : AppCompatActivity() {
                 }
             }
 
-            TapToAddTheme {
+            TapToAddTheme(tapToAddImageRepository) {
                 val systemBarStyle = remember {
                     SystemBarStyle.light(
                         scrim = Color.TRANSPARENT,

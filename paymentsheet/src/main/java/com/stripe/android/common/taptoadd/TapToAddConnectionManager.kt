@@ -2,10 +2,11 @@ package com.stripe.android.common.taptoadd
 
 import android.annotation.SuppressLint
 import android.content.Context
-import androidx.annotation.RestrictTo
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.networking.ExponentialBackoffRetryDelaySupplier
+import com.stripe.android.core.networking.RetryDelaySupplier
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -24,10 +25,11 @@ import com.stripe.stripeterminal.external.models.TapUseCase
 import com.stripe.stripeterminal.external.models.TerminalErrorCode
 import com.stripe.stripeterminal.external.models.TerminalException
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
@@ -38,19 +40,10 @@ internal interface TapToAddConnectionManager {
     val isSupported: Boolean
 
     /**
-     * Indicates if the NFC reader has been connected to.
+     * Connects to the NFC reader. Successful completion of this function indicates a successful connection while
+     * an interruption will result from a connection failure
      */
-    val isConnected: Boolean
-
-    /**
-     * Starts connecting to the NFC reader. If already connected or unsupported, will do nothing.
-     */
-    fun connect()
-
-    /**
-     * Waits for connection to NFC reader to be completed or returns current connection status of the NFC reader.
-     */
-    suspend fun awaitConnection(): Result<Boolean>
+    suspend fun connect()
 
     companion object {
         fun create(
@@ -64,14 +57,17 @@ internal interface TapToAddConnectionManager {
             isSimulated: Boolean,
         ): TapToAddConnectionManager {
             return if (isStripeTerminalSdkAvailable()) {
-                DefaultTapToAddConnectionManager(
-                    applicationContext = applicationContext,
-                    workContext = workContext,
-                    paymentConfiguration = paymentConfiguration,
-                    errorReporter = errorReporter,
-                    terminalWrapper = terminalWrapper,
-                    logger = logger,
-                    isSimulated = isSimulated,
+                TapToAddRetriableConnectionManager(
+                    tapToAddConnectionManager = DefaultTapToAddConnectionManager(
+                        applicationContext = applicationContext,
+                        workContext = workContext,
+                        paymentConfiguration = paymentConfiguration,
+                        errorReporter = errorReporter,
+                        terminalWrapper = terminalWrapper,
+                        logger = logger,
+                        isSimulated = isSimulated,
+                    ),
+                    retryDelaySupplier = ExponentialBackoffRetryDelaySupplier(),
                 )
             } else {
                 UnsupportedTapToAddConnectionManager()
@@ -83,18 +79,17 @@ internal interface TapToAddConnectionManager {
 @OptIn(TapToAddPreview::class)
 internal class DefaultTapToAddConnectionManager(
     applicationContext: Context,
-    workContext: CoroutineContext,
+    private val workContext: CoroutineContext,
     private val paymentConfiguration: Provider<PaymentConfiguration>,
     private val errorReporter: ErrorReporter,
     private val terminalWrapper: TerminalWrapper,
     private val logger: Logger,
     isSimulated: Boolean,
 ) : TapToAddConnectionManager, TerminalListener, TapToPayReaderListener {
-    private var connectionTask: CompletableDeferred<Boolean>? = null
+    private var connectionTask: CompletableDeferred<Unit>? = null
 
     private val discoveryConfiguration = DiscoveryConfiguration.TapToPayDiscoveryConfiguration(isSimulated)
-    private val workScope = CoroutineScope(workContext)
-    private val connectionStartLock = Mutex()
+    private val connectionTaskLock = Mutex()
 
     override val isSupported: Boolean
         get() {
@@ -103,9 +98,6 @@ internal class DefaultTapToAddConnectionManager(
                 discoveryConfiguration = discoveryConfiguration,
             ).isSupported
         }
-
-    override val isConnected: Boolean
-        get() = terminal().connectedReader != null
 
     init {
         if (!terminalWrapper.isInitialized()) {
@@ -121,70 +113,122 @@ internal class DefaultTapToAddConnectionManager(
         }
     }
 
-    override fun connect() {
-        workScope.launch {
-            val canContinue = connectionStartLock.withLock {
-                if (!isSupported || isConnected || connectionTask?.isActive == true) {
-                    false
-                } else {
+    override suspend fun connect() = withContext(workContext) {
+        runCatching {
+            if (!isSupported) {
+                throw IllegalStateException("Tap to Add is not supported by this device!")
+            }
+
+            if (terminal().connectedReader != null) {
+                return@withContext
+            }
+
+            val existingTask = connectionTaskLock.withLock {
+                return@withLock connectionTask ?: run {
                     connectionTask = CompletableDeferred()
-                    true
+                    null
                 }
             }
 
-            if (!canContinue) {
-                return@launch
+            existingTask?.let { task ->
+                return@withContext task.await()
             }
 
-            try {
-                discoverReaders()
-            } catch (exception: SecurityException) {
-                handleConnectError(
-                    error = exception,
-                    errorEvent = ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_LOCATION_PERMISSIONS_FAILURE,
-                )
+            val discoverReadersResult = discoverReaders()
+
+            if (discoverReadersResult is DiscoverCallResult.CollectedReaders) {
+                connectReader(discoverReadersResult.readers)
             }
-        }
-    }
-
-    override suspend fun awaitConnection(): Result<Boolean> {
-        return runCatching {
-            isConnected || connectionTask?.await() ?: false
-        }
-    }
-
-    @SuppressLint("MissingPermission")
-    private fun discoverReaders() {
-        terminal().discoverReaders(
-            config = discoveryConfiguration,
-            discoveryListener = object : DiscoveryListener {
-                override fun onUpdateDiscoveredReaders(readers: List<Reader>) {
-                    onUpdatedReaders(readers)
+        }.fold(
+            onSuccess = {
+                connectionTaskLock.withLock {
+                    connectionTask?.complete(Unit)
+                    connectionTask = null
                 }
             },
-            callback = object : Callback {
-                override fun onFailure(e: TerminalException) {
-                    handleConnectError(
-                        error = e,
-                        errorEvent = ErrorReporter.ExpectedErrorEvent.TAP_TO_ADD_DISCOVER_READERS_CALL_FAILURE,
-                    )
+            onFailure = { error ->
+                connectionTaskLock.withLock {
+                    connectionTask?.completeExceptionally(error)
+                    connectionTask = null
                 }
 
-                override fun onSuccess() {
-                    errorReporter.report(ErrorReporter.SuccessEvent.TAP_TO_ADD_DISCOVER_READERS_CALL_SUCCESS)
-                }
+                throw error
             }
         )
     }
 
-    private fun onUpdatedReaders(readers: List<Reader>) {
+    @SuppressLint("MissingPermission")
+    private suspend fun discoverReaders() = suspendCancellableCoroutine { continuation ->
+        try {
+            val cancellable = terminal().discoverReaders(
+                config = discoveryConfiguration,
+                discoveryListener = object : DiscoveryListener {
+                    override fun onUpdateDiscoveredReaders(readers: List<Reader>) {
+                        continuation.resumeWith(Result.success(DiscoverCallResult.CollectedReaders(readers)))
+                    }
+                },
+                callback = object : Callback {
+                    override fun onFailure(e: TerminalException) {
+                        if (e.isAlreadyConnectedToReader()) {
+                            errorReporter.report(
+                                ErrorReporter.SuccessEvent.TAP_TO_ADD_DISCOVER_READERS_CALL_SUCCESS
+                            )
+
+                            continuation.resumeWith(Result.success(DiscoverCallResult.AlreadyConnected))
+                        } else {
+                            reportError(
+                                error = e,
+                                errorEvent =
+                                    ErrorReporter.ExpectedErrorEvent.TAP_TO_ADD_DISCOVER_READERS_CALL_FAILURE,
+                            )
+
+                            continuation.resumeWith(Result.failure(e))
+                        }
+                    }
+
+                    override fun onSuccess() {
+                        errorReporter.report(
+                            ErrorReporter.SuccessEvent.TAP_TO_ADD_DISCOVER_READERS_CALL_SUCCESS
+                        )
+                    }
+                }
+            )
+
+            continuation.invokeOnCancellation {
+                cancellable.cancel(
+                    object : Callback {
+                        override fun onSuccess() {
+                            // No-op
+                        }
+
+                        override fun onFailure(e: TerminalException) {
+                            // No-op
+                        }
+                    }
+                )
+            }
+        } catch (exception: SecurityException) {
+            reportError(
+                error = exception,
+                errorEvent = ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_LOCATION_PERMISSIONS_FAILURE,
+            )
+
+            continuation.resumeWith(Result.failure(exception))
+        }
+    }
+
+    private suspend fun connectReader(readers: List<Reader>) = suspendCancellableCoroutine { continuation ->
         val reader = readers.firstOrNull() ?: run {
-            handleConnectError(
-                error = IllegalStateException("No reader found!"),
+            val exception = IllegalStateException("No reader found!")
+
+            reportError(
+                error = exception,
                 errorEvent = ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_NO_READER_FOUND,
             )
 
-            return
+            continuation.resumeWith(Result.failure(exception))
+
+            return@suspendCancellableCoroutine
         }
 
         terminal().connectReader(
@@ -196,10 +240,20 @@ internal class DefaultTapToAddConnectionManager(
             ),
             connectionCallback = object : ReaderCallback {
                 override fun onFailure(e: TerminalException) {
-                    handleConnectError(
-                        error = e,
-                        errorEvent = ErrorReporter.ExpectedErrorEvent.TAP_TO_ADD_CONNECT_READER_CALL_FAILURE,
-                    )
+                    if (e.isAlreadyConnectedToReader()) {
+                        errorReporter.report(
+                            ErrorReporter.SuccessEvent.TAP_TO_ADD_CONNECT_READER_CALL_SUCCESS
+                        )
+
+                        continuation.resumeWith(Result.success(Unit))
+                    } else {
+                        reportError(
+                            error = e,
+                            errorEvent = ErrorReporter.ExpectedErrorEvent.TAP_TO_ADD_CONNECT_READER_CALL_FAILURE,
+                        )
+
+                        continuation.resumeWith(Result.failure(e))
+                    }
                 }
 
                 override fun onSuccess(reader: Reader) {
@@ -207,7 +261,7 @@ internal class DefaultTapToAddConnectionManager(
                         ErrorReporter.SuccessEvent.TAP_TO_ADD_CONNECT_READER_CALL_SUCCESS
                     )
 
-                    connectionTask?.complete(true)
+                    continuation.resumeWith(Result.success(Unit))
                 }
             }
         )
@@ -215,19 +269,17 @@ internal class DefaultTapToAddConnectionManager(
 
     private fun terminal() = terminalWrapper.getInstance()
 
-    private fun handleConnectError(
+    private fun Throwable.isAlreadyConnectedToReader(): Boolean {
+        return this is TerminalException && errorCode == TerminalErrorCode.ALREADY_CONNECTED_TO_READER
+    }
+
+    private fun reportError(
         error: Throwable,
         errorEvent: ErrorReporter.ErrorEvent?,
     ) {
         val additionalParams = mutableMapOf<String, String>()
 
         if (error is TerminalException) {
-            if (error.errorCode == TerminalErrorCode.ALREADY_CONNECTED_TO_READER) {
-                connectionTask?.complete(isConnected)
-
-                return
-            }
-
             additionalParams[TERMINAL_ERROR_CODE_KEY] = error.errorCode.toLogString()
         }
 
@@ -239,37 +291,57 @@ internal class DefaultTapToAddConnectionManager(
         }
 
         logger.warning("TapToAddConnectionError: $error")
+    }
 
-        connectionTask?.completeExceptionally(error)
+    private sealed interface DiscoverCallResult {
+        data class CollectedReaders(val readers: List<Reader>) : DiscoverCallResult
+        data object AlreadyConnected : DiscoverCallResult
     }
 }
 
 internal class UnsupportedTapToAddConnectionManager : TapToAddConnectionManager {
     override val isSupported: Boolean = false
-    override val isConnected: Boolean = false
 
-    override fun connect() {
+    override suspend fun connect() {
         // No-op
-    }
-
-    override suspend fun awaitConnection(): Result<Boolean> {
-        return Result.success(false)
     }
 }
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@TapToAddPreview
-sealed interface CreateConnectionTokenResult {
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    class Success(
-        internal val connectionToken: String,
-    ) : CreateConnectionTokenResult
+internal class TapToAddRetriableConnectionManager(
+    private val tapToAddConnectionManager: TapToAddConnectionManager,
+    private val retryDelaySupplier: RetryDelaySupplier,
+) : TapToAddConnectionManager by tapToAddConnectionManager {
+    override suspend fun connect() {
+        var retriesRemaining = MAX_RETRIES
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    class Failure(
-        internal val cause: Exception,
-        internal val message: String,
-    ) : CreateConnectionTokenResult
+        while (true) {
+            runCatching {
+                tapToAddConnectionManager.connect()
+            }.fold(
+                onSuccess = {
+                    break
+                },
+                onFailure = { error ->
+                    if (retriesRemaining == 0) {
+                        throw error
+                    } else {
+                        delay(
+                            retryDelaySupplier.getDelay(
+                                maxRetries = MAX_RETRIES,
+                                remainingRetries = retriesRemaining
+                            )
+                        )
+
+                        retriesRemaining--
+                    }
+                }
+            )
+        }
+    }
+
+    private companion object {
+        private const val MAX_RETRIES = 3
+    }
 }
 
 private const val TERMINAL_ERROR_CODE_KEY = "terminalErrorCode"

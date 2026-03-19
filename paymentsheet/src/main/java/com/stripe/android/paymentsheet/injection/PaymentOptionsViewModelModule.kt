@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.injection
 
 import android.app.Application
 import android.content.Context
+import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -9,6 +10,8 @@ import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import dagger.Module
 import dagger.Provides
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -33,5 +36,11 @@ internal class PaymentOptionsViewModelModule {
     @Provides
     fun providePaymentMethodMetadata(args: PaymentOptionContract.Args): PaymentMethodMetadata {
         return args.state.paymentMethodMetadata
+    }
+
+    @Provides
+    @ViewModelScope
+    fun provideViewModelScope(): CoroutineScope {
+        return CoroutineScope(Dispatchers.Main)
     }
 }

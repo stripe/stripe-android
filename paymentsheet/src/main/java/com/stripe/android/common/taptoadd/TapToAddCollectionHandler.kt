@@ -100,15 +100,7 @@ internal class DefaultTapToAddCollectionHandler(
             )
         }
 
-        if (!connectionManager.isConnected) {
-            connectionManager.connect()
-
-            connectionManager
-                .awaitConnection()
-                .onFailure { exception ->
-                    throw exception
-                }
-        }
+        connectionManager.connect()
 
         val callback = try {
             createCardPresentSetupIntentCallbackRetriever.waitForCallback()

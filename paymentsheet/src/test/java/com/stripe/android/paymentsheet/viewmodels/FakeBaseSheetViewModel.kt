@@ -22,6 +22,7 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakeSavedPaymentMethodRepository
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -39,6 +40,7 @@ internal class FakeBaseSheetViewModel private constructor(
     savedStateHandle: SavedStateHandle,
     linkHandler: LinkHandler,
     paymentMethodMetadata: PaymentMethodMetadata,
+    customViewModelScope: CoroutineScope = CoroutineScope(Dispatchers.Unconfined),
 ) : BaseSheetViewModel(
     config = PaymentSheet.Configuration.Builder("Example, Inc.").build(),
     eventReporter = FakeEventReporter(),
@@ -50,6 +52,7 @@ internal class FakeBaseSheetViewModel private constructor(
     isCompleteFlow = true,
     mode = EventReporter.Mode.Complete,
     customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
+    customViewModelScope = customViewModelScope,
 ) {
     companion object {
         fun create(
