@@ -38,6 +38,7 @@ import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.FakeSavedPaymentMethodRepository
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.runner.RunWith
@@ -162,6 +163,7 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                 mode = EventReporter.Mode.Complete,
                 errorReporter = FakeErrorReporter(),
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
+                customViewModelScope = CoroutineScope(Dispatchers.Unconfined),
             )
         }
     }
@@ -212,6 +214,7 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                 tapToAddHelperFactory = FakeTapToAddHelper.Factory.noOp(),
                 mode = EventReporter.Mode.Complete,
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
+                customViewModelScope = CoroutineScope(Dispatchers.Unconfined),
             )
         }
     }

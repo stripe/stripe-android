@@ -115,6 +115,8 @@
   <string name="stripe_set_as_default_payment_method">Nastaviť ako predvolený spôsob platby</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Nastaviť</string>
+  <!-- Satispay mandate text -->
+  <string name="stripe_twint_mandate">Pokračovaním oprávňujete %1$s na automatické opakované odpísanie vášho zostatku Twint Balance v súlade s vaším nákupom alebo plánom predplatného.</string>
   <!-- Label for UPI ID number field on form -->
   <string name="stripe_upi_id_label">Identifikačné číslo UPI</string>
 </resources>

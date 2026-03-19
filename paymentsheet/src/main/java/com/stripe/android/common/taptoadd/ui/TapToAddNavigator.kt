@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import com.stripe.android.common.taptoadd.TapToAddResult
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.NavigationHandler
 import com.stripe.android.uicore.utils.collectAsState
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
+import com.stripe.android.paymentsheet.R as PaymentSheetR
 
 @Singleton
 internal class TapToAddNavigator(
@@ -66,6 +68,11 @@ internal class TapToAddNavigator(
                     _result.emit(TapToAddResult.Canceled(paymentSelection = paymentSelection))
                 }
             }
+            Action.CloseWithUnsupportedDevice -> {
+                coroutineScope.launch {
+                    _result.emit(TapToAddResult.UnsupportedDevice)
+                }
+            }
             is Action.Complete -> {
                 coroutineScope.launch {
                     _result.emit(TapToAddResult.Complete)
@@ -88,6 +95,7 @@ internal class TapToAddNavigator(
 
     sealed class Screen {
         abstract val cancelButton: CancelButton
+        abstract val onCancelAction: Action
 
         @Composable
         protected abstract fun ColumnScope.Content()
@@ -101,6 +109,7 @@ internal class TapToAddNavigator(
             val interactor: TapToAddCollectingInteractor,
         ) : Screen() {
             override val cancelButton: CancelButton = CancelButton.None
+            override val onCancelAction: Action = Action.Close
 
             @Composable
             override fun ColumnScope.Content() {
@@ -112,6 +121,7 @@ internal class TapToAddNavigator(
             val interactor: TapToAddCardAddedInteractor,
         ) : Screen() {
             override val cancelButton: CancelButton = CancelButton.Visible
+            override val onCancelAction: Action = Action.Close
 
             @Composable
             override fun ColumnScope.Content() {
@@ -130,6 +140,7 @@ internal class TapToAddNavigator(
             val interactor: TapToAddDelayInteractor,
         ) : Screen() {
             override val cancelButton: CancelButton = CancelButton.Visible
+            override val onCancelAction: Action = Action.Close
 
             @Composable
             override fun ColumnScope.Content() {
@@ -144,6 +155,7 @@ internal class TapToAddNavigator(
             val interactor: TapToAddConfirmationInteractor,
         ) : Screen() {
             override val cancelButton: CancelButton = CancelButton.Visible
+            override val onCancelAction: Action = Action.Close
 
             @Composable
             override fun ColumnScope.Content() {
@@ -165,10 +177,23 @@ internal class TapToAddNavigator(
             val message: ResolvableString,
         ) : Screen() {
             override val cancelButton: CancelButton = CancelButton.Visible
+            override val onCancelAction: Action = Action.Close
 
             @Composable
             override fun ColumnScope.Content() {
                 TapToAddErrorScreen(message)
+            }
+        }
+
+        data object NotSupportedError : Screen() {
+            override val cancelButton: CancelButton = CancelButton.Visible
+            override val onCancelAction: Action = Action.CloseWithUnsupportedDevice
+
+            @Composable
+            override fun ColumnScope.Content() {
+                TapToAddErrorScreen(
+                    PaymentSheetR.string.stripe_tap_to_add_unsupported_device_error.resolvableString
+                )
             }
         }
     }
@@ -187,6 +212,7 @@ internal class TapToAddNavigator(
     sealed interface Action {
         class NavigateTo(val screen: Screen) : Action
         data object Close : Action
+        data object CloseWithUnsupportedDevice : Action
         data object Complete : Action
         data class Continue(val paymentSelection: PaymentSelection.Saved) : Action
     }

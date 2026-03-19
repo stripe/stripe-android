@@ -237,6 +237,7 @@ internal class LinkApiRepository @Inject constructor(
             val createParams = PaymentMethodCreateParams.createLink(
                 paymentDetailsId = paymentDetails.id,
                 consumerSessionClientSecret = consumerSessionClientSecret,
+                billingDetails = paymentMethodCreateParams.billingDetails,
                 extraParams = extraParams,
                 allowRedisplay = paymentMethodCreateParams.allowRedisplay,
                 clientAttributionMetadata = clientAttributionMetadata,

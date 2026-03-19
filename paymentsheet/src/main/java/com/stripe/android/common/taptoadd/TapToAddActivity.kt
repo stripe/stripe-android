@@ -20,6 +20,7 @@ import com.stripe.android.common.taptoadd.ui.TapToAddLayout
 import com.stripe.android.common.taptoadd.ui.TapToAddNavigator
 import com.stripe.android.common.taptoadd.ui.TapToAddTheme
 import com.stripe.android.uicore.utils.collectAsState
+import com.stripe.android.uicore.utils.fadeOut
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -40,6 +41,9 @@ internal class TapToAddActivity : AppCompatActivity() {
 
     @Inject
     lateinit var tapToAddRegistrar: TapToAddRegistrar
+
+    @Inject
+    lateinit var tapToAddImageRepository: TapToAddImageRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,7 +85,7 @@ internal class TapToAddActivity : AppCompatActivity() {
                 }
             }
 
-            TapToAddTheme {
+            TapToAddTheme(tapToAddImageRepository) {
                 val systemBarStyle = remember {
                     SystemBarStyle.light(
                         scrim = Color.TRANSPARENT,
@@ -100,11 +104,16 @@ internal class TapToAddActivity : AppCompatActivity() {
 
                 TapToAddLayout(
                     screen = screen,
-                    onCancel = {
-                        tapToAddNavigator.performAction(TapToAddNavigator.Action.Close)
+                    onCancel = { action ->
+                        tapToAddNavigator.performAction(action)
                     }
                 )
             }
         }
+    }
+
+    override fun finish() {
+        super.finish()
+        fadeOut()
     }
 }

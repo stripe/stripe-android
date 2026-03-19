@@ -1,0 +1,56 @@
+apply from: configs.androidApplication
+
+apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
+
+// Read values from gradle.properties or system environment variable
+def getBackendUrl() {
+    return findProperty('STRIPE_CARDSCAN_EXAMPLE_BACKEND_URL') ?: "https://gradle"
+}
+
+def getPublishableKey() {
+    return findProperty('STRIPE_CARDSCAN_EXAMPLE_PUBLISHABLE_KEY') ?: ""
+}
+
+dependencies {
+    implementation project(':stripecardscan')
+
+    implementation libs.androidx.activity
+    implementation libs.androidx.appCompat
+    implementation libs.androidx.constraintLayout
+    implementation libs.androidx.coreKtx
+    implementation libs.androidx.liveDataKtx
+    implementation libs.androidx.navigationFragment
+    implementation libs.androidx.navigationUi
+    implementation libs.androidx.preference
+    implementation libs.androidx.viewModel
+    implementation libs.fuel
+    implementation libs.kotlin.serialization
+    implementation libs.loggingInterceptor
+    implementation libs.material
+    implementation libs.retrofitKotlinSerializationConverter
+
+    debugImplementation libs.leakCanary
+
+    testImplementation testLibs.junit
+
+    androidTestImplementation testLibs.androidx.junit
+    androidTestImplementation testLibs.espresso.core
+}
+
+android {
+    defaultConfig {
+        applicationId "com.stripe.android.stripecardscan.example"
+        versionCode 2
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        manifestPlaceholders = [
+            BACKEND_URL: getBackendUrl(),
+            PUBLISHABLE_KEY: getPublishableKey(),
+        ]
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+}

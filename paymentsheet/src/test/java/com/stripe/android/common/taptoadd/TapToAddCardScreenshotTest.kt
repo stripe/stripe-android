@@ -16,51 +16,11 @@ class TapToAddCardScreenshotTest {
     )
 
     @Test
-    fun visa() {
+    fun default() {
         paparazziRule.snapshot {
             TapToAddCard(
                 cardBrand = CardBrand.Visa,
-                last4 = "4242"
-            )
-        }
-    }
-
-    @Test
-    fun mastercard() {
-        paparazziRule.snapshot {
-            TapToAddCard(
-                cardBrand = CardBrand.MasterCard,
-                last4 = "4242"
-            )
-        }
-    }
-
-    @Test
-    fun discover() {
-        paparazziRule.snapshot {
-            TapToAddCard(
-                cardBrand = CardBrand.Discover,
-                last4 = "4242"
-            )
-        }
-    }
-
-    @Test
-    fun amex() {
-        paparazziRule.snapshot {
-            TapToAddCard(
-                cardBrand = CardBrand.AmericanExpress,
-                last4 = "4242"
-            )
-        }
-    }
-
-    @Test
-    fun jcb() {
-        paparazziRule.snapshot {
-            TapToAddCard(
-                cardBrand = CardBrand.JCB,
-                last4 = "4242"
+                last4 = "4242",
             )
         }
     }

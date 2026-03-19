@@ -41,9 +41,11 @@ stages:
       - run-connections-e2e-payments-tests-on-push: { }
       - run-connections-e2e-token-tests-on-push: { }
       - run-connections-e2e-data-tests-on-push: { }
+      - run-cardscan-instrumentation-tests: { }
       - run-paymentsheet-end-to-end-tests: { }
       - run-crypto-onramp-example-e2e-tests: { }
       - check-dependencies: { }
+      - verify-publish-pom: { }
   stage-run-connect-e2e-tests:
     workflows:
       - run-connect-e2e-tests: { }
@@ -253,7 +255,7 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=1 pixel2api33DebugAndroidTest -x :paymentsheet-example:pixel2api33BaseDebugAndroidTest -x :paymentsheet:pixel2api33DebugAndroidTest -x :example:pixel2api33DebugAndroidTest -x :financial-connections:pixel2api33DebugAndroidTest -x :financial-connections-example:pixel2api33DebugAndroidTest -x :camera-core:pixel2api33DebugAndroidTest -x :crypto-onramp-example:pixel2api33DebugAndroidTest
+            - content: ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=1 pixel2api33DebugAndroidTest -x :paymentsheet-example:pixel2api33BaseDebugAndroidTest -x :paymentsheet:pixel2api33DebugAndroidTest -x :example:pixel2api33DebugAndroidTest -x :financial-connections:pixel2api33DebugAndroidTest -x :financial-connections-example:pixel2api33DebugAndroidTest -x :camera-core:pixel2api33DebugAndroidTest -x :crypto-onramp-example:pixel2api33DebugAndroidTest -x :stripecardscan:pixel2api33DebugAndroidTest -x :stripecardscan-example:pixel2api33DebugAndroidTest
   run-paymentsheet-instrumentation-tests:
     before_run:
       - prepare_all
@@ -309,6 +311,26 @@ workflows:
           timeout: 1200
           inputs:
             - content: ./gradlew :financial-connections:connectedAndroidTest :financial-connections-example:connectedAndroidTest
+  run-cardscan-instrumentation-tests:
+    before_run:
+      - start_cardscan_emulator
+      - prepare_all
+    after_run:
+      - conclude_all
+    steps:
+      - script@1:
+          title: Assemble Instrumentation tests
+          timeout: 600
+          inputs:
+            - content: ./gradlew :camera-core:assembleAndroidTest :stripecardscan:assembleAndroidTest :stripecardscan-example:assembleAndroidTest
+      - wait-for-android-emulator@1:
+          inputs:
+            - boot_timeout: 600
+      - script@1:
+          title: Execute instrumentation tests
+          timeout: 1200
+          inputs:
+            - content: ./gradlew :camera-core:connectedAndroidTest :stripecardscan:connectedAndroidTest :stripecardscan-example:connectedAndroidTest
   run-paymentsheet-end-to-end-tests:
     before_run:
       - prepare_all
@@ -363,6 +385,17 @@ workflows:
       - script@1:
           inputs:
             - content: ruby scripts/dependencies/check_transitive_dependencies.rb
+  verify-publish-pom:
+    before_run:
+      - prepare_all
+    after_run:
+      - conclude_all
+    steps:
+      - script@1:
+          title: Verify Maven publish POMs
+          timeout: 1800
+          inputs:
+            - content: bash ./scripts/verify_publish_pom.sh
   start_connections_emulator:
     steps:
       - avd-manager@2:
@@ -380,6 +413,23 @@ workflows:
                 -no-snapshot
                 -no-audio
                 -no-window
+  start_cardscan_emulator:
+    steps:
+      - avd-manager@2:
+          inputs:
+            - profile: "pixel_6"
+            - abi: "x86_64"
+            - api_level: 33
+            - tag: "google_apis_playstore"
+            - start_command_flags: >
+               -camera-back none
+               -camera-front none
+               -netdelay none
+               -netspeed full
+               -memory 4096
+               -no-snapshot
+               -no-audio
+               -no-window
   start_emulator:
     steps:
       - avd-manager@2:

@@ -83,11 +83,18 @@ internal data class CommonConfiguration(
         }
     }
 
+    @Suppress("ThrowsCount")
     private fun checkoutSessionValidate(initializationMode: PaymentElementLoader.InitializationMode) {
-        if (initializationMode is PaymentElementLoader.InitializationMode.CheckoutSession && customer != null) {
+        val isCheckoutSession = initializationMode is PaymentElementLoader.InitializationMode.CheckoutSession
+        if (isCheckoutSession && customer != null) {
             throw IllegalArgumentException(
                 "configuration.customer must not be set when using CheckoutSession initialization mode. " +
                     "Customer information is provided by the checkout session."
+            )
+        }
+        if (isCheckoutSession && defaultBillingDetails?.email == null) {
+            throw IllegalArgumentException(
+                "configuration.defaultBillingDetails.email must be set when using CheckoutSession initialization mode."
             )
         }
     }

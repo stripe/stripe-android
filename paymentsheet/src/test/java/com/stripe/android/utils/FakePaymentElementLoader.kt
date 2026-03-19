@@ -1,5 +1,6 @@
 package com.stripe.android.utils
 
+import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
@@ -45,6 +46,28 @@ internal class FakePaymentElementLoader(
         }
     }
 
+    private fun createPaymentMethodMetadata(
+        configuration: CommonConfiguration,
+    ) = PaymentMethodMetadataFactory.create(
+        hasCustomerConfiguration = customer != null,
+        stripeIntent = stripeIntent,
+        billingDetailsCollectionConfiguration = configuration
+            .billingDetailsCollectionConfiguration,
+        allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
+        allowsPaymentMethodsRequiringShippingAddress = configuration
+            .allowsPaymentMethodsRequiringShippingAddress,
+        isGooglePayReady = isGooglePayAvailable,
+        cbcEligibility = cbcEligibility,
+        linkState = linkState,
+        passiveCaptchaParams = passiveCaptchaParams,
+        clientAttributionMetadata =
+        clientAttributionMetadata ?: PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+        shippingDetails = shippingDetails,
+        experimentsData = experimentsData,
+        integrationMetadata = integrationMetadata
+            ?: PaymentMethodMetadataFactory.defaultIntegrationMetadata(stripeIntent),
+    )
+
     override suspend fun load(
         initializationMode: PaymentElementLoader.InitializationMode,
         integrationConfiguration: PaymentElementLoader.Configuration,
@@ -61,23 +84,7 @@ internal class FakePaymentElementLoader(
                     customer = customer,
                     paymentSelection = paymentSelection,
                     validationError = validationError,
-                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                        hasCustomerConfiguration = customer != null,
-                        stripeIntent = stripeIntent,
-                        billingDetailsCollectionConfiguration = configuration
-                            .billingDetailsCollectionConfiguration,
-                        allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
-                        allowsPaymentMethodsRequiringShippingAddress = configuration
-                            .allowsPaymentMethodsRequiringShippingAddress,
-                        isGooglePayReady = isGooglePayAvailable,
-                        cbcEligibility = cbcEligibility,
-                        linkState = linkState,
-                        passiveCaptchaParams = passiveCaptchaParams,
-                        clientAttributionMetadata =
-                        clientAttributionMetadata ?: PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
-                        shippingDetails = shippingDetails,
-                        experimentsData = experimentsData,
-                    ).let { metadata ->
+                    paymentMethodMetadata = createPaymentMethodMetadata(configuration).let { metadata ->
                         if (integrationMetadata != null) {
                             metadata.copy(integrationMetadata = integrationMetadata)
                         } else {

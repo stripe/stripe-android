@@ -115,6 +115,8 @@
   <string name="stripe_set_as_default_payment_method">Tetapkan sebagai kaedah pembayaran tetapan asal</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Sediakan</string>
+  <!-- Satispay mandate text -->
+  <string name="stripe_twint_mandate">Dengan meneruskan, anda memberi kuasa kepada %1$s untuk mendebitkan Baki Twint anda secara berulang secara automatik mengikut pelan pembelian atau langganan anda.</string>
   <!-- Label for UPI ID number field on form -->
   <string name="stripe_upi_id_label">ID UPI</string>
 </resources>

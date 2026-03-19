@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:name="vector"
+    android:width="14dp"
+    android:height="14dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+
+    <path
+        android:name="lock_body"
+        android:pathData="
+            M 24,17.5
+            l 10,0
+            a 5,5,0,0,1,5,5
+            l 0,18
+            a 5,5,0,0,1,-5,5
+            l -20,0
+            a 5,5,0,0,1,-5,-5
+            l 0,-18
+            a 5,5,0,0,1,5,-5
+            l 10,0
+            l 0,6.5
+            a 4,4,0,0,0,-1,7.873
+            l -1,6
+            l 4,0
+            l -1,-6
+            a 4,4,0,0,0,-1,-7.873
+            Z"
+        android:fillColor="@color/stripeSecurityColorDark" />
+
+    <path
+        android:name="lock_shank"
+        android:pathData="
+            M 15,18
+            l 0,-5.5
+            a 9,9,0,0,1,18,0
+            l 0,5"
+        android:strokeColor="@color/stripeSecurityColorDark"
+        android:strokeWidth="2"/>
+</vector>

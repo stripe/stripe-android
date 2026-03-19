@@ -2,7 +2,6 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>EmptyFunctionBlock:Camera1Adapter.kt:Camera1Adapter.CameraPreview${}</ID>
     <ID>ForbiddenComment:CameraAdapter.kt:CameraAdapter$// TODO: change this to be a channelFlow once it's no longer experimental, add some capacity and use a backpressure drop strategy</ID>
     <ID>ForbiddenComment:Memoize.kt:CachedFirstResult1$* Cache the result from calling this method. Subsequent calls, even with different parameters, will * not change the cached output. * * TODO: use contracts when they're no longer experimental</ID>
     <ID>ForbiddenComment:Memoize.kt:CachedFirstResult2$* Cache the result from calling this method. Subsequent calls, even with different parameters, will * not change the cached output. * * TODO: use contracts when they're no longer experimental</ID>
@@ -14,11 +13,6 @@
     <ID>ForbiddenComment:NV21Image.kt:NV21Image$* https://github.com/silvaren/easyrs/blob/c8eed0f0b713bbb1eb375aca23d615677e8adb3c/easyrs/src/main/java/io/github/silvaren/easyrs/tools/YuvToRgb.java * * TODO: once the renderscript toolkit is available in maven central, replace this method with * the yuvToRgbBitmap from that https://github.com/android/renderscript-intrinsics-replacement-toolkit/blob/main/renderscript-toolkit/src/main/java/com/google/android/renderscript/Toolkit.kt#L1079</ID>
     <ID>LargeClass:MemoizeTest.kt:MemoizeTest</ID>
     <ID>LongMethod:Layout.kt:@CheckResult @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun Size.resizeRegion: Map&lt;Rect, Rect></ID>
-    <ID>MagicNumber:Camera1Adapter.kt:Camera1Adapter$1.5</ID>
-    <ID>MagicNumber:Camera1Adapter.kt:Camera1Adapter$1000</ID>
-    <ID>MagicNumber:Camera1Adapter.kt:Camera1Adapter$150</ID>
-    <ID>MagicNumber:Camera1Adapter.kt:Camera1Adapter$360</ID>
-    <ID>MagicNumber:Camera1Adapter.kt:Camera1Adapter.CameraPreview$8</ID>
     <ID>MagicNumber:CameraAdapter.kt:CameraAdapter.Companion$90</ID>
     <ID>MagicNumber:CameraXAdapter.kt:4</ID>
     <ID>MagicNumber:Image.kt:0x00030001</ID>
@@ -42,15 +36,10 @@
     <ID>MaxLineLength:CameraView.kt:CameraView$* a [View] to highlight a sub area from previewFrame, the [Rect] of this view is used to crop the highlighted area from the preview.</ID>
     <ID>MaxLineLength:CameraView.kt:CameraView$* an optional [ViewFinderBackground] to draw background and reveals a center viewFinder on previewFrame, has the same size of the [CameraView].</ID>
     <ID>MaxLineLength:NV21Image.kt:NV21Image$// Log.d(Config.logTag, "Bitmap to RGB Byte buffer conversion took: ${System.currentTimeMillis() - startTime} ms")</ID>
-    <ID>SwallowedException:Camera1Adapter.kt:Camera1Adapter$e: java.lang.Exception</ID>
-    <ID>SwallowedException:Camera1Adapter.kt:Camera1Adapter$t: Throwable</ID>
-    <ID>SwallowedException:Camera1Adapter.kt:Camera1Adapter.CameraPreview$t: Throwable</ID>
     <ID>SwallowedException:CameraAdapter.kt:CameraAdapter$e: ClosedSendChannelException</ID>
     <ID>SwallowedException:CameraXAdapter.kt:ex: ReadOnlyBufferException</ID>
     <ID>SwallowedException:NV21Image.kt:ex: ReadOnlyBufferException</ID>
     <ID>ThrowsCount:Retry.kt:internal fun &lt;T> retrySync: T</ID>
-    <ID>TooGenericExceptionCaught:Camera1Adapter.kt:Camera1Adapter$t: Throwable</ID>
-    <ID>TooGenericExceptionCaught:Camera1Adapter.kt:Camera1Adapter.CameraPreview$t: Throwable</ID>
     <ID>TooGenericExceptionCaught:CameraAdapter.kt:CameraAdapter$t: Throwable</ID>
     <ID>TooGenericExceptionCaught:CameraXAdapter.kt:CameraXAdapter$t: Throwable</ID>
     <ID>TooGenericExceptionCaught:Loop.kt:AnalyzerLoop$t: Throwable</ID>
