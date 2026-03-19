@@ -40,6 +40,7 @@
         <activity
             android:name="com.stripe.android.stripecardscan.cardscan.CardScanActivity"
             android:screenOrientation="fullSensor"
+            tools:ignore="Instantiatable"
             tools:replace="android:screenOrientation" />
     </application>
 
