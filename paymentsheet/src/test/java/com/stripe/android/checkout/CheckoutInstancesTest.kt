@@ -219,6 +219,7 @@ class CheckoutInstancesTest {
                 totalSummary = null,
                 lineItems = emptyList(),
                 shippingOptions = emptyList(),
+                adaptivePricingInfo = null,
             ),
         )
         val checkout = Checkout.createWithState(applicationContext, Checkout.State(state))
