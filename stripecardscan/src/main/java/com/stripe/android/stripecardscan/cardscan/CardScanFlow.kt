@@ -24,6 +24,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 internal abstract class CardScanFlow(
     private val scanErrorListener: AnalyzerLoopErrorListener
@@ -122,10 +123,13 @@ internal abstract class CardScanFlow(
         mainLoop?.unsubscribe()
         mainLoop = null
 
+        // Wait for the above unsubscribe() call to take effect
+        // before we closeAllAnalyzers(), or we might inadvertently
+        // deallocate a worker while it's processing
+        runBlocking { mainLoopJob?.join() }
+        mainLoopJob = null
+
         mainLoopAnalyzerPool?.closeAllAnalyzers()
         mainLoopAnalyzerPool = null
-
-        mainLoopJob?.apply { if (isActive) { cancel() } }
-        mainLoopJob = null
     }
 }

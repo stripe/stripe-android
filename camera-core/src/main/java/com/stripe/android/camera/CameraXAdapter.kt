@@ -346,6 +346,7 @@ class CameraXAdapter(
     }
 
     override fun onDestroyed() {
+        super.onDestroyed()
         withCameraProvider {
             it.unbindAll()
             cameraExecutor.shutdown()
