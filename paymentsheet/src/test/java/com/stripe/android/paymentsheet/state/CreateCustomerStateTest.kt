@@ -1,17 +1,13 @@
 package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.common.model.PaymentMethodRemovePermission
-import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
@@ -173,15 +169,12 @@ internal class CreateCustomerStateTest {
 
             val result = createCustomerState(
                 initializationMode = DEFAULT_INITIALIZATION_MODE,
-                configuration = DEFAULT_CONFIGURATION,
                 elementsSession = DEFAULT_ELEMENTS_SESSION.copy(
                     customer = createElementsSessionCustomer(paymentMethods = cards),
                 ),
-                customerMetadata = CUSTOMER_SESSION_METADATA,
-                metadata = PaymentMethodMetadataFactory.create(),
+                metadata = PaymentMethodMetadataFactory.create()
+                    .copy(customerMetadata = CUSTOMER_SESSION_METADATA),
                 savedSelection = CompletableDeferred(SavedSelection.None),
-                cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all()),
-                cardFundingFilter = DefaultCardFundingFilter,
             )
 
             assertThat(result).isNotNull()
@@ -212,16 +205,12 @@ internal class CreateCustomerStateTest {
 
         suspend fun createCustomerState(
             initializationMode: PaymentElementLoader.InitializationMode = DEFAULT_INITIALIZATION_MODE,
-            configuration: com.stripe.android.common.model.CommonConfiguration = DEFAULT_CONFIGURATION,
             elementsSession: ElementsSession = DEFAULT_ELEMENTS_SESSION,
             elementsSessionCustomer: ElementsSession.Customer? = elementsSession.customer,
-            customerMetadata: CustomerMetadata?,
+            customerMetadata: CustomerMetadata? = null,
             metadata: com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata =
-                PaymentMethodMetadataFactory.create(),
+                PaymentMethodMetadataFactory.create().copy(customerMetadata = customerMetadata),
             savedSelection: CompletableDeferred<SavedSelection> = CompletableDeferred(SavedSelection.None),
-            cardBrandFilter: PaymentSheetCardBrandFilter =
-                PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all()),
-            cardFundingFilter: com.stripe.android.CardFundingFilter = DefaultCardFundingFilter,
         ): CustomerState? {
             val session = if (elementsSessionCustomer != elementsSession.customer) {
                 elementsSession.copy(customer = elementsSessionCustomer)
@@ -231,13 +220,9 @@ internal class CreateCustomerStateTest {
 
             return createCustomerStateImpl(
                 initializationMode = initializationMode,
-                configuration = configuration,
                 elementsSession = session,
-                customerMetadata = customerMetadata,
                 metadata = metadata,
                 savedSelection = savedSelection,
-                cardBrandFilter = cardBrandFilter,
-                cardFundingFilter = cardFundingFilter,
             )
         }
     }
@@ -246,14 +231,6 @@ internal class CreateCustomerStateTest {
         val DEFAULT_INITIALIZATION_MODE = PaymentElementLoader.InitializationMode.PaymentIntent(
             clientSecret = "pi_123_secret_456",
         )
-
-        val DEFAULT_CONFIGURATION = PaymentSheet.Configuration(
-            merchantDisplayName = "Merchant",
-            customer = PaymentSheet.CustomerConfiguration(
-                id = "cus_1",
-                ephemeralKeySecret = "ek_123",
-            ),
-        ).asCommonConfiguration()
 
         val DEFAULT_ELEMENTS_SESSION = ElementsSession(
             linkSettings = null,

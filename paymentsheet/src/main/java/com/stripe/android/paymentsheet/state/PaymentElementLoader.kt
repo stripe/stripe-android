@@ -25,8 +25,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
 import com.stripe.android.lpmfoundations.paymentmethod.create
 import com.stripe.android.lpmfoundations.paymentmethod.toSaveConsentBehavior
 import com.stripe.android.model.ClientAttributionMetadata
@@ -234,7 +232,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val analyticsMetadataFactory: AnalyticsMetadataFactory,
     private val createCustomerState: CreateCustomerState,
-    private val cardFundingFilterFactory: PaymentSheetCardFundingFilterFactory,
     private val checkoutSessionLoader: CheckoutSessionLoader,
     private val elementsSessionLoader: ElementsSessionLoader,
 ) : PaymentElementLoader {
@@ -305,10 +302,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             automaticPaymentMethodsEnabled = elementsSession.stripeIntent.automaticPaymentMethodsEnabled,
         )
 
-        val cardFundingFilter = cardFundingFilterFactory(
-            params = configuration.allowedCardFundingTypes(elementsSession.enableCardFundFiltering)
-        )
-
         val customerMetadata = getCustomerMetadata(
             initializationMode = initializationMode,
             configuration = configuration,
@@ -347,13 +340,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val customer = async {
             createCustomerState(
                 initializationMode = initializationMode,
-                configuration = configuration,
                 elementsSession = elementsSession,
-                customerMetadata = customerMetadata,
                 metadata = paymentMethodMetadata.await(),
                 savedSelection = savedSelection,
-                cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
-                cardFundingFilter = cardFundingFilter,
             )
         }
 

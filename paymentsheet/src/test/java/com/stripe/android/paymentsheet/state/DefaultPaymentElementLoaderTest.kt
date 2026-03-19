@@ -4556,7 +4556,6 @@ internal class DefaultPaymentElementLoaderTest {
                 customerRepository = customerRepo,
                 paymentMethodFilter = paymentMethodFilter,
             ),
-            cardFundingFilterFactory = PaymentSheetCardFundingFilter.Factory(),
             checkoutSessionLoader = CheckoutSessionLoader(),
             elementsSessionLoader = ElementsSessionLoader(
                 elementsSessionRepository = elementsSessionRepository,
