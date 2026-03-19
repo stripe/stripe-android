@@ -15,7 +15,6 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
-import kotlin.test.assertFailsWith
 
 internal class CreateCustomerMetadataTest {
 
@@ -112,22 +111,11 @@ internal class CreateCustomerMetadataTest {
     }
 
     @Test
-    fun `customer session without customer in elements session throws in test mode`() = runTest {
-        val errorReporter = FakeErrorReporter()
-        val createCustomerMetadata = CreateCustomerMetadata(errorReporter)
-
-        assertFailsWith<IllegalStateException> {
-            createCustomerMetadata(
-                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                    clientSecret = "pi_123_secret_456",
-                ),
-                configuration = CONFIG_CUSTOMER_SESSION,
-                elementsSession = createElementsSession(
-                    customer = null,
-                    isLiveMode = false,
-                ),
-            )
-        }
+    fun `customer session without customer in elements session throws in test mode`() = runScenario(
+        configuration = CONFIG_CUSTOMER_SESSION,
+        elementsSession = createElementsSession(customer = null, isLiveMode = false),
+    ) {
+        assertThat(callResult.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
 
         val call = errorReporter.awaitCall()
         assertThat(call.errorEvent).isEqualTo(
@@ -136,21 +124,10 @@ internal class CreateCustomerMetadataTest {
     }
 
     @Test
-    fun `customer session without customer in elements session returns null in live mode`() = runTest {
-        val errorReporter = FakeErrorReporter()
-        val createCustomerMetadata = CreateCustomerMetadata(errorReporter)
-
-        val result = createCustomerMetadata(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = "pi_123_secret_456",
-            ),
-            configuration = CONFIG_CUSTOMER_SESSION,
-            elementsSession = createElementsSession(
-                customer = null,
-                isLiveMode = true,
-            ),
-        )
-
+    fun `customer session without customer in elements session returns null in live mode`() = runScenario(
+        configuration = CONFIG_CUSTOMER_SESSION,
+        elementsSession = createElementsSession(customer = null, isLiveMode = true),
+    ) {
         assertThat(result).isNull()
 
         val call = errorReporter.awaitCall()
@@ -227,14 +204,16 @@ internal class CreateCustomerMetadataTest {
         val errorReporter = FakeErrorReporter()
         val createCustomerMetadata = CreateCustomerMetadata(errorReporter)
 
-        val result = createCustomerMetadata(
-            initializationMode = initializationMode,
-            configuration = configuration,
-            elementsSession = elementsSession,
-        )
+        val callResult = runCatching {
+            createCustomerMetadata(
+                initializationMode = initializationMode,
+                configuration = configuration,
+                elementsSession = elementsSession,
+            )
+        }
 
         Scenario(
-            result = result,
+            callResult = callResult,
             errorReporter = errorReporter,
         ).block()
 
@@ -242,9 +221,11 @@ internal class CreateCustomerMetadataTest {
     }
 
     private class Scenario(
-        val result: CustomerMetadata?,
+        val callResult: Result<CustomerMetadata?>,
         val errorReporter: FakeErrorReporter,
-    )
+    ) {
+        val result: CustomerMetadata? get() = callResult.getOrThrow()
+    }
 
     private companion object {
         val CHECKOUT_CUSTOMER = CheckoutSessionResponse.Customer(
