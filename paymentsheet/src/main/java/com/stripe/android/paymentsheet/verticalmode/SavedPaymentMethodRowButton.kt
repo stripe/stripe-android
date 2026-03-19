@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.verticalmode
 import android.content.res.Configuration
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.height
@@ -30,6 +31,7 @@ import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconHeight
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconWidth
 import com.stripe.android.uicore.DefaultStripeTheme
 import com.stripe.android.uicore.image.StripeImage
+import com.stripe.android.uicore.modifiers.shimmer
 import com.stripe.android.uicore.strings.resolve
 
 @Composable
@@ -100,14 +102,11 @@ private fun SavedPaymentMethodIcon(
                 )
             },
             loadingContent = {
-                PaymentMethodIconFromResource(
-                    iconRes = displayableSavedPaymentMethod.paymentMethod.getSavedPaymentMethodIcon(forVerticalMode = true),
-                    colorFilter = null,
-                    alignment = Alignment.Center,
+                Box(
                     modifier = Modifier
                         .height(iconHeight)
                         .width(iconWidth)
-                        .testMetadata(displayBrand)
+                        .shimmer()
                 )
             }
         )

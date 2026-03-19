@@ -11,6 +11,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -43,12 +44,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconHeight
+import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconWidth
 import com.stripe.android.uicore.IconStyle
 import com.stripe.android.uicore.LocalIconStyle
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.image.LocalStripeImageLoader
 import com.stripe.android.uicore.image.StripeImage
+import com.stripe.android.uicore.modifiers.shimmer
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
 
 @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
@@ -204,7 +208,12 @@ private fun SavedPaymentMethodCard(
                         FallbackIcon(iconRes = iconRes, iconTint = iconTint)
                     },
                     loadingContent = {
-                        FallbackIcon(iconRes = iconRes, iconTint = iconTint)
+                        Box(
+                            modifier = Modifier
+                                .height(40.dp)
+                                .width(56.dp)
+                                .shimmer()
+                        )
                     }
                 )
             } else {
