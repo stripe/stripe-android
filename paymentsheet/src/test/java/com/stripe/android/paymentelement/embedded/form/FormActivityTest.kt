@@ -32,6 +32,7 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.manage.ManageActivity
 import com.stripe.android.paymentsheet.createCustomerState
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.paymentelementtestpages.FormPage
@@ -139,7 +140,7 @@ internal class FormActivityTest {
         networkRule.enqueue(
             RequestMatchers.host("api.stripe.com"),
             RequestMatchers.method("POST"),
-            RequestMatchers.path("/v1/payment_pages/cs_test_abc123"),
+            RequestMatchers.path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
         ) { response ->
             response.testBodyFromFile("checkout-session-apply-discount.json")
         }
