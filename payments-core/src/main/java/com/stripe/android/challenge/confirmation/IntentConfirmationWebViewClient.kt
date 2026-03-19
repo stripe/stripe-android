@@ -68,12 +68,10 @@ internal class IntentConfirmationWebViewClient(
     }
 
     override fun onRenderProcessGone(view: WebView?, detail: RenderProcessGoneDetail?): Boolean {
-        val didCrash = detail?.didCrash() ?: true
-        val message = if (didCrash) "render process crashed" else "render process encountered error"
-        logger.error("IntentConfirmationWebViewClient: $message, url=${view?.url}")
+        logger.error("IntentConfirmationWebViewClient: render process gone, url=${view?.url}")
         errorHandler(
             WebViewError(
-                message = message,
+                message = "render process gone",
                 errorCode = null,
                 url = view?.url,
                 webViewErrorType = "render_process_gone"

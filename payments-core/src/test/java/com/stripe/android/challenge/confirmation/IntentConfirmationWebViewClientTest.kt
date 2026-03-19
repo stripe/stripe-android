@@ -163,26 +163,13 @@ internal class IntentConfirmationWebViewClientTest {
 
     // onRenderProcessGone tests
     @Test
-    fun `onRenderProcessGone reports crash when didCrash is true`() = testWithSetup { client, errors, webView ->
-        webView.loadUrl(HOST_URL)
-        val detail = createRenderProcessGoneDetail(didCrash = true)
+    fun `onRenderProcessGone reports error`() = testWithSetup { client, errors, webView ->
+        val detail = createRenderProcessGoneDetail()
 
         client.onRenderProcessGone(webView, detail)
 
         assertThat(errors).hasSize(1)
-        assertThat(errors[0].message).isEqualTo("render process crashed")
-        assertThat(errors[0].errorCode).isNull()
-        assertThat(errors[0].webViewErrorType).isEqualTo("render_process_gone")
-    }
-
-    @Test
-    fun `onRenderProcessGone reports low memory when didCrash is false`() = testWithSetup { client, errors, webView ->
-        val detail = createRenderProcessGoneDetail(didCrash = false)
-
-        client.onRenderProcessGone(webView, detail)
-
-        assertThat(errors).hasSize(1)
-        assertThat(errors[0].message).isEqualTo("render process encountered error")
+        assertThat(errors[0].message).isEqualTo("render process gone")
         assertThat(errors[0].errorCode).isNull()
         assertThat(errors[0].webViewErrorType).isEqualTo("render_process_gone")
     }
@@ -291,15 +278,13 @@ internal class IntentConfirmationWebViewClientTest {
         override fun getReasonPhrase(): String? = reasonPhrase
     }
 
-    private fun createRenderProcessGoneDetail(didCrash: Boolean = true): RenderProcessGoneDetail {
-        return FakeRenderProcessGoneDetail(didCrash)
+    private fun createRenderProcessGoneDetail(): RenderProcessGoneDetail {
+        return FakeRenderProcessGoneDetail()
     }
 
     @Suppress("DEPRECATION")
-    private class FakeRenderProcessGoneDetail(
-        private val didCrash: Boolean,
-    ) : RenderProcessGoneDetail() {
-        override fun didCrash(): Boolean = didCrash
+    private class FakeRenderProcessGoneDetail : RenderProcessGoneDetail() {
+        override fun didCrash(): Boolean = true
         override fun rendererPriorityAtExit(): Int = 0
     }
 
