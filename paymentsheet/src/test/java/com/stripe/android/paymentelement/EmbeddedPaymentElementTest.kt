@@ -19,6 +19,7 @@ import com.stripe.android.paymentelement.embedded.content.FakeEmbeddedContentHel
 import com.stripe.android.paymentelement.embedded.content.FakeEmbeddedStateHelper
 import com.stripe.android.paymentelement.embedded.content.PaymentOptionDisplayDataHolder
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import kotlinx.coroutines.async
@@ -50,7 +51,7 @@ internal class EmbeddedPaymentElementTest {
         networkRule.enqueue(
             host("api.stripe.com"),
             method("POST"),
-            path("/v1/payment_pages/cs_test_abc123"),
+            path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
         ) { response ->
             response.setBodyDelay(5, TimeUnit.SECONDS)
             response.testBodyFromFile("checkout-session-apply-discount.json")

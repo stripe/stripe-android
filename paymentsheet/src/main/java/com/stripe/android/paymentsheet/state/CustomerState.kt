@@ -12,15 +12,6 @@ internal data class CustomerState(
     val defaultPaymentMethodId: String?,
 ) : Parcelable {
 
-    @Parcelize
-    sealed class DefaultPaymentMethodState : Parcelable {
-        @Parcelize
-        data class Enabled(val defaultPaymentMethodId: String?) : DefaultPaymentMethodState()
-
-        @Parcelize
-        data object Disabled : DefaultPaymentMethodState()
-    }
-
     internal companion object {
         /**
          * Creates a [CustomerState] instance using an [ElementsSession.Customer] response.

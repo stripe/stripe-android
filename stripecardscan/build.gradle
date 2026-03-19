@@ -7,7 +7,7 @@ apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 dependencies {
     api project(":stripe-core")
     implementation project(":camera-core")
-    implementation project(":ml-core:cardscan")
+    implementation project(":ml-core:googleplay")
     implementation project(":payments-core")
 
     // DI

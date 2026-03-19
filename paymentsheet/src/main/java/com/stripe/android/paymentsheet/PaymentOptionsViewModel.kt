@@ -16,6 +16,7 @@ import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddMode
 import com.stripe.android.common.taptoadd.TapToAddNextStep
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.link.LinkActivityResult
@@ -50,6 +51,7 @@ import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -75,6 +77,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     tapToAddHelperFactory: TapToAddHelper.Factory,
     mode: EventReporter.Mode,
     customerStateHolderFactory: CustomerStateHolder.Factory,
+    @ViewModelScope customViewModelScope: CoroutineScope,
 ) : BaseSheetViewModel(
     config = args.configuration,
     eventReporter = eventReporter,
@@ -86,6 +89,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     isCompleteFlow = false,
     mode = mode,
     customerStateHolderFactory = customerStateHolderFactory,
+    customViewModelScope = customViewModelScope,
 ) {
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(

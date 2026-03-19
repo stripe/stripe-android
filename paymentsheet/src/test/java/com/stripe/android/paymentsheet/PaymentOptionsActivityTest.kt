@@ -50,6 +50,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.StripeAndroidPrimaryButtonBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
@@ -66,6 +67,8 @@ import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import com.stripe.android.view.ActivityStarter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
@@ -499,7 +502,7 @@ internal class PaymentOptionsActivityTest {
         networkRule.enqueue(
             RequestMatchers.host("api.stripe.com"),
             RequestMatchers.method("POST"),
-            RequestMatchers.path("/v1/payment_pages/cs_test_abc123"),
+            RequestMatchers.path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
         ) { response ->
             response.testBodyFromFile("checkout-session-apply-discount.json")
         }
@@ -539,6 +542,7 @@ internal class PaymentOptionsActivityTest {
                 mode = EventReporter.Mode.Complete,
                 errorReporter = FakeErrorReporter(),
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
+                customViewModelScope = CoroutineScope(Dispatchers.Unconfined),
             )
         }
 

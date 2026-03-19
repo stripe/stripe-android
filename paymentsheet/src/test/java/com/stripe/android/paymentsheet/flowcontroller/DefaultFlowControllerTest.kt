@@ -90,6 +90,7 @@ import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -2303,7 +2304,7 @@ internal class DefaultFlowControllerTest {
         networkRule.enqueue(
             host("api.stripe.com"),
             method("POST"),
-            path("/v1/payment_pages/cs_test_abc123"),
+            path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
         ) { response ->
             response.setBodyDelay(5, TimeUnit.SECONDS)
             response.testBodyFromFile("checkout-session-apply-discount.json")
@@ -2329,7 +2330,7 @@ internal class DefaultFlowControllerTest {
             FakePaymentElementLoader(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 integrationMetadata = IntegrationMetadata.CheckoutSession(
-                    id = "cs_test_abc123",
+                    id = DEFAULT_CHECKOUT_SESSION_ID,
                     instancesKey = "test_key",
                 ),
                 linkState = null,
@@ -2340,7 +2341,7 @@ internal class DefaultFlowControllerTest {
         networkRule.enqueue(
             host("api.stripe.com"),
             method("POST"),
-            path("/v1/payment_pages/cs_test_abc123"),
+            path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
         ) { response ->
             response.setBodyDelay(5, TimeUnit.SECONDS)
             response.testBodyFromFile("checkout-session-apply-discount.json")

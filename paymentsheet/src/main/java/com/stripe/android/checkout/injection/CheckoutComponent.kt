@@ -6,6 +6,7 @@ import com.stripe.android.checkout.CheckoutSessionLoader
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
+import com.stripe.android.core.injection.StripeNetworkClientModule
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -13,7 +14,6 @@ import com.stripe.android.payments.core.injection.PaymentConfigurationModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
 import dagger.Module
@@ -42,7 +42,7 @@ internal interface CheckoutComponent {
     }
 }
 
-@Module(includes = [PaymentConfigurationModule::class, CheckoutSessionRepositoryModule::class])
+@Module(includes = [PaymentConfigurationModule::class, StripeNetworkClientModule::class])
 internal object CheckoutModule {
     @Provides
     @Named(ENABLE_LOGGING)

@@ -45,6 +45,7 @@ stages:
       - run-paymentsheet-end-to-end-tests: { }
       - run-crypto-onramp-example-e2e-tests: { }
       - check-dependencies: { }
+      - verify-publish-pom: { }
   stage-run-connect-e2e-tests:
     workflows:
       - run-connect-e2e-tests: { }
@@ -312,7 +313,7 @@ workflows:
             - content: ./gradlew :financial-connections:connectedAndroidTest :financial-connections-example:connectedAndroidTest
   run-cardscan-instrumentation-tests:
     before_run:
-      - start_emulator
+      - start_cardscan_emulator
       - prepare_all
     after_run:
       - conclude_all
@@ -384,6 +385,17 @@ workflows:
       - script@1:
           inputs:
             - content: ruby scripts/dependencies/check_transitive_dependencies.rb
+  verify-publish-pom:
+    before_run:
+      - prepare_all
+    after_run:
+      - conclude_all
+    steps:
+      - script@1:
+          title: Verify Maven publish POMs
+          timeout: 1800
+          inputs:
+            - content: bash ./scripts/verify_publish_pom.sh
   start_connections_emulator:
     steps:
       - avd-manager@2:
@@ -401,6 +413,23 @@ workflows:
                 -no-snapshot
                 -no-audio
                 -no-window
+  start_cardscan_emulator:
+    steps:
+      - avd-manager@2:
+          inputs:
+            - profile: "pixel_6"
+            - abi: "x86_64"
+            - api_level: 33
+            - tag: "google_apis_playstore"
+            - start_command_flags: >
+               -camera-back none
+               -camera-front none
+               -netdelay none
+               -netspeed full
+               -memory 4096
+               -no-snapshot
+               -no-audio
+               -no-window
   start_emulator:
     steps:
       - avd-manager@2:

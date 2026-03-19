@@ -33,6 +33,7 @@ internal class FlowControllerViewModel(
                 application = application,
                 paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
                 flowControllerViewModel = this,
+                viewModelScope = viewModelScope,
             )
 
     var walletButtonsRendered: Boolean = false
