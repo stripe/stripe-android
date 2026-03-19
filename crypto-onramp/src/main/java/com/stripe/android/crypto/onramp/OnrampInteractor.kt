@@ -590,59 +590,35 @@ internal class OnrampInteractor @Inject constructor(
             OnrampCollectPaymentMethodResult.Cancelled()
     }
 
-    suspend fun handleGooglePayPaymentResult(
+    fun handleGooglePayPaymentResult(
         result: GooglePayPaymentMethodLauncher.Result
     ): OnrampCollectPaymentMethodResult = when (result) {
         is GooglePayPaymentMethodLauncher.Result.Completed -> {
-            val secret = consumerSessionClientSecret()
-            if (secret != null) {
-                cryptoApiRepository.retrieveKycInfo(secret)
-                    .fold(
-                        onSuccess = { _ ->
-                            handleGooglePayPaymentMethod(result.paymentMethod) {
-                                OnrampCollectPaymentMethodResult.Completed(it)
-                            }
-                        },
-                        onFailure = { error ->
-                            val address = result.paymentMethod.billingDetails?.address
+            val address = result.paymentMethod.billingDetails?.address
+            val fullName = result.paymentMethod.billingDetails?.name.orEmpty().trim()
+            val parts = fullName.split("\\s+".toRegex())
+            val firstName = parts.firstOrNull().orEmpty()
+            val lastName = parts.drop(1).joinToString(" ")
 
-                            val fullName = result.paymentMethod.billingDetails?.name.orEmpty().trim()
-                            val parts = fullName.split("\\s+".toRegex())
-                            val firstName = parts.firstOrNull().orEmpty()
-                            val lastName = parts.drop(1).joinToString(" ")
+            val kycAddress = PaymentSheet.Address(
+                city = address?.city,
+                country = address?.country,
+                line1 = address?.line1,
+                line2 = address?.line2,
+                postalCode = address?.postalCode,
+                state = address?.state
+            )
 
-                            val kycAddress = PaymentSheet.Address(
-                                city = address?.city,
-                                country = address?.country,
-                                line1 = address?.line1,
-                                line2 = address?.line2,
-                                postalCode = address?.postalCode,
-                                state = address?.state
-                            )
+            val kycInfo = KycInfo(
+                firstName = firstName,
+                lastName = lastName,
+                idNumber = null,
+                dateOfBirth = null,
+                address = kycAddress
+            )
 
-                            val kycInfo = KycInfo(
-                                firstName = firstName,
-                                lastName = lastName,
-                                idNumber = null,
-                                dateOfBirth = null,
-                                address = kycAddress
-                            )
-
-                            handleGooglePayPaymentMethod(result.paymentMethod) {
-                                OnrampCollectPaymentMethodResult.KYCRequired(it, kycInfo)
-                            }
-                        }
-                    )
-            } else {
-                val error = MissingConsumerSecretException()
-                analyticsService?.track(
-                    OnrampAnalyticsEvent.ErrorOccurred(
-                        operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.CollectPaymentMethod,
-                        error = error,
-                    )
-                )
-
-                OnrampCollectPaymentMethodResult.Failed(error)
+            handleGooglePayPaymentMethod(result.paymentMethod) {
+                OnrampCollectPaymentMethodResult.CompletedWithKycInfo(it, kycInfo)
             }
         }
         is GooglePayPaymentMethodLauncher.Result.Failed -> {

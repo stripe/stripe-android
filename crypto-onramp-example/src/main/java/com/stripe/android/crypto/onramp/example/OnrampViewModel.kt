@@ -370,11 +370,10 @@ internal class OnrampViewModel(
                     )
                 }
             }
-            is OnrampCollectPaymentMethodResult.KYCRequired -> {
-                _message.value = "Payment selection complete, requires KYC"
+            is OnrampCollectPaymentMethodResult.CompletedWithKycInfo -> {
+                _message.value = "Payment selection with KYC complete"
                 _uiState.update {
                     it.copy(
-                        screen = Screen.AuthenticatedOperations,
                         selectedPaymentData = result.displayData,
                     )
                 }
