@@ -290,12 +290,11 @@ internal class LinkPaymentLauncherTest {
         expectedMarkAsUsedCalls: Int,
     ) = runTest {
         RecordingLinkStore.test {
-            val storeScenario = this
             DummyActivityResultCaller.test {
                 val linkAnalyticsHelper = TrackingLinkAnalyticsHelper()
                 val linkPaymentLauncher = createLinkPaymentLauncher(
                     linkAnalyticsHelper = linkAnalyticsHelper,
-                    linkStore = storeScenario.linkStore
+                    linkStore = linkStore
                 )
 
                 var callbackParam: LinkActivityResult? = null
@@ -312,7 +311,7 @@ internal class LinkPaymentLauncherTest {
                 val registerCall = awaitRegisterCall()
                 registerCall.callback.asCallbackFor<LinkActivityResult>().onActivityResult(linkActivityResult)
 
-                storeScenario.verifyActivityResultCallback(
+                verifyActivityResultCallback(
                     linkActivityResult = linkActivityResult,
                     linkAnalyticsHelper = linkAnalyticsHelper,
                     expectedMarkAsUsedCalls = expectedMarkAsUsedCalls,
