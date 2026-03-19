@@ -237,7 +237,7 @@ internal class CardDetailsSectionElementUITest {
                     LocalActivityResultRegistryOwner provides registryOwner,
                     LocalCardNumberCompletedEventReporter provides { },
                     LocalCardScanEventsReporter provides FakeCardScanEventsReporter(),
-                    LocalPaymentCardRecognitionClient provides FakePaymentCardRecognitionClient(true),
+                    LocalPaymentCardRecognitionClient provides FakePaymentCardRecognitionClient(true)
                 ) {
                     CardDetailsSectionElementUI(
                         enabled = true,
