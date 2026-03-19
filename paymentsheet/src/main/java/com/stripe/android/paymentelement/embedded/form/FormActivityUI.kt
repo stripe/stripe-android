@@ -32,7 +32,6 @@ import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInter
 import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
 import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmUI
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormUI
-import com.stripe.android.ui.core.cardscan.CardScanConfig
 import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getOuterFormInsets
@@ -44,7 +43,6 @@ import com.stripe.android.uicore.utils.collectAsState
 internal fun FormActivityUI(
     interactor: DefaultVerticalModeFormInteractor,
     eventReporter: EventReporter,
-    cardScanConfig: CardScanConfig = CardScanConfig(),
     onClick: () -> Unit,
     onProcessingCompleted: () -> Unit,
     state: FormActivityStateHelper.State,
@@ -57,7 +55,7 @@ internal fun FormActivityUI(
 
     DismissKeyboardOnProcessing(interactorState.isProcessing)
 
-    EventReporterProvider(eventReporter, cardScanConfig) {
+    EventReporterProvider(eventReporter) {
         BottomSheetScaffold(
             topBar = {
                 FormActivityTopBar(

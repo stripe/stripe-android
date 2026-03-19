@@ -34,7 +34,10 @@ fun CardDetailsSectionElementUI(
 ) {
     val context = LocalContext.current
 
-    val cardScanLauncher = rememberCardScanLauncher(onResult = { controller.onCardScanResult(it) })
+    val cardScanLauncher = rememberCardScanLauncher(
+        isStripeCardScanAllowed = controller.isStripeCardScanAllowed,
+        onResult = { controller.onCardScanResult(it) },
+    )
 
     if (controller.shouldAutomaticallyLaunchCardScan() && cardScanLauncher != null) {
         SideEffect {
