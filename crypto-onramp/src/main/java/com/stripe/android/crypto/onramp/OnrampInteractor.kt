@@ -594,28 +594,7 @@ internal class OnrampInteractor @Inject constructor(
         result: GooglePayPaymentMethodLauncher.Result
     ): OnrampCollectPaymentMethodResult = when (result) {
         is GooglePayPaymentMethodLauncher.Result.Completed -> {
-            val address = result.paymentMethod.billingDetails?.address
-            val fullName = result.paymentMethod.billingDetails?.name.orEmpty().trim()
-            val parts = fullName.split("\\s+".toRegex())
-            val firstName = parts.firstOrNull().orEmpty()
-            val lastName = parts.drop(1).joinToString(" ")
-
-            val kycAddress = PaymentSheet.Address(
-                city = address?.city,
-                country = address?.country,
-                line1 = address?.line1,
-                line2 = address?.line2,
-                postalCode = address?.postalCode,
-                state = address?.state
-            )
-
-            val kycInfo = KycInfo(
-                firstName = firstName,
-                lastName = lastName,
-                idNumber = null,
-                dateOfBirth = null,
-                address = kycAddress
-            )
+            val kycInfo = googlePayKycInfo(result.paymentMethod)
 
             handleGooglePayPaymentMethod(result.paymentMethod) {
                 OnrampCollectPaymentMethodResult.CompletedWithKycInfo(it, kycInfo)
@@ -666,6 +645,29 @@ internal class OnrampInteractor @Inject constructor(
             label = "Google Pay",
             sublabel = paymentMethod.card?.last4,
             type = PaymentMethodDisplayData.Type.GooglePay
+        )
+    }
+
+    private fun googlePayKycInfo(paymentMethod: PaymentMethod): KycInfo {
+        val address = paymentMethod.billingDetails?.address
+        val fullName = paymentMethod.billingDetails?.name.orEmpty().trim()
+        val parts = fullName.split("\\s+".toRegex())
+        val firstName = parts.firstOrNull().orEmpty()
+        val lastName = parts.drop(1).joinToString(" ")
+
+        return KycInfo(
+            firstName = firstName,
+            lastName = lastName,
+            idNumber = null,
+            dateOfBirth = null,
+            address = PaymentSheet.Address(
+                city = address?.city,
+                country = address?.country,
+                line1 = address?.line1,
+                line2 = address?.line2,
+                postalCode = address?.postalCode,
+                state = address?.state
+            )
         )
     }
 
