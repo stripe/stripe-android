@@ -9,6 +9,7 @@ import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -108,7 +109,7 @@ class CheckoutInstancesTest {
 
         networkRule.enqueue(
             method("POST"),
-            path("/v1/payment_pages/cs_test_abc123/init"),
+            path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID/init"),
         ) { response ->
             requestArrived.countDown()
             holdResponse.await()
@@ -168,7 +169,7 @@ class CheckoutInstancesTest {
         networkRule.enqueue(
             host("api.stripe.com"),
             method("POST"),
-            path("/v1/payment_pages/cs_test_abc123"),
+            path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
         ) { response ->
             response.setResponseCode(400)
             response.setBody("""{"error": {"message": "error"}}""")
@@ -176,7 +177,7 @@ class CheckoutInstancesTest {
         networkRule.enqueue(
             host("api.stripe.com"),
             method("POST"),
-            path("/v1/payment_pages/cs_test_abc123"),
+            path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
         ) { response ->
             response.setResponseCode(400)
             response.setBody("""{"error": {"message": "error"}}""")
@@ -205,7 +206,7 @@ class CheckoutInstancesTest {
         val state = InternalState(
             key = key,
             checkoutSessionResponse = CheckoutSessionResponse(
-                id = "cs_test_abc123",
+                id = DEFAULT_CHECKOUT_SESSION_ID,
                 amount = 1000L,
                 currency = "usd",
                 mode = CheckoutSessionResponse.Mode.PAYMENT,

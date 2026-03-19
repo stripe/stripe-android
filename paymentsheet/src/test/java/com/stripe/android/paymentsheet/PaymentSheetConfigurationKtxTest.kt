@@ -8,6 +8,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferen
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.utils.PaymentElementCallbackTestRule
@@ -355,7 +356,7 @@ class PaymentSheetConfigurationKtxTest {
         val checkoutSessionMode = PaymentElementLoader.InitializationMode.CheckoutSession(
             instancesKey = "PaymentSheetConfigurationKtxTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-                id = "cs_test_123",
+                id = DEFAULT_CHECKOUT_SESSION_ID,
                 amount = 5099,
             ),
         )
@@ -383,7 +384,7 @@ class PaymentSheetConfigurationKtxTest {
         val checkoutSessionMode = PaymentElementLoader.InitializationMode.CheckoutSession(
             instancesKey = "PaymentSheetConfigurationKtxTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-                id = "cs_test_123",
+                id = DEFAULT_CHECKOUT_SESSION_ID,
                 amount = 5099,
             ),
         )
@@ -406,7 +407,7 @@ class PaymentSheetConfigurationKtxTest {
         val checkoutSessionMode = PaymentElementLoader.InitializationMode.CheckoutSession(
             instancesKey = "PaymentSheetConfigurationKtxTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-                id = "cs_test_123",
+                id = DEFAULT_CHECKOUT_SESSION_ID,
                 amount = 5099,
             ),
         )

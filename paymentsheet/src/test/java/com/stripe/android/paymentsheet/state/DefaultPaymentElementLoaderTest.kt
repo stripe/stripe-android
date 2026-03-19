@@ -69,6 +69,7 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.toSavedSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.PaymentIntentInTerminalState
@@ -1697,7 +1698,7 @@ internal class DefaultPaymentElementLoaderTest {
             instancesKey = "DefaultPaymentElementLoaderTest",
             checkoutSessionResponse = createCheckoutSessionResponse(canDetachPaymentMethod = true),
         )
-        assertThat(checkoutSession.checkoutSessionResponse.id).isEqualTo("cs_test_123")
+        assertThat(checkoutSession.checkoutSessionResponse.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
     }
 
     @Test
@@ -1709,7 +1710,7 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(checkoutSession.integrationMetadata(null))
             .isEqualTo(
                 IntegrationMetadata.CheckoutSession(
-                    id = "cs_test_123",
+                    id = DEFAULT_CHECKOUT_SESSION_ID,
                     instancesKey = "DefaultPaymentElementLoaderTest",
                 )
             )
@@ -4668,7 +4669,7 @@ internal class DefaultPaymentElementLoaderTest {
         canDetachPaymentMethod: Boolean,
     ): CheckoutSessionResponse {
         return CheckoutSessionResponseFactory.create(
-            id = "cs_test_123",
+            id = DEFAULT_CHECKOUT_SESSION_ID,
             amount = 5099,
             elementsSession = ElementsSession(
                 linkSettings = null,

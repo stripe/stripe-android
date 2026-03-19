@@ -6,6 +6,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory.DEFAULT_CHECKOUT_SESSION_ID
 import org.json.JSONObject
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -248,7 +249,7 @@ class CheckoutSessionResponseJsonParserTest {
             .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_CUSTOMER_JSON)
 
         assertThat(result).isNotNull()
-        assertThat(result?.id).isEqualTo("cs_test_abc123")
+        assertThat(result?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
         assertThat(result?.amount).isEqualTo(1000L)
 
         // Verify customer is parsed from top-level
@@ -286,7 +287,7 @@ class CheckoutSessionResponseJsonParserTest {
             .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITHOUT_CUSTOMER_JSON)
 
         assertThat(result).isNotNull()
-        assertThat(result?.id).isEqualTo("cs_test_abc123")
+        assertThat(result?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
         assertThat(result?.customer).isNull()
     }
 

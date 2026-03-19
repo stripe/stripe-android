@@ -34,6 +34,7 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.createCustomerState
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.DummyActivityResultCaller.RegisterCall
 import com.stripe.android.testing.FakeErrorReporter
@@ -453,7 +454,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         networkRule.enqueue(
             host("api.stripe.com"),
             method("POST"),
-            path("/v1/payment_pages/cs_test_abc123"),
+            path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
         ) { response ->
             response.setBodyDelay(5, TimeUnit.SECONDS)
             response.testBodyFromFile("checkout-session-apply-discount.json")
@@ -463,7 +464,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
 
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             integrationMetadata = IntegrationMetadata.CheckoutSession(
-                id = "cs_test_abc123",
+                id = DEFAULT_CHECKOUT_SESSION_ID,
                 instancesKey = "test_key",
             ),
         )
@@ -484,7 +485,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         networkRule.enqueue(
             host("api.stripe.com"),
             method("POST"),
-            path("/v1/payment_pages/cs_test_abc123"),
+            path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
         ) { response ->
             response.setBodyDelay(5, TimeUnit.SECONDS)
             response.testBodyFromFile("checkout-session-apply-discount.json")
@@ -494,7 +495,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
 
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             integrationMetadata = IntegrationMetadata.CheckoutSession(
-                id = "cs_test_abc123",
+                id = DEFAULT_CHECKOUT_SESSION_ID,
                 instancesKey = "test_key",
             ),
         )

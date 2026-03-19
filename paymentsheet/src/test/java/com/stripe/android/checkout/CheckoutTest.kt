@@ -16,6 +16,7 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -44,19 +45,19 @@ class CheckoutTest {
     fun `createWithState produces Checkout with correct checkoutSession id`() = runTest {
         runCreateWithStateScenario { checkout ->
             checkout.checkoutSession.test {
-                assertThat(awaitItem().id).isEqualTo("cs_test_abc123")
+                assertThat(awaitItem().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
             }
         }
     }
 
     @Test
     fun `configure returns Checkout with checkoutSession id from network response`() = runConfigureScenario(
-        clientSecret = "cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh_secret_example",
+        clientSecret = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example",
         networkSetup = {
             networkRule.enqueue(
                 host("api.stripe.com"),
                 method("POST"),
-                path("/v1/payment_pages/cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh/init"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID/init"),
             ) { response ->
                 response.testBodyFromFile("checkout-session-init.json")
             }
@@ -65,7 +66,7 @@ class CheckoutTest {
         val checkout = result.getOrThrow()
         checkout.checkoutSession.test {
             assertThat(awaitItem().id)
-                .isEqualTo("cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh")
+                .isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
         }
     }
 
@@ -75,7 +76,7 @@ class CheckoutTest {
             networkRule.enqueue(
                 host("api.stripe.com"),
                 method("POST"),
-                path("/v1/payment_pages/cs_test_abc123"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
                 bodyPart("promotion_code", "10OFF"),
             ) { response ->
                 response.testBodyFromFile("checkout-session-apply-discount.json")
@@ -102,7 +103,7 @@ class CheckoutTest {
             networkRule.enqueue(
                 host("api.stripe.com"),
                 method("POST"),
-                path("/v1/payment_pages/cs_test_abc123"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
             ) { response ->
                 response.setResponseCode(400)
                 response.setBody("""{"error": {"message": "Invalid promotion code"}}""")
@@ -126,7 +127,7 @@ class CheckoutTest {
             networkRule.enqueue(
                 host("api.stripe.com"),
                 method("POST"),
-                path("/v1/payment_pages/cs_test_abc123"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
                 bodyPart("promotion_code", "10OFF"),
             ) { response ->
                 response.testBodyFromFile("checkout-session-apply-discount.json")
@@ -150,7 +151,7 @@ class CheckoutTest {
             networkRule.enqueue(
                 host("api.stripe.com"),
                 method("POST"),
-                path("/v1/payment_pages/cs_test_abc123"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
                 bodyPart("promotion_code", ""),
             ) { response ->
                 response.testBodyFromFile("checkout-session-apply-discount.json")
@@ -174,7 +175,7 @@ class CheckoutTest {
             networkRule.enqueue(
                 host("api.stripe.com"),
                 method("POST"),
-                path("/v1/payment_pages/cs_test_abc123"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
             ) { response ->
                 response.setResponseCode(400)
                 response.setBody("""{"error": {"message": "Failed to remove promotion code"}}""")
@@ -198,7 +199,7 @@ class CheckoutTest {
             networkRule.enqueue(
                 host("api.stripe.com"),
                 method("POST"),
-                path("/v1/payment_pages/cs_test_abc123/init"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID/init"),
             ) { response ->
                 response.testBodyFromFile("checkout-session-apply-discount.json")
             }
@@ -221,7 +222,7 @@ class CheckoutTest {
             networkRule.enqueue(
                 host("api.stripe.com"),
                 method("POST"),
-                path("/v1/payment_pages/cs_test_abc123/init"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID/init"),
             ) { response ->
                 response.setResponseCode(500)
                 response.setBody("""{"error": {"message": "Internal server error"}}""")
@@ -245,7 +246,7 @@ class CheckoutTest {
             networkRule.enqueue(
                 host("api.stripe.com"),
                 method("POST"),
-                path("/v1/payment_pages/cs_test_abc123"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
                 bodyPart(urlEncode("updated_line_item_quantity[line_item_id]"), "li_1"),
                 bodyPart(urlEncode("updated_line_item_quantity[quantity]"), "3"),
                 bodyPart(urlEncode("updated_line_item_quantity[fail_update_on_discount_error]"), "true"),
@@ -273,7 +274,7 @@ class CheckoutTest {
             networkRule.enqueue(
                 host("api.stripe.com"),
                 method("POST"),
-                path("/v1/payment_pages/cs_test_abc123"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
             ) { response ->
                 response.setResponseCode(400)
                 response.setBody("""{"error": {"message": "Invalid quantity"}}""")
@@ -297,7 +298,7 @@ class CheckoutTest {
             networkRule.enqueue(
                 host("api.stripe.com"),
                 method("POST"),
-                path("/v1/payment_pages/cs_test_abc123"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
                 bodyPart("shipping_rate", "shr_express"),
                 bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
             ) { response ->
@@ -331,7 +332,7 @@ class CheckoutTest {
             networkRule.enqueue(
                 host("api.stripe.com"),
                 method("POST"),
-                path("/v1/payment_pages/cs_test_abc123"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
                 bodyPart(urlEncode("tax_region[country]"), "US"),
                 bodyPart(urlEncode("tax_region[city]"), "Denver"),
                 bodyPart(urlEncode("tax_region[state]"), "CO"),
@@ -384,7 +385,7 @@ class CheckoutTest {
             networkRule.enqueue(
                 host("api.stripe.com"),
                 method("POST"),
-                path("/v1/payment_pages/cs_test_abc123"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
             ) { response ->
                 response.setResponseCode(400)
                 response.setBody("""{"error": {"message": "Invalid address"}}""")
@@ -410,7 +411,7 @@ class CheckoutTest {
             networkRule.enqueue(
                 host("api.stripe.com"),
                 method("POST"),
-                path("/v1/payment_pages/cs_test_abc123"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
                 bodyPart(urlEncode("tax_region[country]"), "US"),
                 bodyPart(urlEncode("tax_region[postal_code]"), "80202"),
                 not(hasBodyPart(urlEncode("tax_region[city]"))),
@@ -443,7 +444,7 @@ class CheckoutTest {
             networkRule.enqueue(
                 host("api.stripe.com"),
                 method("POST"),
-                path("/v1/payment_pages/cs_test_abc123"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
                 bodyPart(urlEncode("tax_region[country]"), "US"),
                 bodyPart(urlEncode("tax_region[city]"), "Denver"),
                 bodyPart(urlEncode("tax_region[state]"), "CO"),
@@ -486,7 +487,7 @@ class CheckoutTest {
             networkRule.enqueue(
                 host("api.stripe.com"),
                 method("POST"),
-                path("/v1/payment_pages/cs_test_abc123"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
             ) { response ->
                 response.setResponseCode(400)
                 response.setBody("""{"error": {"message": "Invalid address"}}""")
@@ -512,7 +513,7 @@ class CheckoutTest {
             networkRule.enqueue(
                 host("api.stripe.com"),
                 method("POST"),
-                path("/v1/payment_pages/cs_test_abc123"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
             ) { response ->
                 response.testBodyFromFile("checkout-session-update-shipping-address.json")
             }
@@ -548,7 +549,7 @@ class CheckoutTest {
             networkRule.enqueue(
                 host("api.stripe.com"),
                 method("POST"),
-                path("/v1/payment_pages/cs_test_abc123"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
             ) { response ->
                 response.testBodyFromFile("checkout-session-update-shipping-address.json")
             }
@@ -584,7 +585,7 @@ class CheckoutTest {
             networkRule.enqueue(
                 host("api.stripe.com"),
                 method("POST"),
-                path("/v1/payment_pages/cs_test_abc123"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
             ) { response ->
                 response.setResponseCode(400)
                 response.setBody("""{"error": {"message": "Invalid address"}}""")
@@ -606,7 +607,7 @@ class CheckoutTest {
             networkRule.enqueue(
                 host("api.stripe.com"),
                 method("POST"),
-                path("/v1/payment_pages/cs_test_abc123"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
             ) { response ->
                 response.setResponseCode(400)
                 response.setBody("""{"error": {"message": "Invalid address"}}""")
@@ -628,7 +629,7 @@ class CheckoutTest {
             networkRule.enqueue(
                 host("api.stripe.com"),
                 method("POST"),
-                path("/v1/payment_pages/cs_test_abc123"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
             ) { response ->
                 response.testBodyFromFile("checkout-session-update-shipping-address.json")
             }
@@ -647,7 +648,7 @@ class CheckoutTest {
             networkRule.enqueue(
                 host("api.stripe.com"),
                 method("POST"),
-                path("/v1/payment_pages/cs_test_abc123"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
             ) { response ->
                 response.testBodyFromFile("checkout-session-update-shipping-address.json")
             }
@@ -666,7 +667,7 @@ class CheckoutTest {
             networkRule.enqueue(
                 host("api.stripe.com"),
                 method("POST"),
-                path("/v1/payment_pages/cs_test_abc123"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
             ) { response ->
                 response.setResponseCode(400)
                 response.setBody("""{"error": {"message": "Invalid address"}}""")
@@ -686,7 +687,7 @@ class CheckoutTest {
             networkRule.enqueue(
                 host("api.stripe.com"),
                 method("POST"),
-                path("/v1/payment_pages/cs_test_abc123"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
             ) { response ->
                 response.setResponseCode(400)
                 response.setBody("""{"error": {"message": "Invalid address"}}""")
@@ -706,7 +707,7 @@ class CheckoutTest {
             networkRule.enqueue(
                 host("api.stripe.com"),
                 method("POST"),
-                path("/v1/payment_pages/cs_test_abc123"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
                 bodyPart(urlEncode("tax_region[country]"), "US"),
                 bodyPart(urlEncode("tax_region[postal_code]"), "80202"),
                 not(hasBodyPart(urlEncode("tax_region[city]"))),
@@ -739,7 +740,7 @@ class CheckoutTest {
             networkRule.enqueue(
                 host("api.stripe.com"),
                 method("POST"),
-                path("/v1/payment_pages/cs_test_abc123"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
                 bodyPart(urlEncode("tax_id_collection[tax_id][type]"), "us_ein"),
                 bodyPart(urlEncode("tax_id_collection[tax_id][value]"), "123456789"),
                 bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
@@ -765,7 +766,7 @@ class CheckoutTest {
             networkRule.enqueue(
                 host("api.stripe.com"),
                 method("POST"),
-                path("/v1/payment_pages/cs_test_abc123"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
             ) { response ->
                 response.setResponseCode(400)
                 response.setBody("""{"error": {"message": "Invalid tax ID"}}""")
@@ -789,7 +790,7 @@ class CheckoutTest {
             networkRule.enqueue(
                 host("api.stripe.com"),
                 method("POST"),
-                path("/v1/payment_pages/cs_test_abc123"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
                 bodyPart(urlEncode("tax_id_collection[tax_id][type]"), "us_ein"),
                 bodyPart(urlEncode("tax_id_collection[tax_id][value]"), "123456789"),
                 bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
@@ -815,7 +816,7 @@ class CheckoutTest {
             networkRule.enqueue(
                 host("api.stripe.com"),
                 method("POST"),
-                path("/v1/payment_pages/cs_test_abc123"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
             ) { response ->
                 response.setResponseCode(400)
                 response.setBody("""{"error": {"message": "Invalid shipping rate"}}""")
@@ -840,7 +841,7 @@ class CheckoutTest {
             networkRule.enqueue(
                 host("api.stripe.com"),
                 method("POST"),
-                path("/v1/payment_pages/cs_test_abc123"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
                 bodyPart("promotion_code", "10OFF"),
             ) { response ->
                 response.setBodyDelay(200, TimeUnit.MILLISECONDS)
@@ -862,7 +863,7 @@ class CheckoutTest {
 
             checkout.checkoutSession.test {
                 val initial = awaitItem()
-                assertThat(initial.id).isEqualTo("cs_test_abc123")
+                assertThat(initial.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
                 assertThat(initial.totalSummary).isNull()
 
                 val address = Address()
@@ -901,7 +902,7 @@ class CheckoutTest {
         runCreateWithStateScenario { checkout ->
             checkout.checkoutSession.test {
                 val initial = awaitItem()
-                assertThat(initial.id).isEqualTo("cs_test_abc123")
+                assertThat(initial.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
                 assertThat(initial.totalSummary).isNull()
 
                 val updatedResponse = CheckoutSessionResponseFactory.create(
@@ -929,7 +930,7 @@ class CheckoutTest {
     @Test
     fun `updateWithResponse updates internalState`() = runTest {
         runCreateWithStateScenario { checkout ->
-            assertThat(checkout.internalState.checkoutSessionResponse.id).isEqualTo("cs_test_abc123")
+            assertThat(checkout.internalState.checkoutSessionResponse.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
 
             val updatedResponse = CheckoutSessionResponseFactory.create(id = "cs_test_updated")
             checkout.updateWithResponse(updatedResponse)
@@ -966,7 +967,7 @@ class CheckoutTest {
             networkRule.enqueue(
                 host("api.stripe.com"),
                 method("POST"),
-                path("/v1/payment_pages/cs_test_abc123"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
             ) { response ->
                 response.setBodyDelay(5, TimeUnit.SECONDS)
                 response.testBodyFromFile("checkout-session-apply-discount.json")
@@ -993,7 +994,7 @@ class CheckoutTest {
             networkRule.enqueue(
                 host("api.stripe.com"),
                 method("POST"),
-                path("/v1/payment_pages/cs_test_abc123"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
             ) { response ->
                 response.setBodyDelay(5, TimeUnit.SECONDS)
                 response.testBodyFromFile("checkout-session-apply-discount.json")
@@ -1036,7 +1037,7 @@ class CheckoutTest {
             networkRule.enqueue(
                 host("api.stripe.com"),
                 method("POST"),
-                path("/v1/payment_pages/cs_test_abc123"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
                 bodyPart("promotion_code", "10OFF"),
             ) { response ->
                 response.testBodyFromFile("checkout-session-apply-discount.json")
@@ -1049,12 +1050,12 @@ class CheckoutTest {
 
     @Test
     fun `configure returns failure when network request fails`() = runConfigureScenario(
-        clientSecret = "cs_test_abc123_secret_xyz",
+        clientSecret = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_xyz",
         networkSetup = {
             networkRule.enqueue(
                 host("api.stripe.com"),
                 method("POST"),
-                path("/v1/payment_pages/cs_test_abc123/init"),
+                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID/init"),
             ) { response ->
                 response.setResponseCode(500)
                 response.setBody("""{"error": {"message": "Internal server error"}}""")
