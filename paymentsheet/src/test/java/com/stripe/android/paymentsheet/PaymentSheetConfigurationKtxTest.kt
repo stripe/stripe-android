@@ -2,13 +2,13 @@ package com.stripe.android.paymentsheet
 
 import android.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.utils.PaymentElementCallbackTestRule
