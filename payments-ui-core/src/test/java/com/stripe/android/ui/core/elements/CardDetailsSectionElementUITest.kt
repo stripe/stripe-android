@@ -19,9 +19,11 @@ import com.google.android.gms.wallet.PaymentCardRecognitionResult
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.ui.core.cardscan.CardScanConfig
 import com.stripe.android.ui.core.cardscan.CardScanResult
 import com.stripe.android.ui.core.cardscan.FakeCardScanEventsReporter
 import com.stripe.android.ui.core.cardscan.FakePaymentCardRecognitionClient
+import com.stripe.android.ui.core.cardscan.LocalCardScanConfig
 import com.stripe.android.ui.core.cardscan.LocalCardScanEventsReporter
 import com.stripe.android.ui.core.cardscan.LocalPaymentCardRecognitionClient
 import com.stripe.android.ui.core.cardscan.ScannedCard
@@ -237,7 +239,8 @@ internal class CardDetailsSectionElementUITest {
                     LocalActivityResultRegistryOwner provides registryOwner,
                     LocalCardNumberCompletedEventReporter provides { },
                     LocalCardScanEventsReporter provides FakeCardScanEventsReporter(),
-                    LocalPaymentCardRecognitionClient provides FakePaymentCardRecognitionClient(true)
+                    LocalPaymentCardRecognitionClient provides FakePaymentCardRecognitionClient(true),
+                    LocalCardScanConfig provides CardScanConfig(),
                 ) {
                     CardDetailsSectionElementUI(
                         enabled = true,

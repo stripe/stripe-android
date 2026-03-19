@@ -1,0 +1,114 @@
+package com.stripe.android.ui.core.cardscan
+
+import android.content.Context
+import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContract
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import com.stripe.android.stripecardscan.cardscan.CardScanConfiguration
+import com.stripe.android.stripecardscan.cardscan.CardScanSheetParams
+import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
+import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+
+internal class CardScanStripeLauncher(
+    private val elementsSessionId: String?,
+    private val eventsReporter: CardScanEventsReporter,
+) : CardScanLauncher {
+
+    private val implementation = "stripe_card_scan"
+    private var _isLaunching = false
+    private val _isAvailable = MutableStateFlow(true)
+    override val isAvailable: StateFlow<Boolean> = _isAvailable.asStateFlow()
+
+    lateinit var activityLauncher: ActivityResultLauncher<CardScanSheetParams>
+
+    override fun launch(context: Context) {
+        if (_isLaunching) {
+            return
+        }
+
+        _isLaunching = true
+        eventsReporter.onCardScanStarted(implementation)
+        activityLauncher.launch(
+            CardScanSheetParams(CardScanConfiguration(elementsSessionId = elementsSessionId))
+        )
+    }
+
+    internal fun parseActivityResult(intent: Intent?): CardScanResult {
+        val sheetResult: CardScanSheetResult = intent?.getParcelableExtra(INTENT_PARAM_RESULT)
+            ?: CardScanSheetResult.Failed(UnknownScanException("No data in the result intent"))
+
+        val scanResult = when (sheetResult) {
+            is CardScanSheetResult.Completed -> {
+                CardScanResult.Completed(
+                    ScannedCard(
+                        pan = sheetResult.scannedCard.pan,
+                        expirationMonth = null,
+                        expirationYear = null,
+                    )
+                )
+            }
+            is CardScanSheetResult.Canceled -> CardScanResult.Canceled
+            is CardScanSheetResult.Failed -> CardScanResult.Failed(sheetResult.error)
+        }
+
+        when (scanResult) {
+            is CardScanResult.Completed -> eventsReporter.onCardScanSucceeded(implementation)
+            is CardScanResult.Canceled -> eventsReporter.onCardScanCancelled(implementation)
+            is CardScanResult.Failed -> eventsReporter.onCardScanFailed(implementation, scanResult.error)
+        }
+
+        return scanResult
+    }
+
+    companion object {
+        private const val INTENT_PARAM_REQUEST = "request"
+        private const val INTENT_PARAM_RESULT = "result"
+
+        private val cardScanActivityClass: Class<*> by lazy {
+            Class.forName("com.stripe.android.stripecardscan.cardscan.CardScanActivity")
+        }
+
+        private val activityResultContract = object : ActivityResultContract<
+            CardScanSheetParams,
+            Pair<Int, Intent?>
+            >() {
+            override fun createIntent(context: Context, input: CardScanSheetParams): Intent {
+                return Intent(context, cardScanActivityClass)
+                    .putExtra(INTENT_PARAM_REQUEST, input)
+            }
+
+            override fun parseResult(resultCode: Int, intent: Intent?): Pair<Int, Intent?> {
+                return resultCode to intent
+            }
+        }
+
+        @Composable
+        internal fun rememberCardScanStripeLauncher(
+            elementsSessionId: String?,
+            eventsReporter: CardScanEventsReporter,
+            onResult: (CardScanResult) -> Unit,
+        ): CardScanStripeLauncher {
+            val launcher = remember(elementsSessionId, eventsReporter) {
+                CardScanStripeLauncher(
+                    elementsSessionId = elementsSessionId,
+                    eventsReporter = eventsReporter,
+                )
+            }
+            val activityLauncher = rememberLauncherForActivityResult(
+                activityResultContract,
+            ) { (_, intent) ->
+                launcher._isLaunching = false
+                onResult(launcher.parseActivityResult(intent))
+            }
+            return remember(activityLauncher) {
+                launcher.apply { this.activityLauncher = activityLauncher }
+            }
+        }
+    }
+}

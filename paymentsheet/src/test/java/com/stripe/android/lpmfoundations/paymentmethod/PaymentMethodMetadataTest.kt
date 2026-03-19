@@ -1218,6 +1218,8 @@ internal class PaymentMethodMetadataTest {
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddSupported = false,
             experimentsData = null,
+            isStripeCardScanAllowed = false,
+            elementsSessionId = "session_1234",
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1367,6 +1369,8 @@ internal class PaymentMethodMetadataTest {
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddSupported = false,
             experimentsData = null,
+            isStripeCardScanAllowed = false,
+            elementsSessionId = "session_1234",
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }

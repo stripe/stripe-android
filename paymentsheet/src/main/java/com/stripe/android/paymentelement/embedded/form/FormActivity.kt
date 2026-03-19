@@ -17,6 +17,7 @@ import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
+import com.stripe.android.ui.core.cardscan.CardScanConfig
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.collectAsState
@@ -92,6 +93,12 @@ internal class FormActivity : AppCompatActivity() {
                     FormActivityUI(
                         interactor = formInteractor,
                         eventReporter = eventReporter,
+                        cardScanConfig = CardScanConfig(
+                            isStripeCardScanAllowed = args?.paymentMethodMetadata
+                                ?.isStripeCardScanAllowed == true,
+                            elementsSessionId = args?.paymentMethodMetadata
+                                ?.elementsSessionId,
+                        ),
                         onClick = {
                             confirmationHelper.confirm()
                         },

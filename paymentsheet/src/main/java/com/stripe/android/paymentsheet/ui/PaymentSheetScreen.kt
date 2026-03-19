@@ -78,6 +78,7 @@ import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.shoppay.ShopPayButton
 import com.stripe.android.ui.core.CircularProgressIndicator
+import com.stripe.android.ui.core.cardscan.CardScanConfig
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.StripeTheme
@@ -364,7 +365,14 @@ private fun PaymentSheetContent(
         }
 
         Column(modifier = Modifier.fillMaxWidth()) {
-            EventReporterProvider(viewModel.eventReporter) {
+            val metadata by viewModel.paymentMethodMetadata.collectAsState()
+            EventReporterProvider(
+                eventReporter = viewModel.eventReporter,
+                cardScanConfig = CardScanConfig(
+                    isStripeCardScanAllowed = metadata?.isStripeCardScanAllowed == true,
+                    elementsSessionId = metadata?.elementsSessionId,
+                ),
+            ) {
                 currentScreen.Content(
                     modifier = Modifier.padding(bottom = 8.dp),
                 )
