@@ -266,7 +266,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Title shown in success screen shown after a user has added their card bu tapping -->
   <string name="stripe_tap_to_add_card_added_title">Card added</string>
   <!-- Button label for a button that launches a flow for tapping a card on the device -->
-  <string name="stripe_tap_to_add_card_button_label">Tap to add card</string>
+  <string name="stripe_tap_to_add_card_button_label">Tap to add</string>
   <!-- Title for screen indicating to the user that they have completed a payment of a specified amount -->
   <string name="stripe_tap_to_add_paid_label">Paid %s</string>
   <!-- Button text on a screen asking the user to approve a payment -->

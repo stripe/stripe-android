@@ -15,6 +15,9 @@ internal sealed interface TapToAddResult : Parcelable {
     data class Continue(val paymentSelection: PaymentSelection.Saved) : TapToAddResult
 
     @Parcelize
+    data object UnsupportedDevice : TapToAddResult
+
+    @Parcelize
     data class Canceled(
         val paymentSelection: PaymentSelection.Saved?
     ) : TapToAddResult

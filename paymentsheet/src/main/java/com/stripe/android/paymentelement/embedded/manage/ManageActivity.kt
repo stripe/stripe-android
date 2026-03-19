@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -162,8 +163,11 @@ internal class ManageActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
 
-        if (isFinishing && ::eventReporter.isInitialized) {
-            eventReporter.onDismiss()
+        if (isFinishing) {
+            CheckoutInstances.markIntegrationDismissed(args?.paymentMethodMetadata)
+            if (::eventReporter.isInitialized) {
+                eventReporter.onDismiss()
+            }
         }
     }
 

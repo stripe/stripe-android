@@ -26,6 +26,7 @@ import com.stripe.android.common.taptoadd.ui.createTapToAddUxConfiguration
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
+import com.stripe.android.core.injection.StripeNetworkClientModule
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DefaultDurationProvider
@@ -63,11 +64,11 @@ import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepositoryModule
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.DefaultSavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
+import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.stripeterminal.external.models.TapToPayUxConfiguration
 import dagger.Binds
 import dagger.BindsInstance
@@ -124,7 +125,7 @@ internal interface TapToAddViewModelComponent {
     ],
     includes = [
         TapToAddLinkModule::class,
-        CheckoutSessionRepositoryModule::class,
+        StripeNetworkClientModule::class,
     ]
 )
 @Suppress("TooManyFunctions")
@@ -168,6 +169,11 @@ internal interface TapToAddViewModelModule {
     ): EventReporter
 
     @Binds
+    fun bindsTapToAddImageRepository(
+        tapToAddImageRepository: DefaultTapToAddImageRepository
+    ): TapToAddImageRepository
+
+    @Binds
     fun bindsTapToAddCollectingInteractorFactory(
         tapToAddCollectingInteractorFactory: DefaultTapToAddCollectingInteractor.Factory
     ): TapToAddCollectingInteractor.Factory
@@ -206,6 +212,12 @@ internal interface TapToAddViewModelModule {
         @Singleton
         fun providesTapToAddUxConfiguration(): TapToPayUxConfiguration {
             return createTapToAddUxConfiguration()
+        }
+
+        @Provides
+        @Singleton
+        fun provideStripeImageLoader(context: Context): StripeImageLoader {
+            return StripeImageLoader(context)
         }
 
         @Provides

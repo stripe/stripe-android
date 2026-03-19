@@ -71,6 +71,7 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -1447,6 +1448,7 @@ internal class PaymentOptionsViewModelTest {
                     return customerStateHolder ?: DefaultCustomerStateHolder.Factory.create(viewModel)
                 }
             },
+            customViewModelScope = CoroutineScope(Dispatchers.Unconfined),
         )
     }
 

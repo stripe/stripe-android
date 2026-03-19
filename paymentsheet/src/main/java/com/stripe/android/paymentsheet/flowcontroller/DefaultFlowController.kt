@@ -17,8 +17,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.checkout.Checkout
+import com.stripe.android.checkout.CheckoutConfigurationMerger
 import com.stripe.android.checkout.CheckoutInstances
-import com.stripe.android.checkout.forCheckoutSession
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -241,7 +241,8 @@ internal class DefaultFlowController @Inject internal constructor(
         CheckoutInstances.ensureNoMutationInFlight(checkout.internalState.key)
         configure(
             mode = checkout.internalState.initializationMode,
-            configuration = configuration.forCheckoutSession(checkout.internalState),
+            configuration = CheckoutConfigurationMerger.PaymentSheetConfiguration(configuration)
+                .forCheckoutSession(checkout.internalState),
             callback = callback,
         )
     }
@@ -297,6 +298,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 .integrationMetadata as? IntegrationMetadata.CheckoutSession
             if (checkoutSession != null) {
                 CheckoutInstances.ensureNoMutationInFlight(checkoutSession.instancesKey)
+                CheckoutInstances.markIntegrationLaunched(checkoutSession.instancesKey)
             }
 
             val linkConfiguration = state.paymentSheetState.linkConfiguration

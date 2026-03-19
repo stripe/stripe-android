@@ -3,15 +3,17 @@ package com.stripe.android.checkout
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
+import com.stripe.android.checkouttesting.checkoutInit
+import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.RequestMatchers.method
-import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertThrows
 import org.junit.Rule
@@ -104,10 +106,7 @@ class CheckoutInstancesTest {
         val requestArrived = CountDownLatch(1)
         val holdResponse = CountDownLatch(1)
 
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/payment_pages/cs_test_abc123/init"),
-        ) { response ->
+        networkRule.checkoutInit { response ->
             requestArrived.countDown()
             holdResponse.await()
             response.setBody("{}")
@@ -132,6 +131,53 @@ class CheckoutInstancesTest {
     }
 
     @Test
+    fun `markIntegrationLaunched marks all instances for a key`() = runTest {
+        val checkout1 = createCheckout(key = "key1")
+        val checkout2 = createCheckout(key = "key1")
+        CheckoutInstances.clear()
+        CheckoutInstances.add("key1", checkout1)
+        CheckoutInstances.add("key1", checkout2)
+
+        CheckoutInstances.markIntegrationLaunched("key1")
+
+        // Both instances should return failure because integrationLaunched is set.
+        val result1 = checkout1.applyPromotionCode("code")
+        assertThat(result1.isFailure).isTrue()
+        assertThat(result1.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
+        val result2 = checkout2.applyPromotionCode("code")
+        assertThat(result2.isFailure).isTrue()
+        assertThat(result2.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
+    }
+
+    @Test
+    fun `markIntegrationDismissed clears the flag for all instances`() = runTest {
+        val checkout1 = createCheckout(key = "key1")
+        val checkout2 = createCheckout(key = "key1")
+        CheckoutInstances.clear()
+        CheckoutInstances.add("key1", checkout1)
+        CheckoutInstances.add("key1", checkout2)
+
+        CheckoutInstances.markIntegrationLaunched("key1")
+        CheckoutInstances.markIntegrationDismissed("key1")
+
+        // After dismissing, mutations should not throw the integrationLaunched error.
+        // They will fail for other reasons (network), but they won't throw IllegalStateException.
+        networkRule.checkoutUpdate { response ->
+            response.setResponseCode(400)
+            response.setBody("""{"error": {"message": "error"}}""")
+        }
+        networkRule.checkoutUpdate { response ->
+            response.setResponseCode(400)
+            response.setBody("""{"error": {"message": "error"}}""")
+        }
+
+        val result1 = checkout1.applyPromotionCode("code")
+        assertThat(result1.isFailure).isTrue()
+        val result2 = checkout2.applyPromotionCode("code")
+        assertThat(result2.isFailure).isTrue()
+    }
+
+    @Test
     fun `multiple keys coexist independently`() {
         val checkout1 = createCheckout(key = "key1")
         val checkout2 = createCheckout(key = "key2")
@@ -148,7 +194,7 @@ class CheckoutInstancesTest {
         val state = InternalState(
             key = key,
             checkoutSessionResponse = CheckoutSessionResponse(
-                id = "cs_test_abc123",
+                id = DEFAULT_CHECKOUT_SESSION_ID,
                 amount = 1000L,
                 currency = "usd",
                 mode = CheckoutSessionResponse.Mode.PAYMENT,
@@ -161,6 +207,7 @@ class CheckoutInstancesTest {
                 totalSummary = null,
                 lineItems = emptyList(),
                 shippingOptions = emptyList(),
+                adaptivePricingInfo = null,
             ),
         )
         val checkout = Checkout.createWithState(applicationContext, Checkout.State(state))

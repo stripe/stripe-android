@@ -1,7 +1,9 @@
 package com.stripe.android.common.taptoadd
 
+import android.content.Context
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
@@ -12,6 +14,7 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.uicore.utils.AnimationConstants
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -23,6 +26,7 @@ import javax.inject.Named
 
 internal interface TapToAddHelper {
     val nextStep: SharedFlow<TapToAddNextStep>
+    val isTapToAddEnabled: StateFlow<Boolean>
 
     fun register(
         activityResultCaller: ActivityResultCaller,
@@ -47,6 +51,7 @@ internal interface TapToAddHelper {
 }
 
 internal class DefaultTapToAddHelper(
+    private val context: Context,
     private val coroutineScope: CoroutineScope,
     private val productUsage: Set<String>,
     private val paymentElementCallbackIdentifier: String,
@@ -57,6 +62,9 @@ internal class DefaultTapToAddHelper(
     private val customerStateHolder: CustomerStateHolder,
     private val linkSignupMode: StateFlow<LinkSignupMode?>,
 ) : TapToAddHelper {
+    override val isTapToAddEnabled: StateFlow<Boolean> =
+        savedStateHandle.getStateFlow(IS_TAP_TO_ADD_ENABLED_KEY, true)
+
     private var collecting: Boolean
         get() = savedStateHandle.get<Boolean>(CURRENTLY_COLLECTING_WITH_TAP_TO_ADD_KEY) == true
         set(value) {
@@ -107,6 +115,10 @@ internal class DefaultTapToAddHelper(
             }
             TapToAddResult.Complete -> TapToAddNextStep.Complete
             is TapToAddResult.Continue -> TapToAddNextStep.Continue(tapToAddResult.paymentSelection)
+            TapToAddResult.UnsupportedDevice -> {
+                savedStateHandle[IS_TAP_TO_ADD_ENABLED_KEY] = false
+                null
+            }
         }
     }
 
@@ -129,12 +141,18 @@ internal class DefaultTapToAddHelper(
                     paymentMethodMetadata = paymentMethodMetadata,
                     paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
                     productUsage = productUsage,
+                ),
+                options = ActivityOptionsCompat.makeCustomAnimation(
+                    context,
+                    AnimationConstants.FADE_IN,
+                    AnimationConstants.FADE_OUT,
                 )
             )
         }
     }
 
     class Factory @Inject constructor(
+        private val context: Context,
         @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
         @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
         private val savedStateHandle: SavedStateHandle,
@@ -148,6 +166,7 @@ internal class DefaultTapToAddHelper(
             linkSignupMode: StateFlow<LinkSignupMode?>,
         ): TapToAddHelper {
             return DefaultTapToAddHelper(
+                context = context,
                 coroutineScope = coroutineScope,
                 productUsage = productUsage,
                 paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
@@ -163,5 +182,6 @@ internal class DefaultTapToAddHelper(
 
     private companion object {
         const val CURRENTLY_COLLECTING_WITH_TAP_TO_ADD_KEY = "CURRENTLY_COLLECTING_WITH_TAP_TO_ADD"
+        const val IS_TAP_TO_ADD_ENABLED_KEY = "IS_TAP_TO_ADD_ENABLED"
     }
 }

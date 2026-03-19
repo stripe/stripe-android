@@ -26,6 +26,7 @@ internal class DefaultTapToAddCollectingInteractor(
     private val tapToAddCollectionHandler: TapToAddCollectionHandler,
     private val onCollected: (paymentMethod: PaymentMethod) -> Unit,
     private val onFailedCollection: (message: ResolvableString) -> Unit,
+    private val onTapToAddNotSupported: () -> Unit,
     private val onCanceled: () -> Unit,
     private val logger: Logger,
 ) : TapToAddCollectingInteractor {
@@ -42,9 +43,11 @@ internal class DefaultTapToAddCollectingInteractor(
             }
             is TapToAddCollectionHandler.CollectionState.FailedCollection -> {
                 logger.debug("Tap to add collection failed with error: ${collectionState.error}")
-                onFailedCollection(
-                    collectionState.displayMessage ?: collectionState.error.stripeErrorMessage()
-                )
+                onFailedCollection(collectionState.displayMessage ?: collectionState.error.stripeErrorMessage())
+            }
+            is TapToAddCollectionHandler.CollectionState.UnsupportedDevice -> {
+                logger.debug("Tap to add collection is not supported on this device: ${collectionState.error}")
+                onTapToAddNotSupported()
             }
             is TapToAddCollectionHandler.CollectionState.Canceled -> {
                 onCanceled()
@@ -80,9 +83,14 @@ internal class DefaultTapToAddCollectingInteractor(
                 onFailedCollection = { message ->
                     navigator.get().performAction(
                         action = TapToAddNavigator.Action.NavigateTo(
-                            screen = TapToAddNavigator.Screen.Error(
-                                message = message,
-                            ),
+                            screen = TapToAddNavigator.Screen.Error(message = message),
+                        ),
+                    )
+                },
+                onTapToAddNotSupported = {
+                    navigator.get().performAction(
+                        action = TapToAddNavigator.Action.NavigateTo(
+                            screen = TapToAddNavigator.Screen.NotSupportedError,
                         ),
                     )
                 },

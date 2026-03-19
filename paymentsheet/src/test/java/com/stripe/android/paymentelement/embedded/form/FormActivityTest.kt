@@ -15,23 +15,34 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onIdle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.Checkout
+import com.stripe.android.checkout.CheckoutInstances
+import com.stripe.android.checkout.CheckoutInstancesTestRule
+import com.stripe.android.checkout.InternalState
+import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.manage.ManageActivity
 import com.stripe.android.paymentsheet.createCustomerState
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.paymentelementtestpages.FormPage
+import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
+@OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
 internal class FormActivityTest {
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
@@ -49,6 +60,7 @@ internal class FormActivityTest {
         .outerRule(composeTestRule)
         .around(networkRule)
         .around(PaymentConfigurationTestRule(applicationContext))
+        .around(CheckoutInstancesTestRule())
 
     @Test
     fun `when launched without args should finish with cancelled result`() {
@@ -96,6 +108,42 @@ internal class FormActivityTest {
         assertThat(scenario.result.resultCode).isEqualTo(Activity.RESULT_OK)
         val result = FormContract.parseResult(scenario.result.resultCode, scenario.result.resultData)
         assertThat(result).isInstanceOf<FormResult.Complete>()
+    }
+
+    @Test
+    fun `onDestroy clears checkout integration launched flag`() {
+        val instancesKey = "test-checkout-key"
+        val checkout = Checkout.createWithState(
+            applicationContext,
+            Checkout.State(
+                InternalState(
+                    key = instancesKey,
+                    checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+                ),
+            ),
+        )
+        CheckoutInstances.markIntegrationLaunched(instancesKey)
+
+        launch(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                integrationMetadata = IntegrationMetadata.CheckoutSession(
+                    id = "cs_test",
+                    instancesKey = instancesKey,
+                ),
+            ),
+        ) { scenario ->
+            scenario.onActivity { it.finish() }
+        }
+
+        // Enqueue a response so the mutation attempt doesn't fail due to missing network stub.
+        networkRule.checkoutUpdate { response ->
+            response.testBodyFromFile("checkout-session-apply-discount.json")
+        }
+
+        // If markIntegrationDismissed was not called, this would fail with
+        // "Cannot mutate checkout session while a payment flow is presented."
+        val result = runBlocking { checkout.applyPromotionCode("code") }
+        assertThat(result.isSuccess).isTrue()
     }
 
     private fun launch(

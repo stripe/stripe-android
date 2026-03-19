@@ -3614,7 +3614,8 @@ internal class PaymentSheetViewModelTest {
                     override fun create(viewModel: BaseSheetViewModel): CustomerStateHolder {
                         return customerStateHolder ?: DefaultCustomerStateHolder.Factory.create(viewModel)
                     }
-                }
+                },
+                customViewModelScope = CoroutineScope(Dispatchers.Unconfined),
             )
         }
     }

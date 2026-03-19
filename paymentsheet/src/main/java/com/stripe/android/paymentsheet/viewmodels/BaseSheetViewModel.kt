@@ -40,7 +40,9 @@ import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -63,6 +65,7 @@ internal abstract class BaseSheetViewModel(
     val isCompleteFlow: Boolean,
     val mode: EventReporter.Mode,
     val customerStateHolderFactory: CustomerStateHolder.Factory,
+    val customViewModelScope: CoroutineScope,
 ) : ViewModel() {
     private val autocompleteLauncher = DefaultAutocompleteLauncher(
         AutocompleteAppearanceContext.PaymentElement(config.appearance)
@@ -289,6 +292,7 @@ internal abstract class BaseSheetViewModel(
 
     override fun onCleared() {
         super.onCleared()
+        customViewModelScope.cancel()
         newPaymentSelection = null
         savedStateHandle.set<PaymentSelection?>(SAVE_SELECTION, null)
     }

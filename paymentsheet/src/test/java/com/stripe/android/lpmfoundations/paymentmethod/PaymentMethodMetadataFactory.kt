@@ -145,6 +145,10 @@ internal object PaymentMethodMetadataFactory {
         return LpmSerializer.deserializeList(specsString).getOrThrow()
     }
 
+    fun defaultIntegrationMetadata(stripeIntent: StripeIntent): IntegrationMetadata {
+        return stripeIntent.integrationMetadata()
+    }
+
     private fun StripeIntent.integrationMetadata(): IntegrationMetadata {
         clientSecret?.let { return IntegrationMetadata.IntentFirst(it) }
         return when (this) {

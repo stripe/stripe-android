@@ -3,6 +3,7 @@ package com.stripe.android.common.taptoadd
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
+import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.ui.inline.LinkSignupMode
@@ -213,6 +214,37 @@ class TapToAddHelperTest {
     }
 
     @Test
+    fun `unsupported device result disables tap to add`() = runScenario {
+        helper.register(
+            activityResultCaller = activityResultCallerScenario.activityResultCaller,
+            lifecycleOwner = TestLifecycleOwner(),
+        )
+
+        helper.isTapToAddEnabled.test {
+            assertThat(awaitItem()).isTrue()
+
+            finishTapToAddActivityWithResult(
+                result = TapToAddResult.UnsupportedDevice,
+                helper = helper,
+                activityResultCallerScenario = activityResultCallerScenario,
+                expectedNextStep = null,
+                testScope = testScope,
+            )
+
+            assertThat(awaitItem()).isFalse()
+        }
+    }
+
+    @Test
+    fun `isTapToAddEnabled is restored from SavedStateHandle`() = runScenario(
+        savedStateHandle = SavedStateHandle(mapOf("IS_TAP_TO_ADD_ENABLED" to false)),
+    ) {
+        helper.isTapToAddEnabled.test {
+            assertThat(awaitItem()).isFalse()
+        }
+    }
+
+    @Test
     fun `startPaymentMethodCollection calls launch with expected params`() = runScenario(
         tapToAddMode = TapToAddMode.Continue,
         eventMode = EventReporter.Mode.Embedded,
@@ -229,17 +261,19 @@ class TapToAddHelperTest {
 
         helper.startPaymentMethodCollection(DEFAULT_METADATA)
 
-        val launchCall = activityResultCallerScenario.awaitLaunchCall()
+        val launchCall = activityResultCallerScenario.awaitLaunchCallWithOptions()
 
-        assertThat(launchCall).isInstanceOf(TapToAddContract.Args::class.java)
+        assertThat(launchCall.arguments).isInstanceOf(TapToAddContract.Args::class.java)
 
-        val tapToAddArgs = launchCall as TapToAddContract.Args
+        val tapToAddArgs = launchCall.arguments as TapToAddContract.Args
 
         assertThat(tapToAddArgs.paymentMethodMetadata).isEqualTo(DEFAULT_METADATA)
         assertThat(tapToAddArgs.eventMode).isEqualTo(EventReporter.Mode.Embedded)
         assertThat(tapToAddArgs.paymentElementCallbackIdentifier).isEqualTo("mpe_callback_id")
         assertThat(tapToAddArgs.productUsage).containsExactly("PaymentSheet", "FlowController")
         assertThat(tapToAddArgs.mode).isEqualTo(TapToAddMode.Continue)
+
+        assertThat(launchCall.activityOptions).isNotNull()
     }
 
     private fun runScenario(
@@ -287,6 +321,7 @@ class TapToAddHelperTest {
         testScope: TestScope = TestScope(),
     ): TapToAddHelper {
         return DefaultTapToAddHelper(
+            context = ApplicationProvider.getApplicationContext(),
             coroutineScope = testScope,
             productUsage = productUsage,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,

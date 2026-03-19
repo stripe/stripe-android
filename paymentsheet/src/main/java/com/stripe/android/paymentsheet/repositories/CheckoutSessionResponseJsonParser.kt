@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.repositories
 
+import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArrayToList
 import com.stripe.android.model.DeferredIntentParams
@@ -9,6 +10,7 @@ import com.stripe.android.model.parsers.ElementsSessionJsonParser
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.model.parsers.SetupIntentJsonParser
+import org.json.JSONArray
 import org.json.JSONObject
 
 /**
@@ -35,7 +37,7 @@ internal class CheckoutSessionResponseJsonParser(
         val mode = parseMode(json.optString(FIELD_MODE))
         val amount = extractDueAmount(json) ?: return null
         val currency = json.optString(FIELD_CURRENCY).takeIf { it.isNotEmpty() } ?: return null
-        val customerEmail = json.optString(FIELD_CUSTOMER_EMAIL).takeIf { it.isNotEmpty() }
+        val customerEmail = StripeJsonUtils.optString(json, FIELD_CUSTOMER_EMAIL)
         val paymentIntent = json.optJSONObject(FIELD_PAYMENT_INTENT)?.let {
             PaymentIntentJsonParser().parse(it)
         }
@@ -64,6 +66,9 @@ internal class CheckoutSessionResponseJsonParser(
         val totalSummary = parseTotalSummaryResponse(json)
         val lineItems = parseLineItems(json.optJSONObject(FIELD_LINE_ITEM_GROUP))
         val shippingOptions = parseShippingOptions(json)
+        val adaptivePricingInfo = parseAdaptivePricingInfo(
+            json.optJSONObject(FIELD_ADAPTIVE_PRICING_INFO)
+        )
 
         return CheckoutSessionResponse(
             id = sessionId,
@@ -79,6 +84,7 @@ internal class CheckoutSessionResponseJsonParser(
             totalSummary = totalSummary,
             lineItems = lineItems,
             shippingOptions = shippingOptions,
+            adaptivePricingInfo = adaptivePricingInfo,
         )
     }
 
@@ -186,7 +192,7 @@ internal class CheckoutSessionResponseJsonParser(
             return null
         }
 
-        val customerId = json.optString(FIELD_CUSTOMER_ID).takeIf { it.isNotEmpty() } ?: return null
+        val customerId = StripeJsonUtils.optString(json, FIELD_CUSTOMER_ID) ?: return null
         val paymentMethodsJson = json.optJSONArray(FIELD_PAYMENT_METHODS)
         val paymentMethods = paymentMethodsJson?.let { pmsJson ->
             (0 until pmsJson.length()).mapNotNull { index ->
@@ -400,6 +406,51 @@ internal class CheckoutSessionResponseJsonParser(
         }
     }
 
+    private fun parseAdaptivePricingInfo(
+        json: JSONObject?,
+    ): CheckoutSessionResponse.AdaptivePricingInfo? {
+        if (json == null) return null
+
+        val activePresentmentCurrency = json.optString(FIELD_ACTIVE_PRESENTMENT_CURRENCY)
+            .takeIf { it.isNotEmpty() } ?: return null
+        val integrationAmount = json.optLong(FIELD_INTEGRATION_AMOUNT, -1)
+            .takeIf { it >= 0 } ?: return null
+        val integrationCurrency = json.optString(FIELD_INTEGRATION_CURRENCY)
+            .takeIf { it.isNotEmpty() } ?: return null
+        val localCurrencyOptions = parseLocalCurrencyOptions(
+            json.optJSONArray(FIELD_LOCAL_CURRENCY_OPTIONS)
+        )
+
+        return CheckoutSessionResponse.AdaptivePricingInfo(
+            activePresentmentCurrency = activePresentmentCurrency,
+            integrationAmount = integrationAmount,
+            integrationCurrency = integrationCurrency,
+            localCurrencyOptions = localCurrencyOptions,
+        )
+    }
+
+    private fun parseLocalCurrencyOptions(
+        array: JSONArray?,
+    ): List<CheckoutSessionResponse.LocalCurrencyOption> {
+        if (array == null) return emptyList()
+        return (0 until array.length()).mapNotNull { i ->
+            val obj = array.optJSONObject(i) ?: return@mapNotNull null
+            val amount = obj.optLong(FIELD_AMOUNT, -1).takeIf { it >= 0 } ?: return@mapNotNull null
+            val conversionMarkupBps = obj.optInt(FIELD_CONVERSION_MARKUP_BPS, -1)
+                .takeIf { it >= 0 } ?: return@mapNotNull null
+            val currency = obj.optString(FIELD_CURRENCY).takeIf { it.isNotEmpty() }
+                ?: return@mapNotNull null
+            val presentmentExchangeRate = obj.optString(FIELD_PRESENTMENT_EXCHANGE_RATE)
+                .takeIf { it.isNotEmpty() } ?: return@mapNotNull null
+            CheckoutSessionResponse.LocalCurrencyOption(
+                amount = amount,
+                conversionMarkupBps = conversionMarkupBps,
+                currency = currency,
+                presentmentExchangeRate = presentmentExchangeRate,
+            )
+        }
+    }
+
     private companion object {
         private const val FIELD_SESSION_ID = "session_id"
         private const val FIELD_MODE = "mode"
@@ -440,5 +491,12 @@ internal class CheckoutSessionResponseJsonParser(
         private const val FIELD_LINE_ITEMS = "line_items"
         private const val FIELD_ID = "id"
         private const val FIELD_QUANTITY = "quantity"
+        private const val FIELD_ADAPTIVE_PRICING_INFO = "adaptive_pricing_info"
+        private const val FIELD_ACTIVE_PRESENTMENT_CURRENCY = "active_presentment_currency"
+        private const val FIELD_INTEGRATION_AMOUNT = "integration_amount"
+        private const val FIELD_INTEGRATION_CURRENCY = "integration_currency"
+        private const val FIELD_LOCAL_CURRENCY_OPTIONS = "local_currency_options"
+        private const val FIELD_CONVERSION_MARKUP_BPS = "conversion_markup_bps"
+        private const val FIELD_PRESENTMENT_EXCHANGE_RATE = "presentment_exchange_rate"
     }
 }
