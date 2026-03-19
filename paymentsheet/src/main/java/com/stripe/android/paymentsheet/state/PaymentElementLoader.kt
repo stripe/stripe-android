@@ -11,7 +11,6 @@ import com.stripe.android.common.coroutines.runCatching
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.model.asCommonConfiguration
-import com.stripe.android.common.taptoadd.TapToAddConnectionManager
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
@@ -233,7 +232,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val externalPaymentMethodsRepository: ExternalPaymentMethodsRepository,
     private val userFacingLogger: UserFacingLogger,
     private val integrityRequestManager: IntegrityRequestManager,
-    private val tapToAddConnectionManager: TapToAddConnectionManager,
+    private val tapToAddConnectionStarter: TapToAddConnectionStarter,
     private val paymentConfiguration: Provider<PaymentConfiguration>,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val analyticsMetadataFactory: AnalyticsMetadataFactory,
@@ -271,7 +270,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         )
 
         eventReporter.onLoadStarted(metadata.initializedViaCompose)
-        tapToAddConnectionManager.connect()
+        tapToAddConnectionStarter.start()
 
         val isGooglePaySupportedOnDevice = async {
             isGooglePaySupportedOnDevice()
@@ -501,7 +500,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             clientAttributionMetadata = clientAttributionMetadata,
             integrationMetadata = integrationMetadata,
             analyticsMetadata = analyticsMetadata,
-            isTapToAddSupported = tapToAddConnectionManager.isSupported,
+            isTapToAddSupported = tapToAddConnectionStarter.isSupported,
         )
     }
 
