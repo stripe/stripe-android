@@ -21,6 +21,7 @@ internal object CheckoutSessionResponseFactory {
         totalSummary: CheckoutSessionResponse.TotalSummaryResponse? = null,
         lineItems: List<CheckoutSessionResponse.LineItem> = emptyList(),
         shippingOptions: List<CheckoutSessionResponse.ShippingRate> = emptyList(),
+        adaptivePricingInfo: CheckoutSessionResponse.AdaptivePricingInfo? = null,
     ): CheckoutSessionResponse {
         return CheckoutSessionResponse(
             id = id,
@@ -36,6 +37,7 @@ internal object CheckoutSessionResponseFactory {
             totalSummary = totalSummary,
             lineItems = lineItems,
             shippingOptions = shippingOptions,
+            adaptivePricingInfo = adaptivePricingInfo,
         )
     }
 }
