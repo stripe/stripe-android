@@ -1,4 +1,4 @@
-package com.stripe.android.paymentelement.embedded.form
+package com.stripe.android.paymentelement.embedded.content
 
 import android.app.Application
 import android.content.Context
@@ -29,6 +29,20 @@ import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentE
 import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
 import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.form.DefaultFormActivityConfirmationHelper
+import com.stripe.android.paymentelement.embedded.form.DefaultFormActivityRegistrar
+import com.stripe.android.paymentelement.embedded.form.DefaultFormActivityStateHelper
+import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFactory
+import com.stripe.android.paymentelement.embedded.form.FormActivityConfirmationHelper
+import com.stripe.android.paymentelement.embedded.form.FormActivityRegistrar
+import com.stripe.android.paymentelement.embedded.form.FormActivityScope
+import com.stripe.android.paymentelement.embedded.form.FormActivityStateHelper
+import com.stripe.android.paymentelement.embedded.form.OnClickDelegateOverrideImpl
+import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
+import com.stripe.android.paymentelement.embedded.manage.DefaultEmbeddedManageScreenInteractorFactory
+import com.stripe.android.paymentelement.embedded.manage.DefaultEmbeddedUpdateScreenInteractorFactory
+import com.stripe.android.paymentelement.embedded.manage.EmbeddedManageScreenInteractorFactory
+import com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInteractorFactory
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
@@ -53,44 +67,38 @@ import javax.inject.Singleton
     modules = [
         ApplicationIdModule::class,
         EmbeddedCommonModule::class,
-        FormActivityViewModelModule::class,
+        EmbeddedSheetModule::class,
         ExtendedPaymentElementConfirmationModule::class,
         GooglePayLauncherModule::class,
-        EmbeddedLinkExtrasModule::class
+        EmbeddedLinkExtrasModule::class,
     ]
 )
 @Singleton
-internal interface FormActivityViewModelComponent {
-    val viewModel: FormActivityViewModel
+internal interface EmbeddedSheetComponent {
+    val viewModel: EmbeddedSheetViewModel
     val selectionHolder: EmbeddedSelectionHolder
     val customerStateHolder: CustomerStateHolder
-    val subcomponentFactory: FormActivitySubcomponent.Factory
 
     @Component.Factory
     interface Factory {
         fun build(
             @BindsInstance paymentMethodMetadata: PaymentMethodMetadata,
-            @BindsInstance selectedPaymentMethodCode: PaymentMethodCode,
-            @BindsInstance hasSavedPaymentMethods: Boolean,
-            @BindsInstance
-            @Named(STATUS_BAR_COLOR)
-            statusBarColor: Int?,
-            @BindsInstance configuration: EmbeddedPaymentElement.Configuration,
             @BindsInstance
             @PaymentElementCallbackIdentifier
             paymentElementCallbackIdentifier: String,
             @BindsInstance application: Application,
             @BindsInstance savedStateHandle: SavedStateHandle,
-        ): FormActivityViewModelComponent
+            @BindsInstance embeddedSheetArgs: EmbeddedSheetArgs,
+        ): EmbeddedSheetComponent
     }
 }
 
 @Module(
     subcomponents = [
-        FormActivitySubcomponent::class
+        EmbeddedSheetSubcomponent::class,
     ]
 )
-internal interface FormActivityViewModelModule {
+internal interface EmbeddedSheetModule {
     @Binds
     fun bindsCardAccountRangeRepositoryFactory(
         defaultCardAccountRangeRepositoryFactory: DefaultCardAccountRangeRepositoryFactory
@@ -112,6 +120,16 @@ internal interface FormActivityViewModelModule {
     fun bindsSavedPaymentMethodLinkFormHelper(
         helper: DefaultSavedPaymentMethodLinkFormHelper
     ): SavedPaymentMethodLinkFormHelper
+
+    @Binds
+    fun bindsEmbeddedManageScreenInteractorFactory(
+        factory: DefaultEmbeddedManageScreenInteractorFactory
+    ): EmbeddedManageScreenInteractorFactory
+
+    @Binds
+    fun bindsEmbeddedUpdateScreenInteractorFactory(
+        factory: DefaultEmbeddedUpdateScreenInteractorFactory
+    ): EmbeddedUpdateScreenInteractorFactory
 
     @Suppress("TooManyFunctions")
     companion object {
@@ -135,12 +153,6 @@ internal interface FormActivityViewModelModule {
 
         @Provides
         @Singleton
-        fun provideFormInteractor(
-            interactorFactory: EmbeddedFormInteractorFactory
-        ): DefaultVerticalModeFormInteractor = interactorFactory.create()
-
-        @Provides
-        @Singleton
         fun provideConfirmationHandler(
             confirmationHandlerFactory: ConfirmationHandler.Factory,
             @ViewModelScope coroutineScope: CoroutineScope,
@@ -149,16 +161,76 @@ internal interface FormActivityViewModelModule {
         }
 
         @Provides
+        fun providePaymentMethodMetadataFlow(
+            paymentMethodMetadata: PaymentMethodMetadata
+        ): StateFlow<PaymentMethodMetadata?> {
+            return stateFlowOf(paymentMethodMetadata)
+        }
+
+        @Provides
+        fun providesTapToAddLinkFormElementFactory(): LinkFormElementFactory {
+            return DefaultLinkFormElementFactory
+        }
+
+        // Form-specific providers. These will throw if accessed in manage mode,
+        // which is safe because they're only used through lazy/provider access in form mode.
+
+        @Provides
+        @Singleton
+        fun provideSelectedPaymentMethodCode(
+            embeddedSheetArgs: EmbeddedSheetArgs,
+        ): PaymentMethodCode {
+            return (embeddedSheetArgs as EmbeddedSheetArgs.Form).formArgs.selectedPaymentMethodCode
+        }
+
+        @Provides
+        @Singleton
+        fun provideHasSavedPaymentMethods(
+            embeddedSheetArgs: EmbeddedSheetArgs,
+        ): Boolean {
+            return (embeddedSheetArgs as EmbeddedSheetArgs.Form).formArgs.hasSavedPaymentMethods
+        }
+
+        @Provides
+        @Singleton
+        fun provideConfiguration(
+            embeddedSheetArgs: EmbeddedSheetArgs,
+        ): EmbeddedPaymentElement.Configuration {
+            return (embeddedSheetArgs as EmbeddedSheetArgs.Form).formArgs.configuration
+        }
+
+        @Provides
+        @Singleton
+        @Named(STATUS_BAR_COLOR)
+        fun provideStatusBarColor(
+            embeddedSheetArgs: EmbeddedSheetArgs,
+        ): Int? {
+            return (embeddedSheetArgs as EmbeddedSheetArgs.Form).formArgs.statusBarColor
+        }
+
+        @Provides
+        @Singleton
+        fun provideFormInteractor(
+            interactorFactory: dagger.Lazy<EmbeddedFormInteractorFactory>,
+            embeddedSheetArgs: EmbeddedSheetArgs,
+        ): DefaultVerticalModeFormInteractor {
+            check(embeddedSheetArgs is EmbeddedSheetArgs.Form) { "FormInteractor only available in form mode" }
+            return interactorFactory.get().create()
+        }
+
+        @Provides
         @Singleton
         fun providesTapToAddHelper(
             @ViewModelScope coroutineScope: CoroutineScope,
-            configuration: EmbeddedPaymentElement.Configuration,
-            tapToAddHelperFactory: TapToAddHelper.Factory,
+            embeddedSheetArgs: EmbeddedSheetArgs,
+            tapToAddHelperFactory: dagger.Lazy<TapToAddHelper.Factory>,
             embeddedSelectionHolder: EmbeddedSelectionHolder,
             customerStateHolder: CustomerStateHolder,
             paymentMethodMetadata: PaymentMethodMetadata,
         ): TapToAddHelper {
-            return tapToAddHelperFactory.create(
+            check(embeddedSheetArgs is EmbeddedSheetArgs.Form) { "TapToAddHelper only available in form mode" }
+            val configuration = embeddedSheetArgs.formArgs.configuration
+            return tapToAddHelperFactory.get().create(
                 coroutineScope = coroutineScope,
                 tapToAddMode = when (configuration.formSheetAction) {
                     EmbeddedPaymentElement.FormSheetAction.Continue -> TapToAddMode.Continue
@@ -178,32 +250,26 @@ internal interface FormActivityViewModelModule {
         @Singleton
         fun providesFormActivityConfirmationHandlerRegistrar(
             confirmationHandler: ConfirmationHandler,
-            tapToAddHelper: TapToAddHelper,
+            tapToAddHelper: dagger.Lazy<TapToAddHelper>,
+            embeddedSheetArgs: EmbeddedSheetArgs,
         ): FormActivityRegistrar {
-            return DefaultFormActivityRegistrar(confirmationHandler, tapToAddHelper)
-        }
-
-        @Provides
-        fun providePaymentMethodMetadataFlow(
-            paymentMethodMetadata: PaymentMethodMetadata
-        ): StateFlow<PaymentMethodMetadata?> {
-            return stateFlowOf(paymentMethodMetadata)
-        }
-
-        @Provides
-        fun providesTapToAddLinkFormElementFactory(): LinkFormElementFactory {
-            return DefaultLinkFormElementFactory
+            check(embeddedSheetArgs is EmbeddedSheetArgs.Form) { "FormActivityRegistrar only available in form mode" }
+            return DefaultFormActivityRegistrar(confirmationHandler, tapToAddHelper.get())
         }
 
         @Provides
         fun provideSavedPaymentMethodConfirmInteractorFactory(
             @ViewModelScope coroutineScope: CoroutineScope,
             paymentMethodMetadata: PaymentMethodMetadata,
-            savedPaymentMethodLinkFormHelper: SavedPaymentMethodLinkFormHelper,
+            savedPaymentMethodLinkFormHelper: dagger.Lazy<SavedPaymentMethodLinkFormHelper>,
+            embeddedSheetArgs: EmbeddedSheetArgs,
         ): SavedPaymentMethodConfirmInteractor.Factory {
+            check(embeddedSheetArgs is EmbeddedSheetArgs.Form) {
+                "SavedPaymentMethodConfirmInteractor.Factory only available in form mode"
+            }
             return DefaultSavedPaymentMethodConfirmInteractor.Factory(
                 paymentMethodMetadata = paymentMethodMetadata,
-                savedPaymentMethodLinkFormHelper = savedPaymentMethodLinkFormHelper,
+                savedPaymentMethodLinkFormHelper = savedPaymentMethodLinkFormHelper.get(),
                 coroutineScope = coroutineScope,
             )
         }
@@ -212,24 +278,24 @@ internal interface FormActivityViewModelModule {
 
 @Subcomponent(
     modules = [
-        FormActivityModule::class,
+        EmbeddedSheetActivityModule::class,
     ]
 )
 @FormActivityScope
-internal interface FormActivitySubcomponent {
-    fun inject(activity: FormActivity)
+internal interface EmbeddedSheetSubcomponent {
+    val confirmationHelper: FormActivityConfirmationHelper
 
     @Subcomponent.Factory
     interface Factory {
         fun build(
             @BindsInstance activityResultCaller: ActivityResultCaller,
             @BindsInstance lifecycleOwner: LifecycleOwner,
-        ): FormActivitySubcomponent
+        ): EmbeddedSheetSubcomponent
     }
 }
 
 @Module
-internal interface FormActivityModule {
+internal interface EmbeddedSheetActivityModule {
     @Binds
     fun bindsFormConfirmationHelper(
         confirmationHandler: DefaultFormActivityConfirmationHelper

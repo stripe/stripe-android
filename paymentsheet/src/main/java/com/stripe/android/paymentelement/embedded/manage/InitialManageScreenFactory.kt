@@ -2,8 +2,10 @@ package com.stripe.android.paymentelement.embedded.manage
 
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetScreen
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import javax.inject.Inject
 
@@ -13,7 +15,12 @@ internal class InitialManageScreenFactory @Inject constructor(
     private val updateScreenInteractorFactory: EmbeddedUpdateScreenInteractorFactory,
     private val manageInteractorFactory: EmbeddedManageScreenInteractorFactory,
 ) {
-    fun createInitialScreen(): ManageNavigator.Screen {
+    fun createInitialScreen(
+        savedPaymentMethodMutator: SavedPaymentMethodMutator,
+        close: (shouldInvokeRowSelectionCallback: Boolean) -> Unit,
+        navigateBack: () -> Unit,
+        canGoBack: () -> Boolean,
+    ): EmbeddedSheetScreen {
         val paymentMethods = customerStateHolder.customer.value?.paymentMethods
         return if (paymentMethods?.size == 1) {
             val paymentMethod = paymentMethods.first()
@@ -25,13 +32,25 @@ internal class InitialManageScreenFactory @Inject constructor(
                 paymentMethod = paymentMethod,
                 isCbcEligible = paymentMethodMetadata.cbcEligibility is CardBrandChoiceEligibility.Eligible,
             )
-            ManageNavigator.Screen.Update(
+            EmbeddedSheetScreen.ManageUpdate(
                 interactor = updateScreenInteractorFactory.createUpdateScreenInteractor(
-                    displayableSavedPaymentMethod = displayableSavedPaymentMethod
-                )
+                    displayableSavedPaymentMethod = displayableSavedPaymentMethod,
+                    savedPaymentMethodMutator = savedPaymentMethodMutator,
+                    navigateBack = navigateBack,
+                ),
+                canGoBack = canGoBack,
+                onBack = navigateBack,
             )
         } else {
-            ManageNavigator.Screen.All(interactor = manageInteractorFactory.createManageScreenInteractor())
+            EmbeddedSheetScreen.ManageAll(
+                interactor = manageInteractorFactory.createManageScreenInteractor(
+                    savedPaymentMethodMutator = savedPaymentMethodMutator,
+                    close = close,
+                    navigateBack = navigateBack,
+                ),
+                canGoBack = canGoBack,
+                onBack = navigateBack,
+            )
         }
     }
 }

@@ -1,10 +1,7 @@
 package com.stripe.android.paymentelement.embedded.form
 
-import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
-import androidx.activity.result.contract.ActivityResultContract
-import androidx.core.os.BundleCompat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -36,7 +33,8 @@ internal sealed interface FormResult : Parcelable {
 
         fun fromIntent(intent: Intent?): FormResult {
             val result = intent?.extras?.let { bundle ->
-                BundleCompat.getParcelable(bundle, EXTRA_RESULT, FormResult::class.java)
+                @Suppress("DEPRECATION")
+                bundle.getParcelable(EXTRA_RESULT) as? FormResult
             }
 
             return result ?: Cancelled(customerState = null)
@@ -44,18 +42,7 @@ internal sealed interface FormResult : Parcelable {
     }
 }
 
-internal object FormContract : ActivityResultContract<FormContract.Args, FormResult>() {
-    internal const val EXTRA_ARGS: String = "extra_activity_args"
-
-    override fun createIntent(context: Context, input: Args): Intent {
-        return Intent(context, FormActivity::class.java)
-            .putExtra(EXTRA_ARGS, input)
-    }
-
-    override fun parseResult(resultCode: Int, intent: Intent?): FormResult {
-        return FormResult.fromIntent(intent)
-    }
-
+internal object FormContract {
     @Parcelize
     internal data class Args(
         val selectedPaymentMethodCode: String,
@@ -66,13 +53,5 @@ internal object FormContract : ActivityResultContract<FormContract.Args, FormRes
         val statusBarColor: Int?,
         val paymentSelection: PaymentSelection?,
         val customerState: CustomerState?,
-    ) : Parcelable {
-        companion object {
-            fun fromIntent(intent: Intent): Args? {
-                return intent.extras?.let { bundle ->
-                    BundleCompat.getParcelable(bundle, EXTRA_ARGS, Args::class.java)
-                }
-            }
-        }
-    }
+    ) : Parcelable
 }

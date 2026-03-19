@@ -70,7 +70,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val state = EmbeddedConfirmationStateFixtures.defaultState()
         val customerState = createCustomerState()
-        val expectedArgs = FormContract.Args(
+        val expectedFormArgs = FormContract.Args(
             selectedPaymentMethodCode = code,
             paymentMethodMetadata = paymentMethodMetadata,
             hasSavedPaymentMethods = false,
@@ -84,8 +84,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
         assertThat(selectionHolder.temporarySelection.value).isNull()
         sheetLauncher.launchForm(code, paymentMethodMetadata, false, state, customerState)
-        val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall()
-        assertThat(launchCall).isEqualTo(expectedArgs)
+        val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedSheetArgs
+        assertThat(launchCall).isEqualTo(EmbeddedSheetArgs.Form(expectedFormArgs))
         assertThat(sheetStateHolder.sheetIsOpen).isTrue()
         assertThat(selectionHolder.temporarySelection.value).isEqualTo(code)
     }
@@ -103,8 +103,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
             state,
             createCustomerState(),
         )
-        val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as FormContract.Args
-        assertThat(launchCall.paymentSelection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedSheetArgs.Form
+        assertThat(launchCall.formArgs.paymentSelection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
     }
 
     @Test
@@ -121,8 +121,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
             state,
             createCustomerState(),
         )
-        val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as FormContract.Args
-        assertThat(launchCall.paymentSelection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedSheetArgs.Form
+        assertThat(launchCall.formArgs.paymentSelection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
     }
 
     @Test
@@ -138,8 +138,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
             state,
             createCustomerState(),
         )
-        val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as FormContract.Args
-        assertThat(launchCall.paymentSelection).isNull()
+        val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedSheetArgs.Form
+        assertThat(launchCall.formArgs.paymentSelection).isNull()
     }
 
     @Test
@@ -155,8 +155,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
             state,
             createCustomerState(),
         )
-        val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as FormContract.Args
-        assertThat(launchCall.paymentSelection).isNull()
+        val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedSheetArgs.Form
+        assertThat(launchCall.formArgs.paymentSelection).isNull()
     }
 
     @Test
@@ -201,8 +201,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
         selectionHolder.set(selection)
 
-        val result = FormResult.Complete(null, true, customerState = null)
-        val callback = formRegisterCall.callback.asCallbackFor<FormResult>()
+        val result = EmbeddedSheetResult.Form(FormResult.Complete(null, true, customerState = null))
+        val callback = registerCall.callback.asCallbackFor<EmbeddedSheetResult?>()
 
         callback.onActivityResult(result)
         assertThat(callbackHelper.stateHelper.stateTurbine.awaitItem()).isNull()
@@ -220,8 +220,10 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
         selectionHolder.set(selection)
 
-        val result = FormResult.Complete(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION, false, customerState = null)
-        val callback = formRegisterCall.callback.asCallbackFor<FormResult>()
+        val result = EmbeddedSheetResult.Form(
+            FormResult.Complete(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION, false, customerState = null)
+        )
+        val callback = registerCall.callback.asCallbackFor<EmbeddedSheetResult?>()
 
         callback.onActivityResult(result)
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
@@ -241,12 +243,14 @@ internal class DefaultEmbeddedSheetLauncherTest {
             val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
             selectionHolder.set(selection)
 
-            val result = FormResult.Complete(
-                PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
-                false,
-                customerState = null,
+            val result = EmbeddedSheetResult.Form(
+                FormResult.Complete(
+                    PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
+                    false,
+                    customerState = null,
+                )
             )
-            val callback = formRegisterCall.callback.asCallbackFor<FormResult>()
+            val callback = registerCall.callback.asCallbackFor<EmbeddedSheetResult?>()
 
             callback.onActivityResult(result)
         }
@@ -262,12 +266,14 @@ internal class DefaultEmbeddedSheetLauncherTest {
             val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
             selectionHolder.set(selection)
 
-            val result = FormResult.Complete(
-                PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
-                true,
-                customerState = null,
+            val result = EmbeddedSheetResult.Form(
+                FormResult.Complete(
+                    PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
+                    true,
+                    customerState = null,
+                )
             )
-            val callback = formRegisterCall.callback.asCallbackFor<FormResult>()
+            val callback = registerCall.callback.asCallbackFor<EmbeddedSheetResult?>()
 
             callback.onActivityResult(result)
             assertThat(callbackHelper.stateHelper.stateTurbine.awaitItem()).isNull()
@@ -281,8 +287,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
     fun `formActivityLauncher callback does not update selection holder on non-complete result`() = testScenario {
         sheetStateHolder.sheetIsOpen = true
         selectionHolder.setTemporary("test_code")
-        val result = FormResult.Cancelled(customerState = null)
-        val callback = formRegisterCall.callback.asCallbackFor<FormResult>()
+        val result = EmbeddedSheetResult.Form(FormResult.Cancelled(customerState = null))
+        val callback = registerCall.callback.asCallbackFor<EmbeddedSheetResult?>()
 
         callback.onActivityResult(result)
         assertThat(selectionHolder.selection.value).isEqualTo(null)
@@ -299,8 +305,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
         ) {
             sheetStateHolder.sheetIsOpen = true
             selectionHolder.setTemporary("test_code")
-            val result = FormResult.Cancelled(customerState = null)
-            val callback = formRegisterCall.callback.asCallbackFor<FormResult>()
+            val result = EmbeddedSheetResult.Form(FormResult.Cancelled(customerState = null))
+            val callback = registerCall.callback.asCallbackFor<EmbeddedSheetResult?>()
 
             callback.onActivityResult(result)
             assertThat(callbackHelper.callbackTurbine.awaitItem())
@@ -311,12 +317,14 @@ internal class DefaultEmbeddedSheetLauncherTest {
     @Test
     fun `formActivityLauncher callback sets customer state when available on complete`() = testScenario {
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
-        val result = FormResult.Complete(
-            customerState = createCustomerState(),
-            selection = null,
-            hasBeenConfirmed = false,
+        val result = EmbeddedSheetResult.Form(
+            FormResult.Complete(
+                customerState = createCustomerState(),
+                selection = null,
+                hasBeenConfirmed = false,
+            )
         )
-        val callback = formRegisterCall.callback.asCallbackFor<FormResult>()
+        val callback = registerCall.callback.asCallbackFor<EmbeddedSheetResult?>()
 
         callback.onActivityResult(result)
         assertThat(customerStateHolder.customer.value).isEqualTo(customerState)
@@ -325,10 +333,12 @@ internal class DefaultEmbeddedSheetLauncherTest {
     @Test
     fun `formActivityLauncher callback sets customer state when available on cancel`() = testScenario {
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
-        val result = FormResult.Cancelled(
-            customerState = createCustomerState(),
+        val result = EmbeddedSheetResult.Form(
+            FormResult.Cancelled(
+                customerState = createCustomerState(),
+            )
         )
-        val callback = formRegisterCall.callback.asCallbackFor<FormResult>()
+        val callback = registerCall.callback.asCallbackFor<EmbeddedSheetResult?>()
 
         callback.onActivityResult(result)
         assertThat(customerStateHolder.customer.value).isEqualTo(customerState)
@@ -340,7 +350,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
     fun `launchManage launches activity with correct parameters`() = testScenario {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
-        val expectedArgs = ManageContract.Args(
+        val expectedManageArgs = ManageContract.Args(
             paymentMethodMetadata,
             customerState,
             PaymentSelection.GooglePay,
@@ -348,9 +358,9 @@ internal class DefaultEmbeddedSheetLauncherTest {
         )
 
         sheetLauncher.launchManage(paymentMethodMetadata, customerState, PaymentSelection.GooglePay)
-        val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall()
+        val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedSheetArgs
 
-        assertThat(launchCall).isEqualTo(expectedArgs)
+        assertThat(launchCall).isEqualTo(EmbeddedSheetArgs.Manage(expectedManageArgs))
         assertThat(sheetStateHolder.sheetIsOpen).isTrue()
     }
 
@@ -367,13 +377,15 @@ internal class DefaultEmbeddedSheetLauncherTest {
         sheetStateHolder.sheetIsOpen = true
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
         val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-        val result = ManageResult.Complete(
-            customerState = customerState,
-            selection = selection,
-            shouldInvokeSelectionCallback = false,
+        val result = EmbeddedSheetResult.Manage(
+            ManageResult.Complete(
+                customerState = customerState,
+                selection = selection,
+                shouldInvokeSelectionCallback = false,
+            )
         )
 
-        val callback = manageRegisterCall.callback.asCallbackFor<ManageResult>()
+        val callback = registerCall.callback.asCallbackFor<EmbeddedSheetResult?>()
         callback.onActivityResult(result)
 
         assertThat(customerStateHolder.customer.value).isEqualTo(customerState)
@@ -389,13 +401,15 @@ internal class DefaultEmbeddedSheetLauncherTest {
             sheetStateHolder.sheetIsOpen = true
             val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
             val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-            val result = ManageResult.Complete(
-                customerState = customerState,
-                selection = selection,
-                shouldInvokeSelectionCallback = true,
+            val result = EmbeddedSheetResult.Manage(
+                ManageResult.Complete(
+                    customerState = customerState,
+                    selection = selection,
+                    shouldInvokeSelectionCallback = true,
+                )
             )
 
-            val callback = manageRegisterCall.callback.asCallbackFor<ManageResult>()
+            val callback = registerCall.callback.asCallbackFor<EmbeddedSheetResult?>()
             callback.onActivityResult(result)
         }
     }
@@ -408,13 +422,15 @@ internal class DefaultEmbeddedSheetLauncherTest {
             sheetStateHolder.sheetIsOpen = true
             val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
             val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-            val result = ManageResult.Complete(
-                customerState = customerState,
-                selection = selection,
-                shouldInvokeSelectionCallback = false,
+            val result = EmbeddedSheetResult.Manage(
+                ManageResult.Complete(
+                    customerState = customerState,
+                    selection = selection,
+                    shouldInvokeSelectionCallback = false,
+                )
             )
 
-            val callback = manageRegisterCall.callback.asCallbackFor<ManageResult>()
+            val callback = registerCall.callback.asCallbackFor<EmbeddedSheetResult?>()
             callback.onActivityResult(result)
         }
     }
@@ -423,8 +439,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
     fun `manageActivityLauncher callback does not update state on non-complete result`() = testScenario {
         sheetStateHolder.sheetIsOpen = true
         customerStateHolder.setCustomerState(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
-        val result = ManageResult.Error
-        val callback = manageRegisterCall.callback.asCallbackFor<ManageResult>()
+        val result = EmbeddedSheetResult.Manage(ManageResult.Error)
+        val callback = registerCall.callback.asCallbackFor<EmbeddedSheetResult?>()
 
         callback.onActivityResult(result)
 
@@ -440,8 +456,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
         ) {
             sheetStateHolder.sheetIsOpen = true
             customerStateHolder.setCustomerState(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
-            val result = ManageResult.Error
-            val callback = manageRegisterCall.callback.asCallbackFor<ManageResult>()
+            val result = EmbeddedSheetResult.Manage(ManageResult.Error)
+            val callback = registerCall.callback.asCallbackFor<EmbeddedSheetResult?>()
 
             callback.onActivityResult(result)
         }
@@ -510,14 +526,12 @@ internal class DefaultEmbeddedSheetLauncherTest {
     }
 
     @Test
-    fun `onDestroy unregisters launchers`() = testScenario {
+    fun `onDestroy unregisters launcher`() = testScenario {
         sheetStateHolder.sheetIsOpen = true
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-        val formUnregisteredLauncher = dummyActivityResultCallerScenario.awaitNextUnregisteredLauncher()
-        val manageUnregisteredLauncher = dummyActivityResultCallerScenario.awaitNextUnregisteredLauncher()
+        val unregisteredLauncher = dummyActivityResultCallerScenario.awaitNextUnregisteredLauncher()
 
-        assertThat(formUnregisteredLauncher).isEqualTo(formLauncher)
-        assertThat(manageUnregisteredLauncher).isEqualTo(manageLauncher)
+        assertThat(unregisteredLauncher).isEqualTo(launcher)
         assertThat(sheetStateHolder.sheetIsOpen).isTrue()
     }
 
@@ -561,17 +575,11 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 embeddedResultCallbackHelper = callbackHelper,
                 rowSelectionImmediateActionHandler = immediateActionHandler,
             )
-            val formRegisterCall = awaitRegisterCall()
-            val manageRegisterCall = awaitRegisterCall()
+            val registerCall = awaitRegisterCall()
+            val launcher = awaitNextRegisteredLauncher()
 
-            val formLauncher = awaitNextRegisteredLauncher()
-            val manageLauncher = awaitNextRegisteredLauncher()
-
-            assertThat(formRegisterCall).isNotNull()
-            assertThat(manageRegisterCall).isNotNull()
-
-            assertThat(formRegisterCall.contract).isInstanceOf<FormContract>()
-            assertThat(manageRegisterCall.contract).isInstanceOf<ManageContract>()
+            assertThat(registerCall).isNotNull()
+            assertThat(registerCall.contract).isInstanceOf<EmbeddedSheetContract>()
 
             Scenario(
                 testScope = testScope,
@@ -579,10 +587,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 lifecycleOwner = lifecycleOwner,
                 customerStateHolder = customerStateHolder,
                 dummyActivityResultCallerScenario = this,
-                formRegisterCall = formRegisterCall,
-                manageRegisterCall = manageRegisterCall,
-                formLauncher = formLauncher,
-                manageLauncher = manageLauncher,
+                registerCall = registerCall,
+                launcher = launcher,
                 sheetLauncher = sheetLauncher,
                 sheetStateHolder = sheetStateHolder,
                 errorReporter = errorReporter,
@@ -611,10 +617,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val lifecycleOwner: TestLifecycleOwner,
         val customerStateHolder: CustomerStateHolder,
         val dummyActivityResultCallerScenario: DummyActivityResultCaller.Scenario,
-        val formRegisterCall: RegisterCall<*, *>,
-        val manageRegisterCall: RegisterCall<*, *>,
-        val formLauncher: ActivityResultLauncher<*>,
-        val manageLauncher: ActivityResultLauncher<*>,
+        val registerCall: RegisterCall<*, *>,
+        val launcher: ActivityResultLauncher<*>,
         val sheetLauncher: EmbeddedSheetLauncher,
         val sheetStateHolder: SheetStateHolder,
         val errorReporter: FakeErrorReporter,

@@ -24,6 +24,10 @@ import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetActivity
+import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetArgs
+import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetContract
+import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
@@ -47,7 +51,7 @@ import java.util.concurrent.CountDownLatch
 @RunWith(RobolectricTestRunner::class)
 internal class ManageActivityTest {
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
-    private val composeTestRule = createAndroidComposeRule<ManageActivity>()
+    private val composeTestRule = createAndroidComposeRule<EmbeddedSheetActivity>()
     private val networkRule = NetworkRule()
 
     private val managePage = ManagePage(composeTestRule)
@@ -72,12 +76,13 @@ internal class ManageActivityTest {
     @Test
     fun `when launched without args should finish with error result`() {
         ActivityScenario.launchActivityForResult(
-            ManageActivity::class.java,
+            EmbeddedSheetActivity::class.java,
             Bundle.EMPTY
         ).use { activityScenario ->
             assertThat(activityScenario.state).isEqualTo(Lifecycle.State.DESTROYED)
-            val result = ManageContract.parseResult(0, activityScenario.result.resultData)
-            assertThat(result).isInstanceOf(ManageResult.Error::class.java)
+            val result = EmbeddedSheetContract.parseResult(0, activityScenario.result.resultData)
+            // Without args, the activity defaults to Form cancelled result
+            assertThat(result).isInstanceOf(EmbeddedSheetResult.Form::class.java)
         }
     }
 
@@ -258,17 +263,18 @@ internal class ManageActivityTest {
         selection: PaymentSelection? = null,
         block: Scenario.() -> Unit,
     ) {
-        ActivityScenario.launchActivityForResult<ManageActivity>(
-            ManageContract.createIntent(
+        val manageArgs = ManageContract.Args(
+            paymentMethodMetadata = paymentMethodMetadata,
+            customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
+                paymentMethods = paymentMethods,
+            ),
+            selection = selection,
+            paymentElementCallbackIdentifier = "ManageActivityTestCallbackIdentifier",
+        )
+        ActivityScenario.launchActivityForResult<EmbeddedSheetActivity>(
+            EmbeddedSheetContract.createIntent(
                 context = applicationContext,
-                input = ManageContract.Args(
-                    paymentMethodMetadata = paymentMethodMetadata,
-                    customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
-                        paymentMethods = paymentMethods,
-                    ),
-                    selection = selection,
-                    paymentElementCallbackIdentifier = "ManageActivityTestCallbackIdentifier",
-                ),
+                input = EmbeddedSheetArgs.Manage(manageArgs),
             )
         ).use { scenario ->
             Scenario(
@@ -287,17 +293,19 @@ internal class ManageActivityTest {
     }
 
     private class Scenario(
-        val activityScenario: ActivityScenario<ManageActivity>,
+        val activityScenario: ActivityScenario<EmbeddedSheetActivity>,
     ) {
         fun assertCompletedResultSelection(paymentMethodId: String?) {
-            val result = ManageContract.parseResult(0, activityScenario.result.resultData)
-            assertThat(((result as ManageResult.Complete).selection as PaymentSelection.Saved?)?.paymentMethod?.id)
+            val result = EmbeddedSheetContract.parseResult(0, activityScenario.result.resultData)
+            val manageResult = (result as EmbeddedSheetResult.Manage).manageResult as ManageResult.Complete
+            assertThat((manageResult.selection as PaymentSelection.Saved?)?.paymentMethod?.id)
                 .isEqualTo(paymentMethodId)
         }
 
         fun completedResultPaymentMethods(): List<PaymentMethod> {
-            val result = ManageContract.parseResult(0, activityScenario.result.resultData)
-            return (result as ManageResult.Complete).customerState.paymentMethods
+            val result = EmbeddedSheetContract.parseResult(0, activityScenario.result.resultData)
+            val manageResult = (result as EmbeddedSheetResult.Manage).manageResult as ManageResult.Complete
+            return manageResult.customerState.paymentMethods
         }
     }
 }

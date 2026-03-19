@@ -12,6 +12,7 @@ import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
+import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -25,15 +26,20 @@ internal class ManageSavedPaymentMethodMutatorFactory @Inject constructor(
     private val savedPaymentMethodRepository: SavedPaymentMethodRepository,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val customerStateHolder: CustomerStateHolder,
-    private val manageNavigatorProvider: Provider<ManageNavigator>,
     private val paymentMethodMetadata: PaymentMethodMetadata,
     @IOContext private val workContext: CoroutineContext,
     @UIContext private val uiContext: CoroutineContext,
     @ViewModelScope private val viewModelScope: CoroutineScope,
     private val updateScreenInteractorFactoryProvider: Provider<EmbeddedUpdateScreenInteractorFactory>,
 ) {
-    fun createSavedPaymentMethodMutator(): SavedPaymentMethodMutator {
-        return SavedPaymentMethodMutator(
+    private var createdMutator: SavedPaymentMethodMutator? = null
+
+    fun createSavedPaymentMethodMutator(
+        navigateBack: () -> Unit,
+        close: (shouldInvokeRowSelectionCallback: Boolean) -> Unit,
+        navigateToUpdate: (UpdatePaymentMethodInteractor) -> Unit,
+    ): SavedPaymentMethodMutator {
+        val mutator = SavedPaymentMethodMutator(
             paymentMethodMetadataFlow = stateFlowOf(paymentMethodMetadata),
             eventReporter = eventReporter,
             coroutineScope = viewModelScope,
@@ -45,39 +51,48 @@ internal class ManageSavedPaymentMethodMutatorFactory @Inject constructor(
             customerStateHolder = customerStateHolder,
             prePaymentMethodRemoveActions = {
                 if (customerStateHolder.paymentMethods.value.size > 1) {
-                    manageNavigatorProvider.get().performAction(ManageNavigator.Action.Back)
+                    navigateBack()
                     withContext(workContext) {
                         delay(PaymentMethodRemovalDelayMillis)
                     }
                 }
             },
-            postPaymentMethodRemoveActions = ::onPaymentMethodRemoved,
-            onUpdatePaymentMethod = { displayableSavedPaymentMethod, _, _, _, _ ->
-                onUpdatePaymentMethod(displayableSavedPaymentMethod)
+            postPaymentMethodRemoveActions = {
+                onPaymentMethodRemoved(close)
             },
-            isLinkEnabled = stateFlowOf(false), // Link is never enabled in the manage screen.
+            onUpdatePaymentMethod = { displayableSavedPaymentMethod, _, _, _, _ ->
+                onUpdatePaymentMethod(displayableSavedPaymentMethod, navigateBack, navigateToUpdate)
+            },
+            isLinkEnabled = stateFlowOf(false),
             isNotPaymentFlow = false,
         )
+        createdMutator = mutator
+        return mutator
     }
 
-    private fun onPaymentMethodRemoved() {
+    private fun onPaymentMethodRemoved(
+        close: (shouldInvokeRowSelectionCallback: Boolean) -> Unit,
+    ) {
         val shouldCloseSheet = customerStateHolder.paymentMethods.value.isEmpty()
         if (shouldCloseSheet) {
-            manageNavigatorProvider.get().performAction(ManageNavigator.Action.Close())
+            close(false)
         }
     }
 
     private fun onUpdatePaymentMethod(
         displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
+        navigateBack: () -> Unit,
+        navigateToUpdate: (UpdatePaymentMethodInteractor) -> Unit,
     ) {
         if (displayableSavedPaymentMethod.savedPaymentMethod != SavedPaymentMethod.Unexpected) {
-            manageNavigatorProvider.get().performAction(
-                ManageNavigator.Action.GoToScreen(
-                    screen = ManageNavigator.Screen.Update(
-                        interactor = updateScreenInteractorFactoryProvider.get().createUpdateScreenInteractor(
-                            displayableSavedPaymentMethod
-                        )
-                    )
+            val mutator = requireNotNull(createdMutator) {
+                "SavedPaymentMethodMutator must be created before navigating to update"
+            }
+            navigateToUpdate(
+                updateScreenInteractorFactoryProvider.get().createUpdateScreenInteractor(
+                    displayableSavedPaymentMethod = displayableSavedPaymentMethod,
+                    savedPaymentMethodMutator = mutator,
+                    navigateBack = navigateBack,
                 )
             )
         }

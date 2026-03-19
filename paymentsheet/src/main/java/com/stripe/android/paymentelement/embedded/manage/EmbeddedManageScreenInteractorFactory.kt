@@ -9,21 +9,26 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.verticalmode.DefaultManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import javax.inject.Inject
-import javax.inject.Provider
 
 internal fun interface EmbeddedManageScreenInteractorFactory {
-    fun createManageScreenInteractor(): ManageScreenInteractor
+    fun createManageScreenInteractor(
+        savedPaymentMethodMutator: SavedPaymentMethodMutator,
+        close: (shouldInvokeRowSelectionCallback: Boolean) -> Unit,
+        navigateBack: () -> Unit,
+    ): ManageScreenInteractor
 }
 
 internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
     private val paymentMethodMetadata: PaymentMethodMetadata,
     private val customerStateHolder: CustomerStateHolder,
     private val selectionHolder: EmbeddedSelectionHolder,
-    private val savedPaymentMethodMutator: SavedPaymentMethodMutator,
     private val eventReporter: EventReporter,
-    private val manageNavigatorProvider: Provider<ManageNavigator>,
 ) : EmbeddedManageScreenInteractorFactory {
-    override fun createManageScreenInteractor(): ManageScreenInteractor {
+    override fun createManageScreenInteractor(
+        savedPaymentMethodMutator: SavedPaymentMethodMutator,
+        close: (shouldInvokeRowSelectionCallback: Boolean) -> Unit,
+        navigateBack: () -> Unit,
+    ): ManageScreenInteractor {
         return DefaultManageScreenInteractor(
             paymentMethods = customerStateHolder.paymentMethods,
             paymentMethodMetadata = paymentMethodMetadata,
@@ -35,14 +40,10 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
                 val savedPmSelection = PaymentSelection.Saved(it.paymentMethod)
                 selectionHolder.set(savedPmSelection)
                 eventReporter.onSelectPaymentOption(savedPmSelection)
-                manageNavigatorProvider.get().performAction(
-                    ManageNavigator.Action.Close(shouldInvokeRowSelectionCallback = true)
-                )
+                close(true)
             },
             onUpdatePaymentMethod = savedPaymentMethodMutator::updatePaymentMethod,
-            navigateBack = {
-                manageNavigatorProvider.get().performAction(ManageNavigator.Action.Back)
-            },
+            navigateBack = { _ -> navigateBack() },
             defaultPaymentMethodId = savedPaymentMethodMutator.defaultPaymentMethodId,
         )
     }

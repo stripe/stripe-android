@@ -10,24 +10,25 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import javax.inject.Inject
-import javax.inject.Provider
 
 internal fun interface EmbeddedUpdateScreenInteractorFactory {
     fun createUpdateScreenInteractor(
-        displayableSavedPaymentMethod: DisplayableSavedPaymentMethod
+        displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
+        savedPaymentMethodMutator: SavedPaymentMethodMutator,
+        navigateBack: () -> Unit,
     ): UpdatePaymentMethodInteractor
 }
 
 internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
-    private val savedPaymentMethodMutatorProvider: Provider<SavedPaymentMethodMutator>,
     private val paymentMethodMetadata: PaymentMethodMetadata,
     private val customerStateHolder: CustomerStateHolder,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val eventReporter: EventReporter,
-    private val manageNavigatorProvider: Provider<ManageNavigator>,
 ) : EmbeddedUpdateScreenInteractorFactory {
     override fun createUpdateScreenInteractor(
-        displayableSavedPaymentMethod: DisplayableSavedPaymentMethod
+        displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
+        savedPaymentMethodMutator: SavedPaymentMethodMutator,
+        navigateBack: () -> Unit,
     ): UpdatePaymentMethodInteractor {
         return DefaultUpdatePaymentMethodInteractor(
             isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
@@ -39,7 +40,7 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
             allowedBillingCountries =
             paymentMethodMetadata.billingDetailsCollectionConfiguration.allowedBillingCountries,
             removeExecutor = { method ->
-                val result = savedPaymentMethodMutatorProvider.get().removePaymentMethodInEditScreen(method)
+                val result = savedPaymentMethodMutator.removePaymentMethodInEditScreen(method)
                 if (result == null) {
                     val currentSelection = selectionHolder.selection.value
                     if (method.id == (currentSelection as? PaymentSelection.Saved)?.paymentMethod?.id) {
@@ -49,7 +50,7 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
                 result
             },
             updatePaymentMethodExecutor = { method, cardUpdateParams ->
-                savedPaymentMethodMutatorProvider.get().modifyCardPaymentMethod(
+                savedPaymentMethodMutator.modifyCardPaymentMethod(
                     paymentMethod = method,
                     cardUpdateParams = cardUpdateParams,
                     onSuccess = { paymentMethod ->
@@ -61,7 +62,7 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
                 )
             },
             setDefaultPaymentMethodExecutor = { method ->
-                savedPaymentMethodMutatorProvider.get().setDefaultPaymentMethod(method)
+                savedPaymentMethodMutator.setDefaultPaymentMethod(method)
             },
             onBrandChoiceSelected = {
                 eventReporter.onBrandChoiceSelected(
@@ -79,9 +80,7 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
                 ),
             removeMessage = paymentMethodMetadata.customerMetadata?.removePaymentMethod
                 ?.removeMessage(paymentMethodMetadata.merchantName),
-            onUpdateSuccess = {
-                manageNavigatorProvider.get().performAction(ManageNavigator.Action.Back)
-            },
+            onUpdateSuccess = navigateBack,
         )
     }
 }

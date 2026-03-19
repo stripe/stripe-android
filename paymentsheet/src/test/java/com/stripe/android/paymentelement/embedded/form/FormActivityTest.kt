@@ -11,6 +11,7 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onIdle
@@ -29,7 +30,12 @@ import com.stripe.android.networktesting.RequestMatchers
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.embedded.manage.ManageActivity
+import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetActivity
+import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetArgs
+import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetContract
+import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetResult
+import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetScreen
+import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetViewModel
 import com.stripe.android.paymentsheet.createCustomerState
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
@@ -46,7 +52,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 internal class FormActivityTest {
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
-    private val composeTestRule = createAndroidComposeRule<ManageActivity>()
+    private val composeTestRule = createAndroidComposeRule<EmbeddedSheetActivity>()
     private val networkRule = NetworkRule()
 
     private val formPage = FormPage(composeTestRule)
@@ -65,12 +71,13 @@ internal class FormActivityTest {
     @Test
     fun `when launched without args should finish with cancelled result`() {
         ActivityScenario.launchActivityForResult(
-            FormActivity::class.java,
+            EmbeddedSheetActivity::class.java,
             Bundle.EMPTY
         ).use { activityScenario ->
             assertThat(activityScenario.state).isEqualTo(Lifecycle.State.DESTROYED)
-            val result = FormContract.parseResult(0, activityScenario.result.resultData)
-            assertThat(result).isInstanceOf(FormResult.Cancelled::class.java)
+            val result = EmbeddedSheetContract.parseResult(0, activityScenario.result.resultData)
+            assertThat(result).isInstanceOf(EmbeddedSheetResult.Form::class.java)
+            assertThat((result as EmbeddedSheetResult.Form).formResult).isInstanceOf(FormResult.Cancelled::class.java)
         }
     }
 
@@ -94,7 +101,9 @@ internal class FormActivityTest {
     @Test
     fun `When FormActivityStateHelper has result, activity finishes with that result`() = launch { scenario ->
         scenario.onActivity { activity ->
-            activity.formActivityStateHelper.setResult(
+            val viewModel = ViewModelProvider(activity)[EmbeddedSheetViewModel::class.java]
+            val formScreen = viewModel.navigator.currentScreen.value as EmbeddedSheetScreen.Form
+            formScreen.stateHelper.setResult(
                 FormResult.Complete(
                     selection = null,
                     hasBeenConfirmed = true,
@@ -106,8 +115,9 @@ internal class FormActivityTest {
         onIdle()
 
         assertThat(scenario.result.resultCode).isEqualTo(Activity.RESULT_OK)
-        val result = FormContract.parseResult(scenario.result.resultCode, scenario.result.resultData)
-        assertThat(result).isInstanceOf<FormResult.Complete>()
+        val result = EmbeddedSheetContract.parseResult(scenario.result.resultCode, scenario.result.resultData)
+        assertThat(result).isInstanceOf<EmbeddedSheetResult.Form>()
+        assertThat((result as EmbeddedSheetResult.Form).formResult).isInstanceOf<FormResult.Complete>()
     }
 
     @Test
@@ -156,21 +166,22 @@ internal class FormActivityTest {
         hasSavedPaymentMethods: Boolean = false,
         configuration: EmbeddedPaymentElement.Configuration =
             EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
-        block: (ActivityScenario<FormActivity>) -> Unit,
+        block: (ActivityScenario<EmbeddedSheetActivity>) -> Unit,
     ) {
-        ActivityScenario.launchActivityForResult<FormActivity>(
-            FormContract.createIntent(
+        val formArgs = FormContract.Args(
+            selectedPaymentMethodCode = selectedPaymentMethodCode,
+            paymentMethodMetadata = paymentMethodMetadata,
+            hasSavedPaymentMethods = hasSavedPaymentMethods,
+            configuration = configuration,
+            statusBarColor = null,
+            paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
+            paymentSelection = null,
+            customerState = createCustomerState(paymentMethods = emptyList()),
+        )
+        ActivityScenario.launchActivityForResult<EmbeddedSheetActivity>(
+            EmbeddedSheetContract.createIntent(
                 context = applicationContext,
-                input = FormContract.Args(
-                    selectedPaymentMethodCode = selectedPaymentMethodCode,
-                    paymentMethodMetadata = paymentMethodMetadata,
-                    hasSavedPaymentMethods = hasSavedPaymentMethods,
-                    configuration = configuration,
-                    statusBarColor = null,
-                    paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
-                    paymentSelection = null,
-                    customerState = createCustomerState(paymentMethods = emptyList()),
-                ),
+                input = EmbeddedSheetArgs.Form(formArgs),
             )
         ).use { scenario ->
             block(scenario)

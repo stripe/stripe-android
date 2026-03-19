@@ -6,6 +6,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetScreen
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -15,28 +16,43 @@ import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.test.runTest
+import org.mockito.kotlin.mock
 import kotlin.test.Test
 
 internal class InitialManageScreenFactoryTest {
 
     @Test
-    fun `initialScreen is All when multiple paymentMethods`() = testScenario {
+    fun `initialScreen is ManageAll when multiple paymentMethods`() = testScenario {
         customerStateHolder.setCustomerState(
             PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                 paymentMethods = PaymentMethodFixtures.createCards(2)
             )
         )
-        assertThat(factory.createInitialScreen()).isInstanceOf<ManageNavigator.Screen.All>()
+        assertThat(
+            factory.createInitialScreen(
+                savedPaymentMethodMutator = mock(),
+                close = {},
+                navigateBack = {},
+                canGoBack = { false },
+            )
+        ).isInstanceOf<EmbeddedSheetScreen.ManageAll>()
     }
 
     @Test
-    fun `initialScreen is Update when one paymentMethod`() = testScenario {
+    fun `initialScreen is ManageUpdate when one paymentMethod`() = testScenario {
         customerStateHolder.setCustomerState(
             PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                 paymentMethods = PaymentMethodFixtures.createCards(1)
             )
         )
-        assertThat(factory.createInitialScreen()).isInstanceOf<ManageNavigator.Screen.Update>()
+        assertThat(
+            factory.createInitialScreen(
+                savedPaymentMethodMutator = mock(),
+                close = {},
+                navigateBack = {},
+                canGoBack = { false },
+            )
+        ).isInstanceOf<EmbeddedSheetScreen.ManageUpdate>()
     }
 
     private fun testScenario(
@@ -52,7 +68,7 @@ internal class InitialManageScreenFactoryTest {
         val factory = InitialManageScreenFactory(
             customerStateHolder = customerStateHolder,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
-            updateScreenInteractorFactory = { displayableSavedPaymentMethod ->
+            updateScreenInteractorFactory = { displayableSavedPaymentMethod, _, _ ->
                 FakeUpdatePaymentMethodInteractor(
                     displayableSavedPaymentMethod = displayableSavedPaymentMethod,
                     canRemove = customerStateHolder.canRemove.value,
@@ -69,7 +85,7 @@ internal class InitialManageScreenFactoryTest {
                     shouldShowSaveButton = false,
                 )
             },
-            manageInteractorFactory = {
+            manageInteractorFactory = { _, _, _ ->
                 FakeManageScreenInteractor()
             }
         )

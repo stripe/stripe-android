@@ -1,10 +1,7 @@
 package com.stripe.android.paymentelement.embedded.manage
 
-import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
-import androidx.activity.result.contract.ActivityResultContract
-import androidx.core.os.BundleCompat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
@@ -32,7 +29,8 @@ internal sealed interface ManageResult : Parcelable {
 
         fun fromIntent(intent: Intent?): ManageResult {
             val result = intent?.extras?.let { bundle ->
-                BundleCompat.getParcelable(bundle, EXTRA_RESULT, ManageResult::class.java)
+                @Suppress("DEPRECATION")
+                bundle.getParcelable(EXTRA_RESULT) as? ManageResult
             }
 
             return result ?: Error
@@ -40,31 +38,12 @@ internal sealed interface ManageResult : Parcelable {
     }
 }
 
-internal object ManageContract : ActivityResultContract<ManageContract.Args, ManageResult>() {
-    internal const val EXTRA_ARGS: String = "extra_activity_args"
-
-    override fun createIntent(context: Context, input: Args): Intent {
-        return Intent(context, ManageActivity::class.java)
-            .putExtra(EXTRA_ARGS, input)
-    }
-
-    override fun parseResult(resultCode: Int, intent: Intent?): ManageResult {
-        return ManageResult.fromIntent(intent)
-    }
-
+internal object ManageContract {
     @Parcelize
     internal data class Args(
         val paymentMethodMetadata: PaymentMethodMetadata,
         val customerState: CustomerState,
         val selection: PaymentSelection?,
         val paymentElementCallbackIdentifier: String,
-    ) : Parcelable {
-        companion object {
-            fun fromIntent(intent: Intent): Args? {
-                return intent.extras?.let { bundle ->
-                    BundleCompat.getParcelable(bundle, EXTRA_ARGS, Args::class.java)
-                }
-            }
-        }
-    }
+    ) : Parcelable
 }
