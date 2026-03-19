@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.LinkButtonState
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -55,6 +56,8 @@ internal interface PaymentMethodVerticalLayoutInteractor {
         val displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?,
         val availableSavedPaymentMethodAction: SavedPaymentMethodAction,
         val mandate: ResolvableString?,
+        val currencyOptions: List<CurrencyOption> = emptyList(),
+        val selectedCurrency: CurrencyOption? = null,
     )
 
     sealed interface Selection {
@@ -76,6 +79,7 @@ internal interface PaymentMethodVerticalLayoutInteractor {
         data class SavedPaymentMethodSelected(val savedPaymentMethod: PaymentMethod) : ViewAction
         data class UpdatePaymentMethodVisibility(val itemCode: String, val coordinates: LayoutCoordinates) : ViewAction
         data object CancelPaymentMethodVisibilityTracking : ViewAction
+        data class CurrencySelected(val currency: CurrencyOption) : ViewAction
     }
 
     enum class SavedPaymentMethodAction {
@@ -214,6 +218,19 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
 
     private val supportedPaymentMethods = paymentMethodMetadata.sortedSupportedPaymentMethods()
 
+    private val currencyOptions: List<CurrencyOption> = if (
+        paymentMethodMetadata.integrationMetadata is IntegrationMetadata.CheckoutSession
+    ) {
+        listOf(
+            CurrencyOption("EUR", "\uD83C\uDDEA\uD83C\uDDFA 50.99 EUR"),
+            CurrencyOption("USD", "\uD83C\uDDFA\uD83C\uDDF8 58.72 USD"),
+        )
+    } else {
+        emptyList()
+    }
+
+    private val _selectedCurrency = MutableStateFlow(currencyOptions.firstOrNull())
+
     private val displayedSavedPaymentMethod = combineAsStateFlow(
         paymentMethods,
         mostRecentlySelectedSavedPaymentMethod
@@ -261,7 +278,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
 
     override val isLiveMode: Boolean = paymentMethodMetadata.stripeIntent.isLiveMode
 
-    override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = combineAsStateFlow(
+    private val _rawState: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = combineAsStateFlow(
         displayablePaymentMethods,
         processing,
         verticalModeScreenSelection,
@@ -291,6 +308,16 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
             availableSavedPaymentMethodAction = action,
             mandate = getMandate(temporarySelectionCode, mostRecentSelection),
+        )
+    }
+
+    override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = combineAsStateFlow(
+        _rawState,
+        _selectedCurrency,
+    ) { rawState, selectedCurrency ->
+        rawState.copy(
+            currencyOptions = currencyOptions,
+            selectedCurrency = selectedCurrency,
         )
     }
 
@@ -555,6 +582,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             }
             is ViewAction.CancelPaymentMethodVisibilityTracking -> {
                 cancelPaymentMethodVisibilityTracking()
+            }
+            is ViewAction.CurrencySelected -> {
+                _selectedCurrency.value = viewAction.currency
             }
         }
     }
