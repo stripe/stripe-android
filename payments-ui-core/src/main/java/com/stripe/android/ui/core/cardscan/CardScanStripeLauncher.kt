@@ -26,6 +26,7 @@ internal class CardScanStripeLauncher(
     private var _isLaunching: Boolean
         get() = savedStateHandle?.get<Boolean>(KEY_IS_LAUNCHING) ?: false
         set(value) { savedStateHandle?.set(KEY_IS_LAUNCHING, value) }
+
     // We only instantiate this launcher after checking if stripecardscan is available via reflection
     // (see rememberCardScanLauncher()).
     private val _isAvailable = MutableStateFlow(true)
