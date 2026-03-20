@@ -91,7 +91,7 @@ internal data class ElementsSession(
         get() = flags[Flag.ELEMENTS_MOBILE_ANDROID_TAP_TO_ADD_ENABLED] == true
 
     val isStripeCardScanAllowed: Boolean
-        // TODO: revert to flags[Flag.MOBILE_ALLOW_STRIPECARDSCAN] == true once server flag is live
+        // TODO: revert to flags[Flag.ELEMENTS_MOBILE_ALLOW_STRIPECARDSCAN] == true once server flag is live
         get() = true
 
     val onBehalfOf: String?
@@ -229,7 +229,7 @@ internal data class ElementsSession(
         ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION("elements_mobile_attest_on_intent_confirmation"),
         ELEMENTS_MOBILE_CARD_FUND_FILTERING("elements_mobile_card_funding_filtering"),
         ELEMENTS_MOBILE_ANDROID_TAP_TO_ADD_ENABLED("elements_mobile_android_tap_to_add_enabled"),
-        MOBILE_ALLOW_STRIPECARDSCAN("mobile_allow_stripecardscan")
+        ELEMENTS_MOBILE_ALLOW_STRIPECARDSCAN("elements_mobile_allow_stripecardscan")
     }
 
     /**
