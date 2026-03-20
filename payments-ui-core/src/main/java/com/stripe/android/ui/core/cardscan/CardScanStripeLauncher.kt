@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.core.content.IntentCompat
 import com.stripe.android.stripecardscan.cardscan.CardScanConfiguration
+import com.stripe.android.stripecardscan.cardscan.CardScanSheet
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetParams
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
@@ -17,13 +18,27 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 internal class CardScanStripeLauncher(
+    context: Context,
     private val eventsReporter: CardScanEventsReporter,
 ) : CardScanLauncher {
 
     private val implementation = "stripe_card_scan"
     private var _isLaunching = false
-    private val _isAvailable = MutableStateFlow(true)
+    private val _isAvailable = MutableStateFlow(false)
     override val isAvailable: StateFlow<Boolean> = _isAvailable.asStateFlow()
+
+    init {
+        try {
+            if (CardScanSheet.isSupported(context)) {
+                _isAvailable.value = true
+                eventsReporter.onCardScanApiCheckSucceeded(implementation)
+            } else {
+                eventsReporter.onCardScanApiCheckFailed(implementation)
+            }
+        } catch (_: Exception) {
+            eventsReporter.onCardScanApiCheckFailed(implementation)
+        }
+    }
 
     lateinit var activityLauncher: ActivityResultLauncher<CardScanSheetParams>
 
@@ -91,11 +106,13 @@ internal class CardScanStripeLauncher(
 
         @Composable
         internal fun rememberCardScanStripeLauncher(
+            context: Context,
             eventsReporter: CardScanEventsReporter,
             onResult: (CardScanResult) -> Unit,
         ): CardScanStripeLauncher {
-            val launcher = remember(eventsReporter) {
+            val launcher = remember(context, eventsReporter) {
                 CardScanStripeLauncher(
+                    context = context,
                     eventsReporter = eventsReporter,
                 )
             }

@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.cardscan
 
 import android.content.Intent
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
@@ -73,6 +74,21 @@ class CardScanStripeLauncherTest {
         assertThat(scanFailedCall.implementation).isEqualTo("stripe_card_scan")
     }
 
+    @Test
+    fun `isAvailable is false when GMS check fails`() = runTest {
+        val fakeEventsReporter = FakeCardScanEventsReporter()
+        val launcher = CardScanStripeLauncher(
+            context = ApplicationProvider.getApplicationContext(),
+            eventsReporter = fakeEventsReporter,
+        )
+
+        assertThat(launcher.isAvailable.value).isFalse()
+
+        assertThat(fakeEventsReporter.apiCheckFailedCalls.awaitItem().implementation)
+            .isEqualTo("stripe_card_scan")
+        fakeEventsReporter.validate()
+    }
+
     private class Scenario(
         val launcher: CardScanStripeLauncher,
         val fakeEventsReporter: FakeCardScanEventsReporter,
@@ -83,8 +99,12 @@ class CardScanStripeLauncherTest {
     ) = runTest {
         val fakeEventsReporter = FakeCardScanEventsReporter()
         val launcher = CardScanStripeLauncher(
+            context = ApplicationProvider.getApplicationContext(),
             eventsReporter = fakeEventsReporter,
         )
+
+        // Consume the api check event from init
+        fakeEventsReporter.apiCheckFailedCalls.awaitItem()
 
         val scenario = Scenario(
             launcher = launcher,

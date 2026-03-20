@@ -17,7 +17,11 @@ object InterpreterInitializerImpl : InterpreterInitializer {
             it.addOnSuccessListener { onSuccess() }
             it.addOnFailureListener(onFailure)
         }.let { initializeTask ->
-            Tasks.await(initializeTask)
+            try {
+                Tasks.await(initializeTask)
+            } catch (_: Exception) {
+                // Failure is already handled by addOnFailureListener above.
+            }
         }
     }
 }
