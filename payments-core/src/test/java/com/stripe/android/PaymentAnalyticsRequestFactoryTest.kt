@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.AppInfo
 import com.stripe.android.core.networking.AnalyticsFields
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.HEADER_X_STRIPE_USER_AGENT
@@ -458,6 +459,31 @@ class PaymentAnalyticsRequestFactoryTest {
 
         val productUsage = analyticsRequest.params["product_usage"]
         assertThat(productUsage).isEqualTo("Hello")
+    }
+
+    @Test
+    fun `createRequest includes Stripe app info library fields when available`() {
+        val originalAppInfo = Stripe.appInfo
+        Stripe.appInfo = AppInfo.create(
+            "MyAwesomePlugin",
+            "1.2.34"
+        )
+
+        try {
+            val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
+                context,
+                API_KEY
+            )
+
+            val params = analyticsRequestFactory.createSourceCreation(
+                Source.SourceType.CARD
+            ).params
+
+            assertThat(params[AnalyticsFields.LIBRARY_NAME]).isEqualTo("MyAwesomePlugin")
+            assertThat(params[AnalyticsFields.LIBRARY_VERSION]).isEqualTo("1.2.34")
+        } finally {
+            Stripe.appInfo = originalAppInfo
+        }
     }
 
     private companion object {

@@ -4,6 +4,7 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.AppInfoFixtures
 import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.version.StripeSdkVersion
@@ -161,6 +162,23 @@ class AnalyticsRequestFactoryTest : TestCase() {
                 assertThat(request.params).containsEntry("locale", locale.toString())
             }
         }
+    }
+
+    @Test
+    fun `when app info is available, create params include library name and version`() {
+        val factory = AnalyticsRequestFactory(
+            packageManager = null,
+            packageInfo = null,
+            packageName = "",
+            publishableKeyProvider = { apiKey },
+            networkTypeProvider = { "5G" },
+            appInfo = AppInfoFixtures.DEFAULT,
+        )
+
+        val params = factory.createRequest(mockEvent, emptyMap()).params
+
+        assertThat(params[AnalyticsFields.LIBRARY_NAME]).isEqualTo("MyAwesomePlugin")
+        assertThat(params[AnalyticsFields.LIBRARY_VERSION]).isEqualTo("1.2.34")
     }
 
     private fun createFakeAnalyticsRequestFactory(

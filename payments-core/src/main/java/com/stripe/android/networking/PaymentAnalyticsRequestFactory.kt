@@ -6,6 +6,8 @@ import android.content.pm.PackageManager
 import androidx.annotation.Keep
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.Stripe
+import com.stripe.android.core.AppInfo
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequest
@@ -31,12 +33,14 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
     publishableKeyProvider: Provider<String>,
     networkTypeProvider: Provider<String?>,
     internal val defaultProductUsageTokens: Set<String> = emptySet(),
+    appInfo: AppInfo? = Stripe.appInfo,
 ) : AnalyticsRequestFactory(
     packageManager,
     packageInfo,
     packageName,
     publishableKeyProvider,
     networkTypeProvider,
+    appInfo = appInfo,
 ) {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
