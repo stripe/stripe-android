@@ -3,13 +3,12 @@ package com.stripe.android.checkout
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
+import com.stripe.android.checkouttesting.checkoutInit
+import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.RequestMatchers.host
-import com.stripe.android.networktesting.RequestMatchers.method
-import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -107,10 +106,7 @@ class CheckoutInstancesTest {
         val requestArrived = CountDownLatch(1)
         val holdResponse = CountDownLatch(1)
 
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID/init"),
-        ) { response ->
+        networkRule.checkoutInit { response ->
             requestArrived.countDown()
             holdResponse.await()
             response.setBody("{}")
@@ -166,19 +162,11 @@ class CheckoutInstancesTest {
 
         // After dismissing, mutations should not throw the integrationLaunched error.
         // They will fail for other reasons (network), but they won't throw IllegalStateException.
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("POST"),
-            path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
-        ) { response ->
+        networkRule.checkoutUpdate { response ->
             response.setResponseCode(400)
             response.setBody("""{"error": {"message": "error"}}""")
         }
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("POST"),
-            path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
-        ) { response ->
+        networkRule.checkoutUpdate { response ->
             response.setResponseCode(400)
             response.setBody("""{"error": {"message": "error"}}""")
         }
@@ -219,6 +207,7 @@ class CheckoutInstancesTest {
                 totalSummary = null,
                 lineItems = emptyList(),
                 shippingOptions = emptyList(),
+                adaptivePricingInfo = null,
             ),
         )
         val checkout = Checkout.createWithState(applicationContext, Checkout.State(state))

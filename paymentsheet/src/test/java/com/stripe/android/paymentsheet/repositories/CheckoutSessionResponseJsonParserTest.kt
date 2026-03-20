@@ -1,12 +1,12 @@
 package com.stripe.android.paymentsheet.repositories
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory.DEFAULT_CHECKOUT_SESSION_ID
 import org.json.JSONObject
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -709,6 +709,80 @@ class CheckoutSessionResponseJsonParserTest {
         assertThat(setupIntent?.status).isEqualTo(StripeIntent.Status.RequiresAction)
         assertThat(setupIntent?.requiresAction()).isTrue()
         assertThat(setupIntent?.nextActionType).isEqualTo(StripeIntent.NextActionType.RedirectToUrl)
+    }
+
+    @Test
+    fun `parse adaptive pricing info`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_ADAPTIVE_PRICING_JSON)
+
+        assertThat(result).isNotNull()
+        val adaptivePricingInfo = result?.adaptivePricingInfo
+        assertThat(adaptivePricingInfo).isNotNull()
+        assertThat(adaptivePricingInfo?.activePresentmentCurrency).isEqualTo("usd")
+        assertThat(adaptivePricingInfo?.integrationAmount).isEqualTo(5099L)
+        assertThat(adaptivePricingInfo?.integrationCurrency).isEqualTo("eur")
+
+        val localCurrencyOptions = adaptivePricingInfo?.localCurrencyOptions
+        assertThat(localCurrencyOptions).hasSize(1)
+        assertThat(localCurrencyOptions?.get(0)?.amount).isEqualTo(6106L)
+        assertThat(localCurrencyOptions?.get(0)?.conversionMarkupBps).isEqualTo(400)
+        assertThat(localCurrencyOptions?.get(0)?.currency).isEqualTo("usd")
+        assertThat(localCurrencyOptions?.get(0)?.presentmentExchangeRate).isEqualTo("1.19749")
+    }
+
+    @Test
+    fun `parse adaptive pricing info with multiple local currency options`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_abc123",
+                "currency": "usd",
+                "total_summary": { "due": 6106, "subtotal": 6106, "total": 6106 },
+                "adaptive_pricing_info": {
+                    "active_presentment_currency": "usd",
+                    "integration_amount": 5099,
+                    "integration_currency": "eur",
+                    "local_currency_options": [
+                        {
+                            "amount": 6106,
+                            "conversion_markup_bps": 400,
+                            "currency": "usd",
+                            "presentment_exchange_rate": "1.19749"
+                        },
+                        {
+                            "amount": 7200,
+                            "conversion_markup_bps": 350,
+                            "currency": "gbp",
+                            "presentment_exchange_rate": "1.41200"
+                        }
+                    ]
+                }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+
+        assertThat(result).isNotNull()
+        val localCurrencyOptions = result?.adaptivePricingInfo?.localCurrencyOptions
+        assertThat(localCurrencyOptions).hasSize(2)
+
+        assertThat(localCurrencyOptions?.get(0)?.amount).isEqualTo(6106L)
+        assertThat(localCurrencyOptions?.get(0)?.currency).isEqualTo("usd")
+
+        assertThat(localCurrencyOptions?.get(1)?.amount).isEqualTo(7200L)
+        assertThat(localCurrencyOptions?.get(1)?.conversionMarkupBps).isEqualTo(350)
+        assertThat(localCurrencyOptions?.get(1)?.currency).isEqualTo("gbp")
+        assertThat(localCurrencyOptions?.get(1)?.presentmentExchangeRate).isEqualTo("1.41200")
+    }
+
+    @Test
+    fun `parse returns null adaptive pricing info when not present`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_RESPONSE_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.adaptivePricingInfo).isNull()
     }
 
     @Test

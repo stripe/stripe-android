@@ -4,6 +4,9 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.checkout.Checkout
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
+import com.stripe.android.checkouttesting.checkoutConfirm
+import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
 import com.stripe.android.networktesting.RequestMatchers.host
@@ -23,10 +26,6 @@ import org.junit.runner.RunWith
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(AndroidJUnit4::class)
 internal class PaymentSheetCheckoutSessionTest {
-    private companion object {
-        const val SESSION_ID = "cs_test_abc123"
-    }
-
     @get:Rule
     val testRules: TestRules = TestRules.create()
 
@@ -58,18 +57,14 @@ internal class PaymentSheetCheckoutSessionTest {
         networkRule = networkRule,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("POST"),
-            path("/v1/payment_pages/$SESSION_ID/init"),
-        ) { response ->
+        networkRule.checkoutInit { response ->
             response.testBodyFromFile("checkout-session-init-setup.json")
         }
 
         val context = ApplicationProvider.getApplicationContext<Context>()
         val checkout = Checkout.configure(
             context = context,
-            checkoutSessionClientSecret = "${SESSION_ID}_secret_example",
+            checkoutSessionClientSecret = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example",
         ).getOrThrow()
 
         testContext.presentPaymentSheet {
@@ -89,10 +84,7 @@ internal class PaymentSheetCheckoutSessionTest {
             response.testBodyFromFile("payment-methods-create.json")
         }
 
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("POST"),
-            path("/v1/payment_pages/$SESSION_ID/confirm"),
+        networkRule.checkoutConfirm(
             not(hasBodyPart("expected_amount")),
             not(hasBodyPart("save_payment_method")),
         ) { response ->
@@ -119,18 +111,14 @@ internal class PaymentSheetCheckoutSessionTest {
         resultCallback = ::assertCompleted,
     ) { testContext ->
         // Mock checkout session init API
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("POST"),
-            path("/v1/payment_pages/$SESSION_ID/init"),
-        ) { response ->
+        networkRule.checkoutInit { response ->
             response.testBodyFromFile("checkout-session-init.json")
         }
 
         val context = ApplicationProvider.getApplicationContext<Context>()
         val checkout = Checkout.configure(
             context = context,
-            checkoutSessionClientSecret = "${SESSION_ID}_secret_example",
+            checkoutSessionClientSecret = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example",
         ).getOrThrow()
 
         testContext.presentPaymentSheet {
@@ -152,10 +140,7 @@ internal class PaymentSheetCheckoutSessionTest {
         }
 
         // Mock checkout session confirm API
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("POST"),
-            path("/v1/payment_pages/$SESSION_ID/confirm"),
+        networkRule.checkoutConfirm(
             bodyPart("expected_amount", "5099"),
         ) { response ->
             response.testBodyFromFile("checkout-session-confirm.json")
@@ -178,18 +163,14 @@ internal class PaymentSheetCheckoutSessionTest {
         networkRule = networkRule,
         resultCallback = ::assertFailed,
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("POST"),
-            path("/v1/payment_pages/$SESSION_ID/init"),
-        ) { response ->
+        networkRule.checkoutInit { response ->
             response.testBodyFromFile("checkout-session-init-already-confirmed.json")
         }
 
         val context = ApplicationProvider.getApplicationContext<Context>()
         val checkout = Checkout.configure(
             context = context,
-            checkoutSessionClientSecret = "${SESSION_ID}_secret_example",
+            checkoutSessionClientSecret = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example",
         ).getOrThrow()
 
         testContext.presentPaymentSheet {

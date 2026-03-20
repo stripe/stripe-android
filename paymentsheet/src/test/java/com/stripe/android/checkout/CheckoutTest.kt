@@ -4,19 +4,18 @@ import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
+import com.stripe.android.checkouttesting.checkoutInit
+import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
-import com.stripe.android.networktesting.RequestMatchers.host
-import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
-import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -54,11 +53,7 @@ class CheckoutTest {
     fun `configure returns Checkout with checkoutSession id from network response`() = runConfigureScenario(
         clientSecret = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example",
         networkSetup = {
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("POST"),
-                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID/init"),
-            ) { response ->
+            networkRule.checkoutInit { response ->
                 response.testBodyFromFile("checkout-session-init.json")
             }
         },
@@ -73,10 +68,7 @@ class CheckoutTest {
     @Test
     fun `applyPromotionCode updates checkoutSession on success`() = runTest {
         runCreateWithStateScenario { checkout ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("POST"),
-                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
+            networkRule.checkoutUpdate(
                 bodyPart("promotion_code", "10OFF"),
             ) { response ->
                 response.testBodyFromFile("checkout-session-apply-discount.json")
@@ -100,11 +92,7 @@ class CheckoutTest {
     @Test
     fun `applyPromotionCode returns failure on error response`() = runTest {
         runCreateWithStateScenario { checkout ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("POST"),
-                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
-            ) { response ->
+            networkRule.checkoutUpdate { response ->
                 response.setResponseCode(400)
                 response.setBody("""{"error": {"message": "Invalid promotion code"}}""")
             }
@@ -124,10 +112,7 @@ class CheckoutTest {
     @Test
     fun `applyPromotionCode trims whitespace from promotion code`() = runTest {
         runCreateWithStateScenario { checkout ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("POST"),
-                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
+            networkRule.checkoutUpdate(
                 bodyPart("promotion_code", "10OFF"),
             ) { response ->
                 response.testBodyFromFile("checkout-session-apply-discount.json")
@@ -148,10 +133,7 @@ class CheckoutTest {
     @Test
     fun `removePromotionCode updates checkoutSession on success`() = runTest {
         runCreateWithStateScenario { checkout ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("POST"),
-                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
+            networkRule.checkoutUpdate(
                 bodyPart("promotion_code", ""),
             ) { response ->
                 response.testBodyFromFile("checkout-session-apply-discount.json")
@@ -172,11 +154,7 @@ class CheckoutTest {
     @Test
     fun `removePromotionCode returns failure on error response`() = runTest {
         runCreateWithStateScenario { checkout ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("POST"),
-                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
-            ) { response ->
+            networkRule.checkoutUpdate { response ->
                 response.setResponseCode(400)
                 response.setBody("""{"error": {"message": "Failed to remove promotion code"}}""")
             }
@@ -196,11 +174,7 @@ class CheckoutTest {
     @Test
     fun `refresh updates checkoutSession on success`() = runTest {
         runCreateWithStateScenario { checkout ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("POST"),
-                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID/init"),
-            ) { response ->
+            networkRule.checkoutInit { response ->
                 response.testBodyFromFile("checkout-session-apply-discount.json")
             }
 
@@ -219,11 +193,7 @@ class CheckoutTest {
     @Test
     fun `refresh returns failure on error response`() = runTest {
         runCreateWithStateScenario { checkout ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("POST"),
-                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID/init"),
-            ) { response ->
+            networkRule.checkoutInit { response ->
                 response.setResponseCode(500)
                 response.setBody("""{"error": {"message": "Internal server error"}}""")
             }
@@ -243,10 +213,7 @@ class CheckoutTest {
     @Test
     fun `updateLineItemQuantity updates checkoutSession on success`() = runTest {
         runCreateWithStateScenario { checkout ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("POST"),
-                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
+            networkRule.checkoutUpdate(
                 bodyPart(urlEncode("updated_line_item_quantity[line_item_id]"), "li_1"),
                 bodyPart(urlEncode("updated_line_item_quantity[quantity]"), "3"),
                 bodyPart(urlEncode("updated_line_item_quantity[fail_update_on_discount_error]"), "true"),
@@ -271,11 +238,7 @@ class CheckoutTest {
     @Test
     fun `updateLineItemQuantity returns failure on error response`() = runTest {
         runCreateWithStateScenario { checkout ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("POST"),
-                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
-            ) { response ->
+            networkRule.checkoutUpdate { response ->
                 response.setResponseCode(400)
                 response.setBody("""{"error": {"message": "Invalid quantity"}}""")
             }
@@ -295,10 +258,7 @@ class CheckoutTest {
     @Test
     fun `selectShippingRate updates checkoutSession on success`() = runTest {
         runCreateWithStateScenario { checkout ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("POST"),
-                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
+            networkRule.checkoutUpdate(
                 bodyPart("shipping_rate", "shr_express"),
                 bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
             ) { response ->
@@ -329,10 +289,7 @@ class CheckoutTest {
     @Test
     fun `updateShippingAddress sends address fields and updates checkoutSession on success`() = runTest {
         runCreateWithStateScenario { checkout ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("POST"),
-                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
+            networkRule.checkoutUpdate(
                 bodyPart(urlEncode("tax_region[country]"), "US"),
                 bodyPart(urlEncode("tax_region[city]"), "Denver"),
                 bodyPart(urlEncode("tax_region[state]"), "CO"),
@@ -382,11 +339,7 @@ class CheckoutTest {
     @Test
     fun `updateShippingAddress returns failure on error response`() = runTest {
         runCreateWithStateScenario { checkout ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("POST"),
-                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
-            ) { response ->
+            networkRule.checkoutUpdate { response ->
                 response.setResponseCode(400)
                 response.setBody("""{"error": {"message": "Invalid address"}}""")
             }
@@ -408,10 +361,7 @@ class CheckoutTest {
     @Test
     fun `updateShippingAddress omits empty fields from request`() = runTest {
         runCreateWithStateScenario { checkout ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("POST"),
-                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
+            networkRule.checkoutUpdate(
                 bodyPart(urlEncode("tax_region[country]"), "US"),
                 bodyPart(urlEncode("tax_region[postal_code]"), "80202"),
                 not(hasBodyPart(urlEncode("tax_region[city]"))),
@@ -441,10 +391,7 @@ class CheckoutTest {
     @Test
     fun `updateBillingAddress sends address fields and updates checkoutSession on success`() = runTest {
         runCreateWithStateScenario { checkout ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("POST"),
-                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
+            networkRule.checkoutUpdate(
                 bodyPart(urlEncode("tax_region[country]"), "US"),
                 bodyPart(urlEncode("tax_region[city]"), "Denver"),
                 bodyPart(urlEncode("tax_region[state]"), "CO"),
@@ -484,11 +431,7 @@ class CheckoutTest {
     @Test
     fun `updateBillingAddress returns failure on error response`() = runTest {
         runCreateWithStateScenario { checkout ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("POST"),
-                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
-            ) { response ->
+            networkRule.checkoutUpdate { response ->
                 response.setResponseCode(400)
                 response.setBody("""{"error": {"message": "Invalid address"}}""")
             }
@@ -510,11 +453,7 @@ class CheckoutTest {
     @Test
     fun `updateShippingAddress stores address in internalState`() = runTest {
         runCreateWithStateScenario { checkout ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("POST"),
-                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
-            ) { response ->
+            networkRule.checkoutUpdate { response ->
                 response.testBodyFromFile("checkout-session-update-shipping-address.json")
             }
 
@@ -546,11 +485,7 @@ class CheckoutTest {
     @Test
     fun `updateBillingAddress stores address in internalState`() = runTest {
         runCreateWithStateScenario { checkout ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("POST"),
-                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
-            ) { response ->
+            networkRule.checkoutUpdate { response ->
                 response.testBodyFromFile("checkout-session-update-shipping-address.json")
             }
 
@@ -582,11 +517,7 @@ class CheckoutTest {
     @Test
     fun `updateShippingAddress does not store address in internalState on failure`() = runTest {
         runCreateWithStateScenario { checkout ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("POST"),
-                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
-            ) { response ->
+            networkRule.checkoutUpdate { response ->
                 response.setResponseCode(400)
                 response.setBody("""{"error": {"message": "Invalid address"}}""")
             }
@@ -604,11 +535,7 @@ class CheckoutTest {
     @Test
     fun `updateBillingAddress does not store address in internalState on failure`() = runTest {
         runCreateWithStateScenario { checkout ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("POST"),
-                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
-            ) { response ->
+            networkRule.checkoutUpdate { response ->
                 response.setResponseCode(400)
                 response.setBody("""{"error": {"message": "Invalid address"}}""")
             }
@@ -626,11 +553,7 @@ class CheckoutTest {
     @Test
     fun `updateShippingAddress stores phoneNumber in internalState`() = runTest {
         runCreateWithStateScenario { checkout ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("POST"),
-                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
-            ) { response ->
+            networkRule.checkoutUpdate { response ->
                 response.testBodyFromFile("checkout-session-update-shipping-address.json")
             }
 
@@ -645,11 +568,7 @@ class CheckoutTest {
     @Test
     fun `updateBillingAddress stores phoneNumber in internalState`() = runTest {
         runCreateWithStateScenario { checkout ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("POST"),
-                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
-            ) { response ->
+            networkRule.checkoutUpdate { response ->
                 response.testBodyFromFile("checkout-session-update-shipping-address.json")
             }
 
@@ -664,11 +583,7 @@ class CheckoutTest {
     @Test
     fun `updateShippingAddress does not store phoneNumber in internalState on failure`() = runTest {
         runCreateWithStateScenario { checkout ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("POST"),
-                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
-            ) { response ->
+            networkRule.checkoutUpdate { response ->
                 response.setResponseCode(400)
                 response.setBody("""{"error": {"message": "Invalid address"}}""")
             }
@@ -684,11 +599,7 @@ class CheckoutTest {
     @Test
     fun `updateBillingAddress does not store phoneNumber in internalState on failure`() = runTest {
         runCreateWithStateScenario { checkout ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("POST"),
-                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
-            ) { response ->
+            networkRule.checkoutUpdate { response ->
                 response.setResponseCode(400)
                 response.setBody("""{"error": {"message": "Invalid address"}}""")
             }
@@ -704,10 +615,7 @@ class CheckoutTest {
     @Test
     fun `updateBillingAddress omits empty fields from request`() = runTest {
         runCreateWithStateScenario { checkout ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("POST"),
-                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
+            networkRule.checkoutUpdate(
                 bodyPart(urlEncode("tax_region[country]"), "US"),
                 bodyPart(urlEncode("tax_region[postal_code]"), "80202"),
                 not(hasBodyPart(urlEncode("tax_region[city]"))),
@@ -737,10 +645,7 @@ class CheckoutTest {
     @Test
     fun `updateTaxId sends type and value and updates checkoutSession on success`() = runTest {
         runCreateWithStateScenario { checkout ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("POST"),
-                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
+            networkRule.checkoutUpdate(
                 bodyPart(urlEncode("tax_id_collection[tax_id][type]"), "us_ein"),
                 bodyPart(urlEncode("tax_id_collection[tax_id][value]"), "123456789"),
                 bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
@@ -763,11 +668,7 @@ class CheckoutTest {
     @Test
     fun `updateTaxId returns failure on error response`() = runTest {
         runCreateWithStateScenario { checkout ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("POST"),
-                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
-            ) { response ->
+            networkRule.checkoutUpdate { response ->
                 response.setResponseCode(400)
                 response.setBody("""{"error": {"message": "Invalid tax ID"}}""")
             }
@@ -787,10 +688,7 @@ class CheckoutTest {
     @Test
     fun `updateTaxId trims whitespace from type and value`() = runTest {
         runCreateWithStateScenario { checkout ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("POST"),
-                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
+            networkRule.checkoutUpdate(
                 bodyPart(urlEncode("tax_id_collection[tax_id][type]"), "us_ein"),
                 bodyPart(urlEncode("tax_id_collection[tax_id][value]"), "123456789"),
                 bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
@@ -813,11 +711,7 @@ class CheckoutTest {
     @Test
     fun `selectShippingRate returns failure on error response`() = runTest {
         runCreateWithStateScenario { checkout ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("POST"),
-                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
-            ) { response ->
+            networkRule.checkoutUpdate { response ->
                 response.setResponseCode(400)
                 response.setBody("""{"error": {"message": "Invalid shipping rate"}}""")
             }
@@ -838,10 +732,7 @@ class CheckoutTest {
     fun `concurrent calls to withSessionId are serialized`() = runTest {
         runCreateWithStateScenario { checkout ->
             // First call: applyPromotionCode hits the initial session ID with promotion_code param.
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("POST"),
-                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
+            networkRule.checkoutUpdate(
                 bodyPart("promotion_code", "10OFF"),
             ) { response ->
                 response.setBodyDelay(200, TimeUnit.MILLISECONDS)
@@ -850,13 +741,11 @@ class CheckoutTest {
 
             // Second call: updateShippingAddress must use the session ID from the first response,
             // proving the mutex serialized the calls.
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("POST"),
-                path("/v1/payment_pages/cs_test_after_promo"),
+            networkRule.checkoutUpdate(
                 bodyPart(urlEncode("tax_region[country]"), "US"),
                 bodyPart(urlEncode("tax_region[postal_code]"), "80202"),
                 bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
+                sessionId = "cs_test_after_promo",
             ) { response ->
                 response.testBodyFromFile("checkout-session-concurrent-update-address.json")
             }
@@ -964,11 +853,7 @@ class CheckoutTest {
     @Test
     fun `ensureNoMutationInFlight throws when mutex is locked`() = runTest {
         runCreateWithStateScenario { checkout ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("POST"),
-                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
-            ) { response ->
+            networkRule.checkoutUpdate { response ->
                 response.setBodyDelay(5, TimeUnit.SECONDS)
                 response.testBodyFromFile("checkout-session-apply-discount.json")
             }
@@ -991,11 +876,7 @@ class CheckoutTest {
     @Test
     fun `setting state throws when mutex is locked`() = runTest {
         runCreateWithStateScenario { checkout ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("POST"),
-                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
-            ) { response ->
+            networkRule.checkoutUpdate { response ->
                 response.setBodyDelay(5, TimeUnit.SECONDS)
                 response.testBodyFromFile("checkout-session-apply-discount.json")
             }
@@ -1034,10 +915,7 @@ class CheckoutTest {
             checkout.markIntegrationLaunched()
             checkout.markIntegrationDismissed()
 
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("POST"),
-                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID"),
+            networkRule.checkoutUpdate(
                 bodyPart("promotion_code", "10OFF"),
             ) { response ->
                 response.testBodyFromFile("checkout-session-apply-discount.json")
@@ -1049,14 +927,25 @@ class CheckoutTest {
     }
 
     @Test
+    fun `integrationLaunched persists through State restoration`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            checkout.markIntegrationLaunched()
+
+            val restoredCheckout = Checkout.createWithState(applicationContext, checkout.state)
+
+            val result = restoredCheckout.applyPromotionCode("10OFF")
+            assertThat(result.isFailure).isTrue()
+            assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
+            assertThat(result.exceptionOrNull()).hasMessageThat()
+                .isEqualTo("Cannot mutate checkout session while a payment flow is presented.")
+        }
+    }
+
+    @Test
     fun `configure returns failure when network request fails`() = runConfigureScenario(
         clientSecret = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_xyz",
         networkSetup = {
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("POST"),
-                path("/v1/payment_pages/$DEFAULT_CHECKOUT_SESSION_ID/init"),
-            ) { response ->
+            networkRule.checkoutInit { response ->
                 response.setResponseCode(500)
                 response.setBody("""{"error": {"message": "Internal server error"}}""")
             }

@@ -8,7 +8,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetActivity
 import com.stripe.android.customersheet.CustomerSheetResultCallback
-import com.stripe.android.link.account.LinkStore
+import com.stripe.android.link.account.DefaultLinkStore
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentsheet.MainActivity
 import java.util.concurrent.CountDownLatch
@@ -74,7 +74,7 @@ private fun runCustomerSheetTest(
 
         scenario.onActivity {
             PaymentConfiguration.init(it, "pk_test_123")
-            LinkStore(it.applicationContext).clear()
+            DefaultLinkStore(it.applicationContext).clear()
         }
 
         var customerSheet: CustomerSheet? = null
