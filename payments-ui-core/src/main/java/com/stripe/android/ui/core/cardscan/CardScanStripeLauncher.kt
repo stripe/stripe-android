@@ -6,9 +6,13 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.core.content.IntentCompat
-import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.stripecardscan.cardscan.CardScanConfiguration
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetParams
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
@@ -19,13 +23,11 @@ import kotlinx.coroutines.flow.asStateFlow
 
 internal class CardScanStripeLauncher(
     private val eventsReporter: CardScanEventsReporter,
-    private val savedStateHandle: SavedStateHandle?,
+    isLaunchingState: MutableState<Boolean>,
 ) : CardScanLauncher {
 
     private val implementation = "stripe_card_scan"
-    private var _isLaunching: Boolean
-        get() = savedStateHandle?.get<Boolean>(KEY_IS_LAUNCHING) ?: false
-        set(value) { savedStateHandle?.set(KEY_IS_LAUNCHING, value) }
+    private var _isLaunching by isLaunchingState
 
     // We only instantiate this launcher after checking if stripecardscan is available via reflection
     // (see rememberCardScanLauncher()).
@@ -77,7 +79,6 @@ internal class CardScanStripeLauncher(
     companion object {
         private const val INTENT_PARAM_REQUEST = "request"
         private const val INTENT_PARAM_RESULT = "result"
-        private const val KEY_IS_LAUNCHING = "CardScanStripeLauncher_isLaunching"
 
         private val cardScanActivityClass: Class<*> by lazy {
             Class.forName("com.stripe.android.stripecardscan.cardscan.CardScanActivity")
@@ -100,13 +101,13 @@ internal class CardScanStripeLauncher(
         @Composable
         internal fun rememberCardScanStripeLauncher(
             eventsReporter: CardScanEventsReporter,
-            savedStateHandle: SavedStateHandle?,
             onResult: (CardScanResult) -> Unit,
         ): CardScanStripeLauncher {
+            val isLaunchingState = rememberSaveable { mutableStateOf(false) }
             val launcher = remember(eventsReporter) {
                 CardScanStripeLauncher(
                     eventsReporter = eventsReporter,
-                    savedStateHandle = savedStateHandle,
+                    isLaunchingState = isLaunchingState,
                 )
             }
             val activityLauncher = rememberLauncherForActivityResult(
