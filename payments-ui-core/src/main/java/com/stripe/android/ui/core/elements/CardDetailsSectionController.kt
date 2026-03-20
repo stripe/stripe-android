@@ -21,6 +21,7 @@ class CardDetailsSectionController(
     cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
     val cardDetailsAction: CardDetailsAction? = null,
     private val automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper?,
+    val isStripeCardScanAllowed: Boolean = false,
 ) : SectionFieldValidationController {
 
     internal val cardDetailsElement = CardDetailsElement(
