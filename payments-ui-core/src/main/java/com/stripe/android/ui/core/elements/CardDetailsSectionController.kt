@@ -24,6 +24,8 @@ class CardDetailsSectionController(
     val isStripeCardScanAllowed: Boolean = false,
 ) : SectionFieldValidationController {
 
+    internal val savedStateHandle get() = automaticallyLaunchedCardScanFormDataHelper?.savedStateHandle
+
     internal val cardDetailsElement = CardDetailsElement(
         IdentifierSpec.Generic("card_detail"),
         cardAccountRangeRepositoryFactory,

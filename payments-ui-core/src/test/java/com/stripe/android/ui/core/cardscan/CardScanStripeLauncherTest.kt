@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.cardscan
 
 import android.content.Intent
+import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
@@ -84,6 +85,7 @@ class CardScanStripeLauncherTest {
         val fakeEventsReporter = FakeCardScanEventsReporter()
         val launcher = CardScanStripeLauncher(
             eventsReporter = fakeEventsReporter,
+            savedStateHandle = SavedStateHandle(),
         )
 
         val scenario = Scenario(

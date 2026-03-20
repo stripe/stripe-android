@@ -36,6 +36,7 @@ fun CardDetailsSectionElementUI(
 
     val cardScanLauncher = rememberCardScanLauncher(
         isStripeCardScanAllowed = controller.isStripeCardScanAllowed,
+        savedStateHandle = controller.savedStateHandle,
         onResult = { controller.onCardScanResult(it) },
     )
 

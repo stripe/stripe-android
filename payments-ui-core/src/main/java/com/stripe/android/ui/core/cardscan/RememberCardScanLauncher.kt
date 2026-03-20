@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityOptionsCompat
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.ui.core.cardscan.CardScanGoogleLauncher.Companion.rememberCardScanGoogleLauncher
 import com.stripe.android.ui.core.cardscan.CardScanStripeLauncher.Companion.rememberCardScanStripeLauncher
 import com.stripe.android.uicore.utils.AnimationConstants
@@ -12,6 +13,7 @@ import com.stripe.android.uicore.utils.AnimationConstants
 @Composable
 internal fun rememberCardScanLauncher(
     isStripeCardScanAllowed: Boolean = false,
+    savedStateHandle: SavedStateHandle? = null,
     onResult: (CardScanResult) -> Unit,
     isStripeCardScanAvailable: IsStripeCardScanAvailable = DefaultIsStripeCardScanAvailable(),
 ): CardScanLauncher? {
@@ -23,6 +25,7 @@ internal fun rememberCardScanLauncher(
     return if (isStripeCardScanAllowed && isStripeCardScanAvailable()) {
         rememberCardScanStripeLauncher(
             eventsReporter = eventsReporter,
+            savedStateHandle = savedStateHandle,
             onResult = onResult,
         )
     } else {
