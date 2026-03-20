@@ -35,6 +35,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
@@ -183,6 +184,8 @@ internal class EmbeddedContentUiTest {
                 linkPaymentLauncher = RecordingLinkPaymentLauncher.noOp(),
                 analyticsCallbackProvider = { AnalyticEventCallbackRule() },
                 linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
+                checkoutSessionRepository = mock(),
+                paymentElementLoader = mock(),
             )
         Scenario(
             embeddedContentHelper = embeddedContentHelper,

@@ -1439,6 +1439,8 @@ internal class PaymentOptionsViewModelTest {
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             linkGateFactory = FakeLinkGate.Factory(linkGate),
             linkPaymentLauncher = linkPaymentLauncher,
+            checkoutSessionRepository = mock(),
+            paymentElementLoader = mock(),
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             tapToAddHelperFactory = tapToAddHelperFactory,
             mode = EventReporter.Mode.Complete,

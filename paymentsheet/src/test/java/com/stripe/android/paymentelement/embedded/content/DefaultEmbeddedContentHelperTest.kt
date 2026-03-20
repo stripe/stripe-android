@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
+import org.mockito.kotlin.mock
 import kotlin.test.Test
 
 internal class DefaultEmbeddedContentHelperTest {
@@ -186,7 +187,9 @@ internal class DefaultEmbeddedContentHelperTest {
             internalRowSelectionCallback = { null },
             linkPaymentLauncher = RecordingLinkPaymentLauncher.noOp(),
             analyticsCallbackProvider = { AnalyticEventCallbackRule() },
-            linkAccountHolder = LinkAccountHolder(SavedStateHandle())
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
+            checkoutSessionRepository = mock(),
+            paymentElementLoader = mock(),
         )
         Scenario(
             embeddedContentHelper = embeddedContentHelper,

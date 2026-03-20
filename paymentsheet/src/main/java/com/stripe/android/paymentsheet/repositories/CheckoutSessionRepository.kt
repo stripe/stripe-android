@@ -63,6 +63,7 @@ internal class CheckoutSessionRepository @Inject constructor(
             "eid" to UUID.randomUUID().toString(),
             "redirect_type" to "embedded",
             "elements_session_client[is_aggregation_expected]" to "true",
+            "adaptive_pricing[allowed]" to "true",
         ),
     )
 

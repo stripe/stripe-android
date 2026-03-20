@@ -158,6 +158,8 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                 linkGateFactory = FakeLinkGate.Factory(),
                 linkPaymentLauncher = mock<LinkPaymentLauncher>(),
+                checkoutSessionRepository = mock(),
+                paymentElementLoader = mock(),
                 linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
                 tapToAddHelperFactory = FakeTapToAddHelper.Factory.noOp(),
                 mode = EventReporter.Mode.Complete,
@@ -211,6 +213,7 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                         return FakeCvcRecollectionInteractor()
                     }
                 },
+                checkoutSessionRepository = mock(),
                 tapToAddHelperFactory = FakeTapToAddHelper.Factory.noOp(),
                 mode = EventReporter.Mode.Complete,
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,

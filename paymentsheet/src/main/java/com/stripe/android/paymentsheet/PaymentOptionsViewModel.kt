@@ -40,11 +40,14 @@ import com.stripe.android.paymentsheet.model.PaymentSelection.Link
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultSelectSavedPaymentMethodsInteractor
+import com.stripe.android.paymentsheet.verticalmode.CheckoutSessionCurrencyUpdater
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
@@ -68,6 +71,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     private val linkGateFactory: LinkGate.Factory,
     private val errorReporter: ErrorReporter,
     val linkPaymentLauncher: LinkPaymentLauncher,
+    private val checkoutSessionRepository: CheckoutSessionRepository,
+    private val paymentElementLoader: PaymentElementLoader,
     eventReporter: EventReporter,
     savedPaymentMethodRepository: SavedPaymentMethodRepository,
     @IOContext workContext: CoroutineContext,
@@ -91,6 +96,12 @@ internal class PaymentOptionsViewModel @Inject constructor(
     customerStateHolderFactory = customerStateHolderFactory,
     customViewModelScope = customViewModelScope,
 ) {
+
+    private val currencyUpdater = CheckoutSessionCurrencyUpdater(
+        checkoutSessionRepository = checkoutSessionRepository,
+        paymentElementLoader = paymentElementLoader,
+        workContext = workContext,
+    )
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
         config = config,
@@ -414,6 +425,32 @@ internal class PaymentOptionsViewModel @Inject constructor(
     ): Boolean {
         return paymentSelection is Link &&
             linkGateFactory.create(linkConfiguration).showRuxInFlowController
+    }
+
+    override fun onCurrencyChanged(currencyCode: String) {
+        viewModelScope.launch {
+            savedStateHandle[SAVE_PROCESSING] = true
+            currencyUpdater.updateCurrency(
+                paymentMethodMetadata = paymentMethodMetadata.value ?: return@launch,
+                currencyCode = currencyCode,
+                integrationConfiguration = PaymentElementLoader.Configuration.PaymentSheet(args.configuration),
+                initializedViaCompose = false,
+            ).fold(
+                onSuccess = { state ->
+                    customerStateHolder.setCustomerState(state.customer)
+                    updateSelection(state.paymentSelection)
+                    setPaymentMethodMetadata(state.paymentMethodMetadata)
+                    navigationHandler.resetTo(
+                        determineInitialBackStack(
+                            paymentMethodMetadata = state.paymentMethodMetadata,
+                            customerStateHolder = customerStateHolder,
+                        )
+                    )
+                    savedStateHandle[SAVE_PROCESSING] = false
+                },
+                onFailure = { _error.value = it.stripeErrorMessage() },
+            )
+        }
     }
 
     override fun handlePaymentMethodSelected(selection: PaymentSelection?) {

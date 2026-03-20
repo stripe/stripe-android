@@ -55,6 +55,7 @@ internal interface PaymentMethodVerticalLayoutInteractor {
         val displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?,
         val availableSavedPaymentMethodAction: SavedPaymentMethodAction,
         val mandate: ResolvableString?,
+        val currencySelectorOptions: CurrencySelectorOptions? = null,
     )
 
     sealed interface Selection {
@@ -76,6 +77,7 @@ internal interface PaymentMethodVerticalLayoutInteractor {
         data class SavedPaymentMethodSelected(val savedPaymentMethod: PaymentMethod) : ViewAction
         data class UpdatePaymentMethodVisibility(val itemCode: String, val coordinates: LayoutCoordinates) : ViewAction
         data object CancelPaymentMethodVisibilityTracking : ViewAction
+        data class CurrencySelected(val currency: CurrencyOption) : ViewAction
     }
 
     enum class SavedPaymentMethodAction {
@@ -109,6 +111,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val invokeRowSelectionCallback: (() -> Unit)? = null,
     private val displaysMandatesInFormScreen: Boolean,
     private val onInitiallyDisplayedPaymentMethodVisibilitySnapshot: (List<String>, List<String>) -> Unit,
+    private val currencyHandler: CurrencyHandler = CurrencyHandler(adaptivePricingInfo = null),
     dispatcher: CoroutineContext = Dispatchers.Default,
     mainDispatcher: CoroutineContext = Dispatchers.Main.immediate,
 ) : PaymentMethodVerticalLayoutInteractor {
@@ -124,6 +127,12 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             val isCurrentScreen = viewModel.navigationHandler.currentScreen.mapAsStateFlow {
                 it is PaymentSheetScreen.VerticalMode
             }
+            val currencyHandler = CurrencyHandler.create(
+                paymentMethodMetadata = paymentMethodMetadata,
+                onCurrencyChanged = { currencyCode ->
+                    viewModel.onCurrencyChanged(currencyCode)
+                },
+            )
             return DefaultPaymentMethodVerticalLayoutInteractor(
                 paymentMethodMetadata = paymentMethodMetadata,
                 processing = viewModel.processing,
@@ -177,6 +186,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     !requiresFormScreen
                 },
                 displaysMandatesInFormScreen = false,
+                currencyHandler = currencyHandler,
                 onInitiallyDisplayedPaymentMethodVisibilitySnapshot = { visiblePaymentMethods, hiddenPaymentMethods ->
                     viewModel.eventReporter.onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
                         visiblePaymentMethods = visiblePaymentMethods,
@@ -291,6 +301,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
             availableSavedPaymentMethodAction = action,
             mandate = getMandate(temporarySelectionCode, mostRecentSelection),
+            currencySelectorOptions = currencyHandler.currencySelectorOptions,
         )
     }
 
@@ -555,6 +566,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             }
             is ViewAction.CancelPaymentMethodVisibilityTracking -> {
                 cancelPaymentMethodVisibilityTracking()
+            }
+            is ViewAction.CurrencySelected -> {
+                currencyHandler.onCurrencySelected(viewAction.currency)
             }
         }
     }

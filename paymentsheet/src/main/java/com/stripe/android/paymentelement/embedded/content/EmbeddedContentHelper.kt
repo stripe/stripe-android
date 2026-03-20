@@ -24,11 +24,15 @@ import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.DefaultWalletButtonsInteractor
 import com.stripe.android.paymentsheet.ui.WalletButtonsContent
 import com.stripe.android.paymentsheet.ui.WalletButtonsInteractor
+import com.stripe.android.paymentsheet.verticalmode.CheckoutSessionCurrencyUpdater
+import com.stripe.android.paymentsheet.verticalmode.CurrencyHandler
 import com.stripe.android.paymentsheet.verticalmode.DefaultPaymentMethodVerticalLayoutInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
@@ -85,8 +89,16 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     private val confirmationHandler: ConfirmationHandler,
     private val confirmationStateHolder: EmbeddedConfirmationStateHolder,
     private val linkPaymentLauncher: LinkPaymentLauncher,
-    private val linkAccountHolder: LinkAccountHolder
+    private val linkAccountHolder: LinkAccountHolder,
+    private val checkoutSessionRepository: CheckoutSessionRepository,
+    private val paymentElementLoader: PaymentElementLoader,
 ) : EmbeddedContentHelper {
+
+    private val currencyUpdater = CheckoutSessionCurrencyUpdater(
+        checkoutSessionRepository = checkoutSessionRepository,
+        paymentElementLoader = paymentElementLoader,
+        workContext = workContext,
+    )
 
     private val state: StateFlow<State?> = savedStateHandle.getStateFlow(
         key = STATE_KEY_EMBEDDED_CONTENT,
@@ -187,6 +199,14 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
         isImmediateAction: Boolean,
         embeddedViewDisplaysMandateText: Boolean,
     ): PaymentMethodVerticalLayoutInteractor {
+        val currencyHandler = CurrencyHandler.create(
+            paymentMethodMetadata = paymentMethodMetadata,
+            onCurrencyChanged = { currencyCode ->
+                coroutineScope.launch {
+                    handleCurrencyChanged(currencyCode, paymentMethodMetadata)
+                }
+            },
+        )
         val paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor(
             incentive = paymentMethodMetadata.paymentMethodIncentive,
         )
@@ -273,6 +293,37 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                     isVerticalLayout = true,
                 )
             },
+            currencyHandler = currencyHandler,
+        )
+    }
+
+    private suspend fun handleCurrencyChanged(
+        currencyCode: String,
+        currentMetadata: PaymentMethodMetadata,
+    ) {
+        val configuration = confirmationStateHolder.state?.configuration ?: return
+        currencyUpdater.updateCurrency(
+            paymentMethodMetadata = currentMetadata,
+            currencyCode = currencyCode,
+            integrationConfiguration = PaymentElementLoader.Configuration.Embedded(
+                isRowSelectionImmediateAction = internalRowSelectionCallback.get() != null,
+                configuration = configuration,
+            ),
+            initializedViaCompose = true,
+        ).fold(
+            onSuccess = { state ->
+                customerStateHolder.setCustomerState(state.customer)
+                selectionHolder.set(state.paymentSelection)
+                val appearance = confirmationStateHolder.state?.configuration?.appearance?.embeddedAppearance
+                    ?: return
+                val embeddedViewDisplaysMandateText = confirmationStateHolder.state
+                    ?.configuration?.embeddedViewDisplaysMandateText ?: return
+                confirmationStateHolder.state = confirmationStateHolder.state?.copy(
+                    paymentMethodMetadata = state.paymentMethodMetadata,
+                )
+                dataLoaded(state.paymentMethodMetadata, appearance, embeddedViewDisplaysMandateText)
+            },
+            onFailure = { /* TODO: error handling */ },
         )
     }
 

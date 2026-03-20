@@ -533,6 +533,8 @@ internal class PaymentOptionsActivityTest {
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                 linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
                 linkPaymentLauncher = mock(),
+                checkoutSessionRepository = mock(),
+                paymentElementLoader = mock(),
                 tapToAddHelperFactory = FakeTapToAddHelper.Factory.noOp(),
                 mode = EventReporter.Mode.Complete,
                 errorReporter = FakeErrorReporter(),

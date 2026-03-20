@@ -192,6 +192,37 @@ fun <T1, T2, T3, T4, T5, T6, R> combineAsStateFlow(
 }
 
 /**
+ * Combines seven [StateFlow]s into another, instead of loosening the result to a [Flow].
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun <T1, T2, T3, T4, T5, T6, T7, R> combineAsStateFlow(
+    flow1: StateFlow<T1>,
+    flow2: StateFlow<T2>,
+    flow3: StateFlow<T3>,
+    flow4: StateFlow<T4>,
+    flow5: StateFlow<T5>,
+    flow6: StateFlow<T6>,
+    flow7: StateFlow<T7>,
+    transform: (T1, T2, T3, T4, T5, T6, T7) -> R,
+): StateFlow<R> {
+    @Suppress("DEPRECATION", "UNCHECKED_CAST")
+    return FlowToStateFlow(
+        flow = combine(listOf(flow1, flow2, flow3, flow4, flow5, flow6, flow7)) { values ->
+            transform(
+                values[0] as T1, values[1] as T2, values[2] as T3, values[3] as T4,
+                values[4] as T5, values[5] as T6, values[6] as T7,
+            )
+        },
+        produceValue = {
+            transform(
+                flow1.value, flow2.value, flow3.value, flow4.value,
+                flow5.value, flow6.value, flow7.value,
+            )
+        },
+    )
+}
+
+/**
  * Combines a list of [StateFlow]s into another, instead of loosening the result to a [Flow].
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

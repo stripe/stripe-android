@@ -17,20 +17,20 @@ internal object VerticalModeInitialScreenFactory {
         val supportedPaymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes()
         val bankFormInteractor = BankFormInteractor.create(viewModel)
 
-        if (supportedPaymentMethodTypes.size == 1 && customerStateHolder.paymentMethods.value.isEmpty()) {
-            return listOf(
-                PaymentSheetScreen.VerticalModeForm(
-                    interactor = DefaultVerticalModeFormInteractor.create(
-                        selectedPaymentMethodCode = supportedPaymentMethodTypes.first(),
-                        viewModel = viewModel,
-                        paymentMethodMetadata = paymentMethodMetadata,
-                        customerStateHolder = customerStateHolder,
-                        bankFormInteractor = bankFormInteractor,
-                    ),
-                    showsWalletHeader = paymentMethodMetadata.availableWallets.isNotEmpty(),
-                )
-            )
-        }
+//        if (supportedPaymentMethodTypes.size == 1 && customerStateHolder.paymentMethods.value.isEmpty()) {
+//            return listOf(
+//                PaymentSheetScreen.VerticalModeForm(
+//                    interactor = DefaultVerticalModeFormInteractor.create(
+//                        selectedPaymentMethodCode = supportedPaymentMethodTypes.first(),
+//                        viewModel = viewModel,
+//                        paymentMethodMetadata = paymentMethodMetadata,
+//                        customerStateHolder = customerStateHolder,
+//                        bankFormInteractor = bankFormInteractor,
+//                    ),
+//                    showsWalletHeader = paymentMethodMetadata.availableWallets.isNotEmpty(),
+//                )
+//            )
+//        }
 
         return buildList {
             val interactor = DefaultPaymentMethodVerticalLayoutInteractor.create(

@@ -187,6 +187,10 @@ internal abstract class BaseSheetViewModel(
         _primaryButtonState.value = state
     }
 
+    open fun onCurrencyChanged(currencyCode: String) {
+        // No-op by default. Overridden in PaymentSheetViewModel for checkout sessions.
+    }
+
     abstract fun handlePaymentMethodSelected(selection: PaymentSelection?)
 
     fun updateSelection(selection: PaymentSelection?) {

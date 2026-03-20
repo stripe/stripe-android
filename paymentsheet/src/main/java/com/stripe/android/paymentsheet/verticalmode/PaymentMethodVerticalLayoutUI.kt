@@ -64,6 +64,12 @@ internal fun PaymentMethodVerticalLayoutUI(
         savedPaymentMethodAction = state.availableSavedPaymentMethodAction,
         selection = state.selection,
         isEnabled = !state.isProcessing,
+        currencySelectorOptions = state.currencySelectorOptions,
+        onCurrencySelected = { currency ->
+            interactor.handleViewAction(
+                PaymentMethodVerticalLayoutInteractor.ViewAction.CurrencySelected(currency)
+            )
+        },
         onViewMorePaymentMethods = {
             interactor.handleViewAction(
                 PaymentMethodVerticalLayoutInteractor.ViewAction.TransitionToManageSavedPaymentMethods
@@ -112,6 +118,8 @@ internal fun PaymentMethodVerticalLayoutUI(
     onSelectSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     imageLoader: StripeImageLoader,
     modifier: Modifier = Modifier,
+    currencySelectorOptions: CurrencySelectorOptions? = null,
+    onCurrencySelected: (CurrencyOption) -> Unit = {},
     updatePaymentMethodVisibility: (String, LayoutCoordinates) -> Unit = { _, _ -> },
     cancelPaymentMethodVisibilityTracking: () -> Unit = {},
 ) {
@@ -131,6 +139,15 @@ internal fun PaymentMethodVerticalLayoutUI(
                 .spacingDp(spacingDp)
                 .additionalInsetsDp(StripeTheme.verticalModeRowPadding)
                 .build()
+        }
+
+        if (currencySelectorOptions != null) {
+            CurrencySelectorToggle(
+                options = currencySelectorOptions,
+                onCurrencySelected = onCurrencySelected,
+                isEnabled = isEnabled,
+            )
+            Spacer(Modifier.size(16.dp))
         }
 
         if (displayedSavedPaymentMethod != null) {

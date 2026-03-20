@@ -3608,6 +3608,7 @@ internal class PaymentSheetViewModelTest {
                         return cvcRecollectionInteractor
                     }
                 },
+                checkoutSessionRepository = mock(),
                 tapToAddHelperFactory = tapToAddHelperFactory,
                 mode = EventReporter.Mode.Complete,
                 customerStateHolderFactory = object : CustomerStateHolder.Factory {

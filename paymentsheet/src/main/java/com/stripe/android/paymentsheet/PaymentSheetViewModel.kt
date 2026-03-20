@@ -49,6 +49,7 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Args
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcCompletionState
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
@@ -58,6 +59,7 @@ import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultSelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.utils.asGooglePayButtonType
 import com.stripe.android.paymentsheet.utils.toConfirmationError
+import com.stripe.android.paymentsheet.verticalmode.CheckoutSessionCurrencyUpdater
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
@@ -94,6 +96,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val errorReporter: ErrorReporter,
     internal val cvcRecollectionHandler: CvcRecollectionHandler,
     private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory,
+    private val checkoutSessionRepository: CheckoutSessionRepository,
     tapToAddHelperFactory: TapToAddHelper.Factory,
     mode: EventReporter.Mode,
     customerStateHolderFactory: CustomerStateHolder.Factory,
@@ -111,6 +114,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     customerStateHolderFactory = customerStateHolderFactory,
     customViewModelScope = customViewModelScope,
 ) {
+
+    private val currencyUpdater = CheckoutSessionCurrencyUpdater(
+        checkoutSessionRepository = checkoutSessionRepository,
+        paymentElementLoader = paymentElementLoader,
+        workContext = workContext,
+    )
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
         config = config,
@@ -689,6 +698,32 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     override fun onError(error: ResolvableString?) = resetViewState(error)
+
+    override fun onCurrencyChanged(currencyCode: String) {
+        viewModelScope.launch {
+            savedStateHandle[SAVE_PROCESSING] = true
+            currencyUpdater.updateCurrency(
+                paymentMethodMetadata = paymentMethodMetadata.value ?: return@launch,
+                currencyCode = currencyCode,
+                integrationConfiguration = PaymentElementLoader.Configuration.PaymentSheet(args.config),
+                initializedViaCompose = args.initializedViaCompose,
+            ).fold(
+                onSuccess = { state ->
+                    customerStateHolder.setCustomerState(state.customer)
+                    updateSelection(state.paymentSelection)
+                    setPaymentMethodMetadata(state.paymentMethodMetadata)
+                    navigationHandler.resetTo(
+                        determineInitialBackStack(
+                            paymentMethodMetadata = state.paymentMethodMetadata,
+                            customerStateHolder = customerStateHolder,
+                        )
+                    )
+                    savedStateHandle[SAVE_PROCESSING] = false
+                },
+                onFailure = { onError(it.stripeErrorMessage()) },
+            )
+        }
+    }
 
     private fun determineInitialBackStack(
         paymentMethodMetadata: PaymentMethodMetadata,
