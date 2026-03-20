@@ -927,6 +927,21 @@ class CheckoutTest {
     }
 
     @Test
+    fun `integrationLaunched persists through State restoration`() = runTest {
+        runCreateWithStateScenario { checkout ->
+            checkout.markIntegrationLaunched()
+
+            val restoredCheckout = Checkout.createWithState(applicationContext, checkout.state)
+
+            val result = restoredCheckout.applyPromotionCode("10OFF")
+            assertThat(result.isFailure).isTrue()
+            assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
+            assertThat(result.exceptionOrNull()).hasMessageThat()
+                .isEqualTo("Cannot mutate checkout session while a payment flow is presented.")
+        }
+    }
+
+    @Test
     fun `configure returns failure when network request fails`() = runConfigureScenario(
         clientSecret = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_xyz",
         networkSetup = {
