@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
@@ -24,6 +25,7 @@ class CardDetailsSectionElement(
     override val identifier: IdentifierSpec,
     private val cardDetailsAction: CardDetailsAction? = null,
     private val isStripeCardScanAllowed: Boolean = false,
+    private val savedStateHandle: SavedStateHandle? = null,
     override val controller: CardDetailsSectionController = CardDetailsSectionController(
         cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
         initialValues = initialValues,
@@ -34,6 +36,7 @@ class CardDetailsSectionElement(
         cardDetailsAction = cardDetailsAction,
         automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
         isStripeCardScanAllowed = isStripeCardScanAllowed,
+        savedStateHandle = savedStateHandle,
     )
 ) : FormElement {
     override val allowsUserInteraction: Boolean = true

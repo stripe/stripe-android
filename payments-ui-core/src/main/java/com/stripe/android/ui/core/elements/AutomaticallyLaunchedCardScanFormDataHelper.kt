@@ -7,7 +7,7 @@ import androidx.lifecycle.SavedStateHandle
 class AutomaticallyLaunchedCardScanFormDataHelper(
     private val hasAutomaticallyLaunchedCardScanInitialValue: Boolean,
     private val openCardScanAutomaticallyConfig: Boolean,
-    internal val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle
 ) {
     var shouldLaunchCardScanAutomatically: Boolean
         get() = !hasAutomaticallyLaunchedCardScan &&

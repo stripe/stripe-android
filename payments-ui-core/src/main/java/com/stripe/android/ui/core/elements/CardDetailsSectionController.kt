@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
@@ -22,9 +23,8 @@ class CardDetailsSectionController(
     val cardDetailsAction: CardDetailsAction? = null,
     private val automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper?,
     val isStripeCardScanAllowed: Boolean = false,
+    internal val savedStateHandle: SavedStateHandle? = null,
 ) : SectionFieldValidationController {
-
-    internal val savedStateHandle get() = automaticallyLaunchedCardScanFormDataHelper?.savedStateHandle
 
     internal val cardDetailsElement = CardDetailsElement(
         IdentifierSpec.Generic("card_detail"),
