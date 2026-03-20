@@ -1,80 +1,82 @@
 ---
-name: write-test
-description: Explains how to write tests and structure test classes following stripe-android's coding standards
+name: write-tests
+description: Use when writing or structuring unit tests in stripe-android — covers runScenario pattern, fakes, Turbine Flow testing, and Truth assertions
 ---
-# Setting Up Tests
 
-This skill describes how to structure tests in the Stripe Android SDK using fakes, scenarios, and proper verification patterns.
+# Writing Tests
+
+Structure tests in the Stripe Android SDK using fakes, scenarios, and proper verification patterns.
 
 ## Core Principles
 
-1. **Use fakes over mocks** - Leverage fake implementations for dependencies (see `create-fake.md`)
-2. **Create test scenarios** - Use Scenario classes with `runScenario` functions to organize test setup
-3. **Verify all events consumed** - Call `validate()` or `ensureAllEventsConsumed()` on fakes after test block
-4. **Use Turbine for Flow testing** - Test Flow emissions with Turbine's `.test { }` syntax
+1. **Fakes over mocks** — use fake implementations for dependencies (invoke `create-fake` skill)
+2. **runScenario pattern** — use Scenario classes with `runScenario` functions to organize setup
+3. **Verify all events consumed** — call `ensureAllEventsConsumed()` on fakes after test block
+4. **Truth assertions** — always use `assertThat(actual).isEqualTo(expected)` from Google Truth
+5. **Turbine for Flows** — test Flow emissions with `.test { }` syntax
 
-## Basic Test Structure
+## Test Strategy
 
-Every test should follow this pattern:
+### Priority by Risk
+1. **Critical**: Payment flows, security, API contract correctness
+2. **High**: Multi-module integration, backward compatibility, error handling
+3. **Medium**: UI components, data processing, standard features
+4. **Low**: Utility functions, simple data models — basic happy-path sufficient
 
-```kotlin
-@Test
-fun `test description`() = runScenario(
-    // Test-specific parameters
-    config = testConfig
-) {
-    // 1. Configure: Set up fake behaviors (optional)
-    fakeService.result = expectedResult
+### Android-Specific Concerns
+- **Process death**: Test state save/restore via `SavedStateHandle`
+- **Configuration changes**: Orientation, dark mode, locale changes
+- **API level compatibility**: Test on min and target SDK versions
 
-    // 2. Execute: Call the code under test
-    val result = systemUnderTest.doSomething()
+## Test File Conventions
 
-    // 3. Verify: Assert results and check fake calls
-    assertThat(result).isEqualTo(expected)
-    assertThat(fakeService.calls.awaitItem()).isEqualTo(expectedCall)
-}
-// 4. Validation: ensureAllEventsConsumed called automatically by runScenario
-```
+- Name: `<SourceClass>Test.kt`
+- Location: `src/test/java/` (unit), `src/androidTest/java/` (instrumentation)
+- For Compose UI tests, invoke the `compose-tests` skill
 
-## Scenario Pattern with runScenario
+## runScenario Pattern
 
-### Basic Structure
-
-Create a `runScenario` function and a `Scenario` class at the bottom of your test file:
+Every test class should define its own `runScenario` function and `Scenario` class:
 
 ```kotlin
 class MyFeatureTest {
     @Test
     fun `test case`() = runScenario {
-        // Test code using scenario fields
         assertThat(systemUnderTest.getValue()).isEqualTo(expectedValue)
     }
 
+    @Test
+    fun `test with custom config`() = runScenario(
+        config = customConfig,
+    ) {
+        fakeRepository.dataResult = Result.success(testData)
+
+        val result = systemUnderTest.fetchData()
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(fakeRepository.fetchCalls.awaitItem()).isEqualTo(FetchCall(userId = "123"))
+    }
+
+    // runScenario and Scenario at the bottom of the file
     private fun runScenario(
         config: Config = defaultConfig,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
-        // Setup fakes
         val fakeRepository = FakeRepository()
         val fakeAnalytics = FakeAnalytics()
 
-        // Create system under test
         val systemUnderTest = MyFeature(
             repository = fakeRepository,
             analytics = fakeAnalytics,
-            config = config
+            config = config,
         )
 
-        // Run test block with scenario context
-        block(
-            Scenario(
-                systemUnderTest = systemUnderTest,
-                fakeRepository = fakeRepository,
-                fakeAnalytics = fakeAnalytics,
-            )
-        )
+        Scenario(
+            systemUnderTest = systemUnderTest,
+            fakeRepository = fakeRepository,
+            fakeAnalytics = fakeAnalytics,
+        ).apply { block() }
 
-        // Validate all fakes
         fakeRepository.ensureAllEventsConsumed()
         fakeAnalytics.ensureAllEventsConsumed()
     }
@@ -87,27 +89,54 @@ class MyFeatureTest {
 }
 ```
 
-**Key Features:**
-- `runScenario` replaces `runTest` as the test entry point
-- Default parameters for all configuration make tests concise
-- Trailing lambda provides DSL-like syntax with scenario fields
+**Key points:**
+- `runScenario` wraps `runTest` — it is the test entry point
+- Default parameters for all configuration keep tests concise
 - `ensureAllEventsConsumed()` called automatically after test block
-- Scenario class holds system under test and all fakes
+- Each test class defines its own `runScenario` tailored to its dependencies
 
-### Using runScenario in Tests
+## Turbine Flow Testing
+
+Use Turbine's `.test { }` to assert Flow emissions:
 
 ```kotlin
 @Test
-fun `fetching data returns success when repository succeeds`() = runScenario {
-    // Configure fake behavior
-    fakeRepository.dataResult = Result.success(testData)
+fun `state updates when data changes`() = runScenario {
+    systemUnderTest.state.test {
+        // Initial state
+        assertThat(awaitItem()).isEqualTo(State.Loading)
 
-    // Execute
-    val result = systemUnderTest.fetchData()
+        // Trigger change
+        fakeRepository.emit(newData)
+        assertThat(awaitItem()).isEqualTo(State.Loaded(newData))
 
-    // Verify
-    assertThat(result.isSuccess).isTrue()
-    assertThat(fakeRepository.fetchCalls.awaitItem()).isEqualTo(FetchCall(userId = "123"))
+        // No more events expected
+        ensureAllEventsConsumed()
+    }
 }
-// ensureAllEventsConsumed called automatically
 ```
+
+**Common Turbine operations:**
+- `awaitItem()` — wait for next emission
+- `expectNoEvents()` — assert no emissions occurred
+- `ensureAllEventsConsumed()` — verify no unconsumed events remain
+- `skipItems(n)` — skip past emissions you don't care about
+
+## Quick Reference
+
+| What | Pattern |
+|------|---------|
+| Test entry point | `fun \`test name\`() = runScenario { }` |
+| Assertions | `assertThat(actual).isEqualTo(expected)` |
+| Flow testing | `flow.test { assertThat(awaitItem()).isEqualTo(x) }` |
+| Fake call tracking | `assertThat(fake.calls.awaitItem()).isEqualTo(call)` |
+| Fake validation | `ensureAllEventsConsumed()` — automatic in runScenario |
+| Compose UI tests | Invoke `compose-tests` skill |
+| Creating fakes | Invoke `create-fake` skill |
+
+## Common Mistakes
+
+- **Using mocks instead of fakes** — always create `FakeClassName` implementations
+- **Forgetting `ensureAllEventsConsumed()`** — runScenario handles this, but if using `runTest` directly, call it manually
+- **Testing implementation details** — test behavior (inputs → outputs), not internal method calls
+- **Missing edge cases** — null values, empty lists, blank strings, error paths
