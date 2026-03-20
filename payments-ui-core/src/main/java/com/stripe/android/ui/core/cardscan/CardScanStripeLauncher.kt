@@ -22,6 +22,8 @@ internal class CardScanStripeLauncher(
 
     private val implementation = "stripe_card_scan"
     private var _isLaunching = false
+    // We only instantiate this launcher after checking if stripecardscan is available via reflection
+    // (see rememberCardScanLauncher()).
     private val _isAvailable = MutableStateFlow(true)
     override val isAvailable: StateFlow<Boolean> = _isAvailable.asStateFlow()
 
