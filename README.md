@@ -105,3 +105,8 @@ Get started with our [📚 integration guides](https://stripe.com/docs/payments/
 - The [example project](https://github.com/stripe/stripe-android/tree/master/example) demonstrates other integrations, that give you more control over the user experience:
     - how to use the Stripe class's synchronous and asynchronous methods
     - how to use the CardFormView.
+
+## Licenses
+
+- [Stripe Android SDK License](LICENSE)
+- StripeCardScan and StripeIdentity use LiteRT in Google Play services, and StripeCardScan also uses ML Kit in Google Play services. LiteRT and ML Kit may send performance and usage metrics to Google, and you may need to disclose this data collection to your users. By using StripeCardScan, you agree to the [LiteRT in Google Play services terms of service](https://ai.google.dev/edge/litert/android/play_services#tos) and the [ML Kit terms of service](https://developers.google.com/ml-kit/terms). By using StripeIdentity, you agree to the [LiteRT in Google Play services terms of service](https://ai.google.dev/edge/litert/android/play_services#tos).
