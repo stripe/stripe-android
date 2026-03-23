@@ -13,6 +13,12 @@ def update_pay_server_docs()
     mint_repo = "../mint"
     constants_file = "pay-server/docs/content/constants.yaml"
 
+    unless Dir.exist?(mint_repo)
+        puts 'Mint repo not found. Cloning mint (this may take a while)...'
+        execute_or_fail("cd .. && pay get mint")
+        execute_or_fail("pay mint --enable")
+    end
+
     puts 'Ensuring mint repo is up-to-date.'
     begin
         execute_or_fail("git -C #{mint_repo} checkout master")
