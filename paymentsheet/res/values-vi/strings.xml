@@ -267,6 +267,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_tap_to_add_card_button_label">Chạm vào để thêm thẻ</string>
   <!-- Title for screen indicating to the user that they have completed a payment of a specified amount -->
   <string name="stripe_tap_to_add_paid_label">Đã thanh toán %s</string>
+  <!-- Error message shown when Tap to Add is not supported by the current device. -->
+  <string name="stripe_tap_to_add_unsupported_device_error">Tính năng chạm để thêm không được hỗ trợ trên thiết bị của bạn</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">Hủy và thanh toán theo cách khác</string>
   <!-- Text on a screen asking the user to approve a payment -->

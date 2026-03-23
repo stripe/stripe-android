@@ -269,6 +269,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_tap_to_add_card_button_label">Πατήστε για προσθήκη κάρτας</string>
   <!-- Title for screen indicating to the user that they have completed a payment of a specified amount -->
   <string name="stripe_tap_to_add_paid_label">Πληρώθηκε %s</string>
+  <!-- Error message shown when Tap to Add is not supported by the current device. -->
+  <string name="stripe_tap_to_add_unsupported_device_error">Το Tap to add δεν υποστηρίζεται από τη συσκευή σας</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">Ακύρωση και πληρωμή με άλλον τρόπο</string>
   <!-- Text on a screen asking the user to approve a payment -->
