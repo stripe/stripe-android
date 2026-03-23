@@ -61,7 +61,10 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         ).mapCatching { stripeIntent ->
             when {
                 stripeIntent.status == StripeIntent.Status.Succeeded ||
-                    stripeIntent.status == StripeIntent.Status.RequiresCapture -> {
+                    stripeIntent.status == StripeIntent.Status.RequiresCapture ||
+                    (stripeIntent.status == StripeIntent.Status.Processing &&
+                        stripeIntent.paymentMethod?.type == PaymentMethod.Type.Card &&
+                        result.flowOutcome != CANCELED) -> {
                     createStripeIntentResult(
                         stripeIntent,
                         SUCCEEDED,

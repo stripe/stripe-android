@@ -94,7 +94,7 @@ class PaymentIntentResultTest {
     }
 
     @Test
-    fun outcome_whenCardAndProcessing_shouldReturnUnknown() {
+    fun outcome_whenCardAndProcessing_shouldReturnSucceeded() {
         val paymentIntent = PaymentIntent(
             created = 500L,
             amount = 1000L,
@@ -112,7 +112,7 @@ class PaymentIntentResultTest {
             intent = paymentIntent
         )
         assertThat(result.outcome)
-            .isEqualTo(StripeIntentResult.Outcome.UNKNOWN)
+            .isEqualTo(StripeIntentResult.Outcome.SUCCEEDED)
     }
 
     @Test
