@@ -279,6 +279,7 @@ internal class CustomPaymentMethodsTest {
 
             embeddedContentPage.clickOnLpm("cpmt_123")
             embeddedContentPage.assertHasSelectedLpm("cpmt_123")
+            context.consumePaymentOptionEvent("cpmt_123", "TestPay")
 
             context.confirm()
         }
