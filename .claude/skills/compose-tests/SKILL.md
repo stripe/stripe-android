@@ -13,7 +13,6 @@ Every Compose test needs three rules and Robolectric:
 
 ```kotlin
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [Build.VERSION_CODES.Q])
 internal class MyComposableTest {
     @get:Rule
     val composeRule = createComposeRule()
@@ -68,8 +67,7 @@ private data class TestScenario(val page: MyPage)
 | Finder | Use when |
 |--------|----------|
 | `onNodeWithTag(TAG)` | Element has a test tag (preferred) |
-| `onNodeWithText("text")` | Finding by visible text |
-| `onNodeWithContentDescription("desc")` | Finding by accessibility label |
+| `onNodeWithContentDescription("desc")` | Testing accessibility only — prefer test tags otherwise |
 | `onAllNodesWithTag(TAG)` | Multiple elements share a tag |
 | `onNode(hasTestTag(TAG).and(hasText("x")))` | Combining matchers |
 
@@ -115,7 +113,7 @@ composeRule.onNodeWithTag(SAVE_BUTTON_TEST_TAG).assertIsDisplayed()
 composeRule.waitForIdle()
 
 // Wait for async content with timeout
-composeRule.waitUntil(timeoutMillis = 5000L) {
+composeRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
     composeRule.onAllNodesWithTag(MY_TAG).fetchSemanticsNodes().isNotEmpty()
 }
 ```
