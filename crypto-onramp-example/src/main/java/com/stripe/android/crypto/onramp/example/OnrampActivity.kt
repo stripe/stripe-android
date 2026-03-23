@@ -940,7 +940,7 @@ private fun AuthenticatedOperationsScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable { kycExpanded = !kycExpanded }
-                .padding(vertical = 8.dp),
+                .padding(vertical = 20.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
