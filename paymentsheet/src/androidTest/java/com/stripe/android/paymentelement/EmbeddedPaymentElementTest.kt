@@ -1,6 +1,5 @@
 package com.stripe.android.paymentelement
 
-import app.cash.turbine.test
 import com.google.android.gms.wallet.IsReadyToPayRequest
 import com.google.android.gms.wallet.PaymentsClient
 import com.google.common.truth.Truth.assertThat
@@ -104,6 +103,7 @@ internal class EmbeddedPaymentElementTest {
         formPage.fillOutCardDetails()
         formPage.clickPrimaryButton()
         formPage.waitUntilMissing()
+        testContext.consumePaymentOptionEvent("card", "4242")
 
         embeddedContentPage.assertHasSelectedLpm("card")
         embeddedContentPage.clickOnLpm("card")
@@ -113,6 +113,7 @@ internal class EmbeddedPaymentElementTest {
         enqueueDeferredIntentConfirmationRequests()
 
         testContext.confirm()
+        assertThat(testContext.paymentOptionTurbine.awaitItem()).isNull()
     }
 
     @Test
@@ -132,6 +133,7 @@ internal class EmbeddedPaymentElementTest {
         testContext.configure {
             customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
         }
+        testContext.consumePaymentOptionEvent("card", "4242")
 
         embeddedContentPage.clickViewMore()
 
@@ -167,8 +169,10 @@ internal class EmbeddedPaymentElementTest {
         testContext.configure {
             customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
         }
+        testContext.consumePaymentOptionEvent("card", "4242")
 
         embeddedContentPage.clickOnLpm("cashapp")
+        testContext.consumePaymentOptionEvent("cashapp", "Cash App Pay")
         embeddedContentPage.clickEdit()
 
         editPage.waitUntilVisible()
@@ -205,6 +209,7 @@ internal class EmbeddedPaymentElementTest {
                 customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
             }
+            testContext.consumePaymentOptionEvent("card", "4242")
 
             state = testContext.embeddedPaymentElement.state
             assertThat(state.paymentMethods()).hasSize(2)
@@ -221,14 +226,10 @@ internal class EmbeddedPaymentElementTest {
             },
             resultCallback = ::assertCompleted,
         ) { testContext ->
-            testContext.embeddedPaymentElement.paymentOption.test {
-                assertThat(awaitItem()).isNull()
-                ensureAllEventsConsumed()
-                withContext(Dispatchers.Main) {
-                    testContext.embeddedPaymentElement.state = state
-                }
-                assertThat(awaitItem()?.paymentMethodType).isEqualTo("card")
+            withContext(Dispatchers.Main) {
+                testContext.embeddedPaymentElement.state = state
             }
+            assertThat(testContext.paymentOptionTurbine.awaitItem()?.paymentMethodType).isEqualTo("card")
 
             embeddedContentPage.clickViewMore()
 
@@ -290,6 +291,8 @@ internal class EmbeddedPaymentElementTest {
                 )
             )
         }
+
+        testContext.consumePaymentOptionEvent("google_pay", "Google Pay")
 
         walletButtonsPage.assertLinkIsDisplayed()
         walletButtonsPage.assertGooglePayIsDisplayed()
