@@ -60,7 +60,8 @@ internal fun PaymentElement(
     val horizontalPadding = StripeTheme.getOuterFormInsets()
 
     val selectedIndex = remember(selectedItemCode, supportedPaymentMethods) {
-        supportedPaymentMethods.map { it.code }.indexOf(selectedItemCode)
+        val index = supportedPaymentMethods.map { it.code }.indexOf(selectedItemCode)
+        index.takeIf { it >= 0 } ?: 0
     }
     val selectedItem = remember(selectedIndex, supportedPaymentMethods) {
         supportedPaymentMethods[selectedIndex]
