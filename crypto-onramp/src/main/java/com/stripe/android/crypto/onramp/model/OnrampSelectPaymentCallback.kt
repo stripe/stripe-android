@@ -28,6 +28,7 @@ sealed class OnrampCollectPaymentMethodResult {
      * The user selected a payment option, and there is ancillary KYC
      * information available.
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class CompletedWithKycInfo internal constructor(
         val displayData: PaymentMethodDisplayData,
         val kycInfo: KycInfo
