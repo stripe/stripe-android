@@ -493,6 +493,10 @@ internal fun OnrampScreen(
                     selectedSettlementSpeed = uiState.settlementSpeed,
                     selectedPaymentData = uiState.selectedPaymentData,
                     googlePayIsReady = uiState.googlePayIsReady,
+                    kycFirstName = uiState.kycFirstName,
+                    onKycFirstNameChange = viewModel::updateKycFirstName,
+                    kycLastName = uiState.kycLastName,
+                    onKycLastNameChange = viewModel::updateKycLastName,
                     onAuthenticate = onAuthenticateUser,
                     onRegisterWalletAddress = onRegisterWalletAddress,
                     onCollectKYC = { kycInfo -> viewModel.collectKycInfo(kycInfo) },
@@ -718,6 +722,10 @@ private fun AuthenticatedOperationsScreen(
     selectedPaymentData: PaymentMethodDisplayData?,
     selectedSettlementSpeed: SettlementSpeed?,
     googlePayIsReady: Boolean,
+    kycFirstName: String,
+    onKycFirstNameChange: (String) -> Unit,
+    kycLastName: String,
+    onKycLastNameChange: (String) -> Unit,
     onAuthenticate: (oauthScopes: String) -> Unit,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onCollectKYC: (KycInfo) -> Unit,
@@ -921,7 +929,13 @@ private fun AuthenticatedOperationsScreen(
             Text("Register Wallet Address")
         }
 
-        KYCScreen(onCollectKYC = onCollectKYC)
+        KYCScreen(
+            firstName = kycFirstName,
+            onFirstNameChange = onKycFirstNameChange,
+            lastName = kycLastName,
+            onLastNameChange = onKycLastNameChange,
+            onCollectKYC = onCollectKYC,
+        )
 
         Button(
             onClick = { onVerifyKyc() },
@@ -1046,10 +1060,12 @@ private fun AuthenticatedOperationsScreen(
 
 @Composable
 private fun KYCScreen(
+    firstName: String,
+    onFirstNameChange: (String) -> Unit,
+    lastName: String,
+    onLastNameChange: (String) -> Unit,
     onCollectKYC: (KycInfo) -> Unit
 ) {
-    var firstName by remember { mutableStateOf("") }
-    var lastName by remember { mutableStateOf("") }
     var ssn by remember { mutableStateOf("000000000") }
     var dobDay by remember { mutableStateOf("1") }
     var dobMonth by remember { mutableStateOf("1") }
@@ -1062,8 +1078,8 @@ private fun KYCScreen(
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        KYCTextField(firstName, "First Name") { firstName = it }
-        KYCTextField(lastName, "Last Name") { lastName = it }
+        KYCTextField(firstName, "First Name", onChange = onFirstNameChange)
+        KYCTextField(lastName, "Last Name", onChange = onLastNameChange)
         KYCTextField(ssn, "SSN") { ssn = it }
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

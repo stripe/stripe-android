@@ -375,6 +375,8 @@ internal class OnrampViewModel(
                 _uiState.update {
                     it.copy(
                         selectedPaymentData = result.displayData,
+                        kycFirstName = result.kycInfo.firstName ?: it.kycFirstName,
+                        kycLastName = result.kycInfo.lastName ?: it.kycLastName,
                     )
                 }
             }
@@ -694,6 +696,14 @@ internal class OnrampViewModel(
         _uiState.update { it.copy(settlementSpeed = settlementSpeed) }
     }
 
+    fun updateKycFirstName(value: String) {
+        _uiState.update { it.copy(kycFirstName = value) }
+    }
+
+    fun updateKycLastName(value: String) {
+        _uiState.update { it.copy(kycLastName = value) }
+    }
+
     fun clearCheckoutEvent() {
         _checkoutEvent.value = null
     }
@@ -815,6 +825,8 @@ data class OnrampUiState(
     val loadingMessage: String? = null,
     val settlementSpeed: SettlementSpeed = SettlementSpeed.INSTANT,
     val googlePayIsReady: Boolean = false,
+    val kycFirstName: String = "",
+    val kycLastName: String = "",
 ) : Parcelable
 
 enum class Screen {
