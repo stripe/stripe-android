@@ -14,6 +14,7 @@ import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
+import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -71,11 +72,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             analyticEventCallback(analyticEventRule)
         },
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
@@ -189,11 +186,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             analyticEventCallback(analyticEventRule)
         },
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
         }
 
@@ -293,11 +286,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             analyticEventCallback(analyticEventRule)
         },
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
         }
         networkRule.setupV1PaymentMethodsResponse(card1, card2)
@@ -367,11 +356,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             analyticEventCallback(analyticEventRule)
         },
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
         }
         networkRule.setupV1PaymentMethodsResponse(card1, card2)
@@ -424,11 +409,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
         }
         networkRule.setupV1PaymentMethodsResponse(card1, card2)
