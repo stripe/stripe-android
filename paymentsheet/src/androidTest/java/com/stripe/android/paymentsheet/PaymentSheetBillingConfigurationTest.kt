@@ -11,6 +11,7 @@ import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.PaymentSheet.Builder
 import com.stripe.android.paymentsheet.utils.IntegrationType
@@ -40,10 +41,7 @@ internal class PaymentSheetBillingConfigurationTest {
 
     @Test
     fun testPayloadWithDefaultsAndOverrides() {
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
@@ -117,10 +115,7 @@ internal class PaymentSheetBillingConfigurationTest {
             response.setResponseCode(500)
         }
 
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
@@ -185,10 +180,7 @@ internal class PaymentSheetBillingConfigurationTest {
         integrationType = IntegrationType.Compose,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
@@ -240,10 +232,7 @@ internal class PaymentSheetBillingConfigurationTest {
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 

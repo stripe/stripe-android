@@ -6,6 +6,7 @@ import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -402,11 +403,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             rowSelectionCalls = rowSelectionCalls,
             resultCallback = ::assertCompleted,
         ) { testContext ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("GET"),
-                path("/v1/elements/sessions"),
-            ) { response ->
+            networkRule.elementsSession { response ->
                 response.testBodyFromFile(responseTestBodyFileName)
             }
             if (shouldSetupV1PaymentMethodsResponse) {

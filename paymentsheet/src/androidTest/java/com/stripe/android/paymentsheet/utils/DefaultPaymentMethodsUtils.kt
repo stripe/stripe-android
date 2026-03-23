@@ -4,8 +4,8 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.RequestMatchers
 import com.stripe.android.networktesting.ResponseReplacement
+import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG
@@ -31,11 +31,7 @@ internal object DefaultPaymentMethodsUtils {
             "elements-sessions-with_pi_and_default_pms_enabled.json"
         }
 
-        networkRule.enqueue(
-            RequestMatchers.host("api.stripe.com"),
-            RequestMatchers.method("GET"),
-            RequestMatchers.path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile(
                 responseFile,
                 replacements = listOf(
