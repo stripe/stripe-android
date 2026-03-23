@@ -269,6 +269,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_tap_to_add_card_button_label">Toque para adicionar o cartão</string>
   <!-- Title for screen indicating to the user that they have completed a payment of a specified amount -->
   <string name="stripe_tap_to_add_paid_label">Pago %s</string>
+  <!-- Error message shown when Tap to Add is not supported by the current device. -->
+  <string name="stripe_tap_to_add_unsupported_device_error">A função Toque para adicionar não é compatível com seu dispositivo</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">Cancele e pague de outra forma</string>
   <!-- Text on a screen asking the user to approve a payment -->

@@ -269,6 +269,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_tap_to_add_card_button_label">轻触以添加银行卡</string>
   <!-- Title for screen indicating to the user that they have completed a payment of a specified amount -->
   <string name="stripe_tap_to_add_paid_label">已付 %s</string>
+  <!-- Error message shown when Tap to Add is not supported by the current device. -->
+  <string name="stripe_tap_to_add_unsupported_device_error">您的设备不支持轻触添加</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">取消并用另一方式支付</string>
   <!-- Text on a screen asking the user to approve a payment -->

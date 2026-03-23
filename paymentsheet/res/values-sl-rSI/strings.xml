@@ -269,6 +269,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_tap_to_add_card_button_label">Tapnite, da dodate kartico</string>
   <!-- Title for screen indicating to the user that they have completed a payment of a specified amount -->
   <string name="stripe_tap_to_add_paid_label">Plačano %s</string>
+  <!-- Error message shown when Tap to Add is not supported by the current device. -->
+  <string name="stripe_tap_to_add_unsupported_device_error">Vaša naprava ne podpira dodajanja z dotikom</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">Prekliči ali plačaj na drugačen način</string>
   <!-- Text on a screen asking the user to approve a payment -->
