@@ -19,6 +19,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -56,6 +57,7 @@ internal fun CurrencySelectorToggle(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .alpha(if (isEnabled) 1.0f else 0.6f)
                 .clip(shape)
                 .border(
                     width = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
