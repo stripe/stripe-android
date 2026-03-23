@@ -1129,7 +1129,9 @@ private fun KYCScreen(
         KYCTextField(address.city.orEmpty(), "City") { onAddressChange(address.replacing(city = it)) }
         KYCTextField(address.state.orEmpty(), "State") { onAddressChange(address.replacing(state = it)) }
         KYCTextField(address.country.orEmpty(), "Country") { onAddressChange(address.replacing(country = it)) }
-        KYCTextField(address.postalCode.orEmpty(), "Postal Code") { onAddressChange(address.replacing(postalCode = it)) }
+        KYCTextField(address.postalCode.orEmpty(), "Postal Code") {
+            onAddressChange(address.replacing(postalCode = it))
+        }
 
         Button(
             onClick = {
