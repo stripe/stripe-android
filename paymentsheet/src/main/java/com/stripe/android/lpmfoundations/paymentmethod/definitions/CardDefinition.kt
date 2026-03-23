@@ -135,6 +135,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
                         )
                     },
                     automaticallyLaunchedCardScanFormDataHelper = arguments.automaticallyLaunchedCardScanFormDataHelper,
+                    isStripeCardScanAllowed = metadata.isStripeCardScanAllowed,
                 )
             )
 

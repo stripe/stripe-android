@@ -18,6 +18,7 @@ import com.google.android.gms.wallet.CreditCardExpirationDate
 import com.google.android.gms.wallet.PaymentCardRecognitionResult
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ui.core.cardscan.CardScanGoogleLauncher.Companion.rememberCardScanGoogleLauncher
+import com.stripe.android.ui.core.cardscan.CardScanLauncher
 import com.stripe.android.ui.core.cardscan.FakeCardScanEventsReporter
 import com.stripe.android.ui.core.cardscan.FakePaymentCardRecognitionClient
 import com.stripe.android.ui.core.cardscan.LocalCardScanEventsReporter
@@ -105,14 +106,14 @@ internal class ScanCardButtonUITest {
             ) {
                 val context = LocalContext.current
                 val eventsReporter = LocalCardScanEventsReporter.current
-                val cardScanLauncher = rememberCardScanGoogleLauncher(
+                val cardScanLauncher: CardScanLauncher = rememberCardScanGoogleLauncher(
                     context = context,
                     eventsReporter = eventsReporter,
                 ) { cardScanCall.add("google_pay") }
 
                 ScanCardButtonUI(
                     enabled = true,
-                    cardScanGoogleLauncher = cardScanLauncher
+                    cardScanLauncher = cardScanLauncher
                 )
             }
         }

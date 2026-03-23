@@ -41,6 +41,7 @@ import com.stripe.android.paymentsheet.state.LinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentMethodFilter
 import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
+import com.stripe.android.paymentsheet.state.TapToAddConnectionStarterModule
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import dagger.Binds
@@ -60,6 +61,7 @@ import javax.inject.Singleton
         EmbeddedPaymentElementViewModelModule::class,
         GooglePayLauncherModule::class,
         ExtendedPaymentElementConfirmationModule::class,
+        TapToAddConnectionStarterModule::class,
         EmbeddedCommonModule::class,
         ApplicationIdModule::class,
         MobileSessionIdModule::class,

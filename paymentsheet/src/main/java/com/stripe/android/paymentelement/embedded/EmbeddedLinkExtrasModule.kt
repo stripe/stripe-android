@@ -2,6 +2,8 @@ package com.stripe.android.paymentelement.embedded
 
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.RealLinkConfigurationCoordinator
+import com.stripe.android.link.account.DefaultLinkStore
+import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.gate.DefaultLinkGate
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.LinkAnalyticsComponent
@@ -22,6 +24,9 @@ import dagger.Module
     ]
 )
 internal interface EmbeddedLinkExtrasModule {
+    @Binds
+    fun bindsLinkStore(impl: DefaultLinkStore): LinkStore
+
     @Binds
     fun bindLinkGateFactory(linkGateFactory: DefaultLinkGate.Factory): LinkGate.Factory
 

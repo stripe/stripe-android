@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
-import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.PaymentConfiguration
@@ -9,11 +8,8 @@ import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.common.coroutines.runCatching
 import com.stripe.android.common.model.CommonConfiguration
-import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.model.asCommonConfiguration
-import com.stripe.android.common.taptoadd.TapToAddConnectionManager
 import com.stripe.android.core.Logger
-import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.utils.FeatureFlag
 import com.stripe.android.core.utils.FeatureFlags
@@ -26,11 +22,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
 import com.stripe.android.lpmfoundations.paymentmethod.create
-import com.stripe.android.lpmfoundations.paymentmethod.toSaveConsentBehavior
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
@@ -50,7 +42,6 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.model.validate
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
-import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
 import com.stripe.attestation.IntegrityRequestManager
@@ -222,7 +213,6 @@ internal interface PaymentElementLoader {
 internal class DefaultPaymentElementLoader @Inject constructor(
     private val prefsRepositoryFactory: PrefsRepository.Factory,
     private val googlePayRepositoryFactory: GooglePayRepositoryFactory,
-    private val customerRepository: CustomerRepository,
     private val lpmRepository: LpmRepository,
     private val logger: Logger,
     private val eventReporter: LoadingEventReporter,
@@ -233,14 +223,14 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val externalPaymentMethodsRepository: ExternalPaymentMethodsRepository,
     private val userFacingLogger: UserFacingLogger,
     private val integrityRequestManager: IntegrityRequestManager,
-    private val tapToAddConnectionManager: TapToAddConnectionManager,
+    private val tapToAddConnectionStarter: TapToAddConnectionStarter,
     private val paymentConfiguration: Provider<PaymentConfiguration>,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val analyticsMetadataFactory: AnalyticsMetadataFactory,
-    private val paymentMethodFilter: PaymentMethodFilter,
-    private val cardFundingFilterFactory: PaymentSheetCardFundingFilterFactory,
+    private val createCustomerState: CreateCustomerState,
     private val checkoutSessionLoader: CheckoutSessionLoader,
     private val elementsSessionLoader: ElementsSessionLoader,
+    private val createCustomerMetadata: CreateCustomerMetadata,
 ) : PaymentElementLoader {
 
     fun interface AnalyticsMetadataFactory {
@@ -271,7 +261,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         )
 
         eventReporter.onLoadStarted(metadata.initializedViaCompose)
-        tapToAddConnectionManager.connect()
+        tapToAddConnectionStarter.start()
 
         val isGooglePaySupportedOnDevice = async {
             isGooglePaySupportedOnDevice()
@@ -309,11 +299,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             automaticPaymentMethodsEnabled = elementsSession.stripeIntent.automaticPaymentMethodsEnabled,
         )
 
-        val cardFundingFilter = cardFundingFilterFactory(
-            params = configuration.allowedCardFundingTypes(elementsSession.enableCardFundFiltering)
-        )
-
-        val customerMetadata = getCustomerMetadata(
+        val customerMetadata = createCustomerMetadata(
             initializationMode = initializationMode,
             configuration = configuration,
             elementsSession = elementsSession,
@@ -351,13 +337,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val customer = async {
             createCustomerState(
                 initializationMode = initializationMode,
-                configuration = configuration,
                 elementsSession = elementsSession,
-                customerMetadata = customerMetadata,
                 metadata = paymentMethodMetadata.await(),
                 savedSelection = savedSelection,
-                cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
-                cardFundingFilter = cardFundingFilter,
             )
         }
 
@@ -501,156 +483,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             clientAttributionMetadata = clientAttributionMetadata,
             integrationMetadata = integrationMetadata,
             analyticsMetadata = analyticsMetadata,
-            isTapToAddSupported = tapToAddConnectionManager.isSupported,
+            isTapToAddSupported = tapToAddConnectionStarter.isSupported,
         )
-    }
-
-    private fun getCustomerMetadata(
-        initializationMode: PaymentElementLoader.InitializationMode,
-        configuration: CommonConfiguration,
-        elementsSession: ElementsSession,
-    ): CustomerMetadata? {
-        if (initializationMode is PaymentElementLoader.InitializationMode.CheckoutSession) {
-            val customer = initializationMode.checkoutSessionResponse.customer ?: return null
-            return CustomerMetadata.CheckoutSession(
-                sessionId = initializationMode.checkoutSessionResponse.id,
-                customerId = customer.id,
-                removePaymentMethod = if (customer.canDetachPaymentMethod) {
-                    PaymentMethodRemovePermission.Full
-                } else {
-                    PaymentMethodRemovePermission.None
-                },
-                // Checkout sessions control save behavior via offerSave. If the server
-                // didn't provide it, default to Disabled rather than Legacy to avoid
-                // falling back to intent-level SFU behavior.
-                saveConsent = initializationMode.checkoutSessionResponse.savedPaymentMethodsOfferSave
-                    ?.toSaveConsentBehavior()
-                    ?: PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
-            )
-        }
-
-        return when (val accessType = configuration.customer?.accessType) {
-            is PaymentSheet.CustomerAccessType.CustomerSession -> {
-                val customer = elementsSession.customer ?: run {
-                    val exception = IllegalStateException(
-                        "Excepted 'customer' attribute as part of 'elements_session' response!"
-                    )
-
-                    errorReporter.report(
-                        ErrorReporter.UnexpectedErrorEvent.PAYMENT_SHEET_LOADER_ELEMENTS_SESSION_CUSTOMER_NOT_FOUND,
-                        StripeException.create(exception)
-                    )
-
-                    if (!elementsSession.stripeIntent.isLiveMode) {
-                        throw exception
-                    }
-
-                    return null
-                }
-                CustomerMetadata.createForPaymentSheetCustomerSession(
-                    configuration = configuration,
-                    customer = customer,
-                    id = customer.session.customerId,
-                    ephemeralKeySecret = customer.session.apiKey,
-                    customerSessionClientSecret = accessType.customerSessionClientSecret,
-                    isPaymentMethodSetAsDefaultEnabled = getDefaultPaymentMethodsEnabled(elementsSession),
-                )
-            }
-            is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey -> {
-                CustomerMetadata.createForPaymentSheetLegacyEphemeralKey(
-                    configuration = configuration,
-                    id = configuration.customer.id,
-                    ephemeralKeySecret = accessType.ephemeralKeySecret,
-                    isPaymentMethodSetAsDefaultEnabled = getDefaultPaymentMethodsEnabled(elementsSession),
-                )
-            }
-            null -> null
-        }
-    }
-
-    private fun getDefaultPaymentMethodsEnabled(elementsSession: ElementsSession): Boolean {
-        val mobilePaymentElement = elementsSession.customer?.session?.components?.mobilePaymentElement
-            as? ElementsSession.Customer.Components.MobilePaymentElement.Enabled
-        return mobilePaymentElement?.isPaymentMethodSetAsDefaultEnabled
-            ?: false
-    }
-
-    private suspend fun createCustomerState(
-        initializationMode: PaymentElementLoader.InitializationMode,
-        configuration: CommonConfiguration,
-        elementsSession: ElementsSession,
-        customerMetadata: CustomerMetadata?,
-        metadata: PaymentMethodMetadata,
-        savedSelection: Deferred<SavedSelection>,
-        cardBrandFilter: PaymentSheetCardBrandFilter,
-        cardFundingFilter: CardFundingFilter,
-    ): CustomerState? {
-        val customerState = when (customerMetadata) {
-            is CustomerMetadata.CheckoutSession -> {
-                val checkoutInit = initializationMode as PaymentElementLoader.InitializationMode.CheckoutSession
-                checkoutInit.checkoutSessionResponse.customer?.let {
-                    CustomerState.createForCheckoutSession(
-                        customer = it,
-                        supportedSavedPaymentMethodTypes = metadata.supportedSavedPaymentMethodTypes(),
-                    )
-                }
-            }
-            is CustomerMetadata.CustomerSession -> {
-                elementsSession.customer?.let { customer ->
-                    CustomerState.createForCustomerSession(
-                        customer = customer,
-                        supportedSavedPaymentMethodTypes = metadata.supportedSavedPaymentMethodTypes(),
-                    )
-                }
-            }
-            is CustomerMetadata.LegacyEphemeralKey -> {
-                val customerConfig = configuration.customer ?: return null
-                CustomerState.createForLegacyEphemeralKey(
-                    paymentMethods = retrieveCustomerPaymentMethods(
-                        metadata = metadata,
-                        customerConfig = customerConfig,
-                    )
-                )
-            }
-            null -> null
-        }
-
-        return customerState?.let { state ->
-            state.copy(
-                paymentMethods = paymentMethodFilter.filter(
-                    paymentMethods = state.paymentMethods,
-                    params = PaymentMethodFilter.FilterParams(
-                        billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration,
-                        customerMetadata = metadata.customerMetadata,
-                        cardBrandFilter = cardBrandFilter,
-                        cardFundingFilter = cardFundingFilter,
-                        remoteDefaultPaymentMethodId = state.defaultPaymentMethodId,
-                        localSavedSelection = savedSelection,
-                    )
-                )
-            )
-        }
-    }
-
-    private suspend fun retrieveCustomerPaymentMethods(
-        metadata: PaymentMethodMetadata,
-        customerConfig: PaymentSheet.CustomerConfiguration,
-    ): List<PaymentMethod> {
-        val paymentMethodTypes = metadata.supportedSavedPaymentMethodTypes()
-
-        val customerSession = (customerConfig.accessType as? PaymentSheet.CustomerAccessType.CustomerSession)
-        val customerSessionClientSecret = customerSession?.customerSessionClientSecret
-
-        val paymentMethods = customerRepository.getPaymentMethods(
-            customerId = customerConfig.id,
-            ephemeralKeySecret = customerConfig.ephemeralKeySecret,
-            types = paymentMethodTypes,
-            silentlyFail = metadata.stripeIntent.isLiveMode,
-        ).getOrThrow()
-
-        return paymentMethods.filter { paymentMethod ->
-            paymentMethod.hasExpectedDetails()
-        }
     }
 
     private suspend fun isGooglePayReady(

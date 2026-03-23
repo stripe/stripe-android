@@ -1,9 +1,11 @@
 {
-  "session_id": "cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh",
+  "session_id": "cs_test_abc123",
   "currency": "usd",
   "mode": "setup",
   "total_summary": {
-    "due": 0
+    "subtotal": 0,
+    "due": 0,
+    "total": 0
   },
   "setup_intent": {
     "id": "seti_cs_example",

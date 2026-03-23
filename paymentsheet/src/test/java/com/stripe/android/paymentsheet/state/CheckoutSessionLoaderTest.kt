@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -40,7 +41,7 @@ internal class CheckoutSessionLoaderTest {
 
     private companion object {
         private val CHECKOUT_SESSION_RESPONSE = CheckoutSessionResponseFactory.create(
-            id = "cs_test_123",
+            id = DEFAULT_CHECKOUT_SESSION_ID,
             amount = 5099,
             elementsSession = ElementsSession(
                 linkSettings = null,

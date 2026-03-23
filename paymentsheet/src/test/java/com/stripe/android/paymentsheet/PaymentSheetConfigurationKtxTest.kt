@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import android.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
@@ -355,7 +356,7 @@ class PaymentSheetConfigurationKtxTest {
         val checkoutSessionMode = PaymentElementLoader.InitializationMode.CheckoutSession(
             instancesKey = "PaymentSheetConfigurationKtxTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-                id = "cs_test_123",
+                id = DEFAULT_CHECKOUT_SESSION_ID,
                 amount = 5099,
             ),
         )
@@ -383,7 +384,7 @@ class PaymentSheetConfigurationKtxTest {
         val checkoutSessionMode = PaymentElementLoader.InitializationMode.CheckoutSession(
             instancesKey = "PaymentSheetConfigurationKtxTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-                id = "cs_test_123",
+                id = DEFAULT_CHECKOUT_SESSION_ID,
                 amount = 5099,
             ),
         )
@@ -406,7 +407,7 @@ class PaymentSheetConfigurationKtxTest {
         val checkoutSessionMode = PaymentElementLoader.InitializationMode.CheckoutSession(
             instancesKey = "PaymentSheetConfigurationKtxTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-                id = "cs_test_123",
+                id = DEFAULT_CHECKOUT_SESSION_ID,
                 amount = 5099,
             ),
         )

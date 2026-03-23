@@ -10,14 +10,13 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkout.CheckoutInstancesTestRule
 import com.stripe.android.checkout.InternalState
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
+import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.RequestMatchers.host
-import com.stripe.android.networktesting.RequestMatchers.method
-import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -450,11 +449,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
     @Test
     fun `launchForm throws when checkout mutation is in flight`() = testScenario {
         val checkout = createCheckout(key = "test_key")
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("POST"),
-            path("/v1/payment_pages/cs_test_abc123"),
-        ) { response ->
+        networkRule.checkoutUpdate { response ->
             response.setBodyDelay(5, TimeUnit.SECONDS)
             response.testBodyFromFile("checkout-session-apply-discount.json")
         }
@@ -463,7 +458,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
 
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             integrationMetadata = IntegrationMetadata.CheckoutSession(
-                id = "cs_test_abc123",
+                id = DEFAULT_CHECKOUT_SESSION_ID,
                 instancesKey = "test_key",
             ),
         )
@@ -481,11 +476,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
     @Test
     fun `launchManage throws when checkout mutation is in flight`() = testScenario {
         val checkout = createCheckout(key = "test_key")
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("POST"),
-            path("/v1/payment_pages/cs_test_abc123"),
-        ) { response ->
+        networkRule.checkoutUpdate { response ->
             response.setBodyDelay(5, TimeUnit.SECONDS)
             response.testBodyFromFile("checkout-session-apply-discount.json")
         }
@@ -494,7 +485,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
 
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             integrationMetadata = IntegrationMetadata.CheckoutSession(
-                id = "cs_test_abc123",
+                id = DEFAULT_CHECKOUT_SESSION_ID,
                 instancesKey = "test_key",
             ),
         )
