@@ -22,6 +22,7 @@ import com.stripe.android.crypto.onramp.example.network.SettlementSpeed
 import com.stripe.android.crypto.onramp.example.network.TestBackendRepository
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
@@ -377,6 +378,7 @@ internal class OnrampViewModel(
                         selectedPaymentData = result.displayData,
                         kycFirstName = result.kycInfo.firstName ?: it.kycFirstName,
                         kycLastName = result.kycInfo.lastName ?: it.kycLastName,
+                        kycAddress = result.kycInfo.address ?: it.kycAddress,
                     )
                 }
             }
@@ -704,6 +706,10 @@ internal class OnrampViewModel(
         _uiState.update { it.copy(kycLastName = value) }
     }
 
+    fun updateKycAddress(address: PaymentSheet.Address) {
+        _uiState.update { it.copy(kycAddress = address) }
+    }
+
     fun clearCheckoutEvent() {
         _checkoutEvent.value = null
     }
@@ -827,6 +833,7 @@ data class OnrampUiState(
     val googlePayIsReady: Boolean = false,
     val kycFirstName: String = "",
     val kycLastName: String = "",
+    val kycAddress: PaymentSheet.Address = PaymentSheet.Address(),
 ) : Parcelable
 
 enum class Screen {
