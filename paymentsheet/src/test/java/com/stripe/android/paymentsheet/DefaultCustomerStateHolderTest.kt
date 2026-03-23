@@ -35,8 +35,9 @@ internal class DefaultCustomerStateHolderTest {
     @Test
     fun `customer is restored from savedStateHandle`() {
         val savedStateHandle = SavedStateHandle()
-        val customerState = CustomerState.createForLegacyEphemeralKey(
-            paymentMethods = emptyList()
+        val customerState = CustomerState(
+            paymentMethods = emptyList(),
+            defaultPaymentMethodId = null,
         )
         savedStateHandle[CustomerStateHolder.SAVED_CUSTOMER] = customerState
         runScenario(savedStateHandle = savedStateHandle) {
@@ -52,8 +53,9 @@ internal class DefaultCustomerStateHolderTest {
             assertThat(awaitItem()).isEmpty()
 
             customerStateHolder.setCustomerState(
-                CustomerState.createForLegacyEphemeralKey(
-                    paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+                CustomerState(
+                    paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+                    defaultPaymentMethodId = null,
                 )
             )
 
@@ -66,8 +68,9 @@ internal class DefaultCustomerStateHolderTest {
         val savedStateHandle = SavedStateHandle()
         val newPaymentMethod = PaymentMethodFixtures.LINK_PAYMENT_METHOD
         val originalPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        val customerState = CustomerState.createForLegacyEphemeralKey(
-            paymentMethods = listOf(originalPaymentMethod)
+        val customerState = CustomerState(
+            paymentMethods = listOf(originalPaymentMethod),
+            defaultPaymentMethodId = null,
         )
         savedStateHandle[CustomerStateHolder.SAVED_CUSTOMER] = customerState
 
@@ -85,8 +88,9 @@ internal class DefaultCustomerStateHolderTest {
     @Test
     fun `MostRecentlySelectedSavedPaymentMethod is restored from savedStateHandle`() {
         val savedStateHandle = SavedStateHandle()
-        val customerState = CustomerState.createForLegacyEphemeralKey(
-            paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        val customerState = CustomerState(
+            paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            defaultPaymentMethodId = null,
         )
         savedStateHandle[CustomerStateHolder.SAVED_CUSTOMER] = customerState
         savedStateHandle[CustomerStateHolder.SAVED_PM_SELECTION] = PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -109,16 +113,18 @@ internal class DefaultCustomerStateHolderTest {
             assertThat(awaitItem()).isNull()
 
             customerStateHolder.setCustomerState(
-                CustomerState.createForLegacyEphemeralKey(
-                    paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+                CustomerState(
+                    paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+                    defaultPaymentMethodId = null,
                 )
             )
             customerStateHolder.updateMostRecentlySelectedSavedPaymentMethod(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
             assertThat(awaitItem()).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
 
             customerStateHolder.setCustomerState(
-                CustomerState.createForLegacyEphemeralKey(
+                CustomerState(
                     paymentMethods = emptyList(),
+                    defaultPaymentMethodId = null,
                 )
             )
             assertThat(awaitItem()).isNull()
@@ -132,16 +138,18 @@ internal class DefaultCustomerStateHolderTest {
 
             val extraPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_333")
             customerStateHolder.setCustomerState(
-                CustomerState.createForLegacyEphemeralKey(
-                    paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD, extraPaymentMethod)
+                CustomerState(
+                    paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD, extraPaymentMethod),
+                    defaultPaymentMethodId = null,
                 )
             )
             customerStateHolder.updateMostRecentlySelectedSavedPaymentMethod(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
             assertThat(awaitItem()).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
 
             customerStateHolder.setCustomerState(
-                CustomerState.createForLegacyEphemeralKey(
+                CustomerState(
                     paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+                    defaultPaymentMethodId = null,
                 )
             )
             ensureAllEventsConsumed()
@@ -155,15 +163,16 @@ internal class DefaultCustomerStateHolderTest {
 
             val extraPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_333")
             customerStateHolder.setCustomerState(
-                CustomerState.createForLegacyEphemeralKey(
-                    paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD, extraPaymentMethod)
+                CustomerState(
+                    paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD, extraPaymentMethod),
+                    defaultPaymentMethodId = null,
                 )
             )
             customerStateHolder.updateMostRecentlySelectedSavedPaymentMethod(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
             assertThat(awaitItem()?.card?.brand).isEqualTo(CardBrand.Visa)
 
             customerStateHolder.setCustomerState(
-                CustomerState.createForLegacyEphemeralKey(
+                CustomerState(
                     paymentMethods = listOf(
                         PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
                             card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.card?.copy(
@@ -171,6 +180,7 @@ internal class DefaultCustomerStateHolderTest {
                             )
                         )
                     ),
+                    defaultPaymentMethodId = null,
                 )
             )
             assertThat(awaitItem()?.card?.brand).isEqualTo(CardBrand.CartesBancaires)

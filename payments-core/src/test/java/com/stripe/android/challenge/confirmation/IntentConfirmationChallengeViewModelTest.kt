@@ -7,6 +7,7 @@ import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.challenge.confirmation.analytics.IntentConfirmationChallengeAnalyticsEventReporter
+import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.CancelCaptchaChallengeParams
 import com.stripe.android.model.PaymentIntent
@@ -301,7 +302,8 @@ internal class IntentConfirmationChallengeViewModelTest {
         stripeRepository = stripeRepository,
         errorReporter = errorReporter,
         requestOptions = REQUEST_OPTIONS,
-        fireAndForgetScope = TestScope(testDispatcher)
+        fireAndForgetScope = TestScope(testDispatcher),
+        logger = Logger.noop(),
     )
 
     private class FakeStripeRepository(

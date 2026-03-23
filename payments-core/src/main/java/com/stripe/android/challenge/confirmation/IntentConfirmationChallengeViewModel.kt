@@ -15,6 +15,7 @@ import com.stripe.android.challenge.confirmation.analytics.IntentConfirmationCha
 import com.stripe.android.challenge.confirmation.di.DaggerIntentConfirmationChallengeComponent
 import com.stripe.android.challenge.confirmation.di.FireAndForgetScope
 import com.stripe.android.challenge.confirmation.di.SDK_USER_AGENT
+import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.ApiRequest
@@ -44,7 +45,8 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
     private val stripeRepository: StripeRepository,
     private val errorReporter: ErrorReporter,
     private val requestOptions: ApiRequest.Options,
-    @FireAndForgetScope private val fireAndForgetScope: CoroutineScope
+    @FireAndForgetScope private val fireAndForgetScope: CoroutineScope,
+    val logger: Logger,
 ) : ViewModel(), DefaultLifecycleObserver {
 
     private val _bridgeReady = MutableSharedFlow<Unit>()

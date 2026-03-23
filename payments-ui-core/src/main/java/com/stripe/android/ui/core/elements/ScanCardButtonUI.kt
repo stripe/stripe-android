@@ -20,7 +20,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.cardscan.CardScanGoogleLauncher
+import com.stripe.android.ui.core.cardscan.CardScanLauncher
 import com.stripe.android.uicore.IconStyle
 import com.stripe.android.uicore.LocalIconStyle
 import com.stripe.android.uicore.utils.collectAsState
@@ -28,16 +28,16 @@ import com.stripe.android.uicore.utils.collectAsState
 @Composable
 internal fun ScanCardButtonUI(
     enabled: Boolean,
-    cardScanGoogleLauncher: CardScanGoogleLauncher?,
+    cardScanLauncher: CardScanLauncher?,
 ) {
-    if (cardScanGoogleLauncher == null) {
+    if (cardScanLauncher == null) {
         return
     }
 
     val context = LocalContext.current
-    val isCardScanGoogleAvailable by cardScanGoogleLauncher.isAvailable.collectAsState()
+    val isCardScanAvailable by cardScanLauncher.isAvailable.collectAsState()
 
-    if (isCardScanGoogleAvailable) {
+    if (isCardScanAvailable) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.clickable(
@@ -45,7 +45,7 @@ internal fun ScanCardButtonUI(
                 indication = null,
                 enabled = enabled,
                 onClick = {
-                    cardScanGoogleLauncher.launch(context)
+                    cardScanLauncher.launch(context)
                 }
             )
         ) {

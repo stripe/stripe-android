@@ -6,6 +6,7 @@ import com.stripe.android.CardFundingFilter
 import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.PaymentMethodRemovePermission
@@ -82,15 +83,13 @@ import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeElementsSessionRepository
 import com.stripe.android.utils.FakeElementsSessionRepository.Companion.DEFAULT_ELEMENTS_SESSION_CONFIG_ID
+import com.stripe.android.utils.FakeLinkStore
 import com.stripe.android.utils.FakePaymentMethodFilter
 import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
@@ -1305,9 +1304,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkSignUpOptInInitialValue = false,
                 linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
             ),
-            linkStore = mock {
-                on { hasUsedLink() } doReturn true
-            }
+            linkStore = FakeLinkStore(hasUsedLink = true),
         )
 
         val result = loader.load(
@@ -1697,7 +1694,7 @@ internal class DefaultPaymentElementLoaderTest {
             instancesKey = "DefaultPaymentElementLoaderTest",
             checkoutSessionResponse = createCheckoutSessionResponse(canDetachPaymentMethod = true),
         )
-        assertThat(checkoutSession.checkoutSessionResponse.id).isEqualTo("cs_test_abc123")
+        assertThat(checkoutSession.checkoutSessionResponse.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
     }
 
     @Test
@@ -1709,7 +1706,7 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(checkoutSession.integrationMetadata(null))
             .isEqualTo(
                 IntegrationMetadata.CheckoutSession(
-                    id = "cs_test_abc123",
+                    id = DEFAULT_CHECKOUT_SESSION_ID,
                     instancesKey = "DefaultPaymentElementLoaderTest",
                 )
             )
@@ -2063,18 +2060,12 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `Returns correct Link signup mode if has used Link before`() = runScenario {
-        val linkStore = mock<LinkStore> {
-            on { hasUsedLink() } doReturn true
-        }
-
-        val stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-            isLiveMode = true,
-        )
-
         val loader = createPaymentElementLoader(
             linkAccountState = AccountStatus.SignedOut,
-            linkStore = linkStore,
-            stripeIntent = stripeIntent,
+            linkStore = FakeLinkStore(hasUsedLink = true),
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                isLiveMode = true,
+            ),
         )
 
         val result = loader.load(
@@ -2095,10 +2086,6 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `Returns correct Link signup mode if signup is disabled`() = runScenario {
-        val linkStore = mock<LinkStore> {
-            on { hasUsedLink() } doReturn false
-        }
-
         val loader = createPaymentElementLoader(
             linkAccountState = AccountStatus.SignedOut,
             linkSettings = ElementsSession.LinkSettings(
@@ -2116,7 +2103,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkSignUpOptInInitialValue = false,
                 linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
             ),
-            linkStore = linkStore,
+            linkStore = FakeLinkStore(hasUsedLink = false),
         )
 
         val result = loader.load(
@@ -2308,17 +2295,12 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `Returns null signup mode when linkSignUpOptInFeatureEnabled is true but user has used Link`() = runScenario {
-        val linkStore = mock<LinkStore>()
-        whenever(linkStore.hasUsedLink()).thenReturn(true)
-
-        val stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-            isLiveMode = true,
-        )
-
         val loader = createPaymentElementLoader(
             linkAccountState = AccountStatus.SignedOut,
-            linkStore = linkStore,
-            stripeIntent = stripeIntent,
+            linkStore = FakeLinkStore(hasUsedLink = true),
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                isLiveMode = true,
+            ),
             linkSettings = createLinkSettings(
                 passthroughModeEnabled = false,
                 linkSignUpOptInFeatureEnabled = true
@@ -4489,7 +4471,7 @@ internal class DefaultPaymentElementLoaderTest {
         isGooglePayEnabledFromBackend: Boolean = true,
         fallbackError: Throwable? = null,
         cardBrandChoice: ElementsSession.CardBrandChoice? = null,
-        linkStore: LinkStore = mock(),
+        linkStore: LinkStore = FakeLinkStore(),
         customer: ElementsSession.Customer? = null,
         externalPaymentMethodData: String? = null,
         logLinkHoldbackExperiment: LogLinkHoldbackExperiment = FakeLogLinkHoldbackExperiment(),
@@ -4537,7 +4519,6 @@ internal class DefaultPaymentElementLoaderTest {
                     return GooglePayRepository { flowOf(isGooglePayReady) }
                 }
             },
-            customerRepository = customerRepo,
             lpmRepository = LpmRepository(),
             logger = Logger.noop(),
             eventReporter = eventReporter,
@@ -4552,12 +4533,15 @@ internal class DefaultPaymentElementLoaderTest {
             analyticsMetadataFactory = analyticsMetadataFactory,
             tapToAddConnectionStarter = tapToAddConnectionStarter,
             paymentConfiguration = { PaymentConfiguration(publishableKey = if (isLiveMode) "pk_live" else "pk_test") },
-            paymentMethodFilter = paymentMethodFilter,
-            cardFundingFilterFactory = PaymentSheetCardFundingFilter.Factory(),
+            createCustomerState = CreateCustomerState(
+                customerRepository = customerRepo,
+                paymentMethodFilter = paymentMethodFilter,
+            ),
             checkoutSessionLoader = CheckoutSessionLoader(),
             elementsSessionLoader = ElementsSessionLoader(
                 elementsSessionRepository = elementsSessionRepository,
             ),
+            createCustomerMetadata = CreateCustomerMetadata(errorReporter),
         )
     }
 
@@ -4666,7 +4650,7 @@ internal class DefaultPaymentElementLoaderTest {
         canDetachPaymentMethod: Boolean,
     ): CheckoutSessionResponse {
         return CheckoutSessionResponseFactory.create(
-            id = "cs_test_abc123",
+            id = DEFAULT_CHECKOUT_SESSION_ID,
             amount = 5099,
             elementsSession = ElementsSession(
                 linkSettings = null,
