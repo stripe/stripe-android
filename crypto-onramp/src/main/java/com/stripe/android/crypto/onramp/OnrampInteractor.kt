@@ -596,8 +596,12 @@ internal class OnrampInteractor @Inject constructor(
         is GooglePayPaymentMethodLauncher.Result.Completed -> {
             val kycInfo = googlePayKycInfo(result.paymentMethod)
 
-            handleGooglePayPaymentMethod(result.paymentMethod) {
-                OnrampCollectPaymentMethodResult.CompletedWithKycInfo(it, kycInfo)
+            handleGooglePayPaymentMethod(result.paymentMethod) { displayData ->
+                if (kycInfo != null) {
+                    OnrampCollectPaymentMethodResult.CompletedWithKycInfo(displayData, kycInfo)
+                } else {
+                    OnrampCollectPaymentMethodResult.Completed(displayData)
+                }
             }
         }
         is GooglePayPaymentMethodLauncher.Result.Failed -> {
@@ -648,16 +652,28 @@ internal class OnrampInteractor @Inject constructor(
         )
     }
 
-    private fun googlePayKycInfo(paymentMethod: PaymentMethod): KycInfo {
+    private fun googlePayKycInfo(paymentMethod: PaymentMethod): KycInfo? {
         val address = paymentMethod.billingDetails?.address
         val fullName = paymentMethod.billingDetails?.name.orEmpty().trim()
         val parts = fullName.split("\\s+".toRegex())
         val firstName = parts.firstOrNull().orEmpty()
         val lastName = parts.drop(1).joinToString(" ")
 
+        val hasName = firstName.isNotEmpty() || lastName.isNotEmpty()
+        val hasAddress = listOfNotNull(
+            address?.city,
+            address?.country,
+            address?.line1,
+            address?.line2,
+            address?.postalCode,
+            address?.state,
+        ).any { it.isNotEmpty() }
+
+        if (!hasName && !hasAddress) return null
+
         return KycInfo(
-            firstName = firstName,
-            lastName = lastName,
+            firstName = firstName.takeIf { it.isNotEmpty() },
+            lastName = lastName.takeIf { it.isNotEmpty() },
             idNumber = null,
             dateOfBirth = null,
             address = PaymentSheet.Address(
