@@ -154,6 +154,7 @@ internal class FlowControllerAnalyticsTest {
 
         page.clickPrimaryButton()
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.TappedConfirmButton("card"))
     }
 
@@ -237,6 +238,7 @@ internal class FlowControllerAnalyticsTest {
 
         page.clickPrimaryButton()
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.TappedConfirmButton("card"))
     }
 
@@ -344,6 +346,7 @@ internal class FlowControllerAnalyticsTest {
         )
         page.clickPrimaryButton()
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.TappedConfirmButton("card"))
     }
 

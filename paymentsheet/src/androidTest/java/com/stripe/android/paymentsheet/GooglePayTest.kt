@@ -129,7 +129,7 @@ internal class GooglePayTest {
 
     private fun runGooglePayFlowTest(
         paymentResultCallback: (PaymentSheetResult) -> Unit,
-        test: (GooglePayFlowScenario) -> Unit
+        test: suspend (GooglePayFlowScenario) -> Unit
     ) {
         runGooglePayTest(
             isGooglePayReady = true,
@@ -153,6 +153,8 @@ internal class GooglePayTest {
 
                         context.confirm()
                     }
+
+                    context.consumeNullPaymentOptionEventForFlowController()
                 }
             )
         }
@@ -185,7 +187,7 @@ internal class GooglePayTest {
         isGooglePayEnabledInElementsSession: Boolean,
         hasGooglePayConfig: Boolean,
         paymentResultCallback: (PaymentSheetResult) -> Unit,
-        test: (context: ProductIntegrationTestRunnerContext) -> Unit,
+        test: suspend (context: ProductIntegrationTestRunnerContext) -> Unit,
     ) {
         GooglePayRepository.googlePayAvailabilityClientFactory =
             FakeGooglePayAvailabilityClient.Factory(isGooglePayReady)
@@ -305,7 +307,7 @@ internal class GooglePayTest {
     }
 
     private class GooglePayFlowScenario(
-        val confirm: () -> Unit,
+        val confirm: suspend () -> Unit,
     )
 
     private companion object {
