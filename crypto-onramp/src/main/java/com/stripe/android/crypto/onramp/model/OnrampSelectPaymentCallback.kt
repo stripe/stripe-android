@@ -25,8 +25,8 @@ sealed class OnrampCollectPaymentMethodResult {
     class Completed internal constructor(val displayData: PaymentMethodDisplayData) : OnrampCollectPaymentMethodResult()
 
     /**
-     * The user has selected a payment option but we were unable to automatically fill
-     * KYC information from the platform payment system.
+     * The user selected a payment option, and there is ancillary KYC
+     * information available.
      */
     class CompletedWithKycInfo internal constructor(
         val displayData: PaymentMethodDisplayData,
