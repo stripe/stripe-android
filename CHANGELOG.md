@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### Payments
+[Added][12728](https://github.com/stripe/stripe-android/pull/12728) - New `PaymentLauncher.create()` and `rememberPaymentLauncher()` methods that read configuration from `PaymentConfiguration` instead of requiring explicit publishable key parameters.
+
 ## 23.0.2 - 2026-03-16
 
 ### PaymentSheet
