@@ -148,6 +148,17 @@ internal class CheckoutSessionRepository @Inject constructor(
         ),
     )
 
+    suspend fun updateCurrency(
+        sessionId: String,
+        currencyCode: String,
+    ): Result<CheckoutSessionResponse> = executePost(
+        url = updateUrl(sessionId),
+        params = mapOf(
+            "updated_currency" to currencyCode,
+            "elements_session_client[is_aggregation_expected]" to "true",
+        ),
+    )
+
     private companion object {
         private fun initUrl(sessionId: String): String =
             "${ApiRequest.API_HOST}/v1/payment_pages/$sessionId/init"
