@@ -290,5 +290,6 @@ internal class PaymentSheetBillingConfigurationTest {
 
         page.clickPrimaryButton()
         testContext.consumePaymentOptionEventForFlowController("cashapp", "Cash App Pay")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 }

@@ -4,7 +4,6 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.closeSoftKeyboard
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.link.account.DefaultLinkStore
 import com.stripe.android.networktesting.elementsSession
@@ -119,6 +118,7 @@ internal class LinkTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -223,6 +223,7 @@ internal class LinkTest {
             page.clickPrimaryButton()
 
             testContext.consumePaymentOptionEventForFlowController("card", "4242")
+            testContext.consumeNullPaymentOptionEventForFlowController()
         }
 
     @Test
@@ -304,6 +305,7 @@ internal class LinkTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "1001")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -397,6 +399,7 @@ internal class LinkTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -509,6 +512,7 @@ internal class LinkTest {
             page.clickPrimaryButton()
 
             testContext.consumePaymentOptionEventForFlowController("card", "4242")
+            testContext.consumeNullPaymentOptionEventForFlowController()
         }
 
     @Test
@@ -607,6 +611,7 @@ internal class LinkTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "1001")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -670,6 +675,7 @@ internal class LinkTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -733,6 +739,7 @@ internal class LinkTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -804,6 +811,7 @@ internal class LinkTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -858,6 +866,7 @@ internal class LinkTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -888,6 +897,7 @@ internal class LinkTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -956,6 +966,7 @@ internal class LinkTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -1028,6 +1039,7 @@ internal class LinkTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -1132,6 +1144,7 @@ internal class LinkTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     private fun linkInformation(): RequestMatcher {

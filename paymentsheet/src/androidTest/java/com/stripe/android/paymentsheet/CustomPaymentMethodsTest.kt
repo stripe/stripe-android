@@ -87,6 +87,7 @@ internal class CustomPaymentMethodsTest {
             page.clickPrimaryButton()
 
             context.consumePaymentOptionEventForFlowController("cpmt_123", "TestPay")
+            context.consumeNullPaymentOptionEventForFlowController()
         }
     }
 
@@ -162,6 +163,7 @@ internal class CustomPaymentMethodsTest {
             page.clickPrimaryButton()
 
             context.consumePaymentOptionEventForFlowController("cpmt_123", "TestPay")
+            context.consumeNullPaymentOptionEventForFlowController()
         }
     }
 
@@ -226,6 +228,7 @@ internal class CustomPaymentMethodsTest {
             page.clickPrimaryButton()
 
             context.consumePaymentOptionEventForFlowController("cpmt_123", "TestPay")
+            context.consumeNullPaymentOptionEventForFlowController()
         }
     }
 
