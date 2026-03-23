@@ -31,6 +31,8 @@ internal const val TEST_TAG_CURRENCY_SELECTOR = "TEST_TAG_CURRENCY_SELECTOR"
 
 internal const val TEST_TAG_CURRENCY_OPTION_PREFIX = "TEST_TAG_CURRENCY_OPTION_"
 
+private const val DISABLED_ALPHA = 0.6f
+
 internal data class CurrencyOption(
     val code: String,
     val displayableText: String,
@@ -57,7 +59,7 @@ internal fun CurrencySelectorToggle(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .alpha(if (isEnabled) 1.0f else 0.6f)
+                .alpha(if (isEnabled) 1f else DISABLED_ALPHA)
                 .clip(shape)
                 .border(
                     width = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
