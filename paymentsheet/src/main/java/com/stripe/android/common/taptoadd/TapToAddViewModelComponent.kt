@@ -35,7 +35,9 @@ import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.RealLinkConfigurationCoordinator
+import com.stripe.android.link.account.DefaultLinkStore
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.injection.LinkCommonModule
 import com.stripe.android.link.injection.LinkComponent
@@ -265,6 +267,9 @@ internal interface TapToAddViewModelModule {
     ]
 )
 internal interface TapToAddLinkModule {
+    @Binds
+    fun bindsLinkStore(impl: DefaultLinkStore): LinkStore
+
     @Binds
     fun bindsLinkConfigurationCoordinator(
         linkConfigurationCoordinator: RealLinkConfigurationCoordinator

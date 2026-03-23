@@ -39,6 +39,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.checkout.InternalState
+import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
@@ -63,7 +64,6 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.RequestMatchers
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -241,11 +241,7 @@ internal class PaymentSheetActivityTest {
         }
 
         // Enqueue a response so the mutation attempt doesn't fail due to missing network stub.
-        networkRule.enqueue(
-            RequestMatchers.host("api.stripe.com"),
-            RequestMatchers.method("POST"),
-            RequestMatchers.path("/v1/payment_pages/cs_test_abc123"),
-        ) { response ->
+        networkRule.checkoutUpdate { response ->
             response.testBodyFromFile("checkout-session-apply-discount.json")
         }
 

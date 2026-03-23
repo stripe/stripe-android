@@ -15,6 +15,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.CancelCaptchaChallengeParams
@@ -226,6 +227,7 @@ internal class IntentConfirmationChallengeActivityTest {
                     errorReporter = FakeErrorReporter(),
                     requestOptions = ApiRequest.Options("pk_test_123"),
                     fireAndForgetScope = TestScope(testDispatcher),
+                    logger = Logger.noop(),
                 ) as T
             }
         }
@@ -280,6 +282,7 @@ internal class IntentConfirmationChallengeActivityTest {
                     errorReporter = FakeErrorReporter(),
                     requestOptions = ApiRequest.Options("pk_test_123"),
                     fireAndForgetScope = TestScope(testDispatcher),
+                    logger = Logger.noop(),
                 ) as T
             }
         }

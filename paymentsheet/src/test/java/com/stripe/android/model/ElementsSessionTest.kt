@@ -215,6 +215,39 @@ class ElementsSessionTest {
         assertThat(session.isTapToAddEnabled).isFalse()
     }
 
+    @Test
+    fun `ELEMENTS_MOBILE_ALLOW_STRIPECARDSCAN flag has correct value`() {
+        assertThat(ElementsSession.Flag.ELEMENTS_MOBILE_ALLOW_STRIPECARDSCAN.flagValue)
+            .isEqualTo("elements_mobile_allow_stripecardscan")
+    }
+
+    @Test
+    fun `isStripeCardScanAllowed returns true when flag is enabled`() {
+        val session = createElementsSession(
+            flags = mapOf(ElementsSession.Flag.ELEMENTS_MOBILE_ALLOW_STRIPECARDSCAN to true)
+        )
+
+        assertThat(session.isStripeCardScanAllowed).isTrue()
+    }
+
+    @Test
+    fun `isStripeCardScanAllowed returns false when flag is disabled`() {
+        val session = createElementsSession(
+            flags = mapOf(ElementsSession.Flag.ELEMENTS_MOBILE_ALLOW_STRIPECARDSCAN to false)
+        )
+
+        assertThat(session.isStripeCardScanAllowed).isFalse()
+    }
+
+    @Test
+    fun `isStripeCardScanAllowed returns false when flag is missing`() {
+        val session = createElementsSession(
+            flags = emptyMap()
+        )
+
+        assertThat(session.isStripeCardScanAllowed).isFalse()
+    }
+
     private fun createElementsSession(
         passiveCaptcha: PassiveCaptchaParams? = null,
         flags: Map<ElementsSession.Flag, Boolean> = emptyMap(),

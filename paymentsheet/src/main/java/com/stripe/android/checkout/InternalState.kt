@@ -17,6 +17,7 @@ internal data class InternalState(
     val billingPhoneNumber: String? = null,
     val shippingAddress: Address.State? = null,
     val billingAddress: Address.State? = null,
+    val integrationLaunched: Boolean = false,
 ) : Parcelable {
     val initializationMode: PaymentElementLoader.InitializationMode.CheckoutSession
         get() = PaymentElementLoader.InitializationMode.CheckoutSession(

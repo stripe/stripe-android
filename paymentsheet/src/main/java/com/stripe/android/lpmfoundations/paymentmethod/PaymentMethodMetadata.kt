@@ -87,6 +87,7 @@ internal data class PaymentMethodMetadata(
     val analyticsMetadata: AnalyticsMetadata,
     val experimentsData: ElementsSession.ExperimentsData?,
     val isTapToAddSupported: Boolean,
+    val isStripeCardScanAllowed: Boolean,
 ) : Parcelable {
 
     @IgnoredOnParcel
@@ -399,6 +400,7 @@ internal data class PaymentMethodMetadata(
                 isTapToAddSupported = isTapToAddSupported &&
                     elementsSession.isTapToAddEnabled &&
                     customerMetadata != null,
+                isStripeCardScanAllowed = elementsSession.isStripeCardScanAllowed,
             )
         }
 
@@ -463,6 +465,7 @@ internal data class PaymentMethodMetadata(
                 analyticsMetadata = AnalyticsMetadata(emptyMap()), // This is unused in customer sheet.
                 isTapToAddSupported = false, // This is unused in customer sheet.
                 experimentsData = elementsSession.experimentsData,
+                isStripeCardScanAllowed = elementsSession.isStripeCardScanAllowed,
             )
         }
     }

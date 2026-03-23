@@ -804,6 +804,35 @@ internal object CheckoutSessionFixtures {
     )
 
     /**
+     * Init response with adaptive pricing info (currency conversion).
+     */
+    val CHECKOUT_SESSION_WITH_ADAPTIVE_PRICING_JSON = JSONObject(
+        """
+        {
+            "session_id": "cs_test_abc123",
+            "currency": "usd",
+            "total_summary": {
+                "due": 6106,
+                "subtotal": 6106,
+                "total": 6106
+            },
+            "adaptive_pricing_info": {
+                "active_presentment_currency": "usd",
+                "integration_amount": 5099,
+                "integration_currency": "eur",
+                "local_currency_options": [{
+                    "amount": 6106,
+                    "conversion_markup_bps": 400,
+                    "currency": "usd",
+                    "presentment_exchange_rate": "1.19749"
+                }]
+            },
+            "elements_session": $MINIMAL_ELEMENTS_SESSION_JSON
+        }
+        """.trimIndent()
+    )
+
+    /**
      * Init response with shipping_options array at the root level.
      */
     val CHECKOUT_SESSION_WITH_SHIPPING_OPTIONS_JSON = JSONObject(

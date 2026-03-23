@@ -27,7 +27,7 @@ import com.stripe.android.core.reactnative.UnregisterSignal
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
-import com.stripe.android.link.account.LinkStore
+import com.stripe.android.link.account.DefaultLinkStore
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardFunding
 import com.stripe.android.model.PaymentIntent
@@ -4531,7 +4531,7 @@ class PaymentSheet internal constructor(
          * @param context the Application [Context].
          */
         fun resetCustomer(context: Context) {
-            LinkStore(context).clear()
+            DefaultLinkStore(context).clear()
         }
     }
 }
