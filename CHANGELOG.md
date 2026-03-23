@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+[FIXED][12653](https://github.com/stripe/stripe-android/pull/12653) Fixed a bug where `PaymentSheet.FlowController` wouldn't emit a null `PaymentOption` from `PaymentOptionCallback` after a successful confirmation.
+
 ## 23.1.0 - 2026-03-23
 
 Added new card scanner in PaymentSheet (alpha).
