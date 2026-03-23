@@ -22,11 +22,11 @@ internal class CardScanGoogleLauncher @VisibleForTesting constructor(
     private val options: ActivityOptionsCompat?,
     private val eventsReporter: CardScanEventsReporter,
     private val paymentCardRecognitionClient: PaymentCardRecognitionClient
-) {
+) : CardScanLauncher {
     private val implementation = "google_pay"
     private var _isLaunching = false
     private val _isAvailable = MutableStateFlow(false)
-    val isAvailable: StateFlow<Boolean> = _isAvailable.asStateFlow()
+    override val isAvailable: StateFlow<Boolean> = _isAvailable.asStateFlow()
 
     @VisibleForTesting
     lateinit var activityLauncher: ActivityResultLauncher<IntentSenderRequest>
@@ -45,7 +45,7 @@ internal class CardScanGoogleLauncher @VisibleForTesting constructor(
         )
     }
 
-    fun launch(context: Context) {
+    override fun launch(context: Context) {
         if (_isLaunching) {
             // Prevent multiple simultaneous launches
             return

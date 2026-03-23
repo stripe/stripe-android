@@ -56,9 +56,10 @@ If you're selling digital products or services that will be consumed within your
 
 ### Requirements
 
-* Android 5.0 (API level 21) and above
-* [Android Gradle Plugin](https://developer.android.com/studio/releases/gradle-plugin) 8.1
-* [Gradle](https://gradle.org/releases/) 8.0
+* Android 6.0 (API level 23) and above
+* `compileSdkVersion` 36 and above
+* [Android Gradle Plugin](https://developer.android.com/studio/releases/gradle-plugin) 8.9.1
+* [Gradle](https://gradle.org/releases/) 8.11.1
 
 ### Configuration
 
@@ -104,3 +105,8 @@ Get started with our [📚 integration guides](https://stripe.com/docs/payments/
 - The [example project](https://github.com/stripe/stripe-android/tree/master/example) demonstrates other integrations, that give you more control over the user experience:
     - how to use the Stripe class's synchronous and asynchronous methods
     - how to use the CardFormView.
+
+## Licenses
+
+- [Stripe Android SDK License](LICENSE)
+- StripeCardScan and StripeIdentity use LiteRT in Google Play services, and StripeCardScan also uses ML Kit in Google Play services. LiteRT and ML Kit may send performance and usage metrics to Google, and you may need to disclose this data collection to your users. By using StripeCardScan, you agree to the [LiteRT in Google Play services terms of service](https://ai.google.dev/edge/litert/android/play_services#tos) and the [ML Kit terms of service](https://developers.google.com/ml-kit/terms). By using StripeIdentity, you agree to the [LiteRT in Google Play services terms of service](https://ai.google.dev/edge/litert/android/play_services#tos).

@@ -75,8 +75,6 @@ class Checkout private constructor(
 
     private val mutex = Mutex()
 
-    @Volatile
-    private var integrationLaunched = false
     private val _checkoutSession = MutableStateFlow(internalState.checkoutSessionResponse.asCheckoutSession())
     val checkoutSession: StateFlow<CheckoutSession> = _checkoutSession.asStateFlow()
 
@@ -149,11 +147,11 @@ class Checkout private constructor(
     }
 
     internal fun markIntegrationLaunched() {
-        integrationLaunched = true
+        internalState = internalState.copy(integrationLaunched = true)
     }
 
     internal fun markIntegrationDismissed() {
-        integrationLaunched = false
+        internalState = internalState.copy(integrationLaunched = false)
     }
 
     internal fun ensureNoMutationInFlight() {
@@ -173,7 +171,7 @@ class Checkout private constructor(
         additionalStateMutations: InternalState.() -> InternalState = { this },
         block: suspend (sessionId: String) -> Result<CheckoutSessionResponse>,
     ): Result<CheckoutSession> {
-        if (integrationLaunched) {
+        if (internalState.integrationLaunched) {
             return Result.failure(
                 IllegalStateException(
                     "Cannot mutate checkout session while a payment flow is presented."

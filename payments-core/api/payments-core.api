@@ -3985,6 +3985,7 @@ public abstract interface class com/stripe/android/payments/paymentlauncher/Paym
 	public static final field Companion Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher$Companion;
 	public abstract fun confirm (Lcom/stripe/android/model/ConfirmPaymentIntentParams;)V
 	public abstract fun confirm (Lcom/stripe/android/model/ConfirmSetupIntentParams;)V
+	public static fun create (Landroidx/activity/ComponentActivity;Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher$PaymentResultCallback;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher;
 	public static fun create (Landroidx/activity/ComponentActivity;Ljava/lang/String;Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher$PaymentResultCallback;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher;
 	public static fun create (Landroidx/activity/ComponentActivity;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher$PaymentResultCallback;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher;
 	public static fun create (Landroidx/fragment/app/Fragment;Ljava/lang/String;Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher$PaymentResultCallback;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher;
@@ -3995,6 +3996,7 @@ public abstract interface class com/stripe/android/payments/paymentlauncher/Paym
 }
 
 public final class com/stripe/android/payments/paymentlauncher/PaymentLauncher$Companion {
+	public final fun create (Landroidx/activity/ComponentActivity;Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher$PaymentResultCallback;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher;
 	public final fun create (Landroidx/activity/ComponentActivity;Ljava/lang/String;Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher$PaymentResultCallback;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher;
 	public final fun create (Landroidx/activity/ComponentActivity;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher$PaymentResultCallback;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher;
 	public final fun create (Landroidx/fragment/app/Fragment;Ljava/lang/String;Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher$PaymentResultCallback;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher;
@@ -4010,6 +4012,7 @@ public abstract interface class com/stripe/android/payments/paymentlauncher/Paym
 }
 
 public final class com/stripe/android/payments/paymentlauncher/PaymentLauncherKt {
+	public static final fun rememberPaymentLauncher (Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher$PaymentResultCallback;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher;
 	public static final fun rememberPaymentLauncher (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher$PaymentResultCallback;Landroidx/compose/runtime/Composer;II)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher;
 }
 

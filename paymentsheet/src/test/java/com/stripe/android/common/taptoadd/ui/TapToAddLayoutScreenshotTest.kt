@@ -37,7 +37,7 @@ class TapToAddLayoutScreenshotTest {
         paparazziRule.gif(
             end = 3500L
         ) {
-            TapToAddTheme {
+            TapToAddTheme(imageRepository = null) {
                 var screen by remember {
                     mutableStateOf<TapToAddNavigator.Screen>(
                         TapToAddNavigator.Screen.CardAdded(
@@ -67,7 +67,7 @@ class TapToAddLayoutScreenshotTest {
     @Test
     fun collecting() {
         paparazziRule.snapshot {
-            TapToAddTheme {
+            TapToAddTheme(imageRepository = null) {
                 TapToAddLayout(
                     screen = TapToAddNavigator.Screen.Collecting(FakeTapToAddCollectingInteractor),
                 ) {}
@@ -78,7 +78,7 @@ class TapToAddLayoutScreenshotTest {
     @Test
     fun cardAdded() {
         paparazziRule.snapshot {
-            TapToAddTheme {
+            TapToAddTheme(imageRepository = null) {
                 TapToAddLayout(
                     screen = TapToAddNavigator.Screen.CardAdded(FakeTapToAddCardAddedInteractor()),
                 ) {}
@@ -91,7 +91,7 @@ class TapToAddLayoutScreenshotTest {
         paparazziRule.gif(
             end = 4500L
         ) {
-            TapToAddTheme {
+            TapToAddTheme(imageRepository = null) {
                 TapToAddLayout(
                     screen = TapToAddNavigator.Screen.Error(
                         message = "Something went wrong".resolvableString
@@ -177,7 +177,7 @@ class TapToAddLayoutScreenshotTest {
         error: ResolvableString? = null,
     ) {
         paparazziRule.snapshot {
-            TapToAddTheme {
+            TapToAddTheme(imageRepository = null) {
                 TapToAddLayout(
                     screen = TapToAddNavigator.Screen.Confirmation(
                         interactor = FakeTapToAddConfirmationInteractor(
