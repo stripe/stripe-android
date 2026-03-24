@@ -1,5 +1,9 @@
+@file:OptIn(CheckoutSessionPreview::class)
+
 package com.stripe.android.paymentsheet.example.playground.settings
 
+import com.stripe.android.checkout.Checkout
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 
 internal object CheckoutSessionAdaptivePricingSettingsDefinition : BooleanSettingsDefinition(
@@ -16,5 +20,9 @@ internal object CheckoutSessionAdaptivePricingSettingsDefinition : BooleanSettin
 
     override fun configure(value: Boolean, checkoutRequestBuilder: CheckoutRequest.Builder) {
         checkoutRequestBuilder.adaptivePricing(value)
+    }
+
+    override fun configure(value: Boolean, configuration: Checkout.Configuration) {
+        configuration.adaptivePricingAllowed(value)
     }
 }
