@@ -2,7 +2,6 @@ package com.stripe.android
 
 import androidx.annotation.IntDef
 import com.stripe.android.core.model.StripeModel
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import dev.drewhamilton.poko.Poko
 
@@ -59,8 +58,7 @@ abstract class StripeIntentResult<out T : StripeIntent> internal constructor(
                 Outcome.SUCCEEDED
             }
             StripeIntent.Status.Processing -> {
-                if (intent.paymentMethod?.type?.hasDelayedSettlement() == true ||
-                    intent.paymentMethod?.type == PaymentMethod.Type.Card) {
+                if (intent.paymentMethod?.type?.hasDelayedSettlement() == true) {
                     Outcome.SUCCEEDED
                 } else {
                     Outcome.UNKNOWN
