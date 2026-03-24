@@ -10,6 +10,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 internal data class InternalState(
     val key: String,
+    val configuration: Checkout.Configuration.State,
     val checkoutSessionResponse: CheckoutSessionResponse,
     val shippingName: String? = null,
     val billingName: String? = null,

@@ -193,6 +193,7 @@ class CheckoutInstancesTest {
     private fun createCheckout(key: String): Checkout {
         val state = InternalState(
             key = key,
+            configuration = Checkout.Configuration().build(),
             checkoutSessionResponse = CheckoutSessionResponse(
                 id = DEFAULT_CHECKOUT_SESSION_ID,
                 amount = 1000L,

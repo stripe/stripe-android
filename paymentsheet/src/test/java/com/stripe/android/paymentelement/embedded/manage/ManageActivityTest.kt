@@ -207,6 +207,7 @@ internal class ManageActivityTest {
             Checkout.State(
                 InternalState(
                     key = instancesKey,
+                    configuration = Checkout.Configuration().build(),
                     checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
                 ),
             ),
