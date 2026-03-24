@@ -15,6 +15,7 @@ import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.ResponseReplacement
+import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.ConfirmationType
 import com.stripe.android.paymentsheet.utils.ProductIntegrationTestRunnerContext
@@ -132,10 +133,7 @@ internal class ConfirmWithAttestationTest {
                 "  }"
         )
 
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile(
                 baseFile,
                 replacements = additionalReplacements + attestationReplacement

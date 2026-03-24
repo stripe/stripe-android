@@ -14,6 +14,7 @@ import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
+import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -71,11 +72,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             analyticEventCallback(analyticEventRule)
         },
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
@@ -189,11 +186,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             analyticEventCallback(analyticEventRule)
         },
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
         }
 
@@ -293,11 +286,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             analyticEventCallback(analyticEventRule)
         },
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
         }
         networkRule.setupV1PaymentMethodsResponse(card1, card2)
@@ -317,6 +306,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         testContext.configure {
             customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
         }
+        testContext.consumePaymentOptionEvent("card", "4242")
 
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
 
@@ -353,6 +343,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_embedded_payment_success")
 
         testContext.confirm()
+        assertThat(testContext.paymentOptionTurbine.awaitItem()).isNull()
     }
 
     @Test
@@ -367,11 +358,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             analyticEventCallback(analyticEventRule)
         },
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
         }
         networkRule.setupV1PaymentMethodsResponse(card1, card2)
@@ -391,6 +378,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         testContext.configure {
             customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
         }
+        testContext.consumePaymentOptionEvent("card", "4242")
 
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
 
@@ -424,11 +412,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
         }
         networkRule.setupV1PaymentMethodsResponse(card1, card2)
@@ -448,6 +432,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         testContext.configure {
             customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
         }
+        testContext.consumePaymentOptionEvent("card", "4242")
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
 
         validateAnalyticsRequest(eventName = "mc_embedded_manage_savedpm_show")
@@ -465,6 +450,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
 
         validateAnalyticsRequest(eventName = "mc_embedded_paymentoption_removed")
         editPage.clickRemove()
+//        assertThat(testContext.paymentOptionTurbine.awaitItem()).isNull()
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.RemovedSavedPaymentMethod("card"))
 
         managePage.waitUntilVisible()

@@ -45,8 +45,7 @@ Table of contents
 
 **Localized**: We support the following localizations: Bulgarian, Catalan, Chinese (Hong Kong), Chinese (Simplified), Chinese (Traditional), Croatian, Czech, Danish, Dutch, English (US), English (United Kingdom), Estonian, Filipino, Finnish, French, French (Canada), German, Greek, Hungarian, Indonesian, Italian, Japanese, Korean, Latvian, Lithuanian, Malay, Maltese, Norwegian Bokmål, Norwegian Nynorsk (Norway), Polish, Portuguese, Portuguese (Brazil), Romanian, Russian, Slovak, Slovenian, Spanish, Spanish (Latin America), Swedish, Turkish, Thai and Vietnamese.
 
-**Recommended usage**
-If you're selling digital products or services that will be consumed within your app, (e.g. subscriptions, in-game currencies, game levels, access to premium content, or unlocking a full version), and you plan to distribute it through the Google Play Store, you must use Googles's in-app purchase APIs. See the [Google Play Billing](https://developer.android.com/distribute/play-billing) for more information. For all other scenarios you can use this SDK to process payments via Stripe.
+**Digital Goods**: You can use the SDK to process payments via Stripe, including for digital goods and services consumed within your app (e.g. subscriptions, in-game currencies, game levels, access to premium content, or unlocking a full version).
 
 ## Releases
 * The [changelog](CHANGELOG.md) provides a summary of changes in each release.
@@ -58,8 +57,9 @@ If you're selling digital products or services that will be consumed within your
 
 * Android 6.0 (API level 23) and above
 * `compileSdkVersion` 36 and above
-* [Android Gradle Plugin](https://developer.android.com/studio/releases/gradle-plugin) 8.9.1
-* [Gradle](https://gradle.org/releases/) 8.11.1
+* [Android Gradle Plugin](https://developer.android.com/studio/releases/gradle-plugin) 8.13.2
+* [Gradle](https://gradle.org/releases/) 9.3.1
+* [Kotlin](https://kotlinlang.org/docs/releases.html) 2.3.10
 
 ### Configuration
 
@@ -67,7 +67,7 @@ Add `stripe-android` to your `build.gradle` dependencies.
 
 ```
 dependencies {
-    implementation 'com.stripe:stripe-android:23.0.2'
+    implementation 'com.stripe:stripe-android:23.1.0'
 }
 ```
 

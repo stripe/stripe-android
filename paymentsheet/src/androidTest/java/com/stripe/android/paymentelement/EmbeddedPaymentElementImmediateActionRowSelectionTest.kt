@@ -1,11 +1,13 @@
 package com.stripe.android.paymentelement
 
+import androidx.test.espresso.Espresso
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -54,10 +56,12 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             formPage.fillOutCardDetails()
             formPage.clickPrimaryButton()
             testContext.assertNextCardRowSelectionItem("4242")
+            testContext.consumePaymentOptionEvent("card", "4242")
 
             enqueueDeferredIntentConfirmationRequests()
 
             testContext.confirm()
+            assertThat(testContext.paymentOptionTurbine.awaitItem()).isNull()
         }
     }
 
@@ -75,6 +79,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             formPage.fillOutCardDetails("5555555555554444")
             formPage.clickPrimaryButton()
             testContext.assertNextCardRowSelectionItem("4444")
+            testContext.consumePaymentOptionEvent("card", "4444")
 
             formPage.waitUntilMissing()
             embeddedContentPage.assertHasSelectedLpm("card")
@@ -83,9 +88,11 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             formPage.fillOutCardDetails("4242424242424242")
             formPage.clickPrimaryButton()
             testContext.assertNextCardRowSelectionItem("4242")
+            testContext.consumePaymentOptionEvent("card", "4242")
 
             enqueueDeferredIntentConfirmationRequests()
             testContext.confirm()
+            assertThat(testContext.paymentOptionTurbine.awaitItem()).isNull()
         }
     }
 
@@ -103,6 +110,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             formPage.fillOutCardDetails()
             formPage.clickPrimaryButton()
             testContext.assertNextCardRowSelectionItem("4242")
+            testContext.consumePaymentOptionEvent("card", "4242")
 
             formPage.waitUntilMissing()
             embeddedContentPage.assertHasSelectedLpm("card")
@@ -113,6 +121,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
 
             enqueueDeferredIntentConfirmationRequests()
             testContext.confirm()
+            assertThat(testContext.paymentOptionTurbine.awaitItem()).isNull()
         }
     }
 
@@ -150,10 +159,12 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             }
             embeddedContentPage.clickOnLpm("cashapp")
             testContext.assertNextRowSelectionItem("cashapp", "Cash App Pay")
+            testContext.consumePaymentOptionEvent("cashapp", "Cash App Pay")
 
             enqueueDeferredIntentConfirmationRequests()
 
             testContext.confirm()
+            assertThat(testContext.paymentOptionTurbine.awaitItem()).isNull()
         }
     }
 
@@ -168,6 +179,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             }
             embeddedContentPage.clickOnLpm("cashapp")
             testContext.assertNextRowSelectionItem("cashapp", "Cash App Pay")
+            testContext.consumePaymentOptionEvent("cashapp", "Cash App Pay")
 
             embeddedContentPage.clickOnLpm("cashapp")
             testContext.assertNextRowSelectionItem("cashapp", "Cash App Pay")
@@ -175,6 +187,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             enqueueDeferredIntentConfirmationRequests()
 
             testContext.confirm()
+            assertThat(testContext.paymentOptionTurbine.awaitItem()).isNull()
         }
     }
 
@@ -189,9 +202,11 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             }
             embeddedContentPage.clickOnLpm("cashapp")
             testContext.assertNextRowSelectionItem("cashapp", "Cash App Pay")
+            testContext.consumePaymentOptionEvent("cashapp", "Cash App Pay")
 
             enqueueDeferredIntentConfirmationRequests()
             testContext.confirm()
+            assertThat(testContext.paymentOptionTurbine.awaitItem()).isNull()
         }
     }
 
@@ -206,6 +221,8 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
                 customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
             }
+            testContext.consumePaymentOptionEvent("card", "4242")
+
             embeddedContentPage.clickViewMore()
             managePage.waitUntilVisible()
             managePage.selectPaymentMethod(card1.id)
@@ -213,6 +230,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
 
             enqueueSavedCardIntentConfirmationRequests()
             testContext.confirm()
+            assertThat(testContext.paymentOptionTurbine.awaitItem()).isNull()
         }
     }
 
@@ -227,6 +245,8 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
                 customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
             }
+            testContext.consumePaymentOptionEvent("card", "4242")
+
             embeddedContentPage.clickViewMore()
             managePage.waitUntilVisible()
             managePage.selectPaymentMethod(card1.id)
@@ -237,9 +257,11 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             managePage.waitUntilVisible()
             managePage.selectPaymentMethod(card2.id)
             testContext.assertNextCardRowSelectionItem("5544")
+            testContext.consumePaymentOptionEvent("card", "5544")
 
             enqueueSavedCardIntentConfirmationRequests()
             testContext.confirm()
+            assertThat(testContext.paymentOptionTurbine.awaitItem()).isNull()
         }
     }
 
@@ -254,6 +276,8 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
                 customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
             }
+            testContext.consumePaymentOptionEvent("card", "4242")
+
             embeddedContentPage.clickViewMore()
             managePage.waitUntilVisible()
             managePage.selectPaymentMethod(card1.id)
@@ -267,6 +291,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
 
             enqueueSavedCardIntentConfirmationRequests()
             testContext.confirm()
+            assertThat(testContext.paymentOptionTurbine.awaitItem()).isNull()
         }
     }
 
@@ -281,11 +306,14 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
                 customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
             }
+            testContext.consumePaymentOptionEvent("card", "4242")
+
             embeddedContentPage.clickOnSavedPM(card1.id)
             testContext.assertNextCardRowSelectionItem("4242")
 
             enqueueSavedCardIntentConfirmationRequests()
             testContext.confirm()
+            assertThat(testContext.paymentOptionTurbine.awaitItem()).isNull()
         }
     }
 
@@ -300,6 +328,8 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
                 customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
             }
+            testContext.consumePaymentOptionEvent("card", "4242")
+
             embeddedContentPage.clickOnSavedPM(card1.id)
             testContext.assertNextCardRowSelectionItem("4242")
 
@@ -308,6 +338,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
 
             enqueueSavedCardIntentConfirmationRequests()
             testContext.confirm()
+            assertThat(testContext.paymentOptionTurbine.awaitItem()).isNull()
         }
     }
 
@@ -321,6 +352,8 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
                 embeddedViewDisplaysMandateText(false)
                 customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
             }
+            testContext.consumePaymentOptionEvent("card", "4242")
+
             embeddedContentPage.clickViewMore()
             managePage.waitUntilVisible()
             managePage.clickEdit()
@@ -333,6 +366,9 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             managePage.waitUntilVisible()
             managePage.waitUntilGone(card1.id)
             managePage.clickDone()
+            managePage.clickDone()
+            Espresso.pressBack()
+            assertThat(testContext.paymentOptionTurbine.awaitItem()).isNull()
 
             testContext.rowSelectionCalls.expectNoEvents()
 
@@ -351,9 +387,11 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             formPage.waitUntilVisible()
             formPage.clickPrimaryButton()
             testContext.assertNextRowSelectionItem("cashapp", "Cash App Pay")
+            testContext.consumePaymentOptionEvent("cashapp", "Cash App Pay")
 
             enqueueDeferredIntentConfirmationRequests(isSetupFutureUsage = true)
             testContext.confirm()
+            assertThat(testContext.paymentOptionTurbine.awaitItem()).isNull()
         }
     }
 
@@ -368,9 +406,11 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             }
             embeddedContentPage.clickOnLpm("cashapp")
             testContext.assertNextRowSelectionItem("cashapp", "Cash App Pay")
+            testContext.consumePaymentOptionEvent("cashapp", "Cash App Pay")
 
             enqueueDeferredIntentConfirmationRequests(isSetupFutureUsage = true)
             testContext.confirm()
+            assertThat(testContext.paymentOptionTurbine.awaitItem()).isNull()
         }
     }
 
@@ -402,11 +442,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             rowSelectionCalls = rowSelectionCalls,
             resultCallback = ::assertCompleted,
         ) { testContext ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("GET"),
-                path("/v1/elements/sessions"),
-            ) { response ->
+            networkRule.elementsSession { response ->
                 response.testBodyFromFile(responseTestBodyFileName)
             }
             if (shouldSetupV1PaymentMethodsResponse) {

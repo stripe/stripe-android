@@ -54,7 +54,7 @@ internal class CheckoutPlaygroundViewModel(
     }
 
     fun selectShippingRate(shippingRateId: String) = performWhileLoading {
-        checkout.selectShippingRate(shippingRateId)
+        checkout.selectShippingOption(shippingRateId)
     }
 
     fun updateShippingAddress(addressDetails: AddressDetails) = performWhileLoading {
