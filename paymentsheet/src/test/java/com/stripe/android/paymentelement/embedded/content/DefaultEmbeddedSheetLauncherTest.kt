@@ -9,7 +9,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkout.CheckoutInstancesTestRule
-import com.stripe.android.checkout.InternalState
+import com.stripe.android.checkout.CheckoutStateFactory
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.isInstanceOf
@@ -32,7 +32,6 @@ import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.createCustomerState
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.DummyActivityResultCaller.RegisterCall
 import com.stripe.android.testing.FakeErrorReporter
@@ -587,14 +586,12 @@ internal class DefaultEmbeddedSheetLauncherTest {
     }
 
     private fun createCheckout(key: String): Checkout {
-        val state = Checkout.State(
-            InternalState(
+        return Checkout.createWithState(
+            context = applicationContext,
+            state = CheckoutStateFactory.create(
                 key = key,
-                configuration = Checkout.Configuration().build(),
-                checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
             ),
         )
-        return Checkout.createWithState(applicationContext, state)
     }
 
     private class Scenario(

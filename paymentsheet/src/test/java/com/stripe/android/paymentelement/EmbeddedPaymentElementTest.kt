@@ -6,7 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkout.CheckoutInstancesTestRule
-import com.stripe.android.checkout.InternalState
+import com.stripe.android.checkout.CheckoutStateFactory
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.testBodyFromFile
@@ -16,7 +16,6 @@ import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationHe
 import com.stripe.android.paymentelement.embedded.content.FakeEmbeddedContentHelper
 import com.stripe.android.paymentelement.embedded.content.FakeEmbeddedStateHelper
 import com.stripe.android.paymentelement.embedded.content.PaymentOptionDisplayDataHolder
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import kotlinx.coroutines.async
@@ -87,13 +86,11 @@ internal class EmbeddedPaymentElementTest {
     }
 
     private fun createCheckout(key: String): Checkout {
-        val state = Checkout.State(
-            InternalState(
+        return Checkout.createWithState(
+            context = applicationContext,
+            state = CheckoutStateFactory.create(
                 key = key,
-                configuration = Checkout.Configuration().build(),
-                checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
             ),
         )
-        return Checkout.createWithState(applicationContext, state)
     }
 }
