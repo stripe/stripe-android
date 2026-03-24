@@ -216,15 +216,15 @@ class ElementsSessionTest {
     }
 
     @Test
-    fun `MOBILE_ALLOW_STRIPECARDSCAN flag has correct value`() {
-        assertThat(ElementsSession.Flag.MOBILE_ALLOW_STRIPECARDSCAN.flagValue)
-            .isEqualTo("mobile_allow_stripecardscan")
+    fun `ELEMENTS_MOBILE_ALLOW_STRIPECARDSCAN flag has correct value`() {
+        assertThat(ElementsSession.Flag.ELEMENTS_MOBILE_ALLOW_STRIPECARDSCAN.flagValue)
+            .isEqualTo("elements_mobile_allow_stripecardscan")
     }
 
     @Test
     fun `isStripeCardScanAllowed returns true when flag is enabled`() {
         val session = createElementsSession(
-            flags = mapOf(ElementsSession.Flag.MOBILE_ALLOW_STRIPECARDSCAN to true)
+            flags = mapOf(ElementsSession.Flag.ELEMENTS_MOBILE_ALLOW_STRIPECARDSCAN to true)
         )
 
         assertThat(session.isStripeCardScanAllowed).isTrue()
@@ -233,7 +233,7 @@ class ElementsSessionTest {
     @Test
     fun `isStripeCardScanAllowed returns false when flag is disabled`() {
         val session = createElementsSession(
-            flags = mapOf(ElementsSession.Flag.MOBILE_ALLOW_STRIPECARDSCAN to false)
+            flags = mapOf(ElementsSession.Flag.ELEMENTS_MOBILE_ALLOW_STRIPECARDSCAN to false)
         )
 
         assertThat(session.isStripeCardScanAllowed).isFalse()

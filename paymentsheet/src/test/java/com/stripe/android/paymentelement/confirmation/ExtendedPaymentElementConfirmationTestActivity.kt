@@ -30,7 +30,9 @@ import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.link.LinkConfigurationCoordinator
+import com.stripe.android.link.account.DefaultLinkStore
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.gate.DefaultLinkGate
@@ -152,6 +154,9 @@ internal interface ExtendedPaymentElementConfirmationTestComponent {
 
 @Module(includes = [PaymentElementRequestSurfaceModule::class])
 internal interface ExtendedPaymentElementConfirmationTestModule {
+    @Binds
+    fun bindsLinkStore(impl: DefaultLinkStore): LinkStore
+
     @Binds
     fun bindLinkGateFactory(linkGateFactory: DefaultLinkGate.Factory): LinkGate.Factory
 

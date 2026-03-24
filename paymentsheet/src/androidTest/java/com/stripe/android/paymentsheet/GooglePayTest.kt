@@ -21,10 +21,8 @@ import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayRepository
-import com.stripe.android.networktesting.RequestMatchers.host
-import com.stripe.android.networktesting.RequestMatchers.method
-import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.ResponseReplacement
+import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
@@ -131,7 +129,7 @@ internal class GooglePayTest {
 
     private fun runGooglePayFlowTest(
         paymentResultCallback: (PaymentSheetResult) -> Unit,
-        test: (GooglePayFlowScenario) -> Unit
+        test: suspend (GooglePayFlowScenario) -> Unit
     ) {
         runGooglePayTest(
             isGooglePayReady = true,
@@ -155,6 +153,8 @@ internal class GooglePayTest {
 
                         context.confirm()
                     }
+
+                    context.consumeNullPaymentOptionEventForFlowController()
                 }
             )
         }
@@ -187,7 +187,7 @@ internal class GooglePayTest {
         isGooglePayEnabledInElementsSession: Boolean,
         hasGooglePayConfig: Boolean,
         paymentResultCallback: (PaymentSheetResult) -> Unit,
-        test: (context: ProductIntegrationTestRunnerContext) -> Unit,
+        test: suspend (context: ProductIntegrationTestRunnerContext) -> Unit,
     ) {
         GooglePayRepository.googlePayAvailabilityClientFactory =
             FakeGooglePayAvailabilityClient.Factory(isGooglePayReady)
@@ -220,11 +220,7 @@ internal class GooglePayTest {
     }
 
     private fun enqueueElementsSession(isGooglePayEnabledInElementsSession: Boolean) {
-        testRules.networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        testRules.networkRule.elementsSession { response ->
             val replacements = if (isGooglePayEnabledInElementsSession) {
                 listOf()
             } else {
@@ -311,7 +307,7 @@ internal class GooglePayTest {
     }
 
     private class GooglePayFlowScenario(
-        val confirm: () -> Unit,
+        val confirm: suspend () -> Unit,
     )
 
     private companion object {

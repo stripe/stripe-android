@@ -7,7 +7,7 @@ import androidx.test.core.app.ActivityScenario
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.link.account.LinkStore
+import com.stripe.android.link.account.DefaultLinkStore
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
@@ -43,6 +43,10 @@ internal class FlowControllerTestRunnerContext(
         val paymentOption = configureCallbackTurbine.awaitItem()
         assertThat(paymentOption?.label).endsWith(label)
         assertThat(paymentOption?.paymentMethodType).isEqualTo(paymentMethodType)
+    }
+
+    suspend fun consumeNullPaymentOptionEventForFlowController() {
+        assertThat(configureCallbackTurbine.awaitItem()).isNull()
     }
 
     /**
@@ -83,7 +87,7 @@ internal fun runFlowControllerTest(
 
         scenario.onActivity {
             PaymentConfiguration.init(it, "pk_test_123")
-            LinkStore(it.applicationContext).clear()
+            DefaultLinkStore(it.applicationContext).clear()
         }
 
         var flowController: PaymentSheet.FlowController? = null
@@ -195,7 +199,7 @@ internal fun runMultipleFlowControllerInstancesTest(
         scenario.moveToState(Lifecycle.State.CREATED)
         scenario.onActivity {
             PaymentConfiguration.init(it, "pk_test_123")
-            LinkStore(it.applicationContext).clear()
+            DefaultLinkStore(it.applicationContext).clear()
         }
 
         lateinit var firstFlowController: PaymentSheet.FlowController

@@ -20,15 +20,13 @@ internal fun rememberCardScanLauncher(
 
     val eventsReporter = LocalCardScanEventsReporter.current
 
-    val context = LocalContext.current
-
     return if (isStripeCardScanAllowed && isStripeCardScanAvailable()) {
         rememberCardScanStripeLauncher(
-            context = context,
             eventsReporter = eventsReporter,
             onResult = onResult,
         )
     } else {
+        val context = LocalContext.current
         val options = rememberActivityOptionsCompat()
         rememberCardScanGoogleLauncher(
             context = context,

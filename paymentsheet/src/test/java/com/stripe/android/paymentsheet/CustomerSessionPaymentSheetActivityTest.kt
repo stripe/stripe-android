@@ -19,7 +19,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.RequestMatchers
+import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG
@@ -331,11 +331,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
         defaultPaymentMethod: String? = null,
         test: (PaymentSheetActivity) -> Unit,
     ) {
-        networkRule.enqueue(
-            RequestMatchers.host("api.stripe.com"),
-            RequestMatchers.method("GET"),
-            RequestMatchers.path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.setBody(
                 createElementsSessionResponse(
                     cards = cards,
