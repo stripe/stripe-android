@@ -442,7 +442,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         val interceptor = CheckoutSessionConfirmationInterceptor(
             integrationMetadata = IntegrationMetadata.CheckoutSession(
                 id = DEFAULT_CHECKOUT_SESSION_ID,
-                instancesKey = INSTANCES_KEY,
+                instancesKey = CheckoutStateFactory.DEFAULT_KEY,
             ),
             customerMetadata = customerMetadata,
             clientAttributionMetadata = ClientAttributionMetadata(
@@ -460,9 +460,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         val checkoutInstances = (0 until checkoutInstanceCount).map {
             Checkout.createWithState(
                 context = applicationContext,
-                state = CheckoutStateFactory.create(
-                    key = INSTANCES_KEY,
-                ),
+                state = CheckoutStateFactory.create(),
             )
         }
 
@@ -515,8 +513,6 @@ class CheckoutSessionConfirmationInterceptorTest {
     }
 
     private companion object {
-        const val INSTANCES_KEY = "CheckoutSessionConfirmationInterceptorTest"
-
         val REQUIRES_ACTION_REPLACEMENT = ResponseReplacement(
             original = "\"status\": \"succeeded\"",
             new = "\"status\": \"requires_action\"",

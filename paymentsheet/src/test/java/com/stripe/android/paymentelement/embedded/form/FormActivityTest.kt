@@ -15,7 +15,6 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onIdle
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.checkout.CheckoutInstancesTestRule
 import com.stripe.android.checkout.CheckoutStateFactory
@@ -111,20 +110,14 @@ internal class FormActivityTest {
 
     @Test
     fun `onDestroy clears checkout integration launched flag`() {
-        val instancesKey = "test-checkout-key"
-        val checkout = Checkout.createWithState(
-            context = applicationContext,
-            state = CheckoutStateFactory.create(
-                key = instancesKey,
-            ),
-        )
-        CheckoutInstances.markIntegrationLaunched(instancesKey)
+        val checkout = CheckoutStateFactory.createCheckout(applicationContext)
+        CheckoutInstances.markIntegrationLaunched(CheckoutStateFactory.DEFAULT_KEY)
 
         launch(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 integrationMetadata = IntegrationMetadata.CheckoutSession(
                     id = "cs_test",
-                    instancesKey = instancesKey,
+                    instancesKey = CheckoutStateFactory.DEFAULT_KEY,
                 ),
             ),
         ) { scenario ->

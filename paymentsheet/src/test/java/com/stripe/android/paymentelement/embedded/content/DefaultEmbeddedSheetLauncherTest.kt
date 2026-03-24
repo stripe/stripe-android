@@ -7,7 +7,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkout.CheckoutInstancesTestRule
 import com.stripe.android.checkout.CheckoutStateFactory
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
@@ -447,7 +446,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
 
     @Test
     fun `launchForm throws when checkout mutation is in flight`() = testScenario {
-        val checkout = createCheckout(key = "test_key")
+        val checkout = CheckoutStateFactory.createCheckout(applicationContext)
         networkRule.checkoutUpdate { response ->
             response.setBodyDelay(5, TimeUnit.SECONDS)
             response.testBodyFromFile("checkout-session-apply-discount.json")
@@ -474,7 +473,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
 
     @Test
     fun `launchManage throws when checkout mutation is in flight`() = testScenario {
-        val checkout = createCheckout(key = "test_key")
+        val checkout = CheckoutStateFactory.createCheckout(applicationContext)
         networkRule.checkoutUpdate { response ->
             response.setBodyDelay(5, TimeUnit.SECONDS)
             response.testBodyFromFile("checkout-session-apply-discount.json")
@@ -583,15 +582,6 @@ internal class DefaultEmbeddedSheetLauncherTest {
 
             callbackHelper.validate()
         }
-    }
-
-    private fun createCheckout(key: String): Checkout {
-        return Checkout.createWithState(
-            context = applicationContext,
-            state = CheckoutStateFactory.create(
-                key = key,
-            ),
-        )
     }
 
     private class Scenario(

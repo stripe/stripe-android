@@ -36,7 +36,6 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.checkout.CheckoutStateFactory
 import com.stripe.android.checkouttesting.checkoutUpdate
@@ -213,19 +212,13 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `onDestroy clears checkout integration launched flag`() {
-        val instancesKey = "test-checkout-key"
-        val checkout = Checkout.createWithState(
-            context = context,
-            state = CheckoutStateFactory.create(
-                key = instancesKey,
-            ),
-        )
-        CheckoutInstances.markIntegrationLaunched(instancesKey)
+        val checkout = CheckoutStateFactory.createCheckout(context)
+        CheckoutInstances.markIntegrationLaunched(CheckoutStateFactory.DEFAULT_KEY)
 
         val viewModel = createViewModel(
             integrationMetadata = IntegrationMetadata.CheckoutSession(
                 id = "cs_test",
-                instancesKey = instancesKey,
+                instancesKey = CheckoutStateFactory.DEFAULT_KEY,
             ),
         )
         val scenario = activityScenario(viewModel)

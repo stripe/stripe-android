@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkout.CheckoutInstancesTestRule
 import com.stripe.android.checkout.CheckoutStateFactory
 import com.stripe.android.checkouttesting.checkoutUpdate
@@ -36,7 +35,7 @@ internal class PaymentSheetTest {
 
     @Test
     fun `presentWithCheckout throws when checkout mutation is in flight`() = runTest {
-        val checkout = createCheckout(key = "test_key")
+        val checkout = CheckoutStateFactory.createCheckout(applicationContext)
         networkRule.checkoutUpdate { response ->
             response.setBodyDelay(5, TimeUnit.SECONDS)
             response.testBodyFromFile("checkout-session-apply-discount.json")
@@ -60,14 +59,5 @@ internal class PaymentSheetTest {
             .isEqualTo("Cannot launch while a checkout session mutation is in flight.")
 
         deferred.cancel()
-    }
-
-    private fun createCheckout(key: String): Checkout {
-        return Checkout.createWithState(
-            context = applicationContext,
-            state = CheckoutStateFactory.create(
-                key = key,
-            ),
-        )
     }
 }
