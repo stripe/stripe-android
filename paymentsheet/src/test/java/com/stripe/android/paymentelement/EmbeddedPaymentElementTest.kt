@@ -4,7 +4,6 @@ import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkout.CheckoutInstancesTestRule
 import com.stripe.android.checkout.CheckoutStateFactory
 import com.stripe.android.checkouttesting.checkoutUpdate
@@ -43,7 +42,7 @@ internal class EmbeddedPaymentElementTest {
 
     @Test
     fun `configure with checkout throws when checkout mutation is in flight`() = runTest {
-        val checkout = createCheckout(key = "test_key")
+        val checkout = CheckoutStateFactory.createCheckout(applicationContext)
         networkRule.checkoutUpdate { response ->
             response.setBodyDelay(5, TimeUnit.SECONDS)
             response.testBodyFromFile("checkout-session-apply-discount.json")
@@ -82,15 +81,6 @@ internal class EmbeddedPaymentElementTest {
                 ): EmbeddedPaymentElement.ConfigureResult = error("Not expected")
             },
             stateHelper = FakeEmbeddedStateHelper(),
-        )
-    }
-
-    private fun createCheckout(key: String): Checkout {
-        return Checkout.createWithState(
-            context = applicationContext,
-            state = CheckoutStateFactory.create(
-                key = key,
-            ),
         )
     }
 }

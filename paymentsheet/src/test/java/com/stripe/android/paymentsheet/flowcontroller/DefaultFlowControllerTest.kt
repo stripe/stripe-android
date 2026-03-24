@@ -15,7 +15,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkout.CheckoutInstancesTestRule
 import com.stripe.android.checkout.CheckoutStateFactory
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
@@ -2299,7 +2298,7 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `configureWithCheckout throws when checkout mutation is in flight`() = runTest {
-        val checkout = createCheckout(key = "test_key")
+        val checkout = CheckoutStateFactory.createCheckout(context)
         networkRule.checkoutUpdate { response ->
             response.setBodyDelay(5, TimeUnit.SECONDS)
             response.testBodyFromFile("checkout-session-apply-discount.json")
@@ -2320,7 +2319,7 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `presentPaymentOptions throws when checkout mutation is in flight`() = runTest {
-        val checkout = createCheckout(key = "test_key")
+        val checkout = CheckoutStateFactory.createCheckout(context)
         val flowController = createFlowController(
             FakePaymentElementLoader(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
@@ -2509,15 +2508,6 @@ internal class DefaultFlowControllerTest {
             handle = SavedStateHandle(),
             statusBarColor = STATUS_BAR_COLOR,
             paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
-        )
-    }
-
-    private fun createCheckout(key: String): Checkout {
-        return Checkout.createWithState(
-            context = context,
-            state = CheckoutStateFactory.create(
-                key = key,
-            ),
         )
     }
 
