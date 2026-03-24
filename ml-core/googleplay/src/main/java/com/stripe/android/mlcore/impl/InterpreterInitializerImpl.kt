@@ -20,7 +20,7 @@ object InterpreterInitializerImpl : InterpreterInitializer {
             try {
                 Tasks.await(initializeTask)
             } catch (_: Exception) {
-                // Failure is reported via addOnFailureListener; this just blocks until completion.
+                // Failure is reported via addOnFailureListener
             }
         }
     }
