@@ -11,7 +11,8 @@ internal object RequireCvcRecollectionDefinition : BooleanSettingsDefinition(
         configurationData: PlaygroundConfigurationData,
         settings: Map<PlaygroundSettingDefinition<*>, Any?>
     ): Boolean {
-        return configurationData.integrationType.isPaymentFlow()
+        return configurationData.integrationType.isPaymentFlow() &&
+            settings[InitializationTypeSettingsDefinition] != InitializationType.CheckoutSession
     }
 
     override fun configure(value: Boolean, checkoutRequestBuilder: CheckoutRequest.Builder) {
