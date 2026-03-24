@@ -99,10 +99,10 @@ class Checkout private constructor(
         component.checkoutSessionRepository.applyPromotionCode(sessionId, "")
     }
 
-    suspend fun selectShippingRate(
-        shippingRateId: String,
+    suspend fun selectShippingOption(
+        id: String,
     ): Result<CheckoutSession> = withSessionId { sessionId ->
-        component.checkoutSessionRepository.selectShippingRate(sessionId, shippingRateId)
+        component.checkoutSessionRepository.selectShippingRate(sessionId, id)
     }
 
     suspend fun updateShippingAddress(
