@@ -55,6 +55,7 @@ import com.stripe.android.identity.viewmodel.BottomSheetViewModel
 import com.stripe.android.identity.viewmodel.DocumentScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.identity.viewmodel.SelfieScanViewModel
+import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
 import com.stripe.android.uicore.stripeShapes
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.launch
@@ -303,10 +304,16 @@ internal fun IdentityNavGraph(
                             IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR
                         )
                         if (ErrorDestination.shouldFail(it)) {
+                            val failedReason = identityViewModel.errorCause.value
+                                ?: IllegalStateException("Unknown verification error")
+                            identityViewModel.identityAnalyticsRequestFactory.verificationFailed(
+                                isFromFallbackUrl = false,
+                                requireSelfie = identityViewModel.verificationPage.value?.data?.requireSelfie(),
+                                throwable = failedReason
+                            )
                             verificationFlowFinishable.finishWithResult(
                                 IdentityVerificationSheet.VerificationFlowResult.Failed(
-                                    identityViewModel.errorCause.value
-                                        ?: IllegalStateException("Unknown verification error")
+                                    failedReason
                                 )
                             )
                         } else {

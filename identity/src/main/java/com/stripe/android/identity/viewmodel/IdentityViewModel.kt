@@ -249,7 +249,14 @@ internal class IdentityViewModel(
                 {
                     _isTfLiteInitialized.postValue(true)
                 },
-                { throw IllegalStateException("Failed to initialize TFLite runtime: $it") }
+                {
+                    val cause = IllegalStateException(
+                        "Failed to initialize TFLite runtime: ${it.message}",
+                        it
+                    )
+                    logError(cause)
+                    throw cause
+                }
             )
         }
     }
@@ -1023,6 +1030,16 @@ internal class IdentityViewModel(
             when {
                 submittedVerificationPageData.hasError() -> {
                     submittedVerificationPageData.requirements.errors[0].let { requirementError ->
+                        if (!requirementError.continueButtonText.isNullOrEmpty() &&
+                            !requirementError.requirement.supportsForceConfirm()
+                        ) {
+                            logError(
+                                IllegalStateException(
+                                    "Received unsupported requirement for forceConfirm: " +
+                                        requirementError.requirement
+                                )
+                            )
+                        }
                         errorCause.postValue(
                             IllegalStateException("VerificationPageDataRequirementError: $requirementError")
                         )
@@ -1096,6 +1113,12 @@ internal class IdentityViewModel(
                     target.postValue(Resource.success(it))
                 },
                 onFailure = {
+                    logError(it)
+                    identityAnalyticsRequestFactory.verificationFailed(
+                        isFromFallbackUrl = false,
+                        requireSelfie = verificationPage.value?.data?.requireSelfie(),
+                        throwable = it
+                    )
                     target.postValue(
                         Resource.error(
                             "Failed to download model from $modelUrl",
@@ -1121,6 +1144,11 @@ internal class IdentityViewModel(
         get() {
             return _verificationPage.value?.data?.requirements?.missing ?: Requirement.entries
                 .also {
+                    logError(
+                        IllegalStateException(
+                            "_verificationPage is null, using Requirement.entries as initialMissings"
+                        )
+                    )
                     Log.e(
                         TAG,
                         "_verificationPage is null, using Requirement.entries as initialMissings"
@@ -1199,6 +1227,16 @@ internal class IdentityViewModel(
 
         if (newVerificationPageData.hasError()) {
             newVerificationPageData.requirements.errors[0].let { requirementError ->
+                if (!requirementError.continueButtonText.isNullOrEmpty() &&
+                    !requirementError.requirement.supportsForceConfirm()
+                ) {
+                    logError(
+                        IllegalStateException(
+                            "Received unsupported requirement for forceConfirm: " +
+                                requirementError.requirement
+                        )
+                    )
+                }
                 errorCause.postValue(
                     IllegalStateException("VerificationPageDataRequirementError: $requirementError")
                 )
@@ -1513,7 +1551,12 @@ internal class IdentityViewModel(
                 }
             )
         } catch (e: IllegalStateException) {
-            Log.e(TAG, "Failed to postVerificationPageDataForForceConfirm: ${e.message}")
+            val cause = IllegalStateException(
+                "Failed to postVerificationPageDataForForceConfirm",
+                e
+            )
+            Log.e(TAG, cause.message, cause)
+            errorCause.postValue(cause)
             navController.navigateToFinalErrorScreen(getApplication())
         }
     }
@@ -1842,7 +1885,7 @@ internal class IdentityViewModel(
     private fun logError(cause: Throwable) {
         identityAnalyticsRequestFactory.genericError(
             cause.message,
-            cause.stackTraceToString()
+            cause.javaClass.name
         )
     }
 

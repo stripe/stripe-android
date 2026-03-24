@@ -55,6 +55,7 @@ internal fun IndividualWelcomeScreen(
             merchantLogoUri = merchantLogoUri,
             welcomePage = individualWelcomePage,
             bottomSheets = verificationPage.bottomSheet,
+            onHtmlError = { identityViewModel.errorCause.postValue(it) },
             navController = navController
         )
     }
@@ -65,6 +66,7 @@ private fun SuccessUI(
     merchantLogoUri: Uri,
     welcomePage: VerificationPageStaticContentIndividualWelcomePage,
     bottomSheets: Map<String, VerificationPageStaticContentBottomSheetContent>?,
+    onHtmlError: (Throwable) -> Unit,
     navController: NavController,
 ) {
     Column(
@@ -91,7 +93,11 @@ private fun SuccessUI(
                 merchantLogoUri = merchantLogoUri,
                 title = welcomePage.title
             )
-            ConsentLines(lines = welcomePage.lines, bottomSheets = bottomSheets)
+            ConsentLines(
+                lines = welcomePage.lines,
+                bottomSheets = bottomSheets,
+                onHtmlError = onHtmlError
+            )
         }
 
         var scrolledToBottom by remember { mutableStateOf(false) }

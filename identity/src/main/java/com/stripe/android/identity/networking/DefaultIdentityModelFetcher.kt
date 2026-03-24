@@ -1,5 +1,6 @@
 package com.stripe.android.identity.networking
 
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.mlcore.base.InterpreterOptionsWrapper
 import com.stripe.android.mlcore.impl.InterpreterWrapperImpl
@@ -8,7 +9,8 @@ import javax.inject.Inject
 
 internal class DefaultIdentityModelFetcher @Inject constructor(
     private val identityRepository: IdentityRepository,
-    private val identityIO: IdentityIO
+    private val identityIO: IdentityIO,
+    private val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory
 ) : IdentityModelFetcher {
     override suspend fun fetchIdentityModel(modelUrl: String): File {
         // Use the filename as a look up key
@@ -35,6 +37,10 @@ internal class DefaultIdentityModelFetcher @Inject constructor(
             )
             true
         } catch (e: Exception) {
+            identityAnalyticsRequestFactory.genericError(
+                "Failed to validate TFLite model: ${modelFile.name}",
+                e.javaClass.name
+            )
             false
         }
     }

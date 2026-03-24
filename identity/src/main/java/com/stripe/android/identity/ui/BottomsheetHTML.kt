@@ -29,7 +29,8 @@ internal fun BottomSheetHTML(
     bottomSheets: Map<String, VerificationPageStaticContentBottomSheetContent>?,
     color: Color = Color.Unspecified,
     style: TextStyle,
-    urlSpanStyle: SpanStyle = SpanStyle(textDecoration = TextDecoration.Underline)
+    urlSpanStyle: SpanStyle = SpanStyle(textDecoration = TextDecoration.Underline),
+    onError: (Throwable) -> Unit = {}
 ) {
     val context = LocalContext.current
     val bottomSheetViewModel = viewModel<BottomSheetViewModel>()
@@ -43,9 +44,15 @@ internal fun BottomSheetHTML(
         annotatedStringRanges.firstOrNull()?.item?.let { urlString ->
             when {
                 (URLUtil.isNetworkUrl(urlString)) -> {
-                    val openURL = Intent(Intent.ACTION_VIEW)
-                    openURL.data = Uri.parse(urlString)
-                    context.startActivity(openURL)
+                    runCatching {
+                        val openURL = Intent(Intent.ACTION_VIEW)
+                        openURL.data = Uri.parse(urlString)
+                        context.startActivity(openURL)
+                    }.onFailure {
+                        val error = IllegalStateException("Failed to open url: $urlString", it)
+                        Log.e(BottomSheetHTMLTAG, error.message, error)
+                        onError(error)
+                    }
                 }
 
                 urlString.startsWith(STRIPE_BOTTOM_SHEET) -> {
@@ -53,15 +60,18 @@ internal fun BottomSheetHTML(
                     bottomSheets?.get(bottomSheetId)?.let { bottomSheetContent ->
                         bottomSheetViewModel.showBottomSheet(bottomSheetContent)
                     } ?: run {
-                        Log.e(
-                            BottomSheetHTMLTAG,
-                            "Fail to present buttomsheet with id $bottomSheetId"
+                        val error = IllegalStateException(
+                            "Fail to present bottomsheet with id $bottomSheetId"
                         )
+                        Log.e(BottomSheetHTMLTAG, error.message, error)
+                        onError(error)
                     }
                 }
 
                 else -> {
-                    Log.e(BottomSheetHTMLTAG, "unknown url string: $urlString")
+                    val error = IllegalStateException("unknown url string: $urlString")
+                    Log.e(BottomSheetHTMLTAG, error.message, error)
+                    onError(error)
                 }
             }
         }

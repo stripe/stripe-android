@@ -12,12 +12,16 @@ import android.renderscript.ScriptIntrinsicConvolve3x3
 import android.util.Log
 import androidx.core.graphics.createBitmap
 import com.stripe.android.camera.framework.image.orDefault
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import javax.inject.Inject
 
 /**
  * Detector to determine if an image is blurry based on variance of the laplacian method.
  */
-internal class LaplacianBlurDetector @Inject constructor(context: Context) {
+internal class LaplacianBlurDetector @Inject constructor(
+    context: Context,
+    private val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory
+) {
 
     private val renderScript by lazy {
         RenderScript.create(context)
@@ -119,6 +123,10 @@ internal class LaplacianBlurDetector @Inject constructor(context: Context) {
             return mostLuminousIntensityFromGreyscaleBitmap(edgesBitmap).toFloat() / COLOR_MAX
         } catch (e: Exception) {
             Log.e(TAG, "Failed to calculate blur score. $e")
+            identityAnalyticsRequestFactory.genericError(
+                "Failed to calculate blur score",
+                e.javaClass.name
+            )
             return DEFAULT_SCORE
         }
     }

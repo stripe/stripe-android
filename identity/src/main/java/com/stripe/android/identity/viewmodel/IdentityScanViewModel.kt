@@ -153,6 +153,11 @@ internal abstract class IdentityScanViewModel(
             coroutineScope = viewModelScope,
             parameters = scanType,
             errorHandler = { e ->
+                identityAnalyticsRequestFactory.verificationFailed(
+                    isFromFallbackUrl = false,
+                    scanType = scanType,
+                    throwable = e
+                )
                 verificationFlowFinishable.finishWithResult(
                     IdentityVerificationSheet.VerificationFlowResult.Failed(e)
                 )
