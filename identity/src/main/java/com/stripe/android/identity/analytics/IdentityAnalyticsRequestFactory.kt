@@ -221,6 +221,14 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         eventName = EVENT_CAMERA_PERMISSION_GRANTED
     )
 
+    fun cameraPermissionRationaleShown() = maybeLogExperimentAndSendLog(
+        eventName = EVENT_CAMERA_PERMISSION_RATIONALE_SHOWN
+    )
+
+    fun cameraPermissionAppSettingsClicked() = maybeLogExperimentAndSendLog(
+        eventName = EVENT_CAMERA_PERMISSION_APP_SETTINGS_CLICKED
+    )
+
     fun documentTimeout(
         scanType: IdentityScanState.ScanType
     ) = maybeLogExperimentAndSendLog(
@@ -370,6 +378,9 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val EVENT_CAMERA_ERROR = "camera_error"
         const val EVENT_CAMERA_PERMISSION_DENIED = "camera_permission_denied"
         const val EVENT_CAMERA_PERMISSION_GRANTED = "camera_permission_granted"
+        const val EVENT_CAMERA_PERMISSION_RATIONALE_SHOWN = "camera_permission_rationale_shown"
+        const val EVENT_CAMERA_PERMISSION_APP_SETTINGS_CLICKED =
+            "camera_permission_app_settings_clicked"
         const val EVENT_DOCUMENT_TIMEOUT = "document_timeout"
         const val EVENT_SELFIE_TIMEOUT = "selfie_timeout"
         const val EVENT_AVERAGE_FPS = "average_fps"

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -28,7 +29,6 @@ import com.stripe.android.identity.navigation.navigateTo
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentBottomSheetContent
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentIndividualWelcomePage
 import com.stripe.android.identity.viewmodel.IdentityViewModel
-import com.stripe.android.uicore.text.Html
 
 @Composable
 internal fun IndividualWelcomeScreen(
@@ -61,6 +61,7 @@ internal fun IndividualWelcomeScreen(
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun SuccessUI(
     merchantLogoUri: Uri,
@@ -107,18 +108,21 @@ private fun SuccessUI(
             }
         }
 
-        Html(
+        BottomSheetHTML(
             html = welcomePage.privacyPolicy,
+            bottomSheets = bottomSheets,
             modifier = Modifier
                 .padding(vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin))
                 .semantics {
                     testTag = PRIVACY_POLICY_TAG
                 },
             color = MaterialTheme.colors.onBackground,
+            style = MaterialTheme.typography.body1,
             urlSpanStyle = SpanStyle(
                 textDecoration = TextDecoration.Underline,
                 color = MaterialTheme.colors.secondary
-            )
+            ),
+            onError = onHtmlError
         )
 
         var acceptState by remember { mutableStateOf(LoadingButtonState.Idle) }

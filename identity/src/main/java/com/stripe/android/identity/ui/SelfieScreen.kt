@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Checkbox
 import androidx.compose.material.Icon
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
@@ -71,7 +72,6 @@ import com.stripe.android.identity.utils.startScanning
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.identity.viewmodel.SelfieScanViewModel
-import com.stripe.android.uicore.text.Html
 import com.stripe.android.uicore.text.dimensionResourceSp
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.launch
@@ -261,7 +261,8 @@ private fun SelfieCaptureScreen(
                     allowImageCollectionHtml = successSelfieCapturePage.consentText,
                     isSubmittingSelfie = isSubmittingSelfie,
                     allowImageCollection = allowImageCollection,
-                    navController = navController
+                    navController = navController,
+                    onHtmlError = { identityViewModel.errorCause.postValue(it) }
                 ) {
                     allowImageCollection = it
                 }
@@ -303,6 +304,7 @@ private fun SelfieCaptureScreen(
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun ResultView(
     displayState: IdentityScanState,
@@ -310,6 +312,7 @@ private fun ResultView(
     isSubmittingSelfie: Boolean,
     allowImageCollection: Boolean,
     navController: NavController,
+    onHtmlError: (Throwable) -> Unit,
     onAllowImageCollectionChanged: (Boolean) -> Unit
 ) {
     LazyRow(
@@ -378,13 +381,16 @@ private fun ResultView(
             enabled = !isSubmittingSelfie
         )
 
-        Html(
+        BottomSheetHTML(
             html = allowImageCollectionHtml,
+            bottomSheets = null,
             color = MaterialTheme.colors.onBackground,
+            style = MaterialTheme.typography.body1,
             urlSpanStyle = SpanStyle(
                 textDecoration = TextDecoration.Underline,
                 color = MaterialTheme.colors.secondary
-            )
+            ),
+            onError = onHtmlError
         )
     }
 }

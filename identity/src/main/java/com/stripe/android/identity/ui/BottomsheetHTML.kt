@@ -3,7 +3,6 @@ package com.stripe.android.identity.ui
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
-import android.webkit.URLUtil
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -43,17 +42,6 @@ internal fun BottomSheetHTML(
     ) { annotatedStringRanges ->
         annotatedStringRanges.firstOrNull()?.item?.let { urlString ->
             when {
-                (URLUtil.isNetworkUrl(urlString)) -> {
-                    runCatching {
-                        val openURL = Intent(Intent.ACTION_VIEW)
-                        openURL.data = Uri.parse(urlString)
-                        context.startActivity(openURL)
-                    }.onFailure {
-                        val error = IllegalStateException("Failed to open url: $urlString", it)
-                        Log.e(BottomSheetHTMLTAG, error.message, error)
-                        onError(error)
-                    }
-                }
 
                 urlString.startsWith(STRIPE_BOTTOM_SHEET) -> {
                     val bottomSheetId = urlString.substringAfterLast('/')
@@ -69,9 +57,15 @@ internal fun BottomSheetHTML(
                 }
 
                 else -> {
-                    val error = IllegalStateException("unknown url string: $urlString")
-                    Log.e(BottomSheetHTMLTAG, error.message, error)
-                    onError(error)
+                    runCatching {
+                        val openURL = Intent(Intent.ACTION_VIEW)
+                        openURL.data = Uri.parse(urlString)
+                        context.startActivity(openURL)
+                    }.onFailure {
+                        val error = IllegalStateException("Failed to open url: $urlString", it)
+                        Log.e(BottomSheetHTMLTAG, error.message, error)
+                        onError(error)
+                    }
                 }
             }
         }

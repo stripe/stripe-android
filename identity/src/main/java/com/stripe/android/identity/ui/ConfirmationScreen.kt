@@ -13,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -41,8 +42,8 @@ import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Com
 import com.stripe.android.identity.navigation.navigateToErrorScreenWithDefaultValues
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.viewmodel.IdentityViewModel
-import com.stripe.android.uicore.text.Html
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 internal fun ConfirmationScreen(
     navController: NavController,
@@ -107,18 +108,21 @@ internal fun ConfirmationScreen(
                     fontWeight = FontWeight.Bold
                 )
 
-                Html(
+                BottomSheetHTML(
                     html = successPage.body,
+                    bottomSheets = null,
                     modifier = Modifier
                         .padding(bottom = dimensionResource(id = R.dimen.stripe_item_vertical_margin))
                         .semantics {
                             testTag = CONFIRMATION_BODY_TAG
                         },
                     color = MaterialTheme.colors.onBackground,
+                    style = MaterialTheme.typography.body1,
                     urlSpanStyle = SpanStyle(
                         textDecoration = TextDecoration.Underline,
                         color = MaterialTheme.colors.secondary
-                    )
+                    ),
+                    onError = { identityViewModel.errorCause.postValue(it) }
                 )
             }
             Button(

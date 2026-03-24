@@ -450,25 +450,35 @@ internal class IdentityViewModel(
         uploadMethod: UploadMethod,
         scanType: IdentityScanState.ScanType
     ) {
-        uploadDocumentImagesAndNotify(
-            imageFile =
-            identityIO.resizeUriAndCreateFileToUpload(
-                uri,
-                verificationArgs.verificationSessionId,
-                false,
-                if (isFront) FRONT else BACK,
-                maxDimension = docCapturePage.highResImageMaxDimension,
+        runCatching {
+            uploadDocumentImagesAndNotify(
+                imageFile =
+                identityIO.resizeUriAndCreateFileToUpload(
+                    uri,
+                    verificationArgs.verificationSessionId,
+                    false,
+                    if (isFront) FRONT else BACK,
+                    maxDimension = docCapturePage.highResImageMaxDimension,
+                    compressionQuality = docCapturePage.highResImageCompressionQuality
+                ),
+                filePurpose = requireNotNull(
+                    StripeFilePurpose.fromCode(docCapturePage.filePurpose)
+                ),
+                uploadMethod = uploadMethod,
+                isHighRes = true,
+                isFront = isFront,
+                scanType = scanType,
                 compressionQuality = docCapturePage.highResImageCompressionQuality
-            ),
-            filePurpose = requireNotNull(
-                StripeFilePurpose.fromCode(docCapturePage.filePurpose)
-            ),
-            uploadMethod = uploadMethod,
-            isHighRes = true,
-            isFront = isFront,
-            scanType = scanType,
-            compressionQuality = docCapturePage.highResImageCompressionQuality
-        )
+            )
+        }.onFailure {
+            postDocumentUploadPrepError(
+                isFront = isFront,
+                isHighRes = true,
+                scanType = scanType,
+                message = "Failed to prepare manual document image for upload",
+                throwable = it
+            )
+        }
     }
 
     /**
@@ -544,28 +554,48 @@ internal class IdentityViewModel(
         }
 
         // upload high res
-        processAndUploadBitmap(
-            bitmapToUpload = cropBitmapToUpload(
-                originalBitmap,
-                legacyOutput.boundingBox,
-                verificationPage
-            ),
-            docCapturePage = verificationPage.documentCapture,
-            isHighRes = true,
-            isFront = isFront,
-            scores = scores,
-            targetScanType = targetScanType
-        )
+        runCatching {
+            processAndUploadBitmap(
+                bitmapToUpload = cropBitmapToUpload(
+                    originalBitmap,
+                    legacyOutput.boundingBox,
+                    verificationPage
+                ),
+                docCapturePage = verificationPage.documentCapture,
+                isHighRes = true,
+                isFront = isFront,
+                scores = scores,
+                targetScanType = targetScanType
+            )
+        }.onFailure {
+            postDocumentUploadPrepError(
+                isFront = isFront,
+                isHighRes = true,
+                scanType = targetScanType,
+                message = "Failed to prepare scanned document image for upload",
+                throwable = it
+            )
+        }
 
         // upload low res
-        processAndUploadBitmap(
-            bitmapToUpload = originalBitmap,
-            docCapturePage = verificationPage.documentCapture,
-            isHighRes = false,
-            isFront = isFront,
-            scores = scores,
-            targetScanType = targetScanType
-        )
+        runCatching {
+            processAndUploadBitmap(
+                bitmapToUpload = originalBitmap,
+                docCapturePage = verificationPage.documentCapture,
+                isHighRes = false,
+                isFront = isFront,
+                scores = scores,
+                targetScanType = targetScanType
+            )
+        }.onFailure {
+            postDocumentUploadPrepError(
+                isFront = isFront,
+                isHighRes = false,
+                scanType = targetScanType,
+                message = "Failed to prepare full-frame document image for upload",
+                throwable = it
+            )
+        }
     }
 
     private fun uploadFaceDetectorOutput(
@@ -596,13 +626,22 @@ internal class IdentityViewModel(
             (FaceDetectorTransitioner.Selfie.LAST)
         ).forEach { selfie ->
             listOf(true, false).forEach { isHighRes ->
-                processSelfieScanResultAndUpload(
-                    originalBitmap = filteredFrames[selfie.index].first.cameraPreviewImage.image,
-                    boundingBox = filteredFrames[selfie.index].second.boundingBox,
-                    selfieCapturePage = requireNotNull(verificationPage.selfieCapture),
-                    isHighRes = isHighRes,
-                    selfie = selfie
-                )
+                runCatching {
+                    processSelfieScanResultAndUpload(
+                        originalBitmap = filteredFrames[selfie.index].first.cameraPreviewImage.image,
+                        boundingBox = filteredFrames[selfie.index].second.boundingBox,
+                        selfieCapturePage = requireNotNull(verificationPage.selfieCapture),
+                        isHighRes = isHighRes,
+                        selfie = selfie
+                    )
+                }.onFailure {
+                    postSelfieUploadPrepError(
+                        isHighRes = isHighRes,
+                        selfie = selfie,
+                        message = "Failed to prepare selfie image for upload",
+                        throwable = it
+                    )
+                }
             }
         }
     }
@@ -768,6 +807,30 @@ internal class IdentityViewModel(
         }
     }
 
+    private fun postDocumentUploadPrepError(
+        isFront: Boolean,
+        isHighRes: Boolean,
+        scanType: IdentityScanState.ScanType,
+        message: String,
+        throwable: Throwable
+    ) {
+        val detailedMessage =
+            "$message (${if (isFront) FRONT else BACK}, ${if (isHighRes) "high_res" else "low_res"}, $scanType)"
+        logError(detailedMessage, throwable)
+        val error = IllegalStateException(detailedMessage, throwable)
+        if (isFront) {
+            _documentFrontUploadedState
+        } else {
+            _documentBackUploadedState
+        }.updateStateAndSave { currentState ->
+            currentState.updateError(
+                isHighRes = isHighRes,
+                message = detailedMessage,
+                throwable = error
+            )
+        }
+    }
+
     /**
      * Processes selfie scan result by cropping and padding the bitmap if necessary,
      * then upload the processed file.
@@ -887,6 +950,26 @@ internal class IdentityViewModel(
                         )
                     }
                 }
+            )
+        }
+    }
+
+    private fun postSelfieUploadPrepError(
+        isHighRes: Boolean,
+        selfie: FaceDetectorTransitioner.Selfie,
+        message: String,
+        throwable: Throwable
+    ) {
+        val detailedMessage =
+            "$message (${selfie.value}, ${if (isHighRes) "high_res" else "low_res"})"
+        logError(detailedMessage, throwable)
+        val error = IllegalStateException(detailedMessage, throwable)
+        _selfieUploadedState.updateStateAndSave { currentState ->
+            currentState.updateError(
+                isHighRes = isHighRes,
+                selfie = selfie,
+                message = detailedMessage,
+                throwable = error
             )
         }
     }
@@ -1045,7 +1128,10 @@ internal class IdentityViewModel(
                         )
                         navController.navigateToErrorScreenWithRequirementError(
                             fromRoute,
-                            requirementError
+                            requirementError,
+                            onError = {
+                                logError(it)
+                            }
                         )
                     }
                 }
@@ -1243,6 +1329,9 @@ internal class IdentityViewModel(
                 navController.navigateToErrorScreenWithRequirementError(
                     fromRoute,
                     requirementError,
+                    onError = {
+                        logError(it)
+                    },
                 )
             }
         } else {
@@ -1883,8 +1972,12 @@ internal class IdentityViewModel(
     }
 
     private fun logError(cause: Throwable) {
+        logError(cause.message, cause)
+    }
+
+    private fun logError(message: String?, cause: Throwable) {
         identityAnalyticsRequestFactory.genericError(
-            cause.message,
+            message,
             cause.javaClass.name
         )
     }

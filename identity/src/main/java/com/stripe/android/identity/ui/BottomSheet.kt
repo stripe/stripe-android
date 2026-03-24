@@ -35,13 +35,14 @@ import com.stripe.android.identity.networking.models.VerificationPageStaticConte
 import com.stripe.android.identity.networking.models.getContentDescriptionId
 import com.stripe.android.identity.networking.models.getResourceId
 import com.stripe.android.identity.viewmodel.BottomSheetViewModel
-import com.stripe.android.uicore.text.Html
 import com.stripe.android.uicore.utils.collectAsState
 import java.util.regex.Pattern
 
 @Composable
 @ExperimentalMaterialApi
-internal fun BottomSheet() {
+internal fun BottomSheet(
+    onHtmlError: (Throwable) -> Unit = {}
+) {
     val viewModel = viewModel<BottomSheetViewModel>()
     val state by viewModel.bottomSheetState.collectAsState()
     state.content?.let { bottomSheetContent ->
@@ -74,7 +75,10 @@ internal fun BottomSheet() {
                         .verticalScroll(rememberScrollState())
                 ) {
                     for (line in bottomSheetContent.lines) {
-                        BottomSheetLine(line)
+                        BottomSheetLine(
+                            line = line,
+                            onHtmlError = onHtmlError
+                        )
                     }
                 }
             }
@@ -94,7 +98,10 @@ internal fun BottomSheet() {
 }
 
 @Composable
-private fun BottomSheetLine(line: VerificationPageStaticContentBottomSheetLineContent) {
+private fun BottomSheetLine(
+    line: VerificationPageStaticContentBottomSheetLineContent,
+    onHtmlError: (Throwable) -> Unit
+) {
     Row(
         modifier = Modifier
             .testTag(BOTTOM_SHEET_LINE_TAG)
@@ -135,8 +142,9 @@ private fun BottomSheetLine(line: VerificationPageStaticContentBottomSheetLineCo
                     )
                 }
             } ?: run {
-                Html(
+                BottomSheetHTML(
                     html = line.content,
+                    bottomSheets = null,
                     color = MaterialTheme.colors.onSurface,
                     style = LocalTextStyle.current.merge(
                         lineHeight = 20.sp
@@ -144,7 +152,8 @@ private fun BottomSheetLine(line: VerificationPageStaticContentBottomSheetLineCo
                     urlSpanStyle = SpanStyle(
                         textDecoration = TextDecoration.Underline,
                         color = MaterialTheme.colors.onSurface
-                    )
+                    ),
+                    onError = onHtmlError
                 )
             }
         }

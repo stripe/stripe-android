@@ -90,6 +90,10 @@ internal abstract class CameraViewModel(
 
     override fun onResultFailure(t: Throwable): Boolean {
         Log.d(TAG, "Error executing result : $t, stop analyzing")
+        identityAnalyticsRequestFactory.genericError(
+            "Error executing result: ${t.message}",
+            t.javaClass.name
+        )
         return true
     }
 

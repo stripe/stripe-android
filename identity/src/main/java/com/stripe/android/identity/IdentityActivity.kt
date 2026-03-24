@@ -225,6 +225,7 @@ internal class IdentityActivity :
      * [CameraPermissionCheckingActivity.requestCameraPermission].
      */
     override fun showPermissionRationaleDialog() {
+        identityViewModel.identityAnalyticsRequestFactory.cameraPermissionRationaleShown()
         val builder = AlertDialog.Builder(this)
         builder.setMessage(R.string.stripe_camera_permission_rationale)
             .setPositiveButton(R.string.stripe_ok) { _, _ ->

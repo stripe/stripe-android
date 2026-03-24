@@ -222,6 +222,8 @@ internal fun IdentityNavGraph(
                     bottomButton = ErrorScreenButton(
                         buttonText = stringResource(id = R.string.stripe_app_settings)
                     ) {
+                        identityViewModel.identityAnalyticsRequestFactory
+                            .cameraPermissionAppSettingsClicked()
                         appSettingsOpenable.openAppSettings()
                         // navigate back to DocWarmup, so that when user is back to the app
                         // from settings
@@ -375,7 +377,11 @@ private fun NavGraphBuilder.screen(
 
         ModalBottomSheetLayout(
             sheetContent = {
-                BottomSheet()
+                BottomSheet(
+                    onHtmlError = {
+                        identityViewModel.errorCause.postValue(it)
+                    }
+                )
             },
             sheetState = modalSheetState,
             sheetGesturesEnabled = true,

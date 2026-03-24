@@ -74,7 +74,8 @@ internal fun DocumentScanScreen(
             context = context
         ) { cause ->
             identityViewModel.identityAnalyticsRequestFactory.cameraError(
-                scanType = IdentityScanState.ScanType.DOC_FRONT,
+                scanType = documentScanViewModel.targetScanTypeFlow.value
+                    ?: IdentityScanState.ScanType.DOC_FRONT,
                 throwable = IllegalStateException(cause)
             )
         }
