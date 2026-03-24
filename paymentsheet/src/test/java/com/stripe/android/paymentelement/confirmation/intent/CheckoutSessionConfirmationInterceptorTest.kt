@@ -464,6 +464,7 @@ class CheckoutSessionConfirmationInterceptorTest {
                 state = Checkout.State(
                     InternalState(
                         key = INSTANCES_KEY,
+                        configuration = Checkout.Configuration().build(),
                         checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
                     ),
                 ),

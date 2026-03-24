@@ -2517,6 +2517,7 @@ internal class DefaultFlowControllerTest {
         val state = Checkout.State(
             InternalState(
                 key = key,
+                configuration = Checkout.Configuration().build(),
                 checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
             ),
         )

@@ -472,6 +472,7 @@ internal class PaymentOptionsActivityTest {
             Checkout.State(
                 InternalState(
                     key = instancesKey,
+                    configuration = Checkout.Configuration().build(),
                     checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
                 ),
             ),

@@ -729,7 +729,7 @@ class CheckoutTest {
     }
 
     @Test
-    fun `concurrent calls to withSessionId are serialized`() = runTest {
+    fun `concurrent calls to withInternalState are serialized`() = runTest {
         runCreateWithStateScenario { checkout ->
             // First call: applyPromotionCode hits the initial session ID with promotion_code param.
             networkRule.checkoutUpdate(
@@ -835,6 +835,7 @@ class CheckoutTest {
         val state = Checkout.State(
             InternalState(
                 key = "CheckoutTest",
+                configuration = Checkout.Configuration().adaptivePricingAllowed(true).build(),
                 checkoutSessionResponse = initialResponse,
                 shippingName = "Jane Doe",
                 billingName = "John Doe",
@@ -848,6 +849,7 @@ class CheckoutTest {
         assertThat(checkout.internalState.shippingName).isEqualTo("Jane Doe")
         assertThat(checkout.internalState.billingName).isEqualTo("John Doe")
         assertThat(checkout.internalState.checkoutSessionResponse.id).isEqualTo("cs_test_updated")
+        assertThat(checkout.internalState.configuration.adaptivePricingAllowed).isTrue()
     }
 
     @Test
@@ -942,6 +944,35 @@ class CheckoutTest {
     }
 
     @Test
+    fun `configure sends adaptive_pricing allowed false by default`() = runConfigureScenario(
+        clientSecret = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example",
+        networkSetup = {
+            networkRule.checkoutInit(
+                bodyPart(urlEncode("adaptive_pricing[allowed]"), "false"),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-init.json")
+            }
+        },
+    ) { result ->
+        assertThat(result.isSuccess).isTrue()
+    }
+
+    @Test
+    fun `configure sends adaptive_pricing allowed true when configured`() = runConfigureScenario(
+        clientSecret = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example",
+        configuration = Checkout.Configuration().adaptivePricingAllowed(true),
+        networkSetup = {
+            networkRule.checkoutInit(
+                bodyPart(urlEncode("adaptive_pricing[allowed]"), "true"),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-init.json")
+            }
+        },
+    ) { result ->
+        assertThat(result.isSuccess).isTrue()
+    }
+
+    @Test
     fun `configure returns failure when network request fails`() = runConfigureScenario(
         clientSecret = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_xyz",
         networkSetup = {
@@ -961,6 +992,7 @@ class CheckoutTest {
         val state = Checkout.State(
             InternalState(
                 key = "CheckoutTest",
+                configuration = Checkout.Configuration().build(),
                 checkoutSessionResponse = checkoutSessionResponse,
             ),
         )
@@ -970,6 +1002,7 @@ class CheckoutTest {
 
     private fun runConfigureScenario(
         clientSecret: String,
+        configuration: Checkout.Configuration = Checkout.Configuration(),
         networkSetup: () -> Unit,
         block: suspend (Result<Checkout>) -> Unit,
     ) = runTest {
@@ -977,6 +1010,7 @@ class CheckoutTest {
         val result = Checkout.configure(
             context = applicationContext,
             checkoutSessionClientSecret = clientSecret,
+            configuration = configuration,
         )
         block(result)
     }

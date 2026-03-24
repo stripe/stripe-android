@@ -220,6 +220,7 @@ internal class PaymentSheetActivityTest {
             Checkout.State(
                 InternalState(
                     key = instancesKey,
+                    configuration = Checkout.Configuration().build(),
                     checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
                 ),
             ),
