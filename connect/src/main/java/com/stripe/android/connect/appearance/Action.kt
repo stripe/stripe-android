@@ -2,13 +2,11 @@ package com.stripe.android.connect.appearance
 
 import android.os.Parcelable
 import androidx.annotation.ColorInt
-import com.stripe.android.connect.PreviewConnectSDK
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
 @Poko
-@PreviewConnectSDK
 class Action private constructor(
     @ColorInt internal val colorText: Int? = null,
     internal val textTransform: TextTransform = TextTransform.None

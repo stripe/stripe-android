@@ -2,13 +2,11 @@ package com.stripe.android.connect.appearance
 
 import android.os.Parcelable
 import androidx.annotation.ColorInt
-import com.stripe.android.connect.PreviewConnectSDK
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
 @Poko
-@PreviewConnectSDK
 class Form private constructor(
     @ColorInt internal val colorBackground: Int? = null,
     @ColorInt internal val highlightBorder: Int? = null,

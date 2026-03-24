@@ -10,7 +10,9 @@ import androidx.core.content.ContextCompat
 import com.stripe.android.connect.appearance.Action
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.appearance.Badge
+import com.stripe.android.connect.appearance.BadgeDefaults
 import com.stripe.android.connect.appearance.Button
+import com.stripe.android.connect.appearance.ButtonDefaults
 import com.stripe.android.connect.appearance.Colors
 import com.stripe.android.connect.appearance.CornerRadius
 import com.stripe.android.connect.appearance.Form
@@ -467,35 +469,37 @@ data class AppearanceInfo(
                         .offsetBackground(context.getColorCompat(R.color.full_tokens_offset_background))
                         .build()
                 )
+                .buttonDefaults(
+                    ButtonDefaults(
+                        paddingX = 20f,
+                        paddingY = 20f,
+                        labelTypography = Typography.Style(
+                            fontSize = 15f,
+                            fontWeight = 600,
+                            textTransform = TextTransform.Uppercase,
+                        ),
+                    )
+                )
                 .buttonPrimary(
-                    Button.Builder()
-                        .colorBackground(context.getColorCompat(R.color.full_tokens_button_primary_background))
-                        .colorBorder(context.getColorCompat(R.color.full_tokens_button_primary_border))
-                        .colorText(context.getColorCompat(R.color.full_tokens_button_primary_text))
-                        .paddingX(16f)
-                        .paddingY(12f)
-                        .labelTypography(Typography.Style(fontSize = 15f, fontWeight = 600, textTransform = TextTransform.Uppercase))
-                        .build()
+                    Button(
+                        colorBackground = context.getColorCompat(R.color.full_tokens_button_primary_background),
+                        colorBorder = context.getColorCompat(R.color.full_tokens_button_primary_border),
+                        colorText = context.getColorCompat(R.color.full_tokens_button_primary_text),
+                    )
                 )
                 .buttonSecondary(
-                    Button.Builder()
-                        .colorBackground(context.getColorCompat(R.color.full_tokens_button_secondary_background))
-                        .colorBorder(context.getColorCompat(R.color.full_tokens_button_secondary_border))
-                        .colorText(context.getColorCompat(R.color.full_tokens_button_secondary_text))
-                        .paddingX(16f)
-                        .paddingY(12f)
-                        .labelTypography(Typography.Style(fontSize = 14f, fontWeight = 500, textTransform = TextTransform.None))
-                        .build()
+                    Button(
+                        colorBackground = context.getColorCompat(R.color.full_tokens_button_secondary_background),
+                        colorBorder = context.getColorCompat(R.color.full_tokens_button_secondary_border),
+                        colorText = context.getColorCompat(R.color.full_tokens_button_secondary_text),
+                    )
                 )
                 .buttonDanger(
-                    Button.Builder()
-                        .colorBackground(context.getColorCompat(R.color.full_tokens_button_danger_background))
-                        .colorBorder(context.getColorCompat(R.color.full_tokens_button_danger_border))
-                        .colorText(context.getColorCompat(R.color.full_tokens_button_danger_text))
-                        .paddingX(16f)
-                        .paddingY(12f)
-                        .labelTypography(Typography.Style(fontSize = 14f, fontWeight = 600, textTransform = TextTransform.Uppercase))
-                        .build()
+                    Button(
+                        colorBackground = context.getColorCompat(R.color.full_tokens_button_danger_background),
+                        colorBorder = context.getColorCompat(R.color.full_tokens_button_danger_border),
+                        colorText = context.getColorCompat(R.color.full_tokens_button_danger_text),
+                    )
                 )
                 .actionPrimaryText(
                     Action.Builder()
@@ -509,45 +513,44 @@ data class AppearanceInfo(
                         .textTransform(TextTransform.Lowercase)
                         .build()
                 )
+                .badgeDefaults(
+                    BadgeDefaults(
+                        paddingX = 10f,
+                        paddingY = 4f,
+                        labelTypography = Typography.Style(
+                            fontSize = 12f,
+                            fontWeight = 600,
+                            textTransform = TextTransform.Uppercase,
+                        ),
+                    )
+                )
                 .badgeNeutral(
-                    Badge.Builder()
-                        .colorBackground(context.getColorCompat(R.color.full_tokens_badge_neutral_background))
-                        .colorBorder(context.getColorCompat(R.color.full_tokens_badge_neutral_border))
-                        .colorText(context.getColorCompat(R.color.full_tokens_badge_neutral_text))
-                        .paddingX(10f)
-                        .paddingY(4f)
-                        .labelTypography(Typography.Style(fontSize = 12f, fontWeight = 600, textTransform = TextTransform.Uppercase))
-                        .build()
+                    Badge(
+                        colorBackground = context.getColorCompat(R.color.full_tokens_badge_neutral_background),
+                        colorBorder = context.getColorCompat(R.color.full_tokens_badge_neutral_border),
+                        colorText = context.getColorCompat(R.color.full_tokens_badge_neutral_text),
+                    )
                 )
                 .badgeSuccess(
-                    Badge.Builder()
-                        .colorBackground(context.getColorCompat(R.color.full_tokens_badge_success_background))
-                        .colorBorder(context.getColorCompat(R.color.full_tokens_badge_success_border))
-                        .colorText(context.getColorCompat(R.color.full_tokens_badge_success_text))
-                        .paddingX(10f)
-                        .paddingY(4f)
-                        .labelTypography(Typography.Style(fontSize = 12f, fontWeight = 600, textTransform = TextTransform.None))
-                        .build()
+                    Badge(
+                        colorBackground = context.getColorCompat(R.color.full_tokens_badge_success_background),
+                        colorBorder = context.getColorCompat(R.color.full_tokens_badge_success_border),
+                        colorText = context.getColorCompat(R.color.full_tokens_badge_success_text),
+                    )
                 )
                 .badgeWarning(
-                    Badge.Builder()
-                        .colorBackground(context.getColorCompat(R.color.full_tokens_badge_warning_background))
-                        .colorBorder(context.getColorCompat(R.color.full_tokens_badge_warning_border))
-                        .colorText(context.getColorCompat(R.color.full_tokens_badge_warning_text))
-                        .paddingX(10f)
-                        .paddingY(4f)
-                        .labelTypography(Typography.Style(fontSize = 12f, fontWeight = 500, textTransform = TextTransform.Capitalize))
-                        .build()
+                    Badge(
+                        colorBackground = context.getColorCompat(R.color.full_tokens_badge_warning_background),
+                        colorBorder = context.getColorCompat(R.color.full_tokens_badge_warning_border),
+                        colorText = context.getColorCompat(R.color.full_tokens_badge_warning_text),
+                    )
                 )
                 .badgeDanger(
-                    Badge.Builder()
-                        .colorBackground(context.getColorCompat(R.color.full_tokens_badge_danger_background))
-                        .colorBorder(context.getColorCompat(R.color.full_tokens_badge_danger_border))
-                        .colorText(context.getColorCompat(R.color.full_tokens_badge_danger_text))
-                        .paddingX(10f)
-                        .paddingY(4f)
-                        .labelTypography(Typography.Style(fontSize = 12f, fontWeight = 600, textTransform = TextTransform.Uppercase))
-                        .build()
+                    Badge(
+                        colorBackground = context.getColorCompat(R.color.full_tokens_badge_danger_background),
+                        colorBorder = context.getColorCompat(R.color.full_tokens_badge_danger_border),
+                        colorText = context.getColorCompat(R.color.full_tokens_badge_danger_text),
+                    )
                 )
                 .form(
                     Form.Builder()

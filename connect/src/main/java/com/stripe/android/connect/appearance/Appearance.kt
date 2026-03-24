@@ -1,9 +1,6 @@
-@file:OptIn(com.stripe.android.connect.PreviewConnectSDK::class)
-
 package com.stripe.android.connect.appearance
 
 import android.os.Parcelable
-import com.stripe.android.connect.PreviewConnectSDK
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
@@ -17,10 +14,12 @@ class Appearance private constructor(
     internal val buttonPrimary: Button,
     internal val buttonSecondary: Button,
     internal val buttonDanger: Button,
+    internal val buttonDefaults: ButtonDefaults,
     internal val badgeNeutral: Badge,
     internal val badgeSuccess: Badge,
     internal val badgeWarning: Badge,
     internal val badgeDanger: Badge,
+    internal val badgeDefaults: BadgeDefaults,
     internal val actionPrimaryText: Action,
     internal val actionSecondaryText: Action,
     internal val form: Form,
@@ -36,10 +35,12 @@ class Appearance private constructor(
         private var buttonPrimary: Button = Button.default()
         private var buttonSecondary: Button = Button.default()
         private var buttonDanger: Button = Button.default()
+        private var buttonDefaults: ButtonDefaults = ButtonDefaults.default()
         private var badgeNeutral: Badge = Badge.default()
         private var badgeSuccess: Badge = Badge.default()
         private var badgeWarning: Badge = Badge.default()
         private var badgeDanger: Badge = Badge.default()
+        private var badgeDefaults: BadgeDefaults = BadgeDefaults.default()
         private var actionPrimaryText: Action = Action.default()
         private var actionSecondaryText: Action = Action.default()
         private var form: Form = Form.default()
@@ -85,9 +86,14 @@ class Appearance private constructor(
         /**
          * Describes the danger button appearance settings.
          */
-        @PreviewConnectSDK
         fun buttonDanger(buttonDanger: Button): Builder =
             apply { this.buttonDanger = buttonDanger }
+
+        /**
+         * Describes the padding and label typography shared by all button variants.
+         */
+        fun buttonDefaults(buttonDefaults: ButtonDefaults): Builder =
+            apply { this.buttonDefaults = buttonDefaults }
 
         /**
          * Describes the neutral badge appearance settings.
@@ -114,30 +120,32 @@ class Appearance private constructor(
             apply { this.badgeDanger = badgeDanger }
 
         /**
+         * Describes the padding and label typography shared by all badge variants.
+         */
+        fun badgeDefaults(badgeDefaults: BadgeDefaults): Builder =
+            apply { this.badgeDefaults = badgeDefaults }
+
+        /**
          * Describes the primary action text appearance settings.
          */
-        @PreviewConnectSDK
         fun actionPrimaryText(actionPrimaryText: Action): Builder =
             apply { this.actionPrimaryText = actionPrimaryText }
 
         /**
          * Describes the secondary action text appearance settings.
          */
-        @PreviewConnectSDK
         fun actionSecondaryText(actionSecondaryText: Action): Builder =
             apply { this.actionSecondaryText = actionSecondaryText }
 
         /**
          * Describes the form appearance settings.
          */
-        @PreviewConnectSDK
         fun form(form: Form): Builder =
             apply { this.form = form }
 
         /**
          * Describes the vertical table row padding appearance settings.
          */
-        @PreviewConnectSDK
         fun tableRowPaddingY(tableRowPaddingY: Float): Builder =
             apply { this.tableRowPaddingY = tableRowPaddingY }
 
@@ -150,10 +158,12 @@ class Appearance private constructor(
                 buttonPrimary = buttonPrimary,
                 buttonSecondary = buttonSecondary,
                 buttonDanger = buttonDanger,
+                buttonDefaults = buttonDefaults,
                 badgeNeutral = badgeNeutral,
                 badgeSuccess = badgeSuccess,
                 badgeWarning = badgeWarning,
                 badgeDanger = badgeDanger,
+                badgeDefaults = badgeDefaults,
                 actionPrimaryText = actionPrimaryText,
                 actionSecondaryText = actionSecondaryText,
                 form = form,
