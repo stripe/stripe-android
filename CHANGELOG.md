@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### Identity
+* [CHANGED] Improved selfie capture quality with motion blur gating, center framing validation, and better best-frame selection.
+
 ### PaymentSheet
 [FIXED][12653](https://github.com/stripe/stripe-android/pull/12653) Fixed a bug where `PaymentSheet.FlowController` wouldn't emit a null `PaymentOption` from `PaymentOptionCallback` after a successful confirmation.
 
