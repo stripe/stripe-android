@@ -4,7 +4,6 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.annotation.RestrictTo
-import com.stripe.android.core.AppInfo
 import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.utils.PluginDetector
 import com.stripe.android.core.version.StripeSdkVersion
@@ -20,7 +19,6 @@ open class AnalyticsRequestFactory(
     private val publishableKeyProvider: Provider<String>,
     private val networkTypeProvider: Provider<String?>,
     private val pluginTypeProvider: Provider<String?> = PLUGIN_TYPE_PROVIDER,
-    private val appInfo: AppInfo? = null,
 ) {
     /**
      * Builds an Analytics request for the given [AnalyticsEvent],
@@ -69,7 +67,7 @@ open class AnalyticsRequestFactory(
         AnalyticsFields.SESSION_ID to sessionId,
         AnalyticsFields.TIMESTAMP to System.currentTimeMillis() / MILLIS_TO_SECONDS,
         AnalyticsFields.LOCALE to Locale.getDefault().toString(),
-    ) + networkType() + pluginType() + libraryParams()
+    ) + networkType() + pluginType()
 
     private fun networkType(): Map<String, String> {
         val networkType = networkTypeProvider.get() ?: return emptyMap()
@@ -80,15 +78,6 @@ open class AnalyticsRequestFactory(
         return pluginTypeProvider.get()?.let { pluginType ->
             mapOf(AnalyticsFields.PLUGIN_TYPE to pluginType)
         } ?: emptyMap()
-    }
-
-    private fun libraryParams(): Map<String, String> {
-        val appInfoParams = appInfo?.toParamMap().orEmpty()
-
-        return listOfNotNull(
-            appInfoParams["name"]?.let { AnalyticsFields.LIBRARY_NAME to it },
-            appInfoParams["version"]?.let { AnalyticsFields.LIBRARY_VERSION to it },
-        ).toMap()
     }
 
     internal fun appDataParams(): Map<String, Any> {

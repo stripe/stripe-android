@@ -465,8 +465,8 @@ class PaymentAnalyticsRequestFactoryTest {
     fun `createRequest includes Stripe app info library fields when available`() {
         val originalAppInfo = Stripe.appInfo
         Stripe.appInfo = AppInfo.create(
-            "MyAwesomePlugin",
-            "1.2.34"
+            name = "MyAwesomePlugin",
+            version = "1.2.34",
         )
 
         try {
@@ -481,6 +481,15 @@ class PaymentAnalyticsRequestFactoryTest {
 
             assertThat(params[AnalyticsFields.LIBRARY_NAME]).isEqualTo("MyAwesomePlugin")
             assertThat(params[AnalyticsFields.LIBRARY_VERSION]).isEqualTo("1.2.34")
+
+            Stripe.appInfo = null
+
+            val updatedParams = analyticsRequestFactory.createSourceCreation(
+                Source.SourceType.CARD
+            ).params
+
+            assertThat(updatedParams).doesNotContainKey(AnalyticsFields.LIBRARY_NAME)
+            assertThat(updatedParams).doesNotContainKey(AnalyticsFields.LIBRARY_VERSION)
         } finally {
             Stripe.appInfo = originalAppInfo
         }
