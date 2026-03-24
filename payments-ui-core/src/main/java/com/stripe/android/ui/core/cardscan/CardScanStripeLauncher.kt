@@ -106,7 +106,7 @@ internal class CardScanStripeLauncher(
             eventsReporter: CardScanEventsReporter,
             onResult: (CardScanResult) -> Unit,
         ): CardScanStripeLauncher {
-            val context = LocalContext.current
+            val context = LocalContext.current.applicationContext
             val isLaunchingState = rememberSaveable { mutableStateOf(false) }
             val launcher = remember(eventsReporter, context) {
                 CardScanStripeLauncher(
