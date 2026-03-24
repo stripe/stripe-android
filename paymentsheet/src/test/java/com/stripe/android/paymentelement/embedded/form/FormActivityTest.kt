@@ -18,7 +18,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.checkout.CheckoutInstancesTestRule
-import com.stripe.android.checkout.InternalState
+import com.stripe.android.checkout.CheckoutStateFactory
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
@@ -31,7 +31,6 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.manage.ManageActivity
 import com.stripe.android.paymentsheet.createCustomerState
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.paymentelementtestpages.FormPage
@@ -115,13 +114,7 @@ internal class FormActivityTest {
         val instancesKey = "test-checkout-key"
         val checkout = Checkout.createWithState(
             applicationContext,
-            Checkout.State(
-                InternalState(
-                    key = instancesKey,
-                    configuration = Checkout.Configuration().build(),
-                    checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
-                ),
-            ),
+            CheckoutStateFactory.create(key = instancesKey),
         )
         CheckoutInstances.markIntegrationLaunched(instancesKey)
 

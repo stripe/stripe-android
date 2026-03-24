@@ -9,7 +9,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkout.CheckoutInstancesTestRule
-import com.stripe.android.checkout.InternalState
+import com.stripe.android.checkout.CheckoutStateFactory
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.isInstanceOf
@@ -32,7 +32,6 @@ import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.createCustomerState
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.DummyActivityResultCaller.RegisterCall
 import com.stripe.android.testing.FakeErrorReporter
@@ -448,7 +447,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
 
     @Test
     fun `launchForm throws when checkout mutation is in flight`() = testScenario {
-        val checkout = createCheckout(key = "test_key")
+        val checkout = Checkout.createWithState(applicationContext, CheckoutStateFactory.create(key = "test_key"))
         networkRule.checkoutUpdate { response ->
             response.setBodyDelay(5, TimeUnit.SECONDS)
             response.testBodyFromFile("checkout-session-apply-discount.json")
@@ -475,7 +474,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
 
     @Test
     fun `launchManage throws when checkout mutation is in flight`() = testScenario {
-        val checkout = createCheckout(key = "test_key")
+        val checkout = Checkout.createWithState(applicationContext, CheckoutStateFactory.create(key = "test_key"))
         networkRule.checkoutUpdate { response ->
             response.setBodyDelay(5, TimeUnit.SECONDS)
             response.testBodyFromFile("checkout-session-apply-discount.json")
@@ -584,17 +583,6 @@ internal class DefaultEmbeddedSheetLauncherTest {
 
             callbackHelper.validate()
         }
-    }
-
-    private fun createCheckout(key: String): Checkout {
-        val state = Checkout.State(
-            InternalState(
-                key = key,
-                configuration = Checkout.Configuration().build(),
-                checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
-            ),
-        )
-        return Checkout.createWithState(applicationContext, state)
     }
 
     private class Scenario(

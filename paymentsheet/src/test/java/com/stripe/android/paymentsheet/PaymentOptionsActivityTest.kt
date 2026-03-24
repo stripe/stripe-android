@@ -29,7 +29,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.checkout.CheckoutInstancesTestRule
-import com.stripe.android.checkout.InternalState
+import com.stripe.android.checkout.CheckoutStateFactory
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.core.strings.resolvableString
@@ -49,7 +49,6 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.StripeAndroidPrimaryButtonBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
@@ -469,13 +468,7 @@ internal class PaymentOptionsActivityTest {
         val instancesKey = "test-checkout-key"
         val checkout = Checkout.createWithState(
             context,
-            Checkout.State(
-                InternalState(
-                    key = instancesKey,
-                    configuration = Checkout.Configuration().build(),
-                    checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
-                ),
-            ),
+            CheckoutStateFactory.create(key = instancesKey),
         )
         CheckoutInstances.markIntegrationLaunched(instancesKey)
 

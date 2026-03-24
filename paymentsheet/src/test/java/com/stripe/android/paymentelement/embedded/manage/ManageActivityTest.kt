@@ -11,7 +11,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.checkout.CheckoutInstancesTestRule
-import com.stripe.android.checkout.InternalState
+import com.stripe.android.checkout.CheckoutStateFactory
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
@@ -26,7 +26,6 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.RetryRule
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -204,13 +203,7 @@ internal class ManageActivityTest {
         val instancesKey = "test-checkout-key"
         val checkout = Checkout.createWithState(
             applicationContext,
-            Checkout.State(
-                InternalState(
-                    key = instancesKey,
-                    configuration = Checkout.Configuration().build(),
-                    checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
-                ),
-            ),
+            CheckoutStateFactory.create(key = instancesKey),
         )
         CheckoutInstances.markIntegrationLaunched(instancesKey)
 

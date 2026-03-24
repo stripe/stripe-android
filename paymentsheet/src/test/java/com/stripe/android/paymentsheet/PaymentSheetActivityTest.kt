@@ -38,7 +38,7 @@ import com.stripe.android.CardFundingFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkout.CheckoutInstances
-import com.stripe.android.checkout.InternalState
+import com.stripe.android.checkout.CheckoutStateFactory
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.core.Logger
@@ -87,7 +87,6 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSaved
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.FakeBacsMandateConfirmationLauncher
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Args
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
@@ -217,13 +216,7 @@ internal class PaymentSheetActivityTest {
         val instancesKey = "test-checkout-key"
         val checkout = Checkout.createWithState(
             context,
-            Checkout.State(
-                InternalState(
-                    key = instancesKey,
-                    configuration = Checkout.Configuration().build(),
-                    checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
-                ),
-            ),
+            CheckoutStateFactory.create(key = instancesKey),
         )
         CheckoutInstances.markIntegrationLaunched(instancesKey)
 

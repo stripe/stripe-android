@@ -3,12 +3,10 @@ package com.stripe.android.checkout
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -48,7 +46,7 @@ class CheckoutInstancesTest {
 
     @Test
     fun `add and get round-trips single instance`() {
-        val checkout = createCheckout(key = "key1")
+        val checkout = Checkout.createWithState(applicationContext, CheckoutStateFactory.create(key = "key1"))
         CheckoutInstances.clear()
 
         CheckoutInstances.add("key1", checkout)
@@ -58,8 +56,8 @@ class CheckoutInstancesTest {
 
     @Test
     fun `add multiple instances with same key returns all`() {
-        val checkout1 = createCheckout(key = "key1")
-        val checkout2 = createCheckout(key = "key1")
+        val checkout1 = Checkout.createWithState(applicationContext, CheckoutStateFactory.create(key = "key1"))
+        val checkout2 = Checkout.createWithState(applicationContext, CheckoutStateFactory.create(key = "key1"))
         CheckoutInstances.clear()
 
         CheckoutInstances.add("key1", checkout1)
@@ -70,7 +68,7 @@ class CheckoutInstancesTest {
 
     @Test
     fun `remove clears all instances for a key`() {
-        val checkout = createCheckout(key = "key1")
+        val checkout = Checkout.createWithState(applicationContext, CheckoutStateFactory.create(key = "key1"))
         CheckoutInstances.clear()
 
         CheckoutInstances.add("key1", checkout)
@@ -82,8 +80,8 @@ class CheckoutInstancesTest {
 
     @Test
     fun `clear empties the map`() {
-        val checkout1 = createCheckout(key = "key1")
-        val checkout2 = createCheckout(key = "key2")
+        val checkout1 = Checkout.createWithState(applicationContext, CheckoutStateFactory.create(key = "key1"))
+        val checkout2 = Checkout.createWithState(applicationContext, CheckoutStateFactory.create(key = "key2"))
         CheckoutInstances.clear()
 
         CheckoutInstances.add("key1", checkout1)
@@ -102,7 +100,7 @@ class CheckoutInstancesTest {
 
     @Test
     fun `ensureNoMutationInFlight throws when mutation is in flight`() {
-        val checkout = createCheckout(key = "key1")
+        val checkout = Checkout.createWithState(applicationContext, CheckoutStateFactory.create(key = "key1"))
         val requestArrived = CountDownLatch(1)
         val holdResponse = CountDownLatch(1)
 
@@ -132,8 +130,8 @@ class CheckoutInstancesTest {
 
     @Test
     fun `markIntegrationLaunched marks all instances for a key`() = runTest {
-        val checkout1 = createCheckout(key = "key1")
-        val checkout2 = createCheckout(key = "key1")
+        val checkout1 = Checkout.createWithState(applicationContext, CheckoutStateFactory.create(key = "key1"))
+        val checkout2 = Checkout.createWithState(applicationContext, CheckoutStateFactory.create(key = "key1"))
         CheckoutInstances.clear()
         CheckoutInstances.add("key1", checkout1)
         CheckoutInstances.add("key1", checkout2)
@@ -151,8 +149,8 @@ class CheckoutInstancesTest {
 
     @Test
     fun `markIntegrationDismissed clears the flag for all instances`() = runTest {
-        val checkout1 = createCheckout(key = "key1")
-        val checkout2 = createCheckout(key = "key1")
+        val checkout1 = Checkout.createWithState(applicationContext, CheckoutStateFactory.create(key = "key1"))
+        val checkout2 = Checkout.createWithState(applicationContext, CheckoutStateFactory.create(key = "key1"))
         CheckoutInstances.clear()
         CheckoutInstances.add("key1", checkout1)
         CheckoutInstances.add("key1", checkout2)
@@ -179,8 +177,8 @@ class CheckoutInstancesTest {
 
     @Test
     fun `multiple keys coexist independently`() {
-        val checkout1 = createCheckout(key = "key1")
-        val checkout2 = createCheckout(key = "key2")
+        val checkout1 = Checkout.createWithState(applicationContext, CheckoutStateFactory.create(key = "key1"))
+        val checkout2 = Checkout.createWithState(applicationContext, CheckoutStateFactory.create(key = "key2"))
         CheckoutInstances.clear()
 
         CheckoutInstances.add("key1", checkout1)
@@ -188,30 +186,5 @@ class CheckoutInstancesTest {
 
         assertThat(CheckoutInstances["key1"]).containsExactly(checkout1)
         assertThat(CheckoutInstances["key2"]).containsExactly(checkout2)
-    }
-
-    private fun createCheckout(key: String): Checkout {
-        val state = InternalState(
-            key = key,
-            configuration = Checkout.Configuration().build(),
-            checkoutSessionResponse = CheckoutSessionResponse(
-                id = DEFAULT_CHECKOUT_SESSION_ID,
-                amount = 1000L,
-                currency = "usd",
-                mode = CheckoutSessionResponse.Mode.PAYMENT,
-                customerEmail = null,
-                elementsSession = null,
-                paymentIntent = null,
-                setupIntent = null,
-                customer = null,
-                savedPaymentMethodsOfferSave = null,
-                totalSummary = null,
-                lineItems = emptyList(),
-                shippingOptions = emptyList(),
-                adaptivePricingInfo = null,
-            ),
-        )
-        val checkout = Checkout.createWithState(applicationContext, Checkout.State(state))
-        return checkout
     }
 }
