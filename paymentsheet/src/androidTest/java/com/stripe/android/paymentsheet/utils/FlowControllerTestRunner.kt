@@ -17,6 +17,7 @@ import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.model.PaymentOption
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -123,6 +124,8 @@ internal fun runFlowControllerTest(
         )
         runTest {
             block(testContext)
+
+            delay(500)
         }
 
         testContext.configureCallbackTurbine.ensureAllEventsConsumed()
