@@ -256,7 +256,7 @@ class CheckoutTest {
     }
 
     @Test
-    fun `selectShippingRate updates checkoutSession on success`() = runTest {
+    fun `selectShippingOption updates checkoutSession on success`() = runTest {
         runCreateWithStateScenario { checkout ->
             networkRule.checkoutUpdate(
                 bodyPart("shipping_rate", "shr_express"),
@@ -268,7 +268,7 @@ class CheckoutTest {
             checkout.checkoutSession.test {
                 assertThat(awaitItem().shippingOptions).isEmpty()
 
-                val result = checkout.selectShippingRate("shr_express")
+                val result = checkout.selectShippingOption("shr_express")
 
                 val updated = awaitItem()
                 assertThat(result.getOrThrow()).isEqualTo(updated)
@@ -709,7 +709,7 @@ class CheckoutTest {
     }
 
     @Test
-    fun `selectShippingRate returns failure on error response`() = runTest {
+    fun `selectShippingOption returns failure on error response`() = runTest {
         runCreateWithStateScenario { checkout ->
             networkRule.checkoutUpdate { response ->
                 response.setResponseCode(400)
@@ -719,7 +719,7 @@ class CheckoutTest {
             checkout.checkoutSession.test {
                 val initial = awaitItem()
 
-                val result = checkout.selectShippingRate("shr_invalid")
+                val result = checkout.selectShippingOption("shr_invalid")
                 assertThat(result.isFailure).isTrue()
 
                 expectNoEvents()
