@@ -195,19 +195,30 @@ internal class DefaultCustomerSheetLoader(
             selection = paymentSelection as? PaymentSelection.Saved
         )
 
-        val supportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
-
-        val validSupportedPaymentMethods = filterSupportedPaymentMethods(supportedPaymentMethods)
+        val supportedPaymentMethods = getSupportedPaymentMethods(metadata)
 
         return CustomerSheetState.Full(
             config = configuration,
             paymentMethodMetadata = metadata,
-            supportedPaymentMethods = validSupportedPaymentMethods,
+            supportedPaymentMethods = supportedPaymentMethods,
             customerPaymentMethods = sortedPaymentMethods,
             paymentSelection = paymentSelection,
             validationError = customerSheetSession.elementsSession.stripeIntent.validate(),
             customerPermissions = customerSheetSession.permissions,
         )
+    }
+
+    private fun getSupportedPaymentMethods(metadata: PaymentMethodMetadata): List<SupportedPaymentMethod> {
+        val supportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
+
+        val validSupportedPaymentMethods = filterSupportedPaymentMethods(supportedPaymentMethods)
+
+        require(validSupportedPaymentMethods.isNotEmpty()) {
+            "No supported payment methods were found. " +
+                "Ensure your integration is configured to accept card or US bank account payments."
+        }
+
+        return supportedPaymentMethods
     }
 
     private fun getPaymentSelection(

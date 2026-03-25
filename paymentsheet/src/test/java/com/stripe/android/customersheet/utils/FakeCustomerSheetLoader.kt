@@ -21,7 +21,7 @@ import kotlinx.coroutines.delay
 import kotlin.time.Duration
 
 internal class FakeCustomerSheetLoader(
-    private val stripeIntent: StripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
+    private val stripeIntent: StripeIntent = PaymentIntentFixtures.PI_SUCCEEDED_WITH_US_BANK,
     private val shouldFail: Boolean = false,
     private val customerPaymentMethods: List<PaymentMethod> = emptyList(),
     private val supportedPaymentMethods: List<SupportedPaymentMethod> = listOf(

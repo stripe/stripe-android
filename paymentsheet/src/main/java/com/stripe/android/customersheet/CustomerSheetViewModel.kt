@@ -791,8 +791,7 @@ internal class CustomerSheetViewModel(
         val paymentMethodMetadata = requireNotNull(customerState.metadata)
 
         val paymentMethodCode = previouslySelectedPaymentMethod?.code
-            ?: paymentMethodMetadata.supportedPaymentMethodTypes().firstOrNull()
-            ?: PaymentMethod.Type.Card.code
+            ?: supportedPaymentMethods.first().code
 
         val formArguments = FormArgumentsFactory.create(
             paymentMethodCode = paymentMethodCode,
