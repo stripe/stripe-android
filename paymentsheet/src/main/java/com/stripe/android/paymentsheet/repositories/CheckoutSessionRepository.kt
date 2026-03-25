@@ -55,6 +55,7 @@ internal class CheckoutSessionRepository @Inject constructor(
 
     suspend fun init(
         sessionId: String,
+        adaptivePricingAllowed: Boolean,
     ): Result<CheckoutSessionResponse> = executePost(
         url = initUrl(sessionId),
         params = mapOf(
@@ -63,6 +64,7 @@ internal class CheckoutSessionRepository @Inject constructor(
             "eid" to UUID.randomUUID().toString(),
             "redirect_type" to "embedded",
             "elements_session_client[is_aggregation_expected]" to "true",
+            "adaptive_pricing[allowed]" to adaptivePricingAllowed.toString(),
         ),
     )
 
@@ -144,6 +146,17 @@ internal class CheckoutSessionRepository @Inject constructor(
         params = mapOf(
             "tax_id_collection[tax_id][type]" to type,
             "tax_id_collection[tax_id][value]" to value,
+            "elements_session_client[is_aggregation_expected]" to "true",
+        ),
+    )
+
+    suspend fun updateCurrency(
+        sessionId: String,
+        currencyCode: String,
+    ): Result<CheckoutSessionResponse> = executePost(
+        url = updateUrl(sessionId),
+        params = mapOf(
+            "updated_currency" to currencyCode,
             "elements_session_client[is_aggregation_expected]" to "true",
         ),
     )

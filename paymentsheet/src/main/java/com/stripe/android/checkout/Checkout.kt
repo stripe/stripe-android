@@ -29,12 +29,18 @@ class Checkout private constructor(
         suspend fun configure(
             context: Context,
             checkoutSessionClientSecret: String,
+            configuration: Configuration = Configuration(),
         ): Result<Checkout> {
             val component = DaggerCheckoutComponent.factory().create(context.applicationContext)
-            return component.checkoutSessionLoader.load(checkoutSessionClientSecret).map { response ->
+            val configurationState = configuration.build()
+            return component.checkoutSessionRepository.init(
+                sessionId = checkoutSessionClientSecret.substringBefore("_secret_"),
+                adaptivePricingAllowed = configurationState.adaptivePricingAllowed,
+            ).map { response ->
                 Checkout(
                     internalState = InternalState(
                         key = UUID.randomUUID().toString(),
+                        configuration = configurationState,
                         checkoutSessionResponse = response,
                     ),
                     component,
@@ -62,6 +68,25 @@ class Checkout private constructor(
         internal val internalState: InternalState,
     ) : Parcelable
 
+    @CheckoutSessionPreview
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    class Configuration {
+        private var adaptivePricingAllowed: Boolean = false
+
+        fun adaptivePricingAllowed(adaptivePricingAllowed: Boolean) = apply {
+            this.adaptivePricingAllowed = adaptivePricingAllowed
+        }
+
+        @Parcelize
+        internal data class State(
+            val adaptivePricingAllowed: Boolean,
+        ) : Parcelable
+
+        internal fun build() = State(
+            adaptivePricingAllowed = adaptivePricingAllowed,
+        )
+    }
+
     @Volatile
     internal var internalState: InternalState = internalState
         private set
@@ -84,25 +109,25 @@ class Checkout private constructor(
 
     suspend fun applyPromotionCode(
         promotionCode: String,
-    ): Result<CheckoutSession> = withSessionId { sessionId ->
+    ): Result<CheckoutSession> = withInternalState { sessionId ->
         component.checkoutSessionRepository.applyPromotionCode(sessionId, promotionCode.trim())
     }
 
     suspend fun updateLineItemQuantity(
         lineItemId: String,
         quantity: Int,
-    ): Result<CheckoutSession> = withSessionId { sessionId ->
+    ): Result<CheckoutSession> = withInternalState { sessionId ->
         component.checkoutSessionRepository.updateLineItemQuantity(sessionId, lineItemId, quantity)
     }
 
-    suspend fun removePromotionCode(): Result<CheckoutSession> = withSessionId { sessionId ->
+    suspend fun removePromotionCode(): Result<CheckoutSession> = withInternalState { sessionId ->
         component.checkoutSessionRepository.applyPromotionCode(sessionId, "")
     }
 
-    suspend fun selectShippingRate(
-        shippingRateId: String,
-    ): Result<CheckoutSession> = withSessionId { sessionId ->
-        component.checkoutSessionRepository.selectShippingRate(sessionId, shippingRateId)
+    suspend fun selectShippingOption(
+        id: String,
+    ): Result<CheckoutSession> = withInternalState { sessionId ->
+        component.checkoutSessionRepository.selectShippingRate(sessionId, id)
     }
 
     suspend fun updateShippingAddress(
@@ -111,7 +136,7 @@ class Checkout private constructor(
         address: Address,
     ): Result<CheckoutSession> {
         val built = address.build()
-        return withSessionId(
+        return withInternalState(
             additionalStateMutations = {
                 copy(shippingName = name, shippingPhoneNumber = phoneNumber, shippingAddress = built)
             },
@@ -123,7 +148,7 @@ class Checkout private constructor(
     suspend fun updateTaxId(
         type: String,
         value: String,
-    ): Result<CheckoutSession> = withSessionId { sessionId ->
+    ): Result<CheckoutSession> = withInternalState { sessionId ->
         component.checkoutSessionRepository.updateTaxId(sessionId, type.trim(), value.trim())
     }
 
@@ -133,7 +158,7 @@ class Checkout private constructor(
         address: Address,
     ): Result<CheckoutSession> {
         val built = address.build()
-        return withSessionId(
+        return withInternalState(
             additionalStateMutations = {
                 copy(billingName = name, billingPhoneNumber = phoneNumber, billingAddress = built)
             },
@@ -142,8 +167,11 @@ class Checkout private constructor(
         }
     }
 
-    suspend fun refresh(): Result<CheckoutSession> = withSessionId { sessionId ->
-        component.checkoutSessionRepository.init(sessionId)
+    suspend fun refresh(): Result<CheckoutSession> = withInternalState { sessionId ->
+        component.checkoutSessionRepository.init(
+            sessionId = sessionId,
+            adaptivePricingAllowed = configuration.adaptivePricingAllowed
+        )
     }
 
     internal fun markIntegrationLaunched() {
@@ -167,9 +195,9 @@ class Checkout private constructor(
         _checkoutSession.value = response.asCheckoutSession()
     }
 
-    private suspend fun withSessionId(
+    private suspend fun withInternalState(
         additionalStateMutations: InternalState.() -> InternalState = { this },
-        block: suspend (sessionId: String) -> Result<CheckoutSessionResponse>,
+        block: suspend InternalState.(sessionId: String) -> Result<CheckoutSessionResponse>,
     ): Result<CheckoutSession> {
         if (internalState.integrationLaunched) {
             return Result.failure(
@@ -180,7 +208,7 @@ class Checkout private constructor(
         }
         // Run network requests with a mutex to ensure events are processed in order.
         return mutex.withLock {
-            block(internalState.checkoutSessionResponse.id).map { response ->
+            internalState.block(internalState.checkoutSessionResponse.id).map { response ->
                 internalState = internalState.copy(checkoutSessionResponse = response).additionalStateMutations()
                 val checkoutSession = response.asCheckoutSession()
                 _checkoutSession.value = checkoutSession

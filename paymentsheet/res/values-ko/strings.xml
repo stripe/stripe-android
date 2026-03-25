@@ -267,6 +267,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_tap_to_add_card_button_label">탭하여 카드 추가</string>
   <!-- Title for screen indicating to the user that they have completed a payment of a specified amount -->
   <string name="stripe_tap_to_add_paid_label">%s 지불됨</string>
+  <!-- Error message shown when Tap to Add is not supported by the current device. -->
+  <string name="stripe_tap_to_add_unsupported_device_error">사용 중인 장치에서는 탭하여 추가 기능을 지원하지 않습니다</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">취소 및 다른 방법으로 결제</string>
   <!-- Text on a screen asking the user to approve a payment -->

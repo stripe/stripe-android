@@ -2,6 +2,7 @@ package com.stripe.android.ui.core.cardscan
 
 import android.content.Intent
 import androidx.compose.runtime.mutableStateOf
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
@@ -84,6 +85,7 @@ class CardScanStripeLauncherTest {
     ) = runTest {
         val fakeEventsReporter = FakeCardScanEventsReporter()
         val launcher = CardScanStripeLauncher(
+            context = ApplicationProvider.getApplicationContext(),
             eventsReporter = fakeEventsReporter,
             isLaunchingState = mutableStateOf(false),
         )

@@ -11,10 +11,8 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import com.stripe.android.model.CardBrand
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.RequestMatchers.host
-import com.stripe.android.networktesting.RequestMatchers.method
-import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.ResponseReplacement
+import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentConfigurationTestRule
@@ -568,11 +566,7 @@ internal class VerticalModePaymentSheetActivityTest {
         lpms: List<String> = listOf("card", "cashapp"),
         isCbcEligible: Boolean = false,
     ) {
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             val replacements = mutableListOf<ResponseReplacement>()
             replacements += ResponseReplacement(
                 original = "PAYMENT_METHOD_TYPES_GO_HERE",

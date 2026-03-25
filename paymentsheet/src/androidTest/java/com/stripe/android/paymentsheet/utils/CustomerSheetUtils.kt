@@ -61,14 +61,6 @@ internal object CustomerSheetUtils {
         }
     }
 
-    internal fun retrieveElementsSessionRequest(): RequestMatcher {
-        return RequestMatchers.composite(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        )
-    }
-
     internal fun detachRequest(): RequestMatcher {
         return RequestMatchers.composite(
             host("api.stripe.com"),

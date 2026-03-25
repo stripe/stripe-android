@@ -21,6 +21,9 @@ internal object CustomPaymentMethodsSettingDefinition :
         if (!configurationData.integrationType.isPaymentFlow()) {
             return false
         }
+        if (settings[InitializationTypeSettingsDefinition] == InitializationType.CheckoutSession) {
+            return false
+        }
 
         return (settings[MerchantSettingsDefinition] as? Merchant) == Merchant.US
     }

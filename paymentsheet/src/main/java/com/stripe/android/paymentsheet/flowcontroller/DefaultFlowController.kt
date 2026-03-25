@@ -709,6 +709,7 @@ internal class DefaultFlowController @Inject internal constructor(
             viewModel.paymentSelection = null
             viewModel.state = null
             viewModel.previousConfigureRequest = null
+            paymentOptionResultCallback.onPaymentOptionResult(PaymentOptionResult(null, false))
         }
 
         viewModelScope.launch {
