@@ -25,6 +25,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.MobilePayDefi
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.MultibancoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.OxxoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.P24Definition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.PayByBankDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.PayNowDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.PayPalDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.PayPayDefinition
@@ -69,6 +70,7 @@ internal object PaymentMethodRegistry {
         MultibancoDefinition,
         OxxoDefinition,
         P24Definition,
+        PayByBankDefinition,
         PayNowDefinition,
         PayPalDefinition,
         PayPayDefinition,
