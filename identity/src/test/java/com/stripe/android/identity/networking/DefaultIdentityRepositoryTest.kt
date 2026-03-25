@@ -201,14 +201,19 @@ class DefaultIdentityRepositoryTest {
     }
 
     @Test
-    fun `postVerificationPageData rounds float upload params to two decimals`() {
+    fun `postVerificationPageData rounds float upload params and preserves non-float upload fields`() {
         val collectedDataParam = CollectedDataParam(
             idDocumentFront = DocumentUploadParam(
                 passportScore = 0.987f,
                 highResImage = "front_high_res_image",
+                lowResImage = "front_low_res_image",
                 uploadMethod = DocumentUploadParam.UploadMethod.AUTOCAPTURE,
+                forceConfirm = true,
+                cameraLensModel = "front_camera_lens_model",
                 exposureIso = 200.129f,
-                focalLength = 4.266f
+                focalLength = 4.266f,
+                exposureDuration = 12345L,
+                isVirtualCamera = false
             ),
             face = FaceUploadParam(
                 bestHighResImage = "best_high_res_image",
@@ -220,9 +225,13 @@ class DefaultIdentityRepositoryTest {
                 bestFaceScore = 0.876f,
                 faceScoreVariance = 0.154f,
                 numFrames = 3,
+                bestExposureDuration = 456,
                 bestBrightnessValue = 2.3456f,
+                bestCameraLensModel = "best_camera_lens_model",
                 bestFocalLength = 3.456f,
-                bestExposureIso = 100.123f
+                bestIsVirtualCamera = true,
+                bestExposureIso = 100.123f,
+                trainingConsent = false
             )
         )
 
@@ -240,15 +249,28 @@ class DefaultIdentityRepositoryTest {
             val collectedData = (request as ApiRequest).params?.get("collected_data") as Map<*, *>
             val idDocumentFront = collectedData["id_document_front"] as Map<*, *>
             val face = collectedData["face"] as Map<*, *>
+            assertThat(idDocumentFront["high_res_image"]).isEqualTo("front_high_res_image")
+            assertThat(idDocumentFront["low_res_image"]).isEqualTo("front_low_res_image")
 
             assertThat(idDocumentFront["passport_score"]).isEqualTo("0.99")
+            assertThat(idDocumentFront["upload_method"]).isEqualTo("auto_capture")
+            assertThat(idDocumentFront["force_confirm"]).isEqualTo("true")
+            assertThat(idDocumentFront["camera_lens_model"]).isEqualTo("front_camera_lens_model")
             assertThat(idDocumentFront["exposure_iso"]).isEqualTo("200.13")
             assertThat(idDocumentFront["focal_length"]).isEqualTo("4.27")
+            assertThat(idDocumentFront["exposure_duration"]).isEqualTo("12345")
+            assertThat(idDocumentFront["is_virtual_camera"]).isEqualTo("false")
+            assertThat(face["best_high_res_image"]).isEqualTo("best_high_res_image")
             assertThat(face["best_face_score"]).isEqualTo("0.88")
             assertThat(face["face_score_variance"]).isEqualTo("0.15")
+            assertThat(face["num_frames"]).isEqualTo("3")
+            assertThat(face["best_exposure_duration"]).isEqualTo("456")
             assertThat(face["best_brightness_value"]).isEqualTo("2.35")
+            assertThat(face["best_camera_lens_model"]).isEqualTo("best_camera_lens_model")
             assertThat(face["best_focal_length"]).isEqualTo("3.46")
+            assertThat(face["best_is_virtual_camera"]).isEqualTo("true")
             assertThat(face["best_exposure_iso"]).isEqualTo("100.12")
+            assertThat(face["training_consent"]).isEqualTo("false")
         }
     }
 
