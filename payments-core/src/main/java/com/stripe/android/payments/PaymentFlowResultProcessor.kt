@@ -62,7 +62,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
             when {
                 stripeIntent.status == StripeIntent.Status.Succeeded ||
                     stripeIntent.status == StripeIntent.Status.RequiresCapture ||
-                    isOrchestationPayment(stripeIntent.status, stripeIntent, result) -> {
+                    isOrchestrationPayment(stripeIntent.status, stripeIntent, result) -> {
                     createStripeIntentResult(
                         stripeIntent,
                         SUCCEEDED,
@@ -144,9 +144,9 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         }
     }
 
-    private fun isOrchestationPayment(
+    private fun isOrchestrationPayment(
         status: StripeIntent.Status?,
-        stripeIntent: T,
+        stripeIntent: StripeIntent,
         result: PaymentFlowResult.Validated
     ): Boolean = status == StripeIntent.Status.Processing &&
         stripeIntent.paymentMethod?.type == PaymentMethod.Type.Card &&
