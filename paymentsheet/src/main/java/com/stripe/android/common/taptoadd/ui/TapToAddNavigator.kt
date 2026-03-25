@@ -8,14 +8,16 @@ import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.navigation.NavigationHandler
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.io.Closeable
 import javax.inject.Inject
 import javax.inject.Singleton
 import com.stripe.android.paymentsheet.R as PaymentSheetR
@@ -36,19 +38,15 @@ internal class TapToAddNavigator(
         stateHolder = stateHolder,
     )
 
-    private val navigationHandler = NavigationHandler(
-        coroutineScope = coroutineScope,
-        initialScreen = initialScreen,
-        shouldRemoveInitialScreenOnTransition = false,
-        poppedScreenHandler = {},
-    )
-
-    val screen: StateFlow<Screen> = navigationHandler.currentScreen
+    private val _screen = MutableStateFlow(initialScreen)
+    val screen: StateFlow<Screen> = _screen.asStateFlow()
 
     private val _result = MutableSharedFlow<TapToAddResult>(replay = 1)
     val result: SharedFlow<TapToAddResult> = _result.asSharedFlow()
 
     fun performAction(action: Action) {
+        _screen.value.close()
+
         when (action) {
             is Action.Close -> {
                 coroutineScope.launch {
@@ -88,17 +86,21 @@ internal class TapToAddNavigator(
                 }
             }
             is Action.NavigateTo -> {
-                navigationHandler.transitionTo(action.screen)
+                _screen.value = action.screen
             }
         }
     }
 
-    sealed class Screen {
+    sealed class Screen : Closeable {
         abstract val cancelButton: CancelButton
         abstract val onCancelAction: Action
 
         @Composable
         protected abstract fun ColumnScope.Content()
+
+        override fun close() {
+            // No-op
+        }
 
         @Composable
         fun ScreenContent(scope: ColumnScope) {
@@ -114,6 +116,10 @@ internal class TapToAddNavigator(
             @Composable
             override fun ColumnScope.Content() {
                 TapToAddCollectingScreen()
+            }
+
+            override fun close() {
+                interactor.close()
             }
         }
 
@@ -134,6 +140,10 @@ internal class TapToAddNavigator(
                     }
                 )
             }
+
+            override fun close() {
+                interactor.close()
+            }
         }
 
         data class Delay(
@@ -148,6 +158,10 @@ internal class TapToAddNavigator(
                     cardBrand = interactor.cardBrand,
                     last4 = interactor.last4,
                 )
+            }
+
+            override fun close() {
+                interactor.close()
             }
         }
 
@@ -170,6 +184,10 @@ internal class TapToAddNavigator(
                         interactor.performAction(TapToAddConfirmationInteractor.Action.SuccessShown)
                     }
                 )
+            }
+
+            override fun close() {
+                interactor.close()
             }
         }
 

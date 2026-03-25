@@ -13,7 +13,8 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.testing.PaymentMethodFactory
-import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
@@ -97,24 +98,44 @@ internal class DefaultTapToAddCollectingInteractorTest {
         }
     }
 
+    @Test
+    fun `close should stop any responses from collection handler completion`() {
+        val continueController = CompletableDeferred<Unit>()
+
+        runScenario(
+            continueController = continueController,
+        ) {
+            assertThat(collectionHandlerScenario.collectCalls.awaitItem()).isNotNull()
+
+            interactor.close()
+
+            continueController.complete(Unit)
+
+            onCollected.expectNoEvents()
+            onFailedCollection.expectNoEvents()
+            onTapToAddNotSupported.expectNoEvents()
+            onCanceled.expectNoEvents()
+        }
+    }
+
     private fun runScenario(
         metadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(isTapToAddSupported = true),
         collectResult: TapToAddCollectionHandler.CollectionState =
             TapToAddCollectionHandler.CollectionState.Collected(PaymentMethodFactory.card(last4 = "4242")),
+        continueController: Deferred<Unit> = CompletableDeferred(Unit),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
-        val testScope = this
-
         val onCollected = Turbine<PaymentMethod>()
         val onFailedCollection = Turbine<ResolvableString>()
         val onTapToAddNotSupported = Turbine<Unit>()
         val onCanceled = Turbine<Unit>()
 
-        FakeTapToAddCollectionHandler.test(collectResult) {
+        FakeTapToAddCollectionHandler.test(collectResult, continueController) {
             val scenario = Scenario(
                 interactor = DefaultTapToAddCollectingInteractor(
                     paymentMethodMetadata = metadata,
-                    coroutineScope = testScope,
+                    uiContext = coroutineContext,
+                    ioContext = coroutineContext,
                     tapToAddCollectionHandler = handler,
                     onCollected = { onCollected.add(it) },
                     onFailedCollection = { onFailedCollection.add(it) },
@@ -128,7 +149,6 @@ internal class DefaultTapToAddCollectingInteractorTest {
                 onCanceled = onCanceled,
                 collectionHandlerScenario = this,
             )
-            testScope.advanceUntilIdle()
             block(scenario)
         }
     }
