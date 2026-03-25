@@ -67,6 +67,7 @@ internal interface TapToAddConnectionManager {
                         logger = logger,
                         isSimulated = isSimulated,
                     ),
+                    fatalErrorChecker = DefaultTapToAddFatalErrorChecker(),
                     retryDelaySupplier = ExponentialBackoffRetryDelaySupplier(),
                 )
             } else {
@@ -309,6 +310,7 @@ internal class UnsupportedTapToAddConnectionManager : TapToAddConnectionManager 
 
 internal class TapToAddRetriableConnectionManager(
     private val tapToAddConnectionManager: TapToAddConnectionManager,
+    private val fatalErrorChecker: TapToAddFatalErrorChecker,
     private val retryDelaySupplier: RetryDelaySupplier,
 ) : TapToAddConnectionManager by tapToAddConnectionManager {
     override suspend fun connect() {
@@ -322,7 +324,7 @@ internal class TapToAddRetriableConnectionManager(
                     break
                 },
                 onFailure = { error ->
-                    if (retriesRemaining == 0) {
+                    if (retriesRemaining == 0 || fatalErrorChecker.isFatal(error)) {
                         throw error
                     } else {
                         delay(

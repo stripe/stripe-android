@@ -49,6 +49,42 @@ internal class TapToAddRetriableConnectionManagerTest {
     }
 
     @Test
+    fun `connect does not retry when fatal error`() = runScenario(
+        queuedConnectResults = listOf(
+            Result.failure(IllegalStateException("Fatal!")),
+        ),
+        fatalErrorChecker = FakeTapToAddFatalErrorChecker(isFatal = true),
+    ) {
+        val error = assertFailsWith<IllegalStateException> {
+            retryConnectionManager.connect()
+        }
+
+        assertThat(error.message).isEqualTo("Fatal!")
+        assertThat(innerManagerConnectCalls.awaitItem()).isNotNull()
+        getRetryDelayCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `connect does retry when non-fatal error`() = runScenario(
+        queuedConnectResults = listOf(
+            Result.failure(IllegalStateException("Non-fatal!")),
+            Result.failure(IllegalStateException("Non-fatal!")),
+            Result.success(Unit),
+        ),
+        fatalErrorChecker = FakeTapToAddFatalErrorChecker(isFatal = false),
+    ) {
+        assertThat(retryConnectionManager.connect()).isNotNull()
+
+        repeat(3) {
+            assertThat(innerManagerConnectCalls.awaitItem()).isNotNull()
+        }
+
+        repeat(2) {
+            assertThat(getRetryDelayCalls.awaitItem()).isNotNull()
+        }
+    }
+
+    @Test
     fun `connect throws after all retries exhausted`() = runScenario(
         queuedConnectResults = listOf(
             Result.failure(IllegalStateException("Failed!")),
@@ -90,6 +126,7 @@ internal class TapToAddRetriableConnectionManagerTest {
     private fun runScenario(
         isSupported: Boolean = true,
         queuedConnectResults: List<Result<Unit>> = listOf(Result.success(Unit)),
+        fatalErrorChecker: TapToAddFatalErrorChecker = FakeTapToAddFatalErrorChecker(isFatal = false),
         block: suspend Scenario.() -> Unit
     ) = runTest {
         FakeTapToAddConnectionManager.test(
@@ -102,6 +139,7 @@ internal class TapToAddRetriableConnectionManagerTest {
                 Scenario(
                     retryConnectionManager = TapToAddRetriableConnectionManager(
                         tapToAddConnectionManager = tapToAddConnectionManager,
+                        fatalErrorChecker = fatalErrorChecker,
                         retryDelaySupplier = retryDelaySupplier,
                     ),
                     innerManagerConnectCalls = connectCalls,
@@ -140,5 +178,13 @@ internal class TapToAddRetriableConnectionManagerTest {
             val maxRetries: Int,
             val remainingRetries: Int,
         )
+    }
+
+    private class FakeTapToAddFatalErrorChecker(
+        val isFatal: Boolean
+    ) : TapToAddFatalErrorChecker {
+        override fun isFatal(error: Throwable): Boolean {
+            return isFatal
+        }
     }
 }
