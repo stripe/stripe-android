@@ -265,6 +265,28 @@ internal class PaymentMethodLayoutUITest(
         }
     }
 
+    @Test
+    fun currencySelector_clickingOption_dispatchesCurrencySelectedViewAction() {
+        // Currency selector is only rendered in PaymentMethodVerticalLayoutUI, not embedded layout.
+        assumeTrue(paymentMethodsTag == TEST_TAG_NEW_PAYMENT_METHOD_VERTICAL_LAYOUT_UI)
+        val eurOption = CurrencyOption(code = "EUR", displayableText = "€9.50")
+        runScenario(
+            initialState = createState(
+                currencySelectorOptions = CurrencySelectorOptions(
+                    first = CurrencyOption(code = "USD", displayableText = "$10.00"),
+                    second = eurOption,
+                    selectedCode = "USD",
+                ),
+            ),
+        ) {
+            composeRule.onNodeWithTag("$TEST_TAG_CURRENCY_OPTION_PREFIX${eurOption.code}").performClick()
+            viewActionRecorder.consume(
+                PaymentMethodVerticalLayoutInteractor.ViewAction.CurrencySelected(eurOption)
+            )
+            assertThat(viewActionRecorder.viewActions).isEmpty()
+        }
+    }
+
     private fun runScenario(
         initialState: PaymentMethodVerticalLayoutInteractor.State,
         block: Scenario.() -> Unit

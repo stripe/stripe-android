@@ -98,6 +98,7 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSaved
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Args
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcCompletionState
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.LinkState
@@ -113,6 +114,8 @@ import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.cardParamsUpdateAction
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.paymentsheet.utils.prefillCreate
+import com.stripe.android.paymentsheet.verticalmode.CheckoutCurrencyUpdater
+import com.stripe.android.paymentsheet.verticalmode.FakeCheckoutCurrencyUpdater
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
 import com.stripe.android.testing.DummyActivityResultCaller
@@ -3426,6 +3429,100 @@ internal class PaymentSheetViewModelTest {
         }
     }
 
+    @Test
+    fun `updateCurrency - success updates latest response and resets view state without error`() = runTest {
+        val initialResponse = CheckoutSessionResponseFactory.create()
+        val args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+            initializationMode = InitializationMode.CheckoutSession(
+                instancesKey = "test_key",
+                checkoutSessionResponse = initialResponse,
+            )
+        )
+
+        val updatedResponse = CheckoutSessionResponseFactory.create(id = "cs_updated")
+        val loaderState = FakePaymentElementLoader(
+            stripeIntent = PAYMENT_INTENT,
+            customer = EMPTY_CUSTOMER_STATE.copy(paymentMethods = PAYMENT_METHODS),
+        ).load(
+            initializationMode = InitializationMode.CheckoutSession("test_key", updatedResponse),
+            integrationConfiguration = PaymentElementLoader.Configuration.PaymentSheet(args.config),
+            metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
+        ).getOrThrow()
+
+        val fakeUpdater = FakeCheckoutCurrencyUpdater(
+            result = Result.success(
+                CheckoutCurrencyUpdater.CurrencyUpdateResult(
+                    checkoutSessionResponse = updatedResponse,
+                    loaderState = loaderState,
+                )
+            )
+        )
+
+        val viewModel = createViewModel(
+            args = args,
+            checkoutCurrencyUpdater = fakeUpdater,
+        )
+
+        viewModel.updateCurrency("eur")
+
+        assertThat(viewModel.latestCheckoutSessionResponse).isEqualTo(updatedResponse)
+        assertThat(viewModel.viewState.value).isEqualTo(PaymentSheetViewState.Reset(null))
+
+        assertThat(fakeUpdater.calls.awaitItem()).isEqualTo(
+            FakeCheckoutCurrencyUpdater.UpdateCurrencyCall(
+                instancesKey = "test_key",
+                sessionId = initialResponse.id,
+                currencyCode = "eur",
+                config = args.config,
+                initializedViaCompose = false,
+            )
+        )
+        fakeUpdater.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `updateCurrency - failure shows error via view state`() = runTest {
+        val initialResponse = CheckoutSessionResponseFactory.create()
+        val args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+            initializationMode = InitializationMode.CheckoutSession(
+                instancesKey = "test_key",
+                checkoutSessionResponse = initialResponse,
+            )
+        )
+
+        val fakeUpdater = FakeCheckoutCurrencyUpdater(
+            result = Result.failure(RuntimeException("Currency update failed")),
+        )
+
+        val viewModel = createViewModel(
+            args = args,
+            checkoutCurrencyUpdater = fakeUpdater,
+        )
+
+        viewModel.updateCurrency("eur")
+
+        val viewState = viewModel.viewState.value as? PaymentSheetViewState.Reset
+        assertThat(viewState?.errorMessage).isNotNull()
+
+        assertThat(fakeUpdater.calls.awaitItem().currencyCode).isEqualTo("eur")
+        fakeUpdater.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `updateCurrency - no-op when not a checkout session`() = runTest {
+        val fakeUpdater = FakeCheckoutCurrencyUpdater()
+
+        // Default args use PaymentIntent initialization, not CheckoutSession
+        val viewModel = createViewModel(
+            checkoutCurrencyUpdater = fakeUpdater,
+        )
+
+        viewModel.updateCurrency("eur")
+
+        // No call should be made to the updater
+        fakeUpdater.ensureAllEventsConsumed()
+    }
+
     private fun testConfirmationStateRestorationAfterPaymentSuccess(
         loadStateBeforePaymentResult: Boolean
     ) = confirmationTest(
@@ -3576,6 +3673,7 @@ internal class PaymentSheetViewModelTest {
         confirmationHandlerFactory: ConfirmationHandler.Factory? = null,
         tapToAddHelperFactory: TapToAddHelper.Factory = FakeTapToAddHelper.Factory.noOp(),
         customerStateHolder: CustomerStateHolder? = null,
+        checkoutCurrencyUpdater: CheckoutCurrencyUpdater = FakeCheckoutCurrencyUpdater(),
     ): PaymentSheetViewModel {
         return TestViewModelFactory.create(
             linkConfigurationCoordinator = linkConfigurationCoordinator,
@@ -3616,6 +3714,7 @@ internal class PaymentSheetViewModelTest {
                     }
                 },
                 customViewModelScope = CoroutineScope(Dispatchers.Unconfined),
+                checkoutCurrencyUpdater = checkoutCurrencyUpdater,
             )
         }
     }

@@ -22,7 +22,6 @@ import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.mandateTextFromPaymentMethodMetadata
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.WalletLocation
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.ViewAction
@@ -79,6 +78,7 @@ internal interface PaymentMethodVerticalLayoutInteractor {
         data class SavedPaymentMethodSelected(val savedPaymentMethod: PaymentMethod) : ViewAction
         data class UpdatePaymentMethodVisibility(val itemCode: String, val coordinates: LayoutCoordinates) : ViewAction
         data object CancelPaymentMethodVisibilityTracking : ViewAction
+        data class CurrencySelected(val currencyOption: CurrencyOption) : ViewAction
     }
 
     enum class SavedPaymentMethodAction {
@@ -113,6 +113,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val displaysMandatesInFormScreen: Boolean,
     private val onInitiallyDisplayedPaymentMethodVisibilitySnapshot: (List<String>, List<String>) -> Unit,
     private val currencySelectorOptions: CurrencySelectorOptions? = null,
+    private val onCurrencySelected: (CurrencyOption) -> Unit,
     dispatcher: CoroutineContext = Dispatchers.Default,
     mainDispatcher: CoroutineContext = Dispatchers.Main.immediate,
 ) : PaymentMethodVerticalLayoutInteractor {
@@ -129,8 +130,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 it is PaymentSheetScreen.VerticalMode
             }
             val currencySelectorOptions = (viewModel as? PaymentSheetViewModel)?.let { psViewModel ->
-                (psViewModel.args.initializationMode as? PaymentElementLoader.InitializationMode.CheckoutSession)
-                    ?.checkoutSessionResponse
+                psViewModel.latestCheckoutSessionResponse
                     ?.adaptivePricingInfo
                     ?.let { CurrencySelectorOptionsFactory.create(it) }
             }
@@ -196,6 +196,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     )
                 },
                 currencySelectorOptions = currencySelectorOptions,
+                onCurrencySelected = { currencyOption ->
+                    (viewModel as? PaymentSheetViewModel)?.updateCurrency(currencyOption.code)
+                },
             ).also { interactor ->
                 viewModel.viewModelScope.launch {
                     interactor.state.mapAsStateFlow { it.mandate }.collect { mandate ->
@@ -567,6 +570,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             }
             is ViewAction.CancelPaymentMethodVisibilityTracking -> {
                 cancelPaymentMethodVisibilityTracking()
+            }
+            is ViewAction.CurrencySelected -> {
+                onCurrencySelected(viewAction.currencyOption)
             }
         }
     }
