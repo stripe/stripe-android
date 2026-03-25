@@ -7,6 +7,7 @@ import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutInit
+import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
 import com.stripe.android.networktesting.RequestMatchers.host
@@ -19,6 +20,9 @@ import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.assertFailed
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
+import com.stripe.paymentelementtestpages.CurrencySelector
+import com.stripe.paymentelementtestpages.FormPage
+import com.stripe.paymentelementtestpages.VerticalModePage
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -33,6 +37,9 @@ internal class PaymentSheetCheckoutSessionTest {
     private val networkRule = testRules.networkRule
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
+    private val formPage: FormPage = FormPage(composeTestRule)
+    private val verticalModePage: VerticalModePage = VerticalModePage(composeTestRule)
+    private val currencySelector: CurrencySelector = CurrencySelector(composeTestRule)
 
     private val defaultConfiguration = PaymentSheet.Configuration.Builder(
         merchantDisplayName = "Checkout Session Test",
@@ -179,5 +186,58 @@ internal class PaymentSheetCheckoutSessionTest {
                 configuration = defaultConfiguration,
             )
         }
+    }
+
+    @Test
+    fun testAdaptivePricingShowsCorrectPageBasedOnNumberOfLPMsAvailable() = runPaymentSheetTest(
+        networkRule = networkRule,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.checkoutInit { response ->
+            response.testBodyFromFile("checkout-session-adaptive-pricing-default.json")
+        }
+
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val checkout = Checkout.configure(
+            context = context,
+            checkoutSessionClientSecret = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example",
+        ).getOrThrow()
+
+        testContext.presentPaymentSheet {
+            presentWithCheckout(
+                checkout = checkout,
+                configuration = defaultConfiguration.newBuilder()
+                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                    .build(),
+            )
+        }
+
+        verticalModePage.waitUntilVisible()
+
+        networkRule.checkoutUpdate { response ->
+            response.testBodyFromFile("checkout-session-adaptive-pricing-integration-currency.json")
+        }
+        currencySelector.assertCurrencyOptionIsSelected("EUR")
+        currencySelector.clickCurrencyOption("USD")
+
+        formPage.waitUntilVisible()
+        currencySelector.assertCurrencyOptionIsSelected("USD")
+        formPage.fillOutCardDetails()
+
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("POST"),
+            path("/v1/payment_methods"),
+        ) { response ->
+            response.testBodyFromFile("payment-methods-create.json")
+        }
+
+        networkRule.checkoutConfirm(
+            bodyPart("expected_amount", "5099"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+
+        page.clickPrimaryButton()
     }
 }
