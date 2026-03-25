@@ -38,8 +38,15 @@ internal class DefaultIdentityModelFetcher @Inject constructor(
             true
         } catch (e: Exception) {
             identityAnalyticsRequestFactory.genericError(
-                "Failed to validate TFLite model: ${modelFile.name}",
-                e.javaClass.name
+                throwable = e,
+                overrideMessage = "Failed to validate TFLite model: ${modelFile.name}",
+                additionalMetadata = mapOf(
+                    IdentityAnalyticsRequestFactory.PARAM_ERROR_CONTEXT to
+                        IdentityAnalyticsRequestFactory.ERROR_CONTEXT_MODEL_LOADING,
+                    IdentityAnalyticsRequestFactory.PARAM_ML_MODEL_STAGE to
+                        IdentityAnalyticsRequestFactory.MODEL_LOADING_STAGE_VALIDATE,
+                    IdentityAnalyticsRequestFactory.PARAM_FILE_NAME to modelFile.name
+                )
             )
             false
         }

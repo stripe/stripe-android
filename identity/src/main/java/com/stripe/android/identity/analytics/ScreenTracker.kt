@@ -34,7 +34,14 @@ internal class ScreenTracker @Inject constructor(
                     "screenTransition starts from $fromScreenName, dropping the old screenStateTracker."
             )
             Log.e(TAG, error.message, error)
-            identityAnalyticsRequestFactory.genericError(error.message, error.javaClass.name)
+            identityAnalyticsRequestFactory.genericError(
+                throwable = error,
+                additionalMetadata = mapOf(
+                    IdentityAnalyticsRequestFactory.PARAM_ERROR_CONTEXT to
+                        IdentityAnalyticsRequestFactory.ERROR_CONTEXT_SCREEN_TRANSITION,
+                    IdentityAnalyticsRequestFactory.PARAM_FROM_SCREEN_NAME to fromScreenName
+                )
+            )
         }
 
         screenStatTracker =
@@ -59,7 +66,14 @@ internal class ScreenTracker @Inject constructor(
                 "screenStateTracker is not set when screenTransition ends at $toScreenName"
             )
             Log.e(TAG, error.message, error)
-            identityAnalyticsRequestFactory.genericError(error.message, error.javaClass.name)
+            identityAnalyticsRequestFactory.genericError(
+                throwable = error,
+                additionalMetadata = mapOf(
+                    IdentityAnalyticsRequestFactory.PARAM_ERROR_CONTEXT to
+                        IdentityAnalyticsRequestFactory.ERROR_CONTEXT_SCREEN_TRANSITION,
+                    IdentityAnalyticsRequestFactory.PARAM_TO_SCREEN_NAME to toScreenName
+                )
+            )
         }
     }
 

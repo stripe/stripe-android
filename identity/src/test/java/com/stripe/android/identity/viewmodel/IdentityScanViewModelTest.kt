@@ -7,6 +7,9 @@ import com.stripe.android.camera.CameraAdapter
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.identity.analytics.FPSTracker
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_ERROR_CONTEXT
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCANNER_NAME
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCREEN_NAME
 import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.camera.IdentityCameraManager
 import com.stripe.android.identity.ml.FaceDetectorOutput
@@ -19,6 +22,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -124,10 +128,39 @@ internal class IdentityScanViewModelTest {
     }
 
     @Test
+    fun testAnalyzerFailureLogsContextualGenericError() {
+        val error = IllegalStateException("boom")
+        viewModel.targetScanTypeFlow.update { IdentityScanState.ScanType.DOC_FRONT }
+
+        viewModel.onAnalyzerFailure(error)
+
+        verify(mockIdentityAnalyticsRequestFactory).genericError(
+            eq(error),
+            argWhere {
+                this[PARAM_ERROR_CONTEXT] == IdentityAnalyticsRequestFactory.ERROR_CONTEXT_IMAGE_SCAN &&
+                    this[PARAM_SCANNER_NAME] ==
+                    IdentityAnalyticsRequestFactory.ScannerName.DOCUMENT.analyticsValue &&
+                    this[PARAM_SCREEN_NAME] ==
+                    IdentityAnalyticsRequestFactory.SCREEN_NAME_LIVE_CAPTURE
+            },
+            eq("Error executing analyzer: ${error.message}")
+        )
+        verify(mockIdentityAnalyticsRequestFactory).verificationFailed(
+            eq(false),
+            eq(IdentityScanState.ScanType.DOC_FRONT),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            eq(error),
+            eq(IdentityAnalyticsRequestFactory.SCREEN_NAME_LIVE_CAPTURE)
+        )
+    }
+
+    @Test
     fun testNullIdentityScanFlowWhenStopScan() {
         viewModel.identityScanFlow = null
         viewModel.stopScan(mock())
-        verify(mockIdentityAnalyticsRequestFactory).genericError(anyOrNull(), any())
+        verify(mockIdentityAnalyticsRequestFactory).genericError(anyOrNull<String>(), any<String>())
     }
 
     @Test
@@ -138,7 +171,7 @@ internal class IdentityScanViewModelTest {
             mockCameraManagerWithoutAdapter
         )
         viewModel.stopScan(mock())
-        verify(mockIdentityAnalyticsRequestFactory).genericError(anyOrNull(), any())
+        verify(mockIdentityAnalyticsRequestFactory).genericError(anyOrNull<String>(), any<String>())
     }
 
     @Test

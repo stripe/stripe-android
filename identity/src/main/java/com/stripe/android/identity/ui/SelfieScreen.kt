@@ -60,6 +60,7 @@ import com.stripe.android.camera.framework.image.mirrorHorizontally
 import com.stripe.android.camera.scanui.CameraView
 import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_SELFIE
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.CameraSource
 import com.stripe.android.identity.camera.IdentityCameraManager
 import com.stripe.android.identity.camera.SelfieCameraManager
 import com.stripe.android.identity.navigation.SelfieDestination
@@ -99,7 +100,9 @@ internal fun SelfieScanScreen(
         SelfieCameraManager(context = context) { cause ->
             identityViewModel.identityAnalyticsRequestFactory.cameraError(
                 scanType = IdentityScanState.ScanType.SELFIE,
-                throwable = IllegalStateException(cause)
+                throwable = IllegalStateException(cause),
+                screenName = SCREEN_NAME_SELFIE,
+                cameraSource = CameraSource.CAMERA_SESSION
             )
         }
     }

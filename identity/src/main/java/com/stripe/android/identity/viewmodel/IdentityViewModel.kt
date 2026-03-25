@@ -254,7 +254,15 @@ internal class IdentityViewModel(
                         "Failed to initialize TFLite runtime: ${it.message}",
                         it
                     )
-                    logError(cause)
+                    logError(
+                        cause = cause,
+                        additionalMetadata = mapOf(
+                            IdentityAnalyticsRequestFactory.PARAM_ERROR_CONTEXT to
+                                IdentityAnalyticsRequestFactory.ERROR_CONTEXT_MODEL_LOADING,
+                            IdentityAnalyticsRequestFactory.PARAM_ML_MODEL_STAGE to
+                                IdentityAnalyticsRequestFactory.MODEL_LOADING_STAGE_INITIALIZE
+                        )
+                    )
                     throw cause
                 }
             )
@@ -405,6 +413,7 @@ internal class IdentityViewModel(
     private var selfieBestFocalLength: Float? = null
     private var selfieBestExposureDuration: Long? = null
     private var selfieBestIsVirtualCamera: Boolean? = null
+    internal var analyticsLastScreenName: String? = null
 
     /**
      * Set the camera lens model for subsequent uploads.
@@ -475,6 +484,7 @@ internal class IdentityViewModel(
                 isFront = isFront,
                 isHighRes = true,
                 scanType = scanType,
+                uploadMethod = uploadMethod,
                 message = "Failed to prepare manual document image for upload",
                 throwable = it
             )
@@ -572,6 +582,7 @@ internal class IdentityViewModel(
                 isFront = isFront,
                 isHighRes = true,
                 scanType = targetScanType,
+                uploadMethod = UploadMethod.AUTOCAPTURE,
                 message = "Failed to prepare scanned document image for upload",
                 throwable = it
             )
@@ -592,6 +603,7 @@ internal class IdentityViewModel(
                 isFront = isFront,
                 isHighRes = false,
                 scanType = targetScanType,
+                uploadMethod = UploadMethod.AUTOCAPTURE,
                 message = "Failed to prepare full-frame document image for upload",
                 throwable = it
             )
@@ -791,6 +803,18 @@ internal class IdentityViewModel(
                     }
                 },
                 onFailure = {
+                    identityAnalyticsRequestFactory.genericError(
+                        throwable = it,
+                        overrideMessage = "Failed to upload file : ${imageFile.name}",
+                        additionalMetadata = documentUploadErrorMetadata(
+                            isFront = isFront,
+                            isHighRes = isHighRes,
+                            scanType = scanType,
+                            uploadMethod = uploadMethod,
+                            stage = IdentityAnalyticsRequestFactory.UPLOAD_STAGE_REQUEST,
+                            fileName = imageFile.name
+                        )
+                    )
                     if (isFront) {
                         _documentFrontUploadedState
                     } else {
@@ -811,12 +835,23 @@ internal class IdentityViewModel(
         isFront: Boolean,
         isHighRes: Boolean,
         scanType: IdentityScanState.ScanType,
+        uploadMethod: UploadMethod,
         message: String,
         throwable: Throwable
     ) {
         val detailedMessage =
             "$message (${if (isFront) FRONT else BACK}, ${if (isHighRes) "high_res" else "low_res"}, $scanType)"
-        logError(detailedMessage, throwable)
+        logError(
+            message = detailedMessage,
+            cause = throwable,
+            additionalMetadata = documentUploadErrorMetadata(
+                isFront = isFront,
+                isHighRes = isHighRes,
+                scanType = scanType,
+                uploadMethod = uploadMethod,
+                stage = IdentityAnalyticsRequestFactory.UPLOAD_STAGE_PREPARE
+            )
+        )
         val error = IllegalStateException(detailedMessage, throwable)
         if (isFront) {
             _documentFrontUploadedState
@@ -941,6 +976,16 @@ internal class IdentityViewModel(
                     }
                 },
                 onFailure = {
+                    identityAnalyticsRequestFactory.genericError(
+                        throwable = it,
+                        overrideMessage = "Failed to upload file : ${imageFile.name}",
+                        additionalMetadata = selfieUploadErrorMetadata(
+                            isHighRes = isHighRes,
+                            selfie = selfie,
+                            stage = IdentityAnalyticsRequestFactory.UPLOAD_STAGE_REQUEST,
+                            fileName = imageFile.name
+                        )
+                    )
                     _selfieUploadedState.updateStateAndSave { currentState ->
                         currentState.updateError(
                             isHighRes = isHighRes,
@@ -962,7 +1007,15 @@ internal class IdentityViewModel(
     ) {
         val detailedMessage =
             "$message (${selfie.value}, ${if (isHighRes) "high_res" else "low_res"})"
-        logError(detailedMessage, throwable)
+        logError(
+            message = detailedMessage,
+            cause = throwable,
+            additionalMetadata = selfieUploadErrorMetadata(
+                isHighRes = isHighRes,
+                selfie = selfie,
+                stage = IdentityAnalyticsRequestFactory.UPLOAD_STAGE_PREPARE
+            )
+        )
         val error = IllegalStateException(detailedMessage, throwable)
         _selfieUploadedState.updateStateAndSave { currentState ->
             currentState.updateError(
@@ -1029,12 +1082,14 @@ internal class IdentityViewModel(
                     if (shouldRetrieveModel) {
                         downloadModelAndPost(
                             verificationPage.documentCapture.models.idDetectorUrl,
-                            _idDetectorModelFile
+                            _idDetectorModelFile,
+                            IdentityAnalyticsRequestFactory.ModelType.DOCUMENT
                         )
                         verificationPage.selfieCapture?.let { selfieCapture ->
                             downloadModelAndPost(
                                 selfieCapture.models.faceDetectorUrl,
-                                _faceDetectorModelFile
+                                _faceDetectorModelFile,
+                                IdentityAnalyticsRequestFactory.ModelType.SELFIE
                             )
                         } ?: run {
                             // Selfie not required, post null
@@ -1189,7 +1244,11 @@ internal class IdentityViewModel(
     /**
      * Download an ML model and post its value to [target].
      */
-    private fun downloadModelAndPost(modelUrl: String, target: MutableLiveData<Resource<File>>) {
+    private fun downloadModelAndPost(
+        modelUrl: String,
+        target: MutableLiveData<Resource<File>>,
+        modelType: IdentityAnalyticsRequestFactory.ModelType
+    ) {
         viewModelScope.launch {
             runCatching {
                 target.postValue(Resource.loading())
@@ -1199,11 +1258,19 @@ internal class IdentityViewModel(
                     target.postValue(Resource.success(it))
                 },
                 onFailure = {
-                    logError(it)
+                    identityAnalyticsRequestFactory.genericError(
+                        throwable = it,
+                        overrideMessage = "Failed to download model from $modelUrl",
+                        additionalMetadata = modelLoadingErrorMetadata(
+                            modelType = modelType,
+                            stage = IdentityAnalyticsRequestFactory.MODEL_LOADING_STAGE_DOWNLOAD
+                        )
+                    )
                     identityAnalyticsRequestFactory.verificationFailed(
                         isFromFallbackUrl = false,
                         requireSelfie = verificationPage.value?.data?.requireSelfie(),
-                        throwable = it
+                        throwable = it,
+                        lastScreenName = modelScreenName(modelType)
                     )
                     target.postValue(
                         Resource.error(
@@ -1449,6 +1516,7 @@ internal class IdentityViewModel(
     }
 
     fun trackScreenPresented(scanType: IdentityScanState.ScanType?, screenName: String) {
+        analyticsLastScreenName = screenName
         identityAnalyticsRequestFactory.screenPresented(
             scanType = scanType,
             screenName = screenName
@@ -1466,25 +1534,23 @@ internal class IdentityViewModel(
      * based on values in [analyticsState].
      */
     fun sendSucceededAnalyticsRequestForNative() {
-        viewModelScope.launch {
-            analyticsState.collectLatest { latestState ->
-                identityAnalyticsRequestFactory.verificationSucceeded(
-                    isFromFallbackUrl = false,
-                    scanType = latestState.scanType,
-                    requireSelfie = latestState.requireSelfie,
-                    docFrontRetryTimes = latestState.docFrontRetryTimes,
-                    docBackRetryTimes = latestState.docBackRetryTimes,
-                    selfieRetryTimes = latestState.selfieRetryTimes,
-                    docFrontUploadType = latestState.docFrontUploadType,
-                    docBackUploadType = latestState.docBackUploadType,
-                    docFrontModelScore = latestState.docFrontModelScore,
-                    docBackModelScore = latestState.docBackModelScore,
-                    selfieModelScore = latestState.selfieModelScore,
-                    docFrontBlurScore = latestState.docFrontBlurScore,
-                    docBackBlurScore = latestState.docBackBlurScore
-                )
-            }
-        }
+        val latestState = analyticsState.value
+        identityAnalyticsRequestFactory.verificationSucceeded(
+            isFromFallbackUrl = false,
+            scanType = latestState.scanType,
+            requireSelfie = latestState.requireSelfie,
+            docFrontRetryTimes = latestState.docFrontRetryTimes,
+            docBackRetryTimes = latestState.docBackRetryTimes,
+            selfieRetryTimes = latestState.selfieRetryTimes,
+            docFrontUploadType = latestState.docFrontUploadType,
+            docBackUploadType = latestState.docBackUploadType,
+            docFrontModelScore = latestState.docFrontModelScore,
+            docBackModelScore = latestState.docBackModelScore,
+            selfieModelScore = latestState.selfieModelScore,
+            docFrontBlurScore = latestState.docFrontBlurScore,
+            docBackBlurScore = latestState.docBackBlurScore,
+            lastScreenName = analyticsLastScreenName
+        )
     }
 
     fun clearCollectedData(field: Requirement) {
@@ -1537,6 +1603,7 @@ internal class IdentityViewModel(
             when (scanType) {
                 IdentityScanState.ScanType.DOC_FRONT -> {
                     oldState.copy(
+                        scanType = scanType,
                         docFrontRetryTimes =
                         oldState.docFrontRetryTimes?.let { it + 1 } ?: 0
                     )
@@ -1544,6 +1611,7 @@ internal class IdentityViewModel(
 
                 IdentityScanState.ScanType.DOC_BACK -> {
                     oldState.copy(
+                        scanType = scanType,
                         docBackRetryTimes =
                         oldState.docBackRetryTimes?.let { it + 1 } ?: 0
                     )
@@ -1551,6 +1619,7 @@ internal class IdentityViewModel(
 
                 IdentityScanState.ScanType.SELFIE -> {
                     oldState.copy(
+                        scanType = scanType,
                         selfieRetryTimes =
                         oldState.selfieRetryTimes?.let { it + 1 } ?: 0
                     )
@@ -1565,16 +1634,26 @@ internal class IdentityViewModel(
      */
     fun checkPermissionAndNavigate(
         navController: NavController,
-        cameraPermissionEnsureable: CameraPermissionEnsureable
+        cameraPermissionEnsureable: CameraPermissionEnsureable,
+        screenName: String = IdentityAnalyticsRequestFactory.SCREEN_NAME_UNKNOWN,
+        cameraSource: IdentityAnalyticsRequestFactory.CameraSource =
+            IdentityAnalyticsRequestFactory.CameraSource.CAMERA_SESSION
     ) {
         cameraPermissionEnsureable.ensureCameraPermission(
             onCameraReady = {
-                identityAnalyticsRequestFactory.cameraPermissionGranted()
+                identityAnalyticsRequestFactory.cameraPermissionGranted(
+                    screenName = screenName,
+                    cameraSource = cameraSource
+                )
                 _cameraPermissionGranted.update { true }
                 navController.navigateTo(DocumentScanDestination)
             },
             onUserDeniedCameraPermission = {
-                identityAnalyticsRequestFactory.cameraPermissionDenied()
+                identityAnalyticsRequestFactory.cameraPermissionDenied(
+                    screenName = screenName,
+                    cameraSource = cameraSource,
+                    isGranted = false
+                )
                 _cameraPermissionGranted.update { false }
                 navController.navigateTo(CameraPermissionDeniedDestination)
             }
@@ -1970,17 +2049,116 @@ internal class IdentityViewModel(
     fun visitedIndividualWelcome() {
         _visitedIndividualWelcomeScreen.updateStateAndSave { true }
     }
-
-    private fun logError(cause: Throwable) {
-        logError(cause.message, cause)
+    fun logErrorOnErrorScreen() {
+        errorCause.value?.let { cause ->
+            identityAnalyticsRequestFactory.genericError(
+                throwable = cause,
+                additionalMetadata = mapOf(
+                    IdentityAnalyticsRequestFactory.PARAM_ERROR_CONTEXT to
+                        IdentityAnalyticsRequestFactory.ERROR_CONTEXT_ERROR_SCREEN,
+                    IdentityAnalyticsRequestFactory.PARAM_SCREEN_NAME to
+                        IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR
+                )
+            )
+        }
     }
 
-    private fun logError(message: String?, cause: Throwable) {
+    private fun logError(
+        cause: Throwable,
+        additionalMetadata: Map<String, Any?> = mapOf()
+    ) {
+        logError(cause.message, cause, additionalMetadata)
+    }
+
+    private fun logError(
+        message: String?,
+        cause: Throwable,
+        additionalMetadata: Map<String, Any?> = mapOf()
+    ) {
         identityAnalyticsRequestFactory.genericError(
-            message,
-            cause.javaClass.name
+            throwable = cause,
+            overrideMessage = message,
+            additionalMetadata = defaultErrorMetadata(additionalMetadata)
         )
     }
+
+    private fun defaultErrorMetadata(
+        additionalMetadata: Map<String, Any?>
+    ): Map<String, Any?> {
+        return if (
+            analyticsLastScreenName != null &&
+            !additionalMetadata.containsKey(IdentityAnalyticsRequestFactory.PARAM_SCREEN_NAME)
+        ) {
+            additionalMetadata + mapOf(
+                IdentityAnalyticsRequestFactory.PARAM_SCREEN_NAME to analyticsLastScreenName
+            )
+        } else {
+            additionalMetadata
+        }
+    }
+
+    private fun modelScreenName(
+        modelType: IdentityAnalyticsRequestFactory.ModelType
+    ): String = when (modelType) {
+        IdentityAnalyticsRequestFactory.ModelType.DOCUMENT ->
+            IdentityAnalyticsRequestFactory.SCREEN_NAME_LIVE_CAPTURE
+        IdentityAnalyticsRequestFactory.ModelType.SELFIE ->
+            IdentityAnalyticsRequestFactory.SCREEN_NAME_SELFIE
+    }
+
+    private fun modelLoadingErrorMetadata(
+        modelType: IdentityAnalyticsRequestFactory.ModelType,
+        stage: String
+    ): Map<String, Any?> = mapOf(
+        IdentityAnalyticsRequestFactory.PARAM_ERROR_CONTEXT to
+            IdentityAnalyticsRequestFactory.ERROR_CONTEXT_MODEL_LOADING,
+        IdentityAnalyticsRequestFactory.PARAM_ML_MODEL_STAGE to stage,
+        IdentityAnalyticsRequestFactory.PARAM_ML_MODEL_TYPE to modelType.analyticsValue,
+        IdentityAnalyticsRequestFactory.PARAM_SCREEN_NAME to modelScreenName(modelType)
+    )
+
+    private fun documentUploadErrorMetadata(
+        isFront: Boolean,
+        isHighRes: Boolean,
+        scanType: IdentityScanState.ScanType,
+        uploadMethod: UploadMethod,
+        stage: String,
+        fileName: String? = null
+    ): Map<String, Any?> = mapOf(
+        IdentityAnalyticsRequestFactory.PARAM_ERROR_CONTEXT to
+            IdentityAnalyticsRequestFactory.ERROR_CONTEXT_IMAGE_UPLOAD,
+        IdentityAnalyticsRequestFactory.PARAM_SCREEN_NAME to when (uploadMethod) {
+            UploadMethod.AUTOCAPTURE -> IdentityAnalyticsRequestFactory.SCREEN_NAME_LIVE_CAPTURE
+            UploadMethod.FILEUPLOAD,
+            UploadMethod.MANUALCAPTURE -> IdentityAnalyticsRequestFactory.SCREEN_NAME_FILE_UPLOAD
+        },
+        IdentityAnalyticsRequestFactory.PARAM_SCAN_TYPE to
+            IdentityAnalyticsRequestFactory.analyticsValueForScanType(scanType),
+        IdentityAnalyticsRequestFactory.PARAM_SIDE to if (isFront) FRONT else BACK,
+        IdentityAnalyticsRequestFactory.PARAM_UPLOAD_METHOD to uploadMethod.name.lowercase(),
+        IdentityAnalyticsRequestFactory.PARAM_UPLOAD_STAGE to stage,
+        IdentityAnalyticsRequestFactory.PARAM_IS_HIGH_RES to isHighRes,
+        IdentityAnalyticsRequestFactory.PARAM_FILE_NAME to fileName
+    )
+
+    private fun selfieUploadErrorMetadata(
+        isHighRes: Boolean,
+        selfie: FaceDetectorTransitioner.Selfie,
+        stage: String,
+        fileName: String? = null
+    ): Map<String, Any?> = mapOf(
+        IdentityAnalyticsRequestFactory.PARAM_ERROR_CONTEXT to
+            IdentityAnalyticsRequestFactory.ERROR_CONTEXT_IMAGE_UPLOAD,
+        IdentityAnalyticsRequestFactory.PARAM_SCREEN_NAME to
+            IdentityAnalyticsRequestFactory.SCREEN_NAME_SELFIE,
+        IdentityAnalyticsRequestFactory.PARAM_SCAN_TYPE to
+            IdentityAnalyticsRequestFactory.analyticsValueForScanType(IdentityScanState.ScanType.SELFIE),
+        IdentityAnalyticsRequestFactory.PARAM_UPLOAD_METHOD to UploadMethod.AUTOCAPTURE.name.lowercase(),
+        IdentityAnalyticsRequestFactory.PARAM_UPLOAD_STAGE to stage,
+        IdentityAnalyticsRequestFactory.PARAM_IS_HIGH_RES to isHighRes,
+        IdentityAnalyticsRequestFactory.PARAM_SELFIE_VARIANT to selfie.value,
+        IdentityAnalyticsRequestFactory.PARAM_FILE_NAME to fileName
+    )
 
     private fun <State> MutableStateFlow<State>.updateStateAndSave(function: (State) -> State) {
         this.update(function)

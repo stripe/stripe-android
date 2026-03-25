@@ -124,8 +124,8 @@ internal class LaplacianBlurDetector @Inject constructor(
         } catch (e: Exception) {
             Log.e(TAG, "Failed to calculate blur score. $e")
             identityAnalyticsRequestFactory.genericError(
-                "Failed to calculate blur score",
-                e.javaClass.name
+                throwable = e,
+                overrideMessage = "Failed to calculate blur score"
             )
             return DEFAULT_SCORE
         }

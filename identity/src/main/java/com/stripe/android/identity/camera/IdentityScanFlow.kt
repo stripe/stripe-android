@@ -121,8 +121,16 @@ internal class IdentityScanFlow(
                     )
             } catch (e: Exception) {
                 identityAnalyticsRequestFactory.genericError(
-                    "Analyzer creation failed, likely due to model file issue: ${e.message}",
-                    e.stackTraceToString()
+                    throwable = e,
+                    overrideMessage = "Analyzer creation failed, likely due to model file issue: ${e.message}",
+                    additionalMetadata = mapOf(
+                        IdentityAnalyticsRequestFactory.PARAM_ERROR_CONTEXT to
+                            IdentityAnalyticsRequestFactory.ERROR_CONTEXT_SCANNER_LOAD,
+                        IdentityAnalyticsRequestFactory.PARAM_SCANNER_NAME to
+                            IdentityAnalyticsRequestFactory.scannerNameForScanType(parameters),
+                        IdentityAnalyticsRequestFactory.PARAM_SCREEN_NAME to
+                            IdentityAnalyticsRequestFactory.screenNameForScanType(parameters)
+                    )
                 )
 
                 withContext(Dispatchers.Main) {

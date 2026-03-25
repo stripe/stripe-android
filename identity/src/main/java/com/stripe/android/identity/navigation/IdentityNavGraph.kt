@@ -311,7 +311,8 @@ internal fun IdentityNavGraph(
                             identityViewModel.identityAnalyticsRequestFactory.verificationFailed(
                                 isFromFallbackUrl = false,
                                 requireSelfie = identityViewModel.verificationPage.value?.data?.requireSelfie(),
-                                throwable = failedReason
+                                throwable = failedReason,
+                                lastScreenName = identityViewModel.analyticsLastScreenName
                             )
                             verificationFlowFinishable.finishWithResult(
                                 IdentityVerificationSheet.VerificationFlowResult.Failed(
