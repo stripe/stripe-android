@@ -1,36 +1,38 @@
 package com.stripe.android.common.taptoadd.ui
 
-import app.cash.turbine.ReceiveTurbine
-import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
-import com.stripe.android.link.ui.inline.UserInput
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.testing.PaymentMethodFactory
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
 internal class InitialTapToAddScreenFactoryTest {
     @Test
-    fun `createInitialScreen returns Collecting screen by default`() = scenarioTest(
-        initialState = null,
-    ) {
-        val screen = screenFactory.createInitialScreen()
+    fun `createInitialScreen returns Collecting screen by default`() {
+        val interactor = FakeTapToAddCollectingInteractor()
 
-        assertThat(collectingInteractorFactory.createCalls.awaitItem()).isNotNull()
-        assertThat(screen).isInstanceOf<TapToAddNavigator.Screen.Collecting>()
+        scenarioTest(
+            collectingInteractor = interactor,
+            initialState = null,
+        ) {
+            val screen = screenFactory.createInitialScreen()
 
-        val collectingScreen = screen as TapToAddNavigator.Screen.Collecting
+            assertThat(collectingInteractorFactory.createCalls.awaitItem()).isNotNull()
+            assertThat(screen).isInstanceOf<TapToAddNavigator.Screen.Collecting>()
 
-        assertThat(collectingScreen.interactor).isEqualTo(FakeTapToAddCollectingInteractor)
+            val collectingScreen = screen as TapToAddNavigator.Screen.Collecting
+
+            assertThat(collectingScreen.interactor).isEqualTo(interactor)
+        }
     }
 
     @Test
     fun `createInitialScreen returns Confirmation screen when holder state is Confirmation`() {
+        val interactor = FakeTapToAddConfirmationInteractor()
         val paymentMethod = PaymentMethodFactory.card(random = true)
 
         scenarioTest(
+            confirmationInteractor = interactor,
             initialState = TapToAddStateHolder.State.Confirmation(paymentMethod, linkInput = null),
         ) {
             val screen = screenFactory.createInitialScreen()
@@ -44,15 +46,17 @@ internal class InitialTapToAddScreenFactoryTest {
 
             val confirmationScreen = screen as TapToAddNavigator.Screen.Confirmation
 
-            assertThat(confirmationScreen.interactor).isEqualTo(FakeTapToAddConfirmationInteractor)
+            assertThat(confirmationScreen.interactor).isEqualTo(interactor)
         }
     }
 
     @Test
     fun `createInitialScreen returns CardAdded screen when holder state is CardAdded`() {
+        val interactor = FakeTapToAddCardAddedInteractor()
         val paymentMethod = PaymentMethodFactory.card(random = true)
 
         scenarioTest(
+            cardAddedInteractor = interactor,
             initialState = TapToAddStateHolder.State.CardAdded(paymentMethod),
         ) {
             val screen = screenFactory.createInitialScreen()
@@ -64,18 +68,21 @@ internal class InitialTapToAddScreenFactoryTest {
 
             val cardAddedScreen = screen as TapToAddNavigator.Screen.CardAdded
 
-            assertThat(cardAddedScreen.interactor).isEqualTo(FakeTapToAddCardAddedInteractor)
+            assertThat(cardAddedScreen.interactor).isEqualTo(interactor)
         }
     }
 
     private fun scenarioTest(
+        collectingInteractor: FakeTapToAddCollectingInteractor = FakeTapToAddCollectingInteractor(),
+        cardAddedInteractor: FakeTapToAddCardAddedInteractor = FakeTapToAddCardAddedInteractor(),
+        confirmationInteractor: FakeTapToAddConfirmationInteractor = FakeTapToAddConfirmationInteractor(),
         initialState: TapToAddStateHolder.State?,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val stateHolder = FakeStateHolder(state = initialState)
-        val collectingInteractorFactory = FakeTapToAddCollectingInteractor.Factory()
-        val cardAddedInteractorFactory = FakeTapToAddCardAddedInteractor.Factory()
-        val confirmationInteractorFactory = FakeTapToAddConfirmationInteractor.Factory()
+        val collectingInteractorFactory = FakeTapToAddCollectingInteractor.Factory(collectingInteractor)
+        val cardAddedInteractorFactory = FakeTapToAddCardAddedInteractor.Factory(cardAddedInteractor)
+        val confirmationInteractorFactory = FakeTapToAddConfirmationInteractor.Factory(confirmationInteractor)
 
         val screenFactory = InitialTapToAddScreenFactory(
             paymentMethodHolder = stateHolder,
@@ -97,76 +104,6 @@ internal class InitialTapToAddScreenFactoryTest {
         confirmationInteractorFactory.validate()
         cardAddedInteractorFactory.validate()
         stateHolder.validate()
-    }
-
-    private object FakeTapToAddConfirmationInteractor : TapToAddConfirmationInteractor {
-        override val state: StateFlow<TapToAddConfirmationInteractor.State>
-            get() = throw IllegalStateException("Should not be fetched!")
-
-        override fun performAction(action: TapToAddConfirmationInteractor.Action) {
-            throw IllegalStateException("Should not be called!")
-        }
-
-        class Factory : TapToAddConfirmationInteractor.Factory {
-            private val _createCalls = Turbine<Pair<PaymentMethod, UserInput?>>()
-            val createCalls: ReceiveTurbine<Pair<PaymentMethod, UserInput?>> = _createCalls
-
-            override fun create(
-                paymentMethod: PaymentMethod,
-                linkInput: UserInput?,
-            ): TapToAddConfirmationInteractor {
-                _createCalls.add(paymentMethod to linkInput)
-
-                return FakeTapToAddConfirmationInteractor
-            }
-
-            fun validate() {
-                _createCalls.ensureAllEventsConsumed()
-            }
-        }
-    }
-
-    private object FakeTapToAddCollectingInteractor : TapToAddCollectingInteractor {
-        class Factory : TapToAddCollectingInteractor.Factory {
-            private val _createCalls = Turbine<Unit>()
-            val createCalls: ReceiveTurbine<Unit> = _createCalls
-
-            override fun create(): TapToAddCollectingInteractor {
-                _createCalls.add(Unit)
-
-                return FakeTapToAddCollectingInteractor
-            }
-
-            fun validate() {
-                _createCalls.ensureAllEventsConsumed()
-            }
-        }
-    }
-
-    private object FakeTapToAddCardAddedInteractor : TapToAddCardAddedInteractor {
-        override val state: StateFlow<TapToAddCardAddedInteractor.State>
-            get() = throw IllegalStateException("Should not be fetched!")
-
-        override fun performAction(action: TapToAddCardAddedInteractor.Action) {
-            throw IllegalStateException("Should not be called!")
-        }
-
-        class Factory : TapToAddCardAddedInteractor.Factory {
-            private val _createCalls = Turbine<PaymentMethod>()
-            val createCalls: ReceiveTurbine<PaymentMethod> = _createCalls
-
-            override fun create(
-                paymentMethod: PaymentMethod,
-            ): TapToAddCardAddedInteractor {
-                _createCalls.add(paymentMethod)
-
-                return FakeTapToAddCardAddedInteractor
-            }
-
-            fun validate() {
-                _createCalls.ensureAllEventsConsumed()
-            }
-        }
     }
 
     private class Scenario(

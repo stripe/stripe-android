@@ -109,6 +109,18 @@ internal class DefaultTapToAddCardAddedInteractorTest {
         }
 
     @Test
+    fun `close should stop any more updates from link form helper from being received`() = runScenario(
+        initialLinkState = SavedPaymentMethodLinkFormHelper.State.Unused,
+    ) {
+        interactor.state.test {
+            assertThat(awaitItem().primaryButton.enabled).isTrue()
+            interactor.close()
+            fakeLinkFormHelper.updateState(SavedPaymentMethodLinkFormHelper.State.Incomplete)
+            expectNoEvents()
+        }
+    }
+
+    @Test
     fun `PrimaryButtonPressed in Complete mode calls onConfirm with payment method and link input`() =
         runScenario(
             tapToAddMode = TapToAddMode.Complete,
@@ -139,7 +151,7 @@ internal class DefaultTapToAddCardAddedInteractorTest {
         val scenario = Scenario(
             paymentMethod = paymentMethod,
             interactor = DefaultTapToAddCardAddedInteractor(
-                coroutineScope = backgroundScope,
+                coroutineContext = coroutineContext,
                 tapToAddMode = tapToAddMode,
                 paymentMethod = paymentMethod,
                 savedPaymentMethodLinkFormHelper = fakeLinkFormHelper,

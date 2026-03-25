@@ -11,15 +11,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
-import com.stripe.android.ui.core.elements.CvcController
-import com.stripe.android.ui.core.elements.CvcElement
-import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.elements.IdentifierSpec
-import com.stripe.android.uicore.elements.SectionElement
-import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import org.junit.Rule
 import org.junit.Test
 import kotlin.String
@@ -69,7 +61,7 @@ class TapToAddLayoutScreenshotTest {
         paparazziRule.snapshot {
             TapToAddTheme(imageRepository = null) {
                 TapToAddLayout(
-                    screen = TapToAddNavigator.Screen.Collecting(FakeTapToAddCollectingInteractor),
+                    screen = TapToAddNavigator.Screen.Collecting(FakeTapToAddCollectingInteractor()),
                 ) {}
             }
         }
@@ -192,93 +184,6 @@ class TapToAddLayoutScreenshotTest {
                     ),
                 ) {}
             }
-        }
-    }
-
-    private object FakeTapToAddCollectingInteractor : TapToAddCollectingInteractor
-
-    private class FakeTapToAddCardAddedInteractor(
-        cardBrand: CardBrand = CardBrand.Visa,
-        last4: String? = "4242",
-        primaryButtonEnabled: Boolean = false,
-    ) : TapToAddCardAddedInteractor {
-        override val state: StateFlow<TapToAddCardAddedInteractor.State> = MutableStateFlow(
-            TapToAddCardAddedInteractor.State(
-                cardBrand = cardBrand,
-                last4 = last4,
-                title = "Card added".resolvableString,
-                primaryButton = TapToAddCardAddedInteractor.State.PrimaryButton(
-                    label = "Continue".resolvableString,
-                    enabled = primaryButtonEnabled,
-                ),
-                form = TapToAddCardAddedInteractor.State.Form(
-                    elements = emptyList(),
-                    enabled = true,
-                )
-            )
-        )
-
-        override fun performAction(action: TapToAddCardAddedInteractor.Action) {
-            // No-op
-        }
-    }
-
-    private class FakeTapToAddDelayInteractor(
-        override val cardBrand: CardBrand = CardBrand.Visa,
-        override val last4: String? = "4242",
-    ) : TapToAddDelayInteractor
-
-    private class FakeTapToAddConfirmationInteractor(
-        showCvcElement: Boolean = false,
-        cvcInitialValue: String? = null,
-        cardBrand: CardBrand = CardBrand.Visa,
-        last4: String? = "4242",
-        locked: Boolean = true,
-        primaryButtonState: TapToAddConfirmationInteractor.State.PrimaryButton.State =
-            TapToAddConfirmationInteractor.State.PrimaryButton.State.Idle,
-        error: ResolvableString? = null,
-    ) : TapToAddConfirmationInteractor {
-        override val state: StateFlow<TapToAddConfirmationInteractor.State> = MutableStateFlow(
-            TapToAddConfirmationInteractor.State(
-                cardBrand = cardBrand,
-                last4 = last4,
-                primaryButton = TapToAddConfirmationInteractor.State.PrimaryButton(
-                    label = "Pay".resolvableString,
-                    locked = locked,
-                    state = primaryButtonState,
-                    enabled = true,
-                ),
-                form = TapToAddConfirmationInteractor.State.Form(
-                    elements = listOf(createCvcElement(cardBrand, cvcInitialValue)).takeIf {
-                        showCvcElement
-                    } ?: emptyList(),
-                    enabled = true,
-                ),
-                error = error,
-            )
-        )
-
-        override fun performAction(action: TapToAddConfirmationInteractor.Action) {
-            // No-op
-        }
-
-        private fun createCvcElement(
-            cardBrand: CardBrand,
-            initialValue: String?,
-        ): FormElement {
-            val cvcController = CvcController(
-                cardBrandFlow = stateFlowOf(cardBrand),
-                initialValue = initialValue,
-            )
-            val cvcElement = CvcElement(
-                _identifier = IdentifierSpec.CardCvc,
-                controller = cvcController,
-            )
-
-            return SectionElement.wrap(
-                sectionFieldElement = cvcElement,
-                label = "Confirm your CVC".resolvableString,
-            )
         }
     }
 }

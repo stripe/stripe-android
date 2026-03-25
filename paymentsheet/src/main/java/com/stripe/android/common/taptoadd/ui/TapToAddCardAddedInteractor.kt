@@ -2,7 +2,7 @@ package com.stripe.android.common.taptoadd.ui
 
 import com.stripe.android.common.spms.SavedPaymentMethodLinkFormHelper
 import com.stripe.android.common.taptoadd.TapToAddMode
-import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.inline.UserInput
@@ -12,6 +12,8 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.uicore.elements.FormElement
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,6 +22,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
+import kotlin.coroutines.CoroutineContext
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
 internal interface TapToAddCardAddedInteractor {
@@ -45,6 +48,8 @@ internal interface TapToAddCardAddedInteractor {
 
     fun performAction(action: Action)
 
+    fun close()
+
     sealed interface Action {
         data object PrimaryButtonPressed : Action
     }
@@ -55,13 +60,15 @@ internal interface TapToAddCardAddedInteractor {
 }
 
 internal class DefaultTapToAddCardAddedInteractor(
-    coroutineScope: CoroutineScope,
+    coroutineContext: CoroutineContext,
     private val tapToAddMode: TapToAddMode,
     private val paymentMethod: PaymentMethod,
     private val savedPaymentMethodLinkFormHelper: SavedPaymentMethodLinkFormHelper,
     private val onContinue: (PaymentSelection.Saved) -> Unit,
     private val onConfirm: (PaymentMethod, UserInput?) -> Unit,
 ) : TapToAddCardAddedInteractor {
+    private val coroutineScope = CoroutineScope(coroutineContext + SupervisorJob())
+
     private val _state = MutableStateFlow(
         TapToAddCardAddedInteractor.State(
             cardBrand = paymentMethod.card?.brand ?: CardBrand.Unknown,
@@ -98,6 +105,10 @@ internal class DefaultTapToAddCardAddedInteractor(
         }
     }
 
+    override fun close() {
+        coroutineScope.cancel()
+    }
+
     private fun onPrimaryButtonPressed() {
         val linkInput = when (val state = savedPaymentMethodLinkFormHelper.state.value) {
             is SavedPaymentMethodLinkFormHelper.State.Unused,
@@ -127,17 +138,17 @@ internal class DefaultTapToAddCardAddedInteractor(
     }
 
     class Factory @Inject constructor(
-        @ViewModelScope private val viewModelScope: CoroutineScope,
         private val tapToAddMode: TapToAddMode,
         private val savedPaymentMethodLinkFormHelper: SavedPaymentMethodLinkFormHelper,
         private val tapToAddDelayInteractorFactory: TapToAddDelayInteractor.Factory,
         private val tapToAddConfirmationInteractorFactory: TapToAddConfirmationInteractor.Factory,
         private val tapToAddNavigator: Provider<TapToAddNavigator>,
         private val tapToAddStateHolder: TapToAddStateHolder,
+        @UIContext private val coroutineContext: CoroutineContext
     ) : TapToAddCardAddedInteractor.Factory {
         override fun create(paymentMethod: PaymentMethod): TapToAddCardAddedInteractor {
             return DefaultTapToAddCardAddedInteractor(
-                coroutineScope = viewModelScope,
+                coroutineContext = coroutineContext,
                 tapToAddMode = tapToAddMode,
                 paymentMethod = paymentMethod,
                 savedPaymentMethodLinkFormHelper = savedPaymentMethodLinkFormHelper,

@@ -13,7 +13,7 @@ import org.junit.Test
 internal class TapToAddNavigatorTest {
     @Test
     fun `screen emits initial screen when constructed with initial screen`() = runTest {
-        val initialScreen = TapToAddNavigator.Screen.Collecting(FakeTapToAddCollectingInteractor)
+        val initialScreen = TapToAddNavigator.Screen.Collecting(FakeTapToAddCollectingInteractor())
         val navigator = TapToAddNavigator(
             coroutineScope = this,
             stateHolder = FakeStateHolder(state = null),
@@ -28,7 +28,7 @@ internal class TapToAddNavigatorTest {
     @Test
     fun `performAction with Close event emits Canceled with null payment selection when no payment method collected`() =
         runTest {
-            val initialScreen = TapToAddNavigator.Screen.Collecting(FakeTapToAddCollectingInteractor)
+            val initialScreen = TapToAddNavigator.Screen.Collecting(FakeTapToAddCollectingInteractor())
             val navigator = TapToAddNavigator(
                 coroutineScope = this,
                 stateHolder = FakeStateHolder(state = null),
@@ -45,7 +45,7 @@ internal class TapToAddNavigatorTest {
     fun `performAction with Close event emits Canceled with payment selection when payment method collected`() =
         runTest {
             val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-            val initialScreen = TapToAddNavigator.Screen.Collecting(FakeTapToAddCollectingInteractor)
+            val initialScreen = TapToAddNavigator.Screen.Collecting(FakeTapToAddCollectingInteractor())
             val navigator = TapToAddNavigator(
                 coroutineScope = this,
                 stateHolder = FakeStateHolder(
@@ -72,7 +72,7 @@ internal class TapToAddNavigatorTest {
                 name = "John Doe",
                 consentAction = SignUpConsentAction.Checkbox,
             )
-            val initialScreen = TapToAddNavigator.Screen.Collecting(FakeTapToAddCollectingInteractor)
+            val initialScreen = TapToAddNavigator.Screen.Collecting(FakeTapToAddCollectingInteractor())
             val navigator = TapToAddNavigator(
                 coroutineScope = this,
                 stateHolder = FakeStateHolder(
@@ -111,5 +111,115 @@ internal class TapToAddNavigatorTest {
         }
     }
 
-    private object FakeTapToAddCollectingInteractor : TapToAddCollectingInteractor
+    @Test
+    fun `Close action should close collecting interactor`() = runTest {
+        val interactor = FakeTapToAddCollectingInteractor()
+        val navigator = TapToAddNavigator(
+            coroutineScope = this,
+            stateHolder = FakeStateHolder(state = null),
+            initialScreen = TapToAddNavigator.Screen.Collecting(interactor),
+        )
+
+        navigator.performAction(TapToAddNavigator.Action.Close)
+
+        interactor.onClose.awaitItem()
+        interactor.validate()
+    }
+
+    @Test
+    fun `Close action should close card added interactor`() = runTest {
+        val interactor = FakeTapToAddCardAddedInteractor()
+        val navigator = TapToAddNavigator(
+            coroutineScope = this,
+            stateHolder = FakeStateHolder(state = null),
+            initialScreen = TapToAddNavigator.Screen.CardAdded(interactor),
+        )
+
+        navigator.performAction(TapToAddNavigator.Action.Close)
+
+        interactor.onClose.awaitItem()
+        interactor.validate()
+    }
+
+    @Test
+    fun `Close action should close delay interactor`() = runTest {
+        val interactor = FakeTapToAddDelayInteractor()
+        val navigator = TapToAddNavigator(
+            coroutineScope = this,
+            stateHolder = FakeStateHolder(state = null),
+            initialScreen = TapToAddNavigator.Screen.Delay(interactor),
+        )
+
+        navigator.performAction(TapToAddNavigator.Action.Close)
+
+        interactor.onClose.awaitItem()
+        interactor.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `Close action should close confirmation interactor`() = runTest {
+        val interactor = FakeTapToAddConfirmationInteractor()
+        val navigator = TapToAddNavigator(
+            coroutineScope = this,
+            stateHolder = FakeStateHolder(state = null),
+            initialScreen = TapToAddNavigator.Screen.Confirmation(interactor),
+        )
+
+        navigator.performAction(TapToAddNavigator.Action.Close)
+
+        interactor.onClose.awaitItem()
+        interactor.validate()
+    }
+
+    @Test
+    fun `NavigateTo action closes current screen interactor only`() = runTest {
+        val collectingInteractor = FakeTapToAddCollectingInteractor()
+        val cardAddedInteractor = FakeTapToAddCardAddedInteractor()
+        val navigator = TapToAddNavigator(
+            coroutineScope = this,
+            stateHolder = FakeStateHolder(state = null),
+            initialScreen = TapToAddNavigator.Screen.Collecting(collectingInteractor),
+        )
+
+        navigator.performAction(
+            TapToAddNavigator.Action.NavigateTo(
+                TapToAddNavigator.Screen.CardAdded(cardAddedInteractor),
+            ),
+        )
+
+        collectingInteractor.onClose.awaitItem()
+        collectingInteractor.validate()
+        cardAddedInteractor.validate()
+    }
+
+    @Test
+    fun `Complete action closes current interactor`() = runTest {
+        val interactor = FakeTapToAddCollectingInteractor()
+        val navigator = TapToAddNavigator(
+            coroutineScope = this,
+            stateHolder = FakeStateHolder(state = null),
+            initialScreen = TapToAddNavigator.Screen.Collecting(interactor),
+        )
+
+        navigator.performAction(TapToAddNavigator.Action.Complete)
+
+        interactor.onClose.awaitItem()
+        interactor.validate()
+    }
+
+    @Test
+    fun `Continue closes current interactor`() = runTest {
+        val interactor = FakeTapToAddCollectingInteractor()
+        val navigator = TapToAddNavigator(
+            coroutineScope = this,
+            stateHolder = FakeStateHolder(state = null),
+            initialScreen = TapToAddNavigator.Screen.Collecting(interactor),
+        )
+        val paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+
+        navigator.performAction(TapToAddNavigator.Action.Continue(paymentSelection))
+
+        interactor.onClose.awaitItem()
+        interactor.validate()
+    }
 }

@@ -1,7 +1,7 @@
 package com.stripe.android.common.taptoadd.ui
 
 import com.stripe.android.common.spms.CvcFormHelper
-import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -18,6 +18,8 @@ import com.stripe.android.paymentsheet.utils.reportPaymentResult
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,6 +28,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
+import kotlin.coroutines.CoroutineContext
 
 internal interface TapToAddConfirmationInteractor {
     val state: StateFlow<State>
@@ -58,6 +61,8 @@ internal interface TapToAddConfirmationInteractor {
 
     fun performAction(action: Action)
 
+    fun close()
+
     sealed interface Action {
         data object PrimaryButtonPressed : Action
         data object SuccessShown : Action
@@ -72,7 +77,7 @@ internal interface TapToAddConfirmationInteractor {
 }
 
 internal class DefaultTapToAddConfirmationInteractor(
-    private val coroutineScope: CoroutineScope,
+    private val coroutineContext: CoroutineContext,
     private val paymentMethod: PaymentMethod,
     private val linkInput: UserInput?,
     private val paymentMethodMetadata: PaymentMethodMetadata,
@@ -81,6 +86,8 @@ internal class DefaultTapToAddConfirmationInteractor(
     private val eventReporter: EventReporter,
     private val onComplete: () -> Unit,
 ) : TapToAddConfirmationInteractor {
+    private val coroutineScope = CoroutineScope(coroutineContext + SupervisorJob())
+
     private val selection = cvcFormHelper.state.mapAsStateFlow { cvcState ->
         PaymentSelection.Saved(
             paymentMethod = paymentMethod,
@@ -124,8 +131,21 @@ internal class DefaultTapToAddConfirmationInteractor(
     override fun performAction(action: TapToAddConfirmationInteractor.Action) {
         when (action) {
             TapToAddConfirmationInteractor.Action.PrimaryButtonPressed -> onPrimaryButtonPressed()
-            TapToAddConfirmationInteractor.Action.SuccessShown -> onComplete()
+            TapToAddConfirmationInteractor.Action.SuccessShown -> {
+                val currentConfirmationState = confirmationHandler.state.value
+
+                if (
+                    currentConfirmationState is ConfirmationHandler.State.Complete &&
+                    currentConfirmationState.result is ConfirmationHandler.Result.Succeeded
+                ) {
+                    onComplete()
+                }
+            }
         }
+    }
+
+    override fun close() {
+        coroutineScope.cancel()
     }
 
     private fun onPrimaryButtonPressed() {
@@ -240,7 +260,7 @@ internal class DefaultTapToAddConfirmationInteractor(
     }
 
     class Factory @Inject constructor(
-        @ViewModelScope private val viewModelScope: CoroutineScope,
+        @UIContext private val coroutineContext: CoroutineContext,
         private val paymentMethodMetadata: PaymentMethodMetadata,
         private val cvcFormHelperFactory: CvcFormHelper.Factory,
         private val confirmationHandler: ConfirmationHandler,
@@ -257,7 +277,7 @@ internal class DefaultTapToAddConfirmationInteractor(
                 linkInput = linkInput,
                 confirmationHandler = confirmationHandler,
                 eventReporter = eventReporter,
-                coroutineScope = viewModelScope,
+                coroutineContext = coroutineContext,
                 cvcFormHelper = cvcFormHelperFactory.create(paymentMethod),
                 onComplete = {
                     tapToAddNavigator.get().performAction(
