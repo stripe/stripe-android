@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### Payments
+[FIXED][12768](https://github.com/stripe/stripe-android/pull/12768) Fixed Alipay payment flow closing when the Alipay app is not installed by routing through the in-app WebView instead of Custom Tabs.
+
 ### PaymentSheet
 [FIXED][12653](https://github.com/stripe/stripe-android/pull/12653) Fixed a bug where `PaymentSheet.FlowController` wouldn't emit a null `PaymentOption` from `PaymentOptionCallback` after a successful confirmation.
 
