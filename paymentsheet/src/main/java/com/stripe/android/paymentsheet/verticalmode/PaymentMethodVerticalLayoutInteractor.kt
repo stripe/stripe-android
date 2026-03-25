@@ -13,6 +13,7 @@ import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.FormHelper.FormType
+import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.code
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
@@ -21,6 +22,7 @@ import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.mandateTextFromPaymentMethodMetadata
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.WalletLocation
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.ViewAction
@@ -49,6 +51,7 @@ internal interface PaymentMethodVerticalLayoutInteractor {
     fun handleViewAction(viewAction: ViewAction)
 
     data class State(
+        val currencySelectorOptions: CurrencySelectorOptions?,
         val displayablePaymentMethods: List<DisplayablePaymentMethod>,
         val isProcessing: Boolean,
         val selection: Selection?,
@@ -109,6 +112,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val invokeRowSelectionCallback: (() -> Unit)? = null,
     private val displaysMandatesInFormScreen: Boolean,
     private val onInitiallyDisplayedPaymentMethodVisibilitySnapshot: (List<String>, List<String>) -> Unit,
+    private val currencySelectorOptions: CurrencySelectorOptions? = null,
     dispatcher: CoroutineContext = Dispatchers.Default,
     mainDispatcher: CoroutineContext = Dispatchers.Main.immediate,
 ) : PaymentMethodVerticalLayoutInteractor {
@@ -123,6 +127,12 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             val formHelper = DefaultFormHelper.create(viewModel, paymentMethodMetadata)
             val isCurrentScreen = viewModel.navigationHandler.currentScreen.mapAsStateFlow {
                 it is PaymentSheetScreen.VerticalMode
+            }
+            val currencySelectorOptions = (viewModel as? PaymentSheetViewModel)?.let { psViewModel ->
+                (psViewModel.args.initializationMode as? PaymentElementLoader.InitializationMode.CheckoutSession)
+                    ?.checkoutSessionResponse
+                    ?.adaptivePricingInfo
+                    ?.let { CurrencySelectorOptionsFactory.create(it) }
             }
             return DefaultPaymentMethodVerticalLayoutInteractor(
                 paymentMethodMetadata = paymentMethodMetadata,
@@ -185,6 +195,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                         isVerticalLayout = true,
                     )
                 },
+                currencySelectorOptions = currencySelectorOptions,
             ).also { interactor ->
                 viewModel.viewModelScope.launch {
                     interactor.state.mapAsStateFlow { it.mandate }.collect { mandate ->
@@ -291,6 +302,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
             availableSavedPaymentMethodAction = action,
             mandate = getMandate(temporarySelectionCode, mostRecentSelection),
+            currencySelectorOptions = currencySelectorOptions,
         )
     }
 
