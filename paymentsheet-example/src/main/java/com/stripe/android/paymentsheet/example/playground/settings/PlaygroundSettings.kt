@@ -384,7 +384,11 @@ internal class PlaygroundSettings private constructor(
         }
 
         fun asJsonString(): String {
-            return asJsonString { true }
+            return asJsonString { settingDefinition ->
+                val saveable = settingDefinition.saveable() ?: return@asJsonString false
+                val currentValue = settings[settingDefinition]
+                currentValue != saveable.defaultValue
+            }
         }
 
         private fun <T> PlaygroundSettingDefinition.Saveable<T>.convertToString(
