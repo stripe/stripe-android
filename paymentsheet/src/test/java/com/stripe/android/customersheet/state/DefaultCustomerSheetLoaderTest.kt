@@ -672,6 +672,27 @@ internal class DefaultCustomerSheetLoaderTest {
     }
 
     @Test
+    fun `load fails gracefully when no supported payment methods are available`() = runTest {
+        val eventReporter = FakeCustomerSheetEventReporter()
+
+        val loader = createCustomerSheetLoader(
+            intent = STRIPE_INTENT.copy(
+                paymentMethodTypes = listOf("sepa_debit")
+            ),
+            eventReporter = eventReporter,
+        )
+
+        val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
+
+        val result = loader.load(config)
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isInstanceOf<IllegalArgumentException>()
+        assertThat(result.exceptionOrNull()?.message).contains("No supported payment methods were found")
+        assertThat(eventReporter.onLoadFailedCalls.awaitItem()).isNotNull()
+    }
+
+    @Test
     fun `supportedPaymentMethods uses paymentMethodOrder from configuration`() = runTest {
         val loader = createCustomerSheetLoader(
             isFinancialConnectionsAvailable = { true },
