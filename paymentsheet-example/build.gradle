@@ -101,12 +101,18 @@ android {
             minSdkVersion 26
             dimension "base"
         }
+
+        cardScan {
+            applicationIdSuffix ".cardscan"
+            dimension "base"
+        }
     }
 }
 
 dependencies {
     implementation project(':payments')
     implementation project(':financial-connections')
+    cardScanImplementation project(':stripecardscan')
 
     implementation libs.androidx.activity
     implementation libs.androidx.appCompat

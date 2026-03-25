@@ -23,15 +23,17 @@ internal class PlaygroundRequester(
     playgroundSettings: PlaygroundSettings.Snapshot,
     applicationContext: Context,
 ) : BasePlaygroundRequester(playgroundSettings, applicationContext) {
+    private val json = Json { ignoreUnknownKeys = true }
+
     suspend fun fetch(): kotlin.Result<PlaygroundState> {
         playgroundSettings.setValues()
         val requestBody = playgroundSettings.checkoutRequest()
 
         val apiResponse = withContext(Dispatchers.IO) {
             Fuel.post(baseUrl + "checkout")
-                .jsonBody(Json.encodeToString(CheckoutRequest.serializer(), requestBody))
+                .jsonBody(json.encodeToString(CheckoutRequest.serializer(), requestBody))
                 .suspendable()
-                .awaitModel(CheckoutResponse.serializer())
+                .awaitModel(CheckoutResponse.serializer(), json)
         }
         when (apiResponse) {
             is Result.Failure -> {

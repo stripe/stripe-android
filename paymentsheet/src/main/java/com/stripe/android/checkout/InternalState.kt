@@ -10,6 +10,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 internal data class InternalState(
     val key: String,
+    val configuration: Checkout.Configuration.State,
     val checkoutSessionResponse: CheckoutSessionResponse,
     val shippingName: String? = null,
     val billingName: String? = null,
@@ -17,6 +18,7 @@ internal data class InternalState(
     val billingPhoneNumber: String? = null,
     val shippingAddress: Address.State? = null,
     val billingAddress: Address.State? = null,
+    val integrationLaunched: Boolean = false,
 ) : Parcelable {
     val initializationMode: PaymentElementLoader.InitializationMode.CheckoutSession
         get() = PaymentElementLoader.InitializationMode.CheckoutSession(

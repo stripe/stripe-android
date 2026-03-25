@@ -27,6 +27,7 @@ import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
+import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.WalletButtonsPage
 import com.stripe.android.paymentelement.WalletButtonsPreview
@@ -81,10 +82,7 @@ internal class FlowControllerTest {
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
@@ -112,6 +110,7 @@ internal class FlowControllerTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -122,10 +121,7 @@ internal class FlowControllerTest {
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
@@ -156,6 +152,7 @@ internal class FlowControllerTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -168,10 +165,7 @@ internal class FlowControllerTest {
             callConfirmOnPaymentOptionCallback = false,
             resultCallback = ::assertCompleted,
         ) { testContext ->
-            networkRule.enqueue(
-                method("GET"),
-                path("/v1/elements/sessions"),
-            ) { response ->
+            networkRule.elementsSession { response ->
                 response.testBodyFromFile("elements-sessions-requires_payment_method.json")
             }
 
@@ -213,10 +207,7 @@ internal class FlowControllerTest {
             callConfirmOnPaymentOptionCallback = false,
             resultCallback = ::assertCompleted,
         ) { testContext ->
-            networkRule.enqueue(
-                method("GET"),
-                path("/v1/elements/sessions"),
-            ) { response ->
+            networkRule.elementsSession { response ->
                 response.testBodyFromFile("elements-sessions-requires_payment_method.json")
             }
 
@@ -265,10 +256,7 @@ internal class FlowControllerTest {
             },
             resultCallback = ::assertCompleted,
         ) { testContext ->
-            networkRule.enqueue(
-                method("GET"),
-                path("/v1/elements/sessions"),
-            ) { response ->
+            networkRule.elementsSession { response ->
                 response.testBodyFromFile("elements-sessions-deferred_payment_intent.json")
             }
 
@@ -316,10 +304,7 @@ internal class FlowControllerTest {
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.setResponseCode(500)
         }
 
@@ -354,6 +339,7 @@ internal class FlowControllerTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -379,10 +365,7 @@ internal class FlowControllerTest {
 
         val countDownLatch = CountDownLatch(1)
 
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.socketPolicy = SocketPolicy.DISCONNECT_AFTER_REQUEST
         }
 
@@ -410,10 +393,7 @@ internal class FlowControllerTest {
             integrationType = integrationType,
             resultCallback = ::assertFailed,
         ) { testContext ->
-            networkRule.enqueue(
-                method("GET"),
-                path("/v1/elements/sessions"),
-            ) { response ->
+            networkRule.elementsSession { response ->
                 response.testBodyFromFile("elements-sessions-requires_payment_method.json")
             }
 
@@ -446,10 +426,7 @@ internal class FlowControllerTest {
 
     @Test
     fun testActivityRecreationDoesNotMakeSubsequentCallsToElementsSession() {
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
@@ -560,18 +537,14 @@ internal class FlowControllerTest {
             assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
         }
 
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
+        networkRule.elementsSession(
             query("client_secret", "pi_example_secret_example"),
         ) { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
         configureFlowController("pi_example_secret_example")
 
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
+        networkRule.elementsSession(
             query("client_secret", "pi_example2_secret_example2"),
         ) { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
@@ -592,10 +565,7 @@ internal class FlowControllerTest {
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent.json")
         }
 
@@ -652,6 +622,7 @@ internal class FlowControllerTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -664,10 +635,7 @@ internal class FlowControllerTest {
         createIntentCallback = { _, _ -> CreateIntentResult.Success("pi_example_secret_example") },
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent.json")
         }
 
@@ -714,6 +682,7 @@ internal class FlowControllerTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -736,10 +705,7 @@ internal class FlowControllerTest {
                 .isEqualTo("We don't accept visa")
         },
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent.json")
         }
 
@@ -792,10 +758,7 @@ internal class FlowControllerTest {
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent.json")
         }
 
@@ -832,6 +795,7 @@ internal class FlowControllerTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -853,10 +817,7 @@ internal class FlowControllerTest {
             )
         },
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent.json")
         }
 
@@ -912,11 +873,7 @@ internal class FlowControllerTest {
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_cvc_recollection.json")
         }
 
@@ -969,6 +926,8 @@ internal class FlowControllerTest {
         composeTestRule
             .onNodeWithText("Confirm")
             .performClick()
+
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -980,11 +939,7 @@ internal class FlowControllerTest {
         callConfirmOnPaymentOptionCallback = false,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_cvc_recollection.json")
         }
 
@@ -1059,10 +1014,7 @@ internal class FlowControllerTest {
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.setResponseCode(500)
         }
 
@@ -1129,11 +1081,7 @@ internal class FlowControllerTest {
             }
         }
 
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_pm_with_link_and_cs.json")
         }
 
@@ -1202,11 +1150,7 @@ internal class FlowControllerTest {
             }
         }
 
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_pm_with_link_and_cs.json")
         }
 
@@ -1293,10 +1237,7 @@ internal class FlowControllerTest {
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
@@ -1343,10 +1284,7 @@ internal class FlowControllerTest {
         resultCallback = ::assertCompleted,
     ) { testContext ->
         val oboMerchantID = "acct_connected_1234"
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
+        networkRule.elementsSession(
             query(urlEncode("deferred_intent[on_behalf_of]"), oboMerchantID)
         ) { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")

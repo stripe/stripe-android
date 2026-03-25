@@ -15,9 +15,10 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkout.CheckoutInstancesTestRule
-import com.stripe.android.checkout.InternalState
+import com.stripe.android.checkout.CheckoutStateFactory
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
+import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.strings.resolvableString
@@ -53,9 +54,6 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.RequestMatchers.host
-import com.stripe.android.networktesting.RequestMatchers.method
-import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
@@ -89,7 +87,6 @@ import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -236,6 +233,8 @@ internal class DefaultFlowControllerTest {
         assertThat(viewModel.paymentSelection).isNull()
         assertThat(viewModel.state).isNull()
         assertThat(viewModel.previousConfigureRequest).isNull()
+
+        assertThat(flowController.getPaymentOption()).isNull()
     }
 
     @Test
@@ -2299,12 +2298,8 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `configureWithCheckout throws when checkout mutation is in flight`() = runTest {
-        val checkout = createCheckout(key = "test_key")
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("POST"),
-            path("/v1/payment_pages/cs_test_abc123"),
-        ) { response ->
+        val checkout = CheckoutStateFactory.createCheckout(context)
+        networkRule.checkoutUpdate { response ->
             response.setBodyDelay(5, TimeUnit.SECONDS)
             response.testBodyFromFile("checkout-session-apply-discount.json")
         }
@@ -2324,12 +2319,12 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `presentPaymentOptions throws when checkout mutation is in flight`() = runTest {
-        val checkout = createCheckout(key = "test_key")
+        val checkout = CheckoutStateFactory.createCheckout(context)
         val flowController = createFlowController(
             FakePaymentElementLoader(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 integrationMetadata = IntegrationMetadata.CheckoutSession(
-                    id = "cs_test_abc123",
+                    id = DEFAULT_CHECKOUT_SESSION_ID,
                     instancesKey = "test_key",
                 ),
                 linkState = null,
@@ -2337,11 +2332,7 @@ internal class DefaultFlowControllerTest {
         )
         flowController.configureExpectingSuccess()
 
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("POST"),
-            path("/v1/payment_pages/cs_test_abc123"),
-        ) { response ->
+        networkRule.checkoutUpdate { response ->
             response.setBodyDelay(5, TimeUnit.SECONDS)
             response.testBodyFromFile("checkout-session-apply-discount.json")
         }
@@ -2518,16 +2509,6 @@ internal class DefaultFlowControllerTest {
             statusBarColor = STATUS_BAR_COLOR,
             paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
         )
-    }
-
-    private fun createCheckout(key: String): Checkout {
-        val state = Checkout.State(
-            InternalState(
-                key = key,
-                checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
-            ),
-        )
-        return Checkout.createWithState(context, state)
     }
 
     private fun createBacsPaymentSelection(): PaymentSelection.New.GenericPaymentMethod {

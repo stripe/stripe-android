@@ -2,7 +2,6 @@ package com.stripe.android.checkout.injection
 
 import android.content.Context
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.checkout.CheckoutSessionLoader
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -31,7 +30,6 @@ import javax.inject.Provider
     ],
 )
 internal interface CheckoutComponent {
-    val checkoutSessionLoader: CheckoutSessionLoader
     val checkoutSessionRepository: CheckoutSessionRepository
 
     @Component.Factory

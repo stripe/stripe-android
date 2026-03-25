@@ -10,21 +10,23 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
+import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
-import com.stripe.android.link.account.LinkStore
+import com.stripe.android.link.account.DefaultLinkStore
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.PaymentSheet
-import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.runBlocking
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 internal class EmbeddedPaymentElementTestRunnerContext(
     val embeddedPaymentElement: EmbeddedPaymentElement,
     val rowSelectionCalls: ReceiveTurbine<RowSelectionCall>,
+    val paymentOptionTurbine: ReceiveTurbine<EmbeddedPaymentElement.PaymentOptionDisplayData?>,
     private val countDownLatch: CountDownLatch,
 ) {
     suspend fun configure(
@@ -43,6 +45,12 @@ internal class EmbeddedPaymentElementTestRunnerContext(
 
     fun confirm() {
         embeddedPaymentElement.confirm()
+    }
+
+    suspend fun consumePaymentOptionEvent(paymentMethodType: String, label: String) {
+        val paymentOption = paymentOptionTurbine.awaitItem()
+        assertThat(paymentOption?.label).endsWith(label)
+        assertThat(paymentOption?.paymentMethodType).isEqualTo(paymentMethodType)
     }
 
     /**
@@ -162,7 +170,7 @@ private fun runEmbeddedPaymentElementTestInternal(
         scenario.moveToState(Lifecycle.State.CREATED)
         scenario.onActivity {
             PaymentConfiguration.init(it, "pk_test_123")
-            LinkStore(it.applicationContext).clear()
+            DefaultLinkStore(it.applicationContext).clear()
         }
 
         lateinit var embeddedPaymentElement: EmbeddedPaymentElement
@@ -172,16 +180,29 @@ private fun runEmbeddedPaymentElementTestInternal(
 
         scenario.moveToState(Lifecycle.State.RESUMED)
 
-        val testContext = EmbeddedPaymentElementTestRunnerContext(
-            embeddedPaymentElement = embeddedPaymentElement,
-            rowSelectionCalls = rowSelectionCalls,
-            countDownLatch = countDownLatch,
-        )
-        runTest {
-            block(testContext)
+        runBlocking {
+            turbineScope {
+                val paymentOptionTurbine = embeddedPaymentElement.paymentOption.testIn(this)
+                // Consume the initial null.
+                assertThat(paymentOptionTurbine.awaitItem()).isNull()
+
+                val testContext = EmbeddedPaymentElementTestRunnerContext(
+                    embeddedPaymentElement = embeddedPaymentElement,
+                    rowSelectionCalls = rowSelectionCalls,
+                    paymentOptionTurbine = paymentOptionTurbine,
+                    countDownLatch = countDownLatch,
+                )
+                block(testContext)
+
+                testContext.rowSelectionCalls.ensureAllEventsConsumed()
+
+                paymentOptionTurbine.ensureAllEventsConsumed()
+                // Cancel the turbine to stop collecting the StateFlow, which never
+                // completes on its own and would cause turbineScope to hang indefinitely.
+                paymentOptionTurbine.cancel()
+            }
         }
 
-        testContext.rowSelectionCalls.ensureAllEventsConsumed()
         val didCompleteSuccessfully = countDownLatch.await(countDownLatchTimeoutSeconds, TimeUnit.SECONDS)
         networkRule.validate()
         assertThat(didCompleteSuccessfully).isTrue()

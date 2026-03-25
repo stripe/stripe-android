@@ -8,10 +8,10 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.checkout.CheckoutInstancesTestRule
-import com.stripe.android.checkout.InternalState
+import com.stripe.android.checkout.CheckoutStateFactory
+import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -21,12 +21,10 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.RequestMatchers
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.RetryRule
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -201,17 +199,8 @@ internal class ManageActivityTest {
 
     @Test
     fun `onDestroy clears checkout integration launched flag`() {
-        val instancesKey = "test-checkout-key"
-        val checkout = Checkout.createWithState(
-            applicationContext,
-            Checkout.State(
-                InternalState(
-                    key = instancesKey,
-                    checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
-                ),
-            ),
-        )
-        CheckoutInstances.markIntegrationLaunched(instancesKey)
+        val checkout = CheckoutStateFactory.createCheckout(applicationContext)
+        CheckoutInstances.markIntegrationLaunched(CheckoutStateFactory.DEFAULT_KEY)
 
         launch(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
@@ -223,7 +212,7 @@ internal class ManageActivityTest {
                 canUpdateFullPaymentMethodDetails = false,
                 integrationMetadata = IntegrationMetadata.CheckoutSession(
                     id = "cs_test",
-                    instancesKey = instancesKey,
+                    instancesKey = CheckoutStateFactory.DEFAULT_KEY,
                 ),
             ),
         ) {
@@ -231,11 +220,7 @@ internal class ManageActivityTest {
         }
 
         // Enqueue a response so the mutation attempt doesn't fail due to missing network stub.
-        networkRule.enqueue(
-            RequestMatchers.host("api.stripe.com"),
-            RequestMatchers.method("POST"),
-            RequestMatchers.path("/v1/payment_pages/cs_test_abc123"),
-        ) { response ->
+        networkRule.checkoutUpdate { response ->
             response.testBodyFromFile("checkout-session-apply-discount.json")
         }
 

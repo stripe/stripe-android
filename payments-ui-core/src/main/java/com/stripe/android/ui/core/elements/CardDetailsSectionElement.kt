@@ -23,6 +23,7 @@ class CardDetailsSectionElement(
     private val cardFundingFilter: CardFundingFilter,
     override val identifier: IdentifierSpec,
     private val cardDetailsAction: CardDetailsAction? = null,
+    private val isStripeCardScanAllowed: Boolean = false,
     override val controller: CardDetailsSectionController = CardDetailsSectionController(
         cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
         initialValues = initialValues,
@@ -32,6 +33,7 @@ class CardDetailsSectionElement(
         cardFundingFilter = cardFundingFilter,
         cardDetailsAction = cardDetailsAction,
         automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
+        isStripeCardScanAllowed = isStripeCardScanAllowed,
     )
 ) : FormElement {
     override val allowsUserInteraction: Boolean = true

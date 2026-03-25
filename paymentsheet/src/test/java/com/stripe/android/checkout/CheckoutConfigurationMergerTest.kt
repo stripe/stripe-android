@@ -593,6 +593,7 @@ class CheckoutConfigurationMergerTest {
     ): InternalState {
         return InternalState(
             key = "CheckoutConfigurationMergerTest",
+            configuration = Checkout.Configuration().build(),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 customerEmail = customerEmail,
             ),

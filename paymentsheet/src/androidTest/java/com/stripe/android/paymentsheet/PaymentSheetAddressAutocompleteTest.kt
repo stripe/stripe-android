@@ -6,6 +6,7 @@ import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.AddressAutocompletePreview
 import com.stripe.android.paymentsheet.utils.PlacesClientProxyTestRule
@@ -191,10 +192,7 @@ class PaymentSheetAddressAutocompleteTest {
     }
 
     private fun enqueueElementsSession() {
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
     }

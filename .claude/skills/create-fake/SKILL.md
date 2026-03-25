@@ -1,6 +1,6 @@
 ---
 name: create-fake
-description: Explains how to create a fake following stripe-android's coding standards
+description: Use when creating a fake test implementation in stripe-android — covers FakeClassName pattern, Turbine call tracking, ViewActionRecorder, and ensureAllEventsConsumed validation
 ---
 
 # Creating Fakes for Testing

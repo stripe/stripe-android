@@ -72,6 +72,7 @@ internal data class CheckoutSessionResponse(
     val totalSummary: TotalSummaryResponse?,
     val lineItems: List<LineItem>,
     val shippingOptions: List<ShippingRate>,
+    val adaptivePricingInfo: AdaptivePricingInfo?,
 ) : StripeModel {
 
     /**
@@ -172,6 +173,22 @@ internal data class CheckoutSessionResponse(
         val unitAmount: Long?,
         val subtotal: Long,
         val total: Long,
+    ) : StripeModel
+
+    @Parcelize
+    data class AdaptivePricingInfo(
+        val activePresentmentCurrency: String,
+        val integrationAmount: Long,
+        val integrationCurrency: String,
+        val localCurrencyOptions: List<LocalCurrencyOption>,
+    ) : StripeModel
+
+    @Parcelize
+    data class LocalCurrencyOption(
+        val amount: Long,
+        val conversionMarkupBps: Int,
+        val currency: String,
+        val presentmentExchangeRate: String,
     ) : StripeModel
 
     enum class Mode {

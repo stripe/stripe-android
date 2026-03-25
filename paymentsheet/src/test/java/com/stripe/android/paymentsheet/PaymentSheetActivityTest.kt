@@ -36,9 +36,9 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkout.CheckoutInstances
-import com.stripe.android.checkout.InternalState
+import com.stripe.android.checkout.CheckoutStateFactory
+import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
@@ -63,7 +63,6 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.RequestMatchers
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -87,7 +86,6 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSaved
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.FakeBacsMandateConfirmationLauncher
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Args
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
@@ -100,6 +98,7 @@ import com.stripe.android.paymentsheet.ui.SHEET_NAVIGATION_BUTTON_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.verticalmode.FakeCheckoutCurrencyUpdater
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.createComposeCleanupRule
@@ -214,22 +213,13 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `onDestroy clears checkout integration launched flag`() {
-        val instancesKey = "test-checkout-key"
-        val checkout = Checkout.createWithState(
-            context,
-            Checkout.State(
-                InternalState(
-                    key = instancesKey,
-                    checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
-                ),
-            ),
-        )
-        CheckoutInstances.markIntegrationLaunched(instancesKey)
+        val checkout = CheckoutStateFactory.createCheckout(context)
+        CheckoutInstances.markIntegrationLaunched(CheckoutStateFactory.DEFAULT_KEY)
 
         val viewModel = createViewModel(
             integrationMetadata = IntegrationMetadata.CheckoutSession(
                 id = "cs_test",
-                instancesKey = instancesKey,
+                instancesKey = CheckoutStateFactory.DEFAULT_KEY,
             ),
         )
         val scenario = activityScenario(viewModel)
@@ -241,11 +231,7 @@ internal class PaymentSheetActivityTest {
         }
 
         // Enqueue a response so the mutation attempt doesn't fail due to missing network stub.
-        networkRule.enqueue(
-            RequestMatchers.host("api.stripe.com"),
-            RequestMatchers.method("POST"),
-            RequestMatchers.path("/v1/payment_pages/cs_test_abc123"),
-        ) { response ->
+        networkRule.checkoutUpdate { response ->
             response.testBodyFromFile("checkout-session-apply-discount.json")
         }
 
@@ -1351,6 +1337,7 @@ internal class PaymentSheetActivityTest {
                 tapToAddHelperFactory = FakeTapToAddHelper.Factory.noOp(),
                 mode = EventReporter.Mode.Complete,
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
+                checkoutCurrencyUpdater = FakeCheckoutCurrencyUpdater(),
             )
         }
     }

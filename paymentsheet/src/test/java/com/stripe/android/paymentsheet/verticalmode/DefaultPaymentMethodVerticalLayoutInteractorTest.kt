@@ -29,6 +29,8 @@ import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.WalletsState
+import com.stripe.android.paymentsheet.verticalmode.CurrencyOption
+import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorOptions
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.ViewAction
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -991,6 +993,15 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
+    fun handleViewAction_CurrencySelected_callsOnCurrencySelected() {
+        val currencyOption = CurrencyOption(code = "EUR", displayableText = "€9.50")
+        runScenario {
+            interactor.handleViewAction(ViewAction.CurrencySelected(currencyOption))
+            assertThat(onCurrencySelectedTurbine.awaitItem()).isEqualTo(currencyOption)
+        }
+    }
+
+    @Test
     fun handleViewAction_OnManageOneSavedPaymentMethod_transitionsToUpdateScreen_whenFeatureEnabled() {
         runScenario {
             val paymentMethod = PaymentMethodFixtures.displayableCard()
@@ -1655,6 +1666,22 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         visibilitySnapshotTurbine.expectNoEvents()
     }
 
+    @Test
+    fun `state includes currencySelectorOptions when provided`() {
+        val options = CurrencySelectorOptions(
+            first = CurrencyOption(code = "USD", displayableText = "$10.00"),
+            second = CurrencyOption(code = "EUR", displayableText = "€9.50"),
+            selectedCode = "USD",
+        )
+        runScenario(
+            initialCurrencySelectorOptions = options,
+        ) {
+            interactor.state.test {
+                assertThat(awaitItem().currencySelectorOptions).isEqualTo(options)
+            }
+        }
+    }
+
     private val notImplemented: () -> Nothing = { throw AssertionError("Not implemented") }
 
     private val linkAndGooglePayWalletState = WalletsState(
@@ -1711,6 +1738,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         invokeRowSelectionCallback: (() -> Unit)? = null,
         initialWalletsState: WalletsState? = null,
         displaysMandatesInFormScreen: Boolean = false,
+        initialCurrencySelectorOptions: CurrencySelectorOptions? = null,
         testBlock: suspend TestParams.() -> Unit
     ) {
         val processing: MutableStateFlow<Boolean> = MutableStateFlow(initialProcessing)
@@ -1732,6 +1760,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         val reportFormShownTurbine = Turbine<PaymentMethodCode>()
         val onFormFieldValuesChangedTurbine = Turbine<Pair<FormFieldValues, String>>()
         val visibilitySnapshotTurbine = Turbine<Pair<List<String>, List<String>>>()
+        val onCurrencySelectedTurbine = Turbine<CurrencyOption>()
 
         val interactor = DefaultPaymentMethodVerticalLayoutInteractor(
             paymentMethodMetadata = paymentMethodMetadata,
@@ -1777,7 +1806,11 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 visibilitySnapshotTurbine.add(
                     Pair(visibleItems, hiddenItems)
                 )
-            }
+            },
+            currencySelectorOptions = initialCurrencySelectorOptions,
+            onCurrencySelected = { currencyOption ->
+                onCurrencySelectedTurbine.add(currencyOption)
+            },
         )
 
         TestParams(
@@ -1799,6 +1832,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             reportFormShownTurbine = reportFormShownTurbine,
             onFormFieldValuesChangedTurbine = onFormFieldValuesChangedTurbine,
             visibilitySnapshotTurbine = visibilitySnapshotTurbine,
+            onCurrencySelectedTurbine = onCurrencySelectedTurbine,
         ).apply {
             testScope.runTest {
                 testBlock()
@@ -1826,6 +1860,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         val reportFormShownTurbine: ReceiveTurbine<PaymentMethodCode>,
         val onFormFieldValuesChangedTurbine: ReceiveTurbine<Pair<FormFieldValues, String>>,
         val visibilitySnapshotTurbine: ReceiveTurbine<Pair<List<String>, List<String>>>,
+        val onCurrencySelectedTurbine: ReceiveTurbine<CurrencyOption>,
     ) {
         fun ensureAllEventsConsumed() {
             updateSelectionTurbine.ensureAllEventsConsumed()
@@ -1836,6 +1871,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             reportFormShownTurbine.ensureAllEventsConsumed()
             onFormFieldValuesChangedTurbine.ensureAllEventsConsumed()
             visibilitySnapshotTurbine.ensureAllEventsConsumed()
+            onCurrencySelectedTurbine.ensureAllEventsConsumed()
         }
     }
 }

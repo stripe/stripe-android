@@ -5,7 +5,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.link.account.LinkStore
+import com.stripe.android.link.account.DefaultLinkStore
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.MainActivity
@@ -72,7 +72,7 @@ internal fun runPaymentSheetTest(
                     "pk_test_123"
                 }
             )
-            LinkStore(it.applicationContext).clear()
+            DefaultLinkStore(it.applicationContext).clear()
         }
 
         lateinit var paymentSheet: PaymentSheet
@@ -152,7 +152,7 @@ internal fun runMultiplePaymentSheetInstancesTest(
         scenario.moveToState(Lifecycle.State.CREATED)
         scenario.onActivity {
             PaymentConfiguration.init(it, "pk_test_123")
-            LinkStore(it.applicationContext).clear()
+            DefaultLinkStore(it.applicationContext).clear()
         }
 
         lateinit var firstPaymentSheet: PaymentSheet

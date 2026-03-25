@@ -18,7 +18,7 @@ open class AnalyticsRequestFactory(
     private val packageName: String,
     private val publishableKeyProvider: Provider<String>,
     private val networkTypeProvider: Provider<String?>,
-    private val pluginTypeProvider: Provider<String?> = PLUGIN_TYPE_PROVIDER
+    private val pluginTypeProvider: Provider<String?> = PLUGIN_TYPE_PROVIDER,
 ) {
     /**
      * Builds an Analytics request for the given [AnalyticsEvent],

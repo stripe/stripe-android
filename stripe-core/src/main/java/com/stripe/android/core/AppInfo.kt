@@ -1,6 +1,7 @@
 package com.stripe.android.core
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -20,6 +21,13 @@ data class AppInfo internal constructor(
     private val url: String?,
     private val partnerId: String?
 ) : Parcelable {
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    val appName: String
+        get() = name
+
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    val appVersion: String?
+        get() = version
 
     internal fun toUserAgent(): String {
         return listOfNotNull(
