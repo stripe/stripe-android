@@ -200,6 +200,7 @@ class DefaultIdentityRepositoryTest {
         }
     }
 
+    @Suppress("LongMethod")
     @Test
     fun `postVerificationPageData rounds float upload params and preserves non-float upload fields`() {
         val collectedDataParam = CollectedDataParam(
