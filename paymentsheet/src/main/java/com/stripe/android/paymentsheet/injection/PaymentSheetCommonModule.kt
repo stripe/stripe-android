@@ -63,6 +63,8 @@ import com.stripe.android.paymentsheet.state.LinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentMethodFilter
 import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
+import com.stripe.android.paymentsheet.verticalmode.CheckoutCurrencyUpdater
+import com.stripe.android.paymentsheet.verticalmode.DefaultCheckoutCurrencyUpdater
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -174,6 +176,9 @@ internal abstract class PaymentSheetCommonModule {
 
     @Binds
     abstract fun bindsTapToAddHelperFactory(factory: DefaultTapToAddHelper.Factory): TapToAddHelper.Factory
+
+    @Binds
+    abstract fun bindsCheckoutCurrencyUpdater(impl: DefaultCheckoutCurrencyUpdater): CheckoutCurrencyUpdater
 
     @Suppress("TooManyFunctions")
     companion object {

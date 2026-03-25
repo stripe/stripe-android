@@ -94,6 +94,9 @@ internal fun PaymentMethodVerticalLayoutUI(
                 PaymentMethodVerticalLayoutInteractor.ViewAction.CancelPaymentMethodVisibilityTracking
             )
         },
+        onCurrencySelected = {
+            interactor.handleViewAction(PaymentMethodVerticalLayoutInteractor.ViewAction.CurrencySelected(it))
+        },
         modifier = modifier
             .testTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT)
     )
@@ -114,6 +117,7 @@ internal fun PaymentMethodVerticalLayoutUI(
     imageLoader: StripeImageLoader,
     modifier: Modifier = Modifier,
     currencySelectorOptions: CurrencySelectorOptions? = null,
+    onCurrencySelected: (CurrencyOption) -> Unit = {},
     updatePaymentMethodVisibility: (String, LayoutCoordinates) -> Unit = { _, _ -> },
     cancelPaymentMethodVisibilityTracking: () -> Unit = {},
 ) {
@@ -128,7 +132,7 @@ internal fun PaymentMethodVerticalLayoutUI(
         if (currencySelectorOptions != null) {
             CurrencySelectorToggle(
                 options = currencySelectorOptions,
-                onCurrencySelected = {},
+                onCurrencySelected = onCurrencySelected,
                 isEnabled = isEnabled,
             )
             Spacer(Modifier.size(16.dp))

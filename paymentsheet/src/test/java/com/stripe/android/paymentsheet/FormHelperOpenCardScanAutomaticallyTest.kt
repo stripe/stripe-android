@@ -28,6 +28,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Cvc
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
+import com.stripe.android.paymentsheet.verticalmode.FakeCheckoutCurrencyUpdater
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
@@ -215,6 +216,7 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                 mode = EventReporter.Mode.Complete,
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
                 customViewModelScope = CoroutineScope(Dispatchers.Unconfined),
+                checkoutCurrencyUpdater = FakeCheckoutCurrencyUpdater(),
             )
         }
     }

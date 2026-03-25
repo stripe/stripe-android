@@ -98,6 +98,7 @@ import com.stripe.android.paymentsheet.ui.SHEET_NAVIGATION_BUTTON_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.verticalmode.FakeCheckoutCurrencyUpdater
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.createComposeCleanupRule
@@ -1336,6 +1337,7 @@ internal class PaymentSheetActivityTest {
                 tapToAddHelperFactory = FakeTapToAddHelper.Factory.noOp(),
                 mode = EventReporter.Mode.Complete,
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
+                checkoutCurrencyUpdater = FakeCheckoutCurrencyUpdater(),
             )
         }
     }
