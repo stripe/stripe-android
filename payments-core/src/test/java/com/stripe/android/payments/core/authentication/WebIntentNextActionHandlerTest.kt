@@ -128,6 +128,18 @@ class WebIntentNextActionHandlerTest {
     }
 
     @Test
+    fun authenticate_whenRedirectingToAlipay() {
+        verifyAuthenticate(
+            stripeIntent = PaymentIntentFixtures.ALIPAY_REQUIRES_ACTION,
+            expectedUrl = "https://hooks.stripe.com/redirect/authenticate/src_1HDEFWKlwPmebFhp6tcpln8T?client_secret=src_client_secret_S6H9mVMKK6qxk9YxsUvbH55K",
+            expectedForceInAppWebView = true,
+            expectedReturnUrl = "example://return_url",
+            expectedRequestCode = PAYMENT_REQUEST_CODE,
+            expectedAnalyticsEvent = PaymentAnalyticsEvent.AuthRedirect,
+        )
+    }
+
+    @Test
     fun authenticate_whenRedirectingToKlarna() {
         val beforeRedirectUrl = "https://pm-redirects.stripe.com/authorize/acct_1234/sa_nonce_SmAXX?useWebAuthSession=true&followRedirectsInSDK=true"
         val afterRedirectUrl = "https://payments.klarna.com/na/opf/not-a-real-uuid/handover?opf_s[…]some_random_token&l=en-US"

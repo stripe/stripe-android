@@ -150,6 +150,7 @@ internal class WebIntentNextActionHandler @Inject constructor(
         return WebAuthParams(
             authUrl = webViewUrl.toString(),
             returnUrl = returnUrl,
+            forceInAppWebView = true,
         )
     }
 
