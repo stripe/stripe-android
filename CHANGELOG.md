@@ -6,7 +6,8 @@
 * [CHANGED] Improved selfie capture quality with motion blur gating, center framing validation, and better best-frame selection.
 
 ### PaymentSheet
-[FIXED][12653](https://github.com/stripe/stripe-android/pull/12653) Fixed a bug where `PaymentSheet.FlowController` wouldn't emit a null `PaymentOption` from `PaymentOptionCallback` after a successful confirmation.
+* [FIXED][12653](https://github.com/stripe/stripe-android/pull/12653) Fixed a bug where `PaymentSheet.FlowController` wouldn't emit a null `PaymentOption` from `PaymentOptionCallback` after a successful confirmation.
+* [ADDED][12746](https://github.com/stripe/stripe-android/pull/12746) Added support for [payments orchestration](https://docs.stripe.com/payments/orchestration) (private preview) by allowing `processing` as a PaymentIntent state for cards.
 
 ## 23.1.0 - 2026-03-23
 
