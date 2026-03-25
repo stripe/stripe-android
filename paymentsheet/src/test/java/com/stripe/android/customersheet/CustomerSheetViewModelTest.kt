@@ -1857,19 +1857,19 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `When 'paymentMethodOrder' is defined, initial shown payment method should be first from 'paymentMethodOrder'`() =
+    fun `Initial shown payment method should be first from supportedPaymentMethods`() =
         runTest(testDispatcher) {
             val viewModel = createViewModel(
                 workContext = testDispatcher,
                 customerSheetLoader = FakeCustomerSheetLoader(
                     customerPaymentMethods = listOf(),
                     isGooglePayAvailable = false,
+                    supportedPaymentMethods = listOf(
+                        LpmRepositoryTestHelpers.usBankAccount,
+                        LpmRepositoryTestHelpers.card,
+                    ),
                     stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD_WITH_US_BANK_ACCOUNT,
                 ),
-                configuration = CustomerSheet.Configuration(
-                    merchantDisplayName = "Merchant, Inc.",
-                    paymentMethodOrder = listOf("us_bank_account", "card")
-                )
             )
 
             viewModel.viewState.test {
