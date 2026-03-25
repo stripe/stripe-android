@@ -354,8 +354,8 @@ class CheckoutSessionConfirmationInterceptorTest {
             val checkoutSessionTurbine1 = checkout1.checkoutSession.testIn(backgroundScope)
             val checkoutSessionTurbine2 = checkout2.checkoutSession.testIn(backgroundScope)
 
-            assertThat(checkoutSessionTurbine1.awaitItem().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
-            assertThat(checkoutSessionTurbine2.awaitItem().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+            assertThat(checkoutSessionTurbine1.awaitItem()!!.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+            assertThat(checkoutSessionTurbine2.awaitItem()!!.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
 
             networkRule.checkoutConfirm { response ->
                 response.testBodyFromFile("checkout-session-confirm.json")
@@ -363,8 +363,8 @@ class CheckoutSessionConfirmationInterceptorTest {
 
             interceptNewPm()
 
-            assertThat(checkoutSessionTurbine1.awaitItem().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
-            assertThat(checkoutSessionTurbine2.awaitItem().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+            assertThat(checkoutSessionTurbine1.awaitItem()!!.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+            assertThat(checkoutSessionTurbine2.awaitItem()!!.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
         }
     }
 
@@ -374,7 +374,7 @@ class CheckoutSessionConfirmationInterceptorTest {
     ) {
         val checkout = checkoutInstances.single()
         checkout.checkoutSession.test {
-            assertThat(awaitItem().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+            assertThat(awaitItem()!!.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
 
             networkRule.checkoutConfirm { response ->
                 response.testBodyFromFile("checkout-session-confirm.json")
@@ -382,7 +382,7 @@ class CheckoutSessionConfirmationInterceptorTest {
 
             interceptNewPm()
 
-            assertThat(awaitItem().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+            assertThat(awaitItem()!!.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
         }
     }
 
@@ -392,7 +392,7 @@ class CheckoutSessionConfirmationInterceptorTest {
     ) {
         val checkout = checkoutInstances.single()
         checkout.checkoutSession.test {
-            assertThat(awaitItem().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+            assertThat(awaitItem()!!.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
 
             networkRule.checkoutConfirm { response ->
                 response.testBodyFromFile("checkout-session-confirm.json")
@@ -400,7 +400,7 @@ class CheckoutSessionConfirmationInterceptorTest {
 
             interceptSavedPm()
 
-            assertThat(awaitItem().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+            assertThat(awaitItem()!!.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
         }
     }
 
@@ -415,7 +415,7 @@ class CheckoutSessionConfirmationInterceptorTest {
 
         val checkout = checkoutInstances.single()
         checkout.checkoutSession.test {
-            assertThat(awaitItem().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+            assertThat(awaitItem()!!.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
 
             interceptNewPm()
 
@@ -458,7 +458,7 @@ class CheckoutSessionConfirmationInterceptorTest {
 
         @Suppress("EmptyRange")
         val checkoutInstances = (0 until checkoutInstanceCount).map {
-            Checkout.createWithState(
+            Checkout(
                 context = applicationContext,
                 state = CheckoutStateFactory.create(),
             )

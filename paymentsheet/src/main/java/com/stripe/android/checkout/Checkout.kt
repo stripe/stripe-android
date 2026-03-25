@@ -20,45 +20,21 @@ import java.util.UUID
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Suppress("TooManyFunctions")
 class Checkout private constructor(
-    internalState: InternalState,
     private val component: CheckoutComponent,
+    val key: String,
+    initialInternalState: InternalState?,
 ) {
-    @CheckoutSessionPreview
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    companion object {
-        suspend fun configure(
-            context: Context,
-            checkoutSessionClientSecret: String,
-            configuration: Configuration = Configuration(),
-        ): Result<Checkout> {
-            val component = DaggerCheckoutComponent.factory().create(context.applicationContext)
-            val configurationState = configuration.build()
-            return component.checkoutSessionRepository.init(
-                sessionId = checkoutSessionClientSecret.substringBefore("_secret_"),
-                adaptivePricingAllowed = configurationState.adaptivePricingAllowed,
-            ).map { response ->
-                Checkout(
-                    internalState = InternalState(
-                        key = UUID.randomUUID().toString(),
-                        configuration = configurationState,
-                        checkoutSessionResponse = response,
-                    ),
-                    component,
-                )
-            }
-        }
+    constructor(context: Context) : this(
+        component = DaggerCheckoutComponent.factory().create(context.applicationContext),
+        key = UUID.randomUUID().toString(),
+        initialInternalState = null,
+    )
 
-        fun createWithState(
-            context: Context,
-            state: State,
-        ): Checkout {
-            val component = DaggerCheckoutComponent.factory().create(context.applicationContext)
-            return Checkout(
-                internalState = state.internalState,
-                component = component,
-            )
-        }
-    }
+    constructor(context: Context, state: State) : this(
+        component = DaggerCheckoutComponent.factory().create(context.applicationContext),
+        key = state.internalState.key,
+        initialInternalState = state.internalState,
+    )
 
     @Poko
     @Parcelize
@@ -88,11 +64,11 @@ class Checkout private constructor(
     }
 
     @Volatile
-    internal var internalState: InternalState = internalState
+    internal var internalState: InternalState? = initialInternalState
         private set
 
     var state: State
-        get() = State(internalState)
+        get() = State(requireConfigured())
         set(value) {
             ensureNoMutationInFlight()
             internalState = value.internalState
@@ -100,11 +76,42 @@ class Checkout private constructor(
 
     private val mutex = Mutex()
 
-    private val _checkoutSession = MutableStateFlow(internalState.checkoutSessionResponse.asCheckoutSession())
-    val checkoutSession: StateFlow<CheckoutSession> = _checkoutSession.asStateFlow()
+    private val _checkoutSession = MutableStateFlow(initialInternalState?.checkoutSessionResponse?.asCheckoutSession())
+    val checkoutSession: StateFlow<CheckoutSession?> = _checkoutSession.asStateFlow()
 
     init {
-        CheckoutInstances.add(internalState.key, this)
+        CheckoutInstances.add(key, this)
+    }
+
+    suspend fun configure(
+        checkoutSessionClientSecret: String,
+        configuration: Configuration = Configuration(),
+    ): Result<CheckoutSession> {
+        if (mutex.isLocked) {
+            return Result.failure(
+                IllegalStateException("Cannot launch while a checkout session mutation is in flight.")
+            )
+        }
+        val currentState = internalState
+        if (currentState != null && currentState.integrationLaunched) {
+            return Result.failure(
+                IllegalStateException("Cannot configure while a payment flow is presented.")
+            )
+        }
+        val configurationState = configuration.build()
+        return component.checkoutSessionRepository.init(
+            sessionId = checkoutSessionClientSecret.substringBefore("_secret_"),
+            adaptivePricingAllowed = configurationState.adaptivePricingAllowed,
+        ).map { response ->
+            internalState = InternalState(
+                key = key,
+                configuration = configurationState,
+                checkoutSessionResponse = response,
+            )
+            val checkoutSession = response.asCheckoutSession()
+            _checkoutSession.value = checkoutSession
+            checkoutSession
+        }
     }
 
     suspend fun applyPromotionCode(
@@ -175,11 +182,11 @@ class Checkout private constructor(
     }
 
     internal fun markIntegrationLaunched() {
-        internalState = internalState.copy(integrationLaunched = true)
+        internalState = requireConfigured().copy(integrationLaunched = true)
     }
 
     internal fun markIntegrationDismissed() {
-        internalState = internalState.copy(integrationLaunched = false)
+        internalState = requireConfigured().copy(integrationLaunched = false)
     }
 
     internal fun ensureNoMutationInFlight() {
@@ -191,25 +198,32 @@ class Checkout private constructor(
     }
 
     internal fun updateWithResponse(response: CheckoutSessionResponse) {
-        internalState = internalState.copy(checkoutSessionResponse = response)
+        internalState = requireConfigured().copy(checkoutSessionResponse = response)
         _checkoutSession.value = response.asCheckoutSession()
+    }
+
+    private fun requireConfigured(): InternalState {
+        return internalState ?: throw IllegalStateException("Checkout has not been configured.")
     }
 
     private suspend fun withInternalState(
         additionalStateMutations: InternalState.() -> InternalState = { this },
         block: suspend InternalState.(sessionId: String) -> Result<CheckoutSessionResponse>,
     ): Result<CheckoutSession> {
-        if (internalState.integrationLaunched) {
+        val currentState = internalState ?: return Result.failure(
+            IllegalStateException("Checkout has not been configured.")
+        )
+        if (currentState.integrationLaunched) {
             return Result.failure(
                 IllegalStateException(
                     "Cannot mutate checkout session while a payment flow is presented."
                 )
             )
         }
-        // Run network requests with a mutex to ensure events are processed in order.
         return mutex.withLock {
-            internalState.block(internalState.checkoutSessionResponse.id).map { response ->
-                internalState = internalState.copy(checkoutSessionResponse = response).additionalStateMutations()
+            val lockedState = requireConfigured()
+            lockedState.block(lockedState.checkoutSessionResponse.id).map { response ->
+                internalState = lockedState.copy(checkoutSessionResponse = response).additionalStateMutations()
                 val checkoutSession = response.asCheckoutSession()
                 _checkoutSession.value = checkoutSession
                 checkoutSession

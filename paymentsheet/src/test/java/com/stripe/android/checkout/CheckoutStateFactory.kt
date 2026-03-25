@@ -10,7 +10,7 @@ internal object CheckoutStateFactory {
     const val DEFAULT_KEY = "test_key"
 
     fun createCheckout(context: Context): Checkout {
-        return Checkout.createWithState(
+        return Checkout(
             context = context,
             state = create(),
         )

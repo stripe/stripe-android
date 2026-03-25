@@ -238,11 +238,13 @@ internal class DefaultFlowController @Inject internal constructor(
         configuration: PaymentSheet.Configuration,
         callback: PaymentSheet.FlowController.ConfigCallback
     ) {
-        CheckoutInstances.ensureNoMutationInFlight(checkout.internalState.key)
+        val internalState = checkout.internalState
+            ?: throw IllegalStateException("Checkout has not been configured.")
+        CheckoutInstances.ensureNoMutationInFlight(checkout.key)
         configure(
-            mode = checkout.internalState.initializationMode,
+            mode = internalState.initializationMode,
             configuration = CheckoutConfigurationMerger.PaymentSheetConfiguration(configuration)
-                .forCheckoutSession(checkout.internalState),
+                .forCheckoutSession(internalState),
             callback = callback,
         )
     }

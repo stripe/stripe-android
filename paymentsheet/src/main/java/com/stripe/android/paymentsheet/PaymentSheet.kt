@@ -487,12 +487,14 @@ class PaymentSheet internal constructor(
         checkout: Checkout,
         configuration: Configuration,
     ) {
-        CheckoutInstances.ensureNoMutationInFlight(checkout.internalState.key)
-        CheckoutInstances.markIntegrationLaunched(checkout.internalState.key)
+        val internalState = checkout.internalState
+            ?: throw IllegalStateException("Checkout has not been configured.")
+        CheckoutInstances.ensureNoMutationInFlight(checkout.key)
+        CheckoutInstances.markIntegrationLaunched(checkout.key)
         paymentSheetLauncher.present(
-            mode = checkout.internalState.initializationMode,
+            mode = internalState.initializationMode,
             configuration = CheckoutConfigurationMerger.PaymentSheetConfiguration(configuration)
-                .forCheckoutSession(checkout.internalState),
+                .forCheckoutSession(internalState),
         )
     }
 

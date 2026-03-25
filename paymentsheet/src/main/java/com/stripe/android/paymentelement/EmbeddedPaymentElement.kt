@@ -102,11 +102,13 @@ class EmbeddedPaymentElement @Inject internal constructor(
         checkout: Checkout,
         configuration: Configuration,
     ): ConfigureResult {
-        CheckoutInstances.ensureNoMutationInFlight(checkout.internalState.key)
+        val internalState = checkout.internalState
+            ?: throw IllegalStateException("Checkout has not been configured.")
+        CheckoutInstances.ensureNoMutationInFlight(checkout.key)
         return configurationCoordinator.configure(
             configuration = CheckoutConfigurationMerger.EmbeddedConfiguration(configuration)
-                .forCheckoutSession(checkout.internalState),
-            initializationMode = checkout.internalState.initializationMode,
+                .forCheckoutSession(internalState),
+            initializationMode = internalState.initializationMode,
         )
     }
 

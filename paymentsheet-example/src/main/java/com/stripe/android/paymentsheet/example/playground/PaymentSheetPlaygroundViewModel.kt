@@ -160,13 +160,13 @@ internal class PaymentSheetPlaygroundViewModel(
         val paymentState = state.asPaymentState()
         if (paymentState?.initializationType == InitializationType.CheckoutSession) {
             val configuration = state.snapshot.checkoutConfiguration()
-            Checkout.configure(
-                context = getApplication(),
+            val newCheckout = Checkout(getApplication())
+            newCheckout.configure(
                 checkoutSessionClientSecret = paymentState.clientSecret,
                 configuration = configuration,
             ).fold(
-                onSuccess = { value ->
-                    checkout = value
+                onSuccess = {
+                    checkout = newCheckout
                 },
                 onFailure = { exception ->
                     status.value = StatusMessage(

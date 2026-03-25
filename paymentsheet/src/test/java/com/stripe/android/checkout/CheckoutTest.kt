@@ -41,10 +41,106 @@ class CheckoutTest {
         .around(CheckoutInstancesTestRule())
 
     @Test
+    fun `unconfigured checkout has null checkoutSession`() = runTest {
+        val checkout = Checkout(applicationContext)
+        assertThat(checkout.checkoutSession.value).isNull()
+    }
+
+    @Test
+    fun `mutation returns failure when unconfigured`() = runTest {
+        val checkout = Checkout(applicationContext)
+        val result = checkout.applyPromotionCode("10OFF")
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
+        assertThat(result.exceptionOrNull()).hasMessageThat()
+            .isEqualTo("Checkout has not been configured.")
+    }
+
+    @Test
+    fun `state getter throws when unconfigured`() = runTest {
+        val checkout = Checkout(applicationContext)
+        val error = runCatching { checkout.state }.exceptionOrNull()
+        assertThat(error).isInstanceOf(IllegalStateException::class.java)
+        assertThat(error).hasMessageThat().isEqualTo("Checkout has not been configured.")
+    }
+
+    @Test
+    fun `configure populates checkoutSession on success`() = runConfigureScenario(
+        clientSecret = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example",
+        networkSetup = {
+            networkRule.checkoutInit { response ->
+                response.testBodyFromFile("checkout-session-init.json")
+            }
+        },
+    ) { checkout, result ->
+        result.getOrThrow()
+        checkout.checkoutSession.test {
+            assertThat(awaitItem()!!.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+        }
+    }
+
+    @Test
+    fun `re-configure replaces session and clears old state`() = runTest {
+        val initialState = CheckoutStateFactory.create(shippingName = "Old Name")
+        val checkout = Checkout(applicationContext, initialState)
+        assertThat(checkout.internalState!!.shippingName).isEqualTo("Old Name")
+
+        networkRule.checkoutInit { response ->
+            response.testBodyFromFile("checkout-session-init.json")
+        }
+
+        val result = checkout.configure(
+            checkoutSessionClientSecret = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example",
+        )
+        assertThat(result.isSuccess).isTrue()
+        assertThat(checkout.internalState!!.shippingName).isNull()
+    }
+
+    @Test
+    fun `configure fails when mutation is in flight`() = runTest {
+        networkRule.checkoutInit { response ->
+            response.testBodyFromFile("checkout-session-init.json")
+        }
+        val checkout = Checkout(applicationContext)
+        checkout.configure("${DEFAULT_CHECKOUT_SESSION_ID}_secret_example")
+
+        networkRule.checkoutUpdate { response ->
+            response.setBodyDelay(5, TimeUnit.SECONDS)
+            response.testBodyFromFile("checkout-session-apply-discount.json")
+        }
+
+        val deferred = async { checkout.applyPromotionCode("10OFF") }
+        testScheduler.advanceUntilIdle()
+
+        val result = checkout.configure("${DEFAULT_CHECKOUT_SESSION_ID}_secret_example")
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
+        assertThat(result.exceptionOrNull()).hasMessageThat()
+            .isEqualTo("Cannot launch while a checkout session mutation is in flight.")
+
+        deferred.cancel()
+    }
+
+    @Test
+    fun `configure fails when integration is launched`() = runTest {
+        val checkout = Checkout(
+            context = applicationContext,
+            state = CheckoutStateFactory.create(),
+        )
+        checkout.markIntegrationLaunched()
+
+        val result = checkout.configure("${DEFAULT_CHECKOUT_SESSION_ID}_secret_example")
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
+        assertThat(result.exceptionOrNull()).hasMessageThat()
+            .isEqualTo("Cannot configure while a payment flow is presented.")
+    }
+
+    @Test
     fun `createWithState produces Checkout with correct checkoutSession id`() = runTest {
         runCreateWithStateScenario { checkout ->
             checkout.checkoutSession.test {
-                assertThat(awaitItem().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+                assertThat(awaitItem()!!.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
             }
         }
     }
@@ -57,10 +153,10 @@ class CheckoutTest {
                 response.testBodyFromFile("checkout-session-init.json")
             }
         },
-    ) { result ->
-        val checkout = result.getOrThrow()
+    ) { checkout, result ->
+        result.getOrThrow()
         checkout.checkoutSession.test {
-            assertThat(awaitItem().id)
+            assertThat(awaitItem()!!.id)
                 .isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
         }
     }
@@ -75,11 +171,11 @@ class CheckoutTest {
             }
 
             checkout.checkoutSession.test {
-                assertThat(awaitItem().totalSummary).isNull()
+                assertThat(awaitItem()!!.totalSummary).isNull()
 
                 val result = checkout.applyPromotionCode("10OFF")
 
-                val updated = awaitItem()
+                val updated = awaitItem()!!
                 assertThat(result.getOrThrow()).isEqualTo(updated)
                 val totalSummary = updated.totalSummary
                 assertThat(totalSummary).isNotNull()
@@ -119,11 +215,11 @@ class CheckoutTest {
             }
 
             checkout.checkoutSession.test {
-                assertThat(awaitItem().totalSummary).isNull()
+                assertThat(awaitItem()!!.totalSummary).isNull()
 
                 val result = checkout.applyPromotionCode("  10OFF  ")
 
-                val updated = awaitItem()
+                val updated = awaitItem()!!
                 assertThat(result.getOrThrow()).isEqualTo(updated)
                 assertThat(updated.totalSummary).isNotNull()
             }
@@ -140,11 +236,11 @@ class CheckoutTest {
             }
 
             checkout.checkoutSession.test {
-                assertThat(awaitItem().totalSummary).isNull()
+                assertThat(awaitItem()!!.totalSummary).isNull()
 
                 val result = checkout.removePromotionCode()
 
-                val updated = awaitItem()
+                val updated = awaitItem()!!
                 assertThat(result.getOrThrow()).isEqualTo(updated)
                 assertThat(updated.totalSummary).isNotNull()
             }
@@ -179,11 +275,11 @@ class CheckoutTest {
             }
 
             checkout.checkoutSession.test {
-                assertThat(awaitItem().totalSummary).isNull()
+                assertThat(awaitItem()!!.totalSummary).isNull()
 
                 val result = checkout.refresh()
 
-                val updated = awaitItem()
+                val updated = awaitItem()!!
                 assertThat(result.getOrThrow()).isEqualTo(updated)
                 assertThat(updated.totalSummary).isNotNull()
             }
@@ -222,11 +318,11 @@ class CheckoutTest {
             }
 
             checkout.checkoutSession.test {
-                assertThat(awaitItem().lineItems).isEmpty()
+                assertThat(awaitItem()!!.lineItems).isEmpty()
 
                 val result = checkout.updateLineItemQuantity("li_1", 3)
 
-                val updated = awaitItem()
+                val updated = awaitItem()!!
                 assertThat(result.getOrThrow()).isEqualTo(updated)
                 assertThat(updated.lineItems).hasSize(1)
                 assertThat(updated.lineItems[0].id).isEqualTo("li_1")
@@ -266,11 +362,11 @@ class CheckoutTest {
             }
 
             checkout.checkoutSession.test {
-                assertThat(awaitItem().shippingOptions).isEmpty()
+                assertThat(awaitItem()!!.shippingOptions).isEmpty()
 
                 val result = checkout.selectShippingOption("shr_express")
 
-                val updated = awaitItem()
+                val updated = awaitItem()!!
                 assertThat(result.getOrThrow()).isEqualTo(updated)
                 val totalSummary = updated.totalSummary
                 assertThat(totalSummary).isNotNull()
@@ -300,7 +396,7 @@ class CheckoutTest {
             }
 
             checkout.checkoutSession.test {
-                val initial = awaitItem()
+                val initial = awaitItem()!!
                 assertThat(initial.shippingOptions).isEmpty()
                 assertThat(initial.totalSummary?.taxAmounts).isNull()
 
@@ -313,7 +409,7 @@ class CheckoutTest {
                     .state("CO")
                 val result = checkout.updateShippingAddress(address = address)
 
-                val updated = awaitItem()
+                val updated = awaitItem()!!
                 assertThat(result.getOrThrow()).isEqualTo(updated)
                 assertThat(updated.shippingOptions).hasSize(3)
                 val totalSummary = updated.totalSummary
@@ -381,7 +477,7 @@ class CheckoutTest {
                     .postalCode("80202")
                 val result = checkout.updateShippingAddress(address = address)
 
-                val updated = awaitItem()
+                val updated = awaitItem()!!
                 assertThat(result.isSuccess).isTrue()
                 assertThat(result.getOrThrow()).isEqualTo(updated)
             }
@@ -402,7 +498,7 @@ class CheckoutTest {
             }
 
             checkout.checkoutSession.test {
-                val initial = awaitItem()
+                val initial = awaitItem()!!
                 assertThat(initial.shippingOptions).isEmpty()
                 assertThat(initial.totalSummary?.taxAmounts).isNull()
 
@@ -415,7 +511,7 @@ class CheckoutTest {
                     .state("CO")
                 val result = checkout.updateBillingAddress(address = address)
 
-                val updated = awaitItem()
+                val updated = awaitItem()!!
                 assertThat(result.getOrThrow()).isEqualTo(updated)
                 assertThat(updated.shippingOptions).hasSize(3)
                 val totalSummary = updated.totalSummary
@@ -467,7 +563,7 @@ class CheckoutTest {
             val result = checkout.updateShippingAddress(name = "John", address = address)
             assertThat(result.isSuccess).isTrue()
 
-            val state = checkout.internalState
+            val state = checkout.internalState!!
             assertThat(state.shippingName).isEqualTo("John")
             assertThat(state.shippingAddress).isEqualTo(
                 Address.State(
@@ -499,7 +595,7 @@ class CheckoutTest {
             val result = checkout.updateBillingAddress(name = "Jane", address = address)
             assertThat(result.isSuccess).isTrue()
 
-            val state = checkout.internalState
+            val state = checkout.internalState!!
             assertThat(state.billingName).isEqualTo("Jane")
             assertThat(state.billingAddress).isEqualTo(
                 Address.State(
@@ -527,8 +623,8 @@ class CheckoutTest {
             val result = checkout.updateShippingAddress(name = "John", address = address)
             assertThat(result.isFailure).isTrue()
 
-            assertThat(checkout.internalState.shippingName).isNull()
-            assertThat(checkout.internalState.shippingAddress).isNull()
+            assertThat(checkout.internalState!!.shippingName).isNull()
+            assertThat(checkout.internalState!!.shippingAddress).isNull()
         }
     }
 
@@ -545,8 +641,8 @@ class CheckoutTest {
             val result = checkout.updateBillingAddress(name = "Jane", address = address)
             assertThat(result.isFailure).isTrue()
 
-            assertThat(checkout.internalState.billingName).isNull()
-            assertThat(checkout.internalState.billingAddress).isNull()
+            assertThat(checkout.internalState!!.billingName).isNull()
+            assertThat(checkout.internalState!!.billingAddress).isNull()
         }
     }
 
@@ -561,7 +657,7 @@ class CheckoutTest {
             val result = checkout.updateShippingAddress(phoneNumber = "5551234567", address = address)
             assertThat(result.isSuccess).isTrue()
 
-            assertThat(checkout.internalState.shippingPhoneNumber).isEqualTo("5551234567")
+            assertThat(checkout.internalState!!.shippingPhoneNumber).isEqualTo("5551234567")
         }
     }
 
@@ -576,7 +672,7 @@ class CheckoutTest {
             val result = checkout.updateBillingAddress(phoneNumber = "5559876543", address = address)
             assertThat(result.isSuccess).isTrue()
 
-            assertThat(checkout.internalState.billingPhoneNumber).isEqualTo("5559876543")
+            assertThat(checkout.internalState!!.billingPhoneNumber).isEqualTo("5559876543")
         }
     }
 
@@ -592,7 +688,7 @@ class CheckoutTest {
             val result = checkout.updateShippingAddress(phoneNumber = "5551234567", address = address)
             assertThat(result.isFailure).isTrue()
 
-            assertThat(checkout.internalState.shippingPhoneNumber).isNull()
+            assertThat(checkout.internalState!!.shippingPhoneNumber).isNull()
         }
     }
 
@@ -608,7 +704,7 @@ class CheckoutTest {
             val result = checkout.updateBillingAddress(phoneNumber = "5559876543", address = address)
             assertThat(result.isFailure).isTrue()
 
-            assertThat(checkout.internalState.billingPhoneNumber).isNull()
+            assertThat(checkout.internalState!!.billingPhoneNumber).isNull()
         }
     }
 
@@ -635,7 +731,7 @@ class CheckoutTest {
                     .postalCode("80202")
                 val result = checkout.updateBillingAddress(address = address)
 
-                val updated = awaitItem()
+                val updated = awaitItem()!!
                 assertThat(result.isSuccess).isTrue()
                 assertThat(result.getOrThrow()).isEqualTo(updated)
             }
@@ -654,11 +750,11 @@ class CheckoutTest {
             }
 
             checkout.checkoutSession.test {
-                assertThat(awaitItem().totalSummary).isNull()
+                assertThat(awaitItem()!!.totalSummary).isNull()
 
                 val result = checkout.updateTaxId("us_ein", "123456789")
 
-                val updated = awaitItem()
+                val updated = awaitItem()!!
                 assertThat(result.getOrThrow()).isEqualTo(updated)
                 assertThat(updated.totalSummary).isNotNull()
             }
@@ -697,11 +793,11 @@ class CheckoutTest {
             }
 
             checkout.checkoutSession.test {
-                assertThat(awaitItem().totalSummary).isNull()
+                assertThat(awaitItem()!!.totalSummary).isNull()
 
                 val result = checkout.updateTaxId("  us_ein  ", "  123456789  ")
 
-                val updated = awaitItem()
+                val updated = awaitItem()!!
                 assertThat(result.getOrThrow()).isEqualTo(updated)
                 assertThat(updated.totalSummary).isNotNull()
             }
@@ -751,7 +847,7 @@ class CheckoutTest {
             }
 
             checkout.checkoutSession.test {
-                val initial = awaitItem()
+                val initial = awaitItem()!!
                 assertThat(initial.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
                 assertThat(initial.totalSummary).isNull()
 
@@ -767,14 +863,14 @@ class CheckoutTest {
                 assertThat(results[0].isSuccess).isTrue()
                 assertThat(results[1].isSuccess).isTrue()
 
-                val afterPromo = awaitItem()
+                val afterPromo = awaitItem()!!
                 assertThat(afterPromo.id).isEqualTo("cs_test_after_promo")
                 val promoSummary = requireNotNull(afterPromo.totalSummary)
                 assertThat(promoSummary.totalDueToday).isEqualTo(4099)
                 assertThat(promoSummary.discountAmounts).hasSize(1)
                 assertThat(promoSummary.discountAmounts[0].displayName).isEqualTo("10OFF")
 
-                val afterAddress = awaitItem()
+                val afterAddress = awaitItem()!!
                 assertThat(afterAddress.id).isEqualTo("cs_test_after_address")
                 val addressSummary = requireNotNull(afterAddress.totalSummary)
                 assertThat(addressSummary.totalDueToday).isEqualTo(4599)
@@ -790,7 +886,7 @@ class CheckoutTest {
     fun `updateWithResponse updates checkoutSession flow`() = runTest {
         runCreateWithStateScenario { checkout ->
             checkout.checkoutSession.test {
-                val initial = awaitItem()
+                val initial = awaitItem()!!
                 assertThat(initial.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
                 assertThat(initial.totalSummary).isNull()
 
@@ -808,7 +904,7 @@ class CheckoutTest {
                 )
                 checkout.updateWithResponse(updatedResponse)
 
-                val updated = awaitItem()
+                val updated = awaitItem()!!
                 assertThat(updated.id).isEqualTo("cs_test_updated")
                 assertThat(updated.totalSummary).isNotNull()
                 assertThat(updated.totalSummary!!.subtotal).isEqualTo(2000L)
@@ -819,13 +915,13 @@ class CheckoutTest {
     @Test
     fun `updateWithResponse updates internalState`() = runTest {
         runCreateWithStateScenario { checkout ->
-            assertThat(checkout.internalState.checkoutSessionResponse.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+            assertThat(checkout.internalState!!.checkoutSessionResponse.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
 
             val updatedResponse = CheckoutSessionResponseFactory.create(id = "cs_test_updated")
             checkout.updateWithResponse(updatedResponse)
 
-            assertThat(checkout.internalState.checkoutSessionResponse.id).isEqualTo("cs_test_updated")
-            assertThat(checkout.internalState.checkoutSessionResponse).isEqualTo(updatedResponse)
+            assertThat(checkout.internalState!!.checkoutSessionResponse.id).isEqualTo("cs_test_updated")
+            assertThat(checkout.internalState!!.checkoutSessionResponse).isEqualTo(updatedResponse)
         }
     }
 
@@ -838,15 +934,15 @@ class CheckoutTest {
             shippingName = "Jane Doe",
             billingName = "John Doe",
         )
-        val checkout = Checkout.createWithState(applicationContext, state)
+        val checkout = Checkout(applicationContext, state)
 
         val updatedResponse = CheckoutSessionResponseFactory.create(id = "cs_test_updated")
         checkout.updateWithResponse(updatedResponse)
 
-        assertThat(checkout.internalState.shippingName).isEqualTo("Jane Doe")
-        assertThat(checkout.internalState.billingName).isEqualTo("John Doe")
-        assertThat(checkout.internalState.checkoutSessionResponse.id).isEqualTo("cs_test_updated")
-        assertThat(checkout.internalState.configuration.adaptivePricingAllowed).isTrue()
+        assertThat(checkout.internalState!!.shippingName).isEqualTo("Jane Doe")
+        assertThat(checkout.internalState!!.billingName).isEqualTo("John Doe")
+        assertThat(checkout.internalState!!.checkoutSessionResponse.id).isEqualTo("cs_test_updated")
+        assertThat(checkout.internalState!!.configuration.adaptivePricingAllowed).isTrue()
     }
 
     @Test
@@ -930,7 +1026,7 @@ class CheckoutTest {
         runCreateWithStateScenario { checkout ->
             checkout.markIntegrationLaunched()
 
-            val restoredCheckout = Checkout.createWithState(applicationContext, checkout.state)
+            val restoredCheckout = Checkout(applicationContext, checkout.state)
 
             val result = restoredCheckout.applyPromotionCode("10OFF")
             assertThat(result.isFailure).isTrue()
@@ -950,7 +1046,7 @@ class CheckoutTest {
                 response.testBodyFromFile("checkout-session-init.json")
             }
         },
-    ) { result ->
+    ) { _, result ->
         assertThat(result.isSuccess).isTrue()
     }
 
@@ -965,7 +1061,7 @@ class CheckoutTest {
                 response.testBodyFromFile("checkout-session-init.json")
             }
         },
-    ) { result ->
+    ) { _, result ->
         assertThat(result.isSuccess).isTrue()
     }
 
@@ -978,7 +1074,7 @@ class CheckoutTest {
                 response.setBody("""{"error": {"message": "Internal server error"}}""")
             }
         },
-    ) { result ->
+    ) { _, result ->
         assertThat(result.isFailure).isTrue()
     }
 
@@ -990,7 +1086,7 @@ class CheckoutTest {
             key = "CheckoutTest",
             checkoutSessionResponse = checkoutSessionResponse,
         )
-        val checkout = Checkout.createWithState(applicationContext, state)
+        val checkout = Checkout(applicationContext, state)
         block(checkout)
     }
 
@@ -998,14 +1094,14 @@ class CheckoutTest {
         clientSecret: String,
         configuration: Checkout.Configuration = Checkout.Configuration(),
         networkSetup: () -> Unit,
-        block: suspend (Result<Checkout>) -> Unit,
+        block: suspend (Checkout, Result<CheckoutSession>) -> Unit,
     ) = runTest {
         networkSetup()
-        val result = Checkout.configure(
-            context = applicationContext,
+        val checkout = Checkout(applicationContext)
+        val result = checkout.configure(
             checkoutSessionClientSecret = clientSecret,
             configuration = configuration,
         )
-        block(result)
+        block(checkout, result)
     }
 }

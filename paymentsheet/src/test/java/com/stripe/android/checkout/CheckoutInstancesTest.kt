@@ -189,7 +189,7 @@ class CheckoutInstancesTest {
     }
 
     private fun createCheckout(key: String): Checkout {
-        return Checkout.createWithState(
+        return Checkout(
             context = applicationContext,
             state = CheckoutStateFactory.create(
                 key = key,

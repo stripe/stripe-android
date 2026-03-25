@@ -62,8 +62,8 @@ internal class PaymentSheetCheckoutSessionTest {
         }
 
         val context = ApplicationProvider.getApplicationContext<Context>()
-        val checkout = Checkout.configure(
-            context = context,
+        val checkout = Checkout(context)
+        checkout.configure(
             checkoutSessionClientSecret = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example",
         ).getOrThrow()
 
@@ -116,8 +116,8 @@ internal class PaymentSheetCheckoutSessionTest {
         }
 
         val context = ApplicationProvider.getApplicationContext<Context>()
-        val checkout = Checkout.configure(
-            context = context,
+        val checkout = Checkout(context)
+        checkout.configure(
             checkoutSessionClientSecret = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example",
         ).getOrThrow()
 
@@ -168,8 +168,8 @@ internal class PaymentSheetCheckoutSessionTest {
         }
 
         val context = ApplicationProvider.getApplicationContext<Context>()
-        val checkout = Checkout.configure(
-            context = context,
+        val checkout = Checkout(context)
+        checkout.configure(
             checkoutSessionClientSecret = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example",
         ).getOrThrow()
 

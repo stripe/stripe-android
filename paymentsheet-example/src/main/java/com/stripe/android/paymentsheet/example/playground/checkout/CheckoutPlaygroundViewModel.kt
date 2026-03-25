@@ -134,7 +134,7 @@ internal class CheckoutPlaygroundViewModel(
                 val restoredState = savedStateHandle.get<Checkout.State>(CHECKOUT_STATE_KEY)
                     ?: checkoutState
                 CheckoutPlaygroundViewModel(
-                    checkout = Checkout.createWithState(
+                    checkout = Checkout(
                         context = this[APPLICATION_KEY] as Application,
                         state = restoredState,
                     ),

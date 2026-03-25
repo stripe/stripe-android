@@ -151,7 +151,7 @@ private fun CheckoutScreen(
     updateBillingAddress: () -> Unit,
     refresh: () -> Unit,
 ) {
-    val checkoutSession by checkout.checkoutSession.collectAsState()
+    val checkoutSession = checkout.checkoutSession.collectAsState().value ?: return
     val loading by isLoading.collectAsState()
     val error by errorMessage.collectAsState()
     var promotionCode by rememberSaveable { mutableStateOf("") }
