@@ -590,7 +590,7 @@ style:
   UnnecessaryParentheses:
     active: false
   UnusedImport:
-    active: false
+    active: true
   UnusedPrivateClass:
     active: true
   UnusedPrivateFunction:
