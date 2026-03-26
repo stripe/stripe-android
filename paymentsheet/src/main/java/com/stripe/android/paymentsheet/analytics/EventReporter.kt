@@ -229,6 +229,22 @@ internal interface EventReporter : CardScanEventsReporter {
         isVerticalLayout: Boolean,
     )
 
+    fun onTapToAddStarted()
+
+    fun onCardAddedWithTapToAdd()
+
+    fun onTapToAddCanceled()
+
+    fun onTapToAddContinueAfterCardAdded()
+
+    fun onTapToAddConfirm()
+
+    fun onFailedToAddCardWithTapToAdd(
+        message: String
+    )
+
+    fun onTapToAddAttemptWithUnsupportedDevice()
+
     /**
      * Shop Pay webView loading has been attempted.
      */

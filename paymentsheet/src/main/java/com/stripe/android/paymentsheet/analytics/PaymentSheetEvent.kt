@@ -407,6 +407,69 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                 )
     }
 
+    sealed class TapToAdd : PaymentSheetEvent() {
+        abstract val mode: EventReporter.Mode
+
+        class Started(
+            override val mode: EventReporter.Mode,
+        ) : TapToAdd() {
+            override val eventName: String = formatEventName(mode, "tap_to_add_started")
+        }
+
+        class CardAdded(
+            override val mode: EventReporter.Mode,
+            val duration: Duration?,
+        ) : TapToAdd() {
+            override val eventName: String = formatEventName(mode, "tap_to_add_card_added")
+
+            override val params: Map<String, Any?> = duration.mapOfDurationInSeconds()
+        }
+
+        class FailedToAddCard(
+            override val mode: EventReporter.Mode,
+            val message: String,
+            val duration: Duration?,
+        ) : TapToAdd() {
+            override val eventName: String = formatEventName(mode, "tap_to_add_failed_to_add_card")
+
+            override val params: Map<String, Any?> =
+                mapOf(FIELD_ERROR_MESSAGE to message) + duration.mapOfDurationInSeconds()
+        }
+
+        class ContinueAfterCardAdded(
+            override val mode: EventReporter.Mode,
+        ) : TapToAdd() {
+            override val eventName: String =
+                formatEventName(mode, "tap_to_add_continue_after_card_added")
+        }
+
+        class Confirm(
+            override val mode: EventReporter.Mode,
+        ) : TapToAdd() {
+            override val eventName: String =
+                formatEventName(mode, "tap_to_add_confirm")
+        }
+
+        class Canceled(
+            override val mode: EventReporter.Mode,
+            val duration: Duration?,
+        ) : TapToAdd() {
+            override val eventName: String = formatEventName(mode, "tap_to_add_canceled")
+
+            override val params: Map<String, Any?> = duration.mapOfDurationInSeconds()
+        }
+
+        class AttemptWithUnsupportedDevice(
+            override val mode: EventReporter.Mode,
+            val duration: Duration?,
+        ) : TapToAdd() {
+            override val eventName: String =
+                formatEventName(mode, "tap_to_add_attempt_with_unsupported_device")
+
+            override val params: Map<String, Any?> = duration.mapOfDurationInSeconds()
+        }
+    }
+
     class CardScanCancelled(
         implementation: String,
         duration: Duration?,
@@ -457,7 +520,13 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             paymentSelection: PaymentSelection?
         ) = when (paymentSelection) {
             is PaymentSelection.GooglePay -> "googlepay"
-            is PaymentSelection.Saved -> "savedpm"
+            is PaymentSelection.Saved -> {
+                if (paymentSelection.isLink) {
+                    "link"
+                } else {
+                    "savedpm"
+                }
+            }
             is PaymentSelection.Link,
             is PaymentSelection.ExternalPaymentMethod,
             is PaymentSelection.CustomPaymentMethod,
