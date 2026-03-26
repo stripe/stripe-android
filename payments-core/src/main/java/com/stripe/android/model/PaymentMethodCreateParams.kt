@@ -1441,6 +1441,21 @@ constructor(
             )
         }
 
+        @JvmStatic
+        @JvmOverloads
+        fun createPayByBank(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.PayByBank,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun createLink(
             paymentDetailsId: String,
