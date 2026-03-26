@@ -162,13 +162,6 @@ internal sealed interface AuthorizeAction {
         }
     }
 
-    data object PayByBank : AuthorizeAction {
-        override fun text(isSetup: Boolean): String = "AUTHORIZE TEST PAYMENT"
-
-        override val requiresBrowser: Boolean = false
-        override val isConsideredDone: Boolean = true
-    }
-
     sealed interface Test3DS2 : AuthorizeAction {
         data object HSBCHTML : Test3DS2 {
             override fun text(isSetup: Boolean): String = "Submit"
