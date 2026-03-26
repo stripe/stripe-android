@@ -65,8 +65,7 @@ internal sealed class IdentityScanState(
         type: ScanType,
         transitioner: IdentityScanStateTransitioner,
         internal var reachedStateAt: ComparableTimeMark = TimeSource.Monotonic.markNow(),
-        @androidx.annotation.StringRes val feedbackRes: Int? = null,
-        val isFromLegacyDetector: Boolean? = null
+        @androidx.annotation.StringRes val feedbackRes: Int? = null
     ) : IdentityScanState(type, transitioner, false) {
         override suspend fun consumeTransition(
             analyzerInput: AnalyzerInput,
@@ -78,8 +77,7 @@ internal sealed class IdentityScanState(
             type,
             transitioner,
             reachedStateAt,
-            feedbackRes,
-            isFromLegacyDetector
+            feedbackRes
         )
     }
 

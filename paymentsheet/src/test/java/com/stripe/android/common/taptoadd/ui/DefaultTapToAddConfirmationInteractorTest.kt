@@ -15,6 +15,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
@@ -23,6 +24,7 @@ import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -356,6 +358,53 @@ internal class DefaultTapToAddConfirmationInteractorTest {
         }
     }
 
+    @Test
+    fun `onSuccessShown should call not onComplete if confirmation is not complete`() = runScenario(
+        paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
+        initialConfirmationState = ConfirmationHandler.State.Idle
+    ) {
+        interactor.performAction(TapToAddConfirmationInteractor.Action.SuccessShown)
+        onCompleteCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `onSuccessShown should call onComplete if confirmation is completed successfully`() = runScenario(
+        paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
+        initialConfirmationState = ConfirmationHandler.State.Complete(
+            result = ConfirmationHandler.Result.Succeeded(
+                intent = PaymentIntentFactory.create(
+                    status = StripeIntent.Status.Succeeded,
+                ),
+            ),
+        )
+    ) {
+        interactor.performAction(TapToAddConfirmationInteractor.Action.SuccessShown)
+        assertThat(onCompleteCalls.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `close should stop confirmation state and CVC form helper updates from being received`() = runScenario(
+        initialCvcState = CvcFormHelper.State.Incomplete,
+        paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
+    ) {
+        interactor.state.test {
+            assertThat(awaitItem().primaryButton.enabled).isFalse()
+
+            interactor.close()
+
+            confirmationHandlerScenario.confirmationState.value = ConfirmationHandler.State.Complete(
+                ConfirmationHandler.Result.Failed(
+                    cause = Exception("Payment failed"),
+                    message = "Payment failed".resolvableString,
+                    type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                ),
+            )
+            cvcFormHelper.updateState(CvcFormHelper.State.Complete(cvc = "123"))
+
+            expectNoEvents()
+        }
+    }
+
     private fun runScenario(
         paymentMethod: PaymentMethod,
         linkInput: UserInput? = null,
@@ -373,7 +422,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
             val onCompleteCalls = Turbine<Unit>()
 
             val interactor = DefaultTapToAddConfirmationInteractor(
-                coroutineScope = backgroundScope,
+                coroutineContext = coroutineContext,
                 paymentMethod = paymentMethod,
                 linkInput = linkInput,
                 paymentMethodMetadata = paymentMethodMetadata,
@@ -390,6 +439,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
                     interactor = interactor,
                     paymentMethod = paymentMethod,
                     paymentMethodMetadata = paymentMethodMetadata,
+                    cvcFormHelper = cvcFormHelper,
                     confirmationHandlerScenario = this,
                     onCompleteCalls = onCompleteCalls,
                     eventReporter = eventReporter,
@@ -406,6 +456,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
         val paymentMethod: PaymentMethod,
         val paymentMethodMetadata: PaymentMethodMetadata,
         val confirmationHandlerScenario: FakeConfirmationHandler.Scenario,
+        val cvcFormHelper: FakeCvcFormHelper,
         val onCompleteCalls: ReceiveTurbine<Unit>,
         val eventReporter: FakeEventReporter,
     )
@@ -416,5 +467,9 @@ internal class DefaultTapToAddConfirmationInteractorTest {
         private val _state = MutableStateFlow(initialState)
         override val state: StateFlow<CvcFormHelper.State> = _state.asStateFlow()
         override val formElement: com.stripe.android.uicore.elements.FormElement? = null
+
+        fun updateState(state: CvcFormHelper.State) {
+            _state.value = state
+        }
     }
 }

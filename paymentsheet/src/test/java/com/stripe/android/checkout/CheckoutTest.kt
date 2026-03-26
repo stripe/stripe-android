@@ -832,14 +832,11 @@ class CheckoutTest {
     @Test
     fun `updateWithResponse preserves non-response internalState fields`() = runTest {
         val initialResponse = CheckoutSessionResponseFactory.create()
-        val state = Checkout.State(
-            InternalState(
-                key = "CheckoutTest",
-                configuration = Checkout.Configuration().adaptivePricingAllowed(true).build(),
-                checkoutSessionResponse = initialResponse,
-                shippingName = "Jane Doe",
-                billingName = "John Doe",
-            ),
+        val state = CheckoutStateFactory.create(
+            configuration = Checkout.Configuration().adaptivePricingAllowed(true).build(),
+            checkoutSessionResponse = initialResponse,
+            shippingName = "Jane Doe",
+            billingName = "John Doe",
         )
         val checkout = Checkout.createWithState(applicationContext, state)
 
@@ -989,12 +986,9 @@ class CheckoutTest {
         checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
         block: suspend (Checkout) -> Unit,
     ) {
-        val state = Checkout.State(
-            InternalState(
-                key = "CheckoutTest",
-                configuration = Checkout.Configuration().build(),
-                checkoutSessionResponse = checkoutSessionResponse,
-            ),
+        val state = CheckoutStateFactory.create(
+            key = "CheckoutTest",
+            checkoutSessionResponse = checkoutSessionResponse,
         )
         val checkout = Checkout.createWithState(applicationContext, state)
         block(checkout)

@@ -12,8 +12,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.IntentCompat
 import com.stripe.android.stripecardscan.cardscan.CardScanConfiguration
+import com.stripe.android.stripecardscan.cardscan.CardScanSheet
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetParams
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
@@ -22,6 +24,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 internal class CardScanStripeLauncher(
+    context: Context,
     private val eventsReporter: CardScanEventsReporter,
     isLaunchingState: MutableState<Boolean>,
 ) : CardScanLauncher {
@@ -29,9 +32,9 @@ internal class CardScanStripeLauncher(
     private val implementation = "stripe_card_scan"
     private var _isLaunching by isLaunchingState
 
-    // We only instantiate this launcher after checking if stripecardscan is available via reflection
-    // (see rememberCardScanLauncher()).
-    private val _isAvailable = MutableStateFlow(true)
+    // CardScanSheet.isSupported is safe to call directly here because this class is only
+    // instantiated after confirming stripecardscan is available at runtime (see rememberCardScanLauncher).
+    private val _isAvailable = MutableStateFlow(CardScanSheet.isSupported(context))
     override val isAvailable: StateFlow<Boolean> = _isAvailable.asStateFlow()
 
     lateinit var activityLauncher: ActivityResultLauncher<CardScanSheetParams>
@@ -103,9 +106,11 @@ internal class CardScanStripeLauncher(
             eventsReporter: CardScanEventsReporter,
             onResult: (CardScanResult) -> Unit,
         ): CardScanStripeLauncher {
+            val context = LocalContext.current.applicationContext
             val isLaunchingState = rememberSaveable { mutableStateOf(false) }
-            val launcher = remember(eventsReporter) {
+            val launcher = remember(eventsReporter, context) {
                 CardScanStripeLauncher(
+                    context = context,
                     eventsReporter = eventsReporter,
                     isLaunchingState = isLaunchingState,
                 )

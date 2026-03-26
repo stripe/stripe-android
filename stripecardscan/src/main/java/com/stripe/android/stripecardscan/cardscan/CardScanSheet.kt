@@ -14,6 +14,8 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.add
 import androidx.fragment.app.commit
 import androidx.lifecycle.LifecycleOwner
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
 import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
 import com.stripe.android.stripecardscan.payment.card.ScannedCard
 import com.stripe.android.stripecardscan.scanui.CancellationReason
@@ -62,6 +64,14 @@ class CardScanSheet private constructor() {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
+
+        @JvmStatic
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun isSupported(context: Context): Boolean {
+            return GoogleApiAvailability.getInstance()
+                .isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS
+        }
+
         /**
          * Create a [CardScanSheet] instance with [ComponentActivity].
          *

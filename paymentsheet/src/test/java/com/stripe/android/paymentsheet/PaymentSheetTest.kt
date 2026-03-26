@@ -3,14 +3,12 @@ package com.stripe.android.paymentsheet
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkout.CheckoutInstancesTestRule
-import com.stripe.android.checkout.InternalState
+import com.stripe.android.checkout.CheckoutStateFactory
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import kotlinx.coroutines.async
@@ -37,7 +35,7 @@ internal class PaymentSheetTest {
 
     @Test
     fun `presentWithCheckout throws when checkout mutation is in flight`() = runTest {
-        val checkout = createCheckout(key = "test_key")
+        val checkout = CheckoutStateFactory.createCheckout(applicationContext)
         networkRule.checkoutUpdate { response ->
             response.setBodyDelay(5, TimeUnit.SECONDS)
             response.testBodyFromFile("checkout-session-apply-discount.json")
@@ -61,16 +59,5 @@ internal class PaymentSheetTest {
             .isEqualTo("Cannot launch while a checkout session mutation is in flight.")
 
         deferred.cancel()
-    }
-
-    private fun createCheckout(key: String): Checkout {
-        val state = Checkout.State(
-            InternalState(
-                key = key,
-                configuration = Checkout.Configuration().build(),
-                checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
-            ),
-        )
-        return Checkout.createWithState(applicationContext, state)
     }
 }
