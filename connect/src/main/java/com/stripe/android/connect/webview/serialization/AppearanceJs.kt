@@ -102,7 +102,7 @@ internal data class AppearanceVariablesJs(
     /**
      * The font weight (between 0-1000) for the button label typography.
      */
-    val buttonLabelFontWeight: Int?,
+    val buttonLabelFontWeight: String?,
     /**
      * The text transform for the button label typography.
      */
@@ -204,7 +204,7 @@ internal data class AppearanceVariablesJs(
     /**
      * The font weight (between 0-1000) for the badge label typography.
      */
-    val badgeLabelFontWeight: Int?,
+    val badgeLabelFontWeight: String?,
     /**
      * The text transform for the badge label typography.
      */
@@ -274,7 +274,7 @@ internal data class AppearanceVariablesJs(
     /**
      * The font weight (between 0-1000) for the medium body typography.
      */
-    val bodyMdFontWeight: Int?,
+    val bodyMdFontWeight: String?,
     /**
      * The font size in px for the small body typography.
      */
@@ -282,7 +282,7 @@ internal data class AppearanceVariablesJs(
     /**
      * The font weight (between 0-1000) for the small body typography.
      */
-    val bodySmFontWeight: Int?,
+    val bodySmFontWeight: String?,
     /**
      * The font size in px for the extra large heading typography.
      */
@@ -290,7 +290,7 @@ internal data class AppearanceVariablesJs(
     /**
      * The font weight (between 0-1000) for the extra large heading typography.
      */
-    val headingXlFontWeight: Int?,
+    val headingXlFontWeight: String?,
     /**
      * The text transform for the extra large heading typography. Heading typography variables accept a valid text
      * transform value.
@@ -303,7 +303,7 @@ internal data class AppearanceVariablesJs(
     /**
      * The font weight (between 0-1000) for the large heading typography.
      */
-    val headingLgFontWeight: Int?,
+    val headingLgFontWeight: String?,
     /**
      * The text transform for the large heading typography. Heading typography variables accept a valid text
      * transform value.
@@ -316,7 +316,7 @@ internal data class AppearanceVariablesJs(
     /**
      * The font weight (between 0-1000) for the medium heading typography.
      */
-    val headingMdFontWeight: Int?,
+    val headingMdFontWeight: String?,
     /**
      * The text transform for the medium heading typography. Heading typography variables accept a valid text
      * transform value.
@@ -329,7 +329,7 @@ internal data class AppearanceVariablesJs(
     /**
      * The font weight (between 0-1000) for the small heading typography.
      */
-    val headingSmFontWeight: Int?,
+    val headingSmFontWeight: String?,
     /**
      * The text transform for the small heading typography. Heading typography variables accept a valid text
      * transform value.
@@ -342,7 +342,7 @@ internal data class AppearanceVariablesJs(
     /**
      * The font weight (between 0-1000) for the extra small heading typography.
      */
-    val headingXsFontWeight: Int?,
+    val headingXsFontWeight: String?,
     /**
      * The text transform for the extra small heading typography. Heading typography variables accept a valid text
      * transform value.
@@ -355,7 +355,7 @@ internal data class AppearanceVariablesJs(
     /**
      * The font weight (between 0-1000) for the medium label typography.
      */
-    val labelMdFontWeight: Int?,
+    val labelMdFontWeight: String?,
     /**
      * The text transform for the medium label typography. Label typography variables accept a valid text
      * transform value.
@@ -368,7 +368,7 @@ internal data class AppearanceVariablesJs(
     /**
      * The font weight (between 0-1000) for the small label typography.
      */
-    val labelSmFontWeight: Int?,
+    val labelSmFontWeight: String?,
     /**
      * The text transform for the small label typography. Label typography variables accept a valid text
      * transform value.
@@ -409,7 +409,7 @@ internal fun Appearance.toJs(): AppearanceJs {
             buttonPaddingX = buttonDefaults.paddingX.toPx(),
             buttonPaddingY = buttonDefaults.paddingY.toPx(),
             buttonLabelFontSize = buttonDefaults.labelTypography?.fontSize.toPx(),
-            buttonLabelFontWeight = buttonDefaults.labelTypography?.fontWeight,
+            buttonLabelFontWeight = buttonDefaults.labelTypography?.fontWeight?.toString(),
             buttonLabelTextTransform = buttonDefaults.labelTypography?.textTransform,
             colorSecondaryText = colors.secondaryText,
             actionPrimaryColorText = actionPrimaryText.colorText,
@@ -433,7 +433,7 @@ internal fun Appearance.toJs(): AppearanceJs {
             badgePaddingX = badgeDefaults.paddingX.toPx(),
             badgePaddingY = badgeDefaults.paddingY.toPx(),
             badgeLabelFontSize = badgeDefaults.labelTypography?.fontSize.toPx(),
-            badgeLabelFontWeight = badgeDefaults.labelTypography?.fontWeight,
+            badgeLabelFontWeight = badgeDefaults.labelTypography?.fontWeight?.toString(),
             badgeLabelTextTransform = badgeDefaults.labelTypography?.textTransform,
             offsetBackgroundColor = colors.offsetBackground,
             formBackgroundColor = form.colorBackground,
@@ -450,29 +450,29 @@ internal fun Appearance.toJs(): AppearanceJs {
             overlayBorderRadius = cornerRadius.overlay.toPx(),
             overlayBackdropColor = null,
             bodyMdFontSize = typography.bodyMd?.fontSize.toPx(),
-            bodyMdFontWeight = typography.bodyMd?.fontWeight,
+            bodyMdFontWeight = typography.bodyMd?.fontWeight?.toString(),
             bodySmFontSize = typography.bodySm?.fontSize.toPx(),
-            bodySmFontWeight = typography.bodySm?.fontWeight,
+            bodySmFontWeight = typography.bodySm?.fontWeight?.toString(),
             headingXlFontSize = typography.headingXl?.fontSize.toPx(),
-            headingXlFontWeight = typography.headingXl?.fontWeight,
+            headingXlFontWeight = typography.headingXl?.fontWeight?.toString(),
             headingXlTextTransform = typography.headingXl?.textTransform,
             headingLgFontSize = typography.headingLg?.fontSize.toPx(),
-            headingLgFontWeight = typography.headingLg?.fontWeight,
+            headingLgFontWeight = typography.headingLg?.fontWeight?.toString(),
             headingLgTextTransform = typography.headingLg?.textTransform,
             headingMdFontSize = typography.headingMd?.fontSize.toPx(),
-            headingMdFontWeight = typography.headingMd?.fontWeight,
+            headingMdFontWeight = typography.headingMd?.fontWeight?.toString(),
             headingMdTextTransform = typography.headingMd?.textTransform,
             headingSmFontSize = typography.headingSm?.fontSize.toPx(),
-            headingSmFontWeight = typography.headingSm?.fontWeight,
+            headingSmFontWeight = typography.headingSm?.fontWeight?.toString(),
             headingSmTextTransform = typography.headingSm?.textTransform,
             headingXsFontSize = typography.headingXs?.fontSize.toPx(),
-            headingXsFontWeight = typography.headingXs?.fontWeight,
+            headingXsFontWeight = typography.headingXs?.fontWeight?.toString(),
             headingXsTextTransform = typography.headingXs?.textTransform,
             labelMdFontSize = typography.labelMd?.fontSize.toPx(),
-            labelMdFontWeight = typography.labelMd?.fontWeight,
+            labelMdFontWeight = typography.labelMd?.fontWeight?.toString(),
             labelMdTextTransform = typography.labelMd?.textTransform,
             labelSmFontSize = typography.labelSm?.fontSize.toPx(),
-            labelSmFontWeight = typography.labelSm?.fontWeight,
+            labelSmFontWeight = typography.labelSm?.fontWeight?.toString(),
             labelSmTextTransform = typography.labelSm?.textTransform,
         )
     )
