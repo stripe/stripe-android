@@ -63,7 +63,7 @@ class OnrampFlowTest {
 
         // Enter test login credentials previously registered with the demo backend.
         composeRule.onNodeWithTag(LOGIN_EMAIL_TAG)
-            .performTextInput("onramptest@stripe.com")
+            .performTextInput("onramptest2@stripe.com")
 
         composeRule.onNodeWithTag(LOGIN_PASSWORD_TAG)
             .performTextInput("testing1234")

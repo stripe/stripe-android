@@ -21,7 +21,6 @@ import kotlinx.serialization.Serializable
 data class CountrySpec(
     @SerialName("api_path")
     override val apiPath: IdentifierSpec = IdentifierSpec.Country,
-
     @SerialName("allowed_country_codes")
     val allowedCountryCodes: Set<String> = CountryUtils.supportedBillingCountries
 ) : FormItemSpec() {

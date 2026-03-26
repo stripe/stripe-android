@@ -5,9 +5,9 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import app.cash.turbine.withTurbineTimeout
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.ActivityLaunchObserver
 import com.stripe.android.paymentsheet.utils.TestRules
@@ -31,11 +31,7 @@ class FlowControllerRecreationTest {
 
     @Test
     fun onRecreationShouldNotEmitPreviouslyEmittedResults() = test {
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 

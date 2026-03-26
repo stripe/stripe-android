@@ -7,7 +7,7 @@ import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.paymentelement.confirmation.EmptyConfirmationLauncherArgs
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import javax.inject.Inject
 import javax.inject.Provider
@@ -19,7 +19,7 @@ internal class CustomPaymentMethodConfirmationDefinition @Inject constructor(
 ) : ConfirmationDefinition<
     CustomPaymentMethodConfirmationOption,
     ActivityResultLauncher<CustomPaymentMethodInput>,
-    Unit,
+    EmptyConfirmationLauncherArgs,
     InternalCustomPaymentMethodResult
     > {
     override val key: String = "CustomPaymentMethod"
@@ -33,7 +33,7 @@ internal class CustomPaymentMethodConfirmationDefinition @Inject constructor(
     override suspend fun action(
         confirmationOption: CustomPaymentMethodConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
-    ): ConfirmationDefinition.Action<Unit> {
+    ): ConfirmationDefinition.Action<EmptyConfirmationLauncherArgs> {
         val customPaymentMethodId = confirmationOption.customPaymentMethodType.id
         val confirmCustomPaymentMethodCallback = confirmCustomPaymentMethodCallbackProvider.get()
 
@@ -55,9 +55,8 @@ internal class CustomPaymentMethodConfirmationDefinition @Inject constructor(
             )
         } else {
             ConfirmationDefinition.Action.Launch(
-                launcherArguments = Unit,
+                launcherArguments = EmptyConfirmationLauncherArgs,
                 receivesResultInProcess = false,
-                deferredIntentConfirmationType = null,
             )
         }
     }
@@ -74,7 +73,7 @@ internal class CustomPaymentMethodConfirmationDefinition @Inject constructor(
 
     override fun launch(
         launcher: ActivityResultLauncher<CustomPaymentMethodInput>,
-        arguments: Unit,
+        arguments: EmptyConfirmationLauncherArgs,
         confirmationOption: CustomPaymentMethodConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
     ) {
@@ -97,13 +96,12 @@ internal class CustomPaymentMethodConfirmationDefinition @Inject constructor(
     override fun toResult(
         confirmationOption: CustomPaymentMethodConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
-        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        launcherArgs: EmptyConfirmationLauncherArgs,
         result: InternalCustomPaymentMethodResult
     ): ConfirmationDefinition.Result {
         return when (result) {
             is InternalCustomPaymentMethodResult.Completed -> ConfirmationDefinition.Result.Succeeded(
                 intent = confirmationArgs.intent,
-                deferredIntentConfirmationType = null,
             )
             is InternalCustomPaymentMethodResult.Failed -> ConfirmationDefinition.Result.Failed(
                 cause = result.throwable,

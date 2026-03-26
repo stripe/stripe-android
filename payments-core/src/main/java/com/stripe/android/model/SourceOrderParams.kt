@@ -16,7 +16,6 @@ class SourceOrderParams @JvmOverloads constructor(
      * List of items constituting the order.
      */
     val items: List<Item>,
-
     /**
      * The shipping address for the order. A dictionary containing the fields defined in the
      * [Address](https://stripe.com/docs/api#address_object) API reference.
@@ -47,27 +46,22 @@ class SourceOrderParams @JvmOverloads constructor(
          * Must be [Type.Sku], [Type.Tax], or [Type.Shipping].
          */
         val type: Type? = null,
-
         /**
          * Optional. The amount (price) for this order item.
          */
         val amount: Int? = null,
-
         /**
          * Optional. This currency of this order item. Required when amount is present.
          */
         val currency: String? = null,
-
         /**
          * Optional. Human-readable description for this order item.
          */
         val description: String? = null,
-
         /**
          * Optional. The ID of the SKU being ordered.
          */
         val parent: String? = null,
-
         /**
          * Optional. The quantity of this order item. When type is [Type.Sku], this is the number of
          * instances of the SKU to be ordered.
@@ -126,23 +120,19 @@ class SourceOrderParams @JvmOverloads constructor(
          * Required. Shipping address.
          */
         val address: Address,
-
         /**
          * Optional. The delivery service that shipped a physical product,
          * such as Fedex, UPS, USPS, etc.
          */
         val carrier: String? = null,
-
         /**
          * Optional. Recipient name.
          */
         val name: String? = null,
-
         /**
          * Optional. Recipient phone (including extension).
          */
         val phone: String? = null,
-
         /**
          * Optional. The tracking number for a physical product, obtained from the delivery service.
          * If multiple tracking numbers were generated for this purchase, please separate

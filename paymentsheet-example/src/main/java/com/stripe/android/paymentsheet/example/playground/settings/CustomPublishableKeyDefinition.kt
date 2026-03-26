@@ -29,4 +29,12 @@ internal object CustomPublishableKeyDefinition :
             checkoutRequestBuilder.customPublishableKey(value)
         }
     }
+
+    override fun valueUpdated(value: String, playgroundSettings: PlaygroundSettings) {
+        // When this key is updated, that reflects that we are probably changing the merchant, so we need to reset
+        // the customer.
+        if (playgroundSettings[CustomerSettingsDefinition].value is CustomerType.Existing) {
+            playgroundSettings[CustomerSettingsDefinition] = CustomerType.NEW
+        }
+    }
 }

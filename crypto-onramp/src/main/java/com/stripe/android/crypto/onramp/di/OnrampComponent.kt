@@ -23,12 +23,13 @@ import javax.inject.Singleton
 )
 internal interface OnrampComponent {
     val onrampCoordinator: OnrampCoordinator
+    val onrampCallbackIdentifier: String
 
     @Component.Factory
     interface Factory {
         fun build(
             @BindsInstance application: Application,
-            @BindsInstance savedStateHandle: SavedStateHandle
+            @BindsInstance savedStateHandle: SavedStateHandle,
         ): OnrampComponent
     }
 }

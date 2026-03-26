@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.ui
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
@@ -14,12 +13,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.takeOrElse
-import androidx.core.content.ContextCompat
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getBackgroundColor
 import com.stripe.android.uicore.getBorderStrokeColor
 import com.stripe.android.uicore.getOnBackgroundColor
+import com.stripe.android.uicore.getOnSuccessBackgroundColor
+import com.stripe.android.uicore.getSuccessBackgroundColor
 
 internal data class PrimaryButtonColors(
     val background: Color = Color.Unspecified,
@@ -70,13 +69,11 @@ internal object PrimaryButtonTheme {
         val style = StripeTheme.primaryButtonStyle
         val context = LocalContext.current
         val localColors = LocalPrimaryButtonColors.current
-        val isDarkTheme = isSystemInDarkTheme()
 
         return remember(
             style,
             context,
             localColors,
-            isDarkTheme
         ) {
             PrimaryButtonColors(
                 background = localColors.background.takeOrElse {
@@ -86,19 +83,10 @@ internal object PrimaryButtonTheme {
                     Color(style.getOnBackgroundColor(context))
                 },
                 successBackground = localColors.successBackground.takeOrElse {
-                    Color(
-                        ContextCompat.getColor(
-                            context,
-                            R.color.stripe_paymentsheet_primary_button_success_background
-                        )
-                    )
+                    Color(style.getSuccessBackgroundColor(context))
                 },
                 onSuccessBackground = localColors.onSuccessBackground.takeOrElse {
-                    if (isDarkTheme) {
-                        Color.Black
-                    } else {
-                        Color.White
-                    }
+                    Color(style.getOnSuccessBackgroundColor(context))
                 },
                 border = localColors.border.takeOrElse {
                     Color(style.getBorderStrokeColor(context))

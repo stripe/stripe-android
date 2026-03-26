@@ -404,6 +404,29 @@ class ConfirmPaymentIntentParamsFactoryTest {
     )
 
     @Test
+    fun `create() with 'OffSession' SFU should contain mandate data for satispay`() = mandateDataTest(
+        setupFutureUsage = StripeIntent.Usage.OffSession,
+        expectedMandateDataParams = MandateDataParams(MandateDataParams.Type.Online.DEFAULT),
+        paymentMethod = PaymentMethodFactory.satispay(),
+    )
+
+    @Test
+    fun `create() with 'OffSession' PMO SFU should contain mandate data for satispay`() {
+        mandateDataTest(
+            setupFutureUsage = null,
+            expectedMandateDataParams = MandateDataParams(MandateDataParams.Type.Online.DEFAULT),
+            paymentMethod = PaymentMethodFactory.satispay(),
+            paymentMethodOptionsJsonString = """
+                {
+                    "satispay": {
+                        "setup_future_usage": "off_session"
+                    }
+                }
+            """.trimIndent()
+        )
+    }
+
+    @Test
     fun `create() with 'OffSession' PMO SFU should contain any mandate data`() {
         mandateDataTest(
             setupFutureUsage = null,
@@ -513,6 +536,91 @@ class ConfirmPaymentIntentParamsFactoryTest {
 
     private fun ConfirmStripeIntentParams.asConfirmPaymentIntentParams(): ConfirmPaymentIntentParams {
         return this as ConfirmPaymentIntentParams
+    }
+
+    // Tests for mandateDataForDeferredIntent
+
+    @Test
+    fun `mandateDataForDeferredIntent returns null when paymentMethodType is null`() {
+        val result = mandateDataForDeferredIntent(
+            paymentMethodType = null,
+            requiresMandateFromCreateParams = true,
+            optionsParams = null,
+            intentConfigSetupFutureUsage = null,
+        )
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun `mandateDataForDeferredIntent returns mandate when requiresMandateFromCreateParams is true`() {
+        val result = mandateDataForDeferredIntent(
+            paymentMethodType = PaymentMethod.Type.Satispay,
+            requiresMandateFromCreateParams = true,
+            optionsParams = null,
+            intentConfigSetupFutureUsage = null,
+        )
+        assertThat(result).isEqualTo(MandateDataParams(MandateDataParams.Type.Online.DEFAULT))
+    }
+
+    @Test
+    fun `mandateDataForDeferredIntent returns mandate when PM type requiresMandateForPaymentIntent`() {
+        // SepaDebit has requiresMandateForPaymentIntent = true
+        val result = mandateDataForDeferredIntent(
+            paymentMethodType = PaymentMethod.Type.SepaDebit,
+            requiresMandateFromCreateParams = false,
+            optionsParams = null,
+            intentConfigSetupFutureUsage = null,
+        )
+        assertThat(result).isEqualTo(MandateDataParams(MandateDataParams.Type.Online.DEFAULT))
+    }
+
+    @Test
+    fun `mandateDataForDeferredIntent returns mandate when optionsParams has SFU off_session`() {
+        val result = mandateDataForDeferredIntent(
+            paymentMethodType = PaymentMethod.Type.Satispay,
+            requiresMandateFromCreateParams = false,
+            optionsParams = PaymentMethodOptionsParams.SetupFutureUsage(
+                paymentMethodType = PaymentMethod.Type.Satispay,
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+            ),
+            intentConfigSetupFutureUsage = null,
+        )
+        assertThat(result).isEqualTo(MandateDataParams(MandateDataParams.Type.Online.DEFAULT))
+    }
+
+    @Test
+    fun `mandateDataForDeferredIntent returns mandate when intentConfigSetupFutureUsage is off_session`() {
+        val result = mandateDataForDeferredIntent(
+            paymentMethodType = PaymentMethod.Type.Satispay,
+            requiresMandateFromCreateParams = false,
+            optionsParams = null,
+            intentConfigSetupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
+        )
+        assertThat(result).isEqualTo(MandateDataParams(MandateDataParams.Type.Online.DEFAULT))
+    }
+
+    @Test
+    fun `mandateDataForDeferredIntent returns null when PM type does not require mandate`() {
+        // Card does not require mandate even with SFU
+        val result = mandateDataForDeferredIntent(
+            paymentMethodType = PaymentMethod.Type.Card,
+            requiresMandateFromCreateParams = false,
+            optionsParams = null,
+            intentConfigSetupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
+        )
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun `mandateDataForDeferredIntent returns null when no SFU conditions are met`() {
+        // Satispay requires mandate but no SFU is set
+        val result = mandateDataForDeferredIntent(
+            paymentMethodType = PaymentMethod.Type.Satispay,
+            requiresMandateFromCreateParams = false,
+            optionsParams = null,
+            intentConfigSetupFutureUsage = null,
+        )
+        assertThat(result).isNull()
     }
 
     private companion object {

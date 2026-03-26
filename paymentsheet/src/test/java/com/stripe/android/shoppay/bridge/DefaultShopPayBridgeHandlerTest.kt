@@ -147,7 +147,7 @@ internal class DefaultShopPayBridgeHandlerTest {
 
         val result = handler.calculateShipping(message)
 
-        val response = JSONObject(result!!)
+        val response = JSONObject(result)
         assertThat(response.getString("type")).isEqualTo("data")
 
         val data = response.getJSONObject("data")
@@ -164,7 +164,7 @@ internal class DefaultShopPayBridgeHandlerTest {
 
         val result = handler.calculateShipping(message)
 
-        val response = JSONObject(result!!)
+        val response = JSONObject(result)
         assertThat(response.getString("type")).isEqualTo("error")
         assertThat(response.getString("message")).contains("Failed to parse shipping rate request")
     }
@@ -192,9 +192,40 @@ internal class DefaultShopPayBridgeHandlerTest {
 
         val result = handler.calculateShipping(message)
 
-        val response = JSONObject(result!!)
+        val response = JSONObject(result)
         assertThat(response.getString("type")).isEqualTo("data")
         assertThat(response.has("data")).isFalse()
+    }
+
+    @Test
+    fun `calculateShipping returns default values when shopPayHandlers is null`() {
+        val shippingRequest = ShippingCalculationRequest(
+            shippingAddress = ShippingCalculationRequest.ShippingAddress(
+                name = "John Doe",
+                address = ECEPartialAddress(
+                    city = "San Francisco",
+                    state = "CA",
+                    postalCode = "94105",
+                    country = "US",
+                )
+            )
+        )
+        val fakeParser = FakeShippingCalculationRequestParser(returnValue = shippingRequest)
+        val handler = createDefaultBridgeHandler(
+            shippingCalculationRequestJsonParser = fakeParser,
+            shopPayHandlers = null
+        )
+        val message = """{"name": "John Doe", "address": {"city": "San Francisco", "country": "US"}}"""
+
+        val result = handler.calculateShipping(message)
+
+        val response = JSONObject(result)
+        assertThat(response.getString("type")).isEqualTo("data")
+
+        val data = response.getJSONObject("data")
+        assertThat(data.getJSONArray("lineItems").length()).isEqualTo(1)
+        assertThat(data.getJSONArray("shippingRates").length()).isEqualTo(1)
+        assertThat(data.getInt("totalAmount")).isEqualTo(50)
     }
 
     @Test
@@ -212,7 +243,7 @@ internal class DefaultShopPayBridgeHandlerTest {
 
         val result = handler.calculateShippingRateChange(message)
 
-        val response = JSONObject(result!!)
+        val response = JSONObject(result)
         assertThat(response.getString("type")).isEqualTo("data")
 
         val data = response.getJSONObject("data")
@@ -229,7 +260,7 @@ internal class DefaultShopPayBridgeHandlerTest {
 
         val result = handler.calculateShippingRateChange(message)
 
-        val response = JSONObject(result!!)
+        val response = JSONObject(result)
         assertThat(response.getString("type")).isEqualTo("error")
         assertThat(response.getString("message")).contains("Failed to parse shipping rate change request")
     }
@@ -249,9 +280,32 @@ internal class DefaultShopPayBridgeHandlerTest {
 
         val result = handler.calculateShippingRateChange(message)
 
-        val response = JSONObject(result!!)
+        val response = JSONObject(result)
         assertThat(response.getString("type")).isEqualTo("data")
         assertThat(response.has("data")).isFalse()
+    }
+
+    @Test
+    fun `calculateShippingRateChange returns default values when shopPayHandlers is null`() {
+        val shippingRateRequest = ShippingRateChangeRequest(
+            shippingRate = ShopPayTestFactory.ECE_SHIPPING_RATE
+        )
+        val fakeParser = FakeShippingRateChangeRequestParser(returnValue = shippingRateRequest)
+        val handler = createDefaultBridgeHandler(
+            shippingRateChangeRequestJsonParser = fakeParser,
+            shopPayHandlers = null
+        )
+        val message = """{"shippingRate": {"id": "express", "displayName": "Express Shipping"}}"""
+
+        val result = handler.calculateShippingRateChange(message)
+
+        val response = JSONObject(result)
+        assertThat(response.getString("type")).isEqualTo("data")
+
+        val data = response.getJSONObject("data")
+        assertThat(data.getJSONArray("lineItems").length()).isEqualTo(1)
+        assertThat(data.getJSONArray("shippingRates").length()).isEqualTo(1)
+        assertThat(data.getInt("totalAmount")).isEqualTo(50)
     }
 
     @Test
@@ -378,7 +432,7 @@ internal class DefaultShopPayBridgeHandlerTest {
         shippingRateChangeRequestJsonParser: ModelJsonParser<ShippingRateChangeRequest> =
             FakeShippingRateChangeRequestParser(),
         confirmationRequestJsonParser: ModelJsonParser<ConfirmationRequest> = FakeConfirmationRequestParser(),
-        shopPayHandlers: ShopPayHandlers = createFakeShopPayHandlers(),
+        shopPayHandlers: ShopPayHandlers? = createFakeShopPayHandlers(),
         shopPayArgs: ShopPayArgs = ShopPayTestFactory.SHOP_PAY_ARGS
     ): DefaultShopPayBridgeHandler {
         return DefaultShopPayBridgeHandler(

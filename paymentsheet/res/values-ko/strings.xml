@@ -100,6 +100,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ 추가</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_add_payment_method_title">결제 정보를 추가하세요.</string>
+  <!-- Title shown above a view containing a customer's recently added card -->
+  <string name="stripe_paymentsheet_added_card">추가된 카드</string>
   <!-- Title for a button that when pressed saves the provided address. -->
   <string name="stripe_paymentsheet_address_element_primary_button">주소 저장</string>
   <!-- Title for shipping address entry section -->
@@ -213,6 +215,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_save_this_card_with_merchant_name">이 카드를 향후 %s 결제에 사용하도록 저장</string>
   <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
   <string name="stripe_paymentsheet_saved">저장함</string>
+  <!-- Title shown above a view containing a customer's saved card -->
+  <string name="stripe_paymentsheet_saved_card">저장된 카드</string>
   <!-- Title shown above a view containing the customer's cards -->
   <string name="stripe_paymentsheet_select_card">카드 선택</string>
   <!-- Title shown above a view containing the customer's payment methods -->
@@ -257,6 +261,14 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_something_went_wrong">문제가 발생했습니다.</string>
   <!-- Accessibility description when payment button shows a successful transaction animation. -->
   <string name="stripe_successful_transaction_description">거래 완료</string>
+  <!-- Title shown in success screen shown after a user has added their card bu tapping -->
+  <string name="stripe_tap_to_add_card_added_title">카드 추가됨</string>
+  <!-- Button label for a button that launches a flow for tapping a card on the device -->
+  <string name="stripe_tap_to_add_card_button_label">탭하여 카드 추가</string>
+  <!-- Title for screen indicating to the user that they have completed a payment of a specified amount -->
+  <string name="stripe_tap_to_add_paid_label">%s 지불됨</string>
+  <!-- Error message shown when Tap to Add is not supported by the current device. -->
+  <string name="stripe_tap_to_add_unsupported_device_error">사용 중인 장치에서는 탭하여 추가 기능을 지원하지 않습니다</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">취소 및 다른 방법으로 결제</string>
   <!-- Text on a screen asking the user to approve a payment -->

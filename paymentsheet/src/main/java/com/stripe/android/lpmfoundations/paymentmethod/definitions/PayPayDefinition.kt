@@ -20,11 +20,13 @@ internal object PayPayDefinition : PaymentMethodDefinition {
         return setOf(AddPaymentMethodRequirement.UnsupportedForSetup)
     }
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = PayPayUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = PayPayUiDefinitionFactory
 }
 
 private object PayPayUiDefinitionFactory : UiDefinitionFactory.Simple() {
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         paymentMethodDefinition = PayPayDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_paypay,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_paypay,

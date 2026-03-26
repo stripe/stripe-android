@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.FakeStripeRepository
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.ClientAttributionMetadata
@@ -19,6 +20,7 @@ import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.CreateIntentCallback
@@ -93,8 +95,11 @@ internal class IntentConfirmationFlowTest {
 
         assertThat(completeAction.intent)
             .isEqualTo(DEFERRED_CONFIRMATION_PARAMETERS.paymentMethodMetadata.stripeIntent)
-        assertThat(completeAction.deferredIntentConfirmationType)
-            .isEqualTo(DeferredIntentConfirmationType.None)
+        assertThat(completeAction.metadata).isEqualTo(
+            MutableConfirmationMetadata().apply {
+                set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.None)
+            }
+        )
         assertThat(completeAction.completedFullPaymentFlow).isTrue()
     }
 
@@ -110,7 +115,7 @@ internal class IntentConfirmationFlowTest {
             confirmationOption = CONFIRMATION_OPTION,
             confirmationArgs = DEFERRED_CONFIRMATION_PARAMETERS.copy(
                 paymentMethodMetadata = DEFERRED_CONFIRMATION_PARAMETERS.paymentMethodMetadata.copy(
-                    integrationMetadata = IntegrationMetadata.DeferredIntentWithSharedPaymentToken(
+                    integrationMetadata = IntegrationMetadata.DeferredIntent.WithSharedPaymentToken(
                         intentConfiguration = PaymentSheet.IntentConfiguration(
                             sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Setup(
                                 currency = "USD",
@@ -126,8 +131,11 @@ internal class IntentConfirmationFlowTest {
 
         assertThat(completeAction.intent)
             .isEqualTo(DEFERRED_CONFIRMATION_PARAMETERS.paymentMethodMetadata.stripeIntent)
-        assertThat(completeAction.deferredIntentConfirmationType)
-            .isEqualTo(DeferredIntentConfirmationType.None)
+        assertThat(completeAction.metadata).isEqualTo(
+            MutableConfirmationMetadata().apply {
+                set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.None)
+            }
+        )
         assertThat(completeAction.completedFullPaymentFlow).isFalse()
     }
 
@@ -151,7 +159,8 @@ internal class IntentConfirmationFlowTest {
         val setupIntentParams = confirmArguments.confirmNextParams.asSetup()
 
         assertThat(setupIntentParams.clientSecret).isEqualTo("seti_123_secret_123")
-        assertThat(launchAction.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
+        assertThat(confirmArguments.deferredIntentConfirmationType)
+            .isEqualTo(DeferredIntentConfirmationType.Client)
     }
 
     @Test
@@ -266,8 +275,7 @@ internal class IntentConfirmationFlowTest {
             object : IntentConfirmationInterceptor.Factory {
                 override suspend fun create(
                     integrationMetadata: IntegrationMetadata,
-                    customerId: String?,
-                    ephemeralKeySecret: String?,
+                    customerMetadata: CustomerMetadata?,
                     clientAttributionMetadata: ClientAttributionMetadata,
                 ): IntentConfirmationInterceptor {
                     return createIntentConfirmationInterceptor(

@@ -100,6 +100,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+Magdagdag</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_add_payment_method_title">Magdagdag ng iyong impormasyon sa pagbabayad</string>
+  <!-- Title shown above a view containing a customer's recently added card -->
+  <string name="stripe_paymentsheet_added_card">Idinagdag ang card</string>
   <!-- Title for a button that when pressed saves the provided address. -->
   <string name="stripe_paymentsheet_address_element_primary_button">I-save ang address</string>
   <!-- Title for shipping address entry section -->
@@ -213,6 +215,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_save_this_card_with_merchant_name">I-save ang kard na ito para sa mga hinaharap na pagbabayad sa %s</string>
   <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
   <string name="stripe_paymentsheet_saved">Nai-save</string>
+  <!-- Title shown above a view containing a customer's saved card -->
+  <string name="stripe_paymentsheet_saved_card">Naka-save na card</string>
   <!-- Title shown above a view containing the customer's cards -->
   <string name="stripe_paymentsheet_select_card">Pumili ng kard</string>
   <!-- Title shown above a view containing the customer's payment methods -->
@@ -257,6 +261,14 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_something_went_wrong">May nangyaring mali</string>
   <!-- Accessibility description when payment button shows a successful transaction animation. -->
   <string name="stripe_successful_transaction_description">Kumpleto na ang transaksyon</string>
+  <!-- Title shown in success screen shown after a user has added their card bu tapping -->
+  <string name="stripe_tap_to_add_card_added_title">Idinagdag ang card</string>
+  <!-- Button label for a button that launches a flow for tapping a card on the device -->
+  <string name="stripe_tap_to_add_card_button_label">I-tap upang magdagdag ng card</string>
+  <!-- Title for screen indicating to the user that they have completed a payment of a specified amount -->
+  <string name="stripe_tap_to_add_paid_label">Bayad %s</string>
+  <!-- Error message shown when Tap to Add is not supported by the current device. -->
+  <string name="stripe_tap_to_add_unsupported_device_error">Ang pag-tap upang magdagdag ay hindi suportado ng iyong device</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">Kanselahin at magbayad sa ibang paraan</string>
   <!-- Text on a screen asking the user to approve a payment -->

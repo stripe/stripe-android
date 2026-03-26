@@ -14,6 +14,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
@@ -54,6 +55,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.link.ui.LinkButton
@@ -74,6 +76,7 @@ import com.stripe.android.paymentsheet.utils.DismissKeyboardOnProcessing
 import com.stripe.android.paymentsheet.utils.EventReporterProvider
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.shoppay.ShopPayButton
 import com.stripe.android.ui.core.CircularProgressIndicator
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.ui.core.elements.Mandate
@@ -114,9 +117,10 @@ internal fun PaymentSheetScreen(
 internal fun PaymentSheetScreen(
     viewModel: BaseSheetViewModel,
     type: PaymentSheetFlowType,
+    contentVisible: Boolean = true,
 ) {
     val scrollState = rememberScrollState()
-    PaymentSheetScreen(viewModel, scrollState) {
+    PaymentSheetScreen(viewModel = viewModel, scrollState = scrollState, contentVisible = contentVisible) {
         PaymentSheetScreenContent(viewModel, type = type, scrollState = scrollState)
     }
 }
@@ -182,10 +186,11 @@ private fun PaymentSheetScreen(
                 .fillMaxWidth()
                 .background(MaterialTheme.colors.surface.copy(alpha = 0.9f)),
         ) {
-            ProgressOverlay(
-                contentVisible = contentVisible,
-                walletsProcessingState = walletsProcessingState
-            )
+            if (contentVisible) {
+                ProgressOverlay(
+                    walletsProcessingState = walletsProcessingState
+                )
+            }
         }
     }
 }
@@ -247,17 +252,12 @@ private fun ResetScroll(scrollState: ScrollState, currentScreen: PaymentSheetScr
 @Suppress("UnusedReceiverParameter")
 @Composable
 private fun BoxScope.ProgressOverlay(
-    contentVisible: Boolean,
     walletsProcessingState: WalletsProcessingState?
 ) {
     AnimatedContent(
         targetState = walletsProcessingState,
         label = "AnimatedProcessingState"
     ) { processingState ->
-        if (!contentVisible) {
-            ProgressOverlayProcessing()
-            return@AnimatedContent
-        }
         when (processingState) {
             is WalletsProcessingState.Processing -> {
                 ProgressOverlayProcessing()
@@ -282,7 +282,7 @@ private fun BoxScope.ProgressOverlay(
 }
 
 @Composable
-private fun ProgressOverlayProcessing() {
+internal fun ProgressOverlayProcessing() {
     CircularProgressIndicator(
         color = MaterialTheme.colors.onSurface,
         strokeWidth = dimensionResource(R.dimen.stripe_paymentsheet_loading_indicator_stroke_width),
@@ -355,9 +355,11 @@ private fun PaymentSheetContent(
                 processingState = walletsProcessingState,
                 onGooglePayPressed = state.onGooglePayPressed,
                 onLinkPressed = state.onLinkPressed,
+                onShopPayPressed = state.onShopPayPressed,
                 dividerSpacing = currentScreen.walletsDividerSpacing,
                 modifier = Modifier.padding(bottom = bottomSpacing),
-                cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance)
+                cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance),
+                cardFundingFilter = walletsState.cardFundingFilter
             )
         }
 
@@ -411,37 +413,23 @@ internal fun Wallet(
     processingState: WalletsProcessingState?,
     onGooglePayPressed: () -> Unit,
     onLinkPressed: () -> Unit,
+    onShopPayPressed: () -> Unit,
     dividerSpacing: Dp,
     modifier: Modifier = Modifier,
-    cardBrandFilter: CardBrandFilter
+    cardBrandFilter: CardBrandFilter,
+    cardFundingFilter: CardFundingFilter
 ) {
     val padding = StripeTheme.getOuterFormInsets()
 
     Column(modifier = modifier.padding(padding)) {
-        // Only show Google Pay if allowed in header
-        state.googlePay(WalletLocation.HEADER)?.let { googlePay ->
-            GooglePayButton(
-                state = PrimaryButton.State.Ready,
-                allowCreditCards = googlePay.allowCreditCards,
-                buttonType = googlePay.buttonType,
-                billingAddressParameters = googlePay.billingAddressParameters,
-                isEnabled = state.buttonsEnabled,
-                onPressed = onGooglePayPressed,
-                cardBrandFilter = cardBrandFilter
-            )
-        }
-
-        // Only show Link if allowed in header
-        state.link(WalletLocation.HEADER)?.let {
-            if (state.googlePay(WalletLocation.HEADER) != null) {
-                Spacer(modifier = Modifier.requiredHeight(8.dp))
-            }
-            LinkButton(
-                state = it.state,
-                enabled = state.buttonsEnabled,
-                onClick = onLinkPressed,
-            )
-        }
+        WalletHeader(
+            state = state,
+            onGooglePayPressed = onGooglePayPressed,
+            onLinkPressed = onLinkPressed,
+            onShopPayPressed = onShopPayPressed,
+            cardBrandFilter = cardBrandFilter,
+            cardFundingFilter = cardFundingFilter
+        )
 
         when (processingState) {
             is WalletsProcessingState.Idle -> processingState.error?.let { error ->
@@ -458,6 +446,53 @@ internal fun Wallet(
 
             val text = stringResource(state.dividerTextResource)
             WalletsDivider(text)
+        }
+    }
+}
+
+@Composable
+private fun WalletHeader(
+    state: WalletsState,
+    onGooglePayPressed: () -> Unit,
+    onLinkPressed: () -> Unit,
+    onShopPayPressed: () -> Unit,
+    cardBrandFilter: CardBrandFilter,
+    cardFundingFilter: CardFundingFilter
+) {
+    val walletItems = remember(state) {
+        // Only show wallet if allowed in header
+        state.wallets(WalletLocation.HEADER)
+    }
+
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        for (wallet in walletItems) {
+            when (wallet) {
+                is WalletsState.GooglePay -> {
+                    GooglePayButton(
+                        state = PrimaryButton.State.Ready,
+                        allowCreditCards = wallet.allowCreditCards,
+                        buttonType = wallet.buttonType,
+                        billingAddressParameters = wallet.billingAddressParameters,
+                        isEnabled = state.buttonsEnabled,
+                        onPressed = onGooglePayPressed,
+                        cardBrandFilter = cardBrandFilter,
+                        cardFundingFilter = cardFundingFilter,
+                        additionalEnabledNetworks = wallet.additionalEnabledNetworks
+                    )
+                }
+                is WalletsState.Link -> {
+                    LinkButton(
+                        state = wallet.state,
+                        enabled = state.buttonsEnabled,
+                        onClick = onLinkPressed,
+                    )
+                }
+                WalletsState.ShopPay -> {
+                    ShopPayButton(onClick = onShopPayPressed)
+                }
+            }
         }
     }
 }

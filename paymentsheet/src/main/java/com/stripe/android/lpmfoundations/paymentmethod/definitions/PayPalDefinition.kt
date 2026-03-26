@@ -23,11 +23,13 @@ internal object PayPalDefinition : PaymentMethodDefinition {
         return metadata.hasIntentToSetup(type.code) && metadata.mandateAllowed(type)
     }
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = PayPalUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = PayPalUiDefinitionFactory
 }
 
 private object PayPalUiDefinitionFactory : UiDefinitionFactory.Simple() {
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         paymentMethodDefinition = PayPalDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_paypal,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_paypal_day,

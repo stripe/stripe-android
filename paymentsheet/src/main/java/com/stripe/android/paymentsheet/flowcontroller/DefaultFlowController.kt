@@ -6,6 +6,7 @@ import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistryOwner
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -15,6 +16,9 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.checkout.Checkout
+import com.stripe.android.checkout.CheckoutConfigurationMerger
+import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -32,14 +36,17 @@ import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.toLoginState
 import com.stripe.android.link.utils.determineFallbackPaymentSelectionAfterLinkLogout
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -224,6 +231,22 @@ internal class DefaultFlowController @Inject internal constructor(
         )
     }
 
+    @CheckoutSessionPreview
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    override fun configureWithCheckout(
+        checkout: Checkout,
+        configuration: PaymentSheet.Configuration,
+        callback: PaymentSheet.FlowController.ConfigCallback
+    ) {
+        CheckoutInstances.ensureNoMutationInFlight(checkout.internalState.key)
+        configure(
+            mode = checkout.internalState.initializationMode,
+            configuration = CheckoutConfigurationMerger.PaymentSheetConfiguration(configuration)
+                .forCheckoutSession(checkout.internalState),
+            callback = callback,
+        )
+    }
+
     private fun configure(
         mode: PaymentElementLoader.InitializationMode,
         configuration: PaymentSheet.Configuration,
@@ -271,6 +294,13 @@ internal class DefaultFlowController @Inject internal constructor(
 
     override fun presentPaymentOptions() {
         withCurrentState { state ->
+            val checkoutSession = state.paymentSheetState.paymentMethodMetadata
+                .integrationMetadata as? IntegrationMetadata.CheckoutSession
+            if (checkoutSession != null) {
+                CheckoutInstances.ensureNoMutationInFlight(checkoutSession.instancesKey)
+                CheckoutInstances.markIntegrationLaunched(checkoutSession.instancesKey)
+            }
+
             val linkConfiguration = state.paymentSheetState.linkConfiguration
             val paymentSelection = viewModel.paymentSelection
             val linkAccountInfo = linkAccountHolder.linkAccountInfo.value
@@ -531,6 +561,7 @@ internal class DefaultFlowController @Inject internal constructor(
             val confirmationOption = paymentSelection?.toConfirmationOption(
                 configuration = state.config,
                 linkConfiguration = state.linkConfiguration,
+                cardFundingFilter = state.paymentMethodMetadata.cardFundingFilter
             )
 
             confirmationOption?.let { option ->
@@ -606,14 +637,14 @@ internal class DefaultFlowController @Inject internal constructor(
                 viewModel.paymentSelection?.let { paymentSelection ->
                     eventReporter.onPaymentSuccess(
                         paymentSelection = paymentSelection,
-                        deferredIntentConfirmationType = result.deferredIntentConfirmationType,
+                        deferredIntentConfirmationType = result.metadata[DeferredIntentConfirmationTypeKey],
                         intentId = result.intent.id,
                     )
                 }
 
                 onPaymentResult(
                     paymentResult = PaymentResult.Completed,
-                    deferredIntentConfirmationType = result.deferredIntentConfirmationType,
+                    deferredIntentConfirmationType = result.metadata[DeferredIntentConfirmationTypeKey],
                     shouldLog = false,
                     shouldResetOnCompleted = result.completedFullPaymentFlow,
                     intentId = result.intent.id,
@@ -677,6 +708,8 @@ internal class DefaultFlowController @Inject internal constructor(
         if (paymentResult is PaymentResult.Completed && shouldResetOnCompleted) {
             viewModel.paymentSelection = null
             viewModel.state = null
+            viewModel.previousConfigureRequest = null
+            paymentOptionResultCallback.onPaymentOptionResult(PaymentOptionResult(null, false))
         }
 
         viewModelScope.launch {

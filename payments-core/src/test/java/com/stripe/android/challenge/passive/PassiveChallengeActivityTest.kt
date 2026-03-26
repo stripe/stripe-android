@@ -164,7 +164,8 @@ internal class PassiveChallengeActivityTest {
     companion object {
         private val passiveCaptchaParams = PassiveCaptchaParams(
             siteKey = "test_site_key",
-            rqData = "test_rq_data"
+            rqData = "test_rq_data",
+            tokenTimeoutSeconds = null
         )
 
         private val args = PassiveChallengeArgs(

@@ -263,8 +263,8 @@ class RealCreateInstantDebitsResultTest {
         )
 
         return mock<FinancialConnectionsConsumerSessionRepository> {
-            onBlocking { createPaymentDetails(any(), any(), anyOrNull()) } doReturn consumerPaymentDetails
-            onBlocking { sharePaymentDetails(any(), any(), any(), anyOrNull()) } doReturn sharePaymentDetails
+            on { createPaymentDetails(any(), any(), anyOrNull()) } doReturn consumerPaymentDetails
+            on { sharePaymentDetails(any(), any(), any(), anyOrNull()) } doReturn sharePaymentDetails
         }
     }
 
@@ -272,7 +272,7 @@ class RealCreateInstantDebitsResultTest {
         val paymentMethod = "{\"id\": \"pm_1234\"}"
 
         return mock<FinancialConnectionsRepository> {
-            onBlocking { createPaymentMethod(any(), any(), anyOrNull()) } doReturn paymentMethod
+            on { createPaymentMethod(any(), any(), anyOrNull()) } doReturn paymentMethod
         }
     }
 

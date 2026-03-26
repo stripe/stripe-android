@@ -13,19 +13,19 @@ sealed interface OnrampVerifyKycInfoResult {
      * KYC verified successfully.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data object Confirmed : OnrampVerifyKycInfoResult
+    class Confirmed internal constructor() : OnrampVerifyKycInfoResult
 
     /**
      * The user indicated they need to update their address.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data object UpdateAddress : OnrampVerifyKycInfoResult
+    class UpdateAddress internal constructor() : OnrampVerifyKycInfoResult
 
     /**
      * The KYC verification was cancelled.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data object Cancelled : OnrampVerifyKycInfoResult
+    class Cancelled internal constructor() : OnrampVerifyKycInfoResult
 
     /**
      * Verification failed.

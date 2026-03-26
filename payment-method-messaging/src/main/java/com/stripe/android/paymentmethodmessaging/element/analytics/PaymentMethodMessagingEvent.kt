@@ -6,6 +6,7 @@ import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.paymentmethodmessaging.element.PaymentMethodMessagingElement
 import com.stripe.android.paymentmethodmessaging.element.PaymentMethodMessagingElementPreview
 import kotlin.time.Duration
+import kotlin.time.DurationUnit
 
 internal sealed class PaymentMethodMessagingEvent : AnalyticsEvent {
     abstract val additionalParams: Map<String, Any?>
@@ -37,7 +38,7 @@ internal sealed class PaymentMethodMessagingEvent : AnalyticsEvent {
         override val additionalParams: Map<String, Any?> = buildMap {
             put(FIELD_PAYMENT_METHODS, paymentMethods.joinToString(","))
             put(FIELD_CONTENT_TYPE, contentType.type)
-            put(FIELD_DURATION, duration)
+            put(FIELD_DURATION, duration?.toDouble(DurationUnit.SECONDS)?.toFloat())
         }
     }
 
@@ -47,7 +48,7 @@ internal sealed class PaymentMethodMessagingEvent : AnalyticsEvent {
     ) : PaymentMethodMessagingEvent() {
         override val eventName: String = PMME_LOAD_FAILED
         override val additionalParams: Map<String, Any?> = buildMap {
-            put(FIELD_DURATION, duration)
+            put(FIELD_DURATION, duration?.toDouble(DurationUnit.SECONDS)?.toFloat())
             put(FIELD_ERROR_MESSAGE, error.message)
         }
     }
@@ -69,12 +70,12 @@ internal sealed class PaymentMethodMessagingEvent : AnalyticsEvent {
     internal fun PaymentMethodMessagingElement.Appearance.State.toAnalyticsValue(): Map<String, Any?> {
         val setFont = this.font != null
         val setTextColor = this.colors.textColor != null
-        val setIconColor = this.colors.infoIconColor != null
+        val setLinkColor = this.colors.linkTextColor != null
         val setTheme = this.theme != PaymentMethodMessagingElement.Appearance.Theme.LIGHT
         return buildMap {
             put(FIELD_FONT, setFont)
             put(FIELD_TEXT_COLOR, setTextColor)
-            put(FIELD_ICON_COLOR, setIconColor)
+            put(FIELD_LINK_COLOR, setLinkColor)
             put(FIELD_STYLE, setTheme)
         }
     }
@@ -98,7 +99,7 @@ internal sealed class PaymentMethodMessagingEvent : AnalyticsEvent {
         const val FIELD_APPEARANCE = "appearance"
         const val FIELD_FONT = "font"
         const val FIELD_TEXT_COLOR = "text_color"
-        const val FIELD_ICON_COLOR = "info_icon_color"
+        const val FIELD_LINK_COLOR = "link_text_color"
         const val FIELD_STYLE = "style"
     }
 }

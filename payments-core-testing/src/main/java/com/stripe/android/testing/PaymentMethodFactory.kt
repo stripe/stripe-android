@@ -215,6 +215,16 @@ object PaymentMethodFactory {
         )
     }
 
+    fun satispay(): PaymentMethod {
+        return PaymentMethod(
+            id = "pm_1234",
+            created = 123456789L,
+            liveMode = false,
+            type = PaymentMethod.Type.Satispay,
+            code = PaymentMethod.Type.Satispay.code,
+        )
+    }
+
     fun convertCardToJson(paymentMethod: PaymentMethod): JSONObject {
         val paymentMethodJson = convertGenericPaymentMethodToJson(paymentMethod)
 

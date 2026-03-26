@@ -13,16 +13,16 @@ import kotlinx.serialization.Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal data class KycCollectionRequest(
     @SerialName("first_name")
-    val firstName: String,
+    val firstName: String?,
     @SerialName("last_name")
-    val lastName: String,
+    val lastName: String?,
     @SerialName("id_number")
     val idNumber: String?,
     @SerialName("id_type")
     val idType: String?,
     @SerialName("dob")
     @Serializable(with = DateOfBirthSerializer::class)
-    val dateOfBirth: DateOfBirth,
+    val dateOfBirth: DateOfBirth?,
     @SerialName("city")
     val city: String?,
     @SerialName("country")
@@ -47,17 +47,17 @@ internal data class KycCollectionRequest(
             credentials: CryptoCustomerRequestParams.Credentials
         ): KycCollectionRequest {
             return KycCollectionRequest(
-                firstName = kycInfo.firstName,
-                lastName = kycInfo.lastName,
-                idNumber = kycInfo.idNumber,
-                idType = SOCIAL_SECURITY_NUMBER,
+                firstName = kycInfo.firstName.takeIf { !it.isNullOrEmpty() },
+                lastName = kycInfo.lastName.takeIf { !it.isNullOrEmpty() },
+                idNumber = kycInfo.idNumber.takeIf { !it.isNullOrEmpty() },
+                idType = SOCIAL_SECURITY_NUMBER.takeIf { !kycInfo.idNumber.isNullOrEmpty() },
                 dateOfBirth = kycInfo.dateOfBirth,
-                city = kycInfo.address.city,
-                country = kycInfo.address.country,
-                line1 = kycInfo.address.line1,
-                line2 = kycInfo.address.line2,
-                postalCode = kycInfo.address.postalCode,
-                state = kycInfo.address.state,
+                city = kycInfo.address?.city,
+                country = kycInfo.address?.country,
+                line1 = kycInfo.address?.line1,
+                line2 = kycInfo.address?.line2,
+                postalCode = kycInfo.address?.postalCode,
+                state = kycInfo.address?.state,
                 credentials = credentials
             )
         }

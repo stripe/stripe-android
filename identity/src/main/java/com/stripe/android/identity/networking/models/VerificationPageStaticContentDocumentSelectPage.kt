@@ -8,7 +8,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Parcelize
 internal data class VerificationPageStaticContentDocumentSelectPage(
-
     @SerialName("button_text")
     val buttonText: String,
     @SerialName("id_document_type_allowlist")
@@ -17,5 +16,4 @@ internal data class VerificationPageStaticContentDocumentSelectPage(
     val title: String,
     @SerialName("body")
     val body: String?
-
 ) : Parcelable

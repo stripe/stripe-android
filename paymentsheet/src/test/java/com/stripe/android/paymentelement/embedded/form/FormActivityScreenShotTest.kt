@@ -7,7 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.common.taptoadd.FakeTapToAddCollectionHandler
+import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -17,7 +17,9 @@ import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateFixtures
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.utils.ViewModelStoreOwnerContext
+import com.stripe.android.paymentsheet.verticalmode.FakeSavedPaymentMethodConfirmInteractor
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
@@ -91,11 +93,24 @@ internal class FormActivityScreenShotTest {
         }
     }
 
+    @Test
+    fun testFormActivity_confirmSavedPaymentMethod() {
+        paparazziRule.snapshot {
+            TestFormActivityUi(
+                ConfirmationHandler.State.Idle,
+                savedPaymentMethodSelectionToConfirm = PaymentSelection.Saved(
+                    PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                ),
+            )
+        }
+    }
+
     @Composable
     private fun TestFormActivityUi(
         confirmationState: ConfirmationHandler.State,
         enabled: Boolean = false,
-        usBankMandate: ResolvableString? = null
+        usBankMandate: ResolvableString? = null,
+        savedPaymentMethodSelectionToConfirm: PaymentSelection.Saved? = null,
     ) {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val selectionHolder = EmbeddedSelectionHolder(SavedStateHandle())
@@ -113,7 +128,6 @@ internal class FormActivityScreenShotTest {
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             savedStateHandle = SavedStateHandle(),
             selectedPaymentMethodCode = "",
-            tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
         )
         val eventReporter = FakeEventReporter()
         val interactor = EmbeddedFormInteractorFactory(
@@ -124,11 +138,13 @@ internal class FormActivityScreenShotTest {
             embeddedFormHelperFactory = formHelperFactory,
             viewModelScope = TestScope(UnconfinedTestDispatcher()),
             formActivityStateHelper = stateHolder,
+            tapToAddHelper = FakeTapToAddHelper.noOp(),
             eventReporter = eventReporter
         ).create()
 
         stateHolder.updateConfirmationState(confirmationState)
         stateHolder.updateMandate(usBankMandate)
+        stateHolder.updateSavedPaymentSelectionToConfirm(savedPaymentMethodSelectionToConfirm)
         val state by stateHolder.state.collectAsState()
 
         ViewModelStoreOwnerContext {
@@ -138,7 +154,9 @@ internal class FormActivityScreenShotTest {
                 onClick = {},
                 onProcessingCompleted = {},
                 state = state.copy(isEnabled = enabled),
-                onDismissed = {}
+                onDismissed = {},
+                updateSelection = {},
+                savedPaymentMethodConfirmInteractorFactory = FakeSavedPaymentMethodConfirmInteractor.Factory(),
             )
         }
     }

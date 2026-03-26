@@ -16,6 +16,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
@@ -35,6 +36,9 @@ internal class CustomerSheetActivityTest {
 
     @get:Rule
     val composeTestRule = createEmptyComposeRule()
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule()
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val contract = CustomerSheetContract()

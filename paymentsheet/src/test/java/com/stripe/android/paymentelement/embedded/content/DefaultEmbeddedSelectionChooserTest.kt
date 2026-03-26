@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
-import com.stripe.android.common.taptoadd.FakeTapToAddCollectionHandler
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
@@ -515,7 +514,6 @@ internal class DefaultEmbeddedSelectionChooserTest {
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             savedStateHandle = savedStateHandle,
             selectedPaymentMethodCode = "",
-            tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
         )
         Scenario(
             chooser = DefaultEmbeddedSelectionChooser(

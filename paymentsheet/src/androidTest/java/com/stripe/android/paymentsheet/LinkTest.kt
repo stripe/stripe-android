@@ -5,7 +5,8 @@ import androidx.test.espresso.Espresso.closeSoftKeyboard
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.core.utils.urlEncode
-import com.stripe.android.link.account.LinkStore
+import com.stripe.android.link.account.DefaultLinkStore
+import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -15,6 +16,7 @@ import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.ProductIntegrationType
 import com.stripe.android.paymentsheet.utils.ProductIntegrationTypeProvider
@@ -48,11 +50,7 @@ internal class LinkTest {
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
@@ -120,6 +118,7 @@ internal class LinkTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -129,11 +128,7 @@ internal class LinkTest {
             integrationType = integrationType,
             resultCallback = ::assertCompleted,
         ) { testContext ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("GET"),
-                path("/v1/elements/sessions"),
-            ) { response ->
+            networkRule.elementsSession { response ->
                 response.testBodyFromFile("elements-sessions-requires_payment_method.json")
             }
 
@@ -228,25 +223,22 @@ internal class LinkTest {
             page.clickPrimaryButton()
 
             testContext.consumePaymentOptionEventForFlowController("card", "4242")
+            testContext.consumeNullPaymentOptionEventForFlowController()
         }
 
     @Test
-    fun testSuccessfulCardPaymentWithLinkSignUpAndCardBrandChoice() = runProductIntegrationTest(
+    fun testSuccessfulCardPaymentWithLinkSignUpAndCardBrandChoice_Selector() = runProductIntegrationTest(
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method_with_cbc.json")
         }
 
         testContext.launch()
 
-        page.fillOutCardDetailsWithCardBrandChoice()
+        page.fillOutCardDetailsWithCardBrandChoiceSelector()
 
         networkRule.enqueue(
             method("POST"),
@@ -313,6 +305,7 @@ internal class LinkTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "1001")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -321,11 +314,7 @@ internal class LinkTest {
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_pm_with_link_ps_mode.json")
         }
 
@@ -410,6 +399,7 @@ internal class LinkTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -419,11 +409,7 @@ internal class LinkTest {
             integrationType = integrationType,
             resultCallback = ::assertCompleted,
         ) { testContext ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("GET"),
-                path("/v1/elements/sessions"),
-            ) { response ->
+            networkRule.elementsSession { response ->
                 response.testBodyFromFile("elements-sessions-requires_pm_with_link_ps_mode.json")
             }
 
@@ -526,25 +512,22 @@ internal class LinkTest {
             page.clickPrimaryButton()
 
             testContext.consumePaymentOptionEventForFlowController("card", "4242")
+            testContext.consumeNullPaymentOptionEventForFlowController()
         }
 
     @Test
-    fun testSuccessfulCardPaymentWithLinkSignUpPassthroughModeAndCardBrandChoice() = runProductIntegrationTest(
+    fun testSuccessfulCardPaymentWithLinkSignUpPassthroughModeAndCardBrandChoice_Selector() = runProductIntegrationTest(
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_pm_with_link_ps_mode_and_cbc.json")
         }
 
         testContext.launch()
 
-        page.fillOutCardDetailsWithCardBrandChoice()
+        page.fillOutCardDetailsWithCardBrandChoiceSelector()
 
         networkRule.enqueue(
             method("POST"),
@@ -628,6 +611,7 @@ internal class LinkTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "1001")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -636,11 +620,7 @@ internal class LinkTest {
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
@@ -695,6 +675,7 @@ internal class LinkTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -703,11 +684,7 @@ internal class LinkTest {
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_pm_with_link_ps_mode.json")
         }
 
@@ -762,6 +739,7 @@ internal class LinkTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -770,11 +748,7 @@ internal class LinkTest {
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_pm_with_link_ps_mode.json")
         }
 
@@ -837,6 +811,7 @@ internal class LinkTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -845,11 +820,7 @@ internal class LinkTest {
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
@@ -895,6 +866,7 @@ internal class LinkTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -903,15 +875,11 @@ internal class LinkTest {
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
-        LinkStore(ApplicationProvider.getApplicationContext()).markLinkAsUsed()
+        DefaultLinkStore(ApplicationProvider.getApplicationContext()).markLinkAsUsed()
 
         testContext.launch()
 
@@ -929,6 +897,7 @@ internal class LinkTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -937,11 +906,7 @@ internal class LinkTest {
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
@@ -1001,6 +966,7 @@ internal class LinkTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -1009,11 +975,7 @@ internal class LinkTest {
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
@@ -1077,6 +1039,7 @@ internal class LinkTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -1085,11 +1048,7 @@ internal class LinkTest {
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_pm_with_link_and_cs.json")
         }
 
@@ -1185,6 +1144,7 @@ internal class LinkTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     private fun linkInformation(): RequestMatcher {
@@ -1202,5 +1162,50 @@ internal class LinkTest {
                 value = "12oBEhVjc21yKkFYNnhMVTlXbXdBQUFJRmEaJDUzNTFkNjNhLTZkNGMtND"
             ),
         )
+    }
+
+    @Test
+    fun testSingleConsumerLookupWithLinkEnabled() = runProductIntegrationTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.elementsSession { response ->
+            response.testBodyFromFile(
+                filename = "elements-sessions-requires_payment_method_with_horizontal_mode_experiment.json",
+                replacements = listOf(
+                    ResponseReplacement(
+                        "[EXPERIMENT_ASSIGNMENTS_HERE]",
+                        """{ "link_global_holdback": "control" }"""
+                    ),
+                )
+            )
+        }
+
+        // Only ONE lookup should happen (during Link initialization).
+        // The holdback experiment should NOT trigger a second lookup.
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-lookup-success.json")
+        }
+
+        testContext.launch(
+            configuration = PaymentSheet.Configuration(
+                merchantDisplayName = "Example, Inc.",
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                defaultBillingDetails = PaymentSheet.BillingDetails(
+                    email = "test@example.com",
+                ),
+            )
+        )
+
+        // PaymentSheet loaded successfully with only one lookup call.
+        // networkRule.validate() (called by the test harness) will fail if
+        // a second consumers/sessions/lookup was attempted.
+        page.waitForCardForm()
+
+        testContext.markTestSucceeded()
     }
 }

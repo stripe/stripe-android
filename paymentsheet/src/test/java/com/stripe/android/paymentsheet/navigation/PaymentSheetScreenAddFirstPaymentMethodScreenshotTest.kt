@@ -3,6 +3,8 @@ package com.stripe.android.paymentsheet.navigation
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.ui.LinkButtonState
@@ -115,11 +117,15 @@ internal class PaymentSheetScreenAddFirstPaymentMethodScreenshotTest {
                 state = LinkButtonState.Email("email@email.com"),
             ),
             googlePay = null,
+            shopPay = null,
             buttonsEnabled = true,
             dividerTextResource = com.stripe.android.paymentsheet.R.string.stripe_paymentsheet_or_pay_with_card,
             onLinkPressed = {},
             onGooglePayPressed = {},
+            onShopPayPressed = {},
             walletsAllowedInHeader = WalletType.entries,
+            cardFundingFilter = DefaultCardFundingFilter,
+            cardBrandFilter = DefaultCardBrandFilter
         )
 
         customPrimaryButtonHeightPaparazziRule.snapshot {

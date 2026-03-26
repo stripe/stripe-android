@@ -9,7 +9,7 @@ import org.json.JSONObject
 internal class DefaultCardAccountRangeStore(
     private val context: Context
 ) : CardAccountRangeStore {
-    private val accountRangeJsonParser = AccountRangeJsonParser()
+    private val accountRangeJsonParser = AccountRangeJsonParser(isNetwork = false)
 
     private val prefs by lazy {
         context.getSharedPreferences(PREF_FILE, Context.MODE_PRIVATE)

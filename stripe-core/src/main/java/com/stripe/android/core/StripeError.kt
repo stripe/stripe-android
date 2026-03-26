@@ -31,7 +31,6 @@ constructor(
      * [type](https://stripe.com/docs/api/errors#errors-type)
      */
     val type: String? = null,
-
     /**
      * A human-readable message providing more details about the error. For card errors,
      * these messages can be shown to your users.
@@ -41,7 +40,6 @@ constructor(
      * [message](https://stripe.com/docs/api/errors#errors-message)
      */
     val message: String? = null,
-
     /**
      * For some errors that could be handled programmatically, a short string indicating the
      * [error code](https://stripe.com/docs/error-codes) reported.
@@ -49,7 +47,6 @@ constructor(
      * [code](https://stripe.com/docs/api/errors#errors-code)
      */
     val code: String? = null,
-
     /**
      * If the error is parameter-specific, the parameter related to the error. For example, you can
      * use this to display a message near the correct form field.
@@ -57,7 +54,6 @@ constructor(
      * [param](https://stripe.com/docs/api/errors#errors-param)
      */
     val param: String? = null,
-
     /**
      * For card errors resulting from a card issuer decline, a short string indicating the
      * [card issuer’s reason for the decline](https://stripe.com/docs/declines/codes)
@@ -66,14 +62,12 @@ constructor(
      * [decline_code](https://stripe.com/docs/api/errors#errors-decline_code)
      */
     val declineCode: String? = null,
-
     /**
      * For card errors, the ID of the failed charge.
      *
      * [charge](https://stripe.com/docs/api/errors#errors-charge)
      */
     val charge: String? = null,
-
     /**
      * A URL to more information about the
      * [error code](https://stripe.com/docs/error-codes) reported.
@@ -81,7 +75,6 @@ constructor(
      * [doc_url](https://stripe.com/docs/api/errors#errors-doc_url)
      */
     val docUrl: String? = null,
-
     /**
      * Internal list of extra fields related to the error.
      * Note - value type is ignored and always parsed as string (true -> "true")

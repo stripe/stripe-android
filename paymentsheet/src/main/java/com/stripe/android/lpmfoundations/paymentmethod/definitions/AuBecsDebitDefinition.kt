@@ -22,7 +22,9 @@ internal object AuBecsDebitDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = true
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = AuBecsDebitUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = AuBecsDebitUiDefinitionFactory
 }
 
 private object AuBecsDebitUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDataSpec {

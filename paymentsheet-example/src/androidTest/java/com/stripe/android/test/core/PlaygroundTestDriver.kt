@@ -30,8 +30,10 @@ import androidx.test.espresso.matcher.RootMatchers.isDialog
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.espresso.web.sugar.Web.onWebView
 import androidx.test.espresso.web.webdriver.DriverAtoms.webClick
+import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiSelector
+import androidx.test.uiautomator.Until
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG
@@ -46,14 +48,15 @@ import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CollectAddressSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.Merchant
-import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.Layout
 import com.stripe.android.paymentsheet.example.playground.settings.LayoutSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Merchant
+import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.RequireCvcRecollectionDefinition
+import com.stripe.android.paymentsheet.example.samples.ui.shared.CHECKOUT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_ERROR_TEXT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
@@ -1179,6 +1182,17 @@ internal class PlaygroundTestDriver(
         Espresso.onIdle()
     }
 
+    private fun waitUntilCheckoutButtonIsGone() {
+        composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+            composeTestRule.onAllNodesWithTag(CHECKOUT_TEST_TAG)
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isEmpty()
+        }
+
+        composeTestRule.waitForIdle()
+        Espresso.onIdle()
+    }
+
     /**
      * Here we wait for an activity different from the playground to be in view.  We
      * don't specifically look for PaymentSheetActivity or PaymentOptionsActivity because
@@ -1488,6 +1502,20 @@ internal class PlaygroundTestDriver(
 
                         waitForPollingToFinish()
                     }
+                    is AuthorizeAction.PayByBank -> {
+                        val webView = device.wait(
+                            Until.findObject(By.clazz("android.webkit.WebView")),
+                            DEFAULT_UI_TIMEOUT.inWholeMilliseconds
+                        )
+                        webView.click()
+
+                        val authorizeTestPaymentText = UiAutomatorText(
+                            "AUTHORIZE TEST PAYMENT",
+                            device = device
+                        )
+                        authorizeTestPaymentText.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
+                        authorizeTestPaymentText.click()
+                    }
                     null -> {}
                 }
             } else {
@@ -1514,6 +1542,11 @@ internal class PlaygroundTestDriver(
                     }
 
                     waitForPlaygroundActivity()
+
+                    if (integrationType == PlaygroundConfigurationData.IntegrationType.FlowController) {
+                        waitUntilCheckoutButtonIsGone()
+                    }
+
                     resultCountDownLatch?.let {
                         assertThat(it.await(5, TimeUnit.SECONDS)).isTrue()
                     }
@@ -1550,11 +1583,11 @@ internal class PlaygroundTestDriver(
         }
 
         onWebView()
-            .withElementByTestId("agree-button")
+            .withElementByTestId("institution-default")
             .perform(webClick())
 
         onWebView()
-            .withElementByTestId("institution-default")
+            .withElementByTestId("agree-button")
             .perform(webClick())
 
         onWebView()
@@ -1577,19 +1610,20 @@ internal class PlaygroundTestDriver(
 
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
             composeTestRule
-                .onAllNodesWithText("Agree and continue")
+                .onAllNodesWithTag("consent_cta")
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .size == 1
         }
 
-        clickButton("Agree and continue")
+        clickButtonWithTag("consent_cta")
+        // TODO: Replace with institution ID tag when available
         clickButton("Test (Non-OAuth)")
 
         // Verifies bank in web view so Compose hierarchy can detach. Button should be available
         // after web view verification.
-        clickButton("Connect account", composeCanDetach = true)
+        clickButtonWithTag("connect_account_button", composeCanDetach = true)
 
-        clickButton("Not now")
+        clickButtonWithTag("skip_cta")
         clickButtonWithTag("done_button")
     }
 
@@ -1600,16 +1634,19 @@ internal class PlaygroundTestDriver(
 
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
             composeTestRule
-                .onAllNodesWithText("Agree and continue")
+                .onAllNodesWithTag("consent_cta")
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .size == 1
+                .isNotEmpty()
         }
 
-        clickButton("Agree and continue")
+        clickButtonWithTag("consent_cta")
         clickButtonWithTag("existing_email-button")
-        clickButton("Use test code")
-        clickButton("Checking")
-        clickButton("Connect account")
+        clickButtonWithTag("test_mode_fill_button")
+
+        // TODO: Replace with institution ID tag when available
+        clickButton("Success")
+
+        clickButtonWithTag("link_account_picker_cta")
         clickButtonWithTag("done_button")
     }
 

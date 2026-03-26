@@ -21,11 +21,13 @@ internal object SwishDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = SwishUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = SwishUiDefinitionFactory
 }
 
 private object SwishUiDefinitionFactory : UiDefinitionFactory.Simple() {
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         paymentMethodDefinition = SwishDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_swish,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_swish,

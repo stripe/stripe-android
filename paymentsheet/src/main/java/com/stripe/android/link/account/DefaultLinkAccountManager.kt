@@ -228,9 +228,31 @@ internal class DefaultLinkAccountManager @Inject constructor(
         }
     }
 
+    override suspend fun createPaymentDetailsFromPaymentMethod(
+        paymentMethod: PaymentMethod
+    ): Result<LinkPaymentDetails.Saved> {
+        val linkAccountValue = linkAccountHolder.linkAccountInfo.value.account
+        return linkAccountValue?.let { account ->
+            linkRepository.createPaymentDetailsFromPaymentMethod(
+                paymentMethod = paymentMethod,
+                userEmail = account.email,
+                stripeIntent = config.stripeIntent,
+                consumerSessionClientSecret = account.clientSecret,
+                clientAttributionMetadata = config.clientAttributionMetadata,
+            ).onSuccess {
+                errorReporter.report(ErrorReporter.SuccessEvent.LINK_CREATE_CARD_SUCCESS)
+            }
+        } ?: run {
+            errorReporter.report(ErrorReporter.UnexpectedErrorEvent.LINK_ATTACH_CARD_WITH_NULL_ACCOUNT)
+            Result.failure(
+                exception = IllegalStateException("A non-null Link account is needed to create payment details")
+            )
+        }
+    }
+
     override suspend fun shareCardPaymentDetails(
         cardPaymentDetails: LinkPaymentDetails.New
-    ): Result<LinkPaymentDetails.Saved> {
+    ): Result<LinkPaymentDetails.Passthrough> {
         return runCatching {
             requireNotNull(linkAccountHolder.linkAccountInfo.value.account)
         }.mapCatching { account ->
@@ -544,6 +566,8 @@ internal class DefaultLinkAccountManager @Inject constructor(
             linkAuthTokenClientSecret = null,
         ).onFailure { error ->
             linkEventsReporter.onAccountLookupFailure(error)
+        }.onSuccess {
+            linkEventsReporter.onAccountLookupComplete()
         }.map { consumerSessionLookup ->
             setLinkAccountFromLookupResult(
                 lookup = consumerSessionLookup,
@@ -567,6 +591,8 @@ internal class DefaultLinkAccountManager @Inject constructor(
             linkAuthTokenClientSecret = null,
         ).onFailure { error ->
             linkEventsReporter.onAccountLookupFailure(error)
+        }.onSuccess {
+            linkEventsReporter.onAccountLookupComplete()
         }.map { consumerSessionLookup ->
             setLinkAccountFromLookupResult(
                 lookup = consumerSessionLookup,
@@ -587,6 +613,8 @@ internal class DefaultLinkAccountManager @Inject constructor(
             customerId = null
         ).onFailure { error ->
             linkEventsReporter.onAccountLookupFailure(error)
+        }.onSuccess {
+            linkEventsReporter.onAccountLookupComplete()
         }.map { consumerSessionLookup ->
             setLinkAccountFromLookupResult(
                 lookup = consumerSessionLookup,

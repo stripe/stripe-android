@@ -175,13 +175,13 @@ internal class MessagingElementActivity : AppCompatActivity() {
 
         SettingsDropDown(
             items = colorList(),
-            selectedItem = appearanceSettings.colorsSettings.iconColor,
-            label = "Icon Color",
+            selectedItem = appearanceSettings.colorsSettings.linkTextColor,
+            label = "Link Text Color",
             itemToString = { it.name }
         ) {
             viewModel.updateAppearance(
                 appearanceSettings.copy(
-                    colorsSettings = appearanceSettings.colorsSettings.copy(iconColor = it)
+                    colorsSettings = appearanceSettings.colorsSettings.copy(linkTextColor = it)
                 )
             )
         }

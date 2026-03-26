@@ -3,8 +3,8 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
-import com.stripe.android.common.taptoadd.TapToAddFormWrapperElement
 import com.stripe.android.core.model.CountryUtils
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
@@ -27,6 +27,7 @@ import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.CardDetailsSectionController
+import com.stripe.android.ui.core.elements.CardDetailsSectionElement
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
@@ -40,6 +41,7 @@ import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
 @RunWith(RobolectricTestRunner::class)
 class CardDefinitionTest {
@@ -627,6 +629,94 @@ class CardDefinitionTest {
         ).isFalse()
     }
 
+    @Test
+    fun `createSupportedPaymentMethod returns expected supported PM when tap to add is not supported`() {
+        val metadata = PaymentMethodMetadataFactory.create(isTapToAddSupported = false)
+        val nullablePaymentMethod = CardDefinition.uiDefinitionFactory(metadata).supportedPaymentMethod(
+            metadata = metadata,
+            definition = CardDefinition,
+            sharedDataSpecs = emptyList()
+        )
+
+        assertThat(nullablePaymentMethod).isNotNull()
+
+        val supportedPaymentMethod = requireNotNull(nullablePaymentMethod)
+
+        assertThat(supportedPaymentMethod.iconResource)
+            .isEqualTo(PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_card)
+        assertThat(supportedPaymentMethod.outlinedIconResource)
+            .isEqualTo(PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_card_outlined)
+        assertThat(supportedPaymentMethod.subtitle).isNull()
+    }
+
+    @Test
+    fun `createSupportedPaymentMethod returns tap to add icon when tap to add is supported`() {
+        val metadata = PaymentMethodMetadataFactory.create(isTapToAddSupported = true)
+        val nullablePaymentMethod = CardDefinition.uiDefinitionFactory(metadata).supportedPaymentMethod(
+            metadata = metadata,
+            definition = CardDefinition,
+            sharedDataSpecs = emptyList()
+        )
+
+        assertThat(nullablePaymentMethod).isNotNull()
+
+        val supportedPaymentMethod = requireNotNull(nullablePaymentMethod)
+
+        assertThat(supportedPaymentMethod.iconResource)
+            .isEqualTo(PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_card_with_tap)
+        assertThat(supportedPaymentMethod.outlinedIconResource)
+            .isEqualTo(PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_card_with_tap)
+        assertThat(supportedPaymentMethod.subtitle)
+            .isEqualTo(PaymentsUiCoreR.string.stripe_card_with_tap_or_enter_manually.resolvableString)
+    }
+
+    @Test
+    fun `createFormElements has null cardDetailsAction when tap to add is not supported`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            isTapToAddSupported = false,
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+            )
+        )
+        val tapToAddHelper = FakeTapToAddHelper.noOp()
+
+        val formElements = CardDefinition.formElements(
+            metadata = metadata,
+            tapToAddHelper = tapToAddHelper,
+        )
+
+        assertThat(formElements).hasSize(1)
+        assertThat(formElements[0]).isInstanceOf<CardDetailsSectionElement>()
+
+        val cardDetailsSectionElement = formElements[0] as CardDetailsSectionElement
+        val controller = cardDetailsSectionElement.controller
+
+        assertThat(controller.cardDetailsAction).isNull()
+    }
+
+    @Test
+    fun `createFormElements has null cardDetailsAction when tapToAddHelper is null`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            isTapToAddSupported = false,
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+            )
+        )
+
+        val formElements = CardDefinition.formElements(
+            metadata = metadata,
+            tapToAddHelper = null,
+        )
+
+        assertThat(formElements).hasSize(1)
+        assertThat(formElements[0]).isInstanceOf<CardDetailsSectionElement>()
+
+        val cardDetailsSectionElement = formElements[0] as CardDetailsSectionElement
+        val controller = cardDetailsSectionElement.controller
+
+        assertThat(controller.cardDetailsAction).isNull()
+    }
+
     private fun createLinkConfiguration(): LinkConfiguration {
         return TestFactory.LINK_CONFIGURATION.copy(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
@@ -689,19 +779,5 @@ class CardDefinitionTest {
             paymentMethodExtraParams = paymentMethodExtraParams,
             paymentMethodOptionsParams = paymentMethodOptionsParams,
         )
-    }
-
-    @Test
-    fun `createFormElements wraps in TapToAddFormWrapperElement when isTapToAddSupported is true & helper not null`() {
-        val formElements = CardDefinition.formElements(
-            metadata = PaymentMethodMetadataFactory.create(
-                isTapToAddSupported = true,
-            ),
-            tapToAddHelper = FakeTapToAddHelper.noOp(),
-        )
-
-        assertThat(formElements).hasSize(1)
-        assertThat(formElements[0]).isInstanceOf(TapToAddFormWrapperElement::class.java)
-        assertThat(formElements[0].identifier.v1).isEqualTo("tap_to_add_form")
     }
 }

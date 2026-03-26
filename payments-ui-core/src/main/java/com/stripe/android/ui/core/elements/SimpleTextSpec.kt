@@ -60,17 +60,13 @@ enum class KeyboardType {
 data class SimpleTextSpec(
     @SerialName("api_path")
     override val apiPath: IdentifierSpec,
-
     @SerialName("label")
     @StringRes
     val label: Int,
-
     @SerialName("capitalization")
     val capitalization: Capitalization = Capitalization.None,
-
     @SerialName("keyboard_type")
     val keyboardType: KeyboardType = KeyboardType.Ascii,
-
     @SerialName("show_optional_label")
     val showOptionalLabel: Boolean = false
 ) : FormItemSpec() {

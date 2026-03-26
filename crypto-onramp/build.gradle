@@ -18,6 +18,7 @@ dependencies {
     implementation libs.androidx.appCompat
     implementation libs.material
     implementation libs.kotlin.serialization
+    implementation libs.playServicesWallet
 
     api libs.compose.ui
     implementation libs.compose.activity

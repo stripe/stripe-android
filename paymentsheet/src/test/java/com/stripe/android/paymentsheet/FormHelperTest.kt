@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.isInstanceOf
@@ -158,6 +159,7 @@ internal class FormHelperTest {
     fun `createFormArguments produces the correct form arguments when payment intent is off-session`() = runTest {
         val observedArgs = createFormHelper(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                hasCustomerConfiguration = true,
                 stripeIntent = PaymentIntentFixtures.PI_OFF_SESSION
             )
         ).createFormArguments(
@@ -658,6 +660,7 @@ internal class FormHelperTest {
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         linkInlineHandler: LinkInlineHandler = LinkInlineHandler.create(),
         eventReporter: FakeEventReporter = FakeEventReporter(),
+        tapToAddHelper: TapToAddHelper? = null,
         newPaymentSelectionProvider: () -> NewPaymentOptionSelection? = { throw AssertionError("Not implemented") },
         selectionUpdater: (PaymentSelection?) -> Unit = { throw AssertionError("Not implemented") },
     ): FormHelper {
@@ -674,7 +677,7 @@ internal class FormHelperTest {
             savedStateHandle = SavedStateHandle(),
             autocompleteAddressInteractorFactory = null,
             automaticallyLaunchedCardScanFormDataHelper = null,
-            tapToAddHelper = null,
+            tapToAddHelper = tapToAddHelper,
         )
     }
 

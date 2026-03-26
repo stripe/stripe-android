@@ -4,6 +4,7 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
+import com.stripe.android.paymentelement.confirmation.EmptyConfirmationLauncherArgs
 import com.stripe.android.paymentelement.confirmation.PAYMENT_INTENT
 import com.stripe.android.paymentelement.confirmation.runLaunchTest
 import com.stripe.android.paymentelement.confirmation.runResultTest
@@ -42,9 +43,9 @@ class ExternalPaymentMethodConfirmationFlowTest {
             errorReporter = FakeErrorReporter()
         ),
         launcherResult = PaymentResult.Completed,
+        launcherArgs = EmptyConfirmationLauncherArgs,
         definitionResult = ConfirmationDefinition.Result.Succeeded(
             intent = PAYMENT_INTENT,
-            deferredIntentConfirmationType = null,
         )
     )
 

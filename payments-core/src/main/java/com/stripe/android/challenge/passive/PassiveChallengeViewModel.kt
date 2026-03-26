@@ -25,7 +25,8 @@ internal class PassiveChallengeViewModel @Inject constructor(
         val result = hCaptchaService.performPassiveHCaptcha(
             activity = activity,
             siteKey = passiveCaptchaParams.siteKey,
-            rqData = passiveCaptchaParams.rqData
+            rqData = passiveCaptchaParams.rqData,
+            tokenTimeoutSeconds = passiveCaptchaParams.tokenTimeoutSeconds
         )
         when (result) {
             is HCaptchaService.Result.Failure -> {

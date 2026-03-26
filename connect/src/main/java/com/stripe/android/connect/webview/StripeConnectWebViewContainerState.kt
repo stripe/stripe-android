@@ -12,32 +12,26 @@ internal data class StripeConnectWebViewContainerState(
      * null otherwise.
      */
     val pageViewId: String? = null,
-
     /**
      * The time the webview began loading, in milliseconds from midnight, January 1, 1970 UTC.
      */
     val didBeginLoadingMillis: Long? = null,
-
     /**
      * True if we received the 'setOnLoaderStart' message.
      */
     val receivedSetOnLoaderStart: Boolean = false,
-
     /**
      * True if the native loading indicator should be visible.
      */
     val isNativeLoadingIndicatorVisible: Boolean = !receivedSetOnLoaderStart,
-
     /**
      * True if we received the 'closeWebView' message.
      */
     val receivedCloseWebView: Boolean = false,
-
     /**
      * Message from the last `openAuthenticatedWebView` message.
      */
     val receivedOpenAuthenticatedWebViewMessage: OpenAuthenticatedWebViewMessage? = null,
-
     /**
      * The appearance to use for the view.
      */

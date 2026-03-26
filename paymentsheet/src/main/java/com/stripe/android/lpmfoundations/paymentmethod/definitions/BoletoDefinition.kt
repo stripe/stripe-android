@@ -31,11 +31,13 @@ internal object BoletoDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = BoletoUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = BoletoUiDefinitionFactory
 }
 
 private object BoletoUiDefinitionFactory : UiDefinitionFactory.Simple() {
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         paymentMethodDefinition = BoletoDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_boleto,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_boleto,

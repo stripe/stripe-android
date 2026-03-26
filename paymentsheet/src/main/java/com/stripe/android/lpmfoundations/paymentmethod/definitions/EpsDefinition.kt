@@ -30,13 +30,15 @@ internal object EpsDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = EpsUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = EpsUiDefinitionFactory
 }
 
 private object EpsUiDefinitionFactory : UiDefinitionFactory.Simple() {
     private val epsIdentifier = IdentifierSpec.Generic("eps[bank]")
 
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         paymentMethodDefinition = EpsDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_eps,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_eps,

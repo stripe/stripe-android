@@ -7,6 +7,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.paymentsheet.ui.FakeUpdatePaymentMethodInteractor
@@ -41,11 +42,11 @@ internal class InitialManageScreenFactoryTest {
     private fun testScenario(
         block: suspend Scenario.() -> Unit,
     ) = runTest {
-        val customerStateHolder = CustomerStateHolder(
+        val customerStateHolder = DefaultCustomerStateHolder(
             savedStateHandle = SavedStateHandle(),
             selection = stateFlowOf(null),
-            customerMetadataPermissions = stateFlowOf(
-                PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.permissions
+            customerMetadata = stateFlowOf(
+                PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
             ),
         )
         val factory = InitialManageScreenFactory(

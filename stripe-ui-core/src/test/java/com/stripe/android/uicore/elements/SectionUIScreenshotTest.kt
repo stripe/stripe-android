@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.screenshottesting.FontSize
@@ -126,7 +127,7 @@ class SectionUIScreenshotTest {
         override val showOptionalLabel: Boolean = false
         override val debugLabel: String = "zip"
         override val initialValue: String? = null
-        override val autofillType: androidx.compose.ui.autofill.AutofillType? = null
+        override val autofillType: ContentType? = null
         override val trailingIcon: StateFlow<TextFieldIcon?> = MutableStateFlow(null)
         override val capitalization: androidx.compose.ui.text.input.KeyboardCapitalization =
             androidx.compose.ui.text.input.KeyboardCapitalization.None

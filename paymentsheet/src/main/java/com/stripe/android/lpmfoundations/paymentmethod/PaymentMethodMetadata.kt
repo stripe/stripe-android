@@ -2,6 +2,8 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import android.os.Parcelable
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
+import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
@@ -67,12 +69,12 @@ internal data class PaymentMethodMetadata(
     val customerMetadata: CustomerMetadata?,
     val isGooglePayReady: Boolean,
     val linkConfiguration: PaymentSheet.LinkConfiguration,
-    val paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
     val linkMode: LinkMode?,
     val linkStateResult: LinkStateResult?,
     val paymentMethodIncentive: PaymentMethodIncentive?,
     val financialConnectionsAvailability: FinancialConnectionsAvailability?,
     val cardBrandFilter: CardBrandFilter,
+    val cardFundingFilter: CardFundingFilter,
     val termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay>,
     val forceSetupFutureUseBehaviorAndNewMandate: Boolean,
     val passiveCaptchaParams: PassiveCaptchaParams?,
@@ -85,6 +87,7 @@ internal data class PaymentMethodMetadata(
     val analyticsMetadata: AnalyticsMetadata,
     val experimentsData: ElementsSession.ExperimentsData?,
     val isTapToAddSupported: Boolean,
+    val isStripeCardScanAllowed: Boolean,
 ) : Parcelable {
 
     @IgnoredOnParcel
@@ -152,12 +155,14 @@ internal data class PaymentMethodMetadata(
         code: String,
     ): SupportedPaymentMethod? {
         return if (isExternalPaymentMethod(code)) {
-            getUiDefinitionFactoryForExternalPaymentMethod(code)?.createSupportedPaymentMethod()
+            getUiDefinitionFactoryForExternalPaymentMethod(code)
+                ?.createSupportedPaymentMethod(metadata = this)
         } else if (isCustomPaymentMethod(code)) {
-            getUiDefinitionFactoryForCustomPaymentMethod(code)?.createSupportedPaymentMethod()
+            getUiDefinitionFactoryForCustomPaymentMethod(code)
+                ?.createSupportedPaymentMethod(metadata = this)
         } else {
             val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
-            definition.uiDefinitionFactory().supportedPaymentMethod(this, definition, sharedDataSpecs)
+            definition.uiDefinitionFactory(this).supportedPaymentMethod(this, definition, sharedDataSpecs)
         }
     }
 
@@ -243,7 +248,8 @@ internal data class PaymentMethodMetadata(
             stripeIntent.isLiveMode &&
                 stripeIntent.unactivatedPaymentMethods.contains(it.type.code)
         }.filter { paymentMethodDefinition ->
-            paymentMethodDefinition.uiDefinitionFactory().canBeDisplayedInUi(paymentMethodDefinition, sharedDataSpecs)
+            paymentMethodDefinition.uiDefinitionFactory(this)
+                .canBeDisplayedInUi(paymentMethodDefinition, sharedDataSpecs)
         }
     }
 
@@ -263,18 +269,20 @@ internal data class PaymentMethodMetadata(
     ): FormHeaderInformation? {
         return if (isExternalPaymentMethod(code)) {
             getUiDefinitionFactoryForExternalPaymentMethod(code)?.createFormHeaderInformation(
+                metadata = this,
                 customerHasSavedPaymentMethods = customerHasSavedPaymentMethods,
                 incentive = null,
             )
         } else if (isCustomPaymentMethod(code)) {
             getUiDefinitionFactoryForCustomPaymentMethod(code)?.createFormHeaderInformation(
+                metadata = this,
                 customerHasSavedPaymentMethods = customerHasSavedPaymentMethods,
                 incentive = null,
             )
         } else {
             val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
 
-            definition.uiDefinitionFactory().formHeaderInformation(
+            definition.uiDefinitionFactory(this).formHeaderInformation(
                 metadata = this,
                 definition = definition,
                 sharedDataSpecs = sharedDataSpecs,
@@ -300,7 +308,7 @@ internal data class PaymentMethodMetadata(
         } else {
             val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
 
-            definition.uiDefinitionFactory().formElements(
+            definition.uiDefinitionFactory(this).formElements(
                 metadata = this,
                 definition = definition,
                 sharedDataSpecs = sharedDataSpecs,
@@ -317,10 +325,10 @@ internal data class PaymentMethodMetadata(
         code: PaymentMethodCode
     ): PaymentMethod.AllowRedisplay {
         val isSettingUp = hasIntentToSetup(code) || forceSetupFutureUseBehaviorAndNewMandate
-        return paymentMethodSaveConsentBehavior.allowRedisplay(
+        return customerMetadata?.saveConsent?.allowRedisplay(
             isSetupIntent = isSettingUp,
             customerRequestedSave = customerRequestedSave,
-        )
+        ) ?: PaymentMethod.AllowRedisplay.UNSPECIFIED
     }
 
     internal companion object {
@@ -364,7 +372,6 @@ internal data class PaymentMethodMetadata(
                 customerMetadata = customerMetadata,
                 sharedDataSpecs = sharedDataSpecs,
                 externalPaymentMethodSpecs = externalPaymentMethodSpecs,
-                paymentMethodSaveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),
                 linkConfiguration = configuration.link,
                 linkMode = linkSettings?.linkMode,
                 linkStateResult = linkStateResult,
@@ -372,6 +379,11 @@ internal data class PaymentMethodMetadata(
                 isGooglePayReady = isGooglePayReady,
                 displayableCustomPaymentMethods = elementsSession.toDisplayableCustomPaymentMethods(configuration),
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
+                cardFundingFilter = PaymentSheetCardFundingFilter(
+                    allowedCardFundingTypes = configuration.allowedCardFundingTypes(
+                        enabled = elementsSession.enableCardFundFiltering
+                    )
+                ),
                 financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession),
                 termsDisplay = configuration.termsDisplay,
                 forceSetupFutureUseBehaviorAndNewMandate = elementsSession
@@ -385,14 +397,16 @@ internal data class PaymentMethodMetadata(
                 integrationMetadata = integrationMetadata,
                 analyticsMetadata = analyticsMetadata,
                 experimentsData = elementsSession.experimentsData,
-                isTapToAddSupported = isTapToAddSupported,
+                isTapToAddSupported = isTapToAddSupported &&
+                    elementsSession.isTapToAddEnabled &&
+                    customerMetadata != null,
+                isStripeCardScanAllowed = elementsSession.isStripeCardScanAllowed,
             )
         }
 
         internal fun createForCustomerSheet(
             elementsSession: ElementsSession,
             configuration: CustomerSheet.Configuration,
-            paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
             sharedDataSpecs: List<SharedDataSpec>,
             isGooglePayReady: Boolean,
             customerMetadata: CustomerMetadata,
@@ -422,7 +436,6 @@ internal data class PaymentMethodMetadata(
                 customerMetadata = customerMetadata,
                 sharedDataSpecs = sharedDataSpecs,
                 isGooglePayReady = isGooglePayReady,
-                paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
                 linkConfiguration = PaymentSheet.LinkConfiguration(),
                 linkMode = elementsSession.linkSettings?.linkMode,
                 linkStateResult = null,
@@ -430,6 +443,7 @@ internal data class PaymentMethodMetadata(
                 externalPaymentMethodSpecs = emptyList(),
                 displayableCustomPaymentMethods = emptyList(),
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
+                cardFundingFilter = PaymentSheetCardFundingFilter(ConfigurationDefaults.allowedCardFundingTypes),
                 financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession),
                 termsDisplay = emptyMap(),
                 forceSetupFutureUseBehaviorAndNewMandate = elementsSession
@@ -451,6 +465,7 @@ internal data class PaymentMethodMetadata(
                 analyticsMetadata = AnalyticsMetadata(emptyMap()), // This is unused in customer sheet.
                 isTapToAddSupported = false, // This is unused in customer sheet.
                 experimentsData = elementsSession.experimentsData,
+                isStripeCardScanAllowed = elementsSession.isStripeCardScanAllowed,
             )
         }
     }

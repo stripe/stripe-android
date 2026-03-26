@@ -105,7 +105,7 @@ internal class IDDetectorAnalyzer(
             categories[bestIndex][it].roundToMaxDecimals(2)
         }
 
-        return buildLegacyOutput(
+        return buildOutput(
             bestBoundingBox,
             bestCategory,
             bestScore,
@@ -114,15 +114,14 @@ internal class IDDetectorAnalyzer(
         )
     }
 
-    private fun buildLegacyOutput(
+    private fun buildOutput(
         bestBoundingBox: FloatArray,
         bestCategory: Category,
         bestScore: Float,
         categoriesMapping: List<Float>,
         croppedImage: Bitmap
     ) =
-        IDDetectorOutput.Legacy(
-            // Return Legacy output if mbDetector is not available
+        IDDetectorOutput(
             BoundingBox(
                 bestBoundingBox[0],
                 bestBoundingBox[1],
@@ -132,7 +131,8 @@ internal class IDDetectorAnalyzer(
             bestCategory,
             bestScore,
             categoriesMapping,
-            laplacianBlurDetector.calculateBlurOutput(croppedImage)
+            laplacianBlurDetector.calculateBlurOutput(croppedImage),
+            croppedImage
         )
 
     internal class Factory(

@@ -4,9 +4,8 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.autofill.AutofillType
+import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
@@ -22,15 +21,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-@OptIn(ExperimentalComposeUiApi::class)
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 interface TextFieldController : InputController, SectionFieldComposable, SectionFieldValidationController {
     fun onValueChange(displayFormatted: String): TextFieldState?
     fun onFocusChange(newHasFocus: Boolean)
     fun onDropdownItemClicked(item: TextFieldIcon.Dropdown.Item) {}
+    fun onSelectorItemClicked(item: TextFieldIcon.Selector.Item?) {}
 
     val initialValue: String?
-    val autofillType: AutofillType?
+    val autofillType: ContentType?
     val debugLabel: String
     val trailingIcon: StateFlow<TextFieldIcon?>
     val capitalization: KeyboardCapitalization
@@ -83,7 +82,6 @@ sealed class TextFieldIcon {
         val idRes: Int,
         @StringRes
         val contentDescription: Int? = null,
-
         /** If it is an icon that should be tinted to match the text the value should be true */
         val isTintable: Boolean,
         val onClick: (() -> Unit)? = null
@@ -110,6 +108,23 @@ sealed class TextFieldIcon {
             override val enabled: Boolean = true
         ) : SingleChoiceDropdownItem
     }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+    data class Selector(
+        val message: ResolvableString,
+        val showSelector: Boolean,
+        val currentItem: Item,
+        val items: List<Item>,
+        val hasMadeSelection: Boolean
+    ) : TextFieldIcon() {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+        data class Item(
+            val id: String,
+            val label: ResolvableString,
+            val icon: Int,
+            val enabled: Boolean = true
+        )
+    }
 }
 
 /**
@@ -135,12 +150,11 @@ class SimpleTextFieldController(
     override val debugLabel = textFieldConfig.debugLabel
     override val layoutDirection: LayoutDirection? = textFieldConfig.layoutDirection
 
-    @OptIn(ExperimentalComposeUiApi::class)
-    override val autofillType: AutofillType? = when (textFieldConfig) {
-        is DateConfig -> AutofillType.CreditCardExpirationDate
-        is PostalCodeConfig -> AutofillType.PostalCode
-        is EmailConfig -> AutofillType.EmailAddress
-        is NameConfig -> AutofillType.PersonFullName
+    override val autofillType: ContentType? = when (textFieldConfig) {
+        is DateConfig -> ContentType.CreditCardExpirationDate
+        is PostalCodeConfig -> ContentType.PostalCode
+        is EmailConfig -> ContentType.EmailAddress
+        is NameConfig -> ContentType.PersonFullName
         else -> null
     }
 

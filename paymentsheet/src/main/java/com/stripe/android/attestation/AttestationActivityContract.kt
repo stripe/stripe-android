@@ -2,8 +2,10 @@ package com.stripe.android.attestation
 
 import android.content.Context
 import android.content.Intent
+import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.BundleCompat
+import kotlinx.parcelize.Parcelize
 
 internal class AttestationActivityContract :
     ActivityResultContract<AttestationActivityContract.Args, AttestationActivityResult>() {
@@ -22,14 +24,14 @@ internal class AttestationActivityContract :
         val result = intent?.extras?.let {
             BundleCompat.getParcelable(it, EXTRA_RESULT, AttestationActivityResult::class.java)
         }
-        return result
-            ?: AttestationActivityResult.Failed(IllegalStateException("No result received from AttestationActivity"))
+        return result ?: AttestationActivityResult.NoResult
     }
 
+    @Parcelize
     internal data class Args(
         val publishableKey: String,
         val productUsage: Set<String>
-    )
+    ) : Parcelable
 
     companion object {
         const val EXTRA_RESULT = "com.stripe.android.attestation.AttestationActivityContract.extra_result"

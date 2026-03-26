@@ -23,6 +23,7 @@ import androidx.core.view.children
 import com.google.android.gms.wallet.button.ButtonConstants
 import com.google.android.gms.wallet.button.ButtonOptions
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
@@ -37,7 +38,9 @@ internal fun GooglePayButton(
     isEnabled: Boolean,
     onPressed: () -> Unit,
     modifier: Modifier = Modifier,
-    cardBrandFilter: CardBrandFilter
+    cardBrandFilter: CardBrandFilter,
+    cardFundingFilter: CardFundingFilter,
+    additionalEnabledNetworks: List<String>
 ) {
     val context = LocalContext.current
     val isInspectionMode = LocalInspectionMode.current
@@ -52,7 +55,12 @@ internal fun GooglePayButton(
             ""
         } else {
             JSONArray().put(
-                GooglePayJsonFactory(context, cardBrandFilter = cardBrandFilter).createCardPaymentMethod(
+                GooglePayJsonFactory(
+                    context = context,
+                    cardBrandFilter = cardBrandFilter,
+                    cardFundingFilter = cardFundingFilter,
+                    additionalEnabledNetworks = additionalEnabledNetworks
+                ).createCardPaymentMethod(
                     billingAddressParameters = billingAddressParameters,
                     allowCreditCards = allowCreditCards
                 )

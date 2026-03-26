@@ -5,12 +5,15 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.link.ui.LinkButtonState
+import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -439,12 +442,17 @@ class DefaultEventReporterTest {
                     buttonType = GooglePayButtonType.Pay,
                     allowCreditCards = true,
                     billingAddressParameters = null,
+                    additionalEnabledNetworks = emptyList()
                 ),
+                shopPay = null,
                 walletsAllowedInHeader = listOf(WalletType.GooglePay, WalletType.Link),
                 buttonsEnabled = true,
                 dividerTextResource = 0,
                 onGooglePayPressed = {},
                 onLinkPressed = {},
+                onShopPayPressed = {},
+                cardFundingFilter = DefaultCardFundingFilter,
+                cardBrandFilter = DefaultCardBrandFilter
             )
 
             eventReporter.onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
@@ -493,12 +501,17 @@ class DefaultEventReporterTest {
                     buttonType = GooglePayButtonType.Pay,
                     allowCreditCards = true,
                     billingAddressParameters = null,
+                    additionalEnabledNetworks = emptyList()
                 ),
+                shopPay = null,
                 walletsAllowedInHeader = listOf(WalletType.GooglePay, WalletType.Link),
                 buttonsEnabled = false,
                 dividerTextResource = 0,
                 onGooglePayPressed = {},
                 onLinkPressed = {},
+                onShopPayPressed = {},
+                cardFundingFilter = DefaultCardFundingFilter,
+                cardBrandFilter = DefaultCardBrandFilter
             )
 
             eventReporter.onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
@@ -657,6 +670,110 @@ class DefaultEventReporterTest {
         assertThat(request.params).containsEntry("implementation", "test-value")
         assertThat(request.params).containsEntry("duration", 2.0f)
         assertThat(request.params).containsEntry("example_from_test", true)
+    }
+
+    @Test
+    fun `onTapToAddStarted fires event`() = runScenario {
+        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
+
+        durationProvider.startCalls.push(
+            FakeDurationProvider.StartCall(
+                key = DurationProvider.Key.TapToAdd,
+                reset = true,
+            )
+        )
+
+        eventReporter.onTapToAddStarted()
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "mc_complete_tap_to_add_started")
+    }
+
+    @Test
+    fun `onCardAddedWithTapToAdd fires event`() = runScenario {
+        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
+        durationProvider.endCalls.push(
+            FakeDurationProvider.EndCall(
+                key = DurationProvider.Key.TapToAdd,
+                duration = 4.seconds,
+            )
+        )
+
+        eventReporter.onCardAddedWithTapToAdd()
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "mc_complete_tap_to_add_card_added")
+        assertThat(request.params).containsEntry("duration", 4.0f)
+    }
+
+    @Test
+    fun `onTapToAddCanceled ends duration and fires event`() = runScenario {
+        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
+        durationProvider.endCalls.push(
+            FakeDurationProvider.EndCall(
+                key = DurationProvider.Key.TapToAdd,
+                duration = 1.seconds,
+            )
+        )
+
+        eventReporter.onTapToAddCanceled()
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "mc_complete_tap_to_add_canceled")
+        assertThat(request.params).containsEntry("duration", 1.0f)
+    }
+
+    @Test
+    fun `onTapToAddContinueAfterCardAdded fires event`() = runScenario {
+        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
+        eventReporter.onTapToAddContinueAfterCardAdded()
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "mc_complete_tap_to_add_continue_after_card_added")
+    }
+
+    @Test
+    fun `onTapToAddConfirm fires event`() = runScenario {
+        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
+        eventReporter.onTapToAddConfirm()
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "mc_complete_tap_to_add_confirm")
+    }
+
+    @Test
+    fun `onFailedToAddCardWithTapToAdd fires event`() = runScenario {
+        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
+        durationProvider.endCalls.push(
+            FakeDurationProvider.EndCall(
+                key = DurationProvider.Key.TapToAdd,
+                duration = 5.seconds,
+            )
+        )
+
+        eventReporter.onFailedToAddCardWithTapToAdd(message = "noCustomer")
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "mc_complete_tap_to_add_failed_to_add_card")
+        assertThat(request.params).containsEntry("error_message", "noCustomer")
+        assertThat(request.params).containsEntry("duration", 5.0f)
+    }
+
+    @Test
+    fun `onTapToAddAttemptWithUnsupportedDevice fires event`() = runScenario {
+        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
+        durationProvider.endCalls.push(
+            FakeDurationProvider.EndCall(
+                key = DurationProvider.Key.TapToAdd,
+                duration = 2.seconds,
+            )
+        )
+
+        eventReporter.onTapToAddAttemptWithUnsupportedDevice()
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "mc_complete_tap_to_add_attempt_with_unsupported_device")
+        assertThat(request.params).containsEntry("duration", 2.0f)
     }
 
     @Test
@@ -832,6 +949,25 @@ class DefaultEventReporterTest {
 
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params).containsEntry("event", "mc_complete_paymentoption_savedpm_select")
+        assertThat(request.params).containsEntry("example_from_test", true)
+    }
+
+    @Test
+    fun `onSelectPaymentOption fires event with saved payment method and link input`() = runScenario {
+        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
+
+        val savedWithLink = PaymentSelection.Saved(
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            linkInput = UserInput.SignIn(email = "link@test.com"),
+        )
+
+        eventReporter.onSelectPaymentOption(savedWithLink)
+
+        val analyticEvent = analyticsEventTurbine.awaitItem()
+        assertThat(analyticEvent).isEqualTo(AnalyticEvent.SelectedSavedPaymentMethod("card"))
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "mc_complete_paymentoption_link_select")
         assertThat(request.params).containsEntry("example_from_test", true)
     }
 

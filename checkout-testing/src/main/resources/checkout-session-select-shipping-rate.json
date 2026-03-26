@@ -1,0 +1,39 @@
+{
+  "session_id": "cs_test_abc123",
+  "ui_mode": "custom",
+  "currency": "usd",
+  "shipping_rate": "shr_express",
+  "total_summary": {
+    "due": 2500,
+    "subtotal": 1000,
+    "total": 2500
+  },
+  "line_item_group": {
+    "due": 2500,
+    "subtotal": 1000,
+    "total": 2500,
+    "shipping_rate": {
+      "id": "shr_express",
+      "amount": 1500,
+      "display_name": "Express Shipping"
+    }
+  },
+  "shipping_options": [
+    {
+      "shipping_rate": {
+        "id": "shr_standard",
+        "amount": 500,
+        "display_name": "Standard Shipping",
+        "currency": "usd"
+      }
+    },
+    {
+      "shipping_rate": {
+        "id": "shr_express",
+        "amount": 1500,
+        "display_name": "Express Shipping",
+        "currency": "usd"
+      }
+    }
+  ]
+}

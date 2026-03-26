@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.asCommonConfiguration
-import com.stripe.android.common.taptoadd.FakeTapToAddCollectionHandler
+import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.core.Logger
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
@@ -19,6 +19,7 @@ import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_SELECTION
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.cvcrecollection.FakeCvcRecollectionHandler
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -27,16 +28,18 @@ import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Cvc
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
+import com.stripe.android.paymentsheet.verticalmode.FakeCheckoutCurrencyUpdater
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.elements.CardDetailsSectionController
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentElementLoader
+import com.stripe.android.utils.FakeSavedPaymentMethodRepository
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.runner.RunWith
@@ -147,7 +150,9 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
             PaymentOptionsViewModel(
                 args = args,
                 eventReporter = FakeEventReporter(),
-                customerRepository = FakeCustomerRepository(customer?.paymentMethods ?: emptyList()),
+                savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(
+                    customer?.paymentMethods ?: emptyList()
+                ),
                 workContext = testDispatcher,
                 savedStateHandle = thisSavedStateHandle,
                 linkHandler = linkHandler,
@@ -155,7 +160,11 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                 linkGateFactory = FakeLinkGate.Factory(),
                 linkPaymentLauncher = mock<LinkPaymentLauncher>(),
                 linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
-                tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
+                tapToAddHelperFactory = FakeTapToAddHelper.Factory.noOp(),
+                mode = EventReporter.Mode.Complete,
+                errorReporter = FakeErrorReporter(),
+                customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
+                customViewModelScope = CoroutineScope(Dispatchers.Unconfined),
             )
         }
     }
@@ -183,7 +192,9 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                 args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
                 eventReporter = FakeEventReporter(),
                 paymentElementLoader = paymentElementLoader,
-                customerRepository = FakeCustomerRepository(customer?.paymentMethods ?: emptyList()),
+                savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(
+                    customer?.paymentMethods ?: emptyList()
+                ),
                 logger = Logger.noop(),
                 workContext = testDispatcher,
                 savedStateHandle = thisSavedStateHandle,
@@ -201,7 +212,11 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                         return FakeCvcRecollectionInteractor()
                     }
                 },
-                tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
+                tapToAddHelperFactory = FakeTapToAddHelper.Factory.noOp(),
+                mode = EventReporter.Mode.Complete,
+                customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
+                customViewModelScope = CoroutineScope(Dispatchers.Unconfined),
+                checkoutCurrencyUpdater = FakeCheckoutCurrencyUpdater(),
             )
         }
     }

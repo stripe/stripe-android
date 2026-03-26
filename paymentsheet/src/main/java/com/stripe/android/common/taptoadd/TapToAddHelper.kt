@@ -1,77 +1,187 @@
 package com.stripe.android.common.taptoadd
 
-import com.stripe.android.common.exception.stripeErrorMessage
-import com.stripe.android.core.strings.ResolvableString
+import android.content.Context
+import androidx.activity.result.ActivityResultCaller
+import androidx.activity.result.ActivityResultLauncher
+import androidx.core.app.ActivityOptionsCompat
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
-import com.stripe.android.paymentsheet.verticalmode.toDisplayableSavedPaymentMethod
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.uicore.utils.AnimationConstants
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
+import javax.inject.Named
 
 internal interface TapToAddHelper {
-    val collectedPaymentMethod: StateFlow<DisplayableSavedPaymentMethod?>
+    val nextStep: SharedFlow<TapToAddNextStep>
+    val isTapToAddEnabled: StateFlow<Boolean>
+
+    fun register(
+        activityResultCaller: ActivityResultCaller,
+        lifecycleOwner: LifecycleOwner
+    )
 
     /**
      * Begins collection of payment method from the Tap to Add flow. Calling this method should show a screen that
      * indicates where to tap your card on your device.
      */
-    fun startPaymentMethodCollection()
+    fun startPaymentMethodCollection(paymentMethodMetadata: PaymentMethodMetadata)
 
-    companion object {
+    interface Factory {
         fun create(
             coroutineScope: CoroutineScope,
-            tapToAddCollectionHandler: TapToAddCollectionHandler,
-            paymentMethodMetadata: PaymentMethodMetadata,
-            onCollectingUpdated: (processing: Boolean) -> Unit,
-            onError: (ResolvableString) -> Unit,
-        ): TapToAddHelper? {
-            return if (paymentMethodMetadata.isTapToAddSupported) {
-                DefaultTapToAddHelper(
-                    coroutineScope = coroutineScope,
-                    paymentMethodMetadata = paymentMethodMetadata,
-                    tapToAddCollectionHandler = tapToAddCollectionHandler,
-                    onCollectingUpdated = onCollectingUpdated,
-                    onError = onError,
-                )
-            } else {
-                null
-            }
-        }
+            tapToAddMode: TapToAddMode,
+            updateSelection: (PaymentSelection.Saved) -> Unit,
+            customerStateHolder: CustomerStateHolder,
+            linkSignupMode: StateFlow<LinkSignupMode?>,
+        ): TapToAddHelper
     }
 }
 
 internal class DefaultTapToAddHelper(
+    private val context: Context,
     private val coroutineScope: CoroutineScope,
-    private val tapToAddCollectionHandler: TapToAddCollectionHandler,
-    private val paymentMethodMetadata: PaymentMethodMetadata,
-    private val onCollectingUpdated: (collecting: Boolean) -> Unit,
-    private val onError: (ResolvableString) -> Unit,
+    private val productUsage: Set<String>,
+    private val paymentElementCallbackIdentifier: String,
+    private val tapToAddMode: TapToAddMode,
+    private val eventMode: EventReporter.Mode,
+    private val savedStateHandle: SavedStateHandle,
+    private val updateSelection: (PaymentSelection.Saved) -> Unit,
+    private val customerStateHolder: CustomerStateHolder,
+    private val linkSignupMode: StateFlow<LinkSignupMode?>,
 ) : TapToAddHelper {
-    private val _collectedPaymentMethod = MutableStateFlow<DisplayableSavedPaymentMethod?>(null)
-    override val collectedPaymentMethod = _collectedPaymentMethod.asStateFlow()
+    override val isTapToAddEnabled: StateFlow<Boolean> =
+        savedStateHandle.getStateFlow(IS_TAP_TO_ADD_ENABLED_KEY, true)
 
-    override fun startPaymentMethodCollection() {
-        coroutineScope.launch {
-            onCollectingUpdated(true)
+    private var collecting: Boolean
+        get() = savedStateHandle.get<Boolean>(CURRENTLY_COLLECTING_WITH_TAP_TO_ADD_KEY) == true
+        set(value) {
+            savedStateHandle[CURRENTLY_COLLECTING_WITH_TAP_TO_ADD_KEY] = value
+        }
 
-            when (val collectionState = tapToAddCollectionHandler.collect(paymentMethodMetadata)) {
-                is TapToAddCollectionHandler.CollectionState.Collected -> {
-                    _collectedPaymentMethod.value = collectionState.paymentMethod.toDisplayableSavedPaymentMethod(
-                        paymentMethodMetadata = paymentMethodMetadata,
-                        defaultPaymentMethodId = null,
-                    )
-                }
-                is TapToAddCollectionHandler.CollectionState.FailedCollection -> {
-                    onError(
-                        collectionState.displayMessage ?: collectionState.error.stripeErrorMessage()
-                    )
+    private var launcher: ActivityResultLauncher<TapToAddContract.Args>? = null
+
+    private val _nextStep = MutableSharedFlow<TapToAddNextStep>()
+    override val nextStep: SharedFlow<TapToAddNextStep> = _nextStep.asSharedFlow()
+
+    override fun register(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner) {
+        val launcher = activityResultCaller.registerForActivityResult(TapToAddContract) { result ->
+            collecting = false
+
+            coroutineScope.launch {
+                mapResultToNextStep(result)?.let {
+                    _nextStep.emit(it)
                 }
             }
-
-            onCollectingUpdated(false)
         }
+
+        this.launcher = launcher
+
+        lifecycleOwner.lifecycle.addObserver(
+            object : DefaultLifecycleObserver {
+                override fun onDestroy(owner: LifecycleOwner) {
+                    launcher.unregister()
+                    this@DefaultTapToAddHelper.launcher = null
+                    super.onDestroy(owner)
+                }
+            }
+        )
+    }
+
+    private fun mapResultToNextStep(tapToAddResult: TapToAddResult): TapToAddNextStep? {
+        return when (tapToAddResult) {
+            is TapToAddResult.Canceled -> tapToAddResult.paymentSelection?.let { paymentSelection ->
+                customerStateHolder.addPaymentMethod(paymentSelection.paymentMethod)
+                updateSelection(paymentSelection)
+                if (isLinkInlineSignupEnabled()) {
+                    TapToAddNextStep.ConfirmSavedPaymentMethod(
+                        paymentSelection,
+                    )
+                } else {
+                    TapToAddNextStep.ShowSavedPaymentMethods(paymentSelection)
+                }
+            }
+            TapToAddResult.Complete -> TapToAddNextStep.Complete
+            is TapToAddResult.Continue -> TapToAddNextStep.Continue(tapToAddResult.paymentSelection)
+            TapToAddResult.UnsupportedDevice -> {
+                savedStateHandle[IS_TAP_TO_ADD_ENABLED_KEY] = false
+                null
+            }
+        }
+    }
+
+    private fun isLinkInlineSignupEnabled(): Boolean {
+        return linkSignupMode.value != null
+    }
+
+    override fun startPaymentMethodCollection(paymentMethodMetadata: PaymentMethodMetadata) {
+        if (collecting) {
+            return
+        }
+
+        launcher?.run {
+            collecting = true
+
+            launch(
+                input = TapToAddContract.Args(
+                    mode = tapToAddMode,
+                    eventMode = eventMode,
+                    paymentMethodMetadata = paymentMethodMetadata,
+                    paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
+                    productUsage = productUsage,
+                ),
+                options = ActivityOptionsCompat.makeCustomAnimation(
+                    context,
+                    AnimationConstants.FADE_IN,
+                    AnimationConstants.FADE_OUT,
+                )
+            )
+        }
+    }
+
+    class Factory @Inject constructor(
+        private val context: Context,
+        @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
+        @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
+        private val savedStateHandle: SavedStateHandle,
+        private val eventMode: EventReporter.Mode,
+    ) : TapToAddHelper.Factory {
+        override fun create(
+            coroutineScope: CoroutineScope,
+            tapToAddMode: TapToAddMode,
+            updateSelection: (PaymentSelection.Saved) -> Unit,
+            customerStateHolder: CustomerStateHolder,
+            linkSignupMode: StateFlow<LinkSignupMode?>,
+        ): TapToAddHelper {
+            return DefaultTapToAddHelper(
+                context = context,
+                coroutineScope = coroutineScope,
+                productUsage = productUsage,
+                paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
+                tapToAddMode = tapToAddMode,
+                eventMode = eventMode,
+                savedStateHandle = savedStateHandle,
+                updateSelection = updateSelection,
+                customerStateHolder = customerStateHolder,
+                linkSignupMode = linkSignupMode,
+            )
+        }
+    }
+
+    private companion object {
+        const val CURRENTLY_COLLECTING_WITH_TAP_TO_ADD_KEY = "CURRENTLY_COLLECTING_WITH_TAP_TO_ADD"
+        const val IS_TAP_TO_ADD_ENABLED_KEY = "IS_TAP_TO_ADD_ENABLED"
     }
 }

@@ -165,7 +165,7 @@ private fun CardBrand.getNightIcon(): Int {
 }
 
 @DrawableRes
-private fun CardBrand.getDayIcon(): Int {
+internal fun CardBrand.getDayIcon(): Int {
     return when (this) {
         CardBrand.Visa -> R.drawable.stripe_ic_paymentsheet_card_visa_day
         CardBrand.AmericanExpress -> R.drawable.stripe_ic_paymentsheet_card_amex_day

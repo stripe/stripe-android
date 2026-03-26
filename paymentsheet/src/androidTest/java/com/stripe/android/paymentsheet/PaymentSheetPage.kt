@@ -53,9 +53,13 @@ internal class PaymentSheetPage(
     }
 
     fun fillOutCardDetails(fillOutZipCode: Boolean = true) {
+        fillOutCardDetailsWithCardNumber("4242424242424242", fillOutZipCode)
+    }
+
+    fun fillOutCardDetailsWithCardNumber(cardNumber: String, fillOutZipCode: Boolean = true) {
         waitForCardForm()
 
-        replaceText("Card number", "4242424242424242")
+        replaceText("Card number", cardNumber)
         fillExpirationDate("12/34")
         replaceText("CVC", "123")
 
@@ -189,6 +193,20 @@ internal class PaymentSheetPage(
         clickDropdownMenu()
         waitForText("Select card brand (optional)")
         clickViewWithText("Cartes Bancaires")
+
+        if (fillOutZipCode) {
+            replaceText("ZIP Code", "12345")
+        }
+    }
+
+    fun fillOutCardDetailsWithCardBrandChoiceSelector(fillOutZipCode: Boolean = true) {
+        waitForText("Card number")
+
+        replaceText("Card number", "4000002500001001")
+        fillExpirationDate("12/34")
+        replaceText("CVC", "123")
+
+        clickViewWithContentDescription("Cartes Bancaires")
 
         if (fillOutZipCode) {
             replaceText("ZIP Code", "12345")
@@ -434,6 +452,23 @@ internal class PaymentSheetPage(
         }
 
         composeTestRule.waitForIdle()
+    }
+
+    fun assertLayout(isVerticalMode: Boolean) {
+        val testTagForLayout = if (isVerticalMode) {
+            TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
+        } else {
+            TEST_TAG_LIST
+        }
+
+        composeTestRule.waitUntil {
+            composeTestRule.onAllNodes(
+                hasTestTag(testTagForLayout)
+            )
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag(testTagForLayout).assertExists()
     }
 
     fun assertIsOnFormPage() {

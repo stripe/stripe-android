@@ -1,3 +1,5 @@
+@file:OptIn(CheckoutSessionPreview::class)
+
 package com.stripe.android.paymentsheet.example.playground
 
 import android.content.Intent
@@ -30,7 +32,6 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,13 +51,11 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.stripe.android.common.taptoadd.TerminalConnectionTokenCallbackHolder
-import com.stripe.android.common.taptoadd.TerminalLocationHolder
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.rememberCustomerSheet
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
@@ -75,6 +74,7 @@ import com.stripe.android.paymentsheet.example.playground.activity.AppearanceSto
 import com.stripe.android.paymentsheet.example.playground.activity.CustomPaymentMethodActivity
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity
+import com.stripe.android.paymentsheet.example.playground.checkout.CheckoutPlaygroundContract
 import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundOneStepContract
 import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundTwoStepContract
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
@@ -146,6 +146,14 @@ internal class PaymentSheetPlaygroundActivity :
         }
     }
 
+    private val checkoutPlaygroundLauncher = registerForActivityResult(
+        CheckoutPlaygroundContract()
+    ) { checkoutState ->
+        if (checkoutState != null) {
+            viewModel.checkout?.state = checkoutState
+        }
+    }
+
     @OptIn(
         ExperimentalAnalyticEventCallbackApi::class,
         TapToAddPreview::class,
@@ -165,8 +173,6 @@ internal class PaymentSheetPlaygroundActivity :
             val localPlaygroundSettings = playgroundSettings ?: return@setContent
 
             val playgroundState by viewModel.state.collectAsState()
-
-            SetupTapToAddAlpha(playgroundState)
 
             val paymentSheet = remember(playgroundState) {
                 PaymentSheet.Builder(viewModel::onPaymentSheetResult)
@@ -306,6 +312,10 @@ internal class PaymentSheetPlaygroundActivity :
                         targetState = playgroundState
                     ) { playgroundState ->
                         Column {
+                            CheckoutSessionUi(
+                                playgroundState = playgroundState,
+                            )
+
                             PlaygroundStateUi(
                                 playgroundState = playgroundState,
                                 paymentSheet = paymentSheet,
@@ -333,37 +343,6 @@ internal class PaymentSheetPlaygroundActivity :
                     Toast.makeText(context, status?.message, Toast.LENGTH_LONG).show()
                 }
                 viewModel.status.value = status?.copy(hasBeenDisplayed = true)
-            }
-        }
-    }
-
-    @OptIn(TapToAddPreview::class)
-    @Composable
-    private fun SetupTapToAddAlpha(
-        playgroundState: PlaygroundState?,
-    ) {
-        val lifecycleOwner = LocalLifecycleOwner.current
-
-        DisposableEffect(playgroundState, lifecycleOwner) {
-            val paymentState = playgroundState?.asPaymentState()
-
-            if (
-                paymentState != null &&
-                (
-                    paymentState.integrationType == PlaygroundConfigurationData.IntegrationType.PaymentSheet ||
-                        paymentState.integrationType == PlaygroundConfigurationData.IntegrationType.FlowController
-                    )
-            ) {
-                TerminalConnectionTokenCallbackHolder.set(
-                    lifecycleOwner = lifecycleOwner,
-                    callback = viewModel::createConnectionToken,
-                )
-
-                TerminalLocationHolder.locationId = playgroundState.asPaymentState()?.terminalLocationId
-            }
-
-            onDispose {
-                TerminalLocationHolder.locationId = null
             }
         }
     }
@@ -610,10 +589,7 @@ internal class PaymentSheetPlaygroundActivity :
 
         LaunchedEffect(playgroundState) {
             if (isTwoStep) {
-                val configureResult = embeddedPaymentElement.configure(
-                    intentConfiguration = playgroundState.intentConfiguration(),
-                    configuration = playgroundState.embeddedConfiguration(),
-                )
+                val configureResult = configure(playgroundState)
                 hasConfigured = configureResult is EmbeddedPaymentElement.ConfigureResult.Succeeded
             }
         }
@@ -645,7 +621,12 @@ internal class PaymentSheetPlaygroundActivity :
                 if (isTwoStep) {
                     embeddedPaymentElement.confirm()
                 } else {
-                    embeddedPlaygroundOneStepLauncher.launch(playgroundState)
+                    embeddedPlaygroundOneStepLauncher.launch(
+                        EmbeddedPlaygroundOneStepContract.Args(
+                            playgroundState = playgroundState,
+                            checkoutState = viewModel.checkout?.state,
+                        )
+                    )
                 }
             },
             enabled = if (isTwoStep) hasConfigured else true,
@@ -726,7 +707,43 @@ internal class PaymentSheetPlaygroundActivity :
         }
     }
 
-    private fun presentPaymentSheet(paymentSheet: PaymentSheet, playgroundState: PlaygroundState.Payment) {
+    @Composable
+    private fun CheckoutSessionUi(
+        playgroundState: PlaygroundState?,
+    ) {
+        val paymentState = playgroundState?.asPaymentState()
+        if (paymentState?.initializationType == InitializationType.CheckoutSession) {
+            Button(
+                onClick = {
+                    checkoutPlaygroundLauncher.launch(requireNotNull(viewModel.checkout?.state))
+                },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("Launch Checkout Playground")
+            }
+        }
+    }
+
+    private suspend fun configure(
+        playgroundState: PlaygroundState.Payment,
+    ): EmbeddedPaymentElement.ConfigureResult {
+        return if (playgroundState.initializationType == InitializationType.CheckoutSession) {
+            embeddedPaymentElement.configure(
+                checkout = requireNotNull(viewModel.checkout),
+                configuration = playgroundState.embeddedConfiguration(),
+            )
+        } else {
+            embeddedPaymentElement.configure(
+                intentConfiguration = playgroundState.intentConfiguration(),
+                configuration = playgroundState.embeddedConfiguration(),
+            )
+        }
+    }
+
+    private fun presentPaymentSheet(
+        paymentSheet: PaymentSheet,
+        playgroundState: PlaygroundState.Payment,
+    ) {
         if (playgroundState.initializationType == InitializationType.Normal) {
             if (playgroundState.checkoutMode == CheckoutMode.SETUP) {
                 paymentSheet.presentWithSetupIntent(
@@ -739,6 +756,11 @@ internal class PaymentSheetPlaygroundActivity :
                     configuration = playgroundState.paymentSheetConfiguration(viewModel.settings)
                 )
             }
+        } else if (playgroundState.initializationType == InitializationType.CheckoutSession) {
+            paymentSheet.presentWithCheckout(
+                checkout = requireNotNull(viewModel.checkout),
+                configuration = playgroundState.paymentSheetConfiguration(viewModel.settings),
+            )
         } else {
             paymentSheet.presentWithIntentConfiguration(
                 intentConfiguration = playgroundState.intentConfiguration(),
@@ -765,6 +787,12 @@ internal class PaymentSheetPlaygroundActivity :
                     callback = viewModel::onFlowControllerConfigured,
                 )
             }
+        } else if (playgroundState.initializationType == InitializationType.CheckoutSession) {
+            flowController.configureWithCheckout(
+                checkout = requireNotNull(viewModel.checkout),
+                configuration = playgroundState.paymentSheetConfiguration(viewModel.settings),
+                callback = viewModel::onFlowControllerConfigured,
+            )
         } else {
             flowController.configureWithIntentConfiguration(
                 intentConfiguration = playgroundState.intentConfiguration(),

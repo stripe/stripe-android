@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
-import com.stripe.android.common.taptoadd.TapToAddCollectionHandler
+import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
@@ -29,7 +29,7 @@ import com.stripe.android.paymentsheet.analytics.PaymentSheetAnalyticsListener
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.NavigationHandler
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
-import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -40,7 +40,9 @@ import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -55,13 +57,15 @@ import kotlin.coroutines.CoroutineContext
 internal abstract class BaseSheetViewModel(
     val config: PaymentSheet.Configuration,
     val eventReporter: EventReporter,
-    val customerRepository: CustomerRepository,
+    val savedPaymentMethodRepository: SavedPaymentMethodRepository,
     val workContext: CoroutineContext = Dispatchers.IO,
     val savedStateHandle: SavedStateHandle,
     val linkHandler: LinkHandler,
     val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     val isCompleteFlow: Boolean,
-    val tapToAddCollectionHandler: TapToAddCollectionHandler,
+    val mode: EventReporter.Mode,
+    val customerStateHolderFactory: CustomerStateHolder.Factory,
+    val customViewModelScope: CoroutineScope,
 ) : ViewModel() {
     private val autocompleteLauncher = DefaultAutocompleteLauncher(
         AutocompleteAppearanceContext.PaymentElement(config.appearance)
@@ -113,6 +117,8 @@ internal abstract class BaseSheetViewModel(
     private val _cvcRecollectionCompleteFlow = MutableStateFlow(true)
     internal val cvcRecollectionCompleteFlow: StateFlow<Boolean> = _cvcRecollectionCompleteFlow
 
+    abstract val tapToAddHelper: TapToAddHelper
+
     val analyticsListener: PaymentSheetAnalyticsListener = PaymentSheetAnalyticsListener(
         savedStateHandle = savedStateHandle,
         eventReporter = eventReporter,
@@ -130,7 +136,7 @@ internal abstract class BaseSheetViewModel(
      */
     abstract var newPaymentSelection: NewPaymentOptionSelection?
 
-    val customerStateHolder: CustomerStateHolder = CustomerStateHolder.create(this)
+    val customerStateHolder: CustomerStateHolder = customerStateHolderFactory.create(this)
     val savedPaymentMethodMutator: SavedPaymentMethodMutator = SavedPaymentMethodMutator.create(this)
 
     protected val buttonsEnabled = combineAsStateFlow(
@@ -162,6 +168,7 @@ internal abstract class BaseSheetViewModel(
         lifecycleOwner: LifecycleOwner,
     ) {
         autocompleteLauncher.register(activityResultCaller, lifecycleOwner)
+        tapToAddHelper.register(activityResultCaller, lifecycleOwner)
         registerFromActivity(activityResultCaller, lifecycleOwner)
     }
 
@@ -236,20 +243,47 @@ internal abstract class BaseSheetViewModel(
             return paymentMethodLayout
         }
 
+        logHorizontalModeExperimentExposures(
+            experimentsData = experimentsData,
+            paymentMethodMetadata = paymentMethodMetadata,
+        )
+
         experimentsData.experimentAssignments[
-            ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_ANDROID_AA
+            ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE
         ]?.let { variant ->
-            eventReporter.onExperimentExposure(
-                LoggableExperiment.OcsMobileHorizontalModeAndroidAA(
-                    experimentsData = experimentsData,
-                    group = variant,
-                    paymentMethodMetadata = paymentMethodMetadata,
-                    hasSavedPaymentMethod = customerStateHolder.paymentMethods.value.isNotEmpty(),
-                )
-            )
+            if (variant == "control") {
+                return PaymentSheet.PaymentMethodLayout.Vertical
+            } else if (variant == "treatment") {
+                return PaymentSheet.PaymentMethodLayout.Horizontal
+            }
         }
 
         return paymentMethodLayout
+    }
+
+    private fun logHorizontalModeExperimentExposures(
+        experimentsData: ElementsSession.ExperimentsData,
+        paymentMethodMetadata: PaymentMethodMetadata,
+    ) {
+        listOf(
+            ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_AA,
+            ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE,
+        ).forEach { experimentAssignment ->
+            experimentsData.experimentAssignments[
+                experimentAssignment,
+            ]?.let { variant ->
+                eventReporter.onExperimentExposure(
+                    LoggableExperiment.OcsMobileHorizontalMode(
+                        experimentsData = experimentsData,
+                        experiment = experimentAssignment,
+                        group = variant,
+                        paymentMethodMetadata = paymentMethodMetadata,
+                        hasSavedPaymentMethod = customerStateHolder.paymentMethods.value.isNotEmpty(),
+                        mode = mode,
+                    )
+                )
+            }
+        }
     }
 
     abstract fun onUserCancel()
@@ -258,6 +292,7 @@ internal abstract class BaseSheetViewModel(
 
     override fun onCleared() {
         super.onCleared()
+        customViewModelScope.cancel()
         newPaymentSelection = null
         savedStateHandle.set<PaymentSelection?>(SAVE_SELECTION, null)
     }

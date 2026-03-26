@@ -1,15 +1,13 @@
 package com.stripe.android.paymentsheet.ui
 
 import android.os.Build
-import androidx.compose.ui.test.assertContentDescriptionEquals
-import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
-import androidx.compose.ui.test.printToString
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -20,7 +18,7 @@ import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
-import com.stripe.android.uicore.elements.TEST_TAG_DROP_DOWN_CHOICE
+import com.stripe.android.uicore.elements.SELECTOR_ITEM_TEST_TAG
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
@@ -287,11 +285,12 @@ internal class CardDetailsEditUITest {
     }
 
     @Test
-    fun modifiableCard_cbcDropdownIsShown() {
+    fun modifiableCard_cbcSelectorIsShown() {
         runScenario(
             card = PaymentMethodFixtures.CARD_WITH_NETWORKS
         ) {
-            composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).assertExists()
+            composeRule.onNodeWithTag("${SELECTOR_ITEM_TEST_TAG}_visa").assertExists()
+            composeRule.onNodeWithTag("${SELECTOR_ITEM_TEST_TAG}_cartes_bancaires").assertExists()
         }
     }
 
@@ -306,39 +305,12 @@ internal class CardDetailsEditUITest {
     }
 
     @Test
-    fun selectingCardBrandFromDropdown_displaysNewCardBrand() {
-        runScenario(
-            card = PaymentMethodFixtures.CARD_WITH_NETWORKS,
-        ) {
-            composeRule.onNodeWithTag(
-                testTag = "${SELECTED_CARD_BRAND_DROPDOWN_TAG}_Cartes Bancaires",
-                useUnmergedTree = true
-            ).assertIsDisplayed()
-
-            println(
-                composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG, useUnmergedTree = true)
-                    .printToString()
-            )
-            composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).performClick()
-
-            composeRule.onNodeWithTag("${TEST_TAG_DROP_DOWN_CHOICE}_Visa").performClick()
-
-            composeRule.onNodeWithTag(
-                testTag = "${SELECTED_CARD_BRAND_DROPDOWN_TAG}_Visa",
-                useUnmergedTree = true
-            ).assertIsDisplayed()
-        }
-    }
-
-    @Test
-    fun selectingCardBrandDropdown_sendsOnBrandChoiceChangedAction() {
+    fun selectingCardBrandSelector_sendsOnBrandChoiceChangedAction() {
         runScenario(
             card = PaymentMethodFixtures.CARD_WITH_NETWORKS,
             addressCollectionMode = AddressCollectionMode.Never
         ) {
-            composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).performClick()
-
-            composeRule.onNodeWithTag("${TEST_TAG_DROP_DOWN_CHOICE}_Visa").performClick()
+            composeRule.onNodeWithTag("${SELECTOR_ITEM_TEST_TAG}_visa").performClick()
 
             viewActionRecorder.consume(
                 viewAction = EditCardDetailsInteractor.ViewAction.BrandChoiceChanged(
@@ -390,12 +362,11 @@ internal class CardDetailsEditUITest {
     }
 
     @Test
-    fun `Card drop down has accessibility label`() {
+    fun `Card selector has accessibility label`() {
         runScenario(
             card = PaymentMethodFixtures.CARD_WITH_NETWORKS
         ) {
-            composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
-                .assertContentDescriptionEquals("Cartes Bancaires")
+            composeRule.onNodeWithContentDescription("Cartes Bancaires").assertExists()
         }
     }
 

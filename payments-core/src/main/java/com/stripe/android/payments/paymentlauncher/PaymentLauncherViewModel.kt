@@ -338,6 +338,11 @@ internal class PaymentLauncherViewModel @Inject constructor(
         intent: StripeIntent? = null,
         analyticsParams: Map<String, String> = emptyMap(),
     ) {
+        // Guard against multiple calls - only send analytics event once per flow
+        if (internalPaymentResult.value != null) {
+            return
+        }
+
         internalPaymentResult.value = stripeInternalResult.also {
             val event = if (confirmActionRequested) {
                 PaymentAnalyticsEvent.PaymentLauncherConfirmFinished

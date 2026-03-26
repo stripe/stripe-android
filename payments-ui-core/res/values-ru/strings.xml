@@ -32,6 +32,8 @@
   <string name="stripe_card_brand_not_accepted">(не принимается)</string>
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
   <string name="stripe_card_brand_not_accepted_with_brand">%1$s (не принимается)</string>
+  <!-- Klarna pay later copy -->
+  <string name="stripe_card_with_tap_or_enter_manually">Коснитесь или введите вручную</string>
   <!-- Cash App mandate text -->
   <string name="stripe_cash_app_pay_mandate">Продолжая, вы уполномочиваете компанию %1$s списывать с вашего счета Cash App суммы в соответствии с этим, а также будущими платежами согласно условиям компании %2$s, пока это разрешение не будет отозвано. Отозвать разрешение можно в любой момент в настройках приложения Cash App.</string>
   <!-- Title for the contact information section -->
@@ -111,6 +113,8 @@
   <string name="stripe_set_as_default_payment_method">Назначить способом оплаты по умолчанию</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Настроить</string>
+  <!-- Satispay mandate text -->
+  <string name="stripe_twint_mandate">Продолжая использование, вы тем самым разрешаете %1$s периодически списывать с вашего счета Twint суммы согласно вашему плану покупок или подписок.</string>
   <!-- Label for UPI ID number field on form -->
   <string name="stripe_upi_id_label">Идентификатор UPI</string>
 </resources>

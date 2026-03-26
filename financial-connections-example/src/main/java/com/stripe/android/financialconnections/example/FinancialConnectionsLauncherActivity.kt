@@ -49,35 +49,30 @@ class FinancialConnectionsLauncherActivity : AppCompatActivity() {
                 klass = FinancialConnectionsDataExampleActivity::class.java,
                 section = MenuItem.Section.CompleteFlow,
             ),
-
             MenuItem(
                 titleResId = R.string.financial_connections_data_compose_title,
                 subtitleResId = R.string.financial_connections_data_subtitle,
                 klass = FinancialConnectionsComposeExampleActivity::class.java,
                 section = MenuItem.Section.CompleteFlow,
             ),
-
             MenuItem(
                 titleResId = R.string.financial_connections_data_java_title,
                 subtitleResId = R.string.financial_connections_data_subtitle,
                 klass = FinancialConnectionsDataExampleActivityJava::class.java,
                 section = MenuItem.Section.CompleteFlow,
             ),
-
             MenuItem(
                 titleResId = R.string.financial_connections_payouts_title,
                 subtitleResId = R.string.financial_connections_payouts_subtitle,
                 klass = FinancialConnectionsBankAccountTokenExampleActivity::class.java,
                 section = MenuItem.Section.CompleteFlow,
             ),
-
             MenuItem(
                 titleResId = R.string.financial_connections_webview_title,
                 subtitleResId = R.string.financial_connections_webview_subtitle,
                 klass = FinancialConnectionsWebviewExampleActivity::class.java,
                 section = MenuItem.Section.Alternative,
             ),
-
             MenuItem(
                 titleResId = R.string.financial_connections_playground_title,
                 subtitleResId = R.string.financial_connections_playground_subtitle,

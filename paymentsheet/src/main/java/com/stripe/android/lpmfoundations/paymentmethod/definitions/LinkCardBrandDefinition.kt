@@ -25,12 +25,16 @@ internal object LinkCardBrandDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = true
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = LinkCardBrandDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = LinkCardBrandDefinitionFactory
 }
 
 private object LinkCardBrandDefinitionFactory : UiDefinitionFactory.Custom {
 
-    override fun createSupportedPaymentMethod(): SupportedPaymentMethod {
+    override fun createSupportedPaymentMethod(
+        metadata: PaymentMethodMetadata,
+    ): SupportedPaymentMethod {
         return SupportedPaymentMethod(
             code = InstantDebitsDefinition.type.code,
             syntheticCode = "link_card_brand",

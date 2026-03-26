@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultCallback
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.UserFacingLogger
@@ -14,10 +15,12 @@ import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLaun
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.EmptyConfirmationLauncherArgs
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
 import com.stripe.android.paymentelement.confirmation.PAYMENT_INTENT
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
@@ -108,7 +111,7 @@ class GooglePayConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
-            deferredIntentConfirmationType = null,
+            launcherArgs = EmptyConfirmationLauncherArgs,
             result = GooglePayPaymentMethodLauncher.Result.Completed(
                 paymentMethod = paymentMethod,
             ),
@@ -137,7 +140,7 @@ class GooglePayConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
-            deferredIntentConfirmationType = null,
+            launcherArgs = EmptyConfirmationLauncherArgs,
             result = GooglePayPaymentMethodLauncher.Result.Failed(
                 errorCode = 400,
                 error = exception
@@ -161,7 +164,7 @@ class GooglePayConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
-            deferredIntentConfirmationType = null,
+            launcherArgs = EmptyConfirmationLauncherArgs,
             result = GooglePayPaymentMethodLauncher.Result.Failed(
                 errorCode = GooglePayPaymentMethodLauncher.NETWORK_ERROR,
                 error = exception
@@ -187,7 +190,7 @@ class GooglePayConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
-            deferredIntentConfirmationType = null,
+            launcherArgs = EmptyConfirmationLauncherArgs,
             result = GooglePayPaymentMethodLauncher.Result.Canceled,
         )
 
@@ -269,7 +272,7 @@ class GooglePayConfirmationDefinitionTest {
             definition.launch(
                 confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
                 confirmationArgs = CONFIRMATION_PARAMETERS,
-                arguments = Unit,
+                arguments = EmptyConfirmationLauncherArgs,
                 launcher = launcher,
             )
 
@@ -364,7 +367,7 @@ class GooglePayConfirmationDefinitionTest {
                         sellerBusinessName = "My business, Inc.",
                     ),
                 ),
-                arguments = Unit,
+                arguments = EmptyConfirmationLauncherArgs,
                 launcher = launcher,
             )
 
@@ -394,7 +397,7 @@ class GooglePayConfirmationDefinitionTest {
                         stripeIntent = PAYMENT_INTENT.copy(currency = "CAD")
                     ),
                 ),
-                arguments = Unit,
+                arguments = EmptyConfirmationLauncherArgs,
                 launcher = launcher,
             )
 
@@ -431,7 +434,7 @@ class GooglePayConfirmationDefinitionTest {
                         stripeIntent = PAYMENT_INTENT.copy(currency = "CAD")
                     ),
                 ),
-                arguments = Unit,
+                arguments = EmptyConfirmationLauncherArgs,
                 launcher = launcher,
             )
 
@@ -469,7 +472,7 @@ class GooglePayConfirmationDefinitionTest {
                         stripeIntent = SetupIntentFactory.create(),
                     ),
                 ),
-                arguments = Unit,
+                arguments = EmptyConfirmationLauncherArgs,
                 launcher = launcher,
             )
 
@@ -533,7 +536,7 @@ class GooglePayConfirmationDefinitionTest {
             definition.launch(
                 confirmationOption = confirmationOption,
                 confirmationArgs = CONFIRMATION_PARAMETERS,
-                arguments = Unit,
+                arguments = EmptyConfirmationLauncherArgs,
                 launcher = launcher,
             )
 
@@ -585,13 +588,12 @@ class GooglePayConfirmationDefinitionTest {
     ) {
         val action = scenario.action
 
-        assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Launch<Unit>>()
+        assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Launch<EmptyConfirmationLauncherArgs>>()
 
         val launchAction = action.asLaunch()
 
         assertThat(launchAction.receivesResultInProcess).isTrue()
-        assertThat(launchAction.deferredIntentConfirmationType).isNull()
-        assertThat(launchAction.launcherArguments).isEqualTo(Unit)
+        assertThat(launchAction.launcherArguments).isEqualTo(EmptyConfirmationLauncherArgs)
     }
 
     private fun createGooglePayConfirmationDefinition(
@@ -610,10 +612,14 @@ class GooglePayConfirmationDefinitionTest {
         override fun isAccepted(cardBrand: CardBrand): Boolean {
             return false
         }
+
+        override fun isAccepted(paymentMethod: PaymentMethod): Boolean {
+            return false
+        }
     }
 
     private class ActionScenario(
-        val action: ConfirmationDefinition.Action<Unit>,
+        val action: ConfirmationDefinition.Action<EmptyConfirmationLauncherArgs>,
         val userFacingLogger: FakeUserFacingLogger,
     )
 
@@ -630,6 +636,7 @@ class GooglePayConfirmationDefinitionTest {
                     address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                 ),
                 cardBrandFilter = DefaultCardBrandFilter,
+                cardFundingFilter = DefaultCardFundingFilter,
             ),
         )
 

@@ -50,3 +50,24 @@ sealed interface FieldValidationMessage {
         override val formatArgs: List<Any>? = null
     ) : FieldValidationMessage
 }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface FieldValidationMessageComparator : Comparator<FieldValidationMessage?>
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+object DefaultFieldValidationMessageComparator : FieldValidationMessageComparator {
+    override fun compare(
+        a: FieldValidationMessage?,
+        b: FieldValidationMessage?
+    ): Int {
+        return index(a) - index(b)
+    }
+
+    private fun index(message: FieldValidationMessage?): Int {
+        return when (message) {
+            is FieldValidationMessage.Error -> 0
+            is FieldValidationMessage.Warning -> 1
+            null -> 2
+        }
+    }
+}

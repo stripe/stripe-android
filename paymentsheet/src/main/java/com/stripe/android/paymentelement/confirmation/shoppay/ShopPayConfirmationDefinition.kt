@@ -5,7 +5,7 @@ import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.paymentelement.confirmation.EmptyConfirmationLauncherArgs
 import com.stripe.android.shoppay.ShopPayActivityContract
 import com.stripe.android.shoppay.ShopPayActivityResult
 import javax.inject.Inject
@@ -15,7 +15,7 @@ internal class ShopPayConfirmationDefinition @Inject constructor(
 ) : ConfirmationDefinition<
     ShopPayConfirmationOption,
     ActivityResultLauncher<ShopPayActivityContract.Args>,
-    Unit,
+    EmptyConfirmationLauncherArgs,
     ShopPayActivityResult
     > {
     override val key = "ShopPay"
@@ -27,7 +27,7 @@ internal class ShopPayConfirmationDefinition @Inject constructor(
     override fun toResult(
         confirmationOption: ShopPayConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
-        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        launcherArgs: EmptyConfirmationLauncherArgs,
         result: ShopPayActivityResult
     ): ConfirmationDefinition.Result {
         return when (result) {
@@ -39,7 +39,6 @@ internal class ShopPayConfirmationDefinition @Inject constructor(
             is ShopPayActivityResult.Completed -> {
                 ConfirmationDefinition.Result.Succeeded(
                     intent = confirmationArgs.intent,
-                    deferredIntentConfirmationType = deferredIntentConfirmationType,
                     // Shop Pay is handed off for `preparePaymentMethod` purposes
                     completedFullPaymentFlow = false,
                 )
@@ -66,7 +65,7 @@ internal class ShopPayConfirmationDefinition @Inject constructor(
 
     override fun launch(
         launcher: ActivityResultLauncher<ShopPayActivityContract.Args>,
-        arguments: Unit,
+        arguments: EmptyConfirmationLauncherArgs,
         confirmationOption: ShopPayConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args
     ) {
@@ -84,11 +83,10 @@ internal class ShopPayConfirmationDefinition @Inject constructor(
     override suspend fun action(
         confirmationOption: ShopPayConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args
-    ): ConfirmationDefinition.Action<Unit> {
+    ): ConfirmationDefinition.Action<EmptyConfirmationLauncherArgs> {
         return ConfirmationDefinition.Action.Launch(
-            launcherArguments = Unit,
+            launcherArguments = EmptyConfirmationLauncherArgs,
             receivesResultInProcess = false,
-            deferredIntentConfirmationType = null,
         )
     }
 }

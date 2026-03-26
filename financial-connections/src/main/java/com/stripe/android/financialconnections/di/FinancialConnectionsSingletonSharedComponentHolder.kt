@@ -2,8 +2,8 @@ package com.stripe.android.financialconnections.di
 
 import android.app.Application
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.BuildConfig
 import com.stripe.android.financialconnections.domain.IntegrityVerdictManager
-import com.stripe.attestation.BuildConfig
 import com.stripe.attestation.IntegrityRequestManager
 import com.stripe.attestation.IntegrityStandardRequestManager
 import com.stripe.attestation.RealStandardIntegrityManagerFactory

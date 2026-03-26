@@ -8,7 +8,6 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.R
 import kotlinx.coroutines.test.runTest
 import kotlinx.parcelize.Parcelize
@@ -157,7 +156,6 @@ class ConfirmationMediatorTest {
     fun `On complete confirmation action, should return mediator complete action`() = test(
         action = ConfirmationDefinition.Action.Complete(
             intent = INTENT,
-            deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
             completedFullPaymentFlow = true,
         ),
     ) {
@@ -181,7 +179,6 @@ class ConfirmationMediatorTest {
         val completeAction = action.asComplete()
 
         assertThat(completeAction.intent).isEqualTo(INTENT)
-        assertThat(completeAction.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
         assertThat(completeAction.completedFullPaymentFlow).isTrue()
     }
 
@@ -189,7 +186,6 @@ class ConfirmationMediatorTest {
     fun `On complete confirmation action with uncompleted flow, should return expected action`() = test(
         action = ConfirmationDefinition.Action.Complete(
             intent = INTENT,
-            deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
             completedFullPaymentFlow = false,
         ),
     ) {
@@ -213,7 +209,6 @@ class ConfirmationMediatorTest {
         val completeAction = action.asComplete()
 
         assertThat(completeAction.intent).isEqualTo(INTENT)
-        assertThat(completeAction.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
         assertThat(completeAction.completedFullPaymentFlow).isFalse()
     }
 
@@ -254,7 +249,6 @@ class ConfirmationMediatorTest {
     fun `On launch action, should call definition launch and persist parameters`() = test(
         action = ConfirmationDefinition.Action.Launch(
             launcherArguments = TestConfirmationDefinition.LauncherArgs,
-            deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
             receivesResultInProcess = false,
         ),
     ) {
@@ -298,13 +292,18 @@ class ConfirmationMediatorTest {
         assertThat(launchCall.launcher).isEqualTo(TestConfirmationDefinition.Launcher)
 
         val parameters = savedStateHandle
-            .get<ConfirmationMediator.Parameters<TestConfirmationDefinition.Option>>(
+            .get<
+                ConfirmationMediator.Parameters<
+                    TestConfirmationDefinition.Option,
+                    TestConfirmationDefinition.LauncherArgs
+                    >
+                >(
                 "TestParameters"
             )
 
         assertThat(parameters?.confirmationOption).isEqualTo(TestConfirmationDefinition.Option)
         assertThat(parameters?.confirmationArgs).isEqualTo(CONFIRMATION_PARAMETERS)
-        assertThat(parameters?.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
+        assertThat(parameters?.launcherArgs).isEqualTo(TestConfirmationDefinition.LauncherArgs)
     }
 
     @Test
@@ -312,7 +311,6 @@ class ConfirmationMediatorTest {
         test(
             action = ConfirmationDefinition.Action.Launch(
                 launcherArguments = TestConfirmationDefinition.LauncherArgs,
-                deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
                 receivesResultInProcess = true,
             ),
         ) {
@@ -349,7 +347,6 @@ class ConfirmationMediatorTest {
     fun `On confirmation action without registering, should return fail action`() = test(
         action = ConfirmationDefinition.Action.Launch(
             launcherArguments = TestConfirmationDefinition.LauncherArgs,
-            deferredIntentConfirmationType = null,
             receivesResultInProcess = false,
         ),
     ) {
@@ -384,7 +381,6 @@ class ConfirmationMediatorTest {
     fun `On confirmation action after un-registering, should return fail action`() = test(
         action = ConfirmationDefinition.Action.Launch(
             launcherArguments = TestConfirmationDefinition.LauncherArgs,
-            deferredIntentConfirmationType = null,
             receivesResultInProcess = false,
         ),
     ) {
@@ -428,12 +424,10 @@ class ConfirmationMediatorTest {
     fun `On result, should attempt to convert launcher result to confirmation result and return it`() = test(
         action = ConfirmationDefinition.Action.Launch(
             launcherArguments = TestConfirmationDefinition.LauncherArgs,
-            deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
             receivesResultInProcess = false,
         ),
         result = ConfirmationDefinition.Result.Succeeded(
             intent = INTENT,
-            deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
         ),
     ) {
         val waitForResultLatch = CountDownLatch(1)
@@ -492,15 +486,14 @@ class ConfirmationMediatorTest {
         assertThat(toPaymentConfirmationResultCall.confirmationOption).isEqualTo(TestConfirmationDefinition.Option)
         assertThat(toPaymentConfirmationResultCall.confirmationArgs).isEqualTo(CONFIRMATION_PARAMETERS)
         assertThat(toPaymentConfirmationResultCall.result).isEqualTo(TestConfirmationDefinition.LauncherResult)
-        assertThat(toPaymentConfirmationResultCall.deferredIntentConfirmationType)
-            .isEqualTo(DeferredIntentConfirmationType.Client)
+        assertThat(toPaymentConfirmationResultCall.launcherArgs)
+            .isEqualTo(TestConfirmationDefinition.LauncherArgs)
 
         assertThat(receivedResult).isInstanceOf<ConfirmationDefinition.Result.Succeeded>()
 
         val successResult = receivedResult.asSucceeded()
 
         assertThat(successResult.intent).isEqualTo(INTENT)
-        assertThat(successResult.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Client)
 
         // The params should be cleared to avoid keeping the PAN around in memory longer than necessary.
         assertThat(savedStateHandle.get<Any>(mediator.key + ConfirmationMediator.PARAMETERS_POSTFIX_KEY)).isNull()
@@ -622,7 +615,8 @@ class ConfirmationMediatorTest {
 
         object Launcher
 
-        data object LauncherArgs
+        @Parcelize
+        data object LauncherArgs : Parcelable
 
         @Parcelize
         data object LauncherResult : Parcelable

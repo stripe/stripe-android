@@ -17,7 +17,7 @@ import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_DISABLE_LINK_GLOBA
 import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_ENABLE_LINK_SPM
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.LinkDisabledApiRepository
-import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
 import kotlinx.coroutines.CoroutineScope
@@ -83,8 +83,19 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
 
         val defaultValues = state.getDefaultValues()
 
-        val isReturningUser = customerEmail != null &&
-            isReturningUser(email = customerEmail, sessionId = elementsSession.elementsSessionId)
+        val linkState = state.paymentMethodMetadata.linkState
+        val isReturningUser = when {
+            customerEmail == null -> false
+            linkState != null -> {
+                // Link is enabled — the consumer lookup already happened during initialization.
+                // Derive the answer from loginState instead of making a redundant API call.
+                linkState.loginState != LinkState.LoginState.LoggedOut
+            }
+            else -> {
+                // Link is disabled — perform the lookup for experiment logging.
+                isReturningUser(email = customerEmail, sessionId = elementsSession.elementsSessionId)
+            }
+        }
 
         val useLinkNative: Boolean = state.paymentMethodMetadata.linkState?.configuration?.let {
             linkConfigurationCoordinator.linkGate(it).useNativeLink
@@ -99,8 +110,8 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
         val isSpmEnabled: Boolean = elementsSession.isSpmEnabled(linkEnabled)
 
         experimentAssignments.forEach { experimentAssignment ->
-            val experimentGroup = elementsSession.experimentsData
-                ?.experimentAssignments?.get(experimentAssignment) ?: "control"
+            val experimentGroup = experimentsData
+                .experimentAssignments[experimentAssignment] ?: "control"
             eventReporter.onExperimentExposure(
                 experiment = LinkHoldback(
                     arbId = experimentsData.arbId,
@@ -166,15 +177,11 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
         return paymentMethodSaveEnabled && linkDisabledOrEnableLinkSPMFlagEnabled
     }
 
-    private suspend fun PaymentElementLoader.State.getEmail(): String? =
-        paymentMethodMetadata.linkState?.configuration?.customerInfo?.email ?: retrieveCustomerEmail(
+    private suspend fun PaymentElementLoader.State.getEmail(): String? {
+        paymentMethodMetadata.linkState?.configuration?.customerInfo?.email?.let { return it }
+        return retrieveCustomerEmail(
             configuration = config,
-            customer = paymentMethodMetadata.customerMetadata?.let { customerMetadata ->
-                CustomerRepository.CustomerInfo(
-                    id = customerMetadata.id,
-                    ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
-                    customerSessionClientSecret = customerMetadata.customerSessionClientSecret
-                )
-            }
+            customerMetadata = paymentMethodMetadata.customerMetadata,
         )
+    }
 }

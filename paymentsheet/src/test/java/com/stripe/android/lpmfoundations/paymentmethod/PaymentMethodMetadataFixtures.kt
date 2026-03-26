@@ -9,19 +9,14 @@ import kotlinx.coroutines.flow.StateFlow
 
 internal object PaymentMethodMetadataFixtures {
 
-    internal val DEFAULT_CUSTOMER_METADATA_PERMISSIONS = CustomerMetadata.Permissions(
-        removePaymentMethod = PaymentMethodRemovePermission.Full,
-        canRemoveLastPaymentMethod = true,
-        canRemoveDuplicates = true,
-        canUpdateFullPaymentMethodDetails = false,
-    )
-
-    internal val DEFAULT_CUSTOMER_METADATA = CustomerMetadata(
+    internal val DEFAULT_CUSTOMER_METADATA = CustomerMetadata.LegacyEphemeralKey(
         id = "cus_123",
         ephemeralKeySecret = "ek_123",
-        customerSessionClientSecret = null,
         isPaymentMethodSetAsDefaultEnabled = false,
-        permissions = DEFAULT_CUSTOMER_METADATA_PERMISSIONS
+        removePaymentMethod = PaymentMethodRemovePermission.Full,
+        saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
+        canRemoveLastPaymentMethod = true,
+        canUpdateFullPaymentMethodDetails = false,
     )
 
     internal val DEFAULT_CUSTOMER_INTEGRATION_METADATA = IntegrationMetadata.CustomerSheet(
@@ -34,19 +29,32 @@ internal object PaymentMethodMetadataFixtures {
         paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
     )
 
-    internal val CUSTOMER_SESSIONS_CUSTOMER_METADATA = DEFAULT_CUSTOMER_METADATA.copy(
+    internal val CUSTOMER_SESSIONS_CUSTOMER_METADATA = CustomerMetadata.CustomerSession(
+        id = "cus_123",
+        ephemeralKeySecret = "ek_123",
         customerSessionClientSecret = "cuss_123",
+        isPaymentMethodSetAsDefaultEnabled = false,
+        removePaymentMethod = PaymentMethodRemovePermission.Full,
+        saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
+        canRemoveLastPaymentMethod = true,
+        canUpdateFullPaymentMethodDetails = false,
     )
 
     internal fun getDefaultCustomerMetadata(
         hasCustomerConfiguration: Boolean = true,
         isPaymentMethodSetAsDefaultEnabled: Boolean = false,
-        permissions: CustomerMetadata.Permissions = DEFAULT_CUSTOMER_METADATA_PERMISSIONS,
+        removePaymentMethod: PaymentMethodRemovePermission = PaymentMethodRemovePermission.Full,
+        saveConsent: PaymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+        canRemoveLastPaymentMethod: Boolean = true,
+        canUpdateFullPaymentMethodDetails: Boolean = false,
     ): CustomerMetadata? {
         return if (hasCustomerConfiguration) {
             DEFAULT_CUSTOMER_METADATA.copy(
                 isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
-                permissions = permissions,
+                removePaymentMethod = removePaymentMethod,
+                saveConsent = saveConsent,
+                canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
+                canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
             )
         } else {
             null
@@ -56,13 +64,19 @@ internal object PaymentMethodMetadataFixtures {
     internal fun getDefaultCustomerMetadataFlow(
         hasCustomerConfiguration: Boolean = true,
         isPaymentMethodSetAsDefaultEnabled: Boolean = false,
-        permissions: CustomerMetadata.Permissions = DEFAULT_CUSTOMER_METADATA_PERMISSIONS,
+        removePaymentMethod: PaymentMethodRemovePermission = PaymentMethodRemovePermission.Full,
+        saveConsent: PaymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+        canRemoveLastPaymentMethod: Boolean = true,
+        canUpdateFullPaymentMethodDetails: Boolean = false,
     ): StateFlow<CustomerMetadata?> {
         return stateFlowOf(
             getDefaultCustomerMetadata(
                 hasCustomerConfiguration = hasCustomerConfiguration,
                 isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
-                permissions = permissions,
+                removePaymentMethod = removePaymentMethod,
+                saveConsent = saveConsent,
+                canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
+                canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
             )
         )
     }

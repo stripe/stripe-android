@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.Logger
@@ -25,6 +26,7 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContra
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentMethod
@@ -85,8 +87,7 @@ internal object CustomerSheetTestHelper {
             object : IntentConfirmationInterceptor.Factory {
                 override suspend fun create(
                     integrationMetadata: IntegrationMetadata,
-                    customerId: String?,
-                    ephemeralKeySecret: String?,
+                    customerMetadata: CustomerMetadata?,
                     clientAttributionMetadata: ClientAttributionMetadata,
                 ): IntentConfirmationInterceptor {
                     return FakeIntentConfirmationInterceptor().apply {
@@ -151,7 +152,8 @@ internal object CustomerSheetTestHelper {
                             activityResultLauncher:
                             ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
                             skipReadyCheck: Boolean,
-                            cardBrandFilter: CardBrandFilter
+                            cardBrandFilter: CardBrandFilter,
+                            cardFundingFilter: CardFundingFilter
                         ): GooglePayPaymentMethodLauncher = mock()
                     },
                     statusBarColor = null,

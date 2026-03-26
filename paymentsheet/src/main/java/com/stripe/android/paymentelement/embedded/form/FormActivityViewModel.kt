@@ -36,6 +36,7 @@ internal class FormActivityViewModel @Inject constructor(
             )
 
             component.selectionHolder.set(args.paymentSelection)
+            component.customerStateHolder.setCustomerState(args.customerState)
 
             return component.viewModel as T
         }

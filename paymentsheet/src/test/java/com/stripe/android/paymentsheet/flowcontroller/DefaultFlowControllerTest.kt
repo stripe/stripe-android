@@ -13,7 +13,12 @@ import app.cash.turbine.plusAssign
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.checkout.CheckoutInstancesTestRule
+import com.stripe.android.checkout.CheckoutStateFactory
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
+import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.strings.resolvableString
@@ -38,6 +43,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilt
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.ClientAttributionMetadata
+import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -47,14 +53,19 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOption
 import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
 import com.stripe.android.paymentelement.confirmation.intent.InvalidDeferredIntentUsageException
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationOption
@@ -88,10 +99,12 @@ import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.PaymentElementCallbackTestRule
 import com.stripe.android.utils.RelayingPaymentElementLoader
+import kotlinx.coroutines.async
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
+import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verifyNoInteractions
@@ -108,15 +121,24 @@ import org.mockito.kotlin.reset
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import java.util.concurrent.TimeUnit
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
+@OptIn(CheckoutSessionPreview::class)
 @Suppress("DEPRECATION")
 @RunWith(RobolectricTestRunner::class)
 internal class DefaultFlowControllerTest {
 
+    private val networkRule = NetworkRule()
+
     @get:Rule
     val paymentElementCallbackTestRule = PaymentElementCallbackTestRule()
+
+    @get:Rule
+    val checkoutRuleChain: RuleChain = RuleChain
+        .outerRule(networkRule)
+        .around(CheckoutInstancesTestRule())
 
     private val paymentOptionResultCallback = mock<PaymentOptionResultCallback>()
     private val paymentResultCallback = mock<PaymentSheetResultCallback>()
@@ -210,6 +232,9 @@ internal class DefaultFlowControllerTest {
 
         assertThat(viewModel.paymentSelection).isNull()
         assertThat(viewModel.state).isNull()
+        assertThat(viewModel.previousConfigureRequest).isNull()
+
+        assertThat(flowController.getPaymentOption()).isNull()
     }
 
     @Test
@@ -230,13 +255,13 @@ internal class DefaultFlowControllerTest {
         confirmationState.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Succeeded(
                 intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                deferredIntentConfirmationType = null,
                 completedFullPaymentFlow = false,
             )
         )
 
         assertThat(viewModel.paymentSelection).isEqualTo(paymentSelection)
         assertThat(viewModel.state).isNotNull()
+        assertThat(viewModel.previousConfigureRequest).isNotNull()
     }
 
     @Test
@@ -346,6 +371,7 @@ internal class DefaultFlowControllerTest {
                     merchantName = config.merchantDisplayName,
                     billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
                     cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
+                    cardFundingFilter = DefaultCardFundingFilter,
                 ),
             )
         )
@@ -531,8 +557,11 @@ internal class DefaultFlowControllerTest {
         linkGate.setShowRuxInFlowController(true)
 
         // Create a verificationStartedAccount with VerificationStarted status
+        // Use auth levels that don't meet minimum so account is VerificationStarted, not Verified
         val session = CONSUMER_SESSION.copy(
-            verificationSessions = listOf(VERIFICATION_STARTED_SESSION)
+            verificationSessions = listOf(VERIFICATION_STARTED_SESSION),
+            currentAuthenticationLevel = ConsumerSession.AuthenticationLevel.NotAuthenticated,
+            minimumAuthenticationLevel = ConsumerSession.AuthenticationLevel.OneFactorAuthentication,
         )
         val verificationStartedAccount = LinkAccount(consumerSession = session)
 
@@ -1055,7 +1084,7 @@ internal class DefaultFlowControllerTest {
             val arguments = startTurbine.awaitItem()
 
             assertThat(arguments.confirmationOption).isEqualTo(
-                LinkInlineSignupConfirmationOption(
+                LinkInlineSignupConfirmationOption.New(
                     createParams = paymentSelection.paymentMethodCreateParams,
                     optionsParams = paymentSelection.paymentMethodOptionsParams,
                     extraParams = paymentSelection.paymentMethodExtraParams,
@@ -1113,7 +1142,7 @@ internal class DefaultFlowControllerTest {
             val arguments = startTurbine.awaitItem()
 
             assertThat(arguments.confirmationOption).isEqualTo(
-                LinkInlineSignupConfirmationOption(
+                LinkInlineSignupConfirmationOption.New(
                     createParams = paymentSelection.paymentMethodCreateParams,
                     optionsParams = paymentSelection.paymentMethodOptionsParams,
                     extraParams = paymentSelection.paymentMethodExtraParams,
@@ -1167,7 +1196,7 @@ internal class DefaultFlowControllerTest {
             val arguments = startTurbine.awaitItem()
 
             assertThat(arguments.confirmationOption).isEqualTo(
-                LinkInlineSignupConfirmationOption(
+                LinkInlineSignupConfirmationOption.New(
                     createParams = paymentSelection.paymentMethodCreateParams,
                     optionsParams = paymentSelection.paymentMethodOptionsParams,
                     extraParams = paymentSelection.paymentMethodExtraParams,
@@ -1322,6 +1351,7 @@ internal class DefaultFlowControllerTest {
                     merchantName = config.merchantDisplayName,
                     billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
                     cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
+                    cardFundingFilter = DefaultCardFundingFilter
                 ),
             )
         )
@@ -1629,7 +1659,7 @@ internal class DefaultFlowControllerTest {
             )
         )
         assertThat(arguments.paymentMethodMetadata.integrationMetadata)
-            .isEqualTo(IntegrationMetadata.DeferredIntentWithPaymentMethod(intentConfiguration))
+            .isEqualTo(IntegrationMetadata.DeferredIntent.WithPaymentMethod(intentConfiguration))
     }
 
     @Test
@@ -1656,7 +1686,6 @@ internal class DefaultFlowControllerTest {
         confirmationState.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Succeeded(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
-                deferredIntentConfirmationType = null,
             )
         )
 
@@ -1860,7 +1889,6 @@ internal class DefaultFlowControllerTest {
         confirmationState.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Succeeded(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
-                deferredIntentConfirmationType = null,
             )
         )
 
@@ -1891,7 +1919,9 @@ internal class DefaultFlowControllerTest {
             confirmationState.value = ConfirmationHandler.State.Complete(
                 ConfirmationHandler.Result.Succeeded(
                     intent = PaymentIntentFixtures.PI_SUCCEEDED,
-                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
+                    metadata = MutableConfirmationMetadata().apply {
+                        set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Client)
+                    },
                 )
             )
 
@@ -1922,7 +1952,9 @@ internal class DefaultFlowControllerTest {
             confirmationState.value = ConfirmationHandler.State.Complete(
                 ConfirmationHandler.Result.Succeeded(
                     intent = PaymentIntentFixtures.PI_SUCCEEDED,
-                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                    metadata = MutableConfirmationMetadata().apply {
+                        set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Server)
+                    },
                 )
             )
 
@@ -1979,6 +2011,7 @@ internal class DefaultFlowControllerTest {
                     merchantName = "My merchant",
                     billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
                     cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
+                    cardFundingFilter = DefaultCardFundingFilter,
                 ),
             )
         )
@@ -2263,6 +2296,59 @@ internal class DefaultFlowControllerTest {
             }
         }
 
+    @Test
+    fun `configureWithCheckout throws when checkout mutation is in flight`() = runTest {
+        val checkout = CheckoutStateFactory.createCheckout(context)
+        networkRule.checkoutUpdate { response ->
+            response.setBodyDelay(5, TimeUnit.SECONDS)
+            response.testBodyFromFile("checkout-session-apply-discount.json")
+        }
+        val deferred = async { checkout.applyPromotionCode("10OFF") }
+        testScheduler.advanceUntilIdle()
+
+        val flowController = createFlowController()
+        val error = runCatching {
+            flowController.configureWithCheckout(checkout, PaymentSheet.Configuration("Test")) { _, _ -> }
+        }.exceptionOrNull()
+        assertThat(error).isInstanceOf(IllegalStateException::class.java)
+        assertThat(error).hasMessageThat()
+            .isEqualTo("Cannot launch while a checkout session mutation is in flight.")
+
+        deferred.cancel()
+    }
+
+    @Test
+    fun `presentPaymentOptions throws when checkout mutation is in flight`() = runTest {
+        val checkout = CheckoutStateFactory.createCheckout(context)
+        val flowController = createFlowController(
+            FakePaymentElementLoader(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                integrationMetadata = IntegrationMetadata.CheckoutSession(
+                    id = DEFAULT_CHECKOUT_SESSION_ID,
+                    instancesKey = "test_key",
+                ),
+                linkState = null,
+            ),
+        )
+        flowController.configureExpectingSuccess()
+
+        networkRule.checkoutUpdate { response ->
+            response.setBodyDelay(5, TimeUnit.SECONDS)
+            response.testBodyFromFile("checkout-session-apply-discount.json")
+        }
+        val deferred = async { checkout.applyPromotionCode("10OFF") }
+        testScheduler.advanceUntilIdle()
+
+        val error = runCatching {
+            flowController.presentPaymentOptions()
+        }.exceptionOrNull()
+        assertThat(error).isInstanceOf(IllegalStateException::class.java)
+        assertThat(error).hasMessageThat()
+            .isEqualTo("Cannot launch while a checkout session mutation is in flight.")
+
+        deferred.cancel()
+    }
+
     private suspend fun FakeFlowControllerConfirmationHandler.Scenario.createAndConfigureFlowControllerForDeferred(
         paymentIntent: PaymentIntent = PaymentIntentFixtures.PI_SUCCEEDED,
         intentConfiguration: PaymentSheet.IntentConfiguration = PaymentSheet.IntentConfiguration(
@@ -2412,7 +2498,7 @@ internal class DefaultFlowControllerTest {
             walletsButtonLinkLauncher = walletsButtonLinkPaymentLauncher,
             activityResultRegistryOwner = mock(),
             linkGateFactory = FakeLinkGate.Factory(linkGate),
-            confirmationHandler = confirmationHandler ?: FakeFlowControllerConfirmationHandler(),
+            confirmationHandler = confirmationHandler ?: FakeFlowControllerConfirmationHandler()
         )
     }
 

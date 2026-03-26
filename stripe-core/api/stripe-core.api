@@ -106,7 +106,7 @@ public abstract class com/stripe/android/core/exception/StripeException : java/l
 	public fun toString ()Ljava/lang/String;
 }
 
-public synthetic class com/stripe/android/core/model/Country$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class com/stripe/android/core/model/Country$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lcom/stripe/android/core/model/Country$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
 	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/core/model/Country;
@@ -114,13 +114,14 @@ public synthetic class com/stripe/android/core/model/Country$$serializer : kotli
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/core/model/Country;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/core/model/Country$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public synthetic class com/stripe/android/core/model/CountryCode$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class com/stripe/android/core/model/CountryCode$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lcom/stripe/android/core/model/CountryCode$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
 	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/core/model/CountryCode;
@@ -128,6 +129,7 @@ public synthetic class com/stripe/android/core/model/CountryCode$$serializer : k
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/core/model/CountryCode;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/core/model/StripeFile : com/stripe/android/core/model/StripeModel {
@@ -199,7 +201,7 @@ public final class com/stripe/android/core/model/StripeFilePurpose : java/lang/E
 public abstract interface class com/stripe/android/core/model/StripeModel : android/os/Parcelable {
 }
 
-public synthetic class com/stripe/android/core/networking/AnalyticsRequestV2$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class com/stripe/android/core/networking/AnalyticsRequestV2$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lcom/stripe/android/core/networking/AnalyticsRequestV2$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
 	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/core/networking/AnalyticsRequestV2;
@@ -207,6 +209,7 @@ public synthetic class com/stripe/android/core/networking/AnalyticsRequestV2$$se
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/core/networking/AnalyticsRequestV2;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/core/networking/StripeConnection$Default : com/stripe/android/core/networking/StripeConnection$AbstractConnection {

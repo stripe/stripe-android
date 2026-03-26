@@ -11,7 +11,7 @@ sealed interface OnrampTokenAuthenticationResult {
      * Authentication completed successfully.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data object Completed : OnrampTokenAuthenticationResult
+    class Completed internal constructor() : OnrampTokenAuthenticationResult
 
     /**
      * Authentication failed.

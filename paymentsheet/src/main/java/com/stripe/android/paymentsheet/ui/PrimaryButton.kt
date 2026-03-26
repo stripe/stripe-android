@@ -18,7 +18,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.semantics.invisibleToUser
+import androidx.compose.ui.semantics.hideFromAccessibility
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -29,7 +29,7 @@ import androidx.core.view.setPadding
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.databinding.StripePrimaryButtonBinding
+import com.stripe.android.paymentsheet.databinding.StripeAndroidPrimaryButtonBinding
 import com.stripe.android.uicore.PrimaryButtonStyle
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
@@ -64,7 +64,7 @@ internal class PrimaryButton @JvmOverloads constructor(
     internal var externalLabel: ResolvableString? = null
 
     @VisibleForTesting
-    internal val viewBinding = StripePrimaryButtonBinding.inflate(
+    internal val viewBinding = StripeAndroidPrimaryButtonBinding.inflate(
         LayoutInflater.from(context),
         this
     )
@@ -332,7 +332,7 @@ private fun LabelUI(label: String, color: Int?) {
                     // This shouldn't be visible for accessibility purposes
                     // due to the content description and the click listener
                     // being defined outside of compose, in PrimaryButton.
-                    invisibleToUser()
+                    hideFromAccessibility()
                 }
         )
     }

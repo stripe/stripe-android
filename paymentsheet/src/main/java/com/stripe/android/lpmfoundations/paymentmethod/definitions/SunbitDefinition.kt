@@ -21,11 +21,13 @@ internal object SunbitDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = SunbitUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = SunbitUiDefinitionFactory
 }
 
 private object SunbitUiDefinitionFactory : UiDefinitionFactory.Simple() {
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         paymentMethodDefinition = SunbitDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_sunbit,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_sunbit_day,

@@ -24,11 +24,13 @@ internal object AmazonPayDefinition : PaymentMethodDefinition {
         return metadata.hasIntentToSetup(type.code) && metadata.mandateAllowed(type)
     }
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = AmazonPayUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = AmazonPayUiDefinitionFactory
 }
 
 private object AmazonPayUiDefinitionFactory : UiDefinitionFactory.Simple() {
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         code = PaymentMethod.Type.AmazonPay.code,
         lightThemeIconUrl = null,
         darkThemeIconUrl = null,

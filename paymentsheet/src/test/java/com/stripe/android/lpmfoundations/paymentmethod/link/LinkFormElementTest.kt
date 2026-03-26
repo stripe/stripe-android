@@ -30,6 +30,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentB
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -167,7 +168,6 @@ class LinkFormElementTest {
             allowUserEmailEdits = true,
             allowLogOut = true,
             enableDisplayableDefaultValuesInEce = false,
-            skipWalletInFlowController = false,
             linkAppearance = null,
             linkSignUpOptInFeatureEnabled = false,
             linkSignUpOptInInitialValue = false,
@@ -225,6 +225,13 @@ class LinkFormElementTest {
             configuration: LinkConfiguration,
             paymentMethodCreateParams: PaymentMethodCreateParams
         ): Result<LinkPaymentDetails> {
+            error("Not implemented!")
+        }
+
+        override suspend fun attachExistingCardToAccount(
+            configuration: LinkConfiguration,
+            paymentMethod: PaymentMethod
+        ): Result<LinkPaymentDetails.Saved> {
             error("Not implemented!")
         }
 

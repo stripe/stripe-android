@@ -11,6 +11,7 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -55,7 +56,8 @@ internal fun ShopPayButton(
             modifier = Modifier
                 .height(PrimaryButtonTheme.shape.height - ShopPayButtonVerticalPadding * 2),
             painter = painterResource(R.drawable.stripe_shop_pay_logo_white),
-            contentDescription = null
+            contentDescription = null,
+            contentScale = ContentScale.FillHeight
         )
     }
 }

@@ -186,6 +186,12 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         HCAPTCHA_FAILURE(
             eventName = "elements.captcha.passive.expected_failure"
         ),
+        INTENT_CONFIRMATION_CHALLENGE_CHALLENGE_CANCELLATION_REQUEST_FAILED(
+            eventName = "intent_confirmation_challenge.challenge_cancellation_request_failed"
+        ),
+        INTENT_CONFIRMATION_HANDLER_ATTESTATION_REQUEST_TOKEN_FAILED(
+            eventName = "intent_confirmation_handler.attestation.request_token_failed"
+        ),
         TAP_TO_ADD_DISCOVER_READERS_CALL_FAILURE(
             eventName = "elements.tap_to_add.discover_readers_call.failure"
         ),
@@ -289,6 +295,12 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         INTENT_CONFIRMATION_CHALLENGE_FAILED_TO_PARSE_ERROR_CALLBACK_PARAMS(
             partialEventName = "intent_confirmation_challenge.failed_to_parse_error_callback_params"
         ),
+        INTENT_CONFIRMATION_CHALLENGE_INTENT_PARAMETERS_UNAVAILABLE(
+            partialEventName = "intent_confirmation_challenge.intent_parameters_unavailable"
+        ),
+        INTENT_CONFIRMATION_CHALLENGE_INTENT_NO_ATTESTATION_RESULT(
+            partialEventName = "intent_confirmation_challenge.attestation.no_attestation_result"
+        ),
         HCAPTCHA_UNEXPECTED_FAILURE(
             partialEventName = "elements.captcha.passive.unexpected_failure"
         ),
@@ -303,6 +315,12 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         TAP_TO_ADD_NO_READER_FOUND(
             partialEventName = "elements.tap_to_add.no_reader_found"
+        ),
+        TAP_TO_ADD_FLOW_CONTROLLER_RECEIVED_COMPLETE_RESULT(
+            "elements.tap_to_add.flow_controller_received_complete_result"
+        ),
+        TAP_TO_ADD_PAYMENT_SHEET_RECEIVED_CONTINUE_RESULT(
+            "elements.tap_to_add.payment_sheet_received_continue_result"
         ),
         TAP_TO_ADD_NO_GENERATED_CARD_AFTER_SUCCESSFUL_INTENT_CONFIRMATION(
             partialEventName = "elements.tap_to_add.no_generated_card_after_successful_intent_confirmation"

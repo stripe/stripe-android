@@ -85,6 +85,8 @@ internal object TestFactory {
         verificationSessions = listOf(VERIFIED_SESSION),
         redactedPhoneNumber = "+1********42",
         redactedFormattedPhoneNumber = "+1 (***) ***-**42",
+        currentAuthenticationLevel = ConsumerSession.AuthenticationLevel.OneFactorAuthentication,
+        minimumAuthenticationLevel = ConsumerSession.AuthenticationLevel.OneFactorAuthentication,
     )
 
     val CONSUMER_SESSION_LOOKUP = ConsumerSessionLookup(
@@ -164,7 +166,7 @@ internal object TestFactory {
 
     val LINK_NEW_PAYMENT_DETAILS = LinkPaymentDetails.New(
         paymentDetails = CONSUMER_PAYMENT_DETAILS_CARD,
-        paymentMethodCreateParams = PAYMENT_METHOD_CREATE_PARAMS,
+        confirmParams = PAYMENT_METHOD_CREATE_PARAMS,
         originalParams = mock()
     )
 
@@ -173,9 +175,8 @@ internal object TestFactory {
         encodedPaymentMethod = "{\"id\": \"pm_123\"}",
     )
 
-    val LINK_SAVED_PAYMENT_DETAILS = LinkPaymentDetails.Saved(
+    val LINK_PASSTHROUGH_PAYMENT_DETAILS = LinkPaymentDetails.Passthrough(
         paymentDetails = CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
-        paymentMethodCreateParams = PAYMENT_METHOD_CREATE_PARAMS,
         paymentMethod = PaymentMethod.Builder()
             .setId(CONSUMER_PAYMENT_DETAILS_PASSTHROUGH.paymentMethodId)
             .setType(PaymentMethod.Type.Card)
@@ -188,9 +189,8 @@ internal object TestFactory {
             .build(),
     )
 
-    val LINK_SAVED_PAYMENT_DETAILS_WITH_BILLING = LinkPaymentDetails.Saved(
+    val LINK_PASSTHROUGH_PAYMENT_DETAILS_WITH_BILLING = LinkPaymentDetails.Passthrough(
         paymentDetails = CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
-        paymentMethodCreateParams = PAYMENT_METHOD_CREATE_PARAMS,
         paymentMethod = PaymentMethod.Builder()
             .setId(CONSUMER_PAYMENT_DETAILS_PASSTHROUGH.paymentMethodId)
             .setType(PaymentMethod.Type.Card)
@@ -273,7 +273,6 @@ internal object TestFactory {
         allowUserEmailEdits = true,
         allowLogOut = true,
         enableDisplayableDefaultValuesInEce = false,
-        skipWalletInFlowController = false,
         linkAppearance = null,
         linkSignUpOptInFeatureEnabled = false,
         linkSignUpOptInInitialValue = false,
@@ -312,7 +311,7 @@ internal object TestFactory {
         paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
     )
 
-    val CARD_FORM_ELEMENTS = CardDefinition.formElements()
+    val CARD_FORM_ELEMENTS by lazy { CardDefinition.formElements() }
 
     const val VERIFICATION_TOKEN = "12356edtyf6esrte6r6dtd67"
     val INCENTIVE_ELIGIBILITY_SESSION = IncentiveEligibilitySession.PaymentIntent("pi_12345")

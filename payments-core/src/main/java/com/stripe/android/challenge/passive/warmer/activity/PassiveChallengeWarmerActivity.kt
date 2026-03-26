@@ -23,6 +23,12 @@ internal class PassiveChallengeWarmerActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Check if required args are present, finish gracefully if not
+        if (!hasRequiredArgs()) {
+            finish()
+            return
+        }
+
         lifecycleScope.launch {
             viewModel.result.collect { result ->
                 dismissWithResult(result)
@@ -32,6 +38,10 @@ internal class PassiveChallengeWarmerActivity : AppCompatActivity() {
         lifecycleScope.launch {
             viewModel.warmUpPassiveChallenge(this@PassiveChallengeWarmerActivity)
         }
+    }
+
+    private fun hasRequiredArgs(): Boolean {
+        return intent?.extras?.containsKey(EXTRA_ARGS) == true
     }
 
     private fun dismissWithResult(result: PassiveChallengeWarmerCompleted) {

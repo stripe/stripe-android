@@ -56,7 +56,6 @@ class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
                 low = "340000000000000",
                 high = "349999999999999"
             ),
-
             BinRange(
                 low = "370000000000000",
                 high = "379999999999999"
@@ -75,12 +74,10 @@ class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
                 low = "6000000000000000",
                 high = "6099999999999999"
             ),
-
             BinRange(
                 low = "6400000000000000",
                 high = "6499999999999999"
             ),
-
             BinRange(
                 low = "6500000000000000",
                 high = "6599999999999999"
@@ -114,12 +111,10 @@ class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
                 low = "6200000000000000",
                 high = "6216828049999999"
             ),
-
             BinRange(
                 low = "6216828060000000",
                 high = "6299999999999999"
             ),
-
             BinRange(
                 low = "8100000000000000",
                 high = "8199999999999999"
@@ -153,12 +148,10 @@ class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
                 low = "3000000000000000",
                 high = "3059999999999999"
             ),
-
             BinRange(
                 low = "3095000000000000",
                 high = "3095999999999999"
             ),
-
             BinRange(
                 low = "3800000000000000",
                 high = "3999999999999999"

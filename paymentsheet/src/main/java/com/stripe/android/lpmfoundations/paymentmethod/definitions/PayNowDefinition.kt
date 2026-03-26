@@ -20,11 +20,13 @@ internal object PayNowDefinition : PaymentMethodDefinition {
         return setOf(AddPaymentMethodRequirement.UnsupportedForSetup)
     }
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = PayNowUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = PayNowUiDefinitionFactory
 }
 
 private object PayNowUiDefinitionFactory : UiDefinitionFactory.Simple() {
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         paymentMethodDefinition = PayNowDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_paynow,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_paynow_day,

@@ -17,7 +17,8 @@ internal class FakeHCaptchaService : HCaptchaService {
     override suspend fun performPassiveHCaptcha(
         activity: FragmentActivity,
         siteKey: String,
-        rqData: String?
+        rqData: String?,
+        tokenTimeoutSeconds: Int?
     ): HCaptchaService.Result {
         performPassiveHCaptchaCalls.add(Call(activity, siteKey, rqData))
         return result ?: HCaptchaService.Result.Success("default_token")

@@ -21,11 +21,13 @@ internal object CryptoDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = CryptoUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = CryptoUiDefinitionFactory
 }
 
 private object CryptoUiDefinitionFactory : UiDefinitionFactory.Simple() {
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         paymentMethodDefinition = CryptoDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_crypto,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_crypto_day,

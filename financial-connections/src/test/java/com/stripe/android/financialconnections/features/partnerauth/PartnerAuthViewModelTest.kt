@@ -45,7 +45,7 @@ class PartnerAuthViewModelTest {
         )
 
         val getOrFetchSync = mock<GetOrFetchSync> {
-            onBlocking { invoke(any(), any()) } doReturn syncResponse
+            on { invoke(any(), any()) } doReturn syncResponse
         }
 
         val createAuthorizationSession = mock<PostAuthorizationSession>()
@@ -88,7 +88,7 @@ class PartnerAuthViewModelTest {
         }
 
         val getOrFetchSync = mock<GetOrFetchSync> {
-            onBlocking { invoke(any(), any()) } doReturn syncResponse
+            on { invoke(any(), any()) } doReturn syncResponse
         }
 
         makeViewModel(

@@ -1,0 +1,19 @@
+{
+  "session_id": "cs_test_abc123",
+  "ui_mode": "custom",
+  "currency": "usd",
+  "line_item_group": {
+    "due": 2997,
+    "subtotal": 2997,
+    "total": 2997,
+    "line_items": [
+      {
+        "id": "li_1",
+        "name": "Llama Figure",
+        "quantity": 3,
+        "subtotal": 2997,
+        "total": 2997
+      }
+    ]
+  }
+}

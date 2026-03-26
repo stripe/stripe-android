@@ -5,6 +5,7 @@ import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.attestation.AttestationActivityContract
 import com.stripe.android.attestation.AttestationActivityResult
 import com.stripe.android.attestation.analytics.AttestationAnalyticsEventsReporter
+import com.stripe.android.common.di.APPLICATION_ID
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
@@ -14,9 +15,10 @@ import com.stripe.android.model.AndroidVerificationObject
 import com.stripe.android.model.RadarOptions
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.IsEligibleForConfirmationChallenge
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
-import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.analytics.ErrorReporter.UnexpectedErrorEvent
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.CoroutineScope
@@ -32,17 +34,19 @@ internal class AttestationConfirmationDefinition @Inject constructor(
     @IOContext private val workContext: CoroutineContext,
     private val attestationAnalyticsEventsReporter: AttestationAnalyticsEventsReporter,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
-    @Named(PRODUCT_USAGE) private val productUsage: Set<String>
+    @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
+    @Named(APPLICATION_ID) private val appId: String,
+    private val isEligibleForConfirmationChallenge: IsEligibleForConfirmationChallenge
 ) : ConfirmationDefinition<
-    PaymentMethodConfirmationOption.New,
+    PaymentMethodConfirmationOption,
     ActivityResultLauncher<AttestationActivityContract.Args>,
     AttestationActivityContract.Args,
     AttestationActivityResult
     > {
     override val key = "Attestation"
 
-    override fun option(confirmationOption: ConfirmationHandler.Option): PaymentMethodConfirmationOption.New? {
-        return confirmationOption as? PaymentMethodConfirmationOption.New
+    override fun option(confirmationOption: ConfirmationHandler.Option): PaymentMethodConfirmationOption? {
+        return confirmationOption as? PaymentMethodConfirmationOption
     }
 
     override fun bootstrap(paymentMethodMetadata: PaymentMethodMetadata) {
@@ -55,7 +59,7 @@ internal class AttestationConfirmationDefinition @Inject constructor(
                 }.onFailure { error ->
                     attestationAnalyticsEventsReporter.prepareFailed(error)
                     errorReporter.report(
-                        ErrorReporter.UnexpectedErrorEvent.INTENT_CONFIRMATION_HANDLER_ATTESTATION_FAILED_TO_PREPARE,
+                        UnexpectedErrorEvent.INTENT_CONFIRMATION_HANDLER_ATTESTATION_FAILED_TO_PREPARE,
                         stripeException = StripeException.create(error)
                     )
                 }
@@ -63,19 +67,19 @@ internal class AttestationConfirmationDefinition @Inject constructor(
     }
 
     override fun canConfirm(
-        confirmationOption: PaymentMethodConfirmationOption.New,
+        confirmationOption: PaymentMethodConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args
     ): Boolean {
-        return confirmationOption.createParams.typeCode == "card" &&
+        return isEligibleForConfirmationChallenge(confirmationOption) &&
             confirmationArgs.paymentMethodMetadata.attestOnIntentConfirmation &&
-            confirmationOption.attestationComplete.not() &&
+            confirmationOption.confirmationChallengeState.attestationComplete.not() &&
             confirmationOption.hasToken().not()
     }
 
     override fun toResult(
-        confirmationOption: PaymentMethodConfirmationOption.New,
+        confirmationOption: PaymentMethodConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
-        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        launcherArgs: AttestationActivityContract.Args,
         result: AttestationActivityResult
     ): ConfirmationDefinition.Result {
         return when (result) {
@@ -88,6 +92,15 @@ internal class AttestationConfirmationDefinition @Inject constructor(
             is AttestationActivityResult.Success -> {
                 ConfirmationDefinition.Result.NextStep(
                     confirmationOption = confirmationOption.attachToken(result.token),
+                    arguments = confirmationArgs
+                )
+            }
+            AttestationActivityResult.NoResult -> {
+                errorReporter.report(
+                    errorEvent = UnexpectedErrorEvent.INTENT_CONFIRMATION_CHALLENGE_INTENT_NO_ATTESTATION_RESULT
+                )
+                ConfirmationDefinition.Result.NextStep(
+                    confirmationOption = confirmationOption.attachToken(null),
                     arguments = confirmationArgs
                 )
             }
@@ -104,14 +117,14 @@ internal class AttestationConfirmationDefinition @Inject constructor(
     override fun launch(
         launcher: ActivityResultLauncher<AttestationActivityContract.Args>,
         arguments: AttestationActivityContract.Args,
-        confirmationOption: PaymentMethodConfirmationOption.New,
+        confirmationOption: PaymentMethodConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args
     ) {
         launcher.launch(arguments)
     }
 
     override suspend fun action(
-        confirmationOption: PaymentMethodConfirmationOption.New,
+        confirmationOption: PaymentMethodConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args
     ): ConfirmationDefinition.Action<AttestationActivityContract.Args> {
         if (confirmationArgs.paymentMethodMetadata.attestOnIntentConfirmation) {
@@ -121,13 +134,12 @@ internal class AttestationConfirmationDefinition @Inject constructor(
                     productUsage = productUsage
                 ),
                 receivesResultInProcess = false,
-                deferredIntentConfirmationType = null,
             )
         }
 
         val error = IllegalArgumentException("Attestation is not enabled on intent confirmation")
         errorReporter.report(
-            ErrorReporter.UnexpectedErrorEvent.INTENT_CONFIRMATION_HANDLER_ATTESTATION_INVOKED_WHEN_DISABLED,
+            UnexpectedErrorEvent.INTENT_CONFIRMATION_HANDLER_ATTESTATION_INVOKED_WHEN_DISABLED,
             stripeException = StripeException.create(error)
         )
 
@@ -138,37 +150,58 @@ internal class AttestationConfirmationDefinition @Inject constructor(
         )
     }
 
-    private fun PaymentMethodConfirmationOption.New.attachToken(token: String?): PaymentMethodConfirmationOption {
-        val radarOptions = if (token != null) {
-            createParams.radarOptions?.copy(
-                androidVerificationObject = AndroidVerificationObject(
-                    androidVerificationToken = token
-                )
-            ) ?: RadarOptions(
-                hCaptchaToken = null,
-                androidVerificationObject = AndroidVerificationObject(
-                    androidVerificationToken = token
-                )
-            )
-        } else {
-            createParams.radarOptions
-        }
+    private fun PaymentMethodConfirmationOption.attachToken(token: String?): PaymentMethodConfirmationOption {
+        return when (this) {
+            is PaymentMethodConfirmationOption.New -> {
+                val radarOptions = if (token != null) {
+                    createParams.radarOptions?.copy(
+                        androidVerificationObject = AndroidVerificationObject(
+                            androidVerificationToken = token,
+                            appId = appId
+                        )
+                    ) ?: RadarOptions(
+                        hCaptchaToken = null,
+                        androidVerificationObject = AndroidVerificationObject(
+                            androidVerificationToken = token,
+                            appId = appId
+                        )
+                    )
+                } else {
+                    createParams.radarOptions
+                }
 
-        return copy(
-            createParams = createParams.copy(
-                radarOptions = radarOptions
-            ),
-            attestationComplete = true
-        )
+                copy(
+                    createParams = createParams.copy(
+                        radarOptions = radarOptions
+                    ),
+                    confirmationChallengeState = confirmationChallengeState.copy(
+                        attestationComplete = true
+                    )
+                )
+            }
+            is PaymentMethodConfirmationOption.Saved -> {
+                copy(
+                    confirmationChallengeState = confirmationChallengeState.copy(
+                        attestationResult = token?.let {
+                            AndroidVerificationObject(
+                                appId = appId,
+                                androidVerificationToken = token
+                            )
+                        },
+                        attestationComplete = true
+                    )
+                )
+            }
+        }
     }
 
     private fun PaymentMethodConfirmationOption.hasToken(): Boolean {
         return when (this) {
             is PaymentMethodConfirmationOption.New -> {
-                createParams.radarOptions?.androidVerificationObject?.androidVerificationToken != null
+                createParams.radarOptions?.androidVerificationObject != null
             }
             is PaymentMethodConfirmationOption.Saved -> {
-                attestationToken != null
+                confirmationChallengeState.attestationResult != null
             }
         }
     }

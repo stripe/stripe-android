@@ -2,11 +2,13 @@ package com.stripe.android.paymentsheet.ui
 
 import android.content.res.Resources
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material.Divider
@@ -19,6 +21,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -34,6 +37,8 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.Section
 import com.stripe.android.uicore.elements.SectionFieldElement
 import com.stripe.android.uicore.elements.SectionFieldElementUI
+import com.stripe.android.uicore.elements.Selector
+import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
 import com.stripe.android.uicore.utils.collectAsState
@@ -209,10 +214,10 @@ private fun CardNumberField(
         },
         trailingIcon = {
             if (shouldShowCardBrandDropdown) {
-                CardBrandDropdown(
+                CardBrandChoiceSelector(
                     selectedBrand = selectedBrand,
-                    availableBrands = availableNetworks,
-                    onBrandChoiceChanged = onBrandChoiceChanged,
+                    availableNetworks = availableNetworks,
+                    onBrandChoiceChanged = onBrandChoiceChanged
                 )
             } else {
                 PaymentMethodIconFromResource(
@@ -251,5 +256,49 @@ private fun CvcField(cardBrand: CardBrand, modifier: Modifier) {
     )
 }
 
+@Composable
+private fun CardBrandChoiceSelector(
+    selectedBrand: CardBrandChoice,
+    availableNetworks: List<CardBrandChoice>,
+    onBrandChoiceChanged: (CardBrandChoice) -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .focusProperties { canFocus = false }
+            .padding(10.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Selector(
+            currentItem = selectedBrand.toItem(),
+            items = availableNetworks.map { it.toItem() },
+            onItemSelected = {
+                it?.let {
+                    onBrandChoiceChanged.invoke(it.toCardBrandChoice())
+                }
+            },
+            hasFocus = true,
+            popupMessage = null,
+            hasMadeSelection = true
+        )
+    }
+}
+
+private fun TextFieldIcon.Selector.Item.toCardBrandChoice(): CardBrandChoice {
+    return CardBrandChoice(
+        brand = CardBrand.fromCode(this.id),
+        enabled = enabled
+    )
+}
+
+private fun CardBrandChoice.toItem(): TextFieldIcon.Selector.Item {
+    return TextFieldIcon.Selector.Item(
+        id = brand.code,
+        label = brand.displayName.resolvableString,
+        icon = icon,
+        enabled = enabled
+    )
+}
+
 internal const val CARD_EDIT_UI_ERROR_MESSAGE = "card_edit_ui_error_message"
 internal const val CARD_EDIT_UI_FALLBACK_EXPIRY_DATE = "•• / ••"
+internal const val CARD_EDIT_UI_MISSING_EXPIRY_DATE = ""

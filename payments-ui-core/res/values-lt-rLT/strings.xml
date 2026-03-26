@@ -32,6 +32,8 @@
   <string name="stripe_card_brand_not_accepted">(nepriimama)</string>
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
   <string name="stripe_card_brand_not_accepted_with_brand">%1$s (nepriimama)</string>
+  <!-- Klarna pay later copy -->
+  <string name="stripe_card_with_tap_or_enter_manually">Bakstelėkite arba įveskite rankiniu būdu</string>
   <!-- Cash App mandate text -->
   <string name="stripe_cash_app_pay_mandate">Tęsdami įgaliojate \"%1$s\" nurašyti mokestį nuo jūsų \"Cash App\" sąskaitos už šį mokėjimą ir būsimuosius mokėjimus pagal \"%2$s\" sąlygas, kol šis įgaliojimas bus atšauktas. Galite bet kada tai pakeisti \"Cash App\" nuostatose.</string>
   <!-- Title for the contact information section -->
@@ -113,6 +115,8 @@
   <string name="stripe_set_as_default_payment_method">Nustatyti kaip numatytąjį mokėjimo būdą</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Nustatyti</string>
+  <!-- Satispay mandate text -->
+  <string name="stripe_twint_mandate">Tęsdami, autorizuojate %1$s pagal jūsų pirkimo arba prenumeratos planą automatiškai ir periodiškai nurašyti lėšas nuo jūsų „Twint“ likučio.</string>
   <!-- Label for UPI ID number field on form -->
   <string name="stripe_upi_id_label">UPI ID</string>
 </resources>

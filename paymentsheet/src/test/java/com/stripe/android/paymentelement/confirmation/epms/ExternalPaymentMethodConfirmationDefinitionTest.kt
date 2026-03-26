@@ -10,7 +10,9 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.EmptyConfirmationLauncherArgs
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
+import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.PAYMENT_INTENT
 import com.stripe.android.paymentelement.confirmation.asCallbackFor
 import com.stripe.android.paymentelement.confirmation.asCanceled
@@ -93,7 +95,7 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = EPM_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
-            deferredIntentConfirmationType = null,
+            launcherArgs = EmptyConfirmationLauncherArgs,
             result = PaymentResult.Completed,
         )
 
@@ -102,7 +104,7 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
         val successResult = result.asSucceeded()
 
         assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT)
-        assertThat(successResult.deferredIntentConfirmationType).isNull()
+        assertThat(successResult.metadata).isEqualTo(MutableConfirmationMetadata())
         assertThat(successResult.completedFullPaymentFlow).isTrue()
     }
 
@@ -114,7 +116,7 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = EPM_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
-            deferredIntentConfirmationType = null,
+            launcherArgs = EmptyConfirmationLauncherArgs,
             result = PaymentResult.Failed(exception),
         )
 
@@ -134,7 +136,7 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = EPM_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
-            deferredIntentConfirmationType = null,
+            launcherArgs = EmptyConfirmationLauncherArgs,
             result = PaymentResult.Canceled,
         )
 
@@ -193,12 +195,11 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
             confirmationArgs = CONFIRMATION_PARAMETERS,
         )
 
-        assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Launch<Unit>>()
+        assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Launch<EmptyConfirmationLauncherArgs>>()
 
         val launchAction = action.asLaunch()
 
-        assertThat(launchAction.launcherArguments).isEqualTo(Unit)
-        assertThat(launchAction.deferredIntentConfirmationType).isNull()
+        assertThat(launchAction.launcherArguments).isEqualTo(EmptyConfirmationLauncherArgs)
     }
 
     @Test
@@ -213,7 +214,7 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
         definition.launch(
             confirmationOption = EPM_CONFIRMATION_OPTION,
             confirmationArgs = CONFIRMATION_PARAMETERS,
-            arguments = Unit,
+            arguments = EmptyConfirmationLauncherArgs,
             launcher = launcher,
         )
 

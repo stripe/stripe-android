@@ -23,7 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -205,14 +205,14 @@ private fun rememberActivePollingMessage(
     remainingDuration: Duration,
     @StringRes ctaText: Int
 ): String {
-    val context = LocalContext.current
+    val resources = LocalResources.current
 
     return remember(remainingDuration) {
         val remainingTime = remainingDuration.toComponents { minutes, seconds, _ ->
             val paddedSeconds = seconds.toString().padStart(length = 2, padChar = '0')
             "$minutes:$paddedSeconds"
         }
-        context.getString(ctaText, remainingTime)
+        resources.getString(ctaText, remainingTime)
     }
 }
 

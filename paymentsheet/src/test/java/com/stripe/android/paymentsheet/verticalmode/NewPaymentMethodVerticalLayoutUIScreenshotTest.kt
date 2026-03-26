@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ExternalPaymentMethodUiDefinitionFactory
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.screenshottesting.PaparazziRule
@@ -79,7 +80,7 @@ internal class NewPaymentMethodVerticalLayoutUIScreenshotTest {
         val paymentMethods = listOf(
             ExternalPaymentMethodUiDefinitionFactory(
                 PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC
-            ).createSupportedPaymentMethod().asDisplayablePaymentMethod(
+            ).createSupportedPaymentMethod(PaymentMethodMetadataFactory.create()).asDisplayablePaymentMethod(
                 customerSavedPaymentMethods = emptyList(),
                 incentive = null,
                 onClick = {},

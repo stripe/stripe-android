@@ -102,6 +102,8 @@
   <string name="stripe_becs_widget_name_required">Wymagane jest imię i nazwisko.</string>
   <!-- Button title to cancel action in an alert -->
   <string name="stripe_cancel">Anuluj</string>
+  <!-- String to prompt user to select card brand. -->
+  <string name="stripe_card_brand_choice_choose_card_brand">Wybierz markę karty</string>
   <!-- Title for a dropdown option when selecting a card brand -->
   <string name="stripe_card_brand_choice_no_selection">Nic nie wybrano</string>
   <!-- Title for a dropdown where the customer can select a card brand -->
@@ -110,6 +112,18 @@
   <string name="stripe_card_declined">Karta została odrzucona</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="stripe_card_ending_in">%1$s kończy się %2$s</string>
+  <!-- Warning shown when only credit cards are accepted -->
+  <string name="stripe_card_funding_only_credit">Akceptowane są tylko karty kredytowe</string>
+  <!-- Warning shown when only credit and prepaid cards are accepted -->
+  <string name="stripe_card_funding_only_credit_prepaid">Akceptowane są tylko karty kredytowe i przedpłacone</string>
+  <!-- Warning shown when only debit cards are accepted -->
+  <string name="stripe_card_funding_only_debit">Akceptowane są tylko karty debetowe</string>
+  <!-- Warning shown when only debit and credit cards are accepted -->
+  <string name="stripe_card_funding_only_debit_credit">Akceptowane są tylko karty debetowe i kredytowe</string>
+  <!-- Warning shown when only debit and prepaid cards are accepted -->
+  <string name="stripe_card_funding_only_debit_prepaid">Akceptowane są tylko karty debetowe i przedpłacone</string>
+  <!-- Warning shown when only prepaid cards are accepted -->
+  <string name="stripe_card_funding_only_prepaid">Akceptowane są tylko karty przedpłacone</string>
   <!-- Concise details of a saved card. &apos;{card brand} ···· {last 4}&apos; e.g. &apos;VISA ···· 4242&apos; -->
   <string name="stripe_card_plus_last_4">%1$s ···· %2$s</string>
   <!-- Concise details of a saved card. &apos;{card brand} ····{last 4}&apos; e.g. &apos;VISA ····4242&apos; -->
@@ -170,6 +184,8 @@
   <string name="stripe_remove">Usuń</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="stripe_removed">Usunięto: %s</string>
+  <!-- A request error from Stripe has occurred due to a valid issue or merchant integration problem that has a request ID -->
+  <string name="stripe_request_error">Coś poszło nie tak. Identyfikator żądania: %1$s</string>
   <string name="stripe_secure_checkout">Bezpieczna płatność</string>
   <string name="stripe_title_add_a_card">Dodaj kartę</string>
   <!-- Screen title telling users they should add an address -->

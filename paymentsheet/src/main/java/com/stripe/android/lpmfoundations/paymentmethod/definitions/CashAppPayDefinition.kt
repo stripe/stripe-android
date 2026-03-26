@@ -24,11 +24,13 @@ internal object CashAppPayDefinition : PaymentMethodDefinition {
         return metadata.hasIntentToSetup(type.code) && metadata.mandateAllowed(type)
     }
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = CashAppPayUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = CashAppPayUiDefinitionFactory
 }
 
 private object CashAppPayUiDefinitionFactory : UiDefinitionFactory.Simple() {
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         paymentMethodDefinition = CashAppPayDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_cashapp,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_cash_app_pay,

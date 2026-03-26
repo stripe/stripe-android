@@ -28,7 +28,8 @@ internal class DefaultPassiveChallengeWarmerTest {
 
     private val testPassiveCaptchaParams = PassiveCaptchaParams(
         siteKey = "test_site_key",
-        rqData = "test_rq_data"
+        rqData = "test_rq_data",
+        tokenTimeoutSeconds = null
     )
     private val testPublishableKey = "pk_test_123"
     private val testProductUsage = setOf("PaymentSheet")

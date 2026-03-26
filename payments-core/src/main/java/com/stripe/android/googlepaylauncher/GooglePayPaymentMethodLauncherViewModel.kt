@@ -163,7 +163,7 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
                     context = application,
                     enableLogging = BuildConfig.DEBUG,
                     publishableKeyProvider = {
-                        PaymentConfiguration.getInstance(application).publishableKey
+                        args.publishableKey ?: PaymentConfiguration.getInstance(application).publishableKey
                     },
                     stripeAccountIdProvider = {
                         PaymentConfiguration.getInstance(application).stripeAccountId
@@ -171,6 +171,7 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
                     productUsage = setOf(GooglePayPaymentMethodLauncher.PRODUCT_USAGE_TOKEN),
                     config = args.config,
                     cardBrandFilter = args.cardBrandFilter,
+                    cardFundingFilter = args.cardFundingFilter
                 ).subcomponentFactory
 
             return subComponentFactory

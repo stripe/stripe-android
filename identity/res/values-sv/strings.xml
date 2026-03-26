@@ -18,6 +18,8 @@
   <string name="stripe_back_of_id">Baksida av id-kort</string>
   <!-- Title of ID document scanning screen when scanning the back of an identity card -->
   <string name="stripe_back_of_id_document">Id-handlingens baksida</string>
+  <!-- Instructional text when the back of the ID is not detected while scanning back -->
+  <string name="stripe_back_of_id_not_detected">Id-handlingens baksida inte identifierad</string>
   <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
   <string name="stripe_back_of_id_selected">Id-handlingens baksida är markerad</string>
   <!-- Title displayed when requesting camera permissions -->
@@ -90,8 +92,6 @@
   <string name="stripe_doc_front_warmup_title">Gör dig redo att skanna ditt foto-id</string>
   <!-- Label of the driver's license option for document type selection -->
   <string name="stripe_driver_license">Körkort</string>
-  <!-- Text for error labels -->
-  <string name="stripe_error">Fel</string>
   <!-- Button that opens file upload screen -->
   <string name="stripe_file_upload">Ladda upp fil</string>
   <!-- Instructions for uploading images of drivers license -->
@@ -122,6 +122,8 @@
   <string name="stripe_front_of_id">Framsida av id-kort</string>
   <!-- Title of ID document scanning screen when scanning the front of an identity card -->
   <string name="stripe_front_of_id_document">Id-handlingens framsida</string>
+  <!-- Instructional text when the front of the ID is not detected while scanning front -->
+  <string name="stripe_front_of_id_not_detected">Id-handlingens framsida inte identifierad</string>
   <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
   <string name="stripe_front_of_id_selected">Id-handlingens framsida är markerad</string>
   <!-- Description of front of passport image -->
@@ -164,6 +166,8 @@
   <string name="stripe_move_closer">Flytta id-handlingen närmare</string>
   <!-- Instructional text when camera is too close to a document -->
   <string name="stripe_move_farther">Flytta id-handlingen längre bort</string>
+  <!-- Instructional text when the document is not centered in the frame -->
+  <string name="stripe_move_id_to_center">Centrera id-handlingen</string>
   <!-- Label for the ID field to collect NRIC or FIN for Singaporean ID -->
   <string name="stripe_nric_or_fin">NRIC eller FIN</string>
   <!-- No comment provided by engineer. -->
@@ -198,6 +202,7 @@
   <string name="stripe_position_selfie">Placera ansiktet i mitten av ramen.</string>
   <!-- Instructional text when the document is too blurry -->
   <string name="stripe_reduce_blur">Id-handlingen är inte i fokus</string>
+  <string name="stripe_reduce_blur_2">Bilden är suddig. Håll telefonen stadigt och försök igen.</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Detaljer syns inte</string>
   <string name="stripe_reduce_glare_2">Försök att minska bländningen och se till att id-handlingen är synlig</string>

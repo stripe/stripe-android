@@ -9,6 +9,7 @@ import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
+import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.MultipleInstancesTestType
@@ -51,10 +52,7 @@ internal class PaymentSheetDeferredTest {
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
         }
 
@@ -125,10 +123,7 @@ internal class PaymentSheetDeferredTest {
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
         }
 
@@ -180,10 +175,7 @@ internal class PaymentSheetDeferredTest {
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
         }
 
@@ -200,7 +192,6 @@ internal class PaymentSheetDeferredTest {
             presentWithIntentConfiguration(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Setup()
-
                 ),
                 configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
                     .customer(PaymentSheet.CustomerConfiguration("cus_foobar", "ek_test_foobar"))
@@ -241,10 +232,7 @@ internal class PaymentSheetDeferredTest {
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
         }
 
@@ -326,10 +314,7 @@ internal class PaymentSheetDeferredTest {
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
         }
 
@@ -389,10 +374,7 @@ internal class PaymentSheetDeferredTest {
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
         }
 
@@ -475,10 +457,7 @@ internal class PaymentSheetDeferredTest {
         },
         resultCallback = ::expectNoResult,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
         }
 
@@ -525,10 +504,7 @@ internal class PaymentSheetDeferredTest {
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
         }
 
@@ -572,10 +548,7 @@ internal class PaymentSheetDeferredTest {
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
         }
 
@@ -653,10 +626,7 @@ internal class PaymentSheetDeferredTest {
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.setResponseCode(500)
         }
 
@@ -726,10 +696,7 @@ internal class PaymentSheetDeferredTest {
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.setResponseCode(500)
         }
 
@@ -780,10 +747,7 @@ internal class PaymentSheetDeferredTest {
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
         }
 

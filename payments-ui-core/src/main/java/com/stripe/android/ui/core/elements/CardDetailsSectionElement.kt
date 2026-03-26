@@ -2,6 +2,7 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.core.strings.ResolvableString
@@ -19,14 +20,20 @@ class CardDetailsSectionElement(
     private val collectName: Boolean = false,
     private val cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+    private val cardFundingFilter: CardFundingFilter,
     override val identifier: IdentifierSpec,
+    private val cardDetailsAction: CardDetailsAction? = null,
+    private val isStripeCardScanAllowed: Boolean = false,
     override val controller: CardDetailsSectionController = CardDetailsSectionController(
         cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
         initialValues = initialValues,
         collectName = collectName,
         cbcEligibility = cbcEligibility,
         cardBrandFilter = cardBrandFilter,
+        cardFundingFilter = cardFundingFilter,
+        cardDetailsAction = cardDetailsAction,
         automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
+        isStripeCardScanAllowed = isStripeCardScanAllowed,
     )
 ) : FormElement {
     override val allowsUserInteraction: Boolean = true

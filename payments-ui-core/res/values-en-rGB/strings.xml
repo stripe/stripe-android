@@ -32,6 +32,8 @@
   <string name="stripe_card_brand_not_accepted">(not accepted)</string>
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
   <string name="stripe_card_brand_not_accepted_with_brand">%1$s (not accepted)</string>
+  <!-- Klarna pay later copy -->
+  <string name="stripe_card_with_tap_or_enter_manually">Tap or enter manually</string>
   <!-- Cash App mandate text -->
   <string name="stripe_cash_app_pay_mandate">By continuing, you authorize %1$s to debit your Cash App account for this payment and future payments in accordance with %2$s\'s terms, until this authorization is revoked. You can change this anytime in your Cash App Settings.</string>
   <!-- Title for the contact information section -->
@@ -113,6 +115,8 @@
   <string name="stripe_set_as_default_payment_method">Set as default payment method</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Set up</string>
+  <!-- Satispay mandate text -->
+  <string name="stripe_twint_mandate">By continuing, you authorise %1$s to automatically debit your Twint Balance on a recurring basis in accordance with your purchase or subscription plan.</string>
   <!-- Label for UPI ID number field on form -->
   <string name="stripe_upi_id_label">UPI ID</string>
 </resources>

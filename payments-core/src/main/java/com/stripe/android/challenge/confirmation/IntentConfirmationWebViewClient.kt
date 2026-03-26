@@ -2,7 +2,6 @@ package com.stripe.android.challenge.confirmation
 
 import android.net.Uri
 import android.net.http.SslError
-import android.os.Build
 import android.webkit.RenderProcessGoneDetail
 import android.webkit.SslErrorHandler
 import android.webkit.WebResourceError
@@ -10,14 +9,21 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import androidx.annotation.RequiresApi
+import com.stripe.android.core.Logger
 
 internal class IntentConfirmationWebViewClient(
     private val hostUrl: String,
-    private val errorHandler: WebViewErrorHandler
+    private val errorHandler: WebViewErrorHandler,
+    private val logger: Logger,
+    private val openUri: (Uri) -> Unit,
 ) : WebViewClient() {
 
-    @RequiresApi(Build.VERSION_CODES.M)
+    override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+        val host = request?.url ?: return super.shouldOverrideUrlLoading(view, request)
+        openUri(host)
+        return true
+    }
+
     override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
         super.onReceivedError(view, request, error)
         if (!urlsMatch(request?.url?.toString(), hostUrl)) return
@@ -26,21 +32,6 @@ internal class IntentConfirmationWebViewClient(
                 message = error?.description?.toString(),
                 errorCode = error?.errorCode,
                 url = request?.url?.toString(),
-                webViewErrorType = "generic_resource_error"
-            )
-        )
-    }
-
-    // Pre-23
-    @Suppress("DEPRECATION")
-    override fun onReceivedError(view: WebView?, errorCode: Int, description: String?, failingUrl: String?) {
-        super.onReceivedError(view, errorCode, description, failingUrl)
-        if (!urlsMatch(failingUrl, hostUrl)) return
-        errorHandler(
-            WebViewError(
-                message = description,
-                errorCode = errorCode,
-                url = failingUrl,
                 webViewErrorType = "generic_resource_error"
             )
         )
@@ -77,15 +68,18 @@ internal class IntentConfirmationWebViewClient(
     }
 
     override fun onRenderProcessGone(view: WebView?, detail: RenderProcessGoneDetail?): Boolean {
+        logger.error("IntentConfirmationWebViewClient: render process gone, url=${view?.url}")
         errorHandler(
             WebViewError(
-                message = "render process crashed",
+                message = "render process gone",
                 errorCode = null,
                 url = view?.url,
                 webViewErrorType = "render_process_gone"
             )
         )
-        return super.onRenderProcessGone(view, detail)
+        // Return true to indicate we handled the crash. Returning false (the super default)
+        // causes Android to kill the entire app process.
+        return true
     }
 
     private fun urlsMatch(url1: String?, url2: String): Boolean {

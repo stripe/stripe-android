@@ -1,8 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
-import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.autofill.AutofillType
+import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.LayoutDirection
@@ -25,7 +24,7 @@ import com.stripe.android.R as StripeR
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CvcController constructor(
-    private val cvcTextFieldConfig: CvcConfig = CvcConfig(),
+    private val cvcTextFieldConfig: CvcTextFieldConfig = CvcConfig(),
     cardBrandFlow: StateFlow<CardBrand>,
     override val initialValue: String? = null,
 ) : TextFieldController {
@@ -49,8 +48,7 @@ class CvcController constructor(
 
     override val showOptionalLabel: Boolean = false
 
-    @OptIn(ExperimentalComposeUiApi::class)
-    override val autofillType: AutofillType = AutofillType.CreditCardSecurityCode
+    override val autofillType: ContentType = ContentType.CreditCardSecurityCode
 
     private val _fieldValue = MutableStateFlow("")
     override val fieldValue: StateFlow<String> = _fieldValue.asStateFlow()
@@ -68,7 +66,12 @@ class CvcController constructor(
     }
 
     private val _fieldState = combineAsStateFlow(cardBrandFlow, _fieldValue) { brand, fieldValue ->
-        cvcTextFieldConfig.determineState(brand, fieldValue, brand.maxCvcLength)
+        cvcTextFieldConfig.determineState(
+            brand = brand,
+            accountRanges = emptyList(),
+            number = fieldValue,
+            numberAllowedDigits = brand.maxCvcLength
+        )
     }
     override val fieldState: StateFlow<TextFieldState> = _fieldState
 

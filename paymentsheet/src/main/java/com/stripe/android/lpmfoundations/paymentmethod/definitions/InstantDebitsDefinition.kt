@@ -25,12 +25,16 @@ internal object InstantDebitsDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = true
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = InstantDebitsUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = InstantDebitsUiDefinitionFactory
 }
 
 private object InstantDebitsUiDefinitionFactory : UiDefinitionFactory.Custom {
 
-    override fun createSupportedPaymentMethod(): SupportedPaymentMethod {
+    override fun createSupportedPaymentMethod(
+        metadata: PaymentMethodMetadata
+    ): SupportedPaymentMethod {
         return SupportedPaymentMethod(
             code = InstantDebitsDefinition.type.code,
             syntheticCode = "link_instant_debits",

@@ -17,14 +17,11 @@ import kotlinx.serialization.Serializable
 @Parcelize
 @Suppress("unused")
 data class OwnershipRefresh(
-
     /* The time at which the last refresh attempt was initiated. Measured in seconds since the Unix epoch. */
     @SerialName("last_attempted_at")
     val lastAttemptedAt: Int,
-
     @SerialName("status")
     val status: Status = Status.UNKNOWN
-
 ) : Parcelable, StripeModel {
 
     @Serializable

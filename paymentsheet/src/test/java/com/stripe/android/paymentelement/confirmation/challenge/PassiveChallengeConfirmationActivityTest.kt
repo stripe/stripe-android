@@ -17,8 +17,10 @@ import com.stripe.android.challenge.passive.PassiveChallengeActivityResult
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
+import com.stripe.android.paymentelement.confirmation.ConfirmationChallengeState
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationTestScenario
+import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.PaymentElementConfirmationTestActivity
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.assertComplete
@@ -80,7 +82,7 @@ internal class PassiveChallengeConfirmationActivityTest {
                         optionsParams = CONFIRMATION_OPTION.optionsParams,
                         shouldSave = false,
                         extraParams = null,
-                        passiveChallengeComplete = true,
+                        confirmationChallengeState = ConfirmationChallengeState(passiveChallengeComplete = true),
                     )
                 )
 
@@ -89,7 +91,7 @@ internal class PassiveChallengeConfirmationActivityTest {
             val successResult = awaitItem().assertComplete().result.assertSucceeded()
 
             assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT.copy(paymentMethod = PAYMENT_METHOD))
-            assertThat(successResult.deferredIntentConfirmationType).isNull()
+            assertThat(successResult.metadata).isEqualTo(MutableConfirmationMetadata())
         }
     }
 
@@ -122,7 +124,7 @@ internal class PassiveChallengeConfirmationActivityTest {
                         optionsParams = CONFIRMATION_OPTION.optionsParams,
                         shouldSave = false,
                         extraParams = null,
-                        passiveChallengeComplete = true,
+                        confirmationChallengeState = ConfirmationChallengeState(passiveChallengeComplete = true),
                     )
                 )
 
@@ -131,7 +133,7 @@ internal class PassiveChallengeConfirmationActivityTest {
             val successResult = awaitItem().assertComplete().result.assertSucceeded()
 
             assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT.copy(paymentMethod = PAYMENT_METHOD))
-            assertThat(successResult.deferredIntentConfirmationType).isNull()
+            assertThat(successResult.metadata).isEqualTo(MutableConfirmationMetadata())
         }
     }
 

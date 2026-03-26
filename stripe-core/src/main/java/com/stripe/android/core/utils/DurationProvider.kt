@@ -17,12 +17,15 @@ interface DurationProvider {
         Checkout,
         LinkSignup,
         ConfirmButtonClicked,
+        TapToAdd,
         CardScan,
         Captcha,
         CaptchaAttach,
         PaymentLauncher,
         PrepareAttestation,
-        Attest
+        Attest,
+        IntentConfirmationChallenge,
+        IntentConfirmationChallengeWebViewLoaded
     }
 }
 

@@ -5,7 +5,6 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.common.taptoadd.FakeTapToAddCollectionHandler
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
@@ -16,7 +15,7 @@ import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImm
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
-import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT
@@ -25,8 +24,8 @@ import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.AnalyticEventCallbackRule
-import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
+import com.stripe.android.utils.FakeSavedPaymentMethodRepository
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import com.stripe.android.utils.RecordingLinkPaymentLauncher
 import kotlinx.coroutines.CoroutineScope
@@ -141,7 +140,6 @@ internal class EmbeddedContentUiTest {
             embeddedSelectionHolder = selectionHolder,
             savedStateHandle = savedStateHandle,
             selectedPaymentMethodCode = "",
-            tapToAddCollectionHandler = FakeTapToAddCollectionHandler.noOp(),
         )
         val confirmationHandler = FakeConfirmationHandler()
         val eventReporter = FakeEventReporter()
@@ -159,17 +157,17 @@ internal class EmbeddedContentUiTest {
                 eventReporter = eventReporter,
                 workContext = Dispatchers.Unconfined,
                 uiContext = Dispatchers.Unconfined,
-                customerRepository = FakeCustomerRepository(),
+                savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(),
                 selectionHolder = selectionHolder,
                 embeddedLinkHelper = object : EmbeddedLinkHelper {
                     override val linkEmail: StateFlow<String?> = stateFlowOf(null)
                 },
                 embeddedWalletsHelper = { stateFlowOf(null) },
-                customerStateHolder = CustomerStateHolder(
+                customerStateHolder = DefaultCustomerStateHolder(
                     savedStateHandle = savedStateHandle,
                     selection = selectionHolder.selection,
-                    customerMetadataPermissions = stateFlowOf(
-                        PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.permissions
+                    customerMetadata = stateFlowOf(
+                        PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
                     ),
                 ),
                 embeddedFormHelperFactory = embeddedFormHelperFactory,

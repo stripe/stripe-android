@@ -29,20 +29,7 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
     }
 
     @Test
-    fun updatePaymentMethodScreen_forCbcEligibleCard() {
-        paparazziRule.snapshot {
-            PaymentSheetScreenOnUpdatePaymentMethod(
-                paymentMethod = PaymentMethodFixtures
-                    .CARD_WITH_NETWORKS_PAYMENT_METHOD
-                    .toDisplayableSavedPaymentMethod(),
-                canRemove = true,
-                isModifiablePaymentMethod = true,
-            )
-        }
-    }
-
-    @Test
-    fun updatePaymentMethodScreen_forCbcEligibleCard_withoutRemoveButton() {
+    fun updatePaymentMethodScreen_forCbcEligibleCard_withoutRemoveButton_Selector() {
         paparazziRule.snapshot {
             PaymentSheetScreenOnUpdatePaymentMethod(
                 paymentMethod = PaymentMethodFixtures
@@ -119,7 +106,7 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
     }
 
     @Test
-    fun updatePaymentMethodScreen_forCard_withEditEnabled_automaticAddressCollection() {
+    fun updatePaymentMethodScreen_forCard_withEditEnabled_automaticAddressCollection_Selector() {
         paparazziRule.snapshot {
             PaymentSheetScreenOnUpdatePaymentMethod(
                 paymentMethod = PaymentMethodFixtures
@@ -134,7 +121,7 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
     }
 
     @Test
-    fun updatePaymentMethodScreen_forCard_withEditEnabled_fullAddressCollection() {
+    fun updatePaymentMethodScreen_forCard_withEditEnabled_fullAddressCollection_Selector() {
         paparazziRule.snapshot {
             PaymentSheetScreenOnUpdatePaymentMethod(
                 paymentMethod = PaymentMethodFixtures
@@ -150,7 +137,7 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
     }
 
     @Test
-    fun updatePaymentMethodScreen_forCard_withEditEnabled_noAddressCollection() {
+    fun updatePaymentMethodScreen_forCard_withEditEnabled_noAddressCollection_Selector() {
         paparazziRule.snapshot {
             PaymentSheetScreenOnUpdatePaymentMethod(
                 paymentMethod = PaymentMethodFixtures

@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.isInstanceOf
@@ -311,6 +312,7 @@ class FormElementsBuilderTest {
             linkConfigurationCoordinator = null,
             onLinkInlineSignupStateChanged = { throw AssertionError("Not implemented") },
             cardBrandFilter = DefaultCardBrandFilter,
+            cardFundingFilter = DefaultCardFundingFilter,
             setAsDefaultMatchesSaveForFutureUse = false,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
             linkInlineHandler = null,

@@ -23,11 +23,13 @@ internal object SatispayDefinition : PaymentMethodDefinition {
         return metadata.hasIntentToSetup(type.code) && metadata.mandateAllowed(type)
     }
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = SatispayUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = SatispayUiDefinitionFactory
 }
 
 private object SatispayUiDefinitionFactory : UiDefinitionFactory.Simple() {
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         paymentMethodDefinition = SatispayDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_satispay,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_satispay_day,

@@ -6,13 +6,16 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.UserFacingLogger
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
+import com.stripe.android.mandateDataForDeferredIntent
+import com.stripe.android.model.AndroidVerificationObject
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmationToken
 import com.stripe.android.model.ConfirmationTokenClientContextParams
 import com.stripe.android.model.ConfirmationTokenParams
 import com.stripe.android.model.DeferredIntentParams
-import com.stripe.android.model.MandateDataParams
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.RadarOptions
 import com.stripe.android.model.StripeIntent
@@ -21,6 +24,7 @@ import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition.Args
 import com.stripe.android.paymentelement.confirmation.utils.ConfirmActionHelper
@@ -36,14 +40,33 @@ import dagger.assisted.AssistedInject
 internal class ConfirmationTokenConfirmationInterceptor @AssistedInject constructor(
     @Assisted private val intentConfiguration: PaymentSheet.IntentConfiguration,
     @Assisted private val createIntentCallback: CreateIntentWithConfirmationTokenCallback,
-    @Assisted(CUSTOMER_ID) private val customerId: String?,
-    @Assisted(EPHEMERAL_KEY_SECRET) private val ephemeralKeySecret: String?,
+    @Assisted private val customerMetadata: CustomerMetadata?,
     @Assisted private val clientAttributionMetadata: ClientAttributionMetadata,
     private val context: Context,
     private val stripeRepository: StripeRepository,
     private val requestOptions: ApiRequest.Options,
     private val userFacingLogger: UserFacingLogger,
 ) : IntentConfirmationInterceptor {
+    init {
+        require(customerMetadata !is CustomerMetadata.CheckoutSession) {
+            "CheckoutSession is not yet supported for confirmation tokens"
+        }
+    }
+
+    private val customerId: String? = when (customerMetadata) {
+        is CustomerMetadata.LegacyEphemeralKey -> customerMetadata.id
+        is CustomerMetadata.CustomerSession -> customerMetadata.id
+        is CustomerMetadata.CheckoutSession,
+        null -> null
+    }
+
+    private val ephemeralKeySecret: String? = when (customerMetadata) {
+        is CustomerMetadata.LegacyEphemeralKey -> customerMetadata.ephemeralKeySecret
+        is CustomerMetadata.CustomerSession -> customerMetadata.ephemeralKeySecret
+        is CustomerMetadata.CheckoutSession,
+        null -> null
+    }
+
     private val confirmActionHelper: ConfirmActionHelper = ConfirmActionHelper(requestOptions.apiKeyIsLiveMode)
 
     override suspend fun intercept(
@@ -67,6 +90,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                     // For new PM, radar options is attached in paymentMethodData.radarOptions if provided.
                     // hCaptchaToken = null here means we don't need to send a separate one when confirming the intent.
                     hCaptchaToken = null,
+                    androidVerificationObject = null
                 )
             },
             onFailure = { error ->
@@ -106,7 +130,8 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                     intent = intent,
                     confirmationToken = confirmationToken,
                     shippingValues = shippingValues,
-                    hCaptchaToken = confirmationOption.hCaptchaToken,
+                    hCaptchaToken = confirmationOption.confirmationChallengeState.hCaptchaToken,
+                    androidVerificationObject = confirmationOption.confirmationChallengeState.attestationResult
                 )
             },
             onFailure = { error ->
@@ -124,6 +149,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
         confirmationToken: ConfirmationToken,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         hCaptchaToken: String?,
+        androidVerificationObject: AndroidVerificationObject?,
     ): ConfirmationDefinition.Action<Args> {
         val result = createIntentCallback.onCreateIntent(confirmationToken)
 
@@ -132,7 +158,9 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                 if (result.clientSecret == IntentConfirmationInterceptor.COMPLETE_WITHOUT_CONFIRMING_INTENT) {
                     ConfirmationDefinition.Action.Complete(
                         intent = intent,
-                        deferredIntentConfirmationType = DeferredIntentConfirmationType.None,
+                        metadata = MutableConfirmationMetadata().apply {
+                            set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.None)
+                        },
                         completedFullPaymentFlow = true,
                     )
                 } else {
@@ -141,6 +169,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                         confirmationTokenId = confirmationToken.id,
                         shippingValues = shippingValues,
                         hCaptchaToken = hCaptchaToken,
+                        androidVerificationObject = androidVerificationObject
                     )
                 }
             }
@@ -162,6 +191,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
         confirmationTokenId: String,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         hCaptchaToken: String?,
+        androidVerificationObject: AndroidVerificationObject?
     ): ConfirmationDefinition.Action<Args> {
         return stripeRepository.retrieveStripeIntent(
             clientSecret = clientSecret,
@@ -170,14 +200,18 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
             if (intent.isConfirmed) {
                 ConfirmationDefinition.Action.Complete(
                     intent = intent,
-                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                    metadata = MutableConfirmationMetadata().apply {
+                        set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Server)
+                    },
                     completedFullPaymentFlow = true,
                 )
             } else if (intent.requiresAction()) {
                 ConfirmationDefinition.Action.Launch<Args>(
-                    launcherArguments = Args.NextAction(intent),
+                    launcherArguments = Args.NextAction(
+                        intent = intent,
+                        deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                    ),
                     receivesResultInProcess = false,
-                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
                 )
             } else {
                 confirmActionHelper.createConfirmAction(
@@ -188,12 +222,10 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                 ) {
                     create(
                         confirmationTokenId = confirmationTokenId,
-                        radarOptions = hCaptchaToken?.let {
-                            RadarOptions(
-                                hCaptchaToken = it,
-                                androidVerificationObject = null,
-                            )
-                        },
+                        radarOptions = RadarOptions(
+                            hCaptchaToken = hCaptchaToken,
+                            androidVerificationObject = androidVerificationObject,
+                        ),
                         clientAttributionMetadata = clientAttributionMetadata,
                     )
                 }
@@ -219,16 +251,21 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
             paymentMethodData = (confirmationOption as? PaymentMethodConfirmationOption.New)?.createParams,
             setUpFutureUsage = resolveSetupFutureUsage(confirmationOption.optionsParams),
             shipping = shippingValues,
-            mandateDataParams = MandateDataParams(MandateDataParams.Type.Online.DEFAULT).takeIf {
-                when (confirmationOption) {
-                    is PaymentMethodConfirmationOption.New -> {
-                        confirmationOption.createParams.requiresMandate
-                    }
-                    is PaymentMethodConfirmationOption.Saved -> {
-                        confirmationOption.paymentMethod.type?.requiresMandate == true
-                    }
-                }
-            },
+            mandateDataParams = mandateDataForDeferredIntent(
+                paymentMethodType = when (confirmationOption) {
+                    is PaymentMethodConfirmationOption.New ->
+                        PaymentMethod.Type.fromCode(confirmationOption.createParams.typeCode)
+                    is PaymentMethodConfirmationOption.Saved ->
+                        confirmationOption.paymentMethod.type
+                },
+                requiresMandateFromCreateParams = when (confirmationOption) {
+                    is PaymentMethodConfirmationOption.New -> confirmationOption.createParams.requiresMandate
+                    is PaymentMethodConfirmationOption.Saved -> false
+                },
+                optionsParams = confirmationOption.optionsParams,
+                intentConfigSetupFutureUsage = intentConfiguration.mode.setupFutureUse
+                    ?.toConfirmParamsSetupFutureUsage(),
+            ),
             setAsDefaultPaymentMethod = confirmationOption.shouldSaveAsDefault(),
             cvc = if (intentConfiguration.requireCvcRecollection) {
                 (confirmationOption.optionsParams as? PaymentMethodOptionsParams.Card)?.cvc
@@ -285,16 +322,12 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
         fun create(
             intentConfiguration: PaymentSheet.IntentConfiguration,
             createIntentCallback: CreateIntentWithConfirmationTokenCallback,
-            @Assisted(CUSTOMER_ID) customerId: String?,
-            @Assisted(EPHEMERAL_KEY_SECRET) ephemeralKeySecret: String?,
+            customerMetadata: CustomerMetadata?,
             @Assisted clientAttributionMetadata: ClientAttributionMetadata,
         ): ConfirmationTokenConfirmationInterceptor
     }
 
     companion object {
-        private const val CUSTOMER_ID = "customerId"
-        private const val EPHEMERAL_KEY_SECRET = "ephemeralKeySecret"
-
         private const val ERROR_MISSING_EPHEMERAL_KEY_SECRET =
             "Ephemeral key secret is required to confirm with saved payment method"
     }

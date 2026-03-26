@@ -13,6 +13,7 @@ import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.FormHelper.FormType
+import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.code
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
@@ -49,6 +50,7 @@ internal interface PaymentMethodVerticalLayoutInteractor {
     fun handleViewAction(viewAction: ViewAction)
 
     data class State(
+        val currencySelectorOptions: CurrencySelectorOptions?,
         val displayablePaymentMethods: List<DisplayablePaymentMethod>,
         val isProcessing: Boolean,
         val selection: Selection?,
@@ -76,6 +78,7 @@ internal interface PaymentMethodVerticalLayoutInteractor {
         data class SavedPaymentMethodSelected(val savedPaymentMethod: PaymentMethod) : ViewAction
         data class UpdatePaymentMethodVisibility(val itemCode: String, val coordinates: LayoutCoordinates) : ViewAction
         data object CancelPaymentMethodVisibilityTracking : ViewAction
+        data class CurrencySelected(val currencyOption: CurrencyOption) : ViewAction
     }
 
     enum class SavedPaymentMethodAction {
@@ -109,6 +112,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val invokeRowSelectionCallback: (() -> Unit)? = null,
     private val displaysMandatesInFormScreen: Boolean,
     private val onInitiallyDisplayedPaymentMethodVisibilitySnapshot: (List<String>, List<String>) -> Unit,
+    private val currencySelectorOptions: CurrencySelectorOptions? = null,
+    private val onCurrencySelected: (CurrencyOption) -> Unit,
     dispatcher: CoroutineContext = Dispatchers.Default,
     mainDispatcher: CoroutineContext = Dispatchers.Main.immediate,
 ) : PaymentMethodVerticalLayoutInteractor {
@@ -123,6 +128,11 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             val formHelper = DefaultFormHelper.create(viewModel, paymentMethodMetadata)
             val isCurrentScreen = viewModel.navigationHandler.currentScreen.mapAsStateFlow {
                 it is PaymentSheetScreen.VerticalMode
+            }
+            val currencySelectorOptions = (viewModel as? PaymentSheetViewModel)?.let { psViewModel ->
+                psViewModel.latestCheckoutSessionResponse
+                    ?.adaptivePricingInfo
+                    ?.let { CurrencySelectorOptionsFactory.create(it) }
             }
             return DefaultPaymentMethodVerticalLayoutInteractor(
                 paymentMethodMetadata = paymentMethodMetadata,
@@ -184,6 +194,10 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                         walletsState = viewModel.walletsState.value,
                         isVerticalLayout = true,
                     )
+                },
+                currencySelectorOptions = currencySelectorOptions,
+                onCurrencySelected = { currencyOption ->
+                    (viewModel as? PaymentSheetViewModel)?.updateCurrency(currencyOption.code)
                 },
             ).also { interactor ->
                 viewModel.viewModelScope.launch {
@@ -291,6 +305,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
             availableSavedPaymentMethodAction = action,
             mandate = getMandate(temporarySelectionCode, mostRecentSelection),
+            currencySelectorOptions = currencySelectorOptions,
         )
     }
 
@@ -353,60 +368,79 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             }
         }
 
-        val wallets = mutableListOf<DisplayablePaymentMethod>()
-
-        // Add Link inline if NOT allowed in header
-        walletsState?.getInlineLink()?.let { linkData ->
-            val subtitle = when (val state = linkData.state) {
-                is LinkButtonState.Email -> state.email.resolvableString
-                is LinkButtonState.DefaultPayment,
-                is LinkButtonState.Default ->
-                    PaymentsCoreR.string.stripe_link_simple_secure_payments.resolvableString
-            }
-
-            wallets += DisplayablePaymentMethod(
-                code = PaymentMethod.Type.Link.code,
-                displayName = PaymentsCoreR.string.stripe_link.resolvableString,
-                iconResource = R.drawable.stripe_ic_paymentsheet_link_arrow,
-                iconResourceNight = null,
-                lightThemeIconUrl = null,
-                darkThemeIconUrl = null,
-                iconRequiresTinting = false,
-                subtitle = subtitle,
-                onClick = {
-                    updateSelection(PaymentSelection.Link(), false)
-                    invokeRowSelectionCallback?.invoke()
-                },
-            )
-        }
-
-        // Add Google Pay inline if NOT allowed in header
-        walletsState?.getInlineGPay()?.let { it ->
-            wallets += DisplayablePaymentMethod(
-                code = "google_pay",
-                displayName = PaymentsCoreR.string.stripe_google_pay.resolvableString,
-                iconResource = PaymentsCoreR.drawable.stripe_google_pay_mark,
-                iconResourceNight = null,
-                lightThemeIconUrl = null,
-                darkThemeIconUrl = null,
-                iconRequiresTinting = false,
-                subtitle = null,
-                onClick = {
-                    updateSelection(PaymentSelection.GooglePay, false)
-                    invokeRowSelectionCallback?.invoke()
-                },
-            )
-        }
+        val wallets = getInlineWalletDisplayablePaymentMethods(walletsState)
 
         return wallets + lpms
     }
 
-    private fun WalletsState.getInlineLink(): WalletsState.Link? {
-        return this.link(WalletLocation.INLINE)
+    private fun getInlineWalletDisplayablePaymentMethods(
+        walletsState: WalletsState?,
+    ): List<DisplayablePaymentMethod> {
+        return walletsState?.wallets(WalletLocation.INLINE)
+            ?.map { wallet ->
+                when (wallet) {
+                    is WalletsState.GooglePay -> createGooglePayDisplayablePaymentMethod()
+                    is WalletsState.Link -> createLinkDisplayablePaymentMethod(wallet)
+                    WalletsState.ShopPay -> createShopPayDisplayablePaymentMethod()
+                }
+            } ?: emptyList()
     }
 
-    private fun WalletsState.getInlineGPay(): WalletsState.GooglePay? {
-        return this.googlePay(WalletLocation.INLINE)
+    private fun createGooglePayDisplayablePaymentMethod(): DisplayablePaymentMethod {
+        return DisplayablePaymentMethod(
+            code = "google_pay",
+            displayName = PaymentsCoreR.string.stripe_google_pay.resolvableString,
+            iconResource = PaymentsCoreR.drawable.stripe_google_pay_mark,
+            iconResourceNight = null,
+            lightThemeIconUrl = null,
+            darkThemeIconUrl = null,
+            iconRequiresTinting = false,
+            subtitle = null,
+            onClick = {
+                updateSelection(PaymentSelection.GooglePay, false)
+                invokeRowSelectionCallback?.invoke()
+            },
+        )
+    }
+
+    private fun createLinkDisplayablePaymentMethod(link: WalletsState.Link): DisplayablePaymentMethod {
+        val subtitle = when (val state = link.state) {
+            is LinkButtonState.Email -> state.email.resolvableString
+            is LinkButtonState.DefaultPayment,
+            is LinkButtonState.Default ->
+                PaymentsCoreR.string.stripe_link_simple_secure_payments.resolvableString
+        }
+        return DisplayablePaymentMethod(
+            code = PaymentMethod.Type.Link.code,
+            displayName = PaymentsCoreR.string.stripe_link.resolvableString,
+            iconResource = R.drawable.stripe_ic_paymentsheet_link_arrow,
+            iconResourceNight = null,
+            lightThemeIconUrl = null,
+            darkThemeIconUrl = null,
+            iconRequiresTinting = false,
+            subtitle = subtitle,
+            onClick = {
+                updateSelection(PaymentSelection.Link(), false)
+                invokeRowSelectionCallback?.invoke()
+            },
+        )
+    }
+
+    private fun createShopPayDisplayablePaymentMethod(): DisplayablePaymentMethod {
+        return DisplayablePaymentMethod(
+            code = "shop_pay",
+            displayName = PaymentsCoreR.string.stripe_shop_pay.resolvableString,
+            iconResource = R.drawable.stripe_shop_pay_logo,
+            iconResourceNight = R.drawable.stripe_shop_pay_logo_white,
+            lightThemeIconUrl = null,
+            darkThemeIconUrl = null,
+            iconRequiresTinting = false,
+            subtitle = null,
+            onClick = {
+                updateSelection(PaymentSelection.ShopPay, false)
+                invokeRowSelectionCallback?.invoke()
+            },
+        )
     }
 
     private fun getDisplayedSavedPaymentMethod(
@@ -448,11 +482,19 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             if (currentSavedPaymentMethodCode != null) {
                 add("saved")
             }
-            walletsState?.getInlineLink()?.let {
-                add(PaymentMethod.Type.Link.code)
-            }
-            walletsState?.getInlineGPay()?.let {
-                add("google_pay")
+            val inlineWallets = walletsState?.wallets(WalletLocation.INLINE)
+            inlineWallets?.forEach { wallet ->
+                when (wallet) {
+                    is WalletsState.GooglePay -> {
+                        add("google_pay")
+                    }
+                    is WalletsState.Link -> {
+                        add(PaymentMethod.Type.Link.code)
+                    }
+                    WalletsState.ShopPay -> {
+                        add("shop_pay")
+                    }
+                }
             }
             addAll(currentDisplayablePaymentMethodCodes)
         }
@@ -528,6 +570,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             }
             is ViewAction.CancelPaymentMethodVisibilityTracking -> {
                 cancelPaymentMethodVisibilityTracking()
+            }
+            is ViewAction.CurrencySelected -> {
+                onCurrencySelected(viewAction.currencyOption)
             }
         }
     }

@@ -49,7 +49,7 @@ internal sealed interface PlaygroundState : Parcelable {
     @Parcelize
     data class Payment(
         override val snapshot: PlaygroundSettings.Snapshot,
-        val amount: Long,
+        val amount: Long?,
         val paymentMethodTypes: List<String>,
         val customerConfig: PaymentSheet.CustomerConfiguration?,
         val clientSecret: String,
@@ -240,9 +240,9 @@ internal sealed interface PlaygroundState : Parcelable {
                 amount = amount,
                 paymentMethodTypes = paymentMethodTypes,
                 customerConfig = makeCustomerConfig(snapshot.checkoutRequest().customerKeyType),
-                clientSecret = intentClientSecret,
+                clientSecret = clientSecret,
                 terminalLocationId = terminalLocationId,
-                defaultEndpoint = defaultEndpoint
+                defaultEndpoint = defaultEndpoint,
             )
         }
     }

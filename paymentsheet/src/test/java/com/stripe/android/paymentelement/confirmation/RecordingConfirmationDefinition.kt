@@ -5,12 +5,11 @@ import androidx.activity.result.ActivityResultCaller
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 
 internal class RecordingConfirmationDefinition<
     TConfirmationOption : ConfirmationHandler.Option,
     TLauncher,
-    TLauncherArgs,
+    TLauncherArgs : Parcelable,
     TLauncherResult : Parcelable,
     > private constructor(
     private val definition: ConfirmationDefinition<TConfirmationOption, TLauncher, TLauncherArgs, TLauncherResult>
@@ -22,7 +21,7 @@ internal class RecordingConfirmationDefinition<
     > {
     private val optionCalls = Turbine<OptionCall>()
     private val canConfirmCalls = Turbine<CanConfirmCall>()
-    private val toResultCalls = Turbine<ToResultCall<TConfirmationOption, TLauncherResult>>()
+    private val toResultCalls = Turbine<ToResultCall<TConfirmationOption, TLauncherArgs, TLauncherResult>>()
     private val createLauncherCalls = Turbine<CreateLauncherCall<TLauncherResult>>()
     private val unregisterCalls = Turbine<UnregisterCall<TLauncher>>()
     private val launchCalls = Turbine<LaunchCall<TConfirmationOption, TLauncher, TLauncherArgs>>()
@@ -49,13 +48,13 @@ internal class RecordingConfirmationDefinition<
     override fun toResult(
         confirmationOption: TConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
-        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        launcherArgs: TLauncherArgs,
         result: TLauncherResult
     ): ConfirmationDefinition.Result {
         toResultCalls.add(
             ToResultCall(
                 confirmationOption = confirmationOption,
-                deferredIntentConfirmationType = deferredIntentConfirmationType,
+                launcherArgs = launcherArgs,
                 confirmationArgs = confirmationArgs,
                 result = result
             )
@@ -64,7 +63,7 @@ internal class RecordingConfirmationDefinition<
         return definition.toResult(
             confirmationOption = confirmationOption,
             confirmationArgs = confirmationArgs,
-            deferredIntentConfirmationType = deferredIntentConfirmationType,
+            launcherArgs = launcherArgs,
             result = result
         )
     }
@@ -117,10 +116,10 @@ internal class RecordingConfirmationDefinition<
         val confirmationArgs: ConfirmationHandler.Args,
     )
 
-    class ToResultCall<TConfirmationOption : ConfirmationHandler.Option, TLauncherResult>(
+    class ToResultCall<TConfirmationOption : ConfirmationHandler.Option, TLauncherArgs : Parcelable, TLauncherResult>(
         val confirmationOption: TConfirmationOption,
         val confirmationArgs: ConfirmationHandler.Args,
-        val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        val launcherArgs: TLauncherArgs,
         val result: TLauncherResult,
     )
 
@@ -152,13 +151,13 @@ internal class RecordingConfirmationDefinition<
     class Scenario<
         TConfirmationOption : ConfirmationHandler.Option,
         TLauncher,
-        TLauncherArgs,
+        TLauncherArgs : Parcelable,
         TLauncherResult : Parcelable,
         >(
         val definition: ConfirmationDefinition<TConfirmationOption, TLauncher, TLauncherArgs, TLauncherResult>,
         val optionCalls: ReceiveTurbine<OptionCall>,
         val canConfirmCalls: ReceiveTurbine<CanConfirmCall>,
-        val toResultCalls: ReceiveTurbine<ToResultCall<TConfirmationOption, TLauncherResult>>,
+        val toResultCalls: ReceiveTurbine<ToResultCall<TConfirmationOption, TLauncherArgs, TLauncherResult>>,
         val createLauncherCalls: ReceiveTurbine<CreateLauncherCall<TLauncherResult>>,
         val unregisterCalls: ReceiveTurbine<UnregisterCall<TLauncher>>,
         val launchCalls: ReceiveTurbine<LaunchCall<TConfirmationOption, TLauncher, TLauncherArgs>>,
@@ -170,7 +169,7 @@ internal class RecordingConfirmationDefinition<
         suspend fun <
             TConfirmationOption : ConfirmationHandler.Option,
             TLauncher,
-            TLauncherArgs,
+            TLauncherArgs : Parcelable,
             TLauncherResult : Parcelable,
             > test(
             definition: ConfirmationDefinition<TConfirmationOption, TLauncher, TLauncherArgs, TLauncherResult>,

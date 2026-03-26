@@ -9,22 +9,17 @@ import kotlin.test.Test
 internal class AndroidVerificationObjectTest {
 
     @Test
-    fun `toParamMap() with non-null token returns expected map`() {
+    fun `toParamMap() returns expected map with token and appId`() {
         val androidVerificationObject = AndroidVerificationObject(
-            androidVerificationToken = "test_verification_token_12345"
+            androidVerificationToken = "test_verification_token_12345",
+            appId = "com.stripe.app"
         )
 
         assertThat(androidVerificationObject.toParamMap()).isEqualTo(
-            mapOf("android_verification_token" to "test_verification_token_12345")
+            mapOf(
+                "android_verification_token" to "test_verification_token_12345",
+                "app_id" to "com.stripe.app"
+            )
         )
-    }
-
-    @Test
-    fun `toParamMap() with null token returns empty map`() {
-        val androidVerificationObject = AndroidVerificationObject(
-            androidVerificationToken = null
-        )
-
-        assertThat(androidVerificationObject.toParamMap()).isEmpty()
     }
 }

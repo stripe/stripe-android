@@ -1,5 +1,11 @@
 # Migration Guide
 
+## Migrating from versions < 23.0.0
+- The SDK now requires Android 6.0+ (API level 23+)
+- The SDK now targets `compileSdkVersion` and `targetSdkVersion` 36
+  - The minimum [Android Gradle Plugin](https://developer.android.com/studio/releases/gradle-plugin) version is now 8.9.1 (previously 8.1)
+  - The minimum [Gradle](https://gradle.org/releases/) version is now 8.11.1 (previously 8.0)
+
 ## Migrating from versions < 22.0.0
 SDK v22 introduces breaking changes organized into four categories:
 

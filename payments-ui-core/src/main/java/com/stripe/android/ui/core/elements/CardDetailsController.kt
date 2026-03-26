@@ -4,7 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DateUtils
@@ -13,6 +15,8 @@ import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cardscan.CardScanResult
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.DateConfig
+import com.stripe.android.uicore.elements.DefaultFieldValidationMessageComparator
+import com.stripe.android.uicore.elements.FieldValidationMessageComparator
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.RowController
 import com.stripe.android.uicore.elements.RowElement
@@ -22,6 +26,7 @@ import com.stripe.android.uicore.elements.SectionFieldValidationController
 import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
+import com.stripe.android.uicore.elements.TextFieldConfig
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.Dispatchers
 import java.util.UUID
@@ -34,7 +39,16 @@ internal class CardDetailsController(
     cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
     uiContext: CoroutineContext = Dispatchers.Main,
     workContext: CoroutineContext = Dispatchers.IO,
-    cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
+    cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+    cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
+    cardDetailsTextFieldConfig: CardNumberTextFieldConfig = CardNumberConfig(
+        isCardBrandChoiceEligible = cbcEligibility != CardBrandChoiceEligibility.Ineligible,
+        cardBrandFilter = cardBrandFilter,
+        cardFundingFilter = cardFundingFilter
+    ),
+    cvcTextFieldConfig: CvcTextFieldConfig = CvcConfig(),
+    dateConfig: TextFieldConfig = DateConfig(),
+    private val validationMessageComparator: FieldValidationMessageComparator = DefaultFieldValidationMessageComparator
 ) : SectionFieldValidationController, SectionFieldComposable {
 
     val nameElement = if (collectName) {
@@ -57,10 +71,7 @@ internal class CardDetailsController(
     val numberElement = CardNumberElement(
         IdentifierSpec.CardNumber,
         DefaultCardNumberController(
-            cardTextFieldConfig = CardNumberConfig(
-                isCardBrandChoiceEligible = cbcEligibility != CardBrandChoiceEligibility.Ineligible,
-                cardBrandFilter = cardBrandFilter
-            ),
+            cardTextFieldConfig = cardDetailsTextFieldConfig,
             cardAccountRangeRepository = cardAccountRangeRepositoryFactory.create(),
             uiContext = uiContext,
             workContext = workContext,
@@ -76,14 +87,15 @@ internal class CardDetailsController(
                 )
                 is CardBrandChoiceEligibility.Ineligible -> CardBrandChoiceConfig.Ineligible
             },
-            cardBrandFilter = cardBrandFilter
+            cardBrandFilter = cardBrandFilter,
+            cardFundingFilter = cardFundingFilter
         )
     )
 
     val cvcElement = CvcElement(
         IdentifierSpec.CardCvc,
         CvcController(
-            CvcConfig(),
+            cvcTextFieldConfig,
             numberElement.controller.cardBrandFlow,
             initialValue = initialValues[IdentifierSpec.CardCvc]
         )
@@ -92,7 +104,7 @@ internal class CardDetailsController(
     val expirationDateElement = SimpleTextElement(
         IdentifierSpec.Generic("date"),
         SimpleTextFieldController(
-            textFieldConfig = DateConfig(),
+            textFieldConfig = dateConfig,
             initialValue = initialValues[IdentifierSpec.CardExpMonth] +
                 initialValues[IdentifierSpec.CardExpYear]?.takeLast(2),
             overrideContentDescriptionProvider = ::formatExpirationDateForAccessibility
@@ -143,7 +155,7 @@ internal class CardDetailsController(
             .map { it.controller }
             .map { it.validationMessage }
     ) {
-        it.filterNotNull().firstOrNull()
+        it.sortedWith(validationMessageComparator).filterNotNull().firstOrNull()
     }
 
     override fun onValidationStateChanged(isValidating: Boolean) {

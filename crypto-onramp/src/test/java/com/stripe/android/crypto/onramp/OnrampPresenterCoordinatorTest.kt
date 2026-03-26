@@ -31,23 +31,21 @@ class OnrampPresenterCoordinatorTest {
     private val activity = Robolectric.buildActivity(ComponentActivity::class.java).create().get()
     private val testScope = TestScope()
     private val checkoutCallback = mock<OnrampCheckoutCallback>()
+    private val onrampSessionClientSecretProvider: suspend (String) -> String = { "cos_test_secret" }
 
     @Test
     fun performCheckout_successfulPayment_callsCallbackWithCompleted() = runTest {
         // Given
         val onrampSessionId = "cos_test_session_id"
-        val sessionClientSecret = "cos_test_secret"
-        val onrampSessionClientSecretProvider: suspend () -> String = { sessionClientSecret }
 
         val onrampStateFlow = MutableStateFlow(OnrampState())
         val coordinator = createCoordinator(onrampStateFlow)
 
-        // When
-        coordinator.performCheckout(onrampSessionId, onrampSessionClientSecretProvider)
+        coordinator.performCheckout(onrampSessionId)
         testScope.testScheduler.advanceUntilIdle()
 
         // Verify startCheckout was called
-        verify(interactor).startCheckout(onrampSessionId, onrampSessionClientSecretProvider)
+        verify(interactor).startCheckout(onrampSessionId)
 
         // Simulate the interactor emitting a completed checkout state (this will trigger the observer)
         onrampStateFlow.value = OnrampState(
@@ -86,20 +84,23 @@ class OnrampPresenterCoordinatorTest {
 
         whenever(interactor.state).thenReturn(onrampStateFlow)
 
+        val callbacks = OnrampCallbacks()
+            .checkoutCallback(checkoutCallback)
+            .verifyIdentityCallback {}
+            .collectPaymentCallback {}
+            .authorizeCallback {}
+            .verifyKycCallback {}
+            .onrampSessionClientSecretProvider(onrampSessionClientSecretProvider)
+
+        OnrampCallbackReferences[DEFAULT_ONRAMP_INSTANCE_KEY] = callbacks.build()
+
         return OnrampPresenterCoordinator(
             linkController = linkController,
             interactor = interactor,
             lifecycleOwner = lifecycleOwner,
             activity = activity,
-            onrampCallbacks = OnrampCallbacks(
-                checkoutCallback = checkoutCallback,
-                verifyIdentityCallback = {},
-                authenticateUserCallback = {},
-                collectPaymentCallback = {},
-                authorizeCallback = {},
-                verifyKycCallback = {}
-            ),
-            coroutineScope = testScope
+            coroutineScope = testScope,
+            onrampCallbackIdentifier = DEFAULT_ONRAMP_INSTANCE_KEY
         )
     }
 

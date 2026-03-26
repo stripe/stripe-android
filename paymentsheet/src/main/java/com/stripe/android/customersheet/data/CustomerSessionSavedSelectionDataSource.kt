@@ -98,12 +98,9 @@ internal class CustomerSessionSavedSelectionDataSource @Inject constructor(
     ) {
         val paymentMethodId = (selection as? SavedSelection.PaymentMethod)?.id
         customerRepository.setDefaultPaymentMethod(
+            customerId = ephemeralKey.customerId,
+            ephemeralKeySecret = ephemeralKey.ephemeralKey,
             paymentMethodId = paymentMethodId,
-            customerInfo = CustomerRepository.CustomerInfo(
-                id = ephemeralKey.customerId,
-                ephemeralKeySecret = ephemeralKey.ephemeralKey,
-                customerSessionClientSecret = ephemeralKey.customerSessionClientSecret,
-            )
         ).getOrThrow()
     }
 

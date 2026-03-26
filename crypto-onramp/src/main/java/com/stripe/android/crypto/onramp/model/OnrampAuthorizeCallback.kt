@@ -17,7 +17,7 @@ sealed interface OnrampAuthorizeResult {
      * @param customerId The crypto customer id that matches the authenticated account.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    class Consented(
+    class Consented internal constructor(
         val customerId: String
     ) : OnrampAuthorizeResult
 

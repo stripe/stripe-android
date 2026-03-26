@@ -100,6 +100,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Añadir más datos</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_add_payment_method_title">Añadir información de pago</string>
+  <!-- Title shown above a view containing a customer's recently added card -->
+  <string name="stripe_paymentsheet_added_card">Tarjeta añadida</string>
   <!-- Title for a button that when pressed saves the provided address. -->
   <string name="stripe_paymentsheet_address_element_primary_button">Guardar dirección</string>
   <!-- Title for shipping address entry section -->
@@ -213,6 +215,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Guardar esta tarjeta para realizar compras futuras en %s</string>
   <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
   <string name="stripe_paymentsheet_saved">Se ha guardado</string>
+  <!-- Title shown above a view containing a customer's saved card -->
+  <string name="stripe_paymentsheet_saved_card">Tarjeta guardada</string>
   <!-- Title shown above a view containing the customer's cards -->
   <string name="stripe_paymentsheet_select_card">Seleccionar tarjeta</string>
   <!-- Title shown above a view containing the customer's payment methods -->
@@ -257,6 +261,14 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_something_went_wrong">Se ha producido un error</string>
   <!-- Accessibility description when payment button shows a successful transaction animation. -->
   <string name="stripe_successful_transaction_description">Transacción completada</string>
+  <!-- Title shown in success screen shown after a user has added their card bu tapping -->
+  <string name="stripe_tap_to_add_card_added_title">Tarjeta añadida</string>
+  <!-- Button label for a button that launches a flow for tapping a card on the device -->
+  <string name="stripe_tap_to_add_card_button_label">Toca para añadir una tarjeta</string>
+  <!-- Title for screen indicating to the user that they have completed a payment of a specified amount -->
+  <string name="stripe_tap_to_add_paid_label">Pagado %s</string>
+  <!-- Error message shown when Tap to Add is not supported by the current device. -->
+  <string name="stripe_tap_to_add_unsupported_device_error">Tocar para añadir no es compatible con tu dispositivo</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">Cancelar y usar otro método de pago</string>
   <!-- Text on a screen asking the user to approve a payment -->

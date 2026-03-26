@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.confirmation.intent
 
+import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.common.exception.stripeErrorMessage
@@ -9,11 +10,13 @@ import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
+import kotlinx.parcelize.Parcelize
 
 internal class IntentConfirmationDefinition(
     private val intentConfirmationInterceptorFactory: IntentConfirmationInterceptor.Factory,
@@ -38,9 +41,8 @@ internal class IntentConfirmationDefinition(
         val interceptor: IntentConfirmationInterceptor
         try {
             interceptor = intentConfirmationInterceptorFactory.create(
-                integrationMetadata = confirmationArgs.paymentMethodMetadata.integrationMetadata,
-                customerId = paymentMethodMetadata.customerMetadata?.id,
-                ephemeralKeySecret = paymentMethodMetadata.customerMetadata?.ephemeralKeySecret,
+                integrationMetadata = paymentMethodMetadata.integrationMetadata,
+                customerMetadata = paymentMethodMetadata.customerMetadata,
                 clientAttributionMetadata = paymentMethodMetadata.clientAttributionMetadata,
             )
         } catch (e: CallbackNotFoundException) {
@@ -50,20 +52,19 @@ internal class IntentConfirmationDefinition(
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
             )
         }
+        val shippingValues = paymentMethodMetadata.shippingDetails?.toConfirmPaymentIntentShipping()
         return when (confirmationOption) {
             is PaymentMethodConfirmationOption.New ->
                 interceptor.intercept(
                     intent = confirmationArgs.intent,
                     confirmationOption = confirmationOption,
-                    shippingValues = confirmationArgs.paymentMethodMetadata
-                        .shippingDetails?.toConfirmPaymentIntentShipping(),
+                    shippingValues = shippingValues,
                 )
             is PaymentMethodConfirmationOption.Saved ->
                 interceptor.intercept(
                     intent = confirmationArgs.intent,
                     confirmationOption = confirmationOption,
-                    shippingValues = confirmationArgs.paymentMethodMetadata
-                        .shippingDetails?.toConfirmPaymentIntentShipping(),
+                    shippingValues = shippingValues,
                 )
         }
     }
@@ -95,13 +96,17 @@ internal class IntentConfirmationDefinition(
     override fun toResult(
         confirmationOption: PaymentMethodConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
-        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        launcherArgs: Args,
         result: InternalPaymentResult
     ): ConfirmationDefinition.Result {
         return when (result) {
             is InternalPaymentResult.Completed -> ConfirmationDefinition.Result.Succeeded(
                 intent = result.intent,
-                deferredIntentConfirmationType = deferredIntentConfirmationType,
+                metadata = MutableConfirmationMetadata().apply {
+                    launcherArgs.deferredIntentConfirmationType?.let {
+                        set(DeferredIntentConfirmationTypeKey, it)
+                    }
+                }
             )
             is InternalPaymentResult.Failed -> ConfirmationDefinition.Result.Failed(
                 cause = result.throwable,
@@ -128,11 +133,19 @@ internal class IntentConfirmationDefinition(
         }
     }
 
-    sealed interface Args {
+    sealed interface Args : Parcelable {
+        val deferredIntentConfirmationType: DeferredIntentConfirmationType?
+
+        @Parcelize
         data class NextAction(
             val intent: StripeIntent,
+            override val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         ) : Args
 
-        data class Confirm(val confirmNextParams: ConfirmStripeIntentParams) : Args
+        @Parcelize
+        data class Confirm(
+            val confirmNextParams: ConfirmStripeIntentParams,
+            override val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        ) : Args
     }
 }

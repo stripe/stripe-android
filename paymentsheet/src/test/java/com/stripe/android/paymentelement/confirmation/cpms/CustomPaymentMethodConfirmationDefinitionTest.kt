@@ -9,7 +9,9 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.EmptyConfirmationLauncherArgs
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
+import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.asCallbackFor
 import com.stripe.android.paymentelement.confirmation.asCanceled
 import com.stripe.android.paymentelement.confirmation.asFail
@@ -116,8 +118,7 @@ class CustomPaymentMethodConfirmationDefinitionTest {
 
         val launchAction = action.asLaunch()
 
-        assertThat(launchAction.launcherArguments).isEqualTo(Unit)
-        assertThat(launchAction.deferredIntentConfirmationType).isNull()
+        assertThat(launchAction.launcherArguments).isEqualTo(EmptyConfirmationLauncherArgs)
     }
 
     @Test
@@ -128,7 +129,7 @@ class CustomPaymentMethodConfirmationDefinitionTest {
 
         definition.launch(
             launcher = launcher,
-            arguments = Unit,
+            arguments = EmptyConfirmationLauncherArgs,
             confirmationOption = option,
             confirmationArgs = CONFIRMATION_PARAMETERS,
         )
@@ -153,7 +154,7 @@ class CustomPaymentMethodConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = option,
             confirmationArgs = CONFIRMATION_PARAMETERS,
-            deferredIntentConfirmationType = null,
+            launcherArgs = EmptyConfirmationLauncherArgs,
             result = InternalCustomPaymentMethodResult.Completed,
         )
 
@@ -161,7 +162,7 @@ class CustomPaymentMethodConfirmationDefinitionTest {
 
         val succeededResult = result.asSucceeded()
         assertThat(succeededResult.intent).isEqualTo(CONFIRMATION_PARAMETERS.intent)
-        assertThat(succeededResult.deferredIntentConfirmationType).isNull()
+        assertThat(succeededResult.metadata).isEqualTo(MutableConfirmationMetadata())
         assertThat(succeededResult.completedFullPaymentFlow).isTrue()
     }
 
@@ -173,7 +174,7 @@ class CustomPaymentMethodConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = option,
             confirmationArgs = CONFIRMATION_PARAMETERS,
-            deferredIntentConfirmationType = null,
+            launcherArgs = EmptyConfirmationLauncherArgs,
             result = InternalCustomPaymentMethodResult.Failed(exception),
         )
 
@@ -193,7 +194,7 @@ class CustomPaymentMethodConfirmationDefinitionTest {
         val result = definition.toResult(
             confirmationOption = option,
             confirmationArgs = CONFIRMATION_PARAMETERS,
-            deferredIntentConfirmationType = null,
+            launcherArgs = EmptyConfirmationLauncherArgs,
             result = InternalCustomPaymentMethodResult.Canceled,
         )
 

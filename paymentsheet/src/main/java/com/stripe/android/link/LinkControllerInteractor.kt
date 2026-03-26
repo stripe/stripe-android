@@ -33,11 +33,13 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TransformToBankIcon
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.transformBankIconCodeToBankIcon
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.getCardBrandIconForVerticalMode
 import com.stripe.android.paymentsheet.ui.getLinkIcon
+import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.isSystemDarkTheme
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -102,12 +104,15 @@ internal class LinkControllerInteractor @Inject constructor(
         get() = _state.value.paymentMethodMetadata
 
     fun state(context: Context): StateFlow<LinkController.State> {
+        val imageLoader = StripeImageLoader(context)
+        val iconLoader = PaymentSelection.IconLoader(context.resources, imageLoader)
+
         return combineAsStateFlow(_internalLinkAccount, _state) { account, state ->
             LinkController.State(
                 elementsSessionId = state.linkComponent?.configuration?.elementsSessionId,
                 internalLinkAccount = account,
                 merchantLogoUrl = state.linkComponent?.configuration?.merchantLogoUrl,
-                selectedPaymentMethodPreview = state.selectedPaymentMethod?.details?.toPreview(context),
+                selectedPaymentMethodPreview = state.selectedPaymentMethod?.details?.toPreview(context, iconLoader),
                 createdPaymentMethod = state.createdPaymentMethod,
             )
         }
@@ -195,8 +200,7 @@ internal class LinkControllerInteractor @Inject constructor(
                 )
             },
             getLaunchMode = { linkAccount, _ ->
-                // This condition will need to change for web fallback.
-                if (linkAccount?.hasVerifiedSMSSession == true) {
+                if (linkAccount?.isVerified == true) {
                     logger.debug("$tag: account is already verified, skipping authentication")
                     _authenticationResultFlow.tryEmit(LinkController.AuthenticationResult.Success)
                     null
@@ -222,12 +226,16 @@ internal class LinkControllerInteractor @Inject constructor(
                 } else {
                     val customerInfo = config.customerInfo
                         .copy(email = email ?: config.customerInfo.email)
-                    val nameCollectionConfig =
-                        if (paymentMethodType == LinkController.PaymentMethodType.BankAccount) {
+
+                    val nameCollectionConfig = when (paymentMethodType) {
+                        LinkController.PaymentMethodType.BankAccount, null -> {
                             PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
-                        } else {
+                        }
+                        LinkController.PaymentMethodType.Card -> {
                             config.billingDetailsCollectionConfiguration.name
                         }
+                    }
+
                     val billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration
                         .copy(name = nameCollectionConfig)
                     config.copy(
@@ -656,12 +664,14 @@ sealed interface PaymentMethodPreviewDetails {
 
 internal fun PaymentMethodPreviewDetails.toPreview(
     context: Context,
+    iconLoader: PaymentSelection.IconLoader
 ): LinkController.PaymentMethodPreview {
     val label = context.getString(com.stripe.android.R.string.stripe_link)
     val drawableResourceId = getIconDrawableRes(this, context.isSystemDarkTheme())
     val sublabel = buildString {
         val name: ResolvableString
         val last4: String
+
         when (this@toPreview) {
             is PaymentMethodPreviewDetails.Card -> {
                 name = makeFallbackCardName(funding, brand.displayName)
@@ -678,15 +688,33 @@ internal fun PaymentMethodPreviewDetails.toPreview(
         append(last4)
     }
 
+    val type = when (this@toPreview) {
+        is PaymentMethodPreviewDetails.Card -> {
+            LinkController.PaymentMethodType.Card
+        }
+        is PaymentMethodPreviewDetails.BankAccount -> {
+            LinkController.PaymentMethodType.BankAccount
+        }
+    }
+
     return LinkController.PaymentMethodPreview(
-        iconRes = drawableResourceId,
+        imageLoader = {
+            iconLoader.load(
+                drawableResourceId = drawableResourceId,
+                drawableResourceIdNight = null,
+                lightThemeIconUrl = null,
+                darkThemeIconUrl = null,
+            )
+        },
         label = label,
         sublabel = sublabel,
+        type = type
     )
 }
 
 internal fun ConsumerPaymentDetails.PaymentDetails.toPreview(
     context: Context,
+    iconLoader: PaymentSelection.IconLoader
 ): LinkController.PaymentMethodPreview {
     val label = context.getString(com.stripe.android.R.string.stripe_link)
     val sublabel = buildString {
@@ -699,10 +727,27 @@ internal fun ConsumerPaymentDetails.PaymentDetails.toPreview(
     }
     val drawableResourceId = getIconDrawableRes(context.isSystemDarkTheme())
 
+    val type = when (this@toPreview) {
+        is ConsumerPaymentDetails.Card, is ConsumerPaymentDetails.Passthrough -> {
+            LinkController.PaymentMethodType.Card
+        }
+        is ConsumerPaymentDetails.BankAccount -> {
+            LinkController.PaymentMethodType.BankAccount
+        }
+    }
+
     return LinkController.PaymentMethodPreview(
-        iconRes = drawableResourceId,
+        imageLoader = {
+            iconLoader.load(
+                drawableResourceId = drawableResourceId,
+                drawableResourceIdNight = null,
+                lightThemeIconUrl = null,
+                darkThemeIconUrl = null,
+            )
+        },
         label = label,
         sublabel = sublabel,
+        type = type
     )
 }
 

@@ -4,6 +4,7 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.customersheet.util.isUnverifiedUSBankAccount
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -50,7 +51,6 @@ internal class CustomerSheetConfirmationInterceptor @AssistedInject constructor(
             if (paymentMethod.isUnverifiedUSBankAccount()) {
                 return ConfirmationDefinition.Action.Complete(
                     intent = intent.copy(paymentMethod = paymentMethod),
-                    deferredIntentConfirmationType = null,
                     completedFullPaymentFlow = true,
                 )
             }
@@ -129,8 +129,7 @@ internal class CustomerSheetIntentConfirmationInterceptorFactory @Inject constru
 ) : IntentConfirmationInterceptor.Factory {
     override suspend fun create(
         integrationMetadata: IntegrationMetadata,
-        customerId: String?,
-        ephemeralKeySecret: String?,
+        customerMetadata: CustomerMetadata?,
         clientAttributionMetadata: ClientAttributionMetadata
     ): IntentConfirmationInterceptor {
         return when (integrationMetadata) {

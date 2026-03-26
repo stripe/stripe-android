@@ -6,6 +6,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
 import androidx.core.os.BundleCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
@@ -14,12 +15,19 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.Logger
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.isInstanceOf
+import com.stripe.android.model.CancelCaptchaChallengeParams
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.injectableActivityScenario
 import kotlinx.coroutines.test.TestDispatcher
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -117,10 +125,10 @@ internal class IntentConfirmationChallengeActivityTest {
 
     @Test
     fun `finishes with Failed result when bridge handler emits Error event`() = runTest {
-        val error = RuntimeException("Confirmation challenge failed")
+        val error = BridgeException(RuntimeException("Confirmation challenge failed"))
         val bridgeHandler = FakeConfirmationChallengeBridgeHandler()
             .apply {
-                emitEvent(ConfirmationChallengeBridgeEvent.Error(cause = error))
+                emitEvent(ConfirmationChallengeBridgeEvent.Error(error = error))
             }
 
         val scenario = launchActivityWithBridgeHandler(bridgeHandler)
@@ -133,7 +141,30 @@ internal class IntentConfirmationChallengeActivityTest {
         assertThat(result).isInstanceOf<IntentConfirmationChallengeActivityResult.Failed>()
         val failedResult = result as IntentConfirmationChallengeActivityResult.Failed
         assertThat(failedResult.error).isEqualTo(error)
-        assertThat(failedResult.error.message).isEqualTo("Confirmation challenge failed")
+
+        scenario.close()
+    }
+
+    @Test
+    fun `finishes with Canceled result when close is clicked`() = runTest {
+        val bridgeHandler = FakeConfirmationChallengeBridgeHandler()
+
+        val scenario = launchActivityWithBridgeHandler(bridgeHandler)
+
+        // Emit Ready to ensure the UI is loaded
+        bridgeHandler.emitEvent(ConfirmationChallengeBridgeEvent.Ready)
+        advanceUntilIdle()
+
+        // Click the close button
+        composeTestRule
+            .onNodeWithTag(INTENT_CONFIRMATION_CHALLENGE_CLOSE_BUTTON_TAG)
+            .performClick()
+        advanceUntilIdle()
+
+        assertThat(scenario.getResult().resultCode).isEqualTo(IntentConfirmationChallengeActivity.RESULT_COMPLETE)
+
+        val result = extractActivityResult(scenario)
+        assertThat(result).isInstanceOf<IntentConfirmationChallengeActivityResult.Canceled>()
 
         scenario.close()
     }
@@ -178,11 +209,52 @@ internal class IntentConfirmationChallengeActivityTest {
         scenario.close()
     }
 
+    @Test
+    fun `analytics start event is fired when activity starts`() = runTest {
+        val bridgeHandler = FakeConfirmationChallengeBridgeHandler()
+        val analyticsReporter = FakeIntentConfirmationChallengeAnalyticsEventReporter()
+
+        val factory = object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return IntentConfirmationChallengeViewModel(
+                    args = createTestArgs(),
+                    bridgeHandler = bridgeHandler,
+                    workContext = testDispatcher,
+                    analyticsEventReporter = analyticsReporter,
+                    userAgent = "fake-user-agent",
+                    stripeRepository = object : AbsFakeStripeRepository() {},
+                    errorReporter = FakeErrorReporter(),
+                    requestOptions = ApiRequest.Options("pk_test_123"),
+                    fireAndForgetScope = TestScope(testDispatcher),
+                    logger = Logger.noop(),
+                ) as T
+            }
+        }
+
+        val scenario = injectableActivityScenario<IntentConfirmationChallengeActivity> {
+            injectActivity {
+                viewModelFactory = factory
+            }
+        }.apply {
+            launchForResult(createIntent())
+        }
+
+        advanceUntilIdle()
+
+        assertThat(analyticsReporter.calls.first()).isEqualTo(
+            FakeIntentConfirmationChallengeAnalyticsEventReporter.Call.Start("hcaptcha")
+        )
+
+        scenario.close()
+    }
+
     private fun createTestArgs(): IntentConfirmationChallengeArgs {
         return IntentConfirmationChallengeArgs(
             publishableKey = "pk_test_123",
             intent = PaymentIntentFixtures.PI_SUCCEEDED,
-            productUsage = listOf("PaymentSheet")
+            productUsage = listOf("PaymentSheet"),
+            captchaVendorName = "hcaptcha"
         )
     }
 
@@ -193,8 +265,24 @@ internal class IntentConfirmationChallengeActivityTest {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return IntentConfirmationChallengeViewModel(
+                    args = createTestArgs(),
                     bridgeHandler = bridgeHandler,
-                    workContext = testDispatcher
+                    workContext = testDispatcher,
+                    analyticsEventReporter = FakeIntentConfirmationChallengeAnalyticsEventReporter(),
+                    userAgent = "fake-user-agent",
+                    stripeRepository = object : AbsFakeStripeRepository() {
+                        override suspend fun cancelPaymentIntentCaptchaChallenge(
+                            paymentIntentId: String,
+                            params: CancelCaptchaChallengeParams,
+                            requestOptions: ApiRequest.Options
+                        ): Result<PaymentIntent> {
+                            return Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
+                        }
+                    },
+                    errorReporter = FakeErrorReporter(),
+                    requestOptions = ApiRequest.Options("pk_test_123"),
+                    fireAndForgetScope = TestScope(testDispatcher),
+                    logger = Logger.noop(),
                 ) as T
             }
         }

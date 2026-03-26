@@ -11,9 +11,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal data class StartIdentityVerificationRequest(
-
     val credentials: CryptoCustomerRequestParams.Credentials,
-
     @SerialName("is_mobile")
     val isMobile: Boolean = true
 )

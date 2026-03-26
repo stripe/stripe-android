@@ -26,7 +26,8 @@ internal class PassiveChallengeWarmerViewModelTest {
 
     private val testPassiveCaptchaParams = PassiveCaptchaParams(
         siteKey = "test_site_key",
-        rqData = "test_rq_data"
+        rqData = "test_rq_data",
+        tokenTimeoutSeconds = null
     )
 
     @Test

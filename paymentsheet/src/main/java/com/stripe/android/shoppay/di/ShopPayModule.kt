@@ -102,10 +102,8 @@ internal interface ShopPayModule {
         @Provides
         fun provideShopPayHandlers(
             @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String
-        ): ShopPayHandlers {
-            return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]
-                ?.shopPayHandlers
-                ?: throw IllegalStateException("ShopPayHandlers not found")
+        ): ShopPayHandlers? {
+            return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.shopPayHandlers
         }
 
         @OptIn(SharedPaymentTokenSessionPreview::class)

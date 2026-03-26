@@ -13,6 +13,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferen
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.TermsDisplay
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -31,11 +32,11 @@ internal data class CommonConfiguration(
     val paymentMethodOrder: List<String>,
     val externalPaymentMethods: List<String>,
     val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
-    private val allowedCardFundingTypes: List<PaymentSheet.CardFundingType>,
+    internal val allowedCardFundingTypes: List<PaymentSheet.CardFundingType>,
     val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
     val shopPayConfiguration: PaymentSheet.ShopPayConfiguration?,
     val googlePlacesApiKey: String?,
-    val linkAppearance: LinkAppearance? = null,
+    val linkAppearance: LinkAppearance.State? = null,
     val termsDisplay: Map<PaymentMethod.Type, TermsDisplay>,
     val walletButtons: PaymentSheet.WalletButtonsConfiguration?,
     val opensCardScannerAutomatically: Boolean,
@@ -48,8 +49,13 @@ internal data class CommonConfiguration(
         return ConfigurationDefaults.allowedCardFundingTypes
     }
 
-    fun validate(isLiveMode: Boolean, @PaymentElementCallbackIdentifier callbackIdentifier: String) {
+    fun validate(
+        initializationMode: PaymentElementLoader.InitializationMode,
+        isLiveMode: Boolean,
+        @PaymentElementCallbackIdentifier callbackIdentifier: String,
+    ) {
         customerAndMerchantValidate()
+        checkoutSessionValidate(initializationMode)
         externalPaymentMethodsValidate(isLiveMode)
         confirmationTokenValidate(isLiveMode, callbackIdentifier)
 
@@ -74,6 +80,32 @@ internal data class CommonConfiguration(
                         " the Customer ID cannot be an empty string."
                 )
             }
+        }
+    }
+
+    @Suppress("ThrowsCount")
+    private fun checkoutSessionValidate(initializationMode: PaymentElementLoader.InitializationMode) {
+        if (initializationMode !is PaymentElementLoader.InitializationMode.CheckoutSession) return
+        if (customer != null) {
+            throw IllegalArgumentException(
+                "configuration.customer must not be set when using CheckoutSession initialization mode. " +
+                    "Customer information is provided by the checkout session."
+            )
+        }
+        if (defaultBillingDetails?.email == null) {
+            throw IllegalArgumentException(
+                "configuration.defaultBillingDetails.email must be set when using CheckoutSession initialization mode."
+            )
+        }
+        if (externalPaymentMethods.isNotEmpty()) {
+            throw IllegalArgumentException(
+                "configuration.externalPaymentMethods must not be set when using CheckoutSession initialization mode."
+            )
+        }
+        if (customPaymentMethods.isNotEmpty()) {
+            throw IllegalArgumentException(
+                "configuration.customPaymentMethods must not be set when using CheckoutSession initialization mode."
+            )
         }
     }
 

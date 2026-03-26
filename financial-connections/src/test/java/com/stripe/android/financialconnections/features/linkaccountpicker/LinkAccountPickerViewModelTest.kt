@@ -30,7 +30,6 @@ import com.stripe.android.financialconnections.model.NetworkedAccountsList
 import com.stripe.android.financialconnections.model.ReturningNetworkingUserAccountPicker
 import com.stripe.android.financialconnections.model.ShareNetworkedAccountsResponse
 import com.stripe.android.financialconnections.model.TextUpdate
-import com.stripe.android.financialconnections.navigation.Destination.LinkStepUpVerification
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.uicore.navigation.PopUpToBehavior
@@ -227,51 +226,6 @@ class LinkAccountPickerViewModelTest {
         val destination = accounts.data.first().nextPaneOnSelection!!.destination
         navigationManager.assertNavigatedTo(destination, Pane.LINK_ACCOUNT_PICKER)
     }
-
-    @Test
-    fun `onSelectAccountClick - if next pane is step up, caches accounts and navigates`() =
-        runTest {
-            val accounts = NetworkedAccountsList(
-                data = listOf(
-                    partnerAccount().copy(
-                        id = "id1",
-                        nextPaneOnSelection = Pane.LINK_STEP_UP_VERIFICATION
-                    )
-                ),
-                display = display(
-                    listOf(
-                        NetworkedAccount(
-                            id = "id1",
-                            allowSelection = true
-                        ),
-                    )
-                )
-            )
-            val selectedAccount = accounts.data.first()
-            whenever(getSync()).thenReturn(syncResponse())
-            whenever(fetchNetworkedAccounts(any())).thenReturn(accounts)
-            whenever(
-                selectNetworkedAccounts(
-                    consumerSessionClientSecret = any(),
-                    selectedAccountIds = any(),
-                    consentAcquired = any()
-                )
-            ).thenReturn(
-                ShareNetworkedAccountsResponse(
-                    nextPane = null,
-                    display = null,
-                )
-            )
-
-            val viewModel = buildViewModel(LinkAccountPickerState())
-
-            viewModel.onAccountClick(selectedAccount)
-            viewModel.onSelectAccountsClick()
-
-            verify(updateCachedAccounts).invoke(listOf(selectedAccount))
-            verifyNoInteractions(selectNetworkedAccounts)
-            navigationManager.assertNavigatedTo(LinkStepUpVerification, Pane.LINK_ACCOUNT_PICKER)
-        }
 
     @Test
     fun `init - first selectable account is pre-selected`() = runTest {

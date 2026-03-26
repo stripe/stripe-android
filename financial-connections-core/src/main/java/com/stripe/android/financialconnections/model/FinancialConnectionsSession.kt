@@ -37,37 +37,27 @@ data class FinancialConnectionsSession
 constructor(
     @SerialName("client_secret")
     val clientSecret: String,
-
     @SerialName("id")
     val id: String,
-
     @SerialName("linked_accounts")
     internal val accountsOld: FinancialConnectionsAccountList? = null,
-
     @SerialName("accounts")
     internal val accountsNew: FinancialConnectionsAccountList? = null,
-
     @SerialName("livemode")
     val livemode: Boolean,
-
     @SerialName("payment_account")
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     val paymentAccount: PaymentAccount? = null,
-
     @SerialName("return_url")
     val returnUrl: String? = null,
-
     @SerialName("bank_account_token")
     @Serializable(with = JsonAsStringSerializer::class)
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     val bankAccountToken: String? = null,
-
     @SerialName(value = "manual_entry")
     val manualEntry: ManualEntry? = null,
-
     @SerialName(value = "status")
     val status: Status? = null,
-
     @SerialName(value = "status_details")
     val statusDetails: StatusDetails? = null
 ) : StripeModel, Parcelable {
@@ -112,16 +102,13 @@ constructor(
     @Serializable
     @Parcelize
     data class StatusDetails(
-
         @SerialName(value = "cancelled") val cancelled: Cancelled? = null
     ) : Parcelable {
         @Serializable
         @Parcelize
         data class Cancelled(
-
             /* The reason for the Session being cancelled. */
             @SerialName(value = "reason") val reason: Reason
-
         ) : Parcelable {
             @Serializable(with = Reason.Serializer::class)
             enum class Reason(val value: String) {

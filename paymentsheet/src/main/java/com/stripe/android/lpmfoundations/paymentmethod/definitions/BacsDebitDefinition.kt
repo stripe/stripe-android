@@ -28,7 +28,9 @@ internal object BacsDebitDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = true
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = BacsDebitUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = BacsDebitUiDefinitionFactory
 }
 
 private object BacsDebitUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDataSpec {

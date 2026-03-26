@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.intent
 
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -30,8 +31,7 @@ internal interface IntentConfirmationInterceptor {
     interface Factory {
         suspend fun create(
             integrationMetadata: IntegrationMetadata,
-            customerId: String?,
-            ephemeralKeySecret: String?,
+            customerMetadata: CustomerMetadata?,
             clientAttributionMetadata: ClientAttributionMetadata,
         ): IntentConfirmationInterceptor
     }
@@ -48,11 +48,11 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
     private val deferredIntentConfirmationInterceptorFactory: DeferredIntentConfirmationInterceptor.Factory,
     private val confirmationTokenConfirmationInterceptorFactory: ConfirmationTokenConfirmationInterceptor.Factory,
     private val sharedPaymentTokenConfirmationInterceptorFactory: SharedPaymentTokenConfirmationInterceptor.Factory,
+    private val checkoutSessionConfirmationInterceptorFactory: CheckoutSessionConfirmationInterceptor.Factory,
 ) : IntentConfirmationInterceptor.Factory {
     override suspend fun create(
         integrationMetadata: IntegrationMetadata,
-        customerId: String?,
-        ephemeralKeySecret: String?,
+        customerMetadata: CustomerMetadata?,
         clientAttributionMetadata: ClientAttributionMetadata,
     ): IntentConfirmationInterceptor {
         return when (integrationMetadata) {
@@ -65,23 +65,22 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
                 // CryptoOnRamp doesn't call confirm.
                 throw IllegalStateException("No intent confirmation interceptor for CryptoOnramp.")
             }
-            is IntegrationMetadata.DeferredIntentWithConfirmationToken -> {
+            is IntegrationMetadata.DeferredIntent.WithConfirmationToken -> {
                 confirmationTokenConfirmationInterceptorFactory.create(
                     intentConfiguration = integrationMetadata.intentConfiguration,
                     createIntentCallback = deferredIntentCallbackRetriever.waitForConfirmationTokenCallback(),
-                    customerId = customerId,
-                    ephemeralKeySecret = ephemeralKeySecret,
+                    customerMetadata = customerMetadata,
                     clientAttributionMetadata = clientAttributionMetadata,
                 )
             }
-            is IntegrationMetadata.DeferredIntentWithPaymentMethod -> {
+            is IntegrationMetadata.DeferredIntent.WithPaymentMethod -> {
                 deferredIntentConfirmationInterceptorFactory.create(
                     intentConfiguration = integrationMetadata.intentConfiguration,
                     createIntentCallback = deferredIntentCallbackRetriever.waitForPaymentMethodCallback(),
                     clientAttributionMetadata = clientAttributionMetadata,
                 )
             }
-            is IntegrationMetadata.DeferredIntentWithSharedPaymentToken -> {
+            is IntegrationMetadata.DeferredIntent.WithSharedPaymentToken -> {
                 sharedPaymentTokenConfirmationInterceptorFactory.create(
                     intentConfiguration = integrationMetadata.intentConfiguration,
                     handler = deferredIntentCallbackRetriever.waitForSharedPaymentTokenCallback(),
@@ -90,6 +89,13 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
             is IntegrationMetadata.IntentFirst -> {
                 intentFirstConfirmationInterceptorFactory.create(
                     clientSecret = integrationMetadata.clientSecret,
+                    clientAttributionMetadata = clientAttributionMetadata,
+                )
+            }
+            is IntegrationMetadata.CheckoutSession -> {
+                checkoutSessionConfirmationInterceptorFactory.create(
+                    integrationMetadata = integrationMetadata,
+                    customerMetadata = customerMetadata,
                     clientAttributionMetadata = clientAttributionMetadata,
                 )
             }

@@ -37,7 +37,6 @@ internal class DefaultCustomerSheetAttachPaymentMethodInterceptor(
                 onSuccess = {
                     ConfirmationDefinition.Action.Complete(
                         intent = intent.copy(paymentMethod = paymentMethod),
-                        deferredIntentConfirmationType = null,
                         completedFullPaymentFlow = true,
                     )
                 },

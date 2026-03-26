@@ -35,7 +35,7 @@ constructor(
     private val upi: Upi? = null,
     private val netbanking: Netbanking? = null,
     private val usBankAccount: USBankAccount? = null,
-    private val link: Link? = null,
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val link: Link? = null,
     private val cashAppPay: CashAppPay? = null,
     private val swish: Swish? = null,
     private val shopPay: ShopPay? = null,
@@ -45,7 +45,6 @@ constructor(
     private val metadata: Map<String, String>? = null,
     private val productUsage: Set<String> = emptySet(),
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val clientAttributionMetadata: ClientAttributionMetadata? = null,
-
     /**
      * If provided, will be used as the representation of this object when calling the Stripe API,
      * instead of generating the map from its content.
@@ -600,7 +599,6 @@ constructor(
          * The bank account number (e.g. 00012345)
          */
         var accountNumber: String,
-
         /**
          * The sort code of the bank account (e.g. 10-88-00)
          */
@@ -732,11 +730,25 @@ constructor(
 
     @Parcelize
     @Poko
-    class Link(
+    class Link internal constructor(
         internal var paymentDetailsId: String,
         internal var consumerSessionClientSecret: String,
-        internal var extraParams: Map<String, @RawValue Any>? = null
+        internal var extraParams: Map<String, @RawValue Any>? = null,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val originalPaymentMethodCode: PaymentMethodCode? = null,
     ) : StripeParamsModel, Parcelable {
+
+        constructor(
+            paymentDetailsId: String,
+            consumerSessionClientSecret: String,
+            extraParams: Map<String, @RawValue Any>? = null
+        ) : this(
+            paymentDetailsId = paymentDetailsId,
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            extraParams = extraParams,
+            originalPaymentMethodCode = null
+        )
+
         override fun toParamMap(): Map<String, Any> {
             return mapOf(
                 PARAM_PAYMENT_DETAILS_ID to paymentDetailsId,
@@ -1399,6 +1411,51 @@ constructor(
             )
         }
 
+        @JvmStatic
+        @JvmOverloads
+        fun createTwint(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.Twint,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun createWero(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.Wero,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun createPayByBank(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.PayByBank,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+            )
+        }
+
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun createLink(
             paymentDetailsId: String,
@@ -1407,13 +1464,15 @@ constructor(
             billingDetails: PaymentMethod.BillingDetails? = null,
             extraParams: Map<String, @RawValue Any>? = null,
             allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+            originalPaymentMethodCode: PaymentMethodCode? = null
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = PaymentMethod.Type.Link,
                 link = Link(
                     paymentDetailsId = paymentDetailsId,
                     consumerSessionClientSecret = consumerSessionClientSecret,
-                    extraParams = extraParams
+                    extraParams = extraParams,
+                    originalPaymentMethodCode = originalPaymentMethodCode
                 ),
                 allowRedisplay = allowRedisplay,
                 billingDetails = billingDetails,

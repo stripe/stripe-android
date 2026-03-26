@@ -24,11 +24,13 @@ internal object BlikDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = BlikUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = BlikUiDefinitionFactory
 }
 
 private object BlikUiDefinitionFactory : UiDefinitionFactory.Simple() {
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         paymentMethodDefinition = BlikDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_blik,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_blik,

@@ -21,11 +21,13 @@ internal object BillieDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = BillieUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = BillieUiDefinitionFactory
 }
 
 private object BillieUiDefinitionFactory : UiDefinitionFactory.Simple() {
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         paymentMethodDefinition = BillieDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_billie,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_billie_day,

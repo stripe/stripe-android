@@ -408,7 +408,7 @@ class DefaultAddPaymentMethodInteractorTest {
         val onFormFieldValuesChangedTurbine: ReceiveTurbine<Pair<FormFieldValues?, String>>,
         val clearErrorMessagesTurbine: ReceiveTurbine<Unit>,
         val reportPaymentMethodTypeSelectedTurbine: ReceiveTurbine<PaymentMethodCode>,
-        val initialVisibilityTrackerTurbine: ReceiveTurbine<Pair<List<String>, List<String>>>
+        val initialVisibilityTrackerTurbine: ReceiveTurbine<Pair<List<String>, List<String>>>,
     ) {
         fun ensureAllEventsConsumed() {
             reportFieldInteractionTurbine.ensureAllEventsConsumed()

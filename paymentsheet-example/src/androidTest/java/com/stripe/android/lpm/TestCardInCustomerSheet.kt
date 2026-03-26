@@ -16,6 +16,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.CustomerSheet
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.GooglePayMode
 import com.stripe.android.paymentsheet.example.playground.settings.GooglePaySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodMode
 import com.stripe.android.test.core.AuthorizeAction
@@ -32,7 +33,7 @@ internal class TestCardInCustomerSheet : BasePlaygroundTest() {
     ).copyPlaygroundSettings { settings ->
         settings[CustomerSettingsDefinition] = CustomerType.NEW
         settings[CustomerSheetPaymentMethodModeDefinition] = PaymentMethodMode.CreateAndAttach
-        settings[GooglePaySettingsDefinition] = false
+        settings[GooglePaySettingsDefinition] = GooglePayMode.Off
     }
 
     @Test
@@ -83,9 +84,8 @@ internal class TestCardInCustomerSheet : BasePlaygroundTest() {
                 settings[CustomerSheetPaymentMethodModeDefinition] = PaymentMethodMode.SetupIntent
                 settings[CustomerSessionOnBehalfOfSettingsDefinition] =
                     CustomerSessionOnBehalfOfSettingsDefinition.OnBehalfOf.FR_CONNECTED_ACCOUNT
-                settings[GooglePaySettingsDefinition] = false
+                settings[GooglePaySettingsDefinition] = GooglePayMode.Off
             },
-
             populateCustomLpmFields = {
                 populateCardBrandChoiceCardDetails(null)
             },
@@ -96,14 +96,13 @@ internal class TestCardInCustomerSheet : BasePlaygroundTest() {
     fun testCardWithOBO_UseCartesBancaires() {
         testDriver.savePaymentMethodInCustomerSheet(
             testParameters = testParameters.copyPlaygroundSettings { settings ->
-                settings[GooglePaySettingsDefinition] = false
+                settings[GooglePaySettingsDefinition] = GooglePayMode.Off
                 settings[MerchantSettingsDefinition] = Merchant.US
                 settings[CustomerSessionOnBehalfOfSettingsDefinition] =
                     CustomerSessionOnBehalfOfSettingsDefinition.OnBehalfOf.FR_CONNECTED_ACCOUNT
                 settings[CustomerSessionSettingsDefinition] = true
                 settings[CustomerSheetPaymentMethodModeDefinition] = PaymentMethodMode.SetupIntent
             },
-
             populateCustomLpmFields = {
                 populateCardBrandChoiceCardDetails("Cartes Bancaires")
             },
@@ -120,9 +119,8 @@ internal class TestCardInCustomerSheet : BasePlaygroundTest() {
                 settings[CustomerSheetPaymentMethodModeDefinition] = PaymentMethodMode.SetupIntent
                 settings[CustomerSessionOnBehalfOfSettingsDefinition] =
                     CustomerSessionOnBehalfOfSettingsDefinition.OnBehalfOf.FR_CONNECTED_ACCOUNT
-                settings[GooglePaySettingsDefinition] = false
+                settings[GooglePaySettingsDefinition] = GooglePayMode.Off
             },
-
             populateCustomLpmFields = {
                 populateCardBrandChoiceCardDetails("Visa")
             },

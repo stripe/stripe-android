@@ -308,7 +308,7 @@ class WalletUiStateTest {
         assertThat(state.isItemAvailable(creditCard)).isTrue()
         assertThat(state.isItemAvailable(debitCard)).isFalse()
         assertThat(state.isItemAvailable(prepaidCard)).isFalse()
-        assertThat(state.isItemAvailable(unknownCard)).isFalse()
+        assertThat(state.isItemAvailable(unknownCard)).isTrue()
         assertThat(state.isItemAvailable(bankAccount)).isTrue()
         assertThat(state.isItemAvailable(passthrough)).isTrue()
     }

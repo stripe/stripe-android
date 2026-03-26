@@ -566,7 +566,6 @@ private fun InstitutionResultShimmer(modifier: Modifier) {
                         .height(16.dp)
                         .clip(RoundedCornerShape(6.dp))
                         .background(shimmer)
-
                 )
                 Spacer(modifier = Modifier.size(8.dp))
                 Box(

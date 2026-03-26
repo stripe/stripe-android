@@ -4,8 +4,7 @@ import android.app.Application
 import androidx.activity.ComponentActivity
 import androidx.annotation.RestrictTo
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.crypto.onramp.di.DaggerOnrampComponent
-import com.stripe.android.crypto.onramp.di.OnrampComponent
+import com.stripe.android.crypto.onramp.di.OnrampComponentHolder
 import com.stripe.android.crypto.onramp.di.OnrampPresenterComponent
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
@@ -21,7 +20,7 @@ import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampTokenAuthenticationResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
-import com.stripe.android.crypto.onramp.model.PaymentMethodType
+import com.stripe.android.crypto.onramp.model.PaymentMethodSelection
 import com.stripe.android.paymentsheet.PaymentSheet
 import javax.inject.Inject
 
@@ -46,7 +45,7 @@ class OnrampCoordinator @Inject internal constructor(
     suspend fun configure(
         configuration: OnrampConfiguration,
     ): OnrampConfigurationResult {
-        return interactor.configure(configuration)
+        return interactor.configure(configuration.build())
     }
 
     /**
@@ -136,19 +135,16 @@ class OnrampCoordinator @Inject internal constructor(
      * Create a presenter for handling Link UI interactions.
      *
      * @param activity The activity that will host the Link flows.
-     * @param onrampCallbacks Callbacks for handling asynchronous responses from UI operations.
      * @return A presenter instance for handling Link UI operations.
      */
     fun createPresenter(
-        activity: ComponentActivity,
-        onrampCallbacks: OnrampCallbacks
+        activity: ComponentActivity
     ): Presenter {
         return presenterComponentFactory
             .build(
                 activity = activity,
                 lifecycleOwner = activity,
                 activityResultRegistryOwner = activity,
-                onrampCallbacks = onrampCallbacks,
             )
             .presenter
     }
@@ -160,14 +156,6 @@ class OnrampCoordinator @Inject internal constructor(
     class Presenter @Inject internal constructor(
         private val coordinator: OnrampPresenterCoordinator,
     ) {
-        /**
-         * Presents Link UI to authenticate an existing Link user.
-         * Requires successful lookup or registration of the user first.
-         */
-        fun authenticateUser() {
-            coordinator.authenticateUser()
-        }
-
         /**
          * Creates an identity verification session and launches the document verification flow.
          * Requires an authenticated Link user.
@@ -190,12 +178,12 @@ class OnrampCoordinator @Inject internal constructor(
         }
 
         /**
-         * Presents UI to collect/select a payment method of the given type.
+         * Presents UI to collect/select a payment method.
          *
-         * @param type The payment method type to collect.
+         * @param selection The payment method to collect.
          */
-        fun collectPaymentMethod(type: PaymentMethodType) {
-            coordinator.collectPaymentMethod(type)
+        fun collectPaymentMethod(selection: PaymentMethodSelection) {
+            coordinator.collectPaymentMethod(selection)
         }
 
         /**
@@ -212,20 +200,11 @@ class OnrampCoordinator @Inject internal constructor(
          * The result will be delivered through the checkoutCallback provided in OnrampCallbacks.
          *
          * @param onrampSessionId The onramp session identifier.
-         * @param checkoutHandler An async closure that calls your backend to perform a checkout.
-         *     Your backend should call Stripe's `/v1/crypto/onramp_sessions/:id/checkout`
-         *     endpoint with the onramp session ID. The closure should return the onramp session client secret
-         *     on success, or throw an Error on failure. This closure may be called twice: once initially,
-         *     and once more after handling any required authentication.
          */
         fun performCheckout(
             onrampSessionId: String,
-            checkoutHandler: suspend () -> String
         ) {
-            coordinator.performCheckout(
-                onrampSessionId = onrampSessionId,
-                checkoutHandler = checkoutHandler
-            )
+            coordinator.performCheckout(onrampSessionId = onrampSessionId)
         }
     }
 
@@ -242,14 +221,19 @@ class OnrampCoordinator @Inject internal constructor(
          */
         fun build(
             application: Application,
-            savedStateHandle: SavedStateHandle
+            savedStateHandle: SavedStateHandle,
+            onrampCallbacks: OnrampCallbacks
         ): OnrampCoordinator {
-            val onrampComponent: OnrampComponent =
-                DaggerOnrampComponent.factory()
-                    .build(
-                        application = application,
-                        savedStateHandle = savedStateHandle
-                    )
+            val onrampComponent = OnrampComponentHolder.getOrCreate(
+                application = application,
+                savedStateHandle = savedStateHandle,
+            )
+
+            // Register callbacks eagerly so they're available for activity result
+            // redelivery at onStart(), before Compose's first frame.
+            OnrampCallbackReferences[onrampComponent.onrampCallbackIdentifier] =
+                onrampCallbacks.build()
+
             return onrampComponent.onrampCoordinator
         }
     }

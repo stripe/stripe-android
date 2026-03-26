@@ -43,6 +43,26 @@ internal object PaymentIntentFixtures {
         requireNotNull(PARSER.parse(PI_SUCCEEDED_JSON))
     }
 
+    private val PI_WITH_NULL_ID_JSON by lazy {
+        JSONObject(
+            """
+        {
+            "object": "payment_intent",
+            "amount": 1099,
+            "client_secret": "pi_1IRg6VCRMbs6F_secret_7oH5g4v8GaCrHfsGYS6kiSnwF",
+            "currency": "usd",
+            "livemode": false,
+            "payment_method_types": ["card"],
+            "status": "succeeded"
+        }
+            """.trimIndent()
+        )
+    }
+
+    val PI_WITH_NULL_ID by lazy {
+        requireNotNull(PARSER.parse(PI_WITH_NULL_ID_JSON))
+    }
+
     val PI_VISA_3DS2_JSON by lazy {
         JSONObject(
             """
@@ -195,7 +215,6 @@ internal object PaymentIntentFixtures {
 
     val PI_REQUIRES_MASTERCARD_3DS2_JSON by lazy {
         JSONObject(
-
             """
         {
             "id": "pi_1ExkUeAWhjPjYwPiXph9ouXa",
@@ -1401,7 +1420,6 @@ internal object PaymentIntentFixtures {
 
     val LLAMAPAY_REQUIRES_ACTION_JSON by lazy {
         JSONObject(
-
             """
         {
             "id": "pi_1IcuwoL32KlRo",
@@ -1459,7 +1477,6 @@ internal object PaymentIntentFixtures {
 
     val KONBINI_REQUIRES_ACTION_JSON by lazy {
         JSONObject(
-
             """
         {
             "id": "pi_1IcuwoL32KlRo",

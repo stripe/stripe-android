@@ -37,7 +37,6 @@ class SourceJsonParserTest {
                 verifiedEmail = "jenny.rosen@example.com",
                 verifiedName = "Jenny Rosen",
                 verifiedPhone = "4158675309"
-
             )
         )
     }

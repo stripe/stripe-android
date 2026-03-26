@@ -258,7 +258,7 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
                     params[FIELD_SYNC_DEFAULT_ENABLED] = isPaymentMethodSyncDefaultEnabled
                     if (isPaymentMethodSyncDefaultEnabled) {
                         params[FIELD_HAS_DEFAULT_PAYMENT_METHOD] =
-                            customerSheetSession.elementsSession.customer?.defaultPaymentMethod != null
+                            customerSheetSession.elementsSession.customer.defaultPaymentMethod != null
                     }
                 }
                 return params

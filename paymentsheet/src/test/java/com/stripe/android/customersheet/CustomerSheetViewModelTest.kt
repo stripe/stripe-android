@@ -784,7 +784,6 @@ class CustomerSheetViewModelTest {
                     intent = SetupIntentFactory.create(
                         paymentMethod = CARD_PAYMENT_METHOD
                     ),
-                    deferredIntentConfirmationType = null,
                 )
             )
             assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
@@ -813,7 +812,6 @@ class CustomerSheetViewModelTest {
             awaitResultTurbine.add(
                 ConfirmationHandler.Result.Succeeded(
                     intent = SetupIntentFactory.create(CARD_PAYMENT_METHOD),
-                    deferredIntentConfirmationType = null,
                 )
             )
 
@@ -852,7 +850,6 @@ class CustomerSheetViewModelTest {
                     intent = SetupIntentFactory.create(
                         paymentMethod = CARD_PAYMENT_METHOD,
                     ),
-                    deferredIntentConfirmationType = null,
                 )
             )
 
@@ -1003,7 +1000,6 @@ class CustomerSheetViewModelTest {
             awaitResultTurbine.add(
                 ConfirmationHandler.Result.Succeeded(
                     intent = SetupIntentFactory.create(CARD_PAYMENT_METHOD),
-                    deferredIntentConfirmationType = null,
                 )
             )
 
@@ -1550,7 +1546,6 @@ class CustomerSheetViewModelTest {
                 intent = SetupIntentFactory.create(
                     paymentMethod = PaymentMethodFactory.card(),
                 ),
-                deferredIntentConfirmationType = null,
             )
         )
 
@@ -1623,7 +1618,6 @@ class CustomerSheetViewModelTest {
                 intent = SetupIntentFactory.create(
                     paymentMethod = PaymentMethodFactory.card(),
                 ),
-                deferredIntentConfirmationType = null,
             )
         )
 
@@ -1863,19 +1857,19 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `When 'paymentMethodOrder' is defined, initial shown payment method should be first from 'paymentMethodOrder'`() =
+    fun `Initial shown payment method should be first from supportedPaymentMethods`() =
         runTest(testDispatcher) {
             val viewModel = createViewModel(
                 workContext = testDispatcher,
                 customerSheetLoader = FakeCustomerSheetLoader(
                     customerPaymentMethods = listOf(),
                     isGooglePayAvailable = false,
+                    supportedPaymentMethods = listOf(
+                        LpmRepositoryTestHelpers.usBankAccount,
+                        LpmRepositoryTestHelpers.card,
+                    ),
                     stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD_WITH_US_BANK_ACCOUNT,
                 ),
-                configuration = CustomerSheet.Configuration(
-                    merchantDisplayName = "Merchant, Inc.",
-                    paymentMethodOrder = listOf("us_bank_account", "card")
-                )
             )
 
             viewModel.viewState.test {
@@ -1985,7 +1979,6 @@ class CustomerSheetViewModelTest {
                     intent = SetupIntentFactory.create(
                         paymentMethod = US_BANK_ACCOUNT_VERIFIED,
                     ),
-                    deferredIntentConfirmationType = null,
                 )
             )
 
@@ -2437,7 +2430,6 @@ class CustomerSheetViewModelTest {
                     intent = SetupIntentFactory.create(
                         paymentMethod = CARD_PAYMENT_METHOD,
                     ),
-                    deferredIntentConfirmationType = null,
                 )
             )
 
@@ -2479,7 +2471,6 @@ class CustomerSheetViewModelTest {
                     intent = SetupIntentFactory.create(
                         paymentMethod = US_BANK_ACCOUNT,
                     ),
-                    deferredIntentConfirmationType = null,
                 )
             )
 
@@ -2657,7 +2648,6 @@ class CustomerSheetViewModelTest {
                         intent = SetupIntentFactory.create(
                             paymentMethod = CARD_WITH_NETWORKS_PAYMENT_METHOD,
                         ),
-                        deferredIntentConfirmationType = null,
                     )
                 )
 
@@ -2975,7 +2965,6 @@ class CustomerSheetViewModelTest {
             awaitResultTurbine.add(
                 ConfirmationHandler.Result.Succeeded(
                     intent = SetupIntentFactory.create(acceptedCardPaymentMethod),
-                    deferredIntentConfirmationType = null,
                 )
             )
 
@@ -2984,7 +2973,7 @@ class CustomerSheetViewModelTest {
                 currentState = awaitItem()
             }
 
-            val selectPaymentMethodState = currentState as SelectPaymentMethod
+            val selectPaymentMethodState = currentState
 
             // Should only include the accepted card payment method
             assertThat(selectPaymentMethodState.savedPaymentMethods).hasSize(1)
@@ -3174,7 +3163,6 @@ class CustomerSheetViewModelTest {
                         intent = SetupIntentFactory.create(
                             paymentMethod = attachedPaymentMethod,
                         ),
-                        deferredIntentConfirmationType = null,
                     )
                 )
 
@@ -3215,7 +3203,6 @@ class CustomerSheetViewModelTest {
                         intent = SetupIntentFactory.create(
                             paymentMethod = attachedPaymentMethod,
                         ),
-                        deferredIntentConfirmationType = null,
                     )
                 )
 
@@ -3450,7 +3437,6 @@ class CustomerSheetViewModelTest {
                     intent = SetupIntentFactory.create(
                         paymentMethod = CARD_PAYMENT_METHOD,
                     ),
-                    deferredIntentConfirmationType = null,
                 )
             )
 

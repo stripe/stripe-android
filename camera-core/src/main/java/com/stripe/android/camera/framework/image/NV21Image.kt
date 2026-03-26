@@ -1,4 +1,4 @@
-@file:Suppress("deprecation") // ktlint-disable annotation
+@file:Suppress("deprecation")
 
 /*
  * RenderScript is deprecated, but alternatives are not yet well supported.

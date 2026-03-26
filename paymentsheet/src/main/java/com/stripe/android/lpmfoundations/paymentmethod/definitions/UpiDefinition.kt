@@ -25,11 +25,13 @@ internal object UpiDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
-    override fun uiDefinitionFactory(): UiDefinitionFactory = UpiUiDefinitionFactory
+    override fun uiDefinitionFactory(
+        metadata: PaymentMethodMetadata
+    ): UiDefinitionFactory = UpiUiDefinitionFactory
 }
 
 private object UpiUiDefinitionFactory : UiDefinitionFactory.Simple() {
-    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(metadata: PaymentMethodMetadata) = SupportedPaymentMethod(
         paymentMethodDefinition = UpiDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_upi,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_upi,

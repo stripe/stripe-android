@@ -7,6 +7,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.MerchantSetti
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymentMethodsSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.GooglePayMode
 import com.stripe.android.paymentsheet.example.playground.settings.GooglePaySettingsDefinition
 import com.stripe.android.test.core.TestParameters
 import org.junit.Test
@@ -21,7 +22,7 @@ internal class TestSwish : BasePlaygroundTest() {
         settings[MerchantSettingsDefinition] = Merchant.FR
         settings[CurrencySettingsDefinition] = Currency.SEK
         settings[DelayedPaymentMethodsSettingsDefinition] = true
-        settings[GooglePaySettingsDefinition] = false
+        settings[GooglePaySettingsDefinition] = GooglePayMode.Off
     }
 
     @Test

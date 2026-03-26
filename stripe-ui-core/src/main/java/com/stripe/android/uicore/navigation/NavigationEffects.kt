@@ -1,11 +1,10 @@
 package com.stripe.android.uicore.navigation
 
-import android.app.Activity
+import androidx.activity.compose.LocalActivity
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptionsBuilder
@@ -23,7 +22,7 @@ fun NavigationEffects(
     onPopBackStackResult: (Boolean) -> Unit = {},
     onBackStackEntryUpdated: (NavBackStackEntryUpdate) -> Unit,
 ) {
-    val activity = (LocalContext.current as? Activity)
+    val activity = LocalActivity.current
     val backStackEntry by navHostController.currentBackStackEntryAsState()
 
     LaunchedEffect(backStackEntry) {

@@ -4,8 +4,8 @@ import androidx.activity.result.ActivityResultCaller
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.EmptyConfirmationLauncherArgs
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
-import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionContract
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncher
@@ -19,7 +19,7 @@ internal class CvcRecollectionConfirmationDefinition @Inject constructor(
 ) : ConfirmationDefinition<
     PaymentMethodConfirmationOption.Saved,
     CvcRecollectionLauncher,
-    Unit,
+    EmptyConfirmationLauncherArgs,
     CvcRecollectionResult,
     > {
     override val key: String = "CvcRecollection"
@@ -42,11 +42,10 @@ internal class CvcRecollectionConfirmationDefinition @Inject constructor(
     override suspend fun action(
         confirmationOption: PaymentMethodConfirmationOption.Saved,
         confirmationArgs: ConfirmationHandler.Args
-    ): ConfirmationDefinition.Action<Unit> {
+    ): ConfirmationDefinition.Action<EmptyConfirmationLauncherArgs> {
         return ConfirmationDefinition.Action.Launch(
-            launcherArguments = Unit,
+            launcherArguments = EmptyConfirmationLauncherArgs,
             receivesResultInProcess = true,
-            deferredIntentConfirmationType = null,
         )
     }
 
@@ -64,7 +63,7 @@ internal class CvcRecollectionConfirmationDefinition @Inject constructor(
 
     override fun launch(
         launcher: CvcRecollectionLauncher,
-        arguments: Unit,
+        arguments: EmptyConfirmationLauncherArgs,
         confirmationOption: PaymentMethodConfirmationOption.Saved,
         confirmationArgs: ConfirmationHandler.Args
     ) {
@@ -80,7 +79,7 @@ internal class CvcRecollectionConfirmationDefinition @Inject constructor(
     override fun toResult(
         confirmationOption: PaymentMethodConfirmationOption.Saved,
         confirmationArgs: ConfirmationHandler.Args,
-        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        launcherArgs: EmptyConfirmationLauncherArgs,
         result: CvcRecollectionResult
     ): ConfirmationDefinition.Result {
         return when (result) {

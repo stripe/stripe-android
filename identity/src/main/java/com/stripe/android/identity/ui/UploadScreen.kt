@@ -57,7 +57,6 @@ import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.uicore.text.dimensionResourceSp
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.launch
-import com.google.android.material.R as MaterialR
 
 internal const val FRONT_ROW_TAG = "frontRow"
 internal const val BACK_ROW_TAG = "backRow"
@@ -129,7 +128,6 @@ internal fun UploadScreen(
             Text(
                 text = stringResource(id = R.string.stripe_upload_your_photo_id),
                 fontSize = dimensionResourceSp(id = R.dimen.stripe_upload_title_text_size),
-
                 modifier = Modifier.padding(
                     vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin)
                 )
@@ -351,11 +349,7 @@ private fun DialogListItem(
     Box(
         modifier = Modifier
             .testTag(testTag)
-            .height(
-                dimensionResource(
-                    MaterialR.dimen.abc_list_item_height_small_material
-                )
-            )
+            .height(48.dp)
             .clickable { onSelected() },
         contentAlignment = Alignment.CenterStart,
     ) {

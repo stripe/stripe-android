@@ -15,7 +15,6 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
-import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import kotlinx.coroutines.flow.first
 import kotlinx.parcelize.Parcelize
 
@@ -44,7 +43,6 @@ internal class LinkInlineSignupConfirmationDefinition(
         return ConfirmationDefinition.Action.Launch(
             launcherArguments = LauncherArguments(nextConfirmationOption),
             receivesResultInProcess = true,
-            deferredIntentConfirmationType = null,
         )
     }
 
@@ -67,7 +65,7 @@ internal class LinkInlineSignupConfirmationDefinition(
     override fun toResult(
         confirmationOption: LinkInlineSignupConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
-        deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+        launcherArgs: LauncherArguments,
         result: Result,
     ): ConfirmationDefinition.Result {
         return ConfirmationDefinition.Result.NextStep(
@@ -88,7 +86,7 @@ internal class LinkInlineSignupConfirmationDefinition(
             is AccountStatus.NeedsVerification -> {
                 linkAnalyticsHelper.onLinkPopupSkipped()
 
-                linkInlineSignupConfirmationOption.toNewOption()
+                linkInlineSignupConfirmationOption.toOption()
             }
             AccountStatus.SignedOut,
             is AccountStatus.Error -> {
@@ -98,7 +96,7 @@ internal class LinkInlineSignupConfirmationDefinition(
                         createPaymentMethodConfirmationOption(linkInlineSignupConfirmationOption)
                     },
                     onFailure = {
-                        linkInlineSignupConfirmationOption.toNewOption()
+                        linkInlineSignupConfirmationOption.toOption()
                     }
                 )
             }
@@ -112,45 +110,85 @@ internal class LinkInlineSignupConfirmationDefinition(
         if (userInput is UserInput.SignIn) {
             linkAnalyticsHelper.onLinkPopupSkipped()
 
-            return linkInlineSignupConfirmationOption.toNewOption()
+            return linkInlineSignupConfirmationOption.toOption()
         }
 
-        val createParams = linkInlineSignupConfirmationOption.createParams
-        val saveOption = linkInlineSignupConfirmationOption.saveOption
-        val extraParams = linkInlineSignupConfirmationOption.extraParams
         val configuration = linkInlineSignupConfirmationOption.linkConfiguration
 
-        val linkPaymentDetails = linkConfigurationCoordinator.attachNewCardToAccount(
-            configuration,
-            createParams,
-        ).getOrNull()
+        return when (linkInlineSignupConfirmationOption) {
+            is LinkInlineSignupConfirmationOption.New -> {
+                val createParams = linkInlineSignupConfirmationOption.createParams
+                val saveOption = linkInlineSignupConfirmationOption.saveOption
+                val extraParams = linkInlineSignupConfirmationOption.extraParams
 
-        return when (linkPaymentDetails) {
-            is LinkPaymentDetails.New -> {
-                linkStore.markLinkAsUsed()
+                val linkPaymentDetails = linkConfigurationCoordinator.attachNewCardToAccount(
+                    configuration,
+                    createParams,
+                ).getOrNull()
 
-                linkPaymentDetails.toNewOption(saveOption, configuration, extraParams)
+                when (linkPaymentDetails) {
+                    is LinkPaymentDetails.New -> {
+                        linkStore.markLinkAsUsed()
+
+                        linkPaymentDetails.toNewOption(saveOption, configuration, extraParams)
+                    }
+                    is LinkPaymentDetails.Passthrough -> {
+                        linkStore.markLinkAsUsed()
+
+                        linkPaymentDetails.toSavedOption(saveOption)
+                    }
+                    is LinkPaymentDetails.Saved -> {
+                        linkStore.markLinkAsUsed()
+
+                        linkPaymentDetails.toSavedOption(
+                            savedConfirmationOption = null
+                        )
+                    }
+                    null -> linkInlineSignupConfirmationOption.toOption()
+                }
             }
-            is LinkPaymentDetails.Saved -> {
-                linkStore.markLinkAsUsed()
+            is LinkInlineSignupConfirmationOption.Saved -> {
+                val linkPaymentDetails = linkConfigurationCoordinator.attachExistingCardToAccount(
+                    configuration,
+                    linkInlineSignupConfirmationOption.paymentMethod,
+                ).getOrNull()
 
-                linkPaymentDetails.toSavedOption(saveOption)
+                when (linkPaymentDetails) {
+                    is LinkPaymentDetails.Saved -> {
+                        linkStore.markLinkAsUsed()
+
+                        linkPaymentDetails.toSavedOption(
+                            savedConfirmationOption = linkInlineSignupConfirmationOption
+                        )
+                    }
+                    null -> linkInlineSignupConfirmationOption.toOption()
+                }
             }
-            null -> linkInlineSignupConfirmationOption.toNewOption()
         }
     }
 
     private fun LinkPaymentDetails.Saved.toSavedOption(
-        saveOption: LinkInlineSignupConfirmationOption.PaymentMethodSaveOption,
+        savedConfirmationOption: LinkInlineSignupConfirmationOption.Saved?,
+    ): PaymentMethodConfirmationOption.Saved {
+        return PaymentMethodConfirmationOption.Saved(
+            paymentMethod = paymentMethod,
+            optionsParams = savedConfirmationOption?.optionsParams,
+            originatedFromWallet = false,
+        )
+    }
+
+    private fun LinkPaymentDetails.Passthrough.toSavedOption(
+        saveOption: LinkInlineSignupConfirmationOption.PaymentMethodSaveOption?,
     ): PaymentMethodConfirmationOption.Saved {
         return PaymentMethodConfirmationOption.Saved(
             paymentMethod = paymentMethod,
             optionsParams = PaymentMethodOptionsParams.Card(
                 setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession.takeIf {
-                    saveOption.shouldSave()
+                    saveOption?.shouldSave() ?: false
                 } ?: ConfirmPaymentIntentParams.SetupFutureUsage.Blank
             ),
             originatedFromWallet = true,
+            newPMTransformedForConfirmation = true
         )
     }
 
@@ -168,20 +206,26 @@ internal class LinkInlineSignupConfirmationDefinition(
         }
 
         return PaymentMethodConfirmationOption.New(
-            createParams = paymentMethodCreateParams,
+            createParams = confirmParams,
             optionsParams = optionsParams,
             extraParams = extraParams,
             shouldSave = saveOption.shouldSave(),
         )
     }
 
-    private fun LinkInlineSignupConfirmationOption.toNewOption(): PaymentMethodConfirmationOption.New {
-        return PaymentMethodConfirmationOption.New(
-            createParams = createParams,
-            optionsParams = optionsParams,
-            extraParams = extraParams,
-            shouldSave = saveOption.shouldSave(),
-        )
+    private fun LinkInlineSignupConfirmationOption.toOption(): PaymentMethodConfirmationOption {
+        return when (this) {
+            is LinkInlineSignupConfirmationOption.New -> PaymentMethodConfirmationOption.New(
+                createParams = createParams,
+                optionsParams = optionsParams,
+                extraParams = extraParams,
+                shouldSave = saveOption.shouldSave(),
+            )
+            is LinkInlineSignupConfirmationOption.Saved -> PaymentMethodConfirmationOption.Saved(
+                paymentMethod = paymentMethod,
+                optionsParams = optionsParams,
+            )
+        }
     }
 
     private fun LinkInlineSignupConfirmationOption.PaymentMethodSaveOption.shouldSave(): Boolean {
@@ -193,9 +237,10 @@ internal class LinkInlineSignupConfirmationDefinition(
         val nextConfirmationOption: PaymentMethodConfirmationOption,
     ) : Parcelable
 
+    @Parcelize
     data class LauncherArguments(
         val nextConfirmationOption: PaymentMethodConfirmationOption,
-    )
+    ) : Parcelable
 
     class Launcher(
         val onResult: (Result) -> Unit,

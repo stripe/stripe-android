@@ -122,6 +122,13 @@ interface ConsumersApiService {
         requestOptions: ApiRequest.Options,
     ): Result<ConsumerPaymentDetails>
 
+    suspend fun createPaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentMethodId: String,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options,
+    ): Result<ConsumerPaymentDetails>
+
     suspend fun sharePaymentDetails(
         consumerSessionClientSecret: String,
         paymentDetailsId: String,
@@ -444,6 +451,30 @@ class ConsumersApiServiceImpl(
         )
     }
 
+    override suspend fun createPaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentMethodId: String,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options
+    ): Result<ConsumerPaymentDetails> {
+        return executeRequestWithResultParser(
+            stripeErrorJsonParser = stripeErrorJsonParser,
+            stripeNetworkClient = stripeNetworkClient,
+            request = apiRequestFactory.createPost(
+                url = createPaymentDetailsFromPaymentMethod,
+                options = requestOptions,
+                params = mapOf(
+                    "request_surface" to requestSurface,
+                    "payment_method_id" to paymentMethodId,
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to consumerSessionClientSecret
+                    ),
+                )
+            ),
+            responseJsonParser = ConsumerPaymentDetailsJsonParser,
+        )
+    }
+
     override suspend fun sharePaymentDetails(
         consumerSessionClientSecret: String,
         paymentDetailsId: String,
@@ -603,6 +634,12 @@ class ConsumersApiServiceImpl(
          */
         private val createPaymentDetails: String
             get() = getApiUrl("consumers/payment_details")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/payment_details/from_payment_method`
+         */
+        private val createPaymentDetailsFromPaymentMethod: String
+            get() = getApiUrl("consumers/payment_details/from_payment_method")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/link_account_sessions`

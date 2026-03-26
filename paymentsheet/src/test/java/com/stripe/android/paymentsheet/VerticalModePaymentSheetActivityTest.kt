@@ -11,10 +11,8 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import com.stripe.android.model.CardBrand
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.RequestMatchers.host
-import com.stripe.android.networktesting.RequestMatchers.method
-import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.ResponseReplacement
+import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentConfigurationTestRule
@@ -250,7 +248,7 @@ internal class VerticalModePaymentSheetActivityTest {
     }
 
     @Test
-    fun `Updating a card brand updates the icon in the list`() = runTest(
+    fun `Updating a card brand with selector updates the icon in the list`() = runTest(
         customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse(isCbcEligible = true)
@@ -272,7 +270,7 @@ internal class VerticalModePaymentSheetActivityTest {
         managePage.clickEdit("pm_12345")
 
         editPage.assertIsVisible()
-        editPage.setCardBrand("Visa")
+        editPage.setCardBrandWithSelector("Visa")
         editPage.update()
         managePage.waitUntilVisible()
         managePage.clickDone()
@@ -438,7 +436,6 @@ internal class VerticalModePaymentSheetActivityTest {
     fun `Entering Amex card shows disallowed error when disallowed`() = runTest(
         cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
             listOf(
-
                 PaymentSheet.CardBrandAcceptance.BrandCategory.Amex
             )
         ),
@@ -468,7 +465,6 @@ internal class VerticalModePaymentSheetActivityTest {
     fun `Displayed saved payment method is correct when a card brand is disallowed`() = runTest(
         cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
             listOf(
-
                 PaymentSheet.CardBrandAcceptance.BrandCategory.Visa
             )
         ),
@@ -484,10 +480,9 @@ internal class VerticalModePaymentSheetActivityTest {
     }
 
     @Test
-    fun `Disallowed brands are disabled in the CBC dropdown`() = runTest(
+    fun `Disallowed brands are disabled in the CBC selector`() = runTest(
         cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
             listOf(
-
                 PaymentSheet.CardBrandAcceptance.BrandCategory.Visa
             )
         ),
@@ -514,10 +509,10 @@ internal class VerticalModePaymentSheetActivityTest {
         editPage.assertIsVisible()
 
         // Even though our card is co-branded, Visa should not show up in the dropdown as it is disallowed
-        editPage.assertInDropdownButDisabled("Visa (not accepted)")
+        editPage.assertInSelectorButDisabled("visa")
 
         // Cartes Bancaires item should be in the drop down and selectable
-        editPage.assertInDropdownAndEnabled("Cartes Bancaires")
+        editPage.assertInSelectorAndEnabled("cartes_bancaires")
     }
 
     private fun runTest(
@@ -571,11 +566,7 @@ internal class VerticalModePaymentSheetActivityTest {
         lpms: List<String> = listOf("card", "cashapp"),
         isCbcEligible: Boolean = false,
     ) {
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             val replacements = mutableListOf<ResponseReplacement>()
             replacements += ResponseReplacement(
                 original = "PAYMENT_METHOD_TYPES_GO_HERE",

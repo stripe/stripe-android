@@ -3,10 +3,12 @@ package com.stripe.android.paymentsheet
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.PaymentOptionSelection
 import com.stripe.android.model.CardBrand
+import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.CustomerSheetTestType
 import com.stripe.android.paymentsheet.utils.CustomerSheetTestTypeProvider
@@ -45,9 +47,7 @@ internal class CustomerSheetTest {
             assertThat(result).isInstanceOf(CustomerSheetResult.Selected::class.java)
         }
     ) { context ->
-        networkRule.enqueue(
-            CustomerSheetUtils.retrieveElementsSessionRequest(),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
@@ -100,9 +100,7 @@ internal class CustomerSheetTest {
             PrefsTestStore(it).clear()
         }
 
-        networkRule.enqueue(
-            CustomerSheetUtils.retrieveElementsSessionRequest(),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
@@ -138,9 +136,7 @@ internal class CustomerSheetTest {
             PrefsTestStore(it).clear()
         }
 
-        networkRule.enqueue(
-            CustomerSheetUtils.retrieveElementsSessionRequest(),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
@@ -186,9 +182,7 @@ internal class CustomerSheetTest {
             assertThat(result).isInstanceOf(CustomerSheetResult.Selected::class.java)
         }
     ) { context ->
-        networkRule.enqueue(
-            CustomerSheetUtils.retrieveElementsSessionRequest(),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
@@ -222,7 +216,7 @@ internal class CustomerSheetTest {
     }
 
     @Test
-    fun testSuccessfulCardSaveWithCardBrandChoice(
+    fun testSuccessfulCardSaveWithCardBrandChoice_Selector(
         @TestParameter(valuesProvider = CustomerSheetTestTypeProvider::class)
         customerSheetTestType: CustomerSheetTestType,
     ) = runCustomerSheetTest(
@@ -233,9 +227,7 @@ internal class CustomerSheetTest {
             assertThat(result).isInstanceOf(CustomerSheetResult.Selected::class.java)
         }
     ) { context ->
-        networkRule.enqueue(
-            CustomerSheetUtils.retrieveElementsSessionRequest(),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method_with_cbc.json")
         }
 
@@ -251,7 +243,7 @@ internal class CustomerSheetTest {
         page.fillOutCardDetails(
             cardNumber = TEST_CBC_CARD_NUMBER
         )
-        page.changeCardBrandChoice()
+        page.selectCartesBancaire()
 
         networkRule.enqueue(
             createPaymentMethodsRequest(),
@@ -280,9 +272,7 @@ internal class CustomerSheetTest {
             error("Shouldn't call CustomerSheetResultCallback")
         }
     ) { context ->
-        networkRule.enqueue(
-            CustomerSheetUtils.retrieveElementsSessionRequest(),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 

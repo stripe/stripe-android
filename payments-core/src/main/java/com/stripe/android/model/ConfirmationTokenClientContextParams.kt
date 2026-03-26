@@ -11,28 +11,20 @@ import org.json.JSONObject
 data class ConfirmationTokenClientContextParams(
     /** The mode of this intent, either "payment" or "setup" */
     val mode: String,
-
     /** Three-letter ISO currency code */
     val currency: String?,
-
     /** Indicates how the payment method is intended to be used in the future */
     val setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null,
-
     /** Controls when the funds will be captured (payment mode only) */
     val captureMethod: String? = null,
-
     /** The payment method types for the intent */
     val paymentMethodTypes: List<String>? = null,
-
     /** The account (if any) for which the funds of the intent are intended */
     val onBehalfOf: String? = null,
-
     /** Configuration ID for the selected payment method configuration */
     val paymentMethodConfiguration: String? = null,
-
     /** Customer ID */
     val customer: String? = null,
-
     /** Payment method specific options as a JSON string */
     val paymentMethodOptionsJson: String? = null,
 ) : StripeParamsModel {

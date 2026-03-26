@@ -68,7 +68,7 @@ class SepaDebitDefinitionTest {
                 stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodTypes = listOf("sepa_debit")
                 ),
-                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
+                saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
                 hasCustomerConfiguration = true
             )
         )

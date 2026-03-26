@@ -67,6 +67,7 @@ class DefaultPaymentMethodMessagingEventReporterTest {
         assertThat(request.params["event"]).isEqualTo(PMME_LOAD_SUCCEEDED)
         assertThat(request.params["payment_methods"]).isEqualTo("affirm,klarna")
         assertThat(request.params["content_type"]).isEqualTo("multi_partner")
+        assertThat(request.params["duration"]).isEqualTo(1.0f)
         validateDurationEndCall()
     }
 
@@ -76,6 +77,7 @@ class DefaultPaymentMethodMessagingEventReporterTest {
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params["event"]).isEqualTo(PMME_LOAD_FAILED)
         assertThat(request.params["error_message"]).isEqualTo("something went wrong")
+        assertThat(request.params["duration"]).isEqualTo(1.0f)
         validateDurationEndCall()
     }
 
@@ -85,8 +87,8 @@ class DefaultPaymentMethodMessagingEventReporterTest {
             appearance = PaymentMethodMessagingElement.Appearance()
                 .colors(
                     PaymentMethodMessagingElement.Appearance.Colors()
-                        .infoIconColor(Color.Black.toArgb())
                         .textColor(Color.Blue.toArgb())
+                        .linkTextColor(Color.Blue.toArgb())
                 )
                 .font(
                     PaymentMethodMessagingElement.Appearance.Font()
@@ -102,7 +104,7 @@ class DefaultPaymentMethodMessagingEventReporterTest {
                 "font" to true,
                 "style" to true,
                 "text_color" to true,
-                "info_icon_color" to true
+                "link_text_color" to true
             )
         )
     }
@@ -116,7 +118,7 @@ class DefaultPaymentMethodMessagingEventReporterTest {
                 "font" to false,
                 "style" to false,
                 "text_color" to false,
-                "info_icon_color" to false
+                "link_text_color" to false
             )
         )
         eventReporter.onElementDisplayed(PaymentMethodMessagingElement.Appearance().build())
@@ -133,7 +135,7 @@ class DefaultPaymentMethodMessagingEventReporterTest {
                 "font" to false,
                 "style" to true,
                 "text_color" to false,
-                "info_icon_color" to false
+                "link_text_color" to false
             )
         )
     }

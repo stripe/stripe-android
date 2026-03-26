@@ -16,6 +16,7 @@ android {
     }
 
     buildFeatures {
+        buildConfig true
         viewBinding true
         compose true
     }
@@ -37,8 +38,6 @@ dependencies {
     implementation libs.kotlin.serialization
 
     debugImplementation libs.leakCanary
-
-    testImplementation testLibs.junit
 
     androidTestImplementation project(':payments-core-testing')
     androidTestImplementation testLibs.androidx.junit

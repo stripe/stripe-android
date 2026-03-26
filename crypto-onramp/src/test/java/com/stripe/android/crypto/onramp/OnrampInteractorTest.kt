@@ -1,5 +1,8 @@
 package com.stripe.android.crypto.onramp
 
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
+import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsEvent
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsService
@@ -13,7 +16,6 @@ import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
-import com.stripe.android.crypto.onramp.model.OnrampAuthenticateResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
@@ -23,6 +25,7 @@ import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
+import com.stripe.android.crypto.onramp.model.OnrampSessionClientSecretProvider
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
@@ -32,10 +35,12 @@ import com.stripe.android.crypto.onramp.model.StartIdentityVerificationResponse
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.crypto.onramp.ui.KycRefreshScreenAction
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowResult
 import com.stripe.android.link.LinkController
 import com.stripe.android.link.LinkController.ConfigureResult
 import com.stripe.android.model.DateOfBirth
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -64,14 +69,16 @@ class OnrampInteractorTest {
         application = RuntimeEnvironment.getApplication(),
         linkController = linkController,
         cryptoApiRepository = cryptoApiRepository,
-        analyticsServiceFactory = analyticsServiceFactory
+        analyticsServiceFactory = analyticsServiceFactory,
+        checkoutHandler = OnrampSessionClientSecretProvider { "test_secret" },
+        savedStateHandle = SavedStateHandle()
     )
 
     @Test
     fun testConfigureIsSuccessful() = runTest {
         whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
 
-        val result = interactor.configure(createConfiguration())
+        val result = interactor.configure(createConfigurationState())
 
         assert(result is OnrampConfigurationResult.Completed)
     }
@@ -202,11 +209,11 @@ class OnrampInteractorTest {
 
     @Test
     fun testCreateCryptoPaymentTokenIsSuccessful() = runTest {
-        whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
-        interactor.onLinkControllerState(mockLinkStateWithAccount())
+        whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithSelectedPaymentPreview()))
+        interactor.onLinkControllerState(mockLinkStateWithSelectedPaymentPreview())
 
         whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
-        interactor.configure(createConfiguration(cryptoCustomerId = "cpt_123"))
+        interactor.configure(createConfigurationState(cryptoCustomerId = "cpt_123"))
 
         val mockPlatformSettings = mock<GetPlatformSettingsResponse>()
         doReturn("pk_platform_123").whenever(mockPlatformSettings).publishableKey
@@ -229,6 +236,59 @@ class OnrampInteractorTest {
             cryptoApiRepository.createPaymentToken(cryptoCustomerId = any(), paymentMethod = any())
         ).thenReturn(Result.success(createPaymentTokenResponse))
 
+        interactor.handlePresentPaymentMethodsResult(
+            LinkController.PresentPaymentMethodsResult.Success,
+            RuntimeEnvironment.getApplication()
+        )
+
+        val result = interactor.createCryptoPaymentToken()
+        assertThat(result).isInstanceOf(OnrampCreateCryptoPaymentTokenResult.Completed::class.java)
+
+        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.CryptoPaymentTokenCreated(null))
+    }
+
+    @Test
+    fun testCreateCryptoPaymentTokenForGooglePayIsSuccessful() = runTest {
+        whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
+        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        interactor.configure(createConfigurationState(cryptoCustomerId = "cpt_123"))
+
+        val mockPlatformSettings = mock<GetPlatformSettingsResponse>()
+        doReturn("pk_platform_123").whenever(mockPlatformSettings).publishableKey
+        whenever(
+            cryptoApiRepository.getPlatformSettings(
+                cryptoCustomerId = eq("cpt_123"),
+                countryHint = anyOrNull()
+            )
+        ).thenReturn(Result.success(mockPlatformSettings))
+
+        val mockPaymentMethod = createCardPaymentMethod()
+
+        val mockResult = mock<LinkController.CreatePaymentMethodResult.Success> {
+            on { paymentMethod } doReturn mockPaymentMethod
+        }
+        whenever(linkController.createPaymentMethodForOnramp(any())).thenReturn(mockResult)
+
+        val createPaymentTokenResponse = CreatePaymentTokenResponse(id = "crypto_token_123")
+        whenever(
+            cryptoApiRepository.createPaymentToken(cryptoCustomerId = any(), paymentMethod = any())
+        ).thenReturn(Result.success(createPaymentTokenResponse))
+
+        val pm = PaymentMethod(
+            id = "pm_123456789",
+            created = 1550757934255L,
+            liveMode = false,
+            type = PaymentMethod.Type.Card,
+            customerId = "cus_AQsHpvKfKwJDrF",
+            code = "card"
+        )
+
+        interactor.handleGooglePayPaymentResult(
+            GooglePayPaymentMethodLauncher.Result.Completed(pm)
+        )
+
         val result = interactor.createCryptoPaymentToken()
         assertThat(result).isInstanceOf(OnrampCreateCryptoPaymentTokenResult.Completed::class.java)
 
@@ -246,23 +306,6 @@ class OnrampInteractorTest {
         assert(result is OnrampLogOutResult.Completed)
 
         testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.LinkLogout)
-    }
-
-    @Test
-    fun testHandleAuthenticationResultSuccess() = runTest {
-        whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
-        val permissionsResult = CryptoCustomerResponse(id = "customer_123")
-        whenever(cryptoApiRepository.createCryptoCustomer(any()))
-            .thenReturn(Result.success(permissionsResult))
-
-        interactor.onLinkControllerState(mockLinkStateWithAccount())
-
-        val result = interactor.handleAuthenticationResult(LinkController.AuthenticationResult.Success)
-        assert(result is OnrampAuthenticateResult.Completed)
-
-        testAnalyticsService.assertContainsEvent(
-            OnrampAnalyticsEvent.LinkUserAuthenticationCompleted
-        )
     }
 
     @Test
@@ -298,11 +341,8 @@ class OnrampInteractorTest {
     @Test
     fun testHandlePresentPaymentMethodsResultSuccess() {
         val context = RuntimeEnvironment.getApplication()
-        val paymentMethodPreview = LinkController.PaymentMethodPreview(
-            iconRes = 1,
-            label = "Visa",
-            sublabel = "•••• 4242"
-        )
+        val paymentMethodPreview = mockCardPaymentMethodPreview()
+
         val mockState = LinkController.State(
             internalLinkAccount = null,
             merchantLogoUrl = null,
@@ -329,15 +369,6 @@ class OnrampInteractorTest {
         interactor.onAuthorize()
 
         testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.LinkAuthorizationStarted)
-    }
-
-    @Test
-    fun testOnAuthenticateUser() {
-        interactor.onLinkControllerState(mockLinkStateWithAccount())
-
-        interactor.onAuthenticateUser()
-
-        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.LinkUserAuthenticationStarted)
     }
 
     @Test
@@ -448,7 +479,7 @@ class OnrampInteractorTest {
             )
         )
 
-        assertThat(result).isEqualTo(OnrampVerifyKycInfoResult.Confirmed)
+        assertThat(result).isInstanceOf(OnrampVerifyKycInfoResult.Confirmed::class.java)
         testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.KycVerificationCompleted)
     }
 
@@ -533,6 +564,29 @@ class OnrampInteractorTest {
         elementsSessionId = "test-elements-session-id"
     )
 
+    private fun mockLinkStateWithSelectedPaymentPreview(
+        account: LinkController.LinkAccount = mockLinkAccount()
+    ): LinkController.State = LinkController.State(
+        internalLinkAccount = account,
+        merchantLogoUrl = null,
+        selectedPaymentMethodPreview = mockCardPaymentMethodPreview(),
+        createdPaymentMethod = null,
+        elementsSessionId = "test-elements-session-id"
+    )
+
+    private fun mockCardPaymentMethodPreview(): LinkController.PaymentMethodPreview =
+        LinkController.PaymentMethodPreview(
+            imageLoader = {
+                BitmapDrawable(
+                    null,
+                    Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+                )
+            },
+            label = "Visa",
+            sublabel = "•••• 4242",
+            type = LinkController.PaymentMethodType.Card
+        )
+
     private fun mockLinkAccount(): LinkController.LinkAccount = LinkController.LinkAccount(
         email = "test@email.com",
         redactedPhoneNumber = "***-***-1234",
@@ -547,13 +601,11 @@ class OnrampInteractorTest {
         consumerSessionClientSecret = null
     )
 
-    private fun createConfiguration(
-        cryptoCustomerId: String? = null
-    ): OnrampConfiguration =
-        OnrampConfiguration(
-            merchantDisplayName = "merchant-display-name",
-            publishableKey = "pk_test_12345",
-            appearance = mock(),
-            cryptoCustomerId = cryptoCustomerId
-        )
+    private fun createConfigurationState(cryptoCustomerId: String? = null): OnrampConfiguration.State =
+        OnrampConfiguration()
+            .merchantDisplayName("merchant-display-name")
+            .publishableKey("pk_test_12345")
+            .appearance(mock())
+            .cryptoCustomerId(cryptoCustomerId)
+            .build()
 }

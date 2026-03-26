@@ -6,12 +6,14 @@ import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.core.utils.urlEncode
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
+import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
@@ -57,11 +59,7 @@ internal class PaymentSheetTest {
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
@@ -92,11 +90,7 @@ internal class PaymentSheetTest {
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
@@ -129,11 +123,7 @@ internal class PaymentSheetTest {
     ) { testContext ->
         UsBankAccountFormTestUtils.setupSuccessfulCompletionOfUsBankAccountForm()
 
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
@@ -173,10 +163,7 @@ internal class PaymentSheetTest {
         integrationType = integrationType,
         resultCallback = ::expectNoResult,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
@@ -208,10 +195,7 @@ internal class PaymentSheetTest {
         integrationType = integrationType,
         resultCallback = ::expectNoResult,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
@@ -245,10 +229,7 @@ internal class PaymentSheetTest {
         successTimeoutSeconds = 10L,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
@@ -284,10 +265,7 @@ internal class PaymentSheetTest {
         integrationType = integrationType,
         resultCallback = ::assertFailed,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.setResponseCode(500)
         }
 
@@ -307,16 +285,12 @@ internal class PaymentSheetTest {
     }
 
     @Test
-    fun testPaymentIntentWithCardBrandChoiceSuccess() = runPaymentSheetTest(
+    fun testPaymentIntentWithCardBrandChoiceSuccess_Selector() = runPaymentSheetTest(
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method_with_cbc.json")
         }
 
@@ -327,7 +301,7 @@ internal class PaymentSheetTest {
             )
         }
 
-        page.fillOutCardDetailsWithCardBrandChoice()
+        page.fillOutCardDetailsWithCardBrandChoiceSelector()
 
         networkRule.enqueue(
             method("POST"),
@@ -344,16 +318,46 @@ internal class PaymentSheetTest {
     }
 
     @Test
+    fun testPaymentIntentWithCardBrandChoiceSuccess_PreferredBrands_Deselect() = runPaymentSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.elementsSession { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method_with_cbc.json")
+        }
+
+        testContext.presentPaymentSheet {
+            presentWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = PaymentSheet.Configuration(
+                    merchantDisplayName = "Example, Inc.",
+                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                    preferredNetworks = listOf(CardBrand.CartesBancaires)
+                ),
+            )
+        }
+
+        // Cartes Bancaire selected by default, re-click will deselect
+        page.fillOutCardDetailsWithCardBrandChoiceSelector()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm")
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        page.clickPrimaryButton()
+    }
+
+    @Test
     fun testPaymentIntentReturnsFailureWhenAlreadySucceeded() = runPaymentSheetTest(
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertFailed,
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-payment_intent_success.json")
         }
 
@@ -373,11 +377,7 @@ internal class PaymentSheetTest {
                 integrationType = integrationType,
                 resultCallback = ::assertCompleted,
             ) { testContext ->
-                networkRule.enqueue(
-                    host("api.stripe.com"),
-                    method("GET"),
-                    path("/v1/elements/sessions"),
-                ) { response ->
+                networkRule.elementsSession { response ->
                     response.testBodyFromFile("elements-sessions-requires_payment_method_with_cbc.json")
                 }
 
@@ -419,11 +419,7 @@ internal class PaymentSheetTest {
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_cvc_recollection.json")
         }
 
@@ -471,10 +467,7 @@ internal class PaymentSheetTest {
             }
         }
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
+        networkRule.elementsSession(
             query(urlEncode("deferred_intent[payment_method_options][card][require_cvc_recollection]"), "true")
         ) { response ->
             val cardsArray = JSONArray()
@@ -548,11 +541,7 @@ internal class PaymentSheetTest {
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
@@ -615,11 +604,7 @@ internal class PaymentSheetTest {
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
@@ -678,11 +663,7 @@ internal class PaymentSheetTest {
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-                networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
@@ -741,11 +722,7 @@ internal class PaymentSheetTest {
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
@@ -779,11 +756,7 @@ internal class PaymentSheetTest {
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_cvc_recollection.json")
         }
 
@@ -830,11 +803,7 @@ internal class PaymentSheetTest {
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
@@ -872,10 +841,7 @@ internal class PaymentSheetTest {
         integrationType = integrationType,
         resultCallback = ::assertFailed,
     ) { testContext ->
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.socketPolicy = SocketPolicy.DISCONNECT_AFTER_REQUEST
         }
 
@@ -900,10 +866,7 @@ internal class PaymentSheetTest {
     ) { testContext ->
         val oboMerchantID = "acct_connected_1234"
 
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
+        networkRule.elementsSession(
             query(urlEncode("deferred_intent[on_behalf_of]"), oboMerchantID)
         ) { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")

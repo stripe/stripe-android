@@ -14,6 +14,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.test.core.app.ActivityScenario
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
@@ -26,8 +27,11 @@ import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
+import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.link.LinkConfigurationCoordinator
+import com.stripe.android.link.account.DefaultLinkStore
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.gate.DefaultLinkGate
@@ -120,8 +124,10 @@ internal class PaymentElementConfirmationTestActivity : AppCompatActivity() {
 
 @Component(
     modules = [
+        ApplicationIdModule::class,
         PaymentElementConfirmationModule::class,
         PaymentElementConfirmationTestModule::class,
+        GooglePayLauncherModule::class,
     ]
 )
 @Singleton
@@ -147,6 +153,9 @@ internal interface PaymentElementConfirmationTestComponent {
 
 @Module(includes = [PaymentElementRequestSurfaceModule::class])
 internal interface PaymentElementConfirmationTestModule {
+    @Binds
+    fun bindsLinkStore(impl: DefaultLinkStore): LinkStore
+
     @Binds
     fun bindLinkGateFactory(linkGateFactory: DefaultLinkGate.Factory): LinkGate.Factory
 

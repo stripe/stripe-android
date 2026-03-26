@@ -119,6 +119,10 @@ internal object PaymentMethodCreateParamsFixtures {
         billingDetails = BILLING_DETAILS,
     )
 
+    internal val TWINT = PaymentMethodCreateParams.createTwint(
+        billingDetails = BILLING_DETAILS
+    )
+
     internal val ALMA = PaymentMethodCreateParams.createAlma(
         billingDetails = BILLING_DETAILS
     )

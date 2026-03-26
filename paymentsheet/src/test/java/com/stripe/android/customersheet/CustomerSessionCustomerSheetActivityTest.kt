@@ -21,6 +21,7 @@ import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.ResponseReplacement
+import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
@@ -360,7 +361,7 @@ class CustomerSessionCustomerSheetActivityTest {
             savedPaymentMethodsPage.onEditButton().performClick()
             savedPaymentMethodsPage.onModifyBadgeFor(last4 = "1001").performClick()
 
-            editPage.setCardBrand("Visa")
+            editPage.setCardBrandWithSelector("Visa")
             editPage.update(waitUntilComplete = false)
 
             enqueueUpdatePaymentMethod(id = "pm_1")
@@ -474,10 +475,7 @@ class CustomerSessionCustomerSheetActivityTest {
         paymentMethodRemoveLastFeature: ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature,
         onBehalfOf: String?,
     ) {
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
+        networkRule.elementsSession(
             query("type", "deferred_intent"),
             query(urlEncode("deferred_intent[setup_future_usage]"), "off_session"),
             query(urlEncode("deferred_intent[mode]"), "setup"),

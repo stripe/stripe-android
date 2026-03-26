@@ -106,7 +106,6 @@ internal fun LinkScreenContentBody(
                 navigationChannel = navigationChannel,
             )
         }
-        ScreenState.Loading -> Unit
         is ScreenState.VerificationDialog -> {
             VerificationDialog(
                 modifier = Modifier

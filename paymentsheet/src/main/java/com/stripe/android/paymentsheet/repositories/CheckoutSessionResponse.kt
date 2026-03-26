@@ -1,0 +1,199 @@
+package com.stripe.android.paymentsheet.repositories
+
+import com.stripe.android.core.model.StripeModel
+import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.SetupIntent
+import kotlinx.parcelize.Parcelize
+
+/**
+ * Response from checkout session APIs:
+ * - Init API (`/v1/payment_pages/{cs_id}/init`) - returns [elementsSession]
+ * - Confirm API (`/v1/payment_pages/{cs_id}/confirm`) - returns [paymentIntent] or [setupIntent]
+ *
+ * For init responses, [elementsSession] contains payment method preferences, Link settings,
+ * customer data, and other configuration needed by PaymentSheet.
+ * For confirm responses, [paymentIntent] or [setupIntent] contains the confirmed intent.
+ */
+@Parcelize
+internal data class CheckoutSessionResponse(
+    /**
+     * The checkout session ID (e.g., "cs_xxx").
+     */
+    val id: String,
+    /**
+     * The payment amount in the smallest currency unit (e.g., cents for USD).
+     * 0 for setup mode checkout sessions.
+     */
+    val amount: Long,
+    /**
+     * The three-letter ISO currency code (e.g., "usd").
+     */
+    val currency: String,
+    /**
+     * The checkout session mode: payment or setup.
+     */
+    val mode: Mode,
+    /**
+     * The customer's email address from the checkout session.
+     * Always available at the top level as `customer_email`, regardless of whether
+     * a customer object exists (guest checkout) or not.
+     */
+    val customerEmail: String?,
+    /**
+     * The embedded ElementsSession containing payment method preferences, Link settings,
+     * customer data, and other configuration needed by PaymentSheet.
+     * Only populated in responses from the init API.
+     */
+    val elementsSession: ElementsSession?,
+    /**
+     * The PaymentIntent created/confirmed during checkout session confirmation.
+     * Only populated in confirm responses for payment mode.
+     */
+    val paymentIntent: PaymentIntent?,
+    /**
+     * The SetupIntent created/confirmed during checkout session confirmation.
+     * Only populated in confirm responses for setup mode.
+     */
+    val setupIntent: SetupIntent?,
+    /**
+     * Customer data from the checkout session init response.
+     * This is parsed from the top-level "customer" field in the init response.
+     * For checkout sessions, customer is associated server-side when the session is created,
+     * so we get customer data directly in the init response rather than through customer session auth.
+     */
+    val customer: Customer?,
+    /**
+     * Server-side flag controlling the "Save for future use" checkbox.
+     * Parsed from `customer_managed_saved_payment_methods_offer_save` in the init response.
+     */
+    val savedPaymentMethodsOfferSave: SavedPaymentMethodsOfferSave?,
+    val totalSummary: TotalSummaryResponse?,
+    val lineItems: List<LineItem>,
+    val shippingOptions: List<ShippingRate>,
+    val adaptivePricingInfo: AdaptivePricingInfo?,
+) : StripeModel {
+
+    /**
+     * Controls whether the "Save for future use" checkbox is shown and its initial state.
+     *
+     * This data comes from the checkout session's `customer_managed_saved_payment_methods_offer_save`
+     * configuration, which is set when creating the checkout session.
+     */
+    @Parcelize
+    data class SavedPaymentMethodsOfferSave(
+        /**
+         * Whether the save checkbox should be shown to the user.
+         */
+        val enabled: Boolean,
+        /**
+         * The initial state of the checkbox.
+         */
+        val status: Status,
+    ) : StripeModel {
+        /**
+         * Represents the initial checked state of the save checkbox.
+         */
+        enum class Status {
+            /**
+             * Checkbox should be pre-checked (user has previously agreed to save).
+             */
+            ACCEPTED,
+
+            /**
+             * Checkbox should be unchecked by default.
+             */
+            NOT_ACCEPTED,
+        }
+    }
+
+    /**
+     * Customer data from checkout session.
+     *
+     * This is simpler than [ElementsSession.Customer] because checkout sessions don't use
+     * customer session authentication - the customer is associated server-side when the
+     * checkout session is created.
+     */
+    @Parcelize
+    data class Customer(
+        /**
+         * The customer ID (e.g., "cus_xxx").
+         */
+        val id: String,
+        /**
+         * The customer's saved payment methods.
+         */
+        val paymentMethods: List<PaymentMethod>,
+        /**
+         * Whether the customer has permission to detach saved payment methods.
+         * Defaults to false when not present in the response.
+         */
+        val canDetachPaymentMethod: Boolean,
+    ) : StripeModel
+
+    @Parcelize
+    data class TotalSummaryResponse(
+        val subtotal: Long,
+        val totalDueToday: Long,
+        val totalAmountDue: Long,
+        val discountAmounts: List<DiscountAmount>,
+        val taxAmounts: List<TaxAmount>,
+        val shippingRate: ShippingRate?,
+        val appliedBalance: Long?,
+    ) : StripeModel
+
+    @Parcelize
+    data class DiscountAmount(
+        val amount: Long,
+        val displayName: String,
+    ) : StripeModel
+
+    @Parcelize
+    data class TaxAmount(
+        val amount: Long,
+        val inclusive: Boolean,
+        val displayName: String,
+        val percentage: Double,
+    ) : StripeModel
+
+    @Parcelize
+    data class ShippingRate(
+        val id: String,
+        val amount: Long,
+        val displayName: String,
+        val deliveryEstimate: String?,
+    ) : StripeModel
+
+    @Parcelize
+    data class LineItem(
+        val id: String,
+        val name: String,
+        val quantity: Int,
+        val unitAmount: Long?,
+        val subtotal: Long,
+        val total: Long,
+    ) : StripeModel
+
+    @Parcelize
+    data class AdaptivePricingInfo(
+        val activePresentmentCurrency: String,
+        val integrationAmount: Long,
+        val integrationCurrency: String,
+        val localCurrencyOptions: List<LocalCurrencyOption>,
+    ) : StripeModel
+
+    @Parcelize
+    data class LocalCurrencyOption(
+        val amount: Long,
+        val conversionMarkupBps: Int,
+        val currency: String,
+        val presentmentExchangeRate: String,
+    ) : StripeModel
+
+    enum class Mode {
+        PAYMENT,
+        SETUP,
+        UNKNOWN,
+    }
+}

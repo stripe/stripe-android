@@ -14,6 +14,7 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicText
@@ -47,6 +48,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.core.text.HtmlCompat
 import com.stripe.android.uicore.image.StripeImage
@@ -78,24 +80,25 @@ sealed class EmbeddableImage {
 private fun rememberDrawableImages(
     drawableImageLoader: Map<String, EmbeddableImage.Drawable>,
     imageAlign: PlaceholderVerticalAlign,
-    textStyle: TextStyle,
 ): Map<String, InlineTextContent> {
     return drawableImageLoader.entries.associate { (key, value) ->
         val painter = painterResource(value.id)
         val height = painter.intrinsicSize.height
         val width = painter.intrinsicSize.width
+        val aspectRatio = width / height
 
-        val lineHeight = textStyle.fontSize
-        val newWidth = lineHeight * (width / height)
+        val newHeightEm = 1.em
+        val newWidthEm = newHeightEm * aspectRatio
 
         key to InlineTextContent(
             placeholder = Placeholder(
-                width = newWidth,
-                height = lineHeight,
+                width = newWidthEm,
+                height = newHeightEm,
                 placeholderVerticalAlign = imageAlign
             ),
             children = {
                 Image(
+                    modifier = Modifier.fillMaxSize(),
                     painter = painter,
                     contentDescription = stringResource(
                         value.contentDescription
@@ -298,7 +301,6 @@ fun HtmlWithCustomOnClick(
             it is EmbeddableImage.Drawable
         } as Map<String, EmbeddableImage.Drawable>,
         imageAlign = imageAlign,
-        textStyle = style,
     )
 
     @Suppress("UNCHECKED_CAST")

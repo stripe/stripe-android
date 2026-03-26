@@ -14,9 +14,7 @@ data class LoginSignUpResponse(
 data class User(
     @SerialName("user_id")
     val id: Int,
-
     val email: String,
-
     @SerialName("created_at")
     val createdAt: String
 )

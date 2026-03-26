@@ -3,6 +3,8 @@ package com.stripe.android.paymentsheet.navigation
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.ui.LinkButtonState
@@ -137,6 +139,7 @@ internal class PaymentSheetScreenVerticalModeScreenshotTest {
         }
     }
 
+    @Suppress("ThrowsCount")
     @Test
     fun displaysVerticalModeListWithLink() {
         val metadata = createMetadata()
@@ -149,15 +152,30 @@ internal class PaymentSheetScreenVerticalModeScreenshotTest {
         viewModel.walletsStateSource.value = WalletsState(
             link = WalletsState.Link(state = LinkButtonState.Default),
             googlePay = null,
+            shopPay = null,
             buttonsEnabled = true,
             dividerTextResource = R.string.stripe_paymentsheet_or_pay_using,
             onGooglePayPressed = { throw AssertionError("Not expected.") },
             onLinkPressed = { throw AssertionError("Not expected.") },
+            onShopPayPressed = { throw AssertionError("Not expected.") },
             walletsAllowedInHeader = WalletType.entries,
+            cardFundingFilter = DefaultCardFundingFilter,
+            cardBrandFilter = DefaultCardBrandFilter
         )
 
         paparazziRule.snapshot {
             PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
+        }
+    }
+
+    @Test
+    fun displaysBlankPageWhenContentNotVisible() {
+        val metadata = createMetadata()
+        val initialScreen = VerticalMode(FakePaymentMethodVerticalLayoutInteractor.create(metadata))
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = false)
+
+        paparazziRule.snapshot {
+            PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete, contentVisible = false)
         }
     }
 

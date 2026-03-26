@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
@@ -32,7 +33,9 @@ class GooglePayButtonTest {
                 onPressed = { didCallOnPressed = true },
                 modifier = Modifier.testTag(testTag),
                 buttonType = GooglePayButtonType.Pay,
-                cardBrandFilter = DefaultCardBrandFilter
+                cardBrandFilter = DefaultCardBrandFilter,
+                cardFundingFilter = DefaultCardFundingFilter,
+                additionalEnabledNetworks = emptyList()
             )
         }
 
@@ -59,7 +62,9 @@ class GooglePayButtonTest {
                 onPressed = { didCallOnPressed = true },
                 modifier = Modifier.testTag(testTag),
                 buttonType = GooglePayButtonType.Pay,
-                cardBrandFilter = DefaultCardBrandFilter
+                cardBrandFilter = DefaultCardBrandFilter,
+                cardFundingFilter = DefaultCardFundingFilter,
+                additionalEnabledNetworks = emptyList()
             )
         }
 

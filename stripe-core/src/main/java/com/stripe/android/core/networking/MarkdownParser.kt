@@ -14,7 +14,6 @@ object MarkdownParser {
         // bold, italics rules
         REGEX_BOLD_ASTERISKS.toRegex() to { "<b>${it.groupValues[1]}</b>" },
         REGEX_BOLD_UNDERSCORES.toRegex() to { "<b>${it.groupValues[1]}</b>" },
-
         // links
         REGEX_LINK.toRegex() to { "<a href=\"${it.groupValues[2]}\">${it.groupValues[1]}</a>" }
     )

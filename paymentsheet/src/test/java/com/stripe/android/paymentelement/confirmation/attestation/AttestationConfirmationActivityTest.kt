@@ -18,6 +18,7 @@ import com.stripe.android.model.AndroidVerificationObject
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationTestScenario
+import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.PaymentElementConfirmationTestActivity
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.assertComplete
@@ -76,27 +77,27 @@ internal class AttestationConfirmationActivityTest {
                     RadarOptionsFactory.create(
                         hCaptchaToken = null,
                         verificationObject = AndroidVerificationObject(
-                            androidVerificationToken = testToken
+                            androidVerificationToken = testToken,
+                            appId = "com.stripe.android.paymentsheet.test"
                         )
                     )
                 )
-            assertThat(optionWithToken.attestationComplete).isTrue()
+            assertThat(optionWithToken.confirmationChallengeState.attestationComplete).isTrue()
 
             intendedPaymentConfirmationToBeLaunched()
 
             val successResult = awaitItem().assertComplete().result.assertSucceeded()
 
             assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT.copy(paymentMethod = paymentMethod))
-            assertThat(successResult.deferredIntentConfirmationType).isNull()
+            assertThat(successResult.metadata).isEqualTo(MutableConfirmationMetadata())
         }
     }
 
     @Test
     fun `on attestation failure with New option, should proceed without token`() = test {
-        val testError = Exception("Attestation failed")
         val paymentMethod = PaymentMethodFactory.card()
 
-        intendingAttestationToBeLaunched(AttestationActivityResult.Failed(testError))
+        intendingAttestationToBeLaunched(AttestationActivityResult.Failed)
         intendingPaymentConfirmationToBeLaunched(
             InternalPaymentResult.Completed(PAYMENT_INTENT.copy(paymentMethod = paymentMethod))
         )
@@ -115,14 +116,14 @@ internal class AttestationConfirmationActivityTest {
             // Even on failure, attestation marks the option as complete
             val confirmingAfterAttestation = awaitItem().assertConfirming()
             val optionAfterAttestation = confirmingAfterAttestation.option as PaymentMethodConfirmationOption.New
-            assertThat(optionAfterAttestation.attestationComplete).isTrue()
+            assertThat(optionAfterAttestation.confirmationChallengeState.attestationComplete).isTrue()
 
             intendedPaymentConfirmationToBeLaunched()
 
             val successResult = awaitItem().assertComplete().result.assertSucceeded()
 
             assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT.copy(paymentMethod = paymentMethod))
-            assertThat(successResult.deferredIntentConfirmationType).isNull()
+            assertThat(successResult.metadata).isEqualTo(MutableConfirmationMetadata())
         }
     }
 

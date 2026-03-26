@@ -1,6 +1,5 @@
 package com.stripe.android.ui.core.elements
 
-import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -9,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -17,16 +15,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import androidx.core.app.ActivityOptionsCompat
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.cardscan.CardScanGoogleLauncher.Companion.rememberCardScanGoogleLauncher
-import com.stripe.android.ui.core.cardscan.LocalCardScanEventsReporter
+import com.stripe.android.ui.core.cardscan.rememberCardScanLauncher
 import com.stripe.android.uicore.elements.H6Text
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionController
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionElementUI
-import com.stripe.android.uicore.utils.AnimationConstants
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -38,20 +33,11 @@ fun CardDetailsSectionElementUI(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    val options = rememberActivityOptions()
 
-    // Only create launcher if ActivityResultRegistry is available (e.g., not in screenshot tests)
-    val activityResultRegistryOwner = LocalActivityResultRegistryOwner.current
-    val cardScanLauncher = if (activityResultRegistryOwner != null) {
-        val eventsReporter = LocalCardScanEventsReporter.current
-        rememberCardScanGoogleLauncher(
-            context = context,
-            options = options,
-            eventsReporter = eventsReporter,
-        ) { controller.onCardScanResult(it) }
-    } else {
-        null
-    }
+    val cardScanLauncher = rememberCardScanLauncher(
+        isStripeCardScanAllowed = controller.isStripeCardScanAllowed,
+        onResult = { controller.onCardScanResult(it) },
+    )
 
     if (controller.shouldAutomaticallyLaunchCardScan() && cardScanLauncher != null) {
         SideEffect {
@@ -74,10 +60,12 @@ fun CardDetailsSectionElementUI(
                         heading()
                     }
             )
-            ScanCardButtonUI(
-                enabled = enabled,
-                cardScanGoogleLauncher = cardScanLauncher
-            )
+            controller.cardDetailsAction?.Content(enabled) ?: run {
+                ScanCardButtonUI(
+                    enabled = enabled,
+                    cardScanLauncher = cardScanLauncher
+                )
+            }
         }
         SectionElementUI(
             modifier = Modifier.padding(top = 8.dp),
@@ -92,19 +80,6 @@ fun CardDetailsSectionElementUI(
             ),
             hiddenIdentifiers = hiddenIdentifiers,
             lastTextFieldIdentifier = lastTextFieldIdentifier
-        )
-    }
-}
-
-@Composable
-private fun rememberActivityOptions(): ActivityOptionsCompat {
-    val context = LocalContext.current
-
-    return remember(context) {
-        ActivityOptionsCompat.makeCustomAnimation(
-            context,
-            AnimationConstants.FADE_IN,
-            AnimationConstants.FADE_OUT,
         )
     }
 }

@@ -14,7 +14,6 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.webkit.WebViewAssetLoader
 import com.stripe.android.SharedPaymentTokenSessionPreview
-import com.stripe.android.core.exception.GenericStripeException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.ApiRequest
@@ -52,8 +51,8 @@ internal class ShopPayViewModel @Inject constructor(
     private val preparePaymentMethodHandlerProvider: Provider<PreparePaymentMethodHandler?>,
     private val eventReporter: EventReporter,
     private val errorReporter: ErrorReporter,
-    @UIContext workContext: CoroutineContext = Dispatchers.Main,
-) : ViewModel(CoroutineScope(workContext + SupervisorJob())) {
+    @UIContext private val uiContext: CoroutineContext = Dispatchers.Main,
+) : ViewModel(CoroutineScope(uiContext + SupervisorJob())) {
 
     private val _paymentResult = MutableSharedFlow<ShopPayActivityResult>()
     val paymentResult: Flow<ShopPayActivityResult> = _paymentResult
@@ -148,13 +147,7 @@ internal class ShopPayViewModel @Inject constructor(
     ) {
         runCatching {
             stripeApiRepository.createSavedPaymentMethodRadarSession(
-                paymentMethodId = paymentMethod.id
-                    ?: throw GenericStripeException(
-                        cause = IllegalStateException(
-                            "No payment method ID was found for provided 'PaymentMethod' object!"
-                        ),
-                        analyticsValue = "noPaymentMethodId"
-                    ),
+                paymentMethodId = paymentMethod.id,
                 requestOptions = requestOptions,
             ).getOrThrow()
         }.onFailure {
@@ -200,6 +193,12 @@ internal class ShopPayViewModel @Inject constructor(
     fun loadUrl(webView: WebView) {
         eventReporter.onShopPayWebViewLoadAttempt()
         webView.loadUrl("https://pay.stripe.com/assets/www/index.html")
+    }
+
+    fun onBackPressed() {
+        viewModelScope.launch(uiContext) {
+            _paymentResult.emit(ShopPayActivityResult.Canceled)
+        }
     }
 
     companion object {

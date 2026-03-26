@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit
 internal fun <
     TConfirmationOption : ConfirmationHandler.Option,
     TLauncher,
-    TLauncherArgs,
+    TLauncherArgs : Parcelable,
     TLauncherResult : Parcelable
     > runLaunchTest(
     definition: ConfirmationDefinition<TConfirmationOption, TLauncher, TLauncherArgs, TLauncherResult>,
@@ -47,11 +47,10 @@ internal fun <
         launchAction.launch()
 
         val savedParameters = savedStateHandle
-            .get<Parameters<TConfirmationOption>>("${definition.key}Parameters")
+            .get<Parameters<TConfirmationOption, TLauncherArgs>>("${definition.key}Parameters")
 
         assertThat(savedParameters?.confirmationOption).isEqualTo(confirmationOption)
         assertThat(savedParameters?.confirmationArgs).isEqualTo(parameters)
-        assertThat(savedParameters?.deferredIntentConfirmationType).isNull()
 
         assertThat(awaitRegisterCall()).isNotNull()
         assertThat(awaitLaunchCall()).isNotNull()
@@ -61,12 +60,13 @@ internal fun <
 internal fun <
     TConfirmationOption : ConfirmationHandler.Option,
     TLauncher,
-    TLauncherArgs,
+    TLauncherArgs : Parcelable,
     TLauncherResult : Parcelable
     > runResultTest(
     definition: ConfirmationDefinition<TConfirmationOption, TLauncher, TLauncherArgs, TLauncherResult>,
     confirmationOption: ConfirmationHandler.Option,
     parameters: ConfirmationHandler.Args,
+    launcherArgs: TLauncherArgs,
     launcherResult: TLauncherResult,
     definitionResult: ConfirmationDefinition.Result,
 ) = runTest {
@@ -78,7 +78,7 @@ internal fun <
             Parameters(
                 confirmationOption = confirmationOption,
                 confirmationArgs = parameters,
-                deferredIntentConfirmationType = null,
+                launcherArgs = launcherArgs,
             )
         )
     }
