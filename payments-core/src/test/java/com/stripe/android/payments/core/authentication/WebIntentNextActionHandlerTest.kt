@@ -131,7 +131,8 @@ class WebIntentNextActionHandlerTest {
     fun authenticate_whenRedirectingToAlipay() {
         verifyAuthenticate(
             stripeIntent = PaymentIntentFixtures.ALIPAY_REQUIRES_ACTION,
-            expectedUrl = "https://hooks.stripe.com/redirect/authenticate/src_1HDEFWKlwPmebFhp6tcpln8T?client_secret=src_client_secret_S6H9mVMKK6qxk9YxsUvbH55K",
+            expectedUrl = "https://hooks.stripe.com/redirect/authenticate/src_1HDEFWKlwPmebFhp6tcpln8T?client_secret=" +
+                "src_client_secret_S6H9mVMKK6qxk9YxsUvbH55K",
             expectedForceInAppWebView = true,
             expectedReturnUrl = "example://return_url",
             expectedRequestCode = PAYMENT_REQUEST_CODE,
