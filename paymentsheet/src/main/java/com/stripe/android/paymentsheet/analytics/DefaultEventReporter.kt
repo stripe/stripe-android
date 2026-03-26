@@ -410,6 +410,39 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
+    override fun onTapToAddStarted() {
+        durationProvider.start(DurationProvider.Key.TapToAdd)
+        fireEvent(PaymentSheetEvent.TapToAdd.Started(mode))
+    }
+
+    override fun onCardAddedWithTapToAdd() {
+        val duration = durationProvider.end(DurationProvider.Key.TapToAdd)
+        fireEvent(PaymentSheetEvent.TapToAdd.CardAdded(mode, duration))
+    }
+
+    override fun onTapToAddCanceled() {
+        val duration = durationProvider.end(DurationProvider.Key.TapToAdd)
+        fireEvent(PaymentSheetEvent.TapToAdd.Canceled(mode, duration))
+    }
+
+    override fun onTapToAddContinueAfterCardAdded() {
+        fireEvent(PaymentSheetEvent.TapToAdd.ContinueAfterCardAdded(mode))
+    }
+
+    override fun onTapToAddConfirm() {
+        fireEvent(PaymentSheetEvent.TapToAdd.Confirm(mode))
+    }
+
+    override fun onFailedToAddCardWithTapToAdd(message: String) {
+        val duration = durationProvider.end(DurationProvider.Key.TapToAdd)
+        fireEvent(PaymentSheetEvent.TapToAdd.FailedToAddCard(mode, message, duration))
+    }
+
+    override fun onTapToAddAttemptWithUnsupportedDevice() {
+        val duration = durationProvider.end(DurationProvider.Key.TapToAdd)
+        fireEvent(PaymentSheetEvent.TapToAdd.AttemptWithUnsupportedDevice(mode, duration))
+    }
+
     override fun onAnalyticsEvent(event: AnalyticsEvent) {
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(
