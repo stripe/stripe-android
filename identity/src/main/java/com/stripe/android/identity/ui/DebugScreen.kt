@@ -35,7 +35,9 @@ import androidx.navigation.NavController
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.R
 import com.stripe.android.identity.VerificationFlowFinishable
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_DEBUG
 import com.stripe.android.identity.navigation.DebugDestination
+import com.stripe.android.identity.navigation.IndividualDestination
 import com.stripe.android.identity.navigation.navigateTo
 import com.stripe.android.identity.networking.models.Requirement.Companion.nextDestination
 import com.stripe.android.identity.ui.CompleteOption.FAILURE
@@ -78,6 +80,7 @@ internal fun DebugScreen(
                 proceedState = LoadingButtonState.Disabled
                 when (completeOption) {
                     SUCCESS -> {
+                        identityViewModel.screenTracker.screenTransitionStart(SCREEN_NAME_DEBUG)
                         coroutineScope.launch {
                             identityViewModel.verifySessionAndTransition(
                                 fromRoute = DebugDestination.ROUTE.route,
@@ -88,6 +91,7 @@ internal fun DebugScreen(
                     }
 
                     FAILURE -> {
+                        identityViewModel.screenTracker.screenTransitionStart(SCREEN_NAME_DEBUG)
                         coroutineScope.launch {
                             identityViewModel.unverifySessionAndTransition(
                                 fromRoute = DebugDestination.ROUTE.route,
@@ -98,6 +102,7 @@ internal fun DebugScreen(
                     }
 
                     SUCCESS_ASYNC -> {
+                        identityViewModel.screenTracker.screenTransitionStart(SCREEN_NAME_DEBUG)
                         coroutineScope.launch {
                             identityViewModel.verifySessionAndTransition(
                                 fromRoute = DebugDestination.ROUTE.route,
@@ -108,6 +113,7 @@ internal fun DebugScreen(
                     }
 
                     FAILURE_ASYNC -> {
+                        identityViewModel.screenTracker.screenTransitionStart(SCREEN_NAME_DEBUG)
                         coroutineScope.launch {
                             identityViewModel.unverifySessionAndTransition(
                                 fromRoute = DebugDestination.ROUTE.route,
@@ -122,11 +128,11 @@ internal fun DebugScreen(
             FinishMobileFlowWithResultSection(verificationFlowFinishable)
             Divider(modifier = Modifier.padding(vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin)))
             PreviewUserExperienceSection {
-                navController.navigateTo(
-                    verificationPage.requirements.missing.nextDestination(
-                        context
-                    )
-                )
+                val destination = verificationPage.requirements.missing.nextDestination(context)
+                if (destination != IndividualDestination) {
+                    identityViewModel.screenTracker.screenTransitionStart(SCREEN_NAME_DEBUG)
+                }
+                navController.navigateTo(destination)
             }
         }
     }

@@ -9,6 +9,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavOptionsBuilder
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
@@ -28,6 +29,7 @@ import com.stripe.android.identity.VERIFICATION_PAGE_DATA_MISSING_PHONE_OTP
 import com.stripe.android.identity.VERIFICATION_PAGE_DATA_MISSING_SELFIE
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONSENT
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_DOC_WARMUP
 import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.ml.AnalyzerInput
@@ -567,6 +569,7 @@ internal class IdentityViewModelTest {
             mockController,
             ConsentDestination.ROUTE.route
         )
+        verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_CONSENT), any())
         verify(mockController).navigate(
             eq(SelfieWarmupDestination.routeWithArgs),
             any<NavOptionsBuilder.() -> Unit>()
@@ -600,6 +603,7 @@ internal class IdentityViewModelTest {
             )
 
             assertThat(viewModel.verificationPageSubmit.value).isEqualTo(Resource.success(Resource.DUMMY_RESOURCE))
+            verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_CONSENT), any())
 
             verify(mockController).navigate(
                 argWhere {
@@ -637,12 +641,63 @@ internal class IdentityViewModelTest {
             )
 
             assertThat(viewModel.verificationPageSubmit.value).isEqualTo(Resource.success(Resource.DUMMY_RESOURCE))
+            verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_CONSENT), any())
 
             verify(mockController).navigate(
                 eq(ConfirmationDestination.routeWithArgs),
                 any<NavOptionsBuilder.() -> Unit>()
             )
         }
+    }
+
+    @Test
+    fun `checkPermissionAndNavigate - camera ready starts transition and navigates to document scan`() {
+        val mockCameraPermissionEnsureable = mock<CameraPermissionEnsureable>()
+        val onCameraReadyCaptor = argumentCaptor<() -> Unit>()
+
+        viewModel.checkPermissionAndNavigate(
+            navController = mockController,
+            cameraPermissionEnsureable = mockCameraPermissionEnsureable,
+            screenName = SCREEN_NAME_DOC_WARMUP
+        )
+
+        verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_DOC_WARMUP), any())
+        verify(mockCameraPermissionEnsureable).ensureCameraPermission(
+            onCameraReadyCaptor.capture(),
+            any()
+        )
+
+        onCameraReadyCaptor.firstValue.invoke()
+
+        verify(mockController).navigate(
+            eq(DocumentScanDestination.routeWithArgs),
+            any<NavOptionsBuilder.() -> Unit>()
+        )
+    }
+
+    @Test
+    fun `checkPermissionAndNavigate - user denied starts transition and navigates to permission denied`() {
+        val mockCameraPermissionEnsureable = mock<CameraPermissionEnsureable>()
+        val onUserDeniedCaptor = argumentCaptor<() -> Unit>()
+
+        viewModel.checkPermissionAndNavigate(
+            navController = mockController,
+            cameraPermissionEnsureable = mockCameraPermissionEnsureable,
+            screenName = SCREEN_NAME_DOC_WARMUP
+        )
+
+        verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_DOC_WARMUP), any())
+        verify(mockCameraPermissionEnsureable).ensureCameraPermission(
+            any(),
+            onUserDeniedCaptor.capture()
+        )
+
+        onUserDeniedCaptor.firstValue.invoke()
+
+        verify(mockController).navigate(
+            eq(com.stripe.android.identity.navigation.CameraPermissionDeniedDestination.routeWithArgs),
+            any<NavOptionsBuilder.() -> Unit>()
+        )
     }
 
     @Test

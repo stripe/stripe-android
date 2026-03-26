@@ -228,6 +228,9 @@ internal fun IdentityNavGraph(
                         // navigate back to DocWarmup, so that when user is back to the app
                         // from settings
                         // the camera permission check can be triggered again from there.
+                        identityViewModel.screenTracker.screenTransitionStart(
+                            IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR
+                        )
                         navController.navigateTo(DocWarmupDestination)
                     }
                 )

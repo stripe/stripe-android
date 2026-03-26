@@ -1461,6 +1461,7 @@ internal class IdentityViewModel(
         navController: NavController,
         fromRoute: String
     ) {
+        screenTracker.screenTransitionStart(fromRoute.routeToScreenName())
         if (requireNotNull(verificationPage.value?.data).requireSelfie()) {
             navController.navigateTo(SelfieWarmupDestination)
         } else {
@@ -1639,6 +1640,7 @@ internal class IdentityViewModel(
         cameraSource: IdentityAnalyticsRequestFactory.CameraSource =
             IdentityAnalyticsRequestFactory.CameraSource.CAMERA_SESSION
     ) {
+        screenTracker.screenTransitionStart(screenName)
         cameraPermissionEnsureable.ensureCameraPermission(
             onCameraReady = {
                 identityAnalyticsRequestFactory.cameraPermissionGranted(
