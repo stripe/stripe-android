@@ -44,6 +44,7 @@ import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 
 @OptIn(ExperimentalMaterialApi::class)
+@Suppress("LongMethod")
 @Composable
 internal fun ConfirmationScreen(
     navController: NavController,

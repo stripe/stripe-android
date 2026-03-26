@@ -110,10 +110,11 @@ class IdentityAnalyticsRequestFactoryTest {
 
         verify(mockIdentityRepository).sendAnalyticsRequest(
             argWhere {
+                val metadata = it.params.toMap()[PARAM_EVENT_META_DATA] as Map<*, *>
                 it.eventName == EVENT_SHEET_CLOSED &&
-                    (it.params.toMap()[PARAM_EVENT_META_DATA] as Map<*, *>)[PARAM_SESSION_RESULT] == sessionResult &&
-                    (it.params.toMap()[PARAM_EVENT_META_DATA] as Map<*, *>)[PARAM_LAST_SCREEN_NAME] == TEST_SCREEN_NAME &&
-                    (it.params.toMap()[PARAM_EVENT_META_DATA] as Map<*, *>)[PARAM_LIVE_MODE] == "true"
+                    metadata[PARAM_SESSION_RESULT] == sessionResult &&
+                    metadata[PARAM_LAST_SCREEN_NAME] == TEST_SCREEN_NAME &&
+                    metadata[PARAM_LIVE_MODE] == "true"
             }
         )
     }

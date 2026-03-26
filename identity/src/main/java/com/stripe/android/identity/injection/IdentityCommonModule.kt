@@ -31,7 +31,6 @@ internal abstract class IdentityCommonModule {
     @Singleton
     abstract fun bindRepository(defaultIdentityRepository: DefaultIdentityRepository): IdentityRepository
 
-
     companion object {
         @Provides
         @Named(ENABLE_LOGGING)

@@ -62,6 +62,7 @@ internal fun IndividualWelcomeScreen(
 }
 
 @OptIn(ExperimentalMaterialApi::class)
+@Suppress("LongMethod")
 @Composable
 private fun SuccessUI(
     merchantLogoUri: Uri,

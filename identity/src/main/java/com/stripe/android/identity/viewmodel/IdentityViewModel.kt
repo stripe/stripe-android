@@ -522,6 +522,7 @@ internal class IdentityViewModel(
         }
     }
 
+    @Suppress("LongMethod")
     private fun uploadIDDetectorOutput(
         originalBitmap: Bitmap,
         detectorOutput: IDDetectorOutput,
@@ -1155,6 +1156,7 @@ internal class IdentityViewModel(
      * If Result is failed, navigate to [ErrorDestination] with the failure information.
      *
      */
+    @Suppress("LongMethod")
     private fun Result<VerificationPageData>.checkSubmitStatusAndNavigate(
         fromRoute: String,
         navController: NavController

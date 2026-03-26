@@ -40,7 +40,6 @@ internal fun BottomSheetHTML(
     ) { annotatedStringRanges ->
         annotatedStringRanges.firstOrNull()?.item?.let { urlString ->
             when {
-
                 urlString.startsWith(STRIPE_BOTTOM_SHEET) -> {
                     val bottomSheetId = urlString.substringAfterLast('/')
                     bottomSheets?.get(bottomSheetId)?.let { bottomSheetContent ->
