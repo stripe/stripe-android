@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -39,7 +38,6 @@ import com.stripe.android.uicore.utils.collectAsState
 import java.util.regex.Pattern
 
 @Composable
-@ExperimentalMaterialApi
 internal fun BottomSheet(
     onHtmlError: (Throwable) -> Unit = {}
 ) {
@@ -182,7 +180,6 @@ private fun String.tryParseUl(): List<String>? {
 
 @Preview
 @Composable
-@ExperimentalMaterialApi
 internal fun ButtonSheetPreview() {
     IdentityPreview {
         val mockViewModel = viewModel<BottomSheetViewModel>()

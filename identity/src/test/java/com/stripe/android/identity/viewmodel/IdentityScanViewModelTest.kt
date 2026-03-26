@@ -17,12 +17,13 @@ import com.stripe.android.identity.ml.IDDetectorOutput
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.states.IdentityScanState
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
-import org.mockito.kotlin.argWhere
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -130,20 +131,24 @@ internal class IdentityScanViewModelTest {
     @Test
     fun testAnalyzerFailureLogsContextualGenericError() {
         val error = IllegalStateException("boom")
+        val metadataCaptor = argumentCaptor<Map<String, Any?>>()
         viewModel.targetScanTypeFlow.update { IdentityScanState.ScanType.DOC_FRONT }
 
         viewModel.onAnalyzerFailure(error)
 
         verify(mockIdentityAnalyticsRequestFactory).genericError(
             eq(error),
-            argWhere {
-                this[PARAM_ERROR_CONTEXT] == IdentityAnalyticsRequestFactory.ERROR_CONTEXT_IMAGE_SCAN &&
-                    this[PARAM_SCANNER_NAME] ==
-                    IdentityAnalyticsRequestFactory.ScannerName.DOCUMENT.analyticsValue &&
-                    this[PARAM_SCREEN_NAME] ==
-                    IdentityAnalyticsRequestFactory.SCREEN_NAME_LIVE_CAPTURE
-            },
+            metadataCaptor.capture(),
             eq("Error executing analyzer: ${error.message}")
+        )
+        assertThat(metadataCaptor.firstValue[PARAM_ERROR_CONTEXT]).isEqualTo(
+            IdentityAnalyticsRequestFactory.ERROR_CONTEXT_IMAGE_SCAN
+        )
+        assertThat(metadataCaptor.firstValue[PARAM_SCANNER_NAME]).isEqualTo(
+            IdentityAnalyticsRequestFactory.ScannerName.DOCUMENT.analyticsValue
+        )
+        assertThat(metadataCaptor.firstValue[PARAM_SCREEN_NAME]).isEqualTo(
+            IdentityAnalyticsRequestFactory.SCREEN_NAME_LIVE_CAPTURE
         )
         verify(mockIdentityAnalyticsRequestFactory).verificationFailed(
             eq(false),

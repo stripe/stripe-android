@@ -3,7 +3,6 @@ package com.stripe.android.identity.ui
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,7 +20,6 @@ import com.stripe.android.uicore.text.HtmlWithCustomOnClick
  * Draw Html with the ability to open a web link or bottomsheet
  */
 @Composable
-@ExperimentalMaterialApi
 internal fun BottomSheetHTML(
     html: String,
     modifier: Modifier = Modifier,
