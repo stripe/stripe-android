@@ -64,6 +64,7 @@ internal fun PaymentMethodVerticalLayoutUI(
         savedPaymentMethodAction = state.availableSavedPaymentMethodAction,
         selection = state.selection,
         isEnabled = !state.isProcessing,
+        currencySelectorOptions = state.currencySelectorOptions,
         onViewMorePaymentMethods = {
             interactor.handleViewAction(
                 PaymentMethodVerticalLayoutInteractor.ViewAction.TransitionToManageSavedPaymentMethods
@@ -93,6 +94,9 @@ internal fun PaymentMethodVerticalLayoutUI(
                 PaymentMethodVerticalLayoutInteractor.ViewAction.CancelPaymentMethodVisibilityTracking
             )
         },
+        onCurrencySelected = {
+            interactor.handleViewAction(PaymentMethodVerticalLayoutInteractor.ViewAction.CurrencySelected(it))
+        },
         modifier = modifier
             .testTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT)
     )
@@ -112,6 +116,8 @@ internal fun PaymentMethodVerticalLayoutUI(
     onSelectSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     imageLoader: StripeImageLoader,
     modifier: Modifier = Modifier,
+    currencySelectorOptions: CurrencySelectorOptions? = null,
+    onCurrencySelected: (CurrencyOption) -> Unit = {},
     updatePaymentMethodVisibility: (String, LayoutCoordinates) -> Unit = { _, _ -> },
     cancelPaymentMethodVisibilityTracking: () -> Unit = {},
 ) {
@@ -123,6 +129,15 @@ internal fun PaymentMethodVerticalLayoutUI(
     DisposableEffect(paymentMethodCodes) { onDispose { cancelPaymentMethodVisibilityTracking.invoke() } }
 
     Column(modifier = modifier) {
+        if (currencySelectorOptions != null) {
+            CurrencySelectorToggle(
+                options = currencySelectorOptions,
+                onCurrencySelected = onCurrencySelected,
+                isEnabled = isEnabled,
+            )
+            Spacer(Modifier.size(16.dp))
+        }
+
         val textStyle = MaterialTheme.typography.subtitle1
         val textColor = MaterialTheme.stripeColors.onComponent
 

@@ -18,6 +18,7 @@ internal class FakePaymentMethodVerticalLayoutInteractor(
             initialShowsWalletsHeader: Boolean = true,
             selection: PaymentMethodVerticalLayoutInteractor.Selection? = null,
             mandate: ResolvableString? = null,
+            currencySelectorOptions: CurrencySelectorOptions? = null,
             viewActionRecorder: ViewActionRecorder<PaymentMethodVerticalLayoutInteractor.ViewAction> =
                 ViewActionRecorder()
         ): FakePaymentMethodVerticalLayoutInteractor {
@@ -37,6 +38,7 @@ internal class FakePaymentMethodVerticalLayoutInteractor(
                 availableSavedPaymentMethodAction =
                 PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
                 mandate = mandate,
+                currencySelectorOptions = currencySelectorOptions,
             )
             return FakePaymentMethodVerticalLayoutInteractor(
                 initialState = initialState,

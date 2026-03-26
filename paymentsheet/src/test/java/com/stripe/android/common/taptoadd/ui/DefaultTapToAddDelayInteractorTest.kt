@@ -21,7 +21,7 @@ internal class DefaultTapToAddDelayInteractorTest {
             )
 
         val interactor = DefaultTapToAddDelayInteractor(
-            coroutineScope = this,
+            coroutineContext = coroutineContext,
             paymentMethod = paymentMethod,
             onShown = {},
         )
@@ -36,7 +36,7 @@ internal class DefaultTapToAddDelayInteractorTest {
         val paymentMethod = PaymentMethodFactory.card(last4 = "4242")
 
         DefaultTapToAddDelayInteractor(
-            coroutineScope = this,
+            coroutineContext = coroutineContext,
             paymentMethod = paymentMethod,
             onShown = { onShownCalls.add(Unit) },
         )
@@ -45,5 +45,21 @@ internal class DefaultTapToAddDelayInteractorTest {
         runCurrent()
 
         assertThat(onShownCalls.awaitItem()).isEqualTo(Unit)
+    }
+
+    @Test
+    fun `close before delay elapses does not invoke onShown`() = runTest {
+        val onShownCalls = Turbine<Unit>()
+        val paymentMethod = PaymentMethodFactory.card(last4 = "4242")
+
+        val interactor = DefaultTapToAddDelayInteractor(
+            coroutineContext = coroutineContext,
+            paymentMethod = paymentMethod,
+            onShown = { onShownCalls.add(Unit) },
+        )
+        interactor.close()
+        advanceTimeBy(1000L)
+        runCurrent()
+        onShownCalls.ensureAllEventsConsumed()
     }
 }

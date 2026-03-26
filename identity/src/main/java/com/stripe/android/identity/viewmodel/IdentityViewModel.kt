@@ -472,16 +472,14 @@ internal class IdentityViewModel(
         verificationPage: VerificationPage
     ) {
         when (result.result) {
-            is IDDetectorOutput.Legacy -> {
+            is IDDetectorOutput -> {
                 val transitioner = result.identityState.transitioner as? IDDetectorTransitioner
 
                 val bitmap = transitioner?.getBestFrameBitmap()
                     ?: result.frame.cameraPreviewImage.image
-
-                val output = transitioner?.getBestLegacyOutput()
+                val output = transitioner?.getBestOutput()
                     ?: result.result
-
-                uploadLegacyIDDetectorOutput(
+                uploadIDDetectorOutput(
                     bitmap,
                     output,
                     verificationPage
@@ -497,17 +495,17 @@ internal class IdentityViewModel(
         }
     }
 
-    private fun uploadLegacyIDDetectorOutput(
+    private fun uploadIDDetectorOutput(
         originalBitmap: Bitmap,
-        legacyOutput: IDDetectorOutput.Legacy,
+        detectorOutput: IDDetectorOutput,
         verificationPage: VerificationPage
     ) {
-        val scores = legacyOutput.allScores
+        val scores = detectorOutput.allScores
 
         val isFront: Boolean
         val targetScanType: IdentityScanState.ScanType
 
-        when (legacyOutput.category) {
+        when (detectorOutput.category) {
             Category.PASSPORT -> {
                 isFront = true
                 targetScanType = IdentityScanState.ScanType.DOC_FRONT
@@ -524,12 +522,12 @@ internal class IdentityViewModel(
             }
 
             else -> {
-                Log.e(TAG, "incorrect category: ${legacyOutput.category}")
+                Log.e(TAG, "incorrect category: ${detectorOutput.category}")
                 isFront = true
                 targetScanType = IdentityScanState.ScanType.DOC_FRONT
                 logError(
                     IllegalStateException(
-                        "incorrect legacy targetScanType: ${legacyOutput.category}, " +
+                        "incorrect targetScanType: ${detectorOutput.category}, " +
                             "upload as DOC_FRONT"
                     )
                 )
@@ -540,7 +538,7 @@ internal class IdentityViewModel(
         processAndUploadBitmap(
             bitmapToUpload = cropBitmapToUpload(
                 originalBitmap,
-                legacyOutput.boundingBox,
+                detectorOutput.boundingBox,
                 verificationPage
             ),
             docCapturePage = verificationPage.documentCapture,
