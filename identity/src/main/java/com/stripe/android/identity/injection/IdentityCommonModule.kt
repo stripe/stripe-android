@@ -4,9 +4,7 @@ import android.content.Context
 import android.content.res.Resources
 import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.injection.ENABLE_LOGGING
-import com.stripe.android.identity.networking.DefaultIdentityModelFetcher
 import com.stripe.android.identity.networking.DefaultIdentityRepository
-import com.stripe.android.identity.networking.IdentityModelFetcher
 import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.utils.DefaultIdentityIO
 import com.stripe.android.identity.utils.IdentityIO
@@ -33,9 +31,6 @@ internal abstract class IdentityCommonModule {
     @Singleton
     abstract fun bindRepository(defaultIdentityRepository: DefaultIdentityRepository): IdentityRepository
 
-    @Binds
-    @Singleton
-    abstract fun bindIDDetectorFetcher(defaultIDDetectorFetcher: DefaultIdentityModelFetcher): IdentityModelFetcher
 
     companion object {
         @Provides
