@@ -1,5 +1,6 @@
 {
   "session_id": "cs_test_abc123",
+  "ui_mode": "custom",
   "currency": "usd",
   "mode": "setup",
   "total_summary": {

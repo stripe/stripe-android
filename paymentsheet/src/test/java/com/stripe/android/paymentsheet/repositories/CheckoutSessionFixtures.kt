@@ -12,6 +12,7 @@ internal object CheckoutSessionFixtures {
         """
         {
           "session_id": "cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh",
+          "ui_mode": "custom",
           "object": "checkout.session",
           "currency": "usd",
           "mode": "payment",
@@ -207,6 +208,7 @@ internal object CheckoutSessionFixtures {
         """
         {
             "session_id": "cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh",
+            "ui_mode": "custom",
             "currency": "usd",
             "total_summary": {
                 "due": 999
@@ -234,6 +236,7 @@ internal object CheckoutSessionFixtures {
         """
         {
             "session_id": "cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh",
+            "ui_mode": "custom",
             "currency": "usd",
             "total_summary": {
                 "due": 999
@@ -269,6 +272,7 @@ internal object CheckoutSessionFixtures {
         """
         {
             "session_id": "cs_test_abc123",
+            "ui_mode": "custom",
             "currency": "usd",
             "total_summary": {
                 "due": 1000
@@ -317,6 +321,7 @@ internal object CheckoutSessionFixtures {
         """
         {
             "session_id": "cs_test_abc123",
+            "ui_mode": "custom",
             "currency": "usd",
             "total_summary": {
                 "due": 1000
@@ -337,6 +342,7 @@ internal object CheckoutSessionFixtures {
         """
         {
             "session_id": "cs_test_abc123",
+            "ui_mode": "custom",
             "currency": "usd",
             "total_summary": {
                 "due": 1000
@@ -353,6 +359,7 @@ internal object CheckoutSessionFixtures {
         """
         {
             "session_id": "cs_test_guest123",
+            "ui_mode": "custom",
             "currency": "usd",
             "total_summary": {
                 "due": 1000
@@ -370,6 +377,7 @@ internal object CheckoutSessionFixtures {
         """
         {
             "session_id": "cs_test_abc123",
+            "ui_mode": "custom",
             "currency": "usd",
             "total_summary": {
                 "due": 1000
@@ -390,6 +398,7 @@ internal object CheckoutSessionFixtures {
         """
         {
             "session_id": "cs_test_abc123",
+            "ui_mode": "custom",
             "currency": "usd",
             "total_summary": {
                 "due": 1000
@@ -410,6 +419,7 @@ internal object CheckoutSessionFixtures {
         """
         {
             "session_id": "cs_test_abc123",
+            "ui_mode": "custom",
             "currency": "usd",
             "total_summary": {
                 "due": 1000
@@ -430,6 +440,7 @@ internal object CheckoutSessionFixtures {
         """
         {
             "session_id": "cs_test_abc123",
+            "ui_mode": "custom",
             "currency": "usd",
             "total_summary": {
                 "due": 4044,
@@ -508,6 +519,7 @@ internal object CheckoutSessionFixtures {
         """
         {
             "session_id": "cs_test_abc123",
+            "ui_mode": "custom",
             "currency": "usd",
             "line_item_group": {
                 "currency": "usd",
@@ -527,6 +539,7 @@ internal object CheckoutSessionFixtures {
         """
         {
             "session_id": "cs_test_abc123",
+            "ui_mode": "custom",
             "currency": "usd",
             "total_summary": {
                 "due": 800,
@@ -546,6 +559,7 @@ internal object CheckoutSessionFixtures {
         """
         {
             "session_id": "cs_test_abc123",
+            "ui_mode": "custom",
             "currency": "usd",
             "total_summary": {
                 "due": 4497,
@@ -588,6 +602,7 @@ internal object CheckoutSessionFixtures {
         """
         {
             "session_id": "cs_test_abc123",
+            "ui_mode": "custom",
             "currency": "usd",
             "total_summary": {
                 "due": 1500,
@@ -629,6 +644,7 @@ internal object CheckoutSessionFixtures {
         """
         {
           "session_id": "cs_test_setup_abc123",
+          "ui_mode": "custom",
           "object": "checkout.session",
           "currency": "usd",
           "mode": "setup",
@@ -660,6 +676,7 @@ internal object CheckoutSessionFixtures {
         """
         {
             "session_id": "cs_test_setup_abc123",
+            "ui_mode": "custom",
             "currency": "usd",
             "mode": "setup",
             "total_summary": {
@@ -689,6 +706,7 @@ internal object CheckoutSessionFixtures {
         """
         {
             "session_id": "cs_test_setup_abc123",
+            "ui_mode": "custom",
             "currency": "usd",
             "mode": "setup",
             "total_summary": {
@@ -727,6 +745,7 @@ internal object CheckoutSessionFixtures {
         """
         {
             "session_id": "cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh",
+            "ui_mode": "custom",
             "currency": "usd",
             "mode": "payment",
             "total_summary": {
@@ -771,6 +790,7 @@ internal object CheckoutSessionFixtures {
         """
         {
             "session_id": "cs_test_setup_abc123",
+            "ui_mode": "custom",
             "currency": "usd",
             "mode": "setup",
             "total_summary": {
@@ -810,6 +830,7 @@ internal object CheckoutSessionFixtures {
         """
         {
             "session_id": "cs_test_abc123",
+            "ui_mode": "custom",
             "currency": "usd",
             "total_summary": {
                 "due": 6106,
@@ -839,6 +860,7 @@ internal object CheckoutSessionFixtures {
         """
         {
             "session_id": "cs_test_abc123",
+            "ui_mode": "custom",
             "currency": "usd",
             "shipping_rate": "shr_standard",
             "total_summary": {
