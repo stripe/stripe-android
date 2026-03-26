@@ -4,6 +4,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.FormHelper
+import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -18,6 +19,10 @@ internal object VerticalModeInitialScreenFactory {
         val bankFormInteractor = BankFormInteractor.create(viewModel)
 
         if (supportedPaymentMethodTypes.size == 1 && customerStateHolder.paymentMethods.value.isEmpty()) {
+            val currencySelectorOptions = (viewModel as? PaymentSheetViewModel)
+                ?.latestCheckoutSessionResponse
+                ?.adaptivePricingInfo
+                ?.let { CurrencySelectorOptionsFactory.create(it) }
             return listOf(
                 PaymentSheetScreen.VerticalModeForm(
                     interactor = DefaultVerticalModeFormInteractor.create(
@@ -26,6 +31,10 @@ internal object VerticalModeInitialScreenFactory {
                         paymentMethodMetadata = paymentMethodMetadata,
                         customerStateHolder = customerStateHolder,
                         bankFormInteractor = bankFormInteractor,
+                        currencySelectorOptions = currencySelectorOptions,
+                        onCurrencySelected = { currencyOption ->
+                            (viewModel as? PaymentSheetViewModel)?.updateCurrency(currencyOption.code)
+                        },
                     ),
                     showsWalletHeader = paymentMethodMetadata.availableWallets.isNotEmpty(),
                 )

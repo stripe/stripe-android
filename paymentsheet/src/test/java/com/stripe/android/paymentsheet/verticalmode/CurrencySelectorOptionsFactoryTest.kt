@@ -27,8 +27,8 @@ class CurrencySelectorOptionsFactoryTest {
 
         assertThat(result).isEqualTo(
             CurrencySelectorOptions(
-                first = CurrencyOption(code = "EUR", displayableText = "€50.99"),
-                second = CurrencyOption(code = "USD", displayableText = "$61.06"),
+                first = CurrencyOption(code = "EUR", displayableText = "🇪🇺 €50.99"),
+                second = CurrencyOption(code = "USD", displayableText = "🇺🇸 $61.06"),
                 selectedCode = "USD",
                 exchangeRateText = "1 EUR = 1.19749 USD",
             )
@@ -110,8 +110,8 @@ class CurrencySelectorOptionsFactoryTest {
 
         val result = CurrencySelectorOptionsFactory.create(adaptivePricingInfo, Locale.US)
 
-        assertThat(result?.first).isEqualTo(CurrencyOption(code = "JPY", displayableText = "¥5,000"))
-        assertThat(result?.second).isEqualTo(CurrencyOption(code = "USD", displayableText = "$35.00"))
+        assertThat(result?.first).isEqualTo(CurrencyOption(code = "JPY", displayableText = "🇯🇵 ¥5,000"))
+        assertThat(result?.second).isEqualTo(CurrencyOption(code = "USD", displayableText = "🇺🇸 $35.00"))
         assertThat(result?.exchangeRateText).isEqualTo("1 JPY = 0.00680 USD")
     }
 
@@ -135,6 +135,50 @@ class CurrencySelectorOptionsFactoryTest {
 
         assertThat(result?.selectedCode).isEqualTo("EUR")
         assertThat(result?.exchangeRateText).isEqualTo("1 USD = 0.897235 EUR")
+    }
+
+    @Test
+    fun `supranational XAF currency has no flag emoji`() {
+        val adaptivePricingInfo = CheckoutSessionResponse.AdaptivePricingInfo(
+            activePresentmentCurrency = "xaf",
+            integrationAmount = 1000L,
+            integrationCurrency = "xaf",
+            localCurrencyOptions = listOf(
+                CheckoutSessionResponse.LocalCurrencyOption(
+                    amount = 1500L,
+                    conversionMarkupBps = 100,
+                    currency = "usd",
+                    presentmentExchangeRate = "0.00167",
+                )
+            ),
+        )
+
+        val result = CurrencySelectorOptionsFactory.create(adaptivePricingInfo, Locale.US)
+
+        assertThat(result?.first?.displayableText).isEqualTo("FCFA1,000")
+        assertThat(result?.second?.displayableText).isEqualTo("🇺🇸 $15.00")
+    }
+
+    @Test
+    fun `supranational XPF currency has no flag emoji`() {
+        val adaptivePricingInfo = CheckoutSessionResponse.AdaptivePricingInfo(
+            activePresentmentCurrency = "xpf",
+            integrationAmount = 500L,
+            integrationCurrency = "xpf",
+            localCurrencyOptions = listOf(
+                CheckoutSessionResponse.LocalCurrencyOption(
+                    amount = 600L,
+                    conversionMarkupBps = 100,
+                    currency = "eur",
+                    presentmentExchangeRate = "0.00838",
+                )
+            ),
+        )
+
+        val result = CurrencySelectorOptionsFactory.create(adaptivePricingInfo, Locale.US)
+
+        assertThat(result?.first?.displayableText).isEqualTo("CFPF500")
+        assertThat(result?.second?.displayableText).isEqualTo("🇪🇺 €6.00")
     }
 
     @Test

@@ -9,6 +9,7 @@ import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.uicore.elements.FormElement
 import kotlinx.coroutines.CoroutineScope
@@ -63,6 +64,7 @@ internal class DefaultTapToAddCardAddedInteractor(
     coroutineContext: CoroutineContext,
     private val tapToAddMode: TapToAddMode,
     private val paymentMethod: PaymentMethod,
+    private val eventReporter: EventReporter,
     private val savedPaymentMethodLinkFormHelper: SavedPaymentMethodLinkFormHelper,
     private val onContinue: (PaymentSelection.Saved) -> Unit,
     private val onConfirm: (PaymentMethod, UserInput?) -> Unit,
@@ -101,7 +103,10 @@ internal class DefaultTapToAddCardAddedInteractor(
 
     override fun performAction(action: TapToAddCardAddedInteractor.Action) {
         when (action) {
-            TapToAddCardAddedInteractor.Action.PrimaryButtonPressed -> onPrimaryButtonPressed()
+            TapToAddCardAddedInteractor.Action.PrimaryButtonPressed -> {
+                eventReporter.onTapToAddContinueAfterCardAdded()
+                onPrimaryButtonPressed()
+            }
         }
     }
 
@@ -140,6 +145,7 @@ internal class DefaultTapToAddCardAddedInteractor(
     class Factory @Inject constructor(
         private val tapToAddMode: TapToAddMode,
         private val savedPaymentMethodLinkFormHelper: SavedPaymentMethodLinkFormHelper,
+        private val eventReporter: EventReporter,
         private val tapToAddDelayInteractorFactory: TapToAddDelayInteractor.Factory,
         private val tapToAddConfirmationInteractorFactory: TapToAddConfirmationInteractor.Factory,
         private val tapToAddNavigator: Provider<TapToAddNavigator>,
@@ -152,6 +158,7 @@ internal class DefaultTapToAddCardAddedInteractor(
                 tapToAddMode = tapToAddMode,
                 paymentMethod = paymentMethod,
                 savedPaymentMethodLinkFormHelper = savedPaymentMethodLinkFormHelper,
+                eventReporter = eventReporter,
                 onContinue = { paymentSelection ->
                     tapToAddNavigator.get().performAction(TapToAddNavigator.Action.Continue(paymentSelection))
                 },

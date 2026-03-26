@@ -1,5 +1,6 @@
 {
     "session_id": "cs_test_after_address",
+    "ui_mode": "custom",
     "currency": "usd",
     "total_summary": {
         "due": 4599,

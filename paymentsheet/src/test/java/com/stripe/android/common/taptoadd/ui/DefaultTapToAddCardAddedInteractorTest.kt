@@ -12,6 +12,7 @@ import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
@@ -77,6 +78,7 @@ internal class DefaultTapToAddCardAddedInteractorTest {
         ) {
             interactor.performAction(TapToAddCardAddedInteractor.Action.PrimaryButtonPressed)
 
+            assertThat(fakeEventReporter.tapToAddContinueAfterCardAddedCalls.awaitItem()).isNotNull()
             val selection = onContinueCalls.awaitItem()
             assertThat(selection.paymentMethod).isEqualTo(paymentMethod)
             assertThat(selection.linkInput).isNull()
@@ -90,6 +92,7 @@ internal class DefaultTapToAddCardAddedInteractorTest {
         ) {
             interactor.performAction(TapToAddCardAddedInteractor.Action.PrimaryButtonPressed)
 
+            assertThat(fakeEventReporter.tapToAddContinueAfterCardAddedCalls.awaitItem()).isNotNull()
             val selection = onContinueCalls.awaitItem()
             assertThat(selection.paymentMethod).isEqualTo(paymentMethod)
             assertThat(selection.linkInput).isEqualTo(mockUserInput())
@@ -103,8 +106,9 @@ internal class DefaultTapToAddCardAddedInteractorTest {
         ) {
             interactor.performAction(TapToAddCardAddedInteractor.Action.PrimaryButtonPressed)
 
-            val (paymentMethod, linkInput) = onConfirmCalls.awaitItem()
-            assertThat(paymentMethod).isEqualTo(paymentMethod)
+            assertThat(fakeEventReporter.tapToAddContinueAfterCardAddedCalls.awaitItem()).isNotNull()
+            val (confirmedPm, linkInput) = onConfirmCalls.awaitItem()
+            assertThat(confirmedPm).isEqualTo(paymentMethod)
             assertThat(linkInput).isNull()
         }
 
@@ -128,6 +132,7 @@ internal class DefaultTapToAddCardAddedInteractorTest {
         ) {
             interactor.performAction(TapToAddCardAddedInteractor.Action.PrimaryButtonPressed)
 
+            assertThat(fakeEventReporter.tapToAddContinueAfterCardAddedCalls.awaitItem()).isNotNull()
             val (confirmedPaymentMethod, confirmedLinkInput) = onConfirmCalls.awaitItem()
             assertThat(confirmedPaymentMethod).isEqualTo(paymentMethod)
             assertThat(confirmedLinkInput).isEqualTo(mockUserInput())
@@ -143,6 +148,7 @@ internal class DefaultTapToAddCardAddedInteractorTest {
     ) = runTest {
         val onContinueCalls = Turbine<PaymentSelection.Saved>()
         val onConfirmCalls = Turbine<Pair<PaymentMethod, UserInput?>>()
+        val fakeEventReporter = FakeEventReporter()
         val fakeLinkFormHelper = FakeSavedPaymentMethodLinkFormHelper(
             initialState = initialLinkState,
             formElement = FakeFormElement,
@@ -154,11 +160,13 @@ internal class DefaultTapToAddCardAddedInteractorTest {
                 coroutineContext = coroutineContext,
                 tapToAddMode = tapToAddMode,
                 paymentMethod = paymentMethod,
+                eventReporter = fakeEventReporter,
                 savedPaymentMethodLinkFormHelper = fakeLinkFormHelper,
                 onContinue = { onContinueCalls.add(it) },
                 onConfirm = { pm, linkInput -> onConfirmCalls.add(pm to linkInput) },
             ),
             fakeLinkFormHelper = fakeLinkFormHelper,
+            fakeEventReporter = fakeEventReporter,
             onContinueCalls = onContinueCalls,
             onConfirmCalls = onConfirmCalls,
         )
@@ -166,12 +174,14 @@ internal class DefaultTapToAddCardAddedInteractorTest {
 
         onContinueCalls.ensureAllEventsConsumed()
         onConfirmCalls.ensureAllEventsConsumed()
+        fakeEventReporter.validate()
     }
 
     private class Scenario(
         val paymentMethod: PaymentMethod,
         val interactor: TapToAddCardAddedInteractor,
         val fakeLinkFormHelper: FakeSavedPaymentMethodLinkFormHelper,
+        val fakeEventReporter: FakeEventReporter,
         val onContinueCalls: ReceiveTurbine<PaymentSelection.Saved>,
         val onConfirmCalls: ReceiveTurbine<Pair<PaymentMethod, UserInput?>>,
     )

@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -13,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -113,7 +113,11 @@ private fun RowScope.CurrencyOptionItem(
         modifier = Modifier
             .weight(1f)
             .background(backgroundColor)
-            .clickable(enabled = isEnabled && !isSelected) { onCurrencySelected(currency) }
+            .selectable(
+                selected = isSelected,
+                enabled = isEnabled && !isSelected,
+                onClick = { onCurrencySelected(currency) },
+            )
             .padding(vertical = 12.dp)
             .testTag("$TEST_TAG_CURRENCY_OPTION_PREFIX${currency.code}"),
     ) {

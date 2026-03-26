@@ -1,9 +1,22 @@
 {
   "session_id": "cs_test_abc123",
-  "ui_mode": "custom",
   "currency": "usd",
   "total_summary": {
     "due": 5099
+  },
+  "adaptive_pricing_info": {
+    "active_presentment_currency": "usd",
+    "integration_amount": 5099,
+    "integration_currency": "usd",
+    "integration_custom_amount_info": null,
+    "is_using_subscription_threshold_fx_rate_behavior": null,
+    "local_currency_options": [{
+      "amount": 4594,
+      "conversion_markup_bps": 400,
+      "currency": "eur",
+      "presentment_exchange_rate": "0.900961",
+      "reference_rate_info": null
+    }]
   },
   "elements_session": {
     "apple_pay_preference": "enabled",
@@ -19,39 +32,14 @@
     "merchant_country": "US",
     "merchant_currency": "usd",
     "merchant_id": "acct_1HvTI7Lu5o3P18Zp",
-    "ordered_payment_method_types_and_wallets": [
-      "card",
-      "link",
-      "apple_pay",
-      "google_pay",
-      "cashapp"
-    ],
+    "ordered_payment_method_types_and_wallets": ["card", "card_wallet_link", "google_pay", "apple_pay"],
     "payment_method_preference": {
       "object": "payment_method_preference",
       "country_code": "US",
-      "ordered_payment_method_types": [
-        "card",
-        "link",
-        "cashapp"
-      ],
+      "ordered_payment_method_types": ["card"],
       "type": "deferred_intent"
     },
-    "payment_method_specs": [
-      {
-        "async": false,
-        "fields": [],
-        "type": "card"
-      },
-      {
-        "async": false,
-        "fields": [],
-        "selector_icon": {
-          "light_theme_png": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-cashapp@3x-a89c5d8d0651cae2a511bb49a6be1cfc.png",
-          "light_theme_svg": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-cashapp-981164a833e417d28a8ac2684fda2324.svg"
-        },
-        "type": "cashapp"
-      }
-    ],
+    "payment_method_specs": [],
     "shipping_address_settings": {
       "autocomplete_allowed": true
     },
@@ -67,11 +55,7 @@
       "amount": 5099,
       "currency": "usd",
       "capture_method": "automatic",
-      "payment_method_types": [
-        "card",
-        "link",
-        "cashapp"
-      ]
+      "payment_method_types": ["card"]
     }
   }
 }

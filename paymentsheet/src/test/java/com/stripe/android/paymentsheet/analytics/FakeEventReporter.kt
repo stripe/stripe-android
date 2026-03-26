@@ -67,6 +67,28 @@ internal class FakeEventReporter : EventReporter {
     val usBankAccountFormEventCalls: ReceiveTurbine<USBankAccountFormViewModel.AnalyticsEvent> =
         _usBankAccountFormEventCalls
 
+    private val _tapToAddStartedCalls = Turbine<Unit>()
+    val tapToAddStartedCalls: ReceiveTurbine<Unit> = _tapToAddStartedCalls
+
+    private val _tapToAddCardAddedCalls = Turbine<Unit>()
+    val tapToAddCardAddedCalls: ReceiveTurbine<Unit> = _tapToAddCardAddedCalls
+
+    private val _tapToAddCanceledCalls = Turbine<Unit>()
+    val tapToAddCanceledCalls: ReceiveTurbine<Unit> = _tapToAddCanceledCalls
+
+    private val _tapToAddContinueAfterCardAddedCalls = Turbine<Unit>()
+    val tapToAddContinueAfterCardAddedCalls: ReceiveTurbine<Unit> = _tapToAddContinueAfterCardAddedCalls
+
+    private val _tapToAddConfirmCalls = Turbine<Unit>()
+    val tapToAddConfirmCalls: ReceiveTurbine<Unit> = _tapToAddConfirmCalls
+
+    private val _failedToAddCardWithTapToAddCalls = Turbine<String>()
+    val failedToAddCardWithTapToAddCalls: ReceiveTurbine<String> = _failedToAddCardWithTapToAddCalls
+
+    private val _tapToAddAttemptWithUnsupportedDeviceCalls = Turbine<Unit>()
+    val tapToAddAttemptWithUnsupportedDeviceCalls: ReceiveTurbine<Unit> =
+        _tapToAddAttemptWithUnsupportedDeviceCalls
+
     fun validate() {
         _paymentFailureCalls.ensureAllEventsConsumed()
         _paymentSuccessCalls.ensureAllEventsConsumed()
@@ -84,6 +106,13 @@ internal class FakeEventReporter : EventReporter {
         _formCompletedCalls.ensureAllEventsConsumed()
         _pressConfirmButtonCalls.ensureAllEventsConsumed()
         _usBankAccountFormEventCalls.ensureAllEventsConsumed()
+        _tapToAddStartedCalls.ensureAllEventsConsumed()
+        _tapToAddCardAddedCalls.ensureAllEventsConsumed()
+        _tapToAddCanceledCalls.ensureAllEventsConsumed()
+        _tapToAddContinueAfterCardAddedCalls.ensureAllEventsConsumed()
+        _tapToAddConfirmCalls.ensureAllEventsConsumed()
+        _failedToAddCardWithTapToAddCalls.ensureAllEventsConsumed()
+        _tapToAddAttemptWithUnsupportedDeviceCalls.ensureAllEventsConsumed()
     }
 
     override fun onInit() {
@@ -260,6 +289,34 @@ internal class FakeEventReporter : EventReporter {
         walletsState: WalletsState?,
         isVerticalLayout: Boolean
     ) {
+    }
+
+    override fun onTapToAddStarted() {
+        _tapToAddStartedCalls.add(Unit)
+    }
+
+    override fun onCardAddedWithTapToAdd() {
+        _tapToAddCardAddedCalls.add(Unit)
+    }
+
+    override fun onTapToAddCanceled() {
+        _tapToAddCanceledCalls.add(Unit)
+    }
+
+    override fun onTapToAddContinueAfterCardAdded() {
+        _tapToAddContinueAfterCardAddedCalls.add(Unit)
+    }
+
+    override fun onTapToAddConfirm() {
+        _tapToAddConfirmCalls.add(Unit)
+    }
+
+    override fun onFailedToAddCardWithTapToAdd(message: String) {
+        _failedToAddCardWithTapToAddCalls.add(message)
+    }
+
+    override fun onTapToAddAttemptWithUnsupportedDevice() {
+        _tapToAddAttemptWithUnsupportedDeviceCalls.add(Unit)
     }
 
     data class PaymentFailureCall(

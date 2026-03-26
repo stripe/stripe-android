@@ -153,6 +153,8 @@ internal class DefaultTapToAddConfirmationInteractor(
             return
         }
 
+        eventReporter.onTapToAddConfirm()
+
         val confirmationOption = selection.value.toConfirmationOption(
             linkConfiguration = paymentMethodMetadata.linkState?.configuration,
         )

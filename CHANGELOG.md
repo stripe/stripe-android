@@ -4,10 +4,13 @@
 
 ### Identity
 * [CHANGED] Improved selfie capture quality with motion blur gating, center framing validation, and better best-frame selection.
+* [FIXED] Fixed truncation of some floating-point parameters sent to the Identity API.
+* [CHANGED] Removed legacy ID detector references from the Identity document capture pipeline.
 
 ### PaymentSheet
 * [FIXED][12653](https://github.com/stripe/stripe-android/pull/12653) Fixed a bug where `PaymentSheet.FlowController` wouldn't emit a null `PaymentOption` from `PaymentOptionCallback` after a successful confirmation.
 * [ADDED][12746](https://github.com/stripe/stripe-android/pull/12746) Added support for [payments orchestration](https://docs.stripe.com/payments/orchestration) (private preview) by allowing `processing` as a PaymentIntent state for cards.
+* [ADDED][12769](https://github.com/stripe/stripe-android/pull/12769) Added support for Pay by Bank (GA in GB, private preview in EU).
 
 ## 23.1.0 - 2026-03-23
 

@@ -34,6 +34,10 @@ internal class CheckoutSessionResponseJsonParser(
 
     override fun parse(json: JSONObject): CheckoutSessionResponse? {
         val sessionId = json.optString(FIELD_SESSION_ID).takeIf { it.isNotEmpty() } ?: return null
+        val uiMode = json.optString(FIELD_UI_MODE)
+        require(uiMode == UI_MODE_CUSTOM) {
+            "Expected ui_mode to be \"$UI_MODE_CUSTOM\" but was \"$uiMode\""
+        }
         val mode = parseMode(json.optString(FIELD_MODE))
         val amount = extractDueAmount(json) ?: return null
         val currency = json.optString(FIELD_CURRENCY).takeIf { it.isNotEmpty() } ?: return null
@@ -453,6 +457,8 @@ internal class CheckoutSessionResponseJsonParser(
 
     private companion object {
         private const val FIELD_SESSION_ID = "session_id"
+        private const val FIELD_UI_MODE = "ui_mode"
+        private const val UI_MODE_CUSTOM = "custom"
         private const val FIELD_MODE = "mode"
         private const val FIELD_CURRENCY = "currency"
         private const val FIELD_CUSTOMER_EMAIL = "customer_email"
