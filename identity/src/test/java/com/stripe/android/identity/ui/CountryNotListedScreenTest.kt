@@ -12,6 +12,7 @@ import androidx.navigation.NavOptionsBuilder
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.TestApplication
 import com.stripe.android.identity.VerificationFlowFinishable
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.navigation.INDIVIDUAL
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.VerificationPage
@@ -47,9 +48,11 @@ class CountryNotListedScreenTest {
             )
         )
     }
+    private val mockIdentityAnalyticsRequestFactory = mock<IdentityAnalyticsRequestFactory>()
 
     private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { verificationPage } doReturn MutableLiveData(Resource.success(verificationPage))
+        on { identityAnalyticsRequestFactory } doReturn mockIdentityAnalyticsRequestFactory
     }
 
     private val mockNavController = mock<NavController>()

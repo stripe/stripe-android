@@ -165,7 +165,11 @@ internal class IdentityScanViewModelTest {
     fun testNullIdentityScanFlowWhenStopScan() {
         viewModel.identityScanFlow = null
         viewModel.stopScan(mock())
-        verify(mockIdentityAnalyticsRequestFactory).genericError(anyOrNull<String>(), any<String>())
+        verify(mockIdentityAnalyticsRequestFactory).genericError(
+            anyOrNull<String>(),
+            any<String>(),
+            any<Map<String, Any?>>()
+        )
     }
 
     @Test
@@ -176,7 +180,11 @@ internal class IdentityScanViewModelTest {
             mockCameraManagerWithoutAdapter
         )
         viewModel.stopScan(mock())
-        verify(mockIdentityAnalyticsRequestFactory).genericError(anyOrNull<String>(), any<String>())
+        verify(mockIdentityAnalyticsRequestFactory).genericError(
+            anyOrNull<String>(),
+            any<String>(),
+            any<Map<String, Any?>>()
+        )
     }
 
     @Test
