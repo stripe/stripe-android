@@ -8,6 +8,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.MerchantSetti
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
+import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.TestParameters
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -16,6 +17,7 @@ import org.junit.runner.RunWith
 internal class TestPayByBank : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
         paymentMethodCode = "pay_by_bank",
+        authorizationAction = AuthorizeAction.PayByBank,
     ) { settings ->
         settings[MerchantSettingsDefinition] = Merchant.GB
         settings[CurrencySettingsDefinition] = Currency.GBP
