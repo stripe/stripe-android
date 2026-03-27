@@ -89,6 +89,7 @@ dependencies {
     testImplementation testLibs.turbine
     testImplementation testLibs.espresso.intents
     testImplementation libs.terminal.core
+    testImplementation libs.terminal.tapToPay
 
     // temporary fix for running compose test in RobolectricTestRunner, see https://github.com/robolectric/robolectric/issues/6593
     testImplementation testLibs.espresso.core
