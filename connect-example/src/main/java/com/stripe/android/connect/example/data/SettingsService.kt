@@ -323,7 +323,8 @@ class SettingsService @Inject constructor(@ApplicationContext context: Context) 
         private const val KEY_BADGE_LABEL_FONT_SIZE = "${CUSTOM_THEME_OVERRIDES_PREFIX}badgeLabelFontSize"
         private const val KEY_BADGE_PADDING_Y = "${CUSTOM_THEME_OVERRIDES_PREFIX}badgePaddingY"
         private const val KEY_BADGE_PADDING_X = "${CUSTOM_THEME_OVERRIDES_PREFIX}badgePaddingX"
-        private const val KEY_ACTION_PRIMARY_TEXT_TRANSFORM = "${CUSTOM_THEME_OVERRIDES_PREFIX}actionPrimaryTextTransform"
+        private const val KEY_ACTION_PRIMARY_TEXT_TRANSFORM =
+            "${CUSTOM_THEME_OVERRIDES_PREFIX}actionPrimaryTextTransform"
         private const val KEY_ACTION_SECONDARY_TEXT_TRANSFORM =
             "${CUSTOM_THEME_OVERRIDES_PREFIX}actionSecondaryTextTransform"
         private const val KEY_FORM_PLACEHOLDER_COLOR = "${CUSTOM_THEME_OVERRIDES_PREFIX}formPlaceholderTextColor"

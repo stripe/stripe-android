@@ -280,7 +280,9 @@ private fun CustomThemeView(
                 TextTransformDropdown(
                     label = "actionSecondaryTextTransform",
                     value = customThemeOverrides.actionSecondaryTextTransform,
-                    onValueChange = { onOverridesChanged(customThemeOverrides.copy(actionSecondaryTextTransform = it)) },
+                    onValueChange = {
+                        onOverridesChanged(customThemeOverrides.copy(actionSecondaryTextTransform = it))
+                    },
                 )
             }
             item {
