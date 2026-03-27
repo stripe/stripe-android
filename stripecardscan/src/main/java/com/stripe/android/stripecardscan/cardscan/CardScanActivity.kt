@@ -191,10 +191,11 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
         val cardScanConfiguration = cardScanSheetParams?.cardScanConfiguration
             ?: CardScanConfiguration(elementsSessionId = null)
 
-        DaggerCardScanComponent.builder()
-            .application(this.application)
-            .configuration(cardScanConfiguration)
-            .build()
+        DaggerCardScanComponent.factory()
+            .build(
+                application = this.application,
+                cardScanConfiguration = cardScanConfiguration,
+            )
             .inject(this)
 
         onBackPressedDispatcher.addCallback {

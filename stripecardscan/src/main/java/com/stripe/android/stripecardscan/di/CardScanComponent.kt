@@ -21,14 +21,11 @@ internal interface CardScanComponent {
 
     fun inject(activity: CardScanActivity)
 
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun application(application: Application): Builder
-
-        @BindsInstance
-        fun configuration(cardScanConfiguration: CardScanConfiguration): Builder
-
-        fun build(): CardScanComponent
+    @Component.Factory
+    interface Factory {
+        fun build(
+            @BindsInstance application: Application,
+            @BindsInstance cardScanConfiguration: CardScanConfiguration,
+        ): CardScanComponent
     }
 }
