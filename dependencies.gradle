@@ -42,7 +42,7 @@ ext.versions = [
         instantApps                 : '1.1.0',
         junit                       : '4.13.2',
         json                        : '20251224',
-        kotlin                      : '2.3.10',
+        kotlin                      : '2.2.21',
         kotlinCoroutines            : '1.10.2',
         kotlinSerialization         : '1.10.0',
         lint                        : '32.0.1',
