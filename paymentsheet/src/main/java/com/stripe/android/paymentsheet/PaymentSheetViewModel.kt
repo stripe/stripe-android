@@ -82,7 +82,6 @@ import kotlin.coroutines.CoroutineContext
 
 @Singleton
 internal class PaymentSheetViewModel @Inject internal constructor(
-    // Properties provided through PaymentSheetViewModelComponent.Builder
     internal val args: PaymentSheetContract.Args,
     eventReporter: EventReporter,
     private val paymentElementLoader: PaymentElementLoader,
