@@ -164,7 +164,11 @@ data class AppearanceInfo(
                     .background(context.getColorCompat(R.color.link_background))
                     .text(context.getColorCompat(R.color.link_text))
                     .secondaryText(context.getColorCompat(R.color.link_secondary_text))
-                    .actionPrimaryText(context.getColorCompat(R.color.link_action_primary_text))
+                    .build()
+            )
+            .actionPrimaryText(
+                Action.Builder()
+                    .colorText(context.getColorCompat(R.color.link_action_primary_text))
                     .build()
             )
             .buttonPrimary(
@@ -207,12 +211,24 @@ data class AppearanceInfo(
                     .background(context.getColorCompat(R.color.dynamic_colors_background))
                     .border(context.getColorCompat(R.color.dynamic_colors_border))
                     .secondaryText(context.getColorCompat(R.color.dynamic_colors_secondary_text))
-                    .actionPrimaryText(context.getColorCompat(R.color.dynamic_colors_action_primary_text))
-                    .actionSecondaryText(context.getColorCompat(R.color.dynamic_colors_action_secondary_text))
-                    .formAccent(context.getColorCompat(R.color.dynamic_colors_form_accent))
-                    .formHighlightBorder(context.getColorCompat(R.color.dynamic_colors_form_highlight_border))
                     .danger(context.getColorCompat(R.color.dynamic_colors_danger))
                     .offsetBackground(context.getColorCompat(R.color.dynamic_colors_offset_background))
+                    .build()
+            )
+            .actionPrimaryText(
+                Action.Builder()
+                    .colorText(context.getColorCompat(R.color.dynamic_colors_action_primary_text))
+                    .build()
+            )
+            .actionSecondaryText(
+                Action.Builder()
+                    .colorText(context.getColorCompat(R.color.dynamic_colors_action_secondary_text))
+                    .build()
+            )
+            .form(
+                Form.Builder()
+                    .accent(context.getColorCompat(R.color.dynamic_colors_form_accent))
+                    .highlightBorder(context.getColorCompat(R.color.dynamic_colors_form_highlight_border))
                     .build()
             )
             .buttonPrimary(
@@ -273,9 +289,13 @@ data class AppearanceInfo(
                     .text(context.getColorCompat(R.color.retro_text))
                     .background(context.getColorCompat(R.color.retro_background))
                     .secondaryText(context.getColorCompat(R.color.retro_secondary_text))
-                    .actionSecondaryText(context.getColorCompat(R.color.retro_action_secondary_text))
                     .border(context.getColorCompat(R.color.retro_border))
                     .offsetBackground(context.getColorCompat(R.color.retro_offset_background))
+                    .build()
+            )
+            .actionSecondaryText(
+                Action.Builder()
+                    .colorText(context.getColorCompat(R.color.retro_action_secondary_text))
                     .build()
             )
             .buttonSecondary(
@@ -384,10 +404,14 @@ data class AppearanceInfo(
                     .text(context.getColorCompat(R.color.dark_mode_text))
                     .background(context.getColorCompat(R.color.dark_mode_background))
                     .secondaryText(context.getColorCompat(R.color.dark_mode_secondary_text))
-                    .actionSecondaryText(context.getColorCompat(R.color.dark_mode_action_secondary_text))
                     .border(context.getColorCompat(R.color.dark_mode_border))
                     .danger(context.getColorCompat(R.color.dark_mode_danger))
                     .offsetBackground(context.getColorCompat(R.color.dark_mode_offset_background))
+                    .build()
+            )
+            .actionSecondaryText(
+                Action.Builder()
+                    .colorText(context.getColorCompat(R.color.dark_mode_action_secondary_text))
                     .build()
             )
             .buttonSecondary(
@@ -445,7 +469,7 @@ data class AppearanceInfo(
                     labelTypography = Typography.Style(
                         fontSize = 15f,
                         fontWeight = 600,
-                        textTransform = TextTransform.Uppercase,
+                        textTransform = TextTransform.None,
                     ),
                 )
             )
@@ -473,13 +497,13 @@ data class AppearanceInfo(
             .actionPrimaryText(
                 Action.Builder()
                     .colorText(context.getColorCompat(R.color.full_tokens_action_primary_text))
-                    .textTransform(TextTransform.Capitalize)
+                    .textTransform(TextTransform.None)
                     .build()
             )
             .actionSecondaryText(
                 Action.Builder()
                     .colorText(context.getColorCompat(R.color.full_tokens_action_secondary_text))
-                    .textTransform(TextTransform.Lowercase)
+                    .textTransform(TextTransform.None)
                     .build()
             )
             .badgeDefaults(
@@ -489,7 +513,7 @@ data class AppearanceInfo(
                     labelTypography = Typography.Style(
                         fontSize = 12f,
                         fontWeight = 200,
-                        textTransform = TextTransform.Uppercase,
+                        textTransform = TextTransform.None,
                     ),
                 )
             )

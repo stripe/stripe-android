@@ -5,10 +5,9 @@ import androidx.annotation.ColorInt
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
+// Deprecating old version to for parameters that moved to other classes
 @Parcelize
 @Poko
-// Deprecating old version to for parameters that moved to other classes
-@Deprecated("Use builder instead")
 class Colors private constructor(
     @ColorInt internal val primary: Int?,
     @ColorInt internal val background: Int?,
@@ -24,7 +23,7 @@ class Colors private constructor(
     @Deprecated("Use Form class instead") @ColorInt internal val formAccent: Int?
 ) : Parcelable {
 
-    @Suppress("TooManyFunctions")
+    @Suppress("TooManyFunctions", "DEPRECATION")
     class Builder {
         @ColorInt private var primary: Int? = null
 

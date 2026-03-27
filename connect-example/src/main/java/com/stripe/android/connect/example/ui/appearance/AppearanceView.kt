@@ -68,6 +68,7 @@ fun AppearanceView(
     }
 }
 
+@Suppress("LongMethod")
 @Composable
 private fun AppearancePickerView(
     state: AppearanceViewModel.AppearanceState,
@@ -140,6 +141,7 @@ private fun AppearancePickerView(
     }
 }
 
+@Suppress("LongMethod")
 @Composable
 private fun CustomThemeView(
     tokenOverrides: NewTokenOverridesUiState,
@@ -177,7 +179,7 @@ private fun CustomThemeView(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = "Leave blank to inherit from the selected theme.",
+                        text = "Choose your own values for the appearance",
                         style = MaterialTheme.typography.caption,
                         modifier = Modifier.weight(1f),
                     )

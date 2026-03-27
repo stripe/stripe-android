@@ -123,6 +123,7 @@ class SettingsService @Inject constructor(@ApplicationContext context: Context) 
         }
     }
 
+    @Suppress("SwallowedException")
     private fun parseHexColor(hex: String): Int? {
         return try {
             val formatted = if (hex.startsWith("#")) hex else "#$hex"
@@ -324,7 +325,8 @@ class SettingsService @Inject constructor(@ApplicationContext context: Context) 
         private const val KEY_BADGE_PADDING_Y = "${NEW_TOKEN_OVERRIDES_PREFIX}badgePaddingY"
         private const val KEY_BADGE_PADDING_X = "${NEW_TOKEN_OVERRIDES_PREFIX}badgePaddingX"
         private const val KEY_ACTION_PRIMARY_TEXT_TRANSFORM = "${NEW_TOKEN_OVERRIDES_PREFIX}actionPrimaryTextTransform"
-        private const val KEY_ACTION_SECONDARY_TEXT_TRANSFORM = "${NEW_TOKEN_OVERRIDES_PREFIX}actionSecondaryTextTransform"
+        private const val KEY_ACTION_SECONDARY_TEXT_TRANSFORM =
+            "${NEW_TOKEN_OVERRIDES_PREFIX}actionSecondaryTextTransform"
         private const val KEY_FORM_PLACEHOLDER_COLOR = "${NEW_TOKEN_OVERRIDES_PREFIX}formPlaceholderTextColor"
         private const val KEY_INPUT_PADDING_X = "${NEW_TOKEN_OVERRIDES_PREFIX}inputFieldPaddingX"
         private const val KEY_INPUT_PADDING_Y = "${NEW_TOKEN_OVERRIDES_PREFIX}inputFieldPaddingY"

@@ -27,7 +27,13 @@ class AppearanceViewModel @Inject constructor(
     }
 
     fun onAppearanceSelected(appearanceId: AppearanceInfo.AppearanceId) {
-        _state.update { it.copy(selectedAppearance = appearanceId, saveEnabled = true) }
+        _state.update {
+            it.copy(
+                selectedAppearance = appearanceId,
+                tokenOverrides = NewTokenOverridesUiState(),
+                saveEnabled = true,
+            )
+        }
     }
 
     fun onOverridesChanged(overrides: NewTokenOverridesUiState) {
@@ -53,11 +59,11 @@ class AppearanceViewModel @Inject constructor(
 
     private fun loadAppearance() {
         _state.update { state ->
-            val appearance = settingsService.getAppearanceId()
-            val overrides = settingsService.getNewTokenOverrides()
+            val appearanceId = settingsService.getAppearanceId() ?: AppearanceInfo.AppearanceId.Default
+            val savedOverrides = settingsService.getNewTokenOverrides()
             state.copy(
-                selectedAppearance = appearance ?: AppearanceInfo.AppearanceId.Default,
-                tokenOverrides = NewTokenOverridesUiState.fromNewTokenOverrides(overrides),
+                selectedAppearance = appearanceId,
+                tokenOverrides = NewTokenOverridesUiState.fromNewTokenOverrides(savedOverrides),
                 saveEnabled = false,
             )
         }
@@ -74,9 +80,9 @@ class AppearanceViewModel @Inject constructor(
 }
 
 /**
- * UI state for the new token overrides form. String fields are empty when not set.
- * TextTransform fields default to None; None maps to null (no override) in [toNewTokenOverrides].
- * Color fields are stored as hex strings (e.g. "FF0000" or "FFFF0000").
+ * State for the new token overrides form. String fields are empty when not set.
+ * TextTransform defaults to None.
+ * Color inputs are stored as hex strings (e.g. "FF0000" or "FFFF0000").
  */
 @Suppress("LongParameterList")
 data class NewTokenOverridesUiState(
@@ -108,7 +114,7 @@ data class NewTokenOverridesUiState(
     @Suppress("LongMethod")
     fun toNewTokenOverrides(): NewTokenOverrides {
         return NewTokenOverrides(
-            buttonLabelTextTransform = buttonLabelTextTransform.takeUnlessNone(),
+            buttonLabelTextTransform = buttonLabelTextTransform,
             buttonLabelFontWeight = buttonLabelFontWeight.toIntOrNull(),
             buttonLabelFontSize = buttonLabelFontSize.toFloatOrNull(),
             buttonPaddingY = buttonPaddingY.toFloatOrNull(),
@@ -116,13 +122,13 @@ data class NewTokenOverridesUiState(
             buttonDangerColorBackground = buttonDangerColorBackground.parseColor(),
             buttonDangerColorBorder = buttonDangerColorBorder.parseColor(),
             buttonDangerColorText = buttonDangerColorText.parseColor(),
-            badgeLabelTextTransform = badgeLabelTextTransform.takeUnlessNone(),
+            badgeLabelTextTransform = badgeLabelTextTransform,
             badgeLabelFontWeight = badgeLabelFontWeight.toIntOrNull(),
             badgeLabelFontSize = badgeLabelFontSize.toFloatOrNull(),
             badgePaddingY = badgePaddingY.toFloatOrNull(),
             badgePaddingX = badgePaddingX.toFloatOrNull(),
-            actionPrimaryTextTransform = actionPrimaryTextTransform.takeUnlessNone(),
-            actionSecondaryTextTransform = actionSecondaryTextTransform.takeUnlessNone(),
+            actionPrimaryTextTransform = actionPrimaryTextTransform,
+            actionSecondaryTextTransform = actionSecondaryTextTransform,
             formPlaceholderTextColor = formPlaceholderTextColor.parseColor(),
             inputFieldPaddingX = inputFieldPaddingX.toFloatOrNull(),
             inputFieldPaddingY = inputFieldPaddingY.toFloatOrNull(),
@@ -131,44 +137,46 @@ data class NewTokenOverridesUiState(
     }
 
     companion object {
-        @Suppress("LongMethod")
         fun fromNewTokenOverrides(overrides: NewTokenOverrides): NewTokenOverridesUiState {
             return NewTokenOverridesUiState(
-                buttonLabelTextTransform = overrides.buttonLabelTextTransform ?: TextTransform.None,
-                buttonLabelFontWeight = overrides.buttonLabelFontWeight?.toString() ?: "",
-                buttonLabelFontSize = overrides.buttonLabelFontSize?.toString() ?: "",
-                buttonPaddingY = overrides.buttonPaddingY?.toString() ?: "",
-                buttonPaddingX = overrides.buttonPaddingX?.toString() ?: "",
-                buttonDangerColorBackground = overrides.buttonDangerColorBackground?.let { toHexString(it) } ?: "",
-                buttonDangerColorBorder = overrides.buttonDangerColorBorder?.let { toHexString(it) } ?: "",
-                buttonDangerColorText = overrides.buttonDangerColorText?.let { toHexString(it) } ?: "",
-                badgeLabelTextTransform = overrides.badgeLabelTextTransform ?: TextTransform.None,
-                badgeLabelFontWeight = overrides.badgeLabelFontWeight?.toString() ?: "",
-                badgeLabelFontSize = overrides.badgeLabelFontSize?.toString() ?: "",
-                badgePaddingY = overrides.badgePaddingY?.toString() ?: "",
-                badgePaddingX = overrides.badgePaddingX?.toString() ?: "",
-                actionPrimaryTextTransform = overrides.actionPrimaryTextTransform ?: TextTransform.None,
-                actionSecondaryTextTransform = overrides.actionSecondaryTextTransform ?: TextTransform.None,
-                formPlaceholderTextColor = overrides.formPlaceholderTextColor?.let { toHexString(it) } ?: "",
-                inputFieldPaddingX = overrides.inputFieldPaddingX?.toString() ?: "",
-                inputFieldPaddingY = overrides.inputFieldPaddingY?.toString() ?: "",
-                tableRowPaddingY = overrides.tableRowPaddingY?.toString() ?: "",
+                buttonLabelTextTransform = overrides.buttonLabelTextTransform.orNone(),
+                buttonLabelFontWeight = overrides.buttonLabelFontWeight.toStringOrEmpty(),
+                buttonLabelFontSize = overrides.buttonLabelFontSize.toStringOrEmpty(),
+                buttonPaddingY = overrides.buttonPaddingY.toStringOrEmpty(),
+                buttonPaddingX = overrides.buttonPaddingX.toStringOrEmpty(),
+                buttonDangerColorBackground = overrides.buttonDangerColorBackground.toHexOrEmpty(),
+                buttonDangerColorBorder = overrides.buttonDangerColorBorder.toHexOrEmpty(),
+                buttonDangerColorText = overrides.buttonDangerColorText.toHexOrEmpty(),
+                badgeLabelTextTransform = overrides.badgeLabelTextTransform.orNone(),
+                badgeLabelFontWeight = overrides.badgeLabelFontWeight.toStringOrEmpty(),
+                badgeLabelFontSize = overrides.badgeLabelFontSize.toStringOrEmpty(),
+                badgePaddingY = overrides.badgePaddingY.toStringOrEmpty(),
+                badgePaddingX = overrides.badgePaddingX.toStringOrEmpty(),
+                actionPrimaryTextTransform = overrides.actionPrimaryTextTransform.orNone(),
+                actionSecondaryTextTransform = overrides.actionSecondaryTextTransform.orNone(),
+                formPlaceholderTextColor = overrides.formPlaceholderTextColor.toHexOrEmpty(),
+                inputFieldPaddingX = overrides.inputFieldPaddingX.toStringOrEmpty(),
+                inputFieldPaddingY = overrides.inputFieldPaddingY.toStringOrEmpty(),
+                tableRowPaddingY = overrides.tableRowPaddingY.toStringOrEmpty(),
             )
         }
-
-        private fun toHexString(colorInt: Int): String = String.format("%08X", colorInt)
     }
 }
-
-private fun TextTransform.takeUnlessNone(): TextTransform? =
-    takeUnless { it == TextTransform.None }
 
 private fun String.parseColor(): Int? {
     if (isEmpty()) return null
     return try {
         val hex = if (startsWith("#")) this else "#$this"
         android.graphics.Color.parseColor(hex)
-    } catch (e: IllegalArgumentException) {
+    } catch (_: IllegalArgumentException) {
         null
     }
 }
+
+private fun toHexString(colorInt: Int): String = String.format("%08X", colorInt)
+
+private fun TextTransform?.orNone(): TextTransform = this ?: TextTransform.None
+
+private fun Any?.toStringOrEmpty(): String = this?.toString() ?: ""
+
+private fun Int?.toHexOrEmpty(): String = this?.let { toHexString(it) } ?: ""
