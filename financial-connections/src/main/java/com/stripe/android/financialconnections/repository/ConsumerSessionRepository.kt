@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.repository
 
 import android.os.Parcelable
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.financialconnections.di.ActivityRetainedScope
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSession.VerificationSession.SessionState.Verified
 import com.stripe.android.model.ConsumerSession.VerificationSession.SessionType.SignUp
@@ -35,6 +36,7 @@ internal interface ConsumerSessionRepository : ConsumerSessionProvider {
     )
 }
 
+@ActivityRetainedScope
 internal class RealConsumerSessionRepository @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
 ) : ConsumerSessionRepository {

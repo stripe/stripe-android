@@ -4,6 +4,7 @@ import android.content.Context
 import com.google.android.gms.wallet.PaymentsClient
 import com.google.android.gms.wallet.Wallet
 import javax.inject.Inject
+import javax.inject.Singleton
 
 internal fun interface PaymentsClientFactory {
     fun create(
@@ -11,6 +12,7 @@ internal fun interface PaymentsClientFactory {
     ): PaymentsClient
 }
 
+@Singleton
 internal class DefaultPaymentsClientFactory @Inject constructor(
     private val context: Context
 ) : PaymentsClientFactory {

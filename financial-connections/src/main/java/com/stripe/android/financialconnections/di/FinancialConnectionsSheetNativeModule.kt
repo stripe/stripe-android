@@ -50,7 +50,6 @@ internal interface FinancialConnectionsSheetNativeModule {
     @Binds
     fun bindsPresentNoticeSheet(impl: RealPresentSheet): PresentSheet
 
-    @ActivityRetainedScope
     @Binds
     fun bindsNavigationManager(
         impl: NavigationManagerImpl
@@ -62,7 +61,6 @@ internal interface FinancialConnectionsSheetNativeModule {
     ): HandleError
 
     @Binds
-    @ActivityRetainedScope
     fun bindsProvideApiRequestOptions(impl: RealProvideApiRequestOptions): ProvideApiRequestOptions
 
     @Binds

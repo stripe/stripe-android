@@ -70,19 +70,15 @@ import kotlin.coroutines.CoroutineContext
 internal interface FinancialConnectionsSheetSharedModule {
 
     @Binds
-    @ActivityRetainedScope
     fun bindsAnalyticsRequestV2Storage(impl: RealAnalyticsRequestV2Storage): AnalyticsRequestV2Storage
 
     @Binds
-    @ActivityRetainedScope
     fun bindsAnalyticsRequestV2Executor(impl: DefaultAnalyticsRequestV2Executor): AnalyticsRequestV2Executor
 
     @Binds
-    @ActivityRetainedScope
     fun bindsConsumerSessionRepository(impl: RealConsumerSessionRepository): ConsumerSessionRepository
 
     @Binds
-    @ActivityRetainedScope
     fun bindsConsumerSessionProvider(impl: RealConsumerSessionRepository): ConsumerSessionProvider
 
     @Binds

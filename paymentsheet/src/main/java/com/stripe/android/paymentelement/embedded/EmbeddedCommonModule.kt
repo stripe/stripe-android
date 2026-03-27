@@ -57,11 +57,9 @@ import kotlin.coroutines.CoroutineContext
 )
 internal interface EmbeddedCommonModule {
     @Binds
-    @Singleton
     fun bindsEventReporter(eventReporter: DefaultEventReporter): EventReporter
 
     @Binds
-    @Singleton
     fun bindsLoadingReporter(eventReporter: DefaultEventReporter): LoadingEventReporter
 
     @Binds

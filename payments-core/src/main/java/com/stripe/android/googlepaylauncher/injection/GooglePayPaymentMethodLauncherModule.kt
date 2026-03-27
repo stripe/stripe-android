@@ -20,25 +20,21 @@ import javax.inject.Singleton
 @SuppressWarnings("UnnecessaryAbstractClass")
 internal abstract class GooglePayPaymentMethodLauncherModule {
     @Binds
-    @Singleton
     abstract fun bindsGooglePayRepository(
         defaultGooglePayRepository: DefaultGooglePayRepository
     ): GooglePayRepository
 
     @Binds
-    @Singleton
     abstract fun bindsPaymentsClientFactory(
         defaultPaymentsClientFactory: DefaultPaymentsClientFactory
     ): PaymentsClientFactory
 
     @Binds
-    @Singleton
     abstract fun bindsAnalyticsRequestFactory(
         paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     ): AnalyticsRequestFactory
 
     @Binds
-    @Singleton
     abstract fun bindsErrorReporter(
         realErrorReporter: RealErrorReporter
     ): ErrorReporter

@@ -20,11 +20,9 @@ import kotlin.coroutines.CoroutineContext
 @Module
 internal interface LinkCommonModule {
     @Binds
-    @Singleton
     fun bindLinkRepository(linkApiRepository: LinkApiRepository): LinkRepository
 
     @Binds
-    @Singleton
     fun bindLinkEventsReporter(linkEventsReporter: DefaultLinkEventsReporter): LinkEventsReporter
 
     companion object {

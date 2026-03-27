@@ -87,12 +87,10 @@ import javax.inject.Singleton
 )
 internal abstract class PaymentSheetCommonModule {
 
-    @Singleton
     @Binds
     abstract fun bindsEventReporter(eventReporter: DefaultEventReporter): EventReporter
 
     @Binds
-    @Singleton
     abstract fun bindsLoadingReporter(eventReporter: DefaultEventReporter): LoadingEventReporter
 
     @Binds

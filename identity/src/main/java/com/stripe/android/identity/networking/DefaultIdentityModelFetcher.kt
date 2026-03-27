@@ -5,7 +5,9 @@ import com.stripe.android.mlcore.base.InterpreterOptionsWrapper
 import com.stripe.android.mlcore.impl.InterpreterWrapperImpl
 import java.io.File
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 internal class DefaultIdentityModelFetcher @Inject constructor(
     private val identityRepository: IdentityRepository,
     private val identityIO: IdentityIO

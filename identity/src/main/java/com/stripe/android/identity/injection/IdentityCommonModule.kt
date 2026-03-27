@@ -26,15 +26,12 @@ import javax.inject.Singleton
 )
 internal abstract class IdentityCommonModule {
     @Binds
-    @Singleton
     abstract fun bindIdentityIO(defaultIdentityIO: DefaultIdentityIO): IdentityIO
 
     @Binds
-    @Singleton
     abstract fun bindRepository(defaultIdentityRepository: DefaultIdentityRepository): IdentityRepository
 
     @Binds
-    @Singleton
     abstract fun bindIDDetectorFetcher(defaultIDDetectorFetcher: DefaultIdentityModelFetcher): IdentityModelFetcher
 
     companion object {

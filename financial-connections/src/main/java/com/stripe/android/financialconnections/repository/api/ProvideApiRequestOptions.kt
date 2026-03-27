@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.repository.api
 
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.financialconnections.di.ActivityRetainedScope
 import com.stripe.android.financialconnections.domain.IsLinkWithStripe
 import com.stripe.android.financialconnections.repository.ConsumerSessionProvider
 import javax.inject.Inject
@@ -9,6 +10,7 @@ internal fun interface ProvideApiRequestOptions {
     operator fun invoke(useConsumerPublishableKey: Boolean): ApiRequest.Options
 }
 
+@ActivityRetainedScope
 internal class RealProvideApiRequestOptions @Inject constructor(
     private val consumerSessionProvider: ConsumerSessionProvider,
     private val isLinkWithStripe: IsLinkWithStripe,

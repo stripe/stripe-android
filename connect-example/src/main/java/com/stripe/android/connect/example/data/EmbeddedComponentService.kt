@@ -22,6 +22,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
+import javax.inject.Singleton
 
 interface EmbeddedComponentService {
     val serverBaseUrl: String
@@ -53,6 +54,7 @@ interface EmbeddedComponentService {
     }
 }
 
+@Singleton
 class EmbeddedComponentServiceImpl @Inject constructor(
     private val settingsService: SettingsService,
     private val logger: Logger,

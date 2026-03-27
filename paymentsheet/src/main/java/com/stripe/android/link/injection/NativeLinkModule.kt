@@ -80,47 +80,37 @@ import kotlin.coroutines.CoroutineContext
 )
 internal interface NativeLinkModule {
     @Binds
-    @NativeLinkScope
     fun bindLinkRepository(linkApiRepository: LinkApiRepository): LinkRepository
 
     @Binds
-    @NativeLinkScope
     fun bindLinkEventsReporter(linkEventsReporter: DefaultLinkEventsReporter): LinkEventsReporter
 
     @Binds
-    @NativeLinkScope
     fun bindLinkAccountManager(linkAccountManager: DefaultLinkAccountManager): LinkAccountManager
 
     @Binds
-    @NativeLinkScope
     fun bindsNavigationManager(
         impl: NavigationManagerImpl
     ): NavigationManager
 
     @Binds
-    @NativeLinkScope
     fun bindsErrorReporter(errorReporter: RealErrorReporter): ErrorReporter
 
     @Binds
-    @NativeLinkScope
     fun bindsCardAccountRangeRepositoryFactory(
         defaultCardAccountRangeRepositoryFactory: DefaultCardAccountRangeRepositoryFactory
     ): CardAccountRangeRepository.Factory
 
     @Binds
-    @NativeLinkScope
     fun bindsEventReporter(eventReporter: DefaultEventReporter): EventReporter
 
     @Binds
-    @NativeLinkScope
     fun bindsLinkGate(linkGate: DefaultLinkGate): LinkGate
 
     @Binds
-    @NativeLinkScope
     fun bindsLinkAuth(linkGate: DefaultLinkAuth): LinkAuth
 
     @Binds
-    @NativeLinkScope
     fun bindsLinkAttestationCheck(linkAttestationCheck: DefaultLinkAttestationCheck): LinkAttestationCheck
 
     @Binds
@@ -130,15 +120,12 @@ internal interface NativeLinkModule {
     fun bindsAnalyticsRequestFactory(impl: PaymentAnalyticsRequestFactory): AnalyticsRequestFactory
 
     @Binds
-    @NativeLinkScope
     fun bindsDismissalCoordinator(impl: RealLinkDismissalCoordinator): LinkDismissalCoordinator
 
     @Binds
-    @NativeLinkScope
     fun bindsAutocompleteActivityLauncher(impl: DefaultAutocompleteLauncher): AutocompleteActivityLauncher
 
     @Binds
-    @NativeLinkScope
     fun bindsAutocompleteLauncher(impl: DefaultAutocompleteLauncher): AutocompleteLauncher
 
     @Binds

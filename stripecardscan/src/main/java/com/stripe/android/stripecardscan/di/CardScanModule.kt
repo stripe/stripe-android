@@ -25,7 +25,6 @@ import javax.inject.Singleton
 internal interface CardScanModule {
 
     @Binds
-    @Singleton
     fun bindCardScanEventReporter(cardScanEventsReporter: DefaultCardScanEventsReporter): CardScanEventsReporter
 
     companion object {

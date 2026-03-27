@@ -29,8 +29,10 @@ import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import java.io.File
 import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.time.TimeSource
 
+@Singleton
 internal class DefaultIdentityRepository @Inject constructor(
     private val stripeNetworkClient: StripeNetworkClient,
     private val identityIO: IdentityIO,

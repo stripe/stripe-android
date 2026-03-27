@@ -21,10 +21,12 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Default implementation of [IdentityIO].
  */
+@Singleton
 internal class DefaultIdentityIO @Inject constructor(private val context: Context) : IdentityIO {
     override fun createInternalFileUri(): ContentUriResult {
         createImageFile().also { file ->

@@ -42,6 +42,7 @@ internal interface FlowControllerConfirmationHandler {
     suspend fun start(arguments: Args)
 }
 
+@javax.inject.Singleton
 internal class DefaultFlowControllerConfirmationHandler @Inject constructor(
     val coroutineScope: CoroutineScope,
     val confirmationHandler: ConfirmationHandler

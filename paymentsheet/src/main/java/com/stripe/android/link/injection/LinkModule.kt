@@ -16,19 +16,15 @@ import dagger.Provides
 @Module
 internal interface LinkModule {
     @Binds
-    @LinkScope
     fun bindLinkAccountManager(linkAccountManager: DefaultLinkAccountManager): LinkAccountManager
 
     @Binds
-    @LinkScope
     fun bindsLinkGate(linkGate: DefaultLinkGate): LinkGate
 
     @Binds
-    @LinkScope
     fun bindsLinkAuth(linkGate: DefaultLinkAuth): LinkAuth
 
     @Binds
-    @LinkScope
     fun bindsLinkAttestationCheck(linkAttestationCheck: DefaultLinkAttestationCheck): LinkAttestationCheck
 
     companion object {
