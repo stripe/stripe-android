@@ -45,7 +45,7 @@ fun AppearanceView(
 
     if (showTokenEditor) {
         CustomThemeView(
-            tokenOverrides = state.tokenOverrides,
+            customThemeOverrides = state.customThemeOverrides,
             onOverridesChanged = viewModel::onOverridesChanged,
             onClearOverrides = viewModel::clearOverrides,
             onBack = { showTokenEditor = false },
@@ -144,8 +144,8 @@ private fun AppearancePickerView(
 @Suppress("LongMethod")
 @Composable
 private fun CustomThemeView(
-    tokenOverrides: NewTokenOverridesUiState,
-    onOverridesChanged: (NewTokenOverridesUiState) -> Unit,
+    customThemeOverrides: CustomThemeOverridesState,
+    onOverridesChanged: (CustomThemeOverridesState) -> Unit,
     onClearOverrides: () -> Unit,
     onBack: () -> Unit,
     onSave: () -> Unit,
@@ -192,95 +192,95 @@ private fun CustomThemeView(
                 TokenSectionHeader("Button")
                 TextTransformDropdown(
                     label = "buttonLabelTextTransform",
-                    value = tokenOverrides.buttonLabelTextTransform,
-                    onValueChange = { onOverridesChanged(tokenOverrides.copy(buttonLabelTextTransform = it)) },
+                    value = customThemeOverrides.buttonLabelTextTransform,
+                    onValueChange = { onOverridesChanged(customThemeOverrides.copy(buttonLabelTextTransform = it)) },
                 )
                 TokenTextField(
                     label = "buttonLabelFontWeight",
                     placeholder = "e.g. 600",
-                    value = tokenOverrides.buttonLabelFontWeight,
-                    onValueChange = { onOverridesChanged(tokenOverrides.copy(buttonLabelFontWeight = it)) },
+                    value = customThemeOverrides.buttonLabelFontWeight,
+                    onValueChange = { onOverridesChanged(customThemeOverrides.copy(buttonLabelFontWeight = it)) },
                 )
                 TokenTextField(
                     label = "buttonLabelFontSize",
                     placeholder = "e.g. 15",
-                    value = tokenOverrides.buttonLabelFontSize,
-                    onValueChange = { onOverridesChanged(tokenOverrides.copy(buttonLabelFontSize = it)) },
+                    value = customThemeOverrides.buttonLabelFontSize,
+                    onValueChange = { onOverridesChanged(customThemeOverrides.copy(buttonLabelFontSize = it)) },
                 )
                 TokenTextField(
                     label = "buttonPaddingY",
                     placeholder = "e.g. 12",
-                    value = tokenOverrides.buttonPaddingY,
-                    onValueChange = { onOverridesChanged(tokenOverrides.copy(buttonPaddingY = it)) },
+                    value = customThemeOverrides.buttonPaddingY,
+                    onValueChange = { onOverridesChanged(customThemeOverrides.copy(buttonPaddingY = it)) },
                 )
                 TokenTextField(
                     label = "buttonPaddingX",
                     placeholder = "e.g. 20",
-                    value = tokenOverrides.buttonPaddingX,
-                    onValueChange = { onOverridesChanged(tokenOverrides.copy(buttonPaddingX = it)) },
+                    value = customThemeOverrides.buttonPaddingX,
+                    onValueChange = { onOverridesChanged(customThemeOverrides.copy(buttonPaddingX = it)) },
                 )
                 TokenTextField(
                     label = "buttonDangerColorBackground",
                     placeholder = "hex e.g. FF0000",
-                    value = tokenOverrides.buttonDangerColorBackground,
-                    onValueChange = { onOverridesChanged(tokenOverrides.copy(buttonDangerColorBackground = it)) },
+                    value = customThemeOverrides.buttonDangerColorBackground,
+                    onValueChange = { onOverridesChanged(customThemeOverrides.copy(buttonDangerColorBackground = it)) },
                 )
                 TokenTextField(
                     label = "buttonDangerColorBorder",
                     placeholder = "hex e.g. CC0000",
-                    value = tokenOverrides.buttonDangerColorBorder,
-                    onValueChange = { onOverridesChanged(tokenOverrides.copy(buttonDangerColorBorder = it)) },
+                    value = customThemeOverrides.buttonDangerColorBorder,
+                    onValueChange = { onOverridesChanged(customThemeOverrides.copy(buttonDangerColorBorder = it)) },
                 )
                 TokenTextField(
                     label = "buttonDangerColorText",
                     placeholder = "hex e.g. FFFFFF",
-                    value = tokenOverrides.buttonDangerColorText,
-                    onValueChange = { onOverridesChanged(tokenOverrides.copy(buttonDangerColorText = it)) },
+                    value = customThemeOverrides.buttonDangerColorText,
+                    onValueChange = { onOverridesChanged(customThemeOverrides.copy(buttonDangerColorText = it)) },
                 )
             }
             item {
                 TokenSectionHeader("Badge")
                 TextTransformDropdown(
                     label = "badgeLabelTextTransform",
-                    value = tokenOverrides.badgeLabelTextTransform,
-                    onValueChange = { onOverridesChanged(tokenOverrides.copy(badgeLabelTextTransform = it)) },
+                    value = customThemeOverrides.badgeLabelTextTransform,
+                    onValueChange = { onOverridesChanged(customThemeOverrides.copy(badgeLabelTextTransform = it)) },
                 )
                 TokenTextField(
                     label = "badgeLabelFontWeight",
                     placeholder = "e.g. 600",
-                    value = tokenOverrides.badgeLabelFontWeight,
-                    onValueChange = { onOverridesChanged(tokenOverrides.copy(badgeLabelFontWeight = it)) },
+                    value = customThemeOverrides.badgeLabelFontWeight,
+                    onValueChange = { onOverridesChanged(customThemeOverrides.copy(badgeLabelFontWeight = it)) },
                 )
                 TokenTextField(
                     label = "badgeLabelFontSize",
                     placeholder = "e.g. 12",
-                    value = tokenOverrides.badgeLabelFontSize,
-                    onValueChange = { onOverridesChanged(tokenOverrides.copy(badgeLabelFontSize = it)) },
+                    value = customThemeOverrides.badgeLabelFontSize,
+                    onValueChange = { onOverridesChanged(customThemeOverrides.copy(badgeLabelFontSize = it)) },
                 )
                 TokenTextField(
                     label = "badgePaddingY",
                     placeholder = "e.g. 4",
-                    value = tokenOverrides.badgePaddingY,
-                    onValueChange = { onOverridesChanged(tokenOverrides.copy(badgePaddingY = it)) },
+                    value = customThemeOverrides.badgePaddingY,
+                    onValueChange = { onOverridesChanged(customThemeOverrides.copy(badgePaddingY = it)) },
                 )
                 TokenTextField(
                     label = "badgePaddingX",
                     placeholder = "e.g. 10",
-                    value = tokenOverrides.badgePaddingX,
-                    onValueChange = { onOverridesChanged(tokenOverrides.copy(badgePaddingX = it)) },
+                    value = customThemeOverrides.badgePaddingX,
+                    onValueChange = { onOverridesChanged(customThemeOverrides.copy(badgePaddingX = it)) },
                 )
             }
             item {
                 TokenSectionHeader("Action")
                 TextTransformDropdown(
                     label = "actionPrimaryTextTransform",
-                    value = tokenOverrides.actionPrimaryTextTransform,
-                    onValueChange = { onOverridesChanged(tokenOverrides.copy(actionPrimaryTextTransform = it)) },
+                    value = customThemeOverrides.actionPrimaryTextTransform,
+                    onValueChange = { onOverridesChanged(customThemeOverrides.copy(actionPrimaryTextTransform = it)) },
                 )
                 TextTransformDropdown(
                     label = "actionSecondaryTextTransform",
-                    value = tokenOverrides.actionSecondaryTextTransform,
-                    onValueChange = { onOverridesChanged(tokenOverrides.copy(actionSecondaryTextTransform = it)) },
+                    value = customThemeOverrides.actionSecondaryTextTransform,
+                    onValueChange = { onOverridesChanged(customThemeOverrides.copy(actionSecondaryTextTransform = it)) },
                 )
             }
             item {
@@ -288,20 +288,20 @@ private fun CustomThemeView(
                 TokenTextField(
                     label = "formPlaceholderTextColor",
                     placeholder = "hex e.g. 999999",
-                    value = tokenOverrides.formPlaceholderTextColor,
-                    onValueChange = { onOverridesChanged(tokenOverrides.copy(formPlaceholderTextColor = it)) },
+                    value = customThemeOverrides.formPlaceholderTextColor,
+                    onValueChange = { onOverridesChanged(customThemeOverrides.copy(formPlaceholderTextColor = it)) },
                 )
                 TokenTextField(
                     label = "inputFieldPaddingX",
                     placeholder = "e.g. 14",
-                    value = tokenOverrides.inputFieldPaddingX,
-                    onValueChange = { onOverridesChanged(tokenOverrides.copy(inputFieldPaddingX = it)) },
+                    value = customThemeOverrides.inputFieldPaddingX,
+                    onValueChange = { onOverridesChanged(customThemeOverrides.copy(inputFieldPaddingX = it)) },
                 )
                 TokenTextField(
                     label = "inputFieldPaddingY",
                     placeholder = "e.g. 10",
-                    value = tokenOverrides.inputFieldPaddingY,
-                    onValueChange = { onOverridesChanged(tokenOverrides.copy(inputFieldPaddingY = it)) },
+                    value = customThemeOverrides.inputFieldPaddingY,
+                    onValueChange = { onOverridesChanged(customThemeOverrides.copy(inputFieldPaddingY = it)) },
                 )
             }
             item {
@@ -309,8 +309,8 @@ private fun CustomThemeView(
                 TokenTextField(
                     label = "tableRowPaddingY",
                     placeholder = "e.g. 16",
-                    value = tokenOverrides.tableRowPaddingY,
-                    onValueChange = { onOverridesChanged(tokenOverrides.copy(tableRowPaddingY = it)) },
+                    value = customThemeOverrides.tableRowPaddingY,
+                    onValueChange = { onOverridesChanged(customThemeOverrides.copy(tableRowPaddingY = it)) },
                 )
             }
         }

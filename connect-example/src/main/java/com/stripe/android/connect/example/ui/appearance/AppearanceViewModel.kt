@@ -30,25 +30,25 @@ class AppearanceViewModel @Inject constructor(
         _state.update {
             it.copy(
                 selectedAppearance = appearanceId,
-                tokenOverrides = NewTokenOverridesUiState(),
+                customThemeOverrides = CustomThemeOverridesState(),
                 saveEnabled = true,
             )
         }
     }
 
-    fun onOverridesChanged(overrides: NewTokenOverridesUiState) {
-        _state.update { it.copy(tokenOverrides = overrides, saveEnabled = true) }
+    fun onOverridesChanged(overrides: CustomThemeOverridesState) {
+        _state.update { it.copy(customThemeOverrides = overrides, saveEnabled = true) }
     }
 
     fun clearOverrides() {
-        _state.update { it.copy(tokenOverrides = NewTokenOverridesUiState(), saveEnabled = true) }
+        _state.update { it.copy(customThemeOverrides = CustomThemeOverridesState(), saveEnabled = true) }
     }
 
     fun saveAppearance() {
         viewModelScope.launch {
             with(state.value) {
                 settingsService.setAppearanceId(selectedAppearance)
-                settingsService.setNewTokenOverrides(tokenOverrides.toNewTokenOverrides())
+                settingsService.setCustomThemeOverrides(customThemeOverrides.toCustomThemeOverrides())
             }
             logger.info("($loggingTag) Appearance saved")
             _state.update { it.copy(saveEnabled = false) }
@@ -60,10 +60,10 @@ class AppearanceViewModel @Inject constructor(
     private fun loadAppearance() {
         _state.update { state ->
             val appearanceId = settingsService.getAppearanceId() ?: AppearanceInfo.AppearanceId.Default
-            val savedOverrides = settingsService.getNewTokenOverrides()
+            val savedOverrides = settingsService.getCustomThemeOverrides()
             state.copy(
                 selectedAppearance = appearanceId,
-                tokenOverrides = NewTokenOverridesUiState.fromNewTokenOverrides(savedOverrides),
+                customThemeOverrides = CustomThemeOverridesState.fromCustomThemeOverrides(savedOverrides),
                 saveEnabled = false,
             )
         }
@@ -75,7 +75,7 @@ class AppearanceViewModel @Inject constructor(
         val saveEnabled: Boolean = false,
         val selectedAppearance: AppearanceInfo.AppearanceId = AppearanceInfo.AppearanceId.Default,
         val appearances: List<AppearanceInfo.AppearanceId> = AppearanceInfo.AppearanceId.entries,
-        val tokenOverrides: NewTokenOverridesUiState = NewTokenOverridesUiState(),
+        val customThemeOverrides: CustomThemeOverridesState = CustomThemeOverridesState(),
     )
 }
 
@@ -85,7 +85,7 @@ class AppearanceViewModel @Inject constructor(
  * Color inputs are stored as hex strings (e.g. "FF0000" or "FFFF0000").
  */
 @Suppress("LongParameterList")
-data class NewTokenOverridesUiState(
+data class CustomThemeOverridesState(
     // Button
     val buttonLabelTextTransform: TextTransform = TextTransform.None,
     val buttonLabelFontWeight: String = "",
@@ -112,8 +112,8 @@ data class NewTokenOverridesUiState(
     val tableRowPaddingY: String = "",
 ) {
     @Suppress("LongMethod")
-    fun toNewTokenOverrides(): NewTokenOverrides {
-        return NewTokenOverrides(
+    fun toCustomThemeOverrides(): CustomThemeOverrides {
+        return CustomThemeOverrides(
             buttonLabelTextTransform = buttonLabelTextTransform,
             buttonLabelFontWeight = buttonLabelFontWeight.toIntOrNull(),
             buttonLabelFontSize = buttonLabelFontSize.toFloatOrNull(),
@@ -137,8 +137,8 @@ data class NewTokenOverridesUiState(
     }
 
     companion object {
-        fun fromNewTokenOverrides(overrides: NewTokenOverrides): NewTokenOverridesUiState {
-            return NewTokenOverridesUiState(
+        fun fromCustomThemeOverrides(overrides: CustomThemeOverrides): CustomThemeOverridesState {
+            return CustomThemeOverridesState(
                 buttonLabelTextTransform = overrides.buttonLabelTextTransform.orNone(),
                 buttonLabelFontWeight = overrides.buttonLabelFontWeight.toStringOrEmpty(),
                 buttonLabelFontSize = overrides.buttonLabelFontSize.toStringOrEmpty(),

@@ -58,7 +58,7 @@ class EmbeddedComponentLoaderViewModel @Inject constructor(
                 .map { it.embeddedComponentManagerAsync() }
                 .filterNotNull()
             val appearanceIdFlow = settingsService.getAppearanceIdFlow().filterNotNull()
-            val overridesFlow = settingsService.getNewTokenOverridesFlow()
+            val overridesFlow = settingsService.getCustomThemeOverridesFlow()
             val appearanceFlow = combine(appearanceIdFlow, overridesFlow) { id, overrides ->
                 AppearanceInfo.getAppearance(id, activity, overrides).appearance
             }
