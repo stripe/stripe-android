@@ -135,7 +135,7 @@ class CheckoutRequest private constructor(
         private var adaptivePricing: Boolean? = null
         private var displayShippingRates: Boolean? = null
         private var customerEmail: String? = null
-        private var useManualCapture: Boolean? = null
+        private var useManualCapture: Boolean = true
 
         fun initialization(initialization: String?) = apply {
             this.initialization = initialization
@@ -283,10 +283,6 @@ class CheckoutRequest private constructor(
 
         fun customerEmail(customerEmail: String?) = apply {
             this.customerEmail = customerEmail
-        }
-
-        fun useManualCapture(useManualCapture: Boolean?) = apply {
-            this.useManualCapture = useManualCapture
         }
 
         fun build(): CheckoutRequest {
