@@ -30,10 +30,8 @@ import androidx.test.espresso.matcher.RootMatchers.isDialog
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.espresso.web.sugar.Web.onWebView
 import androidx.test.espresso.web.webdriver.DriverAtoms.webClick
-import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiSelector
-import androidx.test.uiautomator.Until
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG
@@ -1501,20 +1499,6 @@ internal class PlaygroundTestDriver(
                         authorizeTestPaymentText.click()
 
                         waitForPollingToFinish()
-                    }
-                    is AuthorizeAction.PayByBank -> {
-                        val webView = device.wait(
-                            Until.findObject(By.clazz("android.webkit.WebView")),
-                            DEFAULT_UI_TIMEOUT.inWholeMilliseconds
-                        )
-                        webView.click()
-
-                        val authorizeTestPaymentText = UiAutomatorText(
-                            "AUTHORIZE TEST PAYMENT",
-                            device = device
-                        )
-                        authorizeTestPaymentText.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
-                        authorizeTestPaymentText.click()
                     }
                     null -> {}
                 }
