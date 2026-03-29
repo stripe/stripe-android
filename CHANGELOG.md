@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+Dependencies updated in [12785](https://github.com/stripe/stripe-android/pull/12785):
+- Rolled back kotlin to 2.2.21 from 2.3.10.
+
 ### Identity
 * [CHANGED] Improved selfie capture quality with motion blur gating, center framing validation, and better best-frame selection.
 * [FIXED] Fixed truncation of some floating-point parameters sent to the Identity API.
