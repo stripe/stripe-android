@@ -7,14 +7,17 @@ import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutInit
+import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.utils.PaymentSheetTestRunnerContext
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.assertFailed
@@ -179,5 +182,127 @@ internal class PaymentSheetCheckoutSessionTest {
                 configuration = defaultConfiguration,
             )
         }
+    }
+
+    // region allow_redisplay tests
+
+    @Test
+    fun allowRedisplayIsUnspecifiedWhenNotSavingWithPaymentIntent() =
+        runCheckoutSessionAllowRedisplayTest(
+            initFile = "checkout-session-init-with-customer.json",
+            confirmFile = "checkout-session-confirm.json",
+            expectedAllowRedisplay = "unspecified",
+        )
+
+    @Test
+    fun allowRedisplayIsAlwaysWhenSavingWithPaymentIntent() =
+        runCheckoutSessionAllowRedisplayTest(
+            initFile = "checkout-session-init-with-customer.json",
+            confirmFile = "checkout-session-confirm.json",
+            clickSaveCheckbox = true,
+            expectedAllowRedisplay = "always",
+        )
+
+    @Test
+    fun allowRedisplayIsUnspecifiedWhenSaveDisabledWithPaymentIntent() =
+        runCheckoutSessionAllowRedisplayTest(
+            initFile = "checkout-session-init-with-customer.json",
+            initReplacements = listOf(SAVE_DISABLED_REPLACEMENT),
+            confirmFile = "checkout-session-confirm.json",
+            expectedAllowRedisplay = "unspecified",
+        )
+
+    @Test
+    fun allowRedisplayIsLimitedWhenNotSavingWithSetupIntent() =
+        runCheckoutSessionAllowRedisplayTest(
+            initFile = "checkout-session-init-setup-with-customer.json",
+            confirmFile = "checkout-session-confirm-setup.json",
+            expectedAllowRedisplay = "limited",
+        )
+
+    @Test
+    fun allowRedisplayIsAlwaysWhenSavingWithSetupIntent() =
+        runCheckoutSessionAllowRedisplayTest(
+            initFile = "checkout-session-init-setup-with-customer.json",
+            confirmFile = "checkout-session-confirm-setup.json",
+            clickSaveCheckbox = true,
+            expectedAllowRedisplay = "always",
+        )
+
+    @Test
+    fun allowRedisplayIsLimitedWhenSaveDisabledWithSetupIntent() =
+        runCheckoutSessionAllowRedisplayTest(
+            initFile = "checkout-session-init-setup-with-customer.json",
+            initReplacements = listOf(SAVE_DISABLED_REPLACEMENT),
+            confirmFile = "checkout-session-confirm-setup.json",
+            expectedAllowRedisplay = "limited",
+        )
+
+    // endregion
+
+    private fun runCheckoutSessionAllowRedisplayTest(
+        initFile: String,
+        confirmFile: String,
+        initReplacements: List<ResponseReplacement> = emptyList(),
+        clickSaveCheckbox: Boolean = false,
+        expectedAllowRedisplay: String,
+    ) = runPaymentSheetTest(
+        networkRule = networkRule,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.checkoutInit { response ->
+            response.testBodyFromFile(initFile, initReplacements)
+        }
+
+        testContext.presentWithCheckout()
+
+        page.fillOutCardDetails()
+
+        if (clickSaveCheckbox) {
+            page.clickOnSaveForFutureUsage()
+        }
+
+        enqueuePaymentMethodCreation(
+            bodyPart("allow_redisplay", expectedAllowRedisplay),
+        )
+
+        networkRule.checkoutConfirm { response ->
+            response.testBodyFromFile(confirmFile)
+        }
+
+        page.clickPrimaryButton()
+    }
+
+    private suspend fun PaymentSheetTestRunnerContext.presentWithCheckout() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val checkout = Checkout.configure(
+            context = context,
+            checkoutSessionClientSecret = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example",
+        ).getOrThrow()
+
+        presentPaymentSheet {
+            presentWithCheckout(
+                checkout = checkout,
+                configuration = defaultConfiguration,
+            )
+        }
+    }
+
+    private fun enqueuePaymentMethodCreation(vararg requestMatchers: RequestMatcher) {
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("POST"),
+            path("/v1/payment_methods"),
+            *requestMatchers,
+        ) { response ->
+            response.testBodyFromFile("payment-methods-create.json")
+        }
+    }
+
+    private companion object {
+        val SAVE_DISABLED_REPLACEMENT = ResponseReplacement(
+            original = "\"enabled\": true",
+            new = "\"enabled\": false",
+        )
     }
 }
