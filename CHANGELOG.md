@@ -2,8 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
-Dependencies updated in [12785](https://github.com/stripe/stripe-android/pull/12785):
+Dependencies updated in [12785](https://github.com/stripe/stripe-android/pull/12785) and [12786](https://github.com/stripe/stripe-android/pull/12786):
 - Rolled back kotlin to 2.2.21 from 2.3.10.
+- Bumped Compose from 1.10.4 to 1.10.6.
 
 ### Identity
 * [CHANGED] Improved selfie capture quality with motion blur gating, center framing validation, and better best-frame selection.
