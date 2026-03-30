@@ -187,7 +187,7 @@ internal class PaymentSheetCheckoutSessionTest {
     // region allow_redisplay tests
 
     @Test
-    fun allowRedisplayIsUnspecifiedWhenNotSavingWithPaymentIntent() =
+    fun allowRedisplayIsUnspecifiedWhenNotSavingWithPayment() =
         runCheckoutSessionAllowRedisplayTest(
             initFile = "checkout-session-init-with-customer.json",
             confirmFile = "checkout-session-confirm.json",
@@ -195,7 +195,7 @@ internal class PaymentSheetCheckoutSessionTest {
         )
 
     @Test
-    fun allowRedisplayIsAlwaysWhenSavingWithPaymentIntent() =
+    fun allowRedisplayIsAlwaysWhenSavingWithPayment() =
         runCheckoutSessionAllowRedisplayTest(
             initFile = "checkout-session-init-with-customer.json",
             confirmFile = "checkout-session-confirm.json",
@@ -204,7 +204,7 @@ internal class PaymentSheetCheckoutSessionTest {
         )
 
     @Test
-    fun allowRedisplayIsUnspecifiedWhenSaveDisabledWithPaymentIntent() =
+    fun allowRedisplayIsUnspecifiedWhenSaveDisabledWithPayment() =
         runCheckoutSessionAllowRedisplayTest(
             initFile = "checkout-session-init-with-customer.json",
             initReplacements = listOf(SAVE_DISABLED_REPLACEMENT),
@@ -213,7 +213,7 @@ internal class PaymentSheetCheckoutSessionTest {
         )
 
     @Test
-    fun allowRedisplayIsLimitedWhenNotSavingWithSetupIntent() =
+    fun allowRedisplayIsLimitedWhenNotSavingWithSetup() =
         runCheckoutSessionAllowRedisplayTest(
             initFile = "checkout-session-init-setup-with-customer.json",
             confirmFile = "checkout-session-confirm-setup.json",
@@ -221,7 +221,7 @@ internal class PaymentSheetCheckoutSessionTest {
         )
 
     @Test
-    fun allowRedisplayIsAlwaysWhenSavingWithSetupIntent() =
+    fun allowRedisplayIsAlwaysWhenSavingWithSetup() =
         runCheckoutSessionAllowRedisplayTest(
             initFile = "checkout-session-init-setup-with-customer.json",
             confirmFile = "checkout-session-confirm-setup.json",
@@ -230,7 +230,7 @@ internal class PaymentSheetCheckoutSessionTest {
         )
 
     @Test
-    fun allowRedisplayIsLimitedWhenSaveDisabledWithSetupIntent() =
+    fun allowRedisplayIsLimitedWhenSaveDisabledWithSetup() =
         runCheckoutSessionAllowRedisplayTest(
             initFile = "checkout-session-init-setup-with-customer.json",
             initReplacements = listOf(SAVE_DISABLED_REPLACEMENT),
