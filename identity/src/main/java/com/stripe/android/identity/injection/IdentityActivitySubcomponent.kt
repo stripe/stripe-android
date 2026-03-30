@@ -45,31 +45,17 @@ internal interface IdentityActivitySubcomponent {
     val identityImageHandler: IdentityImageHandler
     val tfLiteInitializer: InterpreterInitializer
 
-    @Subcomponent.Builder
-    interface Builder {
-
-        @BindsInstance
-        fun args(args: IdentityVerificationSheetContract.Args): Builder
-
-        @BindsInstance
-        fun cameraPermissionEnsureable(cameraPermissionEnsureable: CameraPermissionEnsureable): Builder
-
-        @BindsInstance
-        fun appSettingsOpenable(appSettingsOpenable: AppSettingsOpenable): Builder
-
-        @BindsInstance
-        fun verificationFlowFinishable(verificationFlowFinishable: VerificationFlowFinishable): Builder
-
-        @BindsInstance
-        fun identityViewModelFactory(identityViewModelFactory: ViewModelProvider.Factory): Builder
-
-        @BindsInstance
-        fun viewModelStoreOwner(viewModelStore0wner: ViewModelStoreOwner): Builder
-
-        @BindsInstance
-        fun fallbackUrlLauncher(fallbackUrlLauncher: FallbackUrlLauncher): Builder
-
-        fun build(): IdentityActivitySubcomponent
+    @Subcomponent.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance args: IdentityVerificationSheetContract.Args,
+            @BindsInstance cameraPermissionEnsureable: CameraPermissionEnsureable,
+            @BindsInstance appSettingsOpenable: AppSettingsOpenable,
+            @BindsInstance verificationFlowFinishable: VerificationFlowFinishable,
+            @BindsInstance identityViewModelFactory: ViewModelProvider.Factory,
+            @BindsInstance viewModelStoreOwner: ViewModelStoreOwner,
+            @BindsInstance fallbackUrlLauncher: FallbackUrlLauncher,
+        ): IdentityActivitySubcomponent
     }
 }
 

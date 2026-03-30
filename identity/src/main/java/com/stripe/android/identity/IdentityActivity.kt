@@ -80,7 +80,7 @@ internal class IdentityActivity :
     lateinit var subcomponent: IdentityActivitySubcomponent
 
     @Inject
-    lateinit var subComponentBuilderProvider: Provider<IdentityActivitySubcomponent.Builder>
+    lateinit var subComponentBuilderProvider: Provider<IdentityActivitySubcomponent.Factory>
 
     @Inject
     @UIContext
@@ -91,9 +91,8 @@ internal class IdentityActivity :
     lateinit var workContext: CoroutineContext
 
     override fun fallbackInitialize(arg: Context): Injector? {
-        DaggerIdentityActivityFallbackComponent.builder()
-            .context(arg)
-            .build().inject(this)
+        DaggerIdentityActivityFallbackComponent.factory()
+            .create(arg).inject(this)
         return null
     }
 
@@ -110,14 +109,15 @@ internal class IdentityActivity :
             this.applicationContext
         )
         subcomponent = subComponentBuilderProvider.get()
-            .args(starterArgs)
-            .cameraPermissionEnsureable(this)
-            .appSettingsOpenable(this)
-            .verificationFlowFinishable(this)
-            .identityViewModelFactory(viewModelFactory)
-            .fallbackUrlLauncher(this)
-            .viewModelStoreOwner(this)
-            .build()
+            .create(
+                args = starterArgs,
+                cameraPermissionEnsureable = this,
+                appSettingsOpenable = this,
+                verificationFlowFinishable = this,
+                identityViewModelFactory = viewModelFactory,
+                viewModelStoreOwner = this,
+                fallbackUrlLauncher = this,
+            )
         identityViewModel.retrieveAndBufferVerificationPage()
         identityViewModel.initializeTfLite()
         identityViewModel.registerActivityResultCaller(this)
