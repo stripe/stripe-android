@@ -43,12 +43,12 @@ data class AppearanceInfo(
             context: Context,
             overrides: CustomThemeOverrides = CustomThemeOverrides(),
         ): AppearanceInfo {
-            val builder = builderFor(appearanceId, context)
+            val builder = builder(appearanceId, context)
             builder.applyCustomThemeOverrides(overrides)
             return AppearanceInfo(appearanceId, builder.build())
         }
 
-        private fun builderFor(id: AppearanceId, context: Context): Appearance.Builder {
+        private fun builder(id: AppearanceId, context: Context): Appearance.Builder {
             return when (id) {
                 AppearanceId.Default -> defaultAppearance()
                 AppearanceId.Ogre -> ogreAppearance(context)
@@ -56,7 +56,7 @@ data class AppearanceInfo(
                 AppearanceId.OceanBreeze -> oceanBreezeAppearance(context)
                 AppearanceId.Link -> linkAppearance(context)
                 AppearanceId.Dynamic -> dynamicAppearance(context)
-                AppearanceId.CustomFont -> customFontAppearance()
+                AppearanceId.CustomFont -> customFont()
                 AppearanceId.Retro -> retroAppearance(context)
                 AppearanceId.Forest -> forestAppearance(context)
                 AppearanceId.DarkMode -> darkModeAppearance(context)
@@ -265,7 +265,7 @@ data class AppearanceInfo(
                 )
             )
 
-        private fun customFontAppearance() = Appearance.Builder()
+        private fun customFont() = Appearance.Builder()
             .typography(
                 Typography.Builder()
                     .fontFamily("doto")
