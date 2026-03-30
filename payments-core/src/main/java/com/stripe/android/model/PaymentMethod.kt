@@ -533,14 +533,6 @@ constructor(
             requiresMandate = false,
             hasDelayedSettlement = false,
             requiresMandateForPaymentIntent = false,
-        ),
-        PayByBank(
-            "pay_by_bank",
-            isReusable = false,
-            isVoucher = false,
-            requiresMandate = false,
-            requiresMandateForPaymentIntent = false,
-            hasDelayedSettlement = false,
         );
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
