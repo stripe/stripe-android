@@ -217,7 +217,7 @@ internal interface TapToAddViewModelModule {
         @Provides
         @Singleton
         fun provideStripeImageLoader(context: Context): StripeImageLoader {
-            return StripeImageLoader(context)
+            return TapToAddStripeImageLoaderFactory.create(context)
         }
 
         @Provides
