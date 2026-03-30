@@ -8,12 +8,10 @@ import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
+import com.stripe.android.checkouttesting.createPaymentMethod
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
-import com.stripe.android.networktesting.RequestMatchers.host
-import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
-import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.utils.TestRules
@@ -83,13 +81,7 @@ internal class PaymentSheetCheckoutSessionTest {
 
         page.fillOutCardDetails()
 
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("POST"),
-            path("/v1/payment_methods"),
-        ) { response ->
-            response.testBodyFromFile("payment-methods-create.json")
-        }
+        networkRule.createPaymentMethod()
 
         networkRule.checkoutConfirm(
             not(hasBodyPart("expected_amount")),
@@ -138,13 +130,7 @@ internal class PaymentSheetCheckoutSessionTest {
         page.fillOutCardDetails()
 
         // Mock payment method creation
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("POST"),
-            path("/v1/payment_methods"),
-        ) { response ->
-            response.testBodyFromFile("payment-methods-create.json")
-        }
+        networkRule.createPaymentMethod()
 
         // Mock checkout session confirm API
         networkRule.checkoutConfirm(
@@ -224,13 +210,7 @@ internal class PaymentSheetCheckoutSessionTest {
         currencySelector.assertCurrencyOptionIsSelected("USD")
         formPage.fillOutCardDetails()
 
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("POST"),
-            path("/v1/payment_methods"),
-        ) { response ->
-            response.testBodyFromFile("payment-methods-create.json")
-        }
+        networkRule.createPaymentMethod()
 
         networkRule.checkoutConfirm(
             bodyPart("expected_amount", "5099"),
