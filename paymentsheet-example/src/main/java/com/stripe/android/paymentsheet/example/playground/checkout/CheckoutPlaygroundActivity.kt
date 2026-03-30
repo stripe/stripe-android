@@ -169,6 +169,7 @@ private fun CheckoutScreen(
     Box {
         PlaygroundTheme(
             content = {
+                checkout.AdaptivePricingContent()
                 LineItemsSection(checkoutSession, updateLineItemQuantity)
                 ShippingAddressSection(
                     lastAddressDetails = lastAddressDetails,

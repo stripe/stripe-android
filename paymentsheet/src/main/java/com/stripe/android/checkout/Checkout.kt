@@ -3,14 +3,22 @@ package com.stripe.android.checkout
 import android.content.Context
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import com.stripe.android.checkout.injection.CheckoutComponent
 import com.stripe.android.checkout.injection.DaggerCheckoutComponent
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorOptions
+import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorOptionsFactory
+import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorToggle
+import com.stripe.android.uicore.utils.collectAsState
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.parcelize.Parcelize
@@ -96,12 +104,15 @@ class Checkout private constructor(
         set(value) {
             ensureNoMutationInFlight()
             internalState = value.internalState
+            refreshAdaptivePricingState()
         }
 
     private val mutex = Mutex()
 
     private val _checkoutSession = MutableStateFlow(internalState.checkoutSessionResponse.asCheckoutSession())
     val checkoutSession: StateFlow<CheckoutSession> = _checkoutSession.asStateFlow()
+
+    private val _adaptivePricingState = MutableStateFlow(computeAdaptivePricingState())
 
     init {
         CheckoutInstances.add(internalState.key, this)
@@ -174,12 +185,41 @@ class Checkout private constructor(
         )
     }
 
+    private suspend fun updateCurrency(
+        currencyCode: String,
+    ): Result<CheckoutSession> {
+        _adaptivePricingState.value = _adaptivePricingState.value?.copy(isEnabled = false)
+        try {
+            return withInternalState { sessionId ->
+                component.checkoutSessionRepository.updateCurrency(sessionId, currencyCode)
+            }
+        } finally {
+            refreshAdaptivePricingState()
+        }
+    }
+
+    @Composable
+    fun AdaptivePricingContent() {
+        val state by _adaptivePricingState.collectAsState()
+        val adaptivePricingState = state ?: return
+        val scope = rememberCoroutineScope()
+        CurrencySelectorToggle(
+            options = adaptivePricingState.options,
+            onCurrencySelected = { currencyOption ->
+                scope.launch { updateCurrency(currencyOption.code) }
+            },
+            isEnabled = adaptivePricingState.isEnabled,
+        )
+    }
+
     internal fun markIntegrationLaunched() {
         internalState = internalState.copy(integrationLaunched = true)
+        refreshAdaptivePricingState()
     }
 
     internal fun markIntegrationDismissed() {
         internalState = internalState.copy(integrationLaunched = false)
+        refreshAdaptivePricingState()
     }
 
     internal fun ensureNoMutationInFlight() {
@@ -193,7 +233,26 @@ class Checkout private constructor(
     internal fun updateWithResponse(response: CheckoutSessionResponse) {
         internalState = internalState.copy(checkoutSessionResponse = response)
         _checkoutSession.value = response.asCheckoutSession()
+        refreshAdaptivePricingState()
     }
+
+    private fun computeAdaptivePricingState(): AdaptivePricingState? {
+        val info = internalState.checkoutSessionResponse.adaptivePricingInfo ?: return null
+        val options = CurrencySelectorOptionsFactory.create(info) ?: return null
+        return AdaptivePricingState(
+            options = options,
+            isEnabled = !internalState.integrationLaunched,
+        )
+    }
+
+    private fun refreshAdaptivePricingState() {
+        _adaptivePricingState.value = computeAdaptivePricingState()
+    }
+
+    private data class AdaptivePricingState(
+        val options: CurrencySelectorOptions,
+        val isEnabled: Boolean,
+    )
 
     private suspend fun withInternalState(
         additionalStateMutations: InternalState.() -> InternalState = { this },
@@ -212,6 +271,7 @@ class Checkout private constructor(
                 internalState = internalState.copy(checkoutSessionResponse = response).additionalStateMutations()
                 val checkoutSession = response.asCheckoutSession()
                 _checkoutSession.value = checkoutSession
+                refreshAdaptivePricingState()
                 checkoutSession
             }
         }
