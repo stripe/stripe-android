@@ -61,12 +61,6 @@ public final class com/stripe/android/identity/IdentityVerificationSheet$Verific
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/identity/navigation/ComposableSingletons$IdentityNavGraphKt {
-	public static final field INSTANCE Lcom/stripe/android/identity/navigation/ComposableSingletons$IdentityNavGraphKt;
-	public fun <init> ()V
-	public final fun getLambda$2119843079$identity_release ()Lkotlin/jvm/functions/Function3;
-}
-
 public final class com/stripe/android/identity/navigation/NavControllerExtKt {
 	public static final field NAV_CONTROLLER_TAG Ljava/lang/String;
 }
@@ -75,7 +69,7 @@ public final class com/stripe/android/identity/ui/ComposableSingletons$BottomShe
 	public static final field INSTANCE Lcom/stripe/android/identity/ui/ComposableSingletons$BottomSheetKt;
 	public fun <init> ()V
 	public final fun getLambda$-642111401$identity_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda$1967370484$identity_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$1929299223$identity_release ()Lkotlin/jvm/functions/Function3;
 }
 
 public final class com/stripe/android/identity/ui/ComposableSingletons$ConsentLinesKt {
@@ -113,7 +107,7 @@ public final class com/stripe/android/identity/ui/ComposableSingletons$DocWarmup
 public final class com/stripe/android/identity/ui/ComposableSingletons$SelfieScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/identity/ui/ComposableSingletons$SelfieScreenKt;
 	public fun <init> ()V
-	public final fun getLambda$313324597$identity_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-1426406200$identity_release ()Lkotlin/jvm/functions/Function3;
 }
 
 public final class com/stripe/android/identity/ui/ComposableSingletons$UploadScreenKt {
