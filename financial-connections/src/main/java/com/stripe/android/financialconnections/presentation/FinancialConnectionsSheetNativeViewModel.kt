@@ -498,14 +498,15 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                     savedState = savedState
                 )
                 DaggerFinancialConnectionsSheetNativeComponent
-                    .builder()
-                    .initialSyncResponse(args.initialSyncResponse.takeIf { state.firstInit })
-                    .application(app)
-                    .configuration(state.configuration)
-                    .sharedComponent(FinancialConnectionsSingletonSharedComponentHolder.getComponent(app))
-                    .savedStateHandle(savedStateHandle)
-                    .initialState(state)
-                    .build()
+                    .factory()
+                    .build(
+                        initialSyncResponse = args.initialSyncResponse.takeIf { state.firstInit },
+                        application = app,
+                        initialState = state,
+                        configuration = state.configuration,
+                        sharedComponent = FinancialConnectionsSingletonSharedComponentHolder.getComponent(app),
+                        savedStateHandle = savedStateHandle,
+                    )
                     .viewModel
             }
         }
