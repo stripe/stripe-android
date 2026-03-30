@@ -5,7 +5,8 @@ import android.app.Application
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.isDisplayed
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
@@ -55,10 +56,11 @@ import android.graphics.Color as BaseAndroidColor
 @RunWith(RobolectricTestRunner::class)
 class TapToAddActivityTest {
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
-    private val composeTestRule = createAndroidComposeRule<TapToAddActivity>()
+    private val composeTestRule = createEmptyComposeRule()
     private val featureFlagTestRule = FeatureFlagTestRule(FeatureFlags.enableTapToAdd, true)
     private val composeCleanupRule = createComposeCleanupRule()
     private val terminalWrapperTestRule = TerminalWrapperTestRule()
+    private val imageLoaderTestRule = TapToAddStripeImageLoaderTestRule()
     private val paymentElementCallbackTestRule = PaymentElementCallbackTestRule()
     private val networkRule = NetworkRule()
 
@@ -70,6 +72,7 @@ class TapToAddActivityTest {
         .around(terminalWrapperTestRule)
         .around(featureFlagTestRule)
         .around(paymentElementCallbackTestRule)
+        .around(imageLoaderTestRule)
         .around(PaymentConfigurationTestRule(applicationContext))
         .around(RetryRule(3))
 
@@ -115,6 +118,7 @@ class TapToAddActivityTest {
         }
 
         launch { activityScenario ->
+            assertCardArtAssetPreloads()
             assertIsInitializedCall()
             assertConnectedReaderCall()
             assertSupportsReadersOfTypeCall()
@@ -179,6 +183,28 @@ class TapToAddActivityTest {
         PaymentElementCallbackReferences[PAYMENT_ELEMENT_CALLBACK_IDENTIFIER] = PaymentElementCallbacks.Builder()
             .createCardPresentSetupIntentCallback(createCardPresentSetupIntentCallback)
             .build()
+    }
+
+    private suspend fun assertCardArtAssetPreloads() {
+        /*
+         * These images are loaded asynchronously all together. The order itself does not matter, only that all the
+         * images were asked to be loaded.
+         */
+        val preloadingImages = setOf(
+            imageLoaderTestRule.awaitImageLoadWithUrl(),
+            imageLoaderTestRule.awaitImageLoadWithUrl(),
+            imageLoaderTestRule.awaitImageLoadWithUrl(),
+            imageLoaderTestRule.awaitImageLoadWithUrl(),
+            imageLoaderTestRule.awaitImageLoadWithUrl(),
+        )
+
+        assertThat(preloadingImages).containsExactly(
+            "https://b.stripecdn.com/ocs-mobile/assets/visa.png",
+            "https://b.stripecdn.com/ocs-mobile/assets/mastercard.png",
+            "https://b.stripecdn.com/ocs-mobile/assets/discover.webp",
+            "https://b.stripecdn.com/ocs-mobile/assets/amex.webp",
+            "https://b.stripecdn.com/ocs-mobile/assets/jcb.png"
+        )
     }
 
     private suspend fun assertIsInitializedCall() {
@@ -259,7 +285,9 @@ class TapToAddActivityTest {
     }
 
     private fun assertHasCardAddedText() {
-        composeTestRule.onNode(hasText("Card added")).assertIsDisplayed()
+        composeTestRule.waitUntil(5000L) {
+            composeTestRule.onNode(hasText("Card added")).isDisplayed()
+        }
     }
 
     private fun assertAndClickOnContinueButton() {
