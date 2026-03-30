@@ -2051,19 +2051,6 @@ internal class IdentityViewModel(
     fun visitedIndividualWelcome() {
         _visitedIndividualWelcomeScreen.updateStateAndSave { true }
     }
-    fun logErrorOnErrorScreen() {
-        errorCause.value?.let { cause ->
-            identityAnalyticsRequestFactory.genericError(
-                throwable = cause,
-                additionalMetadata = mapOf(
-                    IdentityAnalyticsRequestFactory.PARAM_ERROR_CONTEXT to
-                        IdentityAnalyticsRequestFactory.ERROR_CONTEXT_ERROR_SCREEN,
-                    IdentityAnalyticsRequestFactory.PARAM_SCREEN_NAME to
-                        IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR
-                )
-            )
-        }
-    }
 
     private fun logError(
         cause: Throwable,

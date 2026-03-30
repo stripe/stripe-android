@@ -12,7 +12,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,9 +53,6 @@ internal fun ErrorScreen(
             identityViewModel = identityViewModel,
             screenName = IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR
         )
-        LaunchedEffect(Unit) {
-            identityViewModel.logErrorOnErrorScreen()
-        }
         Column(
             modifier = Modifier
                 .weight(1f)
