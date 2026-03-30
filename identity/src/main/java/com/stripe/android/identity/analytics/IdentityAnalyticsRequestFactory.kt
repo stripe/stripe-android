@@ -247,12 +247,14 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
 
     fun screenPresented(
         scanType: IdentityScanState.ScanType? = null,
-        screenName: String
+        screenName: String,
+        previousScreenName: String? = null
     ) = maybeLogExperimentAndSendLog(
         eventName = EVENT_SCREEN_PRESENTED,
         additionalParams = additionalParamWithEventMetadata(
             PARAM_SCAN_TYPE to scanType?.toParam(),
-            PARAM_SCREEN_NAME to screenName
+            PARAM_SCREEN_NAME to screenName,
+            PARAM_PREVIOUS_SCREEN_NAME to previousScreenName
         )
     )
 
@@ -524,6 +526,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val PARAM_EXCEPTION = "exception"
         const val PARAM_STACKTRACE = "stacktrace"
         const val PARAM_SCREEN_NAME = "screen_name"
+        const val PARAM_PREVIOUS_SCREEN_NAME = "previous_screen_name"
         const val PARAM_CAMERA_SOURCE = "camera_source"
         const val PARAM_CAMERA_EVENT_KIND = "camera_event_kind"
         const val PARAM_CAMERA_ACCESS_STATE = "camera_access_state"

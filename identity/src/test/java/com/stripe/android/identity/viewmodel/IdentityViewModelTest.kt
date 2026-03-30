@@ -360,6 +360,41 @@ internal class IdentityViewModelTest {
     }
 
     @Test
+    fun `trackScreenPresented includes previous screen name`() {
+        val scanTypeCaptor = argumentCaptor<IdentityScanState.ScanType?>()
+        val screenNameCaptor = argumentCaptor<String>()
+        val previousScreenNameCaptor = argumentCaptor<String?>()
+
+        viewModel.trackScreenPresented(
+            scanType = IdentityScanState.ScanType.DOC_FRONT,
+            screenName = SCREEN_NAME_CONSENT
+        )
+        viewModel.trackScreenPresented(
+            scanType = IdentityScanState.ScanType.DOC_BACK,
+            screenName = SCREEN_NAME_DOC_WARMUP
+        )
+
+        verify(mockIdentityAnalyticsRequestFactory, times(2)).screenPresented(
+            scanTypeCaptor.capture(),
+            screenNameCaptor.capture(),
+            previousScreenNameCaptor.capture()
+        )
+        assertThat(scanTypeCaptor.allValues).containsExactly(
+            IdentityScanState.ScanType.DOC_FRONT,
+            IdentityScanState.ScanType.DOC_BACK
+        ).inOrder()
+        assertThat(screenNameCaptor.allValues).containsExactly(
+            SCREEN_NAME_CONSENT,
+            SCREEN_NAME_DOC_WARMUP
+        ).inOrder()
+        assertThat(previousScreenNameCaptor.allValues).containsExactly(
+            null,
+            SCREEN_NAME_CONSENT
+        ).inOrder()
+        assertThat(viewModel.analyticsLastScreenName).isEqualTo(SCREEN_NAME_DOC_WARMUP)
+    }
+
+    @Test
     fun `postVerificationPageDataAndMaybeNavigate - postFailure`() = runBlocking {
         viewModel._verificationPage.postValue(
             Resource.success(

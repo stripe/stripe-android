@@ -1517,10 +1517,12 @@ internal class IdentityViewModel(
     }
 
     fun trackScreenPresented(scanType: IdentityScanState.ScanType?, screenName: String) {
+        val previousScreenName = analyticsLastScreenName
         analyticsLastScreenName = screenName
         identityAnalyticsRequestFactory.screenPresented(
             scanType = scanType,
-            screenName = screenName
+            screenName = screenName,
+            previousScreenName = previousScreenName
         )
     }
 

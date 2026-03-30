@@ -23,6 +23,7 @@ import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Com
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_EXPERIMENT_RETRIEVED
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_LAST_SCREEN_NAME
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_LIVE_MODE
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_PREVIOUS_SCREEN_NAME
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCAN_TYPE
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCREEN_NAME
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SESSION_RESULT
@@ -169,19 +170,22 @@ class IdentityAnalyticsRequestFactoryTest {
     }
 
     @Test
-    fun testDocBackUsesDocBackAnalyticsValue() = runBlocking {
+    fun testScreenPresentedIncludesPreviousScreenNameAndDocBackAnalyticsValue() = runBlocking {
         factory.verificationPage = liveModePage
 
         factory.screenPresented(
             IdentityScanState.ScanType.DOC_BACK,
-            TEST_SCREEN_NAME
+            TEST_SCREEN_NAME,
+            PREVIOUS_SCREEN_NAME
         )
 
         verify(mockIdentityRepository).sendAnalyticsRequest(
             argWhere {
                 val metadata = it.params.toMap()[PARAM_EVENT_META_DATA] as Map<*, *>
                 it.eventName == EVENT_SCREEN_PRESENTED &&
-                    metadata[PARAM_SCAN_TYPE] == DOC_BACK
+                    metadata[PARAM_SCAN_TYPE] == DOC_BACK &&
+                    metadata[PARAM_SCREEN_NAME] == TEST_SCREEN_NAME &&
+                    metadata[PARAM_PREVIOUS_SCREEN_NAME] == PREVIOUS_SCREEN_NAME
             }
         )
     }
@@ -227,6 +231,7 @@ class IdentityAnalyticsRequestFactoryTest {
     private companion object {
         const val USER_SESSION_ID = "userSessionId"
         const val EXP1 = "EXP1"
+        const val PREVIOUS_SCREEN_NAME = "previousScreenName"
         const val TEST_SCREEN_NAME = "testScreenName"
         const val VERIFICATION_SESSION = "session1"
     }
