@@ -78,6 +78,7 @@ class SettingsService @Inject constructor(@ApplicationContext context: Context) 
             inputFieldPaddingX = str(KEY_INPUT_PADDING_X)?.toFloatOrNull(),
             inputFieldPaddingY = str(KEY_INPUT_PADDING_Y)?.toFloatOrNull(),
             tableRowPaddingY = str(KEY_TABLE_ROW_PADDING_Y)?.toFloatOrNull(),
+            spacingUnit = str(KEY_SPACING_UNIT)?.toFloatOrNull(),
         )
     }
 
@@ -103,6 +104,7 @@ class SettingsService @Inject constructor(@ApplicationContext context: Context) 
             putString(KEY_INPUT_PADDING_X, overrides.inputFieldPaddingX?.toString())
             putString(KEY_INPUT_PADDING_Y, overrides.inputFieldPaddingY?.toString())
             putString(KEY_TABLE_ROW_PADDING_Y, overrides.tableRowPaddingY?.toString())
+            putString(KEY_SPACING_UNIT, overrides.spacingUnit?.toString())
         }
     }
 
@@ -331,6 +333,7 @@ class SettingsService @Inject constructor(@ApplicationContext context: Context) 
         private const val KEY_INPUT_PADDING_X = "${CUSTOM_THEME_OVERRIDES_PREFIX}inputFieldPaddingX"
         private const val KEY_INPUT_PADDING_Y = "${CUSTOM_THEME_OVERRIDES_PREFIX}inputFieldPaddingY"
         private const val KEY_TABLE_ROW_PADDING_Y = "${CUSTOM_THEME_OVERRIDES_PREFIX}tableRowPaddingY"
+        private const val KEY_SPACING_UNIT = "${CUSTOM_THEME_OVERRIDES_PREFIX}spacingUnit"
     }
 }
 

@@ -219,6 +219,9 @@ private fun CustomThemeView(
                     value = customThemeOverrides.buttonPaddingX,
                     onValueChange = { onOverridesChanged(customThemeOverrides.copy(buttonPaddingX = it)) },
                 )
+            }
+            item {
+                TokenSectionHeader("Button Danger")
                 TokenTextField(
                     label = "buttonDangerColorBackground",
                     placeholder = "hex e.g. FF0000",
@@ -313,6 +316,15 @@ private fun CustomThemeView(
                     placeholder = "e.g. 16",
                     value = customThemeOverrides.tableRowPaddingY,
                     onValueChange = { onOverridesChanged(customThemeOverrides.copy(tableRowPaddingY = it)) },
+                )
+            }
+            item {
+                TokenSectionHeader("Spacing")
+                TokenTextField(
+                    label = "spacingUnit",
+                    placeholder = "e.g. 11",
+                    value = customThemeOverrides.spacingUnit,
+                    onValueChange = { onOverridesChanged(customThemeOverrides.copy(spacingUnit = it)) },
                 )
             }
         }

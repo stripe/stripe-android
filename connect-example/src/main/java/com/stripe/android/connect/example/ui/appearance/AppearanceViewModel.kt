@@ -110,6 +110,8 @@ data class CustomThemeOverridesState(
     val inputFieldPaddingY: String = "",
     // Table
     val tableRowPaddingY: String = "",
+    // Spacing
+    val spacingUnit: String = "",
 ) {
     @Suppress("LongMethod")
     fun toCustomThemeOverrides(): CustomThemeOverrides {
@@ -133,6 +135,7 @@ data class CustomThemeOverridesState(
             inputFieldPaddingX = inputFieldPaddingX.toFloatOrNull(),
             inputFieldPaddingY = inputFieldPaddingY.toFloatOrNull(),
             tableRowPaddingY = tableRowPaddingY.toFloatOrNull(),
+            spacingUnit = spacingUnit.toFloatOrNull(),
         )
     }
 
@@ -158,6 +161,7 @@ data class CustomThemeOverridesState(
                 inputFieldPaddingX = overrides.inputFieldPaddingX.toStringOrEmpty(),
                 inputFieldPaddingY = overrides.inputFieldPaddingY.toStringOrEmpty(),
                 tableRowPaddingY = overrides.tableRowPaddingY.toStringOrEmpty(),
+                spacingUnit = overrides.spacingUnit.toStringOrEmpty(),
             )
         }
     }

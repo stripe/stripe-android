@@ -30,6 +30,7 @@ data class CustomThemeOverrides(
     val inputFieldPaddingX: Float? = null,
     val inputFieldPaddingY: Float? = null,
     val tableRowPaddingY: Float? = null,
+    val spacingUnit: Float? = null,
 )
 
 internal fun Appearance.Builder.applyCustomThemeOverrides(overrides: CustomThemeOverrides): Appearance.Builder {
@@ -39,6 +40,7 @@ internal fun Appearance.Builder.applyCustomThemeOverrides(overrides: CustomTheme
     applyActions(overrides)
     applyForm(overrides)
     overrides.tableRowPaddingY?.let { tableRowPaddingY(it) }
+    overrides.spacingUnit?.let { spacingUnit(it) }
     return this
 }
 
