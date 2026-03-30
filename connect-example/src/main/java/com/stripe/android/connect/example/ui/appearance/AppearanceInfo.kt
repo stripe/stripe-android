@@ -50,22 +50,22 @@ data class AppearanceInfo(
 
         private fun builderFor(id: AppearanceId, context: Context): Appearance.Builder {
             return when (id) {
-                AppearanceId.Default -> defaultBuilder()
-                AppearanceId.Ogre -> ogreBuilder(context)
-                AppearanceId.HotDog -> hotDogBuilder(context)
-                AppearanceId.OceanBreeze -> oceanBreezeBuilder(context)
-                AppearanceId.Link -> linkBuilder(context)
-                AppearanceId.Dynamic -> dynamicBuilder(context)
-                AppearanceId.CustomFont -> customFontBuilder()
-                AppearanceId.Retro -> retroBuilder(context)
-                AppearanceId.Forest -> forestBuilder(context)
-                AppearanceId.DarkMode -> darkModeBuilder(context)
+                AppearanceId.Default -> defaultAppearance()
+                AppearanceId.Ogre -> ogreAppearance(context)
+                AppearanceId.HotDog -> hotDogAppearance(context)
+                AppearanceId.OceanBreeze -> oceanBreezeAppearance(context)
+                AppearanceId.Link -> linkAppearance(context)
+                AppearanceId.Dynamic -> dynamicAppearance(context)
+                AppearanceId.CustomFont -> customFontAppearance()
+                AppearanceId.Retro -> retroAppearance(context)
+                AppearanceId.Forest -> forestAppearance(context)
+                AppearanceId.DarkMode -> darkModeAppearance(context)
             }
         }
 
-        private fun defaultBuilder() = Appearance.Builder()
+        private fun defaultAppearance() = Appearance.Builder()
 
-        private fun ogreBuilder(context: Context) = Appearance.Builder()
+        private fun ogreAppearance(context: Context) = Appearance.Builder()
             .colors(
                 Colors.Builder()
                     .primary(context.getColorCompat(R.color.ogre_primary))
@@ -93,7 +93,7 @@ data class AppearanceInfo(
                 )
             )
 
-        private fun hotDogBuilder(context: Context) = Appearance.Builder()
+        private fun hotDogAppearance(context: Context) = Appearance.Builder()
             .colors(
                 Colors.Builder()
                     .primary(context.getColorCompat(R.color.hot_dog_primary))
@@ -129,7 +129,7 @@ data class AppearanceInfo(
                     .build()
             )
 
-        private fun oceanBreezeBuilder(context: Context) = Appearance.Builder()
+        private fun oceanBreezeAppearance(context: Context) = Appearance.Builder()
             .colors(
                 Colors.Builder()
                     .background(context.getColorCompat(R.color.ocean_breeze_background))
@@ -152,7 +152,7 @@ data class AppearanceInfo(
                     .build()
             )
 
-        private fun linkBuilder(context: Context) = Appearance.Builder()
+        private fun linkAppearance(context: Context) = Appearance.Builder()
             .colors(
                 Colors.Builder()
                     .primary(context.getColorCompat(R.color.link_primary))
@@ -198,7 +198,7 @@ data class AppearanceInfo(
             )
 
         @Suppress("LongMethod")
-        private fun dynamicBuilder(context: Context) = Appearance.Builder()
+        private fun dynamicAppearance(context: Context) = Appearance.Builder()
             .colors(
                 Colors.Builder()
                     .primary(context.getColorCompat(R.color.dynamic_colors_primary))
@@ -265,7 +265,7 @@ data class AppearanceInfo(
                 )
             )
 
-        private fun customFontBuilder() = Appearance.Builder()
+        private fun customFontAppearance() = Appearance.Builder()
             .typography(
                 Typography.Builder()
                     .fontFamily("doto")
@@ -277,7 +277,7 @@ data class AppearanceInfo(
             )
 
         @Suppress("LongMethod")
-        private fun retroBuilder(context: Context) = Appearance.Builder()
+        private fun retroAppearance(context: Context) = Appearance.Builder()
             .colors(
                 Colors.Builder()
                     .primary(context.getColorCompat(R.color.retro_primary))
@@ -340,7 +340,7 @@ data class AppearanceInfo(
             )
 
         @Suppress("LongMethod")
-        private fun forestBuilder(context: Context) = Appearance.Builder()
+        private fun forestAppearance(context: Context) = Appearance.Builder()
             .colors(
                 Colors.Builder()
                     .primary(context.getColorCompat(R.color.forest_primary))
@@ -392,7 +392,7 @@ data class AppearanceInfo(
             )
 
         @Suppress("LongMethod")
-        private fun darkModeBuilder(context: Context) = Appearance.Builder()
+        private fun darkModeAppearance(context: Context) = Appearance.Builder()
             .colors(
                 Colors.Builder()
                     .primary(context.getColorCompat(R.color.dark_mode_primary))
