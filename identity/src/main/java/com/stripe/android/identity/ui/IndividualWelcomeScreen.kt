@@ -23,6 +23,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.navigation.NavController
 import com.stripe.android.identity.R
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_INDIVIDUAL_WELCOME
 import com.stripe.android.identity.navigation.IndividualDestination
 import com.stripe.android.identity.navigation.navigateTo
@@ -56,6 +57,7 @@ internal fun IndividualWelcomeScreen(
             welcomePage = individualWelcomePage,
             bottomSheets = verificationPage.bottomSheet,
             onHtmlError = { identityViewModel.errorCause.postValue(it) },
+            identityViewModel = identityViewModel,
             navController = navController
         )
     }
@@ -69,6 +71,7 @@ private fun SuccessUI(
     welcomePage: VerificationPageStaticContentIndividualWelcomePage,
     bottomSheets: Map<String, VerificationPageStaticContentBottomSheetContent>?,
     onHtmlError: (Throwable) -> Unit,
+    identityViewModel: IdentityViewModel,
     navController: NavController,
 ) {
     Column(
@@ -134,6 +137,9 @@ private fun SuccessUI(
             state = acceptState
         ) {
             acceptState = LoadingButtonState.Disabled
+            identityViewModel.screenTracker.screenTransitionStart(
+                IdentityAnalyticsRequestFactory.SCREEN_NAME_INDIVIDUAL_WELCOME
+            )
             navController.navigateTo(IndividualDestination)
         }
     }

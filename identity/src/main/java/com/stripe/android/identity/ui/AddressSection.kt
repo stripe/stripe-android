@@ -13,11 +13,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.stripe.android.core.model.Country
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.identity.navigation.CountryNotListedDestination
-import com.stripe.android.identity.navigation.navigateTo
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.RequiredInternationalAddress
 import com.stripe.android.uicore.address.AddressSchemaRegistry
@@ -42,7 +39,7 @@ internal fun AddressSection(
     enabled: Boolean,
     addressCountries: List<Country>,
     addressNotListedText: String,
-    navController: NavController,
+    onAddressNotListedClick: () -> Unit,
     onAddressCollected: (Resource<RequiredInternationalAddress>) -> Unit
 ) {
     val controller = remember {
@@ -111,7 +108,7 @@ internal fun AddressSection(
         addressNotListedText,
         sectionElement,
         textIdentifiers,
-        navController
+        onAddressNotListedClick
     )
 }
 
@@ -121,7 +118,7 @@ private fun AddressSectionContent(
     addressNotListedText: String,
     sectionElement: SectionElement,
     textIdentifiers: List<IdentifierSpec>,
-    navController: NavController
+    onAddressNotListedClick: () -> Unit
 ) {
     SectionElementUI(
         modifier = Modifier.padding(vertical = 8.dp),
@@ -134,13 +131,7 @@ private fun AddressSectionContent(
     TextButton(
         modifier = Modifier.testTag(ADDRESS_COUNTRY_NOT_LISTED_BUTTON_TAG),
         contentPadding = PaddingValues(horizontal = 0.dp),
-        onClick = {
-            navController.navigateTo(
-                CountryNotListedDestination(
-                    isMissingId = false
-                )
-            )
-        }
+        onClick = onAddressNotListedClick
     ) {
         Text(
             text = addressNotListedText,

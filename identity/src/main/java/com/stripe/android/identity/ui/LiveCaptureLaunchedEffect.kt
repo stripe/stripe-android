@@ -8,6 +8,7 @@ import androidx.navigation.NavController
 import com.stripe.android.identity.camera.IdentityCameraManager
 import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.ml.IDDetectorOutput
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.navigation.CouldNotCaptureDestination
 import com.stripe.android.identity.navigation.navigateTo
 import com.stripe.android.identity.networking.models.VerificationPage
@@ -76,6 +77,13 @@ internal fun LiveCaptureLaunchedEffect(
                 }
             }
         } else if (scannerState is IdentityScanViewModel.State.Timeout) {
+            identityViewModel.screenTracker.screenTransitionStart(
+                identityViewModel.analyticsLastScreenName ?: if (scannerState.fromSelfie) {
+                    IdentityAnalyticsRequestFactory.SCREEN_NAME_SELFIE
+                } else {
+                    IdentityAnalyticsRequestFactory.SCREEN_NAME_LIVE_CAPTURE
+                }
+            )
             navController.navigateTo(
                 CouldNotCaptureDestination(fromSelfie = scannerState.fromSelfie)
             )

@@ -35,9 +35,9 @@ import androidx.navigation.NavController
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.R
 import com.stripe.android.identity.VerificationFlowFinishable
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_DEBUG
 import com.stripe.android.identity.navigation.DebugDestination
-import com.stripe.android.identity.navigation.IndividualDestination
 import com.stripe.android.identity.navigation.navigateTo
 import com.stripe.android.identity.networking.models.Requirement.Companion.nextDestination
 import com.stripe.android.identity.ui.CompleteOption.FAILURE
@@ -60,6 +60,10 @@ internal fun DebugScreen(
         identityViewModel = identityViewModel,
         navController = navController
     ) { verificationPage ->
+        ScreenTransitionLaunchedEffect(
+            identityViewModel = identityViewModel,
+            screenName = IdentityAnalyticsRequestFactory.SCREEN_NAME_DEBUG
+        )
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -129,9 +133,7 @@ internal fun DebugScreen(
             Divider(modifier = Modifier.padding(vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin)))
             PreviewUserExperienceSection {
                 val destination = verificationPage.requirements.missing.nextDestination(context)
-                if (destination != IndividualDestination) {
-                    identityViewModel.screenTracker.screenTransitionStart(SCREEN_NAME_DEBUG)
-                }
+                identityViewModel.screenTracker.screenTransitionStart(SCREEN_NAME_DEBUG)
                 navController.navigateTo(destination)
             }
         }
