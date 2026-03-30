@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.di
 
 import com.stripe.android.core.Logger
+import com.stripe.android.core.injection.ActivityRetainedScope
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository

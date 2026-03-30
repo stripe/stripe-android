@@ -6,6 +6,7 @@ import androidx.core.os.LocaleListCompat
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.Logger
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
+import com.stripe.android.core.injection.ActivityRetainedScope
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID

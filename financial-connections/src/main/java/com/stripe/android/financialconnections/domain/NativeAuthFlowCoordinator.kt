@@ -1,6 +1,6 @@
 package com.stripe.android.financialconnections.domain
 
-import com.stripe.android.financialconnections.di.ActivityRetainedScope
+import com.stripe.android.core.injection.ActivityRetainedScope
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import kotlinx.coroutines.flow.MutableSharedFlow
 import javax.inject.Inject

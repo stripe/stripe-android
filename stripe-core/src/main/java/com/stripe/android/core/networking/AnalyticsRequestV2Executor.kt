@@ -8,6 +8,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.await
 import com.stripe.android.core.Logger
+import com.stripe.android.core.injection.ActivityRetainedScope
 import com.stripe.android.core.utils.IsWorkManagerAvailable
 import javax.inject.Inject
 
@@ -16,6 +17,7 @@ fun interface AnalyticsRequestV2Executor {
     suspend fun enqueue(request: AnalyticsRequestV2)
 }
 
+@ActivityRetainedScope
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class DefaultAnalyticsRequestV2Executor @Inject constructor(
     private val context: Context,

@@ -1,4 +1,4 @@
-package com.stripe.android.financialconnections.di
+package com.stripe.android.core.injection
 
 import javax.inject.Scope
 
@@ -9,4 +9,4 @@ import javax.inject.Scope
  */
 @Scope
 @Retention(AnnotationRetention.RUNTIME)
-internal annotation class ActivityRetainedScope
+annotation class ActivityRetainedScope

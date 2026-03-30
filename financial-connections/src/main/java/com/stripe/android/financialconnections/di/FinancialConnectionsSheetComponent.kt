@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.di
 
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.core.injection.ActivityRetainedScope
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.FinancialConnectionsSheetState
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewModel

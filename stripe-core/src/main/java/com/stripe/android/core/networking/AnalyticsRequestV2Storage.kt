@@ -2,6 +2,7 @@ package com.stripe.android.core.networking
 
 import android.content.Context
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.injection.ActivityRetainedScope
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -18,6 +19,7 @@ interface AnalyticsRequestV2Storage {
     suspend fun delete(id: String)
 }
 
+@ActivityRetainedScope
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class RealAnalyticsRequestV2Storage private constructor(
     private val context: Context,
