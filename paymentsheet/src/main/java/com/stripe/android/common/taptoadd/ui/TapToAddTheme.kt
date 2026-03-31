@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
@@ -14,7 +15,6 @@ import com.stripe.android.uicore.StripeColors
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.stripeterminal.external.models.TapToPayUxConfiguration
-import android.graphics.Color as BaseAndroidColor
 
 @Composable
 internal fun TapToAddTheme(
@@ -77,10 +77,12 @@ internal fun createTapToAddUxConfiguration(): TapToPayUxConfiguration {
             colors = TapToPayUxConfiguration.ColorScheme.Builder()
                 .primary(
                     primary = TapToPayUxConfiguration.Color.Value(
-                        color = BaseAndroidColor.BLACK
+                        color = PRIMARY_COLOR.toArgb(),
                     )
                 )
                 .build()
         )
         .build()
 }
+
+private val PRIMARY_COLOR = Color(0xFF007AFF)

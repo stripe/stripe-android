@@ -19,7 +19,12 @@ class CardScanDemoActivity : AppCompatActivity() {
         val cardScanSheet = CardScanSheet.create(this, ::onScanFinished)
 
         viewBinding.launchScanButton.setOnClickListener {
-            cardScanSheet.present(CardScanConfiguration(null))
+            cardScanSheet.present(
+                CardScanConfiguration(
+                    elementsSessionId = null,
+                    enableMlKitTextRecognition = viewBinding.enableMlKitCheckbox.isChecked,
+                )
+            )
         }
     }
 

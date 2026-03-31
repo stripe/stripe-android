@@ -21,11 +21,8 @@ import javax.inject.Singleton
 internal interface IdentityVerificationSheetComponent {
     fun inject(identityActivity: IdentityActivity)
 
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun context(context: Context): Builder
-
-        fun build(): IdentityVerificationSheetComponent
+    @Component.Factory
+    interface Factory {
+        fun create(@BindsInstance context: Context): IdentityVerificationSheetComponent
     }
 }

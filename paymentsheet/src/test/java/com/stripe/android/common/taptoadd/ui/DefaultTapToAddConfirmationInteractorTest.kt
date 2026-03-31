@@ -98,6 +98,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
         ) {
             interactor.performAction(TapToAddConfirmationInteractor.Action.PrimaryButtonPressed)
 
+            assertThat(eventReporter.tapToAddConfirmCalls.awaitItem()).isNotNull()
             val args = confirmationHandlerScenario.startTurbine.awaitItem()
 
             assertThat(args.confirmationOption).isInstanceOf<LinkInlineSignupConfirmationOption.Saved>()
@@ -114,6 +115,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
     ) {
         interactor.performAction(TapToAddConfirmationInteractor.Action.PrimaryButtonPressed)
 
+        assertThat(eventReporter.tapToAddConfirmCalls.awaitItem()).isNotNull()
         val args = confirmationHandlerScenario.startTurbine.awaitItem()
 
         assertThat(args.confirmationOption).isInstanceOf<PaymentMethodConfirmationOption.Saved>()
@@ -272,6 +274,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
         ) {
             interactor.performAction(TapToAddConfirmationInteractor.Action.PrimaryButtonPressed)
 
+            assertThat(eventReporter.tapToAddConfirmCalls.awaitItem()).isNotNull()
             val args = confirmationHandlerScenario.startTurbine.awaitItem()
 
             assertThat(args.confirmationOption).isInstanceOf<PaymentMethodConfirmationOption.Saved>()

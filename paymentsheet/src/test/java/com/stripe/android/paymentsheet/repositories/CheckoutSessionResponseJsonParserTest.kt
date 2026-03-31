@@ -104,6 +104,7 @@ class CheckoutSessionResponseJsonParserTest {
             """
             {
                 "session_id": "cs_test_123",
+                "ui_mode": "custom",
                 "currency": "usd",
                 "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
             }
@@ -132,11 +133,49 @@ class CheckoutSessionResponseJsonParserTest {
     }
 
     @Test
+    fun `parse throws when ui_mode is missing`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "currency": "usd",
+                "total_summary": { "due": 1000 }
+            }
+            """.trimIndent()
+        )
+
+        val exception = org.junit.Assert.assertThrows(IllegalArgumentException::class.java) {
+            CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+        }
+        assertThat(exception.message).contains("Expected ui_mode to be \"custom\"")
+    }
+
+    @Test
+    fun `parse throws when ui_mode is not custom`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "embedded",
+                "currency": "usd",
+                "total_summary": { "due": 1000 }
+            }
+            """.trimIndent()
+        )
+
+        val exception = org.junit.Assert.assertThrows(IllegalArgumentException::class.java) {
+            CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+        }
+        assertThat(exception.message).contains("Expected ui_mode to be \"custom\"")
+    }
+
+    @Test
     fun `parse returns null when currency is missing`() {
         val json = JSONObject(
             """
             {
                 "session_id": "cs_test_123",
+                "ui_mode": "custom",
                 "total_summary": { "due": 1000 },
                 "elements_session": ${CheckoutSessionFixtures.MINIMAL_ELEMENTS_SESSION_JSON}
             }
@@ -153,6 +192,7 @@ class CheckoutSessionResponseJsonParserTest {
             """
             {
                 "session_id": "cs_test_123",
+                "ui_mode": "custom",
                 "currency": "usd",
                 "elements_session": ${CheckoutSessionFixtures.MINIMAL_ELEMENTS_SESSION_JSON}
             }
@@ -169,6 +209,7 @@ class CheckoutSessionResponseJsonParserTest {
             """
             {
                 "session_id": "cs_test_123",
+                "ui_mode": "custom",
                 "currency": "usd",
                 "total_summary": { "due": 1000 }
             }
@@ -189,6 +230,7 @@ class CheckoutSessionResponseJsonParserTest {
             """
             {
                 "session_id": "cs_test_123",
+                "ui_mode": "custom",
                 "currency": "usd",
                 "total_summary": { "due": 1000 },
                 "elements_session": {}
@@ -348,6 +390,7 @@ class CheckoutSessionResponseJsonParserTest {
             """
             {
                 "session_id": "cs_test_abc123",
+                "ui_mode": "custom",
                 "currency": "usd",
                 "total_summary": {
                     "due": 1000
@@ -375,6 +418,7 @@ class CheckoutSessionResponseJsonParserTest {
             """
             {
                 "session_id": "cs_test_abc123",
+                "ui_mode": "custom",
                 "currency": "usd",
                 "total_summary": {
                     "due": 1000
@@ -501,6 +545,7 @@ class CheckoutSessionResponseJsonParserTest {
             """
             {
                 "session_id": "cs_test_abc123",
+                "ui_mode": "custom",
                 "currency": "usd",
                 "total_summary": {
                     "due": 1000,
@@ -534,6 +579,7 @@ class CheckoutSessionResponseJsonParserTest {
             """
             {
                 "session_id": "cs_test_123",
+                "ui_mode": "custom",
                 "currency": "usd",
                 "total_summary": { "due": 1000 }
             }
@@ -551,6 +597,7 @@ class CheckoutSessionResponseJsonParserTest {
             """
             {
                 "session_id": "cs_test_abc123",
+                "ui_mode": "custom",
                 "currency": "usd",
                 "total_summary": {
                     "due": 4099,
@@ -632,6 +679,7 @@ class CheckoutSessionResponseJsonParserTest {
             """
             {
                 "session_id": "cs_test_123",
+                "ui_mode": "custom",
                 "currency": "usd",
                 "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 },
                 "customer_email": null
@@ -737,6 +785,7 @@ class CheckoutSessionResponseJsonParserTest {
             """
             {
                 "session_id": "cs_test_abc123",
+                "ui_mode": "custom",
                 "currency": "usd",
                 "total_summary": { "due": 6106, "subtotal": 6106, "total": 6106 },
                 "adaptive_pricing_info": {
