@@ -145,8 +145,10 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
     /**
      * The flow used to scan an item.
      */
-    private val scanFlow: CardScanFlow by lazy {
-        object : CardScanFlow(scanErrorListener) {
+    private lateinit var scanFlow: CardScanFlow
+
+    private fun createScanFlow(enableMlKitTextRecognition: Boolean): CardScanFlow {
+        return object : CardScanFlow(scanErrorListener, enableMlKitTextRecognition) {
             /**
              * A final result was received from the aggregator. Set the result from this activity.
              */
@@ -190,6 +192,8 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
         }
         val cardScanConfiguration = cardScanSheetParams?.cardScanConfiguration
             ?: CardScanConfiguration(elementsSessionId = null)
+
+        scanFlow = createScanFlow(cardScanConfiguration.enableMlKitTextRecognition)
 
         DaggerCardScanComponent.factory()
             .build(

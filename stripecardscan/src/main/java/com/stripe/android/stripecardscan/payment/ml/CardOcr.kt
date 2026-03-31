@@ -16,7 +16,7 @@ private const val IMAGE_STD = 128.5f
  */
 internal object CardOcr {
 
-    data class Input(val ssdOcrImage: MLImage)
+    data class Input(val ssdOcrImage: MLImage, val cardBitmap: Bitmap)
 
     data class Prediction(val pan: String?) {
 
@@ -42,6 +42,7 @@ internal object CardOcr {
             .scale(SSDOcr.Factory.TRAINED_IMAGE_SIZE)
         return Input(
             ssdOcrImage = scaled.toMLImage(mean = IMAGE_MEAN, std = IMAGE_STD),
+            cardBitmap = scaled,
         )
     }
 }

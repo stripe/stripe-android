@@ -17,6 +17,7 @@ import com.stripe.android.camera.scanui.ScanFlow
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopAggregator
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopState
 import com.stripe.android.stripecardscan.payment.ml.CardOcr
+import com.stripe.android.stripecardscan.payment.ml.MLKitTextRecognizer
 import com.stripe.android.stripecardscan.payment.ml.SSDOcr
 import com.stripe.android.stripecardscan.payment.ml.SSDOcrModelManager
 import kotlinx.coroutines.CoroutineScope
@@ -28,7 +29,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 internal abstract class CardScanFlow(
-    private val scanErrorListener: AnalyzerLoopErrorListener
+    private val scanErrorListener: AnalyzerLoopErrorListener,
+    private val enableMlKitTextRecognition: Boolean = false,
 ) : ScanFlow<Unit?, CameraPreviewImage<Bitmap>>,
     AggregateResultListener<MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult> {
 
@@ -81,10 +83,20 @@ internal abstract class CardScanFlow(
             forImmediateUse = true,
             isOptional = false
         )
+        // SSD loop: uses a built-in model, runs ~3x faster than ML Kit
         createAndRegisterLoop(
             AnalyzerPool.of(SSDOcr.Factory(context, fetchedModel)),
             aggregator, inputStream, coroutineScope,
         )
+
+        // ML Kit loop: Uses generic OCR, much slower (~2 fps) but potentially
+        // catches more cards, can detect expiration dates
+        if (enableMlKitTextRecognition) {
+            createAndRegisterLoop(
+                AnalyzerPool.of(MLKitTextRecognizer.Factory(), desiredAnalyzerCount = 1),
+                aggregator, inputStream, coroutineScope,
+            )
+        }
     }.let { }
 
     /**
