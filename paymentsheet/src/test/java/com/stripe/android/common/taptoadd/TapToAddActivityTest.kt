@@ -2,6 +2,8 @@ package com.stripe.android.common.taptoadd
 
 import android.app.Activity.RESULT_OK
 import android.app.Application
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasText
@@ -50,7 +52,6 @@ import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
-import android.graphics.Color as BaseAndroidColor
 
 @OptIn(TapToAddPreview::class)
 @RunWith(RobolectricTestRunner::class)
@@ -253,7 +254,7 @@ class TapToAddActivityTest {
                     colors = TapToPayUxConfiguration.ColorScheme.Builder()
                         .primary(
                             primary = TapToPayUxConfiguration.Color.Value(
-                                color = BaseAndroidColor.BLACK
+                                color = Color(0xFF007AFF).toArgb(),
                             )
                         )
                         .build()
