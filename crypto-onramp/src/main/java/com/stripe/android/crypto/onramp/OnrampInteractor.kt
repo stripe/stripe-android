@@ -594,7 +594,7 @@ internal class OnrampInteractor @Inject constructor(
         result: GooglePayPaymentMethodLauncher.Result
     ): OnrampCollectPaymentMethodResult = when (result) {
         is GooglePayPaymentMethodLauncher.Result.Completed -> {
-            val kycInfo = googlePayKycInfo(result.paymentMethod)
+            val kycInfo = result.paymentMethod.googlePayKycInfo()
 
             handleGooglePayPaymentMethod(result.paymentMethod) { displayData ->
                 OnrampCollectPaymentMethodResult.Completed(displayData, kycInfo)
@@ -645,41 +645,6 @@ internal class OnrampInteractor @Inject constructor(
             label = "Google Pay",
             sublabel = paymentMethod.card?.last4,
             type = PaymentMethodDisplayData.Type.GooglePay
-        )
-    }
-
-    private fun googlePayKycInfo(paymentMethod: PaymentMethod): KycInfo? {
-        val address = paymentMethod.billingDetails?.address
-        val fullName = paymentMethod.billingDetails?.name.orEmpty().trim()
-        val parts = fullName.split("\\s+".toRegex())
-        val firstName = parts.firstOrNull().orEmpty()
-        val lastName = parts.drop(1).joinToString(" ")
-
-        val hasName = firstName.isNotEmpty() || lastName.isNotEmpty()
-        val hasAddress = listOfNotNull(
-            address?.city,
-            address?.country,
-            address?.line1,
-            address?.line2,
-            address?.postalCode,
-            address?.state,
-        ).any { it.isNotBlank() }
-
-        if (!hasName && !hasAddress) return null
-
-        return KycInfo(
-            firstName = firstName.takeIf { it.isNotEmpty() },
-            lastName = lastName.takeIf { it.isNotEmpty() },
-            idNumber = null,
-            dateOfBirth = null,
-            address = if (hasAddress) PaymentSheet.Address(
-                city = address?.city,
-                country = address?.country,
-                line1 = address?.line1,
-                line2 = address?.line2,
-                postalCode = address?.postalCode,
-                state = address?.state
-            ) else null
         )
     }
 

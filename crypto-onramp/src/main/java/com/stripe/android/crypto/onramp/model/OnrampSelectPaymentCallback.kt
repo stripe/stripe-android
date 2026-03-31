@@ -26,7 +26,7 @@ sealed class OnrampCollectPaymentMethodResult {
         val displayData: PaymentMethodDisplayData,
         val kycInfo: KycInfo?
     ) : OnrampCollectPaymentMethodResult()
-    
+
     /**
      * The user declined to select a payment option.
      */
