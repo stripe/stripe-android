@@ -61,8 +61,8 @@ internal class CardScanStripeLauncher(
                 CardScanResult.Completed(
                     ScannedCard(
                         pan = sheetResult.scannedCard.pan,
-                        expirationMonth = null,
-                        expirationYear = null,
+                        expirationMonth = sheetResult.scannedCard.expiryMonth,
+                        expirationYear = sheetResult.scannedCard.expiryYear,
                     )
                 )
             }
