@@ -60,6 +60,7 @@ ext.versions = [
         poko                        : '0.20.2',
         places                      : '5.1.1',
         playServicesCoroutines      : '1.10.1',
+        playServicesMlKitTextRecognition: '19.0.1',
         playServicesTfLite          : '16.4.0',
         playServicesWallet          : '19.5.0',
         playIntegrity               : '1.4.0',
@@ -195,6 +196,7 @@ ext.libs = [
         litertSupport                       : "com.google.ai.edge.litert:litert-support:${versions.litert}",
         tensorflowLitePlayServices          : "com.google.android.gms:play-services-tflite-java:${versions.playServicesTfLite}",
         tensorflowLitePlayServicesSupport   : "com.google.android.gms:play-services-tflite-support:${versions.playServicesTfLite}",
+        mlKitTextRecognition                : "com.google.android.gms:play-services-mlkit-text-recognition:${versions.playServicesMlKitTextRecognition}",
         zxing                               : "com.google.zxing:core:${versions.zxing}",
 ]
 

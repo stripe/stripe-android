@@ -13,6 +13,20 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <CheckBox
+            android:id="@+id/enableMlKitCheckbox"
+            android:text="@string/enable_mlkit_text_recognition"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/launchScanButton"
+            app:layout_constraintVertical_chainStyle="packed" />
+
         <Button
             android:id="@+id/launchScanButton"
             android:text="@string/cardscansheet"
@@ -23,8 +37,7 @@
             app:layout_constraintBottom_toTopOf="@id/scanResultScroll"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_chainStyle="packed" />
+            app:layout_constraintTop_toBottomOf="@id/enableMlKitCheckbox" />
 
         <ScrollView
             android:id="@+id/scanResultScroll"

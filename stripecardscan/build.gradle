@@ -20,7 +20,9 @@ dependencies {
     implementation libs.androidx.fragment
     implementation libs.kotlin.coroutines
     implementation libs.kotlin.coroutinesAndroid
+    implementation libs.kotlin.coroutinesPlayServices
     implementation libs.kotlin.serialization
+    implementation libs.mlKitTextRecognition
 
 
     testImplementation project(':payments-core-testing')
