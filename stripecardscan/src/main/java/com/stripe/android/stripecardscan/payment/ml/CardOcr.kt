@@ -18,6 +18,13 @@ internal object CardOcr {
 
     data class Input(val ssdOcrImage: MLImage, val cardBitmap: Bitmap)
 
+    /**
+     * A recognized card expiration date with named month and year fields.
+     */
+    data class Expiry(val month: Int, val year: Int) {
+        override fun toString(): String = "Expiry"
+    }
+
     data class Prediction(
         val pan: String?,
         val expiryMonth: Int? = null,
