@@ -1,18 +1,12 @@
 package com.stripe.android.stripecardscan.payment.ml
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.Rect
 import android.util.Size
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.camera.framework.image.cropCameraPreviewToViewFinder
 import com.stripe.android.camera.framework.image.hasOpenGl31
-import com.stripe.android.camera.framework.image.scale
 import com.stripe.android.mlcore.base.InterpreterOptionsWrapper
 import com.stripe.android.mlcore.base.InterpreterWrapper
 import com.stripe.android.stripecardscan.framework.FetchedData
-import com.stripe.android.stripecardscan.framework.image.MLImage
-import com.stripe.android.stripecardscan.framework.image.toMLImage
 import com.stripe.android.stripecardscan.framework.ml.TFLAnalyzerFactory
 import com.stripe.android.stripecardscan.framework.ml.TensorFlowLiteAnalyzer
 import com.stripe.android.stripecardscan.framework.ml.ssd.adjustLocations
@@ -26,10 +20,6 @@ import com.stripe.android.stripecardscan.payment.ml.ssd.determineLayoutAndFilter
 import com.stripe.android.stripecardscan.payment.ml.ssd.extractPredictions
 import com.stripe.android.stripecardscan.payment.ml.ssd.rearrangeOCRArray
 import java.nio.ByteBuffer
-
-/** Training images are normalized with mean 127.5 and std 128.5. */
-private const val IMAGE_MEAN = 127.5f
-private const val IMAGE_STD = 128.5f
 
 /**
  * We use the output from last two layers with feature maps 19x19 and 10x10
@@ -92,48 +82,19 @@ private val PRIORS = combinePriors(SSDOcr.Factory.TRAINED_IMAGE_SIZE)
  */
 internal class SSDOcr private constructor(interpreter: InterpreterWrapper) :
     TensorFlowLiteAnalyzer<
-        SSDOcr.Input,
+        CardOcr.Input,
         Array<ByteBuffer>,
-        SSDOcr.Prediction,
+        CardOcr.Prediction,
         Map<Int, Array<FloatArray>>
         >(interpreter) {
 
-    data class Input(val ssdOcrImage: MLImage)
-
-    data class Prediction(val pan: String?) {
-
-        /**
-         * Force a generic toString method to prevent leaking information about this class'
-         * parameters after R8. Without this method, this `data class` will automatically generate a
-         * toString which retains the original names of the parameters even after obfuscation.
-         */
-        override fun toString(): String {
-            return "Prediction"
-        }
-    }
-
-    companion object {
-        /**
-         * Convert a camera preview image into a SSDOcr input
-         */
-        fun cameraPreviewToInput(
-            cameraPreviewImage: Bitmap,
-            previewBounds: Rect,
-            cardFinder: Rect
-        ) = Input(
-            cropCameraPreviewToViewFinder(cameraPreviewImage, previewBounds, cardFinder)
-                .scale(Factory.TRAINED_IMAGE_SIZE)
-                .toMLImage(mean = IMAGE_MEAN, std = IMAGE_STD)
-        )
-    }
-
-    override suspend fun transformData(data: Input): Array<ByteBuffer> =
+    override suspend fun transformData(data: CardOcr.Input): Array<ByteBuffer> =
         arrayOf(data.ssdOcrImage.getData())
 
     override suspend fun interpretMLOutput(
-        data: Input,
+        data: CardOcr.Input,
         mlOutput: Map<Int, Array<FloatArray>>
-    ): Prediction {
+    ): CardOcr.Prediction {
         val outputClasses = mlOutput[0] ?: arrayOf(FloatArray(NUM_CLASS))
         val outputLocations = mlOutput[1] ?: arrayOf(FloatArray(NUM_LOC))
 
@@ -172,9 +133,9 @@ internal class SSDOcr private constructor(interpreter: InterpreterWrapper) :
 
         val predictedNumber = detectedBoxes.map { it.label }.joinToString("")
         return if (isValidPan(predictedNumber)) {
-            Prediction(predictedNumber)
+            CardOcr.Prediction(predictedNumber)
         } else {
-            Prediction(null)
+            CardOcr.Prediction(null)
         }
     }
 
@@ -199,7 +160,7 @@ internal class SSDOcr private constructor(interpreter: InterpreterWrapper) :
         context: Context,
         fetchedModel: FetchedData,
         threads: Int = DEFAULT_THREADS
-    ) : TFLAnalyzerFactory<Input, Prediction, SSDOcr>(context, fetchedModel) {
+    ) : TFLAnalyzerFactory<CardOcr.Input, CardOcr.Prediction, SSDOcr>(context, fetchedModel) {
         companion object {
             private const val USE_GPU = false
             private const val DEFAULT_THREADS = 4
