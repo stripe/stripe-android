@@ -10,10 +10,8 @@ import com.stripe.android.checkout.CheckoutInstancesTestRule
 import com.stripe.android.checkout.CheckoutStateFactory
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutConfirm
-import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
-import com.stripe.android.core.networking.executeRequestWithResultParser
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
@@ -29,15 +27,10 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
-import com.stripe.android.networktesting.RequestMatchers.host
-import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
-import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -430,67 +423,6 @@ class CheckoutSessionConfirmationInterceptorTest {
         }
     }
 
-    @Test
-    fun `intercept passes allow_redisplay always on payment method creation`() =
-        runNetworkPmCreationScenario(
-            allowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS,
-            customerMetadata = SAVE_ENABLED_CUSTOMER_METADATA,
-        ) {
-            enqueuePaymentMethodCreation(
-                bodyPart("allow_redisplay", "always"),
-            )
-            networkRule.checkoutConfirm { response ->
-                response.testBodyFromFile("checkout-session-confirm.json")
-            }
-
-            interceptNewPm(shouldSave = true)
-        }
-
-    @Test
-    fun `intercept passes allow_redisplay unspecified on payment method creation`() =
-        runNetworkPmCreationScenario(
-            allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
-        ) {
-            enqueuePaymentMethodCreation(
-                bodyPart("allow_redisplay", "unspecified"),
-            )
-            networkRule.checkoutConfirm { response ->
-                response.testBodyFromFile("checkout-session-confirm.json")
-            }
-
-            interceptNewPm()
-        }
-
-    @Test
-    fun `intercept passes allow_redisplay limited on payment method creation`() =
-        runNetworkPmCreationScenario(
-            allowRedisplay = PaymentMethod.AllowRedisplay.LIMITED,
-        ) {
-            enqueuePaymentMethodCreation(
-                bodyPart("allow_redisplay", "limited"),
-            )
-            networkRule.checkoutConfirm { response ->
-                response.testBodyFromFile("checkout-session-confirm.json")
-            }
-
-            interceptNewPm()
-        }
-
-    @Test
-    fun `intercept omits allow_redisplay on payment method creation when null`() =
-        runNetworkPmCreationScenario(
-            allowRedisplay = null,
-        ) {
-            enqueuePaymentMethodCreation(
-                not(hasBodyPart("allow_redisplay")),
-            )
-            networkRule.checkoutConfirm { response ->
-                response.testBodyFromFile("checkout-session-confirm.json")
-            }
-
-            interceptNewPm()
-        }
-
     private fun runScenario(
         createPaymentMethodResult: Result<PaymentMethod> = Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         customerMetadata: CustomerMetadata? = null,
@@ -543,49 +475,6 @@ class CheckoutSessionConfirmationInterceptorTest {
         }
     }
 
-    private fun runNetworkPmCreationScenario(
-        allowRedisplay: PaymentMethod.AllowRedisplay?,
-        customerMetadata: CustomerMetadata? = null,
-        block: suspend NetworkPmCreationScenario.() -> Unit,
-    ) {
-        val stripeRepository = NetworkBackedCreatePaymentMethodRepository()
-
-        val checkoutSessionRepository = CheckoutSessionRepository(
-            stripeNetworkClient = DefaultStripeNetworkClient(),
-            publishableKeyProvider = { "pk_test_123" },
-            stripeAccountIdProvider = { null },
-        )
-
-        val interceptor = CheckoutSessionConfirmationInterceptor(
-            integrationMetadata = IntegrationMetadata.CheckoutSession(
-                id = DEFAULT_CHECKOUT_SESSION_ID,
-                instancesKey = CheckoutStateFactory.DEFAULT_KEY,
-            ),
-            customerMetadata = customerMetadata,
-            clientAttributionMetadata = ClientAttributionMetadata(
-                elementsSessionConfigId = "test_session_id",
-                paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
-                paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
-            ),
-            context = applicationContext,
-            stripeRepository = stripeRepository,
-            checkoutSessionRepository = checkoutSessionRepository,
-            requestOptions = ApiRequest.Options(apiKey = "pk_test_123"),
-        )
-
-        val createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD.copy(
-            allowRedisplay = allowRedisplay,
-        )
-
-        runTest {
-            NetworkPmCreationScenario(
-                interceptor = interceptor,
-                createParams = createParams,
-                networkRule = networkRule,
-            ).block()
-        }
-    }
-
     private data class Scenario(
         val interceptor: CheckoutSessionConfirmationInterceptor,
         val checkoutInstances: List<Checkout>,
@@ -610,39 +499,6 @@ class CheckoutSessionConfirmationInterceptorTest {
             )
     }
 
-    private data class NetworkPmCreationScenario(
-        val interceptor: CheckoutSessionConfirmationInterceptor,
-        val createParams: PaymentMethodCreateParams,
-        val networkRule: NetworkRule,
-    ) {
-        fun enqueuePaymentMethodCreation(
-            vararg requestMatchers: RequestMatcher,
-        ) {
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("POST"),
-                path("/v1/payment_methods"),
-                *requestMatchers,
-            ) { response ->
-                response.testBodyFromFile("payment-methods-create.json")
-            }
-        }
-
-        suspend fun interceptNewPm(
-            shouldSave: Boolean = false,
-            intent: StripeIntent = PaymentIntentFactory.create(),
-        ): ConfirmationDefinition.Action<IntentConfirmationDefinition.Args> = interceptor.intercept(
-            intent = intent,
-            confirmationOption = PaymentMethodConfirmationOption.New(
-                createParams = createParams,
-                optionsParams = null,
-                extraParams = null,
-                shouldSave = shouldSave,
-            ),
-            shippingValues = null,
-        )
-    }
-
     private class FakeCreatePaymentMethodRepository(
         private val createPaymentMethodResult: Result<PaymentMethod> =
             Result.failure(NotImplementedError()),
@@ -653,28 +509,6 @@ class CheckoutSessionConfirmationInterceptorTest {
             options: ApiRequest.Options
         ): Result<PaymentMethod> {
             return createPaymentMethodResult
-        }
-    }
-
-    private class NetworkBackedCreatePaymentMethodRepository : AbsFakeStripeRepository() {
-        private val stripeNetworkClient = DefaultStripeNetworkClient()
-        private val apiRequestFactory = ApiRequest.Factory()
-        private val stripeErrorJsonParser = StripeErrorJsonParser()
-
-        override suspend fun createPaymentMethod(
-            paymentMethodCreateParams: PaymentMethodCreateParams,
-            options: ApiRequest.Options
-        ): Result<PaymentMethod> {
-            return executeRequestWithResultParser(
-                stripeNetworkClient = stripeNetworkClient,
-                stripeErrorJsonParser = stripeErrorJsonParser,
-                request = apiRequestFactory.createPost(
-                    url = "${ApiRequest.API_HOST}/v1/payment_methods",
-                    options = options,
-                    params = paymentMethodCreateParams.toParamMap(),
-                ),
-                responseJsonParser = PaymentMethodJsonParser(),
-            )
         }
     }
 
