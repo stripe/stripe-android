@@ -279,6 +279,12 @@ internal class PaymentSheetCheckoutSessionTest {
 
     // endregion
 
+    /**
+     * Runs a checkout session test verifying that allow_redisplay is sent with the expected
+     * value on PM creation. CUSTOMER_REPLACEMENT is always applied first to inject the customer
+     * and save offer fields; [initReplacements] (e.g. SAVE_DISABLED_REPLACEMENT) are applied
+     * after and may depend on fields injected by CUSTOMER_REPLACEMENT.
+     */
     private fun runCheckoutSessionAllowRedisplayTest(
         initFile: String,
         confirmFile: String,
@@ -338,6 +344,7 @@ internal class PaymentSheetCheckoutSessionTest {
                 """"customer_managed_saved_payment_methods_offer_save": {"enabled": true, "status": "not_accepted"},""",
         )
 
+        // Must be applied after CUSTOMER_REPLACEMENT, which injects the field this matches on.
         val SAVE_DISABLED_REPLACEMENT = ResponseReplacement(
             original = """"customer_managed_saved_payment_methods_offer_save": {"enabled": true,""",
             new = """"customer_managed_saved_payment_methods_offer_save": {"enabled": false,""",
