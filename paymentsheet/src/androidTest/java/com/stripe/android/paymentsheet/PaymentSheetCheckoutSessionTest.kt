@@ -329,8 +329,10 @@ internal class PaymentSheetCheckoutSessionTest {
 
     private companion object {
         val SAVE_DISABLED_REPLACEMENT = ResponseReplacement(
-            original = "\"enabled\": true",
-            new = "\"enabled\": false",
+            original = """"customer_managed_saved_payment_methods_offer_save": {
+    "enabled": true,""",
+            new = """"customer_managed_saved_payment_methods_offer_save": {
+    "enabled": false,""",
         )
     }
 }
