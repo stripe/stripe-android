@@ -228,7 +228,7 @@ internal class PaymentSheetCheckoutSessionTest {
     @Test
     fun allowRedisplayIsUnspecifiedWhenNotSavingWithPayment() =
         runCheckoutSessionAllowRedisplayTest(
-            initFile = "checkout-session-init-with-customer.json",
+            initFile = "checkout-session-init.json",
             confirmFile = "checkout-session-confirm.json",
             expectedAllowRedisplay = "unspecified",
         )
@@ -236,7 +236,7 @@ internal class PaymentSheetCheckoutSessionTest {
     @Test
     fun allowRedisplayIsAlwaysWhenSavingWithPayment() =
         runCheckoutSessionAllowRedisplayTest(
-            initFile = "checkout-session-init-with-customer.json",
+            initFile = "checkout-session-init.json",
             confirmFile = "checkout-session-confirm.json",
             clickSaveCheckbox = true,
             expectedAllowRedisplay = "always",
@@ -245,7 +245,7 @@ internal class PaymentSheetCheckoutSessionTest {
     @Test
     fun allowRedisplayIsUnspecifiedWhenSaveDisabledWithPayment() =
         runCheckoutSessionAllowRedisplayTest(
-            initFile = "checkout-session-init-with-customer.json",
+            initFile = "checkout-session-init.json",
             initReplacements = listOf(SAVE_DISABLED_REPLACEMENT),
             confirmFile = "checkout-session-confirm.json",
             expectedAllowRedisplay = "unspecified",
@@ -254,7 +254,7 @@ internal class PaymentSheetCheckoutSessionTest {
     @Test
     fun allowRedisplayIsLimitedWhenNotSavingWithSetup() =
         runCheckoutSessionAllowRedisplayTest(
-            initFile = "checkout-session-init-setup-with-customer.json",
+            initFile = "checkout-session-init-setup.json",
             confirmFile = "checkout-session-confirm-setup.json",
             expectedAllowRedisplay = "limited",
         )
@@ -262,7 +262,7 @@ internal class PaymentSheetCheckoutSessionTest {
     @Test
     fun allowRedisplayIsAlwaysWhenSavingWithSetup() =
         runCheckoutSessionAllowRedisplayTest(
-            initFile = "checkout-session-init-setup-with-customer.json",
+            initFile = "checkout-session-init-setup.json",
             confirmFile = "checkout-session-confirm-setup.json",
             clickSaveCheckbox = true,
             expectedAllowRedisplay = "always",
@@ -271,7 +271,7 @@ internal class PaymentSheetCheckoutSessionTest {
     @Test
     fun allowRedisplayIsLimitedWhenSaveDisabledWithSetup() =
         runCheckoutSessionAllowRedisplayTest(
-            initFile = "checkout-session-init-setup-with-customer.json",
+            initFile = "checkout-session-init-setup.json",
             initReplacements = listOf(SAVE_DISABLED_REPLACEMENT),
             confirmFile = "checkout-session-confirm-setup.json",
             expectedAllowRedisplay = "limited",
@@ -290,7 +290,7 @@ internal class PaymentSheetCheckoutSessionTest {
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.checkoutInit { response ->
-            response.testBodyFromFile(initFile, initReplacements)
+            response.testBodyFromFile(initFile, listOf(CUSTOMER_REPLACEMENT) + initReplacements)
         }
 
         testContext.presentWithCheckout()
@@ -328,11 +328,19 @@ internal class PaymentSheetCheckoutSessionTest {
     }
 
     private companion object {
+        // Injects customer + save offer fields into base checkout-session-init fixtures.
+        // Note: testBodyFromFile concatenates lines without newlines, so all JSON ends up
+        // on one line. We anchor on the unique "ui_mode" field and append inline.
+        val CUSTOMER_REPLACEMENT = ResponseReplacement(
+            original = """"ui_mode": "custom",""",
+            new = """"ui_mode": "custom", """ +
+                """"customer": {"id": "cus_12345", "payment_methods": [], "can_detach_payment_method": true}, """ +
+                """"customer_managed_saved_payment_methods_offer_save": {"enabled": true, "status": "not_accepted"},""",
+        )
+
         val SAVE_DISABLED_REPLACEMENT = ResponseReplacement(
-            original = """"customer_managed_saved_payment_methods_offer_save": {
-    "enabled": true,""",
-            new = """"customer_managed_saved_payment_methods_offer_save": {
-    "enabled": false,""",
+            original = """"customer_managed_saved_payment_methods_offer_save": {"enabled": true,""",
+            new = """"customer_managed_saved_payment_methods_offer_save": {"enabled": false,""",
         )
     }
 }
