@@ -6,11 +6,13 @@ import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.LinkMetadata
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import javax.inject.Inject
+import javax.inject.Singleton
 
 internal interface LinkConfigurationLoader {
     suspend fun load(configuration: LinkController.Configuration): Result<LinkMetadata>
 }
 
+@Singleton
 internal class DefaultLinkConfigurationLoader @Inject constructor(
     private val logger: Logger,
     private val paymentElementLoader: PaymentElementLoader,

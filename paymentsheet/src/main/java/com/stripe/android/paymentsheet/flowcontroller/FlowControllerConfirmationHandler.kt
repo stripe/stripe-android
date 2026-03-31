@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import javax.inject.Singleton
 
 internal interface FlowControllerConfirmationHandler {
     /**
@@ -42,6 +43,7 @@ internal interface FlowControllerConfirmationHandler {
     suspend fun start(arguments: Args)
 }
 
+@Singleton
 internal class DefaultFlowControllerConfirmationHandler @Inject constructor(
     val coroutineScope: CoroutineScope,
     val confirmationHandler: ConfirmationHandler

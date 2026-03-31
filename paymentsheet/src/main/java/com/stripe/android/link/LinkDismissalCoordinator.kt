@@ -1,5 +1,6 @@
 package com.stripe.android.link
 
+import com.stripe.android.link.injection.NativeLinkScope
 import javax.inject.Inject
 
 /**
@@ -26,6 +27,7 @@ internal inline fun <R> LinkDismissalCoordinator.withDismissalDisabled(
     }
 }
 
+@NativeLinkScope
 internal class RealLinkDismissalCoordinator @Inject constructor() : LinkDismissalCoordinator {
 
     private var _canDismiss: Boolean = true

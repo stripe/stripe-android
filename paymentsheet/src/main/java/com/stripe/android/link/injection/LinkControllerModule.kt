@@ -47,7 +47,6 @@ import javax.inject.Singleton
 )
 internal interface LinkControllerModule {
     @Binds
-    @Singleton
     fun bindLinkConfigurationLoader(impl: DefaultLinkConfigurationLoader): LinkConfigurationLoader
 
     companion object {

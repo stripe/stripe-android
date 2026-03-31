@@ -128,7 +128,6 @@ internal object FlowControllerModule {
     @Module
     interface Bindings {
         @Binds
-        @Singleton
         fun bindsFlowControllerConfirmationHandler(
             handler: DefaultFlowControllerConfirmationHandler
         ): FlowControllerConfirmationHandler

@@ -130,7 +130,6 @@ internal interface NativeLinkModule {
     fun bindsAnalyticsRequestFactory(impl: PaymentAnalyticsRequestFactory): AnalyticsRequestFactory
 
     @Binds
-    @NativeLinkScope
     fun bindsDismissalCoordinator(impl: RealLinkDismissalCoordinator): LinkDismissalCoordinator
 
     @Binds
