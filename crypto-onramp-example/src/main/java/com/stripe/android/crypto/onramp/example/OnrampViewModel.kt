@@ -368,17 +368,9 @@ internal class OnrampViewModel(
                     it.copy(
                         screen = Screen.AuthenticatedOperations,
                         selectedPaymentData = result.displayData,
-                    )
-                }
-            }
-            is OnrampCollectPaymentMethodResult.CompletedWithKycInfo -> {
-                _message.value = "Payment selection with KYC complete"
-                _uiState.update {
-                    it.copy(
-                        selectedPaymentData = result.displayData,
-                        kycFirstName = result.kycInfo.firstName ?: it.kycFirstName,
-                        kycLastName = result.kycInfo.lastName ?: it.kycLastName,
-                        kycAddress = result.kycInfo.address ?: it.kycAddress,
+                        kycFirstName = result.kycInfo?.firstName ?: it.kycFirstName,
+                        kycLastName = result.kycInfo?.lastName ?: it.kycLastName,
+                        kycAddress = result.kycInfo?.address ?: it.kycAddress
                     )
                 }
             }

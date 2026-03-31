@@ -571,7 +571,7 @@ internal class OnrampInteractor @Inject constructor(
                         label = it.label,
                         sublabel = it.sublabel,
                         type = it.type.toDisplayType()
-                    )
+                    ), kycInfo = null
                 )
             } ?: run {
                 OnrampCollectPaymentMethodResult.Failed(MissingPaymentMethodException())
@@ -597,11 +597,7 @@ internal class OnrampInteractor @Inject constructor(
             val kycInfo = googlePayKycInfo(result.paymentMethod)
 
             handleGooglePayPaymentMethod(result.paymentMethod) { displayData ->
-                if (kycInfo != null) {
-                    OnrampCollectPaymentMethodResult.CompletedWithKycInfo(displayData, kycInfo)
-                } else {
-                    OnrampCollectPaymentMethodResult.Completed(displayData)
-                }
+                OnrampCollectPaymentMethodResult.Completed(displayData, kycInfo)
             }
         }
         is GooglePayPaymentMethodLauncher.Result.Failed -> {
@@ -667,7 +663,7 @@ internal class OnrampInteractor @Inject constructor(
             address?.line2,
             address?.postalCode,
             address?.state,
-        ).any { it.isNotEmpty() }
+        ).any { it.isNotBlank() }
 
         if (!hasName && !hasAddress) return null
 
@@ -676,14 +672,14 @@ internal class OnrampInteractor @Inject constructor(
             lastName = lastName.takeIf { it.isNotEmpty() },
             idNumber = null,
             dateOfBirth = null,
-            address = PaymentSheet.Address(
+            address = if (hasAddress) PaymentSheet.Address(
                 city = address?.city,
                 country = address?.country,
                 line1 = address?.line1,
                 line2 = address?.line2,
                 postalCode = address?.postalCode,
                 state = address?.state
-            )
+            ) else null
         )
     }
 

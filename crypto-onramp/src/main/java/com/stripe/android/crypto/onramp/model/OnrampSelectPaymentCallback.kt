@@ -22,18 +22,11 @@ sealed class OnrampCollectPaymentMethodResult {
      * The user has selected a payment option.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    class Completed internal constructor(val displayData: PaymentMethodDisplayData) : OnrampCollectPaymentMethodResult()
-
-    /**
-     * The user selected a payment option, and there is ancillary KYC
-     * information available.
-     */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    class CompletedWithKycInfo internal constructor(
+    class Completed internal constructor(
         val displayData: PaymentMethodDisplayData,
-        val kycInfo: KycInfo
+        val kycInfo: KycInfo?
     ) : OnrampCollectPaymentMethodResult()
-
+    
     /**
      * The user declined to select a payment option.
      */
