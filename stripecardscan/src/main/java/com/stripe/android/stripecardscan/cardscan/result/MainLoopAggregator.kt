@@ -4,7 +4,7 @@ import com.stripe.android.camera.framework.AggregateResultListener
 import com.stripe.android.camera.framework.ResultAggregator
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopAggregator.FinalResult
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopAggregator.InterimResult
-import com.stripe.android.stripecardscan.payment.ml.SSDOcr
+import com.stripe.android.stripecardscan.payment.ml.CardOcr
 import kotlin.time.TimeSource
 
 /**
@@ -18,9 +18,9 @@ import kotlin.time.TimeSource
 internal class MainLoopAggregator(
     listener: AggregateResultListener<InterimResult, FinalResult>
 ) : ResultAggregator<
-    SSDOcr.Input,
+    CardOcr.Input,
     MainLoopState,
-    SSDOcr.Prediction,
+    CardOcr.Prediction,
     InterimResult,
     FinalResult
     >(
@@ -33,14 +33,14 @@ internal class MainLoopAggregator(
     )
 
     internal data class InterimResult(
-        val analyzerResult: SSDOcr.Prediction,
-        val frame: SSDOcr.Input,
+        val analyzerResult: CardOcr.Prediction,
+        val frame: CardOcr.Input,
         val state: MainLoopState
     )
 
     override suspend fun aggregateResult(
-        frame: SSDOcr.Input,
-        result: SSDOcr.Prediction
+        frame: CardOcr.Input,
+        result: CardOcr.Prediction
     ): Pair<InterimResult, FinalResult?> {
         val previousState = state
         val currentState = previousState.consumeTransition(result)

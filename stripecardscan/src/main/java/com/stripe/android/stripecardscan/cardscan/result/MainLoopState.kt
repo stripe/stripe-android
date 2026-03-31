@@ -2,7 +2,7 @@ package com.stripe.android.stripecardscan.cardscan.result
 
 import com.stripe.android.stripecardscan.framework.MachineState
 import com.stripe.android.stripecardscan.framework.util.ItemCounter
-import com.stripe.android.stripecardscan.payment.ml.SSDOcr
+import com.stripe.android.stripecardscan.payment.ml.CardOcr
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.TimeSource
 
@@ -27,12 +27,12 @@ internal sealed class MainLoopState(timeSource: TimeSource) : MachineState(timeS
     }
 
     internal abstract suspend fun consumeTransition(
-        transition: SSDOcr.Prediction
+        transition: CardOcr.Prediction
     ): MainLoopState
 
     class Initial(timeSource: TimeSource) : MainLoopState(timeSource) {
         override suspend fun consumeTransition(
-            transition: SSDOcr.Prediction
+            transition: CardOcr.Prediction
         ): MainLoopState = if (transition.pan.isNullOrEmpty()) {
             this
         } else {
@@ -67,7 +67,7 @@ internal sealed class MainLoopState(timeSource: TimeSource) : MachineState(timeS
         private fun isNoCardVisible() = lastCardVisible.elapsedNow() > NO_CARD_VISIBLE_DURATION
 
         override suspend fun consumeTransition(
-            transition: SSDOcr.Prediction
+            transition: CardOcr.Prediction
         ): MainLoopState {
             val transitionPan = transition.pan
             if (!transitionPan.isNullOrEmpty()) {
@@ -92,7 +92,7 @@ internal sealed class MainLoopState(timeSource: TimeSource) : MachineState(timeS
 
     class Finished(timeSource: TimeSource, val pan: String) : MainLoopState(timeSource) {
         override suspend fun consumeTransition(
-            transition: SSDOcr.Prediction
+            transition: CardOcr.Prediction
         ): MainLoopState = this
     }
 }
