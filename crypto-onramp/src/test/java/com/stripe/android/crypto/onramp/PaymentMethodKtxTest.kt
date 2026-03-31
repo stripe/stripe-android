@@ -1,6 +1,7 @@
 package com.stripe.android.crypto.onramp
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.crypto.onramp.model.googlePayKycInfo
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import org.junit.Test

@@ -1,11 +1,13 @@
-package com.stripe.android.crypto.onramp
+package com.stripe.android.crypto.onramp.model
 
-import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 
 internal fun PaymentMethod.googlePayKycInfo(): KycInfo? {
     val address = billingDetails?.address
+
+    // Google Pay on Android exposes billing name as a single free-form string.
+    // We split on whitespace as a best-effort heuristic to populate first/last name.
     val fullName = billingDetails?.name.orEmpty().trim()
     val parts = fullName.split("\\s+".toRegex())
     val firstName = parts.firstOrNull().orEmpty()

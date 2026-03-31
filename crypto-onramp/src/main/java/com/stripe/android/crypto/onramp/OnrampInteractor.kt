@@ -38,6 +38,7 @@ import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
+import com.stripe.android.crypto.onramp.model.googlePayKycInfo
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.crypto.onramp.ui.KycRefreshScreenAction
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
@@ -571,7 +572,8 @@ internal class OnrampInteractor @Inject constructor(
                         label = it.label,
                         sublabel = it.sublabel,
                         type = it.type.toDisplayType()
-                    ), kycInfo = null
+                    ),
+                        kycInfo = null
                 )
             } ?: run {
                 OnrampCollectPaymentMethodResult.Failed(MissingPaymentMethodException())
