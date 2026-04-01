@@ -106,6 +106,7 @@ class CardScanStripeLauncherTest {
         val launcher = CardScanStripeLauncher(
             context = ApplicationProvider.getApplicationContext(),
             eventsReporter = fakeEventsReporter,
+            enableMlKitCardScan = false,
             isLaunchingState = mutableStateOf(false),
         )
 

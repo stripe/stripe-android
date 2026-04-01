@@ -248,6 +248,39 @@ class ElementsSessionTest {
         assertThat(session.isStripeCardScanAllowed).isFalse()
     }
 
+    @Test
+    fun `ELEMENTS_MOBILE_CARDSCAN_USE_MLKIT flag has correct value`() {
+        assertThat(ElementsSession.Flag.ELEMENTS_MOBILE_CARDSCAN_USE_MLKIT.flagValue)
+            .isEqualTo("elements_mobile_cardscan_use_mlkit")
+    }
+
+    @Test
+    fun `enableMlKitCardScan returns true when flag is enabled`() {
+        val session = createElementsSession(
+            flags = mapOf(ElementsSession.Flag.ELEMENTS_MOBILE_CARDSCAN_USE_MLKIT to true)
+        )
+
+        assertThat(session.enableMlKitCardScan).isTrue()
+    }
+
+    @Test
+    fun `enableMlKitCardScan returns false when flag is disabled`() {
+        val session = createElementsSession(
+            flags = mapOf(ElementsSession.Flag.ELEMENTS_MOBILE_CARDSCAN_USE_MLKIT to false)
+        )
+
+        assertThat(session.enableMlKitCardScan).isFalse()
+    }
+
+    @Test
+    fun `enableMlKitCardScan returns false when flag is missing`() {
+        val session = createElementsSession(
+            flags = emptyMap()
+        )
+
+        assertThat(session.enableMlKitCardScan).isFalse()
+    }
+
     private fun createElementsSession(
         passiveCaptcha: PassiveCaptchaParams? = null,
         flags: Map<ElementsSession.Flag, Boolean> = emptyMap(),
