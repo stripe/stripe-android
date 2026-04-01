@@ -13,7 +13,7 @@ class Form private constructor(
     @ColorInt internal val accent: Int?,
     @ColorInt internal val placeholderTextColor: Int?,
     internal val inputFieldPaddingY: Float?,
-    internal val inputFieldPaddingX: Float?,
+    internal val inputFieldPaddingX: Float?
 ) : Parcelable {
 
     class Builder {
