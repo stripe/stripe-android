@@ -15,15 +15,15 @@ class Colors private constructor(
     @ColorInt internal val secondaryText: Int?,
     @ColorInt internal val danger: Int?,
     @ColorInt internal val border: Int?,
-    @Deprecated("Use Action class instead") @ColorInt internal val actionPrimaryText: Int?,
-    @Deprecated("Use Action class instead") @ColorInt internal val actionSecondaryText: Int?,
+    @ColorInt internal val actionPrimaryText: Int?,
+    @ColorInt internal val actionSecondaryText: Int?,
     @ColorInt internal val offsetBackground: Int?,
-    @Deprecated("Use Form class instead") @ColorInt internal val formBackground: Int?,
-    @Deprecated("Use Form class instead") @ColorInt internal val formHighlightBorder: Int?,
-    @Deprecated("Use Form class instead") @ColorInt internal val formAccent: Int?
+    @ColorInt internal val formBackground: Int?,
+    @ColorInt internal val formHighlightBorder: Int?,
+    @ColorInt internal val formAccent: Int?
 ) : Parcelable {
 
-    @Suppress("TooManyFunctions", "DEPRECATION")
+    @Suppress("TooManyFunctions")
     class Builder {
         @ColorInt private var primary: Int? = null
 
@@ -37,21 +37,16 @@ class Colors private constructor(
 
         @ColorInt private var border: Int? = null
 
-        @Deprecated("Use Action class instead")
         @ColorInt private var actionPrimaryText: Int? = null
 
-        @Deprecated("Use Action class instead")
         @ColorInt private var actionSecondaryText: Int? = null
 
         @ColorInt private var offsetBackground: Int? = null
 
-        @Deprecated("Use Form class instead")
         @ColorInt private var formBackground: Int? = null
 
-        @Deprecated("Use Form class instead")
         @ColorInt private var formHighlightBorder: Int? = null
 
-        @Deprecated("Use Form class instead")
         @ColorInt private var formAccent: Int? = null
 
         /**

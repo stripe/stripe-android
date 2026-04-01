@@ -12,11 +12,31 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 @Poko
 class BadgeDefaults(
-    internal val paddingX: Float? = null,
-    internal val paddingY: Float? = null,
-    internal val labelTypography: Typography.Style? = null,
+    internal val paddingX: Float?,
+    internal val paddingY: Float?,
+    internal val labelTypography: Typography.Style?
 ) : Parcelable {
+
+    class Builder {
+        private var paddingX: Float? = null
+        private var paddingY: Float? = null
+        private var labelTypography: Typography.Style? = null
+
+        fun paddingX(paddingX: Float?): Builder =
+            apply { this.paddingX = paddingX }
+
+        fun paddingY(paddingY: Float?): Builder =
+            apply { this.paddingY = paddingY }
+
+        fun labelTypography(labelTypography: Typography.Style?): Builder =
+            apply { this.labelTypography = labelTypography }
+
+        fun build(): BadgeDefaults {
+            return BadgeDefaults(paddingX = paddingX, paddingY = paddingY, labelTypography = labelTypography)
+        }
+    }
+
     internal companion object {
-        internal fun default() = BadgeDefaults()
+        internal fun default() = Builder().build()
     }
 }

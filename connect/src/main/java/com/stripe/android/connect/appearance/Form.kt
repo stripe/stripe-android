@@ -58,6 +58,6 @@ class Form private constructor(
     }
 
     internal companion object {
-        internal fun default() = Form()
+        internal fun default() = Builder().build()
     }
 }

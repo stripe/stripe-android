@@ -8,8 +8,8 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 @Poko
 class Action private constructor(
-    @ColorInt internal val colorText: Int? = null,
-    internal val textTransform: TextTransform = TextTransform.None
+    @ColorInt internal val colorText: Int?,
+    internal val textTransform: TextTransform?
 ) : Parcelable {
 
     class Builder {
@@ -28,6 +28,6 @@ class Action private constructor(
     }
 
     internal companion object {
-        internal fun default() = Action()
+        internal fun default() = Builder().build()
     }
 }
