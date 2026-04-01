@@ -1029,9 +1029,8 @@ constructor(
          */
         @Parcelize
         @Poko
-        class CardArt
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        constructor(
+        class CardArt(
             @JvmField val artImage: ArtImage?,
             @JvmField val programName: String?
         ) : StripeModel {
@@ -1041,9 +1040,8 @@ constructor(
              */
             @Parcelize
             @Poko
-            class ArtImage
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            constructor(
+            class ArtImage(
                 @JvmField val format: String,
                 @JvmField val url: String
             ) : StripeModel

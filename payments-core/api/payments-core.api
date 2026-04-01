@@ -2004,30 +2004,6 @@ public final class com/stripe/android/model/PaymentMethod$Card : com/stripe/andr
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/model/PaymentMethod$Card$CardArt : com/stripe/android/core/model/StripeModel {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public final field artImage Lcom/stripe/android/model/PaymentMethod$Card$CardArt$ArtImage;
-	public final field programName Ljava/lang/String;
-	public final fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public final fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/model/PaymentMethod$Card$CardArt$ArtImage : com/stripe/android/core/model/StripeModel {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public final field format Ljava/lang/String;
-	public final field url Ljava/lang/String;
-	public final fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public final fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
 public final class com/stripe/android/model/PaymentMethod$Card$Checks : com/stripe/android/core/model/StripeModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
