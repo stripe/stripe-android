@@ -1986,82 +1986,16 @@ class ElementsSessionJsonParserTest {
         cardArt: String? = null,
         extraPaymentMethod: String = "",
     ): JSONObject {
-        val cardArtField = if (cardArt != null) {
-            "\"card_art\": $cardArt,"
-        } else {
-            ""
-        }
+        val cardArtField = if (cardArt != null) "\"card_art\": $cardArt," else ""
         return JSONObject(
             """
             {
-              "payment_method_preference": {
-                "object": "payment_method_preference",
-                "country_code": "US",
-                "ordered_payment_method_types": ["card"],
-                "payment_intent": {
-                  "id": "pi_123",
-                  "object": "payment_intent",
-                  "amount": 973,
-                  "client_secret": "pi_1234567",
-                  "confirmation_method": "automatic",
-                  "created": 1630103948,
-                  "currency": "eur",
-                  "livemode": false,
-                  "status": "requires_payment_method"
-                },
-                "type": "payment_intent"
-              },
+              "payment_method_preference": $PAYMENT_METHOD_PREFERENCE_JSON,
               "customer": {
                 $cardArtField
-                "customer_session": {
-                  "id": "cuss_123",
-                  "api_key": "ek_test_1234",
-                  "api_key_expiry": 1713890664,
-                  "components": {
-                    "mobile_payment_element": {
-                      "enabled": true,
-                      "features": {
-                        "payment_method_remove": "enabled",
-                        "payment_method_save": "disabled",
-                        "payment_method_remove_last": "enabled"
-                      }
-                    },
-                    "customer_sheet": {
-                      "enabled": true,
-                      "features": {
-                        "payment_method_remove": "enabled",
-                        "payment_method_remove_last": "enabled"
-                      }
-                    }
-                  },
-                  "customer": "cus_1",
-                  "livemode": false
-                },
+                "customer_session": $CUSTOMER_SESSION_JSON,
                 "default_payment_method": "pm_123",
-                "payment_methods": [
-                  {
-                    "id": "pm_123",
-                    "created": 1550757934255,
-                    "customer": "cus_1",
-                    "livemode": false,
-                    "type": "card",
-                    "card": {
-                      "brand": "visa",
-                      "last4": "4242",
-                      "exp_month": 8,
-                      "exp_year": 2032,
-                      "country": "US",
-                      "funding": "credit",
-                      "fingerprint": "fingerprint123",
-                      "checks": {
-                        "address_line1_check": "unchecked",
-                        "cvc_check": "unchecked"
-                      },
-                      "three_d_secure_usage": { "supported": true }
-                    }
-                  }
-                  $extraPaymentMethod
-                ]
+                "payment_methods": [$CARD_PM_JSON $extraPaymentMethod]
               }
             }
             """.trimIndent()
@@ -2072,5 +2006,50 @@ class ElementsSessionJsonParserTest {
 
     companion object {
         private const val APP_ID = "com.app.id"
+
+        private val PAYMENT_METHOD_PREFERENCE_JSON = """
+            {
+              "object": "payment_method_preference",
+              "country_code": "US",
+              "ordered_payment_method_types": ["card"],
+              "payment_intent": {
+                "id": "pi_123", "object": "payment_intent", "amount": 973,
+                "client_secret": "pi_1234567", "confirmation_method": "automatic",
+                "created": 1630103948, "currency": "eur", "livemode": false,
+                "status": "requires_payment_method"
+              },
+              "type": "payment_intent"
+            }
+        """.trimIndent()
+
+        private val CUSTOMER_SESSION_JSON = """
+            {
+              "id": "cuss_123", "api_key": "ek_test_1234", "api_key_expiry": 1713890664,
+              "components": {
+                "mobile_payment_element": {
+                  "enabled": true,
+                  "features": { "payment_method_remove": "enabled", "payment_method_save": "disabled", "payment_method_remove_last": "enabled" }
+                },
+                "customer_sheet": {
+                  "enabled": true,
+                  "features": { "payment_method_remove": "enabled", "payment_method_remove_last": "enabled" }
+                }
+              },
+              "customer": "cus_1", "livemode": false
+            }
+        """.trimIndent()
+
+        private val CARD_PM_JSON = """
+            {
+              "id": "pm_123", "created": 1550757934255, "customer": "cus_1",
+              "livemode": false, "type": "card",
+              "card": {
+                "brand": "visa", "last4": "4242", "exp_month": 8, "exp_year": 2032,
+                "country": "US", "funding": "credit", "fingerprint": "fingerprint123",
+                "checks": { "address_line1_check": "unchecked", "cvc_check": "unchecked" },
+                "three_d_secure_usage": { "supported": true }
+              }
+            }
+        """.trimIndent()
     }
 }

@@ -503,17 +503,14 @@ internal class ElementsSessionJsonParser(
     private fun buildCardArtLookup(json: JSONObject): Map<String, PaymentMethod.Card.CardArt> {
         val cardArtArray = json.optJSONArray(FIELD_CARD_ART) ?: return emptyMap()
         val parser = CardArtJsonParser()
-        val map = mutableMapOf<String, PaymentMethod.Card.CardArt>()
-        for (i in 0 until cardArtArray.length()) {
-            val artJson = cardArtArray.optJSONObject(i) ?: continue
+        return (0 until cardArtArray.length()).mapNotNull { i ->
+            val artJson = cardArtArray.optJSONObject(i) ?: return@mapNotNull null
             val paymentMethodId = StripeJsonUtils.optString(
                 artJson,
                 FIELD_CARD_ART_PAYMENT_METHOD
-            ) ?: continue
-            val cardArt = parser.parse(artJson)
-            map[paymentMethodId] = cardArt
-        }
-        return map
+            ) ?: return@mapNotNull null
+            paymentMethodId to parser.parse(artJson)
+        }.toMap()
     }
 
     private fun mergeCardArt(
