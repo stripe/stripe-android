@@ -147,8 +147,29 @@ class MLKitTextRecognizerTest {
 
     @Test
     fun `extractPan falls back to block strategy when line strategy fails`() {
-        // Elements that form a valid PAN but aren't contiguous in any single line
-        val text = textWithElements("4242", "4242", "4242", "4242")
+        // Digits are split across lines so no single line contains a full PAN,
+        // but the block strategy can still reassemble elements into 4+4+4+4.
+        val text = textWithMultiLineElements(
+            listOf("4242", "4242"),  // line text "4242 4242" — only 8 digits
+            listOf("4242", "4242"),  // line text "4242 4242" — only 8 digits
+        )
+
+        val result = MLKitTextRecognizer.extractPan(text)
+
+        assertThat(result).isEqualTo("4242424242424242")
+    }
+
+    @Test
+    fun `extractPan block strategy handles messy OCR with interleaved non-PAN digits`() {
+        // Realistic OCR mess: expiry and name text scattered around the card number,
+        // which is itself split across two lines. The "12/25" produces a junk digit
+        // token "1225" that the sliding window must skip past.
+        val text = textWithMultiLineElements(
+            listOf("VALID", "THRU", "12/25"),  // "1225" junk digit token
+            listOf("JOHN", "DOE"),              // no digits, filtered out
+            listOf("4242", "4242"),             // first half of PAN
+            listOf("4242", "4242"),             // second half of PAN
+        )
 
         val result = MLKitTextRecognizer.extractPan(text)
 
@@ -185,6 +206,25 @@ class MLKitTextRecognizerTest {
             whenever(it.elements).thenReturn(elements)
         }
         val block = mock<Text.TextBlock>().also { whenever(it.lines).thenReturn(listOf(line)) }
+        return mock<Text>().also { whenever(it.textBlocks).thenReturn(listOf(block)) }
+    }
+
+    /**
+     * Build a mock [Text] with one block containing multiple lines, each with its own elements.
+     * Useful for testing the fallback from line strategy to block strategy: no single line
+     * contains a full PAN, but the block strategy collects elements across all lines.
+     */
+    private fun textWithMultiLineElements(vararg linesElements: List<String>): Text {
+        val lines = linesElements.map { elementTexts ->
+            val elements = elementTexts.map { text ->
+                mock<Text.Element>().also { whenever(it.text).thenReturn(text) }
+            }
+            mock<Text.Line>().also {
+                whenever(it.text).thenReturn(elementTexts.joinToString(" "))
+                whenever(it.elements).thenReturn(elements)
+            }
+        }
+        val block = mock<Text.TextBlock>().also { whenever(it.lines).thenReturn(lines) }
         return mock<Text>().also { whenever(it.textBlocks).thenReturn(listOf(block)) }
     }
 }
