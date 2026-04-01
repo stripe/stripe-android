@@ -35,58 +35,42 @@ internal class IdentityExampleViewModel(application: Application) : AndroidViewM
                         options =
                         when (submissionState.verificationType) {
                             VerificationType.DOCUMENT -> {
-                                if (submissionState.requirePhoneVerification == true) {
-                                    VerificationSessionCreationRequest.Options(
-                                        document = submissionState.toDocumentOptions(),
-                                        phone = VerificationSessionCreationRequest.Options.Phone(
-                                            requireVerification = true
-                                        )
-                                    )
-                                } else {
-                                    VerificationSessionCreationRequest.Options(
-                                        document = submissionState.toDocumentOptions()
-                                    )
-                                }
+                                VerificationSessionCreationRequest.Options(
+                                    document = submissionState.toDocumentOptions(),
+                                    phone = submissionState.toPhoneOptions()
+                                )
                             }
 
                             VerificationType.PHONE -> {
-                                if (submissionState.useDocumentFallback == true) {
-                                    VerificationSessionCreationRequest.Options(
-                                        document = submissionState.toDocumentOptions(),
-                                        phoneRecords = VerificationSessionCreationRequest.Options.PhoneRecords(
-                                            fallback = Fallback.Document
-                                        ),
-                                        phoneOtp = VerificationSessionCreationRequest.Options.PhoneOTP(
-                                            check = requireNotNull(submissionState.phoneOtpCheck)
+                                VerificationSessionCreationRequest.Options(
+                                    document = if (submissionState.useDocumentFallback == true) {
+                                        submissionState.toDocumentOptions()
+                                    } else {
+                                        null
+                                    },
+                                    phone = if (
+                                        submissionState.useDocumentFallback == true &&
+                                        submissionState.phoneOtpCheck == PhoneOTPCheck.Required
+                                    ) {
+                                        VerificationSessionCreationRequest.Options.Phone(
+                                            requireVerification = true
                                         )
-                                    )
-                                } else {
-                                    null
-                                }
+                                    } else {
+                                        null
+                                    }
+                                )
                             }
 
                             VerificationType.ID_NUMBER -> {
-                                if (submissionState.requirePhoneVerification == true) {
-                                    VerificationSessionCreationRequest.Options(
-                                        phone = VerificationSessionCreationRequest.Options.Phone(
-                                            requireVerification = true
-                                        )
-                                    )
-                                } else {
-                                    null
-                                }
+                                VerificationSessionCreationRequest.Options(
+                                    phone = submissionState.toPhoneOptions()
+                                )
                             }
 
                             VerificationType.ADDRESS -> {
-                                if (submissionState.requirePhoneVerification == true) {
-                                    VerificationSessionCreationRequest.Options(
-                                        phone = VerificationSessionCreationRequest.Options.Phone(
-                                            requireVerification = true
-                                        )
-                                    )
-                                } else {
-                                    null
-                                }
+                                VerificationSessionCreationRequest.Options(
+                                    phone = submissionState.toPhoneOptions()
+                                )
                             }
                         },
                         providedDetails = when (submissionState.verificationType) {
@@ -155,7 +139,6 @@ internal class IdentityExampleViewModel(application: Application) : AndroidViewM
             requireIdNumber = this.requireId,
             requireMatchingSelfie = this.requireSelfie,
             requireLiveCapture = this.requireLiveCapture,
-            requireAddress = this.requireAddress,
             allowedTypes = mutableListOf<DocumentType>().also {
                 if (this.allowDrivingLicense) {
                     it.add(
@@ -171,10 +154,19 @@ internal class IdentityExampleViewModel(application: Application) : AndroidViewM
             }
         )
 
+    private fun IdentitySubmissionState.toPhoneOptions() =
+        if (this.requirePhoneVerification == true) {
+            VerificationSessionCreationRequest.Options.Phone(
+                requireVerification = true
+            )
+        } else {
+            null
+        }
+
     private companion object {
         // if you want to view and fork the backend code, go to
         // https://codesandbox.io/p/devbox/compassionate-violet-gshhgf
         const val EXAMPLE_BACKEND_URL =
-            "https://stripe-mobile-identity-verification-playground.stripedemos.com/create-verification-session"
+            "https://stripe-mobile-identity-verification-playground.stripedemos.com/verification-sessions"
     }
 }
