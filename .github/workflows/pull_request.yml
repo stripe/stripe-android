@@ -66,6 +66,16 @@ jobs:
           old-file-path: apk/paymentsheet-example-release-master.apk
           new-file-path: apk/paymentsheet-example-release-pr.apk
 
+      - name: Check size difference
+        id: size_check
+        run: |
+          old_size=$(stat -c%s "apk/paymentsheet-example-release-master.apk")
+          new_size=$(stat -c%s "apk/paymentsheet-example-release-pr.apk")
+          diff=$((new_size - old_size))
+          abs_diff=${diff#-}
+          echo "abs_diff=$abs_diff" >> "$GITHUB_OUTPUT"
+          echo "Size difference: $diff bytes (abs: $abs_diff)"
+
       # Post comment with output
 
       - uses: peter-evans/find-comment@b30e6a3c0ed37e7c023ccd3f1db5c6c0b0c23aad
@@ -75,7 +85,7 @@ jobs:
           body-includes: Diffuse output
 
       - uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9
-        if: ${{ steps.diffuse.outputs.diff-raw != null || steps.find_comment.outputs.comment-id != null }}
+        if: ${{ (steps.diffuse.outputs.diff-raw != null || steps.find_comment.outputs.comment-id != null) && steps.size_check.outputs.abs_diff >= 20 }}
         with:
           body: |
             Diffuse output:
