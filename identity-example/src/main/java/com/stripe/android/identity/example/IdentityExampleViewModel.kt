@@ -42,23 +42,19 @@ internal class IdentityExampleViewModel(application: Application) : AndroidViewM
                             }
 
                             VerificationType.PHONE -> {
-                                VerificationSessionCreationRequest.Options(
-                                    document = if (submissionState.useDocumentFallback == true) {
-                                        submissionState.toDocumentOptions()
-                                    } else {
-                                        null
-                                    },
-                                    phone = if (
-                                        submissionState.useDocumentFallback == true &&
-                                        submissionState.phoneOtpCheck == PhoneOTPCheck.Required
-                                    ) {
-                                        VerificationSessionCreationRequest.Options.Phone(
-                                            requireVerification = true
+                                if (submissionState.useDocumentFallback == true) {
+                                    VerificationSessionCreationRequest.Options(
+                                        document = submissionState.toDocumentOptions(),
+                                        phoneRecords = VerificationSessionCreationRequest.Options.PhoneRecords(
+                                            fallback = Fallback.Document
+                                        ),
+                                        phoneOtp = VerificationSessionCreationRequest.Options.PhoneOTP(
+                                            check = requireNotNull(submissionState.phoneOtpCheck)
                                         )
-                                    } else {
-                                        null
-                                    }
-                                )
+                                    )
+                                } else {
+                                    VerificationSessionCreationRequest.Options()
+                                }
                             }
 
                             VerificationType.ID_NUMBER -> {
@@ -68,9 +64,7 @@ internal class IdentityExampleViewModel(application: Application) : AndroidViewM
                             }
 
                             VerificationType.ADDRESS -> {
-                                VerificationSessionCreationRequest.Options(
-                                    phone = submissionState.toPhoneOptions()
-                                )
+                                VerificationSessionCreationRequest.Options()
                             }
                         },
                         providedDetails = when (submissionState.verificationType) {
@@ -87,15 +81,7 @@ internal class IdentityExampleViewModel(application: Application) : AndroidViewM
                             }
 
                             VerificationType.ADDRESS -> {
-                                if (submissionState.requirePhoneVerification == true) {
-                                    VerificationSessionCreationRequest.ProvidedDetails(
-                                        phone = requireNotNull(
-                                            submissionState.providedPhoneNumber
-                                        )
-                                    )
-                                } else {
-                                    null
-                                }
+                                null
                             }
 
                             VerificationType.ID_NUMBER -> {
@@ -139,6 +125,7 @@ internal class IdentityExampleViewModel(application: Application) : AndroidViewM
             requireIdNumber = this.requireId,
             requireMatchingSelfie = this.requireSelfie,
             requireLiveCapture = this.requireLiveCapture,
+            requireAddress = this.requireAddress,
             allowedTypes = mutableListOf<DocumentType>().also {
                 if (this.allowDrivingLicense) {
                     it.add(

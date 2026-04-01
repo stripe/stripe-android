@@ -20,7 +20,9 @@ internal data class VerificationSessionCreationRequest(
     @Serializable
     data class Options(
         @SerialName("document") val document: Document? = null,
-        @SerialName("phone") val phone: Phone? = null
+        @SerialName("phone") val phone: Phone? = null,
+        @SerialName("phone_otp") val phoneOtp: PhoneOTP? = null,
+        @SerialName("phone_records") val phoneRecords: PhoneRecords? = null
     ) {
         @Serializable
         data class Phone(
@@ -32,7 +34,18 @@ internal data class VerificationSessionCreationRequest(
             @SerialName("allowed_types") val allowedTypes: List<DocumentType>? = null,
             @SerialName("require_id_number") val requireIdNumber: Boolean? = null,
             @SerialName("require_live_capture") val requireLiveCapture: Boolean? = null,
-            @SerialName("require_matching_selfie") val requireMatchingSelfie: Boolean? = null
+            @SerialName("require_matching_selfie") val requireMatchingSelfie: Boolean? = null,
+            @SerialName("require_address") val requireAddress: Boolean? = null
+        )
+
+        @Serializable
+        data class PhoneOTP(
+            @SerialName("check") val check: PhoneOTPCheck? = null,
+        )
+
+        @Serializable
+        data class PhoneRecords(
+            @SerialName("fallback") val fallback: Fallback? = null,
         )
     }
 
@@ -51,6 +64,10 @@ internal enum class DocumentType {
 
     @SerialName("id_card")
     IdCard
+}
+internal enum class Fallback {
+    @SerialName("document")
+    Document
 }
 
 
