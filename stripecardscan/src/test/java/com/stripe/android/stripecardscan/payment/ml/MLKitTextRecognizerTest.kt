@@ -176,6 +176,186 @@ class MLKitTextRecognizerTest {
         assertThat(result).isEqualTo("4242424242424242")
     }
 
+    // --- extractExpiry ---
+
+    @Test
+    fun `extractExpiry returns month and year for slash format`() {
+        val text = textWith("VALID THRU 12/28")
+
+        val result = MLKitTextRecognizer.extractExpiry(text)
+
+        assertThat(result).isEqualTo(CardOcr.Expiry(month = 12, year = 2028))
+    }
+
+    @Test
+    fun `extractExpiry returns month and year for 4-digit year`() {
+        val text = textWith("01/2029")
+
+        val result = MLKitTextRecognizer.extractExpiry(text)
+
+        assertThat(result).isEqualTo(CardOcr.Expiry(month = 1, year = 2029))
+    }
+
+    @Test
+    fun `extractExpiry finds expiry among card text`() {
+        val text = textWith(
+            "JOHN DOE",
+            "4242 4242 4242 4242",
+            "VALID THRU 12/28",
+        )
+
+        val result = MLKitTextRecognizer.extractExpiry(text)
+
+        assertThat(result).isEqualTo(CardOcr.Expiry(month = 12, year = 2028))
+    }
+
+    @Test
+    fun `extractExpiry returns null when no expiry found`() {
+        val text = textWith("JOHN DOE", "4242 4242 4242 4242")
+
+        val result = MLKitTextRecognizer.extractExpiry(text)
+
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun `extractExpiry returns null for expired date`() {
+        val text = textWith("01/20")
+
+        val result = MLKitTextRecognizer.extractExpiry(text)
+
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun `extractExpiry returns null for invalid month`() {
+        val text = textWith("13/28")
+
+        val result = MLKitTextRecognizer.extractExpiry(text)
+
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun `extractExpiry finds separator-format expiry from elements`() {
+        val text = textWithElements("01-29")
+
+        val result = MLKitTextRecognizer.extractExpiry(text)
+
+        assertThat(result).isEqualTo(CardOcr.Expiry(month = 1, year = 2029))
+    }
+
+    // --- parseExpiry ---
+
+    @Test
+    fun `parseExpiry parses slash format`() {
+        val regex = Regex("""\b(\d{1,2})/(\d{2,4})\b""")
+
+        assertThat(MLKitTextRecognizer.parseExpiry("12/25", regex)).isEqualTo(CardOcr.Expiry(12, 2025))
+    }
+
+    @Test
+    fun `parseExpiry parses 4-digit year`() {
+        val regex = Regex("""\b(\d{1,2})/(\d{2,4})\b""")
+
+        assertThat(MLKitTextRecognizer.parseExpiry("01/2028", regex)).isEqualTo(CardOcr.Expiry(month = 1, year = 2028))
+    }
+
+    @Test
+    fun `parseExpiry returns null for non-matching text`() {
+        val regex = Regex("""\b(\d{1,2})/(\d{2,4})\b""")
+
+        assertThat(MLKitTextRecognizer.parseExpiry("JOHN DOE", regex)).isNull()
+    }
+
+    // --- isValidExpiry ---
+
+    @Test
+    fun `isValidExpiry returns true for future date`() {
+        val result = MLKitTextRecognizer.isValidExpiry(
+            expiry = CardOcr.Expiry(month = 6, year = 2028),
+            currentMonth = 3,
+            currentYear = 2026,
+        )
+        assertThat(result).isTrue()
+    }
+
+    @Test
+    fun `isValidExpiry returns true for current month`() {
+        val result = MLKitTextRecognizer.isValidExpiry(
+            expiry = CardOcr.Expiry(month = 3, year = 2026),
+            currentMonth = 3,
+            currentYear = 2026,
+        )
+        assertThat(result).isTrue()
+    }
+
+    @Test
+    fun `isValidExpiry returns false for expired date`() {
+        val result = MLKitTextRecognizer.isValidExpiry(
+            expiry = CardOcr.Expiry(month = 1, year = 2020),
+            currentMonth = 3,
+            currentYear = 2026,
+        )
+        assertThat(result).isFalse()
+    }
+
+    @Test
+    fun `isValidExpiry returns false for expired month in current year`() {
+        val result = MLKitTextRecognizer.isValidExpiry(
+            expiry = CardOcr.Expiry(month = 1, year = 2026),
+            currentMonth = 3,
+            currentYear = 2026,
+        )
+        assertThat(result).isFalse()
+    }
+
+    @Test
+    fun `isValidExpiry returns false for month out of range`() {
+        val tooHigh = MLKitTextRecognizer.isValidExpiry(
+            expiry = CardOcr.Expiry(month = 13, year = 2028),
+            currentMonth = 3,
+            currentYear = 2026,
+        )
+        val tooLow = MLKitTextRecognizer.isValidExpiry(
+            expiry = CardOcr.Expiry(month = 0, year = 2028),
+            currentMonth = 3,
+            currentYear = 2026,
+        )
+        assertThat(tooHigh).isFalse()
+        assertThat(tooLow).isFalse()
+    }
+
+    @Test
+    fun `isValidExpiry returns false for date more than 10 years in the future`() {
+        val result = MLKitTextRecognizer.isValidExpiry(
+            expiry = CardOcr.Expiry(month = 1, year = 2037),
+            currentMonth = 3,
+            currentYear = 2026,
+        )
+        assertThat(result).isFalse()
+    }
+
+    @Test
+    fun `isValidExpiry returns true for date exactly 10 years in the future`() {
+        val result = MLKitTextRecognizer.isValidExpiry(
+            expiry = CardOcr.Expiry(month = 12, year = 2036),
+            currentMonth = 3,
+            currentYear = 2026,
+        )
+        assertThat(result).isTrue()
+    }
+
+    @Test
+    fun `isValidExpiry normalizes 2-digit year`() {
+        val result = MLKitTextRecognizer.isValidExpiry(
+            expiry = CardOcr.Expiry(month = 6, year = 28),
+            currentMonth = 3,
+            currentYear = 2026,
+        )
+        assertThat(result).isTrue()
+    }
+
     // --- Helpers ---
 
     /**
