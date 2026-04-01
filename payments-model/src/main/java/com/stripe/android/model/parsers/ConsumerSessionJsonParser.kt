@@ -24,6 +24,14 @@ class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
             consumerSessionJson.optJSONObject(FIELD_MOBILE_FALLBACK_WEBVIEW_PARAMS)
                 ?.let { parseMobileFallbackWebviewParams(it) }
 
+        val currentAuthenticationLevel =
+            optString(consumerSessionJson, FIELD_CURRENT_AUTHENTICATION_LEVEL)
+                ?.let { ConsumerSession.AuthenticationLevel.fromValue(it) }
+
+        val minimumAuthenticationLevel =
+            optString(consumerSessionJson, FIELD_MINIMUM_AUTHENTICATION_LEVEL)
+                ?.let { ConsumerSession.AuthenticationLevel.fromValue(it) }
+
         return ConsumerSession(
             clientSecret = consumerSessionJson.getString(FIELD_CONSUMER_SESSION_SECRET),
             emailAddress = consumerSessionJson.getString(FIELD_CONSUMER_SESSION_EMAIL),
@@ -33,6 +41,8 @@ class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
             phoneNumberCountry = optString(consumerSessionJson, FIELD_CONSUMER_SESSION_PHONE_COUNTRY),
             verificationSessions = verificationSession,
             mobileFallbackWebviewParams = mobileFallbackWebviewParams,
+            currentAuthenticationLevel = currentAuthenticationLevel,
+            minimumAuthenticationLevel = minimumAuthenticationLevel,
         )
     }
 
@@ -65,6 +75,8 @@ class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
         private const val FIELD_CONSUMER_SESSION_UNREDACTED_PHONE = "unredacted_phone_number"
         private const val FIELD_CONSUMER_SESSION_PHONE_COUNTRY = "phone_number_country"
         private const val FIELD_MOBILE_FALLBACK_WEBVIEW_PARAMS = "mobile_fallback_webview_params"
+        private const val FIELD_CURRENT_AUTHENTICATION_LEVEL = "current_authentication_level"
+        private const val FIELD_MINIMUM_AUTHENTICATION_LEVEL = "minimum_authentication_level"
 
         private const val FIELD_VERIFICATION_SESSION_TYPE = "type"
         private const val FIELD_VERIFICATION_SESSION_STATE = "state"

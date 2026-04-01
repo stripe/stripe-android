@@ -10,13 +10,15 @@ import com.stripe.android.identity.networking.models.VerificationPageStaticConte
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.eq
+import org.mockito.kotlin.argThat
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.same
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.shadows.ShadowSystemClock
+import java.util.concurrent.TimeUnit
 import kotlin.time.ComparableTimeMark
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -74,7 +76,7 @@ internal class FaceDetectorTransitionerTest {
         )
 
         verify(mockSelfieFrameSaver).saveFrame(
-            eq((mockInput to VALID_OUTPUT)),
+            argThat { input == mockInput && output == VALID_OUTPUT },
             same(VALID_OUTPUT)
         )
         assertThat(
@@ -287,6 +289,102 @@ internal class FaceDetectorTransitionerTest {
             verify(transitionerSpy).resetAndReturn()
             assertThat(resultState).isInstanceOf(IdentityScanState.Initial::class.java)
         }
+
+    @Test
+    fun `filteredFrames chooses best frame based on bestFrameScore`() = runBlocking {
+        val transitioner = FaceDetectorTransitioner(SELFIE_CAPTURE_PAGE)
+
+        val oldestOutput = FaceDetectorOutput(
+            boundingBox = BoundingBox(0.2f, 0.2f, 0.6f, 0.6f),
+            resultScore = 0.8f
+        )
+        val midAOutput = FaceDetectorOutput(
+            boundingBox = BoundingBox(0.21f, 0.21f, 0.6f, 0.6f),
+            resultScore = 0.95f
+        )
+        val midBOutput = FaceDetectorOutput(
+            boundingBox = BoundingBox(0.22f, 0.22f, 0.6f, 0.6f),
+            resultScore = 0.7f
+        )
+        val newestOutput = FaceDetectorOutput(
+            boundingBox = BoundingBox(0.23f, 0.23f, 0.6f, 0.6f),
+            resultScore = 0.6f
+        )
+
+        // Save in chronological order; FrameSaver stores most recent at the beginning.
+        transitioner.selfieFrameSaver.saveFrame(
+            FaceDetectorTransitioner.SelfieFrame(mock(), oldestOutput, bestFrameScore = 0.1f),
+            oldestOutput
+        )
+        transitioner.selfieFrameSaver.saveFrame(
+            FaceDetectorTransitioner.SelfieFrame(mock(), midAOutput, bestFrameScore = 0.2f),
+            midAOutput
+        )
+        transitioner.selfieFrameSaver.saveFrame(
+            FaceDetectorTransitioner.SelfieFrame(mock(), midBOutput, bestFrameScore = 0.8f),
+            midBOutput
+        )
+        transitioner.selfieFrameSaver.saveFrame(
+            FaceDetectorTransitioner.SelfieFrame(mock(), newestOutput, bestFrameScore = 0.3f),
+            newestOutput
+        )
+
+        assertThat(
+            transitioner.filteredFrames[FaceDetectorTransitioner.INDEX_BEST].second
+        ).isEqualTo(midBOutput)
+    }
+
+    @Test
+    fun `Found does not save frame when motion blur is detected`() = runBlocking {
+        val pageWithStrictIou = SELFIE_CAPTURE_PAGE.copy(
+            models = SELFIE_CAPTURE_PAGE.models.copy(faceDetectorIou = 0.94f)
+        )
+        val transitioner = FaceDetectorTransitioner(pageWithStrictIou)
+        transitioner.timeoutAt = mockNeverTimeoutClockMark
+
+        val initialState = IdentityScanState.Initial(
+            IdentityScanState.ScanType.SELFIE,
+            transitioner
+        )
+
+        // First valid frame: should be saved.
+        val foundState = transitioner.transitionFromInitial(
+            initialState,
+            mock(),
+            VALID_OUTPUT
+        ) as IdentityScanState.Found
+        assertThat(transitioner.selfieFrameSaver.selfieCollected()).isEqualTo(1)
+
+        // Advance time so the motion blur detector will return a non-null result.
+        ShadowSystemClock.advanceBy(150, TimeUnit.MILLISECONDS)
+
+        whenever(mockReachedStateAt.elapsedNow()).thenReturn((SAMPLE_INTERVAL + 10).milliseconds)
+        val foundStateWithIntervalReached = IdentityScanState.Found(
+            IdentityScanState.ScanType.SELFIE,
+            transitioner,
+            reachedStateAt = mockReachedStateAt
+        )
+
+        val movedButStillValidOutput = FaceDetectorOutput(
+            boundingBox = BoundingBox(
+                left = 0.11f,
+                top = 0.11f,
+                width = 0.6f,
+                height = 0.6f
+            ),
+            resultScore = VALID_SCORE
+        )
+
+        val resultState = transitioner.transitionFromFound(
+            foundStateWithIntervalReached,
+            mock(),
+            movedButStillValidOutput
+        )
+
+        // Motion blur gating should prevent the frame from being saved.
+        assertThat(resultState).isSameInstanceAs(foundStateWithIntervalReached)
+        assertThat(transitioner.selfieFrameSaver.selfieCollected()).isEqualTo(1)
+    }
 
     private companion object {
 

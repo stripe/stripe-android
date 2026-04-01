@@ -1,10 +1,8 @@
 package com.stripe.android.paymentsheet.state
 
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.common.model.asCommonConfiguration
-import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
@@ -19,6 +17,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeElementsSessionRepository
+import com.stripe.android.utils.FakeLinkStore
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -52,7 +51,7 @@ internal class DefaultCreateLinkStateTest {
         expectedFundingTypes: List<PaymentSheet.CardFundingType>
     ) {
         val cardFundingFilterFactory = FakeCardFundingFilterFactory()
-        val createLinkState = createLinkStateFactory(cardFundingFilterFactory)
+        val createLinkState = createLinkStateFactory(cardFundingFilterFactory = cardFundingFilterFactory)
 
         val configuration = PaymentSheetFixtures.CONFIG_MINIMUM
             .newBuilder()
@@ -69,34 +68,28 @@ internal class DefaultCreateLinkStateTest {
         createLinkState(
             elementsSession = elementsSession,
             configuration = configuration,
-            customer = null,
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value
-            ),
-            clientAttributionMetadata = ClientAttributionMetadata(
-                elementsSessionConfigId = FakeElementsSessionRepository.DEFAULT_ELEMENTS_SESSION_CONFIG_ID,
-                paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
-                paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified
-            )
+            initializationMode = PAYMENT_INTENT_INIT_MODE,
+            customerMetadata = null,
+            clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
         )
 
         assertThat(cardFundingFilterFactory.invokedWith).isEqualTo(expectedFundingTypes)
     }
 
     private fun createLinkStateFactory(
-        cardFundingFilterFactory: PaymentSheetCardFundingFilterFactory,
+        cardFundingFilterFactory: PaymentSheetCardFundingFilterFactory = FakeCardFundingFilterFactory(),
     ): DefaultCreateLinkState {
         return DefaultCreateLinkState(
             accountStatusProvider = { AccountStatus.SignedOut },
             retrieveCustomerEmail = DefaultRetrieveCustomerEmail(FakeCustomerRepository()),
-            linkStore = LinkStore(ApplicationProvider.getApplicationContext()),
+            linkStore = FakeLinkStore(),
             linkGateFactory = FakeLinkGate.Factory(FakeLinkGate()),
             cardFundingFilterFactory = cardFundingFilterFactory
         )
     }
 
     private fun createElementsSession(
-        flags: Map<ElementsSession.Flag, Boolean>
+        flags: Map<ElementsSession.Flag, Boolean> = emptyMap(),
     ): ElementsSession {
         return ElementsSession(
             linkSettings = null,
@@ -128,5 +121,17 @@ internal class DefaultCreateLinkStateTest {
             invokedWith = params
             return PaymentSheetCardFundingFilter(params)
         }
+    }
+
+    private companion object {
+        val PAYMENT_INTENT_INIT_MODE = PaymentElementLoader.InitializationMode.PaymentIntent(
+            clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value
+        )
+
+        val DEFAULT_CLIENT_ATTRIBUTION_METADATA = ClientAttributionMetadata(
+            elementsSessionConfigId = FakeElementsSessionRepository.DEFAULT_ELEMENTS_SESSION_CONFIG_ID,
+            paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
+            paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
+        )
     }
 }

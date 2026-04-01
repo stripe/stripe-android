@@ -21,11 +21,9 @@ internal class CustomerMetadataTest {
     fun `Should create 'Permissions' for customer session properly with permissions disabled`() {
         customerSessionPermissionsTest(
             paymentElementDisabled = true,
-        ) { permissions ->
-            assertThat(permissions.canRemovePaymentMethods).isFalse()
-            assertThat(permissions.canRemoveLastPaymentMethod).isFalse()
-            // Always true for `customer_session`
-            assertThat(permissions.canRemoveDuplicates).isTrue()
+        ) { result ->
+            assertThat(result.canRemovePaymentMethods).isFalse()
+            assertThat(result.canRemoveLastPaymentMethod).isFalse()
         }
     }
 
@@ -35,12 +33,10 @@ internal class CustomerMetadataTest {
             canRemoveLastPaymentMethodConfigValue = true,
             paymentMethodRemoveLast = ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
             paymentMethodRemove = ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
-        ) { permissions ->
-            assertThat(permissions.removePaymentMethod).isEqualTo(PaymentMethodRemovePermission.Full)
-            assertThat(permissions.canRemovePaymentMethods).isTrue()
-            assertThat(permissions.canRemoveLastPaymentMethod).isTrue()
-            // Always true for `customer_session`
-            assertThat(permissions.canRemoveDuplicates).isTrue()
+        ) { result ->
+            assertThat(result.removePaymentMethod).isEqualTo(PaymentMethodRemovePermission.Full)
+            assertThat(result.canRemovePaymentMethods).isTrue()
+            assertThat(result.canRemoveLastPaymentMethod).isTrue()
         }
     }
 
@@ -50,12 +46,10 @@ internal class CustomerMetadataTest {
             canRemoveLastPaymentMethodConfigValue = true,
             paymentMethodRemoveLast = ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
             paymentMethodRemove = ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Partial,
-        ) { permissions ->
-            assertThat(permissions.removePaymentMethod).isEqualTo(PaymentMethodRemovePermission.Partial)
-            assertThat(permissions.canRemovePaymentMethods).isTrue()
-            assertThat(permissions.canRemoveLastPaymentMethod).isTrue()
-            // Always true for `customer_session`
-            assertThat(permissions.canRemoveDuplicates).isTrue()
+        ) { result ->
+            assertThat(result.removePaymentMethod).isEqualTo(PaymentMethodRemovePermission.Partial)
+            assertThat(result.canRemovePaymentMethods).isTrue()
+            assertThat(result.canRemoveLastPaymentMethod).isTrue()
         }
     }
 
@@ -65,12 +59,10 @@ internal class CustomerMetadataTest {
             canRemoveLastPaymentMethodConfigValue = true,
             paymentMethodRemoveLast = ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
             paymentMethodRemove = ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Disabled
-        ) { permissions ->
-            assertThat(permissions.removePaymentMethod).isEqualTo(PaymentMethodRemovePermission.None)
-            assertThat(permissions.canRemovePaymentMethods).isFalse()
-            assertThat(permissions.canRemoveLastPaymentMethod).isTrue()
-            // Always true for `customer_session`
-            assertThat(permissions.canRemoveDuplicates).isTrue()
+        ) { result ->
+            assertThat(result.removePaymentMethod).isEqualTo(PaymentMethodRemovePermission.None)
+            assertThat(result.canRemovePaymentMethods).isFalse()
+            assertThat(result.canRemoveLastPaymentMethod).isTrue()
         }
     }
 
@@ -78,8 +70,8 @@ internal class CustomerMetadataTest {
     fun `Should set 'canRemoveLastPaymentMethod' to true if config value is true for legacy ephemeral keys`() {
         legacyEphemeralKeyTestingScenario(
             allowsRemovalOfLastSavedPaymentMethod = true,
-        ) { permissions ->
-            assertThat(permissions.canRemoveLastPaymentMethod).isTrue()
+        ) { result ->
+            assertThat(result.canRemoveLastPaymentMethod).isTrue()
         }
     }
 
@@ -87,8 +79,8 @@ internal class CustomerMetadataTest {
     fun `Should set 'canRemoveLastPaymentMethod' to false if config value is false for legacy ephemeral keys`() {
         legacyEphemeralKeyTestingScenario(
             allowsRemovalOfLastSavedPaymentMethod = false,
-        ) { permissions ->
-            assertThat(permissions.canRemoveLastPaymentMethod).isFalse()
+        ) { result ->
+            assertThat(result.canRemoveLastPaymentMethod).isFalse()
         }
     }
 
@@ -97,8 +89,8 @@ internal class CustomerMetadataTest {
         customerSessionPermissionsTest(
             paymentMethodRemoveLast = ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Disabled,
             canRemoveLastPaymentMethodConfigValue = false,
-        ) { permissions ->
-            assertThat(permissions.canRemoveLastPaymentMethod).isFalse()
+        ) { result ->
+            assertThat(result.canRemoveLastPaymentMethod).isFalse()
         }
 
     @Test
@@ -106,8 +98,8 @@ internal class CustomerMetadataTest {
         customerSessionPermissionsTest(
             paymentElementDisabled = false,
             canRemoveLastPaymentMethodConfigValue = false,
-        ) { permissions ->
-            assertThat(permissions.canRemoveLastPaymentMethod).isFalse()
+        ) { result ->
+            assertThat(result.canRemoveLastPaymentMethod).isFalse()
         }
 
     @Test
@@ -115,8 +107,8 @@ internal class CustomerMetadataTest {
         customerSessionPermissionsTest(
             paymentElementDisabled = true,
             canRemoveLastPaymentMethodConfigValue = true,
-        ) { permissions ->
-            assertThat(permissions.canRemoveLastPaymentMethod).isFalse()
+        ) { result ->
+            assertThat(result.canRemoveLastPaymentMethod).isFalse()
         }
 
     @Test
@@ -124,8 +116,8 @@ internal class CustomerMetadataTest {
         customerSessionPermissionsTest(
             paymentMethodRemoveLast = ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Disabled,
             canRemoveLastPaymentMethodConfigValue = true,
-        ) { permissions ->
-            assertThat(permissions.canRemoveLastPaymentMethod).isFalse()
+        ) { result ->
+            assertThat(result.canRemoveLastPaymentMethod).isFalse()
         }
 
     @Test
@@ -133,8 +125,8 @@ internal class CustomerMetadataTest {
         customerSessionPermissionsTest(
             paymentMethodRemoveLast = ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.NotProvided,
             canRemoveLastPaymentMethodConfigValue = false,
-        ) { permissions ->
-            assertThat(permissions.canRemoveLastPaymentMethod).isFalse()
+        ) { result ->
+            assertThat(result.canRemoveLastPaymentMethod).isFalse()
         }
 
     @Test
@@ -142,8 +134,8 @@ internal class CustomerMetadataTest {
         customerSessionPermissionsTest(
             paymentMethodRemoveLast = ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
             canRemoveLastPaymentMethodConfigValue = false,
-        ) { permissions ->
-            assertThat(permissions.canRemoveLastPaymentMethod).isFalse()
+        ) { result ->
+            assertThat(result.canRemoveLastPaymentMethod).isFalse()
         }
 
     @Test
@@ -151,8 +143,8 @@ internal class CustomerMetadataTest {
         customerSessionPermissionsTest(
             paymentMethodRemoveLast = ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.NotProvided,
             canRemoveLastPaymentMethodConfigValue = true,
-        ) { permissions ->
-            assertThat(permissions.canRemoveLastPaymentMethod).isTrue()
+        ) { result ->
+            assertThat(result.canRemoveLastPaymentMethod).isTrue()
         }
 
     @Test
@@ -160,47 +152,114 @@ internal class CustomerMetadataTest {
         customerSessionPermissionsTest(
             paymentMethodRemoveLast = ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
             canRemoveLastPaymentMethodConfigValue = true,
-        ) { permissions ->
-            assertThat(permissions.canRemoveLastPaymentMethod).isTrue()
+        ) { result ->
+            assertThat(result.canRemoveLastPaymentMethod).isTrue()
         }
+
+    @Test
+    fun `Should set saveConsent to Enabled when save is enabled for customer session`() {
+        customerSessionPermissionsTest { result ->
+            assertThat(result.saveConsent).isEqualTo(PaymentMethodSaveConsentBehavior.Enabled)
+        }
+    }
+
+    @Test
+    fun `Should set saveConsent to Disabled when save is disabled for customer session`() {
+        val mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
+            isPaymentMethodSaveEnabled = false,
+            paymentMethodRemove = ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
+            paymentMethodRemoveLast = ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
+            allowRedisplayOverride = PaymentMethod.AllowRedisplay.ALWAYS,
+            isPaymentMethodSetAsDefaultEnabled = false,
+        )
+        val configuration = createConfiguration()
+        val customer = createElementsSessionCustomer(
+            mobilePaymentElementComponent = mobilePaymentElement,
+        )
+        val result = CustomerMetadata.createForPaymentSheetCustomerSession(
+            configuration = configuration,
+            customer = customer,
+            id = "cus_test",
+            ephemeralKeySecret = "ek_test",
+            customerSessionClientSecret = "cuss_test",
+            isPaymentMethodSetAsDefaultEnabled = false,
+        )
+        assertThat(result.saveConsent).isEqualTo(
+            PaymentMethodSaveConsentBehavior.Disabled(
+                overrideAllowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS,
+            )
+        )
+    }
+
+    @Test
+    fun `Should set saveConsent to Disabled when MPE is disabled for customer session`() {
+        customerSessionPermissionsTest(
+            paymentElementDisabled = true,
+        ) { result ->
+            assertThat(result.saveConsent).isEqualTo(
+                PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null)
+            )
+        }
+    }
+
+    @Test
+    fun `Should set saveConsent to Legacy for legacy ephemeral keys`() {
+        legacyEphemeralKeyTestingScenario(
+            allowsRemovalOfLastSavedPaymentMethod = true,
+        ) { result ->
+            assertThat(result.saveConsent).isEqualTo(PaymentMethodSaveConsentBehavior.Legacy)
+        }
+    }
 
     @Test
     fun `'createForCustomerSheet' should have payment method remove permissions of 'Full'`() {
         val customerSheetSession = createCustomerSheetSession(PaymentMethodRemovePermission.Full)
 
-        val permissions = CustomerMetadata.Permissions.createForCustomerSheet(
+        val result = CustomerMetadata.createForCustomerSheet(
             configuration = createCustomerSheetConfiguration(),
-            customerSheetSession = customerSheetSession
+            customerSheetSession = customerSheetSession,
+            id = "cus_test",
+            ephemeralKeySecret = "ek_test",
+            customerSessionClientSecret = null,
+            isPaymentMethodSetAsDefaultEnabled = false,
         )
 
-        assertThat(permissions.removePaymentMethod).isEqualTo(PaymentMethodRemovePermission.Full)
-        assertThat(permissions.canRemovePaymentMethods).isTrue()
+        assertThat(result.removePaymentMethod).isEqualTo(PaymentMethodRemovePermission.Full)
+        assertThat(result.canRemovePaymentMethods).isTrue()
     }
 
     @Test
     fun `'createForCustomerSheet' should have payment method remove permissions of 'Partial'`() {
         val customerSheetSession = createCustomerSheetSession(PaymentMethodRemovePermission.Partial)
 
-        val permissions = CustomerMetadata.Permissions.createForCustomerSheet(
+        val result = CustomerMetadata.createForCustomerSheet(
             configuration = createCustomerSheetConfiguration(),
-            customerSheetSession = customerSheetSession
+            customerSheetSession = customerSheetSession,
+            id = "cus_test",
+            ephemeralKeySecret = "ek_test",
+            customerSessionClientSecret = null,
+            isPaymentMethodSetAsDefaultEnabled = false,
         )
 
-        assertThat(permissions.removePaymentMethod).isEqualTo(PaymentMethodRemovePermission.Partial)
-        assertThat(permissions.canRemovePaymentMethods).isTrue()
+        assertThat(result.removePaymentMethod).isEqualTo(PaymentMethodRemovePermission.Partial)
+        assertThat(result.canRemovePaymentMethods).isTrue()
     }
 
     @Test
     fun `'createForCustomerSheet' should have payment method remove permissions of 'None'`() {
         val customerSheetSession = createCustomerSheetSession(PaymentMethodRemovePermission.None)
 
-        val permissions = CustomerMetadata.Permissions.createForCustomerSheet(
+        val result = CustomerMetadata.createForCustomerSheet(
             configuration = createCustomerSheetConfiguration(),
-            customerSheetSession = customerSheetSession
+            customerSheetSession = customerSheetSession,
+            id = "cus_test",
+            ephemeralKeySecret = "ek_test",
+            customerSessionClientSecret = null,
+            isPaymentMethodSetAsDefaultEnabled = false,
         )
 
-        assertThat(permissions.removePaymentMethod).isEqualTo(PaymentMethodRemovePermission.None)
-        assertThat(permissions.canRemovePaymentMethods).isFalse()
+        assertThat(result.removePaymentMethod).isEqualTo(PaymentMethodRemovePermission.None)
+        assertThat(result.canRemovePaymentMethods).isFalse()
     }
 
     private fun createEnabledMobilePaymentElement(
@@ -221,15 +280,18 @@ internal class CustomerMetadataTest {
 
     private fun legacyEphemeralKeyTestingScenario(
         allowsRemovalOfLastSavedPaymentMethod: Boolean,
-        block: (CustomerMetadata.Permissions) -> Unit
+        block: (CustomerMetadata) -> Unit
     ) {
-        val permissions = CustomerMetadata.Permissions.createForPaymentSheetLegacyEphemeralKey(
+        val result = CustomerMetadata.createForPaymentSheetLegacyEphemeralKey(
             configuration = createConfiguration(
                 allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod
-            )
+            ),
+            id = "cus_test",
+            ephemeralKeySecret = "ek_test",
+            isPaymentMethodSetAsDefaultEnabled = false,
         )
 
-        block(permissions)
+        block(result)
     }
 
     private fun createCustomerSheetSession(
@@ -284,7 +346,7 @@ internal class CustomerMetadataTest {
             ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
         paymentMethodRemove: ElementsSession.Customer.Components.PaymentMethodRemoveFeature =
             ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
-        block: (CustomerMetadata.Permissions) -> Unit
+        block: (CustomerMetadata) -> Unit
     ) {
         val mobilePaymentElementComponent = if (paymentElementDisabled) {
             ElementsSession.Customer.Components.MobilePaymentElement.Disabled
@@ -300,12 +362,16 @@ internal class CustomerMetadataTest {
             mobilePaymentElementComponent = mobilePaymentElementComponent,
         )
 
-        val permissions = CustomerMetadata.Permissions.createForPaymentSheetCustomerSession(
+        val result = CustomerMetadata.createForPaymentSheetCustomerSession(
             configuration = configuration,
             customer = customer,
+            id = "cus_test",
+            ephemeralKeySecret = "ek_test",
+            customerSessionClientSecret = "cuss_test",
+            isPaymentMethodSetAsDefaultEnabled = false,
         )
 
-        block(permissions)
+        block(result)
     }
 
     private fun createElementsSessionCustomer(

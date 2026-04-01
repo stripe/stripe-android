@@ -10,6 +10,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.AndroidVerificationObject
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmationToken
@@ -517,7 +518,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         runInterceptorScenario(
             integrationMetadata = defaultIntegrationMetadata,
             scenario = InterceptorTestScenario(
-                ephemeralKeySecret = "ek_test_123",
+                customerMetadata = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA,
                 stripeRepository = object : AbsFakeStripeRepository() {
                     override suspend fun createConfirmationToken(
                         confirmationTokenParams: ConfirmationTokenParams,
@@ -568,7 +569,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         )
 
         val interceptor = createIntentConfirmationInterceptor(
-            ephemeralKeySecret = "ek_test_123",
+            customerMetadata = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA,
             integrationMetadata = defaultIntegrationMetadata,
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun createConfirmationToken(
@@ -747,7 +748,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         val observedParams = mutableListOf<ConfirmationTokenParams>()
 
         val interceptor = createIntentConfirmationInterceptor(
-            ephemeralKeySecret = "ek_test_123",
+            customerMetadata = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA,
             integrationMetadata = defaultIntegrationMetadata,
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun createConfirmationToken(
@@ -793,7 +794,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         val observedParams = mutableListOf<ConfirmationTokenParams>()
 
         val interceptor = createIntentConfirmationInterceptor(
-            ephemeralKeySecret = "ek_test_123",
+            customerMetadata = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA,
             integrationMetadata = defaultIntegrationMetadata,
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun createConfirmationToken(
@@ -839,7 +840,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         val observedParams = mutableListOf<ConfirmationTokenParams>()
 
         val interceptor = createIntentConfirmationInterceptor(
-            ephemeralKeySecret = "ek_test_123",
+            customerMetadata = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA,
             integrationMetadata = IntegrationMetadata.DeferredIntent.WithConfirmationToken(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
@@ -893,7 +894,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         val observedParams = mutableListOf<ConfirmationTokenParams>()
 
         val interceptor = createIntentConfirmationInterceptor(
-            ephemeralKeySecret = "ek_test_123",
+            customerMetadata = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA,
             integrationMetadata = IntegrationMetadata.DeferredIntent.WithConfirmationToken(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
@@ -947,7 +948,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         val observedParams = mutableListOf<ConfirmationTokenParams>()
 
         val interceptor = createIntentConfirmationInterceptor(
-            ephemeralKeySecret = "ek_test_123",
+            customerMetadata = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA,
             publishableKeyProvider = { "pk_test_123" },
             integrationMetadata = IntegrationMetadata.DeferredIntent.WithConfirmationToken(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
@@ -1133,51 +1134,76 @@ class ConfirmationTokenConfirmationInterceptorTest {
     }
 
     @Test
-    fun `Saved PM - includes radarOptions when hCaptchaToken is provided for CSC flow`() {
-        runRadarOptionsTest(
+    fun `Saved PM - Returns confirm params with all challenge state fields`() {
+        val challengeState = ConfirmationChallengeState(
             hCaptchaToken = "test_hcaptcha_token",
-            attestationToken = null,
+            attestationResult = AndroidVerificationObject(
+                androidVerificationToken = "test_attestation_token",
+                appId = "com.stripe.test"
+            ),
+        )
+
+        val confirmParams = interceptWithSavedPaymentMethodForCSC(challengeState)
+
+        assertRadarOptionsEquals(
+            confirmParams = confirmParams,
+            expectedRadarOptions = challengeState.toExpectedRadarOptions()
         )
     }
 
     @Test
-    fun `Saved PM - includes radarOptions when attestationToken is provided for CSC flow`() {
-        runRadarOptionsTest(
-            hCaptchaToken = null,
-            attestationToken = "test_attestation_token",
+    fun `Saved PM - Returns confirm params with null attestationToken when not provided`() {
+        val challengeState = ConfirmationChallengeState(hCaptchaToken = "test_hcaptcha_token")
+
+        val confirmParams = interceptWithSavedPaymentMethodForCSC(challengeState)
+
+        assertRadarOptionsEquals(
+            confirmParams = confirmParams,
+            expectedRadarOptions = challengeState.toExpectedRadarOptions()
         )
     }
 
     @Test
-    fun `Saved PM - includes radarOptions when both tokens are provided for CSC flow`() {
-        runRadarOptionsTest(
-            hCaptchaToken = "test_hcaptcha_token",
-            attestationToken = "test_attestation_token",
+    fun `Saved PM - Returns confirm with RadarOptions when both tokens are null`() {
+        val challengeState = ConfirmationChallengeState()
+
+        val confirmParams = interceptWithSavedPaymentMethodForCSC(challengeState)
+
+        assertRadarOptionsEquals(
+            confirmParams = confirmParams,
+            expectedRadarOptions = challengeState.toExpectedRadarOptions()
         )
     }
 
     @Test
-    fun `Saved PM - includes radarOptions with empty values when no challenge tokens for CSC flow`() {
-        runRadarOptionsTest(
-            hCaptchaToken = null,
-            attestationToken = null,
+    fun `Saved PM - Returns confirm params with only attestationResult`() {
+        val challengeState = ConfirmationChallengeState(
+            attestationResult = AndroidVerificationObject(
+                androidVerificationToken = "attestation_token_123",
+                appId = "com.stripe.test.app"
+            ),
+        )
+
+        val confirmParams = interceptWithSavedPaymentMethodForCSC(challengeState)
+
+        assertRadarOptionsEquals(
+            confirmParams = confirmParams,
+            expectedRadarOptions = challengeState.toExpectedRadarOptions()
         )
     }
 
-    private fun runRadarOptionsTest(
-        hCaptchaToken: String?,
-        attestationToken: String?,
-    ) {
+    private fun interceptWithSavedPaymentMethodForCSC(
+        challengeState: ConfirmationChallengeState
+    ): ConfirmPaymentIntentParams? {
+        var confirmParams: ConfirmPaymentIntentParams? = null
+
         runConfirmationTokenInterceptorScenario(
             retrievedIntentStatus = StripeIntent.Status.RequiresConfirmation,
         ) { interceptor ->
             val confirmationOption = PaymentMethodConfirmationOption.Saved(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 optionsParams = null,
-                confirmationChallengeState = ConfirmationChallengeState(
-                    hCaptchaToken = hCaptchaToken,
-                    attestationToken = attestationToken,
-                ),
+                confirmationChallengeState = challengeState,
             )
 
             val nextAction = interceptor.intercept(
@@ -1188,15 +1214,16 @@ class ConfirmationTokenConfirmationInterceptorTest {
 
             assertThat(nextAction)
                 .isInstanceOf<ConfirmationDefinition.Action.Launch<IntentConfirmationDefinition.Args>>()
-            assertThat(nextAction.asConfirmParams<ConfirmPaymentIntentParams>()?.radarOptions)
-                .isEqualTo(
-                    RadarOptionsFactory.create(
-                        hCaptchaToken = hCaptchaToken,
-                        verificationObject = AndroidVerificationObject(androidVerificationToken = attestationToken),
-                    )
-                )
+            confirmParams = nextAction.asConfirmParams()
         }
+
+        return confirmParams
     }
+
+    private fun ConfirmationChallengeState.toExpectedRadarOptions() = RadarOptionsFactory.create(
+        hCaptchaToken = hCaptchaToken,
+        verificationObject = attestationResult
+    )
 
     private fun runConfirmationTokenInterceptorScenario(
         observedParams: Turbine<ConfirmationTokenParams> = Turbine(),
@@ -1208,7 +1235,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
         runInterceptorScenario(
             integrationMetadata = integrationMetadata,
             scenario = InterceptorTestScenario(
-                ephemeralKeySecret = "ek_test_123",
+                customerMetadata = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA,
                 publishableKeyProvider = { if (isLiveMode) "pk_live_123" else "pk_test_123" },
                 stripeRepository = createFakeStripeRepositoryForConfirmationToken(
                     observedParams,

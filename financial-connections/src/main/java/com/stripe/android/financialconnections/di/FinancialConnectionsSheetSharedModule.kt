@@ -9,6 +9,7 @@ import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.core.injection.StripeNetworkClientModule
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
@@ -17,10 +18,8 @@ import com.stripe.android.core.networking.AnalyticsRequestV2Storage
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestV2Executor
-import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.networking.NetworkTypeDetector
 import com.stripe.android.core.networking.RealAnalyticsRequestV2Storage
-import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.core.utils.IsWorkManagerAvailable
 import com.stripe.android.core.utils.RealIsWorkManagerAvailable
@@ -66,7 +65,7 @@ import kotlin.coroutines.CoroutineContext
  * saving and restoring user-provided configuration dependencies.
  */
 @Module(
-    includes = [FinancialConnectionsSheetConfigurationModule::class]
+    includes = [FinancialConnectionsSheetConfigurationModule::class, StripeNetworkClientModule::class]
 )
 internal interface FinancialConnectionsSheetSharedModule {
 
@@ -135,16 +134,6 @@ internal interface FinancialConnectionsSheetSharedModule {
             isLenient = true
             encodeDefaults = true
         }
-
-        @Provides
-        @ActivityRetainedScope
-        fun provideStripeNetworkClient(
-            @IOContext context: CoroutineContext,
-            logger: Logger
-        ): StripeNetworkClient = DefaultStripeNetworkClient(
-            workContext = context,
-            logger = logger
-        )
 
         @Provides
         @ActivityRetainedScope

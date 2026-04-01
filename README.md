@@ -45,8 +45,7 @@ Table of contents
 
 **Localized**: We support the following localizations: Bulgarian, Catalan, Chinese (Hong Kong), Chinese (Simplified), Chinese (Traditional), Croatian, Czech, Danish, Dutch, English (US), English (United Kingdom), Estonian, Filipino, Finnish, French, French (Canada), German, Greek, Hungarian, Indonesian, Italian, Japanese, Korean, Latvian, Lithuanian, Malay, Maltese, Norwegian Bokmål, Norwegian Nynorsk (Norway), Polish, Portuguese, Portuguese (Brazil), Romanian, Russian, Slovak, Slovenian, Spanish, Spanish (Latin America), Swedish, Turkish, Thai and Vietnamese.
 
-**Recommended usage**
-If you're selling digital products or services that will be consumed within your app, (e.g. subscriptions, in-game currencies, game levels, access to premium content, or unlocking a full version), and you plan to distribute it through the Google Play Store, you must use Googles's in-app purchase APIs. See the [Google Play Billing](https://developer.android.com/distribute/play-billing) for more information. For all other scenarios you can use this SDK to process payments via Stripe.
+**Digital Goods**: You can use the SDK to process payments via Stripe, including for digital goods and services consumed within your app (e.g. subscriptions, in-game currencies, game levels, access to premium content, or unlocking a full version).
 
 ## Releases
 * The [changelog](CHANGELOG.md) provides a summary of changes in each release.
@@ -56,9 +55,11 @@ If you're selling digital products or services that will be consumed within your
 
 ### Requirements
 
-* Android 5.0 (API level 21) and above
-* [Android Gradle Plugin](https://developer.android.com/studio/releases/gradle-plugin) 8.1
-* [Gradle](https://gradle.org/releases/) 8.0
+* Android 6.0 (API level 23) and above
+* `compileSdkVersion` 36 and above
+* [Android Gradle Plugin](https://developer.android.com/studio/releases/gradle-plugin) 8.13.2
+* [Gradle](https://gradle.org/releases/) 9.3.1
+* [Kotlin](https://kotlinlang.org/docs/releases.html) 2.3.10
 
 ### Configuration
 
@@ -66,11 +67,13 @@ Add `stripe-android` to your `build.gradle` dependencies.
 
 ```
 dependencies {
-    implementation 'com.stripe:stripe-android:22.8.0'
+    implementation 'com.stripe:stripe-android:23.2.0'
 }
 ```
 
 ### Compatibility with Jetpack Compose
+
+To ensure broad compatibility across the ecosystem, `stripe-android` updates its dependencies (including Jetpack Compose) to their latest versions on a monthly basis.
 
 `stripe-android` uses Jetpack Compose internally and expects consumers to use a compatible version:
 
@@ -82,7 +85,13 @@ dependencies {
   <td>20.32.0-20.53.0</td><td>Compose UI 1.5.x</td>
  </tr>
  <tr>
-  <td>21.0.0-Current</td><td>Compose UI 1.6.x or Compose UI 1.7.x</td>
+  <td>21.0.0-22.6.1</td><td>Compose UI 1.6.x or Compose UI 1.7.x or Compose UI 1.8.x</td>
+ </tr>
+ <tr>
+  <td>22.7.0-22.8.1</td><td>Compose UI 1.9.x</td>
+ </tr>
+ <tr>
+  <td>23.0.0-Current</td><td>Compose UI 1.10.x</td>
  </tr>
 </table>
 
@@ -96,3 +105,8 @@ Get started with our [📚 integration guides](https://stripe.com/docs/payments/
 - The [example project](https://github.com/stripe/stripe-android/tree/master/example) demonstrates other integrations, that give you more control over the user experience:
     - how to use the Stripe class's synchronous and asynchronous methods
     - how to use the CardFormView.
+
+## Licenses
+
+- [Stripe Android SDK License](LICENSE)
+- StripeCardScan and StripeIdentity use LiteRT in Google Play services, and StripeCardScan also uses ML Kit in Google Play services. LiteRT and ML Kit may send performance and usage metrics to Google, and you may need to disclose this data collection to your users. By using StripeCardScan, you agree to the [LiteRT in Google Play services terms of service](https://ai.google.dev/edge/litert/android/play_services#tos) and the [ML Kit terms of service](https://developers.google.com/ml-kit/terms). By using StripeIdentity, you agree to the [LiteRT in Google Play services terms of service](https://ai.google.dev/edge/litert/android/play_services#tos).

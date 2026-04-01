@@ -302,7 +302,7 @@ internal class LinkActivityViewModelTest {
     fun `onCreate should start with Wallet screen account status is Verified`() = runTest {
         val linkAccountManager = FakeLinkAccountManager()
         linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
-        linkAccountManager.setAccountStatus(AccountStatus.Verified(true, null))
+        linkAccountManager.setAccountStatus(AccountStatus.Verified(consentPresentation = null))
 
         val vm = createViewModel(linkAccountManager = linkAccountManager)
 
@@ -429,7 +429,6 @@ internal class LinkActivityViewModelTest {
             )
             linkAccountManager.setAccountStatus(
                 AccountStatus.Verified(
-                    hasVerifiedSMSSession = false,
                     consentPresentation = null
                 )
             )
@@ -501,7 +500,7 @@ internal class LinkActivityViewModelTest {
 
         vm.onCreate(mock())
 
-        assertThat(vm.linkScreenState.value).isEqualTo(ScreenState.Loading)
+        assertThat(vm.linkScreenState.value).isEqualTo(ScreenState.FullScreen(initialDestination = LinkScreen.Loading))
 
         assertThat(launchWebConfig).isNotNull()
     }
@@ -576,11 +575,11 @@ internal class LinkActivityViewModelTest {
         linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification())
 
         vm.linkScreenState.test {
-            assertThat(awaitItem()).isEqualTo(ScreenState.Loading)
+            assertThat(awaitItem()).isEqualTo(ScreenState.FullScreen(initialDestination = LinkScreen.Loading))
             vm.onCreate(mock())
             assertThat(awaitItem()).isEqualTo(ScreenState.VerificationDialog(TestFactory.LINK_ACCOUNT))
 
-            linkAccountManager.setAccountStatus(AccountStatus.Verified(true, null))
+            linkAccountManager.setAccountStatus(AccountStatus.Verified(consentPresentation = null))
             vm.onVerificationSucceeded(null)
             assertThat(awaitItem()).isInstanceOf(ScreenState.FullScreen::class.java)
         }
@@ -797,7 +796,7 @@ internal class LinkActivityViewModelTest {
                 linkAccountManager = linkAccountManager,
                 linkLaunchMode = LinkLaunchMode.Authorization(linkAuthIntentId = "lai_123")
             )
-            linkAccountManager.setAccountStatus(AccountStatus.Verified(true, inlineConsentPresentation))
+            linkAccountManager.setAccountStatus(AccountStatus.Verified(consentPresentation = inlineConsentPresentation))
 
             vm.result.test {
                 vm.onCreate(mock())
@@ -820,7 +819,6 @@ internal class LinkActivityViewModelTest {
         )
         linkAccountManager.setAccountStatus(
             AccountStatus.Verified(
-                hasVerifiedSMSSession = true,
                 consentPresentation = ConsentPresentation.FullScreen(TestFactory.CONSENT_PANE)
             )
         )
@@ -922,7 +920,7 @@ internal class LinkActivityViewModelTest {
 
         val vm = createViewModel(linkAccountManager = linkAccountManager)
 
-        val accountStatus = AccountStatus.Verified(true, consentPresentation)
+        val accountStatus = AccountStatus.Verified(consentPresentation = consentPresentation)
         val consumerSessionRefresh = ConsumerSessionRefresh(
             consumerSession = TestFactory.CONSUMER_SESSION,
             linkAuthIntent = linkAuthIntentStatus?.let { LinkAuthIntent(it) }

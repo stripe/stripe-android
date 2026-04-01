@@ -16,6 +16,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.checkout.Checkout
+import com.stripe.android.checkout.CheckoutConfigurationMerger
+import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.core.utils.StatusBarCompat
@@ -39,6 +42,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.TermsDisplay
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.CustomerState
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.utils.applicationIsTaskOwner
 import com.stripe.android.uicore.image.rememberDrawablePainter
 import com.stripe.android.uicore.utils.collectAsState
@@ -81,7 +85,29 @@ class EmbeddedPaymentElement @Inject internal constructor(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         configuration: Configuration,
     ): ConfigureResult {
-        return configurationCoordinator.configure(intentConfiguration, configuration)
+        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration)
+        return configurationCoordinator.configure(configuration, initializationMode)
+    }
+
+    /**
+     * Call this method to configure [EmbeddedPaymentElement] or when the [Checkout] values you used to
+     *  configure [EmbeddedPaymentElement] change.
+     *
+     * This ensures the appropriate payment methods are displayed, collect the right fields, etc.
+     * - Note: Upon completion, [paymentOption] may become null if it's no longer available.
+     */
+    @CheckoutSessionPreview
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun configure(
+        checkout: Checkout,
+        configuration: Configuration,
+    ): ConfigureResult {
+        CheckoutInstances.ensureNoMutationInFlight(checkout.internalState.key)
+        return configurationCoordinator.configure(
+            configuration = CheckoutConfigurationMerger.EmbeddedConfiguration(configuration)
+                .forCheckoutSession(checkout.internalState),
+            initializationMode = checkout.internalState.initializationMode,
+        )
     }
 
     /**
@@ -579,6 +605,36 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 userOverrideCountry = userOverrideCountry,
             )
         }
+
+        @OptIn(
+            ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class,
+            CardFundingFilteringPrivatePreview::class,
+        )
+        internal fun newBuilder(): Builder = Builder(merchantDisplayName)
+            .customer(customer)
+            .googlePay(googlePay)
+            .defaultBillingDetails(defaultBillingDetails)
+            .shippingDetails(shippingDetails)
+            .allowsDelayedPaymentMethods(allowsDelayedPaymentMethods)
+            .allowsPaymentMethodsRequiringShippingAddress(allowsPaymentMethodsRequiringShippingAddress)
+            .appearance(appearance)
+            .billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
+            .preferredNetworks(preferredNetworks)
+            .allowsRemovalOfLastSavedPaymentMethod(allowsRemovalOfLastSavedPaymentMethod)
+            .paymentMethodOrder(paymentMethodOrder)
+            .externalPaymentMethods(externalPaymentMethods)
+            .cardBrandAcceptance(cardBrandAcceptance)
+            .allowedCardFundingTypes(allowedCardFundingTypes)
+            .customPaymentMethods(customPaymentMethods)
+            .embeddedViewDisplaysMandateText(embeddedViewDisplaysMandateText)
+            .link(link)
+            .formSheetAction(formSheetAction)
+            .termsDisplay(termsDisplay)
+            .opensCardScannerAutomatically(opensCardScannerAutomatically)
+            .userOverrideCountry(userOverrideCountry)
+            .apply {
+                primaryButtonLabel?.let { primaryButtonLabel(it) }
+            }
     }
 
     /**
@@ -622,17 +678,14 @@ class EmbeddedPaymentElement @Inject internal constructor(
     class PaymentOptionDisplayData internal constructor(
         @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         val imageLoader: suspend () -> Drawable,
-
         /**
          * A user facing string representing the payment method; e.g. "Google Pay" or "···· 4242" for a card.
          */
         val label: String,
-
         /**
          * The billing details associated with the customer's desired payment method.
          */
         val billingDetails: PaymentSheet.BillingDetails?,
-
         /**
          * A string representation of the customer's desired payment method:
          * - If this is a Stripe payment method, see
@@ -643,7 +696,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
          * - If this is Google Pay, the value is "google_pay".
          */
         val paymentMethodType: String,
-
         /**
          * If you set [Configuration.Builder.embeddedViewDisplaysMandateText] to `false`, this text must be displayed to
          * the customer near your "Buy" button to comply with regulations.

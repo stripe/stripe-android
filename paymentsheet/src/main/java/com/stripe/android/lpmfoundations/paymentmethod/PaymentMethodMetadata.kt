@@ -70,7 +70,6 @@ internal data class PaymentMethodMetadata(
     val customerMetadata: CustomerMetadata?,
     val isGooglePayReady: Boolean,
     val linkConfiguration: PaymentSheet.LinkConfiguration,
-    val paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
     val linkMode: LinkMode?,
     val linkStateResult: LinkStateResult?,
     val paymentMethodIncentive: PaymentMethodIncentive?,
@@ -89,7 +88,8 @@ internal data class PaymentMethodMetadata(
     val analyticsMetadata: AnalyticsMetadata,
     val experimentsData: ElementsSession.ExperimentsData?,
     val isTapToAddSupported: Boolean,
-    val paymentMethodMessagingHelper: PaymentMethodMessagingHelper
+    val paymentMethodMessagingHelper: PaymentMethodMessagingHelper,
+    val isStripeCardScanAllowed: Boolean,
 ) : Parcelable {
 
     @IgnoredOnParcel
@@ -322,37 +322,15 @@ internal data class PaymentMethodMetadata(
         }
     }
 
-    fun actionForCode(
-        code: String,
-        uiDefinitionFactoryArgumentsFactory: UiDefinitionFactory.Arguments.Factory,
-    ) {
-        val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code }
-            ?: return
-
-        val uiFactory = definition.uiDefinitionFactory(this)
-
-        if (uiFactory !is UiDefinitionFactory.Actionable) {
-            return
-        }
-
-        uiFactory.action(
-            metadata = this,
-            arguments = uiDefinitionFactoryArgumentsFactory.create(
-                metadata = this,
-                requiresMandate = definition.requiresMandate(this),
-            ),
-        )
-    }
-
     fun allowRedisplay(
         customerRequestedSave: PaymentSelection.CustomerRequestedSave,
         code: PaymentMethodCode
     ): PaymentMethod.AllowRedisplay {
         val isSettingUp = hasIntentToSetup(code) || forceSetupFutureUseBehaviorAndNewMandate
-        return paymentMethodSaveConsentBehavior.allowRedisplay(
+        return customerMetadata?.saveConsent?.allowRedisplay(
             isSetupIntent = isSettingUp,
             customerRequestedSave = customerRequestedSave,
-        )
+        ) ?: PaymentMethod.AllowRedisplay.UNSPECIFIED
     }
 
     internal companion object {
@@ -397,7 +375,6 @@ internal data class PaymentMethodMetadata(
                 customerMetadata = customerMetadata,
                 sharedDataSpecs = sharedDataSpecs,
                 externalPaymentMethodSpecs = externalPaymentMethodSpecs,
-                paymentMethodSaveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),
                 linkConfiguration = configuration.link,
                 linkMode = linkSettings?.linkMode,
                 linkStateResult = linkStateResult,
@@ -423,15 +400,17 @@ internal data class PaymentMethodMetadata(
                 integrationMetadata = integrationMetadata,
                 analyticsMetadata = analyticsMetadata,
                 experimentsData = elementsSession.experimentsData,
-                isTapToAddSupported = isTapToAddSupported,
-                paymentMethodMessagingHelper = DefaultPaymentMethodMessagingHelper(promotions)
+                paymentMethodMessagingHelper = DefaultPaymentMethodMessagingHelper(promotions),
+                isTapToAddSupported = isTapToAddSupported &&
+                    elementsSession.isTapToAddEnabled &&
+                    customerMetadata != null,
+                isStripeCardScanAllowed = elementsSession.isStripeCardScanAllowed,
             )
         }
 
         internal fun createForCustomerSheet(
             elementsSession: ElementsSession,
             configuration: CustomerSheet.Configuration,
-            paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
             sharedDataSpecs: List<SharedDataSpec>,
             isGooglePayReady: Boolean,
             customerMetadata: CustomerMetadata,
@@ -461,7 +440,6 @@ internal data class PaymentMethodMetadata(
                 customerMetadata = customerMetadata,
                 sharedDataSpecs = sharedDataSpecs,
                 isGooglePayReady = isGooglePayReady,
-                paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
                 linkConfiguration = PaymentSheet.LinkConfiguration(),
                 linkMode = elementsSession.linkSettings?.linkMode,
                 linkStateResult = null,
@@ -491,7 +469,8 @@ internal data class PaymentMethodMetadata(
                 analyticsMetadata = AnalyticsMetadata(emptyMap()), // This is unused in customer sheet.
                 isTapToAddSupported = false, // This is unused in customer sheet.
                 experimentsData = elementsSession.experimentsData,
-                paymentMethodMessagingHelper = NoopPaymentMethodMessagingHelper()
+                paymentMethodMessagingHelper = NoopPaymentMethodMessagingHelper(),
+                isStripeCardScanAllowed = elementsSession.isStripeCardScanAllowed,
             )
         }
     }

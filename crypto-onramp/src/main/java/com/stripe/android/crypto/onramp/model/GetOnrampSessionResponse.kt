@@ -13,14 +13,12 @@ internal data class GetOnrampSessionResponse(
      * `cos_XXXXXXXXX`
      */
     val id: String,
-
     /**
      * The onramp session client secret.
      * `cos_XXXXXXXXX_secret_XXXXXXXXX`
      */
     @SerialName("client_secret")
     val clientSecret: String,
-
     /**
      * The PaymentIntent client secret associated with this onramp session.
      */

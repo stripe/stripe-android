@@ -1,0 +1,21 @@
+{
+    "session_id": "cs_test_after_promo",
+    "ui_mode": "custom",
+    "currency": "usd",
+    "total_summary": {
+        "due": 4099,
+        "subtotal": 5099,
+        "total": 4099
+    },
+    "line_item_group": {
+        "due": 4099,
+        "subtotal": 5099,
+        "total": 4099,
+        "discount_amounts": [
+            {
+                "amount": 1000,
+                "coupon": { "name": "10OFF" }
+            }
+        ]
+    }
+}

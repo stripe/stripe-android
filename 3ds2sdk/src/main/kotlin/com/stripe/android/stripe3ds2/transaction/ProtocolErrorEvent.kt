@@ -24,7 +24,6 @@ data class ProtocolErrorEvent(
      * The SDK Transaction ID.
      */
     val sdkTransactionId: SdkTransactionId?,
-
     /**
      * The error message.
      */

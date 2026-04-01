@@ -95,7 +95,6 @@ private fun BodyContent(
             .height(32.dp)
             .clip(RoundedCornerShape(10.dp)),
         contentAlignment = Alignment.Center
-
     ) {
         Image(
             painter = painterResource(id = R.drawable.stripe_exclamation),

@@ -65,6 +65,24 @@ class CheckoutRequest private constructor(
     val customPublishableKey: String?,
     @SerialName("use_checkout_session")
     val useCheckoutSession: Boolean?,
+    @SerialName("checkout_session_payment_method_save")
+    val checkoutSessionPaymentMethodSave: FeatureState?,
+    @SerialName("checkout_session_payment_method_remove")
+    val checkoutSessionPaymentMethodRemove: FeatureState?,
+    @SerialName("allow_promotion_codes")
+    val allowPromotionCodes: Boolean?,
+    @SerialName("adjustable_quantity")
+    val adjustableQuantity: Boolean?,
+    @SerialName("automatic_tax")
+    val automaticTax: Boolean?,
+    @SerialName("adaptive_pricing")
+    val adaptivePricing: Boolean?,
+    @SerialName("display_shipping_rates")
+    val displayShippingRates: Boolean?,
+    @SerialName("customer_email")
+    val customerEmail: String?,
+    @SerialName("use_manual_capture")
+    val useManualCapture: Boolean?,
 ) {
     @Serializable
     enum class CustomerKeyType {
@@ -109,6 +127,15 @@ class CheckoutRequest private constructor(
         private var customSecretKey: String? = null
         private var customPublishableKey: String? = null
         private var useCheckoutSession: Boolean? = null
+        private var checkoutSessionPaymentMethodSave: FeatureState? = null
+        private var checkoutSessionPaymentMethodRemove: FeatureState? = null
+        private var allowPromotionCodes: Boolean? = null
+        private var adjustableQuantity: Boolean? = null
+        private var automaticTax: Boolean? = null
+        private var adaptivePricing: Boolean? = null
+        private var displayShippingRates: Boolean? = null
+        private var customerEmail: String? = null
+        private var useManualCapture: Boolean? = null
 
         fun initialization(initialization: String?) = apply {
             this.initialization = initialization
@@ -226,6 +253,42 @@ class CheckoutRequest private constructor(
             this.useCheckoutSession = useCheckoutSession
         }
 
+        fun checkoutSessionPaymentMethodSave(state: FeatureState?) = apply {
+            this.checkoutSessionPaymentMethodSave = state
+        }
+
+        fun checkoutSessionPaymentMethodRemove(state: FeatureState?) = apply {
+            this.checkoutSessionPaymentMethodRemove = state
+        }
+
+        fun allowPromotionCodes(allowPromotionCodes: Boolean?) = apply {
+            this.allowPromotionCodes = allowPromotionCodes
+        }
+
+        fun adjustableQuantity(adjustableQuantity: Boolean?) = apply {
+            this.adjustableQuantity = adjustableQuantity
+        }
+
+        fun automaticTax(automaticTax: Boolean?) = apply {
+            this.automaticTax = automaticTax
+        }
+
+        fun adaptivePricing(adaptivePricing: Boolean?) = apply {
+            this.adaptivePricing = adaptivePricing
+        }
+
+        fun displayShippingRates(displayShippingRates: Boolean?) = apply {
+            this.displayShippingRates = displayShippingRates
+        }
+
+        fun customerEmail(customerEmail: String?) = apply {
+            this.customerEmail = customerEmail
+        }
+
+        fun useManualCapture(useManualCapture: Boolean?) = apply {
+            this.useManualCapture = useManualCapture
+        }
+
         fun build(): CheckoutRequest {
             return CheckoutRequest(
                 initialization = initialization,
@@ -260,6 +323,15 @@ class CheckoutRequest private constructor(
                 customSecretKey = customSecretKey,
                 customPublishableKey = customPublishableKey,
                 useCheckoutSession = useCheckoutSession,
+                checkoutSessionPaymentMethodSave = checkoutSessionPaymentMethodSave,
+                checkoutSessionPaymentMethodRemove = checkoutSessionPaymentMethodRemove,
+                allowPromotionCodes = allowPromotionCodes,
+                adjustableQuantity = adjustableQuantity,
+                automaticTax = automaticTax,
+                adaptivePricing = adaptivePricing,
+                displayShippingRates = displayShippingRates,
+                customerEmail = customerEmail,
+                useManualCapture = useManualCapture,
             )
         }
     }
@@ -282,7 +354,7 @@ data class CheckoutResponse(
     @SerialName("terminalLocationId")
     val terminalLocationId: String? = null,
     @SerialName("amount")
-    val amount: Long,
+    val amount: Long? = null,
     @SerialName("paymentMethodTypes")
     val paymentMethodTypes: String? = null,
 ) {

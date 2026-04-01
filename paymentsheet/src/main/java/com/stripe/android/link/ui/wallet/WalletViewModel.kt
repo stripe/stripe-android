@@ -93,7 +93,6 @@ internal class WalletViewModel(
             secondaryButtonLabel = configuration.stripeIntent.secondaryButtonLabel(linkLaunchMode),
             addPaymentMethodOptions = addPaymentMethodOptions.values,
             paymentSelectionHint = paymentSelectionHint,
-            isAutoSelecting = shouldAutoSelectDefaultPaymentMethod(),
             signupToggleEnabled = configuration.linkSignUpOptInFeatureEnabled,
             billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
         )
@@ -169,11 +168,6 @@ internal class WalletViewModel(
                             )
                         }
                     }
-                } else {
-                    // Auto-select default payment method only on first load
-                    if (shouldAutoSelectDefaultPaymentMethod() && !currentState.hasAttemptedAutoSelection) {
-                        handleAutoSelection(filteredPaymentDetails)
-                    }
                 }
             }
         }
@@ -225,46 +219,6 @@ internal class WalletViewModel(
                 linkAccountUpdate = linkAccountManager.linkAccountUpdate
             )
         )
-    }
-
-    private fun shouldAutoSelectDefaultPaymentMethod(): Boolean {
-        return linkLaunchMode is LinkLaunchMode.PaymentMethodSelection &&
-            linkLaunchMode.selectedPayment == null &&
-            configuration.skipWalletInFlowController
-    }
-
-    private suspend fun handleAutoSelection(paymentDetails: List<LinkPaymentMethod.ConsumerPaymentDetails>) {
-        val autoSelectedPaymentMethod =
-            (paymentDetails.firstOrNull { it.details.isDefault } ?: paymentDetails.singleOrNull())?.details
-
-        _uiState.update { it.copy(hasAttemptedAutoSelection = true) }
-
-        if (autoSelectedPaymentMethod?.isReadyForUse() == true) {
-            // Set the default as selected and proceed with payment selection
-            _uiState.update {
-                it.copy(selectedItemId = autoSelectedPaymentMethod.id)
-            }
-            performPaymentConfirmation(autoSelectedPaymentMethod)
-        } else {
-            // Auto-selection not supported, show the wallet UI
-            _uiState.update {
-                it.copy(isAutoSelecting = false)
-            }
-        }
-    }
-
-    private fun ConsumerPaymentDetails.PaymentDetails.isReadyForUse(): Boolean {
-        // Check if card requires details recollection (includes both expiry and CVC checks)
-        val requiresCardDetailsRecollection = (this as? ConsumerPaymentDetails.Card)
-            ?.requiresCardDetailsRecollection == true
-
-        // Check if billing details collection is needed
-        val needsBillingDetails = supports(
-            billingDetailsConfig = configuration.billingDetailsCollectionConfiguration,
-            linkAccount = linkAccount
-        ).not() && _uiState.value.collectMissingBillingDetailsForExistingPaymentMethods
-
-        return !requiresCardDetailsRecollection && !needsBillingDetails
     }
 
     fun onItemSelected(item: ConsumerPaymentDetails.PaymentDetails) {

@@ -35,28 +35,14 @@ internal sealed interface AnalyzerOutput
 /**
  * Output of IDDetector
  */
-internal sealed class IDDetectorOutput(
-    open val boundingBox: BoundingBox,
-    open val category: Category,
-    open val resultScore: Float,
-    open val allScores: List<Float>,
-    open val blurScore: Float
-) : AnalyzerOutput {
-    data class Legacy(
-        override val boundingBox: BoundingBox,
-        override val category: Category,
-        override val resultScore: Float,
-        override val allScores: List<Float>,
-        override val blurScore: Float
-    ) : IDDetectorOutput(boundingBox, category, resultScore, allScores, blurScore)
-
-    fun blurScore(): Float =
-        when (this) {
-            is Legacy -> {
-                this.blurScore
-            }
-        }
-}
+internal data class IDDetectorOutput(
+    val boundingBox: BoundingBox,
+    val category: Category,
+    val resultScore: Float,
+    val allScores: List<Float>,
+    val blurScore: Float,
+    val croppedImage: Bitmap
+) : AnalyzerOutput
 
 /**
  * Output of FaceDetector

@@ -19,6 +19,7 @@ enum class PaymentAnalyticsEvent(val code: String) : AnalyticsEvent {
     // Customer
     CustomerRetrieve("retrieve_customer"),
     CustomerRetrievePaymentMethods("retrieve_payment_methods"),
+    CustomerRetrievePaymentMethod("retrieve_customer_payment_method"),
     CustomerAttachPaymentMethod("attach_payment_method"),
     CustomerDetachPaymentMethod("detach_payment_method"),
     CustomerDeleteSource("delete_source"),

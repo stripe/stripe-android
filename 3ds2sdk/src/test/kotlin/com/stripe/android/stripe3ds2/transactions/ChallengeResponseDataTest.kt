@@ -192,29 +192,29 @@ class ChallengeResponseDataTest {
         assertNotNull(cresData.issuerImage)
         assertEquals(
             "http://acs.com/medium_image.png",
-            cresData.issuerImage?.mediumUrl
+            cresData.issuerImage.mediumUrl
         )
         assertEquals(
             "http://acs.com/high_image.png",
-            cresData.issuerImage?.highUrl
+            cresData.issuerImage.highUrl
         )
         assertEquals(
             "http://acs.com/extraHigh_image.png",
-            cresData.issuerImage?.extraHighUrl
+            cresData.issuerImage.extraHighUrl
         )
 
         assertNotNull(cresData.paymentSystemImage)
         assertEquals(
             "http://ds.com/medium_image.png",
-            cresData.paymentSystemImage?.mediumUrl
+            cresData.paymentSystemImage.mediumUrl
         )
         assertEquals(
             "http://ds.com/high_image.png",
-            cresData.paymentSystemImage?.highUrl
+            cresData.paymentSystemImage.highUrl
         )
         assertEquals(
             "http://ds.com/extraHigh_image.png",
-            cresData.paymentSystemImage?.extraHighUrl
+            cresData.paymentSystemImage.extraHighUrl
         )
 
         assertEquals("Click here to open Your Bank App", cresData.oobAppLabel)
@@ -254,33 +254,33 @@ class ChallengeResponseDataTest {
         assertNotNull(cresData.paymentSystemImage)
         assertEquals(
             "http://ds.com/medium_image.png",
-            cresData.paymentSystemImage?.getUrlForDensity(DisplayMetrics.DENSITY_LOW)
+            cresData.paymentSystemImage.getUrlForDensity(DisplayMetrics.DENSITY_LOW)
         )
         assertEquals(
             "http://ds.com/medium_image.png",
-            cresData.paymentSystemImage?.getUrlForDensity(DisplayMetrics.DENSITY_MEDIUM)
+            cresData.paymentSystemImage.getUrlForDensity(DisplayMetrics.DENSITY_MEDIUM)
         )
 
         assertEquals(
             "http://ds.com/high_image.png",
-            cresData.paymentSystemImage?.getUrlForDensity(DisplayMetrics.DENSITY_MEDIUM + 1)
+            cresData.paymentSystemImage.getUrlForDensity(DisplayMetrics.DENSITY_MEDIUM + 1)
         )
         assertEquals(
             "http://ds.com/high_image.png",
-            cresData.paymentSystemImage?.getUrlForDensity(DisplayMetrics.DENSITY_HIGH)
+            cresData.paymentSystemImage.getUrlForDensity(DisplayMetrics.DENSITY_HIGH)
         )
         assertEquals(
             "http://ds.com/high_image.png",
-            cresData.paymentSystemImage?.getUrlForDensity(DisplayMetrics.DENSITY_XHIGH - 1)
+            cresData.paymentSystemImage.getUrlForDensity(DisplayMetrics.DENSITY_XHIGH - 1)
         )
 
         assertEquals(
             "http://ds.com/extraHigh_image.png",
-            cresData.paymentSystemImage?.getUrlForDensity(DisplayMetrics.DENSITY_XHIGH)
+            cresData.paymentSystemImage.getUrlForDensity(DisplayMetrics.DENSITY_XHIGH)
         )
         assertEquals(
             "http://ds.com/extraHigh_image.png",
-            cresData.paymentSystemImage?.getUrlForDensity(DisplayMetrics.DENSITY_XXHIGH)
+            cresData.paymentSystemImage.getUrlForDensity(DisplayMetrics.DENSITY_XXHIGH)
         )
     }
 
@@ -321,14 +321,14 @@ class ChallengeResponseDataTest {
 
         assertNotNull(cresData.acsHtml)
         assertTrue(
-            true == cresData.acsHtml?.contains(
+            cresData.acsHtml.contains(
                 "<title>3DS - One-Time Passcode - PA</title>"
             )
         )
 
         assertNotNull(cresData.acsHtmlRefresh)
         assertTrue(
-            true == cresData.acsHtmlRefresh?.contains(
+            cresData.acsHtmlRefresh.contains(
                 "<p>Tap continue once you have verified this payment.</p>"
             )
         )

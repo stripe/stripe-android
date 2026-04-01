@@ -69,10 +69,22 @@ class CountryConfigTest {
         ).displayItems
 
         val excludedCountries = setOf(
-            "American Samoa", "Christmas Island", "Cocos (Keeling) Islands", "Cuba",
-            "Heard & McDonald Islands", "Iran", "Marshall Islands", "Micronesia",
-            "Norfolk Island", "North Korea", "Northern Mariana Islands", "Palau", "Sudan", "Syria",
-            "U.S. Outlying Islands", "U.S. Virgin Islands"
+            "American Samoa",
+            "Christmas Island",
+            "Cocos (Keeling) Islands",
+            "Cuba",
+            "Heard & McDonald Islands",
+            "Iran",
+            "Marshall Islands",
+            "Micronesia",
+            "Norfolk Island",
+            "North Korea",
+            "Northern Mariana Islands",
+            "Palau",
+            "Sudan",
+            "Syria",
+            "U.S. Outlying Islands",
+            "U.S. Virgin Islands"
         )
 
         excludedCountries.forEach {

@@ -20,6 +20,7 @@ internal class FakeElementsSessionRepository(
     private val passiveCaptchaParams: PassiveCaptchaParams? = null,
     private val flags: Map<ElementsSession.Flag, Boolean> = mapOf(
         ElementsSession.Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA to true,
+        ElementsSession.Flag.ELEMENTS_MOBILE_ANDROID_TAP_TO_ADD_ENABLED to true,
     )
 ) : ElementsSessionRepository {
     data class Params(
@@ -40,7 +41,7 @@ internal class FakeElementsSessionRepository(
         customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         externalPaymentMethods: List<String>,
         savedPaymentMethodSelectionId: String?,
-        userOverrideCountry: String?,
+        countryOverride: String?,
         linkDisallowedFundingSourceCreation: Set<String>,
     ): Result<ElementsSession> {
         lastParams = Params(
@@ -49,7 +50,7 @@ internal class FakeElementsSessionRepository(
             externalPaymentMethods = externalPaymentMethods,
             customPaymentMethods = customPaymentMethods,
             savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
-            userOverrideCountry = userOverrideCountry,
+            userOverrideCountry = countryOverride,
             linkDisallowedFundingSourceCreation = linkDisallowedFundingSourceCreation,
         )
         return if (error != null) {

@@ -545,8 +545,7 @@ internal fun Decoration(
     typography: TextStyle? = null,
     contentAlpha: Float? = null,
     content: @Composable
-    @ComposableOpenTarget(index = 0)
-    () -> Unit
+    @ComposableOpenTarget(index = 0) () -> Unit
 ) {
     val colorAndEmphasis: @Composable () -> Unit = @Composable {
         CompositionLocalProvider(LocalContentColor provides contentColor) {

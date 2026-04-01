@@ -114,6 +114,14 @@ internal interface LinkRepository {
         clientAttributionMetadata: ClientAttributionMetadata,
     ): Result<LinkPaymentDetails.New>
 
+    suspend fun createPaymentDetailsFromPaymentMethod(
+        paymentMethod: PaymentMethod,
+        userEmail: String,
+        stripeIntent: StripeIntent,
+        consumerSessionClientSecret: String,
+        clientAttributionMetadata: ClientAttributionMetadata,
+    ): Result<LinkPaymentDetails.Saved>
+
     suspend fun createBankAccountPaymentDetails(
         bankAccountId: String,
         userEmail: String,
@@ -126,7 +134,7 @@ internal interface LinkRepository {
         id: String,
         consumerSessionClientSecret: String,
         clientAttributionMetadata: ClientAttributionMetadata,
-    ): Result<LinkPaymentDetails.Saved>
+    ): Result<LinkPaymentDetails.Passthrough>
 
     suspend fun sharePaymentDetails(
         consumerSessionClientSecret: String,

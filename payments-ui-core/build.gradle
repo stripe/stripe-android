@@ -10,6 +10,7 @@ dependencies {
     implementation project(":payments-core")
     implementation project(":stripe-ui-core")
     compileOnly libs.places
+    compileOnly project(":stripecardscan")
 
     implementation libs.androidx.constraintLayout
     implementation libs.androidx.coreKtx
@@ -23,7 +24,6 @@ dependencies {
     implementation libs.compose.foundation
     implementation libs.compose.material
     implementation libs.compose.activity
-    implementation libs.accompanist.flowLayout
     implementation libs.compose.uiToolingPreview
 
     implementation libs.kotlin.coroutines
@@ -36,6 +36,7 @@ dependencies {
 
     implementation libs.playServicesWallet
 
+    testImplementation project(':stripecardscan')
     testImplementation project(':payments-core-testing')
     testImplementation libs.places
     testImplementation testLibs.androidx.archCore
@@ -61,6 +62,7 @@ android {
     buildFeatures {
         compose = true
         viewBinding = true
+        buildConfig = true
     }
 
     testOptions {
@@ -73,8 +75,10 @@ android {
         }
     }
 
-    kotlinOptions {
-        freeCompilerArgs += ["-opt-in=kotlinx.coroutines.FlowPreview", "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"]
+    kotlin {
+        compilerOptions {
+            freeCompilerArgs.addAll(["-opt-in=kotlinx.coroutines.FlowPreview", "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"])
+        }
     }
 }
 

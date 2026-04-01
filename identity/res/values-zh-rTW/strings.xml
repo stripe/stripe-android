@@ -88,8 +88,6 @@
   <string name="stripe_doc_front_warmup_title">準備好掃描您帶照片的身分證件</string>
   <!-- Label of the driver's license option for document type selection -->
   <string name="stripe_driver_license">駕駛執照</string>
-  <!-- Text for error labels -->
-  <string name="stripe_error">錯誤</string>
   <!-- Button that opens file upload screen -->
   <string name="stripe_file_upload">檔案上傳</string>
   <!-- Instructions for uploading images of drivers license -->

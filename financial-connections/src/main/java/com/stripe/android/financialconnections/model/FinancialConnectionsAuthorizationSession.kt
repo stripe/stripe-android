@@ -21,34 +21,24 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Parcelize
 internal data class FinancialConnectionsAuthorizationSession(
-
     @SerialName(value = "id")
     val id: String,
-
     @SerialName(value = "next_pane")
     val nextPane: FinancialConnectionsSessionManifest.Pane,
-
     @SerialName(value = "flow")
     val flow: String? = null,
-
     @SerialName(value = "institution_skip_account_selection")
     val institutionSkipAccountSelection: Boolean? = null,
-
     @SerialName(value = "show_partner_disclosure")
     val showPartnerDisclosure: Boolean? = null,
-
     @SerialName(value = "skip_account_selection")
     val skipAccountSelection: Boolean? = null,
-
     @SerialName(value = "url")
     val url: String? = null,
-
     @SerialName(value = "url_qr_code")
     val urlQrCode: String? = null,
-
     @SerialName(value = "is_oauth")
     private val _isOAuth: Boolean? = false,
-
     @SerialName(value = "display")
     val display: Display? = null
 ) : Parcelable {

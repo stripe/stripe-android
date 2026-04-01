@@ -7,23 +7,27 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.crypto.onramp.di.OnrampPresenterScope
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
-import com.stripe.android.crypto.onramp.model.OnrampAuthenticateResult
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
+import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
+import com.stripe.android.crypto.onramp.model.PaymentMethodSelection
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityArgs
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
 import com.stripe.android.crypto.onramp.ui.VerifyKycInfoActivityContract
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
-import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherFactory
@@ -39,16 +43,18 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     linkController: LinkController,
     lifecycleOwner: LifecycleOwner,
     private val activity: ComponentActivity,
-    onrampCallbacks: OnrampCallbacks,
     private val coroutineScope: CoroutineScope,
+    private val onrampCallbackIdentifier: String
 ) {
-    private val onrampCallbacksState = onrampCallbacks.build()
+    private val onrampCallbacksState: OnrampCallbacks.State
+        get() = OnrampCallbackReferences[onrampCallbackIdentifier]
+            ?: error("OnrampCallbackReferences not registered for key: $onrampCallbackIdentifier")
     private val linkControllerState = linkController.state(activity)
 
     private val linkPresenter = linkController.createPresenter(
         activity = activity,
         presentPaymentMethodsCallback = ::handlePresentPaymentResult,
-        authenticationCallback = ::handleAuthenticationResult,
+        authenticationCallback = { /* No-op: Authentication is not used for Onramp */ },
         authorizeCallback = ::handleAuthorizeResult
     )
 
@@ -61,12 +67,28 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         callback = ::handlePaymentLauncherResult
     )
 
-    private val currentLinkAccount: LinkController.LinkAccount?
-        get() = interactor.state.value.linkControllerState?.internalLinkAccount
+    private val googlePayActivityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args> =
+        activity.activityResultRegistry.register(
+            "OnrampPresenterCoordinator_GooglePayResultLauncher",
+            GooglePayPaymentMethodLauncherContractV2(),
+            ::handleGooglePayPaymentSelection
+        )
+
+    private val googlePayPaymentMethodLauncher: GooglePayPaymentMethodLauncher? = googlePayConfig()?.let {
+        GooglePayPaymentMethodLauncher(
+            context = activity,
+            lifecycleScope = activity.lifecycleScope,
+            activityResultLauncher = googlePayActivityResultLauncher,
+            config = it,
+            readyCallback = ::handleGooglePayIsReady,
+            cardBrandFilter = DefaultCardBrandFilter,
+            cardFundingFilter = DefaultCardFundingFilter
+        )
+    }
 
     private val verifyKycResultLauncher: ActivityResultLauncher<VerifyKycActivityArgs> =
         activity.activityResultRegistry.register(
-            key = "OnrampPresenterCoordinator_VerifyKycResultLauncher",
+            key = "OnrampPresenterCoordinator_VerifyKycResultLauncher($onrampCallbackIdentifier)",
             contract = VerifyKycInfoActivityContract(),
             callback = ::handleVerifyKycResult
         )
@@ -91,22 +113,15 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
+                    googlePayActivityResultLauncher.unregister()
                     verifyKycResultLauncher.unregister()
+
+                    if (activity.isFinishing) {
+                        OnrampCallbackReferences.remove(onrampCallbackIdentifier)
+                    }
                 }
             }
         )
-    }
-
-    fun authenticateUser() {
-        val email = currentLinkAccount?.email
-        if (email == null) {
-            onrampCallbacksState.authenticateUserCallback.onResult(
-                OnrampAuthenticateResult.Failed(NoLinkAccountFoundException())
-            )
-            return
-        }
-        interactor.onAuthenticateUser()
-        linkPresenter.authenticateExistingConsumer(email)
     }
 
     fun verifyIdentity() {
@@ -150,12 +165,40 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         }
     }
 
-    fun collectPaymentMethod(type: PaymentMethodType) {
-        interactor.onCollectPaymentMethod(type)
-        linkPresenter.presentPaymentMethodsForOnramp(
-            email = clientEmail(),
-            paymentMethodType = type.toLinkType()
-        )
+    fun collectPaymentMethod(selection: PaymentMethodSelection) {
+        interactor.onCollectPaymentMethod(selection.type)
+
+        when (selection) {
+            is PaymentMethodSelection.Card,
+            is PaymentMethodSelection.BankAccount,
+            is PaymentMethodSelection.CardAndBankAccount -> {
+                linkPresenter.presentPaymentMethodsForOnramp(
+                    email = clientEmail(),
+                    paymentMethodType = selection.type.toLinkType()
+                )
+            }
+            is PaymentMethodSelection.GooglePay -> {
+                coroutineScope.launch {
+                    interactor.getOrFetchPlatformKey().fold(
+                        onSuccess = {
+                            googlePayPaymentMethodLauncher?.present(
+                                currencyCode = selection.currencyCode,
+                                amount = selection.amount,
+                                clientAttributionMetadata = null,
+                                transactionId = selection.transactionId,
+                                label = selection.label,
+                                publishableKey = it
+                            )
+                        },
+                        onFailure = { error ->
+                            onrampCallbacksState.collectPaymentCallback.onResult(
+                                OnrampCollectPaymentMethodResult.Failed(error)
+                            )
+                        }
+                    )
+                }
+            }
+        }
     }
 
     fun authorize(linkAuthIntentId: String) {
@@ -172,7 +215,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         onrampSessionId: String
     ) {
         coroutineScope.launch {
-            interactor.startCheckout(onrampSessionId, onrampCallbacksState.onrampSessionClientSecretProvider)
+            interactor.startCheckout(onrampSessionId)
         }
     }
 
@@ -224,12 +267,14 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             }
             is InternalPaymentResult.Canceled -> {
                 // User canceled the next action
+                interactor.clearPendingCheckout()
                 onrampCallbacksState.checkoutCallback.onResult(
                     OnrampCheckoutResult.Canceled()
                 )
             }
             is InternalPaymentResult.Failed -> {
                 // Next action failed
+                interactor.clearPendingCheckout()
                 onrampCallbacksState.checkoutCallback.onResult(
                     OnrampCheckoutResult.Failed(paymentResult.throwable)
                 )
@@ -245,16 +290,11 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         }
     }
 
+    private fun googlePayConfig(): GooglePayPaymentMethodLauncher.Config? =
+        interactor.state.value.configurationState?.googlePayConfig
+
     private fun clientEmail(): String? =
         interactor.state.value.linkControllerState?.internalLinkAccount?.email
-
-    private fun handleAuthenticationResult(result: LinkController.AuthenticationResult) {
-        coroutineScope.launch {
-            onrampCallbacksState.authenticateUserCallback.onResult(
-                interactor.handleAuthenticationResult(result)
-            )
-        }
-    }
 
     private fun handleAuthorizeResult(result: LinkController.AuthorizeResult) {
         coroutineScope.launch {
@@ -295,10 +335,26 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             identityVerificationCallback = ::handleIdentityVerificationResult
         )
     }
+
+    private fun handleGooglePayPaymentSelection(result: GooglePayPaymentMethodLauncher.Result) {
+        coroutineScope.launch {
+            onrampCallbacksState.collectPaymentCallback.onResult(
+                interactor.handleGooglePayPaymentResult(result)
+            )
+        }
+    }
+
+    private fun handleGooglePayIsReady(isReady: Boolean) {
+        coroutineScope.launch {
+            onrampCallbacksState.googlePayIsReadyCallback?.let { it(isReady) }
+        }
+    }
 }
 
-private fun PaymentMethodType.toLinkType(): LinkController.PaymentMethodType =
+private fun PaymentMethodType.toLinkType(): LinkController.PaymentMethodType? =
     when (this) {
         PaymentMethodType.Card -> LinkController.PaymentMethodType.Card
         PaymentMethodType.BankAccount -> LinkController.PaymentMethodType.BankAccount
+        PaymentMethodType.CardAndBankAccount -> null
+        PaymentMethodType.GooglePay -> error("Google Pay is not supported in LinkController")
     }

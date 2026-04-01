@@ -14,20 +14,13 @@ import androidx.annotation.RestrictTo
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class OnrampCallbacks {
 
-    private var authenticateUserCallback: OnrampAuthenticateUserCallback? = null
     private var verifyIdentityCallback: OnrampVerifyIdentityCallback? = null
     private var verifyKycCallback: OnrampVerifyKycCallback? = null
     private var collectPaymentCallback: OnrampCollectPaymentMethodCallback? = null
     private var authorizeCallback: OnrampAuthorizeCallback? = null
     private var checkoutCallback: OnrampCheckoutCallback? = null
-    private var onrampSessionClientSecretProvider: (suspend (String) -> String)? = null
-
-    /**
-     * Callback invoked to authenticate the user before starting the onramp flow.
-     */
-    fun authenticateUserCallback(callback: OnrampAuthenticateUserCallback) = apply {
-        this.authenticateUserCallback = callback
-    }
+    private var onrampSessionClientSecretProvider: OnrampSessionClientSecretProvider? = null
+    private var googlePayIsReadyCallback: ((Boolean) -> Unit)? = null
 
     /**
      * Callback invoked when signaling the result of verifying the user's identity.
@@ -72,24 +65,32 @@ class OnrampCallbacks {
      *     @param The session ID of the current checkout.
      */
     fun onrampSessionClientSecretProvider(callback: suspend (String) -> String) = apply {
-        this.onrampSessionClientSecretProvider = callback
+        this.onrampSessionClientSecretProvider =
+            OnrampSessionClientSecretProvider { id -> callback(id) }
+    }
+
+    /**
+     * Callback invoked with the result of checking whether Google Pay is ready.
+     * This may be called more than once, and should update the UI to reflect the availability
+     * of Google Pay as a payment method.
+     * Only applicable if the merchant has provided a Google Pay configuration in OnrampConfiguration.
+     */
+    fun googlePayIsReadyCallback(callback: (Boolean) -> Unit) = apply {
+        this.googlePayIsReadyCallback = callback
     }
 
     internal class State(
-        val authenticateUserCallback: OnrampAuthenticateUserCallback,
         val verifyIdentityCallback: OnrampVerifyIdentityCallback,
         val verifyKycCallback: OnrampVerifyKycCallback,
         val collectPaymentCallback: OnrampCollectPaymentMethodCallback,
         val authorizeCallback: OnrampAuthorizeCallback,
         val checkoutCallback: OnrampCheckoutCallback,
-        val onrampSessionClientSecretProvider: suspend (String) -> String
+        val onrampSessionClientSecretProvider: OnrampSessionClientSecretProvider,
+        val googlePayIsReadyCallback: ((Boolean) -> Unit)?
     )
 
     internal fun build(): State {
         return State(
-            authenticateUserCallback = requireNotNull(authenticateUserCallback) {
-                "authenticateUserCallback must not be null"
-            },
             verifyIdentityCallback = requireNotNull(verifyIdentityCallback) {
                 "verifyIdentityCallback must not be null"
             },
@@ -108,6 +109,7 @@ class OnrampCallbacks {
             onrampSessionClientSecretProvider = requireNotNull(onrampSessionClientSecretProvider) {
                 "onrampSessionClientSecretProvider must be not null"
             },
+            googlePayIsReadyCallback = googlePayIsReadyCallback
         )
     }
 }

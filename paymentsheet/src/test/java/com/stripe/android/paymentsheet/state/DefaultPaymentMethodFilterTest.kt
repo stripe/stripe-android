@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.state
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.model.Address
@@ -207,17 +208,15 @@ class DefaultPaymentMethodFilterTest {
             paymentMethods = paymentMethods,
             params = PaymentMethodFilter.FilterParams(
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-                customerMetadata = CustomerMetadata(
+                customerMetadata = CustomerMetadata.CustomerSession(
                     id = "cus_1",
                     ephemeralKeySecret = "ek_123",
                     customerSessionClientSecret = "cuss_123",
                     isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
-                    permissions = CustomerMetadata.Permissions(
-                        removePaymentMethod = PaymentMethodRemovePermission.Full,
-                        canRemoveLastPaymentMethod = false,
-                        canRemoveDuplicates = false,
-                        canUpdateFullPaymentMethodDetails = false,
-                    )
+                    removePaymentMethod = PaymentMethodRemovePermission.Full,
+                    saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
+                    canRemoveLastPaymentMethod = false,
+                    canUpdateFullPaymentMethodDetails = false,
                 ),
                 remoteDefaultPaymentMethodId = remoteDefaultPaymentMethodId,
                 localSavedSelection = CompletableDeferred(localSavedSelection),

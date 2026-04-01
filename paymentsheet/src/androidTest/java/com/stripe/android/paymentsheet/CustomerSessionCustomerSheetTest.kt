@@ -8,6 +8,7 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.PaymentOptionSelection
 import com.stripe.android.model.CardBrand
@@ -17,6 +18,7 @@ import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.ResponseReplacement
+import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.paymentsheet.utils.CustomerSheetTestType
@@ -81,7 +83,7 @@ internal class CustomerSessionCustomerSheetTest {
     }
 
     @Test
-    fun testSuccessfulCardSaveWithCardBrandChoice() = runCustomerSheetTest(
+    fun testSuccessfulCardSaveWithCardBrandChoice_Selector() = runCustomerSheetTest(
         networkRule = networkRule,
         integrationType = integrationType,
         customerSheetTestType = CustomerSheetTestType.CustomerSession,
@@ -108,7 +110,7 @@ internal class CustomerSessionCustomerSheetTest {
         page.fillOutCardDetails(
             cardNumber = TEST_CBC_CARD_NUMBER
         )
-        page.changeCardBrandChoice()
+        page.selectCartesBancaire()
 
         enqueueCbcPaymentMethodCreation()
         enqueueSetupIntentConfirmation()
@@ -282,11 +284,7 @@ internal class CustomerSessionCustomerSheetTest {
             "disabled"
         }
 
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
+        networkRule.elementsSession { response ->
             response.testBodyFromFile(
                 filename = "elements-sessions-requires_pm_with_cs.json",
                 replacements = listOf(

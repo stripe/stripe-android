@@ -14,6 +14,7 @@ import com.stripe.android.paymentelement.confirmation.asCallbackFor
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.utils.FakeActivityResultRegistry
+import com.stripe.android.utils.FakeLinkStore
 import com.stripe.android.utils.RecordingLinkStore
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -21,8 +22,6 @@ import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.never
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
@@ -279,7 +278,6 @@ internal class LinkPaymentLauncherTest {
 
             verifyActivityResultCallback(
                 linkActivityResult = linkActivityResult,
-                linkStore = linkStore,
                 linkAnalyticsHelper = linkAnalyticsHelper,
                 expectedMarkAsUsedCalls = expectedMarkAsUsedCalls,
                 callbackResult = callbackParam,
@@ -315,7 +313,6 @@ internal class LinkPaymentLauncherTest {
 
                 verifyActivityResultCallback(
                     linkActivityResult = linkActivityResult,
-                    linkStore = linkStore,
                     linkAnalyticsHelper = linkAnalyticsHelper,
                     expectedMarkAsUsedCalls = expectedMarkAsUsedCalls,
                     callbackResult = callbackParam,
@@ -329,17 +326,10 @@ internal class LinkPaymentLauncherTest {
 
     private suspend fun RecordingLinkStore.Scenario.verifyActivityResultCallback(
         linkActivityResult: LinkActivityResult,
-        linkStore: LinkStore,
         linkAnalyticsHelper: TrackingLinkAnalyticsHelper,
         expectedMarkAsUsedCalls: Int,
         callbackResult: LinkActivityResult?,
     ) {
-        if (expectedMarkAsUsedCalls > 0) {
-            verify(linkStore, times(expectedMarkAsUsedCalls)).markLinkAsUsed()
-        } else {
-            verify(linkStore, never()).markLinkAsUsed()
-        }
-
         assertThat(callbackResult).isEqualTo(linkActivityResult)
         assertThat(markAsUsedCalls.cancelAndConsumeRemainingEvents().size).isEqualTo(expectedMarkAsUsedCalls)
         assertThat(linkAnalyticsHelper.results).containsExactly(linkActivityResult)
@@ -372,7 +362,7 @@ internal class LinkPaymentLauncherTest {
     private fun createLinkPaymentLauncher(
         linkActivityContract: LinkActivityContract = mock(),
         linkAnalyticsHelper: LinkAnalyticsHelper = TrackingLinkAnalyticsHelper(),
-        linkStore: LinkStore = mock()
+        linkStore: LinkStore = FakeLinkStore()
     ): LinkPaymentLauncher {
         return LinkPaymentLauncher(
             linkAnalyticsComponentFactory = object : LinkAnalyticsComponent.Factory {

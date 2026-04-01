@@ -125,7 +125,7 @@ class AutocompleteViewModelTest {
         val result = Result.failure<FetchPlaceResponse>(exception)
 
         mockClient.stub {
-            onBlocking { fetchPlace(any()) }.thenReturn(result)
+            on { fetchPlace(any()) }.thenReturn(result)
         }
 
         viewModel.event.test {

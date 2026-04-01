@@ -504,6 +504,7 @@ private fun PaymentMethodButtonPreview() {
                     },
                     label = "Link",
                     sublabel = "Visa (Personal) •••• 4242",
+                    type = LinkController.PaymentMethodType.Card
                 ),
                 onClick = {},
             )

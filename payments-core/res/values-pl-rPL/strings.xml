@@ -102,6 +102,8 @@
   <string name="stripe_becs_widget_name_required">Wymagane jest imię i nazwisko.</string>
   <!-- Button title to cancel action in an alert -->
   <string name="stripe_cancel">Anuluj</string>
+  <!-- String to prompt user to select card brand. -->
+  <string name="stripe_card_brand_choice_choose_card_brand">Wybierz markę karty</string>
   <!-- Title for a dropdown option when selecting a card brand -->
   <string name="stripe_card_brand_choice_no_selection">Nic nie wybrano</string>
   <!-- Title for a dropdown where the customer can select a card brand -->
@@ -182,6 +184,8 @@
   <string name="stripe_remove">Usuń</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="stripe_removed">Usunięto: %s</string>
+  <!-- A request error from Stripe has occurred due to a valid issue or merchant integration problem that has a request ID -->
+  <string name="stripe_request_error">Coś poszło nie tak. Identyfikator żądania: %1$s</string>
   <string name="stripe_secure_checkout">Bezpieczna płatność</string>
   <string name="stripe_title_add_a_card">Dodaj kartę</string>
   <!-- Screen title telling users they should add an address -->

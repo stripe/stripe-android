@@ -13,15 +13,15 @@ import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImm
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedContentHelper.Companion.STATE_KEY_EMBEDDED_CONTENT
-import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.AnalyticEventCallbackRule
-import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
+import com.stripe.android.utils.FakeSavedPaymentMethodRepository
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import com.stripe.android.utils.RecordingLinkPaymentLauncher
 import kotlinx.coroutines.CoroutineScope
@@ -161,17 +161,17 @@ internal class DefaultEmbeddedContentHelperTest {
             eventReporter = eventReporter,
             workContext = Dispatchers.Unconfined,
             uiContext = Dispatchers.Unconfined,
-            customerRepository = FakeCustomerRepository(),
+            savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(),
             selectionHolder = selectionHolder,
             embeddedLinkHelper = object : EmbeddedLinkHelper {
                 override val linkEmail: StateFlow<String?> = stateFlowOf(null)
             },
             embeddedWalletsHelper = { stateFlowOf(null) },
-            customerStateHolder = CustomerStateHolder(
+            customerStateHolder = DefaultCustomerStateHolder(
                 savedStateHandle = savedStateHandle,
                 selection = selectionHolder.selection,
-                customerMetadataPermissions = stateFlowOf(
-                    PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.permissions
+                customerMetadata = stateFlowOf(
+                    PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
                 ),
             ),
             embeddedFormHelperFactory = embeddedFormHelperFactory,

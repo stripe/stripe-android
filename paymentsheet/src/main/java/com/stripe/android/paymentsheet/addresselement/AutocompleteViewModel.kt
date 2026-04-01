@@ -200,8 +200,7 @@ internal class AutocompleteViewModel @Inject constructor(
         }
 
         constructor(
-            autoCompleteViewModelSubcomponentFactoryProvider:
-            Provider<AutocompleteViewModelSubcomponent.Factory>,
+            autoCompleteViewModelSubcomponentFactoryProvider: Provider<AutocompleteViewModelSubcomponent.Factory>,
             args: Args,
         ) : this(
             Type.WithinAddressElement(autoCompleteViewModelSubcomponentFactoryProvider, args)

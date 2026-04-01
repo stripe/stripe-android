@@ -22,7 +22,7 @@ internal fun PaymentSelection.toConfirmationOption(
     cardFundingFilter: CardFundingFilter
 ): ConfirmationHandler.Option? {
     return when (this) {
-        is PaymentSelection.Saved -> toConfirmationOption()
+        is PaymentSelection.Saved -> toConfirmationOption(linkConfiguration)
         is PaymentSelection.ExternalPaymentMethod -> toConfirmationOption()
         is PaymentSelection.CustomPaymentMethod -> toConfirmationOption(configuration)
         is PaymentSelection.New.USBankAccount -> toConfirmationOption()
@@ -35,13 +35,6 @@ internal fun PaymentSelection.toConfirmationOption(
         is PaymentSelection.Link -> toConfirmationOption(linkConfiguration)
         is PaymentSelection.ShopPay -> toConfirmationOption(configuration)
     }
-}
-
-private fun PaymentSelection.Saved.toConfirmationOption(): PaymentMethodConfirmationOption.Saved {
-    return PaymentMethodConfirmationOption.Saved(
-        paymentMethod = paymentMethod,
-        optionsParams = paymentMethodOptionsParams,
-    )
 }
 
 private fun PaymentSelection.ExternalPaymentMethod.toConfirmationOption(): ExternalPaymentMethodConfirmationOption {
@@ -69,11 +62,29 @@ private fun PaymentSelection.New.USBankAccount.toConfirmationOption(): PaymentMe
     }
 }
 
+internal fun PaymentSelection.Saved.toConfirmationOption(
+    linkConfiguration: LinkConfiguration?,
+): ConfirmationHandler.Option {
+    return if (linkInput != null && linkConfiguration != null) {
+        LinkInlineSignupConfirmationOption.Saved(
+            paymentMethod = paymentMethod,
+            optionsParams = paymentMethodOptionsParams,
+            linkConfiguration = linkConfiguration,
+            userInput = linkInput,
+        )
+    } else {
+        PaymentMethodConfirmationOption.Saved(
+            paymentMethod = paymentMethod,
+            optionsParams = paymentMethodOptionsParams,
+        )
+    }
+}
+
 private fun PaymentSelection.New.Card.toConfirmationOption(
     linkConfiguration: LinkConfiguration?,
 ): ConfirmationHandler.Option {
     return if (linkInput != null && linkConfiguration != null) {
-        LinkInlineSignupConfirmationOption(
+        LinkInlineSignupConfirmationOption.New(
             createParams = paymentMethodCreateParams,
             optionsParams = paymentMethodOptionsParams,
             extraParams = paymentMethodExtraParams,
@@ -162,9 +173,9 @@ private fun PaymentSelection.CustomPaymentMethod.toConfirmationOption(
 }
 
 private fun PaymentSelection.ShopPay.toConfirmationOption(
-    configuration: CommonConfiguration
+    configuration: CommonConfiguration?
 ): ShopPayConfirmationOption? {
-    val customerSessionClientSecret = when (val accessType = configuration.customer?.accessType) {
+    val customerSessionClientSecret = when (val accessType = configuration?.customer?.accessType) {
         is PaymentSheet.CustomerAccessType.CustomerSession -> accessType.customerSessionClientSecret
         else -> return null
     }

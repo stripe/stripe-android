@@ -42,14 +42,12 @@ class MandateDataParams constructor(
              * [mandate_data.customer_acceptance.online.ip_address](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-mandate_data-customer_acceptance-online-ip_address)
              */
             private val ipAddress: String? = null,
-
             /**
              * The user agent of the browser from which the Mandate was accepted by the customer.
              *
              * [mandate_data.customer_acceptance.online.user_agent](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-mandate_data-customer_acceptance-online-user_agent)
              */
             private val userAgent: String? = null,
-
             private val inferFromClient: Boolean = false
         ) : Type("online") {
 
@@ -60,7 +58,6 @@ class MandateDataParams constructor(
                  * [mandate_data.customer_acceptance.online.ip_address](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-mandate_data-customer_acceptance-online-ip_address)
                  */
                 ipAddress: String,
-
                 /**
                  * The user agent of the browser from which the Mandate was accepted by the customer.
                  *

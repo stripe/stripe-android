@@ -716,7 +716,7 @@ class NetworkingLinkSignupViewModelTest {
         )
 
         val getOrFetchSync = mock<GetOrFetchSync> {
-            onBlocking { invoke(any(), anyOrNull()) } doReturn syncResponse().copy(
+            on { invoke(any(), anyOrNull()) } doReturn syncResponse().copy(
                 manifest = manifest,
                 text = TextUpdate(
                     consent = null,
@@ -726,16 +726,16 @@ class NetworkingLinkSignupViewModelTest {
         }
 
         val getCachedAccounts = mock<GetCachedAccounts> {
-            onBlocking { invoke() } doReturn cachedPartnerAccounts()
+            on { invoke() } doReturn cachedPartnerAccounts()
         }
 
         val saveAccountToLink = mock<SaveAccountToLink> {
             if (failOnSignup) {
-                onBlocking { new(any(), any(), any(), any(), any()) } doAnswer {
+                on { new(any(), any(), any(), any(), any()) } doAnswer {
                     throw APIConnectionException()
                 }
             } else {
-                onBlocking { new(any(), any(), any(), any(), any()) } doReturn manifest
+                on { new(any(), any(), any(), any(), any()) } doReturn manifest
             }
         }
 
@@ -762,7 +762,7 @@ class NetworkingLinkSignupViewModelTest {
         )
 
         val getOrFetchSync = mock<GetOrFetchSync> {
-            onBlocking { invoke(any(), anyOrNull()) } doReturn syncResponse().copy(
+            on { invoke(any(), anyOrNull()) } doReturn syncResponse().copy(
                 manifest = manifest,
                 text = TextUpdate(
                     consent = null,
@@ -789,15 +789,15 @@ class NetworkingLinkSignupViewModelTest {
     private fun consumerSessionRepository(failOnSignup: Boolean): FinancialConnectionsConsumerSessionRepository {
         val consumerRepository = mock<FinancialConnectionsConsumerSessionRepository> {
             if (failOnSignup) {
-                onBlocking { signUp(any(), any(), any()) } doAnswer {
+                on { signUp(any(), any(), any()) } doAnswer {
                     throw APIConnectionException()
                 }
-                onBlocking { mobileSignUp(any(), any(), any(), any(), any()) } doAnswer {
+                on { mobileSignUp(any(), any(), any(), any(), any()) } doAnswer {
                     throw APIConnectionException()
                 }
             } else {
-                onBlocking { signUp(any(), any(), any()) } doReturn consumerSessionSignup()
-                onBlocking { mobileSignUp(any(), any(), any(), any(), any()) } doReturn consumerSessionSignup()
+                on { signUp(any(), any(), any()) } doReturn consumerSessionSignup()
+                on { mobileSignUp(any(), any(), any(), any(), any()) } doReturn consumerSessionSignup()
             }
         }
         return consumerRepository

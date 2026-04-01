@@ -1,0 +1,20 @@
+{
+    "session_id": "cs_test_after_address",
+    "ui_mode": "custom",
+    "currency": "usd",
+    "total_summary": {
+        "due": 4599,
+        "subtotal": 5099,
+        "total": 4599
+    },
+    "line_item_group": {
+        "due": 4599,
+        "subtotal": 5099,
+        "total": 4599,
+        "shipping_rate": {
+            "id": "shr_express",
+            "amount": 500,
+            "display_name": "Express Shipping"
+        }
+    }
+}

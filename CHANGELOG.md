@@ -2,6 +2,80 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 23.2.0 - 2026-03-30
+
+Dependencies updated in [12785](https://github.com/stripe/stripe-android/pull/12785) and [12786](https://github.com/stripe/stripe-android/pull/12786):
+- Rolled back kotlin to 2.2.21 from 2.3.10.
+- Bumped Compose from 1.10.4 to 1.10.6.
+
+### Identity
+* [CHANGED] Improved selfie capture quality with motion blur gating, center framing validation, and better best-frame selection.
+* [FIXED] Fixed truncation of some floating-point parameters sent to the Identity API.
+* [CHANGED] Removed legacy ID detector references from the Identity document capture pipeline.
+
+### PaymentSheet
+* [FIXED][12653](https://github.com/stripe/stripe-android/pull/12653) Fixed a bug where `PaymentSheet.FlowController` wouldn't emit a null `PaymentOption` from `PaymentOptionCallback` after a successful confirmation.
+* [ADDED][12746](https://github.com/stripe/stripe-android/pull/12746) Added support for [payments orchestration](https://docs.stripe.com/payments/orchestration) (private preview) by allowing `processing` as a PaymentIntent state for cards.
+
+## 23.1.0 - 2026-03-23
+
+Added new card scanner in PaymentSheet (alpha).
+
+### Payments
+[Added][12728](https://github.com/stripe/stripe-android/pull/12728) - New `PaymentLauncher.create()` and `rememberPaymentLauncher()` methods that read configuration from `PaymentConfiguration` instead of requiring explicit publishable key parameters.
+
+## 23.0.2 - 2026-03-16
+
+### PaymentSheet
+[Changed][12667](https://github.com/stripe/stripe-android/pull/12667) CBC selector UI from a dropdown to a segmented selector following Mastercard requirements.
+
+## 23.0.1 - 2026-03-10
+
+### Payments
+[FIXED][12596](https://github.com/stripe/stripe-android/pull/12596) Correctly resolve project dependency artifactId when generating pom files to ensure accurate dependency metadata.
+
+## 23.0.0 - 2026-03-09
+
+Dependencies updated in [12373](https://github.com/stripe/stripe-android/pull/12373), [12410](https://github.com/stripe/stripe-android/pull/12410), [12419](https://github.com/stripe/stripe-android/pull/12419), [12433](https://github.com/stripe/stripe-android/pull/12433), and [12486](https://github.com/stripe/stripe-android/pull/12486):
+- Bumped `minSdkVersion` to `23`.
+- Bumped `compileSdkVersion` and `targetSdkVersion` to `36`.
+- Bumped Kotlin from 2.1.10 to 2.3.10.
+- Bumped Kotlin Coroutines from 1.10.1 to 1.10.2.
+- Bumped Kotlin Serialization from 1.8.0 to 1.10.0.
+- Bumped Android Gradle Plugin from 8.13.1 to 8.13.2.
+- Bumped Poko from 0.18.2 to 0.21.1.
+- Bumped App compat from 1.7.0 to 1.7.1.
+- Bumped nimbus-jose-jwt from 10.4.2 to 10.6.
+- Bumped constraintlayout from 2.2.0 to 2.2.1.
+- Bumped androidx.camera from 1.4.2 to 1.5.3.
+- Bumped recyclerview from 1.3.2 to 1.4.0.
+- Bumped Compose from 1.9.4 to 1.10.4.
+- Bumped androidx.activity from 1.9.3 to 1.12.4.
+- Bumped androidx.browser from 1.8.0 to 1.9.0.
+- Bumped androidx.core from 1.13.1 to 1.17.0.
+- Bumped androidx.fragment from 1.8.6 to 1.8.9.
+- Bumped androidx.hilt from 1.2.0 to 1.3.0.
+- Bumped androidx.lifecycle from 2.8.7 to 2.10.0.
+- Bumped androidx.navigation from 2.8.5 to 2.9.7.
+- Bumped androidx.webkit from 1.14.0 to 1.15.0.
+- Bumped Google Places from 5.0.0 to 5.1.1.
+- Bumped Play Services Wallet from 19.4.0 to 19.5.0.
+- Bumped LiteRT from 1.4.0 to 1.4.1.
+- Bumped WorkManager from 2.9.0 to 2.11.1.
+- Bumped Material from 1.12.0 to 1.13.0.
+
+### PaymentSheet
+* [Added] Added support for Wero payments (private preview).
+
+## 22.8.1 - 2026-02-17
+
+### Identity
+* [Added] More live feedback during document capture.
+* [Added] Added best frame detector to improve document capture quality.
+
+### PaymentSheet
+* [Changed] Afterpay/Clearpay no longer requires billing address by default. Set `billingDetailsCollectionConfiguration.address` to `AddressCollectionMode.Full` if you need to collect billing address for Afterpay.
+
 ## 22.8.0 - 2026-02-09
 
 Dependencies updated in [12276](https://github.com/stripe/stripe-android/pull/12276):

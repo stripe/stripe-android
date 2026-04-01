@@ -50,7 +50,6 @@ dependencies {
 
     // Other
     implementation libs.playServicesWallet
-    implementation libs.payButtonCompose
     implementation libs.material
     compileOnly libs.places
 
@@ -59,6 +58,7 @@ dependencies {
     debugImplementation libs.compose.uiTooling
     debugImplementation libs.compose.uiTestManifest
 
+    testImplementation project(':checkout-testing')
     testImplementation project(':financial-connections')
     testImplementation project(':network-testing')
     testImplementation project(':payments-core-testing')
@@ -89,12 +89,14 @@ dependencies {
     testImplementation testLibs.turbine
     testImplementation testLibs.espresso.intents
     testImplementation libs.terminal.core
+    testImplementation libs.terminal.tapToPay
 
     // temporary fix for running compose test in RobolectricTestRunner, see https://github.com/robolectric/robolectric/issues/6593
     testImplementation testLibs.espresso.core
 
     kspTest libs.daggerCompiler
 
+    androidTestImplementation project(':checkout-testing')
     androidTestImplementation project(':network-testing')
     androidTestImplementation project(':payments-core-testing')
     androidTestImplementation project(':payment-element-test-pages')
@@ -134,6 +136,7 @@ android {
     buildFeatures {
         compose = true
         viewBinding true
+        buildConfig = true
     }
 
     testOptions {
@@ -145,19 +148,20 @@ android {
             }
         }
 
-        kotlinOptions {
-            freeCompilerArgs += ["-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"]
-        }
     }
 
-    kotlinOptions {
-        freeCompilerArgs += [
-                "-opt-in=kotlinx.coroutines.FlowPreview",
-                "-Xcontext-receivers",
-                "-Xconsistent-data-class-copy-visibility"
-        ]
-        if (gradle.ext.isCi) {
-            kotlinOptions.allWarningsAsErrors = true
+    kotlin {
+        compilerOptions {
+            freeCompilerArgs.addAll([
+                    "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+                    "-opt-in=kotlinx.coroutines.FlowPreview",
+                    "-Xcontext-parameters",
+                    "-Xannotation-default-target=param-property",
+                    "-Xconsistent-data-class-copy-visibility"
+            ])
+            if (gradle.ext.isCi) {
+                allWarningsAsErrors = true
+            }
         }
     }
 }

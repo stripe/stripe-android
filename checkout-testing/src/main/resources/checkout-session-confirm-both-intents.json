@@ -1,0 +1,37 @@
+{
+  "session_id": "cs_test_abc123",
+  "ui_mode": "custom",
+  "currency": "usd",
+  "total_summary": {
+    "subtotal": 5099,
+    "due": 5099,
+    "total": 5099
+  },
+  "payment_intent": {
+    "id": "pi_123",
+    "object": "payment_intent",
+    "amount": 5099,
+    "capture_method": "automatic",
+    "client_secret": "pi_123_secret",
+    "confirmation_method": "automatic",
+    "created": 1674747412,
+    "currency": "usd",
+    "livemode": false,
+    "payment_method_types": [
+      "card"
+    ],
+    "status": "succeeded"
+  },
+  "setup_intent": {
+    "id": "seti_123",
+    "object": "setup_intent",
+    "client_secret": "seti_123_secret",
+    "created": 1674747412,
+    "livemode": false,
+    "payment_method_types": [
+      "card"
+    ],
+    "status": "succeeded",
+    "usage": "off_session"
+  }
+}

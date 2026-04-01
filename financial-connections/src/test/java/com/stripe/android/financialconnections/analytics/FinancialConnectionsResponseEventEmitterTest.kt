@@ -46,7 +46,6 @@ class FinancialConnectionsResponseEventEmitterTest {
                 }
             }
             """.trimIndent()
-
         )
 
         emitter.emitIfPresent(response)

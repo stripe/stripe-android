@@ -101,6 +101,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                                 ?.sharePaymentDetailsImmediatelyAfterCreation != false
                         if (shouldShare) {
                             linkAccountManager.shareCardPaymentDetails(linkPaymentDetails).getOrThrow()
+                                .copy(createdFromNewPaymentMethod = true)
                         } else {
                             linkPaymentDetails
                         }

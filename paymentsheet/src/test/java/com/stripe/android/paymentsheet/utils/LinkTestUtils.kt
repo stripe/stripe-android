@@ -20,7 +20,7 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 
 internal object LinkTestUtils {
-    val LINK_SAVED_PAYMENT_DETAILS = LinkPaymentDetails.Saved(
+    val LINK_PASSTHROUGH_PAYMENT_DETAILS = LinkPaymentDetails.Passthrough(
         paymentDetails = ConsumerPaymentDetails.Passthrough(
             id = "csmrpd_123",
             last4 = "4242",
@@ -109,7 +109,6 @@ internal object LinkTestUtils {
             linkAppearance = null,
             linkSignUpOptInFeatureEnabled = false,
             linkSignUpOptInInitialValue = false,
-            skipWalletInFlowController = false,
             customerId = null,
             saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             forceSetupFutureUseBehaviorAndNewMandate = false,

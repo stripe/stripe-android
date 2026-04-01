@@ -19,6 +19,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_SELECTION
 import com.stripe.android.testing.PaymentIntentFactory
+import com.stripe.android.utils.FakeLinkStore
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
@@ -177,7 +178,7 @@ private fun runLinkTest(
         .thenReturn(linkAttestationCheck)
     val savedStateHandle = SavedStateHandle()
     val linkAnalyticsHelper = mock<LinkAnalyticsHelper>()
-    val linkStore = mock<LinkStore>()
+    val linkStore = FakeLinkStore()
     val handler = LinkHandler(
         linkConfigurationCoordinator = linkConfigurationCoordinator,
     )

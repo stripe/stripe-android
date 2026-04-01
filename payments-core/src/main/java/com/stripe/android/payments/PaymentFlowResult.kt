@@ -95,13 +95,11 @@ sealed class PaymentFlowResult {
     internal data class Validated internal constructor(
         val clientSecret: String,
         @StripeIntentResult.Outcome internal val flowOutcome: Int,
-
         /**
          * The Source is eligible for cancellation.
          * See [PaymentFlowResultProcessor.shouldCancelIntent] for usage.
          */
         internal val canCancelSource: Boolean = false,
-
         internal val sourceId: String? = null,
         internal val source: Source? = null,
         val stripeAccountId: String? = null

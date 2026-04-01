@@ -46,16 +46,13 @@ data class Stripe3ds2AuthResult internal constructor(
     internal data class MessageExtension internal constructor(
         // The name of the extension data set as defined by the extension owner.
         val name: String?,
-
         // A boolean value indicating whether the recipient must understand the contents of the
         // extension to interpret the entire message.
         private val criticalityIndicator: Boolean,
-
         // A unique identifier for the extension.
         // Note: Payment System Registered Application Provider Identifier (RID) is required as
         // prefix of the ID.
         val id: String?,
-
         // The data carried in the extension.
         val data: Map<String, String>?
     ) : StripeModel

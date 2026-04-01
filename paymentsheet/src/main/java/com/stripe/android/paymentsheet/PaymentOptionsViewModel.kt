@@ -12,8 +12,11 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.common.exception.stripeErrorMessage
-import com.stripe.android.common.taptoadd.TapToAddCollectionHandler
+import com.stripe.android.common.taptoadd.TapToAddHelper
+import com.stripe.android.common.taptoadd.TapToAddMode
+import com.stripe.android.common.taptoadd.TapToAddNextStep
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.link.LinkActivityResult
@@ -28,6 +31,7 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
@@ -36,7 +40,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection.Link
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
-import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
@@ -45,7 +49,9 @@ import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFac
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
 import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -60,26 +66,30 @@ internal class PaymentOptionsViewModel @Inject constructor(
     private val args: PaymentOptionContract.Args,
     private val linkAccountHolder: LinkAccountHolder,
     private val linkGateFactory: LinkGate.Factory,
+    private val errorReporter: ErrorReporter,
     val linkPaymentLauncher: LinkPaymentLauncher,
     eventReporter: EventReporter,
-    customerRepository: CustomerRepository,
+    savedPaymentMethodRepository: SavedPaymentMethodRepository,
     @IOContext workContext: CoroutineContext,
     savedStateHandle: SavedStateHandle,
     linkHandler: LinkHandler,
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
-    tapToAddCollectionHandler: TapToAddCollectionHandler,
+    tapToAddHelperFactory: TapToAddHelper.Factory,
     mode: EventReporter.Mode,
+    customerStateHolderFactory: CustomerStateHolder.Factory,
+    @ViewModelScope customViewModelScope: CoroutineScope,
 ) : BaseSheetViewModel(
     config = args.configuration,
     eventReporter = eventReporter,
-    customerRepository = customerRepository,
+    savedPaymentMethodRepository = savedPaymentMethodRepository,
     workContext = workContext,
     savedStateHandle = savedStateHandle,
     linkHandler = linkHandler,
     cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
     isCompleteFlow = false,
-    tapToAddCollectionHandler = tapToAddCollectionHandler,
     mode = mode,
+    customerStateHolderFactory = customerStateHolderFactory,
+    customViewModelScope = customViewModelScope,
 ) {
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
@@ -97,6 +107,14 @@ internal class PaymentOptionsViewModel @Inject constructor(
             onUserSelection()
         },
         onDisabledClick = ::onDisabledClick,
+    )
+
+    override val tapToAddHelper = tapToAddHelperFactory.create(
+        coroutineScope = viewModelScope,
+        tapToAddMode = TapToAddMode.Continue,
+        updateSelection = ::updateSelection,
+        customerStateHolder = customerStateHolder,
+        linkSignupMode = paymentMethodMetadata.mapAsStateFlow { it?.linkState?.signupMode },
     )
 
     private val _paymentOptionsActivityResult = MutableSharedFlow<PaymentOptionsActivityResult>(replay = 1)
@@ -135,7 +153,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
         buttonsEnabled,
         selection,
         linkAccountHolder.linkAccountInfo
-
     ) { isLinkAvailable, linkEmail, buttonsEnabled, currentSelection, linkAccountInfo ->
         val paymentMethodMetadata = args.state.paymentMethodMetadata
         val linkConfiguration = paymentMethodMetadata.linkState?.configuration
@@ -210,6 +227,41 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
         updateSelection(args.state.paymentSelection)
 
+        navigateToInitialScreens()
+
+        viewModelScope.launch {
+            tapToAddHelper.nextStep.collect { result ->
+                when (result) {
+                    is TapToAddNextStep.ConfirmSavedPaymentMethod -> {
+                        val paymentMethodMetadata = args.state.paymentMethodMetadata
+                        val savedPaymentMethodConfirmScreen = PaymentSheetScreen.SavedPaymentMethodConfirm.create(
+                            viewModel = this@PaymentOptionsViewModel,
+                            paymentMethodMetadata = paymentMethodMetadata,
+                            initialSelection = result.paymentSelection,
+                        )
+                        val newScreens = determineInitialBackStack(
+                            paymentMethodMetadata,
+                            customerStateHolder,
+                        ).plus(savedPaymentMethodConfirmScreen)
+                        navigationHandler.resetTo(newScreens)
+                    }
+                    is TapToAddNextStep.ShowSavedPaymentMethods -> navigateToInitialScreens()
+                    TapToAddNextStep.Complete -> {
+                        errorReporter.report(
+                            ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_FLOW_CONTROLLER_RECEIVED_COMPLETE_RESULT,
+                        )
+                    }
+                    is TapToAddNextStep.Continue -> {
+                        customerStateHolder.addPaymentMethod(result.paymentSelection.paymentMethod)
+                        updateSelection(result.paymentSelection)
+                        onUserSelection()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun navigateToInitialScreens() {
         navigationHandler.resetTo(
             determineInitialBackStack(
                 paymentMethodMetadata = args.state.paymentMethodMetadata,

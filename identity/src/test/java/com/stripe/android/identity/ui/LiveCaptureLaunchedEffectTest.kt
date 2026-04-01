@@ -104,12 +104,13 @@ class LiveCaptureLaunchedEffectTest {
         val idScannedState = IdentityScanViewModel.State.Scanned(
             IdentityAggregator.FinalResult(
                 frame = mock(),
-                result = IDDetectorOutput.Legacy(
+                result = IDDetectorOutput(
                     boundingBox = mock(),
                     category = mock(),
                     resultScore = ID_FRONT_MODEL_SCORE,
                     allScores = mock(),
-                    blurScore = ID_FRONT_BLUR_SCORE
+                    blurScore = ID_FRONT_BLUR_SCORE,
+                    croppedImage = mock()
                 ),
                 identityState = IdentityScanState.Finished(
                     type = IdentityScanState.ScanType.DOC_FRONT,
@@ -153,12 +154,13 @@ class LiveCaptureLaunchedEffectTest {
         val idScannedState = IdentityScanViewModel.State.Scanned(
             IdentityAggregator.FinalResult(
                 frame = mock(),
-                result = IDDetectorOutput.Legacy(
+                result = IDDetectorOutput(
                     boundingBox = mock(),
                     category = mock(),
                     resultScore = ID_BACK_MODEL_SCORE,
                     allScores = mock(),
-                    blurScore = ID_BACK_BLUR_SCORE
+                    blurScore = ID_BACK_BLUR_SCORE,
+                    croppedImage = mock()
                 ),
                 identityState = IdentityScanState.Finished(
                     type = IdentityScanState.ScanType.DOC_BACK,

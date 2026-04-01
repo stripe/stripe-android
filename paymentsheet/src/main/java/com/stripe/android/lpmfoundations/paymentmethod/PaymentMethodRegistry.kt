@@ -17,7 +17,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.CryptoDefinit
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.EpsDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.FpxDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.GrabPayDefinition
-import com.stripe.android.lpmfoundations.paymentmethod.definitions.IdealDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.IdealWeroDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.InstantDebitsDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.KlarnaDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.KonbiniDefinition
@@ -38,6 +38,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.TwintDefiniti
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.UpiDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.UsBankAccountDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.WeChatPayDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.WeroDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ZipDefinition
 
 internal object PaymentMethodRegistry {
@@ -60,7 +61,7 @@ internal object PaymentMethodRegistry {
         EpsDefinition,
         FpxDefinition,
         GrabPayDefinition,
-        IdealDefinition,
+        IdealWeroDefinition,
         InstantDebitsDefinition,
         KlarnaDefinition,
         KonbiniDefinition,
@@ -81,6 +82,7 @@ internal object PaymentMethodRegistry {
         UpiDefinition,
         UsBankAccountDefinition,
         WeChatPayDefinition,
+        WeroDefinition,
         ZipDefinition,
     )
 

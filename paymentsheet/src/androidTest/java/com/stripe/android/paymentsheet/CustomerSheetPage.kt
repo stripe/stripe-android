@@ -81,6 +81,11 @@ internal class CustomerSheetPage(
         clickOnCartesBancaires()
     }
 
+    fun selectCartesBancaire() {
+        waitForIdle()
+        click(hasContentDescription("Cartes Bancaires"))
+    }
+
     fun closeKeyboard() {
         Espresso.closeSoftKeyboard()
     }

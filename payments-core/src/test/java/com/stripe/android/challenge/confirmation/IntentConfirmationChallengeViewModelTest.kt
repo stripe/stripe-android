@@ -3,10 +3,24 @@ package com.stripe.android.challenge.confirmation
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
+import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.challenge.confirmation.analytics.IntentConfirmationChallengeAnalyticsEventReporter
+import com.stripe.android.core.Logger
+import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.CancelCaptchaChallengeParams
+import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.SetupIntent
+import com.stripe.android.model.StripeIntent
+import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.core.analytics.ErrorReporter.ExpectedErrorEvent
+import com.stripe.android.payments.core.analytics.ErrorReporter.UnexpectedErrorEvent
+import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeErrorReporter
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -24,17 +38,13 @@ internal class IntentConfirmationChallengeViewModelTest {
     val coroutineTestRule = CoroutineTestRule(testDispatcher)
 
     @Test
-    fun `when Ready event is received, bridgeReady emits value`() = runTest {
-        val fakeBridgeHandler = FakeConfirmationChallengeBridgeHandler()
-        val fakeAnalyticsReporter = FakeIntentConfirmationChallengeAnalyticsEventReporter()
-        val viewModel = createViewModel(fakeBridgeHandler, fakeAnalyticsReporter)
-
+    fun `when Ready event is received, bridgeReady emits value`() = testScenario {
         viewModel.bridgeReady.test {
             // Initial state
             expectNoEvents()
 
             // Emit Ready event
-            fakeBridgeHandler.emitEvent(ConfirmationChallengeBridgeEvent.Ready)
+            bridgeHandler.emitEvent(ConfirmationChallengeBridgeEvent.Ready)
 
             // Should emit value
             awaitItem()
@@ -43,21 +53,18 @@ internal class IntentConfirmationChallengeViewModelTest {
         }
 
         // Verify analytics
-        assertThat(fakeAnalyticsReporter.calls).hasSize(1)
-        assertThat(fakeAnalyticsReporter.calls.last()).isEqualTo(
-            FakeIntentConfirmationChallengeAnalyticsEventReporter.Call.WebViewLoaded
+        assertThat(analyticsReporter.calls).hasSize(1)
+        assertThat(analyticsReporter.calls.last()).isEqualTo(
+            FakeIntentConfirmationChallengeAnalyticsEventReporter.Call.WebViewLoaded("hcaptcha")
         )
     }
 
     @Test
-    fun `when Success event is received, result emits Success with clientSecret`() = runTest {
-        val fakeBridgeHandler = FakeConfirmationChallengeBridgeHandler()
-        val fakeAnalyticsReporter = FakeIntentConfirmationChallengeAnalyticsEventReporter()
-        val viewModel = createViewModel(fakeBridgeHandler, fakeAnalyticsReporter)
+    fun `when Success event is received, result emits Success with clientSecret`() = testScenario {
         val expectedClientSecret = "pi_test_secret_123"
 
         viewModel.result.test {
-            fakeBridgeHandler.emitEvent(
+            bridgeHandler.emitEvent(
                 ConfirmationChallengeBridgeEvent.Success(clientSecret = expectedClientSecret)
             )
 
@@ -70,21 +77,18 @@ internal class IntentConfirmationChallengeViewModelTest {
         }
 
         // Verify analytics
-        assertThat(fakeAnalyticsReporter.calls).hasSize(1)
-        assertThat(fakeAnalyticsReporter.calls.last()).isEqualTo(
-            FakeIntentConfirmationChallengeAnalyticsEventReporter.Call.Success
+        assertThat(analyticsReporter.calls).hasSize(1)
+        assertThat(analyticsReporter.calls.last()).isEqualTo(
+            FakeIntentConfirmationChallengeAnalyticsEventReporter.Call.Success("hcaptcha")
         )
     }
 
     @Test
-    fun `when Error event is received, result emits Failed with error`() = runTest {
-        val fakeBridgeHandler = FakeConfirmationChallengeBridgeHandler()
-        val fakeAnalyticsReporter = FakeIntentConfirmationChallengeAnalyticsEventReporter()
-        val viewModel = createViewModel(fakeBridgeHandler, fakeAnalyticsReporter)
+    fun `when Error event is received, result emits Failed with error`() = testScenario {
         val expectedError = BridgeException(IOException("Network error"))
 
         viewModel.result.test {
-            fakeBridgeHandler.emitEvent(
+            bridgeHandler.emitEvent(
                 ConfirmationChallengeBridgeEvent.Error(error = expectedError)
             )
 
@@ -97,19 +101,17 @@ internal class IntentConfirmationChallengeViewModelTest {
         }
 
         // Verify analytics
-        assertThat(fakeAnalyticsReporter.calls).hasSize(1)
+        assertThat(analyticsReporter.calls).hasSize(1)
         val errorCall =
-            fakeAnalyticsReporter.calls.last() as FakeIntentConfirmationChallengeAnalyticsEventReporter.Call.Error
+            analyticsReporter.calls.last() as FakeIntentConfirmationChallengeAnalyticsEventReporter.Call.Error
         assertThat(errorCall.errorType).isNull()
         assertThat(errorCall.errorCode).isNull()
         assertThat(errorCall.fromBridge).isTrue()
+        assertThat(errorCall.captchaVendorName).isEqualTo("hcaptcha")
     }
 
     @Test
-    fun `when handleWebViewError is called, result emits Failed with WebViewError`() = runTest {
-        val fakeBridgeHandler = FakeConfirmationChallengeBridgeHandler()
-        val fakeAnalyticsReporter = FakeIntentConfirmationChallengeAnalyticsEventReporter()
-        val viewModel = createViewModel(fakeBridgeHandler, fakeAnalyticsReporter)
+    fun `when handleWebViewError is called, result emits Failed with WebViewError`() = testScenario {
         val webViewError = WebViewError(
             message = "net::ERR_FAILED",
             url = "https://example.com/payment",
@@ -130,19 +132,114 @@ internal class IntentConfirmationChallengeViewModelTest {
         }
 
         // Verify analytics
-        assertThat(fakeAnalyticsReporter.calls).hasSize(1)
+        assertThat(analyticsReporter.calls).hasSize(1)
         val errorCall =
-            fakeAnalyticsReporter.calls.last() as FakeIntentConfirmationChallengeAnalyticsEventReporter.Call.Error
+            analyticsReporter.calls.last() as FakeIntentConfirmationChallengeAnalyticsEventReporter.Call.Error
         assertThat(errorCall.errorType).isEqualTo("generic_resource_error")
         assertThat(errorCall.errorCode).isEqualTo("-2")
         assertThat(errorCall.fromBridge).isFalse()
+        assertThat(errorCall.captchaVendorName).isEqualTo("hcaptcha")
     }
 
     @Test
-    fun `when onStart is called, analytics start is reported`() = runTest {
-        val fakeBridgeHandler = FakeConfirmationChallengeBridgeHandler()
-        val fakeAnalyticsReporter = FakeIntentConfirmationChallengeAnalyticsEventReporter()
-        val viewModel = createViewModel(fakeBridgeHandler, fakeAnalyticsReporter)
+    fun `when closeClicked is called and verify succeeds, result emits Canceled`() {
+        val fakeStripeRepository = FakeStripeRepository(
+            cancelResult = Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
+        )
+        testScenario(stripeRepository = fakeStripeRepository) {
+            viewModel.result.test {
+                viewModel.closeClicked()
+
+                val result = awaitItem()
+                assertThat(result).isInstanceOf(IntentConfirmationChallengeActivityResult.Canceled::class.java)
+                val canceledResult = result as IntentConfirmationChallengeActivityResult.Canceled
+                assertThat(canceledResult.clientSecret).isEqualTo(TEST_ARGS.intent.clientSecret)
+
+                ensureAllEventsConsumed()
+            }
+
+            val repoCall = fakeStripeRepository.awaitCall()
+            assertThat(repoCall.intentId).isEqualTo(TEST_ARGS.intent.id)
+            assertThat(repoCall.params.clientSecret).isEqualTo(TEST_ARGS.intent.clientSecret)
+            assertThat(repoCall.requestOptions).isEqualTo(REQUEST_OPTIONS)
+            fakeStripeRepository.ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun `when closeClicked is called and intent id is null, result emits Canceled and errorReporter reports`() {
+        val fakeErrorReporter = FakeErrorReporter()
+        val argsWithNullId = IntentConfirmationChallengeArgs(
+            publishableKey = "pk_test_123",
+            intent = PaymentIntentFixtures.PI_WITH_NULL_ID,
+            productUsage = listOf("PaymentSheet"),
+            captchaVendorName = "hcaptcha",
+        )
+        testScenario(args = argsWithNullId, errorReporter = fakeErrorReporter) {
+            viewModel.result.test {
+                viewModel.closeClicked()
+
+                val result = awaitItem()
+                assertThat(result).isInstanceOf(IntentConfirmationChallengeActivityResult.Canceled::class.java)
+                val canceledResult = result as IntentConfirmationChallengeActivityResult.Canceled
+                assertThat(canceledResult.clientSecret).isEqualTo(argsWithNullId.intent.clientSecret)
+
+                ensureAllEventsConsumed()
+            }
+
+            val errorCall = fakeErrorReporter.awaitCall()
+            assertThat(errorCall.errorEvent).isEqualTo(
+                UnexpectedErrorEvent.INTENT_CONFIRMATION_CHALLENGE_INTENT_PARAMETERS_UNAVAILABLE
+            )
+            fakeErrorReporter.ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun `when closeClicked is called and cancel fails, result emits Canceled and error is reported`() {
+        val fakeErrorReporter = FakeErrorReporter()
+        val fakeStripeRepository = FakeStripeRepository(
+            cancelResult = Result.failure(Throwable("Network error"))
+        )
+        testScenario(stripeRepository = fakeStripeRepository, errorReporter = fakeErrorReporter) {
+            viewModel.result.test {
+                viewModel.closeClicked()
+
+                val result = awaitItem()
+                assertThat(result).isInstanceOf(IntentConfirmationChallengeActivityResult.Canceled::class.java)
+                val canceledResult = result as IntentConfirmationChallengeActivityResult.Canceled
+                assertThat(canceledResult.clientSecret).isEqualTo(TEST_ARGS.intent.clientSecret)
+
+                ensureAllEventsConsumed()
+            }
+
+            fakeStripeRepository.awaitCall()
+            fakeStripeRepository.ensureAllEventsConsumed()
+
+            val errorCall = fakeErrorReporter.awaitCall()
+            assertThat(errorCall.errorEvent)
+                .isEqualTo(ExpectedErrorEvent.INTENT_CONFIRMATION_CHALLENGE_CHALLENGE_CANCELLATION_REQUEST_FAILED)
+            assertThat(errorCall.stripeException?.message).isEqualTo("Network error")
+            fakeErrorReporter.ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun `when closeClicked is called, analytics cancel is reported`() = testScenario {
+        viewModel.result.test {
+            viewModel.closeClicked()
+            awaitItem()
+            ensureAllEventsConsumed()
+        }
+
+        assertThat(analyticsReporter.calls).hasSize(1)
+        assertThat(analyticsReporter.calls.last()).isEqualTo(
+            FakeIntentConfirmationChallengeAnalyticsEventReporter.Call.Cancel("hcaptcha")
+        )
+    }
+
+    @Test
+    fun `when onStart is called, analytics start is reported`() = testScenario {
         val lifecycleOwner = object : LifecycleOwner {
             private val registry = LifecycleRegistry(this)
             override val lifecycle: Lifecycle = registry
@@ -155,19 +252,120 @@ internal class IntentConfirmationChallengeViewModelTest {
 
         lifecycleOwner.start()
 
-        assertThat(fakeAnalyticsReporter.calls).hasSize(1)
-        assertThat(fakeAnalyticsReporter.calls.first()).isEqualTo(
-            FakeIntentConfirmationChallengeAnalyticsEventReporter.Call.Start
+        assertThat(analyticsReporter.calls).hasSize(1)
+        assertThat(analyticsReporter.calls.first()).isEqualTo(
+            FakeIntentConfirmationChallengeAnalyticsEventReporter.Call.Start("hcaptcha")
         )
+    }
+
+    private class Scenario(
+        val viewModel: IntentConfirmationChallengeViewModel,
+        val bridgeHandler: FakeConfirmationChallengeBridgeHandler,
+        val analyticsReporter: FakeIntentConfirmationChallengeAnalyticsEventReporter,
+    )
+
+    private fun testScenario(
+        stripeRepository: StripeRepository = FakeStripeRepository(
+            cancelResult = Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
+        ),
+        args: IntentConfirmationChallengeArgs = TEST_ARGS,
+        errorReporter: FakeErrorReporter = FakeErrorReporter(),
+        test: suspend Scenario.() -> Unit
+    ) = runTest {
+        val bridgeHandler = FakeConfirmationChallengeBridgeHandler()
+        val analyticsReporter = FakeIntentConfirmationChallengeAnalyticsEventReporter()
+        val viewModel = createViewModel(
+            bridgeHandler = bridgeHandler,
+            analyticsReporter = analyticsReporter,
+            stripeRepository = stripeRepository,
+            args = args,
+            errorReporter = errorReporter,
+        )
+        Scenario(viewModel, bridgeHandler, analyticsReporter).test()
     }
 
     private fun createViewModel(
         bridgeHandler: ConfirmationChallengeBridgeHandler,
         analyticsReporter: IntentConfirmationChallengeAnalyticsEventReporter =
-            FakeIntentConfirmationChallengeAnalyticsEventReporter()
+            FakeIntentConfirmationChallengeAnalyticsEventReporter(),
+        stripeRepository: StripeRepository = FakeStripeRepository(
+            cancelResult = Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
+        ),
+        args: IntentConfirmationChallengeArgs = TEST_ARGS,
+        errorReporter: FakeErrorReporter = FakeErrorReporter()
     ) = IntentConfirmationChallengeViewModel(
+        args = args,
         bridgeHandler = bridgeHandler,
         workContext = testDispatcher,
-        analyticsEventReporter = analyticsReporter
+        analyticsEventReporter = analyticsReporter,
+        userAgent = "fake-user-agent",
+        stripeRepository = stripeRepository,
+        errorReporter = errorReporter,
+        requestOptions = REQUEST_OPTIONS,
+        fireAndForgetScope = TestScope(testDispatcher),
+        logger = Logger.noop(),
     )
+
+    private class FakeStripeRepository(
+        private val cancelResult: Result<StripeIntent>,
+    ) : AbsFakeStripeRepository() {
+        private val calls = Turbine<Call>()
+
+        override suspend fun cancelPaymentIntentCaptchaChallenge(
+            paymentIntentId: String,
+            params: CancelCaptchaChallengeParams,
+            requestOptions: ApiRequest.Options
+        ): Result<PaymentIntent> {
+            calls.add(
+                item = Call(
+                    intentId = paymentIntentId,
+                    params = params,
+                    requestOptions = requestOptions
+                )
+            )
+            @Suppress("UNCHECKED_CAST")
+            return cancelResult as Result<PaymentIntent>
+        }
+
+        override suspend fun cancelSetupIntentCaptchaChallenge(
+            setupIntentId: String,
+            params: CancelCaptchaChallengeParams,
+            requestOptions: ApiRequest.Options
+        ): Result<SetupIntent> {
+            calls.add(
+                item = Call(
+                    intentId = setupIntentId,
+                    params = params,
+                    requestOptions = requestOptions
+                )
+            )
+            @Suppress("UNCHECKED_CAST")
+            return cancelResult as Result<SetupIntent>
+        }
+
+        suspend fun awaitCall(): Call {
+            return calls.awaitItem()
+        }
+
+        fun ensureAllEventsConsumed() {
+            calls.ensureAllEventsConsumed()
+        }
+
+        data class Call(
+            val intentId: String,
+            val params: CancelCaptchaChallengeParams,
+            val requestOptions: ApiRequest.Options
+        )
+    }
+
+    private companion object {
+        private val REQUEST_OPTIONS = ApiRequest.Options("pk_test_vOo1umqsYxSrP5UXfOeL3ecm")
+
+        val TEST_ARGS = IntentConfirmationChallengeArgs(
+            publishableKey = "pk_test_123",
+            intent = PaymentIntentFixtures.PI_SUCCEEDED,
+            productUsage = listOf("PaymentSheet"),
+            captchaVendorName = "hcaptcha",
+        )
+    }
 }

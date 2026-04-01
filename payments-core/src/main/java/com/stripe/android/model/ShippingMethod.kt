@@ -16,22 +16,18 @@ class ShippingMethod @JvmOverloads constructor(
      * Human friendly label specifying the shipping method that can be shown in the UI.
      */
     val label: String,
-
     /**
      * Identifier for the shipping method.
      */
     val identifier: String,
-
     /**
      * The cost in minor unit based on [currency]
      */
     val amount: Long,
-
     /**
      * The currency that the specified amount will be rendered in.
      */
     val currency: Currency,
-
     /**
      * Human friendly information such as estimated shipping times that can be shown in
      * the UI

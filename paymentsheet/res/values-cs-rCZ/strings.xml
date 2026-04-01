@@ -100,6 +100,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Přidat</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_add_payment_method_title">Přidejte své platební údaje</string>
+  <!-- Title shown above a view containing a customer's recently added card -->
+  <string name="stripe_paymentsheet_added_card">Přidaná karta</string>
   <!-- Title for a button that when pressed saves the provided address. -->
   <string name="stripe_paymentsheet_address_element_primary_button">Uložit adresu</string>
   <!-- Title for shipping address entry section -->
@@ -213,6 +215,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Uložit tuto kartu pro budoucí platby %s</string>
   <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
   <string name="stripe_paymentsheet_saved">Uloženo</string>
+  <!-- Title shown above a view containing a customer's saved card -->
+  <string name="stripe_paymentsheet_saved_card">Uložená karta</string>
   <!-- Title shown above a view containing the customer's cards -->
   <string name="stripe_paymentsheet_select_card">Vybrat kartu</string>
   <!-- Title shown above a view containing the customer's payment methods -->
@@ -259,8 +263,14 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_something_went_wrong">Něco se pokazilo</string>
   <!-- Accessibility description when payment button shows a successful transaction animation. -->
   <string name="stripe_successful_transaction_description">Transakce dokončena</string>
+  <!-- Title shown in success screen shown after a user has added their card bu tapping -->
+  <string name="stripe_tap_to_add_card_added_title">Karta přidána</string>
   <!-- Button label for a button that launches a flow for tapping a card on the device -->
   <string name="stripe_tap_to_add_card_button_label">Klepnutím přidáte kartu</string>
+  <!-- Title for screen indicating to the user that they have completed a payment of a specified amount -->
+  <string name="stripe_tap_to_add_paid_label">Zaplaceno %s</string>
+  <!-- Error message shown when Tap to Add is not supported by the current device. -->
+  <string name="stripe_tap_to_add_unsupported_device_error">Možnost klepnutím přidat není vaším zařízením podporována</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">Zrušit a zaplatit jiným způsobem</string>
   <!-- Text on a screen asking the user to approve a payment -->

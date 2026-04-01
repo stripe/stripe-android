@@ -86,7 +86,6 @@ internal class TestCardInCustomerSheet : BasePlaygroundTest() {
                     CustomerSessionOnBehalfOfSettingsDefinition.OnBehalfOf.FR_CONNECTED_ACCOUNT
                 settings[GooglePaySettingsDefinition] = GooglePayMode.Off
             },
-
             populateCustomLpmFields = {
                 populateCardBrandChoiceCardDetails(null)
             },
@@ -104,7 +103,6 @@ internal class TestCardInCustomerSheet : BasePlaygroundTest() {
                 settings[CustomerSessionSettingsDefinition] = true
                 settings[CustomerSheetPaymentMethodModeDefinition] = PaymentMethodMode.SetupIntent
             },
-
             populateCustomLpmFields = {
                 populateCardBrandChoiceCardDetails("Cartes Bancaires")
             },
@@ -123,7 +121,6 @@ internal class TestCardInCustomerSheet : BasePlaygroundTest() {
                     CustomerSessionOnBehalfOfSettingsDefinition.OnBehalfOf.FR_CONNECTED_ACCOUNT
                 settings[GooglePaySettingsDefinition] = GooglePayMode.Off
             },
-
             populateCustomLpmFields = {
                 populateCardBrandChoiceCardDetails("Visa")
             },

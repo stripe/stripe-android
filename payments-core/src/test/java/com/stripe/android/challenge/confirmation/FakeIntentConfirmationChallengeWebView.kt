@@ -22,6 +22,10 @@ internal class FakeIntentConfirmationChallengeWebView(
         calls.add(Call.SetWebViewClient(client))
     }
 
+    override fun updateUserAgent(userAgent: String) {
+        calls.add(Call.UpdateUserAgent(userAgent))
+    }
+
     suspend fun awaitCall() = calls.awaitItem()
 
     fun ensureAllEventsConsumed() = calls.ensureAllEventsConsumed()
@@ -30,5 +34,6 @@ internal class FakeIntentConfirmationChallengeWebView(
         data class LoadUrl(val url: String) : Call
         data class AddBridgeHandler(val handler: ConfirmationChallengeBridgeHandler) : Call
         data class SetWebViewClient(val webViewClient: WebViewClient) : Call
+        data class UpdateUserAgent(val userAgent: String) : Call
     }
 }

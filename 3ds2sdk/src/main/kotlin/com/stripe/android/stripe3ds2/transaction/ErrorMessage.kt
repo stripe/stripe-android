@@ -14,24 +14,20 @@ import kotlinx.parcelize.Parcelize
  */
 @Parcelize
 data class ErrorMessage(
-
     /**
      * The Transaction ID.
      * The EMV 3DS Protocol Specification defines the Transaction ID.
      */
     val transactionId: String,
-
     /**
      * The error code.
      */
     val errorCode: String,
-
     /**
      * Text describing the error.
      * The EMV 3DS Protocol Specification defines error descriptions for a transaction.
      */
     val errorDescription: String,
-
     /**
      * Error details.
      * The EMV 3DS Protocol Specification defines error details for a transaction.

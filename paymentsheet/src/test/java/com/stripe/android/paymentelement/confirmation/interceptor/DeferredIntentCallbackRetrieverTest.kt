@@ -220,8 +220,8 @@ class DeferredIntentCallbackRetrieverTest {
         publishableKeyProvider: Provider<String> = Provider { "pk_test_1234" },
         errorReporter: FakeErrorReporter = FakeErrorReporter(),
         intentCreationCallbackProvider: Provider<CreateIntentCallback?> = Provider { null },
-        intentCreationWithConfirmationTokenCallback:
-        Provider<CreateIntentWithConfirmationTokenCallback?> = Provider { null },
+        intentCreationWithConfirmationTokenCallback: Provider<CreateIntentWithConfirmationTokenCallback?> =
+            Provider { null },
         preparePaymentMethodHandlerProvider: Provider<PreparePaymentMethodHandler?> = Provider { null },
     ): DeferredIntentCallbackRetriever {
         return DeferredIntentCallbackRetriever(

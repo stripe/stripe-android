@@ -18,8 +18,7 @@ internal class ConfirmationMediator<
     TLauncherResult : Parcelable
     >(
     private val savedStateHandle: SavedStateHandle,
-    private val definition:
-    ConfirmationDefinition<TConfirmationOption, TLauncher, TLauncherArgs, TLauncherResult>,
+    private val definition: ConfirmationDefinition<TConfirmationOption, TLauncher, TLauncherArgs, TLauncherResult>,
 ) {
     private var launcher: TLauncher? = null
 

@@ -27,6 +27,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.utils.FakeLinkStore
 import com.stripe.android.utils.RecordingLinkPaymentLauncher
 import com.stripe.android.utils.RecordingLinkStore
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -251,7 +252,6 @@ internal class LinkConfirmationDefinitionTest {
             result = LinkActivityResult.Failed(
                 error = exception,
                 linkAccountUpdate = LinkAccountUpdate.Value(null)
-
             )
         )
 
@@ -298,10 +298,9 @@ internal class LinkConfirmationDefinitionTest {
 
     @Test
     fun `'toResult' should be 'Canceled' when result is 'Canceled' with 'BackPressed' reason`() = test {
-        val linkStore = mock<LinkStore>()
         val linkAccountHolder = mock<LinkAccountHolder>()
         val definition = createLinkConfirmationDefinition(
-            linkStore = linkStore,
+            linkStore = FakeLinkStore(),
             linkAccountHolder = linkAccountHolder
         )
 
@@ -342,7 +341,7 @@ internal class LinkConfirmationDefinitionTest {
 
     private fun createLinkConfirmationDefinition(
         linkPaymentLauncher: LinkPaymentLauncher = mock(),
-        linkStore: LinkStore = mock(),
+        linkStore: LinkStore = FakeLinkStore(),
         linkAccountHolder: LinkAccountHolder = LinkAccountHolder(SavedStateHandle())
     ): LinkConfirmationDefinition {
         return LinkConfirmationDefinition(

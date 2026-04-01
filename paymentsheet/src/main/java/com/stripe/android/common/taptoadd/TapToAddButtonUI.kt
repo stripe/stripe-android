@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -24,6 +25,12 @@ internal fun TapToButtonUI(
     enabled: Boolean,
     onClick: () -> Unit,
 ) {
+    val contentColor = if (enabled) {
+        MaterialTheme.colors.primary
+    } else {
+        MaterialTheme.colors.primary.copy(alpha = ContentAlpha.disabled)
+    }
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.clickable(
@@ -36,13 +43,13 @@ internal fun TapToButtonUI(
         Image(
             painter = painterResource(R.drawable.stripe_ic_nfc_tap),
             contentDescription = stringResource(R.string.stripe_tap_to_add_card_button_label),
-            colorFilter = ColorFilter.tint(MaterialTheme.colors.primary),
+            colorFilter = ColorFilter.tint(contentColor),
             modifier = Modifier.width(18.dp).height(18.dp),
         )
         Text(
             text = stringResource(R.string.stripe_tap_to_add_card_button_label),
             modifier = Modifier.padding(start = 4.dp),
-            color = MaterialTheme.colors.primary,
+            color = contentColor,
             style = MaterialTheme.typography.h6,
         )
     }

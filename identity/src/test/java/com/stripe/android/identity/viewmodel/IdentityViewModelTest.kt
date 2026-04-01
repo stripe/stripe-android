@@ -98,15 +98,15 @@ internal class IdentityViewModelTest {
     }
 
     private val mockIdentityRepository = mock<IdentityRepository> {
-        onBlocking {
+        on {
             retrieveVerificationPage(any(), any())
         }.thenReturn(mockVerificationPage)
     }
     private val mockIdentityModelFetcher = mock<IdentityModelFetcher> {
-        onBlocking {
+        on {
             fetchIdentityModel(eq(ID_DETECTOR_URL))
         }.thenReturn(ID_DETECTOR_FILE)
-        onBlocking {
+        on {
             fetchIdentityModel(eq(FACE_DETECTOR_URL))
         }.thenReturn(FACE_DETECTOR_FILE)
     }
@@ -203,12 +203,12 @@ internal class IdentityViewModelTest {
     }
 
     @Test
-    fun `legacy uploadScanResult front success uploads both files and notifies _documentUploadedState`() {
+    fun `uploadScanResult front success uploads both files and notifies _documentUploadedState`() {
         testUploadDocumentScanSuccessResult(isFront = true)
     }
 
     @Test
-    fun `legacy uploadScanResult back success uploads both files and notifies _documentUploadedState`() {
+    fun `uploadScanResult back success uploads both files and notifies _documentUploadedState`() {
         testUploadDocumentScanSuccessResult(isFront = false)
     }
 
@@ -921,9 +921,9 @@ internal class IdentityViewModelTest {
 
         viewModel.uploadScanResult(
             if (isFront) {
-                FINAL_ID_DETECTOR_LEGACY_RESULT_FRONT
+                FINAL_ID_DETECTOR_RESULT_FRONT
             } else {
-                FINAL_ID_DETECTOR_LEGACY_RESULT_BACK
+                FINAL_ID_DETECTOR_RESULT_BACK
             },
             mockVerificationPage
         )
@@ -1193,7 +1193,7 @@ internal class IdentityViewModelTest {
         val EXTRACTED_BITMAP = mock<Bitmap>()
         val BOUNDING_BOX = mock<BoundingBox>()
         val ALL_SCORES = listOf(1f, 2f, 3f)
-        val FINAL_ID_DETECTOR_LEGACY_RESULT_FRONT = IdentityAggregator.FinalResult(
+        val FINAL_ID_DETECTOR_RESULT_FRONT = IdentityAggregator.FinalResult(
             frame = AnalyzerInput(
                 CameraPreviewImage(
                     INPUT_BITMAP,
@@ -1201,16 +1201,17 @@ internal class IdentityViewModelTest {
                 ),
                 mock()
             ),
-            result = IDDetectorOutput.Legacy(
+            result = IDDetectorOutput(
                 boundingBox = BOUNDING_BOX,
                 category = Category.ID_FRONT,
                 resultScore = 0.8f,
                 allScores = ALL_SCORES,
-                blurScore = 1.0f
+                blurScore = 1.0f,
+                croppedImage = INPUT_BITMAP
             ),
             identityState = mock<IdentityScanState.Finished>()
         )
-        val FINAL_ID_DETECTOR_LEGACY_RESULT_BACK = IdentityAggregator.FinalResult(
+        val FINAL_ID_DETECTOR_RESULT_BACK = IdentityAggregator.FinalResult(
             frame = AnalyzerInput(
                 CameraPreviewImage(
                     INPUT_BITMAP,
@@ -1218,12 +1219,13 @@ internal class IdentityViewModelTest {
                 ),
                 mock()
             ),
-            result = IDDetectorOutput.Legacy(
+            result = IDDetectorOutput(
                 boundingBox = BOUNDING_BOX,
                 category = Category.ID_BACK,
                 resultScore = 0.8f,
                 allScores = ALL_SCORES,
-                blurScore = 1.0f
+                blurScore = 1.0f,
+                croppedImage = INPUT_BITMAP
             ),
             identityState = mock<IdentityScanState.Finished>()
         )

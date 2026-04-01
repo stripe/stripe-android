@@ -18,7 +18,6 @@ class EphemeralKey internal constructor(
      * Represents a customer id or issuing card id, depending on the context
      */
     internal val objectId: String,
-
     internal val created: Long,
     internal val expires: Long,
     internal val id: String,

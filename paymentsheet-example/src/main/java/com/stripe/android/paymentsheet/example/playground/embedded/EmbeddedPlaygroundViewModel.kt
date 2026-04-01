@@ -3,12 +3,9 @@ package com.stripe.android.paymentsheet.example.playground.embedded
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import com.stripe.android.common.taptoadd.CreateConnectionTokenResult
-import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.network.CreateCardPresentSetupIntentRequester
-import com.stripe.android.paymentsheet.example.playground.network.CreateConnectionTokenRequester
 import com.stripe.android.paymentsheet.example.playground.network.PlaygroundRequester
 import kotlinx.coroutines.flow.StateFlow
 
@@ -19,26 +16,6 @@ internal class EmbeddedPlaygroundViewModel(
 
     fun setConfirming(confirming: Boolean) {
         savedStateHandle[CONFIRMING_KEY] = confirming
-    }
-
-    @OptIn(TapToAddPreview::class)
-    suspend fun createConnectionToken(
-        playgroundState: PlaygroundState,
-        applicationContext: Context,
-    ): CreateConnectionTokenResult {
-        return CreateConnectionTokenRequester(playgroundState.snapshot, applicationContext)
-            .fetch()
-            .fold(
-                onSuccess = {
-                    CreateConnectionTokenResult.Success(it)
-                },
-                onFailure = {
-                    CreateConnectionTokenResult.Failure(
-                        cause = IllegalStateException("No playground state!"),
-                        message = "No playground state on token creation!"
-                    )
-                }
-            )
     }
 
     suspend fun createCardPresentSetupIntent(

@@ -1,14 +1,13 @@
 package com.stripe.android.paymentsheet.injection
 
-import android.content.Context
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
-import com.stripe.android.common.taptoadd.TapToAddModule
+import com.stripe.android.common.taptoadd.DefaultTapToAddHelper
+import com.stripe.android.common.taptoadd.TapToAddConnectionModule
+import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.core.injection.ENABLE_LOGGING
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.core.injection.StripeNetworkClientModule
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
@@ -16,7 +15,9 @@ import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.RealLinkConfigurationCoordinator
+import com.stripe.android.link.account.DefaultLinkStore
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.gate.DefaultLinkGate
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.LinkAnalyticsComponent
@@ -32,7 +33,10 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentif
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
+import com.stripe.android.payments.core.injection.PaymentConfigurationModule
 import com.stripe.android.paymentsheet.BuildConfig
+import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
@@ -44,8 +48,10 @@ import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Cvc
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.DefaultCvcRecollectionInteractor
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.repositories.DefaultSavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
+import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.state.CreateLinkState
 import com.stripe.android.paymentsheet.state.DefaultAnalyticsMetadataFactory
 import com.stripe.android.paymentsheet.state.DefaultCreateLinkState
@@ -57,12 +63,12 @@ import com.stripe.android.paymentsheet.state.LinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentMethodFilter
 import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
+import com.stripe.android.paymentsheet.verticalmode.CheckoutCurrencyUpdater
+import com.stripe.android.paymentsheet.verticalmode.DefaultCheckoutCurrencyUpdater
 import dagger.Binds
-import dagger.Lazy
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
-import javax.inject.Provider
 import javax.inject.Singleton
 
 @SuppressWarnings("TooManyFunctions")
@@ -73,8 +79,10 @@ import javax.inject.Singleton
     ],
     includes = [
         LinkCommonModule::class,
-        TapToAddModule::class,
-        PaymentsIntegrityModule::class
+        TapToAddConnectionModule::class,
+        PaymentsIntegrityModule::class,
+        PaymentConfigurationModule::class,
+        StripeNetworkClientModule::class,
     ]
 )
 internal abstract class PaymentSheetCommonModule {
@@ -89,6 +97,11 @@ internal abstract class PaymentSheetCommonModule {
 
     @Binds
     abstract fun bindsCustomerRepository(repository: CustomerApiRepository): CustomerRepository
+
+    @Binds
+    abstract fun bindsSavedPaymentMethodRepository(
+        repository: DefaultSavedPaymentMethodRepository,
+    ): SavedPaymentMethodRepository
 
     @Binds
     abstract fun bindsErrorReporter(errorReporter: RealErrorReporter): ErrorReporter
@@ -158,6 +171,15 @@ internal abstract class PaymentSheetCommonModule {
         factory: DefaultPrefsRepository.Factory
     ): PrefsRepository.Factory
 
+    @Binds
+    abstract fun bindsLinkStore(impl: DefaultLinkStore): LinkStore
+
+    @Binds
+    abstract fun bindsTapToAddHelperFactory(factory: DefaultTapToAddHelper.Factory): TapToAddHelper.Factory
+
+    @Binds
+    abstract fun bindsCheckoutCurrencyUpdater(impl: DefaultCheckoutCurrencyUpdater): CheckoutCurrencyUpdater
+
     @Suppress("TooManyFunctions")
     companion object {
         @Provides
@@ -166,30 +188,10 @@ internal abstract class PaymentSheetCommonModule {
             return LinkAccountHolder(savedStateHandle)
         }
 
-        /**
-         * Provides a non-singleton PaymentConfiguration.
-         *
-         * Should be fetched only when it's needed, to allow client to set the publishableKey and
-         * stripeAccountId in PaymentConfiguration any time before configuring the FlowController
-         * or presenting Payment Sheet.
-         *
-         * Should always be injected with [Lazy] or [Provider].
-         */
         @Provides
-        fun providePaymentConfiguration(appContext: Context): PaymentConfiguration {
-            return PaymentConfiguration.getInstance(appContext)
+        fun provideCustomerStateHolderFactory(): CustomerStateHolder.Factory {
+            return DefaultCustomerStateHolder.Factory
         }
-
-        @Provides
-        @Named(PUBLISHABLE_KEY)
-        fun providePublishableKey(
-            paymentConfiguration: Provider<PaymentConfiguration>
-        ): () -> String = { paymentConfiguration.get().publishableKey }
-
-        @Provides
-        @Named(STRIPE_ACCOUNT_ID)
-        fun provideStripeAccountId(paymentConfiguration: Provider<PaymentConfiguration>):
-            () -> String? = { paymentConfiguration.get().stripeAccountId }
 
         @Provides
         @Singleton

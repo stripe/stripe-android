@@ -41,9 +41,8 @@ internal class IntentConfirmationDefinition(
         val interceptor: IntentConfirmationInterceptor
         try {
             interceptor = intentConfirmationInterceptorFactory.create(
-                integrationMetadata = confirmationArgs.paymentMethodMetadata.integrationMetadata,
-                customerId = paymentMethodMetadata.customerMetadata?.id,
-                ephemeralKeySecret = paymentMethodMetadata.customerMetadata?.ephemeralKeySecret,
+                integrationMetadata = paymentMethodMetadata.integrationMetadata,
+                customerMetadata = paymentMethodMetadata.customerMetadata,
                 clientAttributionMetadata = paymentMethodMetadata.clientAttributionMetadata,
             )
         } catch (e: CallbackNotFoundException) {
@@ -53,20 +52,19 @@ internal class IntentConfirmationDefinition(
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
             )
         }
+        val shippingValues = paymentMethodMetadata.shippingDetails?.toConfirmPaymentIntentShipping()
         return when (confirmationOption) {
             is PaymentMethodConfirmationOption.New ->
                 interceptor.intercept(
                     intent = confirmationArgs.intent,
                     confirmationOption = confirmationOption,
-                    shippingValues = confirmationArgs.paymentMethodMetadata
-                        .shippingDetails?.toConfirmPaymentIntentShipping(),
+                    shippingValues = shippingValues,
                 )
             is PaymentMethodConfirmationOption.Saved ->
                 interceptor.intercept(
                     intent = confirmationArgs.intent,
                     confirmationOption = confirmationOption,
-                    shippingValues = confirmationArgs.paymentMethodMetadata
-                        .shippingDetails?.toConfirmPaymentIntentShipping(),
+                    shippingValues = shippingValues,
                 )
         }
     }

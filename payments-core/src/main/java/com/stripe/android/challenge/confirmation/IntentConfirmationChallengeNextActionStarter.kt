@@ -2,6 +2,7 @@ package com.stripe.android.challenge.confirmation
 
 import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.StripePaymentController
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.view.AuthActivityStarterHost
 
 internal interface IntentConfirmationChallengeNextActionStarter {
@@ -27,6 +28,8 @@ internal interface IntentConfirmationChallengeNextActionStarter {
         private val host: AuthActivityStarterHost
     ) : IntentConfirmationChallengeNextActionStarter {
         override fun start(args: IntentConfirmationChallengeActivityContract.Args) {
+            val nextActionData = args.intent.nextActionData
+                as? StripeIntent.NextActionData.SdkData.IntentConfirmationChallenge
             host.startActivityForResult(
                 target = IntentConfirmationChallengeActivity::class.java,
                 extras = IntentConfirmationChallengeActivity.getBundle(
@@ -34,6 +37,7 @@ internal interface IntentConfirmationChallengeNextActionStarter {
                         publishableKey = args.publishableKey,
                         intent = args.intent,
                         productUsage = args.productUsage.toList(),
+                        captchaVendorName = nextActionData?.stripeJs?.captchaVendorName
                     )
                 ),
                 requestCode = StripePaymentController.getRequestCode(args.intent)

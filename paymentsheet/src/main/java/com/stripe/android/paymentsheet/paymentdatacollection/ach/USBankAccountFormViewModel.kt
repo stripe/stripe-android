@@ -785,10 +785,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     ): PaymentMethod.AllowRedisplay {
         val formArgs = args.formArgs
 
-        return formArgs.paymentMethodSaveConsentBehavior.allowRedisplay(
+        return formArgs.paymentMethodSaveConsentBehavior?.allowRedisplay(
             isSetupIntent = formArgs.hasIntentToSetup,
             customerRequestedSave = customerRequestedSave,
-        )
+        ) ?: PaymentMethod.AllowRedisplay.UNSPECIFIED
     }
 
     private fun buildMandateText(

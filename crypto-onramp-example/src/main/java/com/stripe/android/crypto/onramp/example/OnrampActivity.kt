@@ -23,11 +23,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.AppBarDefaults
 import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
@@ -80,7 +83,7 @@ import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
-import com.stripe.android.crypto.onramp.model.PaymentMethodType
+import com.stripe.android.crypto.onramp.model.PaymentMethodSelection
 import com.stripe.android.model.DateOfBirth
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.launch
@@ -191,16 +194,12 @@ internal class OnrampActivity : ComponentActivity() {
                             modifier = Modifier.padding(innerPadding),
                             viewModel = viewModel,
                             onAuthenticateUser = { oauthScopes ->
-                                if (oauthScopes.isNullOrBlank()) {
-                                    onrampPresenter.authenticateUser()
-                                } else {
-                                    // Not the cleanest approach, but good enough for an example.
-                                    lifecycleScope.launch {
-                                        val linkAuthIntentId = viewModel.createLinkAuthIntent(oauthScopes)
-                                            ?: return@launch
-                                        viewModel.onAuthorize(linkAuthIntentId)
-                                        onrampPresenter.authorize(linkAuthIntentId)
-                                    }
+                                // Not the cleanest approach, but good enough for an example.
+                                lifecycleScope.launch {
+                                    val linkAuthIntentId = viewModel.createLinkAuthIntent(oauthScopes)
+                                        ?: return@launch
+                                    viewModel.onAuthorize(linkAuthIntentId)
+                                    onrampPresenter.authorize(linkAuthIntentId)
                                 }
                             },
                             onRegisterWalletAddress = { address, network ->
@@ -209,9 +208,8 @@ internal class OnrampActivity : ComponentActivity() {
                             onStartVerification = {
                                 onrampPresenter.verifyIdentity()
                             },
-                            onCollectPayment = { type ->
-                                viewModel.updateSelectedPaymentMethod(type)
-                                onrampPresenter.collectPaymentMethod(type)
+                            onCollectPayment = { selection ->
+                                onrampPresenter.collectPaymentMethod(selection)
                             },
                             onCreatePaymentToken = {
                                 viewModel.createCryptoPaymentToken()
@@ -423,10 +421,10 @@ internal fun LoginSignupScreen(
 internal fun OnrampScreen(
     viewModel: OnrampViewModel,
     modifier: Modifier = Modifier,
-    onAuthenticateUser: (oauthScopes: String?) -> Unit,
+    onAuthenticateUser: (oauthScopes: String) -> Unit,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onStartVerification: () -> Unit,
-    onCollectPayment: (type: PaymentMethodType) -> Unit,
+    onCollectPayment: (type: PaymentMethodSelection) -> Unit,
     onCreatePaymentToken: () -> Unit,
     onVerifyKyc: () -> Unit,
 ) {
@@ -492,9 +490,9 @@ internal fun OnrampScreen(
                     email = uiState.email,
                     consentedLinkAuthIntentIds = uiState.consentedLinkAuthIntentIds,
                     onrampSessionResponse = uiState.onrampSession,
-                    selectedPaymentType = uiState.selectedPaymentType,
                     selectedSettlementSpeed = uiState.settlementSpeed,
                     selectedPaymentData = uiState.selectedPaymentData,
+                    googlePayIsReady = uiState.googlePayIsReady,
                     onAuthenticate = onAuthenticateUser,
                     onRegisterWalletAddress = onRegisterWalletAddress,
                     onCollectKYC = { kycInfo -> viewModel.collectKycInfo(kycInfo) },
@@ -647,7 +645,7 @@ private fun RegistrationButtons(
 @Composable
 private fun AuthenticationScreen(
     email: String,
-    onAuthenticate: (oauthScopes: String?) -> Unit,
+    onAuthenticate: (oauthScopes: String) -> Unit,
     onUpdatePhoneNumber: (String) -> Unit,
     onBack: () -> Unit
 ) {
@@ -687,7 +685,7 @@ private fun AuthenticationScreen(
 
 @Composable
 fun AuthenticateSection(
-    onAuthenticate: (oauthScopes: String?) -> Unit,
+    onAuthenticate: (oauthScopes: String) -> Unit,
 ) {
     var oauthScopes by remember { mutableStateOf("kyc.status:read,crypto:ramp,auth.persist_login:read") }
     OutlinedTextField(
@@ -718,14 +716,14 @@ private fun AuthenticatedOperationsScreen(
     consentedLinkAuthIntentIds: List<String>,
     onrampSessionResponse: OnrampSessionResponse?,
     selectedPaymentData: PaymentMethodDisplayData?,
-    selectedPaymentType: PaymentMethodType?,
     selectedSettlementSpeed: SettlementSpeed?,
-    onAuthenticate: (oauthScopes: String?) -> Unit,
+    googlePayIsReady: Boolean,
+    onAuthenticate: (oauthScopes: String) -> Unit,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onCollectKYC: (KycInfo) -> Unit,
     onVerifyKyc: () -> Unit,
     onStartVerification: () -> Unit,
-    onCollectPayment: (type: PaymentMethodType) -> Unit,
+    onCollectPayment: (type: PaymentMethodSelection) -> Unit,
     onCreatePaymentToken: () -> Unit,
     onCreateSession: () -> Unit,
     onPerformCheckout: () -> Unit,
@@ -803,29 +801,32 @@ private fun AuthenticatedOperationsScreen(
         }
 
         selectedPaymentData?.let {
-            if (selectedPaymentType == PaymentMethodType.BankAccount) {
-                Text(
-                    text = "Settlement Speed",
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
+            when (it.type) {
+                PaymentMethodDisplayData.Type.Card, PaymentMethodDisplayData.Type.GooglePay -> { }
+                PaymentMethodDisplayData.Type.BankAccount -> {
+                    Text(
+                        text = "Settlement Speed",
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
 
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.padding(bottom = 16.dp)
-                ) {
-                    SettlementSpeed.entries.forEach { speed ->
-                        val isSelected = selectedSettlementSpeed == speed
-                        Box(
-                            modifier = Modifier
-                                .background(if (isSelected) MaterialTheme.colors.primary else Color.LightGray)
-                                .clickable { onSelectSettlementSpeed(speed) }
-                                .padding(horizontal = 16.dp, vertical = 8.dp)
-                        ) {
-                            Text(
-                                text = speed.name.lowercase().replaceFirstChar { it.uppercase() },
-                                color = if (isSelected) Color.White else Color.Black
-                            )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    ) {
+                        SettlementSpeed.entries.forEach { speed ->
+                            val isSelected = selectedSettlementSpeed == speed
+                            Box(
+                                modifier = Modifier
+                                    .background(if (isSelected) MaterialTheme.colors.primary else Color.LightGray)
+                                    .clickable { onSelectSettlementSpeed(speed) }
+                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                            ) {
+                                Text(
+                                    text = speed.name.lowercase().replaceFirstChar { it.uppercase() },
+                                    color = if (isSelected) Color.White else Color.Black
+                                )
+                            }
                         }
                     }
                 }
@@ -920,19 +921,7 @@ private fun AuthenticatedOperationsScreen(
             Text("Register Wallet Address")
         }
 
-        var firstName by remember { mutableStateOf("") }
-        var lastName by remember { mutableStateOf("") }
-        var ssn by remember { mutableStateOf("000000000") }
-
-        KYCScreen(
-            firstName = firstName,
-            onFirstNameChange = { firstName = it },
-            lastName = lastName,
-            onLastNameChange = { lastName = it },
-            ssn = ssn,
-            onSsnChange = { ssn = it },
-            onCollectKYC = { kycInfo -> onCollectKYC(kycInfo) }
-        )
+        KYCScreen(onCollectKYC = onCollectKYC)
 
         Button(
             onClick = { onVerifyKyc() },
@@ -954,7 +943,7 @@ private fun AuthenticatedOperationsScreen(
         )
 
         Button(
-            onClick = { onCollectPayment(PaymentMethodType.Card) },
+            onClick = { onCollectPayment(PaymentMethodSelection.Card()) },
             modifier = Modifier
                 .testTag(COLLECT_CARD_BUTTON_TAG)
                 .fillMaxWidth()
@@ -964,13 +953,39 @@ private fun AuthenticatedOperationsScreen(
         }
 
         Button(
-            onClick = { onCollectPayment(PaymentMethodType.BankAccount) },
+            onClick = { onCollectPayment(PaymentMethodSelection.BankAccount()) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
         ) {
             Text("Collect Bank Account")
         }
+
+        Button(
+            onClick = { onCollectPayment(PaymentMethodSelection.CardAndBankAccount()) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp)
+        ) {
+            Text("Collect Card or Bank Account")
+        }
+
+        GooglePayButton(
+            enabled = googlePayIsReady,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp)
+                .padding(bottom = 8.dp),
+            onClick = {
+                val selection = PaymentMethodSelection.GooglePay(
+                    currencyCode = "USD",
+                    amount = 0L
+                )
+                onCollectPayment(selection)
+            },
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
 
         Button(
             onClick = onCreatePaymentToken,
@@ -1031,14 +1046,15 @@ private fun AuthenticatedOperationsScreen(
 
 @Composable
 private fun KYCScreen(
-    firstName: String,
-    onFirstNameChange: (String) -> Unit,
-    lastName: String,
-    onLastNameChange: (String) -> Unit,
-    ssn: String,
-    onSsnChange: (String) -> Unit,
     onCollectKYC: (KycInfo) -> Unit
 ) {
+    var firstName by remember { mutableStateOf("") }
+    var lastName by remember { mutableStateOf("") }
+    var ssn by remember { mutableStateOf("000000000") }
+    var dobDay by remember { mutableStateOf("1") }
+    var dobMonth by remember { mutableStateOf("1") }
+    var dobYear by remember { mutableStateOf("1990") }
+
     Column {
         Text(
             text = "Collect KYC Info",
@@ -1046,18 +1062,32 @@ private fun KYCScreen(
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        KYCTextField(firstName, "First Name", onFirstNameChange)
-        KYCTextField(lastName, "Last Name", onLastNameChange)
-        KYCTextField(ssn, "SSN", onSsnChange)
+        KYCTextField(firstName, "First Name") { firstName = it }
+        KYCTextField(lastName, "Last Name") { lastName = it }
+        KYCTextField(ssn, "SSN") { ssn = it }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            KYCTextField(dobMonth, "Month", Modifier.weight(1f), KeyboardType.Number) { dobMonth = it }
+            KYCTextField(dobDay, "Day", Modifier.weight(1f), KeyboardType.Number) { dobDay = it }
+            KYCTextField(dobYear, "Year", Modifier.weight(2f), KeyboardType.Number) { dobYear = it }
+        }
 
         Button(
             onClick = {
+                val dateOfBirth = runCatching {
+                    DateOfBirth(
+                        day = dobDay.toInt(),
+                        month = dobMonth.toInt(),
+                        year = dobYear.toInt()
+                    )
+                }.getOrNull()
+
                 onCollectKYC(
                     KycInfo(
                         firstName = firstName,
                         lastName = lastName,
                         idNumber = ssn,
-                        dateOfBirth = DateOfBirth(1, month = 1, year = 1990),
+                        dateOfBirth = dateOfBirth,
                         address = PaymentSheet.Address(
                             city = "New York",
                             country = "US",
@@ -1081,18 +1111,18 @@ private fun KYCScreen(
 private fun KYCTextField(
     value: String,
     label: String,
-    onChange: (String) -> Unit
+    modifier: Modifier = Modifier.fillMaxWidth(),
+    keyboardType: KeyboardType = KeyboardType.Text,
+    onChange: (String) -> Unit,
 ) {
     OutlinedTextField(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 24.dp),
+        modifier = modifier.padding(bottom = 24.dp),
         value = value,
         onValueChange = onChange,
         label = { Text(label) },
         singleLine = true,
         enabled = true,
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next, keyboardType = keyboardType)
     )
 }
 
@@ -1161,6 +1191,48 @@ fun OnrampExampleTheme(
         colors = if (isSystemInDarkTheme()) darkColors() else lightColors(),
         content = content,
     )
+}
+
+@Composable
+fun GooglePayButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+) {
+    val isDark = MaterialTheme.colors.isLight.not()
+
+    val background = if (isDark) Color.White else Color.Black
+    val content = if (isDark) Color.Black else Color.White
+
+    Button(
+        onClick = onClick,
+        enabled = enabled,
+        shape = RoundedCornerShape(8.dp),
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = background,
+            contentColor = content
+        ),
+        modifier = modifier
+            .fillMaxWidth()
+            .height(48.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Image(
+                painter = painterResource(
+                    com.stripe.android.R.drawable.stripe_google_pay_mark
+                ),
+                contentDescription = null,
+                modifier = Modifier.height(24.dp)
+            )
+
+            Spacer(Modifier.width(8.dp))
+
+            Text("Google Pay")
+        }
+    }
 }
 
 internal const val LOGIN_EMAIL_TAG = "LoginEmailTag"

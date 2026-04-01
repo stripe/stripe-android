@@ -35,6 +35,7 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsSdkAvailable
@@ -668,6 +669,45 @@ internal class DefaultCustomerSheetLoaderTest {
 
         assertThat(customerSheetMetadata.attachmentStyle)
             .isEqualTo(IntegrationMetadata.CustomerSheet.AttachmentStyle.CreateAttach)
+    }
+
+    @Test
+    fun `load fails gracefully when no supported payment methods are available`() = runTest {
+        val eventReporter = FakeCustomerSheetEventReporter()
+
+        val loader = createCustomerSheetLoader(
+            intent = STRIPE_INTENT.copy(
+                paymentMethodTypes = listOf("sepa_debit")
+            ),
+            eventReporter = eventReporter,
+        )
+
+        val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
+
+        val result = loader.load(config)
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isInstanceOf<IllegalArgumentException>()
+        assertThat(result.exceptionOrNull()?.message).contains("No supported payment methods were found")
+        assertThat(eventReporter.onLoadFailedCalls.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `supportedPaymentMethods uses paymentMethodOrder from configuration`() = runTest {
+        val loader = createCustomerSheetLoader(
+            isFinancialConnectionsAvailable = { true },
+            intent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD_WITH_US_BANK_ACCOUNT,
+        )
+
+        val config = CustomerSheet.Configuration(
+            merchantDisplayName = "Example",
+            paymentMethodOrder = listOf("us_bank_account", "card"),
+        )
+
+        val supportedPaymentMethods = loader.load(config).getOrThrow().supportedPaymentMethods
+        assertThat(supportedPaymentMethods.map { it.code })
+            .containsExactly("us_bank_account", "card")
+            .inOrder()
     }
 
     private fun createCustomerSheetLoader(

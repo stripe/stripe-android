@@ -1,25 +1,13 @@
 package com.stripe.android.link
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
-import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.link.model.LinkAccount
-import com.stripe.android.link.theme.DefaultLinkTheme
-import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.LocalLinkAppearance
 import com.stripe.android.link.ui.FullScreenContent
 import com.stripe.android.link.ui.LinkAppBarState
@@ -28,7 +16,6 @@ import com.stripe.android.link.ui.LocalLinkContentScrollHandler
 import com.stripe.android.link.ui.image.LocalStripeImageLoader
 import com.stripe.android.link.ui.verification.VerificationDialog
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.ui.ProgressOverlayProcessing
 import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetState
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.navigation.NavBackStackEntryUpdate
@@ -118,28 +105,6 @@ internal fun LinkScreenContentBody(
                 onNavBackStackEntryChanged = onNavBackStackEntryChanged,
                 navigationChannel = navigationChannel,
             )
-        }
-        ScreenState.Loading -> {
-            ElementsBottomSheetLayout(
-                state = bottomSheetState,
-                cornerRadius = 24.dp,
-                onDismissed = dismiss,
-            ) {
-                DefaultLinkTheme {
-                    Surface(
-                        modifier = Modifier.fillMaxWidth()
-                            .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()),
-                        color = LinkTheme.colors.surfacePrimary,
-                    ) {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier.padding(top = 10.dp)
-                        ) {
-                            ProgressOverlayProcessing()
-                        }
-                    }
-                }
-            }
         }
         is ScreenState.VerificationDialog -> {
             VerificationDialog(

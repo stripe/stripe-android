@@ -14,7 +14,6 @@ import kotlinx.serialization.Transient
 data class NameSpec(
     @SerialName("api_path")
     override val apiPath: IdentifierSpec = IdentifierSpec.Name,
-
     @SerialName("translation_id")
     val labelTranslationId: TranslationId = TranslationId.AddressName
 ) : FormItemSpec() {

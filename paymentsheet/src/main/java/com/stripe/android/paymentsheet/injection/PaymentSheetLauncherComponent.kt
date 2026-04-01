@@ -12,6 +12,7 @@ import com.stripe.android.paymentelement.confirmation.injection.PaymentElementCo
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.PaymentSheetContract
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
+import com.stripe.android.paymentsheet.state.TapToAddConnectionStarterModule
 import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
@@ -32,6 +33,7 @@ import javax.inject.Singleton
         MobileSessionIdModule::class,
         LinkHoldbackExposureModule::class,
         PaymentSheetViewModelModule::class,
+        TapToAddConnectionStarterModule::class,
         PaymentElementConfirmationModule::class,
     ]
 )

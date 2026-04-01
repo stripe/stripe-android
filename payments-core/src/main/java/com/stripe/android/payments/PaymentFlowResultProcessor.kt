@@ -52,6 +52,8 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
 
         val initialRetrieveIntentStartTime = System.currentTimeMillis()
 
+        val requestId = unvalidatedResult.exception?.requestId
+
         retrieveStripeIntent(
             clientSecret = result.clientSecret,
             requestOptions = requestOptions,
@@ -59,11 +61,16 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         ).mapCatching { stripeIntent ->
             when {
                 stripeIntent.status == StripeIntent.Status.Succeeded ||
-                    stripeIntent.status == StripeIntent.Status.RequiresCapture -> {
+                    stripeIntent.status == StripeIntent.Status.RequiresCapture ||
+                    isOrchestrationPayment(stripeIntent, result) -> {
                     createStripeIntentResult(
                         stripeIntent,
                         SUCCEEDED,
-                        failureMessageFactory.create(stripeIntent, result.flowOutcome)
+                        failureMessageFactory.create(
+                            intent = stripeIntent,
+                            requestId = requestId,
+                            outcome = result.flowOutcome
+                        )
                     )
                 }
                 shouldRefreshOrPollIntent(stripeIntent, result.flowOutcome) -> {
@@ -86,7 +93,11 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
                     createStripeIntentResult(
                         intent,
                         flowOutcome,
-                        failureMessageFactory.create(intent, result.flowOutcome)
+                        failureMessageFactory.create(
+                            intent = intent,
+                            requestId = requestId,
+                            outcome = result.flowOutcome
+                        )
                     )
                 }
                 shouldCancelIntentSource(stripeIntent, result.canCancelSource) -> {
@@ -111,19 +122,34 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
                     createStripeIntentResult(
                         intent,
                         result.flowOutcome,
-                        failureMessageFactory.create(intent, result.flowOutcome)
+                        failureMessageFactory.create(
+                            intent = intent,
+                            requestId = requestId,
+                            outcome = result.flowOutcome
+                        )
                     )
                 }
                 else -> {
                     createStripeIntentResult(
                         stripeIntent,
                         result.flowOutcome,
-                        failureMessageFactory.create(stripeIntent, result.flowOutcome)
+                        failureMessageFactory.create(
+                            intent = stripeIntent,
+                            requestId = requestId,
+                            outcome = result.flowOutcome
+                        )
                     )
                 }
             }
         }
     }
+
+    private fun isOrchestrationPayment(
+        stripeIntent: StripeIntent,
+        result: PaymentFlowResult.Validated
+    ): Boolean = stripeIntent.status == StripeIntent.Status.Processing &&
+        stripeIntent.paymentMethod?.type == PaymentMethod.Type.Card &&
+        result.flowOutcome != CANCELED
 
     private fun shouldCancelIntentSource(
         stripeIntent: StripeIntent,

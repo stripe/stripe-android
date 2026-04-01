@@ -222,9 +222,9 @@ class CardUiDefinitionFactoryTest {
                     stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
                         paymentMethodTypes = listOf("card"),
                     ),
-                    paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
                     customerMetadata = getDefaultCustomerMetadata(
                         isPaymentMethodSetAsDefaultEnabled = false,
+                        saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
                     ),
                 ),
             )
@@ -241,8 +241,9 @@ class CardUiDefinitionFactoryTest {
             CardDefinition.CreateFormUi(
                 metadata = metadata.copy(
                     stripeIntent = setupIntent,
-                    paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
-                    customerMetadata = getDefaultCustomerMetadata(),
+                    customerMetadata = getDefaultCustomerMetadata(
+                        saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
+                    ),
                 ),
             )
         }
@@ -258,8 +259,9 @@ class CardUiDefinitionFactoryTest {
             CardDefinition.CreateFormUi(
                 metadata = metadata.copy(
                     stripeIntent = setupIntent,
-                    paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
-                    customerMetadata = getDefaultCustomerMetadata(),
+                    customerMetadata = getDefaultCustomerMetadata(
+                        saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
+                    ),
                 ),
             )
         }

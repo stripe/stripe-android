@@ -25,23 +25,19 @@ constructor(
      * Unique identifier for the object.
      */
     override val id: String?,
-
     /**
      * Reason for cancellation of this [SetupIntent].
      */
     val cancellationReason: CancellationReason?,
-
     /**
      * Time at which the object was created. Measured in seconds since the Unix epoch.
      */
     override val created: Long,
-
     /**
      * Country code of the user.
      */
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     override val countryCode: String?,
-
     /**
      * The client secret of this SetupIntent. Used for client-side retrieval using a
      * publishable key.
@@ -51,38 +47,31 @@ constructor(
      * sure that you have TLS enabled on any page that includes the client secret.
      */
     override val clientSecret: String?,
-
     /**
      * An arbitrary string attached to the object. Often useful for displaying to users.
      */
     override val description: String?,
-
     /**
      * Has the value `true` if the object exists in live mode or the value
      * `false` if the object exists in test mode.
      */
     override val isLiveMode: Boolean,
-
     /**
      * The expanded [PaymentMethod] represented by [paymentMethodId].
      */
     override val paymentMethod: PaymentMethod? = null,
-
     /**
      * ID of the payment method used with this [SetupIntent].
      */
     override val paymentMethodId: String?,
-
     /**
      * The list of payment method types (e.g. card) that this [SetupIntent] is allowed to set up.
      */
     override val paymentMethodTypes: List<String>,
-
     /**
      * [Status](https://stripe.com/docs/payments/intents#intent-statuses) of this [SetupIntent].
      */
     override val status: StripeIntent.Status?,
-
     /**
      * Indicates how the payment method is intended to be used in the future.
      *
@@ -92,26 +81,20 @@ constructor(
      * [StripeIntent.Usage.OffSession].
      */
     val usage: StripeIntent.Usage?,
-
     /**
      * The error encountered in the previous [SetupIntent] confirmation.
      */
     val lastSetupError: Error? = null,
-
     /**
      * Payment types that have not been activated in livemode, but have been activated in testmode.
      */
     override val unactivatedPaymentMethods: List<String>,
-
     /**
      * Payment types that are accepted when paying with Link.
      */
     override val linkFundingSources: List<String>,
-
     override val nextActionData: StripeIntent.NextActionData?,
-
     private val paymentMethodOptionsJsonString: String? = null,
-
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     override val automaticPaymentMethodsEnabled: Boolean = false,
 ) : StripeIntent {
@@ -184,43 +167,36 @@ constructor(
     @Parcelize
     @Poko
     class Error internal constructor(
-
         /**
          * For some errors that could be handled programmatically, a short string indicating the
          * [error code](https://stripe.com/docs/error-codes) reported.
          */
         val code: String?,
-
         /**
          * For card errors resulting from a card issuer decline, a short string indicating the
          * [card issuer’s reason for the decline](https://stripe.com/docs/declines#issuer-declines)
          * if they provide one.
          */
         val declineCode: String?,
-
         /**
          * A URL to more information about the
          * [error code](https://stripe.com/docs/error-codes) reported.
          */
         val docUrl: String?,
-
         /**
          * A human-readable message providing more details about the error. For card errors,
          * these messages can be shown to your users.
          */
         val message: String?,
-
         /**
          * If the error is parameter-specific, the parameter related to the error.
          * For example, you can use this to display a message near the correct form field.
          */
         val param: String?,
-
         /**
          * The PaymentMethod object for errors returned on a request involving a PaymentMethod.
          */
         val paymentMethod: PaymentMethod?,
-
         /**
          * The type of error returned.
          */

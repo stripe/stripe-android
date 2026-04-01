@@ -6,8 +6,10 @@ import android.content.pm.PackageManager
 import androidx.annotation.Keep
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.Stripe
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.AnalyticsEvent
+import com.stripe.android.core.networking.AnalyticsFields
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.NetworkTypeDetector
@@ -38,6 +40,8 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
     publishableKeyProvider,
     networkTypeProvider,
 ) {
+    private val appInfo get() = Stripe.appInfo
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         context: Context,
@@ -83,8 +87,18 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
             additionalParams = defaultProductUsageTokens
                 .takeUnless { it.isEmpty() }?.let { mapOf(FIELD_PRODUCT_USAGE to it.joinToString(",")) }
                 .orEmpty()
-                .plus(additionalParams),
+                .plus(additionalParams)
+                .plus(libraryParams()),
         )
+    }
+
+    private fun libraryParams(): Map<String, String> {
+        val appInfo = appInfo ?: return emptyMap()
+
+        return listOfNotNull(
+            AnalyticsFields.LIBRARY_NAME to appInfo.appName,
+            appInfo.appVersion?.let { AnalyticsFields.LIBRARY_VERSION to it },
+        ).toMap()
     }
 
     @JvmSynthetic

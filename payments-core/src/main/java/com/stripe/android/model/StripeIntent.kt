@@ -190,12 +190,10 @@ sealed interface StripeIntent : StripeModel {
              * The timestamp after which the OXXO expires.
              */
             val expiresAfter: Int = 0,
-
             /**
              * The OXXO number.
              */
             val number: String? = null,
-
             /**
              * URL of a webpage containing the voucher for this OXXO payment.
              */
@@ -332,7 +330,15 @@ sealed interface StripeIntent : StripeModel {
 
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @Parcelize
-            data object IntentConfirmationChallenge : SdkData()
+            data class IntentConfirmationChallenge(
+                val stripeJs: StripeJs
+            ) : SdkData() {
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                @Parcelize
+                data class StripeJs(
+                    val captchaVendorName: String?
+                ) : Parcelable
+            }
         }
 
         @Parcelize

@@ -7,9 +7,8 @@ import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.model.BankStatuses
+import com.stripe.android.model.CancelCaptchaChallengeParams
 import com.stripe.android.model.CardMetadata
-import com.stripe.android.model.CheckoutSessionResponse
-import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmationToken
@@ -21,8 +20,6 @@ import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.Customer
-import com.stripe.android.model.ElementsSession
-import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.MobileCardElementConfig
@@ -150,6 +147,12 @@ interface StripeRepository {
         options: ApiRequest.Options,
     ): Result<Customer>
 
+    suspend fun retrieveSavedPaymentMethodFromCardPresentPaymentMethod(
+        cardPresentPaymentMethodId: String,
+        customerId: String,
+        options: ApiRequest.Options,
+    ): Result<PaymentMethod>
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun createToken(
         tokenParams: TokenParams,
@@ -210,6 +213,14 @@ interface StripeRepository {
         productUsageTokens: Set<String>,
         requestOptions: ApiRequest.Options
     ): Result<List<PaymentMethod>>
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun retrieveCustomerPaymentMethod(
+        customerId: String,
+        paymentMethodId: String,
+        productUsageTokens: Set<String>,
+        requestOptions: ApiRequest.Options
+    ): Result<PaymentMethod>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun setDefaultCustomerSource(
@@ -450,6 +461,7 @@ interface StripeRepository {
     ): Result<CheckoutSessionResponse>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+
     suspend fun retrieveCardMetadata(
         cardNumber: String,
         requestOptions: ApiRequest.Options
@@ -487,6 +499,20 @@ interface StripeRepository {
         paymentDetailsUpdateParams: ConsumerPaymentDetailsUpdateParams,
         requestOptions: ApiRequest.Options
     ): Result<ConsumerPaymentDetails>
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun cancelPaymentIntentCaptchaChallenge(
+        paymentIntentId: String,
+        params: CancelCaptchaChallengeParams,
+        requestOptions: ApiRequest.Options
+    ): Result<PaymentIntent>
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun cancelSetupIntentCaptchaChallenge(
+        setupIntentId: String,
+        params: CancelCaptchaChallengeParams,
+        requestOptions: ApiRequest.Options
+    ): Result<SetupIntent>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun buildPaymentUserAgent(attribution: Set<String> = emptySet()): String

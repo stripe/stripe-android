@@ -24,7 +24,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.DefaultWalletButtonsInteractor
 import com.stripe.android.paymentsheet.ui.WalletButtonsContent
@@ -73,7 +73,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     private val errorReporter: ErrorReporter,
     @IOContext private val workContext: CoroutineContext,
     @UIContext private val uiContext: CoroutineContext,
-    private val customerRepository: CustomerRepository,
+    private val savedPaymentMethodRepository: SavedPaymentMethodRepository,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val embeddedLinkHelper: EmbeddedLinkHelper,
     private val rowSelectionImmediateActionHandler: EmbeddedRowSelectionImmediateActionHandler,
@@ -236,7 +236,8 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                     hasSavedPaymentMethods = customerStateHolder.paymentMethods.value.any {
                         it.type?.code == code
                     },
-                    embeddedConfirmationState = confirmationStateHolder.state
+                    embeddedConfirmationState = confirmationStateHolder.state,
+                    customerState = customerStateHolder.customer.value,
                 )
             },
             paymentMethods = customerStateHolder.paymentMethods,
@@ -264,7 +265,9 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             },
             invokeRowSelectionCallback = ::invokeRowSelectionCallback,
             displaysMandatesInFormScreen = isImmediateAction && embeddedViewDisplaysMandateText,
-            runActionForCode = formHelper::runActionForCode,
+            onCurrencySelected = {
+                throw IllegalStateException("onCurrencySelected not supported.")
+            },
             onInitiallyDisplayedPaymentMethodVisibilitySnapshot = { visiblePaymentMethods, hiddenPaymentMethods ->
                 eventReporter.onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
                     visiblePaymentMethods = visiblePaymentMethods,
@@ -287,7 +290,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             coroutineScope = coroutineScope,
             workContext = workContext,
             uiContext = uiContext,
-            customerRepository = customerRepository,
+            savedPaymentMethodRepository = savedPaymentMethodRepository,
             selection = selectionHolder.selection,
             setSelection = ::setSelection,
             customerStateHolder = customerStateHolder,

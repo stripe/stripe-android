@@ -1,0 +1,5 @@
+apply from: configs.androidLibrary
+
+dependencies {
+    implementation project(":network-testing")
+}

@@ -5,6 +5,7 @@ import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.common.di.MobileSessionIdModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
+import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.verification.DefaultLinkInlineInteractor
@@ -18,14 +19,15 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.LinkHandler
-import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetCommonModule
+import com.stripe.android.paymentsheet.state.TapToAddConnectionStarterModule
 import com.stripe.android.paymentsheet.ui.WalletButtonsContent
 import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
+import kotlinx.coroutines.CoroutineScope
 import javax.inject.Named
 import javax.inject.Provider
 import javax.inject.Singleton
@@ -36,6 +38,7 @@ import javax.inject.Singleton
     modules = [
         StripeRepositoryModule::class,
         ExtendedPaymentElementConfirmationModule::class,
+        TapToAddConnectionStarterModule::class,
         PaymentSheetCommonModule::class,
         PaymentElementRequestSurfaceModule::class,
         FlowControllerModule::class,
@@ -45,7 +48,7 @@ import javax.inject.Singleton
         ResourceRepositoryModule::class,
         ApplicationIdModule::class,
         MobileSessionIdModule::class,
-        LinkHoldbackExposureModule::class
+        LinkHoldbackExposureModule::class,
     ]
 )
 internal interface FlowControllerStateComponent {
@@ -58,8 +61,6 @@ internal interface FlowControllerStateComponent {
     val linkInlineInteractor: DefaultLinkInlineInteractor
     val linkAccountHolder: LinkAccountHolder
     val analyticEventCallbackProvider: Provider<AnalyticEventCallback?>
-
-    fun inject(paymentOptionsViewModel: PaymentOptionsViewModel.Factory)
 
     @Component.Factory
     interface Factory {
@@ -74,6 +75,9 @@ internal interface FlowControllerStateComponent {
             paymentElementCallbackIdentifier: String,
             @BindsInstance
             flowControllerViewModel: FlowControllerViewModel,
+            @BindsInstance
+            @ViewModelScope
+            viewModelScope: CoroutineScope,
         ): FlowControllerStateComponent
     }
 }

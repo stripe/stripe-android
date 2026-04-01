@@ -127,7 +127,7 @@ public final class com/stripe/android/model/CardFunding : java/lang/Enum {
 	public static fun values ()[Lcom/stripe/android/model/CardFunding;
 }
 
-public synthetic class com/stripe/android/model/ConsentUi$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class com/stripe/android/model/ConsentUi$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lcom/stripe/android/model/ConsentUi$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
 	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/model/ConsentUi;
@@ -135,13 +135,14 @@ public synthetic class com/stripe/android/model/ConsentUi$$serializer : kotlinx/
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/model/ConsentUi;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/model/ConsentUi$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public synthetic class com/stripe/android/model/ConsentUi$ConsentPane$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class com/stripe/android/model/ConsentUi$ConsentPane$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lcom/stripe/android/model/ConsentUi$ConsentPane$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
 	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/model/ConsentUi$ConsentPane;
@@ -149,13 +150,14 @@ public synthetic class com/stripe/android/model/ConsentUi$ConsentPane$$serialize
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/model/ConsentUi$ConsentPane;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/model/ConsentUi$ConsentPane$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public synthetic class com/stripe/android/model/ConsentUi$ConsentPane$ScopesSection$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class com/stripe/android/model/ConsentUi$ConsentPane$ScopesSection$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lcom/stripe/android/model/ConsentUi$ConsentPane$ScopesSection$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
 	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/model/ConsentUi$ConsentPane$ScopesSection;
@@ -163,13 +165,14 @@ public synthetic class com/stripe/android/model/ConsentUi$ConsentPane$ScopesSect
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/model/ConsentUi$ConsentPane$ScopesSection;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/model/ConsentUi$ConsentPane$ScopesSection$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public synthetic class com/stripe/android/model/ConsentUi$ConsentPane$ScopesSection$Scope$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class com/stripe/android/model/ConsentUi$ConsentPane$ScopesSection$Scope$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lcom/stripe/android/model/ConsentUi$ConsentPane$ScopesSection$Scope$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
 	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/model/ConsentUi$ConsentPane$ScopesSection$Scope;
@@ -177,13 +180,14 @@ public synthetic class com/stripe/android/model/ConsentUi$ConsentPane$ScopesSect
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/model/ConsentUi$ConsentPane$ScopesSection$Scope;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/model/ConsentUi$ConsentPane$ScopesSection$Scope$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public synthetic class com/stripe/android/model/ConsentUi$ConsentSection$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class com/stripe/android/model/ConsentUi$ConsentSection$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lcom/stripe/android/model/ConsentUi$ConsentSection$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
 	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/model/ConsentUi$ConsentSection;
@@ -191,13 +195,14 @@ public synthetic class com/stripe/android/model/ConsentUi$ConsentSection$$serial
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/model/ConsentUi$ConsentSection;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/model/ConsentUi$ConsentSection$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public synthetic class com/stripe/android/model/ConsentUi$Icon$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class com/stripe/android/model/ConsentUi$Icon$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lcom/stripe/android/model/ConsentUi$Icon$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
 	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/model/ConsentUi$Icon;
@@ -205,6 +210,7 @@ public synthetic class com/stripe/android/model/ConsentUi$Icon$$serializer : kot
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/model/ConsentUi$Icon;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/model/ConsentUi$Icon$Companion {
@@ -220,7 +226,7 @@ public final class com/stripe/android/model/ConsumerPaymentDetails$Card$Companio
 public final class com/stripe/android/model/ConsumerPaymentDetails$Passthrough$Companion {
 }
 
-public synthetic class com/stripe/android/model/ConsumerSession$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class com/stripe/android/model/ConsumerSession$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lcom/stripe/android/model/ConsumerSession$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
 	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/model/ConsumerSession;
@@ -228,13 +234,14 @@ public synthetic class com/stripe/android/model/ConsumerSession$$serializer : ko
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/model/ConsumerSession;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/model/ConsumerSession$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public synthetic class com/stripe/android/model/ConsumerSession$VerificationSession$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class com/stripe/android/model/ConsumerSession$VerificationSession$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lcom/stripe/android/model/ConsumerSession$VerificationSession$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
 	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/model/ConsumerSession$VerificationSession;
@@ -242,13 +249,14 @@ public synthetic class com/stripe/android/model/ConsumerSession$VerificationSess
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/model/ConsumerSession$VerificationSession;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/model/ConsumerSession$VerificationSession$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public synthetic class com/stripe/android/model/ConsumerSessionLookup$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class com/stripe/android/model/ConsumerSessionLookup$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lcom/stripe/android/model/ConsumerSessionLookup$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
 	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/model/ConsumerSessionLookup;
@@ -256,13 +264,14 @@ public synthetic class com/stripe/android/model/ConsumerSessionLookup$$serialize
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/model/ConsumerSessionLookup;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/model/ConsumerSessionLookup$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public synthetic class com/stripe/android/model/ConsumerSessionRefresh$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class com/stripe/android/model/ConsumerSessionRefresh$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lcom/stripe/android/model/ConsumerSessionRefresh$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
 	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/model/ConsumerSessionRefresh;
@@ -270,13 +279,14 @@ public synthetic class com/stripe/android/model/ConsumerSessionRefresh$$serializ
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/model/ConsumerSessionRefresh;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/model/ConsumerSessionRefresh$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public synthetic class com/stripe/android/model/ConsumerSessionSignup$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class com/stripe/android/model/ConsumerSessionSignup$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lcom/stripe/android/model/ConsumerSessionSignup$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
 	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/model/ConsumerSessionSignup;
@@ -284,13 +294,14 @@ public synthetic class com/stripe/android/model/ConsumerSessionSignup$$serialize
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/model/ConsumerSessionSignup;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/model/ConsumerSessionSignup$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public synthetic class com/stripe/android/model/DisplayablePaymentDetails$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class com/stripe/android/model/DisplayablePaymentDetails$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lcom/stripe/android/model/DisplayablePaymentDetails$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
 	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/model/DisplayablePaymentDetails;
@@ -298,13 +309,14 @@ public synthetic class com/stripe/android/model/DisplayablePaymentDetails$$seria
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/model/DisplayablePaymentDetails;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/model/DisplayablePaymentDetails$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public synthetic class com/stripe/android/model/LinkAuthIntent$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class com/stripe/android/model/LinkAuthIntent$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lcom/stripe/android/model/LinkAuthIntent$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
 	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/model/LinkAuthIntent;
@@ -312,13 +324,14 @@ public synthetic class com/stripe/android/model/LinkAuthIntent$$serializer : kot
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/model/LinkAuthIntent;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/model/LinkAuthIntent$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public synthetic class com/stripe/android/model/MobileFallbackWebviewParams$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class com/stripe/android/model/MobileFallbackWebviewParams$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lcom/stripe/android/model/MobileFallbackWebviewParams$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
 	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/model/MobileFallbackWebviewParams;
@@ -326,6 +339,7 @@ public synthetic class com/stripe/android/model/MobileFallbackWebviewParams$$ser
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/model/MobileFallbackWebviewParams;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/model/MobileFallbackWebviewParams$Companion {
@@ -389,12 +403,5 @@ public final class com/stripe/android/model/TokenizationMethod : java/lang/Enum 
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/model/TokenizationMethod;
 	public static fun values ()[Lcom/stripe/android/model/TokenizationMethod;
-}
-
-public final class com/stripe/payments/model/BuildConfig {
-	public static final field BUILD_TYPE Ljava/lang/String;
-	public static final field DEBUG Z
-	public static final field LIBRARY_PACKAGE_NAME Ljava/lang/String;
-	public fun <init> ()V
 }
 

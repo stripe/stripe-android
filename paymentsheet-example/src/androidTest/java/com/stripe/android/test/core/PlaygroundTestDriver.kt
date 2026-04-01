@@ -10,6 +10,7 @@ import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -54,6 +55,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.Merchant
 import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.RequireCvcRecollectionDefinition
+import com.stripe.android.paymentsheet.example.samples.ui.shared.CHECKOUT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_ERROR_TEXT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
@@ -781,9 +783,12 @@ internal class PlaygroundTestDriver(
             selectors.externalPaymentMethodFailButton,
         )
 
-        composeTestRule.onNode(hasTestTag(PAYMENT_SHEET_ERROR_TEXT_TEST_TAG))
-            .assertIsDisplayed()
-            .assertTextEquals(FawryActivity.FAILED_DISPLAY_MESSAGE)
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+            composeTestRule
+                .onAllNodes(hasTestTag(PAYMENT_SHEET_ERROR_TEXT_TEST_TAG).and(hasText(FawryActivity.FAILED_DISPLAY_MESSAGE)))
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isNotEmpty()
+        }
 
         teardown()
     }
@@ -1179,6 +1184,17 @@ internal class PlaygroundTestDriver(
         Espresso.onIdle()
     }
 
+    private fun waitUntilCheckoutButtonIsGone() {
+        composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+            composeTestRule.onAllNodesWithTag(CHECKOUT_TEST_TAG)
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isEmpty()
+        }
+
+        composeTestRule.waitForIdle()
+        Espresso.onIdle()
+    }
+
     /**
      * Here we wait for an activity different from the playground to be in view.  We
      * don't specifically look for PaymentSheetActivity or PaymentOptionsActivity because
@@ -1514,6 +1530,11 @@ internal class PlaygroundTestDriver(
                     }
 
                     waitForPlaygroundActivity()
+
+                    if (integrationType == PlaygroundConfigurationData.IntegrationType.FlowController) {
+                        waitUntilCheckoutButtonIsGone()
+                    }
+
                     resultCountDownLatch?.let {
                         assertThat(it.await(5, TimeUnit.SECONDS)).isTrue()
                     }
@@ -1550,11 +1571,11 @@ internal class PlaygroundTestDriver(
         }
 
         onWebView()
-            .withElementByTestId("agree-button")
+            .withElementByTestId("institution-default")
             .perform(webClick())
 
         onWebView()
-            .withElementByTestId("institution-default")
+            .withElementByTestId("agree-button")
             .perform(webClick())
 
         onWebView()
@@ -1577,17 +1598,18 @@ internal class PlaygroundTestDriver(
 
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
             composeTestRule
-                .onAllNodesWithText("Agree and continue")
+                .onAllNodesWithTag("consent_cta")
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .size == 1
         }
 
-        clickButton("Agree and continue")
+        clickButtonWithTag("consent_cta")
+        // TODO: Replace with institution ID tag when available
         clickButton("Test (Non-OAuth)")
 
         // Verifies bank in web view so Compose hierarchy can detach. Button should be available
         // after web view verification.
-        clickButton("Connect account", composeCanDetach = true)
+        clickButtonWithTag("connect_account_button", composeCanDetach = true)
 
         clickButtonWithTag("skip_cta")
         clickButtonWithTag("done_button")
@@ -1600,16 +1622,19 @@ internal class PlaygroundTestDriver(
 
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
             composeTestRule
-                .onAllNodesWithText("Agree and continue")
+                .onAllNodesWithTag("consent_cta")
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .size == 1
+                .isNotEmpty()
         }
 
-        clickButton("Agree and continue")
+        clickButtonWithTag("consent_cta")
         clickButtonWithTag("existing_email-button")
-        clickButton("Use test code")
+        clickButtonWithTag("test_mode_fill_button")
+
+        // TODO: Replace with institution ID tag when available
         clickButton("Success")
-        clickButton("Connect account")
+
+        clickButtonWithTag("link_account_picker_cta")
         clickButtonWithTag("done_button")
     }
 

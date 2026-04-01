@@ -55,7 +55,6 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import kotlin.Result
 import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.link.confirmation.Result as LinkConfirmationResult
 
@@ -607,10 +606,10 @@ class WalletViewModelTest {
         val linkAccountManager = object : WalletLinkAccountManager() {
             override suspend fun updatePaymentDetails(
                 updateParams: ConsumerPaymentDetailsUpdateParams,
-                billingPhone: String?
+                phone: String?
             ): Result<ConsumerPaymentDetails> {
                 delay(CARD_PROCESSING_DELAY)
-                return super.updatePaymentDetails(updateParams, billingPhone)
+                return super.updatePaymentDetails(updateParams, phone)
             }
         }
         linkAccountManager.listPaymentDetailsResult = Result.success(
@@ -970,59 +969,6 @@ class WalletViewModelTest {
             assertThat(viewModel.uiState.value.paymentSelectionHint)
                 .isEqualTo(expectedHint)
         }
-    }
-
-    @Test
-    fun `marks auto-selection attempted when skipWalletInFlowController is enabled`() = runTest(dispatcher) {
-        val defaultCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(isDefault = true)
-
-        val linkAccountManager = WalletLinkAccountManager()
-        linkAccountManager.listPaymentDetailsResult = Result.success(
-            ConsumerPaymentDetails(paymentDetails = listOf(defaultCard))
-        )
-
-        val configuration = TestFactory.LINK_CONFIGURATION.copy(
-            skipWalletInFlowController = true
-        )
-
-        val viewModel = createViewModel(
-            linkAccountManager = linkAccountManager,
-            configuration = configuration,
-            linkLaunchMode = LinkLaunchMode.PaymentMethodSelection(selectedPayment = null)
-        )
-
-        // Wait for async operations to complete
-        advanceUntilIdle()
-
-        // Verify auto-selection was attempted
-        assertThat(viewModel.uiState.value.hasAttemptedAutoSelection).isTrue()
-    }
-
-    @Test
-    fun `does not auto-select when skipWalletInFlowController is disabled`() = runTest(dispatcher) {
-        val defaultCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(isDefault = true)
-
-        val linkAccountManager = WalletLinkAccountManager()
-        linkAccountManager.listPaymentDetailsResult = Result.success(
-            ConsumerPaymentDetails(paymentDetails = listOf(defaultCard))
-        )
-
-        val configuration = TestFactory.LINK_CONFIGURATION.copy(
-            skipWalletInFlowController = false // Disabled
-        )
-
-        val viewModel = createViewModel(
-            linkAccountManager = linkAccountManager,
-            configuration = configuration,
-            linkLaunchMode = LinkLaunchMode.PaymentMethodSelection(selectedPayment = null)
-        )
-
-        // Wait for async operations to complete
-        advanceUntilIdle()
-
-        // Verify auto-selection was NOT attempted when flag is disabled
-        assertThat(viewModel.uiState.value.hasAttemptedAutoSelection).isFalse()
-        assertThat(viewModel.uiState.value.isAutoSelecting).isFalse()
     }
 
     @Test

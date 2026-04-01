@@ -17,7 +17,6 @@ import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -29,12 +28,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.stripe.android.common.taptoadd.TerminalConnectionTokenCallbackHolder
-import com.stripe.android.common.taptoadd.TerminalLocationHolder
+import com.stripe.android.checkout.Checkout
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.AnalyticEventCallback
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -55,6 +53,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.ConfirmationT
 import com.stripe.android.paymentsheet.example.playground.settings.DropdownSetting
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedRowSelectionBehaviorSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedViewDisplaysMandateSettingDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.settings.WalletButtonsPlaygroundType
@@ -67,6 +66,7 @@ import kotlinx.coroutines.launch
     ExperimentalAnalyticEventCallbackApi::class,
     WalletButtonsPreview::class,
     TapToAddPreview::class,
+    CheckoutSessionPreview::class,
 )
 internal class EmbeddedPlaygroundActivity :
     AppCompatActivity(),
@@ -76,16 +76,19 @@ internal class EmbeddedPlaygroundActivity :
     CreateCardPresentSetupIntentCallback {
     companion object {
         private const val PLAYGROUND_STATE_KEY = "playgroundState"
+        private const val CHECKOUT_STATE_KEY = "checkoutState"
         const val EMBEDDED_PAYMENT_ELEMENT_STATE_KEY = "EMBEDDED_PAYMENT_ELEMENT_STATE_KEY"
 
         fun create(
             context: Context,
             playgroundState: PlaygroundState.Payment,
             embeddedPaymentElementState: EmbeddedPaymentElement.State? = null,
+            checkoutState: Checkout.State? = null,
         ): Intent {
             return Intent(context, EmbeddedPlaygroundActivity::class.java).apply {
                 putExtra(PLAYGROUND_STATE_KEY, playgroundState)
                 putExtra(EMBEDDED_PAYMENT_ELEMENT_STATE_KEY, embeddedPaymentElementState)
+                putExtra(CHECKOUT_STATE_KEY, checkoutState)
             }
         }
     }
@@ -94,6 +97,7 @@ internal class EmbeddedPlaygroundActivity :
     private lateinit var playgroundState: PlaygroundState.Payment
     private lateinit var playgroundSettings: PlaygroundSettings
     private lateinit var embeddedPaymentElement: EmbeddedPaymentElement
+    private var checkout: Checkout? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -105,34 +109,19 @@ internal class EmbeddedPlaygroundActivity :
         }
         this.playgroundState = initialPlaygroundState
         this.playgroundSettings = initialPlaygroundState.snapshot.playgroundSettings()
+        this.checkout = getCheckout()
 
-        val embeddedBuilder =
-            if (playgroundState.snapshot[ConfirmationTokenSettingsDefinition] == true) {
-                EmbeddedPaymentElement.Builder(
-                    createIntentCallback = { _ ->
-                        viewModel.handleCreateIntentCallback(playgroundState, applicationContext)
-                    },
-                    resultCallback = ::handleEmbeddedResult,
-                )
-            } else {
-                EmbeddedPaymentElement.Builder(
-                    createIntentCallback = { _, _ ->
-                        viewModel.handleCreateIntentCallback(playgroundState, applicationContext)
-                    },
-                    resultCallback = ::handleEmbeddedResult,
-                )
-            }
-                .confirmCustomPaymentMethodCallback(this)
-                .externalPaymentMethodConfirmHandler(this)
-                .analyticEventCallback(this)
-                .rowSelectionBehavior(
-                    playgroundSettings[EmbeddedRowSelectionBehaviorSettingsDefinition].value.rowSelectionBehavior
-                )
+        val embeddedBuilder = createBuilder()
+            .confirmCustomPaymentMethodCallback(this)
+            .externalPaymentMethodConfirmHandler(this)
+            .analyticEventCallback(this)
+            .createCardPresentSetupIntentCallback(this)
+            .rowSelectionBehavior(
+                playgroundSettings[EmbeddedRowSelectionBehaviorSettingsDefinition].value.rowSelectionBehavior
+            )
         val embeddedViewDisplaysMandateText =
             initialPlaygroundState.snapshot[EmbeddedViewDisplaysMandateSettingDefinition]
         setContent {
-            SetupTapToAddAlpha()
-
             embeddedPaymentElement = rememberEmbeddedPaymentElement(embeddedBuilder)
 
             var loadingState: LoadingState by remember { mutableStateOf(LoadingState.Loading) }
@@ -141,10 +130,17 @@ internal class EmbeddedPlaygroundActivity :
 
             fun configure() = coroutineScope.launch {
                 loadingState = LoadingState.Loading
-                val result = embeddedPaymentElement.configure(
-                    intentConfiguration = playgroundState.intentConfiguration(),
-                    configuration = playgroundState.embeddedConfiguration(),
-                )
+                val result = if (playgroundState.initializationType == InitializationType.CheckoutSession) {
+                    embeddedPaymentElement.configure(
+                        checkout = requireNotNull(checkout),
+                        configuration = playgroundState.embeddedConfiguration(),
+                    )
+                } else {
+                    embeddedPaymentElement.configure(
+                        intentConfiguration = playgroundState.intentConfiguration(),
+                        configuration = playgroundState.embeddedConfiguration(),
+                    )
+                }
                 loadingState = when (result) {
                     is EmbeddedPaymentElement.ConfigureResult.Failed -> {
                         LoadingState.Failed(result.error.message ?: "Unknown error")
@@ -206,6 +202,24 @@ internal class EmbeddedPlaygroundActivity :
         )
     }
 
+    private fun createBuilder(): EmbeddedPaymentElement.Builder {
+        return if (playgroundState.snapshot[ConfirmationTokenSettingsDefinition]) {
+            EmbeddedPaymentElement.Builder(
+                createIntentCallback = { _ ->
+                    viewModel.handleCreateIntentCallback(playgroundState, applicationContext)
+                },
+                resultCallback = ::handleEmbeddedResult,
+            )
+        } else {
+            EmbeddedPaymentElement.Builder(
+                createIntentCallback = { _, _ ->
+                    viewModel.handleCreateIntentCallback(playgroundState, applicationContext)
+                },
+                resultCallback = ::handleEmbeddedResult,
+            )
+        }
+    }
+
     private fun setupBackPressedCallback() {
         onBackPressedDispatcher.addCallback(
             object : OnBackPressedCallback(enabled = true) {
@@ -249,26 +263,6 @@ internal class EmbeddedPlaygroundActivity :
                 configure()
             },
         )
-    }
-
-    @Composable
-    private fun SetupTapToAddAlpha() {
-        val lifecycleOwner = LocalLifecycleOwner.current
-
-        DisposableEffect(playgroundState, lifecycleOwner) {
-            TerminalConnectionTokenCallbackHolder.set(
-                lifecycleOwner = lifecycleOwner,
-                callback = {
-                    viewModel.createConnectionToken(playgroundState, applicationContext)
-                }
-            )
-
-            TerminalLocationHolder.locationId = playgroundState.terminalLocationId
-
-            onDispose {
-                TerminalLocationHolder.locationId = null
-            }
-        }
     }
 
     @Composable
@@ -343,6 +337,12 @@ internal class EmbeddedPlaygroundActivity :
     private fun getPlaygroundState(savedInstanceState: Bundle?): PlaygroundState.Payment? {
         return savedInstanceState?.getParcelable<PlaygroundState.Payment?>(PLAYGROUND_STATE_KEY)
             ?: intent.getParcelableExtra<PlaygroundState.Payment?>(PLAYGROUND_STATE_KEY)
+    }
+
+    @Suppress("DEPRECATION")
+    private fun getCheckout(): Checkout? {
+        return intent.getParcelableExtra<Checkout.State?>(CHECKOUT_STATE_KEY)
+            ?.let { Checkout.createWithState(this, it) }
     }
 
     @Suppress("DEPRECATION")

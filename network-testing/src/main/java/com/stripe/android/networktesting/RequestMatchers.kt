@@ -94,6 +94,15 @@ object RequestMatchers {
         }
     }
 
+    fun hasBodyPart(name: String): RequestMatcher {
+        return ToStringRequestMatcher("hasBodyPart($name)") { request ->
+            request.bodyText.substringAfter("?")
+                .split("&")
+                .map { it.substringBefore("=") }
+                .contains(name)
+        }
+    }
+
     fun bodyPart(name: String, value: String): RequestMatcher {
         return ToStringRequestMatcher("bodyPart($name, $value)") { request ->
             request.bodyText.substringAfter("?")

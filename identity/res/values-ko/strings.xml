@@ -92,8 +92,6 @@
   <string name="stripe_doc_front_warmup_title">사진이 있는 신분증 스캔 준비</string>
   <!-- Label of the driver's license option for document type selection -->
   <string name="stripe_driver_license">운전 면허증</string>
-  <!-- Text for error labels -->
-  <string name="stripe_error">오류</string>
   <!-- Button that opens file upload screen -->
   <string name="stripe_file_upload">파일 업로드</string>
   <!-- Instructions for uploading images of drivers license -->

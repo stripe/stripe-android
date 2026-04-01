@@ -15,7 +15,7 @@ import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResu
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.payments.bankaccount.navigation.toUSBankAccountResult
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
-import com.stripe.android.payments.financialconnections.GetFinancialConnectionsAvailability
+import com.stripe.android.payments.financialconnections.GetDefaultFinancialConnectionsAvailability
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
@@ -91,7 +91,7 @@ interface CollectBankAccountLauncher {
                 hostActivityLauncher = activity.registerForActivityResult(CollectBankAccountContract()) {
                     callback(it.toUSBankAccountResult())
                 },
-                financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null),
+                financialConnectionsAvailability = GetDefaultFinancialConnectionsAvailability(),
             )
         }
 
@@ -112,7 +112,7 @@ interface CollectBankAccountLauncher {
                 ) {
                     callback(it.toUSBankAccountResult())
                 },
-                financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null),
+                financialConnectionsAvailability = GetDefaultFinancialConnectionsAvailability(),
             )
         }
 
@@ -132,7 +132,7 @@ interface CollectBankAccountLauncher {
                 hostActivityLauncher = fragment.registerForActivityResult(CollectBankAccountContract()) {
                     callback(it.toUSBankAccountResult())
                 },
-                financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null)
+                financialConnectionsAvailability = GetDefaultFinancialConnectionsAvailability()
             )
         }
 
@@ -153,7 +153,7 @@ interface CollectBankAccountLauncher {
                     CollectBankAccountContract(),
                     callback,
                 ),
-                financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null)
+                financialConnectionsAvailability = GetDefaultFinancialConnectionsAvailability()
             )
         }
     }

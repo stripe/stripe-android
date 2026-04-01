@@ -19,18 +19,7 @@ internal object CustomerSessionSaveSettingsDefinition : BooleanSettingsDefinitio
         return settings[CustomerSessionSettingsDefinition] == true
     }
 
-    override fun createOptions(
-        configurationData: PlaygroundConfigurationData
-    ) = listOf(
-        PlaygroundSettingDefinition.Displayable.Option("Enabled", true),
-        PlaygroundSettingDefinition.Displayable.Option("Disabled", false),
-    )
-
     override fun configure(value: Boolean, checkoutRequestBuilder: CheckoutRequest.Builder) {
-        if (value) {
-            checkoutRequestBuilder.paymentMethodSaveFeature(FeatureState.Enabled)
-        } else {
-            checkoutRequestBuilder.paymentMethodSaveFeature(FeatureState.Disabled)
-        }
+        checkoutRequestBuilder.paymentMethodSaveFeature(FeatureState.fromBoolean(value))
     }
 }

@@ -36,7 +36,8 @@ class TextFieldUiScreenshotTest {
                 shouldShowValidationMessage = false,
                 validationMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = null
+                trailingIcon = null,
+                hasFocus = false
             )
         }
     }
@@ -53,7 +54,8 @@ class TextFieldUiScreenshotTest {
                 shouldShowValidationMessage = false,
                 validationMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = null
+                trailingIcon = null,
+                hasFocus = false
             )
         }
     }
@@ -70,7 +72,8 @@ class TextFieldUiScreenshotTest {
                 shouldShowValidationMessage = true,
                 validationMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = null
+                trailingIcon = null,
+                hasFocus = false
             )
         }
     }
@@ -89,7 +92,8 @@ class TextFieldUiScreenshotTest {
                     message = R.string.stripe_address_zip_incomplete
                 ),
                 showOptionalLabel = false,
-                trailingIcon = null
+                trailingIcon = null,
+                hasFocus = false
             )
         }
     }
@@ -106,7 +110,8 @@ class TextFieldUiScreenshotTest {
                 shouldShowValidationMessage = false,
                 validationMessage = null,
                 showOptionalLabel = true,
-                trailingIcon = null
+                trailingIcon = null,
+                hasFocus = false
             )
         }
     }
@@ -126,7 +131,8 @@ class TextFieldUiScreenshotTest {
                 trailingIcon = TextFieldIcon.Trailing(
                     idRes = R.drawable.stripe_ic_search,
                     isTintable = true,
-                )
+                ),
+                hasFocus = false
             )
         }
     }
@@ -158,7 +164,8 @@ class TextFieldUiScreenshotTest {
                             icon = R.drawable.stripe_ic_card_visa
                         )
                     )
-                )
+                ),
+                hasFocus = false
             )
         }
     }
@@ -190,7 +197,8 @@ class TextFieldUiScreenshotTest {
                             icon = R.drawable.stripe_ic_card_visa
                         )
                     )
-                )
+                ),
+                hasFocus = false
             )
         }
     }
@@ -207,7 +215,8 @@ class TextFieldUiScreenshotTest {
                 shouldShowValidationMessage = false,
                 validationMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = null
+                trailingIcon = null,
+                hasFocus = false
             )
         }
     }
@@ -224,7 +233,8 @@ class TextFieldUiScreenshotTest {
                 shouldShowValidationMessage = false,
                 validationMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = null
+                trailingIcon = null,
+                hasFocus = false
             )
         }
     }
@@ -241,7 +251,8 @@ class TextFieldUiScreenshotTest {
                 shouldShowValidationMessage = false,
                 validationMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = null
+                trailingIcon = null,
+                hasFocus = false
             )
         }
     }
@@ -258,7 +269,8 @@ class TextFieldUiScreenshotTest {
                 shouldShowValidationMessage = false,
                 validationMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = null
+                trailingIcon = null,
+                hasFocus = false
             )
         }
     }

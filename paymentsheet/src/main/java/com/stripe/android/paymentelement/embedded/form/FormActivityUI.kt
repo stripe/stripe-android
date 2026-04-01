@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.TestModeBadge
@@ -28,6 +29,8 @@ import com.stripe.android.paymentsheet.utils.DismissKeyboardOnProcessing
 import com.stripe.android.paymentsheet.utils.EventReporterProvider
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
+import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
+import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmUI
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormUI
 import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.StripeTheme
@@ -44,6 +47,8 @@ internal fun FormActivityUI(
     onProcessingCompleted: () -> Unit,
     state: FormActivityStateHelper.State,
     onDismissed: () -> Unit,
+    updateSelection: (PaymentSelection.Saved) -> Unit,
+    savedPaymentMethodConfirmInteractorFactory: SavedPaymentMethodConfirmInteractor.Factory,
 ) {
     val scrollState = rememberScrollState()
     val interactorState by interactor.state.collectAsState()
@@ -59,10 +64,19 @@ internal fun FormActivityUI(
                 )
             },
             content = {
-                VerticalModeFormUI(
-                    interactor = interactor,
-                    showsWalletHeader = false
-                )
+                if (state.savedPaymentSelectionToConfirm == null) {
+                    VerticalModeFormUI(
+                        interactor = interactor,
+                        showsWalletHeader = false
+                    )
+                } else {
+                    SavedPaymentMethodConfirmUI(
+                        savedPaymentMethodConfirmInteractor = savedPaymentMethodConfirmInteractorFactory.create(
+                            initialSelection = state.savedPaymentSelectionToConfirm,
+                            updateSelection = updateSelection,
+                        ),
+                    )
+                }
                 USBankAccountMandate(state)
                 FormActivityError(state)
                 Spacer(Modifier.height(40.dp))

@@ -1,6 +1,7 @@
 package com.stripe.android.crypto.onramp.model
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.LinkAppearance
 
 /**
@@ -10,6 +11,7 @@ import com.stripe.android.link.LinkAppearance
  * @property publishableKey The publishable key from the API dashboard to enable requests.
  * @property appearance Appearance settings for the PaymentSheet UI.
  * @property cryptoCustomerId The unique customer ID for crypto onramp.
+ * @property googlePayConfig The configuration for Google Pay, if Google Pay is supported by the merchant.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class OnrampConfiguration {
@@ -17,6 +19,7 @@ class OnrampConfiguration {
     private var publishableKey: String? = null
     private var appearance: LinkAppearance? = null
     private var cryptoCustomerId: String? = null
+    private var googlePayConfig: GooglePayPaymentMethodLauncher.Config? = null
 
     /**
      * Sets the display name of the merchant.
@@ -47,11 +50,19 @@ class OnrampConfiguration {
         this.cryptoCustomerId = cryptoCustomerId
     }
 
+    /**
+     * Sets the Google Pay configuration to use if Google Pay is supported by the merchant.
+     */
+    fun googlePayConfig(googlePayConfig: GooglePayPaymentMethodLauncher.Config) = apply {
+        this.googlePayConfig = googlePayConfig
+    }
+
     internal class State(
         val merchantDisplayName: String,
         val publishableKey: String,
         val appearance: LinkAppearance,
-        val cryptoCustomerId: String? = null
+        val cryptoCustomerId: String? = null,
+        val googlePayConfig: GooglePayPaymentMethodLauncher.Config? = null
     )
 
     internal fun build(): State {
@@ -64,6 +75,7 @@ class OnrampConfiguration {
             },
             appearance = appearance ?: LinkAppearance(),
             cryptoCustomerId = cryptoCustomerId,
+            googlePayConfig = googlePayConfig
         )
     }
 }

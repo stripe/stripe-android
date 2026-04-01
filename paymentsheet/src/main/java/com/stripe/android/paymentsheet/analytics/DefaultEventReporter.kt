@@ -240,17 +240,12 @@ internal class DefaultEventReporter @Inject internal constructor(
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         intentId: String?,
     ) {
-        // Wallets are treated as a saved payment method after confirmation, so we need
-        // to "reset" to the correct PaymentSelection for accurate reporting.
-        val savedSelection = (paymentSelection as? PaymentSelection.Saved)
-
-        val realSelection = savedSelection?.walletType?.paymentSelection ?: paymentSelection
         val duration = durationProvider.end(DurationProvider.Key.Checkout)
 
         fireEvent(
             PaymentSheetEvent.Payment(
                 mode = mode,
-                paymentSelection = realSelection,
+                paymentSelection = paymentSelection,
                 duration = duration,
                 result = PaymentSheetEvent.Payment.Result.Success,
                 deferredIntentConfirmationType = deferredIntentConfirmationType,
@@ -413,6 +408,39 @@ internal class DefaultEventReporter @Inject internal constructor(
                 isVerticalLayout = isVerticalLayout,
             )
         )
+    }
+
+    override fun onTapToAddStarted() {
+        durationProvider.start(DurationProvider.Key.TapToAdd)
+        fireEvent(PaymentSheetEvent.TapToAdd.Started(mode))
+    }
+
+    override fun onCardAddedWithTapToAdd() {
+        val duration = durationProvider.end(DurationProvider.Key.TapToAdd)
+        fireEvent(PaymentSheetEvent.TapToAdd.CardAdded(mode, duration))
+    }
+
+    override fun onTapToAddCanceled() {
+        val duration = durationProvider.end(DurationProvider.Key.TapToAdd)
+        fireEvent(PaymentSheetEvent.TapToAdd.Canceled(mode, duration))
+    }
+
+    override fun onTapToAddContinueAfterCardAdded() {
+        fireEvent(PaymentSheetEvent.TapToAdd.ContinueAfterCardAdded(mode))
+    }
+
+    override fun onTapToAddConfirm() {
+        fireEvent(PaymentSheetEvent.TapToAdd.Confirm(mode))
+    }
+
+    override fun onFailedToAddCardWithTapToAdd(message: String) {
+        val duration = durationProvider.end(DurationProvider.Key.TapToAdd)
+        fireEvent(PaymentSheetEvent.TapToAdd.FailedToAddCard(mode, message, duration))
+    }
+
+    override fun onTapToAddAttemptWithUnsupportedDevice() {
+        val duration = durationProvider.end(DurationProvider.Key.TapToAdd)
+        fireEvent(PaymentSheetEvent.TapToAdd.AttemptWithUnsupportedDevice(mode, duration))
     }
 
     override fun onAnalyticsEvent(event: AnalyticsEvent) {

@@ -4,6 +4,7 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
+import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.LinkMode
@@ -25,6 +26,7 @@ import com.stripe.android.ui.core.elements.LpmSerializer
 import com.stripe.android.ui.core.elements.SharedDataSpec
 
 internal object PaymentMethodMetadataFactory {
+    @Suppress("LongMethod")
     fun create(
         stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
@@ -41,7 +43,6 @@ internal object PaymentMethodMetadataFactory {
         externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec> = emptyList(),
         displayableCustomPaymentMethods: List<DisplayableCustomPaymentMethod> = emptyList(),
         isGooglePayReady: Boolean = false,
-        paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
         linkConfiguration: PaymentSheet.LinkConfiguration = PaymentSheet.LinkConfiguration(),
         linkMode: LinkMode? = LinkMode.LinkPaymentMethod,
         linkState: LinkStateResult? = null,
@@ -51,8 +52,12 @@ internal object PaymentMethodMetadataFactory {
         paymentMethodIncentive: PaymentMethodIncentive? = null,
         isPaymentMethodSetAsDefaultEnabled: Boolean = IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE,
         financialConnectionsAvailability: FinancialConnectionsAvailability? = FinancialConnectionsAvailability.Lite,
-        customerMetadataPermissions: CustomerMetadata.Permissions =
-            PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS,
+        removePaymentMethod: PaymentMethodRemovePermission =
+            PaymentMethodRemovePermission.Full,
+        saveConsent: PaymentMethodSaveConsentBehavior =
+            PaymentMethodSaveConsentBehavior.Legacy,
+        canRemoveLastPaymentMethod: Boolean = true,
+        canUpdateFullPaymentMethodDetails: Boolean = false,
         customerSessionClientSecret: String? = null,
         termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay> = emptyMap(),
         forceSetupFutureUseBehaviorAndNewMandate: Boolean = false,
@@ -67,6 +72,7 @@ internal object PaymentMethodMetadataFactory {
         analyticsMetadata: AnalyticsMetadata = AnalyticsMetadata(emptyMap()),
         isTapToAddSupported: Boolean = false,
         experimentsData: ElementsSession.ExperimentsData? = null,
+        isStripeCardScanAllowed: Boolean = false,
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -82,16 +88,32 @@ internal object PaymentMethodMetadataFactory {
             defaultBillingDetails = defaultBillingDetails,
             shippingDetails = shippingDetails,
             customerMetadata = if (hasCustomerConfiguration) {
-                PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.copy(
-                    isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
-                    permissions = customerMetadataPermissions,
-                    customerSessionClientSecret = customerSessionClientSecret,
-                )
+                if (customerSessionClientSecret != null) {
+                    CustomerMetadata.CustomerSession(
+                        id = "cus_123",
+                        ephemeralKeySecret = "ek_123",
+                        customerSessionClientSecret = customerSessionClientSecret,
+                        isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
+                        removePaymentMethod = removePaymentMethod,
+                        saveConsent = saveConsent,
+                        canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
+                        canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
+                    )
+                } else {
+                    CustomerMetadata.LegacyEphemeralKey(
+                        id = "cus_123",
+                        ephemeralKeySecret = "ek_123",
+                        isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
+                        removePaymentMethod = removePaymentMethod,
+                        saveConsent = saveConsent,
+                        canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
+                        canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
+                    )
+                }
             } else {
                 null
             },
             sharedDataSpecs = sharedDataSpecs,
-            paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             displayableCustomPaymentMethods = displayableCustomPaymentMethods,
             isGooglePayReady = isGooglePayReady,
@@ -115,6 +137,7 @@ internal object PaymentMethodMetadataFactory {
             analyticsMetadata = analyticsMetadata,
             isTapToAddSupported = isTapToAddSupported,
             experimentsData = experimentsData,
+            isStripeCardScanAllowed = isStripeCardScanAllowed,
         )
     }
 
@@ -122,6 +145,10 @@ internal object PaymentMethodMetadataFactory {
         val inputStream = PaymentMethodMetadataFactory::class.java.classLoader!!.getResourceAsStream("lpms.json")
         val specsString = inputStream.bufferedReader().use { it.readText() }
         return LpmSerializer.deserializeList(specsString).getOrThrow()
+    }
+
+    fun defaultIntegrationMetadata(stripeIntent: StripeIntent): IntegrationMetadata {
+        return stripeIntent.integrationMetadata()
     }
 
     private fun StripeIntent.integrationMetadata(): IntegrationMetadata {

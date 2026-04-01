@@ -198,6 +198,7 @@ fun TextField(
             }
         },
         onDropdownItemClicked = textFieldController::onDropdownItemClicked,
+        onSelectorItemClicked = textFieldController::onSelectorItemClicked,
         modifier = modifier
             .onPreviewKeyEvent(
                 value = value,
@@ -240,6 +241,7 @@ fun TextField(
                 focusManager.clearFocus(true)
             }
         ),
+        hasFocus = hasFocus.value
     )
 }
 
@@ -261,7 +263,9 @@ internal fun TextFieldUi(
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions(),
     onValueChange: (value: TextFieldValue) -> Unit = {},
-    onDropdownItemClicked: (item: TextFieldIcon.Dropdown.Item) -> Unit = {}
+    onDropdownItemClicked: (item: TextFieldIcon.Dropdown.Item) -> Unit = {},
+    onSelectorItemClicked: (item: TextFieldIcon.Selector.Item?) -> Unit = {},
+    hasFocus: Boolean
 ) {
     val displayState = when (shouldShowValidationMessage) {
         true -> {
@@ -303,7 +307,7 @@ internal fun TextFieldUi(
             },
             trailingIcon = trailingIcon?.let { icon ->
                 {
-                    icon.Composable(loading, onDropdownItemClicked)
+                    icon.Composable(loading, onDropdownItemClicked, onSelectorItemClicked, hasFocus)
                 }
             },
             isError = shouldShowValidationMessage,
@@ -322,6 +326,8 @@ internal fun TextFieldUi(
 private fun TextFieldIcon.Composable(
     loading: Boolean,
     onDropdownItemClicked: (item: TextFieldIcon.Dropdown.Item) -> Unit,
+    onSelectorItemClicked: (item: TextFieldIcon.Selector.Item?) -> Unit,
+    hasFocus: Boolean
 ) {
     Row {
         when (this@Composable) {
@@ -343,6 +349,15 @@ private fun TextFieldIcon.Composable(
                     icon = this@Composable,
                     loading = loading,
                     onDropdownItemClicked = onDropdownItemClicked
+                )
+            }
+
+            is TextFieldIcon.Selector -> {
+                TrailingSelector(
+                    icon = this@Composable,
+                    loading = loading,
+                    onSelectorItemClicked = onSelectorItemClicked,
+                    hasFocus = hasFocus
                 )
             }
         }
@@ -526,6 +541,41 @@ private fun Modifier.onPreviewKeyEvent(
 }
 
 @Composable
+private fun TrailingSelector(
+    icon: TextFieldIcon.Selector,
+    loading: Boolean,
+    onSelectorItemClicked: (item: TextFieldIcon.Selector.Item?) -> Unit,
+    hasFocus: Boolean
+) {
+    Box(
+        modifier = Modifier
+            .focusProperties { canFocus = false }
+            .padding(10.dp)
+            .testTag(SELECTOR_CLICKABLE_TEST_TAG),
+        contentAlignment = Alignment.Center
+    ) {
+        if (icon.showSelector) {
+            Selector(
+                currentItem = icon.currentItem,
+                items = icon.items,
+                onItemSelected = onSelectorItemClicked,
+                hasFocus = hasFocus,
+                popupMessage = icon.message,
+                hasMadeSelection = icon.hasMadeSelection
+            )
+        } else {
+            TrailingIcon(
+                TextFieldIcon.Trailing(
+                    icon.currentItem.icon,
+                    isTintable = false
+                ),
+                loading
+            )
+        }
+    }
+}
+
+@Composable
 private fun Modifier.onAutofill(
     textFieldController: TextFieldController,
     autofillReporter: (String) -> Unit
@@ -565,6 +615,9 @@ private fun Modifier.conditionallyClickable(onClick: (() -> Unit)?): Modifier {
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val DROPDOWN_MENU_CLICKABLE_TEST_TAG = "dropdown_menu_clickable"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val SELECTOR_CLICKABLE_TEST_TAG = "selector_clickable"
 
 // Default size of Material Theme icons
 private const val LOADING_INDICATOR_SIZE = 24

@@ -9,6 +9,7 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.amount
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -18,7 +19,9 @@ import com.stripe.android.paymentsheet.utils.continueButtonLabel
 import com.stripe.android.paymentsheet.utils.reportPaymentResult
 import com.stripe.android.ui.core.Amount
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
@@ -28,11 +31,16 @@ import javax.inject.Singleton
 
 internal interface FormActivityStateHelper {
     val state: StateFlow<State>
+    val result: SharedFlow<FormResult>
     fun updateEnabled(enabled: Boolean)
     fun updateConfirmationState(confirmationState: ConfirmationHandler.State)
     fun updateMandate(mandateText: ResolvableString?)
     fun updatePrimaryButton(callback: (PrimaryButton.UIState?) -> PrimaryButton.UIState?)
     fun updateError(error: ResolvableString?)
+
+    fun setResult(result: FormResult)
+
+    fun updateSavedPaymentSelectionToConfirm(selection: PaymentSelection.Saved?)
 
     data class State(
         val primaryButtonLabel: ResolvableString,
@@ -42,6 +50,7 @@ internal interface FormActivityStateHelper {
         val shouldDisplayLockIcon: Boolean,
         val error: ResolvableString? = null,
         val mandateText: ResolvableString? = null,
+        val savedPaymentSelectionToConfirm: PaymentSelection.Saved? = null,
     )
 }
 
@@ -52,7 +61,7 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
     private val configuration: EmbeddedPaymentElement.Configuration,
     private val onClickDelegate: OnClickOverrideDelegate,
     private val eventReporter: EventReporter,
-    @ViewModelScope coroutineScope: CoroutineScope,
+    @param:ViewModelScope private val coroutineScope: CoroutineScope,
 ) : FormActivityStateHelper {
     private val _state = MutableStateFlow(
         FormActivityStateHelper.State(
@@ -61,9 +70,13 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
             processingState = PrimaryButtonProcessingState.Idle(null),
             isProcessing = false,
             shouldDisplayLockIcon = configuration.formSheetAction == EmbeddedPaymentElement.FormSheetAction.Confirm,
+            savedPaymentSelectionToConfirm = null,
         )
     )
     override val state: StateFlow<FormActivityStateHelper.State> = _state
+
+    private val _result = MutableSharedFlow<FormResult>()
+    override val result: SharedFlow<FormResult> = _result
 
     private var usBankAccountFormPrimaryButtonUiState: PrimaryButton.UIState? = null
 
@@ -77,6 +90,12 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
                     )
                 }
             }
+        }
+    }
+
+    override fun setResult(result: FormResult) {
+        coroutineScope.launch {
+            _result.emit(result)
         }
     }
 
@@ -107,6 +126,12 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
             it.copy(
                 error = error
             )
+        }
+    }
+
+    override fun updateSavedPaymentSelectionToConfirm(selection: PaymentSelection.Saved?) {
+        _state.update {
+            it.copy(savedPaymentSelectionToConfirm = selection)
         }
     }
 

@@ -1,8 +1,6 @@
 package com.stripe.android.financialconnections.features.common
 
 import FinancialConnectionsGenericInfoScreen
-import android.os.Build.VERSION.SDK_INT
-import android.os.Build.VERSION_CODES.M
 import android.view.HapticFeedbackConstants.CONTEXT_CLICK
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -82,7 +80,7 @@ internal fun AccountItem(
                 shape = shape
             )
             .clickableSingle(enabled = viewState != Disabled) {
-                if (SDK_INT >= M) view.performHapticFeedback(CONTEXT_CLICK)
+                view.performHapticFeedback(CONTEXT_CLICK)
                 onAccountClicked(account)
             }
             .alpha(viewState.alpha)
@@ -172,7 +170,6 @@ private fun AccountSubtitle(
                             shape = RoundedCornerShape(4.dp)
                         )
                         .padding(horizontal = 6.dp, vertical = 4.dp)
-
                 )
             }
     }

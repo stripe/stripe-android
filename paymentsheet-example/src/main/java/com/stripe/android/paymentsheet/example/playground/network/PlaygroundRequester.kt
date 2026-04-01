@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground.network
 
 import android.content.Context
+import android.util.Log
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.core.requests.suspendable
@@ -22,17 +23,21 @@ internal class PlaygroundRequester(
     playgroundSettings: PlaygroundSettings.Snapshot,
     applicationContext: Context,
 ) : BasePlaygroundRequester(playgroundSettings, applicationContext) {
+    private val json = Json { ignoreUnknownKeys = true }
+
     suspend fun fetch(): kotlin.Result<PlaygroundState> {
+        playgroundSettings.setValues()
         val requestBody = playgroundSettings.checkoutRequest()
 
         val apiResponse = withContext(Dispatchers.IO) {
             Fuel.post(baseUrl + "checkout")
-                .jsonBody(Json.encodeToString(CheckoutRequest.serializer(), requestBody))
+                .jsonBody(json.encodeToString(CheckoutRequest.serializer(), requestBody))
                 .suspendable()
-                .awaitModel(CheckoutResponse.serializer())
+                .awaitModel(CheckoutResponse.serializer(), json)
         }
         when (apiResponse) {
             is Result.Failure -> {
+                Log.e("PaymentSheetPlaygroundViewModel", "Failed to fetch playground", apiResponse.getException())
                 return kotlin.Result.failure(apiResponse.getException())
             }
 

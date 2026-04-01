@@ -5,7 +5,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.testing.FakeErrorReporter
-import com.stripe.android.testing.FakeLogger
 import kotlinx.coroutines.test.runTest
 import org.json.JSONObject
 import org.junit.Test
@@ -19,6 +18,7 @@ internal class DefaultConfirmationChallengeBridgeHandlerTest {
         publishableKey = "pk_test_123",
         intent = PaymentIntentFixtures.PI_SUCCEEDED,
         productUsage = listOf("PaymentSheet"),
+        captchaVendorName = "hcaptcha",
     )
 
     @Test
@@ -197,7 +197,6 @@ internal class DefaultConfirmationChallengeBridgeHandlerTest {
             successParamsParser = successParamsParser,
             errorParamsParser = errorParamsParser,
             args = args,
-            logger = FakeLogger(),
             errorReporter = errorReporter,
         )
     }

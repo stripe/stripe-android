@@ -156,21 +156,18 @@ internal class DefaultCustomerSheetLoader(
         ).isReady().first()
         val isGooglePayReadyAndEnabled = configuration.googlePayEnabled && isGooglePaySupportedOnDevice
 
-        val customerMetadata = CustomerMetadata(
+        val customerMetadata = CustomerMetadata.createForCustomerSheet(
+            configuration = configuration,
+            customerSheetSession = customerSheetSession,
             id = customerSheetSession.customerId,
             ephemeralKeySecret = customerSheetSession.customerEphemeralKeySecret,
             customerSessionClientSecret = customerSheetSession.customerSessionClientSecret,
             isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
-            permissions = CustomerMetadata.Permissions.createForCustomerSheet(
-                configuration = configuration,
-                customerSheetSession = customerSheetSession
-            )
         )
 
         return PaymentMethodMetadata.createForCustomerSheet(
             elementsSession = elementsSession,
             configuration = configuration,
-            paymentMethodSaveConsentBehavior = customerSheetSession.paymentMethodSaveConsentBehavior,
             sharedDataSpecs = sharedDataSpecs,
             isGooglePayReady = isGooglePayReadyAndEnabled,
             customerMetadata = customerMetadata,
@@ -198,19 +195,30 @@ internal class DefaultCustomerSheetLoader(
             selection = paymentSelection as? PaymentSelection.Saved
         )
 
-        val supportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
-
-        val validSupportedPaymentMethods = filterSupportedPaymentMethods(supportedPaymentMethods)
+        val supportedPaymentMethods = getSupportedPaymentMethods(metadata)
 
         return CustomerSheetState.Full(
             config = configuration,
             paymentMethodMetadata = metadata,
-            supportedPaymentMethods = validSupportedPaymentMethods,
+            supportedPaymentMethods = supportedPaymentMethods,
             customerPaymentMethods = sortedPaymentMethods,
             paymentSelection = paymentSelection,
             validationError = customerSheetSession.elementsSession.stripeIntent.validate(),
             customerPermissions = customerSheetSession.permissions,
         )
+    }
+
+    private fun getSupportedPaymentMethods(metadata: PaymentMethodMetadata): List<SupportedPaymentMethod> {
+        val supportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
+
+        val validSupportedPaymentMethods = filterSupportedPaymentMethods(supportedPaymentMethods)
+
+        require(validSupportedPaymentMethods.isNotEmpty()) {
+            "No supported payment methods were found. " +
+                "Ensure your integration is configured to accept card or US bank account payments."
+        }
+
+        return supportedPaymentMethods
     }
 
     private fun getPaymentSelection(
