@@ -15,6 +15,8 @@ import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import org.junit.Rule
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
 internal class SavedPaymentMethodRowButtonScreenshotTest {
