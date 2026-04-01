@@ -1,10 +1,12 @@
 package com.stripe.android.model.parsers
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.model.PaymentMethod
 import org.json.JSONObject
 
-internal class CardArtJsonParser {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class CardArtJsonParser {
     fun parse(json: JSONObject): PaymentMethod.Card.CardArt {
         return PaymentMethod.Card.CardArt(
             artImage = json.optJSONObject(FIELD_ART_IMAGE)?.let {
