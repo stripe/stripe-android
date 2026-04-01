@@ -8,6 +8,7 @@
 - `./gradlew :MODULE:testDebugUnitTest` - Single module (e.g. `:payments-core`, `:paymentsheet`)
 - `./gradlew connectedAndroidTest` - Instrumentation tests (requires device)
 - `./gradlew detekt` - Static analysis
+- `./gradlew detektFormat` - Static analysis with auto-fix
 - `./gradlew :dokkaGenerate` - API docs (outputs to docs/)
 
 **GitHub Issues** — use `gh` CLI with `GH_HOST=github.com` prefix (`export` for reads, inline for writes). Always use `--state all` when searching. Check existing issues before investigating user reports.
