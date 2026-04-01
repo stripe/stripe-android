@@ -87,4 +87,6 @@
     <string name="unable_to_load_checkout_button">Try again</string>
     <string name="success">Success</string>
     <string name="finish">Finish</string>
+    <!-- TODO: Remove this string after verifying diffuse workflow size threshold -->
+    <string name="diffuse_test_padding">This is a temporary string added to test the Diffuse output size threshold in CI. It needs to be long enough to cause a noticeable APK size increase of at least 20 bytes so the workflow posts a comment. AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</string>
 </resources>
