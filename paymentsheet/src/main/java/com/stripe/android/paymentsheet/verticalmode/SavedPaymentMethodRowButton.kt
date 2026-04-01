@@ -27,6 +27,7 @@ import com.stripe.android.paymentsheet.utils.testMetadata
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconHeight
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconWidth
 import com.stripe.android.uicore.DefaultStripeTheme
+import com.stripe.android.paymentsheet.ui.CardArtImage
 import com.stripe.android.uicore.strings.resolve
 
 @Composable
@@ -53,15 +54,23 @@ internal fun SavedPaymentMethodRowButton(
         isSelected = isSelected,
         iconContent = {
             val displayBrand = displayableSavedPaymentMethod.paymentMethod.card?.displayBrand
-            PaymentMethodIconFromResource(
-                iconRes = displayableSavedPaymentMethod.paymentMethod.getSavedPaymentMethodIcon(forVerticalMode = true),
-                colorFilter = null,
-                alignment = Alignment.Center,
+            CardArtImage(
+                url = displayableSavedPaymentMethod.paymentMethod.card?.cardArt?.artImage?.url,
                 modifier = Modifier
-                    .height(iconHeight)
                     .width(iconWidth)
-                    .testMetadata(displayBrand)
-            )
+            ) {
+                PaymentMethodIconFromResource(
+                    iconRes = displayableSavedPaymentMethod.paymentMethod.getSavedPaymentMethodIcon(
+                        forVerticalMode = true
+                    ),
+                    colorFilter = null,
+                    alignment = Alignment.Center,
+                    modifier = Modifier
+                        .height(iconHeight)
+                        .width(iconWidth)
+                        .testMetadata(displayBrand)
+                )
+            }
         },
         title = paymentMethodTitle.resolve(),
         subtitle = displayableSavedPaymentMethod.paymentMethod.getSublabel()?.resolve(),

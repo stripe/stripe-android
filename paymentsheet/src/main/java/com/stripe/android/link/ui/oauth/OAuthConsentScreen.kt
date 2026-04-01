@@ -42,7 +42,7 @@ import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.LocalLinkContentScrollHandler
-import com.stripe.android.link.ui.image.LocalStripeImageLoader
+import com.stripe.android.uicore.image.LocalStripeImageLoader
 import com.stripe.android.model.ConsentUi
 import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.StripeImageLoader
