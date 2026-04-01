@@ -913,7 +913,10 @@ constructor(
         val networks: Networks? = null,
         @JvmField
         @field:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        val displayBrand: String? = null
+        val displayBrand: String? = null,
+        @JvmField
+        @field:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val cardArt: CardArt? = null
     ) : TypeData() {
         override val type: Type get() = Type.Card
 
@@ -930,7 +933,8 @@ constructor(
             threeDSecureUsage: ThreeDSecureUsage? = this.threeDSecureUsage,
             wallet: Wallet? = this.wallet,
             networks: Networks? = this.networks,
-            displayBrand: String? = this.displayBrand
+            displayBrand: String? = this.displayBrand,
+            cardArt: CardArt? = this.cardArt
         ): Card {
             return Card(
                 brand = brand,
@@ -944,7 +948,8 @@ constructor(
                 threeDSecureUsage = threeDSecureUsage,
                 wallet = wallet,
                 networks = networks,
-                displayBrand = displayBrand
+                displayBrand = displayBrand,
+                cardArt = cardArt
             )
         }
 
@@ -1016,6 +1021,45 @@ constructor(
                     selectionMandatory = selectionMandatory,
                     preferred = preferred
                 )
+            }
+        }
+
+        /**
+         * Card art and program name details for this card, if available.
+         */
+        @Parcelize
+        @Poko
+        class CardArt
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        constructor(
+            @JvmField val artImage: ArtImage?,
+            @JvmField val programName: String?,
+            @JvmField val status: Status
+        ) : StripeModel {
+
+            /**
+             * The card art image details.
+             */
+            @Parcelize
+            @Poko
+            class ArtImage
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            constructor(
+                @JvmField val format: String,
+                @JvmField val url: String
+            ) : StripeModel
+
+            @Parcelize
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            enum class Status(val value: String) : StripeModel {
+                Available("available"),
+                Unavailable("unavailable");
+
+                companion object {
+                    fun fromValue(value: String?): Status? {
+                        return entries.firstOrNull { it.value == value }
+                    }
+                }
             }
         }
     }

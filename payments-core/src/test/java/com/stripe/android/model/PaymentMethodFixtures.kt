@@ -428,6 +428,52 @@ internal object PaymentMethodFixtures {
 
     internal val CARD_WITH_DISPLAY_BRAND = PaymentMethodJsonParser().parse(CARD_WITH_DISPLAY_BRAND_JSON)
 
+    internal val CARD_WITH_CARD_ART_JSON = JSONObject(
+        """
+        {
+            "id": "pm_123456789",
+            "created": 1550757934255,
+            "livemode": true,
+            "type": "card",
+            "card": {
+                "brand": "visa",
+                "country": "US",
+                "exp_month": 8,
+                "exp_year": 2022,
+                "funding": "credit",
+                "last4": "4242",
+                "card_art": {
+                    "art_image": {
+                        "format": "image/png",
+                        "url": "https://example.com/card_art.png"
+                    },
+                    "program_name": "My Card Program",
+                    "status": "available"
+                }
+            }
+        }
+        """.trimIndent()
+    )
+
+    internal val CARD_WITHOUT_CARD_ART_JSON = JSONObject(
+        """
+        {
+            "id": "pm_123456789",
+            "created": 1550757934255,
+            "livemode": true,
+            "type": "card",
+            "card": {
+                "brand": "visa",
+                "country": "US",
+                "exp_month": 8,
+                "exp_year": 2022,
+                "funding": "credit",
+                "last4": "4242"
+            }
+        }
+        """.trimIndent()
+    )
+
     val IDEAL_JSON = JSONObject(
         """
             {
