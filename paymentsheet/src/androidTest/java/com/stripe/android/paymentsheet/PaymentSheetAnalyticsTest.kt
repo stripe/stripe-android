@@ -14,6 +14,7 @@ import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
+import com.stripe.android.networktesting.createConfirmationToken
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.AnalyticEvent
@@ -275,9 +276,7 @@ internal class PaymentSheetAnalyticsTest {
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.StartedInteractionWithPaymentMethodForm("card"))
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.CompletedPaymentMethodForm("card"))
 
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/confirmation_tokens"),
+        networkRule.createConfirmationToken(
             clientAttributionMetadataParamsForDeferredIntent(),
         ) { response ->
             response.testBodyFromFile("confirmation-token-create-with-new-card.json")
