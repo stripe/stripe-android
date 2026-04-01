@@ -1,4 +1,4 @@
-package com.stripe.android.common.taptoadd
+package com.stripe.android.tta.testing
 
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
@@ -6,9 +6,9 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.ComposeTestRule
 
-internal class TapToAddCardAddedPage(
+class TapToAddCardAddedPage(
     private val composeTestRule: ComposeTestRule,
-    private val linkHelper: TapToAddLinkHelper,
+    private val linkHelper: TapToAddLinkTestHelper,
 ) {
     private val primaryButtonElement = TapToAddPrimaryButtonElement(composeTestRule)
 
@@ -47,7 +47,7 @@ internal class TapToAddCardAddedPage(
     }
 
     private fun assertHasCardAddedText() {
-        composeTestRule.waitUntil(5000L) {
+        composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT) {
             composeTestRule.onNode(hasText("Card added")).isDisplayed()
         }
     }

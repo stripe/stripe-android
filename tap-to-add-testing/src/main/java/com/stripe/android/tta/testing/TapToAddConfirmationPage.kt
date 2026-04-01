@@ -1,4 +1,4 @@
-package com.stripe.android.common.taptoadd
+package com.stripe.android.tta.testing
 
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
