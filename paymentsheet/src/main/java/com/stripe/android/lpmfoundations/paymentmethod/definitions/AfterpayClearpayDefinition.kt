@@ -61,11 +61,13 @@ private object AfterpayClearpayUiDefinitionFactory : UiDefinitionFactory.Simple(
         arguments: UiDefinitionFactory.Arguments,
         builder: FormElementsBuilder,
     ) {
+        val promotion = arguments.promotionsRepository?.getPromotionForCode(PaymentMethod.Type.AfterpayClearpay.code)
         builder
             .header(
                 AfterpayClearpayHeaderElement(
                     identifier = IdentifierSpec.Generic("afterpay_header"),
-                    currency = metadata.stripeIntent.currency
+                    currency = metadata.stripeIntent.currency,
+                    promotion = promotion
                 )
             )
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Name)

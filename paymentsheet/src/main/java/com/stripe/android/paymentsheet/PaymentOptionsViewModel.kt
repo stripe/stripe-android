@@ -40,6 +40,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection.Link
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
+import com.stripe.android.paymentsheet.repositories.PromotionsRepository
 import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
@@ -78,6 +79,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     mode: EventReporter.Mode,
     customerStateHolderFactory: CustomerStateHolder.Factory,
     @ViewModelScope customViewModelScope: CoroutineScope,
+    promotionsRepository: PromotionsRepository
 ) : BaseSheetViewModel(
     config = args.configuration,
     eventReporter = eventReporter,
@@ -90,6 +92,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     mode = mode,
     customerStateHolderFactory = customerStateHolderFactory,
     customViewModelScope = customViewModelScope,
+    promotionsRepository = promotionsRepository
 ) {
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(

@@ -54,7 +54,7 @@ internal interface VerticalModeFormInteractor {
     }
 }
 
-internal class DefaultVerticalModeFormInteractor(
+internal class DefaultVerticalModeFormInteractor constructor(
     private val selectedPaymentMethodCode: String,
     private val formArguments: FormArguments,
     private val formElements: List<FormElement>,

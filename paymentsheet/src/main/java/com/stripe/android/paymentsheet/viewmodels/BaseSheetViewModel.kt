@@ -29,6 +29,7 @@ import com.stripe.android.paymentsheet.analytics.PaymentSheetAnalyticsListener
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.NavigationHandler
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.repositories.PromotionsRepository
 import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
@@ -66,6 +67,7 @@ internal abstract class BaseSheetViewModel(
     val mode: EventReporter.Mode,
     val customerStateHolderFactory: CustomerStateHolder.Factory,
     val customViewModelScope: CoroutineScope,
+    val promotionsRepository: PromotionsRepository
 ) : ViewModel() {
     private val autocompleteLauncher = DefaultAutocompleteLauncher(
         AutocompleteAppearanceContext.PaymentElement(config.appearance)

@@ -42,6 +42,7 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.model.validate
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.PromotionsRepository
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
 import com.stripe.attestation.IntegrityRequestManager
@@ -231,6 +232,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val checkoutSessionLoader: CheckoutSessionLoader,
     private val elementsSessionLoader: ElementsSessionLoader,
     private val createCustomerMetadata: CreateCustomerMetadata,
+    private val promotionsRepository: PromotionsRepository,
 ) : PaymentElementLoader {
 
     fun interface AnalyticsMetadataFactory {
@@ -350,6 +352,13 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 customer = customer.await(),
                 isGooglePayReady = isGooglePayReady,
                 isUsingWalletButtons = configuration.walletButtons?.willDisplayExternally ?: false
+            )
+        }
+
+        // Fire and forget
+        async {
+            promotionsRepository.prefetchPromotions(
+                intent = elementsSession.stripeIntent,
             )
         }
 
