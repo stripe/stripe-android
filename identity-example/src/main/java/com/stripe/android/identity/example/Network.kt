@@ -65,11 +65,11 @@ internal enum class DocumentType {
     @SerialName("id_card")
     IdCard
 }
+
 internal enum class Fallback {
     @SerialName("document")
     Document
 }
-
 
 internal enum class PhoneOTPCheck(val value: String) {
     @SerialName("none")
