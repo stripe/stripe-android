@@ -67,6 +67,11 @@ class PaymentSheetConfigurationKtxTest {
             isLiveMode = false,
             callbackIdentifier = "",
         )
+        getConfig("uk_12345").validate(
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            isLiveMode = false,
+            callbackIdentifier = "",
+        )
     }
 
     @Test
