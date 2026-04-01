@@ -61,6 +61,9 @@ internal sealed class MainLoopState(timeSource: TimeSource) : MachineState(timeS
 
         private var lastCardVisible = TimeSource.Monotonic.markNow()
 
+        private var expiryMonth: Int? = null
+        private var expiryYear: Int? = null
+
         private fun highestOcrCount() = panCounter.getHighestCountItem().first
         private fun isOcrSatisfied() = highestOcrCount() >= DESIRED_OCR_AGREEMENT
         private fun isTimedOut() = reachedStateAt.elapsedNow() > OCR_SEARCH_DURATION
@@ -75,13 +78,20 @@ internal sealed class MainLoopState(timeSource: TimeSource) : MachineState(timeS
                 lastCardVisible = TimeSource.Monotonic.markNow()
             }
 
+            if (transition.expiryMonth != null && transition.expiryYear != null) {
+                expiryMonth = transition.expiryMonth
+                expiryYear = transition.expiryYear
+            }
+
             val pan = mostLikelyPan
 
             return when {
                 isOcrSatisfied() || isTimedOut() ->
                     Finished(
                         timeSource = timeSource,
-                        pan = pan
+                        pan = pan,
+                        expiryMonth = expiryMonth,
+                        expiryYear = expiryYear,
                     )
                 isNoCardVisible() ->
                     Initial(timeSource)
@@ -90,7 +100,12 @@ internal sealed class MainLoopState(timeSource: TimeSource) : MachineState(timeS
         }
     }
 
-    class Finished(timeSource: TimeSource, val pan: String) : MainLoopState(timeSource) {
+    class Finished(
+        timeSource: TimeSource,
+        val pan: String,
+        val expiryMonth: Int? = null,
+        val expiryYear: Int? = null,
+    ) : MainLoopState(timeSource) {
         override suspend fun consumeTransition(
             transition: CardOcr.Prediction
         ): MainLoopState = this
