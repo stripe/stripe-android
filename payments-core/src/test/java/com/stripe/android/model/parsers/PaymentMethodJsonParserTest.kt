@@ -183,8 +183,7 @@ class PaymentMethodJsonParserTest {
                     format = "image/png",
                     url = "https://example.com/card_art.png"
                 ),
-                programName = "My Card Program",
-                status = PaymentMethod.Card.CardArt.Status.Available
+                programName = "My Card Program"
             )
         )
     }

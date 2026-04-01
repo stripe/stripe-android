@@ -7,17 +7,12 @@ import org.json.JSONObject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CardArtJsonParser {
-    fun parse(json: JSONObject): PaymentMethod.Card.CardArt? {
-        val status = PaymentMethod.Card.CardArt.Status.fromValue(
-            StripeJsonUtils.optString(json, FIELD_STATUS)
-        ) ?: return null
-
+    fun parse(json: JSONObject): PaymentMethod.Card.CardArt {
         return PaymentMethod.Card.CardArt(
             artImage = json.optJSONObject(FIELD_ART_IMAGE)?.let {
                 ArtImageJsonParser().parse(it)
             },
-            programName = StripeJsonUtils.optString(json, FIELD_PROGRAM_NAME),
-            status = status
+            programName = StripeJsonUtils.optString(json, FIELD_PROGRAM_NAME)
         )
     }
 
@@ -40,6 +35,5 @@ class CardArtJsonParser {
     private companion object {
         private const val FIELD_ART_IMAGE = "art_image"
         private const val FIELD_PROGRAM_NAME = "program_name"
-        private const val FIELD_STATUS = "status"
     }
 }

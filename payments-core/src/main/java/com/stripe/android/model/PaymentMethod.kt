@@ -1033,8 +1033,7 @@ constructor(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         constructor(
             @JvmField val artImage: ArtImage?,
-            @JvmField val programName: String?,
-            @JvmField val status: Status
+            @JvmField val programName: String?
         ) : StripeModel {
 
             /**
@@ -1048,19 +1047,6 @@ constructor(
                 @JvmField val format: String,
                 @JvmField val url: String
             ) : StripeModel
-
-            @Parcelize
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            enum class Status(val value: String) : StripeModel {
-                Available("available"),
-                Unavailable("unavailable");
-
-                companion object {
-                    fun fromValue(value: String?): Status? {
-                        return entries.firstOrNull { it.value == value }
-                    }
-                }
-            }
         }
     }
 

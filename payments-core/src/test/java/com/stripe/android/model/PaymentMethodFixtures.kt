@@ -447,8 +447,7 @@ internal object PaymentMethodFixtures {
                         "format": "image/png",
                         "url": "https://example.com/card_art.png"
                     },
-                    "program_name": "My Card Program",
-                    "status": "available"
+                    "program_name": "My Card Program"
                 }
             }
         }

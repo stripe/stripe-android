@@ -17,49 +17,13 @@ class CardArtJsonParserTest {
                     format = "image/png",
                     url = "https://example.com/card_art.png"
                 ),
-                programName = "My Card Program",
-                status = PaymentMethod.Card.CardArt.Status.Available
+                programName = "My Card Program"
             )
         )
     }
 
     @Test
     fun `parse with null art_image should return CardArt with null artImage`() {
-        val json = JSONObject(
-            """
-            {
-                "program_name": "My Card Program",
-                "status": "unavailable"
-            }
-            """.trimIndent()
-        )
-
-        val cardArt = CardArtJsonParser().parse(json)
-
-        assertThat(cardArt).isNotNull()
-        assertThat(cardArt!!.artImage).isNull()
-        assertThat(cardArt.programName).isEqualTo("My Card Program")
-        assertThat(cardArt.status).isEqualTo(PaymentMethod.Card.CardArt.Status.Unavailable)
-    }
-
-    @Test
-    fun `parse with unknown status should return null`() {
-        val json = JSONObject(
-            """
-            {
-                "program_name": "My Card Program",
-                "status": "pending"
-            }
-            """.trimIndent()
-        )
-
-        val cardArt = CardArtJsonParser().parse(json)
-
-        assertThat(cardArt).isNull()
-    }
-
-    @Test
-    fun `parse with missing status should return null`() {
         val json = JSONObject(
             """
             {
@@ -70,7 +34,8 @@ class CardArtJsonParserTest {
 
         val cardArt = CardArtJsonParser().parse(json)
 
-        assertThat(cardArt).isNull()
+        assertThat(cardArt.artImage).isNull()
+        assertThat(cardArt.programName).isEqualTo("My Card Program")
     }
 
     @Test
@@ -80,16 +45,14 @@ class CardArtJsonParserTest {
             {
                 "art_image": {
                     "url": "https://example.com/card_art.png"
-                },
-                "status": "available"
+                }
             }
             """.trimIndent()
         )
 
         val cardArt = CardArtJsonParser().parse(json)
 
-        assertThat(cardArt).isNotNull()
-        assertThat(cardArt!!.artImage).isNull()
+        assertThat(cardArt.artImage).isNull()
     }
 
     private companion object {
@@ -100,8 +63,7 @@ class CardArtJsonParserTest {
                     "format": "image/png",
                     "url": "https://example.com/card_art.png"
                 },
-                "program_name": "My Card Program",
-                "status": "available"
+                "program_name": "My Card Program"
             }
             """.trimIndent()
         )
