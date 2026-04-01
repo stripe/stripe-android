@@ -92,7 +92,6 @@ class CheckoutPlaygroundActivity : AppCompatActivity() {
 
             CheckoutScreen(
                 checkout = viewModel.checkout,
-                isLoading = viewModel.isLoading,
                 errorMessage = viewModel.errorMessage,
                 clearErrorMessage = viewModel::clearErrorMessage,
                 applyPromotionCode = viewModel::applyPromotionCode,
@@ -134,7 +133,6 @@ class CheckoutPlaygroundActivity : AppCompatActivity() {
 @Composable
 private fun CheckoutScreen(
     checkout: Checkout,
-    isLoading: StateFlow<Boolean>,
     errorMessage: StateFlow<String?>,
     clearErrorMessage: () -> Unit,
     applyPromotionCode: (String) -> Unit,
@@ -152,7 +150,7 @@ private fun CheckoutScreen(
     refresh: () -> Unit,
 ) {
     val checkoutSession by checkout.checkoutSession.collectAsState()
-    val loading by isLoading.collectAsState()
+    val loading by checkout.isLoading.collectAsState()
     val error by errorMessage.collectAsState()
     var promotionCode by rememberSaveable { mutableStateOf("") }
 

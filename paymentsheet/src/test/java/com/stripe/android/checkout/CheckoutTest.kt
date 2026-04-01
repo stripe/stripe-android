@@ -897,6 +897,51 @@ class CheckoutTest {
         assertThat(result.isFailure).isTrue()
     }
 
+    @Test
+    fun `isLoading is false initially`() = runCreateWithStateScenario(
+        shouldValidateEvents = false,
+    ) {
+        assertThat(isLoadingTurbine.awaitItem()).isFalse()
+        isLoadingTurbine.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `isLoading transitions to true then false on successful mutation`() = runCreateWithStateScenario(
+        shouldValidateEvents = false,
+    ) {
+        networkRule.checkoutUpdate(
+            bodyPart("promotion_code", "10OFF"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-apply-discount.json")
+        }
+
+        assertThat(isLoadingTurbine.awaitItem()).isFalse()
+
+        checkout.applyPromotionCode("10OFF")
+
+        assertThat(isLoadingTurbine.awaitItem()).isTrue()
+        assertThat(isLoadingTurbine.awaitItem()).isFalse()
+        isLoadingTurbine.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `isLoading transitions to true then false on failed mutation`() = runCreateWithStateScenario(
+        shouldValidateEvents = false,
+    ) {
+        networkRule.checkoutUpdate { response ->
+            response.setResponseCode(400)
+            response.setBody("""{"error": {"message": "Invalid promotion code"}}""")
+        }
+
+        assertThat(isLoadingTurbine.awaitItem()).isFalse()
+
+        checkout.applyPromotionCode("INVALID")
+
+        assertThat(isLoadingTurbine.awaitItem()).isTrue()
+        assertThat(isLoadingTurbine.awaitItem()).isFalse()
+        isLoadingTurbine.ensureAllEventsConsumed()
+    }
+
     private fun runCreateWithStateScenario(
         checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
         shouldValidateEvents: Boolean = true,
@@ -910,11 +955,13 @@ class CheckoutTest {
         val bgScope = backgroundScope
         turbineScope {
             val checkoutSessionTurbine = checkout.checkoutSession.testIn(bgScope)
+            val isLoadingTurbine = checkout.isLoading.testIn(bgScope)
             block(
                 Scenario(
                     checkout = checkout,
                     testScope = this@runTest,
                     checkoutSessionTurbine = checkoutSessionTurbine,
+                    isLoadingTurbine = isLoadingTurbine,
                 )
             )
             if (shouldValidateEvents) {
@@ -922,6 +969,7 @@ class CheckoutTest {
             } else {
                 checkoutSessionTurbine.cancelAndIgnoreRemainingEvents()
             }
+            isLoadingTurbine.cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -944,6 +992,7 @@ class CheckoutTest {
         val checkout: Checkout,
         private val testScope: TestScope,
         val checkoutSessionTurbine: ReceiveTurbine<CheckoutSession>,
+        val isLoadingTurbine: ReceiveTurbine<Boolean>,
     ) : CoroutineScope by testScope {
         val testScheduler: TestCoroutineScheduler get() = testScope.testScheduler
     }

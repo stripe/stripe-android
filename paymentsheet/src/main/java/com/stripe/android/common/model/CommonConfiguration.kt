@@ -296,7 +296,7 @@ private fun String.isEKClientSecretValid(): Boolean {
     return Regex(EK_CLIENT_SECRET_VALID_REGEX_PATTERN).matches(this)
 }
 
-private const val EK_CLIENT_SECRET_VALID_REGEX_PATTERN = "^ek_[^_](.)+$"
+private const val EK_CLIENT_SECRET_VALID_REGEX_PATTERN = "^(ek|uk)_[^_](.)+$"
 
 internal fun CommonConfiguration.containsVolatileDifferences(
     other: CommonConfiguration
