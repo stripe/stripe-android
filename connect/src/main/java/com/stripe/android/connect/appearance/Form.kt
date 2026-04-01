@@ -8,12 +8,12 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 @Poko
 class Form private constructor(
-    @ColorInt internal val colorBackground: Int? = null,
-    @ColorInt internal val highlightBorder: Int? = null,
-    @ColorInt internal val accent: Int? = null,
-    @ColorInt internal val placeholderTextColor: Int? = null,
-    internal val inputFieldPaddingY: Float? = null,
-    internal val inputFieldPaddingX: Float? = null,
+    @ColorInt internal val colorBackground: Int?,
+    @ColorInt internal val highlightBorder: Int?,
+    @ColorInt internal val accent: Int?,
+    @ColorInt internal val placeholderTextColor: Int?,
+    internal val inputFieldPaddingY: Float?,
+    internal val inputFieldPaddingX: Float?,
 ) : Parcelable {
 
     class Builder {
