@@ -1,3 +1,4 @@
+// TODO: Remove - triggers paymentsheet-example size diff workflow for testing
 package com.stripe.android
 
 import android.app.Activity
