@@ -7,8 +7,6 @@ import com.stripe.android.stripecardscan.cardscan.CardScanSheet
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.stripecardscan.example.databinding.ActivityCardScanDemoBinding
 
-private const val YEAR_MOD = 100
-
 class CardScanDemoActivity : AppCompatActivity() {
     private val viewBinding by lazy {
         ActivityCardScanDemoBinding.inflate(layoutInflater)
@@ -35,7 +33,8 @@ class CardScanDemoActivity : AppCompatActivity() {
             is CardScanSheetResult.Completed -> {
                 val card = result.scannedCard
                 val expiry = if (card.expiryMonth != null && card.expiryYear != null) {
-                    "\nExpires: %02d/%02d".format(card.expiryMonth, card.expiryYear!! % YEAR_MOD)
+                    @Suppress("MagicNumber")
+                    "\nExpires: %02d/%02d".format(card.expiryMonth, card.expiryYear!! % 100)
                 } else {
                     ""
                 }
