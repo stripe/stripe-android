@@ -179,40 +179,21 @@ class MLKitTextRecognizerTest {
     // --- Helpers ---
 
     /**
-     * Build a mock [Text] with one block containing lines for each [lineTexts] entry.
-     * Each line has no elements (empty list).
+     * Build a mock [Text] with one block containing one line per string.
+     * Lines have no elements (for line-level strategy tests).
      */
-    private fun textWith(vararg lineTexts: String): Text {
-        val lines = lineTexts.map { lineText ->
-            mock<Text.Line>().also {
-                whenever(it.text).thenReturn(lineText)
-                whenever(it.elements).thenReturn(emptyList())
-            }
-        }
-        val block = mock<Text.TextBlock>().also { whenever(it.lines).thenReturn(lines) }
-        return mock<Text>().also { whenever(it.textBlocks).thenReturn(listOf(block)) }
-    }
+    private fun textWith(vararg lineTexts: String): Text =
+        textWithMultiLineElements(*lineTexts.map { listOf(it) }.toTypedArray())
 
     /**
-     * Build a mock [Text] with one block, one line, and individual [Text.Element] objects
-     * for each entry in [elementTexts]. Useful for testing block-pattern PAN matching.
+     * Build a mock [Text] with one block, one line, and individual elements.
+     * Useful for block-pattern strategy tests.
      */
-    private fun textWithElements(vararg elementTexts: String): Text {
-        val elements = elementTexts.map { text ->
-            mock<Text.Element>().also { whenever(it.text).thenReturn(text) }
-        }
-        val line = mock<Text.Line>().also {
-            whenever(it.text).thenReturn(elementTexts.joinToString(" "))
-            whenever(it.elements).thenReturn(elements)
-        }
-        val block = mock<Text.TextBlock>().also { whenever(it.lines).thenReturn(listOf(line)) }
-        return mock<Text>().also { whenever(it.textBlocks).thenReturn(listOf(block)) }
-    }
+    private fun textWithElements(vararg elementTexts: String): Text =
+        textWithMultiLineElements(elementTexts.toList())
 
     /**
      * Build a mock [Text] with one block containing multiple lines, each with its own elements.
-     * Useful for testing the fallback from line strategy to block strategy: no single line
-     * contains a full PAN, but the block strategy collects elements across all lines.
      */
     private fun textWithMultiLineElements(vararg linesElements: List<String>): Text {
         val lines = linesElements.map { elementTexts ->
