@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.stripecardscan.payment.ml.CardOcr
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.TestTimeSource
 
 class MainLoopStateTest {
@@ -184,5 +185,124 @@ class MainLoopStateTest {
         val finished = state as MainLoopState.Finished
         assertThat(finished.expiryMonth).isEqualTo(3)
         assertThat(finished.expiryYear).isEqualTo(2030)
+    }
+
+    // --- ExpiryWait state ---
+
+    @Test
+    fun `OcrFound transitions to ExpiryWait when enableExpiryWait and no expiry`() = runTest {
+        var state: MainLoopState = MainLoopState.Initial(timeSource, enableExpiryWait = true)
+
+        state = state.consumeTransition(CardOcr.Prediction(pan = "4242424242424242"))
+        state = state.consumeTransition(CardOcr.Prediction(pan = "4242424242424242"))
+        state = state.consumeTransition(CardOcr.Prediction(pan = "4242424242424242"))
+
+        assertThat(state).isInstanceOf(MainLoopState.ExpiryWait::class.java)
+    }
+
+    @Test
+    fun `ExpiryWait finishes immediately when expiry arrives`() = runTest {
+        var state: MainLoopState = MainLoopState.Initial(timeSource, enableExpiryWait = true)
+
+        // Reach ExpiryWait
+        state = state.consumeTransition(CardOcr.Prediction(pan = "4242424242424242"))
+        state = state.consumeTransition(CardOcr.Prediction(pan = "4242424242424242"))
+        state = state.consumeTransition(CardOcr.Prediction(pan = "4242424242424242"))
+        assertThat(state).isInstanceOf(MainLoopState.ExpiryWait::class.java)
+
+        // Expiry arrives
+        state = state.consumeTransition(
+            CardOcr.Prediction(pan = "4242424242424242", expiryMonth = 12, expiryYear = 2028)
+        )
+
+        assertThat(state).isInstanceOf(MainLoopState.Finished::class.java)
+        val finished = state as MainLoopState.Finished
+        assertThat(finished.pan).isEqualTo("4242424242424242")
+        assertThat(finished.expiryMonth).isEqualTo(12)
+        assertThat(finished.expiryYear).isEqualTo(2028)
+    }
+
+    @Test
+    fun `ExpiryWait finishes after 1 second without expiry`() = runTest {
+        var state: MainLoopState = MainLoopState.Initial(timeSource, enableExpiryWait = true)
+
+        // Reach ExpiryWait
+        state = state.consumeTransition(CardOcr.Prediction(pan = "4242424242424242"))
+        state = state.consumeTransition(CardOcr.Prediction(pan = "4242424242424242"))
+        state = state.consumeTransition(CardOcr.Prediction(pan = "4242424242424242"))
+        assertThat(state).isInstanceOf(MainLoopState.ExpiryWait::class.java)
+
+        // 1 second passes with no expiry
+        timeSource += 1.1.seconds
+        state = state.consumeTransition(CardOcr.Prediction(pan = null))
+
+        assertThat(state).isInstanceOf(MainLoopState.Finished::class.java)
+        val finished = state as MainLoopState.Finished
+        assertThat(finished.pan).isEqualTo("4242424242424242")
+        assertThat(finished.expiryMonth).isNull()
+        assertThat(finished.expiryYear).isNull()
+    }
+
+    @Test
+    fun `ExpiryWait stays in ExpiryWait before timeout with no expiry`() = runTest {
+        var state: MainLoopState = MainLoopState.Initial(timeSource, enableExpiryWait = true)
+
+        // Reach ExpiryWait
+        state = state.consumeTransition(CardOcr.Prediction(pan = "4242424242424242"))
+        state = state.consumeTransition(CardOcr.Prediction(pan = "4242424242424242"))
+        state = state.consumeTransition(CardOcr.Prediction(pan = "4242424242424242"))
+        assertThat(state).isInstanceOf(MainLoopState.ExpiryWait::class.java)
+
+        // Only 500ms passes, no expiry
+        timeSource += 0.5.seconds
+        state = state.consumeTransition(CardOcr.Prediction(pan = null))
+
+        assertThat(state).isInstanceOf(MainLoopState.ExpiryWait::class.java)
+    }
+
+    @Test
+    fun `OcrFound skips ExpiryWait when expiry already present`() = runTest {
+        var state: MainLoopState = MainLoopState.Initial(timeSource, enableExpiryWait = true)
+
+        val prediction = CardOcr.Prediction(
+            pan = "4242424242424242",
+            expiryMonth = 6,
+            expiryYear = 2029,
+        )
+        state = state.consumeTransition(prediction)
+        state = state.consumeTransition(prediction)
+        state = state.consumeTransition(prediction)
+
+        assertThat(state).isInstanceOf(MainLoopState.Finished::class.java)
+        val finished = state as MainLoopState.Finished
+        assertThat(finished.expiryMonth).isEqualTo(6)
+        assertThat(finished.expiryYear).isEqualTo(2029)
+    }
+
+    @Test
+    fun `OcrFound skips ExpiryWait when enableExpiryWait is false`() = runTest {
+        var state: MainLoopState = MainLoopState.Initial(timeSource, enableExpiryWait = false)
+
+        state = state.consumeTransition(CardOcr.Prediction(pan = "4242424242424242"))
+        state = state.consumeTransition(CardOcr.Prediction(pan = "4242424242424242"))
+        state = state.consumeTransition(CardOcr.Prediction(pan = "4242424242424242"))
+
+        assertThat(state).isInstanceOf(MainLoopState.Finished::class.java)
+    }
+
+    @Test
+    fun `OcrFound 10-second timeout bypasses ExpiryWait even when enabled`() = runTest {
+        var state: MainLoopState = MainLoopState.Initial(timeSource, enableExpiryWait = true)
+
+        // First PAN -> OcrFound
+        state = state.consumeTransition(CardOcr.Prediction(pan = "4242424242424242"))
+        assertThat(state).isInstanceOf(MainLoopState.OcrFound::class.java)
+
+        // 10+ seconds elapse without agreement
+        timeSource += 10.1.seconds
+        state = state.consumeTransition(CardOcr.Prediction(pan = "4242424242424242"))
+
+        // Should go directly to Finished, not ExpiryWait
+        assertThat(state).isInstanceOf(MainLoopState.Finished::class.java)
     }
 }
