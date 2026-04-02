@@ -45,36 +45,31 @@ internal sealed class MainLoopState(timeSource: TimeSource) : MachineState(timeS
         }
     }
 
-    class OcrFound private constructor(
+    class OcrFound(
         timeSource: TimeSource,
-        private val panCounter: ItemCounter<String>,
-        private var expiryCounter: ItemCounter<CardOcr.Expiry>?,
+        pan: String,
+        expiryMonth: Int? = null,
+        expiryYear: Int? = null,
     ) : MainLoopState(timeSource) {
 
-        internal constructor(
-            timeSource: TimeSource,
-            pan: String,
-            expiryMonth: Int? = null,
-            expiryYear: Int? = null,
-        ) : this(
-            timeSource,
-            ItemCounter(pan),
+        private val panCounter = ItemCounter(pan)
+        private val expiryCounter = ItemCounter(
             if (expiryMonth != null && expiryYear != null) {
-                ItemCounter(CardOcr.Expiry(month = expiryMonth, year = expiryYear))
+                CardOcr.Expiry(month = expiryMonth, year = expiryYear)
             } else {
                 null
             }
         )
 
         private val mostLikelyPan: String
-            get() = panCounter.getHighestCountItem().second
+            get() = panCounter.getHighestCountItem().item
 
         private val mostLikelyExpiry: CardOcr.Expiry?
-            get() = expiryCounter?.getHighestCountItem()?.second
+            get() = expiryCounter.getHighestCountItemOrNull()?.item
 
         private var lastCardVisible = TimeSource.Monotonic.markNow()
 
-        private fun highestOcrCount() = panCounter.getHighestCountItem().first
+        private fun highestOcrCount() = panCounter.getHighestCountItem().count
         private fun isOcrSatisfied() = highestOcrCount() >= DESIRED_OCR_AGREEMENT
         private fun isTimedOut() = reachedStateAt.elapsedNow() > OCR_SEARCH_DURATION
         private fun isNoCardVisible() = lastCardVisible.elapsedNow() > NO_CARD_VISIBLE_DURATION
@@ -89,13 +84,9 @@ internal sealed class MainLoopState(timeSource: TimeSource) : MachineState(timeS
             }
 
             if (transition.expiryMonth != null && transition.expiryYear != null) {
-                val expiry = CardOcr.Expiry(month = transition.expiryMonth, year = transition.expiryYear)
-                val counter = expiryCounter
-                if (counter != null) {
-                    counter.countItem(expiry)
-                } else {
-                    expiryCounter = ItemCounter(expiry)
-                }
+                expiryCounter.countItem(
+                    CardOcr.Expiry(month = transition.expiryMonth, year = transition.expiryYear)
+                )
             }
 
             return when {
