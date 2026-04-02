@@ -63,9 +63,9 @@ internal class TransformSpecToElements(
                 is AfterpayClearpayTextSpec -> listOf(
                     spec.transform(
                         metadata?.stripeIntent?.currency,
-                        arguments.promotionsRepository?.getPromotionsIfAvailable()
-                            ?.promotions
-                            ?.firstOrNull { it.paymentMethodType == PaymentMethod.Type.AfterpayClearpay.code }
+                        arguments.paymentMethodMessagingPromotionsHelper?.getPromotionIfAvailableForCode(
+                            PaymentMethod.Type.AfterpayClearpay.code
+                        )
                     )
                 )
                 is AffirmTextSpec -> listOf(spec.transform())

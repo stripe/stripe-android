@@ -94,6 +94,7 @@ internal class DefaultAddPaymentMethodInteractor(
                 viewModel = viewModel,
                 paymentMethodMetadata = paymentMethodMetadata,
                 shouldCreateAutomaticallyLaunchedCardScanFormDataHelper = true,
+                paymentMethodMessagingPromotionsHelper = null
             )
             val bankFormInteractor = BankFormInteractor.create(viewModel)
 

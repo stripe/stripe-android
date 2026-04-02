@@ -50,7 +50,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Arg
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcCompletionState
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
-import com.stripe.android.paymentsheet.repositories.PromotionsRepository
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagingPromotionsHelper
 import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
@@ -101,7 +101,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     customerStateHolderFactory: CustomerStateHolder.Factory,
     @ViewModelScope customViewModelScope: CoroutineScope,
     private val checkoutCurrencyUpdater: CheckoutCurrencyUpdater,
-    promotionsRepository: PromotionsRepository
+    private val paymentMethodMessagingPromotionsHelper: PaymentMethodMessagingPromotionsHelper
 ) : BaseSheetViewModel(
     config = args.config,
     eventReporter = eventReporter,
@@ -114,7 +114,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     mode = mode,
     customerStateHolderFactory = customerStateHolderFactory,
     customViewModelScope = customViewModelScope,
-    promotionsRepository = promotionsRepository
 ) {
 
     internal var latestCheckoutSessionResponse: CheckoutSessionResponse?
@@ -742,6 +741,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 viewModel = this,
                 paymentMethodMetadata = paymentMethodMetadata,
                 customerStateHolder = customerStateHolder,
+                paymentMethodMessagingPromotionsHelper = paymentMethodMessagingPromotionsHelper
             )
         }
         val hasPaymentMethods = customerStateHolder.paymentMethods.value.isNotEmpty()

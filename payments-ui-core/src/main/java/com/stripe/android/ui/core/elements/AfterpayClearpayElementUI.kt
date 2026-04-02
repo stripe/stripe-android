@@ -27,11 +27,17 @@ fun AfterpayClearpayElementUI(
     element: AfterpayClearpayHeaderElement,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
-    val messageFormatString = element.getLabel(context.resources)
-        .replace("<img/>", "<img src=\"afterpay\"/>")
+    if (element.promotion != null) {
+        val header = PaymentMethodMessageHeader(
+            identifier = IdentifierSpec.Generic("idk"),
+            messagePromotion = element.promotion
+        )
+        PaymentMethodMessageHeaderUI(header)
+    } else {
+        val context = LocalContext.current
+        val messageFormatString = element.getLabel(context.resources)
+            .replace("<img/>", "<img src=\"afterpay\"/>")
 
-    if (false) {
         Html(
             html = messageFormatString,
             enabled = enabled,
@@ -64,49 +70,5 @@ fun AfterpayClearpayElementUI(
                 context.startActivity(openURL)
             }
         )
-    } else {
-        if (element.promotion != null) {
-            val header = PaymentMethodMessageHeader(
-                identifier = IdentifierSpec.Generic("idk"),
-                messagePromotion = element.promotion
-            )
-            PaymentMethodMessageHeaderUI(header)
-        } else {
-            val messageFormatString = element.getLabel(context.resources)
-                .replace("<img/>", "<img src=\"afterpay\"/>")
-
-            Html(
-                html = messageFormatString,
-                enabled = enabled,
-                imageLoader = mapOf(
-                    "afterpay" to EmbeddableImage.Drawable(
-                        if (isClearpay(element.currency)) {
-                            R.drawable.stripe_ic_clearpay_logo
-                        } else {
-                            R.drawable.stripe_ic_afterpay_logo
-                        },
-                        if (isClearpay(element.currency)) {
-                            R.string.stripe_paymentsheet_payment_method_clearpay
-                        } else {
-                            R.string.stripe_paymentsheet_payment_method_afterpay
-                        },
-                        colorFilter = if (MaterialTheme.colors.surface.shouldUseDarkDynamicColor()) {
-                            null
-                        } else {
-                            ColorFilter.tint(Color.White)
-                        }
-                    )
-                ),
-                modifier = modifier,
-                color = MaterialTheme.stripeColors.subtitle,
-                style = MaterialTheme.typography.h6,
-                urlSpanStyle = SpanStyle(),
-                imageAlign = PlaceholderVerticalAlign.Bottom,
-                onClick = {
-                    val openURL = Intent(Intent.ACTION_VIEW, Uri.parse(element.infoUrl))
-                    context.startActivity(openURL)
-                }
-            )
-        }
     }
 }

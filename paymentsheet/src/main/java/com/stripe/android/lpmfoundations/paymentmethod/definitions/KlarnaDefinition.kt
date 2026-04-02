@@ -60,7 +60,7 @@ private object KlarnaUiDefinitionFactory : UiDefinitionFactory.Simple() {
         arguments: UiDefinitionFactory.Arguments,
         builder: FormElementsBuilder,
     ) {
-        val message = arguments.promotionsRepository?.getPromotionForCode(PaymentMethod.Type.Klarna.code)
+        val message = arguments.paymentMethodMessagingPromotionsHelper?.getPromotionIfAvailableForCode(PaymentMethod.Type.Klarna.code)
         val header = if (message != null) {
             PaymentMethodMessageHeader(
                 identifier = IdentifierSpec.Generic("klarna_header_text"),

@@ -61,7 +61,7 @@ private object AfterpayClearpayUiDefinitionFactory : UiDefinitionFactory.Simple(
         arguments: UiDefinitionFactory.Arguments,
         builder: FormElementsBuilder,
     ) {
-        val promotion = arguments.promotionsRepository?.getPromotionForCode(PaymentMethod.Type.AfterpayClearpay.code)
+        val promotion = arguments.paymentMethodMessagingPromotionsHelper?.getPromotionIfAvailableForCode(PaymentMethod.Type.AfterpayClearpay.code)
         builder
             .header(
                 AfterpayClearpayHeaderElement(

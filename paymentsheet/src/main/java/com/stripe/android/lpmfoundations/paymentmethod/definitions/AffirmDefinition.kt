@@ -48,7 +48,7 @@ private object AffirmUiDefinitionFactory : UiDefinitionFactory.Simple() {
         arguments: UiDefinitionFactory.Arguments,
         builder: FormElementsBuilder,
     ) {
-        val message = arguments.promotionsRepository?.getPromotionForCode(PaymentMethod.Type.Affirm.code)
+        val message = arguments.paymentMethodMessagingPromotionsHelper?.getPromotionIfAvailableForCode(PaymentMethod.Type.Affirm.code)
         val header = if (message != null) {
             PaymentMethodMessageHeader(
                 identifier = IdentifierSpec.Generic("affirm_header"),
