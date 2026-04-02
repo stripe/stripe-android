@@ -128,11 +128,13 @@ class AppearanceToJsTest {
 
     @Test
     @Suppress("DEPRECATION")
-    fun `Uses deprecated Colors fields and not the Form fields to ensure there are no breaking changes`() {
+    fun `Uses deprecated Colors fields and not the Form and Action fields to ensure there are no breaking changes`() {
         val colors = Colors.Builder()
             .formBackground(0xFF11_2233.toInt())
             .formHighlightBorder(0xFFDE_AD00.toInt())
             .formAccent(0xFFBE_EF00.toInt())
+            .actionPrimaryText(0xFFCA_FE00.toInt())
+            .actionSecondaryText(0xFFBA_BE00.toInt())
             .build()
 
         val appearance = Appearance.Builder()
@@ -145,15 +147,19 @@ class AppearanceToJsTest {
         assertThat(v.string("formBackgroundColor")).isEqualTo("#112233")
         assertThat(v.string("formHighlightColorBorder")).isEqualTo("#DEAD00")
         assertThat(v.string("formAccentColor")).isEqualTo("#BEEF00")
+        assertThat(v.string("actionPrimaryColorText")).isEqualTo("#CAFE00")
+        assertThat(v.string("actionSecondaryColorText")).isEqualTo("#BABE00")
     }
 
     @Test
     @Suppress("DEPRECATION")
-    fun `Prefers Form over deprecated Colors for form background highlight and accent`() {
+    fun `Prefers Form and Action classes over deprecated Colors`() {
         val colors = Colors.Builder()
             .formBackground(0xFF11_1111.toInt())
             .formHighlightBorder(0xFF22_2222.toInt())
             .formAccent(0xFF33_3333.toInt())
+            .actionPrimaryText(0xFF11_1111.toInt())
+            .actionSecondaryText(0xFF22_2222.toInt())
             .build()
 
         val form = Form.Builder()
@@ -165,6 +171,12 @@ class AppearanceToJsTest {
         val appearance = Appearance.Builder()
             .colors(colors)
             .form(form)
+            .actionPrimaryText(
+                Action.Builder().colorText(0xFFAA_AAAA.toInt()).build()
+            )
+            .actionSecondaryText(
+                Action.Builder().colorText(0xFFBB_BBBB.toInt()).build()
+            )
             .build()
 
         val v = appearanceVariables(appearance)
@@ -172,5 +184,7 @@ class AppearanceToJsTest {
         assertThat(v.string("formBackgroundColor")).isEqualTo("#AAAAAA")
         assertThat(v.string("formHighlightColorBorder")).isEqualTo("#BBBBBB")
         assertThat(v.string("formAccentColor")).isEqualTo("#CCCCCC")
+        assertThat(v.string("actionPrimaryColorText")).isEqualTo("#AAAAAA")
+        assertThat(v.string("actionSecondaryColorText")).isEqualTo("#BBBBBB")
     }
 }
