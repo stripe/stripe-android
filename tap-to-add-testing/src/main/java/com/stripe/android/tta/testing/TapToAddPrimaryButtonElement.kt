@@ -1,4 +1,4 @@
-package com.stripe.android.common.taptoadd
+package com.stripe.android.tta.testing
 
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
@@ -28,10 +28,6 @@ class TapToAddPrimaryButtonElement(
 
         return composeTestRule.onNode(matcher)
             .assertExists()
-    }
-
-    private companion object {
-        const val DEFAULT_UI_TIMEOUT = 5000L
     }
 }
 

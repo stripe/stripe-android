@@ -1,4 +1,4 @@
-package com.stripe.android.common.taptoadd
+package com.stripe.android.tta.testing
 
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertHasClickAction
@@ -8,15 +8,13 @@ import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import com.stripe.android.core.utils.urlEncode
-import com.stripe.android.link.ui.inline.SignUpConsentAction
-import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 
-internal class TapToAddLinkHelper(
+class TapToAddLinkTestHelper(
     private val composeTestRule: ComposeTestRule,
     private val networkRule: NetworkRule,
 ) {
@@ -69,13 +67,11 @@ internal class TapToAddLinkHelper(
         return waitForText("Full name").inputText("John Doe")
     }
 
-    fun userInput(): UserInput {
-        return UserInput.SignUp(
+    fun input(): Input {
+        return Input(
             email = EMAIL,
             phone = PHONE,
             name = NAME,
-            country = "US",
-            consentAction = SignUpConsentAction.Checkbox,
         )
     }
 
@@ -98,6 +94,12 @@ internal class TapToAddLinkHelper(
 
         composeTestRule.waitForIdle()
     }
+
+    data class Input(
+        val email: String,
+        val phone: String,
+        val name: String,
+    )
 
     private companion object {
         const val DEFAULT_UI_TIMEOUT = 5000L

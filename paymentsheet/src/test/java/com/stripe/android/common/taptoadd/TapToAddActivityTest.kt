@@ -11,12 +11,17 @@ import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.ui.inline.LinkSignupMode
+import com.stripe.android.link.ui.inline.SignUpConsentAction
+import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentelement.TapToAddPreview
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
+import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
@@ -24,6 +29,11 @@ import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.RetryRule
 import com.stripe.android.testing.createComposeCleanupRule
+import com.stripe.android.tta.testing.TapToAddCardAddedPage
+import com.stripe.android.tta.testing.TapToAddCardCollectionTestHelper
+import com.stripe.android.tta.testing.TapToAddConfirmationPage
+import com.stripe.android.tta.testing.TapToAddConfirmationTestHelper
+import com.stripe.android.tta.testing.TapToAddLinkTestHelper
 import com.stripe.android.utils.PaymentElementCallbackTestRule
 import com.stripe.android.view.ActivityStarter
 import kotlinx.coroutines.test.runTest
@@ -59,10 +69,12 @@ class TapToAddActivityTest {
         .around(RetryRule(3))
         .around(intentsRule)
 
-    private val linkHelper = TapToAddLinkHelper(composeTestRule, networkRule)
+    private val linkHelper = TapToAddLinkTestHelper(composeTestRule, networkRule)
     private val confirmationHelper = TapToAddConfirmationTestHelper(composeTestRule)
-    private val cardCollectionHelper =
-        TapToAddCardCollectionTestHelper(networkRule, imageLoaderTestRule, terminalWrapperTestRule)
+    private val cardCollectionHelper = TapToAddCardCollectionTestHelper(networkRule) {
+        terminalWrapperTestRule.delegate
+    }
+    private val cardArtTestHelper = TapToAddCardArtTestHelper(imageLoaderTestRule)
     private val cardAddedPage = TapToAddCardAddedPage(composeTestRule, linkHelper)
     private val confirmationPage = TapToAddConfirmationPage(composeTestRule)
 
@@ -72,7 +84,10 @@ class TapToAddActivityTest {
     ) {
         val info = cardCollectionHelper.enqueueSuccessfulTapToCollectFlow()
 
+        enqueueCallbacks(CreateIntentResult.Success(info.setupIntentClientSecret))
+
         launch { activityScenario ->
+            cardArtTestHelper.assertCardArtAssetPreloads()
             cardCollectionHelper.assertSuccessfulCardCollection(info)
 
             waitForIdle()
@@ -112,9 +127,11 @@ class TapToAddActivityTest {
     ) {
         val info = cardCollectionHelper.enqueueSuccessfulTapToCollectFlow()
 
+        enqueueCallbacks(CreateIntentResult.Success(info.setupIntentClientSecret))
         linkHelper.enqueueLookup()
 
         launch { activityScenario ->
+            cardArtTestHelper.assertCardArtAssetPreloads()
             cardCollectionHelper.assertSuccessfulCardCollection(info)
 
             waitForIdle()
@@ -133,7 +150,7 @@ class TapToAddActivityTest {
                 expectedResult = TapToAddResult.Continue(
                     paymentSelection = PaymentSelection.Saved(
                         paymentMethod = info.cardPaymentMethod,
-                        linkInput = linkHelper.userInput(),
+                        linkInput = linkHelper.input().toUserInput(),
                     ),
                 ),
                 activityScenario = activityScenario,
@@ -152,11 +169,14 @@ class TapToAddActivityTest {
     ) {
         val info = cardCollectionHelper.enqueueSuccessfulTapToCollectFlow()
 
+        enqueueCallbacks(CreateIntentResult.Success(info.setupIntentClientSecret))
+
         confirmationHelper.intendingPaymentConfirmationToBeLaunched(
             InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED)
         )
 
         launch { activityScenario ->
+            cardArtTestHelper.assertCardArtAssetPreloads()
             cardCollectionHelper.assertSuccessfulCardCollection(info)
 
             waitForIdle()
@@ -206,6 +226,8 @@ class TapToAddActivityTest {
     ) {
         val info = cardCollectionHelper.enqueueSuccessfulTapToCollectFlow()
 
+        enqueueCallbacks(CreateIntentResult.Success(info.setupIntentClientSecret))
+
         linkHelper.enqueueLookup()
         linkHelper.enqueueSignup()
         linkHelper.enqueueCreatePaymentDetailsFromPaymentMethod(info.cardPaymentMethod.id)
@@ -215,6 +237,7 @@ class TapToAddActivityTest {
         )
 
         launch { activityScenario ->
+            cardArtTestHelper.assertCardArtAssetPreloads()
             cardCollectionHelper.assertSuccessfulCardCollection(info)
 
             waitForIdle()
@@ -263,8 +286,7 @@ class TapToAddActivityTest {
                                 mode = mode,
                                 eventMode = EventReporter.Mode.Custom,
                                 paymentMethodMetadata = metadata,
-                                paymentElementCallbackIdentifier =
-                                    cardCollectionHelper.paymentElementCallbackIdentifier,
+                                paymentElementCallbackIdentifier = PAYMENT_ELEMENT_CALLBACK_IDENTIFIER,
                                 productUsage = emptySet()
                             )
                         )
@@ -297,6 +319,27 @@ class TapToAddActivityTest {
         composeTestRule.waitForIdle()
     }
 
+    private fun enqueueCallbacks(
+        createCardPresentSetupIntentResult: CreateIntentResult
+    ) {
+        PaymentElementCallbackReferences[PAYMENT_ELEMENT_CALLBACK_IDENTIFIER] =
+            PaymentElementCallbacks.Builder()
+                .createCardPresentSetupIntentCallback {
+                    createCardPresentSetupIntentResult
+                }
+                .build()
+    }
+
+    private fun TapToAddLinkTestHelper.Input.toUserInput(): UserInput {
+        return UserInput.SignUp(
+            email = email,
+            phone = phone,
+            name = name,
+            country = "US",
+            consentAction = SignUpConsentAction.Checkbox,
+        )
+    }
+
     private class Scenario(
         val launch: (
             block: suspend (activityScenario: ActivityScenario<TapToAddActivity>) -> Unit
@@ -304,6 +347,7 @@ class TapToAddActivityTest {
     )
 
     private companion object {
+        const val PAYMENT_ELEMENT_CALLBACK_IDENTIFIER = "mpe1"
         val PAYMENT_INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
             amount = 1099
         )
