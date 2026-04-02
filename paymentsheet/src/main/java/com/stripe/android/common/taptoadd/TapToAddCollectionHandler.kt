@@ -2,6 +2,7 @@ package com.stripe.android.common.taptoadd
 
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.ResolvableString
@@ -190,7 +191,10 @@ internal class DefaultTapToAddCollectionHandler(
             callback = continuation.createSetupIntentCallback(),
         )
 
-        continuation.handleCancellation(cancellable)
+        continuation.handleCancellation(
+            cancelable = cancellable,
+            errorEvent = ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_COLLECT_SETUP_INTENT_CANCEL_FAILURE,
+        )
     }
 
     private fun validatePaymentMethod(
@@ -219,7 +223,10 @@ internal class DefaultTapToAddCollectionHandler(
             callback = continuation.createSetupIntentCallback(),
         )
 
-        continuation.handleCancellation(cancellable)
+        continuation.handleCancellation(
+            cancelable = cancellable,
+            errorEvent = ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_CONFIRM_SETUP_INTENT_CANCEL_FAILURE,
+        )
     }
 
     private fun Continuation<SetupIntent>.createSetupIntentCallback(): SetupIntentCallback {
@@ -235,7 +242,8 @@ internal class DefaultTapToAddCollectionHandler(
     }
 
     private fun CancellableContinuation<SetupIntent>.handleCancellation(
-        cancelable: Cancelable
+        cancelable: Cancelable,
+        errorEvent: ErrorReporter.UnexpectedErrorEvent,
     ) {
         invokeOnCancellation {
             cancelable.cancel(
@@ -245,7 +253,13 @@ internal class DefaultTapToAddCollectionHandler(
                     }
 
                     override fun onFailure(e: TerminalException) {
-                        // No-op
+                        errorReporter.report(
+                            errorEvent = errorEvent,
+                            stripeException = StripeException.create(e),
+                            additionalNonPiiParams = mapOf(
+                                TERMINAL_ERROR_CODE_KEY to e.errorCode.toLogString()
+                            ),
+                        )
                     }
                 }
             )
@@ -320,6 +334,8 @@ internal class UnsupportedTapToAddCollectionHandler : TapToAddCollectionHandler 
         override val value: String = "attemptedTapToAddWhenUnsupported"
     }
 }
+
+private const val TERMINAL_ERROR_CODE_KEY = "terminalErrorCode"
 
 private val unsupportedDeviceErrorCodes = listOf(
     TerminalErrorCode.TAP_TO_PAY_DEVICE_TAMPERED,
