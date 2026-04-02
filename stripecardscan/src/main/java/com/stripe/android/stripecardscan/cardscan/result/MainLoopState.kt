@@ -38,33 +38,38 @@ internal sealed class MainLoopState(timeSource: TimeSource) : MachineState(timeS
         } else {
             OcrFound(
                 timeSource = timeSource,
-                pan = transition.pan
+                pan = transition.pan,
+                expiryMonth = transition.expiryMonth,
+                expiryYear = transition.expiryYear,
             )
         }
     }
 
-    class OcrFound private constructor(
+    class OcrFound(
         timeSource: TimeSource,
-        private val panCounter: ItemCounter<String>
+        pan: String,
+        expiryMonth: Int? = null,
+        expiryYear: Int? = null,
     ) : MainLoopState(timeSource) {
 
-        internal constructor(
-            timeSource: TimeSource,
-            pan: String
-        ) : this(
-            timeSource,
-            ItemCounter(pan)
+        private val panCounter = ItemCounter(pan)
+        private val expiryCounter = ItemCounter(
+            if (expiryMonth != null && expiryYear != null) {
+                CardOcr.Expiry(month = expiryMonth, year = expiryYear)
+            } else {
+                null
+            }
         )
 
         private val mostLikelyPan: String
-            get() = panCounter.getHighestCountItem().second
+            get() = panCounter.getHighestCountItem().item
+
+        private val mostLikelyExpiry: CardOcr.Expiry?
+            get() = expiryCounter.getHighestCountItemOrNull()?.item
 
         private var lastCardVisible = TimeSource.Monotonic.markNow()
 
-        private var expiryMonth: Int? = null
-        private var expiryYear: Int? = null
-
-        private fun highestOcrCount() = panCounter.getHighestCountItem().first
+        private fun highestOcrCount() = panCounter.getHighestCountItem().count
         private fun isOcrSatisfied() = highestOcrCount() >= DESIRED_OCR_AGREEMENT
         private fun isTimedOut() = reachedStateAt.elapsedNow() > OCR_SEARCH_DURATION
         private fun isNoCardVisible() = lastCardVisible.elapsedNow() > NO_CARD_VISIBLE_DURATION
@@ -79,19 +84,18 @@ internal sealed class MainLoopState(timeSource: TimeSource) : MachineState(timeS
             }
 
             if (transition.expiryMonth != null && transition.expiryYear != null) {
-                expiryMonth = transition.expiryMonth
-                expiryYear = transition.expiryYear
+                expiryCounter.countItem(
+                    CardOcr.Expiry(month = transition.expiryMonth, year = transition.expiryYear)
+                )
             }
-
-            val pan = mostLikelyPan
 
             return when {
                 isOcrSatisfied() || isTimedOut() ->
                     Finished(
                         timeSource = timeSource,
-                        pan = pan,
-                        expiryMonth = expiryMonth,
-                        expiryYear = expiryYear,
+                        pan = mostLikelyPan,
+                        expiryMonth = mostLikelyExpiry?.month,
+                        expiryYear = mostLikelyExpiry?.year,
                     )
                 isNoCardVisible() ->
                     Initial(timeSource)
