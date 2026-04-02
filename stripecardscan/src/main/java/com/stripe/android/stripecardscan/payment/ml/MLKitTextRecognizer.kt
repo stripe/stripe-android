@@ -185,13 +185,11 @@ internal class MLKitTextRecognizer internal constructor(
          *
          * @return a [CardOcr.Expiry], or null if parsing fails.
          */
-        @Suppress("MagicNumber")
         @VisibleForTesting
         internal fun parseExpiry(text: String, regex: Regex): CardOcr.Expiry? {
             val match = regex.find(text) ?: return null
             val month = match.groupValues[1].toIntOrNull() ?: return null
-            val yearRaw = match.groupValues[2].toIntOrNull() ?: return null
-            val year = if (yearRaw < 100) yearRaw + 2000 else yearRaw
+            val year = match.groupValues[2].toIntOrNull() ?: return null
             return CardOcr.Expiry(month = month, year = year)
         }
 
@@ -208,7 +206,7 @@ internal class MLKitTextRecognizer internal constructor(
          * - Not be expired (month/year >= current month/year)
          * - Not be more than 10 years in the future (prevents OCR misreads)
          *
-         * [CardOcr.Expiry.year] is expected to be a full 4-digit year.
+         * [CardOcr.Expiry.year] is always a full 4-digit year (auto-normalized by [CardOcr.Expiry]).
          * Parameters [currentMonth] and [currentYear] are injectable for testing.
          */
         @Suppress("MagicNumber")
