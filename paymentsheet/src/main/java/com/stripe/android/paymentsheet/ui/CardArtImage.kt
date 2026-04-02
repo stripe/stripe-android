@@ -29,7 +29,7 @@ internal fun CardArtImage(
             StripeImage(
                 url = optimizedUrl,
                 imageLoader = LocalStripeImageLoader.current,
-                debugPainter = painterResource(R.drawable.card_art_sample),
+                debugPainter = painterResource(R.drawable.stripe_card_art_sample),
                 contentDescription = null,
                 modifier = Modifier
                     .clip(RoundedCornerShape(3.dp))
