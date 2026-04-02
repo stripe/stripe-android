@@ -66,6 +66,7 @@ internal interface TapToAddConfirmationInteractor {
     sealed interface Action {
         data object PrimaryButtonPressed : Action
         data object SuccessShown : Action
+        data object CancelPressed : Action
     }
 
     interface Factory {
@@ -140,6 +141,9 @@ internal class DefaultTapToAddConfirmationInteractor(
                 ) {
                     onComplete()
                 }
+            }
+            TapToAddConfirmationInteractor.Action.CancelPressed -> {
+                eventReporter.onTapToAddCanceled(EventReporter.TapToAddCancelSource.Confirmation)
             }
         }
     }
