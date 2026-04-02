@@ -195,6 +195,11 @@ internal class MLKitTextRecognizer internal constructor(
             return CardOcr.Expiry(month = month, year = year)
         }
 
+        // Calendar.getInstance() is expensive, so we cache it for the duration of the scan.
+        private val cachedCalendar = Calendar.getInstance()
+        private val cachedCurrentMonth: Int = cachedCalendar.get(Calendar.MONTH) + 1
+        private val cachedCurrentYear: Int = cachedCalendar.get(Calendar.YEAR)
+
         /**
          * Check whether the given expiration date is valid for OCR purposes.
          *
@@ -203,19 +208,19 @@ internal class MLKitTextRecognizer internal constructor(
          * - Not be expired (month/year >= current month/year)
          * - Not be more than 10 years in the future (prevents OCR misreads)
          *
+         * [CardOcr.Expiry.year] is expected to be a full 4-digit year.
          * Parameters [currentMonth] and [currentYear] are injectable for testing.
          */
         @Suppress("MagicNumber")
         @VisibleForTesting
         internal fun isValidExpiry(
             expiry: CardOcr.Expiry,
-            currentMonth: Int = Calendar.getInstance().let { it.get(Calendar.MONTH) + 1 },
-            currentYear: Int = Calendar.getInstance().get(Calendar.YEAR),
+            currentMonth: Int = cachedCurrentMonth,
+            currentYear: Int = cachedCurrentYear,
         ): Boolean {
             if (expiry.month !in 1..12) return false
-            val fullYear = if (expiry.year < 100) expiry.year + 2000 else expiry.year
-            if (fullYear < currentYear || (fullYear == currentYear && expiry.month < currentMonth)) return false
-            if (fullYear > currentYear + 10) return false
+            if (expiry.year < currentYear || (expiry.year == currentYear && expiry.month < currentMonth)) return false
+            if (expiry.year > currentYear + 10) return false
             return true
         }
     }

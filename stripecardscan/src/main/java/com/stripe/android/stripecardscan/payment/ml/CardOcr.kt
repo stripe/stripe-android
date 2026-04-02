@@ -20,6 +20,7 @@ internal object CardOcr {
 
     /**
      * A recognized card expiration date with named month and year fields.
+     * [year] is always a full 4-digit value (e.g. 2028, not 28).
      */
     data class Expiry(val month: Int, val year: Int) {
         override fun toString(): String = "Expiry"

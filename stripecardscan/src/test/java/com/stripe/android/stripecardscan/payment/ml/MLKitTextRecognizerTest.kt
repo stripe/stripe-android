@@ -347,13 +347,13 @@ class MLKitTextRecognizerTest {
     }
 
     @Test
-    fun `isValidExpiry normalizes 2-digit year`() {
+    fun `isValidExpiry treats 2-digit year literally (no normalization)`() {
         val result = MLKitTextRecognizer.isValidExpiry(
             expiry = CardOcr.Expiry(month = 6, year = 28),
             currentMonth = 3,
             currentYear = 2026,
         )
-        assertThat(result).isTrue()
+        assertThat(result).isFalse()
     }
 
     // --- Helpers ---
