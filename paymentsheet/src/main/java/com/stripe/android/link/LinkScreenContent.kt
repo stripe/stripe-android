@@ -13,10 +13,10 @@ import com.stripe.android.link.ui.FullScreenContent
 import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.link.ui.LinkContentScrollHandler
 import com.stripe.android.link.ui.LocalLinkContentScrollHandler
-import com.stripe.android.uicore.image.LocalStripeImageLoader
 import com.stripe.android.link.ui.verification.VerificationDialog
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetState
+import com.stripe.android.uicore.image.LocalStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.navigation.NavBackStackEntryUpdate
 import com.stripe.android.uicore.navigation.NavigationIntent

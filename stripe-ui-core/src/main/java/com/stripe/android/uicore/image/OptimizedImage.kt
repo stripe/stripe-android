@@ -9,14 +9,13 @@ fun rememberOptimizedImage(
     url: String?,
     width: Dp
 ): String? {
+    if (url == null) return null
     val density = LocalDensity.current
     val imageOptimizer = LocalImageOptimizer.current
-    return url?.let {
-        imageOptimizer.optimize(
-            url = url,
-            width = with(density) {
-                width.roundToPx()
-            }
-        )
-    }
+    return imageOptimizer.optimize(
+        url = url,
+        width = with(density) {
+            width.roundToPx()
+        }
+    )
 }
