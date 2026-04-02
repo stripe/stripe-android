@@ -21,6 +21,7 @@ import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.model.PaymentMethodMessagePromotionList
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.utils.sellerBusinessName
@@ -87,6 +88,7 @@ internal data class PaymentMethodMetadata(
     val analyticsMetadata: AnalyticsMetadata,
     val experimentsData: ElementsSession.ExperimentsData?,
     val isTapToAddSupported: Boolean,
+    val paymentMethodMessagingHelper: PaymentMethodMessagingHelper,
     val isStripeCardScanAllowed: Boolean,
     val enableMlKitCardScan: Boolean,
 ) : Parcelable {
@@ -346,6 +348,7 @@ internal data class PaymentMethodMetadata(
             integrationMetadata: IntegrationMetadata,
             analyticsMetadata: AnalyticsMetadata,
             isTapToAddSupported: Boolean,
+            promotions: PaymentMethodMessagePromotionList?
         ): PaymentMethodMetadata {
             val linkSettings = elementsSession.linkSettings
             return PaymentMethodMetadata(
@@ -398,6 +401,7 @@ internal data class PaymentMethodMetadata(
                 integrationMetadata = integrationMetadata,
                 analyticsMetadata = analyticsMetadata,
                 experimentsData = elementsSession.experimentsData,
+                paymentMethodMessagingHelper = DefaultPaymentMethodMessagingHelper(promotions),
                 isTapToAddSupported = isTapToAddSupported &&
                     elementsSession.isTapToAddEnabled &&
                     customerMetadata != null,
@@ -467,6 +471,7 @@ internal data class PaymentMethodMetadata(
                 analyticsMetadata = AnalyticsMetadata(emptyMap()), // This is unused in customer sheet.
                 isTapToAddSupported = false, // This is unused in customer sheet.
                 experimentsData = elementsSession.experimentsData,
+                paymentMethodMessagingHelper = NoopPaymentMethodMessagingHelper(),
                 isStripeCardScanAllowed = elementsSession.isStripeCardScanAllowed,
                 enableMlKitCardScan = elementsSession.enableMlKitCardScan,
             )

@@ -27,6 +27,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodMessage
+import com.stripe.android.model.PaymentMethodMessagePromotionList
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.RadarSessionWithHCaptcha
 import com.stripe.android.model.SetupIntent
@@ -414,6 +415,53 @@ interface StripeRepository {
     ): Result<PaymentMethodMessage>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun retrievePaymentMethodMessageForPaymentSheet(
+        amount: Int,
+        currency: String,
+        country: String?,
+        locale: String,
+        requestOptions: ApiRequest.Options
+    ): Result<PaymentMethodMessagePromotionList>
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun retrieveElementsSession(
+        params: ElementsSessionParams,
+        options: ApiRequest.Options,
+    ): Result<ElementsSession>
+
+    /**
+     * Initialize a checkout session by calling the `/v1/payment_pages/{cs_id}/init` endpoint.
+     *
+     * @param params The checkout session parameters including session ID.
+     * @param options API request options including the publishable key.
+     * @return A [CheckoutSessionResponse] containing checkout metadata and embedded [ElementsSession].
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun initCheckoutSession(
+        params: ElementsSessionParams.CheckoutSessionType,
+        options: ApiRequest.Options,
+    ): Result<CheckoutSessionResponse>
+
+    /**
+     * Confirms a checkout session by calling the `/v1/payment_pages/{checkoutSessionId}/confirm` endpoint.
+     *
+     * @param checkoutSessionId The checkout session ID (e.g., "cs_test_xxx").
+     * @param paymentMethodId The payment method ID to use for confirmation.
+     * @param returnUrl The URL to redirect to after confirmation (required for ui_mode=custom).
+     * @param options API request options including the publishable key.
+     * @return A [CheckoutSessionResponse] containing the confirmed [PaymentIntent].
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun confirmCheckoutSession(
+        checkoutSessionId: String,
+        paymentMethodId: String,
+        clientAttributionMetadata: ClientAttributionMetadata,
+        returnUrl: String,
+        options: ApiRequest.Options,
+    ): Result<CheckoutSessionResponse>
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+
     suspend fun retrieveCardMetadata(
         cardNumber: String,
         requestOptions: ApiRequest.Options

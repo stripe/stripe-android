@@ -1,7 +1,9 @@
 package com.stripe.android.lpmfoundations.luxe
 
+import com.stripe.android.link.LinkScreen
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.forms.PlaceholderHelper.specsForConfiguration
 import com.stripe.android.paymentsheet.model.currency
@@ -59,7 +61,12 @@ internal class TransformSpecToElements(
         ).flatMap { spec ->
             when (spec) {
                 is StaticTextSpec -> listOf(spec.transform())
-                is AfterpayClearpayTextSpec -> listOf(spec.transform(metadata?.stripeIntent?.currency))
+                is AfterpayClearpayTextSpec -> listOf(
+                    spec.transform(
+                        metadata?.stripeIntent?.currency,
+                        metadata?.paymentMethodMessagingHelper?.getPromotion(PaymentMethod.Type.AfterpayClearpay.code)
+                    )
+                )
                 is AffirmTextSpec -> listOf(spec.transform())
                 is EmptyFormSpec -> listOf(EmptyFormElement())
                 is MandateTextSpec -> listOf(spec.transform(arguments.merchantName))

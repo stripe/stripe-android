@@ -25,6 +25,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.stripe.android.model.PaymentMethodMessagePromotionList
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
@@ -98,7 +99,7 @@ internal fun PaymentMethodVerticalLayoutUI(
             interactor.handleViewAction(PaymentMethodVerticalLayoutInteractor.ViewAction.CurrencySelected(it))
         },
         modifier = modifier
-            .testTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT)
+            .testTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT),
     )
 }
 

@@ -29,6 +29,7 @@ internal data class ElementsSession(
     val elementsSessionConfigId: String?,
     val accountId: String?,
     val merchantId: String?,
+    val promotions: PaymentMethodMessagePromotionList? = null
 ) : StripeModel {
 
     val linkPassthroughModeEnabled: Boolean
