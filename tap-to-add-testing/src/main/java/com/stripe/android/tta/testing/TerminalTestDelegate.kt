@@ -132,14 +132,15 @@ class TerminalTestDelegate {
     }
 
     class Scenario(
-        val isInitialized: Boolean,
-        val connectedReader: Reader?,
-        val discoveredReaders: List<Reader>,
-        val connectReaderResult: ConnectReaderResult,
-        val readerSupportResult: ReaderSupportResult,
-        val retrieveSetupIntentResult: SetupIntentResult,
-        val collectSetupIntentPaymentMethodResult: SetupIntentResult,
-        val confirmSetupIntentResult: SetupIntentResult
+        val isInitialized: Boolean = true,
+        val connectedReader: Reader? = DEFAULT_READER,
+        val discoveredReaders: List<Reader> = listOf(DEFAULT_READER),
+        val connectReaderResult: ConnectReaderResult = ConnectReaderResult.Success(DEFAULT_READER),
+        val readerSupportResult: ReaderSupportResult = ReaderSupportResult.Supported,
+        val retrieveSetupIntentResult: SetupIntentResult = SetupIntentResult.Success(mock()),
+        val collectSetupIntentPaymentMethodResult: SetupIntentResult =
+            SetupIntentResult.Success(mock()),
+        val confirmSetupIntentResult: SetupIntentResult = SetupIntentResult.Success(mock()),
     )
 
     class InitTerminalCall(
@@ -339,5 +340,11 @@ class TerminalTestDelegate {
 
             mock()
         }
+    }
+
+    private companion object {
+        val DEFAULT_READER = Reader(
+            deviceType = DeviceType.TAP_TO_PAY_DEVICE,
+        )
     }
 }
