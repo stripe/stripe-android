@@ -203,7 +203,11 @@ internal class DefaultTapToAddConnectionManager(
                         }
 
                         override fun onFailure(e: TerminalException) {
-                            // No-op
+                            reportError(
+                                error = e,
+                                errorEvent =
+                                    ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_DISCOVER_READERS_CANCEL_FAILURE,
+                            )
                         }
                     }
                 )
