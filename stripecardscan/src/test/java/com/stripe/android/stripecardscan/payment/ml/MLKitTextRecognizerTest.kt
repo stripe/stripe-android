@@ -150,8 +150,8 @@ class MLKitTextRecognizerTest {
         // Digits are split across lines so no single line contains a full PAN,
         // but the block strategy can still reassemble elements into 4+4+4+4.
         val text = textWithMultiLineElements(
-            listOf("4242", "4242"),  // line text "4242 4242" — only 8 digits
-            listOf("4242", "4242"),  // line text "4242 4242" — only 8 digits
+            listOf("4242", "4242"), // line text "4242 4242" — only 8 digits
+            listOf("4242", "4242"), // line text "4242 4242" — only 8 digits
         )
 
         val result = MLKitTextRecognizer.extractPan(text)
@@ -165,10 +165,10 @@ class MLKitTextRecognizerTest {
         // which is itself split across two lines. The "12/25" produces a junk digit
         // token "1225" that the sliding window must skip past.
         val text = textWithMultiLineElements(
-            listOf("VALID", "THRU", "12/25"),  // "1225" junk digit token
-            listOf("JOHN", "DOE"),              // no digits, filtered out
-            listOf("4242", "4242"),             // first half of PAN
-            listOf("4242", "4242"),             // second half of PAN
+            listOf("VALID", "THRU", "12/25"), // "1225" junk digit token
+            listOf("JOHN", "DOE"), // no digits, filtered out
+            listOf("4242", "4242"), // first half of PAN
+            listOf("4242", "4242"), // second half of PAN
         )
 
         val result = MLKitTextRecognizer.extractPan(text)
