@@ -266,7 +266,7 @@ internal class ElementsSessionJsonParser(
         // Card art is a paid feature gated at the API resource level. The backend returns it as a
         // separate top-level array (keyed by PM ID) to bypass those gates for Elements sessions.
         // We merge it into each PaymentMethod.Card here so the rest of the SDK sees card art
-        // where it belongs — on the card object — rather than leaking this backend workaround.
+        // where it belongs — on the card object — rather than leaking this elements session backend workaround.
         val mergedPaymentMethods = if (FeatureFlags.enableCardArt.isEnabled) {
             val cardArtMap = buildCardArtLookup(json)
             mergeCardArt(paymentMethods, cardArtMap)
