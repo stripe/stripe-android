@@ -2262,6 +2262,12 @@ public final class com/stripe/android/paymentsheet/paymentdatacollection/polling
 	public final fun getLambda$792710640$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
+public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$CardArtImageKt {
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/ui/ComposableSingletons$CardArtImageKt;
+	public fun <init> ()V
+	public final fun getLambda$-333731789$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
+}
+
 public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$DefaultPaymentMethodLabelKt {
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/ui/ComposableSingletons$DefaultPaymentMethodLabelKt;
 	public fun <init> ()V
