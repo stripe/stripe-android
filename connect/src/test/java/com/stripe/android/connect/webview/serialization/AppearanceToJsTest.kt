@@ -29,7 +29,8 @@ class AppearanceToJsTest {
         this[key]?.jsonPrimitive?.content
 
     @Test
-    fun `Creates appearance object for new tokens and checks it maps to correct variables and inherits correct values`() {
+    @Suppress("LongMethod")
+    fun `Checks new tokens map to correct variables and inherits correct values`() {
         val dangerColorBackground = 0xFFFF_0000.toInt()
         val dangerColorBorder = 0xFF00_FF00.toInt()
         val dangerColorText = 0xFF00_00FF.toInt()
