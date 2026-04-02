@@ -404,7 +404,7 @@ public final class com/stripe/android/connect/appearance/Badge : android/os/Parc
 public final class com/stripe/android/connect/appearance/BadgeDefaults : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Ljava/lang/Float;Ljava/lang/Float;Lcom/stripe/android/connect/appearance/Typography$Style;)V
+	public synthetic fun <init> (Ljava/lang/Float;Ljava/lang/Float;Lcom/stripe/android/connect/appearance/Typography$Style;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
@@ -437,7 +437,7 @@ public final class com/stripe/android/connect/appearance/Button : android/os/Par
 public final class com/stripe/android/connect/appearance/ButtonDefaults : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Ljava/lang/Float;Ljava/lang/Float;Lcom/stripe/android/connect/appearance/Typography$Style;)V
+	public synthetic fun <init> (Ljava/lang/Float;Ljava/lang/Float;Lcom/stripe/android/connect/appearance/Typography$Style;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I

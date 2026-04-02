@@ -9,6 +9,8 @@ import com.stripe.android.connect.PreviewConnectSDK
 import com.stripe.android.connect.appearance.TextTransform
 import com.stripe.android.connect.example.ui.appearance.AppearanceInfo
 import com.stripe.android.connect.example.ui.appearance.CustomThemeOverrides
+import com.stripe.android.connect.example.util.parseHexColor
+import com.stripe.android.connect.example.util.toHexColor
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -64,9 +66,9 @@ class SettingsService @Inject constructor(@ApplicationContext context: Context) 
             buttonLabelFontSize = str(KEY_BTN_LABEL_FONT_SIZE)?.toFloatOrNull(),
             buttonPaddingY = str(KEY_BTN_PADDING_Y)?.toFloatOrNull(),
             buttonPaddingX = str(KEY_BTN_PADDING_X)?.toFloatOrNull(),
-            buttonDangerColorBackground = str(KEY_BTN_DANGER_COLOR_BG)?.let { parseHexColor(it) },
-            buttonDangerColorBorder = str(KEY_BTN_DANGER_COLOR_BORDER)?.let { parseHexColor(it) },
-            buttonDangerColorText = str(KEY_BTN_DANGER_COLOR_TEXT)?.let { parseHexColor(it) },
+            buttonDangerColorBackground = str(KEY_BTN_DANGER_COLOR_BG)?.parseHexColor(),
+            buttonDangerColorBorder = str(KEY_BTN_DANGER_COLOR_BORDER)?.parseHexColor(),
+            buttonDangerColorText = str(KEY_BTN_DANGER_COLOR_TEXT)?.parseHexColor(),
             badgeLabelTextTransform = str(KEY_BADGE_LABEL_TEXT_TRANSFORM)?.let { TextTransform.valueOf(it) },
             badgeLabelFontWeight = str(KEY_BADGE_LABEL_FONT_WEIGHT)?.toIntOrNull(),
             badgeLabelFontSize = str(KEY_BADGE_LABEL_FONT_SIZE)?.toFloatOrNull(),
@@ -74,7 +76,7 @@ class SettingsService @Inject constructor(@ApplicationContext context: Context) 
             badgePaddingX = str(KEY_BADGE_PADDING_X)?.toFloatOrNull(),
             actionPrimaryTextTransform = str(KEY_ACTION_PRIMARY_TEXT_TRANSFORM)?.let { TextTransform.valueOf(it) },
             actionSecondaryTextTransform = str(KEY_ACTION_SECONDARY_TEXT_TRANSFORM)?.let { TextTransform.valueOf(it) },
-            formPlaceholderTextColor = str(KEY_FORM_PLACEHOLDER_COLOR)?.let { parseHexColor(it) },
+            formPlaceholderTextColor = str(KEY_FORM_PLACEHOLDER_COLOR)?.parseHexColor(),
             inputFieldPaddingX = str(KEY_INPUT_PADDING_X)?.toFloatOrNull(),
             inputFieldPaddingY = str(KEY_INPUT_PADDING_Y)?.toFloatOrNull(),
             tableRowPaddingY = str(KEY_TABLE_ROW_PADDING_Y)?.toFloatOrNull(),
@@ -90,9 +92,9 @@ class SettingsService @Inject constructor(@ApplicationContext context: Context) 
             putString(KEY_BTN_LABEL_FONT_SIZE, overrides.buttonLabelFontSize?.toString())
             putString(KEY_BTN_PADDING_Y, overrides.buttonPaddingY?.toString())
             putString(KEY_BTN_PADDING_X, overrides.buttonPaddingX?.toString())
-            putString(KEY_BTN_DANGER_COLOR_BG, overrides.buttonDangerColorBackground?.let { toHexColor(it) })
-            putString(KEY_BTN_DANGER_COLOR_BORDER, overrides.buttonDangerColorBorder?.let { toHexColor(it) })
-            putString(KEY_BTN_DANGER_COLOR_TEXT, overrides.buttonDangerColorText?.let { toHexColor(it) })
+            putString(KEY_BTN_DANGER_COLOR_BG, overrides.buttonDangerColorBackground?.toHexColor())
+            putString(KEY_BTN_DANGER_COLOR_BORDER, overrides.buttonDangerColorBorder?.toHexColor())
+            putString(KEY_BTN_DANGER_COLOR_TEXT, overrides.buttonDangerColorText?.toHexColor())
             putString(KEY_BADGE_LABEL_TEXT_TRANSFORM, overrides.badgeLabelTextTransform?.name)
             putString(KEY_BADGE_LABEL_FONT_WEIGHT, overrides.badgeLabelFontWeight?.toString())
             putString(KEY_BADGE_LABEL_FONT_SIZE, overrides.badgeLabelFontSize?.toString())
@@ -100,7 +102,7 @@ class SettingsService @Inject constructor(@ApplicationContext context: Context) 
             putString(KEY_BADGE_PADDING_X, overrides.badgePaddingX?.toString())
             putString(KEY_ACTION_PRIMARY_TEXT_TRANSFORM, overrides.actionPrimaryTextTransform?.name)
             putString(KEY_ACTION_SECONDARY_TEXT_TRANSFORM, overrides.actionSecondaryTextTransform?.name)
-            putString(KEY_FORM_PLACEHOLDER_COLOR, overrides.formPlaceholderTextColor?.let { toHexColor(it) })
+            putString(KEY_FORM_PLACEHOLDER_COLOR, overrides.formPlaceholderTextColor?.toHexColor())
             putString(KEY_INPUT_PADDING_X, overrides.inputFieldPaddingX?.toString())
             putString(KEY_INPUT_PADDING_Y, overrides.inputFieldPaddingY?.toString())
             putString(KEY_TABLE_ROW_PADDING_Y, overrides.tableRowPaddingY?.toString())
@@ -124,17 +126,6 @@ class SettingsService @Inject constructor(@ApplicationContext context: Context) 
             }
         }
     }
-
-    private fun parseHexColor(hex: String): Int? {
-        return try {
-            val formatted = if (hex.startsWith("#")) hex else "#$hex"
-            android.graphics.Color.parseColor(formatted)
-        } catch (_: IllegalArgumentException) {
-            null
-        }
-    }
-
-    private fun toHexColor(colorInt: Int): String = String.format("%08X", colorInt)
 
     fun getOnboardingSettings(): OnboardingSettings {
         return OnboardingSettings(

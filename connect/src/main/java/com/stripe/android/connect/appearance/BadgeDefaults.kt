@@ -11,7 +11,7 @@ import kotlinx.parcelize.Parcelize
  */
 @Parcelize
 @Poko
-class BadgeDefaults(
+class BadgeDefaults private constructor(
     internal val paddingX: Float?,
     internal val paddingY: Float?,
     internal val labelTypography: Typography.Style?

@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.connect.appearance.TextTransform
 import com.stripe.android.connect.example.data.SettingsService
+import com.stripe.android.connect.example.util.parseHexColor
+import com.stripe.android.connect.example.util.toHexColor
 import com.stripe.android.core.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -121,9 +123,9 @@ data class CustomThemeOverridesState(
             buttonLabelFontSize = buttonLabelFontSize.toFloatOrNull(),
             buttonPaddingY = buttonPaddingY.toFloatOrNull(),
             buttonPaddingX = buttonPaddingX.toFloatOrNull(),
-            buttonDangerColorBackground = buttonDangerColorBackground.parseColor(),
-            buttonDangerColorBorder = buttonDangerColorBorder.parseColor(),
-            buttonDangerColorText = buttonDangerColorText.parseColor(),
+            buttonDangerColorBackground = buttonDangerColorBackground.parseHexColor(),
+            buttonDangerColorBorder = buttonDangerColorBorder.parseHexColor(),
+            buttonDangerColorText = buttonDangerColorText.parseHexColor(),
             badgeLabelTextTransform = badgeLabelTextTransform,
             badgeLabelFontWeight = badgeLabelFontWeight.toIntOrNull(),
             badgeLabelFontSize = badgeLabelFontSize.toFloatOrNull(),
@@ -131,7 +133,7 @@ data class CustomThemeOverridesState(
             badgePaddingX = badgePaddingX.toFloatOrNull(),
             actionPrimaryTextTransform = actionPrimaryTextTransform,
             actionSecondaryTextTransform = actionSecondaryTextTransform,
-            formPlaceholderTextColor = formPlaceholderTextColor.parseColor(),
+            formPlaceholderTextColor = formPlaceholderTextColor.parseHexColor(),
             inputFieldPaddingX = inputFieldPaddingX.toFloatOrNull(),
             inputFieldPaddingY = inputFieldPaddingY.toFloatOrNull(),
             tableRowPaddingY = tableRowPaddingY.toFloatOrNull(),
@@ -167,20 +169,8 @@ data class CustomThemeOverridesState(
     }
 }
 
-private fun String.parseColor(): Int? {
-    if (isEmpty()) return null
-    return try {
-        val hex = if (startsWith("#")) this else "#$this"
-        android.graphics.Color.parseColor(hex)
-    } catch (_: IllegalArgumentException) {
-        null
-    }
-}
-
-private fun toHexString(colorInt: Int): String = String.format("%08X", colorInt)
-
 private fun TextTransform?.orNone(): TextTransform = this ?: TextTransform.None
 
 private fun Any?.toStringOrEmpty(): String = this?.toString() ?: ""
 
-private fun Int?.toHexOrEmpty(): String = this?.let { toHexString(it) } ?: ""
+private fun Int?.toHexOrEmpty(): String = this?.toHexColor() ?: ""

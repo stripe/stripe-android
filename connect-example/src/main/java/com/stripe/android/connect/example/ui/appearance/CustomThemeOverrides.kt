@@ -50,21 +50,19 @@ private fun Appearance.Builder.applyButtonDefaults(overrides: CustomThemeOverrid
         overrides.buttonLabelFontSize != null
     val hasButtonPadding = overrides.buttonPaddingX != null || overrides.buttonPaddingY != null
     if (!hasButtonLabel && !hasButtonPadding) return
-    buttonDefaults(
-        ButtonDefaults(
-            paddingX = overrides.buttonPaddingX,
-            paddingY = overrides.buttonPaddingY,
-            labelTypography = if (hasButtonLabel) {
-                Typography.Style(
-                    fontSize = overrides.buttonLabelFontSize,
-                    fontWeight = overrides.buttonLabelFontWeight,
-                    textTransform = overrides.buttonLabelTextTransform ?: TextTransform.None,
-                )
-            } else {
-                null
-            },
+    val buttonDefaultsBuilder = ButtonDefaults.Builder()
+        .paddingX(overrides.buttonPaddingX)
+        .paddingY(overrides.buttonPaddingY)
+    if (hasButtonLabel) {
+        buttonDefaultsBuilder.labelTypography(
+            Typography.Style(
+                fontSize = overrides.buttonLabelFontSize,
+                fontWeight = overrides.buttonLabelFontWeight,
+                textTransform = overrides.buttonLabelTextTransform ?: TextTransform.None,
+            )
         )
-    )
+    }
+    buttonDefaults(buttonDefaultsBuilder.build())
 }
 
 private fun Appearance.Builder.applyButtonDanger(overrides: CustomThemeOverrides) {
@@ -89,21 +87,19 @@ private fun Appearance.Builder.applyBadgeDefaults(overrides: CustomThemeOverride
         overrides.badgeLabelFontSize != null
     val hasBadgePadding = overrides.badgePaddingX != null || overrides.badgePaddingY != null
     if (!hasBadgeLabel && !hasBadgePadding) return
-    badgeDefaults(
-        BadgeDefaults(
-            paddingX = overrides.badgePaddingX,
-            paddingY = overrides.badgePaddingY,
-            labelTypography = if (hasBadgeLabel) {
-                Typography.Style(
-                    fontSize = overrides.badgeLabelFontSize,
-                    fontWeight = overrides.badgeLabelFontWeight,
-                    textTransform = overrides.badgeLabelTextTransform ?: TextTransform.None,
-                )
-            } else {
-                null
-            },
+    val badgeDefaultsBuilder = BadgeDefaults.Builder()
+        .paddingX(overrides.badgePaddingX)
+        .paddingY(overrides.badgePaddingY)
+    if (hasBadgeLabel) {
+        badgeDefaultsBuilder.labelTypography(
+            Typography.Style(
+                fontSize = overrides.badgeLabelFontSize,
+                fontWeight = overrides.badgeLabelFontWeight,
+                textTransform = overrides.badgeLabelTextTransform ?: TextTransform.None,
+            )
         )
-    )
+    }
+    badgeDefaults(badgeDefaultsBuilder.build())
 }
 
 private fun Appearance.Builder.applyActions(overrides: CustomThemeOverrides) {

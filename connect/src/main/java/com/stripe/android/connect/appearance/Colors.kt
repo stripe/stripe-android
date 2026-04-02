@@ -5,7 +5,7 @@ import androidx.annotation.ColorInt
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
-// Deprecating old version to for parameters that moved to other classes
+// Deprecating old version for parameters that moved to other classes
 @Parcelize
 @Poko
 class Colors private constructor(
