@@ -33,9 +33,13 @@ import com.stripe.android.tta.testing.TapToAddCardAddedPage
 import com.stripe.android.tta.testing.TapToAddCardCollectionTestHelper
 import com.stripe.android.tta.testing.TapToAddConfirmationPage
 import com.stripe.android.tta.testing.TapToAddConfirmationTestHelper
+import com.stripe.android.tta.testing.TapToAddErrorPage
 import com.stripe.android.tta.testing.TapToAddLinkTestHelper
+import com.stripe.android.tta.testing.TerminalTestDelegate
 import com.stripe.android.utils.PaymentElementCallbackTestRule
 import com.stripe.android.view.ActivityStarter
+import com.stripe.stripeterminal.external.models.TerminalErrorCode
+import com.stripe.stripeterminal.external.models.TerminalException
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.rules.RuleChain
@@ -77,6 +81,7 @@ class TapToAddActivityTest {
     private val cardArtTestHelper = TapToAddCardArtTestHelper(imageLoaderTestRule)
     private val cardAddedPage = TapToAddCardAddedPage(composeTestRule, linkHelper)
     private val confirmationPage = TapToAddConfirmationPage(composeTestRule)
+    private val errorPage = TapToAddErrorPage(composeTestRule)
 
     @Test
     fun successInContinueMode() = runScenario(
@@ -263,6 +268,64 @@ class TapToAddActivityTest {
 
             assertTapToAddResult(
                 expectedResult = TapToAddResult.Complete,
+                activityScenario = activityScenario,
+            )
+        }
+    }
+
+    @Test
+    fun userShownErrorFromCardCollection() = errorTest(
+        errorCode = TerminalErrorCode.CARD_READ_TIMED_OUT,
+        errorMessage = "Transaction timed out!",
+        expectedResult = TapToAddResult.Canceled(paymentSelection = null)
+    )
+
+    @Test
+    fun userShownUnsupportedErrorFromCardCollection() = errorTest(
+        errorCode = TerminalErrorCode.TAP_TO_PAY_UNSUPPORTED_DEVICE,
+        errorMessage = "Unsupported device!",
+        expectedResult = TapToAddResult.UnsupportedDevice
+    )
+
+    private fun errorTest(
+        errorCode: TerminalErrorCode,
+        errorMessage: String,
+        expectedResult: TapToAddResult,
+    ) = runScenario(
+        mode = TapToAddMode.Complete
+    ) {
+        terminalWrapperTestRule.delegate.setScenario(
+            TerminalTestDelegate.Scenario(
+                collectSetupIntentPaymentMethodResult = TerminalTestDelegate.SetupIntentResult.Failure(
+                    exception = TerminalException(
+                        errorCode = errorCode,
+                        errorMessage = errorMessage,
+                    )
+                )
+            )
+        )
+
+        enqueueCallbacks(CreateIntentResult.Success("seti_123_secret_123"))
+
+        launch { activityScenario ->
+            cardArtTestHelper.assertCardArtAssetPreloads()
+
+            assertThat(terminalWrapperTestRule.delegate.awaitIsInitializedCall()).isNotNull()
+            assertThat(terminalWrapperTestRule.delegate.awaitSetTapToPayUxConfigurationCall()).isNotNull()
+            assertThat(terminalWrapperTestRule.delegate.awaitConnectedReaderCall()).isNotNull()
+            assertThat(terminalWrapperTestRule.delegate.awaitRetrieveSetupIntentCall()).isNotNull()
+            assertThat(terminalWrapperTestRule.delegate.awaitCollectSetupIntentPaymentMethodCall()).isNotNull()
+            assertThat(terminalWrapperTestRule.delegate.awaitSupportsReadersOfTypeCall()).isNotNull()
+
+            waitForIdle()
+
+            errorPage.assertShown(errorMessage)
+            errorPage.clickCloseButton()
+
+            waitForIdle()
+
+            assertTapToAddResult(
+                expectedResult = expectedResult,
                 activityScenario = activityScenario,
             )
         }
