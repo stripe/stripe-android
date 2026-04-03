@@ -18,8 +18,5 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, CardScanDemoActivity::class.java))
         }
 
-        viewBinding.buttonCardScanFragment.setOnClickListener {
-            startActivity(Intent(this, CardScanFragmentDemoActivity::class.java))
-        }
     }
 }
