@@ -7,7 +7,6 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.ExponentialBackoffRetryDelaySupplier
 import com.stripe.android.core.networking.RetryDelaySupplier
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.stripeterminal.external.callable.Callback
@@ -97,7 +96,7 @@ internal class DefaultTapToAddConnectionManager(
 
     override val isSupported: Boolean
         get() {
-            return FeatureFlags.enableTapToAdd.isEnabled && terminal().supportsReadersOfType(
+            return terminal().supportsReadersOfType(
                 deviceType = DeviceType.TAP_TO_PAY_DEVICE,
                 discoveryConfiguration = discoveryConfiguration,
             ).isSupported
