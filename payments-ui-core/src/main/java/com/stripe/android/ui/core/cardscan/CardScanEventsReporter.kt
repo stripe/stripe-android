@@ -37,6 +37,11 @@ interface CardScanEventsReporter {
      * Card scan API availability check failed.
      */
     fun onCardScanApiCheckFailed(implementation: String, error: Throwable? = null)
+
+    /**
+     * The scan card button is being shown to the user.
+     */
+    fun onCardScanButtonShown()
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -67,6 +72,10 @@ private object EmptyCardScanEventsReporter : CardScanEventsReporter {
 
     override fun onCardScanApiCheckFailed(implementation: String, error: Throwable?) {
         errorIfDebug("onCardScanApiCheckFailed")
+    }
+
+    override fun onCardScanButtonShown() {
+        errorIfDebug("onCardScanButtonShown")
     }
 
     private fun errorIfDebug(eventName: String) {

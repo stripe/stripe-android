@@ -283,6 +283,9 @@ internal class FakeEventReporter : EventReporter {
     override fun onCardScanApiCheckFailed(implementation: String, error: Throwable?) {
     }
 
+    override fun onCardScanButtonShown() {
+    }
+
     override fun onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
         visiblePaymentMethods: List<String>,
         hiddenPaymentMethods: List<String>,

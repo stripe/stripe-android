@@ -512,6 +512,10 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
+    override fun onCardScanButtonShown() {
+        fireEvent(PaymentSheetEvent.CardScanButtonShown())
+    }
+
     override fun onCardScanApiCheckSucceeded(implementation: String) {
         fireEvent(
             PaymentSheetEvent.CardScanApiCheckSucceeded(

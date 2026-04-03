@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -21,6 +22,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cardscan.CardScanLauncher
+import com.stripe.android.ui.core.cardscan.LocalCardScanEventsReporter
 import com.stripe.android.uicore.IconStyle
 import com.stripe.android.uicore.LocalIconStyle
 import com.stripe.android.uicore.utils.collectAsState
@@ -38,6 +40,11 @@ internal fun ScanCardButtonUI(
     val isCardScanAvailable by cardScanLauncher.isAvailable.collectAsState()
 
     if (isCardScanAvailable) {
+        val eventsReporter = LocalCardScanEventsReporter.current
+        LaunchedEffect(Unit) {
+            eventsReporter.onCardScanButtonShown()
+        }
+
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.clickable(
