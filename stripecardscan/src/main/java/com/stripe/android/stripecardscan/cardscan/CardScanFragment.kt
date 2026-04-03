@@ -98,9 +98,7 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
         object : CardScanResultListener {
 
             override fun cardScanComplete(card: ScannedCard) {
-                if (::cardScanEventsReporter.isInitialized) {
-                    cardScanEventsReporter.scanSucceeded(scanFlow.collectAnalyticsData())
-                }
+                cardScanEventsReporter.scanSucceeded(scanFlow.collectAnalyticsData())
                 setFragmentResult(
                     CARD_SCAN_FRAGMENT_REQUEST_KEY,
                     bundleOf(
@@ -111,9 +109,7 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
             }
 
             override fun userCanceled(reason: CancellationReason) {
-                if (::cardScanEventsReporter.isInitialized) {
-                    cardScanEventsReporter.scanCancelled(reason, scanFlow.collectAnalyticsData())
-                }
+                cardScanEventsReporter.scanCancelled(reason, scanFlow.collectAnalyticsData())
                 setFragmentResult(
                     CARD_SCAN_FRAGMENT_REQUEST_KEY,
                     bundleOf(
@@ -123,9 +119,7 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
             }
 
             override fun failed(cause: Throwable?) {
-                if (::cardScanEventsReporter.isInitialized) {
-                    cardScanEventsReporter.scanFailed(cause, scanFlow.collectAnalyticsData())
-                }
+                cardScanEventsReporter.scanFailed(cause, scanFlow.collectAnalyticsData())
                 setFragmentResult(
                     CARD_SCAN_FRAGMENT_REQUEST_KEY,
                     bundleOf(
@@ -282,9 +276,7 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
      * Once the camera stream is available, start processing images.
      */
     override suspend fun onCameraStreamAvailable(cameraStream: Flow<CameraPreviewImage<Bitmap>>) {
-        if (::cardScanEventsReporter.isInitialized) {
-            cardScanEventsReporter.scanStarted()
-        }
+        cardScanEventsReporter.scanStarted()
         context?.let {
             scanFlow.startFlow(
                 context = it,
