@@ -17,7 +17,6 @@ import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetCommonModule
-import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagingPromotionsHelperModule
 import com.stripe.android.paymentsheet.state.NoOpTapToAddConnectionStarterModule
 import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
 import dagger.Binds
@@ -40,7 +39,6 @@ import javax.inject.Singleton
         MobileSessionIdModule::class,
         LinkHoldbackExposureModule::class,
         PaymentsIntegrityModule::class,
-        PaymentMethodMessagingPromotionsHelperModule::class,
     ],
     subcomponents = [
         LinkControllerPresenterComponent::class,

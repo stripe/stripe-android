@@ -22,7 +22,6 @@ import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetCommonModule
-import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagingPromotionsHelperModule
 import com.stripe.android.paymentsheet.state.TapToAddConnectionStarterModule
 import com.stripe.android.paymentsheet.ui.WalletButtonsContent
 import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
@@ -50,7 +49,6 @@ import javax.inject.Singleton
         ApplicationIdModule::class,
         MobileSessionIdModule::class,
         LinkHoldbackExposureModule::class,
-        PaymentMethodMessagingPromotionsHelperModule::class,
     ]
 )
 internal interface FlowControllerStateComponent {
