@@ -37,6 +37,7 @@ fun CardDetailsSectionElementUI(
     val cardScanLauncher = rememberCardScanLauncher(
         isStripeCardScanAllowed = controller.isStripeCardScanAllowed,
         enableMlKitCardScan = controller.enableMlKitCardScan,
+        disableSsdOcrCardScan = controller.disableSsdOcrCardScan,
         onResult = { controller.onCardScanResult(it) },
     )
 

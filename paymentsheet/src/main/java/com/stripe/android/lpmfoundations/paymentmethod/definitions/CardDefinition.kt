@@ -137,6 +137,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
                     automaticallyLaunchedCardScanFormDataHelper = arguments.automaticallyLaunchedCardScanFormDataHelper,
                     isStripeCardScanAllowed = metadata.isStripeCardScanAllowed,
                     enableMlKitCardScan = metadata.enableMlKitCardScan,
+                    disableSsdOcrCardScan = metadata.disableSsdOcrCardScan,
                 )
             )
 

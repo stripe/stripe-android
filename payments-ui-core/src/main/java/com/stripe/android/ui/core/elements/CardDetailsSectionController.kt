@@ -23,6 +23,7 @@ class CardDetailsSectionController(
     private val automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper?,
     val isStripeCardScanAllowed: Boolean = false,
     val enableMlKitCardScan: Boolean = false,
+    val disableSsdOcrCardScan: Boolean = false,
 ) : SectionFieldValidationController {
 
     internal val cardDetailsElement = CardDetailsElement(
