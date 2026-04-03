@@ -1,4 +1,10 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
+ext.useKotlinMultiplatformAndroid = true
+
 apply from: configs.androidLibrary
+
+apply plugin: 'org.jetbrains.kotlin.multiplatform'
 
 apply plugin: 'com.google.devtools.ksp'
 apply plugin: 'checkstyle'
@@ -15,45 +21,58 @@ android {
     buildFeatures {
         buildConfig = true
     }
-    kotlin {
+}
+
+kotlin {
+    androidTarget {
         compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_11)
             freeCompilerArgs.addAll([
                     "-Xconsistent-data-class-copy-visibility"
             ])
         }
     }
+
+    sourceSets {
+        commonMain
+        commonTest
+
+        androidMain.dependencies {
+            implementation libs.androidx.browser
+            implementation libs.dagger
+            implementation libs.kotlin.coroutines
+            implementation libs.kotlin.coroutinesAndroid
+            implementation libs.kotlin.serialization
+            implementation libs.androidx.activity
+            implementation libs.androidx.viewModel
+            implementation libs.androidx.savedState
+
+            compileOnly libs.androidx.workManager
+        }
+
+        androidUnitTest.dependencies {
+            implementation project(':network-testing')
+            implementation testLibs.androidx.archCore
+            implementation testLibs.androidx.core
+            implementation testLibs.androidx.fragment
+            implementation testLibs.androidx.testRunner
+            implementation testLibs.androidx.workManager
+            implementation testLibs.json
+            implementation testLibs.junit
+            implementation testLibs.kotlin.annotations
+            implementation testLibs.kotlin.coroutines
+            implementation testLibs.kotlin.junit
+            implementation testLibs.mockito.core
+            implementation testLibs.mockito.kotlin
+            implementation testLibs.okhttpMockWebServer
+            implementation testLibs.robolectric
+            implementation testLibs.truth
+        }
+    }
 }
 
 dependencies {
-    implementation libs.androidx.browser
-    implementation libs.dagger
-    implementation libs.kotlin.coroutines
-    implementation libs.kotlin.coroutinesAndroid
-    implementation libs.kotlin.serialization
-    implementation libs.androidx.activity
-    implementation libs.androidx.viewModel
-    implementation libs.androidx.savedState
-
-    compileOnly libs.androidx.workManager
-
-    ksp libs.daggerCompiler
-
-    testImplementation project(':network-testing')
-    testImplementation testLibs.androidx.archCore
-    testImplementation testLibs.androidx.core
-    testImplementation testLibs.androidx.fragment
-    testImplementation testLibs.androidx.testRunner
-    testImplementation testLibs.androidx.workManager
-    testImplementation testLibs.json
-    testImplementation testLibs.junit
-    testImplementation testLibs.kotlin.annotations
-    testImplementation testLibs.kotlin.coroutines
-    testImplementation testLibs.kotlin.junit
-    testImplementation testLibs.mockito.core
-    testImplementation testLibs.mockito.kotlin
-    testImplementation testLibs.okhttpMockWebServer
-    testImplementation testLibs.robolectric
-    testImplementation testLibs.truth
+    add("kspAndroid", libs.daggerCompiler)
 }
 
 apply from: "${rootDir}/deploy/deploy.gradle"

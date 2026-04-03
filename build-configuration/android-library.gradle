@@ -1,10 +1,15 @@
+def usesKotlinMultiplatformAndroid = project.hasProperty("useKotlinMultiplatformAndroid") &&
+        project.useKotlinMultiplatformAndroid.toString().toBoolean()
+
 /**
  * Base build configuration for all android libraries (modules applying the android library plugin).
  *
  * Don't add any configuration here that is not common to *every* android library.
  */
 apply plugin: "com.android.library"
-apply plugin: "kotlin-android"
+if (!usesKotlinMultiplatformAndroid && !project.plugins.hasPlugin("org.jetbrains.kotlin.multiplatform")) {
+    apply plugin: "kotlin-android"
+}
 if (project.hasProperty("enable_dokka") && project.enable_dokka) {
     apply plugin: "org.jetbrains.dokka"
 }
@@ -81,15 +86,17 @@ android {
         targetCompatibility JavaVersion.VERSION_11
     }
 
-    kotlin {
-        if (JavaVersion.current() < JavaVersion.VERSION_17) {
-            jvmToolchain {
-                languageVersion.set(JavaLanguageVersion.of("17"))
+    if (!usesKotlinMultiplatformAndroid && !project.plugins.hasPlugin("org.jetbrains.kotlin.multiplatform")) {
+        kotlin {
+            if (JavaVersion.current() < JavaVersion.VERSION_17) {
+                jvmToolchain {
+                    languageVersion.set(JavaLanguageVersion.of("17"))
+                }
             }
-        }
 
-        compilerOptions {
-            jvmTarget.set("JVM_11")
+            compilerOptions {
+                jvmTarget.set("JVM_11")
+            }
         }
     }
 }
