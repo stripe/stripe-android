@@ -30,12 +30,14 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         paymentSelection: PaymentSelection?,
         orderedLpms: List<String>,
         duration: Duration?,
+        hasCardArt: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_load_succeeded"
         override val params: Map<String, Any?> = buildMap {
             put(FIELD_DURATION, duration?.asSeconds)
             put(FIELD_SELECTED_LPM, paymentSelection.defaultAnalyticsValue)
             put(FIELD_ORDERED_LPMS, orderedLpms.joinToString(","))
+            put(FIELD_HAS_CARD_ART, hasCardArt)
         }
 
         private val PaymentSelection?.defaultAnalyticsValue: String
@@ -578,6 +580,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_LINK_CONTEXT = "link_context"
         const val FIELD_PAYMENT_METHOD_LAYOUT = "payment_method_layout"
         const val FIELD_ORDERED_LPMS = "ordered_lpms"
+        const val FIELD_HAS_CARD_ART = "has_card_art"
         const val INTENT_ID = "intent_id"
         const val LINK_ACCOUNT_SESSION_ID = "link_account_session_id"
         const val FC_SDK_RESULT = "fc_sdk_result"

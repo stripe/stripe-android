@@ -351,20 +351,22 @@ internal data class PaymentMethodMetadata(
             analyticsMetadata: AnalyticsMetadata,
             isTapToAddAvailable: Boolean,
         ): PaymentMethodMetadata {
-            val linkSettings = elementsSession.linkSettings
+            val paymentElementData = createPaymentElementData(
+                elementsSession = elementsSession,
+                configuration = configuration,
+                initializationMode = initializationMode,
+                isGooglePayReady = isGooglePayReady,
+                linkStateResult = linkStateResult,
+                customerMetadata = customerMetadata,
+                isTapToAddSupported = isTapToAddSupported,
+            )
             return PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
                 allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
-                allowsPaymentMethodsRequiringShippingAddress = configuration
-                    .allowsPaymentMethodsRequiringShippingAddress,
+                allowsPaymentMethodsRequiringShippingAddress = paymentElementData.allowsShipping,
                 allowsLinkInSavedPaymentMethods = elementsSession.enableLinkInSpm,
-                availableWallets = WalletType.listFrom(
-                    elementsSession = elementsSession,
-                    isGooglePayReady = isGooglePayReady,
-                    linkState = linkStateResult as? LinkState,
-                    isShopPayAvailable = configuration.shopPayConfiguration != null
-                ),
+                availableWallets = paymentElementData.availableWallets,
                 paymentMethodOrder = configuration.paymentMethodOrder,
                 cbcEligibility = CardBrandChoiceEligibility.create(
                     isEligible = elementsSession.cardBrandChoice?.eligible ?: false,
@@ -378,9 +380,9 @@ internal data class PaymentMethodMetadata(
                 sharedDataSpecs = sharedDataSpecs,
                 externalPaymentMethodSpecs = externalPaymentMethodSpecs,
                 linkConfiguration = configuration.link,
-                linkMode = linkSettings?.linkMode,
+                linkMode = paymentElementData.linkSettings?.linkMode,
                 linkStateResult = linkStateResult,
-                paymentMethodIncentive = linkSettings?.linkConsumerIncentive?.toPaymentMethodIncentive(),
+                paymentMethodIncentive = paymentElementData.paymentMethodIncentive,
                 isGooglePayReady = isGooglePayReady,
                 displayableCustomPaymentMethods = elementsSession.toDisplayableCustomPaymentMethods(configuration),
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
@@ -419,6 +421,7 @@ internal data class PaymentMethodMetadata(
             customerMetadata: CustomerMetadata,
             integrationMetadata: IntegrationMetadata.CustomerSheet,
         ): PaymentMethodMetadata {
+            val savedPaymentMethods = elementsSession.customer?.paymentMethods.orEmpty()
             return PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
@@ -479,5 +482,62 @@ internal data class PaymentMethodMetadata(
                 cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty()
             )
         }
+
+        private fun savedPaymentMethods(
+            elementsSession: ElementsSession,
+            initializationMode: PaymentElementLoader.InitializationMode,
+        ): List<PaymentMethod> {
+            val checkoutSessionMode = initializationMode as? PaymentElementLoader.InitializationMode.CheckoutSession
+            return elementsSession.customer?.paymentMethods
+                ?: checkoutSessionMode
+                    ?.checkoutSessionResponse
+                    ?.customer
+                    ?.paymentMethods
+                ?: emptyList()
+        }
+
+        private fun hasCardArt(paymentMethods: List<PaymentMethod>): Boolean {
+            return paymentMethods.any { paymentMethod ->
+                paymentMethod.type == PaymentMethod.Type.Card &&
+                    paymentMethod.card?.cardArt?.artImage?.url != null
+            }
+        }
+
+        private fun createPaymentElementData(
+            elementsSession: ElementsSession,
+            configuration: CommonConfiguration,
+            initializationMode: PaymentElementLoader.InitializationMode,
+            isGooglePayReady: Boolean,
+            linkStateResult: LinkStateResult?,
+            customerMetadata: CustomerMetadata?,
+            isTapToAddSupported: Boolean,
+        ): PaymentElementData {
+            val savedPaymentMethods = savedPaymentMethods(elementsSession, initializationMode)
+            val linkSettings = elementsSession.linkSettings
+            return PaymentElementData(
+                linkSettings = linkSettings,
+                availableWallets = WalletType.listFrom(
+                    elementsSession = elementsSession,
+                    isGooglePayReady = isGooglePayReady,
+                    linkState = linkStateResult as? LinkState,
+                    isShopPayAvailable = configuration.shopPayConfiguration != null,
+                ),
+                paymentMethodIncentive = linkSettings?.linkConsumerIncentive?.toPaymentMethodIncentive(),
+                allowsShipping = configuration.allowsPaymentMethodsRequiringShippingAddress,
+                isTapToAddSupported = isTapToAddSupported &&
+                    elementsSession.isTapToAddEnabled &&
+                    customerMetadata != null,
+                hasCardArt = hasCardArt(savedPaymentMethods),
+            )
+        }
+
+        private data class PaymentElementData(
+            val linkSettings: ElementsSession.LinkSettings?,
+            val availableWallets: List<WalletType>,
+            val paymentMethodIncentive: PaymentMethodIncentive?,
+            val allowsShipping: Boolean,
+            val isTapToAddSupported: Boolean,
+            val hasCardArt: Boolean,
+        )
     }
 }
