@@ -30,7 +30,6 @@ import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopAggregator
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopState
 import com.stripe.android.stripecardscan.databinding.StripeFragmentCardscanBinding
-import com.stripe.android.stripecardscan.di.DaggerCardScanComponent
 import com.stripe.android.stripecardscan.payment.card.ScannedCard
 import com.stripe.android.stripecardscan.scanui.CancellationReason
 import com.stripe.android.stripecardscan.scanui.ScanFragment
@@ -40,7 +39,6 @@ import com.stripe.android.stripecardscan.scanui.util.setVisible
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 import kotlin.math.min
 import kotlin.math.roundToInt
 import com.stripe.android.camera.R as CameraR
@@ -55,9 +53,6 @@ const val CARD_SCAN_FRAGMENT_BUNDLE_KEY = "CardScanBundleKey"
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
-
-    @Inject
-    internal lateinit var cardScanEventsReporter: CardScanEventsReporter
 
     override val minimumAnalysisResolution = MINIMUM_RESOLUTION
 
@@ -98,7 +93,6 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
         object : CardScanResultListener {
 
             override fun cardScanComplete(card: ScannedCard) {
-                cardScanEventsReporter.scanSucceeded(scanFlow.collectAnalyticsData())
                 setFragmentResult(
                     CARD_SCAN_FRAGMENT_REQUEST_KEY,
                     bundleOf(
@@ -109,7 +103,6 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
             }
 
             override fun userCanceled(reason: CancellationReason) {
-                cardScanEventsReporter.scanCancelled(reason, scanFlow.collectAnalyticsData())
                 setFragmentResult(
                     CARD_SCAN_FRAGMENT_REQUEST_KEY,
                     bundleOf(
@@ -119,7 +112,6 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
             }
 
             override fun failed(cause: Throwable?) {
-                cardScanEventsReporter.scanFailed(cause, scanFlow.collectAnalyticsData())
                 setFragmentResult(
                     CARD_SCAN_FRAGMENT_REQUEST_KEY,
                     bundleOf(
@@ -183,13 +175,6 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        DaggerCardScanComponent.factory()
-            .build(
-                application = requireActivity().application,
-                cardScanConfiguration = CardScanConfiguration(elementsSessionId = null),
-            )
-            .inject(this)
-
         viewBinding = StripeFragmentCardscanBinding.inflate(inflater, container, false)
 
         setupViewFinderConstraints()
@@ -276,7 +261,6 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
      * Once the camera stream is available, start processing images.
      */
     override suspend fun onCameraStreamAvailable(cameraStream: Flow<CameraPreviewImage<Bitmap>>) {
-        cardScanEventsReporter.scanStarted()
         context?.let {
             scanFlow.startFlow(
                 context = it,
