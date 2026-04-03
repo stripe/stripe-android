@@ -16,7 +16,7 @@ import kotlinx.serialization.json.JsonPrimitive
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun JsonElement.toMap(): Map<String, *> = when (this) {
     is JsonObject -> toMap()
-    else -> throw InvalidSerializationException(this::class.java.simpleName)
+    else -> throw InvalidSerializationException(this::class.simpleName.orEmpty())
 }
 
 /**

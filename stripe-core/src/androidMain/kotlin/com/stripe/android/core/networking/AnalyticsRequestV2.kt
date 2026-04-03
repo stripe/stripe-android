@@ -9,6 +9,7 @@ import com.stripe.android.core.networking.AnalyticsRequestV2.Companion.PARAM_CRE
 import com.stripe.android.core.networking.AnalyticsRequestV2.Companion.PARAM_EVENT_ID
 import com.stripe.android.core.networking.AnalyticsRequestV2.Companion.PARAM_EVENT_NAME
 import com.stripe.android.core.networking.StripeRequest.MimeType
+import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.core.version.StripeSdkVersion.VERSION_NAME
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonArray
@@ -17,7 +18,6 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import java.io.OutputStream
 import java.io.UnsupportedEncodingException
-import java.net.URLEncoder
 import java.util.UUID
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.DurationUnit.SECONDS
@@ -80,13 +80,6 @@ data class AnalyticsRequestV2 private constructor(
             val encodedKey = urlEncode(key)
             val encodedValue = urlEncode(value)
             return "$encodedKey=$encodedValue"
-        }
-
-        @Throws(UnsupportedEncodingException::class)
-        private fun urlEncode(str: String): String {
-            // Preserve original behavior that passing null for an object id will lead
-            // to us actually making a request to /v1/foo/null
-            return URLEncoder.encode(str, Charsets.UTF_8.name())
         }
     }
 

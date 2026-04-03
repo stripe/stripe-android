@@ -2,8 +2,7 @@ package com.stripe.android.core.networking
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.exception.InvalidRequestException
-import java.io.UnsupportedEncodingException
-import java.net.URLEncoder
+import com.stripe.android.core.utils.urlEncode
 import java.util.HashMap
 import java.util.HashSet
 
@@ -132,13 +131,6 @@ object QueryStringFactory {
             val encodedKey = urlEncode(key)
             val encodedValue = urlEncode(value)
             return "$encodedKey=$encodedValue"
-        }
-
-        @Throws(UnsupportedEncodingException::class)
-        private fun urlEncode(str: String): String {
-            // Preserve original behavior that passing null for an object id will lead
-            // to us actually making a request to /v1/foo/null
-            return URLEncoder.encode(str, Charsets.UTF_8.name())
         }
     }
 }

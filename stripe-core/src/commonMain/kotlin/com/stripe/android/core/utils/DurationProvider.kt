@@ -1,10 +1,10 @@
 package com.stripe.android.core.utils
 
-import android.os.SystemClock
 import androidx.annotation.RestrictTo
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.DurationUnit
+import kotlin.time.TimeMark
+import kotlin.time.TimeSource
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface DurationProvider {
@@ -32,19 +32,18 @@ interface DurationProvider {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class DefaultDurationProvider private constructor() : DurationProvider {
 
-    private val store = mutableMapOf<DurationProvider.Key, Long>()
+    private val store = mutableMapOf<DurationProvider.Key, TimeMark>()
 
     override fun start(key: DurationProvider.Key, reset: Boolean) {
         if (reset || key !in store) {
-            val startTime = SystemClock.uptimeMillis()
+            val startTime = TimeSource.Monotonic.markNow()
             store[key] = startTime
         }
     }
 
     override fun end(key: DurationProvider.Key): Duration? {
         val startTime = store.remove(key) ?: return null
-        val duration = SystemClock.uptimeMillis() - startTime
-        return duration.milliseconds
+        return startTime.elapsedNow()
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

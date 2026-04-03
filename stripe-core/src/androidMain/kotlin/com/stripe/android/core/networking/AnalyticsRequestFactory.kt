@@ -125,11 +125,3 @@ open class AnalyticsRequestFactory(
         }
     }
 }
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-interface AnalyticsEvent {
-    /**
-     * value that will be sent as [AnalyticsFields.EVENT] param.
-     */
-    val eventName: String
-}

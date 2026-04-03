@@ -1,23 +1,19 @@
 package com.stripe.android.core.utils
 
 import com.google.common.truth.Truth.assertThat
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
-import java.util.Calendar
 import kotlin.test.Test
 
 /**
  * Test class for [DateUtils].
  */
-@RunWith(RobolectricTestRunner::class)
 class DateUtilsTest {
 
     @Test
     fun convertTwoDigitYearToFour_whenCurrentYearIsLessThanEighty_addsNormalBase() {
         assertThat(
             DateUtils.convertTwoDigitYearToFour(
-                19,
-                createCalendar(year = 2017)
+                inputYear = 19,
+                currentYear = 2017
             )
         ).isEqualTo(2019)
     }
@@ -26,8 +22,8 @@ class DateUtilsTest {
     fun convertTwoDigitYearToFour_whenDateIsNearCenturyButYearIsSmall_addsIncreasedBase() {
         assertThat(
             DateUtils.convertTwoDigitYearToFour(
-                8,
-                createCalendar(year = 2081)
+                inputYear = 8,
+                currentYear = 2081
             )
         ).isEqualTo(2108)
     }
@@ -36,8 +32,8 @@ class DateUtilsTest {
     fun convertTwoDigitYearToFour_whenDateIsNearCenturyAndYearIsLarge_addsNormalBase() {
         assertThat(
             DateUtils.convertTwoDigitYearToFour(
-                95,
-                createCalendar(year = 2088)
+                inputYear = 95,
+                currentYear = 2088
             )
         ).isEqualTo(2095)
     }
@@ -47,16 +43,16 @@ class DateUtilsTest {
         // In the year 2502, when you say "95", you probably mean 2495.
         assertThat(
             DateUtils.convertTwoDigitYearToFour(
-                95,
-                createCalendar(year = 2502)
+                inputYear = 95,
+                currentYear = 2502
             )
         ).isEqualTo(2495)
 
         // A more practical test
         assertThat(
             DateUtils.convertTwoDigitYearToFour(
-                99,
-                createCalendar(year = 2017)
+                inputYear = 99,
+                currentYear = 2017
             )
         ).isEqualTo(1999)
     }
@@ -65,8 +61,8 @@ class DateUtilsTest {
     fun convertTwoDigitYearToFour_whenDateIsMidCenturyAndYearIsLarge_addsNormalBase() {
         assertThat(
             DateUtils.convertTwoDigitYearToFour(
-                99,
-                createCalendar(year = 3535)
+                inputYear = 99,
+                currentYear = 3535
             )
         ).isEqualTo(3599)
     }
@@ -75,9 +71,10 @@ class DateUtilsTest {
     fun isExpiryDataValid_whenDateIsAfterCalendarYear_returnsTrue() {
         assertThat(
             DateUtils.isExpiryDataValid(
-                1,
-                2019,
-                createCalendar(year = 2018, month = Calendar.JANUARY)
+                expiryMonth = 1,
+                expiryYear = 2019,
+                currentYear = 2018,
+                currentMonth = 1
             )
         ).isTrue()
     }
@@ -86,9 +83,10 @@ class DateUtilsTest {
     fun isExpiryDataValid_whenDateIsSameCalendarYearButLaterMonth_returnsTrue() {
         assertThat(
             DateUtils.isExpiryDataValid(
-                2,
-                2018,
-                createCalendar(year = 2018, month = Calendar.JANUARY)
+                expiryMonth = 2,
+                expiryYear = 2018,
+                currentYear = 2018,
+                currentMonth = 1
             )
         ).isTrue()
     }
@@ -97,21 +95,17 @@ class DateUtilsTest {
     fun isExpiryDataValid_whenDateIsSameCalendarYearAndMonth_returnsTrue() {
         assertThat(
             DateUtils.isExpiryDataValid(
-                1,
-                2018,
-                createCalendar(year = 2018, month = Calendar.JANUARY)
+                expiryMonth = 1,
+                expiryYear = 2018,
+                currentYear = 2018,
+                currentMonth = 1
             )
         ).isTrue()
     }
 
     @Test
     fun isExpiryDataValid_whenDateIsSameCalendarYearButEarlierMonth_returnsFalse() {
-        val testCalendar = Calendar.getInstance().also {
-            it.set(Calendar.YEAR, 2018)
-            it.set(Calendar.MONTH, Calendar.MARCH)
-        }
-
-        assertThat(DateUtils.isExpiryDataValid(1, 2018, testCalendar))
+        assertThat(DateUtils.isExpiryDataValid(expiryMonth = 1, expiryYear = 2018, currentYear = 2018, currentMonth = 3))
             .isFalse()
     }
 
@@ -132,21 +126,5 @@ class DateUtilsTest {
         assertThat(
             DateUtils.isExpiryDataValid(5, 9985)
         ).isFalse()
-    }
-
-    private companion object {
-        fun createCalendar(
-            year: Int? = null,
-            month: Int? = null
-        ): Calendar {
-            return Calendar.getInstance().also { calendar ->
-                if (year != null) {
-                    calendar.set(Calendar.YEAR, year)
-                }
-                if (month != null) {
-                    calendar.set(Calendar.MONTH, month)
-                }
-            }
-        }
     }
 }

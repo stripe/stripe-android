@@ -8,11 +8,6 @@ import com.stripe.android.core.Logger
 import javax.inject.Inject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-interface UserFacingLogger {
-    fun logWarningWithoutPii(message: String)
-}
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class RealUserFacingLogger @Inject constructor(context: Context) : UserFacingLogger {
 
     private val isDebuggable = 0 != context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE

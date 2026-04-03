@@ -5,11 +5,6 @@ import androidx.work.WorkManager
 import javax.inject.Inject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun interface IsWorkManagerAvailable {
-    suspend operator fun invoke(): Boolean
-}
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class RealIsWorkManagerAvailable @Inject constructor(
     private val isEnabledForMerchant: suspend () -> Boolean,
 ) : IsWorkManagerAvailable {

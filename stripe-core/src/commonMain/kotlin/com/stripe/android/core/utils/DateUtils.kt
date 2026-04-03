@@ -3,7 +3,13 @@ package com.stripe.android.core.utils
 import androidx.annotation.IntRange
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
-import java.util.Calendar
+
+internal data class CurrentYearMonth(
+    val year: Int,
+    val month: Int
+)
+
+internal expect fun currentYearMonth(): CurrentYearMonth
 
 @SuppressWarnings("MagicNumber")
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -24,19 +30,28 @@ object DateUtils {
      * month and year, `false` otherwise. Note that some cards expire on the first of the
      * month, but we don't validate that here.
      */
-    @JvmStatic
     fun isExpiryDataValid(expiryMonth: Int, expiryYear: Int): Boolean {
         val fullExpiryYear = if (expiryYear < 100) {
             convertTwoDigitYearToFour(expiryYear)
         } else {
             expiryYear
         }
-        return isExpiryDataValid(expiryMonth, fullExpiryYear, Calendar.getInstance())
+        val currentYearMonth = currentYearMonth()
+        return isExpiryDataValid(
+            expiryMonth = expiryMonth,
+            expiryYear = fullExpiryYear,
+            currentYear = currentYearMonth.year,
+            currentMonth = currentYearMonth.month
+        )
     }
 
     @VisibleForTesting
-    @JvmStatic
-    fun isExpiryDataValid(expiryMonth: Int, expiryYear: Int, calendar: Calendar): Boolean {
+    internal fun isExpiryDataValid(
+        expiryMonth: Int,
+        expiryYear: Int,
+        currentYear: Int,
+        currentMonth: Int
+    ): Boolean {
         if (expiryMonth !in 1..12) {
             return false
         }
@@ -45,13 +60,11 @@ object DateUtils {
             return false
         }
 
-        val currentYear = calendar.get(Calendar.YEAR)
         return when {
             expiryYear < currentYear -> false
             expiryYear > currentYear -> true
             else -> { // the card expires this year
-                val readableMonth = calendar.get(Calendar.MONTH) + 1
-                expiryMonth >= readableMonth
+                expiryMonth >= currentMonth
             }
         }
     }
@@ -68,21 +81,20 @@ object DateUtils {
      */
     @IntRange(from = 1000, to = 9999)
     fun convertTwoDigitYearToFour(@IntRange(from = 0, to = 99) inputYear: Int): Int {
-        return convertTwoDigitYearToFour(inputYear, Calendar.getInstance())
+        return convertTwoDigitYearToFour(inputYear, currentYearMonth().year)
     }
 
     @VisibleForTesting
     @IntRange(from = 1000, to = 9999)
-    fun convertTwoDigitYearToFour(
+    internal fun convertTwoDigitYearToFour(
         @IntRange(from = 0, to = 99) inputYear: Int,
-        calendar: Calendar
+        currentYear: Int
     ): Int {
-        val year = calendar.get(Calendar.YEAR)
         // Intentional integer division
-        var centuryBase = year / 100
-        if (year % 100 > 80 && inputYear < 20) {
+        var centuryBase = currentYear / 100
+        if (currentYear % 100 > 80 && inputYear < 20) {
             centuryBase++
-        } else if (year % 100 < 20 && inputYear > 80) {
+        } else if (currentYear % 100 < 20 && inputYear > 80) {
             centuryBase--
         }
         return centuryBase * 100 + inputYear

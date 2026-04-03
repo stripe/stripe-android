@@ -32,13 +32,26 @@ The following types are already migrated into `commonMain`:
 - `StripeModel`
 - `version/StripeSdkVersion`
 - `networking/AnalyticsFields`
+- `networking/AnalyticsEvent`
 - `networking/ExponentialBackoffRetryDelaySupplier`
 - `networking/LinearRetryDelaySupplier`
 - `networking/MarkdownParser`
 - `networking/MarkdownToHtmlSerializer`
 - `networking/NetworkConstants`
+- `networking/JsonUtils`
 - `networking/RequestId`
 - `networking/RetryDelaySupplier`
+- `browser/BrowserCapabilities`
+- `model/Country`
+- `model/CountryCode`
+- `model/serializers/CountryListSerializer`
+- `storage/Storage`
+- `utils/DateUtils`
+- `utils/DefaultDurationProvider` and `DurationProvider`
+- `utils/FeatureFlags`
+- `utils/ResultUtils`
+- `utils/UserFacingLogger` interface
+- `utils/IsWorkManagerAvailable` interface
 
 Shared models use `CommonParcelize`, `CommonParcelable`, and
 `CommonJavaSerializable` so Android keeps the real `Parcelable`/`Serializable`
@@ -51,7 +64,11 @@ Two migration decisions are now validated in code:
    these annotations are not themselves a blocker.
 2. Prefer interface- or DI-based seams over `expect`/`actual` when there is an
    existing Android injection path. The retry-delay suppliers now live in
-   `commonMain`, while Android Dagger wiring stays in `androidMain`.
+   `commonMain`, while Android Dagger wiring stays in `androidMain`. The same
+   pattern now applies to `UserFacingLogger` and `IsWorkManagerAvailable`.
+3. Use narrow `expect`/`actual` only for small platform primitives where DI
+   would add more ceremony than value. `utils/urlEncode()` now follows this
+   pattern so Android keeps `URLEncoder` behavior exactly.
 
 ## Official Kotlin Integration Guidance Applied Here
 
@@ -121,7 +138,7 @@ Applied to this repo:
 | `AnalyticsRequest.kt` | `QueryStringFactory` remains JVM-shaped today and `StripeRequest` still writes through `OutputStream` | Commonize query/form encoding and request-body sink first |
 | `AnalyticsRequestV2.kt` | `java.io.OutputStream`, `java.net.URLEncoder`, `UUID.randomUUID()`, `System.currentTimeMillis()`, and current query-string coupling | Move after Okio body writing, common URL encoding, and runtime-provider cleanup |
 | `QueryStringFactory.kt` | `java.net.URLEncoder` | Replace with a common UTF-8 form-encoding utility that preserves current behavior |
-| `JsonUtils.kt` | Depends on content | Verify, likely portable |
+| `JsonUtils.kt` | None after removing JVM-only type-name lookup | Already in `commonMain` |
 | `RequestExecutor.kt` | Uses `StripeRequest`, `StripeNetworkClient`, `StripeResponse`, and `responseJson()` → `JSONObject` | First remove `OutputStream`/`File` from request and client contracts, then handle JSON abstraction |
 | `ApiRequest.kt` | `Options : Parcelable`, `java.io.OutputStream`, `javax.inject`, and direct dependency on Android-shaped `RequestHeadersFactory.Api` | Split common request data from Android header generation; use Okio for body writing; move Android injection/header code out |
 | `FileUploadRequest.kt` | `java.io.OutputStream`, `java.io.File`, `java.net.URLConnection.guessContentTypeFromName`, and Android-shaped `RequestHeadersFactory.FileUpload` | Use Okio types and content-type resolver; split header generation from common request body construction |
@@ -178,7 +195,7 @@ Applied to this repo:
 
 | File | Blockers | Disposition |
 |------|----------|-------------|
-| `Storage.kt` (interface) | Interface is portable, but the current file also contains Android factory/implementation code | Split the file first, then move the interface to `commonMain` |
+| `Storage.kt` | None after split | Already in `commonMain` |
 | `StorageFactory` | `android.content.Context` | `androidMain` |
 | `SharedPreferencesStorage` | `android.content.SharedPreferences`, `android.util.Log` | `androidMain` |
 
@@ -187,8 +204,7 @@ Applied to this repo:
 - `utils/ContextUtils.kt` — `Context.packageInfo` extension
 - `utils/StatusBarCompat.kt` — Status bar color (uses `Activity`, `Build.VERSION`)
 - `utils/CreationExtrasKtx.kt` — ViewModel factory (AndroidX)
-- `utils/IsWorkManagerAvailable.kt` — WorkManager class-loading check
-- `utils/UserFacingLogger.kt` — `Context.applicationInfo.flags`
+- `utils/PluginDetector.kt` — reflection plus Android logging
 - `browser/BrowserCapabilitiesSupplier.kt` — Chrome Custom Tabs
 - `reactnative/*` — React Native bridge
 - `injection/*` — Dagger modules
@@ -399,13 +415,12 @@ val isError: Boolean = code < 200 || code >= 300
 #### 2d. `QueryStringFactory` — URL encoding
 
 `java.net.URLEncoder.encode()` is JVM-only. Options:
-1. Implement a simple percent-encoding function in common (RFC 3986 is straightforward)
-2. Or use Okio's `Buffer` to build encoded strings
+1. Use a tiny `expect` declaration in `commonMain`
+2. Keep the Android `actual` backed by `java.net.URLEncoder.encode()`
 
-Recommended: write a small `internal fun urlEncode(str: String): String` in common
-using `kotlin.text` APIs + manual percent encoding that preserves the current UTF-8
-`application/x-www-form-urlencoded` behavior. This must remain byte-compatible with
-the existing request encoding for non-ASCII values as well.
+Recommended: use `expect/actual` here instead of a manual common implementation.
+The encoding must stay byte-for-byte compatible with the existing Android/JVM
+form-encoding behavior, and this seam is small enough that DI would not help.
 
 ### Phase 3: Logger, Storage, and Platform Info Interfaces
 
@@ -456,11 +471,11 @@ private object AndroidLogger : Logger {
 
 #### 3b. Storage
 
-Already well-structured. `Storage` is an interface.
+Completed.
 
-- `Storage` interface → `commonMain` (drop `@RestrictTo`)
-- `StorageFactory` → `androidMain`
-- `SharedPreferencesStorage` → `androidMain`
+- `Storage` interface now lives in `commonMain`
+- `StorageFactory` stays in `androidMain`
+- `SharedPreferencesStorage` stays in `androidMain`
 
 #### 3c. PlatformInfo interface (NEW)
 
@@ -630,8 +645,7 @@ Everything that can't be in `commonMain` goes to `androidMain`:
 - `utils/ContextUtils.kt`
 - `utils/StatusBarCompat.kt`
 - `utils/CreationExtrasKtx.kt`
-- `utils/IsWorkManagerAvailable.kt`
-- `utils/UserFacingLogger.kt`
+- `utils/PluginDetector.kt`
 - `frauddetection/` implementations (stores, default repository)
 - `SendAnalyticsRequestV2Worker.kt`
 - Analytics factories that use `PlatformInfo` Android impl
