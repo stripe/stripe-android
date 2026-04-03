@@ -1,8 +1,6 @@
 package com.stripe.android.core.model
 
-import android.os.Parcelable
-
 /**
  * Model for a Stripe API object.
  */
-interface StripeModel : Parcelable
+interface StripeModel : CommonParcelable

@@ -28,7 +28,9 @@ kotlin {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
             freeCompilerArgs.addAll([
-                    "-Xconsistent-data-class-copy-visibility"
+                    "-Xconsistent-data-class-copy-visibility",
+                    "-P",
+                    "plugin:org.jetbrains.kotlin.parcelize:additionalAnnotation=com.stripe.android.core.model.CommonParcelize"
             ])
         }
     }
