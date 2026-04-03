@@ -155,5 +155,4 @@ class CardScanSheet private constructor() {
     fun present(configuration: CardScanConfiguration) {
         launcher.launch(CardScanSheetParams(configuration))
     }
-
 }

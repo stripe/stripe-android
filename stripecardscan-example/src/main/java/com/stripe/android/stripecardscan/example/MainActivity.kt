@@ -17,6 +17,5 @@ class MainActivity : AppCompatActivity() {
         viewBinding.buttonCardScan.setOnClickListener {
             startActivity(Intent(this, CardScanDemoActivity::class.java))
         }
-
     }
 }
