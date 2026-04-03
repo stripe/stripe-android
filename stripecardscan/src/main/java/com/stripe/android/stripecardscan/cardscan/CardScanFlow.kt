@@ -63,7 +63,8 @@ internal abstract class CardScanFlow(
         }
 
         val aggregator = MainLoopAggregator(
-            listener = this@CardScanFlow
+            listener = this@CardScanFlow,
+            enableExpiryWait = enableMlKitTextRecognition,
         ).also { it.bindToLifecycle(lifecycleOwner) }
         mainLoopAggregator = aggregator
 

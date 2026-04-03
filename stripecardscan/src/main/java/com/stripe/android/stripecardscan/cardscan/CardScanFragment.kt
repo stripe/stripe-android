@@ -157,7 +157,8 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
             ) = launch(Dispatchers.Main) {
                 when (result.state) {
                     is MainLoopState.Initial -> changeScanState(CardScanState.NotFound)
-                    is MainLoopState.OcrFound -> changeScanState(CardScanState.Found)
+                    is MainLoopState.OcrFound,
+                    is MainLoopState.ExpiryWait -> changeScanState(CardScanState.Found)
                     is MainLoopState.Finished -> changeScanState(CardScanState.Correct)
                 }
             }.let { }
