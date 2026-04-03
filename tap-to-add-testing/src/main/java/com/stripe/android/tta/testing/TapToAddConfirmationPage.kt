@@ -1,11 +1,14 @@
 package com.stripe.android.tta.testing
 
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeTestRule
+import androidx.compose.ui.test.performTextInput
 
 class TapToAddConfirmationPage(
-    composeTestRule: ComposeTestRule,
+    private val composeTestRule: ComposeTestRule,
 ) {
     private val primaryButtonElement = TapToAddPrimaryButtonElement(composeTestRule)
 
@@ -17,6 +20,17 @@ class TapToAddConfirmationPage(
                 assertIsNotEnabled()
             }
         }
+    }
+
+    fun assertCvcRecollectionFieldShown() {
+        composeTestRule.onNode(hasText("CVC"))
+            .assertIsDisplayed()
+            .assertIsEnabled()
+    }
+
+    fun fillCvc(cvc: String) {
+        composeTestRule.onNode(hasText("CVC"))
+            .performTextInput(cvc)
     }
 
     fun clickPrimaryButton(label: String) {
