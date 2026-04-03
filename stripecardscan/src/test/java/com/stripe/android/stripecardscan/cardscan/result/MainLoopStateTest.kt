@@ -168,60 +168,6 @@ class MainLoopStateTest {
         assertThat(finished.expiryYear).isNull()
     }
 
-    // --- Analytics fields on Finished ---
-
-    @Test
-    fun `Finished has ocr_agreement finishReason when agreement reached`() = runTest {
-        var state: MainLoopState = MainLoopState.Initial(timeSource)
-
-        state = state.consumeTransition(CardOcr.Prediction(pan = "4242424242424242"))
-        state = state.consumeTransition(CardOcr.Prediction(pan = "4242424242424242"))
-        state = state.consumeTransition(CardOcr.Prediction(pan = "4242424242424242"))
-
-        assertThat(state).isInstanceOf(MainLoopState.Finished::class.java)
-        val finished = state as MainLoopState.Finished
-        assertThat(finished.finishReason).isEqualTo(MainLoopState.FINISH_REASON_OCR_AGREEMENT)
-        assertThat(finished.highestPanAgreement).isEqualTo(3)
-        assertThat(finished.expiryFound).isFalse()
-    }
-
-    @Test
-    fun `Finished has timeout finishReason when timed out`() = runTest {
-        var state: MainLoopState = MainLoopState.Initial(timeSource)
-
-        // First PAN to enter OcrFound
-        state = state.consumeTransition(CardOcr.Prediction(pan = "4242424242424242"))
-        assertThat(state).isInstanceOf(MainLoopState.OcrFound::class.java)
-
-        // Advance past OCR_SEARCH_DURATION
-        timeSource += MainLoopState.OCR_SEARCH_DURATION + 1.seconds
-
-        // One more frame triggers timeout check
-        state = state.consumeTransition(CardOcr.Prediction(pan = "5500000000000004"))
-
-        assertThat(state).isInstanceOf(MainLoopState.Finished::class.java)
-        val finished = state as MainLoopState.Finished
-        assertThat(finished.finishReason).isEqualTo(MainLoopState.FINISH_REASON_TIMEOUT)
-    }
-
-    @Test
-    fun `Finished has expiryFound true when expiry detected`() = runTest {
-        var state: MainLoopState = MainLoopState.Initial(timeSource)
-        val prediction = CardOcr.Prediction(
-            pan = "4242424242424242",
-            expiryMonth = 12,
-            expiryYear = 2028,
-        )
-
-        state = state.consumeTransition(prediction)
-        state = state.consumeTransition(prediction)
-        state = state.consumeTransition(prediction)
-
-        assertThat(state).isInstanceOf(MainLoopState.Finished::class.java)
-        val finished = state as MainLoopState.Finished
-        assertThat(finished.expiryFound).isTrue()
-    }
-
     @Test
     fun `OcrFound accumulates expiry arriving on later frames`() = runTest {
         var state: MainLoopState = MainLoopState.Initial(timeSource)

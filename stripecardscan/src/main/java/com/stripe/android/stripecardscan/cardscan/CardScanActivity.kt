@@ -97,8 +97,6 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
 
     override var scanStatePrevious: CardScanState? = null
 
-    private var lastAnalyticsData: CardScanAnalyticsData? = null
-
     override val scanErrorListener: ScanErrorListener = ScanErrorListener()
 
     override val cameraAdapterBuilder = ::getScanCameraAdapter
@@ -110,7 +108,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
         object : CardScanResultListener {
 
             override fun cardScanComplete(card: ScannedCard) {
-                cardScanEventsReporter.scanSucceeded(lastAnalyticsData)
+                cardScanEventsReporter.scanSucceeded(scanFlow.collectAnalyticsData())
                 val intent = Intent()
                     .putExtra(
                         INTENT_PARAM_RESULT,
@@ -120,8 +118,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
             }
 
             override fun userCanceled(reason: CancellationReason) {
-                val analyticsData = lastAnalyticsData ?: scanFlow.collectPartialAnalyticsData()
-                cardScanEventsReporter.scanCancelled(reason, analyticsData)
+                cardScanEventsReporter.scanCancelled(reason, scanFlow.collectAnalyticsData())
                 val intent = Intent()
                     .putExtra(
                         INTENT_PARAM_RESULT,
@@ -131,8 +128,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
             }
 
             override fun failed(cause: Throwable?) {
-                val analyticsData = lastAnalyticsData ?: scanFlow.collectPartialAnalyticsData()
-                cardScanEventsReporter.scanFailed(cause, analyticsData)
+                cardScanEventsReporter.scanFailed(cause, scanFlow.collectAnalyticsData())
                 val intent = Intent()
                     .putExtra(
                         INTENT_PARAM_RESULT,
@@ -155,7 +151,6 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
             override suspend fun onResult(
                 result: MainLoopAggregator.FinalResult
             ) {
-                lastAnalyticsData = collectAnalyticsData(result)
                 launch(Dispatchers.Main) {
                     changeScanState(CardScanState.Correct)
                     cameraAdapter.unbindFromLifecycle(this@CardScanActivity)

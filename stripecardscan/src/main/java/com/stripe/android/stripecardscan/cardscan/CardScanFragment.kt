@@ -59,8 +59,6 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
     @Inject
     internal lateinit var cardScanEventsReporter: CardScanEventsReporter
 
-    private var lastAnalyticsData: CardScanAnalyticsData? = null
-
     override val minimumAnalysisResolution = MINIMUM_RESOLUTION
 
     private lateinit var viewBinding: StripeFragmentCardscanBinding
@@ -101,7 +99,7 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
 
             override fun cardScanComplete(card: ScannedCard) {
                 if (::cardScanEventsReporter.isInitialized) {
-                    cardScanEventsReporter.scanSucceeded(lastAnalyticsData)
+                    cardScanEventsReporter.scanSucceeded(scanFlow.collectAnalyticsData())
                 }
                 setFragmentResult(
                     CARD_SCAN_FRAGMENT_REQUEST_KEY,
@@ -114,8 +112,7 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
 
             override fun userCanceled(reason: CancellationReason) {
                 if (::cardScanEventsReporter.isInitialized) {
-                    val analyticsData = lastAnalyticsData ?: scanFlow.collectPartialAnalyticsData()
-                    cardScanEventsReporter.scanCancelled(reason, analyticsData)
+                    cardScanEventsReporter.scanCancelled(reason, scanFlow.collectAnalyticsData())
                 }
                 setFragmentResult(
                     CARD_SCAN_FRAGMENT_REQUEST_KEY,
@@ -127,8 +124,7 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
 
             override fun failed(cause: Throwable?) {
                 if (::cardScanEventsReporter.isInitialized) {
-                    val analyticsData = lastAnalyticsData ?: scanFlow.collectPartialAnalyticsData()
-                    cardScanEventsReporter.scanFailed(cause, analyticsData)
+                    cardScanEventsReporter.scanFailed(cause, scanFlow.collectAnalyticsData())
                 }
                 setFragmentResult(
                     CARD_SCAN_FRAGMENT_REQUEST_KEY,
@@ -153,7 +149,6 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
             override suspend fun onResult(
                 result: MainLoopAggregator.FinalResult
             ) {
-                lastAnalyticsData = collectAnalyticsData(result)
                 launch(Dispatchers.Main) {
                     changeScanState(CardScanState.Correct)
                     activity?.let { cameraAdapter.unbindFromLifecycle(it) }

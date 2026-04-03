@@ -40,6 +40,7 @@ internal abstract class CardScanFlow(
     private var canceled = false
 
     private var mainLoopAggregator: MainLoopAggregator? = null
+    private var analyticsObserver: CardScanAnalyticsObserver? = null
 
     private val analyzerLoops = mutableListOf<AnalyzerLoop>()
 
@@ -62,9 +63,15 @@ internal abstract class CardScanFlow(
             return@launch
         }
 
+        val observer = CardScanAnalyticsObserver(
+            mlKitEnabled = enableMlKitTextRecognition,
+        )
+        analyticsObserver = observer
+
         val aggregator = MainLoopAggregator(
             listener = this@CardScanFlow,
             enableExpiryWait = enableMlKitTextRecognition,
+            analyticsObserver = observer,
         ).also { it.bindToLifecycle(lifecycleOwner) }
         mainLoopAggregator = aggregator
 
@@ -131,37 +138,14 @@ internal abstract class CardScanFlow(
     }
 
     /**
-     * Collect analytics data from a completed scan with a final result.
+     * Collect analytics data from the observer. Works for both completed and incomplete scans.
      */
-    internal fun collectAnalyticsData(
-        finalResult: MainLoopAggregator.FinalResult
-    ): CardScanAnalyticsData {
-        val aggregator = mainLoopAggregator
-        return CardScanAnalyticsData().apply {
-            mlKitEnabled = enableMlKitTextRecognition
-            totalFramesProcessed = aggregator?.getTotalFramesProcessed() ?: 0
-            averageFrameRateHz = aggregator?.getAverageFrameRateHz()
-            panFound = true
-            expiryFound = finalResult.expiryFound
-            highestPanAgreement = finalResult.highestPanAgreement
-            finishReason = finalResult.finishReason
-            stateResetCount = aggregator?.stateResetCount ?: 0
-            timeToFirstDetectionMs = aggregator?.timeToFirstDetectionMs
-        }
-    }
-
-    /**
-     * Collect partial analytics data when scan ends without a final result (failure/cancel).
-     */
-    internal fun collectPartialAnalyticsData(): CardScanAnalyticsData {
-        val aggregator = mainLoopAggregator
-        return CardScanAnalyticsData().apply {
-            mlKitEnabled = enableMlKitTextRecognition
-            totalFramesProcessed = aggregator?.getTotalFramesProcessed() ?: 0
-            averageFrameRateHz = aggregator?.getAverageFrameRateHz()
-            stateResetCount = aggregator?.stateResetCount ?: 0
-            timeToFirstDetectionMs = aggregator?.timeToFirstDetectionMs
-        }
+    internal fun collectAnalyticsData(): CardScanAnalyticsData {
+        val observer = analyticsObserver ?: return CardScanAnalyticsData()
+        return observer.buildAnalyticsData(
+            totalFramesProcessed = mainLoopAggregator?.getTotalFramesProcessed() ?: 0,
+            averageFrameRateHz = mainLoopAggregator?.getAverageFrameRateHz(),
+        )
     }
 
     private fun createAndRegisterLoop(

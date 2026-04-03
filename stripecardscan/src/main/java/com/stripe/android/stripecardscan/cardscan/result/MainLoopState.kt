@@ -28,9 +28,6 @@ internal sealed class MainLoopState(
          */
         const val DESIRED_OCR_AGREEMENT = 3
 
-        const val FINISH_REASON_OCR_AGREEMENT = "ocr_agreement"
-        const val FINISH_REASON_TIMEOUT = "timeout"
-
         /**
          * After PAN agreement is reached, wait up to this duration for an expiration date
          * when expiry detection is enabled.
@@ -128,9 +125,6 @@ internal sealed class MainLoopState(
                         pan = mostLikelyPan,
                         expiryMonth = mostLikelyExpiry?.month,
                         expiryYear = mostLikelyExpiry?.year,
-                        finishReason = if (isOcrSatisfied()) FINISH_REASON_OCR_AGREEMENT else FINISH_REASON_TIMEOUT,
-                        highestPanAgreement = highestOcrCount(),
-                        expiryFound = mostLikelyExpiry != null,
                     )
                 isNoCardVisible() ->
                     Initial(timeSource, enableExpiryWait)
@@ -161,12 +155,14 @@ internal sealed class MainLoopState(
                 )
             }
 
-            return if (mostLikelyExpiry != null || isTimedOut()) {
+            val expiry = mostLikelyExpiry
+            val timedOut = isTimedOut()
+            return if (expiry != null || timedOut) {
                 Finished(
                     timeSource = timeSource,
                     pan = pan,
-                    expiryMonth = mostLikelyExpiry?.month,
-                    expiryYear = mostLikelyExpiry?.year,
+                    expiryMonth = expiry?.month,
+                    expiryYear = expiry?.year,
                 )
             } else {
                 this
@@ -179,9 +175,6 @@ internal sealed class MainLoopState(
         val pan: String,
         val expiryMonth: Int? = null,
         val expiryYear: Int? = null,
-        val finishReason: String = FINISH_REASON_OCR_AGREEMENT,
-        val highestPanAgreement: Int = DESIRED_OCR_AGREEMENT,
-        val expiryFound: Boolean = false,
     ) : MainLoopState(timeSource) {
         override suspend fun consumeTransition(
             transition: CardOcr.Prediction

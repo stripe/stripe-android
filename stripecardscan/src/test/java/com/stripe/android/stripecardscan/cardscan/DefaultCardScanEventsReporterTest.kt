@@ -48,17 +48,16 @@ internal class DefaultCardScanEventsReporterTest {
             defaultCardScanEventsReporter.scanStarted()
             ShadowSystemClock.advanceBy(5, TimeUnit.SECONDS)
 
-            val analyticsData = CardScanAnalyticsData().apply {
-                mlKitEnabled = true
-                totalFramesProcessed = 42
-                averageFrameRateHz = 2.8f
-                panFound = true
-                expiryFound = true
-                highestPanAgreement = 3
-                finishReason = "ocr_agreement"
-                timeToFirstDetectionMs = 1200L
-                stateResetCount = 1
-            }
+            val analyticsData = CardScanAnalyticsData(
+                mlKitEnabled = true,
+                totalFramesProcessed = 42,
+                averageFrameRateHz = 2.8f,
+                panFound = true,
+                expiryFound = true,
+                finishReason = "ocr_agreement",
+                timeToFirstDetectionMs = 1200L,
+                stateResetCount = 1,
+            )
             defaultCardScanEventsReporter.scanSucceeded(analyticsData)
 
             val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
@@ -72,7 +71,6 @@ internal class DefaultCardScanEventsReporterTest {
             assertThat(loggedParams["average_fps"]).isEqualTo(2.8f)
             assertThat(loggedParams["pan_found"]).isEqualTo(true)
             assertThat(loggedParams["expiry_found"]).isEqualTo(true)
-            assertThat(loggedParams["highest_pan_agreement"]).isEqualTo(3)
             assertThat(loggedParams["finish_reason"]).isEqualTo("ocr_agreement")
             assertThat(loggedParams["time_to_first_detection_ms"]).isEqualTo(1200L)
             assertThat(loggedParams["state_reset_count"]).isEqualTo(1)
