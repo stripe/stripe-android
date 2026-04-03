@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 23.3.0 - 2026-04-06
+## XX.XX.XX - 20XX-XX-XX
 
 Added in types for new theming tokens in Connect Embedded Components
 
