@@ -36,7 +36,9 @@ kotlin {
     }
 
     sourceSets {
-        commonMain
+        commonMain.dependencies {
+            implementation libs.androidx.annotation
+        }
         commonTest
 
         androidMain.dependencies {

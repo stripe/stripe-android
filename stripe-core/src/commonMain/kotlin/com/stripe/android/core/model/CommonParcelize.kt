@@ -9,4 +9,4 @@ package com.stripe.android.core.model
  */
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.BINARY)
-annotation class CommonParcelize
+internal annotation class CommonParcelize

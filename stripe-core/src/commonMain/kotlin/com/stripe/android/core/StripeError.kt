@@ -1,9 +1,9 @@
 package com.stripe.android.core
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.model.CommonJavaSerializable
+import com.stripe.android.core.model.CommonParcelize
 import com.stripe.android.core.model.StripeModel
-import kotlinx.parcelize.Parcelize
-import java.io.Serializable
 
 /**
  * A model representing a Stripe [Errors](https://stripe.com/docs/api/errors) object.
@@ -19,7 +19,7 @@ import java.io.Serializable
  * [declined](https://stripe.com/docs/declines)) include an
  * [error code](https://stripe.com/docs/error-codes) that briefly explains the error reported.
  */
-@Parcelize
+@CommonParcelize
 data class StripeError
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 constructor(
@@ -56,7 +56,7 @@ constructor(
     val param: String? = null,
     /**
      * For card errors resulting from a card issuer decline, a short string indicating the
-     * [card issuer’s reason for the decline](https://stripe.com/docs/declines/codes)
+     * [card issuer's reason for the decline](https://stripe.com/docs/declines/codes)
      * if they provide one.
      *
      * [decline_code](https://stripe.com/docs/api/errors#errors-decline_code)
@@ -80,4 +80,4 @@ constructor(
      * Note - value type is ignored and always parsed as string (true -> "true")
      */
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val extraFields: Map<String, String>? = null
-) : StripeModel, Serializable
+) : StripeModel, CommonJavaSerializable
