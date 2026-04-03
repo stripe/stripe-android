@@ -155,14 +155,12 @@ internal sealed class MainLoopState(
                 )
             }
 
-            val expiry = mostLikelyExpiry
-            val timedOut = isTimedOut()
-            return if (expiry != null || timedOut) {
+            return if (mostLikelyExpiry != null || isTimedOut()) {
                 Finished(
                     timeSource = timeSource,
                     pan = pan,
-                    expiryMonth = expiry?.month,
-                    expiryYear = expiry?.year,
+                    expiryMonth = mostLikelyExpiry?.month,
+                    expiryYear = mostLikelyExpiry?.year,
                 )
             } else {
                 this
