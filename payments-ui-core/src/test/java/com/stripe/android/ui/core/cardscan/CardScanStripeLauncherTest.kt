@@ -107,7 +107,6 @@ class CardScanStripeLauncherTest {
             context = ApplicationProvider.getApplicationContext(),
             eventsReporter = fakeEventsReporter,
             enableMlKitCardScan = false,
-            elementsSessionId = null,
             isLaunchingState = mutableStateOf(false),
         )
 

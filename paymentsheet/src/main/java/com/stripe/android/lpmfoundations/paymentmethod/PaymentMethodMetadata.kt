@@ -89,7 +89,6 @@ internal data class PaymentMethodMetadata(
     val isTapToAddSupported: Boolean,
     val isStripeCardScanAllowed: Boolean,
     val enableMlKitCardScan: Boolean,
-    val elementsSessionId: String? = null,
 ) : Parcelable {
 
     @IgnoredOnParcel
@@ -404,7 +403,6 @@ internal data class PaymentMethodMetadata(
                     customerMetadata != null,
                 isStripeCardScanAllowed = elementsSession.isStripeCardScanAllowed,
                 enableMlKitCardScan = elementsSession.enableMlKitCardScan,
-                elementsSessionId = elementsSession.elementsSessionId,
             )
         }
 
@@ -471,7 +469,6 @@ internal data class PaymentMethodMetadata(
                 experimentsData = elementsSession.experimentsData,
                 isStripeCardScanAllowed = elementsSession.isStripeCardScanAllowed,
                 enableMlKitCardScan = elementsSession.enableMlKitCardScan,
-                elementsSessionId = elementsSession.elementsSessionId,
             )
         }
     }
