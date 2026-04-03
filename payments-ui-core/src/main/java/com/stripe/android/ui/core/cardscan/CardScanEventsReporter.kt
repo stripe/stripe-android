@@ -40,6 +40,9 @@ interface CardScanEventsReporter {
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+val LocalElementsSessionId = compositionLocalOf<String?> { null }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val LocalCardScanEventsReporter = compositionLocalOf<CardScanEventsReporter> {
     EmptyCardScanEventsReporter
 }
