@@ -17,7 +17,8 @@ import kotlin.time.TimeSource
  * [MainLoopState].
  */
 internal class MainLoopAggregator(
-    listener: AggregateResultListener<InterimResult, FinalResult>
+    listener: AggregateResultListener<InterimResult, FinalResult>,
+    enableExpiryWait: Boolean = false,
 ) : ResultAggregator<
     CardOcr.Input,
     MainLoopState,
@@ -26,7 +27,7 @@ internal class MainLoopAggregator(
     FinalResult
     >(
     listener = listener,
-    initialState = MainLoopState.Initial(TimeSource.Monotonic)
+    initialState = MainLoopState.Initial(TimeSource.Monotonic, enableExpiryWait)
 ) {
 
     internal data class FinalResult(

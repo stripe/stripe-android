@@ -6,7 +6,10 @@ import com.stripe.android.stripecardscan.payment.ml.CardOcr
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.TimeSource
 
-internal sealed class MainLoopState(timeSource: TimeSource) : MachineState(timeSource) {
+internal sealed class MainLoopState(
+    timeSource: TimeSource,
+    protected val enableExpiryWait: Boolean = false,
+) : MachineState(timeSource) {
 
     companion object {
         /**
@@ -27,13 +30,22 @@ internal sealed class MainLoopState(timeSource: TimeSource) : MachineState(timeS
 
         const val FINISH_REASON_OCR_AGREEMENT = "ocr_agreement"
         const val FINISH_REASON_TIMEOUT = "timeout"
+
+        /**
+         * After PAN agreement is reached, wait up to this duration for an expiration date
+         * when expiry detection is enabled.
+         */
+        val EXPIRY_WAIT_DURATION = 1.seconds
     }
 
     internal abstract suspend fun consumeTransition(
         transition: CardOcr.Prediction
     ): MainLoopState
 
-    class Initial(timeSource: TimeSource) : MainLoopState(timeSource) {
+    class Initial(
+        timeSource: TimeSource,
+        enableExpiryWait: Boolean = false,
+    ) : MainLoopState(timeSource, enableExpiryWait) {
         override suspend fun consumeTransition(
             transition: CardOcr.Prediction
         ): MainLoopState = if (transition.pan.isNullOrEmpty()) {
@@ -41,6 +53,7 @@ internal sealed class MainLoopState(timeSource: TimeSource) : MachineState(timeS
         } else {
             OcrFound(
                 timeSource = timeSource,
+                enableExpiryWait = enableExpiryWait,
                 pan = transition.pan,
                 expiryMonth = transition.expiryMonth,
                 expiryYear = transition.expiryYear,
@@ -50,10 +63,11 @@ internal sealed class MainLoopState(timeSource: TimeSource) : MachineState(timeS
 
     class OcrFound(
         timeSource: TimeSource,
+        enableExpiryWait: Boolean = false,
         pan: String,
         expiryMonth: Int? = null,
         expiryYear: Int? = null,
-    ) : MainLoopState(timeSource) {
+    ) : MainLoopState(timeSource, enableExpiryWait) {
 
         private val panCounter = ItemCounter(pan)
         private val expiryCounter = ItemCounter(
@@ -93,7 +107,22 @@ internal sealed class MainLoopState(timeSource: TimeSource) : MachineState(timeS
             }
 
             return when {
-                isOcrSatisfied() || isTimedOut() ->
+                isOcrSatisfied() ->
+                    if (enableExpiryWait && mostLikelyExpiry == null) {
+                        ExpiryWait(
+                            timeSource = timeSource,
+                            enableExpiryWait = enableExpiryWait,
+                            pan = mostLikelyPan,
+                        )
+                    } else {
+                        Finished(
+                            timeSource = timeSource,
+                            pan = mostLikelyPan,
+                            expiryMonth = mostLikelyExpiry?.month,
+                            expiryYear = mostLikelyExpiry?.year,
+                        )
+                    }
+                isTimedOut() ->
                     Finished(
                         timeSource = timeSource,
                         pan = mostLikelyPan,
@@ -104,8 +133,43 @@ internal sealed class MainLoopState(timeSource: TimeSource) : MachineState(timeS
                         expiryFound = mostLikelyExpiry != null,
                     )
                 isNoCardVisible() ->
-                    Initial(timeSource)
+                    Initial(timeSource, enableExpiryWait)
                 else -> this
+            }
+        }
+    }
+
+    class ExpiryWait(
+        timeSource: TimeSource,
+        enableExpiryWait: Boolean = false,
+        private val pan: String,
+    ) : MainLoopState(timeSource, enableExpiryWait) {
+
+        private val expiryCounter = ItemCounter<CardOcr.Expiry>(null)
+
+        private val mostLikelyExpiry: CardOcr.Expiry?
+            get() = expiryCounter.getHighestCountItemOrNull()?.item
+
+        private fun isTimedOut() = reachedStateAt.elapsedNow() > EXPIRY_WAIT_DURATION
+
+        override suspend fun consumeTransition(
+            transition: CardOcr.Prediction
+        ): MainLoopState {
+            if (transition.expiryMonth != null && transition.expiryYear != null) {
+                expiryCounter.countItem(
+                    CardOcr.Expiry(month = transition.expiryMonth, year = transition.expiryYear)
+                )
+            }
+
+            return if (mostLikelyExpiry != null || isTimedOut()) {
+                Finished(
+                    timeSource = timeSource,
+                    pan = pan,
+                    expiryMonth = mostLikelyExpiry?.month,
+                    expiryYear = mostLikelyExpiry?.year,
+                )
+            } else {
+                this
             }
         }
     }
