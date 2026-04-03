@@ -1,12 +1,11 @@
 package com.stripe.android.core.model
 
 import androidx.annotation.RestrictTo
-import kotlinx.parcelize.Parcelize
 
 /**
  * [The file object](https://stripe.com/docs/api/files/object)
  */
-@Parcelize
+@CommonParcelize
 data class StripeFile
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 constructor(

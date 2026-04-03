@@ -4,27 +4,31 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.networking.ExponentialBackoffRetryDelaySupplier
 import com.stripe.android.core.networking.LinearRetryDelaySupplier
 import com.stripe.android.core.networking.RetryDelaySupplier
-import dagger.Binds
 import dagger.Module
+import dagger.Provides
 import javax.inject.Named
+import javax.inject.Singleton
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Module
-interface RetryDelayModule {
-    @Binds
-    fun bindsDefaultRetryDelaySupplier(
-        retryDelaySupplier: ExponentialBackoffRetryDelaySupplier
-    ): RetryDelaySupplier
+object RetryDelayModule {
+    @Provides
+    @Singleton
+    fun provideDefaultBackoffRetryDelaySupplier(): RetryDelaySupplier {
+        return ExponentialBackoffRetryDelaySupplier()
+    }
 
-    @Binds
+    @Provides
+    @Singleton
     @Named(LINEAR_DELAY)
-    fun bindsLinearRetryDelaySupplier(
-        retryDelaySupplier: LinearRetryDelaySupplier
-    ): RetryDelaySupplier
+    fun provideLinearRetryDelaySupplier(): RetryDelaySupplier {
+        return LinearRetryDelaySupplier()
+    }
 
-    @Binds
+    @Provides
+    @Singleton
     @Named(EXPONENTIAL_BACKOFF_DELAY)
-    fun bindsExponentialBackoffRetryDelaySupplier(
-        retryDelaySupplier: ExponentialBackoffRetryDelaySupplier
-    ): RetryDelaySupplier
+    fun provideExponentialBackoffRetryDelaySupplier(): RetryDelaySupplier {
+        return ExponentialBackoffRetryDelaySupplier()
+    }
 }

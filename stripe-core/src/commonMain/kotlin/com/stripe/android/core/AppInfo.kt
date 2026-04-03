@@ -1,8 +1,8 @@
 package com.stripe.android.core
 
-import android.os.Parcelable
 import androidx.annotation.RestrictTo
-import kotlinx.parcelize.Parcelize
+import com.stripe.android.core.model.CommonParcelize
+import com.stripe.android.core.model.CommonParcelable
 
 /**
  * Data for identifying your plug-in or library.
@@ -14,13 +14,13 @@ import kotlinx.parcelize.Parcelize
  * @param url Website for your application (e.g. "https://myawesomeapp.info")
  * @param partnerId Your Stripe Partner ID (e.g. "pp_partner_1234")
  */
-@Parcelize
+@CommonParcelize
 data class AppInfo internal constructor(
     private val name: String,
     private val version: String?,
     private val url: String?,
     private val partnerId: String?
-) : Parcelable {
+) : CommonParcelable {
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     val appName: String
         get() = name

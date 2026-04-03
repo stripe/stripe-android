@@ -13,9 +13,45 @@ This is a prerequisite for making the `com.stripe.android.networking` package in
 - **Kotlin**: 2.2.21 (post-2.0 — affects Parcelize KMP approach)
 - **AGP**: 8.13.x, compileSdk 36, minSdk 23
 - **Okio**: 3.16.4 already in dependency catalog (not yet used in stripe-core)
-- **Build plugin**: `com.android.library` + `kotlin-android` via `android-library.gradle`
-- **KMP**: None. Zero `expect`/`actual` declarations in the entire repo.
+- **Build plugin**: `org.jetbrains.kotlin.multiplatform` is already enabled in `stripe-core/build.gradle`
+- **KMP**: `stripe-core` now has `commonMain` and `androidMain`
 - **Consumers**: 10 modules directly depend on `stripe-core` (4 via `api`, 6 via `implementation`)
+
+## Progress Snapshot
+
+The following types are already migrated into `commonMain`:
+
+- `ApiKeyValidator`
+- `ApiVersion`
+- `AppInfo`
+- `Logger` interface plus Android logger factory split
+- `PlatformContext` via `actual typealias PlatformContext = android.content.Context`
+- `StripeError`
+- `StripeFile`
+- `StripeFilePurpose`
+- `StripeModel`
+- `version/StripeSdkVersion`
+- `networking/AnalyticsFields`
+- `networking/ExponentialBackoffRetryDelaySupplier`
+- `networking/LinearRetryDelaySupplier`
+- `networking/MarkdownParser`
+- `networking/MarkdownToHtmlSerializer`
+- `networking/NetworkConstants`
+- `networking/RequestId`
+- `networking/RetryDelaySupplier`
+
+Shared models use `CommonParcelize`, `CommonParcelable`, and
+`CommonJavaSerializable` so Android keeps the real `Parcelable`/`Serializable`
+behavior without forcing platform imports into `commonMain`.
+
+Two migration decisions are now validated in code:
+
+1. Keep `@RestrictTo` in `commonMain` where it still communicates intended
+   visibility. `androidx.annotation` is already a multiplatform dependency, so
+   these annotations are not themselves a blocker.
+2. Prefer interface- or DI-based seams over `expect`/`actual` when there is an
+   existing Android injection path. The retry-delay suppliers now live in
+   `commonMain`, while Android Dagger wiring stays in `androidMain`.
 
 ## Official Kotlin Integration Guidance Applied Here
 
@@ -62,27 +98,31 @@ Applied to this repo:
 
 ### Networking (`com.stripe.android.core.networking`) — 32 files
 
+#### Already in `commonMain`
+
+| File | Notes |
+|------|-------|
+| `RequestId.kt` | Pure value wrapper |
+| `AnalyticsFields.kt` | Pure constants |
+| `RetryDelaySupplier.kt` | Pure interface |
+| `ExponentialBackoffRetryDelaySupplier.kt` | Shared implementation; Android Dagger now provides instances from `RetryDelayModule` |
+| `LinearRetryDelaySupplier.kt` | Shared implementation; Android Dagger now provides instances from `RetryDelayModule` |
+| `MarkdownParser.kt` | Pure regex/string logic |
+| `MarkdownToHtmlSerializer.kt` | `kotlinx.serialization` serializer; common-safe |
+| `NetworkConstants.kt` | Shared HTTP/header constants |
+
 #### Can move to `commonMain` after targeted refactors
 
 | File | Blockers | Fix |
 |------|----------|-----|
-| `StripeRequest.kt` | `java.io.OutputStream` in `writePostBody()` | Replace with `okio.BufferedSink` |
+| `StripeRequest.kt` | `java.io.OutputStream` in `writePostBody()` | Replace with `okio.BufferedSink`; this is the current lowest useful networking seam to unlock |
 | `StripeResponse.kt` | `java.net.HttpURLConnection.HTTP_OK` constants | Replace with inline Int constants (200, 300) |
-| `StripeNetworkClient.kt` | `java.io.File` in `executeRequestForFile` | Replace with `okio.Path` |
-| `NetworkConstants.kt` | `@RestrictTo` only, but some constants are imported from sibling modules | Drop annotation; keep cross-module symbols `public`, make only truly module-local helpers `internal` |
-| `RequestId.kt` | `@RestrictTo` only, but `payments-core` consumes it today | Drop annotation; keep `public` as shared internal API for sibling modules |
-| `AnalyticsRequest.kt` | `@RestrictTo`, `QueryStringFactory` remains JVM-shaped today | Commonize query/form encoding first, then drop annotation |
+| `StripeNetworkClient.kt` | `java.io.File` in `executeRequestForFile` | Replace with `okio.Path`; this pairs directly with the `StripeRequest` change |
+| `AnalyticsRequest.kt` | `QueryStringFactory` remains JVM-shaped today and `StripeRequest` still writes through `OutputStream` | Commonize query/form encoding and request-body sink first |
 | `AnalyticsRequestV2.kt` | `java.io.OutputStream`, `java.net.URLEncoder`, `UUID.randomUUID()`, `System.currentTimeMillis()`, and current query-string coupling | Move after Okio body writing, common URL encoding, and runtime-provider cleanup |
-| `AnalyticsRequestExecutor.kt` | `@RestrictTo` only | Drop annotation, keep as interface |
-| `AnalyticsFields.kt` | `@RestrictTo` only | Drop annotation, keep constants in common |
-| `RetryDelaySupplier.kt` | `@RestrictTo` only | Drop annotation |
-| `ExponentialBackoffRetryDelaySupplier.kt` | `@RestrictTo`, `javax.inject.Inject/Singleton` | Drop annotations, keep logic |
-| `LinearRetryDelaySupplier.kt` | `@RestrictTo`, `javax.inject.Inject` | Drop annotations |
 | `QueryStringFactory.kt` | `java.net.URLEncoder` | Replace with a common UTF-8 form-encoding utility that preserves current behavior |
-| `MarkdownParser.kt` | None significant | Verify no JVM-only APIs |
-| `MarkdownToHtmlSerializer.kt` | None significant | Verify no JVM-only APIs |
 | `JsonUtils.kt` | Depends on content | Verify, likely portable |
-| `RequestExecutor.kt` | Uses `ModelJsonParser` + `responseJson()` → `JSONObject` | Needs JSON abstraction (Phase 2). Already has `executeRequestWithKSerializerParser` using `kotlinx.serialization` |
+| `RequestExecutor.kt` | Uses `StripeRequest`, `StripeNetworkClient`, `StripeResponse`, and `responseJson()` → `JSONObject` | First remove `OutputStream`/`File` from request and client contracts, then handle JSON abstraction |
 | `ApiRequest.kt` | `Options : Parcelable`, `java.io.OutputStream`, `javax.inject`, and direct dependency on Android-shaped `RequestHeadersFactory.Api` | Split common request data from Android header generation; use Okio for body writing; move Android injection/header code out |
 | `FileUploadRequest.kt` | `java.io.OutputStream`, `java.io.File`, `java.net.URLConnection.guessContentTypeFromName`, and Android-shaped `RequestHeadersFactory.FileUpload` | Use Okio types and content-type resolver; split header generation from common request body construction |
 
@@ -108,10 +148,10 @@ Applied to this repo:
 
 | File | Blockers | Fix |
 |------|----------|-----|
-| `StripeModel.kt` | `android.os.Parcelable` | Parcelize KMP approach (see Phase 1) |
-| `StripeFile.kt` | `@Parcelize`, `Parcelable` | Parcelize KMP |
+| `StripeModel.kt` | Already in `commonMain` | Done via `CommonParcelable` |
+| `StripeFile.kt` | Already in `commonMain` | Done via `CommonParcelize` |
 | `StripeFileParams.kt` | `@Parcelize`, `java.io.File` | Parcelize KMP; replace `File` with `okio.Path` |
-| `StripeError.kt` | `@Parcelize`, `java.io.Serializable` | Parcelize KMP; treat `Serializable` as an explicit compatibility decision, not a free cleanup |
+| `StripeError.kt` | Already in `commonMain` | Done via `CommonParcelize` + `CommonJavaSerializable` |
 | `parsers/ModelJsonParser.kt` | `org.json.JSONObject` | Phase 2 — JSON abstraction |
 | `parsers/StripeErrorJsonParser.kt` | `org.json.JSONObject` | Phase 2 — JSON abstraction |
 | Other parsers | `org.json.JSONObject` | Phase 2 |
@@ -127,12 +167,12 @@ Applied to this repo:
 
 | File | Blockers | Disposition |
 |------|----------|-------------|
-| `Logger.kt` | `android.util.Log` | Interface is already clean. Move interface to `commonMain`. Move `REAL_LOGGER` (uses `android.util.Log`) and `getInstance` factory to `androidMain`. |
-| `ApiVersion.kt` | None | `commonMain` directly |
-| `AppInfo.kt` | `@Parcelize`, `Parcelable` | Parcelize KMP |
-| `StripeError.kt` | See models above | Parcelize KMP; preserve or deliberately replace `Serializable` behavior |
-| `ApiKeyValidator.kt` | None likely | `commonMain` |
-| `version/StripeSdkVersion.kt` | None likely | `commonMain` |
+| `Logger.kt` | `android.util.Log` | Already split: interface/common factory surface in `commonMain`, Android logger implementation in `androidMain` |
+| `ApiVersion.kt` | None | Already in `commonMain` |
+| `AppInfo.kt` | `@Parcelize`, `Parcelable` | Already in `commonMain` via `CommonParcelize` + `CommonParcelable` |
+| `StripeError.kt` | See models above | Already in `commonMain`; `Serializable` behavior preserved via shim |
+| `ApiKeyValidator.kt` | None likely | Already in `commonMain` |
+| `version/StripeSdkVersion.kt` | None likely | Already in `commonMain` |
 
 ### Storage (`com.stripe.android.core.storage`)
 
@@ -311,6 +351,11 @@ All existing model classes change `@Parcelize` → `@CommonParcelize` and
 
 **Goal**: Replace `java.io.*` and `java.net.*` types in common networking interfaces with
 Okio equivalents and platform-neutral constants.
+
+This is now the next meaningful migration boundary. The lowest-value files have
+already moved; the smallest high-leverage next step is to commonize
+`StripeRequest` and `StripeNetworkClient` by removing `OutputStream` and `File`
+from their public contracts.
 
 #### 2a. Replace `java.io.OutputStream` with `okio.BufferedSink`
 

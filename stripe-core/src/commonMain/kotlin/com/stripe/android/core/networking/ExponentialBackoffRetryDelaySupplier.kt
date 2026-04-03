@@ -1,21 +1,17 @@
 package com.stripe.android.core.networking
 
 import androidx.annotation.RestrictTo
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.math.pow
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
-@Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class ExponentialBackoffRetryDelaySupplier(
+open class ExponentialBackoffRetryDelaySupplier(
     private val incrementDuration: Duration
 ) : RetryDelaySupplier {
 
-    @Inject
     constructor() : this(DEFAULT_INCREMENT_SECONDS.toDuration(DurationUnit.SECONDS))
 
     override fun maxDuration(maxRetries: Int): Duration {
