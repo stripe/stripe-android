@@ -286,7 +286,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         }
 
         // Fire and forget
-        paymentMethodMessagingPromotionsHelper.prefetchPromotions(
+        paymentMethodMessagingPromotionsHelper.fetchPromotionsAsync(
             intent = elementsSession.stripeIntent,
         )
 

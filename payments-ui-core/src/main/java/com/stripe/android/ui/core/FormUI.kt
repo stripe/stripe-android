@@ -5,13 +5,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.LinkAnnotation
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.ui.core.elements.AffirmElementUI
@@ -28,6 +24,7 @@ import com.stripe.android.ui.core.elements.EmptyFormElement
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.MandateTextUI
 import com.stripe.android.ui.core.elements.PaymentMethodMessageHeaderElement
+import com.stripe.android.ui.core.elements.PaymentMethodMessageHeaderUI
 import com.stripe.android.ui.core.elements.RenderableFormElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElementUI
@@ -246,25 +243,6 @@ private fun FormUIElement(
         is RenderableFormElement -> element.ComposeUI(enabled, hiddenIdentifiers, lastTextFieldIdentifier)
         is PaymentMethodMessageHeaderElement -> PaymentMethodMessageHeaderUI(element)
     }
-}
-
-@Composable
-internal fun PaymentMethodMessageHeaderUI(paymentMethodMessage: PaymentMethodMessageHeaderElement) {
-    val promotion = paymentMethodMessage.messagePromotion
-    val message = buildAnnotatedString {
-        append(promotion.message)
-        append(". ")
-        withLink(
-            LinkAnnotation.Url(
-            url = promotion.learnMore.url
-        )
-        ) {
-            append(promotion.learnMore.message)
-        }
-    }
-    Text(
-        text = message
-    )
 }
 
 private fun Modifier.formVerticalPadding(

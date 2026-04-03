@@ -74,8 +74,7 @@ private object AfterpayClearpayUiDefinitionFactory : UiDefinitionFactory.Simple(
         } else {
             AfterpayClearpayHeaderElement(
                 identifier = IdentifierSpec.Generic("afterpay_header"),
-                currency = metadata.stripeIntent.currency,
-                promotion = promotion
+                currency = metadata.stripeIntent.currency
             )
         }
 

@@ -29,6 +29,7 @@ import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagingPromotionsHelperModule
 import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
 import com.stripe.android.paymentsheet.state.CreateLinkState
 import com.stripe.android.paymentsheet.state.DefaultAnalyticsMetadataFactory
@@ -68,6 +69,7 @@ import javax.inject.Singleton
         EmbeddedLinkExtrasModule::class,
         PaymentsIntegrityModule::class,
         LinkHoldbackExposureModule::class,
+        PaymentMethodMessagingPromotionsHelperModule::class,
     ],
 )
 internal interface EmbeddedPaymentElementViewModelComponent {
