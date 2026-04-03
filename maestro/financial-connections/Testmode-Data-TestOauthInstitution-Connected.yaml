@@ -1,6 +1,7 @@
 appId: com.stripe.android.financialconnections.example
 tags:
-  - skip
+  - all
+  - testmode-data
 ---
 - startRecording: ${'/tmp/test_results/testmode-data-testoauthinstitution-connected-' + new Date().getTime()}
 - clearState
