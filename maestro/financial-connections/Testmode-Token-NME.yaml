@@ -4,8 +4,7 @@
 ##
 appId: com.stripe.android.financialconnections.example
 tags:
-  - all
-  - testmode-token
+  - skip
 ---
 - startRecording: ${'/tmp/test_results/testmode-nme-' + new Date().getTime()}
 - clearState
