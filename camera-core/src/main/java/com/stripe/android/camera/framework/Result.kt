@@ -10,6 +10,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlin.time.Duration
 
 /**
  * A result handler for data processing. This is called when results are available from an
@@ -187,6 +188,24 @@ abstract class ResultAggregator<
                 }
                 isFinished
             }
+        }
+    }
+
+    /**
+     * Get the total number of frames processed by the aggregator.
+     */
+    fun getTotalFramesProcessed(): Long = frameRateTracker.getAverageFrameRate().amount
+
+    /**
+     * Get the average frame processing rate in Hz, or null if no frames have been processed.
+     */
+    @Suppress("MagicNumber")
+    fun getAverageFrameRateHz(): Float? {
+        val rate = frameRateTracker.getAverageFrameRate()
+        return if (rate.duration > Duration.ZERO) {
+            (rate.amount.toDouble() / rate.duration.inWholeMilliseconds * 1000).toFloat()
+        } else {
+            null
         }
     }
 

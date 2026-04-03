@@ -43,6 +43,42 @@ internal class DefaultCardScanEventsReporterTest {
     }
 
     @Test
+    fun testScanSucceededWithAnalyticsData() =
+        runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor ->
+            defaultCardScanEventsReporter.scanStarted()
+            ShadowSystemClock.advanceBy(5, TimeUnit.SECONDS)
+
+            val analyticsData = CardScanAnalyticsData().apply {
+                mlKitEnabled = true
+                totalFramesProcessed = 42
+                averageFrameRateHz = 2.8f
+                panFound = true
+                expiryFound = true
+                highestPanAgreement = 3
+                finishReason = "ocr_agreement"
+                timeToFirstDetectionMs = 1200L
+                stateResetCount = 1
+            }
+            defaultCardScanEventsReporter.scanSucceeded(analyticsData)
+
+            val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
+
+            assertThat(loggedRequests).hasSize(2)
+            val loggedParams = loggedRequests.last().params
+            assertThat(loggedParams["event"]).isEqualTo("cardscan_success")
+            assertThat(loggedParams["duration"]).isEqualTo(5f)
+            assertThat(loggedParams["ml_kit_enabled"]).isEqualTo(true)
+            assertThat(loggedParams["total_frames_processed"]).isEqualTo(42L)
+            assertThat(loggedParams["average_fps"]).isEqualTo(2.8f)
+            assertThat(loggedParams["pan_found"]).isEqualTo(true)
+            assertThat(loggedParams["expiry_found"]).isEqualTo(true)
+            assertThat(loggedParams["highest_pan_agreement"]).isEqualTo(3)
+            assertThat(loggedParams["finish_reason"]).isEqualTo("ocr_agreement")
+            assertThat(loggedParams["time_to_first_detection_ms"]).isEqualTo(1200L)
+            assertThat(loggedParams["state_reset_count"]).isEqualTo(1)
+        }
+
+    @Test
     fun testScanFailed() = runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor ->
         defaultCardScanEventsReporter.scanStarted()
         ShadowSystemClock.advanceBy(11, TimeUnit.SECONDS)

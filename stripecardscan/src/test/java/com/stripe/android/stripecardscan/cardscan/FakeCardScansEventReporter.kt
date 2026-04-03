@@ -3,26 +3,26 @@ package com.stripe.android.stripecardscan.cardscan
 import app.cash.turbine.Turbine
 import com.stripe.android.stripecardscan.scanui.CancellationReason
 
-class FakeCardScansEventReporter private constructor() : CardScanEventsReporter {
+internal class FakeCardScansEventReporter private constructor() : CardScanEventsReporter {
     private val scanStartedTurbine = Turbine<Unit>()
-    private val scanSucceededTurbine = Turbine<Unit>()
-    private val scanFailedTurbine = Turbine<Throwable?>()
-    private val scanCancelledTurbine = Turbine<Unit>()
+    private val scanSucceededTurbine = Turbine<CardScanAnalyticsData?>()
+    private val scanFailedTurbine = Turbine<Pair<Throwable?, CardScanAnalyticsData?>>()
+    private val scanCancelledTurbine = Turbine<Pair<CancellationReason, CardScanAnalyticsData?>>()
 
     override fun scanStarted() {
         scanStartedTurbine.add(Unit)
     }
 
-    override fun scanSucceeded() {
-        scanSucceededTurbine.add(Unit)
+    override fun scanSucceeded(analyticsData: CardScanAnalyticsData?) {
+        scanSucceededTurbine.add(analyticsData)
     }
 
-    override fun scanFailed(error: Throwable?) {
-        scanFailedTurbine.add(error)
+    override fun scanFailed(error: Throwable?, analyticsData: CardScanAnalyticsData?) {
+        scanFailedTurbine.add(Pair(error, analyticsData))
     }
 
-    override fun scanCancelled(reason: CancellationReason) {
-        scanCancelledTurbine.add(Unit)
+    override fun scanCancelled(reason: CancellationReason, analyticsData: CardScanAnalyticsData?) {
+        scanCancelledTurbine.add(Pair(reason, analyticsData))
     }
 
     private fun ensureAllEventsConsumed() {
@@ -39,15 +39,15 @@ class FakeCardScansEventReporter private constructor() : CardScanEventsReporter 
             return eventsReporter.scanStartedTurbine.awaitItem()
         }
 
-        suspend fun awaitScanSucceeded() {
+        suspend fun awaitScanSucceeded(): CardScanAnalyticsData? {
             return eventsReporter.scanSucceededTurbine.awaitItem()
         }
 
-        suspend fun awaitScanFailed(): Throwable? {
+        suspend fun awaitScanFailed(): Pair<Throwable?, CardScanAnalyticsData?> {
             return eventsReporter.scanFailedTurbine.awaitItem()
         }
 
-        suspend fun awaitScanCancelled() {
+        suspend fun awaitScanCancelled(): Pair<CancellationReason, CardScanAnalyticsData?> {
             return eventsReporter.scanCancelledTurbine.awaitItem()
         }
     }

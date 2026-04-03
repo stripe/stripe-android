@@ -33,7 +33,7 @@ internal class CardScanActivityTest {
             activity.resultListener.failed(error)
         }
 
-        assertThat(eventReporterScenario.awaitScanFailed()).isEqualTo(error)
+        assertThat(eventReporterScenario.awaitScanFailed().first).isEqualTo(error)
     }
 
     @Test

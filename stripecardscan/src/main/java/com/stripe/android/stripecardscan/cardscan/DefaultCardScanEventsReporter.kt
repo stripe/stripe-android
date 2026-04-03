@@ -23,32 +23,34 @@ internal class DefaultCardScanEventsReporter @Inject constructor(
         )
     }
 
-    override fun scanSucceeded() {
+    override fun scanSucceeded(analyticsData: CardScanAnalyticsData?) {
         val duration = durationProvider.end(DurationProvider.Key.CardScan)
         fireEvent(
             eventName = "cardscan_success",
-            additionalParams = durationInSecondsFromStart(duration)
+            additionalParams = durationInSecondsFromStart(duration) +
+                (analyticsData?.toParamMap() ?: emptyMap())
         )
     }
 
-    override fun scanFailed(error: Throwable?) {
+    override fun scanFailed(error: Throwable?, analyticsData: CardScanAnalyticsData?) {
         val duration = durationProvider.end(DurationProvider.Key.CardScan)
         val params = error?.let {
             mapOf("error_message" to error.safeAnalyticsMessage)
         } ?: emptyMap()
         fireEvent(
             eventName = "cardscan_failed",
-            additionalParams = durationInSecondsFromStart(duration) + params
+            additionalParams = durationInSecondsFromStart(duration) + params +
+                (analyticsData?.toParamMap() ?: emptyMap())
         )
     }
 
-    override fun scanCancelled(reason: CancellationReason) {
+    override fun scanCancelled(reason: CancellationReason, analyticsData: CardScanAnalyticsData?) {
         val duration = durationProvider.end(DurationProvider.Key.CardScan)
         fireEvent(
             eventName = "cardscan_cancel",
             additionalParams = durationInSecondsFromStart(duration) + mapOf(
                 "cancellation_reason" to reason.analyticsReason()
-            )
+            ) + (analyticsData?.toParamMap() ?: emptyMap())
         )
     }
 

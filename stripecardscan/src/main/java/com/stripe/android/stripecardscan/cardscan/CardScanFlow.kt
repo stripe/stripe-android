@@ -129,6 +129,40 @@ internal abstract class CardScanFlow(
         analyzerLoops.clear()
     }
 
+    /**
+     * Collect analytics data from a completed scan with a final result.
+     */
+    internal fun collectAnalyticsData(
+        finalResult: MainLoopAggregator.FinalResult
+    ): CardScanAnalyticsData {
+        val aggregator = mainLoopAggregator
+        return CardScanAnalyticsData().apply {
+            mlKitEnabled = enableMlKitTextRecognition
+            totalFramesProcessed = aggregator?.getTotalFramesProcessed() ?: 0
+            averageFrameRateHz = aggregator?.getAverageFrameRateHz()
+            panFound = true
+            expiryFound = finalResult.expiryFound
+            highestPanAgreement = finalResult.highestPanAgreement
+            finishReason = finalResult.finishReason
+            stateResetCount = aggregator?.stateResetCount ?: 0
+            timeToFirstDetectionMs = aggregator?.timeToFirstDetectionMs
+        }
+    }
+
+    /**
+     * Collect partial analytics data when scan ends without a final result (failure/cancel).
+     */
+    internal fun collectPartialAnalyticsData(): CardScanAnalyticsData {
+        val aggregator = mainLoopAggregator
+        return CardScanAnalyticsData().apply {
+            mlKitEnabled = enableMlKitTextRecognition
+            totalFramesProcessed = aggregator?.getTotalFramesProcessed() ?: 0
+            averageFrameRateHz = aggregator?.getAverageFrameRateHz()
+            stateResetCount = aggregator?.stateResetCount ?: 0
+            timeToFirstDetectionMs = aggregator?.timeToFirstDetectionMs
+        }
+    }
+
     private fun createAndRegisterLoop(
         pool: AnalyzerPool<CardOcr.Input, Any, CardOcr.Prediction>,
         aggregator: MainLoopAggregator,

@@ -24,6 +24,9 @@ internal sealed class MainLoopState(timeSource: TimeSource) : MachineState(timeS
          * numbers.
          */
         const val DESIRED_OCR_AGREEMENT = 3
+
+        const val FINISH_REASON_OCR_AGREEMENT = "ocr_agreement"
+        const val FINISH_REASON_TIMEOUT = "timeout"
     }
 
     internal abstract suspend fun consumeTransition(
@@ -96,6 +99,9 @@ internal sealed class MainLoopState(timeSource: TimeSource) : MachineState(timeS
                         pan = mostLikelyPan,
                         expiryMonth = mostLikelyExpiry?.month,
                         expiryYear = mostLikelyExpiry?.year,
+                        finishReason = if (isOcrSatisfied()) FINISH_REASON_OCR_AGREEMENT else FINISH_REASON_TIMEOUT,
+                        highestPanAgreement = highestOcrCount(),
+                        expiryFound = mostLikelyExpiry != null,
                     )
                 isNoCardVisible() ->
                     Initial(timeSource)
@@ -109,6 +115,9 @@ internal sealed class MainLoopState(timeSource: TimeSource) : MachineState(timeS
         val pan: String,
         val expiryMonth: Int? = null,
         val expiryYear: Int? = null,
+        val finishReason: String = FINISH_REASON_OCR_AGREEMENT,
+        val highestPanAgreement: Int = DESIRED_OCR_AGREEMENT,
+        val expiryFound: Boolean = false,
     ) : MainLoopState(timeSource) {
         override suspend fun consumeTransition(
             transition: CardOcr.Prediction

@@ -5,9 +5,9 @@ import com.stripe.android.stripecardscan.scanui.CancellationReason
 internal interface CardScanEventsReporter {
     fun scanStarted()
 
-    fun scanSucceeded()
+    fun scanSucceeded(analyticsData: CardScanAnalyticsData? = null)
 
-    fun scanFailed(error: Throwable?)
+    fun scanFailed(error: Throwable?, analyticsData: CardScanAnalyticsData? = null)
 
-    fun scanCancelled(reason: CancellationReason)
+    fun scanCancelled(reason: CancellationReason, analyticsData: CardScanAnalyticsData? = null)
 }

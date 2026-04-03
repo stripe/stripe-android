@@ -97,6 +97,8 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
 
     override var scanStatePrevious: CardScanState? = null
 
+    private var lastAnalyticsData: CardScanAnalyticsData? = null
+
     override val scanErrorListener: ScanErrorListener = ScanErrorListener()
 
     override val cameraAdapterBuilder = ::getScanCameraAdapter
@@ -108,7 +110,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
         object : CardScanResultListener {
 
             override fun cardScanComplete(card: ScannedCard) {
-                cardScanEventsReporter.scanSucceeded()
+                cardScanEventsReporter.scanSucceeded(lastAnalyticsData)
                 val intent = Intent()
                     .putExtra(
                         INTENT_PARAM_RESULT,
@@ -118,7 +120,8 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
             }
 
             override fun userCanceled(reason: CancellationReason) {
-                cardScanEventsReporter.scanCancelled(reason)
+                val analyticsData = lastAnalyticsData ?: scanFlow.collectPartialAnalyticsData()
+                cardScanEventsReporter.scanCancelled(reason, analyticsData)
                 val intent = Intent()
                     .putExtra(
                         INTENT_PARAM_RESULT,
@@ -128,7 +131,8 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
             }
 
             override fun failed(cause: Throwable?) {
-                cardScanEventsReporter.scanFailed(cause)
+                val analyticsData = lastAnalyticsData ?: scanFlow.collectPartialAnalyticsData()
+                cardScanEventsReporter.scanFailed(cause, analyticsData)
                 val intent = Intent()
                     .putExtra(
                         INTENT_PARAM_RESULT,
@@ -151,6 +155,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
             override suspend fun onResult(
                 result: MainLoopAggregator.FinalResult
             ) {
+                lastAnalyticsData = collectAnalyticsData(result)
                 launch(Dispatchers.Main) {
                     changeScanState(CardScanState.Correct)
                     cameraAdapter.unbindFromLifecycle(this@CardScanActivity)
