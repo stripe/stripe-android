@@ -9,7 +9,6 @@ import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.model.PaymentMethodMessage
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive

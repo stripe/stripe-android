@@ -12,8 +12,8 @@ internal class PaymentMethodMessagePromotionJsonParser : ModelJsonParser<Payment
         val paymentPlanGroups = json.optJSONArray("payment_plan_groups")
         if (paymentPlanGroups != null) {
             for (i in 0 until paymentPlanGroups.length()) {
-                val group = paymentPlanGroups.get(i) as? JSONObject ?: continue
-                val content = group.optJSONObject("content") ?: continue
+                val group = paymentPlanGroups.get(i) as? JSONObject
+                val content = group?.optJSONObject("content") ?: continue
                 val promotion = content.optJSONObject("promotion")
                 val promotionMessage = promotion?.optString("message").takeIf { !it.isNullOrBlank() }
                 val learnMore = getLearnMore(content)

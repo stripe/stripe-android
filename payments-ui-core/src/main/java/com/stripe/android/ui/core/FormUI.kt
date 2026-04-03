@@ -27,7 +27,7 @@ import com.stripe.android.ui.core.elements.CardDetailsSectionElementUI
 import com.stripe.android.ui.core.elements.EmptyFormElement
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.MandateTextUI
-import com.stripe.android.ui.core.elements.PaymentMethodMessageHeader
+import com.stripe.android.ui.core.elements.PaymentMethodMessageHeaderElement
 import com.stripe.android.ui.core.elements.RenderableFormElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElementUI
@@ -244,12 +244,12 @@ private fun FormUIElement(
         )
         is OTPElement -> OTPElementUI(enabled, element)
         is RenderableFormElement -> element.ComposeUI(enabled, hiddenIdentifiers, lastTextFieldIdentifier)
-        is PaymentMethodMessageHeader -> PaymentMethodMessageHeaderUI(element)
+        is PaymentMethodMessageHeaderElement -> PaymentMethodMessageHeaderUI(element)
     }
 }
 
 @Composable
-internal fun PaymentMethodMessageHeaderUI(paymentMethodMessage: PaymentMethodMessageHeader) {
+internal fun PaymentMethodMessageHeaderUI(paymentMethodMessage: PaymentMethodMessageHeaderElement) {
     val promotion = paymentMethodMessage.messagePromotion
     val message = buildAnnotatedString {
         append(promotion.message)
@@ -257,7 +257,8 @@ internal fun PaymentMethodMessageHeaderUI(paymentMethodMessage: PaymentMethodMes
         withLink(
             LinkAnnotation.Url(
             url = promotion.learnMore.url
-        )) {
+        )
+        ) {
             append(promotion.learnMore.message)
         }
     }

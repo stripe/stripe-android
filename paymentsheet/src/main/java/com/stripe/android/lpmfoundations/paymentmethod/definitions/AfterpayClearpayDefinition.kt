@@ -12,6 +12,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement
+import com.stripe.android.ui.core.elements.PaymentMethodMessageHeaderElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.ui.core.R as UiCoreR
 
@@ -61,15 +62,25 @@ private object AfterpayClearpayUiDefinitionFactory : UiDefinitionFactory.Simple(
         arguments: UiDefinitionFactory.Arguments,
         builder: FormElementsBuilder,
     ) {
-        val promotion = arguments.paymentMethodMessagingPromotionsHelper?.getPromotionIfAvailableForCode(PaymentMethod.Type.AfterpayClearpay.code)
-        builder
-            .header(
-                AfterpayClearpayHeaderElement(
-                    identifier = IdentifierSpec.Generic("afterpay_header"),
-                    currency = metadata.stripeIntent.currency,
-                    promotion = promotion
-                )
+        val promotion = arguments.paymentMethodMessagingPromotionsHelper?.getPromotionIfAvailableForCode(
+            PaymentMethod.Type.AfterpayClearpay.code
+        )
+
+        val header = if (promotion != null) {
+            PaymentMethodMessageHeaderElement(
+                identifier = IdentifierSpec.Generic("afterpay_header"),
+                messagePromotion = promotion
             )
+        } else {
+            AfterpayClearpayHeaderElement(
+                identifier = IdentifierSpec.Generic("afterpay_header"),
+                currency = metadata.stripeIntent.currency,
+                promotion = promotion
+            )
+        }
+
+        builder
+            .header(header)
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Name)
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Email)
     }
