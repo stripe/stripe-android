@@ -1,7 +1,7 @@
 package com.stripe.android.core.exception
 
 import androidx.annotation.RestrictTo
-import java.io.IOException
+import okio.IOException
 
 /**
  * An [Exception] that represents a failure to connect to Stripe's API.

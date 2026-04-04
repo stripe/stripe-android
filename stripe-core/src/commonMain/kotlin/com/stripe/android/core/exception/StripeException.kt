@@ -2,9 +2,7 @@ package com.stripe.android.core.exception
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.StripeError
-import org.json.JSONException
-import java.io.IOException
-import java.util.Objects
+import okio.IOException
 
 /**
  * A base class for Stripe-related exceptions.
@@ -38,7 +36,11 @@ abstract class StripeException(
     }
 
     override fun hashCode(): Int {
-        return Objects.hash(stripeError, requestId, statusCode, message)
+        var result = stripeError.hashCode()
+        result = 31 * result + requestId.hashCode()
+        result = 31 * result + statusCode
+        result = 31 * result + message.hashCode()
+        return result
     }
 
     private fun typedEquals(ex: StripeException): Boolean {
@@ -55,11 +57,11 @@ abstract class StripeException(
         const val DEFAULT_STATUS_CODE = 0
 
         fun create(throwable: Throwable): StripeException {
-            return when (throwable) {
-                is StripeException -> throwable
-                is JSONException -> APIException(throwable)
-                is IOException -> APIConnectionException.create(throwable)
-                is IllegalArgumentException -> InvalidRequestException(
+            return when {
+                throwable is StripeException -> throwable
+                isJsonException(throwable) -> APIException(throwable)
+                throwable is IOException -> APIConnectionException.create(throwable)
+                throwable is IllegalArgumentException -> InvalidRequestException(
                     message = throwable.message,
                     cause = throwable
                 )
@@ -68,9 +70,15 @@ abstract class StripeException(
         }
 
         private fun analyticsValueForThrowable(throwable: Throwable): String? {
-            val throwableClass = throwable.javaClass
-            if (throwableClass.name.startsWith("android.") || throwableClass.name.startsWith("java.")) {
-                return throwableClass.name
+            val throwableClassName = throwableClassName(throwable)
+            if (
+                throwableClassName != null &&
+                (
+                    throwableClassName.startsWith("android.") ||
+                        throwableClassName.startsWith("java.")
+                    )
+            ) {
+                return throwableClassName
             }
             return null
         }

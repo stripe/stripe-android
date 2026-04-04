@@ -2,7 +2,6 @@ package com.stripe.android.core.exception
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.StripeError
-import java.net.HttpURLConnection
 
 /**
  * A type of [AuthenticationException] resulting from incorrect permissions
@@ -14,8 +13,10 @@ class PermissionException(
 ) : StripeException(
     stripeError,
     requestId,
-    HttpURLConnection.HTTP_FORBIDDEN
+    HTTP_FORBIDDEN
 ) {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     override fun analyticsValue(): String = "permissionError"
 }
+
+private const val HTTP_FORBIDDEN = 403

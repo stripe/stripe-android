@@ -201,8 +201,8 @@ Applied to this repo:
 
 | File | Blockers | Fix |
 |------|----------|-----|
-| `StripeException.kt` | `org.json.JSONException`, `java.io.IOException`, `.javaClass` usage | Replace `JSONException` ref with general approach; `IOException` → `okio.IOException` (re-exported by Okio); `.javaClass` → platform-specific analytics |
-| All other exceptions | `@RestrictTo` only | Drop annotations — all are pure Kotlin classes extending `StripeException` |
+| `StripeException.kt` | None after replacing JVM-only throwable inspection with a tiny platform helper seam | Already in `commonMain`; uses `okio.IOException` plus `ThrowablePlatform` expect/actual helpers for JSON detection and class-name inspection |
+| All other exceptions | None | Already in `commonMain`; `@RestrictTo` stays because `androidx.annotation` is available from common code |
 
 ### Core Utilities
 
@@ -250,7 +250,7 @@ Applied to this repo:
 | `FraudDetectionDataRequestParamsFactory.kt` | `Context`, `Build`, `DisplayMetrics`, `Locale`, `TimeZone` | `androidMain` |
 
 Tracked follow-up:
-- Change `FraudDetectionErrorReporter.reportFraudDetectionError(error: Throwable)` back to `StripeException` once `StripeException` moves to `commonMain`.
+- `FraudDetectionErrorReporter.reportFraudDetectionError(error: Throwable)` can now be narrowed back to `StripeException` in a follow-up, because `StripeException` is in `commonMain`.
 
 ---
 
@@ -697,16 +697,15 @@ as `String` and routes them through `StripeModelParser.parse(String)` or
 
 #### 5a. Exceptions
 
-Almost all exceptions are pure Kotlin. Changes needed:
+This is now done.
 
-- `StripeException.kt`:
-  - Remove `org.json.JSONException` import — replace with a general catch in the
-    factory method, or move `create(throwable)` to `androidMain`
-  - `java.io.IOException` → `okio.IOException` (Okio re-exports it for KMP)
-  - `.javaClass.name` in `analyticsValueForThrowable` → move this helper to `androidMain`
-
-- All other exceptions (`APIException`, `APIConnectionException`, etc.): only need
-  `@RestrictTo` removed. They're pure data carriers extending `StripeException`.
+- `StripeException.kt` moved to `commonMain`.
+- `java.io.IOException` was replaced with `okio.IOException`.
+- JSON exception detection and throwable class-name lookup now go through a tiny
+  `ThrowablePlatform` expect/actual seam.
+- The rest of the hierarchy moved to `commonMain` unchanged apart from source-set
+  relocation; `@RestrictTo` stays in place because `androidx.annotation` is
+  usable from common code.
 
 #### 5b. Finalize StripeNetworkClient in commonMain
 
@@ -754,12 +753,14 @@ stripe-core/
 │   │   ├── StripeError.kt                (@CommonParcelize)
 │   │   ├── exception/
 │   │   │   ├── StripeException.kt
+│   │   │   ├── ExceptionUtils.kt
 │   │   │   ├── APIException.kt
 │   │   │   ├── APIConnectionException.kt
 │   │   │   ├── AuthenticationException.kt
 │   │   │   ├── InvalidRequestException.kt
 │   │   │   ├── PermissionException.kt
 │   │   │   ├── RateLimitException.kt
+│   │   │   ├── ThrowablePlatform.kt
 │   │   │   └── ... (all other exceptions)
 │   │   ├── model/
 │   │   │   ├── CommonParcelize.kt         (annotation)
@@ -816,6 +817,8 @@ stripe-core/
 │   │
 │   ├── androidMain/kotlin/com/stripe/android/core/
 │   │   ├── Logger.android.kt              (real() logger with android.util.Log)
+│   │   ├── exception/
+│   │   │   └── ThrowablePlatform.android.kt
 │   │   ├── model/
 │   │   │   ├── CommonParcelable.android.kt (actual = Parcelable)
 │   │   │   ├── CommonIgnoredOnParcel.android.kt

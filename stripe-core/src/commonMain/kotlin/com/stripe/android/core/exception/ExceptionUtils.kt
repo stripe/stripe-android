@@ -3,7 +3,7 @@
 package com.stripe.android.core.exception
 
 import androidx.annotation.RestrictTo
-import java.io.IOException
+import okio.IOException
 
 private const val IO_EXCEPTION_ANALYTICS_MESSAGE = "ioException"
 private const val DEFAULT_ANALYTICS_MESSAGE = "unknown"
