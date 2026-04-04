@@ -133,6 +133,7 @@ Applied to this repo:
 | `StripeNetworkClient.kt` | Now in `commonMain`; file execution uses `okio.Path` |
 | `QueryStringFactory.kt` | Now in `commonMain`; uses the existing `urlEncode` expect/actual seam |
 | `AnalyticsRequest.kt` | Now in `commonMain`; pure GET request on top of shared query-string building |
+| `AnalyticsRequestV2.kt` | Now in `commonMain`; uses `kotlin.uuid` for event IDs and `kotlin.time.Clock.System` for wall-clock timestamps |
 | `ApiRequest.kt` | Now in `commonMain`; `Options` uses `CommonParcelize` / `CommonParcelable` and header generation now routes through the shared `RequestHeadersFactory` |
 | `RequestHeadersFactory.kt` | Now in `commonMain`; `Locale` usage was reduced to `languageTag: String?`, and Android platform data comes from an internal `RequestHeadersPlatform` expect/actual helper |
 | `StripeClientUserAgentHeaderFactory.kt` | Now in `commonMain`; uses `kotlinx.serialization.json` plus the shared `RequestHeadersPlatform` helper |
@@ -141,7 +142,6 @@ Applied to this repo:
 
 | File | Blockers | Fix |
 |------|----------|-----|
-| `AnalyticsRequestV2.kt` | `java.net.URLEncoder`, `UUID.randomUUID()`, `System.currentTimeMillis()`, and current query-string coupling | Move after common URL encoding and runtime-provider cleanup |
 | `JsonUtils.kt` | None after removing JVM-only type-name lookup | Already in `commonMain` |
 | `RequestExecutor.kt` | Uses `responseJson()` → `JSONObject` and Android-only request implementations | Handle JSON abstraction and commonize request types first |
 | `FileUploadRequest.kt` | `StripeFileParams.file: java.io.File` and `java.net.URLConnection.guessContentTypeFromName` | Keep Okio body writing; replace input file type/content-type resolution |

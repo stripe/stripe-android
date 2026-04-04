@@ -8,19 +8,20 @@ import com.stripe.android.core.networking.AnalyticsRequestV2.Companion.PARAM_CLI
 import com.stripe.android.core.networking.AnalyticsRequestV2.Companion.PARAM_CREATED
 import com.stripe.android.core.networking.AnalyticsRequestV2.Companion.PARAM_EVENT_ID
 import com.stripe.android.core.networking.AnalyticsRequestV2.Companion.PARAM_EVENT_NAME
-import com.stripe.android.core.networking.StripeRequest.MimeType
 import com.stripe.android.core.utils.urlEncode
-import com.stripe.android.core.version.StripeSdkVersion.VERSION_NAME
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
-import java.io.UnsupportedEncodingException
-import java.util.UUID
+import okio.BufferedSink
+import kotlin.time.Clock
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.DurationUnit.SECONDS
-import okio.BufferedSink
+import kotlin.time.ExperimentalTime
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 internal const val InstantAnalyticsExecutionCutOff = 5
 
@@ -67,10 +68,7 @@ data class AnalyticsRequestV2 private constructor(
     internal val postParameters: String = createPostParams()
 
     private val postBodyBytes: ByteArray
-        @Throws(UnsupportedEncodingException::class)
-        get() {
-            return postParameters.toByteArray(Charsets.UTF_8)
-        }
+        get() = postParameters.encodeToByteArray()
 
     private data class Parameter(
         private val key: String,
@@ -134,11 +132,12 @@ data class AnalyticsRequestV2 private constructor(
     /**
      * Parameters required by r.stripe.com
      */
+    @OptIn(ExperimentalUuidApi::class)
     private fun analyticParams(): Map<String, Any> = mapOf(
         PARAM_CLIENT_ID to clientId,
         PARAM_CREATED to created,
         PARAM_EVENT_NAME to eventName,
-        PARAM_EVENT_ID to UUID.randomUUID().toString()
+        PARAM_EVENT_ID to Uuid.random().toString()
     )
 
     override fun writePostBody(sink: BufferedSink) {
@@ -151,7 +150,7 @@ data class AnalyticsRequestV2 private constructor(
     override val headers: Map<String, String> = mapOf(
         HEADER_CONTENT_TYPE to "${MimeType.Form.code}; charset=${Charsets.UTF_8.name()}",
         HEADER_ORIGIN to origin, // required by r.stripe.com
-        HEADER_USER_AGENT to "Stripe/v1 android/$VERSION_NAME" // required by r.stripe.com
+        HEADER_USER_AGENT to RequestHeadersFactory.getUserAgent() // required by r.stripe.com
     )
 
     override val method: Method = Method.POST
@@ -172,7 +171,7 @@ data class AnalyticsRequestV2 private constructor(
     }
 
     private fun createWorkManagerParams(runAttemptCount: Int): Map<String, *> {
-        val currentTimeInSeconds = System.currentTimeMillis().milliseconds.toDouble(SECONDS)
+        val currentTimeInSeconds = analyticsRequestV2CurrentTimeMillis().toDouble(SECONDS)
 
         // Our very scientific formula to determine if an event was fired immediately or
         // with a delay due to unsatisfied conditions.
@@ -214,11 +213,16 @@ data class AnalyticsRequestV2 private constructor(
                 eventName = eventName,
                 clientId = clientId,
                 origin = origin,
-                created = System.currentTimeMillis().milliseconds.toDouble(SECONDS),
+                created = analyticsRequestV2CurrentTimeMillis().toDouble(SECONDS),
                 params = initialParams.toJsonElement(),
             )
         }
     }
+}
+
+@OptIn(ExperimentalTime::class)
+private fun analyticsRequestV2CurrentTimeMillis(): Duration {
+    return Clock.System.now().toEpochMilliseconds().milliseconds
 }
 
 private fun List<*>.toJsonElement(): JsonElement {

@@ -39,6 +39,7 @@ kotlin {
         commonMain.dependencies {
             api libs.okio
             implementation libs.androidx.annotation
+            implementation libs.kotlin.serialization
         }
         commonTest
 
