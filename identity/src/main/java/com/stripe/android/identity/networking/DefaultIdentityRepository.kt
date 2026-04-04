@@ -16,8 +16,8 @@ import com.stripe.android.core.networking.AnalyticsRequestV2
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
-import com.stripe.android.core.networking.responseJson
 import com.stripe.android.core.networking.responseJsonObject
+import com.stripe.android.core.networking.executeRequestWithModelJsonParser as executeCoreRequestWithModelJsonParser
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.ClearDataParam.Companion.createCollectedDataParamEntry
@@ -293,37 +293,14 @@ internal class DefaultIdentityRepository @Inject constructor(
         onSuccessExecutionTimeBlock: (Long) -> Unit = {}
     ): Response {
         val started = TimeSource.Monotonic.markNow()
-        return runCatching {
-            stripeNetworkClient.executeRequest(
-                request
-            )
-        }.fold(
-            onSuccess = { response ->
-                if (response.isError) {
-                    // TODO(ccen) Parse the response code and throw different exceptions
-                    throw APIException(
-                        stripeError = stripeErrorJsonParser.parse(response.responseJsonObject()),
-                        requestId = response.requestId?.value,
-                        statusCode = response.code
-                    )
-                } else {
-                    responseJsonParser.parse(response.responseJson())?.let { response ->
-                        onSuccessExecutionTimeBlock(started.elapsedNow().inWholeMilliseconds)
-                        response
-                    } ?: run {
-                        throw APIException(
-                            message = "$responseJsonParser returns null for ${response.responseJson()}"
-                        )
-                    }
-                }
-            },
-            onFailure = {
-                throw APIConnectionException(
-                    "Failed to execute $request",
-                    cause = it
-                )
-            }
-        )
+        return executeCoreRequestWithModelJsonParser(
+            stripeNetworkClient = stripeNetworkClient,
+            stripeErrorJsonParser = stripeErrorJsonParser,
+            request = request,
+            responseJsonParser = responseJsonParser
+        ).also {
+            onSuccessExecutionTimeBlock(started.elapsedNow().inWholeMilliseconds)
+        }
     }
 
     internal companion object {

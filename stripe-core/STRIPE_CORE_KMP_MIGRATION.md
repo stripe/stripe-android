@@ -155,7 +155,7 @@ Applied to this repo:
 | File | Blockers | Fix |
 |------|----------|-----|
 | `JsonUtils.kt` | None after removing JVM-only type-name lookup | Already in `commonMain` |
-| `RequestExecutor.kt` | Legacy success parsing still depends on `ModelJsonParser` + `responseJson()`; error parsing now uses shared `StripeErrorJsonParser` plus Android `responseJsonObject()` helper | Finish exception/common request work, then split legacy `ModelJsonParser` path from KSerializer/common paths |
+| `RequestExecutor.kt` | Legacy parser inputs are still Android-only via `ModelJsonParser`, but success parsing now routes through shared `StripeModelParser` string seams and error parsing uses `responseJsonObject()` | Finish exception/common request work, then keep draining legacy `ModelJsonParser` implementations |
 | `FileUploadRequest.kt` | `StripeFileParams.file: java.io.File` and `java.net.URLConnection.guessContentTypeFromName` | Keep Okio body writing; replace input file type/content-type resolution |
 
 #### Must stay in `androidMain` (or be restructured)
@@ -623,8 +623,9 @@ This is the most impactful change because `org.json.JSONObject` is used in:
 
 `StripeErrorJsonParser` has already been moved to `commonMain` and now parses
 `kotlinx.serialization.json.JsonObject`. Android callers use a separate
-`responseJsonObject()` helper for error bodies, while the legacy success path
-still goes through `responseJson()` and `ModelJsonParser`.
+`responseJsonObject()` helper for error bodies, while legacy success parsers now
+enter through raw-string seams (`StripeModelParser`) instead of calling
+`responseJson()` directly in production code.
 
 #### Recommended approach: two parallel parser contracts
 
@@ -653,7 +654,9 @@ class ModelJsonParserAdapter<out T : StripeModel>(
 `fetchStripeModelResult` in `StripeApiRepository` (payments-core) now works through
 this seam: legacy `ModelJsonParser<T>` inputs are wrapped in
 `ModelJsonParserAdapter`, and success parsing operates on raw response strings
-instead of calling `responseJson()` directly.
+instead of calling `responseJson()` directly. The same seam is now used by
+other production callers such as `DefaultIdentityRepository`, and
+`FraudDetectionDataRepository` no longer calls `responseJson()` directly either.
 
 Over time, individual parsers migrate from `ModelJsonParser` (using `JSONObject`)
 to either:
@@ -661,7 +664,10 @@ to either:
 2. `StripeModelParser` with manual string/kotlinx.serialization.json parsing (for gradual migration)
 
 **`ResponseJson.kt`** stays in `androidMain` since it creates `org.json.JSONObject`.
-In `commonMain`, response body stays as `String` and goes to `StripeModelParser.parse(String)`.
+At this point it is effectively a legacy helper for remaining Android-only
+`ModelJsonParser` interop and tests; production parsing now keeps response bodies
+as `String` and routes them through `StripeModelParser.parse(String)` or
+`responseJsonObject()`.
 
 ### Phase 5: Exception Layer + StripeNetworkClient Contract Finalization
 

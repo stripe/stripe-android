@@ -2,9 +2,9 @@ package com.stripe.android.core.frauddetection
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.model.parsers.ModelJsonParserAdapter
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeResponse
-import com.stripe.android.core.networking.responseJson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -107,10 +107,12 @@ class DefaultFraudDetectionDataRepository(
     }
 }
 
-private val fraudDetectionJsonParser = FraudDetectionDataJsonParser(timestampSupplier)
+private val fraudDetectionJsonParser = ModelJsonParserAdapter(
+    FraudDetectionDataJsonParser(timestampSupplier)
+)
 
 /**
  * Internal extension to convert the [String] body of [StripeResponse] to a [FraudDetectionData].
  */
 private fun StripeResponse<String>.fraudDetectionData(): FraudDetectionData? =
-    takeIf { isOk }?.let { fraudDetectionJsonParser.parse(it.responseJson()) }
+    takeIf { isOk }?.let { fraudDetectionJsonParser.parse(it.body ?: "{}") }

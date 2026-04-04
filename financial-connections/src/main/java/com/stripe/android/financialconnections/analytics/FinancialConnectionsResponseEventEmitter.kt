@@ -2,7 +2,7 @@ package com.stripe.android.financialconnections.analytics
 
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.StripeResponse
-import com.stripe.android.core.networking.responseJson
+import com.stripe.android.core.networking.responseJsonObject
 import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ErrorCode
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
@@ -10,6 +10,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.model.UserFacingEventResponse
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 import javax.inject.Inject
 
 /**
@@ -41,15 +42,16 @@ internal class FinancialConnectionsResponseEventEmitter @Inject constructor(
 
     private fun StripeResponse<String>.eventsToEmit() = when {
         // error responses: events to emit come in the extra_fields error object
-        isError -> responseJson()
-            .optJSONObject("error")
-            ?.optJSONObject("extra_fields")
+        isError -> responseJsonObject()
+            .getObject("error")
+            ?.getObject("extra_fields")
 
         // success responses: events are emitted by clients.
         else -> null
     }
-        ?.optString(EVENTS_TO_EMIT)
-        ?.takeIf { it.isNotEmpty() }
+        ?.get(EVENTS_TO_EMIT)
+        ?.toString()
+        ?.takeIf { it.isNotEmpty() && it != "null" }
 
     private fun UserFacingEventResponse.toEvent() = runCatching {
         FinancialConnectionsEvent(
@@ -73,3 +75,5 @@ internal class FinancialConnectionsResponseEventEmitter @Inject constructor(
         const val EVENTS_TO_EMIT = "events_to_emit"
     }
 }
+
+private fun JsonObject.getObject(key: String): JsonObject? = this[key] as? JsonObject
