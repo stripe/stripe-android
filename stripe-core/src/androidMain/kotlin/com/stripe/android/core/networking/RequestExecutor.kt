@@ -21,6 +21,29 @@ suspend fun <Response : StripeModel> executeRequestWithModelJsonParser(
     request: StripeRequest,
     responseJsonParser: ModelJsonParser<Response>,
 ): Response {
+    return executeRequestWithStripeModelParser(
+        stripeNetworkClient = stripeNetworkClient,
+        stripeErrorJsonParser = stripeErrorJsonParser,
+        request = request,
+        responseParser = ModelJsonParserAdapter(responseJsonParser),
+        parserName = responseJsonParser::class.java.simpleName,
+        nullParseMessage = { responseBody ->
+            "$responseJsonParser returns null for $responseBody"
+        }
+    )
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+suspend fun <Response : StripeModel> executeRequestWithStripeModelParser(
+    stripeNetworkClient: StripeNetworkClient,
+    stripeErrorJsonParser: StripeErrorJsonParser,
+    request: StripeRequest,
+    responseParser: StripeModelParser<Response>,
+    parserName: String = responseParser::class.java.simpleName,
+    nullParseMessage: (responseBody: String) -> String = {
+        "Unable to parse response with $parserName"
+    }
+): Response {
     return runCatching {
         stripeNetworkClient.executeRequest(request)
     }.fold(
@@ -29,11 +52,9 @@ suspend fun <Response : StripeModel> executeRequestWithModelJsonParser(
                 throw apiException(stripeErrorJsonParser, response)
             } else {
                 response.parseStripeModel(
-                    parser = ModelJsonParserAdapter(responseJsonParser),
-                    parserName = responseJsonParser::class.java.simpleName,
-                    nullParseMessage = { responseBody ->
-                        "$responseJsonParser returns null for $responseBody"
-                    }
+                    parser = responseParser,
+                    parserName = parserName,
+                    nullParseMessage = nullParseMessage
                 )
             }
         },

@@ -2,7 +2,6 @@ package com.stripe.android.core.model.parsers
 
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeFilePurpose
-import org.json.JSONObject
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -25,7 +24,7 @@ class StripeFileJsonParserTest {
             url = "https://files.stripe.com/v1/files/file_1G1H0DBbvEc/contents"
         )
 
-        val DEFAULT = JSONObject(
+        val DEFAULT =
             """
             {
                 "id": "file_1FzRQ6CRMbs6FrXfgjerzyUQ",
@@ -39,6 +38,5 @@ class StripeFileJsonParserTest {
                 "url": "https://files.stripe.com/v1/files/file_1G1H0DBbvEc/contents"
             }
             """.trimIndent()
-        )
     }
 }

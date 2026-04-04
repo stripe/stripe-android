@@ -183,6 +183,7 @@ Applied to this repo:
 | `StripeError.kt` | Already in `commonMain` | Done via `CommonParcelize` + `CommonJavaSerializable` |
 | `parsers/StripeModelParser.kt` | Already in `commonMain`; string-based shared parser seam | Done; Android bridges legacy `ModelJsonParser` through `ModelJsonParserAdapter` |
 | `parsers/ModelJsonParser.kt` | `org.json.JSONObject` | Phase 2 — JSON abstraction |
+| `parsers/StripeFileJsonParser.kt` | Already in `commonMain`; string-based parser over `kotlinx.serialization.json` | Done |
 | `parsers/StripeErrorJsonParser.kt` | Already in `commonMain`; uses `kotlinx.serialization.json.JsonObject` instead of `org.json.JSONObject` | Done; Android callers parse error bodies through `responseJsonObject()` |
 | `serializers/StripeErrorSerializer.kt` | Already in `commonMain`; deserializes from `kotlinx.serialization.json.JsonObject` | Done |
 | Other parsers | `org.json.JSONObject` | Phase 2 |
@@ -657,6 +658,8 @@ this seam: legacy `ModelJsonParser<T>` inputs are wrapped in
 instead of calling `responseJson()` directly. The same seam is now used by
 other production callers such as `DefaultIdentityRepository`, and
 `FraudDetectionDataRepository` no longer calls `responseJson()` directly either.
+`StripeFileJsonParser` has already crossed this seam completely and now lives in
+`commonMain` as a direct `StripeModelParser<StripeFile>` implementation.
 
 Over time, individual parsers migrate from `ModelJsonParser` (using `JSONObject`)
 to either:
@@ -749,6 +752,7 @@ stripe-core/
 │   │   │   ├── StripeFilePurpose.kt
 │   │   │   ├── parsers/
 │   │   │   │   ├── StripeErrorJsonParser.kt
+│   │   │   │   ├── StripeFileJsonParser.kt
 │   │   │   │   └── StripeModelParser.kt
 │   │   │   ├── serializers/
 │   │   │   │   └── StripeErrorSerializer.kt

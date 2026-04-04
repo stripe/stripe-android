@@ -9,15 +9,15 @@ import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.model.StripeFilePurpose
 import com.stripe.android.core.model.StripeModel
-import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.model.parsers.StripeFileJsonParser
+import com.stripe.android.core.model.parsers.StripeModelParser
 import com.stripe.android.core.networking.AnalyticsRequestV2
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.responseJsonObject
-import com.stripe.android.core.networking.executeRequestWithModelJsonParser as executeCoreRequestWithModelJsonParser
+import com.stripe.android.core.networking.executeRequestWithStripeModelParser as executeCoreRequestWithStripeModelParser
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.ClearDataParam.Companion.createCollectedDataParamEntry
@@ -167,7 +167,7 @@ internal class DefaultIdentityRepository @Inject constructor(
         imageFile: File,
         filePurpose: StripeFilePurpose,
         onSuccessExecutionTimeBlock: (Long) -> Unit
-    ): StripeFile = executeRequestWithModelJsonParser(
+    ): StripeFile = executeRequestWithStripeModelParser(
         request = IdentityFileUploadRequest(
             fileParams = StripeFileParams(
                 file = imageFile,
@@ -178,7 +178,7 @@ internal class DefaultIdentityRepository @Inject constructor(
             ),
             verificationId = verificationId
         ),
-        responseJsonParser = stripeFileJsonParser,
+        responseParser = stripeFileJsonParser,
         onSuccessExecutionTimeBlock = onSuccessExecutionTimeBlock
     )
 
@@ -287,17 +287,17 @@ internal class DefaultIdentityRepository @Inject constructor(
         }
     )
 
-    private suspend fun <Response : StripeModel> executeRequestWithModelJsonParser(
+    private suspend fun <Response : StripeModel> executeRequestWithStripeModelParser(
         request: StripeRequest,
-        responseJsonParser: ModelJsonParser<Response>,
+        responseParser: StripeModelParser<Response>,
         onSuccessExecutionTimeBlock: (Long) -> Unit = {}
     ): Response {
         val started = TimeSource.Monotonic.markNow()
-        return executeCoreRequestWithModelJsonParser(
+        return executeCoreRequestWithStripeModelParser(
             stripeNetworkClient = stripeNetworkClient,
             stripeErrorJsonParser = stripeErrorJsonParser,
             request = request,
-            responseJsonParser = responseJsonParser
+            responseParser = responseParser
         ).also {
             onSuccessExecutionTimeBlock(started.elapsedNow().inWholeMilliseconds)
         }
