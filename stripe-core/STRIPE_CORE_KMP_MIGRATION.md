@@ -33,6 +33,7 @@ The following types are already migrated into `commonMain`:
 - `version/StripeSdkVersion`
 - `networking/AnalyticsFields`
 - `networking/AnalyticsEvent`
+- `networking/AnalyticsRequestExecutor`
 - `networking/ExponentialBackoffRetryDelaySupplier`
 - `networking/LinearRetryDelaySupplier`
 - `networking/MarkdownParser`
@@ -134,6 +135,7 @@ Applied to this repo:
 | `QueryStringFactory.kt` | Now in `commonMain`; uses the existing `urlEncode` expect/actual seam |
 | `AnalyticsRequest.kt` | Now in `commonMain`; pure GET request on top of shared query-string building |
 | `AnalyticsRequestV2.kt` | Now in `commonMain`; uses `kotlin.uuid` for event IDs and `kotlin.time.Clock.System` for wall-clock timestamps |
+| `AnalyticsRequestExecutor.kt` | Now in `commonMain`; pure interface over shared `AnalyticsRequest` |
 | `ApiRequest.kt` | Now in `commonMain`; `Options` uses `CommonParcelize` / `CommonParcelable` and header generation now routes through the shared `RequestHeadersFactory` |
 | `RequestHeadersFactory.kt` | Now in `commonMain`; `Locale` usage was reduced to `languageTag: String?`, and Android platform data comes from an internal `RequestHeadersPlatform` expect/actual helper |
 | `StripeClientUserAgentHeaderFactory.kt` | Now in `commonMain`; uses `kotlinx.serialization.json` plus the shared `RequestHeadersPlatform` helper |
