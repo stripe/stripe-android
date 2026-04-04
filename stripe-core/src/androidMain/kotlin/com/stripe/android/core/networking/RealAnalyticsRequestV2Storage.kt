@@ -12,13 +12,6 @@ import javax.inject.Inject
 private const val AnalyticsRequestV2StorageName = "StripeAnalyticsRequestV2Storage"
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-interface AnalyticsRequestV2Storage {
-    suspend fun store(request: AnalyticsRequestV2): String
-    suspend fun retrieve(id: String): AnalyticsRequestV2?
-    suspend fun delete(id: String)
-}
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class RealAnalyticsRequestV2Storage private constructor(
     private val context: Context,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,

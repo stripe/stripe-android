@@ -34,6 +34,8 @@ The following types are already migrated into `commonMain`:
 - `networking/AnalyticsFields`
 - `networking/AnalyticsEvent`
 - `networking/AnalyticsRequestExecutor`
+- `networking/AnalyticsRequestV2Executor`
+- `networking/AnalyticsRequestV2Storage`
 - `networking/ExponentialBackoffRetryDelaySupplier`
 - `networking/LinearRetryDelaySupplier`
 - `networking/MarkdownParser`
@@ -136,6 +138,8 @@ Applied to this repo:
 | `AnalyticsRequest.kt` | Now in `commonMain`; pure GET request on top of shared query-string building |
 | `AnalyticsRequestV2.kt` | Now in `commonMain`; uses `kotlin.uuid` for event IDs and `kotlin.time.Clock.System` for wall-clock timestamps |
 | `AnalyticsRequestExecutor.kt` | Now in `commonMain`; pure interface over shared `AnalyticsRequest` |
+| `AnalyticsRequestV2Executor.kt` | Now in `commonMain`; pure interface over shared `AnalyticsRequestV2` |
+| `AnalyticsRequestV2Storage.kt` | Now in `commonMain`; pure storage contract over shared `AnalyticsRequestV2` |
 | `ApiRequest.kt` | Now in `commonMain`; `Options` uses `CommonParcelize` / `CommonParcelable` and header generation now routes through the shared `RequestHeadersFactory` |
 | `RequestHeadersFactory.kt` | Now in `commonMain`; `Locale` usage was reduced to `languageTag: String?`, and Android platform data comes from an internal `RequestHeadersPlatform` expect/actual helper |
 | `StripeClientUserAgentHeaderFactory.kt` | Now in `commonMain`; uses `kotlinx.serialization.json` plus the shared `RequestHeadersPlatform` helper |
@@ -159,8 +163,8 @@ Applied to this repo:
 | `AnalyticsRequestV2Factory.kt` | `android.content.Context`, `android.os.Build`, `android.provider.Settings.Secure.ANDROID_ID` |
 | `NetworkTypeDetector.kt` | `android.net.ConnectivityManager`, `android.telephony.TelephonyManager` |
 | `DefaultAnalyticsRequestExecutor.kt` | Not Android-bound by imports, but its injected convenience constructor currently hardwires `DefaultStripeNetworkClient` | Keep in `androidMain` until the default-construction path is removed or split from the common executor |
-| `AnalyticsRequestV2Executor.kt` | Uses `AnalyticsRequestV2Storage` which uses SharedPreferences |
-| `AnalyticsRequestV2Storage.kt` | `android.content.Context`, `SharedPreferences` |
+| `DefaultAnalyticsRequestV2Executor.kt` | Uses `AnalyticsRequestV2Storage`, `WorkManager`, and Android `Context` |
+| `RealAnalyticsRequestV2Storage.kt` | Uses Android `Context` and `SharedPreferences` for persistence |
 | `SendAnalyticsRequestV2Worker.kt` | `androidx.work.CoroutineWorker`, `WorkManager` — fully Android |
 | `ResponseJson.kt` | `org.json.JSONObject` — parses response body to JSONObject |
 

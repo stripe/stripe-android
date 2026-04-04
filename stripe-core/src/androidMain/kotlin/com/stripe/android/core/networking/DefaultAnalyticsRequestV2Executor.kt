@@ -12,11 +12,6 @@ import com.stripe.android.core.utils.IsWorkManagerAvailable
 import javax.inject.Inject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun interface AnalyticsRequestV2Executor {
-    suspend fun enqueue(request: AnalyticsRequestV2)
-}
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class DefaultAnalyticsRequestV2Executor @Inject constructor(
     private val context: Context,
     private val networkClient: StripeNetworkClient,
