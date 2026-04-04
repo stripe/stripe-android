@@ -1,12 +1,13 @@
 package com.stripe.android.core.frauddetection
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.core.exception.InvalidRequestException
-import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.networking.DEFAULT_RETRY_CODES
 import com.stripe.android.core.networking.RequestHeadersFactory
 import com.stripe.android.core.networking.StripeRequest
-import java.io.UnsupportedEncodingException
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import okio.BufferedSink
 
 /**
@@ -18,21 +19,7 @@ class FraudDetectionDataRequest(
     guid: String
 ) : StripeRequest() {
     private val jsonBody: String
-        get() {
-            return StripeJsonUtils.mapToJsonObject(params).toString()
-        }
-    private val postBodyBytes: ByteArray
-        get() {
-            try {
-                return jsonBody.toByteArray(Charsets.UTF_8)
-            } catch (e: UnsupportedEncodingException) {
-                throw InvalidRequestException(
-                    message = "Unable to encode parameters to ${Charsets.UTF_8.name()}. " +
-                        "Please contact support@stripe.com for assistance.",
-                    cause = e
-                )
-            }
-        }
+        get() = params.toJsonObject().toString()
 
     private val headersFactory = RequestHeadersFactory.FraudDetection(
         guid = guid
@@ -51,13 +38,36 @@ class FraudDetectionDataRequest(
     override var postHeaders: Map<String, String>? = headersFactory.createPostHeader()
 
     override fun writePostBody(sink: BufferedSink) {
-        postBodyBytes.let {
-            sink.write(it)
-            sink.flush()
-        }
+        sink.write(jsonBody.encodeToByteArray())
+        sink.flush()
     }
 
     private companion object {
         private const val URL = "https://m.stripe.com/6"
+    }
+}
+
+private fun Map<*, *>.toJsonObject(): JsonObject {
+    val map = mutableMapOf<String, JsonElement>()
+    forEach { (key, value) ->
+        val jsonKey = key as? String ?: return@forEach
+        val jsonValue = value?.toJsonElement() ?: return@forEach
+        map[jsonKey] = jsonValue
+    }
+    return JsonObject(map)
+}
+
+private fun List<*>.toJsonArray(): JsonArray {
+    return JsonArray(map { value -> value.toJsonElement() })
+}
+
+private fun Any?.toJsonElement(): JsonElement {
+    return when (this) {
+        is Map<*, *> -> toJsonObject()
+        is List<*> -> toJsonArray()
+        is Number -> JsonPrimitive(this)
+        is Boolean -> JsonPrimitive(this)
+        null -> JsonPrimitive("null")
+        else -> JsonPrimitive(toString())
     }
 }

@@ -34,10 +34,10 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         additionalNonPiiParams: Map<String, String> = emptyMap(),
     )
 
-    override fun reportFraudDetectionError(error: StripeException) {
+    override fun reportFraudDetectionError(error: Throwable) {
         report(
             errorEvent = ExpectedErrorEvent.FRAUD_DETECTION_API_FAILURE,
-            stripeException = error,
+            stripeException = StripeException.create(error),
         )
     }
 

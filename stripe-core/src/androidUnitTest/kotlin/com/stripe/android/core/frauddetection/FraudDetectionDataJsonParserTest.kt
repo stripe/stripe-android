@@ -1,13 +1,12 @@
 package com.stripe.android.core.frauddetection
 
 import com.google.common.truth.Truth.assertThat
-import org.json.JSONObject
 import kotlin.test.Test
 
 class FraudDetectionDataJsonParserTest {
     @Test
     fun `should parse correctly`() {
-        assertThat(FraudDetectionDataJsonParser { 100L }.parse(JSON))
+        assertThat(FraudDetectionDataJsonParser(timestampSupplier = { 100L }).parse(JSON))
             .isEqualTo(
                 FraudDetectionData(
                     guid = "200",
@@ -19,7 +18,7 @@ class FraudDetectionDataJsonParserTest {
     }
 
     private companion object {
-        private val JSON = JSONObject(
+        private val JSON =
             """
                 {
                     "guid": "200",
@@ -27,6 +26,5 @@ class FraudDetectionDataJsonParserTest {
                     "sid": "300"
                 }
             """.trimIndent()
-        )
     }
 }

@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIConnectionException
-import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeResponse
@@ -36,8 +35,8 @@ class FraudDetectionDataRepositoryTest {
     fun `save() ➡ refresh() ➡ get() should return original object`() {
         val expectedFraudDetectionData = createFraudDetectionData(elapsedTime = -5L)
         val repository = DefaultFraudDetectionDataRepository(
-            localStore = DefaultFraudDetectionDataStore(context, testDispatcher),
-            fraudDetectionDataRequestFactory = DefaultFraudDetectionDataRequestFactory(context),
+            localStore = createFraudDetectionDataStore(context, testDispatcher),
+            fraudDetectionDataRequestFactory = createFraudDetectionDataRequestFactory(context),
             stripeNetworkClient = DefaultStripeNetworkClient(workContext = testDispatcher),
             errorReporter = { /* No-op */ },
             workContext = testDispatcher,
@@ -72,11 +71,11 @@ class FraudDetectionDataRepositoryTest {
             )
 
             val repository = DefaultFraudDetectionDataRepository(
-                localStore = DefaultFraudDetectionDataStore(
+                localStore = createFraudDetectionDataStore(
                     context,
                     testDispatcher
                 ),
-                fraudDetectionDataRequestFactory = DefaultFraudDetectionDataRequestFactory(context),
+                fraudDetectionDataRequestFactory = createFraudDetectionDataRequestFactory(context),
                 stripeNetworkClient = mockStripeNetworkClient,
                 workContext = testDispatcher,
                 errorReporter = { /* No-op */ },
@@ -122,18 +121,18 @@ class FraudDetectionDataRepositoryTest {
     @Test
     fun `on getLatest() fails, should report error`() =
         runTest {
-            var reportedError: StripeException? = null
+            var reportedError: Throwable? = null
             val mockStripeNetworkClient = mock<StripeNetworkClient>()
 
             val expectedError = APIConnectionException("API connection failed!")
             whenever(mockStripeNetworkClient.executeRequest(any())).thenThrow(expectedError)
 
             val repository = DefaultFraudDetectionDataRepository(
-                localStore = DefaultFraudDetectionDataStore(
+                localStore = createFraudDetectionDataStore(
                     context,
                     testDispatcher
                 ),
-                fraudDetectionDataRequestFactory = DefaultFraudDetectionDataRequestFactory(context),
+                fraudDetectionDataRequestFactory = createFraudDetectionDataRequestFactory(context),
                 stripeNetworkClient = mockStripeNetworkClient,
                 workContext = testDispatcher,
                 errorReporter = { reportedError = it },

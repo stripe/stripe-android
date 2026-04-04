@@ -5,8 +5,8 @@ package com.stripe.android
 import android.content.Context
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.frauddetection.DefaultFraudDetectionDataRepository
-import com.stripe.android.core.frauddetection.DefaultFraudDetectionDataRequestFactory
-import com.stripe.android.core.frauddetection.DefaultFraudDetectionDataStore
+import com.stripe.android.core.frauddetection.createFraudDetectionDataRequestFactory
+import com.stripe.android.core.frauddetection.createFraudDetectionDataStore
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import kotlinx.coroutines.Dispatchers
@@ -19,8 +19,8 @@ fun DefaultFraudDetectionDataRepository(
     workContext: CoroutineContext = Dispatchers.IO,
 ): DefaultFraudDetectionDataRepository {
     return DefaultFraudDetectionDataRepository(
-        localStore = DefaultFraudDetectionDataStore(context, workContext),
-        fraudDetectionDataRequestFactory = DefaultFraudDetectionDataRequestFactory(context),
+        localStore = createFraudDetectionDataStore(context, workContext),
+        fraudDetectionDataRequestFactory = createFraudDetectionDataRequestFactory(context),
         stripeNetworkClient = DefaultStripeNetworkClient(workContext = workContext),
         errorReporter = ErrorReporter.createFallbackInstance(context, emptySet()),
         workContext = workContext,

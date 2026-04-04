@@ -1,13 +1,14 @@
 package com.stripe.android.core.frauddetection
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.model.CommonParcelize
 import com.stripe.android.core.model.StripeModel
-import kotlinx.parcelize.Parcelize
-import org.json.JSONObject
-import java.util.concurrent.TimeUnit
+import kotlinx.serialization.Serializable
+import kotlin.time.Duration.Companion.minutes
 
+@Serializable
+@CommonParcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@Parcelize
 data class FraudDetectionData(
     val guid: String,
     val muid: String,
@@ -21,14 +22,6 @@ data class FraudDetectionData(
             KEY_SID to sid
         )
 
-    fun toJson(): JSONObject {
-        return JSONObject()
-            .put(KEY_GUID, guid)
-            .put(KEY_MUID, muid)
-            .put(KEY_SID, sid)
-            .put(KEY_TIMESTAMP, timestamp)
-    }
-
     fun isExpired(currentTime: Long): Boolean {
         return (currentTime - timestamp) > TTL
     }
@@ -37,8 +30,7 @@ data class FraudDetectionData(
         private const val KEY_GUID = "guid"
         private const val KEY_MUID = "muid"
         private const val KEY_SID = "sid"
-        internal const val KEY_TIMESTAMP = "timestamp"
 
-        private val TTL = TimeUnit.MINUTES.toMillis(30L)
+        private val TTL = 30.minutes.inWholeMilliseconds
     }
 }

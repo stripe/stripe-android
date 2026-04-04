@@ -41,6 +41,33 @@ class FraudDetectionDataRequestTest {
             .isGreaterThan(0L)
     }
 
+    @Test
+    fun writeBody_shouldPreserveNestedJsonTypes() {
+        val request = FraudDetectionDataRequest(
+            params = mapOf(
+                "string" to "value",
+                "number" to 1,
+                "flag" to true,
+                "nested" to mapOf(
+                    "child" to "nested_value"
+                ),
+                "list" to listOf(
+                    2,
+                    "item",
+                    false
+                )
+            ),
+            guid = FRAUD_DETECTION_DATA.guid
+        )
+        val buffer = Buffer()
+
+        request.writePostBody(buffer)
+
+        assertThat(buffer.readUtf8()).isEqualTo(
+            """{"string":"value","number":1,"flag":true,"nested":{"child":"nested_value"},"list":[2,"item",false]}"""
+        )
+    }
+
     private companion object {
         private val FRAUD_DETECTION_DATA = FraudDetectionDataFixtures.create()
     }

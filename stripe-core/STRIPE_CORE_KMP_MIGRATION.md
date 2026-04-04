@@ -50,6 +50,15 @@ The following types are already migrated into `commonMain`:
 - `model/Country`
 - `model/CountryCode`
 - `model/serializers/CountryListSerializer`
+- `frauddetection/FraudDetectionData`
+- `frauddetection/FraudDetectionDataJsonParser`
+- `frauddetection/FraudDetectionDataParamsUtils`
+- `frauddetection/FraudDetectionDataRequest`
+- `frauddetection/FraudDetectionDataRequestFactory`
+- `frauddetection/FraudDetectionDataRepository`
+- `frauddetection/FraudDetectionDataStore`
+- `frauddetection/FraudDetectionEnabledProvider`
+- `frauddetection/FraudDetectionErrorReporter`
 - `storage/Storage`
 - `utils/DateUtils`
 - `utils/DefaultDurationProvider` and `DurationProvider`
@@ -228,10 +237,20 @@ Applied to this repo:
 
 | File | Blockers | Disposition |
 |------|----------|-------------|
-| `FraudDetectionDataRepository.kt` (interface) | `@RestrictTo` | Interface → `commonMain` |
-| `FraudDetectionData.kt` | `@Parcelize`, `StripeModel`, `org.json.JSONObject`, `TimeUnit` | Not first-wave common; move only after Parcelize and JSON cleanup |
-| `FraudDetectionDataStore.kt` | `SharedPreferences`, `org.json.JSONObject` | `androidMain` |
-| Other impls | `Context` | `androidMain` |
+| `FraudDetectionDataRepository.kt` (interface) | None after source-set split | Already in `commonMain` |
+| `FraudDetectionData.kt` | None after `CommonParcelize` + `@Serializable` migration | Already in `commonMain` |
+| `FraudDetectionDataJsonParser.kt` | None after switching to `StripeModelParser` + `kotlinx.serialization.json` | Already in `commonMain` |
+| `FraudDetectionDataParamsUtils.kt` | Pure map-merging helper | Already in `commonMain` |
+| `FraudDetectionDataStore.kt` | None after extracting a tiny persistence backend seam | Already in `commonMain`; Android now provides a SharedPreferences-backed helper |
+| `FraudDetectionDataRequest.kt` | None after replacing `StripeJsonUtils.mapToJsonObject()` with `kotlinx.serialization.json` body construction | Already in `commonMain` |
+| `FraudDetectionDataRequestFactory.kt` | None after replacing the `Context` constructor with injected params creation | Already in `commonMain`; Android now provides a Context-backed helper |
+| `FraudDetectionErrorReporter` | None after narrowing the shared seam to `Throwable` | Already in `commonMain` |
+| `FraudDetectionEnabledProvider` | Pure boolean provider | Already in `commonMain` |
+| `DefaultFraudDetectionDataRepository.kt` | Android helper wiring and platform wall-clock source still live beside it | `androidMain` |
+| `FraudDetectionDataRequestParamsFactory.kt` | `Context`, `Build`, `DisplayMetrics`, `Locale`, `TimeZone` | `androidMain` |
+
+Tracked follow-up:
+- Change `FraudDetectionErrorReporter.reportFraudDetectionError(error: Throwable)` back to `StripeException` once `StripeException` moves to `commonMain`.
 
 ---
 
@@ -616,11 +635,10 @@ object AndroidContentTypeResolver : ContentTypeResolver {
 
 **Goal**: Decouple `ModelJsonParser` and response-parsing from `org.json.JSONObject`.
 
-This is the most impactful change because `org.json.JSONObject` is used in:
+This is the most impactful change because `org.json.JSONObject` is still used in:
 - `ResponseJson.kt` — converts `StripeResponse<String>` body to `JSONObject`
 - `ModelJsonParser<T>.parse(json: JSONObject)` — every model parser
-- `StripeClientUserAgentHeaderFactory` — builds JSON for User-Agent header
-- `FraudDetectionDataStore` — serializes/deserializes fraud data
+- `StripeJsonUtils.kt` — legacy `JSONObject`/`JSONArray` helpers still used by Android-only model and parser code
 
 `StripeErrorJsonParser` has already been moved to `commonMain` and now parses
 `kotlinx.serialization.json.JsonObject`. Android callers use a separate
@@ -658,8 +676,9 @@ this seam: legacy `ModelJsonParser<T>` inputs are wrapped in
 instead of calling `responseJson()` directly. The same seam is now used by
 other production callers such as `DefaultIdentityRepository`, and
 `FraudDetectionDataRepository` no longer calls `responseJson()` directly either.
-`StripeFileJsonParser` has already crossed this seam completely and now lives in
-`commonMain` as a direct `StripeModelParser<StripeFile>` implementation.
+`StripeFileJsonParser` and `FraudDetectionDataJsonParser` have already crossed
+this seam completely and now live in `commonMain` as direct
+`StripeModelParser` implementations.
 
 Over time, individual parsers migrate from `ModelJsonParser` (using `JSONObject`)
 to either:
@@ -715,7 +734,7 @@ Everything that can't be in `commonMain` goes to `androidMain`:
 - `utils/StatusBarCompat.kt`
 - `utils/CreationExtrasKtx.kt`
 - `utils/PluginDetector.kt`
-- `frauddetection/` implementations (stores, default repository)
+- `frauddetection/` remaining Android implementations/helpers (request params factory, SharedPreferences helper, Context-backed request-factory helper, default repository)
 - `SendAnalyticsRequestV2Worker.kt`
 - Analytics factories that use `PlatformInfo` Android impl
 - `ResponseJson.kt`
@@ -782,7 +801,14 @@ stripe-core/
 │   │   ├── storage/
 │   │   │   └── Storage.kt                 (interface only)
 │   │   ├── frauddetection/
-│   │   │   └── FraudDetectionDataRepository.kt (interface)
+│   │   │   ├── FraudDetectionData.kt
+│   │   │   ├── FraudDetectionDataJsonParser.kt
+│   │   │   ├── FraudDetectionDataParamsUtils.kt
+│   │   │   ├── FraudDetectionDataRequest.kt
+│   │   │   ├── FraudDetectionDataRequestFactory.kt
+│   │   │   ├── FraudDetectionDataRepository.kt      (interface)
+│   │   │   ├── FraudDetectionDataRepositoryDependencies.kt
+│   │   │   └── FraudDetectionDataStore.kt
 │   │   ├── platform/
 │   │   │   └── PlatformInfo.kt
 │   │   └── version/
@@ -817,9 +843,9 @@ stripe-core/
 │   │   │   ├── StorageFactory.kt
 │   │   │   └── SharedPreferencesStorage.kt
 │   │   ├── frauddetection/
-│   │   │   ├── FraudDetectionData.kt      (until Parcelize + JSON cleanup is done)
-│   │   │   ├── FraudDetectionDataStore.kt
-│   │   │   ├── FraudDetectionDataParamsUtils.kt
+│   │   │   ├── FraudDetectionDataRequestFactory.android.kt
+│   │   │   ├── FraudDetectionDataRequestParamsFactory.kt
+│   │   │   ├── FraudDetectionDataStore.android.kt
 │   │   │   └── DefaultFraudDetectionDataRepository.kt
 │   │   ├── injection/                     (all Dagger modules)
 │   │   ├── browser/                       (Chrome Custom Tabs)
