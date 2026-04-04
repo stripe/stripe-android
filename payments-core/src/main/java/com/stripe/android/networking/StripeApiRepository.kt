@@ -31,19 +31,21 @@ import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.model.parsers.ModelJsonParser
+import com.stripe.android.core.model.parsers.ModelJsonParserAdapter
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.model.parsers.StripeFileJsonParser
+import com.stripe.android.core.model.parsers.StripeModelParser
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.networking.FileUploadRequest
+import com.stripe.android.core.networking.HEADER_CONTENT_TYPE
 import com.stripe.android.core.networking.HTTP_TOO_MANY_REQUESTS
 import com.stripe.android.core.networking.RequestId
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeResponse
-import com.stripe.android.core.networking.responseJson
 import com.stripe.android.core.networking.responseJsonObject
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.exception.CardException
@@ -112,6 +114,7 @@ import java.io.IOException
 import java.net.HttpURLConnection
 import java.security.Security
 import java.util.Locale
+import org.json.JSONException
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
@@ -1134,7 +1137,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         }
 
         return response.mapCatching {
-            StripeFileJsonParser().parse(it.responseJson())
+            it.parseStripeModel(StripeFileJsonParser())
         }
     }
 
@@ -1783,12 +1786,62 @@ class StripeApiRepository @JvmOverloads internal constructor(
         jsonParser: ModelJsonParser<ModelType>,
         onResponse: (result: Result<StripeResponse<String>>) -> Unit = {},
     ): Result<ModelType> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequest,
+            parser = ModelJsonParserAdapter(jsonParser),
+            parserName = jsonParser::class.java.simpleName,
+            onResponse = onResponse
+        )
+    }
+
+    private suspend fun <ModelType : StripeModel> fetchStripeModelResult(
+        apiRequest: ApiRequest,
+        parser: StripeModelParser<ModelType>,
+        parserName: String = parser::class.java.simpleName,
+        onResponse: (result: Result<StripeResponse<String>>) -> Unit = {},
+    ): Result<ModelType> {
         return runCatching {
-            val response = makeApiRequest(apiRequest, onResponse).responseJson()
-            jsonParser.parse(response) ?: throw APIException(
-                message = "Unable to parse response with ${jsonParser::class.java.simpleName}",
+            makeApiRequest(apiRequest, onResponse).parseStripeModel(
+                parser = parser,
+                parserName = parserName
             )
         }
+    }
+
+    private fun <ModelType : StripeModel> StripeResponse<String>.parseStripeModel(
+        parser: ModelJsonParser<ModelType>
+    ): ModelType {
+        return parseStripeModel(
+            parser = ModelJsonParserAdapter(parser),
+            parserName = parser::class.java.simpleName
+        )
+    }
+
+    private fun <ModelType : StripeModel> StripeResponse<String>.parseStripeModel(
+        parser: StripeModelParser<ModelType>,
+        parserName: String = parser::class.java.simpleName
+    ): ModelType {
+        val responseBody = body ?: "{}"
+
+        val parsedResponse = try {
+            parser.parse(responseBody)
+        } catch (e: JSONException) {
+            throw APIException(
+                message =
+                """
+                    Exception while parsing response body.
+                      Status code: $code
+                      Request-Id: $requestId
+                      Content-Type: ${getHeaderValue(HEADER_CONTENT_TYPE)?.firstOrNull()}
+                      Body: "$responseBody"
+                """.trimIndent(),
+                cause = e
+            )
+        }
+
+        return parsedResponse ?: throw APIException(
+            message = "Unable to parse response with $parserName",
+        )
     }
 
     @VisibleForTesting

@@ -181,6 +181,7 @@ Applied to this repo:
 | `StripeFile.kt` | Already in `commonMain` | Done via `CommonParcelize` |
 | `StripeFileParams.kt` | `@Parcelize`, `java.io.File` | Parcelize KMP; replace `File` with `okio.Path` |
 | `StripeError.kt` | Already in `commonMain` | Done via `CommonParcelize` + `CommonJavaSerializable` |
+| `parsers/StripeModelParser.kt` | Already in `commonMain`; string-based shared parser seam | Done; Android bridges legacy `ModelJsonParser` through `ModelJsonParserAdapter` |
 | `parsers/ModelJsonParser.kt` | `org.json.JSONObject` | Phase 2 — JSON abstraction |
 | `parsers/StripeErrorJsonParser.kt` | Already in `commonMain`; uses `kotlinx.serialization.json.JsonObject` instead of `org.json.JSONObject` | Done; Android callers parse error bodies through `responseJsonObject()` |
 | `serializers/StripeErrorSerializer.kt` | Already in `commonMain`; deserializes from `kotlinx.serialization.json.JsonObject` | Done |
@@ -649,8 +650,10 @@ class ModelJsonParserAdapter<out T : StripeModel>(
 }
 ```
 
-`fetchStripeModelResult` in `StripeApiRepository` (payments-core) can then accept
-either `StripeModelParser<T>` (common) or `ModelJsonParser<T>` (Android, via adapter).
+`fetchStripeModelResult` in `StripeApiRepository` (payments-core) now works through
+this seam: legacy `ModelJsonParser<T>` inputs are wrapped in
+`ModelJsonParserAdapter`, and success parsing operates on raw response strings
+instead of calling `responseJson()` directly.
 
 Over time, individual parsers migrate from `ModelJsonParser` (using `JSONObject`)
 to either:
@@ -739,10 +742,11 @@ stripe-core/
 │   │   │   ├── StripeFileParams.kt        (okio.Path instead of File)
 │   │   │   ├── StripeFilePurpose.kt
 │   │   │   ├── parsers/
-│   │   │   │   └── StripeErrorJsonParser.kt
+│   │   │   │   ├── StripeErrorJsonParser.kt
+│   │   │   │   └── StripeModelParser.kt
 │   │   │   ├── serializers/
 │   │   │   │   └── StripeErrorSerializer.kt
-│   │   │   └── StripeModelParser.kt       (new: parse from String)
+│   │   │   └── ...
 │   │   ├── networking/
 │   │   │   ├── StripeRequest.kt           (okio.BufferedSink)
 │   │   │   ├── StripeResponse.kt          (inline constants)
@@ -781,8 +785,9 @@ stripe-core/
 │   │   │   ├── CommonIgnoredOnParcel.android.kt
 │   │   │   ├── parsers/                   (all existing ModelJsonParser impls)
 │   │   │   │   ├── ModelJsonParser.kt     (uses org.json.JSONObject)
+│   │   │   │   ├── ModelJsonParserAdapter.kt
 │   │   │   │   └── ...
-│   │   │   └── ModelJsonParserAdapter.kt  (bridges to StripeModelParser)
+│   │   │   └── ...
 │   │   ├── networking/
 │   │   │   ├── ConnectionFactory.kt       (HttpsURLConnection)
 │   │   │   ├── StripeConnection.kt        (HttpsURLConnection wrapper)
