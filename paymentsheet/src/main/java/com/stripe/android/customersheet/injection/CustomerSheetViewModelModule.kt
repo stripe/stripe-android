@@ -3,9 +3,7 @@ package com.stripe.android.customersheet.injection
 import android.app.Application
 import android.content.Context
 import android.content.res.Resources
-import androidx.core.os.LocaleListCompat
 import com.stripe.android.BuildConfig
-import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.StripeNetworkClientModule
@@ -123,14 +121,6 @@ internal interface CustomerSheetViewModelModule {
         @Provides
         @Named(ENABLE_LOGGING)
         fun providesEnableLogging(): Boolean = BuildConfig.DEBUG
-
-        @Provides
-        fun provideLogger(@Named(ENABLE_LOGGING) enableLogging: Boolean) =
-            Logger.getInstance(enableLogging)
-
-        @Provides
-        fun provideLocale() =
-            LocaleListCompat.getAdjustedDefault().takeUnless { it.isEmpty }?.get(0)
 
         @Provides
         @Named(ALLOWS_MANUAL_CONFIRMATION)

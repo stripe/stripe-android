@@ -3,6 +3,7 @@ package com.stripe.android.customersheet.injection
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.di.ApplicationIdModule
+import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetIntegration
 import com.stripe.android.customersheet.CustomerSheetViewModel
@@ -19,6 +20,7 @@ import javax.inject.Named
 @Component(
     modules = [
         ApplicationIdModule::class,
+        CoreCommonModule::class,
         CustomerSheetConfirmationModule::class,
         CustomerSheetViewModelModule::class,
         StripeRepositoryModule::class,

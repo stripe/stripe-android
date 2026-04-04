@@ -1,19 +1,12 @@
 package com.stripe.android.core.networking
 
-import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.ApiKeyValidator
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.AppInfo
-import com.stripe.android.core.exception.InvalidRequestException
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.core.model.CommonParcelable
+import com.stripe.android.core.model.CommonParcelize
 import com.stripe.android.core.version.StripeSdkVersion
-import kotlinx.parcelize.Parcelize
-import java.io.UnsupportedEncodingException
-import javax.inject.Inject
-import javax.inject.Named
-import javax.inject.Provider
 import okio.BufferedSink
 
 /**
@@ -31,27 +24,15 @@ data class ApiRequest internal constructor(
     override val shouldCache: Boolean = false
 ) : StripeRequest() {
     private val query: String = QueryStringFactory.createFromParamsWithEmptyValues(params)
-
-    private val postBodyBytes: ByteArray
-        @Throws(UnsupportedEncodingException::class, InvalidRequestException::class)
-        get() {
-            try {
-                return query.toByteArray(Charsets.UTF_8)
-            } catch (e: UnsupportedEncodingException) {
-                throw InvalidRequestException(
-                    message = "Unable to encode parameters to ${Charsets.UTF_8.name()}. " +
-                        "Please contact support@stripe.com for assistance.",
-                    cause = e
-                )
-            }
-        }
-
     private val headersFactory = RequestHeadersFactory.Api(
         options = options,
         appInfo = appInfo,
         apiVersion = apiVersion,
         sdkVersion = sdkVersion
     )
+
+    private val postBodyBytes: ByteArray
+        get() = query.toByteArray(Charsets.UTF_8)
 
     override val mimeType: MimeType = MimeType.Form
 
@@ -98,12 +79,12 @@ data class ApiRequest internal constructor(
      * Data class representing options for a Stripe API request.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    @Parcelize
+    @CommonParcelize
     data class Options constructor(
         val apiKey: String,
         val stripeAccount: String? = null,
         val idempotencyKey: String? = null
-    ) : Parcelable {
+    ) : CommonParcelable {
 
         val apiKeyIsUserKey: Boolean
             get() = apiKey.startsWith("uk_")
@@ -114,14 +95,13 @@ data class ApiRequest internal constructor(
         /**
          * Dedicated constructor for injection.
          *
-         * Because [PUBLISHABLE_KEY] and [STRIPE_ACCOUNT_ID] might change, whenever required, a new
+         * Because publishable key and stripe account providers might change, whenever required, a new
          * [ApiRequest.Options] instance is created with the latest values.
-         * Should always be used with [Provider] or [Lazy].
+         * Should be used by DI code paths that need a fresh value on each request.
          */
-        @Inject
         constructor(
-            @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
-            @Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?
+            publishableKeyProvider: () -> String,
+            stripeAccountIdProvider: () -> String?
         ) : this(
             apiKey = publishableKeyProvider(),
             stripeAccount = stripeAccountIdProvider()

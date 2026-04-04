@@ -41,6 +41,7 @@ The following types are already migrated into `commonMain`:
 - `networking/JsonUtils`
 - `networking/RequestId`
 - `networking/RetryDelaySupplier`
+- `networking/ApiRequest`
 - `browser/BrowserCapabilities`
 - `model/Country`
 - `model/CountryCode`
@@ -132,6 +133,9 @@ Applied to this repo:
 | `StripeNetworkClient.kt` | Now in `commonMain`; file execution uses `okio.Path` |
 | `QueryStringFactory.kt` | Now in `commonMain`; uses the existing `urlEncode` expect/actual seam |
 | `AnalyticsRequest.kt` | Now in `commonMain`; pure GET request on top of shared query-string building |
+| `ApiRequest.kt` | Now in `commonMain`; `Options` uses `CommonParcelize` / `CommonParcelable` and header generation now routes through the shared `RequestHeadersFactory` |
+| `RequestHeadersFactory.kt` | Now in `commonMain`; `Locale` usage was reduced to `languageTag: String?`, and Android platform data comes from an internal `RequestHeadersPlatform` expect/actual helper |
+| `StripeClientUserAgentHeaderFactory.kt` | Now in `commonMain`; uses `kotlinx.serialization.json` plus the shared `RequestHeadersPlatform` helper |
 
 #### Can move to `commonMain` after targeted refactors
 
@@ -140,8 +144,7 @@ Applied to this repo:
 | `AnalyticsRequestV2.kt` | `java.net.URLEncoder`, `UUID.randomUUID()`, `System.currentTimeMillis()`, and current query-string coupling | Move after common URL encoding and runtime-provider cleanup |
 | `JsonUtils.kt` | None after removing JVM-only type-name lookup | Already in `commonMain` |
 | `RequestExecutor.kt` | Uses `responseJson()` → `JSONObject` and Android-only request implementations | Handle JSON abstraction and commonize request types first |
-| `ApiRequest.kt` | `Options : Parcelable`, `javax.inject`, and direct dependency on Android-shaped `RequestHeadersFactory.Api` | Split common request data from Android header generation; body writing is already Okio-based |
-| `FileUploadRequest.kt` | `StripeFileParams.file: java.io.File`, `java.net.URLConnection.guessContentTypeFromName`, and Android-shaped `RequestHeadersFactory.FileUpload` | Keep Okio body writing; replace input file type/content-type resolution and split header generation from common request body construction |
+| `FileUploadRequest.kt` | `StripeFileParams.file: java.io.File` and `java.net.URLConnection.guessContentTypeFromName` | Keep Okio body writing; replace input file type/content-type resolution |
 
 #### Must stay in `androidMain` (or be restructured)
 
@@ -150,11 +153,9 @@ Applied to this repo:
 | `DefaultStripeNetworkClient.kt` | Uses `ConnectionFactory` → `HttpsURLConnection`. Move to `androidMain` as the Android `StripeNetworkClient` implementation. |
 | `ConnectionFactory.kt` | `java.net.URL`, `javax.net.ssl.HttpsURLConnection` — the actual HTTP transport. Android-only. |
 | `StripeConnection.kt` | `HttpsURLConnection`, `java.io.InputStream/Scanner`, and Android file persistence via Okio `FileSystem` — Android HTTP response reader. |
-| `RequestHeadersFactory.kt` | `android.os.Build`, `android.system.Os.getenv()` — device/platform info in headers. |
 | `AnalyticsRequestFactory.kt` | `android.content.pm.PackageInfo/PackageManager`, `android.os.Build` |
 | `AnalyticsRequestV2Factory.kt` | `android.content.Context`, `android.os.Build`, `android.provider.Settings.Secure.ANDROID_ID` |
 | `NetworkTypeDetector.kt` | `android.net.ConnectivityManager`, `android.telephony.TelephonyManager` |
-| `StripeClientUserAgentHeaderFactory.kt` | `android.os.Build`, `org.json.JSONObject` |
 | `DefaultAnalyticsRequestExecutor.kt` | Not Android-bound by imports, but its injected convenience constructor currently hardwires `DefaultStripeNetworkClient` | Keep in `androidMain` until the default-construction path is removed or split from the common executor |
 | `AnalyticsRequestV2Executor.kt` | Uses `AnalyticsRequestV2Storage` which uses SharedPreferences |
 | `AnalyticsRequestV2Storage.kt` | `android.content.Context`, `SharedPreferences` |
@@ -378,8 +379,9 @@ This seam is now complete for the transport contracts:
 - Downstream Android consumers (`identity`, `network-testing`, and affected unit tests) were updated to the new Okio seam
 
 The next meaningful networking boundary is no longer the transport contract itself.
-It is now the remaining request-building layer: `ApiRequest`, `FileUploadRequest`,
-`AnalyticsRequestV2`, and then `RequestExecutor` once the JSON dependency is abstracted.
+`ApiRequest` is now shared as well, so the remaining request-building boundary is
+`FileUploadRequest`, `AnalyticsRequestV2`, and then `RequestExecutor` once the
+JSON dependency is abstracted.
 
 #### 2a. Replace `java.io.OutputStream` with `okio.BufferedSink`
 
@@ -437,6 +439,25 @@ form-encoding behavior, and this seam is small enough that DI would not help.
 
 This is now done by routing `QueryStringFactory` through the existing shared
 `urlEncode()` expect/actual function.
+
+#### 2e. `ApiRequest` — current state
+
+This step is now done:
+- `ApiRequest.kt` moved to `commonMain`
+- `ApiRequest.Options` now uses `@CommonParcelize` / `CommonParcelable`
+- the provider-based secondary constructor remains for API continuity, but Dagger
+  creation moved into Android `CoreCommonModule`
+- `RequestHeadersFactory` and `StripeClientUserAgentHeaderFactory` also moved to
+  `commonMain`
+- `Locale` handling in request headers was reduced to a `languageTag: String?`
+  input instead of carrying `Locale` through the shared API
+- Android-only platform reads now live behind the internal
+  `RequestHeadersPlatform` expect/actual helper
+
+What still remains around this area is downstream cleanup, not `ApiRequest`
+itself:
+- `FileUploadRequest` still depends on `java.io.File` and content-type guessing
+- analytics factories still read Android platform/app state directly
 
 ### Phase 3: Logger, Storage, and Platform Info Interfaces
 
@@ -498,6 +519,12 @@ Completed.
 Consolidates scattered `Build.*`, `Context.packageManager`, `Settings.Secure`,
 and `Os.getenv()` calls into a single injectable interface:
 
+This is no longer required for request-header generation. `RequestHeadersFactory`
+and `StripeClientUserAgentHeaderFactory` already moved to `commonMain` using a
+much narrower internal `RequestHeadersPlatform` expect/actual helper, which fits
+this low-level code better than introducing DI just to read a few platform
+fields.
+
 ```kotlin
 // commonMain
 interface PlatformInfo {
@@ -549,11 +576,9 @@ class AndroidPlatformInfo(context: Context) : PlatformInfo {
 }
 ```
 
-This replaces direct usages in:
-- `RequestHeadersFactory` — device info in headers
+This is still most relevant for:
 - `AnalyticsRequestFactory` — package info, OS version
 - `AnalyticsRequestV2Factory` — device ID, device info
-- `StripeClientUserAgentHeaderFactory` — OS info in user-agent JSON
 - `NetworkTypeDetector` — wrapped into `PlatformInfo.networkType`
 
 #### 3d. ContentTypeResolver interface (NEW)
@@ -710,10 +735,13 @@ stripe-core/
 │   │   │   ├── FileUploadRequest.kt       (okio.Path + okio.FileSystem)
 │   │   │   ├── NetworkConstants.kt
 │   │   │   ├── QueryStringFactory.kt      (common URL encoding)
+│   │   │   ├── RequestHeadersFactory.kt   (shared headers + languageTag)
+│   │   │   ├── RequestHeadersPlatform.kt  (internal expect helpers)
 │   │   │   ├── RequestId.kt
 │   │   │   ├── RetryDelaySupplier.kt
 │   │   │   ├── ExponentialBackoffRetryDelaySupplier.kt
 │   │   │   ├── LinearRetryDelaySupplier.kt
+│   │   │   ├── StripeClientUserAgentHeaderFactory.kt
 │   │   │   ├── MarkdownParser.kt
 │   │   │   └── MarkdownToHtmlSerializer.kt
 │   │   ├── storage/
@@ -740,12 +768,11 @@ stripe-core/
 │   │   │   ├── StripeConnection.kt        (HttpsURLConnection wrapper)
 │   │   │   ├── DefaultStripeNetworkClient.kt
 │   │   │   ├── DefaultAnalyticsRequestExecutor.kt
-│   │   │   ├── RequestHeadersFactory.kt   (uses PlatformInfo)
+│   │   │   ├── RequestHeadersPlatform.android.kt
 │   │   │   ├── AnalyticsRequestFactory.kt
 │   │   │   ├── AnalyticsRequestV2Factory.kt
 │   │   │   ├── AnalyticsRequestV2Executor.kt
 │   │   │   ├── AnalyticsRequestV2Storage.kt
-│   │   │   ├── StripeClientUserAgentHeaderFactory.kt
 │   │   │   ├── NetworkTypeDetector.kt
 │   │   │   ├── SendAnalyticsRequestV2Worker.kt
 │   │   │   ├── ResponseJson.kt            (org.json.JSONObject)

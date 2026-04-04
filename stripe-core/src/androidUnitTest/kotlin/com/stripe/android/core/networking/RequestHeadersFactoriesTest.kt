@@ -16,7 +16,6 @@ import com.stripe.android.core.version.StripeSdkVersion
 import org.json.JSONObject
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.util.Locale
 import java.util.UUID
 import kotlin.test.Test
 
@@ -26,12 +25,12 @@ class RequestHeadersFactoriesTest {
     // Tests for RequestHeadersFactory.AbstractPaymentApiHeadersFactory
     @Test
     fun create_shouldIncludeExpectedAcceptLanguageHeader() {
-        assertThat(createBasePaymentApiHeaders(Locale.JAPAN)[HEADER_ACCEPT_LANGUAGE])
+        assertThat(createBasePaymentApiHeaders(languageTag = "ja-JP")[HEADER_ACCEPT_LANGUAGE])
             .isEqualTo("ja-JP")
 
-        assertThat(createBasePaymentApiHeaders(Locale.ENGLISH)[HEADER_ACCEPT_LANGUAGE]).isEqualTo("en")
+        assertThat(createBasePaymentApiHeaders(languageTag = "en")[HEADER_ACCEPT_LANGUAGE]).isEqualTo("en")
 
-        assertThat(createBasePaymentApiHeaders(Locale.ROOT)[HEADER_ACCEPT_LANGUAGE])
+        assertThat(createBasePaymentApiHeaders(languageTag = RequestHeadersFactory.UNDETERMINED_LANGUAGE)[HEADER_ACCEPT_LANGUAGE])
             .isNull()
     }
 
@@ -39,7 +38,7 @@ class RequestHeadersFactoriesTest {
     fun headers_withAllRequestOptions_properlyMapsRequestOptions() {
         val stripeAccount = "acct_123abc"
         val headers = createBasePaymentApiHeaders(
-            locale = Locale.US,
+            languageTag = "en-US",
             options = ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccount)
         )
 
@@ -128,7 +127,7 @@ class RequestHeadersFactoriesTest {
     fun headers_withChineseSimplified_hasProperLanguageTag() {
         val stripeAccount = "acct_123abc"
         val headers = createBasePaymentApiHeaders(
-            locale = Locale.SIMPLIFIED_CHINESE,
+            languageTag = "zh-CN",
             options = ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccount)
         )
 
@@ -140,14 +139,14 @@ class RequestHeadersFactoriesTest {
     }
 
     private fun createBasePaymentApiHeaders(
-        locale: Locale = Locale.getDefault(),
+        languageTag: String? = defaultRequestHeadersLanguageTag(),
         options: ApiRequest.Options = OPTIONS,
         appInfo: AppInfo? = null
     ): Map<String, String> {
         return RequestHeadersFactory.BaseApiHeadersFactory(
             optionsProvider = { options },
             appInfo = appInfo,
-            locale = locale
+            languageTag = languageTag
         ).create()
     }
 

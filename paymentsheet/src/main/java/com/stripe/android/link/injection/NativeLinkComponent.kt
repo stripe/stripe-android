@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.core.Logger
+import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.link.LinkAccountUpdate
@@ -46,6 +47,7 @@ internal annotation class NativeLinkScope
 @Component(
     modules = [
         NativeLinkModule::class,
+        CoreCommonModule::class,
         ApplicationIdModule::class,
         DefaultConfirmationModule::class,
         DefaultIntentConfirmationModule::class,

@@ -1,7 +1,6 @@
 package com.stripe.android.link.injection
 
 import android.content.Context
-import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.BuildConfig
 import com.stripe.android.PaymentConfiguration
@@ -177,16 +176,6 @@ internal interface NativeLinkModule {
         fun provideDurationProvider(): DurationProvider {
             return DefaultDurationProvider.instance
         }
-
-        @Provides
-        @NativeLinkScope
-        fun provideLogger(@Named(ENABLE_LOGGING) enableLogging: Boolean) =
-            Logger.getInstance(enableLogging)
-
-        @Provides
-        @NativeLinkScope
-        fun provideLocale() =
-            LocaleListCompat.getAdjustedDefault().takeUnless { it.isEmpty }?.get(0)
 
         @IOContext
         @Provides

@@ -1,12 +1,11 @@
 package com.stripe.android.core.networking
 
-import android.os.Build
-import android.system.Os
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.AppInfo
 import com.stripe.android.core.version.StripeSdkVersion
-import java.util.Locale
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed class RequestHeadersFactory {
@@ -39,29 +38,16 @@ sealed class RequestHeadersFactory {
 
     protected abstract val xStripeUserAgent: String
 
-    protected fun defaultXStripeUserAgentMap() = mutableMapOf<String, String?>(
-        LANG to KOTLIN,
-        AnalyticsFields.BINDINGS_VERSION to StripeSdkVersion.VERSION_NAME,
-        AnalyticsFields.OS_VERSION to "${Build.VERSION.SDK_INT}",
-        TYPE to "${Build.MANUFACTURER}_${Build.BRAND}_${Build.MODEL}",
-        MODEL to Build.MODEL
-    )
-
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     open class BaseApiHeadersFactory(
         private val optionsProvider: () -> ApiRequest.Options,
         private val appInfo: AppInfo? = null,
-        private val locale: Locale = Locale.getDefault(),
+        private val languageTag: String? = defaultRequestHeadersLanguageTag(),
         private val apiVersion: String = ApiVersion.get().code,
         private val sdkVersion: String = StripeSdkVersion.VERSION
     ) : RequestHeadersFactory() {
+        private val platformData = defaultRequestHeadersPlatformData()
         private val stripeClientUserAgentHeaderFactory = StripeClientUserAgentHeaderFactory()
-
-        private val languageTag: String?
-            get() {
-                return locale.toLanguageTag()
-                    .takeIf { it.isNotBlank() && it != UNDETERMINED_LANGUAGE }
-            }
 
         override val userAgent: String
             get() {
@@ -73,14 +59,11 @@ sealed class RequestHeadersFactory {
 
         override val xStripeUserAgent: String
             get() {
-                val paramMap = defaultXStripeUserAgentMap()
+                val paramMap = defaultXStripeUserAgentMap(platformData)
                 appInfo?.let {
                     paramMap.putAll(it.toParamMap())
                 }
-
-                return "{" + paramMap.map { (key, value) ->
-                    "\"$key\":\"$value\""
-                }.joinToString(",") + "}"
+                return paramMap.toJsonString()
             }
 
         override val extraHeaders: Map<String, String>
@@ -94,8 +77,7 @@ sealed class RequestHeadersFactory {
                     stripeClientUserAgentHeaderFactory.create(appInfo)
                 ).plus(
                     if (apiRequestOptions.apiKeyIsUserKey) {
-                        val isLiveMode = Os.getenv("Stripe-Livemode") != "false"
-                        mapOf(HEADER_STRIPE_LIVEMODE to isLiveMode.toString())
+                        mapOf(HEADER_STRIPE_LIVEMODE to platformData.isStripeLiveMode.toString())
                     } else {
                         emptyMap()
                     }
@@ -108,7 +90,7 @@ sealed class RequestHeadersFactory {
                         mapOf(HEADER_IDEMPOTENCY_KEY to it)
                     }.orEmpty()
                 ).plus(
-                    languageTag?.let { mapOf(HEADER_ACCEPT_LANGUAGE to it) }.orEmpty()
+                    normalizedLanguageTag(languageTag)?.let { mapOf(HEADER_ACCEPT_LANGUAGE to it) }.orEmpty()
                 )
             }
     }
@@ -120,15 +102,15 @@ sealed class RequestHeadersFactory {
     class Api(
         options: ApiRequest.Options,
         appInfo: AppInfo? = null,
-        locale: Locale = Locale.getDefault(),
+        languageTag: String? = defaultRequestHeadersLanguageTag(),
         apiVersion: String = ApiVersion.get().code,
         sdkVersion: String = StripeSdkVersion.VERSION
     ) : BaseApiHeadersFactory(
-        { options },
-        appInfo,
-        locale,
-        apiVersion,
-        sdkVersion
+        optionsProvider = { options },
+        appInfo = appInfo,
+        languageTag = languageTag,
+        apiVersion = apiVersion,
+        sdkVersion = sdkVersion
     ) {
         override var postHeaders = mapOf(
             HEADER_CONTENT_TYPE to "${StripeRequest.MimeType.Form.code}; charset=$CHARSET"
@@ -142,16 +124,16 @@ sealed class RequestHeadersFactory {
     class FileUpload(
         options: ApiRequest.Options,
         appInfo: AppInfo? = null,
-        locale: Locale = Locale.getDefault(),
+        languageTag: String? = defaultRequestHeadersLanguageTag(),
         apiVersion: String = ApiVersion.get().code,
         sdkVersion: String = StripeSdkVersion.VERSION,
         boundary: String
     ) : BaseApiHeadersFactory(
-        { options },
-        appInfo,
-        locale,
-        apiVersion,
-        sdkVersion
+        optionsProvider = { options },
+        appInfo = appInfo,
+        languageTag = languageTag,
+        apiVersion = apiVersion,
+        sdkVersion = sdkVersion
     ) {
         override var postHeaders = mapOf(
             HEADER_CONTENT_TYPE to "${StripeRequest.MimeType.MultipartForm.code}; boundary=$boundary"
@@ -166,6 +148,7 @@ sealed class RequestHeadersFactory {
     class FraudDetection(
         guid: String
     ) : RequestHeadersFactory() {
+        private val platformData = defaultRequestHeadersPlatformData()
         override val extraHeaders = mapOf(HEADER_COOKIE to "m=$guid")
 
         override val userAgent = getUserAgent(StripeSdkVersion.VERSION)
@@ -180,10 +163,7 @@ sealed class RequestHeadersFactory {
         )
         override val xStripeUserAgent: String
             get() {
-                val paramMap = defaultXStripeUserAgentMap()
-                return "{" + paramMap.map { (key, value) ->
-                    "\"$key\":\"$value\""
-                }.joinToString(",") + "}"
+                return defaultXStripeUserAgentMap(platformData).toJsonString()
             }
     }
 
@@ -196,10 +176,7 @@ sealed class RequestHeadersFactory {
         override val extraHeaders = emptyMap<String, String>()
         override val xStripeUserAgent: String
             get() {
-                val paramMap = defaultXStripeUserAgentMap()
-                return "{" + paramMap.map { (key, value) ->
-                    "\"$key\":\"$value\""
-                }.joinToString(",") + "}"
+                return defaultXStripeUserAgentMap(defaultRequestHeadersPlatformData()).toJsonString()
             }
     }
 
@@ -218,4 +195,26 @@ sealed class RequestHeadersFactory {
         const val TYPE = "type"
         const val MODEL = "model"
     }
+}
+
+private fun defaultXStripeUserAgentMap(
+    platformData: RequestHeadersPlatformData
+) = mutableMapOf<String, String?>(
+    RequestHeadersFactory.LANG to RequestHeadersFactory.KOTLIN,
+    AnalyticsFields.BINDINGS_VERSION to StripeSdkVersion.VERSION_NAME,
+    AnalyticsFields.OS_VERSION to platformData.osVersion,
+    RequestHeadersFactory.TYPE to platformData.deviceType,
+    RequestHeadersFactory.MODEL to platformData.deviceModel
+)
+
+private fun normalizedLanguageTag(languageTag: String?): String? {
+    return languageTag?.takeIf { it.isNotBlank() && it != RequestHeadersFactory.UNDETERMINED_LANGUAGE }
+}
+
+private fun Map<String, String?>.toJsonString(): String {
+    return JsonObject(
+        mapValues { (_, value) ->
+            JsonPrimitive(value ?: "null")
+        }
+    ).toString()
 }
