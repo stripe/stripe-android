@@ -2,12 +2,14 @@ package com.stripe.android.core.networking
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.exception.InvalidRequestException
-import java.io.File
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.concurrent.TimeUnit
 import javax.net.ssl.HttpsURLConnection
+import okio.Path
+import okio.buffer
+import okio.sink
 
 /**
  * Factory to create [StripeConnection], which encapsulates an [HttpsURLConnection], triggers the
@@ -22,10 +24,10 @@ interface ConnectionFactory {
     fun create(request: StripeRequest): StripeConnection<String>
 
     /**
-     * Creates an [StripeConnection] which attempts to parse the http response body as a [File].
+     * Creates a [StripeConnection] which attempts to parse the http response body into a file [Path].
      */
     @Throws(IOException::class, InvalidRequestException::class)
-    fun createForFile(request: StripeRequest, outputFile: File): StripeConnection<File>
+    fun createForFile(request: StripeRequest, outputFile: Path): StripeConnection<Path>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun interface ConnectionOpener {
@@ -60,8 +62,8 @@ interface ConnectionFactory {
 
         override fun createForFile(
             request: StripeRequest,
-            outputFile: File
-        ): StripeConnection<File> {
+            outputFile: Path
+        ): StripeConnection<Path> {
             return StripeConnection.FileConnection(
                 openConnectionAndApplyFields(request),
                 outputFile
@@ -86,7 +88,7 @@ interface ConnectionFactory {
                     request.postHeaders?.forEach { (key, value) ->
                         setRequestProperty(key, value)
                     }
-                    outputStream.use { output -> request.writePostBody(output) }
+                    outputStream.sink().buffer().use { output -> request.writePostBody(output) }
                 }
             }
         }

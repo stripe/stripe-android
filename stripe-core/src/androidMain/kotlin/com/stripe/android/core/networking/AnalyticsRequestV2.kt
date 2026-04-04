@@ -16,11 +16,11 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
-import java.io.OutputStream
 import java.io.UnsupportedEncodingException
 import java.util.UUID
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.DurationUnit.SECONDS
+import okio.BufferedSink
 
 internal const val InstantAnalyticsExecutionCutOff = 5
 
@@ -141,10 +141,10 @@ data class AnalyticsRequestV2 private constructor(
         PARAM_EVENT_ID to UUID.randomUUID().toString()
     )
 
-    override fun writePostBody(outputStream: OutputStream) {
+    override fun writePostBody(sink: BufferedSink) {
         postBodyBytes.let {
-            outputStream.write(it)
-            outputStream.flush()
+            sink.write(it)
+            sink.flush()
         }
     }
 

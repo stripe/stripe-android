@@ -3,11 +3,11 @@ package com.stripe.android.core.networking
 import com.stripe.android.core.ApiKeyFixtures
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.io.ByteArrayOutputStream
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
+import okio.Buffer
 
 @RunWith(RobolectricTestRunner::class)
 internal class ApiRequestTest {
@@ -22,25 +22,23 @@ internal class ApiRequestTest {
 
     @Test
     fun writeBody_withEmptyBody_shouldHaveZeroLength() {
-        ByteArrayOutputStream().use {
-            FACTORY.createPost(
-                PAYMENT_METHODS_URL,
-                OPTIONS
-            ).writePostBody(it)
-            assertTrue(it.size() == 0)
-        }
+        val buffer = Buffer()
+        FACTORY.createPost(
+            PAYMENT_METHODS_URL,
+            OPTIONS
+        ).writePostBody(buffer)
+        assertTrue(buffer.size == 0L)
     }
 
     @Test
     fun writeBody_withNonEmptyBody_shouldHaveNonZeroLength() {
-        ByteArrayOutputStream().use {
-            FACTORY.createPost(
-                PAYMENT_METHODS_URL,
-                OPTIONS,
-                mapOf("customer" to "cus_123")
-            ).writePostBody(it)
-            assertEquals(16, it.size())
-        }
+        val buffer = Buffer()
+        FACTORY.createPost(
+            PAYMENT_METHODS_URL,
+            OPTIONS,
+            mapOf("customer" to "cus_123")
+        ).writePostBody(buffer)
+        assertEquals(16L, buffer.size)
     }
 
     @Test

@@ -3,11 +3,11 @@ package com.stripe.android.core.utils
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
-import java.io.File
+import okio.Path
 
 internal class FakeStripeNetworkClient(
     private val executeRequest: () -> StripeResponse<String> = { StripeResponse(200, null) },
-    private val executeRequestForFile: () -> StripeResponse<File> = { StripeResponse(200, null) },
+    private val executeRequestForFile: () -> StripeResponse<Path> = { StripeResponse(200, null) },
 ) : StripeNetworkClient {
 
     var executeRequestCalled: Boolean = false
@@ -18,7 +18,7 @@ internal class FakeStripeNetworkClient(
         return executeRequest()
     }
 
-    override suspend fun executeRequestForFile(request: StripeRequest, outputFile: File): StripeResponse<File> {
+    override suspend fun executeRequestForFile(request: StripeRequest, outputFile: Path): StripeResponse<Path> {
         return executeRequestForFile()
     }
 }

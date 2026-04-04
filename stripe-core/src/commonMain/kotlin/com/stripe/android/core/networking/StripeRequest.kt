@@ -1,7 +1,7 @@
 package com.stripe.android.core.networking
 
 import androidx.annotation.RestrictTo
-import java.io.OutputStream
+import okio.BufferedSink
 
 /**
  * A class representing a request to a Stripe-owned service.
@@ -44,9 +44,9 @@ abstract class StripeRequest {
     open val shouldCache = false
 
     /**
-     * Writes the body of a POST request with [OutputStream], left empty for non-POST requests
+     * Writes the body of a POST request to [BufferedSink], left empty for non-POST requests.
      */
-    open fun writePostBody(outputStream: OutputStream) {}
+    open fun writePostBody(sink: BufferedSink) {}
 
     enum class Method(val code: String) {
         GET("GET"),

@@ -127,21 +127,21 @@ Applied to this repo:
 | `MarkdownParser.kt` | Pure regex/string logic |
 | `MarkdownToHtmlSerializer.kt` | `kotlinx.serialization` serializer; common-safe |
 | `NetworkConstants.kt` | Shared HTTP/header constants |
+| `StripeRequest.kt` | Now in `commonMain`; `writePostBody()` uses `okio.BufferedSink` |
+| `StripeResponse.kt` | Now in `commonMain`; uses inline HTTP status thresholds instead of `HttpURLConnection` constants |
+| `StripeNetworkClient.kt` | Now in `commonMain`; file execution uses `okio.Path` |
+| `QueryStringFactory.kt` | Now in `commonMain`; uses the existing `urlEncode` expect/actual seam |
+| `AnalyticsRequest.kt` | Now in `commonMain`; pure GET request on top of shared query-string building |
 
 #### Can move to `commonMain` after targeted refactors
 
 | File | Blockers | Fix |
 |------|----------|-----|
-| `StripeRequest.kt` | `java.io.OutputStream` in `writePostBody()` | Replace with `okio.BufferedSink`; this is the current lowest useful networking seam to unlock |
-| `StripeResponse.kt` | `java.net.HttpURLConnection.HTTP_OK` constants | Replace with inline Int constants (200, 300) |
-| `StripeNetworkClient.kt` | `java.io.File` in `executeRequestForFile` | Replace with `okio.Path`; this pairs directly with the `StripeRequest` change |
-| `AnalyticsRequest.kt` | `QueryStringFactory` remains JVM-shaped today and `StripeRequest` still writes through `OutputStream` | Commonize query/form encoding and request-body sink first |
-| `AnalyticsRequestV2.kt` | `java.io.OutputStream`, `java.net.URLEncoder`, `UUID.randomUUID()`, `System.currentTimeMillis()`, and current query-string coupling | Move after Okio body writing, common URL encoding, and runtime-provider cleanup |
-| `QueryStringFactory.kt` | `java.net.URLEncoder` | Replace with a common UTF-8 form-encoding utility that preserves current behavior |
+| `AnalyticsRequestV2.kt` | `java.net.URLEncoder`, `UUID.randomUUID()`, `System.currentTimeMillis()`, and current query-string coupling | Move after common URL encoding and runtime-provider cleanup |
 | `JsonUtils.kt` | None after removing JVM-only type-name lookup | Already in `commonMain` |
-| `RequestExecutor.kt` | Uses `StripeRequest`, `StripeNetworkClient`, `StripeResponse`, and `responseJson()` → `JSONObject` | First remove `OutputStream`/`File` from request and client contracts, then handle JSON abstraction |
-| `ApiRequest.kt` | `Options : Parcelable`, `java.io.OutputStream`, `javax.inject`, and direct dependency on Android-shaped `RequestHeadersFactory.Api` | Split common request data from Android header generation; use Okio for body writing; move Android injection/header code out |
-| `FileUploadRequest.kt` | `java.io.OutputStream`, `java.io.File`, `java.net.URLConnection.guessContentTypeFromName`, and Android-shaped `RequestHeadersFactory.FileUpload` | Use Okio types and content-type resolver; split header generation from common request body construction |
+| `RequestExecutor.kt` | Uses `responseJson()` → `JSONObject` and Android-only request implementations | Handle JSON abstraction and commonize request types first |
+| `ApiRequest.kt` | `Options : Parcelable`, `javax.inject`, and direct dependency on Android-shaped `RequestHeadersFactory.Api` | Split common request data from Android header generation; body writing is already Okio-based |
+| `FileUploadRequest.kt` | `StripeFileParams.file: java.io.File`, `java.net.URLConnection.guessContentTypeFromName`, and Android-shaped `RequestHeadersFactory.FileUpload` | Keep Okio body writing; replace input file type/content-type resolution and split header generation from common request body construction |
 
 #### Must stay in `androidMain` (or be restructured)
 
@@ -149,7 +149,7 @@ Applied to this repo:
 |------|-----|
 | `DefaultStripeNetworkClient.kt` | Uses `ConnectionFactory` → `HttpsURLConnection`. Move to `androidMain` as the Android `StripeNetworkClient` implementation. |
 | `ConnectionFactory.kt` | `java.net.URL`, `javax.net.ssl.HttpsURLConnection` — the actual HTTP transport. Android-only. |
-| `StripeConnection.kt` | `HttpsURLConnection`, `java.io.InputStream/FileOutputStream/Scanner` — Android HTTP response reader. |
+| `StripeConnection.kt` | `HttpsURLConnection`, `java.io.InputStream/Scanner`, and Android file persistence via Okio `FileSystem` — Android HTTP response reader. |
 | `RequestHeadersFactory.kt` | `android.os.Build`, `android.system.Os.getenv()` — device/platform info in headers. |
 | `AnalyticsRequestFactory.kt` | `android.content.pm.PackageInfo/PackageManager`, `android.os.Build` |
 | `AnalyticsRequestV2Factory.kt` | `android.content.Context`, `android.os.Build`, `android.provider.Settings.Secure.ANDROID_ID` |
@@ -368,49 +368,62 @@ All existing model classes change `@Parcelize` → `@CommonParcelize` and
 **Goal**: Replace `java.io.*` and `java.net.*` types in common networking interfaces with
 Okio equivalents and platform-neutral constants.
 
-This is now the next meaningful migration boundary. The lowest-value files have
-already moved; the smallest high-leverage next step is to commonize
-`StripeRequest` and `StripeNetworkClient` by removing `OutputStream` and `File`
-from their public contracts.
+This seam is now complete for the transport contracts:
+- `StripeRequest` moved to `commonMain` with `writePostBody(sink: BufferedSink)`
+- `StripeResponse` moved to `commonMain` with inline status thresholds (`200`, `300`)
+- `StripeNetworkClient` moved to `commonMain` with `executeRequestForFile(..., outputFile: Path)`
+- `QueryStringFactory` moved to `commonMain` using the existing `urlEncode` expect/actual seam
+- `AnalyticsRequest` moved to `commonMain` on top of the shared query-string builder
+- Android transport implementations (`ConnectionFactory`, `StripeConnection`, `DefaultStripeNetworkClient`) now adapt `HttpsURLConnection` to Okio
+- Downstream Android consumers (`identity`, `network-testing`, and affected unit tests) were updated to the new Okio seam
+
+The next meaningful networking boundary is no longer the transport contract itself.
+It is now the remaining request-building layer: `ApiRequest`, `FileUploadRequest`,
+`AnalyticsRequestV2`, and then `RequestExecutor` once the JSON dependency is abstracted.
 
 #### 2a. Replace `java.io.OutputStream` with `okio.BufferedSink`
 
 `StripeRequest.writePostBody()` is the key method:
 
 ```kotlin
-// Current (StripeRequest.kt)
+// Previous
 open fun writePostBody(outputStream: OutputStream) {}
 
-// New (commonMain)
+// Current (commonMain)
 open fun writePostBody(sink: okio.BufferedSink) {}
 ```
 
-`ApiRequest`, `FileUploadRequest`, and `AnalyticsRequestV2` override this method.
-All post-body writing uses `outputStream.write(bytes)` / `PrintWriter` — these
-map cleanly to `sink.write(bytes)` / `sink.writeUtf8(string)`.
+`ApiRequest`, `FileUploadRequest`, `AnalyticsRequestV2`, `FraudDetectionDataRequest`,
+and Identity’s `IdentityFileUploadRequest` now override the sink-based method.
 
-The `androidMain` `ConnectionFactory` implementation would wrap
-`HttpsURLConnection.outputStream` in `outputStream.sink().buffer()`.
+The Android `ConnectionFactory` now wraps `HttpsURLConnection.outputStream` in
+`outputStream.sink().buffer()`.
 
 #### 2b. Replace `java.io.File` with `okio.Path`
 
-Affected signatures:
+Completed transport signatures:
 - `StripeNetworkClient.executeRequestForFile(request, outputFile: File)` → `outputFile: okio.Path`
+- `DefaultStripeNetworkClient.executeRequestForFile` → `StripeResponse<okio.Path>`
+- `ConnectionFactory.createForFile(...)` → `StripeConnection<okio.Path>`
+- `StripeConnection.FileConnection` now persists to `okio.Path` via `okio.FileSystem`
+
+Still pending:
 - `StripeFileParams.file: File` → `file: okio.Path`
-- `FileUploadRequest` (reads file content) → use `okio.FileSystem.SYSTEM.source(path)`
-- `DefaultStripeNetworkClient.executeRequestForFile` → adapt in `androidMain`
+- `FileUploadRequest` input file access should move fully to `okio.FileSystem.SYSTEM.source(path)`
 
 #### 2c. Replace `HttpURLConnection` constants in `StripeResponse`
 
 ```kotlin
-// Current
+// Previous
 val isOk: Boolean = code == HttpURLConnection.HTTP_OK
 val isError: Boolean = code < HttpURLConnection.HTTP_OK || code >= HTTP_MULT_CHOICE
 
-// New (commonMain)
+// Current (commonMain)
 val isOk: Boolean = code == 200
 val isError: Boolean = code < 200 || code >= 300
 ```
+
+This is now done in `commonMain`.
 
 #### 2d. `QueryStringFactory` — URL encoding
 
@@ -421,6 +434,9 @@ val isError: Boolean = code < 200 || code >= 300
 Recommended: use `expect/actual` here instead of a manual common implementation.
 The encoding must stay byte-for-byte compatible with the existing Android/JVM
 form-encoding behavior, and this seam is small enough that DI would not help.
+
+This is now done by routing `QueryStringFactory` through the existing shared
+`urlEncode()` expect/actual function.
 
 ### Phase 3: Logger, Storage, and Platform Info Interfaces
 
@@ -828,7 +844,7 @@ org.json                    → androidMain only (bundled with Android)
 | `org.json.JSONObject` removal affects parsers | High | Phase 4 uses adapter pattern — existing parsers keep working. Migrate one-by-one. |
 | Okio version conflicts | Low | Already in dependency catalog at 3.16.4. Transitive via OkHttp in some modules anyway. |
 | Test migration effort | Medium | Most tests use Robolectric → stay in `androidUnitTest`. Pure logic tests can move to `commonTest` over time. |
-| `QueryStringFactory` URL encoding | Low | Write a small common implementation. Test against existing behavior exhaustively. |
+| `QueryStringFactory` URL encoding | Low | Keep URL encoding behind a narrow `expect`/`actual` seam. Test against existing behavior exhaustively. |
 | Dagger injection breaks in common code | Medium | Common code uses constructor parameters and interfaces. Dagger wiring stays in `androidMain`. |
 
 ---
@@ -838,7 +854,7 @@ org.json                    → androidMain only (bundled with Android)
 ```
 Phase 1  ─── Gradle KMP setup + Parcelize KMP + StripeModel ───────── Foundation
    │
-Phase 2  ─── Okio integration (BufferedSink, Path, constants) ─────── Unblocks networking interfaces
+Phase 2  ─── Okio integration (BufferedSink, Path, constants) ─────── Completed for transport interfaces
    │
 Phase 3  ─── Logger, Storage, PlatformInfo interfaces ─────────────── Unblocks analytics/platform code
    │

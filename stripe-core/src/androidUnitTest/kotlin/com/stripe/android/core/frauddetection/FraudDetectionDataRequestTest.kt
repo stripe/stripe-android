@@ -6,8 +6,8 @@ import com.stripe.android.core.networking.HEADER_CONTENT_TYPE
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import java.io.ByteArrayOutputStream
 import kotlin.test.Test
+import okio.Buffer
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [30])
@@ -35,11 +35,10 @@ class FraudDetectionDataRequestTest {
 
     @Test
     fun writeBody_shouldWriteNonEmptyBytes() {
-        ByteArrayOutputStream().use {
-            request.writePostBody(it)
-            assertThat(it.size())
-                .isGreaterThan(0)
-        }
+        val buffer = Buffer()
+        request.writePostBody(buffer)
+        assertThat(buffer.size)
+            .isGreaterThan(0L)
     }
 
     private companion object {

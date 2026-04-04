@@ -7,9 +7,9 @@ import com.stripe.android.core.exception.APIConnectionException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
-import java.io.File
 import java.io.IOException
 import kotlin.coroutines.CoroutineContext
+import okio.Path
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class DefaultStripeNetworkClient @JvmOverloads constructor(
@@ -27,8 +27,8 @@ class DefaultStripeNetworkClient @JvmOverloads constructor(
 
     override suspend fun executeRequestForFile(
         request: StripeRequest,
-        outputFile: File
-    ): StripeResponse<File> {
+        outputFile: Path
+    ): StripeResponse<Path> {
         return executeInternal(maxRetries, request.retryResponseCodes) {
             makeRequestForFile(request, outputFile)
         }
@@ -67,8 +67,8 @@ class DefaultStripeNetworkClient @JvmOverloads constructor(
 
     private fun makeRequestForFile(
         request: StripeRequest,
-        outputFile: File
-    ): StripeResponse<File> {
+        outputFile: Path
+    ): StripeResponse<Path> {
         return parseResponse(connectionFactory.createForFile(request, outputFile), request.url)
     }
 

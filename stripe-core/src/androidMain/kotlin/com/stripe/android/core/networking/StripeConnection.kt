@@ -2,14 +2,17 @@ package com.stripe.android.core.networking
 
 import androidx.annotation.RestrictTo
 import java.io.Closeable
-import java.io.File
-import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.net.HttpURLConnection
 import java.nio.charset.StandardCharsets
 import java.util.Scanner
 import javax.net.ssl.HttpsURLConnection
+import okio.FileSystem
+import okio.Path
+import okio.buffer
+import okio.sink
+import okio.source
 
 /**
  * A wrapper for accessing a [HttpURLConnection]. Implements [Closeable] to simplify closing related
@@ -93,23 +96,27 @@ interface StripeConnection<ResponseBodyType> : Closeable {
     }
 
     /**
-     * [StripeConnection] that writes the ResponseStream to a File.
+     * [StripeConnection] that writes the ResponseStream to a file [Path].
      */
     class FileConnection internal constructor(
         conn: HttpsURLConnection,
-        private val outputFile: File
-    ) : AbstractConnection<File>(conn = conn) {
+        private val outputFile: Path
+    ) : AbstractConnection<Path>(conn = conn) {
 
         /**
-         * Convert stream to a File
+         * Convert stream to a file [Path].
          */
         @Throws(IOException::class)
-        override fun createBodyFromResponseStream(responseStream: InputStream?): File? {
+        override fun createBodyFromResponseStream(responseStream: InputStream?): Path? {
             if (responseStream == null) {
                 return null
             }
             responseStream.use { stream ->
-                FileOutputStream(outputFile).use { stream.copyTo(it) }
+                FileSystem.SYSTEM.sink(outputFile).buffer().use { fileSink ->
+                    stream.source().use { source ->
+                        fileSink.writeAll(source)
+                    }
+                }
             }
             return outputFile
         }

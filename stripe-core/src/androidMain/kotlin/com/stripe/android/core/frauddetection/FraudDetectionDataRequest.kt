@@ -6,8 +6,8 @@ import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.networking.DEFAULT_RETRY_CODES
 import com.stripe.android.core.networking.RequestHeadersFactory
 import com.stripe.android.core.networking.StripeRequest
-import java.io.OutputStream
 import java.io.UnsupportedEncodingException
+import okio.BufferedSink
 
 /**
  * A class representing a [FraudDetectionData] request.
@@ -50,10 +50,10 @@ class FraudDetectionDataRequest(
 
     override var postHeaders: Map<String, String>? = headersFactory.createPostHeader()
 
-    override fun writePostBody(outputStream: OutputStream) {
+    override fun writePostBody(sink: BufferedSink) {
         postBodyBytes.let {
-            outputStream.write(it)
-            outputStream.flush()
+            sink.write(it)
+            sink.flush()
         }
     }
 

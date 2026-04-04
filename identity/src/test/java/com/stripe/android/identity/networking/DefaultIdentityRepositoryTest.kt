@@ -41,11 +41,16 @@ import java.io.File
 import java.net.HttpURLConnection.HTTP_OK
 import java.net.HttpURLConnection.HTTP_UNAUTHORIZED
 import kotlin.test.assertFailsWith
+import okio.Path.Companion.toOkioPath
 
 @RunWith(RobolectricTestRunner::class)
 class DefaultIdentityRepositoryTest {
+    private val modelFile = File("build/tmp/default_identity_repository_test/model.tflite")
+    private val cacheFile = File("build/tmp/default_identity_repository_test/cache.bin")
+
     private val mockIO = mock<IdentityIO>().also {
-        whenever(it.createTFLiteFile(any())).thenReturn(mock())
+        whenever(it.createTFLiteFile(any())).thenReturn(modelFile)
+        whenever(it.createCacheFile()).thenReturn(cacheFile)
     }
     private val mockStripeNetworkClient: StripeNetworkClient = mock()
     private val identityRepository = DefaultIdentityRepository(
@@ -514,16 +519,15 @@ class DefaultIdentityRepositoryTest {
     @Test
     fun `downloadModel returns File`() {
         runBlocking {
-            val mockFile = mock<File>()
             whenever(mockStripeNetworkClient.executeRequestForFile(any(), any())).thenReturn(
                 StripeResponse(
                     code = HTTP_OK,
-                    body = mockFile
+                    body = modelFile.toOkioPath()
                 )
             )
             val downloadedModel = identityRepository.downloadModel(TEST_URL)
 
-            assertThat(downloadedModel).isSameInstanceAs(mockFile)
+            assertThat(downloadedModel).isSameInstanceAs(modelFile)
             verify(mockStripeNetworkClient).executeRequestForFile(requestCaptor.capture(), any())
 
             val request = requestCaptor.firstValue
@@ -539,7 +543,7 @@ class DefaultIdentityRepositoryTest {
             whenever(mockStripeNetworkClient.executeRequestForFile(any(), any())).thenReturn(
                 StripeResponse(
                     code = HTTP_UNAUTHORIZED,
-                    body = mock()
+                    body = modelFile.toOkioPath()
                 )
             )
             assertFailsWith<APIException> {

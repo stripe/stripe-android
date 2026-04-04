@@ -14,12 +14,12 @@ import org.json.JSONObject
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
-import java.io.OutputStream
 import java.net.HttpURLConnection
 import java.net.URL
 import javax.net.ssl.HttpsURLConnection
 import javax.net.ssl.SSLSocketFactory
 import kotlin.time.Duration
+import okio.BufferedSink
 
 class NetworkRule private constructor(
     private val hostsToTrack: Set<String>,
@@ -175,8 +175,8 @@ private class DelegatingStripeRequest(
     override val shouldCache: Boolean
         get() = original.shouldCache
 
-    override fun writePostBody(outputStream: OutputStream) {
-        original.writePostBody(outputStream)
+    override fun writePostBody(sink: BufferedSink) {
+        original.writePostBody(sink)
     }
 }
 

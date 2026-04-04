@@ -10,11 +10,11 @@ import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.version.StripeSdkVersion
 import kotlinx.parcelize.Parcelize
-import java.io.OutputStream
 import java.io.UnsupportedEncodingException
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
+import okio.BufferedSink
 
 /**
  * A class representing a Stripe API or Analytics request.
@@ -83,10 +83,10 @@ data class ApiRequest internal constructor(
 
     override var postHeaders: Map<String, String>? = headersFactory.createPostHeader()
 
-    override fun writePostBody(outputStream: OutputStream) {
+    override fun writePostBody(sink: BufferedSink) {
         postBodyBytes.let {
-            outputStream.write(it)
-            outputStream.flush()
+            sink.write(it)
+            sink.flush()
         }
     }
 

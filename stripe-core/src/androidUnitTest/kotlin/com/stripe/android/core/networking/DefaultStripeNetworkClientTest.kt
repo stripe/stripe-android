@@ -22,6 +22,8 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 import kotlin.time.Duration
+import okio.Path
+import okio.Path.Companion.toOkioPath
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -32,7 +34,7 @@ internal class DefaultStripeNetworkClientTest {
         StripeResponse(code = HttpURLConnection.HTTP_OK, body = "response_string")
 
     private val okResponseWithFile =
-        StripeResponse(code = HttpURLConnection.HTTP_OK, body = File("response_file"))
+        StripeResponse(code = HttpURLConnection.HTTP_OK, body = File("response_file").toOkioPath())
 
     private val okConnectionFactory = mock<ConnectionFactory>()
 
@@ -41,7 +43,7 @@ internal class DefaultStripeNetworkClientTest {
     @BeforeTest
     fun setUp() {
         val okConnectionWithString = mock<StripeConnection<String>>()
-        val okConnectionWithFile = mock<StripeConnection<File>>()
+        val okConnectionWithFile = mock<StripeConnection<Path>>()
 
         whenever(okConnectionFactory.create(any())).thenReturn(okConnectionWithString)
         whenever(okConnectionFactory.createForFile(any(), any())).thenReturn(okConnectionWithFile)
@@ -68,7 +70,7 @@ internal class DefaultStripeNetworkClientTest {
                 workContext = testDispatcher,
                 connectionFactory = okConnectionFactory
             )
-            assertThat(executor.executeRequestForFile(mock(), mock())).isSameInstanceAs(
+            assertThat(executor.executeRequestForFile(mock(), File("output_file").toOkioPath())).isSameInstanceAs(
                 okResponseWithFile
             )
         }
@@ -205,8 +207,8 @@ internal class DefaultStripeNetworkClientTest {
 
         override fun createForFile(
             request: StripeRequest,
-            outputFile: File
-        ): StripeConnection<File> {
+            outputFile: Path
+        ): StripeConnection<Path> {
             // not used
             return mock()
         }

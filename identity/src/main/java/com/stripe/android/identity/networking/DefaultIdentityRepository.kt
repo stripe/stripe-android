@@ -30,6 +30,7 @@ import kotlinx.serialization.json.Json
 import java.io.File
 import javax.inject.Inject
 import kotlin.time.TimeSource
+import okio.Path.Companion.toOkioPath
 
 internal class DefaultIdentityRepository @Inject constructor(
     private val stripeNetworkClient: StripeNetworkClient,
@@ -181,12 +182,14 @@ internal class DefaultIdentityRepository @Inject constructor(
     )
 
     override suspend fun downloadModel(modelUrl: String) = runCatching {
-        stripeNetworkClient.executeRequestForFile(
-            IdentityFileDownloadRequest(modelUrl),
-            identityIO.createTFLiteFile(modelUrl)
-        )
+        identityIO.createTFLiteFile(modelUrl).let { outputFile ->
+            outputFile to stripeNetworkClient.executeRequestForFile(
+                IdentityFileDownloadRequest(modelUrl),
+                outputFile.toOkioPath()
+            )
+        }
     }.fold(
-        onSuccess = { response ->
+        onSuccess = { (outputFile, response) ->
             if (response.isError) {
                 throw APIException(
                     requestId = response.requestId?.value,
@@ -194,7 +197,9 @@ internal class DefaultIdentityRepository @Inject constructor(
                     message = "Downloading from $modelUrl returns error response"
                 )
             } else {
-                response.body ?: run {
+                response.body?.let {
+                    outputFile
+                } ?: run {
                     throw APIException(
                         message = "Downloading from $modelUrl returns a null body"
                     )
@@ -210,12 +215,14 @@ internal class DefaultIdentityRepository @Inject constructor(
     )
 
     override suspend fun downloadFile(fileUrl: String) = runCatching {
-        stripeNetworkClient.executeRequestForFile(
-            IdentityFileDownloadRequest(fileUrl),
-            identityIO.createCacheFile()
-        )
+        identityIO.createCacheFile().let { outputFile ->
+            outputFile to stripeNetworkClient.executeRequestForFile(
+                IdentityFileDownloadRequest(fileUrl),
+                outputFile.toOkioPath()
+            )
+        }
     }.fold(
-        onSuccess = { response ->
+        onSuccess = { (outputFile, response) ->
             if (response.isError) {
                 throw APIException(
                     requestId = response.requestId?.value,
@@ -223,7 +230,9 @@ internal class DefaultIdentityRepository @Inject constructor(
                     message = "Downloading from $fileUrl returns error response"
                 )
             } else {
-                response.body ?: run {
+                response.body?.let {
+                    outputFile
+                } ?: run {
                     throw APIException(
                         message = "Downloading from $fileUrl returns a null body"
                     )

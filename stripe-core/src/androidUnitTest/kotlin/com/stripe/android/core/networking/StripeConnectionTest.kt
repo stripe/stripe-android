@@ -9,9 +9,9 @@ import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import java.io.ByteArrayInputStream
 import java.io.File
-import java.io.FileReader
 import javax.net.ssl.HttpsURLConnection
 import kotlin.test.AfterTest
+import okio.Path.Companion.toOkioPath
 
 @RunWith(RobolectricTestRunner::class)
 class StripeConnectionTest {
@@ -50,10 +50,11 @@ class StripeConnectionTest {
         if (outputFile.exists()) {
             outputFile.delete()
         }
+        val outputPath = outputFile.toOkioPath()
 
-        val connection = StripeConnection.FileConnection(mockConnection, outputFile)
-        assertThat(connection.response.body).isSameInstanceAs(outputFile)
-        assertThat(FileReader(outputFile).readText()).isEqualTo(expectedFileContent)
+        val connection = StripeConnection.FileConnection(mockConnection, outputPath)
+        assertThat(connection.response.body).isEqualTo(outputPath)
+        assertThat(outputFile.readText()).isEqualTo(expectedFileContent)
     }
 
     private companion object {

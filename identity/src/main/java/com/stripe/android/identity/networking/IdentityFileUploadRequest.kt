@@ -4,8 +4,7 @@ import com.stripe.android.core.AppInfo
 import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.FileUploadRequest
-import java.io.OutputStream
-import java.io.PrintWriter
+import okio.BufferedSink
 
 /**
  * Identity's [FileUploadRequest] that needs to add form data "owned_by"
@@ -17,19 +16,15 @@ internal class IdentityFileUploadRequest(
     internal val verificationId: String
 ) : FileUploadRequest(fileParams, options, appInfo) {
 
-    override fun writePostBody(outputStream: OutputStream) {
-        outputStream.writer().use {
-            PrintWriter(it, true).use { writer ->
-                writeString(writer, ownedBy)
-                writeString(writer, purposeContents)
-                writeString(writer, fileMetadata)
-                writeFile(outputStream)
+    override fun writePostBody(sink: BufferedSink) {
+        writeString(sink, ownedBy)
+        writeString(sink, purposeContents)
+        writeString(sink, fileMetadata)
+        writeFile(sink)
 
-                writer.write(LINE_BREAK)
-                writer.write("--$boundary--")
-                writer.flush()
-            }
-        }
+        sink.writeUtf8(LINE_BREAK)
+        sink.writeUtf8("--$boundary--")
+        sink.flush()
     }
 
     private val ownedBy: String

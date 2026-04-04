@@ -37,6 +37,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            api libs.okio
             implementation libs.androidx.annotation
         }
         commonTest

@@ -218,8 +218,8 @@ public final class com/stripe/android/core/networking/StripeConnection$Default :
 }
 
 public final class com/stripe/android/core/networking/StripeConnection$FileConnection : com/stripe/android/core/networking/StripeConnection$AbstractConnection {
-	public fun createBodyFromResponseStream (Ljava/io/InputStream;)Ljava/io/File;
 	public synthetic fun createBodyFromResponseStream (Ljava/io/InputStream;)Ljava/lang/Object;
+	public fun createBodyFromResponseStream (Ljava/io/InputStream;)Lokio/Path;
 }
 
 public final class com/stripe/android/core/networking/StripeRequest$Method : java/lang/Enum {

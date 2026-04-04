@@ -4,10 +4,10 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.AppInfo
 import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.networking.StripeRequest.MimeType
-import java.io.OutputStream
-import java.io.PrintWriter
 import java.net.URLConnection
 import kotlin.random.Random
+import okio.BufferedSink
+import okio.source
 
 /**
  * A [StripeRequest] for uploading a file using [MimeType.MultipartForm].
@@ -44,27 +44,26 @@ open class FileUploadRequest(
 
     override var postHeaders: Map<String, String>? = headersFactory.createPostHeader()
 
-    override fun writePostBody(outputStream: OutputStream) {
-        outputStream.writer().use {
-            PrintWriter(it, true).use { writer ->
-                writeString(writer, purposeContents)
-                writeString(writer, fileMetadata)
-                writeFile(outputStream)
+    override fun writePostBody(sink: BufferedSink) {
+        writeString(sink, purposeContents)
+        writeString(sink, fileMetadata)
+        writeFile(sink)
 
-                writer.write(LINE_BREAK)
-                writer.write("--$boundary--")
-                writer.flush()
-            }
+        sink.writeUtf8(LINE_BREAK)
+        sink.writeUtf8("--$boundary--")
+        sink.flush()
+    }
+
+    protected fun writeString(sink: BufferedSink, contents: String) {
+        sink.writeUtf8(contents.replace("\n", LINE_BREAK))
+        sink.flush()
+    }
+
+    protected fun writeFile(sink: BufferedSink) {
+        fileParams.file.source().use { fileSource ->
+            sink.writeAll(fileSource)
         }
-    }
-
-    protected fun writeString(writer: PrintWriter, contents: String) {
-        writer.write(contents.replace("\n", LINE_BREAK))
-        writer.flush()
-    }
-
-    protected fun writeFile(outputStream: OutputStream) {
-        fileParams.file.inputStream().copyTo(outputStream)
+        sink.flush()
     }
 
     val fileMetadata: String

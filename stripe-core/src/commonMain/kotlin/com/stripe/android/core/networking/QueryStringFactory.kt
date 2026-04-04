@@ -1,10 +1,7 @@
 package com.stripe.android.core.networking
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.utils.urlEncode
-import java.util.HashMap
-import java.util.HashSet
 
 /**
  * Factory for HTTP request query strings, converts a [Map] of <param, value> into a query string
@@ -36,24 +33,21 @@ object QueryStringFactory {
      * @param params a [Map] from which to remove the keys that have `null` values
      */
     fun compactParams(params: Map<String, *>): Map<String, Any> {
-        val compactParams = HashMap<String, Any>(params)
+        val compactParams = mutableMapOf<String, Any>()
 
-        // Remove all null values; they cause validation errors
-        for (key in HashSet(compactParams.keys)) {
-            when (val value = compactParams[key]) {
+        params.forEach { (key, value) ->
+            when (value) {
                 is Map<*, *> -> {
-                    compactParams[key] = compactParams(value as Map<String, *>)
+                    compactParams[key] = compactParams(value.asStringMap())
                 }
-                null -> {
-                    compactParams.remove(key)
-                }
+                null -> Unit
+                else -> compactParams[key] = value
             }
         }
 
         return compactParams
     }
 
-    @Throws(InvalidRequestException::class)
     private fun flattenParams(params: Map<String, *>?): List<Parameter> {
         return flattenParamsMap(params)
     }
@@ -69,7 +63,6 @@ object QueryStringFactory {
      */
     private fun isPrimitiveList(l: List<*>) = l.all { isPrimitive(it) }
 
-    @Throws(InvalidRequestException::class)
     private fun flattenParamsList(
         params: List<*>,
         keyPrefix: String
@@ -94,7 +87,6 @@ object QueryStringFactory {
         }
     }
 
-    @Throws(InvalidRequestException::class)
     private fun flattenParamsMap(
         params: Map<String, *>?,
         keyPrefix: String? = null
@@ -106,13 +98,12 @@ object QueryStringFactory {
             ?: emptyList()
     }
 
-    @Throws(InvalidRequestException::class)
     private fun flattenParamsValue(
         value: Any?,
         keyPrefix: String
     ): List<Parameter> {
         return when (value) {
-            is Map<*, *> -> flattenParamsMap(value as Map<String, Any?>?, keyPrefix)
+            is Map<*, *> -> flattenParamsMap(value.asStringMap(), keyPrefix)
             is List<*> -> flattenParamsList(value, keyPrefix)
             null -> {
                 listOf(Parameter(keyPrefix, ""))
@@ -132,5 +123,10 @@ object QueryStringFactory {
             val encodedValue = urlEncode(value)
             return "$encodedKey=$encodedValue"
         }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun Map<*, *>.asStringMap(): Map<String, *> {
+        return this as Map<String, *>
     }
 }

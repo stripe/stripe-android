@@ -1,14 +1,11 @@
 package com.stripe.android.core.networking
 
 import androidx.annotation.RestrictTo
-import java.io.File
-import java.net.HttpURLConnection
-import java.net.HttpURLConnection.HTTP_MULT_CHOICE
 
 /**
  * Represents a response from the Stripe servers.
  * Upon receiving the HTTP response, its body is parsed into [ResponseBody], such as a
- * [String] or a [File].
+ * [String] or a file [okio.Path].
  *
  * @param code the response code (i.e. 404)
  * @param body the body of the response
@@ -29,8 +26,8 @@ data class StripeResponse<ResponseBody>(
      */
     val headers: Map<String, List<String>> = emptyMap()
 ) {
-    val isOk: Boolean = code == HttpURLConnection.HTTP_OK
-    val isError: Boolean = code < HttpURLConnection.HTTP_OK || code >= HTTP_MULT_CHOICE
+    val isOk: Boolean = code == HTTP_OK
+    val isError: Boolean = code < HTTP_OK || code >= HTTP_MULTIPLE_CHOICE
     val isRateLimited = code == HTTP_TOO_MANY_REQUESTS
 
     val requestId: RequestId? = RequestId.fromString(
@@ -49,6 +46,8 @@ data class StripeResponse<ResponseBody>(
     }
 
     internal companion object {
+        internal const val HTTP_OK = 200
+        internal const val HTTP_MULTIPLE_CHOICE = 300
         internal const val HEADER_REQUEST_ID = "Request-Id"
     }
 }

@@ -9,8 +9,8 @@ import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.model.StripeFilePurpose
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.io.ByteArrayOutputStream
 import kotlin.test.Test
+import okio.Buffer
 
 @RunWith(RobolectricTestRunner::class)
 class FileUploadRequestTest {
@@ -28,11 +28,10 @@ class FileUploadRequestTest {
             boundary = "5955816017232305695"
         )
 
-        ByteArrayOutputStream().use {
-            request.writePostBody(it)
+        val buffer = Buffer()
+        request.writePostBody(buffer)
 
-            assertThat(it.size()).isEqualTo(1247)
-        }
+        assertThat(buffer.size).isEqualTo(1247L)
     }
 
     @Test
