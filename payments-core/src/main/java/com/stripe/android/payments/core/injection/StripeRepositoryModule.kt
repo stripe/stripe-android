@@ -26,16 +26,20 @@ import kotlin.coroutines.CoroutineContext
 @Module
 abstract class StripeRepositoryModule {
     @Binds
-    internal abstract fun bindsAnalyticsRequestExecutor(
-        default: DefaultAnalyticsRequestExecutor
-    ): AnalyticsRequestExecutor
-
-    @Binds
     internal abstract fun bindsStripeRepository(
         stripeApiRepository: StripeApiRepository
     ): StripeRepository
 
     internal companion object {
+        @Provides
+        fun providesAnalyticsRequestExecutor(
+            logger: Logger,
+            @IOContext coroutineContext: CoroutineContext
+        ): AnalyticsRequestExecutor = DefaultAnalyticsRequestExecutor(
+            logger = logger,
+            workContext = coroutineContext,
+        )
+
         @Provides
         fun providesAnalyticsRequestV2Executor(
             application: Context,

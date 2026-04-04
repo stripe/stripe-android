@@ -4,7 +4,7 @@ import androidx.annotation.RestrictTo
 import javax.inject.Qualifier
 
 /**
- * [Qualifier] for coroutine context used for IO.
+ * Qualifier for coroutine context used for IO.
  */
 @Qualifier
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

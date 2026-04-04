@@ -424,16 +424,20 @@ internal interface DefaultErrorReporterModule {
     ): ErrorReporter
 
     @Binds
-    fun providesAnalyticsRequestExecutor(
-        executor: DefaultAnalyticsRequestExecutor
-    ): AnalyticsRequestExecutor
-
-    @Binds
     fun providePaymentAnalyticsRequestFactory(
         requestFactory: PaymentAnalyticsRequestFactory
     ): AnalyticsRequestFactory
 
     companion object {
+        @Provides
+        fun providesAnalyticsRequestExecutor(
+            logger: Logger,
+            @IOContext workContext: CoroutineContext,
+        ): AnalyticsRequestExecutor = DefaultAnalyticsRequestExecutor(
+            logger = logger,
+            workContext = workContext,
+        )
+
         @Provides
         fun provideLogger(): Logger {
             return Logger.getInstance(BuildConfig.DEBUG)

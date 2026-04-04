@@ -4,6 +4,7 @@ import android.app.Application
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
+import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
@@ -20,6 +21,7 @@ import dagger.Module
 import dagger.Provides
 import javax.inject.Named
 import javax.inject.Singleton
+import kotlin.coroutines.CoroutineContext
 
 @Module
 internal interface CardScanModule {
@@ -32,8 +34,12 @@ internal interface CardScanModule {
         @Provides
         @Singleton
         internal fun providesAnalyticsRequestExecutor(
-            executor: DefaultAnalyticsRequestExecutor
-        ): AnalyticsRequestExecutor = executor
+            logger: Logger,
+            @IOContext workContext: CoroutineContext,
+        ): AnalyticsRequestExecutor = DefaultAnalyticsRequestExecutor(
+            logger = logger,
+            workContext = workContext,
+        )
 
         @Provides
         @Singleton

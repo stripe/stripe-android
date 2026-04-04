@@ -174,8 +174,12 @@ internal interface FinancialConnectionsSheetSharedModule {
         @Provides
         @ActivityRetainedScope
         internal fun providesAnalyticsRequestExecutor(
-            executor: DefaultAnalyticsRequestExecutor
-        ): AnalyticsRequestExecutor = executor
+            logger: Logger,
+            @IOContext workContext: CoroutineContext,
+        ): AnalyticsRequestExecutor = DefaultAnalyticsRequestExecutor(
+            logger = logger,
+            workContext = workContext,
+        )
 
         @Provides
         @ActivityRetainedScope

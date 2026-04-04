@@ -2,33 +2,29 @@ package com.stripe.android.core.networking
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.Logger
-import com.stripe.android.core.injection.IOContext
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class DefaultAnalyticsRequestExecutor(
     private val stripeNetworkClient: StripeNetworkClient,
-    @IOContext private val workContext: CoroutineContext,
+    private val workContext: CoroutineContext,
     private val logger: Logger
 ) : AnalyticsRequestExecutor {
 
     constructor() : this(
         Logger.noop(),
-        Dispatchers.IO
+        defaultAnalyticsRequestExecutorWorkContext()
     )
 
-    @Inject
     constructor(
         logger: Logger,
-        @IOContext workContext: CoroutineContext
+        workContext: CoroutineContext
     ) : this(
-        DefaultStripeNetworkClient(
+        createDefaultAnalyticsRequestExecutorNetworkClient(
             workContext = workContext,
-            logger = logger
+            logger = logger,
         ),
         workContext,
         logger

@@ -34,6 +34,7 @@ The following types are already migrated into `commonMain`:
 - `networking/AnalyticsFields`
 - `networking/AnalyticsEvent`
 - `networking/AnalyticsRequestExecutor`
+- `networking/DefaultAnalyticsRequestExecutor`
 - `networking/AnalyticsRequestV2Executor`
 - `networking/AnalyticsRequestV2Storage`
 - `networking/ExponentialBackoffRetryDelaySupplier`
@@ -73,6 +74,10 @@ Two migration decisions are now validated in code:
 3. Use narrow `expect`/`actual` only for small platform primitives where DI
    would add more ceremony than value. `utils/urlEncode()` now follows this
    pattern so Android keeps `URLEncoder` behavior exactly.
+4. Do not rely on `expect`/`actual` alias shims for Dagger qualifiers or
+   `@Inject`. `DefaultAnalyticsRequestExecutor` now lives in `commonMain`, but
+   Android modules provide it explicitly and a tiny Android actual helper
+   creates the default `DefaultStripeNetworkClient`.
 
 ## Official Kotlin Integration Guidance Applied Here
 
@@ -138,6 +143,7 @@ Applied to this repo:
 | `AnalyticsRequest.kt` | Now in `commonMain`; pure GET request on top of shared query-string building |
 | `AnalyticsRequestV2.kt` | Now in `commonMain`; uses `kotlin.uuid` for event IDs and `kotlin.time.Clock.System` for wall-clock timestamps |
 | `AnalyticsRequestExecutor.kt` | Now in `commonMain`; pure interface over shared `AnalyticsRequest` |
+| `DefaultAnalyticsRequestExecutor.kt` | Now in `commonMain`; shared implementation with Android explicit provider wiring and a small actual helper for default client construction |
 | `AnalyticsRequestV2Executor.kt` | Now in `commonMain`; pure interface over shared `AnalyticsRequestV2` |
 | `AnalyticsRequestV2Storage.kt` | Now in `commonMain`; pure storage contract over shared `AnalyticsRequestV2` |
 | `ApiRequest.kt` | Now in `commonMain`; `Options` uses `CommonParcelize` / `CommonParcelable` and header generation now routes through the shared `RequestHeadersFactory` |
@@ -162,7 +168,6 @@ Applied to this repo:
 | `AnalyticsRequestFactory.kt` | `android.content.pm.PackageInfo/PackageManager`, `android.os.Build` |
 | `AnalyticsRequestV2Factory.kt` | `android.content.Context`, `android.os.Build`, `android.provider.Settings.Secure.ANDROID_ID` |
 | `NetworkTypeDetector.kt` | `android.net.ConnectivityManager`, `android.telephony.TelephonyManager` |
-| `DefaultAnalyticsRequestExecutor.kt` | Not Android-bound by imports, but its injected convenience constructor currently hardwires `DefaultStripeNetworkClient` | Keep in `androidMain` until the default-construction path is removed or split from the common executor |
 | `DefaultAnalyticsRequestV2Executor.kt` | Uses `AnalyticsRequestV2Storage`, `WorkManager`, and Android `Context` |
 | `RealAnalyticsRequestV2Storage.kt` | Uses Android `Context` and `SharedPreferences` for persistence |
 | `SendAnalyticsRequestV2Worker.kt` | `androidx.work.CoroutineWorker`, `WorkManager` — fully Android |
@@ -737,6 +742,7 @@ stripe-core/
 │   │   │   ├── AnalyticsRequest.kt
 │   │   │   ├── AnalyticsRequestV2.kt
 │   │   │   ├── AnalyticsRequestExecutor.kt (interface)
+│   │   │   ├── DefaultAnalyticsRequestExecutor.kt
 │   │   │   ├── AnalyticsFields.kt
 │   │   │   ├── FileUploadRequest.kt       (okio.Path + okio.FileSystem)
 │   │   │   ├── NetworkConstants.kt
@@ -773,12 +779,11 @@ stripe-core/
 │   │   │   ├── ConnectionFactory.kt       (HttpsURLConnection)
 │   │   │   ├── StripeConnection.kt        (HttpsURLConnection wrapper)
 │   │   │   ├── DefaultStripeNetworkClient.kt
-│   │   │   ├── DefaultAnalyticsRequestExecutor.kt
 │   │   │   ├── RequestHeadersPlatform.android.kt
 │   │   │   ├── AnalyticsRequestFactory.kt
 │   │   │   ├── AnalyticsRequestV2Factory.kt
-│   │   │   ├── AnalyticsRequestV2Executor.kt
-│   │   │   ├── AnalyticsRequestV2Storage.kt
+│   │   │   ├── DefaultAnalyticsRequestV2Executor.kt
+│   │   │   ├── RealAnalyticsRequestV2Storage.kt
 │   │   │   ├── NetworkTypeDetector.kt
 │   │   │   ├── SendAnalyticsRequestV2Worker.kt
 │   │   │   ├── ResponseJson.kt            (org.json.JSONObject)
