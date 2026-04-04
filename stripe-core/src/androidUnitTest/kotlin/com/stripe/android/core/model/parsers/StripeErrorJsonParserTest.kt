@@ -3,7 +3,9 @@ package com.stripe.android.core.model.parsers
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.StripeErrorFixtures
-import org.json.JSONObject
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonObject
 import kotlin.test.Test
 
 /**
@@ -23,7 +25,7 @@ class StripeErrorJsonParserTest {
 
     @Test
     fun parseError_withEmptyJson_addsInvalidResponseMessage() {
-        assertThat(StripeErrorJsonParser().parse(JSONObject()).message)
+        assertThat(StripeErrorJsonParser().parse(buildJsonObject {}).message)
             .isEqualTo(StripeErrorJsonParser.MALFORMED_RESPONSE_MESSAGE)
     }
 
@@ -60,7 +62,7 @@ class StripeErrorJsonParserTest {
 
     @Suppress("MaxLineLength")
     private companion object {
-        private val RAW_INVALID_REQUEST_ERROR = JSONObject(
+        private val RAW_INVALID_REQUEST_ERROR = Json.parseToJsonElement(
             """
             {
                 "error": {
@@ -69,18 +71,18 @@ class StripeErrorJsonParserTest {
                 }
             }
             """.trimIndent()
-        )
+        ).jsonObject
 
-        private val RAW_INCORRECT_FORMAT_ERROR = JSONObject(
+        private val RAW_INCORRECT_FORMAT_ERROR = Json.parseToJsonElement(
             """
             {
                 "message": "The Stripe API is only accessible over HTTPS. Please see <https://stripe.com/docs> for more information.",
                 "type": "invalid_request_error"
             }
             """.trimIndent()
-        )
+        ).jsonObject
 
-        private val RAW_ERROR_WITH_ALL_FIELDS = JSONObject(
+        private val RAW_ERROR_WITH_ALL_FIELDS = Json.parseToJsonElement(
             """
             {
                 "error": {
@@ -98,6 +100,6 @@ class StripeErrorJsonParserTest {
                 }
             }
             """.trimIndent()
-        )
+        ).jsonObject
     }
 }

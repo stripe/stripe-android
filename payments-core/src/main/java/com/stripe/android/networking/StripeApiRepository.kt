@@ -44,6 +44,7 @@ import com.stripe.android.core.networking.RequestId
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.networking.responseJson
+import com.stripe.android.core.networking.responseJsonObject
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.exception.CardException
 import com.stripe.android.model.BankStatuses
@@ -1748,7 +1749,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         val responseCode = response.code
 
         val stripeError = StripeErrorJsonParser()
-            .parse(response.responseJson())
+            .parse(response.responseJsonObject())
             .withLocalizedMessage(context, requestId, requestOptions.apiKeyIsLiveMode)
 
         when (responseCode) {

@@ -40,7 +40,7 @@ kotlin {
             api libs.okio
             implementation libs.androidx.annotation
             implementation libs.kotlin.coroutines
-            implementation libs.kotlin.serialization
+            api libs.kotlin.serialization
         }
         commonTest
 

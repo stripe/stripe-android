@@ -12,7 +12,7 @@ import com.stripe.android.core.networking.HTTP_TOO_MANY_REQUESTS
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
-import com.stripe.android.core.networking.responseJson
+import com.stripe.android.core.networking.responseJsonObject
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsResponseEventEmitter
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
@@ -93,7 +93,7 @@ internal class FinancialConnectionsRequestExecutor @Inject constructor(
     private fun handleApiError(response: StripeResponse<String>): Exception {
         val requestId = response.requestId?.value
         val responseCode = response.code
-        val stripeError = StripeErrorJsonParser().parse(response.responseJson())
+        val stripeError = StripeErrorJsonParser().parse(response.responseJsonObject())
         throw when (responseCode) {
             HttpURLConnection.HTTP_ACCEPTED,
             HttpURLConnection.HTTP_BAD_REQUEST,

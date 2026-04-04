@@ -1,7 +1,8 @@
 package com.stripe.android.core
 
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
-import org.json.JSONObject
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
 
 internal object StripeErrorFixtures {
     @JvmField
@@ -15,7 +16,7 @@ internal object StripeErrorFixtures {
     )
 
     val INVALID_CARD_NUMBER = StripeErrorJsonParser().parse(
-        JSONObject(
+        Json.parseToJsonElement(
             """
         {
             "error": {
@@ -27,6 +28,6 @@ internal object StripeErrorFixtures {
             }
         }
             """.trimIndent()
-        )
+        ).jsonObject
     )
 }

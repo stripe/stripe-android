@@ -27,7 +27,8 @@ import com.stripe.android.identity.networking.models.VerificationPageIconType
 import com.stripe.android.identity.networking.models.VerificationPageStaticConsentLineContent
 import com.stripe.android.identity.utils.IdentityIO
 import kotlinx.coroutines.runBlocking
-import org.json.JSONObject
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.KArgumentCaptor
@@ -419,7 +420,7 @@ class DefaultIdentityRepositoryTest {
                 )
             }.let { apiException ->
                 assertThat(apiException.stripeError).isEqualTo(
-                    StripeErrorJsonParser().parse(JSONObject(ERROR_JSON_STRING))
+                    StripeErrorJsonParser().parse(Json.parseToJsonElement(ERROR_JSON_STRING).jsonObject)
                 )
                 assertThat(apiException.statusCode).isEqualTo(HTTP_UNAUTHORIZED)
             }
@@ -489,7 +490,7 @@ class DefaultIdentityRepositoryTest {
                 )
             }.let { apiException ->
                 assertThat(apiException.stripeError).isEqualTo(
-                    StripeErrorJsonParser().parse(JSONObject(ERROR_JSON_STRING))
+                    StripeErrorJsonParser().parse(Json.parseToJsonElement(ERROR_JSON_STRING).jsonObject)
                 )
                 assertThat(apiException.statusCode).isEqualTo(HTTP_UNAUTHORIZED)
             }

@@ -17,6 +17,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.responseJson
+import com.stripe.android.core.networking.responseJsonObject
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.ClearDataParam.Companion.createCollectedDataParamEntry
@@ -267,7 +268,7 @@ internal class DefaultIdentityRepository @Inject constructor(
             if (response.isError) {
                 // TODO(ccen) Parse the response code and throw different exceptions
                 throw APIException(
-                    stripeError = stripeErrorJsonParser.parse(response.responseJson()),
+                    stripeError = stripeErrorJsonParser.parse(response.responseJsonObject()),
                     requestId = response.requestId?.value,
                     statusCode = response.code
                 )
@@ -301,7 +302,7 @@ internal class DefaultIdentityRepository @Inject constructor(
                 if (response.isError) {
                     // TODO(ccen) Parse the response code and throw different exceptions
                     throw APIException(
-                        stripeError = stripeErrorJsonParser.parse(response.responseJson()),
+                        stripeError = stripeErrorJsonParser.parse(response.responseJsonObject()),
                         requestId = response.requestId?.value,
                         statusCode = response.code
                     )

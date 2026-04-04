@@ -11,8 +11,8 @@ import kotlinx.serialization.json.JsonEncoder
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.put
-import org.json.JSONObject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object StripeErrorSerializer : KSerializer<StripeError> {
@@ -22,8 +22,8 @@ object StripeErrorSerializer : KSerializer<StripeError> {
     override fun deserialize(decoder: Decoder): StripeError {
         check(decoder is JsonDecoder)
         val parser = StripeErrorJsonParser()
-        val json = decoder.decodeJsonElement()
-        return parser.parse(JSONObject(json.toString()))
+        val json = decoder.decodeJsonElement().jsonObject
+        return parser.parse(json)
     }
 
     override fun serialize(encoder: Encoder, value: StripeError) {

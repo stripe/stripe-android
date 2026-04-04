@@ -127,12 +127,12 @@ suspend fun <Response> executeRequestWithKSerializerParser(
     )
 }
 
-private fun apiException(
+internal fun apiException(
     stripeErrorJsonParser: StripeErrorJsonParser,
     response: StripeResponse<String>
 ): APIException {
     val stripeError = try {
-        stripeErrorJsonParser.parse(response.responseJson())
+        stripeErrorJsonParser.parse(response.responseJsonObject())
     } catch (_: APIException) {
         null
     }
@@ -144,7 +144,7 @@ private fun apiException(
     )
 }
 
-private fun connectionException(request: StripeRequest, cause: Throwable) = APIConnectionException(
+internal fun connectionException(request: StripeRequest, cause: Throwable) = APIConnectionException(
     "Failed to execute $request",
     cause = cause
 )

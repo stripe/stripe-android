@@ -155,7 +155,7 @@ Applied to this repo:
 | File | Blockers | Fix |
 |------|----------|-----|
 | `JsonUtils.kt` | None after removing JVM-only type-name lookup | Already in `commonMain` |
-| `RequestExecutor.kt` | Uses `responseJson()` → `JSONObject` and Android-only request implementations | Handle JSON abstraction and commonize request types first |
+| `RequestExecutor.kt` | Legacy success parsing still depends on `ModelJsonParser` + `responseJson()`; error parsing now uses shared `StripeErrorJsonParser` plus Android `responseJsonObject()` helper | Finish exception/common request work, then split legacy `ModelJsonParser` path from KSerializer/common paths |
 | `FileUploadRequest.kt` | `StripeFileParams.file: java.io.File` and `java.net.URLConnection.guessContentTypeFromName` | Keep Okio body writing; replace input file type/content-type resolution |
 
 #### Must stay in `androidMain` (or be restructured)
@@ -182,7 +182,8 @@ Applied to this repo:
 | `StripeFileParams.kt` | `@Parcelize`, `java.io.File` | Parcelize KMP; replace `File` with `okio.Path` |
 | `StripeError.kt` | Already in `commonMain` | Done via `CommonParcelize` + `CommonJavaSerializable` |
 | `parsers/ModelJsonParser.kt` | `org.json.JSONObject` | Phase 2 — JSON abstraction |
-| `parsers/StripeErrorJsonParser.kt` | `org.json.JSONObject` | Phase 2 — JSON abstraction |
+| `parsers/StripeErrorJsonParser.kt` | Already in `commonMain`; uses `kotlinx.serialization.json.JsonObject` instead of `org.json.JSONObject` | Done; Android callers parse error bodies through `responseJsonObject()` |
+| `serializers/StripeErrorSerializer.kt` | Already in `commonMain`; deserializes from `kotlinx.serialization.json.JsonObject` | Done |
 | Other parsers | `org.json.JSONObject` | Phase 2 |
 
 ### Exceptions (`com.stripe.android.core.exception`) — 13 files
@@ -616,9 +617,13 @@ object AndroidContentTypeResolver : ContentTypeResolver {
 This is the most impactful change because `org.json.JSONObject` is used in:
 - `ResponseJson.kt` — converts `StripeResponse<String>` body to `JSONObject`
 - `ModelJsonParser<T>.parse(json: JSONObject)` — every model parser
-- `StripeErrorJsonParser` — error response parsing
 - `StripeClientUserAgentHeaderFactory` — builds JSON for User-Agent header
 - `FraudDetectionDataStore` — serializes/deserializes fraud data
+
+`StripeErrorJsonParser` has already been moved to `commonMain` and now parses
+`kotlinx.serialization.json.JsonObject`. Android callers use a separate
+`responseJsonObject()` helper for error bodies, while the legacy success path
+still goes through `responseJson()` and `ModelJsonParser`.
 
 #### Recommended approach: two parallel parser contracts
 
@@ -733,6 +738,10 @@ stripe-core/
 │   │   │   ├── StripeFile.kt              (@CommonParcelize)
 │   │   │   ├── StripeFileParams.kt        (okio.Path instead of File)
 │   │   │   ├── StripeFilePurpose.kt
+│   │   │   ├── parsers/
+│   │   │   │   └── StripeErrorJsonParser.kt
+│   │   │   ├── serializers/
+│   │   │   │   └── StripeErrorSerializer.kt
 │   │   │   └── StripeModelParser.kt       (new: parse from String)
 │   │   ├── networking/
 │   │   │   ├── StripeRequest.kt           (okio.BufferedSink)
@@ -772,7 +781,6 @@ stripe-core/
 │   │   │   ├── CommonIgnoredOnParcel.android.kt
 │   │   │   ├── parsers/                   (all existing ModelJsonParser impls)
 │   │   │   │   ├── ModelJsonParser.kt     (uses org.json.JSONObject)
-│   │   │   │   ├── StripeErrorJsonParser.kt
 │   │   │   │   └── ...
 │   │   │   └── ModelJsonParserAdapter.kt  (bridges to StripeModelParser)
 │   │   ├── networking/
