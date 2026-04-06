@@ -12,8 +12,8 @@ import com.stripe.android.checkouttesting.createPaymentMethod
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
 import com.stripe.android.networktesting.RequestMatchers.not
-import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
+import org.json.JSONObject
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.utils.PaymentSheetTestRunnerContext
 import com.stripe.android.paymentsheet.utils.TestRules
@@ -246,7 +246,7 @@ internal class PaymentSheetCheckoutSessionTest {
     fun allowRedisplayIsUnspecifiedWhenSaveDisabledWithPayment() =
         runCheckoutSessionAllowRedisplayTest(
             initFile = "checkout-session-init.json",
-            initReplacements = listOf(SAVE_DISABLED_REPLACEMENT),
+            saveEnabled = false,
             confirmFile = "checkout-session-confirm.json",
             noSaveCheckbox = true,
             expectedAllowRedisplay = "unspecified",
@@ -273,7 +273,7 @@ internal class PaymentSheetCheckoutSessionTest {
     fun allowRedisplayIsLimitedWhenSaveDisabledWithSetup() =
         runCheckoutSessionAllowRedisplayTest(
             initFile = "checkout-session-init-setup.json",
-            initReplacements = listOf(SAVE_DISABLED_REPLACEMENT),
+            saveEnabled = false,
             confirmFile = "checkout-session-confirm-setup.json",
             noSaveCheckbox = true,
             expectedAllowRedisplay = "limited",
@@ -283,14 +283,13 @@ internal class PaymentSheetCheckoutSessionTest {
 
     /**
      * Runs a checkout session test verifying that allow_redisplay is sent with the expected
-     * value on PM creation. CUSTOMER_REPLACEMENT is always applied first to inject the customer
-     * and save offer fields; [initReplacements] (e.g. SAVE_DISABLED_REPLACEMENT) are applied
-     * after and may depend on fields injected by CUSTOMER_REPLACEMENT.
+     * value on PM creation. Injects customer and save offer fields into the init fixture
+     * using JSON modification.
      */
     private fun runCheckoutSessionAllowRedisplayTest(
         initFile: String,
         confirmFile: String,
-        initReplacements: List<ResponseReplacement> = emptyList(),
+        saveEnabled: Boolean = true,
         clickSaveCheckbox: Boolean = false,
         noSaveCheckbox: Boolean = false,
         expectedAllowRedisplay: String,
@@ -299,7 +298,18 @@ internal class PaymentSheetCheckoutSessionTest {
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.checkoutInit { response ->
-            response.testBodyFromFile(initFile, listOf(CUSTOMER_REPLACEMENT) + initReplacements)
+            response.testBodyFromFile(initFile) { json ->
+                json.put("customer", JSONObject("""
+                    {
+                        "id": "cus_12345",
+                        "payment_methods": [],
+                        "can_detach_payment_method": true
+                    }
+                """.trimIndent()))
+                json.put("customer_managed_saved_payment_methods_offer_save", JSONObject("""
+                    {"enabled": $saveEnabled, "status": "not_accepted"}
+                """.trimIndent()))
+            }
         }
 
         testContext.presentWithCheckout()
@@ -338,21 +348,4 @@ internal class PaymentSheetCheckoutSessionTest {
         }
     }
 
-    private companion object {
-        // Injects customer + save offer fields into base checkout-session-init fixtures.
-        // Note: testBodyFromFile concatenates lines without newlines, so all JSON ends up
-        // on one line. We anchor on the unique "ui_mode" field and append inline.
-        val CUSTOMER_REPLACEMENT = ResponseReplacement(
-            original = """"ui_mode": "custom",""",
-            new = """"ui_mode": "custom", """ +
-                """"customer": {"id": "cus_12345", "payment_methods": [], "can_detach_payment_method": true}, """ +
-                """"customer_managed_saved_payment_methods_offer_save": {"enabled": true, "status": "not_accepted"},""",
-        )
-
-        // Must be applied after CUSTOMER_REPLACEMENT, which injects the field this matches on.
-        val SAVE_DISABLED_REPLACEMENT = ResponseReplacement(
-            original = """"customer_managed_saved_payment_methods_offer_save": {"enabled": true,""",
-            new = """"customer_managed_saved_payment_methods_offer_save": {"enabled": false,""",
-        )
-    }
 }
