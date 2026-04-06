@@ -108,6 +108,7 @@ class CardScanStripeLauncherTest {
             eventsReporter = fakeEventsReporter,
             enableMlKitCardScan = false,
             elementsSessionId = null,
+            disableSsdOcrCardScan = false,
             isLaunchingState = mutableStateOf(false),
         )
 

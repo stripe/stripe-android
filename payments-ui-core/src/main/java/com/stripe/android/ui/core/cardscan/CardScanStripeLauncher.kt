@@ -28,6 +28,7 @@ internal class CardScanStripeLauncher(
     private val eventsReporter: CardScanEventsReporter,
     private val enableMlKitCardScan: Boolean,
     private val elementsSessionId: String?,
+    private val disableSsdOcrCardScan: Boolean,
     isLaunchingState: MutableState<Boolean>,
 ) : CardScanLauncher {
 
@@ -53,6 +54,7 @@ internal class CardScanStripeLauncher(
                 CardScanConfiguration(
                     elementsSessionId = elementsSessionId,
                     enableMlKitTextRecognition = enableMlKitCardScan,
+                    disableSsdOcr = disableSsdOcrCardScan,
                 )
             )
         )
@@ -113,16 +115,18 @@ internal class CardScanStripeLauncher(
             eventsReporter: CardScanEventsReporter,
             enableMlKitCardScan: Boolean = false,
             elementsSessionId: String? = null,
+            disableSsdOcrCardScan: Boolean = false,
             onResult: (CardScanResult) -> Unit,
         ): CardScanStripeLauncher {
             val context = LocalContext.current.applicationContext
             val isLaunchingState = rememberSaveable { mutableStateOf(false) }
-            val launcher = remember(eventsReporter, context, enableMlKitCardScan, elementsSessionId) {
+            val launcher = remember(eventsReporter, context, enableMlKitCardScan, elementsSessionId, disableSsdOcrCardScan) {
                 CardScanStripeLauncher(
                     context = context,
                     eventsReporter = eventsReporter,
                     enableMlKitCardScan = enableMlKitCardScan,
                     elementsSessionId = elementsSessionId,
+                    disableSsdOcrCardScan = disableSsdOcrCardScan,
                     isLaunchingState = isLaunchingState,
                 )
             }

@@ -75,6 +75,7 @@ internal object PaymentMethodMetadataFactory {
         isStripeCardScanAllowed: Boolean = false,
         enableMlKitCardScan: Boolean = false,
         elementsSessionId: String? = null,
+        disableSsdOcrCardScan: Boolean = false,
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -142,6 +143,7 @@ internal object PaymentMethodMetadataFactory {
             isStripeCardScanAllowed = isStripeCardScanAllowed,
             enableMlKitCardScan = enableMlKitCardScan,
             elementsSessionId = elementsSessionId,
+            disableSsdOcrCardScan = disableSsdOcrCardScan,
         )
     }
 

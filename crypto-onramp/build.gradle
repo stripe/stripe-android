@@ -44,6 +44,14 @@ android {
     buildFeatures {
         compose = true
     }
+
+    kotlin {
+        compilerOptions {
+            freeCompilerArgs.addAll([
+                    "-opt-in=com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp",
+            ])
+        }
+    }
 }
 
 ext {
