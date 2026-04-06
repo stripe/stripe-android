@@ -18,7 +18,11 @@ internal object CardOcr {
 
     data class Input(val ssdOcrImage: MLImage, val cardBitmap: Bitmap)
 
-    data class Prediction(val pan: String?) {
+    data class Prediction(
+        val pan: String?,
+        val expiryMonth: Int? = null,
+        val expiryYear: Int? = null,
+    ) {
 
         /**
          * Force a generic toString method to prevent leaking information about this class'
