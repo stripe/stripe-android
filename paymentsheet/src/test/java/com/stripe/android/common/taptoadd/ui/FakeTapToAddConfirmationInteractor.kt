@@ -49,8 +49,11 @@ internal class FakeTapToAddConfirmationInteractor(
     private val _onClose = Turbine<Unit>()
     val onClose: ReceiveTurbine<Unit> = _onClose
 
+    private val _performActionCalls = Turbine<TapToAddConfirmationInteractor.Action>()
+    val performActionCalls: ReceiveTurbine<TapToAddConfirmationInteractor.Action> = _performActionCalls
+
     override fun performAction(action: TapToAddConfirmationInteractor.Action) {
-        // No-op
+        _performActionCalls.add(action)
     }
 
     override fun close() {
@@ -58,6 +61,7 @@ internal class FakeTapToAddConfirmationInteractor(
     }
 
     fun validate() {
+        _performActionCalls.ensureAllEventsConsumed()
         _onClose.ensureAllEventsConsumed()
     }
 

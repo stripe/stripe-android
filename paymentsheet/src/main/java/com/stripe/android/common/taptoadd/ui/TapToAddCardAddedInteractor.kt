@@ -53,6 +53,7 @@ internal interface TapToAddCardAddedInteractor {
 
     sealed interface Action {
         data object PrimaryButtonPressed : Action
+        data object CancelPressed : Action
     }
 
     interface Factory {
@@ -106,6 +107,9 @@ internal class DefaultTapToAddCardAddedInteractor(
             TapToAddCardAddedInteractor.Action.PrimaryButtonPressed -> {
                 eventReporter.onTapToAddContinueAfterCardAdded()
                 onPrimaryButtonPressed()
+            }
+            TapToAddCardAddedInteractor.Action.CancelPressed -> {
+                eventReporter.onTapToAddCanceled(EventReporter.TapToAddCancelSource.CardAdded)
             }
         }
     }

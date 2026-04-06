@@ -73,8 +73,9 @@ internal class FakeEventReporter : EventReporter {
     private val _tapToAddCardAddedCalls = Turbine<Unit>()
     val tapToAddCardAddedCalls: ReceiveTurbine<Unit> = _tapToAddCardAddedCalls
 
-    private val _tapToAddCanceledCalls = Turbine<Unit>()
-    val tapToAddCanceledCalls: ReceiveTurbine<Unit> = _tapToAddCanceledCalls
+    private val _tapToAddCanceledCalls = Turbine<EventReporter.TapToAddCancelSource>()
+    val tapToAddCanceledCalls: ReceiveTurbine<EventReporter.TapToAddCancelSource> =
+        _tapToAddCanceledCalls
 
     private val _tapToAddContinueAfterCardAddedCalls = Turbine<Unit>()
     val tapToAddContinueAfterCardAddedCalls: ReceiveTurbine<Unit> = _tapToAddContinueAfterCardAddedCalls
@@ -299,8 +300,8 @@ internal class FakeEventReporter : EventReporter {
         _tapToAddCardAddedCalls.add(Unit)
     }
 
-    override fun onTapToAddCanceled() {
-        _tapToAddCanceledCalls.add(Unit)
+    override fun onTapToAddCanceled(source: EventReporter.TapToAddCancelSource) {
+        _tapToAddCanceledCalls.add(source)
     }
 
     override fun onTapToAddContinueAfterCardAdded() {

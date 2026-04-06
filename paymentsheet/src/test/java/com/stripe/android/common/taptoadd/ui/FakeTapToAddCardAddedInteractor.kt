@@ -32,8 +32,11 @@ internal class FakeTapToAddCardAddedInteractor(
     private val _onClose = Turbine<Unit>()
     val onClose: ReceiveTurbine<Unit> = _onClose
 
+    private val _performActionCalls = Turbine<TapToAddCardAddedInteractor.Action>()
+    val performActionCalls: ReceiveTurbine<TapToAddCardAddedInteractor.Action> = _performActionCalls
+
     override fun performAction(action: TapToAddCardAddedInteractor.Action) {
-        // No-op
+        _performActionCalls.add(action)
     }
 
     override fun close() {
@@ -41,6 +44,7 @@ internal class FakeTapToAddCardAddedInteractor(
     }
 
     fun validate() {
+        _performActionCalls.ensureAllEventsConsumed()
         _onClose.ensureAllEventsConsumed()
     }
 

@@ -420,9 +420,9 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireEvent(PaymentSheetEvent.TapToAdd.CardAdded(mode, duration))
     }
 
-    override fun onTapToAddCanceled() {
+    override fun onTapToAddCanceled(source: EventReporter.TapToAddCancelSource) {
         val duration = durationProvider.end(DurationProvider.Key.TapToAdd)
-        fireEvent(PaymentSheetEvent.TapToAdd.Canceled(mode, duration))
+        fireEvent(PaymentSheetEvent.TapToAdd.Canceled(mode, source, duration))
     }
 
     override fun onTapToAddContinueAfterCardAdded() {
