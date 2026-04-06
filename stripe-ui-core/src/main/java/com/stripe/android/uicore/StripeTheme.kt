@@ -49,7 +49,7 @@ import androidx.core.graphics.ColorUtils
 import com.stripe.android.uicore.image.LocalImageOptimizer
 import com.stripe.android.uicore.image.LocalStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
-import com.stripe.android.uicore.image.StripeImageOptimizer
+import com.stripe.android.uicore.image.StripeCdnImageOptimizer
 import java.lang.Float.max
 import androidx.compose.ui.unit.max as maxDp
 
@@ -532,7 +532,7 @@ fun StripeTheme(
         LocalInspectionMode provides inspectionMode,
         LocalInstrumentationTest provides isInstrumentationTest,
         LocalStripeImageLoader provides StripeImageLoader(LocalContext.current),
-        LocalImageOptimizer provides StripeImageOptimizer
+        LocalImageOptimizer provides StripeCdnImageOptimizer
     ) {
         MaterialTheme(
             colors = colors.materialColors,

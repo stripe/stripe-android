@@ -3,11 +3,11 @@ package com.stripe.android.uicore.image
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
-internal class StripeImageOptimizerTest {
+internal class StripeCdnImageOptimizerTest {
 
     @Test
     fun `optimize returns Stripe CDN URL with height and dpr`() {
-        val result = StripeImageOptimizer.optimize(
+        val result = StripeCdnImageOptimizer.optimize(
             url = "https://example.com/card_art.png",
             width = 120
         )
