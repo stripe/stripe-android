@@ -28,7 +28,9 @@ import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
+import com.stripe.android.paymentsheet.repositories.DefaultPaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
 import com.stripe.android.paymentsheet.state.CreateLinkState
 import com.stripe.android.paymentsheet.state.DefaultAnalyticsMetadataFactory
@@ -171,6 +173,11 @@ internal interface EmbeddedPaymentElementViewModelModule {
     fun bindsPrefsRepositoryFactory(
         factory: DefaultPrefsRepository.Factory
     ): PrefsRepository.Factory
+
+    @Binds
+    fun bindsPaymentMethodMessagePromotionHelper(
+        impl: DefaultPaymentMethodMessagePromotionsHelper
+    ): PaymentMethodMessagePromotionsHelper
 
     @Suppress("TooManyFunctions")
     companion object {
