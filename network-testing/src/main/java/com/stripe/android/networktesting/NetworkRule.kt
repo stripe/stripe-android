@@ -5,7 +5,10 @@ import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestV2
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.ConnectionFactory
-import com.stripe.android.core.networking.StripeRequest
+import com.stripe.android.core.networking.HttpClientFactory
+import io.ktor.client.HttpClient
+import io.ktor.client.HttpClientConfig
+import io.ktor.client.engine.okhttp.OkHttp
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.mockwebserver.MockResponse
@@ -14,12 +17,8 @@ import org.json.JSONObject
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
-import java.net.HttpURLConnection
-import java.net.URL
-import javax.net.ssl.HttpsURLConnection
 import javax.net.ssl.SSLSocketFactory
 import kotlin.time.Duration
-import okio.BufferedSink
 
 class NetworkRule private constructor(
     private val hostsToTrack: Set<String>,
@@ -94,6 +93,8 @@ private class NetworkStatement(
     private val mockWebServer: TestMockWebServer,
     private val hostsToTrack: Set<String>,
 ) : Statement() {
+    private var originalHttpClientFactory: HttpClientFactory? = null
+
     override fun evaluate() {
         try {
             if (
@@ -112,71 +113,59 @@ private class NetworkStatement(
     }
 
     private fun setup() {
-        ConnectionFactory.Default.connectionOpener = NetworkRuleConnectionOpener()
+        originalHttpClientFactory = ConnectionFactory.Default.httpClientFactory
+        ConnectionFactory.Default.httpClientFactory = NetworkRuleHttpClientFactory()
     }
 
     private fun tearDown() {
         mockWebServer.dispatcher.clear()
-        ConnectionFactory.Default.connectionOpener = ConnectionFactory.ConnectionOpener.Default
-    }
-
-    inner class NetworkRuleConnectionOpener : ConnectionFactory.ConnectionOpener {
-        override fun open(
-            request: StripeRequest,
-            callback: HttpURLConnection.(request: StripeRequest) -> Unit
-        ): HttpsURLConnection {
-            val requestHost = request.url.hostFromUrl()
-            if (!hostsToTrack.contains(requestHost)) {
-                throw RequestNotFoundException(
-                    "Test request attempted to reach a non test endpoint. " +
-                        "Url: ${request.url}"
-                )
-            }
-
-            val delegatingRequest = DelegatingStripeRequest(
-                request,
-                request.url.replace(
-                    "https://$requestHost",
-                    mockWebServer.baseUrl.toString().removeSuffix("/")
-                )
-            )
-            return (URL(delegatingRequest.url).openConnection() as HttpsURLConnection).apply {
-                sslSocketFactory = mockWebServer.clientSocketFactory()
-                callback(delegatingRequest)
-            }
+        originalHttpClientFactory?.let {
+            ConnectionFactory.Default.httpClientFactory = it
         }
     }
-}
 
-private class DelegatingStripeRequest(
-    private val original: StripeRequest,
-    private val testUrl: String,
-) : StripeRequest() {
+    inner class NetworkRuleHttpClientFactory : HttpClientFactory {
+        override fun create(
+            configure: HttpClientConfig<*>.() -> Unit
+        ): HttpClient {
+            val trustManager = mockWebServer.clientTrustManager()
 
-    private val originalHost: String = original.url.hostFromUrl()
+            return HttpClient(OkHttp) {
+                engine {
+                    config {
+                        addInterceptor { chain ->
+                            val request = chain.request()
+                            val originalHost = request.header("original-host") ?: request.url.host
 
-    override val method: Method
-        get() = original.method
+                            if (!hostsToTrack.contains(originalHost)) {
+                                throw RequestNotFoundException(
+                                    "Test request attempted to reach a non test endpoint. " +
+                                        "Url: ${request.url}"
+                                )
+                            }
 
-    override val mimeType: MimeType
-        get() = original.mimeType
+                            val rewrittenRequest = request.newBuilder()
+                                .header("original-host", originalHost)
+                                .url(
+                                    request.url.newBuilder()
+                                        .scheme(mockWebServer.baseUrl.scheme)
+                                        .host(mockWebServer.baseUrl.host)
+                                        .port(mockWebServer.baseUrl.port)
+                                        .build()
+                                )
+                                .build()
 
-    override val retryResponseCodes: Iterable<Int>
-        get() = original.retryResponseCodes
-
-    override val url: String
-        get() = testUrl
-
-    override val headers: Map<String, String>
-        get() = original.headers.plus(Pair("original-host", originalHost))
-
-    override var postHeaders: Map<String, String>? = original.postHeaders
-
-    override val shouldCache: Boolean
-        get() = original.shouldCache
-
-    override fun writePostBody(sink: BufferedSink) {
-        original.writePostBody(sink)
+                            chain.proceed(rewrittenRequest)
+                        }
+                        sslSocketFactory(
+                            mockWebServer.clientSocketFactory(trustManager),
+                            trustManager
+                        )
+                    }
+                }
+                configure()
+            }
+        }
     }
 }
 

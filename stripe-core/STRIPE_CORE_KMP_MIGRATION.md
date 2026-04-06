@@ -46,6 +46,8 @@ The following types are already migrated into `commonMain`:
 - `networking/RequestId`
 - `networking/RetryDelaySupplier`
 - `networking/ApiRequest`
+- `networking/ConnectionFactory`
+- `networking/StripeConnection`
 - `browser/BrowserCapabilities`
 - `model/Country`
 - `model/CountryCode`
@@ -171,9 +173,7 @@ Applied to this repo:
 
 | File | Why |
 |------|-----|
-| `DefaultStripeNetworkClient.kt` | Uses `ConnectionFactory` → `HttpsURLConnection`. Move to `androidMain` as the Android `StripeNetworkClient` implementation. |
-| `ConnectionFactory.kt` | `java.net.URL`, `javax.net.ssl.HttpsURLConnection` — the actual HTTP transport. Android-only. |
-| `StripeConnection.kt` | `HttpsURLConnection`, `java.io.InputStream/Scanner`, and Android file persistence via Okio `FileSystem` — Android HTTP response reader. |
+| `DefaultStripeNetworkClient.kt` | Still the Android `StripeNetworkClient` implementation; it has not been moved yet even though it now calls the shared Ktor-based `ConnectionFactory`. |
 | `AnalyticsRequestFactory.kt` | `android.content.pm.PackageInfo/PackageManager`, `android.os.Build` |
 | `AnalyticsRequestV2Factory.kt` | `android.content.Context`, `android.os.Build`, `android.provider.Settings.Secure.ANDROID_ID` |
 | `NetworkTypeDetector.kt` | `android.net.ConnectivityManager`, `android.telephony.TelephonyManager` |
@@ -408,7 +408,8 @@ This seam is now complete for the transport contracts:
 - `StripeNetworkClient` moved to `commonMain` with `executeRequestForFile(..., outputFile: Path)`
 - `QueryStringFactory` moved to `commonMain` using the existing `urlEncode` expect/actual seam
 - `AnalyticsRequest` moved to `commonMain` on top of the shared query-string builder
-- Android transport implementations (`ConnectionFactory`, `StripeConnection`, `DefaultStripeNetworkClient`) now adapt `HttpsURLConnection` to Okio
+- `ConnectionFactory` and `StripeConnection` moved to `commonMain` and now orchestrate requests through shared Ktor APIs
+- Android provides the OkHttp engine through the `HttpClientFactory` / `PlatformHttpClientFactory` seam
 - Downstream Android consumers (`identity`, `network-testing`, and affected unit tests) were updated to the new Okio seam
 
 The next meaningful networking boundary is no longer the transport contract itself.
@@ -431,8 +432,8 @@ open fun writePostBody(sink: okio.BufferedSink) {}
 `ApiRequest`, `FileUploadRequest`, `AnalyticsRequestV2`, `FraudDetectionDataRequest`,
 and Identity’s `IdentityFileUploadRequest` now override the sink-based method.
 
-The Android `ConnectionFactory` now wraps `HttpsURLConnection.outputStream` in
-`outputStream.sink().buffer()`.
+`ConnectionFactory` now buffers request bodies with Okio in shared code and hands
+the encoded bytes to Ktor via `setBody(...)`.
 
 #### 2b. Replace `java.io.File` with `okio.Path`
 
@@ -445,6 +446,10 @@ Completed transport signatures:
 Still pending:
 - `StripeFileParams.file: File` → `file: okio.Path`
 - `FileUploadRequest` input file access should move fully to `okio.FileSystem.SYSTEM.source(path)`
+- `ConnectionFactory` now installs `HttpCache` only when `StripeRequest.shouldCache`
+  is true, but it still builds a fresh `HttpClient` per request. Cache state
+  therefore does not persist across calls yet, so `NetworkCachingTest` stays
+  disabled pending a real shared cache strategy.
 
 #### 2c. Replace `HttpURLConnection` constants in `StripeResponse`
 
@@ -717,10 +722,12 @@ interface StripeNetworkClient {
 }
 ```
 
-`DefaultStripeNetworkClient` stays in `androidMain` as the `HttpsURLConnection`-based implementation.
+`DefaultStripeNetworkClient` stays in `androidMain` for now as the Android-facing
+`StripeNetworkClient` implementation.
 
-`ConnectionFactory` and `StripeConnection` stay in `androidMain` — they are
-implementation details of the Android HTTP transport.
+`ConnectionFactory` and `StripeConnection` now live in `commonMain`. The only
+platform-specific transport piece left is engine selection via
+`PlatformHttpClientFactory`.
 
 ### Phase 6: Move Remaining Android-Only Code
 

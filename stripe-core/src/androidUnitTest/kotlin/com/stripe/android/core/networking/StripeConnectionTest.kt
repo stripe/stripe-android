@@ -2,14 +2,16 @@ package com.stripe.android.core.networking
 
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.request.get
+import kotlinx.coroutines.runBlocking
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import java.io.ByteArrayInputStream
 import java.io.File
-import javax.net.ssl.HttpsURLConnection
 import kotlin.test.AfterTest
 import okio.Path.Companion.toOkioPath
 
@@ -26,36 +28,22 @@ class StripeConnectionTest {
 
     @Test
     fun `Default correctly reads String from responseStream`() {
-        val mockConnection = mock<HttpsURLConnection>()
-        whenever(mockConnection.responseCode).thenReturn(HttpsURLConnection.HTTP_OK)
-
         val expectedStringValue = "test input stream value"
-        whenever(mockConnection.inputStream).thenReturn(ByteArrayInputStream(expectedStringValue.toByteArray()))
-
-        val connection = StripeConnection.Default(mockConnection)
-
-        assertThat(connection.response.body).isEqualTo(expectedStringValue)
+        withStripeConnection(expectedStringValue) { connection ->
+            assertThat(connection.response.body).isEqualTo(expectedStringValue)
+        }
     }
 
     @Test
     fun `Default returns null for empty responseStream`() {
-        val mockConnection = mock<HttpsURLConnection>()
-        whenever(mockConnection.responseCode).thenReturn(HttpsURLConnection.HTTP_OK)
-        whenever(mockConnection.inputStream).thenReturn(ByteArrayInputStream(byteArrayOf()))
-
-        val connection = StripeConnection.Default(mockConnection)
-
-        assertThat(connection.response.body).isNull()
+        withStripeConnection("") { connection ->
+            assertThat(connection.response.body).isNull()
+        }
     }
 
     @Test
     fun `FileConnection correctly reads File from responseStream`() {
-        val mockConnection = mock<HttpsURLConnection>()
-        whenever(mockConnection.responseCode).thenReturn(HttpsURLConnection.HTTP_OK)
-
         val expectedFileContent = "test file content"
-        whenever(mockConnection.inputStream).thenReturn(ByteArrayInputStream(expectedFileContent.toByteArray()))
-
         val outputFile =
             File(InstrumentationRegistry.getInstrumentation().context.cacheDir, TEST_FILE_NAME)
         if (outputFile.exists()) {
@@ -63,9 +51,39 @@ class StripeConnectionTest {
         }
         val outputPath = outputFile.toOkioPath()
 
-        val connection = StripeConnection.FileConnection(mockConnection, outputPath)
-        assertThat(connection.response.body).isEqualTo(outputPath)
-        assertThat(outputFile.readText()).isEqualTo(expectedFileContent)
+        withStripeKtorConnection(expectedFileContent) { ktorConnection ->
+            val connection = StripeConnection.FileConnection(ktorConnection, outputPath)
+            assertThat(connection.response.body).isEqualTo(outputPath)
+            assertThat(outputFile.readText()).isEqualTo(expectedFileContent)
+        }
+    }
+
+    private fun withStripeConnection(
+        responseBody: String,
+        block: (StripeConnection.Default) -> Unit
+    ) {
+        withStripeKtorConnection(responseBody) { ktorConnection ->
+            block(StripeConnection.Default(ktorConnection))
+        }
+    }
+
+    private fun withStripeKtorConnection(
+        responseBody: String,
+        block: (ConnectionFactory.StripeKtorConnection) -> Unit
+    ) {
+        val server = MockWebServer()
+        val client = HttpClient(OkHttp)
+        try {
+            server.start()
+            server.enqueue(MockResponse().setBody(responseBody))
+            val response = runBlocking {
+                client.get(server.url("/").toString())
+            }
+            block(ConnectionFactory.StripeKtorConnection(client, response))
+        } finally {
+            client.close()
+            server.shutdown()
+        }
     }
 
     private companion object {

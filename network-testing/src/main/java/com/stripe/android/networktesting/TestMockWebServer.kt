@@ -40,10 +40,10 @@ internal class TestMockWebServer(validationTimeout: Duration?) {
     }
 
     @Suppress("CustomX509TrustManager", "TrustAllX509TrustManager")
-    fun clientSocketFactory(
+    fun clientTrustManager(
         trustAll: Boolean = false,
-    ): SSLSocketFactory {
-        val trustManager = if (trustAll) {
+    ): X509TrustManager {
+        return if (trustAll) {
             object : X509TrustManager {
                 override fun checkClientTrusted(
                     chain: Array<out X509Certificate>?,
@@ -65,9 +65,19 @@ internal class TestMockWebServer(validationTimeout: Duration?) {
                 .build()
                 .trustManager
         }
+    }
 
+    fun clientSocketFactory(
+        trustManager: X509TrustManager,
+    ): SSLSocketFactory {
         val sslContext: SSLContext = SSLContext.getInstance("SSL")
         sslContext.init(null, arrayOf(trustManager), SecureRandom())
         return sslContext.socketFactory
+    }
+
+    fun clientSocketFactory(
+        trustAll: Boolean = false,
+    ): SSLSocketFactory {
+        return clientSocketFactory(clientTrustManager(trustAll))
     }
 }

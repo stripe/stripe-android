@@ -3,7 +3,6 @@ package com.stripe.android.core.networking
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.exception.InvalidRequestException
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.cache.HttpCache
 import io.ktor.client.request.delete
@@ -36,36 +35,14 @@ interface ConnectionFactory {
     fun createForFile(request: StripeRequest, outputFile: Path): StripeConnection<Path>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun interface ConnectionOpener {
-        fun open(
-            request: StripeRequest,
-            callback: HttpClient.(request: StripeRequest) -> StripeKtorConnection
-        ): StripeKtorConnection
-
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        object Default : ConnectionOpener {
-            override fun open(
-                request: StripeRequest,
-                callback: HttpClient.(request: StripeRequest) -> StripeKtorConnection
-            ): StripeKtorConnection {
-                return callback(createHttpClient(), request)
-            }
-        }
-    }
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     object Default : ConnectionFactory {
         @Volatile
-        var connectionOpener: ConnectionOpener = ConnectionOpener.Default
+        var httpClientFactory: HttpClientFactory = PlatformHttpClientFactory
 
         @Throws(IOException::class, InvalidRequestException::class)
         @JvmSynthetic
         override fun create(request: StripeRequest): StripeConnection<String> {
-            return StripeConnection.Default(
-                connectionOpener.open(request) { originalRequest ->
-                    startHttpRequest(this, originalRequest)
-                }
-            )
+            return StripeConnection.Default(startHttpRequest(createHttpClient(request.shouldCache), request))
         }
 
         override fun createForFile(
@@ -73,9 +50,7 @@ interface ConnectionFactory {
             outputFile: Path
         ): StripeConnection<Path> {
             return StripeConnection.FileConnection(
-                connectionOpener.open(request) { originalRequest ->
-                    startHttpRequest(this, originalRequest)
-                },
+                startHttpRequest(createHttpClient(request.shouldCache), request),
                 outputFile
             )
         }
@@ -121,25 +96,22 @@ interface ConnectionFactory {
             return StripeKtorConnection(client, httpResponse)
         }
 
+        private fun createHttpClient(shouldCache: Boolean): HttpClient {
+            return httpClientFactory.create {
+                install(HttpTimeout) {
+                    connectTimeoutMillis = CONNECT_TIMEOUT
+                    socketTimeoutMillis = READ_TIMEOUT
+                }
+                if (shouldCache) {
+                    install(HttpCache)
+                }
+            }
+        }
     }
 
     private companion object {
         private val CONNECT_TIMEOUT = 30.seconds.inWholeMilliseconds
         private val READ_TIMEOUT = 80.seconds.inWholeMilliseconds
-
-        private fun createHttpClient(): HttpClient {
-            return HttpClient(OkHttp) {
-
-                // Timeouts
-                install(HttpTimeout) {
-                    // No equivalent in HttpUrlConnection
-//                    requestTimeoutMillis = 15_000
-                    connectTimeoutMillis = CONNECT_TIMEOUT
-                    socketTimeoutMillis = READ_TIMEOUT
-                }
-                install(HttpCache)
-            }
-        }
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

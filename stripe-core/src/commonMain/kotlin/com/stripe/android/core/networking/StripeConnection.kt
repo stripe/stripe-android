@@ -10,7 +10,6 @@ import okio.FileSystem
 import okio.IOException
 import okio.Path
 import okio.buffer
-import java.nio.charset.StandardCharsets
 
 /**
  * A wrapper for accessing an http connection. Implements [AutoCloseable] to simplify closing related
@@ -80,7 +79,7 @@ interface StripeConnection<ResponseBodyType> : AutoCloseable {
                 if (bufferedSource.exhausted()) {
                     return null
                 }
-                return bufferedSource.readString(StandardCharsets.UTF_8)
+                return bufferedSource.readUtf8()
             }
         }
     }

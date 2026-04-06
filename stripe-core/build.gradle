@@ -74,7 +74,7 @@ kotlin {
             implementation testLibs.kotlin.junit
             implementation testLibs.mockito.core
             implementation testLibs.mockito.kotlin
-            implementation testLibs.okhttpMockWebServer
+            implementation testLibs.okhttpKtorMockWebServer
             implementation testLibs.robolectric
             implementation testLibs.truth
         }

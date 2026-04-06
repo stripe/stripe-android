@@ -4,11 +4,10 @@ import android.annotation.SuppressLint
 import android.app.Application
 import android.os.StrictMode
 import com.stripe.android.core.networking.ConnectionFactory
-import com.stripe.android.core.networking.StripeRequest
+import com.stripe.android.core.networking.HttpClientFactory
 import io.ktor.client.HttpClient
+import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.plugins.HttpTimeout
-import io.ktor.client.plugins.cache.HttpCache
 import java.net.InetSocketAddress
 import java.net.Proxy
 import java.security.SecureRandom
@@ -17,14 +16,13 @@ import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLSocketFactory
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
-import kotlin.time.Duration.Companion.seconds
 
 class ExampleApplication : Application() {
 
     override fun onCreate() {
         val proxyIpAddress = BuildConfig.PROXY_IP_ADDRESS
         if (proxyIpAddress.isNotEmpty()) {
-            ConnectionFactory.Default.connectionOpener = ProxyConnectionOpener(proxyIpAddress)
+            ConnectionFactory.Default.httpClientFactory = ProxyHttpClientFactory(proxyIpAddress)
         }
 
         StrictMode.setThreadPolicy(
@@ -61,32 +59,26 @@ class ExampleApplication : Application() {
 }
 
 @Suppress("EmptyFunctionBlock", "MagicNumber")
-class ProxyConnectionOpener(
+class ProxyHttpClientFactory(
     private val ipAddress: String
-) : ConnectionFactory.ConnectionOpener {
-    override fun open(
-        request: StripeRequest,
-        callback: HttpClient.(request: StripeRequest) -> ConnectionFactory.StripeKtorConnection
-    ): ConnectionFactory.StripeKtorConnection {
+) : HttpClientFactory {
+    override fun create(
+        configure: HttpClientConfig<*>.() -> Unit
+    ): HttpClient {
         val trustManager = trustAllTrustManager()
         val proxy = Proxy(
             Proxy.Type.HTTP,
             InetSocketAddress.createUnresolved(ipAddress, PROXY_PORT)
         )
-        val client = HttpClient(OkHttp) {
-            install(HttpTimeout) {
-                connectTimeoutMillis = CONNECT_TIMEOUT
-                socketTimeoutMillis = READ_TIMEOUT
-            }
-            install(HttpCache)
+        return HttpClient(OkHttp) {
             engine {
                 config {
                     proxy(proxy)
                     sslSocketFactory(trustAllSocketFactory(trustManager), trustManager)
                 }
             }
+            configure()
         }
-        return callback(client, request)
     }
 
     @SuppressLint("CustomX509TrustManager", "TrustAllX509TrustManager")
@@ -119,7 +111,5 @@ class ProxyConnectionOpener(
 
     private companion object {
         private const val PROXY_PORT = 8888
-        private val CONNECT_TIMEOUT = 30.seconds.inWholeMilliseconds
-        private val READ_TIMEOUT = 80.seconds.inWholeMilliseconds
     }
 }

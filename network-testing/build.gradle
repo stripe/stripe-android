@@ -1,11 +1,12 @@
 apply from: configs.androidLibrary
 
 dependencies {
-    api testLibs.okhttpMockWebServer
+    api testLibs.okhttpKtorMockWebServer
 
     implementation project(":payments-core")
+    implementation libs.ktor.clientOkhttp
     implementation testLibs.junit
-    implementation testLibs.okhttpTls
+    implementation testLibs.okhttpKtorTls
 
     androidTestImplementation project(':stripe-ui-core') // Resources defined here, but used in payments-core.
 }
