@@ -25,9 +25,6 @@ internal class CheckoutPlaygroundViewModel(
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
-
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
@@ -54,7 +51,7 @@ internal class CheckoutPlaygroundViewModel(
     }
 
     fun selectShippingRate(shippingRateId: String) = performWhileLoading {
-        checkout.selectShippingRate(shippingRateId)
+        checkout.selectShippingOption(shippingRateId)
     }
 
     fun updateShippingAddress(addressDetails: AddressDetails) = performWhileLoading {
@@ -114,14 +111,12 @@ internal class CheckoutPlaygroundViewModel(
 
     private fun performWhileLoading(block: suspend () -> Result<CheckoutSession>) {
         viewModelScope.launch {
-            _isLoading.value = true
             block().onSuccess {
                 savedStateHandle[CHECKOUT_STATE_KEY] = checkout.state
             }.onFailure { exception ->
                 Log.e("CheckoutPlaygroundViewModel", "Failed to perform request", exception)
                 _errorMessage.value = exception.message
             }
-            _isLoading.value = false
         }
     }
 

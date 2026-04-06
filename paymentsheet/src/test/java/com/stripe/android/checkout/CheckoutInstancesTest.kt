@@ -3,12 +3,10 @@ package com.stripe.android.checkout
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -191,26 +189,11 @@ class CheckoutInstancesTest {
     }
 
     private fun createCheckout(key: String): Checkout {
-        val state = InternalState(
-            key = key,
-            checkoutSessionResponse = CheckoutSessionResponse(
-                id = DEFAULT_CHECKOUT_SESSION_ID,
-                amount = 1000L,
-                currency = "usd",
-                mode = CheckoutSessionResponse.Mode.PAYMENT,
-                customerEmail = null,
-                elementsSession = null,
-                paymentIntent = null,
-                setupIntent = null,
-                customer = null,
-                savedPaymentMethodsOfferSave = null,
-                totalSummary = null,
-                lineItems = emptyList(),
-                shippingOptions = emptyList(),
-                adaptivePricingInfo = null,
+        return Checkout.createWithState(
+            context = applicationContext,
+            state = CheckoutStateFactory.create(
+                key = key,
             ),
         )
-        val checkout = Checkout.createWithState(applicationContext, Checkout.State(state))
-        return checkout
     }
 }

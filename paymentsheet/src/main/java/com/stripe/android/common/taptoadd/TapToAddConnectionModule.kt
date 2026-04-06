@@ -19,12 +19,12 @@ internal interface TapToAddConnectionModule {
         isStripeTerminalSdkAvailable: DefaultIsStripeTerminalSdkAvailable
     ): IsStripeTerminalSdkAvailable
 
-    @Binds
-    fun bindsTerminalWrapper(
-        terminalWrapper: DefaultTerminalWrapper
-    ): TerminalWrapper
-
     companion object {
+        @Provides
+        fun providesTerminalWrapper(): TerminalWrapper {
+            return TerminalWrapper.create()
+        }
+
         @Provides
         fun providesTapToAddConnectionManager(
             isStripeTerminalSdkAvailable: IsStripeTerminalSdkAvailable,

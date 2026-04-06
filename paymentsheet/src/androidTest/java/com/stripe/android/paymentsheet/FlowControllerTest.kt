@@ -110,6 +110,7 @@ internal class FlowControllerTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -151,6 +152,7 @@ internal class FlowControllerTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -337,6 +339,7 @@ internal class FlowControllerTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -619,6 +622,7 @@ internal class FlowControllerTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -678,6 +682,7 @@ internal class FlowControllerTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -790,6 +795,7 @@ internal class FlowControllerTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -920,6 +926,8 @@ internal class FlowControllerTest {
         composeTestRule
             .onNodeWithText("Confirm")
             .performClick()
+
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test

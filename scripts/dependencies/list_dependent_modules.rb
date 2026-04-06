@@ -26,6 +26,8 @@ def list_dependent_modules
 end
 
 def filter_module_names(module_names)
-  # Use the select method to filter out names containing "test"
-  module_names.reject { |name| name.include?("test") }
+  # Filter out test modules by matching "test" or "testing" as a whole word
+  # segment (delimited by hyphens), so modules like "stripe-attestation" are
+  # not accidentally excluded.
+  module_names.reject { |name| name.match?(/(?:^|-)(?:test|testing)(?:-|$)/) }
 end

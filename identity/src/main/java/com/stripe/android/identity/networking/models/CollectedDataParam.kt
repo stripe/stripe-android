@@ -9,6 +9,7 @@ import com.stripe.android.identity.networking.UploadedResult
 import com.stripe.android.identity.ui.DRIVING_LICENSE_KEY
 import com.stripe.android.identity.ui.ID_CARD_KEY
 import com.stripe.android.identity.ui.PASSPORT_KEY
+import com.stripe.android.identity.utils.roundToMaxDecimals
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -73,7 +74,7 @@ internal data class CollectedDataParam(
         fun CollectedDataParam.createCollectedDataParamEntry(json: Json) =
             COLLECTED_DATA_PARAM to json.encodeToJsonElement(
                 serializer(),
-                this
+                this.roundFloatUploadParams()
             ).toMap()
 
         fun createFromFrontUploadedResultsForAutoCapture(
@@ -265,3 +266,31 @@ internal data class CollectedDataParam(
             }
     }
 }
+
+private const val MAX_UPLOAD_FLOAT_DECIMALS = 2
+
+private fun CollectedDataParam.roundFloatUploadParams(): CollectedDataParam =
+    copy(
+        idDocumentFront = idDocumentFront?.roundFloatUploadParams(),
+        idDocumentBack = idDocumentBack?.roundFloatUploadParams(),
+        face = face?.roundFloatUploadParams(),
+    )
+
+private fun DocumentUploadParam.roundFloatUploadParams(): DocumentUploadParam =
+    copy(
+        backScore = backScore?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
+        frontCardScore = frontCardScore?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
+        invalidScore = invalidScore?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
+        passportScore = passportScore?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
+        exposureIso = exposureIso?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
+        focalLength = focalLength?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
+    )
+
+private fun FaceUploadParam.roundFloatUploadParams(): FaceUploadParam =
+    copy(
+        bestFaceScore = bestFaceScore.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
+        faceScoreVariance = faceScoreVariance.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
+        bestBrightnessValue = bestBrightnessValue?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
+        bestFocalLength = bestFocalLength?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
+        bestExposureIso = bestExposureIso?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
+    )

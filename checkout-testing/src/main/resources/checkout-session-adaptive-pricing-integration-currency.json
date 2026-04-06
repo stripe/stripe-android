@@ -1,0 +1,62 @@
+{
+  "session_id": "cs_test_abc123",
+  "ui_mode": "custom",
+  "currency": "usd",
+  "total_summary": {
+    "due": 5099
+  },
+  "adaptive_pricing_info": {
+    "active_presentment_currency": "usd",
+    "integration_amount": 5099,
+    "integration_currency": "usd",
+    "integration_custom_amount_info": null,
+    "is_using_subscription_threshold_fx_rate_behavior": null,
+    "local_currency_options": [{
+      "amount": 4594,
+      "conversion_markup_bps": 400,
+      "currency": "eur",
+      "presentment_exchange_rate": "0.900961",
+      "reference_rate_info": null
+    }]
+  },
+  "elements_session": {
+    "apple_pay_preference": "enabled",
+    "business_name": "Mobile Example Account",
+    "google_pay_preference": "enabled",
+    "link_settings": {
+      "link_authenticated_change_event_enabled": false,
+      "link_bank_onboarding_enabled": false,
+      "link_funding_sources": ["CARD"],
+      "link_mobile_disable_default_opt_in": true,
+      "link_passthrough_mode_enabled": false
+    },
+    "merchant_country": "US",
+    "merchant_currency": "usd",
+    "merchant_id": "acct_1HvTI7Lu5o3P18Zp",
+    "ordered_payment_method_types_and_wallets": ["card", "card_wallet_link", "google_pay", "apple_pay"],
+    "payment_method_preference": {
+      "object": "payment_method_preference",
+      "country_code": "US",
+      "ordered_payment_method_types": ["card"],
+      "type": "deferred_intent"
+    },
+    "payment_method_specs": [],
+    "shipping_address_settings": {
+      "autocomplete_allowed": true
+    },
+    "unactivated_payment_method_types": [],
+    "session_id": "elements_session_cs_123",
+    "config_id": "cs_config_123"
+  },
+  "server_built_elements_session_params": {
+    "type": "deferred_intent",
+    "locale": "en-US",
+    "deferred_intent": {
+      "mode": "payment",
+      "amount": 5099,
+      "currency": "usd",
+      "capture_method": "automatic",
+      "payment_method_types": ["card"]
+    }
+  }
+}

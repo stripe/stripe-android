@@ -63,30 +63,15 @@ internal interface FinancialConnectionsSheetNativeComponent {
     val linkAccountPickerViewModelFactory: LinkAccountPickerViewModel.Factory
     val accountUpdateRequiredViewModelFactory: AccountUpdateRequiredViewModel.Factory
 
-    @Component.Builder
-    interface Builder {
-
-        @BindsInstance
-        fun initialSyncResponse(
-            @Named(INITIAL_SYNC_RESPONSE) initialSyncResponse: SynchronizeSessionResponse?
-        ): Builder
-
-        @BindsInstance
-        fun savedStateHandle(
-            savedStateHandle: SavedStateHandle
-        ): Builder
-
-        @BindsInstance
-        fun application(application: Application): Builder
-
-        @BindsInstance
-        fun initialState(initialState: FinancialConnectionsSheetNativeState): Builder
-
-        @BindsInstance
-        fun configuration(configuration: FinancialConnectionsSheetConfiguration): Builder
-
-        fun sharedComponent(component: FinancialConnectionsSingletonSharedComponent): Builder
-
-        fun build(): FinancialConnectionsSheetNativeComponent
+    @Component.Factory
+    interface Factory {
+        fun build(
+            @BindsInstance @Named(INITIAL_SYNC_RESPONSE) initialSyncResponse: SynchronizeSessionResponse?,
+            @BindsInstance savedStateHandle: SavedStateHandle,
+            @BindsInstance application: Application,
+            @BindsInstance initialState: FinancialConnectionsSheetNativeState,
+            @BindsInstance configuration: FinancialConnectionsSheetConfiguration,
+            sharedComponent: FinancialConnectionsSingletonSharedComponent,
+        ): FinancialConnectionsSheetNativeComponent
     }
 }

@@ -7,7 +7,7 @@ import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkout.CheckoutInstancesTestRule
-import com.stripe.android.checkout.InternalState
+import com.stripe.android.checkout.CheckoutStateFactory
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.core.networking.ApiRequest
@@ -39,7 +39,6 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.PaymentIntentFactory
@@ -443,7 +442,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         val interceptor = CheckoutSessionConfirmationInterceptor(
             integrationMetadata = IntegrationMetadata.CheckoutSession(
                 id = DEFAULT_CHECKOUT_SESSION_ID,
-                instancesKey = INSTANCES_KEY,
+                instancesKey = CheckoutStateFactory.DEFAULT_KEY,
             ),
             customerMetadata = customerMetadata,
             clientAttributionMetadata = ClientAttributionMetadata(
@@ -461,12 +460,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         val checkoutInstances = (0 until checkoutInstanceCount).map {
             Checkout.createWithState(
                 context = applicationContext,
-                state = Checkout.State(
-                    InternalState(
-                        key = INSTANCES_KEY,
-                        checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
-                    ),
-                ),
+                state = CheckoutStateFactory.create(),
             )
         }
 
@@ -519,8 +513,6 @@ class CheckoutSessionConfirmationInterceptorTest {
     }
 
     private companion object {
-        const val INSTANCES_KEY = "CheckoutSessionConfirmationInterceptorTest"
-
         val REQUIRES_ACTION_REPLACEMENT = ResponseReplacement(
             original = "\"status\": \"succeeded\"",
             new = "\"status\": \"requires_action\"",

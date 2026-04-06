@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.verticalmode
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.MaterialTheme
@@ -46,6 +47,20 @@ internal fun VerticalModeFormUI(
     Column(modifier) {
         val headerInformation = state.headerInformation
         val enabled = !state.isProcessing
+        val currencySelectorOptions = state.currencySelectorOptions
+        if (currencySelectorOptions != null) {
+            CurrencySelectorToggle(
+                options = currencySelectorOptions,
+                onCurrencySelected = { currencyOption ->
+                    interactor.handleViewAction(
+                        VerticalModeFormInteractor.ViewAction.CurrencySelected(currencyOption)
+                    )
+                },
+                isEnabled = enabled,
+                modifier = Modifier.padding(horizontalPadding),
+            )
+            Spacer(Modifier.size(16.dp))
+        }
         if (headerInformation != null && shouldShowHeader(state.selectedPaymentMethodCode, showsWalletHeader)) {
             VerticalModeFormHeaderUI(isEnabled = enabled, formHeaderInformation = headerInformation)
         }

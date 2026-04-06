@@ -45,7 +45,7 @@ internal class IDDetectorTransitioner(
     private val bestFrameDetector = BestFrameDetector(
         windowDurationMs = maxOf(timeRequired.toLong(), MIN_BEST_FRAME_WINDOW_MS)
     )
-    private var bestLegacyOutput: IDDetectorOutput.Legacy? = null
+    private var bestOutput: IDDetectorOutput? = null
 
     @VisibleForTesting
     var timeoutAt: ComparableTimeMark = TimeSource.Monotonic.markNow() + timeout
@@ -59,7 +59,7 @@ internal class IDDetectorTransitioner(
         unmatchedFrame = 0
         timeoutAt = TimeSource.Monotonic.markNow() + timeout
         bestFrameDetector.reset()
-        bestLegacyOutput = null
+        bestOutput = null
         Log.d(TAG, "Reset! timeoutAt: $timeoutAt")
         return this
     }
@@ -86,8 +86,7 @@ internal class IDDetectorTransitioner(
                 )
                 Found(
                     initialState.type,
-                    this,
-                    isFromLegacyDetector = analyzerOutput is IDDetectorOutput.Legacy
+                    this
                 )
             }
 
@@ -145,32 +144,18 @@ internal class IDDetectorTransitioner(
         require(analyzerOutput is IDDetectorOutput) {
             "Unexpected output type: $analyzerOutput"
         }
-        return when (analyzerOutput) {
-            is IDDetectorOutput.Legacy -> {
-                transitionFromFoundLegacy(
-                    foundState,
-                    analyzerInput,
-                    analyzerOutput
-                )
-            }
-        }
+        return transitionFromFoundOutput(foundState, analyzerInput, analyzerOutput)
     }
 
     @Suppress("CyclomaticComplexMethod", "LongMethod", "MagicNumber")
-    private fun transitionFromFoundLegacy(
+    private fun transitionFromFoundOutput(
         foundState: Found,
         analyzerInput: AnalyzerInput,
-        analyzerOutput: IDDetectorOutput.Legacy
+        analyzerOutput: IDDetectorOutput
     ): IdentityScanState {
         val nowTimestampMs = SystemClock.elapsedRealtime()
 
         return when {
-            foundState.isFromLegacyDetector != true -> Unsatisfied(
-                "Expecting Legacy IDDetectorOutput but received a Modern IDDetectorOutput",
-                foundState.type,
-                foundState.transitioner
-            )
-
             timeoutAt.hasPassedNow() -> {
                 Log.d(TAG, "Timeout reached during scanning")
                 IdentityScanState.TimeOut(foundState.type, foundState.transitioner)
@@ -262,7 +247,7 @@ internal class IDDetectorTransitioner(
                     timestamp = nowTimestampMs
                 )
                 if (updatedBest) {
-                    bestLegacyOutput = analyzerOutput
+                    bestOutput = analyzerOutput
                 }
 
                 foundState
@@ -363,8 +348,8 @@ internal class IDDetectorTransitioner(
         return bestFrameDetector.getBestFrameBitmap()
     }
 
-    fun getBestLegacyOutput(): IDDetectorOutput.Legacy? {
-        return bestLegacyOutput
+    fun getBestOutput(): IDDetectorOutput? {
+        return bestOutput
     }
 
     private fun coverage(box: BoundingBox): Float {

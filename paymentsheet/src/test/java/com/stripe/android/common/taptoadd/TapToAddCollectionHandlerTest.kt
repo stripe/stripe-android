@@ -9,6 +9,7 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.taptoadd.ui.createTapToAddUxConfiguration
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
@@ -28,6 +29,7 @@ import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.stripeterminal.Terminal
+import com.stripe.stripeterminal.external.callable.Callback
 import com.stripe.stripeterminal.external.callable.Cancelable
 import com.stripe.stripeterminal.external.callable.SetupIntentCallback
 import com.stripe.stripeterminal.external.models.AllowRedisplay
@@ -49,6 +51,7 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.timeout
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -104,11 +107,11 @@ class TapToAddCollectionHandlerTest {
         ) {
             val result = handler.collect(DEFAULT_METADATA)
 
-            assertThat(result).isEqualTo(
-                TapToAddCollectionHandler.CollectionState.FailedCollection(
-                    error = error,
-                    displayMessage = R.string.stripe_something_went_wrong.resolvableString
-                )
+            assertFailedCollection(
+                result = result,
+                expectedError = error,
+                expectedErrorCodeValue = "unknown",
+                expectedDisplayMessage = R.string.stripe_something_went_wrong.resolvableString,
             )
         }
     }
@@ -148,11 +151,11 @@ class TapToAddCollectionHandlerTest {
 
             assertThat(retrieverScenario.waitForCallbackCalls.awaitItem()).isNotNull()
 
-            assertThat(result).isEqualTo(
-                TapToAddCollectionHandler.CollectionState.FailedCollection(
-                    error = error,
-                    displayMessage = error.resolvableError,
-                )
+            assertFailedCollection(
+                result = result,
+                expectedError = error,
+                expectedErrorCodeValue = "noCardPresentCallbackFailure",
+                expectedDisplayMessage = error.resolvableError,
             )
         }
     }
@@ -172,11 +175,11 @@ class TapToAddCollectionHandlerTest {
 
             assertThat(retrieverScenario.waitForCallbackCalls.awaitItem()).isNotNull()
 
-            assertThat(result).isEqualTo(
-                TapToAddCollectionHandler.CollectionState.FailedCollection(
-                    error = cause,
-                    displayMessage = "Something went wrong".resolvableString,
-                )
+            assertFailedCollection(
+                result = result,
+                expectedError = cause,
+                expectedErrorCodeValue = "failureFromMerchantCardPresentCallback",
+                expectedDisplayMessage = "Something went wrong".resolvableString,
             )
         }
     }
@@ -192,13 +195,13 @@ class TapToAddCollectionHandlerTest {
 
         val result = handler.collect(metadataWithoutCustomer)
 
-        assertThat(result).isInstanceOf<TapToAddCollectionHandler.CollectionState.FailedCollection>()
-
-        val failed = result as TapToAddCollectionHandler.CollectionState.FailedCollection
-
-        assertThat(failed.error).isInstanceOf(IllegalStateException::class.java)
-        assertThat(failed.error.message)
-            .isEqualTo("Attempted to collect with tap to add without a customer")
+        assertFailedCollection(
+            result = result,
+            expectedErrorType = IllegalStateException::class.java,
+            expectedErrorMessage = "Attempted to collect with tap to add without a customer",
+            expectedErrorCodeValue = "noCustomer",
+            expectedDisplayMessage = R.string.stripe_something_went_wrong.resolvableString,
+        )
     }
 
     @Test
@@ -238,13 +241,14 @@ class TapToAddCollectionHandlerTest {
             )
 
             val collectionResult = result.await()
-            assertThat(collectionResult)
-                .isInstanceOf(TapToAddCollectionHandler.CollectionState.FailedCollection::class.java)
 
-            val failed = collectionResult as TapToAddCollectionHandler.CollectionState.FailedCollection
-            assertThat(failed.error).isInstanceOf(NotImplementedError::class.java)
-            assertThat(failed.error.message)
-                .isEqualTo("Checkout sessions do not support retrieving individual payment methods!")
+            assertFailedCollection(
+                result = collectionResult,
+                expectedErrorType = NotImplementedError::class.java,
+                expectedErrorMessage = "Checkout sessions do not support retrieving individual payment methods!",
+                expectedErrorCodeValue = "unknown",
+                expectedDisplayMessage = R.string.stripe_something_went_wrong.resolvableString,
+            )
         }
     }
 
@@ -316,12 +320,14 @@ class TapToAddCollectionHandlerTest {
             checkConfirmCall(collectedSetupIntent = collectedIntent, paymentMethod = null)
 
             val collectionResult = result.await()
-            assertThat(collectionResult)
-                .isInstanceOf(TapToAddCollectionHandler.CollectionState.FailedCollection::class.java)
 
-            val failed = collectionResult as TapToAddCollectionHandler.CollectionState.FailedCollection
-            assertThat(failed.error).isInstanceOf(IllegalStateException::class.java)
-            assertThat(failed.error.message).isEqualTo("No card payment method after collecting through tap!")
+            assertFailedCollection(
+                result = collectionResult,
+                expectedErrorType = IllegalStateException::class.java,
+                expectedErrorMessage = "No card payment method after collecting through tap!",
+                expectedErrorCodeValue = "unknown",
+                expectedDisplayMessage = R.string.stripe_something_went_wrong.resolvableString,
+            )
 
             val errorCall = errorReporter.awaitCall()
             assertThat(errorCall.errorEvent).isEqualTo(
@@ -354,11 +360,11 @@ class TapToAddCollectionHandlerTest {
         val retrieveSetupIntentCall = terminalScenario.retrieveSetupIntentCalls.awaitItem()
         retrieveSetupIntentCall.callback.onFailure(terminalException)
 
-        assertThat(result.await()).isEqualTo(
-            TapToAddCollectionHandler.CollectionState.FailedCollection(
-                error = terminalException,
-                displayMessage = "Failed to retrieve setup intent".resolvableString
-            )
+        assertFailedCollection(
+            result = result.await(),
+            expectedError = terminalException,
+            expectedErrorCodeValue = "error_code_unexpected_error_unexpected_sdk_error",
+            expectedDisplayMessage = "Failed to retrieve setup intent".resolvableString,
         )
     }
 
@@ -388,11 +394,11 @@ class TapToAddCollectionHandlerTest {
         assertThat(collectPaymentMethodCall.intent).isEqualTo(retrievedSetupIntent)
         collectPaymentMethodCall.callback.onFailure(terminalException)
 
-        assertThat(result.await()).isEqualTo(
-            TapToAddCollectionHandler.CollectionState.FailedCollection(
-                error = terminalException,
-                displayMessage = "Card declined".resolvableString
-            )
+        assertFailedCollection(
+            result = result.await(),
+            expectedError = terminalException,
+            expectedErrorCodeValue = "error_code_payment_error_declined_by_stripe_api",
+            expectedDisplayMessage = "Card declined".resolvableString,
         )
     }
 
@@ -452,11 +458,11 @@ class TapToAddCollectionHandlerTest {
         assertThat(confirmSetupIntentCall.intent).isEqualTo(collectedIntent)
         confirmSetupIntentCall.callback.onFailure(terminalException)
 
-        assertThat(result.await()).isEqualTo(
-            TapToAddCollectionHandler.CollectionState.FailedCollection(
-                error = terminalException,
-                displayMessage = "Setup intent confirmation failed".resolvableString
-            )
+        assertFailedCollection(
+            result = result.await(),
+            expectedError = terminalException,
+            expectedErrorCodeValue = "error_code_payment_error_declined_by_stripe_api",
+            expectedDisplayMessage = "Setup intent confirmation failed".resolvableString,
         )
     }
 
@@ -487,11 +493,11 @@ class TapToAddCollectionHandlerTest {
                 paymentMethod = paymentMethod,
             )
 
-            assertThat(result.await()).isEqualTo(
-                TapToAddCollectionHandler.CollectionState.FailedCollection(
-                    error = retrieveError,
-                    displayMessage = retrieveError.stripeErrorMessage()
-                )
+            assertFailedCollection(
+                result = result.await(),
+                expectedError = retrieveError,
+                expectedDisplayMessage = retrieveError.stripeErrorMessage(),
+                expectedErrorCodeValue = "unknown"
             )
         }
     }
@@ -505,14 +511,12 @@ class TapToAddCollectionHandlerTest {
                 ),
             ),
         ) { result ->
-            assertThat(result)
-                .isInstanceOf(TapToAddCollectionHandler.CollectionState.FailedCollection::class.java)
-            val failed = result as TapToAddCollectionHandler.CollectionState.FailedCollection
-            assertThat(failed.error).isInstanceOf(IllegalStateException::class.java)
-            assertThat(failed.error.message)
-                .isEqualTo("Payment method is not supported by card brand filter!")
-            assertThat(failed.displayMessage).isEqualTo(
-                resolvableString(
+            assertFailedCollection(
+                result = result,
+                expectedErrorType = IllegalStateException::class.java,
+                expectedErrorCodeValue = "cardBrandNotSupportedByMerchant",
+                expectedErrorMessage = "Payment method is not supported by card brand filter!",
+                expectedDisplayMessage = resolvableString(
                     StripeR.string.stripe_disallowed_card_brand,
                     CardBrand.MasterCard,
                 ),
@@ -583,6 +587,128 @@ class TapToAddCollectionHandlerTest {
         job.cancel()
 
         verify(confirmSetupIntentCall.cancelable, timeout(1000)).cancel(any())
+    }
+
+    @Test
+    fun `handler reports error when collectSetupIntentPaymentMethod cancel fails after coroutine cancelled`() =
+        runScenario(
+            callbackResult = Result.success(
+                CreateCardPresentSetupIntentCallback {
+                    CreateIntentResult.Success("si_123_secret")
+                }
+            ),
+        ) {
+            val job = testScope.backgroundScope.async {
+                handler.collect(DEFAULT_METADATA)
+            }
+
+            assertThat(retrieverScenario.waitForCallbackCalls.awaitItem()).isNotNull()
+            assertThat(terminalScenario.setTapToPayUxConfigurationCalls.awaitItem()).isNotNull()
+
+            checkRetrieveSetupIntent("si_123_secret")
+
+            val collectPaymentMethodCall = terminalScenario.collectPaymentMethodCalls.awaitItem()
+
+            val cancelFailure = TerminalException(
+                errorCode = TerminalErrorCode.CANCEL_FAILED,
+                errorMessage = "Failed to cancel collect",
+            )
+
+            whenever(collectPaymentMethodCall.cancelable.cancel(any()))
+                .thenAnswer { invocation ->
+                    val callback = invocation.getArgument<Callback>(0)
+                    callback.onFailure(cancelFailure)
+                }
+
+            job.cancel()
+
+            verify(collectPaymentMethodCall.cancelable, timeout(1000)).cancel(any())
+
+            val reportCall = errorReporter.awaitCall()
+            assertThat(reportCall.errorEvent)
+                .isEqualTo(ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_COLLECT_SETUP_INTENT_CANCEL_FAILURE)
+            assertThat(reportCall.stripeException?.cause).isEqualTo(cancelFailure)
+            assertThat(reportCall.additionalNonPiiParams).isEqualTo(
+                mapOf("terminalErrorCode" to cancelFailure.errorCode.toLogString())
+            )
+        }
+
+    @Test
+    fun `handler reports error when confirmSetupIntent cancel fails after coroutine cancelled`() =
+        runScenario(
+            callbackResult = Result.success(
+                CreateCardPresentSetupIntentCallback {
+                    CreateIntentResult.Success("si_123_secret")
+                }
+            ),
+        ) {
+            val job = testScope.backgroundScope.async {
+                handler.collect(DEFAULT_METADATA)
+            }
+
+            assertThat(retrieverScenario.waitForCallbackCalls.awaitItem()).isNotNull()
+            assertThat(terminalScenario.setTapToPayUxConfigurationCalls.awaitItem()).isNotNull()
+
+            val retrievedSetupIntent = checkRetrieveSetupIntent("si_123_secret")
+            checkCollectCall(retrievedSetupIntent)
+
+            val confirmSetupIntentCall = terminalScenario.confirmSetupIntentCalls.awaitItem()
+
+            val cancelFailure = TerminalException(
+                errorCode = TerminalErrorCode.CANCEL_FAILED,
+                errorMessage = "Failed to cancel confirm",
+            )
+
+            whenever(confirmSetupIntentCall.cancelable.cancel(any())).thenAnswer { invocation ->
+                val callback = invocation.getArgument<Callback>(0)
+                callback.onFailure(cancelFailure)
+            }
+
+            job.cancel()
+
+            verify(confirmSetupIntentCall.cancelable, timeout(1000)).cancel(any())
+
+            val reportCall = errorReporter.awaitCall()
+            assertThat(reportCall.errorEvent)
+                .isEqualTo(ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_CONFIRM_SETUP_INTENT_CANCEL_FAILURE)
+            assertThat(reportCall.stripeException?.cause).isEqualTo(cancelFailure)
+            assertThat(reportCall.additionalNonPiiParams).isEqualTo(
+                mapOf("terminalErrorCode" to cancelFailure.errorCode.toLogString())
+            )
+        }
+
+    private fun assertFailedCollection(
+        result: TapToAddCollectionHandler.CollectionState,
+    ): TapToAddCollectionHandler.CollectionState.FailedCollection {
+        assertThat(result).isInstanceOf<TapToAddCollectionHandler.CollectionState.FailedCollection>()
+
+        return result as TapToAddCollectionHandler.CollectionState.FailedCollection
+    }
+
+    private fun assertFailedCollection(
+        result: TapToAddCollectionHandler.CollectionState,
+        expectedError: Throwable,
+        expectedErrorCodeValue: String,
+        expectedDisplayMessage: ResolvableString?,
+    ) {
+        val failed = assertFailedCollection(result)
+        assertThat(failed.error).isEqualTo(expectedError)
+        assertThat(failed.errorCode.value).isEqualTo(expectedErrorCodeValue)
+        assertThat(failed.displayMessage).isEqualTo(expectedDisplayMessage)
+    }
+
+    private fun assertFailedCollection(
+        result: TapToAddCollectionHandler.CollectionState,
+        expectedErrorType: Class<*>,
+        expectedErrorMessage: String,
+        expectedErrorCodeValue: String,
+        expectedDisplayMessage: ResolvableString?,
+    ) {
+        val failed = assertFailedCollection(result)
+        assertThat(failed.error).isInstanceOf(expectedErrorType)
+        assertThat(failed.error.message).isEqualTo(expectedErrorMessage)
+        assertThat(failed.errorCode.value).isEqualTo(expectedErrorCodeValue)
+        assertThat(failed.displayMessage).isEqualTo(expectedDisplayMessage)
     }
 
     private fun testCardBrandChoiceFilterFlow(

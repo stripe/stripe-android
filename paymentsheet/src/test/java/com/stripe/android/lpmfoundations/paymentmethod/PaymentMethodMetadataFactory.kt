@@ -73,6 +73,7 @@ internal object PaymentMethodMetadataFactory {
         isTapToAddSupported: Boolean = false,
         experimentsData: ElementsSession.ExperimentsData? = null,
         isStripeCardScanAllowed: Boolean = false,
+        enableMlKitCardScan: Boolean = false,
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -138,6 +139,7 @@ internal object PaymentMethodMetadataFactory {
             isTapToAddSupported = isTapToAddSupported,
             experimentsData = experimentsData,
             isStripeCardScanAllowed = isStripeCardScanAllowed,
+            enableMlKitCardScan = enableMlKitCardScan,
         )
     }
 

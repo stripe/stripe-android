@@ -67,6 +67,11 @@ class PaymentSheetConfigurationKtxTest {
             isLiveMode = false,
             callbackIdentifier = "",
         )
+        getConfig("uk_12345").validate(
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            isLiveMode = false,
+            callbackIdentifier = "",
+        )
     }
 
     @Test
@@ -418,6 +423,72 @@ class PaymentSheetConfigurationKtxTest {
                 " initialization mode."
         ) {
             configWithoutEmail.validate(
+                initializationMode = checkoutSessionMode,
+                isLiveMode = false,
+                callbackIdentifier = ""
+            )
+        }
+    }
+
+    @Test
+    fun `'validate' should fail when using CheckoutSession mode with non-empty externalPaymentMethods`() {
+        val config = configuration.newBuilder()
+            .customer(null)
+            .defaultBillingDetails(PaymentSheet.BillingDetails(email = "test@example.com"))
+            .externalPaymentMethods(listOf("external_paypal"))
+            .build()
+            .asCommonConfiguration()
+        val checkoutSessionMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            instancesKey = "PaymentSheetConfigurationKtxTest",
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                id = DEFAULT_CHECKOUT_SESSION_ID,
+                amount = 5099,
+            ),
+        )
+
+        assertFailsWith(
+            IllegalArgumentException::class,
+            message = "configuration.externalPaymentMethods must not be set when using CheckoutSession " +
+                "initialization mode."
+        ) {
+            config.validate(
+                initializationMode = checkoutSessionMode,
+                isLiveMode = false,
+                callbackIdentifier = ""
+            )
+        }
+    }
+
+    @Test
+    fun `'validate' should fail when using CheckoutSession mode with non-empty customPaymentMethods`() {
+        val config = configuration.newBuilder()
+            .customer(null)
+            .defaultBillingDetails(PaymentSheet.BillingDetails(email = "test@example.com"))
+            .customPaymentMethods(
+                listOf(
+                    PaymentSheet.CustomPaymentMethod(
+                        id = "cpmt_123",
+                        subtitle = "Pay with BufoPay",
+                        disableBillingDetailCollection = false,
+                    )
+                )
+            )
+            .build()
+            .asCommonConfiguration()
+        val checkoutSessionMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            instancesKey = "PaymentSheetConfigurationKtxTest",
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                id = DEFAULT_CHECKOUT_SESSION_ID,
+                amount = 5099,
+            ),
+        )
+
+        assertFailsWith(
+            IllegalArgumentException::class,
+            message = "configuration.customPaymentMethods must not be set when using CheckoutSession " +
+                "initialization mode."
+        ) {
+            config.validate(
                 initializationMode = checkoutSessionMode,
                 isLiveMode = false,
                 callbackIdentifier = ""

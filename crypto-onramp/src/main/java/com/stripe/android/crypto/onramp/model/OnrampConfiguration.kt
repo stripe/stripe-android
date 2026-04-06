@@ -1,6 +1,6 @@
 package com.stripe.android.crypto.onramp.model
 
-import androidx.annotation.RestrictTo
+import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.LinkAppearance
 
@@ -13,7 +13,7 @@ import com.stripe.android.link.LinkAppearance
  * @property cryptoCustomerId The unique customer ID for crypto onramp.
  * @property googlePayConfig The configuration for Google Pay, if Google Pay is supported by the merchant.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@ExperimentalCryptoOnramp
 class OnrampConfiguration {
     private var merchantDisplayName: String? = null
     private var publishableKey: String? = null

@@ -29,8 +29,7 @@ Multi-module Android library for payment processing and financial services.
 - Gradle with shared deps (dependencies.gradle), AGP 8.13.x, Kotlin 2.3.x
 - Detekt for static analysis, Paparazzi for screenshot testing
 
-**Testing**
-- JUnit + Truth assertions + Robolectric
-- **Fakes over mocks** — MUST invoke `write-tests` skill before writing any test, MUST invoke `create-fake` skill before creating any fake
-- Turbine for Flow testing and call tracking in fakes
-- Compose UI tests with `createComposeRule()`
+**Testing** — MUST invoke the relevant skill before writing any test code:
+- `write-tests` — unit test structure, runScenario pattern, Turbine Flow testing, Truth assertions
+- `create-fake` — fake implementations with Turbine call tracking
+- `compose-tests` — Compose UI tests with composeRule, Robolectric, node assertions

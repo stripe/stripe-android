@@ -913,7 +913,10 @@ constructor(
         val networks: Networks? = null,
         @JvmField
         @field:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        val displayBrand: String? = null
+        val displayBrand: String? = null,
+        @JvmField
+        @field:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val cardArt: CardArt? = null
     ) : TypeData() {
         override val type: Type get() = Type.Card
 
@@ -930,7 +933,8 @@ constructor(
             threeDSecureUsage: ThreeDSecureUsage? = this.threeDSecureUsage,
             wallet: Wallet? = this.wallet,
             networks: Networks? = this.networks,
-            displayBrand: String? = this.displayBrand
+            displayBrand: String? = this.displayBrand,
+            cardArt: CardArt? = this.cardArt
         ): Card {
             return Card(
                 brand = brand,
@@ -944,7 +948,8 @@ constructor(
                 threeDSecureUsage = threeDSecureUsage,
                 wallet = wallet,
                 networks = networks,
-                displayBrand = displayBrand
+                displayBrand = displayBrand,
+                cardArt = cardArt
             )
         }
 
@@ -1017,6 +1022,29 @@ constructor(
                     preferred = preferred
                 )
             }
+        }
+
+        /**
+         * Card art and program name details for this card, if available.
+         */
+        @Parcelize
+        @Poko
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class CardArt(
+            @JvmField val artImage: ArtImage?,
+            @JvmField val programName: String?
+        ) : StripeModel {
+
+            /**
+             * The card art image details.
+             */
+            @Parcelize
+            @Poko
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            class ArtImage(
+                @JvmField val format: String,
+                @JvmField val url: String
+            ) : StripeModel
         }
     }
 

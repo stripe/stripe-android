@@ -45,8 +45,8 @@ jobs:
         include:
         - language: actions
           build-mode: none
-#        - language: java-kotlin
-#          build-mode: autobuild
+        - language: java-kotlin
+          build-mode: autobuild
         - language: javascript-typescript
           build-mode: none
         - language: python
@@ -65,11 +65,9 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v6
 
-    # Add any setup steps before running the `github/codeql-action/init` action.
-    # This includes steps like installing compilers or runtimes (`actions/setup-node`
-    # or others). This is typically only required for manual builds.
-    # - name: Setup runtime (example)
-    #   uses: actions/setup-example@v1
+    - name: Stripe Setup
+      if: matrix.language == 'java-kotlin'
+      uses: ./.github/actions/stripe_setup
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL

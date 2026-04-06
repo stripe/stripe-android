@@ -16,6 +16,8 @@ import com.stripe.android.camera.framework.util.union
 import com.stripe.android.camera.scanui.ScanFlow
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopAggregator
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopState
+import com.stripe.android.stripecardscan.payment.ml.CardOcr
+import com.stripe.android.stripecardscan.payment.ml.MLKitTextRecognizer
 import com.stripe.android.stripecardscan.payment.ml.SSDOcr
 import com.stripe.android.stripecardscan.payment.ml.SSDOcrModelManager
 import kotlinx.coroutines.CoroutineScope
@@ -27,7 +29,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 internal abstract class CardScanFlow(
-    private val scanErrorListener: AnalyzerLoopErrorListener
+    private val scanErrorListener: AnalyzerLoopErrorListener,
+    private val enableMlKitTextRecognition: Boolean = false,
 ) : ScanFlow<Unit?, CameraPreviewImage<Bitmap>>,
     AggregateResultListener<MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult> {
 
@@ -36,19 +39,15 @@ internal abstract class CardScanFlow(
      */
     private var canceled = false
 
-    private var mainLoopAnalyzerPool: AnalyzerPool<
-        SSDOcr.Input,
-        Any,
-        SSDOcr.Prediction
-        >? = null
     private var mainLoopAggregator: MainLoopAggregator? = null
-    private var mainLoop: ProcessBoundAnalyzerLoop<
-        SSDOcr.Input,
-        MainLoopState,
-        SSDOcr.Prediction
-        >? = null
 
-    private var mainLoopJob: Job? = null
+    private val analyzerLoops = mutableListOf<AnalyzerLoop>()
+
+    private data class AnalyzerLoop(
+        val pool: AnalyzerPool<CardOcr.Input, Any, CardOcr.Prediction>,
+        val loop: ProcessBoundAnalyzerLoop<CardOcr.Input, MainLoopState, CardOcr.Prediction>,
+        val job: Job,
+    )
 
     override fun startFlow(
         context: Context,
@@ -63,43 +62,41 @@ internal abstract class CardScanFlow(
             return@launch
         }
 
-        mainLoopAggregator = MainLoopAggregator(
-            listener = this@CardScanFlow
-        ).also {
-            // make this result aggregator pause and reset when the lifecycle pauses.
-            it.bindToLifecycle(lifecycleOwner)
+        val aggregator = MainLoopAggregator(
+            listener = this@CardScanFlow,
+            enableExpiryWait = enableMlKitTextRecognition,
+        ).also { it.bindToLifecycle(lifecycleOwner) }
+        mainLoopAggregator = aggregator
 
-            val analyzerPool = AnalyzerPool.of(
-                SSDOcr.Factory(
-                    context,
-                    SSDOcrModelManager.fetchModel(
-                        context,
-                        forImmediateUse = true,
-                        isOptional = false
-                    )
-                )
+        val inputStream = imageStream.map { cameraImage ->
+            CardOcr.cameraPreviewToInput(
+                cameraImage.image,
+                minAspectRatioSurroundingSize(
+                    cameraImage.viewBounds.size().union(viewFinder.size()),
+                    cameraImage.image.width.toFloat() / cameraImage.image.height
+                ).centerOn(cameraImage.viewBounds),
+                viewFinder
             )
-            mainLoopAnalyzerPool = analyzerPool
+        }
 
-            mainLoop = ProcessBoundAnalyzerLoop(
-                analyzerPool = analyzerPool,
-                resultHandler = it,
-                analyzerLoopErrorListener = scanErrorListener,
-            ).apply {
-                mainLoopJob = subscribeTo(
-                    imageStream.map { cameraImage ->
-                        SSDOcr.cameraPreviewToInput(
-                            cameraImage.image,
-                            minAspectRatioSurroundingSize(
-                                cameraImage.viewBounds.size().union(viewFinder.size()),
-                                cameraImage.image.width.toFloat() / cameraImage.image.height
-                            ).centerOn(cameraImage.viewBounds),
-                            viewFinder
-                        )
-                    },
-                    coroutineScope
-                )
-            }
+        val fetchedModel = SSDOcrModelManager.fetchModel(
+            context,
+            forImmediateUse = true,
+            isOptional = false
+        )
+        // SSD loop: uses a built-in model, runs ~3x faster than ML Kit
+        createAndRegisterLoop(
+            AnalyzerPool.of(SSDOcr.Factory(context, fetchedModel)),
+            aggregator, inputStream, coroutineScope,
+        )
+
+        // ML Kit loop: Uses generic OCR, much slower (~2 fps) but potentially
+        // catches more cards, can detect expiration dates
+        if (enableMlKitTextRecognition) {
+            createAndRegisterLoop(
+                AnalyzerPool.of(MLKitTextRecognizer.Factory(), desiredAnalyzerCount = 1),
+                aggregator, inputStream, coroutineScope,
+            )
         }
     }.let { }
 
@@ -117,19 +114,36 @@ internal abstract class CardScanFlow(
     }
 
     private fun cleanUp() {
-        mainLoopAggregator?.run { cancel() }
+        mainLoopAggregator?.cancel()
         mainLoopAggregator = null
 
-        mainLoop?.unsubscribe()
-        mainLoop = null
+        analyzerLoops.forEach { it.loop.unsubscribe() }
 
-        // Wait for the above unsubscribe() call to take effect
+        // Wait for the above unsubscribe() calls to take effect
         // before we closeAllAnalyzers(), or we might inadvertently
         // deallocate a worker while it's processing
-        runBlocking { mainLoopJob?.join() }
-        mainLoopJob = null
+        runBlocking {
+            analyzerLoops.forEach { it.job.join() }
+        }
 
-        mainLoopAnalyzerPool?.closeAllAnalyzers()
-        mainLoopAnalyzerPool = null
+        analyzerLoops.forEach { it.pool.closeAllAnalyzers() }
+        analyzerLoops.clear()
+    }
+
+    private fun createAndRegisterLoop(
+        pool: AnalyzerPool<CardOcr.Input, Any, CardOcr.Prediction>,
+        aggregator: MainLoopAggregator,
+        inputStream: Flow<CardOcr.Input>,
+        coroutineScope: CoroutineScope,
+    ) {
+        val loop = ProcessBoundAnalyzerLoop(
+            analyzerPool = pool,
+            resultHandler = aggregator,
+            analyzerLoopErrorListener = scanErrorListener,
+        )
+        val job = loop.subscribeTo(inputStream, coroutineScope)
+        if (job != null) {
+            analyzerLoops.add(AnalyzerLoop(pool, loop, job))
+        }
     }
 }

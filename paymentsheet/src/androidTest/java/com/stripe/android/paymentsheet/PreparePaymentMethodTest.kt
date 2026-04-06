@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.checkouttesting.createPaymentMethod
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
@@ -81,7 +82,7 @@ internal class PreparePaymentMethodTest {
 
             paymentSheetPage.fillOutCardDetails()
 
-            enqueuePaymentMethodCreation()
+            networkRule.createPaymentMethod()
 
             paymentSheetPage.clickPrimaryButton()
 
@@ -146,7 +147,7 @@ internal class PreparePaymentMethodTest {
 
             paymentSheetPage.fillOutCardDetails()
 
-            enqueuePaymentMethodCreation()
+            networkRule.createPaymentMethod()
 
             paymentSheetPage.clickPrimaryButton()
 
@@ -213,7 +214,7 @@ internal class PreparePaymentMethodTest {
             embeddedContentPage.clickOnLpm(code = "card")
             embeddedFormPage.fillOutCardDetails()
 
-            enqueuePaymentMethodCreation()
+            networkRule.createPaymentMethod()
 
             embeddedFormPage.clickPrimaryButton()
             embeddedFormPage.waitUntilMissing()
@@ -258,15 +259,6 @@ internal class PreparePaymentMethodTest {
                     )
                 ),
             )
-        }
-    }
-
-    private fun enqueuePaymentMethodCreation() {
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/payment_methods"),
-        ) { response ->
-            response.testBodyFromFile("payment-methods-create.json")
         }
     }
 

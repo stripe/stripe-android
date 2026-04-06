@@ -805,6 +805,43 @@ internal class PaymentIntentFlowResultProcessorTest {
             assertThat(result).isEqualTo(expectedResult)
         }
 
+    @Test
+    fun `card processing with non-canceled outcome should succeed immediately`() =
+        runTest(testDispatcher) {
+            val processingIntent = PaymentIntentFixtures.PI_VISA_3DS2.copy(
+                status = StripeIntent.Status.Processing
+            )
+
+            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+                Result.success(processingIntent)
+            )
+
+            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+                AssertionError("Not expected to call refresh in this test")
+            )
+
+            val clientSecret = requireNotNull(processingIntent.clientSecret)
+
+            val result = createProcessor().processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = clientSecret,
+                    flowOutcome = StripeIntentResult.Outcome.SUCCEEDED
+                )
+            ).getOrThrow()
+
+            // Should only retrieve once (no polling)
+            verify(mockStripeRepository, times(1)).retrievePaymentIntent(any(), any(), any())
+
+            assertThat(result)
+                .isEqualTo(
+                    PaymentIntentResult(
+                        processingIntent,
+                        StripeIntentResult.Outcome.SUCCEEDED,
+                        null
+                    )
+                )
+        }
+
     private suspend fun runCanceledFlow(
         initialIntent: PaymentIntent,
         refreshedIntent: PaymentIntent = initialIntent,

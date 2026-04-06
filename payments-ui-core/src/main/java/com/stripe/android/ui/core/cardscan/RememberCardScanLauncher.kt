@@ -12,6 +12,7 @@ import com.stripe.android.uicore.utils.AnimationConstants
 @Composable
 internal fun rememberCardScanLauncher(
     isStripeCardScanAllowed: Boolean = false,
+    enableMlKitCardScan: Boolean = false,
     onResult: (CardScanResult) -> Unit,
     isStripeCardScanAvailable: IsStripeCardScanAvailable = DefaultIsStripeCardScanAvailable(),
 ): CardScanLauncher? {
@@ -23,6 +24,7 @@ internal fun rememberCardScanLauncher(
     return if (isStripeCardScanAllowed && isStripeCardScanAvailable()) {
         rememberCardScanStripeLauncher(
             eventsReporter = eventsReporter,
+            enableMlKitCardScan = enableMlKitCardScan,
             onResult = onResult,
         )
     } else {

@@ -172,4 +172,26 @@ class PaymentMethodJsonParserTest {
         )
         assertThat(usBankAccount.isLinkPassthroughMode).isTrue()
     }
+
+    @Test
+    fun `parse card JSON with card_art should return expected cardArt`() {
+        val paymentMethod = PaymentMethodJsonParser().parse(PaymentMethodFixtures.CARD_WITH_CARD_ART_JSON)
+
+        assertThat(paymentMethod.card?.cardArt).isEqualTo(
+            PaymentMethod.Card.CardArt(
+                artImage = PaymentMethod.Card.CardArt.ArtImage(
+                    format = "image/png",
+                    url = "https://example.com/card_art.png"
+                ),
+                programName = "My Card Program"
+            )
+        )
+    }
+
+    @Test
+    fun `parse card JSON without card_art should return null cardArt`() {
+        val paymentMethod = PaymentMethodJsonParser().parse(PaymentMethodFixtures.CARD_WITHOUT_CARD_ART_JSON)
+
+        assertThat(paymentMethod.card?.cardArt).isNull()
+    }
 }

@@ -11,9 +11,11 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.testing.PaymentMethodFactory
-import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
@@ -28,6 +30,8 @@ internal class DefaultTapToAddCollectingInteractorTest {
             ),
         ) {
             assertThat(collectionHandlerScenario.collectCalls.awaitItem()).isEqualTo(metadata)
+            assertThat(fakeEventReporter.tapToAddStartedCalls.awaitItem()).isNotNull()
+            assertThat(fakeEventReporter.tapToAddCardAddedCalls.awaitItem()).isNotNull()
         }
     }
 
@@ -39,6 +43,8 @@ internal class DefaultTapToAddCollectingInteractorTest {
             collectResult = TapToAddCollectionHandler.CollectionState.Collected(paymentMethod),
         ) {
             assertThat(collectionHandlerScenario.collectCalls.awaitItem()).isNotNull()
+            assertThat(fakeEventReporter.tapToAddStartedCalls.awaitItem()).isNotNull()
+            assertThat(fakeEventReporter.tapToAddCardAddedCalls.awaitItem()).isNotNull()
             assertThat(onCollected.awaitItem()).isEqualTo(paymentMethod)
         }
     }
@@ -50,10 +56,14 @@ internal class DefaultTapToAddCollectingInteractorTest {
         runScenario(
             collectResult = TapToAddCollectionHandler.CollectionState.FailedCollection(
                 error = RuntimeException("underlying"),
+                errorCode = TEST_ERROR_CODE,
                 displayMessage = errorMessage,
             ),
         ) {
             assertThat(collectionHandlerScenario.collectCalls.awaitItem()).isNotNull()
+            assertThat(fakeEventReporter.tapToAddStartedCalls.awaitItem()).isNotNull()
+            assertThat(fakeEventReporter.failedToAddCardWithTapToAddCalls.awaitItem())
+                .isEqualTo(TEST_ERROR_CODE.value)
             assertThat(onFailedCollection.awaitItem()).isEqualTo(errorMessage)
         }
     }
@@ -65,10 +75,14 @@ internal class DefaultTapToAddCollectingInteractorTest {
         runScenario(
             collectResult = TapToAddCollectionHandler.CollectionState.FailedCollection(
                 error = exception,
+                errorCode = TEST_ERROR_CODE,
                 displayMessage = null,
             ),
         ) {
             assertThat(collectionHandlerScenario.collectCalls.awaitItem()).isNotNull()
+            assertThat(fakeEventReporter.tapToAddStartedCalls.awaitItem()).isNotNull()
+            assertThat(fakeEventReporter.failedToAddCardWithTapToAddCalls.awaitItem())
+                .isEqualTo(TEST_ERROR_CODE.value)
             assertThat(onFailedCollection.awaitItem()).isEqualTo(exception.stripeErrorMessage())
         }
     }
@@ -79,6 +93,8 @@ internal class DefaultTapToAddCollectingInteractorTest {
             collectResult = TapToAddCollectionHandler.CollectionState.Canceled,
         ) {
             assertThat(collectionHandlerScenario.collectCalls.awaitItem()).isNotNull()
+            assertThat(fakeEventReporter.tapToAddStartedCalls.awaitItem()).isNotNull()
+            assertThat(fakeEventReporter.tapToAddCanceledCalls.awaitItem()).isNotNull()
             assertThat(onCanceled.awaitItem()).isNotNull()
         }
     }
@@ -93,7 +109,34 @@ internal class DefaultTapToAddCollectingInteractorTest {
             ),
         ) {
             assertThat(collectionHandlerScenario.collectCalls.awaitItem()).isNotNull()
+            assertThat(fakeEventReporter.tapToAddStartedCalls.awaitItem()).isNotNull()
+            assertThat(fakeEventReporter.tapToAddAttemptWithUnsupportedDeviceCalls.awaitItem()).isNotNull()
             assertThat(onTapToAddNotSupported.awaitItem()).isNotNull()
+        }
+    }
+
+    @Test
+    fun `close should stop any responses from collection handler completion`() {
+        val continueController = CompletableDeferred<Unit>()
+
+        runScenario(
+            continueController = continueController,
+        ) {
+            assertThat(collectionHandlerScenario.collectCalls.awaitItem()).isNotNull()
+            assertThat(fakeEventReporter.tapToAddStartedCalls.awaitItem()).isNotNull()
+
+            interactor.close()
+
+            continueController.complete(Unit)
+
+            onCollected.expectNoEvents()
+            onFailedCollection.expectNoEvents()
+            onTapToAddNotSupported.expectNoEvents()
+            onCanceled.expectNoEvents()
+            fakeEventReporter.tapToAddCardAddedCalls.expectNoEvents()
+            fakeEventReporter.failedToAddCardWithTapToAddCalls.expectNoEvents()
+            fakeEventReporter.tapToAddCanceledCalls.expectNoEvents()
+            fakeEventReporter.tapToAddAttemptWithUnsupportedDeviceCalls.expectNoEvents()
         }
     }
 
@@ -101,21 +144,23 @@ internal class DefaultTapToAddCollectingInteractorTest {
         metadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(isTapToAddSupported = true),
         collectResult: TapToAddCollectionHandler.CollectionState =
             TapToAddCollectionHandler.CollectionState.Collected(PaymentMethodFactory.card(last4 = "4242")),
+        continueController: Deferred<Unit> = CompletableDeferred(Unit),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
-        val testScope = this
-
         val onCollected = Turbine<PaymentMethod>()
         val onFailedCollection = Turbine<ResolvableString>()
         val onTapToAddNotSupported = Turbine<Unit>()
         val onCanceled = Turbine<Unit>()
+        val fakeEventReporter = FakeEventReporter()
 
-        FakeTapToAddCollectionHandler.test(collectResult) {
+        FakeTapToAddCollectionHandler.test(collectResult, continueController) {
             val scenario = Scenario(
                 interactor = DefaultTapToAddCollectingInteractor(
                     paymentMethodMetadata = metadata,
-                    coroutineScope = testScope,
+                    uiContext = coroutineContext,
+                    ioContext = coroutineContext,
                     tapToAddCollectionHandler = handler,
+                    eventReporter = fakeEventReporter,
                     onCollected = { onCollected.add(it) },
                     onFailedCollection = { onFailedCollection.add(it) },
                     onTapToAddNotSupported = { onTapToAddNotSupported.add(Unit) },
@@ -127,9 +172,10 @@ internal class DefaultTapToAddCollectingInteractorTest {
                 onTapToAddNotSupported = onTapToAddNotSupported,
                 onCanceled = onCanceled,
                 collectionHandlerScenario = this,
+                fakeEventReporter = fakeEventReporter,
             )
-            testScope.advanceUntilIdle()
             block(scenario)
+            fakeEventReporter.validate()
         }
     }
 
@@ -140,5 +186,12 @@ internal class DefaultTapToAddCollectingInteractorTest {
         val onTapToAddNotSupported: ReceiveTurbine<Unit>,
         val onCanceled: ReceiveTurbine<Unit>,
         val collectionHandlerScenario: FakeTapToAddCollectionHandler.Scenario,
+        val fakeEventReporter: FakeEventReporter,
     )
+
+    private companion object {
+        val TEST_ERROR_CODE = object : TapToAddCollectionHandler.ErrorCode {
+            override val value: String = "test_error_code"
+        }
+    }
 }

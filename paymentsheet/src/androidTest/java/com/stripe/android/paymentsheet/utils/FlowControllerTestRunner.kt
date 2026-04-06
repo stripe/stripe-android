@@ -45,6 +45,10 @@ internal class FlowControllerTestRunnerContext(
         assertThat(paymentOption?.paymentMethodType).isEqualTo(paymentMethodType)
     }
 
+    suspend fun consumeNullPaymentOptionEventForFlowController() {
+        assertThat(configureCallbackTurbine.awaitItem()).isNull()
+    }
+
     /**
      * Normally we know a test succeeds when it calls [PaymentSheetResultCallback], but some tests
      * succeed based on other criteria. In these cases, call this method to manually mark a test as

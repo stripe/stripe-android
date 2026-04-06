@@ -4,7 +4,7 @@ import com.stripe.android.camera.framework.AggregateResultListener
 import com.stripe.android.camera.framework.ResultAggregator
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopAggregator.FinalResult
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopAggregator.InterimResult
-import com.stripe.android.stripecardscan.payment.ml.SSDOcr
+import com.stripe.android.stripecardscan.payment.ml.CardOcr
 import kotlin.time.TimeSource
 
 /**
@@ -16,31 +16,34 @@ import kotlin.time.TimeSource
  * [MainLoopState].
  */
 internal class MainLoopAggregator(
-    listener: AggregateResultListener<InterimResult, FinalResult>
+    listener: AggregateResultListener<InterimResult, FinalResult>,
+    enableExpiryWait: Boolean = false,
 ) : ResultAggregator<
-    SSDOcr.Input,
+    CardOcr.Input,
     MainLoopState,
-    SSDOcr.Prediction,
+    CardOcr.Prediction,
     InterimResult,
     FinalResult
     >(
     listener = listener,
-    initialState = MainLoopState.Initial(TimeSource.Monotonic)
+    initialState = MainLoopState.Initial(TimeSource.Monotonic, enableExpiryWait)
 ) {
 
     internal data class FinalResult(
-        val pan: String
+        val pan: String,
+        val expiryMonth: Int? = null,
+        val expiryYear: Int? = null,
     )
 
     internal data class InterimResult(
-        val analyzerResult: SSDOcr.Prediction,
-        val frame: SSDOcr.Input,
+        val analyzerResult: CardOcr.Prediction,
+        val frame: CardOcr.Input,
         val state: MainLoopState
     )
 
     override suspend fun aggregateResult(
-        frame: SSDOcr.Input,
-        result: SSDOcr.Prediction
+        frame: CardOcr.Input,
+        result: CardOcr.Prediction
     ): Pair<InterimResult, FinalResult?> {
         val previousState = state
         val currentState = previousState.consumeTransition(result)
@@ -54,7 +57,11 @@ internal class MainLoopAggregator(
         )
 
         return if (currentState is MainLoopState.Finished) {
-            interimResult to FinalResult(currentState.pan)
+            interimResult to FinalResult(
+                pan = currentState.pan,
+                expiryMonth = currentState.expiryMonth,
+                expiryYear = currentState.expiryYear,
+            )
         } else {
             interimResult to null
         }

@@ -2,6 +2,17 @@ apply from: rootProject.file('build-configuration/configurations.gradle')
 
 apply plugin: "org.jetbrains.kotlin.jvm"
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+    }
+}
+
 dependencies {
     compileOnly "org.jetbrains.dokka:dokka-base:${versions.dokka}"
     compileOnly "org.jetbrains.dokka:dokka-core:${versions.dokka}"

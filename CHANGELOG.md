@@ -2,6 +2,25 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 23.2.0 - 2026-03-30
+
+Dependencies updated in [12785](https://github.com/stripe/stripe-android/pull/12785) and [12786](https://github.com/stripe/stripe-android/pull/12786):
+- Rolled back kotlin to 2.2.21 from 2.3.10.
+- Bumped Compose from 1.10.4 to 1.10.6.
+
+### Identity
+* [CHANGED] Improved selfie capture quality with motion blur gating, center framing validation, and better best-frame selection.
+* [FIXED] Fixed truncation of some floating-point parameters sent to the Identity API.
+* [CHANGED] Removed legacy ID detector references from the Identity document capture pipeline.
+
+### PaymentSheet
+* [FIXED][12653](https://github.com/stripe/stripe-android/pull/12653) Fixed a bug where `PaymentSheet.FlowController` wouldn't emit a null `PaymentOption` from `PaymentOptionCallback` after a successful confirmation.
+* [ADDED][12746](https://github.com/stripe/stripe-android/pull/12746) Added support for [payments orchestration](https://docs.stripe.com/payments/orchestration) (private preview) by allowing `processing` as a PaymentIntent state for cards.
+
+## 23.1.0 - 2026-03-23
+
+Added new card scanner in PaymentSheet (alpha).
+
 ### Payments
 [Added][12728](https://github.com/stripe/stripe-android/pull/12728) - New `PaymentLauncher.create()` and `rememberPaymentLauncher()` methods that read configuration from `PaymentConfiguration` instead of requiring explicit publishable key parameters.
 

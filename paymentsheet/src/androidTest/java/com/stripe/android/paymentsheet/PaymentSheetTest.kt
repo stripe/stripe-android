@@ -9,12 +9,13 @@ import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
-import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.ResponseReplacement
+import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.utils.IntegrationType
@@ -888,5 +889,55 @@ internal class PaymentSheetTest {
         page.waitForCardForm()
 
         testContext.markTestSucceeded()
+    }
+
+    @Test
+    fun testSavedCard_isDisplayedForDashboard() = runPaymentSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.elementsSession { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/payment_methods"),
+            query("type", "card"),
+            header("Authorization", "Bearer uk_12345"),
+        ) { response ->
+            response.testBodyFromFile("payment-methods-get-success.json")
+        }
+
+        testContext.presentPaymentSheet {
+            presentWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = PaymentSheet.Configuration.Builder(
+                    merchantDisplayName = "Merchant, Inc."
+                )
+                    .customer(
+                        customer = PaymentSheet.CustomerConfiguration(
+                            id = "cus_1",
+                            ephemeralKeySecret = "uk_12345",
+                        )
+                    )
+                    .link(PaymentSheet.LinkConfiguration.Builder().display(PaymentSheet.LinkConfiguration.Display.Never).build())
+                    .build()
+            )
+        }
+
+        page.assertSavedSelection("pm_12345")
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            topLevelClientAttributionMetadataParams(),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        page.clickPrimaryButton()
     }
 }

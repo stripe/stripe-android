@@ -10,6 +10,7 @@ import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -782,9 +783,12 @@ internal class PlaygroundTestDriver(
             selectors.externalPaymentMethodFailButton,
         )
 
-        composeTestRule.onNode(hasTestTag(PAYMENT_SHEET_ERROR_TEXT_TEST_TAG))
-            .assertIsDisplayed()
-            .assertTextEquals(FawryActivity.FAILED_DISPLAY_MESSAGE)
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+            composeTestRule
+                .onAllNodes(hasTestTag(PAYMENT_SHEET_ERROR_TEXT_TEST_TAG).and(hasText(FawryActivity.FAILED_DISPLAY_MESSAGE)))
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isNotEmpty()
+        }
 
         teardown()
     }
