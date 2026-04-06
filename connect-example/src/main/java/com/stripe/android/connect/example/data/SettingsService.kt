@@ -6,7 +6,11 @@ import androidx.core.content.edit
 import com.stripe.android.connect.AccountOnboardingProps
 import com.stripe.android.connect.PaymentsProps
 import com.stripe.android.connect.PreviewConnectSDK
+import com.stripe.android.connect.appearance.TextTransform
 import com.stripe.android.connect.example.ui.appearance.AppearanceInfo
+import com.stripe.android.connect.example.ui.appearance.CustomThemeOverrides
+import com.stripe.android.connect.example.util.parseHexColor
+import com.stripe.android.connect.example.util.toHexColor
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -51,6 +55,76 @@ class SettingsService @Inject constructor(@ApplicationContext context: Context) 
 
     fun setAppearanceId(value: AppearanceInfo.AppearanceId?) {
         sharedPreferences.edit { putString(APPEARANCE_ID_KEY, value?.name) }
+    }
+
+    @Suppress("LongMethod")
+    fun getCustomThemeOverrides(): CustomThemeOverrides {
+        fun str(key: String): String? = sharedPreferences.getString(key, null)?.takeIf { it.isNotEmpty() }
+        return CustomThemeOverrides(
+            buttonLabelTextTransform = str(KEY_BTN_LABEL_TEXT_TRANSFORM)?.let { TextTransform.valueOf(it) },
+            buttonLabelFontWeight = str(KEY_BTN_LABEL_FONT_WEIGHT)?.toIntOrNull(),
+            buttonLabelFontSize = str(KEY_BTN_LABEL_FONT_SIZE)?.toFloatOrNull(),
+            buttonPaddingY = str(KEY_BTN_PADDING_Y)?.toFloatOrNull(),
+            buttonPaddingX = str(KEY_BTN_PADDING_X)?.toFloatOrNull(),
+            buttonDangerColorBackground = str(KEY_BTN_DANGER_COLOR_BG)?.parseHexColor(),
+            buttonDangerColorBorder = str(KEY_BTN_DANGER_COLOR_BORDER)?.parseHexColor(),
+            buttonDangerColorText = str(KEY_BTN_DANGER_COLOR_TEXT)?.parseHexColor(),
+            badgeLabelTextTransform = str(KEY_BADGE_LABEL_TEXT_TRANSFORM)?.let { TextTransform.valueOf(it) },
+            badgeLabelFontWeight = str(KEY_BADGE_LABEL_FONT_WEIGHT)?.toIntOrNull(),
+            badgeLabelFontSize = str(KEY_BADGE_LABEL_FONT_SIZE)?.toFloatOrNull(),
+            badgePaddingY = str(KEY_BADGE_PADDING_Y)?.toFloatOrNull(),
+            badgePaddingX = str(KEY_BADGE_PADDING_X)?.toFloatOrNull(),
+            actionPrimaryTextTransform = str(KEY_ACTION_PRIMARY_TEXT_TRANSFORM)?.let { TextTransform.valueOf(it) },
+            actionSecondaryTextTransform = str(KEY_ACTION_SECONDARY_TEXT_TRANSFORM)?.let { TextTransform.valueOf(it) },
+            formPlaceholderTextColor = str(KEY_FORM_PLACEHOLDER_COLOR)?.parseHexColor(),
+            inputFieldPaddingX = str(KEY_INPUT_PADDING_X)?.toFloatOrNull(),
+            inputFieldPaddingY = str(KEY_INPUT_PADDING_Y)?.toFloatOrNull(),
+            tableRowPaddingY = str(KEY_TABLE_ROW_PADDING_Y)?.toFloatOrNull(),
+            spacingUnit = str(KEY_SPACING_UNIT)?.toFloatOrNull(),
+        )
+    }
+
+    @Suppress("LongMethod")
+    fun setCustomThemeOverrides(overrides: CustomThemeOverrides) {
+        sharedPreferences.edit {
+            putString(KEY_BTN_LABEL_TEXT_TRANSFORM, overrides.buttonLabelTextTransform?.name)
+            putString(KEY_BTN_LABEL_FONT_WEIGHT, overrides.buttonLabelFontWeight?.toString())
+            putString(KEY_BTN_LABEL_FONT_SIZE, overrides.buttonLabelFontSize?.toString())
+            putString(KEY_BTN_PADDING_Y, overrides.buttonPaddingY?.toString())
+            putString(KEY_BTN_PADDING_X, overrides.buttonPaddingX?.toString())
+            putString(KEY_BTN_DANGER_COLOR_BG, overrides.buttonDangerColorBackground?.toHexColor())
+            putString(KEY_BTN_DANGER_COLOR_BORDER, overrides.buttonDangerColorBorder?.toHexColor())
+            putString(KEY_BTN_DANGER_COLOR_TEXT, overrides.buttonDangerColorText?.toHexColor())
+            putString(KEY_BADGE_LABEL_TEXT_TRANSFORM, overrides.badgeLabelTextTransform?.name)
+            putString(KEY_BADGE_LABEL_FONT_WEIGHT, overrides.badgeLabelFontWeight?.toString())
+            putString(KEY_BADGE_LABEL_FONT_SIZE, overrides.badgeLabelFontSize?.toString())
+            putString(KEY_BADGE_PADDING_Y, overrides.badgePaddingY?.toString())
+            putString(KEY_BADGE_PADDING_X, overrides.badgePaddingX?.toString())
+            putString(KEY_ACTION_PRIMARY_TEXT_TRANSFORM, overrides.actionPrimaryTextTransform?.name)
+            putString(KEY_ACTION_SECONDARY_TEXT_TRANSFORM, overrides.actionSecondaryTextTransform?.name)
+            putString(KEY_FORM_PLACEHOLDER_COLOR, overrides.formPlaceholderTextColor?.toHexColor())
+            putString(KEY_INPUT_PADDING_X, overrides.inputFieldPaddingX?.toString())
+            putString(KEY_INPUT_PADDING_Y, overrides.inputFieldPaddingY?.toString())
+            putString(KEY_TABLE_ROW_PADDING_Y, overrides.tableRowPaddingY?.toString())
+            putString(KEY_SPACING_UNIT, overrides.spacingUnit?.toString())
+        }
+    }
+
+    fun getCustomThemeOverridesFlow(): Flow<CustomThemeOverrides> {
+        return callbackFlow {
+            trySend(getCustomThemeOverrides())
+            val callback = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+                if (key?.startsWith(CUSTOM_THEME_OVERRIDES_PREFIX) == true) {
+                    trySend(getCustomThemeOverrides())
+                }
+            }
+            synchronized(changeListeners) { changeListeners.add(callback) }
+            sharedPreferences.registerOnSharedPreferenceChangeListener(callback)
+            awaitClose {
+                synchronized(changeListeners) { changeListeners.remove(callback) }
+                sharedPreferences.unregisterOnSharedPreferenceChangeListener(callback)
+            }
+        }
     }
 
     fun getOnboardingSettings(): OnboardingSettings {
@@ -226,6 +300,31 @@ class SettingsService @Inject constructor(@ApplicationContext context: Context) 
         private const val PAYMENTS_DATE_END = "PaymentsDateEnd"
         private const val PAYMENTS_STATUS_FILTER = "PaymentsStatusFilter"
         private const val PAYMENTS_PAYMENT_METHOD_FILTER = "PaymentsPaymentMethodFilter"
+
+        // New token overrides
+        private const val CUSTOM_THEME_OVERRIDES_PREFIX = "CustomThemeOverride_"
+        private const val KEY_BTN_LABEL_TEXT_TRANSFORM = "${CUSTOM_THEME_OVERRIDES_PREFIX}buttonLabelTextTransform"
+        private const val KEY_BTN_LABEL_FONT_WEIGHT = "${CUSTOM_THEME_OVERRIDES_PREFIX}buttonLabelFontWeight"
+        private const val KEY_BTN_LABEL_FONT_SIZE = "${CUSTOM_THEME_OVERRIDES_PREFIX}buttonLabelFontSize"
+        private const val KEY_BTN_PADDING_Y = "${CUSTOM_THEME_OVERRIDES_PREFIX}buttonPaddingY"
+        private const val KEY_BTN_PADDING_X = "${CUSTOM_THEME_OVERRIDES_PREFIX}buttonPaddingX"
+        private const val KEY_BTN_DANGER_COLOR_BG = "${CUSTOM_THEME_OVERRIDES_PREFIX}buttonDangerColorBackground"
+        private const val KEY_BTN_DANGER_COLOR_BORDER = "${CUSTOM_THEME_OVERRIDES_PREFIX}buttonDangerColorBorder"
+        private const val KEY_BTN_DANGER_COLOR_TEXT = "${CUSTOM_THEME_OVERRIDES_PREFIX}buttonDangerColorText"
+        private const val KEY_BADGE_LABEL_TEXT_TRANSFORM = "${CUSTOM_THEME_OVERRIDES_PREFIX}badgeLabelTextTransform"
+        private const val KEY_BADGE_LABEL_FONT_WEIGHT = "${CUSTOM_THEME_OVERRIDES_PREFIX}badgeLabelFontWeight"
+        private const val KEY_BADGE_LABEL_FONT_SIZE = "${CUSTOM_THEME_OVERRIDES_PREFIX}badgeLabelFontSize"
+        private const val KEY_BADGE_PADDING_Y = "${CUSTOM_THEME_OVERRIDES_PREFIX}badgePaddingY"
+        private const val KEY_BADGE_PADDING_X = "${CUSTOM_THEME_OVERRIDES_PREFIX}badgePaddingX"
+        private const val KEY_ACTION_PRIMARY_TEXT_TRANSFORM =
+            "${CUSTOM_THEME_OVERRIDES_PREFIX}actionPrimaryTextTransform"
+        private const val KEY_ACTION_SECONDARY_TEXT_TRANSFORM =
+            "${CUSTOM_THEME_OVERRIDES_PREFIX}actionSecondaryTextTransform"
+        private const val KEY_FORM_PLACEHOLDER_COLOR = "${CUSTOM_THEME_OVERRIDES_PREFIX}formPlaceholderTextColor"
+        private const val KEY_INPUT_PADDING_X = "${CUSTOM_THEME_OVERRIDES_PREFIX}inputFieldPaddingX"
+        private const val KEY_INPUT_PADDING_Y = "${CUSTOM_THEME_OVERRIDES_PREFIX}inputFieldPaddingY"
+        private const val KEY_TABLE_ROW_PADDING_Y = "${CUSTOM_THEME_OVERRIDES_PREFIX}tableRowPaddingY"
+        private const val KEY_SPACING_UNIT = "${CUSTOM_THEME_OVERRIDES_PREFIX}spacingUnit"
     }
 }
 

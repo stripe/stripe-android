@@ -335,10 +335,29 @@ public final class com/stripe/android/connect/StripeEmbeddedComponentListener$De
 	public static fun onLoaderStart (Lcom/stripe/android/connect/StripeEmbeddedComponentListener;)V
 }
 
+public final class com/stripe/android/connect/appearance/Action : android/os/Parcelable {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public synthetic fun <init> (Ljava/lang/Integer;Lcom/stripe/android/connect/appearance/TextTransform;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/connect/appearance/Action$Builder {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun build ()Lcom/stripe/android/connect/appearance/Action;
+	public final fun colorText (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Action$Builder;
+	public final fun textTransform (Lcom/stripe/android/connect/appearance/TextTransform;)Lcom/stripe/android/connect/appearance/Action$Builder;
+}
+
 public final class com/stripe/android/connect/appearance/Appearance : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public synthetic fun <init> (Lcom/stripe/android/connect/appearance/Colors;Lcom/stripe/android/connect/appearance/CornerRadius;Lcom/stripe/android/connect/appearance/Typography;Ljava/lang/Float;Lcom/stripe/android/connect/appearance/Button;Lcom/stripe/android/connect/appearance/Button;Lcom/stripe/android/connect/appearance/Badge;Lcom/stripe/android/connect/appearance/Badge;Lcom/stripe/android/connect/appearance/Badge;Lcom/stripe/android/connect/appearance/Badge;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Lcom/stripe/android/connect/appearance/Colors;Lcom/stripe/android/connect/appearance/CornerRadius;Lcom/stripe/android/connect/appearance/Typography;Ljava/lang/Float;Lcom/stripe/android/connect/appearance/Button;Lcom/stripe/android/connect/appearance/Button;Lcom/stripe/android/connect/appearance/Button;Lcom/stripe/android/connect/appearance/ButtonDefaults;Lcom/stripe/android/connect/appearance/Badge;Lcom/stripe/android/connect/appearance/Badge;Lcom/stripe/android/connect/appearance/Badge;Lcom/stripe/android/connect/appearance/Badge;Lcom/stripe/android/connect/appearance/BadgeDefaults;Lcom/stripe/android/connect/appearance/Action;Lcom/stripe/android/connect/appearance/Action;Lcom/stripe/android/connect/appearance/Form;Ljava/lang/Float;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
@@ -349,16 +368,23 @@ public final class com/stripe/android/connect/appearance/Appearance : android/os
 public final class com/stripe/android/connect/appearance/Appearance$Builder {
 	public static final field $stable I
 	public fun <init> ()V
+	public final fun actionPrimaryText (Lcom/stripe/android/connect/appearance/Action;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
+	public final fun actionSecondaryText (Lcom/stripe/android/connect/appearance/Action;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
 	public final fun badgeDanger (Lcom/stripe/android/connect/appearance/Badge;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
+	public final fun badgeDefaults (Lcom/stripe/android/connect/appearance/BadgeDefaults;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
 	public final fun badgeNeutral (Lcom/stripe/android/connect/appearance/Badge;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
 	public final fun badgeSuccess (Lcom/stripe/android/connect/appearance/Badge;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
 	public final fun badgeWarning (Lcom/stripe/android/connect/appearance/Badge;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
 	public final fun build ()Lcom/stripe/android/connect/appearance/Appearance;
+	public final fun buttonDanger (Lcom/stripe/android/connect/appearance/Button;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
+	public final fun buttonDefaults (Lcom/stripe/android/connect/appearance/ButtonDefaults;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
 	public final fun buttonPrimary (Lcom/stripe/android/connect/appearance/Button;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
 	public final fun buttonSecondary (Lcom/stripe/android/connect/appearance/Button;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
 	public final fun colors (Lcom/stripe/android/connect/appearance/Colors;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
 	public final fun cornerRadius (Lcom/stripe/android/connect/appearance/CornerRadius;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
+	public final fun form (Lcom/stripe/android/connect/appearance/Form;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
 	public final fun spacingUnit (F)Lcom/stripe/android/connect/appearance/Appearance$Builder;
+	public final fun tableRowPaddingY (F)Lcom/stripe/android/connect/appearance/Appearance$Builder;
 	public final fun typography (Lcom/stripe/android/connect/appearance/Typography;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
 }
 
@@ -375,6 +401,26 @@ public final class com/stripe/android/connect/appearance/Badge : android/os/Parc
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
+public final class com/stripe/android/connect/appearance/BadgeDefaults : android/os/Parcelable {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public synthetic fun <init> (Ljava/lang/Float;Ljava/lang/Float;Lcom/stripe/android/connect/appearance/Typography$Style;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/connect/appearance/BadgeDefaults$Builder {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun build ()Lcom/stripe/android/connect/appearance/BadgeDefaults;
+	public final fun labelTypography (Lcom/stripe/android/connect/appearance/Typography$Style;)Lcom/stripe/android/connect/appearance/BadgeDefaults$Builder;
+	public final fun paddingX (Ljava/lang/Float;)Lcom/stripe/android/connect/appearance/BadgeDefaults$Builder;
+	public final fun paddingY (Ljava/lang/Float;)Lcom/stripe/android/connect/appearance/BadgeDefaults$Builder;
+}
+
 public final class com/stripe/android/connect/appearance/Button : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
@@ -386,6 +432,26 @@ public final class com/stripe/android/connect/appearance/Button : android/os/Par
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/connect/appearance/ButtonDefaults : android/os/Parcelable {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public synthetic fun <init> (Ljava/lang/Float;Ljava/lang/Float;Lcom/stripe/android/connect/appearance/Typography$Style;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/connect/appearance/ButtonDefaults$Builder {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun build ()Lcom/stripe/android/connect/appearance/ButtonDefaults;
+	public final fun labelTypography (Lcom/stripe/android/connect/appearance/Typography$Style;)Lcom/stripe/android/connect/appearance/ButtonDefaults$Builder;
+	public final fun paddingX (Ljava/lang/Float;)Lcom/stripe/android/connect/appearance/ButtonDefaults$Builder;
+	public final fun paddingY (Ljava/lang/Float;)Lcom/stripe/android/connect/appearance/ButtonDefaults$Builder;
 }
 
 public final class com/stripe/android/connect/appearance/Colors : android/os/Parcelable {
@@ -437,6 +503,29 @@ public final class com/stripe/android/connect/appearance/CornerRadius$Builder {
 	public final fun button (Ljava/lang/Float;)Lcom/stripe/android/connect/appearance/CornerRadius$Builder;
 	public final fun form (Ljava/lang/Float;)Lcom/stripe/android/connect/appearance/CornerRadius$Builder;
 	public final fun overlay (Ljava/lang/Float;)Lcom/stripe/android/connect/appearance/CornerRadius$Builder;
+}
+
+public final class com/stripe/android/connect/appearance/Form : android/os/Parcelable {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public synthetic fun <init> (Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Float;Ljava/lang/Float;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/connect/appearance/Form$Builder {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun accent (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Form$Builder;
+	public final fun build ()Lcom/stripe/android/connect/appearance/Form;
+	public final fun colorBackground (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Form$Builder;
+	public final fun highlightBorder (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Form$Builder;
+	public final fun inputFieldPaddingX (F)Lcom/stripe/android/connect/appearance/Form$Builder;
+	public final fun inputFieldPaddingY (F)Lcom/stripe/android/connect/appearance/Form$Builder;
+	public final fun placeholderTextColor (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Form$Builder;
 }
 
 public final class com/stripe/android/connect/appearance/TextTransform : java/lang/Enum {

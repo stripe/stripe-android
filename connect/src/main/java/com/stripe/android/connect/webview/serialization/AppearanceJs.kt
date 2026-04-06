@@ -1,3 +1,5 @@
+@file:OptIn(com.stripe.android.connect.PreviewConnectSDK::class)
+
 package com.stripe.android.connect.webview.serialization
 
 import androidx.annotation.ColorInt
@@ -74,6 +76,38 @@ internal data class AppearanceVariablesJs(
      */
     @ColorInt val buttonSecondaryColorText: IntAsRgbHexString?,
     /**
+     * The background color for danger buttons to indicate destructive actions.
+     */
+    @ColorInt val buttonDangerColorBackground: IntAsRgbHexString?,
+    /**
+     * The border color for danger buttons to indicate destructive actions.
+     */
+    @ColorInt val buttonDangerColorBorder: IntAsRgbHexString?,
+    /**
+     * The text color for danger buttons to indicate destructive actions.
+     */
+    @ColorInt val buttonDangerColorText: IntAsRgbHexString?,
+    /**
+     * The vertical padding in px for buttons.
+     */
+    val buttonPaddingY: String?,
+    /**
+     * The horizontal padding in px for buttons.
+     */
+    val buttonPaddingX: String?,
+    /**
+     * The font size in px for the button label typography.
+     */
+    val buttonLabelFontSize: String?,
+    /**
+     * The font weight (between 0-1000) for the button label typography.
+     */
+    val buttonLabelFontWeight: String?,
+    /**
+     * The text transform for the button label typography.
+     */
+    val buttonLabelTextTransform: TextTransform?,
+    /**
      * The color used for secondary text.
      */
     @ColorInt val colorSecondaryText: IntAsRgbHexString?,
@@ -86,6 +120,10 @@ internal data class AppearanceVariablesJs(
      */
     @ColorInt val actionPrimaryTextDecorationColor: IntAsRgbHexString?,
     /**
+     * The text transform for primary actions and links.
+     */
+    val actionPrimaryTextTransform: TextTransform?,
+    /**
      * The color used for secondary actions and links.
      */
     @ColorInt val actionSecondaryColorText: IntAsRgbHexString?,
@@ -93,6 +131,10 @@ internal data class AppearanceVariablesJs(
      * The color used for text decoration of secondary actions and links.
      */
     @ColorInt val actionSecondaryTextDecorationColor: IntAsRgbHexString?,
+    /**
+     * The text transform for secondary actions and links.
+     */
+    val actionSecondaryTextTransform: TextTransform?,
     /**
      * The background color used to represent neutral state or lack of state in status badges.
      */
@@ -148,6 +190,26 @@ internal data class AppearanceVariablesJs(
      */
     @ColorInt val badgeDangerColorBorder: IntAsRgbHexString?,
     /**
+     * The horizontal padding in px for badges.
+     */
+    val badgePaddingX: String?,
+    /**
+     * The vertical padding in px for badges.
+     */
+    val badgePaddingY: String?,
+    /**
+     * The font size in px for the badge label typography.
+     */
+    val badgeLabelFontSize: String?,
+    /**
+     * The font weight (between 0-1000) for the badge label typography.
+     */
+    val badgeLabelFontWeight: String?,
+    /**
+     * The text transform for the badge label typography.
+     */
+    val badgeLabelTextTransform: TextTransform?,
+    /**
      * The background color used when highlighting information, like the selected row on a table or particular piece of
      * UI.
      */
@@ -169,6 +231,22 @@ internal data class AppearanceVariablesJs(
      */
     @ColorInt val formAccentColor: IntAsRgbHexString?,
     /**
+     * The color used for placeholder text in form items.
+     */
+    @ColorInt val formPlaceholderTextColor: IntAsRgbHexString?,
+    /**
+     * The horizontal padding in px for form items.
+     */
+    val inputFieldPaddingX: String?,
+    /**
+     * The vertical padding in px for form items.
+     */
+    val inputFieldPaddingY: String?,
+    /**
+     * The vertical padding in px for table rows.
+     */
+    val tableRowPaddingY: String?,
+    /**
      * The border radius in px used for buttons.
      */
     val buttonBorderRadius: String?,
@@ -188,6 +266,7 @@ internal data class AppearanceVariablesJs(
      * The backdrop color when an overlay is opened.
      */
     @ColorInt val overlayBackdropColor: IntAsRgbHexString?,
+
     /**
      * The font size in px for the medium body typography.
      */
@@ -195,7 +274,7 @@ internal data class AppearanceVariablesJs(
     /**
      * The font weight (between 0-1000) for the medium body typography.
      */
-    val bodyMdFontWeight: Int?,
+    val bodyMdFontWeight: String?,
     /**
      * The font size in px for the small body typography.
      */
@@ -203,7 +282,7 @@ internal data class AppearanceVariablesJs(
     /**
      * The font weight (between 0-1000) for the small body typography.
      */
-    val bodySmFontWeight: Int?,
+    val bodySmFontWeight: String?,
     /**
      * The font size in px for the extra large heading typography.
      */
@@ -211,7 +290,7 @@ internal data class AppearanceVariablesJs(
     /**
      * The font weight (between 0-1000) for the extra large heading typography.
      */
-    val headingXlFontWeight: Int?,
+    val headingXlFontWeight: String?,
     /**
      * The text transform for the extra large heading typography. Heading typography variables accept a valid text
      * transform value.
@@ -224,7 +303,7 @@ internal data class AppearanceVariablesJs(
     /**
      * The font weight (between 0-1000) for the large heading typography.
      */
-    val headingLgFontWeight: Int?,
+    val headingLgFontWeight: String?,
     /**
      * The text transform for the large heading typography. Heading typography variables accept a valid text
      * transform value.
@@ -237,7 +316,7 @@ internal data class AppearanceVariablesJs(
     /**
      * The font weight (between 0-1000) for the medium heading typography.
      */
-    val headingMdFontWeight: Int?,
+    val headingMdFontWeight: String?,
     /**
      * The text transform for the medium heading typography. Heading typography variables accept a valid text
      * transform value.
@@ -250,7 +329,7 @@ internal data class AppearanceVariablesJs(
     /**
      * The font weight (between 0-1000) for the small heading typography.
      */
-    val headingSmFontWeight: Int?,
+    val headingSmFontWeight: String?,
     /**
      * The text transform for the small heading typography. Heading typography variables accept a valid text
      * transform value.
@@ -263,7 +342,7 @@ internal data class AppearanceVariablesJs(
     /**
      * The font weight (between 0-1000) for the extra small heading typography.
      */
-    val headingXsFontWeight: Int?,
+    val headingXsFontWeight: String?,
     /**
      * The text transform for the extra small heading typography. Heading typography variables accept a valid text
      * transform value.
@@ -276,7 +355,7 @@ internal data class AppearanceVariablesJs(
     /**
      * The font weight (between 0-1000) for the medium label typography.
      */
-    val labelMdFontWeight: Int?,
+    val labelMdFontWeight: String?,
     /**
      * The text transform for the medium label typography. Label typography variables accept a valid text
      * transform value.
@@ -289,7 +368,7 @@ internal data class AppearanceVariablesJs(
     /**
      * The font weight (between 0-1000) for the small label typography.
      */
-    val labelSmFontWeight: Int?,
+    val labelSmFontWeight: String?,
     /**
      * The text transform for the small label typography. Label typography variables accept a valid text
      * transform value.
@@ -324,11 +403,21 @@ internal fun Appearance.toJs(): AppearanceJs {
             buttonSecondaryColorBackground = buttonSecondary.colorBackground,
             buttonSecondaryColorBorder = buttonSecondary.colorBorder,
             buttonSecondaryColorText = buttonSecondary.colorText,
+            buttonDangerColorBackground = buttonDanger.colorBackground,
+            buttonDangerColorBorder = buttonDanger.colorBorder,
+            buttonDangerColorText = buttonDanger.colorText,
+            buttonPaddingX = buttonDefaults.paddingX.toPx(),
+            buttonPaddingY = buttonDefaults.paddingY.toPx(),
+            buttonLabelFontSize = buttonDefaults.labelTypography?.fontSize.toPx(),
+            buttonLabelFontWeight = buttonDefaults.labelTypography?.fontWeight?.toString(),
+            buttonLabelTextTransform = buttonDefaults.labelTypography?.textTransform,
             colorSecondaryText = colors.secondaryText,
-            actionPrimaryColorText = colors.actionPrimaryText,
+            actionPrimaryColorText = actionPrimaryText.colorText ?: colors.actionPrimaryText,
             actionPrimaryTextDecorationColor = null,
-            actionSecondaryColorText = colors.actionSecondaryText,
+            actionPrimaryTextTransform = actionPrimaryText.textTransform,
+            actionSecondaryColorText = actionSecondaryText.colorText ?: colors.actionSecondaryText,
             actionSecondaryTextDecorationColor = null,
+            actionSecondaryTextTransform = actionSecondaryText.textTransform,
             badgeNeutralColorBackground = badgeNeutral.colorBackground,
             badgeNeutralColorText = badgeNeutral.colorText,
             badgeNeutralColorBorder = badgeNeutral.colorBorder,
@@ -341,40 +430,49 @@ internal fun Appearance.toJs(): AppearanceJs {
             badgeDangerColorBackground = badgeDanger.colorBackground,
             badgeDangerColorText = badgeDanger.colorText,
             badgeDangerColorBorder = badgeDanger.colorBorder,
+            badgePaddingX = badgeDefaults.paddingX.toPx(),
+            badgePaddingY = badgeDefaults.paddingY.toPx(),
+            badgeLabelFontSize = badgeDefaults.labelTypography?.fontSize.toPx(),
+            badgeLabelFontWeight = badgeDefaults.labelTypography?.fontWeight?.toString(),
+            badgeLabelTextTransform = badgeDefaults.labelTypography?.textTransform,
             offsetBackgroundColor = colors.offsetBackground,
-            formBackgroundColor = colors.formBackground,
+            formBackgroundColor = form.colorBackground ?: colors.formBackground,
             colorBorder = colors.border,
-            formHighlightColorBorder = colors.formHighlightBorder,
-            formAccentColor = colors.formAccent,
+            formHighlightColorBorder = form.highlightBorder ?: colors.formHighlightBorder,
+            formAccentColor = form.accent ?: colors.formAccent,
+            formPlaceholderTextColor = form.placeholderTextColor,
+            inputFieldPaddingX = form.inputFieldPaddingX.toPx(),
+            inputFieldPaddingY = form.inputFieldPaddingY.toPx(),
+            tableRowPaddingY = tableRowPaddingY.toPx(),
             buttonBorderRadius = cornerRadius.button.toPx(),
             formBorderRadius = cornerRadius.form.toPx(),
             badgeBorderRadius = cornerRadius.badge.toPx(),
             overlayBorderRadius = cornerRadius.overlay.toPx(),
             overlayBackdropColor = null,
             bodyMdFontSize = typography.bodyMd?.fontSize.toPx(),
-            bodyMdFontWeight = typography.bodyMd?.fontWeight,
+            bodyMdFontWeight = typography.bodyMd?.fontWeight?.toString(),
             bodySmFontSize = typography.bodySm?.fontSize.toPx(),
-            bodySmFontWeight = typography.bodySm?.fontWeight,
+            bodySmFontWeight = typography.bodySm?.fontWeight?.toString(),
             headingXlFontSize = typography.headingXl?.fontSize.toPx(),
-            headingXlFontWeight = typography.headingXl?.fontWeight,
+            headingXlFontWeight = typography.headingXl?.fontWeight?.toString(),
             headingXlTextTransform = typography.headingXl?.textTransform,
             headingLgFontSize = typography.headingLg?.fontSize.toPx(),
-            headingLgFontWeight = typography.headingLg?.fontWeight,
+            headingLgFontWeight = typography.headingLg?.fontWeight?.toString(),
             headingLgTextTransform = typography.headingLg?.textTransform,
             headingMdFontSize = typography.headingMd?.fontSize.toPx(),
-            headingMdFontWeight = typography.headingMd?.fontWeight,
+            headingMdFontWeight = typography.headingMd?.fontWeight?.toString(),
             headingMdTextTransform = typography.headingMd?.textTransform,
             headingSmFontSize = typography.headingSm?.fontSize.toPx(),
-            headingSmFontWeight = typography.headingSm?.fontWeight,
+            headingSmFontWeight = typography.headingSm?.fontWeight?.toString(),
             headingSmTextTransform = typography.headingSm?.textTransform,
             headingXsFontSize = typography.headingXs?.fontSize.toPx(),
-            headingXsFontWeight = typography.headingXs?.fontWeight,
+            headingXsFontWeight = typography.headingXs?.fontWeight?.toString(),
             headingXsTextTransform = typography.headingXs?.textTransform,
             labelMdFontSize = typography.labelMd?.fontSize.toPx(),
-            labelMdFontWeight = typography.labelMd?.fontWeight,
+            labelMdFontWeight = typography.labelMd?.fontWeight?.toString(),
             labelMdTextTransform = typography.labelMd?.textTransform,
             labelSmFontSize = typography.labelSm?.fontSize.toPx(),
-            labelSmFontWeight = typography.labelSm?.fontWeight,
+            labelSmFontWeight = typography.labelSm?.fontWeight?.toString(),
             labelSmTextTransform = typography.labelSm?.textTransform,
         )
     )
