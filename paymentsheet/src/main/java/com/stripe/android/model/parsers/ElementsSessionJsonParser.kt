@@ -263,6 +263,17 @@ internal class ElementsSessionJsonParser(
             parsePaymentMethods(json)
         }
 
+        // Card art is a paid feature gated at the API resource level. The backend returns it as a
+        // separate top-level array (keyed by PM ID) to bypass those gates for Elements sessions.
+        // We merge it into each PaymentMethod.Card here so the rest of the SDK sees card art
+        // where it belongs — on the card object — rather than leaking this elements session backend workaround.
+        val mergedPaymentMethods = if (FeatureFlags.enableCardArt.isEnabled) {
+            val cardArtMap = buildCardArtLookup(json)
+            mergeCardArt(paymentMethods, cardArtMap)
+        } else {
+            paymentMethods
+        }
+
         val customerSession = parseCustomerSession(json.optJSONObject(FIELD_CUSTOMER_SESSION))
             ?: return null
 
@@ -271,7 +282,7 @@ internal class ElementsSessionJsonParser(
         }
 
         return ElementsSession.Customer(
-            paymentMethods = paymentMethods,
+            paymentMethods = mergedPaymentMethods,
             session = customerSession,
             defaultPaymentMethod = defaultPaymentMethod
         )
@@ -489,6 +500,35 @@ internal class ElementsSessionJsonParser(
         return specs.toMap()
     }
 
+    private fun buildCardArtLookup(json: JSONObject): Map<String, PaymentMethod.Card.CardArt> {
+        val cardArtArray = json.optJSONArray(FIELD_CARD_ART) ?: return emptyMap()
+        val parser = CardArtJsonParser()
+        return (0 until cardArtArray.length()).mapNotNull { i ->
+            val artJson = cardArtArray.optJSONObject(i) ?: return@mapNotNull null
+            val paymentMethodId = StripeJsonUtils.optString(
+                artJson,
+                FIELD_CARD_ART_PAYMENT_METHOD
+            ) ?: return@mapNotNull null
+            paymentMethodId to parser.parse(artJson)
+        }.toMap()
+    }
+
+    private fun mergeCardArt(
+        paymentMethods: List<PaymentMethod>,
+        cardArtMap: Map<String, PaymentMethod.Card.CardArt>
+    ): List<PaymentMethod> {
+        if (cardArtMap.isEmpty()) return paymentMethods
+        return paymentMethods.map { pm ->
+            val cardArt = cardArtMap[pm.id]
+            val card = pm.card
+            if (cardArt != null && card != null) {
+                pm.copy(card = card.copy(cardArt = cardArt))
+            } else {
+                pm
+            }
+        }
+    }
+
     internal companion object {
         private const val FIELD_OBJECT = "object"
         private const val FIELD_ELEMENTS_SESSION_ID = "session_id"
@@ -552,6 +592,9 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_EXPERIMENTS_ASSIGNMENTS = "experiment_assignments"
         private const val FIELD_PASSIVE_CAPTCHA = "passive_captcha"
         private const val ARB_ID = "arb_id"
+
+        private const val FIELD_CARD_ART = "card_art"
+        private const val FIELD_CARD_ART_PAYMENT_METHOD = "payment_method"
 
         private val CUSTOM_PAYMENT_METHOD_JSON_PARSER = CustomPaymentMethodJsonParser()
     }

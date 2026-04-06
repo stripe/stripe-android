@@ -5,6 +5,7 @@ import androidx.annotation.ColorInt
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
+// Deprecating old version for parameters that moved to other classes
 @Parcelize
 @Poko
 class Colors private constructor(
@@ -87,12 +88,14 @@ class Colors private constructor(
         /**
          * The color used for primary actions and link text. If null the default will be used.
          */
+        @Deprecated("Use Action class instead")
         fun actionPrimaryText(@ColorInt actionPrimaryText: Int?): Builder =
             apply { this.actionPrimaryText = actionPrimaryText }
 
         /**
          * The color used for secondary actions and link text. If null the default will be used.
          */
+        @Deprecated("Use Action class instead")
         fun actionSecondaryText(@ColorInt actionSecondaryText: Int?): Builder =
             apply { this.actionSecondaryText = actionSecondaryText }
 
@@ -105,12 +108,14 @@ class Colors private constructor(
         /**
          * The background color used for form fields. If null the default will be used.
          */
+        @Deprecated("Use Form class instead")
         fun formBackground(@ColorInt formBackground: Int?): Builder =
             apply { this.formBackground = formBackground }
 
         /**
          * The border color used to highlight form items when focused. If null the default will be used.
          */
+        @Deprecated("Use Form class instead")
         fun formHighlightBorder(@ColorInt formHighlightBorder: Int?): Builder =
             apply { this.formHighlightBorder = formHighlightBorder }
 
@@ -118,6 +123,7 @@ class Colors private constructor(
          * The accent color used for filling form elements like checkboxes or radio buttons.
          * If null the default will be used.
          */
+        @Deprecated("Use Form class instead")
         fun formAccent(@ColorInt formAccent: Int?): Builder =
             apply { this.formAccent = formAccent }
 

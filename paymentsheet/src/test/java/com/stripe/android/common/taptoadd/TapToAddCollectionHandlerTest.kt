@@ -29,6 +29,7 @@ import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.stripeterminal.Terminal
+import com.stripe.stripeterminal.external.callable.Callback
 import com.stripe.stripeterminal.external.callable.Cancelable
 import com.stripe.stripeterminal.external.callable.SetupIntentCallback
 import com.stripe.stripeterminal.external.models.AllowRedisplay
@@ -50,6 +51,7 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.timeout
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -586,6 +588,94 @@ class TapToAddCollectionHandlerTest {
 
         verify(confirmSetupIntentCall.cancelable, timeout(1000)).cancel(any())
     }
+
+    @Test
+    fun `handler reports error when collectSetupIntentPaymentMethod cancel fails after coroutine cancelled`() =
+        runScenario(
+            callbackResult = Result.success(
+                CreateCardPresentSetupIntentCallback {
+                    CreateIntentResult.Success("si_123_secret")
+                }
+            ),
+        ) {
+            val job = testScope.backgroundScope.async {
+                handler.collect(DEFAULT_METADATA)
+            }
+
+            assertThat(retrieverScenario.waitForCallbackCalls.awaitItem()).isNotNull()
+            assertThat(terminalScenario.setTapToPayUxConfigurationCalls.awaitItem()).isNotNull()
+
+            checkRetrieveSetupIntent("si_123_secret")
+
+            val collectPaymentMethodCall = terminalScenario.collectPaymentMethodCalls.awaitItem()
+
+            val cancelFailure = TerminalException(
+                errorCode = TerminalErrorCode.CANCEL_FAILED,
+                errorMessage = "Failed to cancel collect",
+            )
+
+            whenever(collectPaymentMethodCall.cancelable.cancel(any()))
+                .thenAnswer { invocation ->
+                    val callback = invocation.getArgument<Callback>(0)
+                    callback.onFailure(cancelFailure)
+                }
+
+            job.cancel()
+
+            verify(collectPaymentMethodCall.cancelable, timeout(1000)).cancel(any())
+
+            val reportCall = errorReporter.awaitCall()
+            assertThat(reportCall.errorEvent)
+                .isEqualTo(ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_COLLECT_SETUP_INTENT_CANCEL_FAILURE)
+            assertThat(reportCall.stripeException?.cause).isEqualTo(cancelFailure)
+            assertThat(reportCall.additionalNonPiiParams).isEqualTo(
+                mapOf("terminalErrorCode" to cancelFailure.errorCode.toLogString())
+            )
+        }
+
+    @Test
+    fun `handler reports error when confirmSetupIntent cancel fails after coroutine cancelled`() =
+        runScenario(
+            callbackResult = Result.success(
+                CreateCardPresentSetupIntentCallback {
+                    CreateIntentResult.Success("si_123_secret")
+                }
+            ),
+        ) {
+            val job = testScope.backgroundScope.async {
+                handler.collect(DEFAULT_METADATA)
+            }
+
+            assertThat(retrieverScenario.waitForCallbackCalls.awaitItem()).isNotNull()
+            assertThat(terminalScenario.setTapToPayUxConfigurationCalls.awaitItem()).isNotNull()
+
+            val retrievedSetupIntent = checkRetrieveSetupIntent("si_123_secret")
+            checkCollectCall(retrievedSetupIntent)
+
+            val confirmSetupIntentCall = terminalScenario.confirmSetupIntentCalls.awaitItem()
+
+            val cancelFailure = TerminalException(
+                errorCode = TerminalErrorCode.CANCEL_FAILED,
+                errorMessage = "Failed to cancel confirm",
+            )
+
+            whenever(confirmSetupIntentCall.cancelable.cancel(any())).thenAnswer { invocation ->
+                val callback = invocation.getArgument<Callback>(0)
+                callback.onFailure(cancelFailure)
+            }
+
+            job.cancel()
+
+            verify(confirmSetupIntentCall.cancelable, timeout(1000)).cancel(any())
+
+            val reportCall = errorReporter.awaitCall()
+            assertThat(reportCall.errorEvent)
+                .isEqualTo(ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_CONFIRM_SETUP_INTENT_CANCEL_FAILURE)
+            assertThat(reportCall.stripeException?.cause).isEqualTo(cancelFailure)
+            assertThat(reportCall.additionalNonPiiParams).isEqualTo(
+                mapOf("terminalErrorCode" to cancelFailure.errorCode.toLogString())
+            )
+        }
 
     private fun assertFailedCollection(
         result: TapToAddCollectionHandler.CollectionState,

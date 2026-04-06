@@ -10,6 +10,7 @@ import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.ResponseReplacement
+import com.stripe.android.networktesting.createConfirmationToken
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.PaymentSheetTestRunnerContext
@@ -221,9 +222,7 @@ internal class PaymentSheetConfirmationTokenTest {
         paymentMethodType: PaymentMethodType,
         isPayment: Boolean,
     ) {
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/confirmation_tokens"),
+        networkRule.createConfirmationToken(
             clientContext(isLiveMode, isPayment),
             cvcRecollection(paymentMethodType),
             mandateDataAndSetupFutureUsage(paymentMethodType, isPayment),

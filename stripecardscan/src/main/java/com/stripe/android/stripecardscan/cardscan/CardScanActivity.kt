@@ -112,11 +112,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
                 val intent = Intent()
                     .putExtra(
                         INTENT_PARAM_RESULT,
-                        CardScanSheetResult.Completed(
-                            ScannedCard(
-                                pan = card.pan
-                            )
-                        )
+                        CardScanSheetResult.Completed(card)
                     )
                 setResult(RESULT_OK, intent)
             }
@@ -147,8 +143,11 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
      */
     private lateinit var scanFlow: CardScanFlow
 
-    private fun createScanFlow(enableMlKitTextRecognition: Boolean): CardScanFlow {
-        return object : CardScanFlow(scanErrorListener, enableMlKitTextRecognition) {
+    private fun createScanFlow(
+        enableMlKitTextRecognition: Boolean,
+        disableSsdOcr: Boolean,
+    ): CardScanFlow {
+        return object : CardScanFlow(scanErrorListener, enableMlKitTextRecognition, disableSsdOcr) {
             /**
              * A final result was received from the aggregator. Set the result from this activity.
              */
@@ -158,7 +157,13 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
                 launch(Dispatchers.Main) {
                     changeScanState(CardScanState.Correct)
                     cameraAdapter.unbindFromLifecycle(this@CardScanActivity)
-                    resultListener.cardScanComplete(ScannedCard(result.pan))
+                    resultListener.cardScanComplete(
+                        ScannedCard(
+                            pan = result.pan,
+                            expiryMonth = result.expiryMonth,
+                            expiryYear = result.expiryYear,
+                        )
+                    )
                     closeScanner()
                 }.let { }
             }
@@ -171,7 +176,8 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
             ) = launch(Dispatchers.Main) {
                 when (result.state) {
                     is MainLoopState.Initial -> changeScanState(CardScanState.NotFound)
-                    is MainLoopState.OcrFound -> changeScanState(CardScanState.Found)
+                    is MainLoopState.OcrFound,
+                    is MainLoopState.ExpiryWait -> changeScanState(CardScanState.Found)
                     is MainLoopState.Finished -> changeScanState(CardScanState.Correct)
                 }
             }.let { }
@@ -193,7 +199,10 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
         val cardScanConfiguration = cardScanSheetParams?.cardScanConfiguration
             ?: CardScanConfiguration(elementsSessionId = null)
 
-        scanFlow = createScanFlow(cardScanConfiguration.enableMlKitTextRecognition)
+        scanFlow = createScanFlow(
+            enableMlKitTextRecognition = cardScanConfiguration.enableMlKitTextRecognition,
+            disableSsdOcr = cardScanConfiguration.disableSsdOcr,
+        )
 
         DaggerCardScanComponent.factory()
             .build(

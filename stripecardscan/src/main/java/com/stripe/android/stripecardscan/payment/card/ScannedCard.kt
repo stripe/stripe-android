@@ -10,5 +10,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class ScannedCard(
-    val pan: String
+    val pan: String,
+    val expiryMonth: Int? = null,
+    val expiryYear: Int? = null,
 ) : Parcelable

@@ -1,11 +1,11 @@
 package com.stripe.android.crypto.onramp.model
 
-import androidx.annotation.RestrictTo
+import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 
 /**
  * The type of payment method to present for selection.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@ExperimentalCryptoOnramp
 enum class PaymentMethodType(internal val value: String) {
     Card("card"),
     BankAccount("bank_account"),
@@ -16,7 +16,7 @@ enum class PaymentMethodType(internal val value: String) {
 /**
  * Represents the available payment method selections supported by the payment flow.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@ExperimentalCryptoOnramp
 sealed interface PaymentMethodSelection {
 
     /**
@@ -27,7 +27,7 @@ sealed interface PaymentMethodSelection {
     /**
      * Represents a card-only payment method selection.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @ExperimentalCryptoOnramp
     class Card : PaymentMethodSelection {
         override val type = PaymentMethodType.Card
     }
@@ -35,7 +35,7 @@ sealed interface PaymentMethodSelection {
     /**
      * Represents a bank account payment method selection.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @ExperimentalCryptoOnramp
     class BankAccount : PaymentMethodSelection {
         override val type = PaymentMethodType.BankAccount
     }
@@ -44,7 +44,7 @@ sealed interface PaymentMethodSelection {
      * Represents a combined payment method selection allowing both
      * card and bank account options within the same flow.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @ExperimentalCryptoOnramp
     class CardAndBankAccount : PaymentMethodSelection {
         override val type = PaymentMethodType.CardAndBankAccount
     }
@@ -61,7 +61,7 @@ sealed interface PaymentMethodSelection {
      * @param label Optional label describing the transaction shown to the user
      * in the Google Pay sheet when supported.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @ExperimentalCryptoOnramp
     class GooglePay(
         internal val currencyCode: String,
         internal val amount: Long,

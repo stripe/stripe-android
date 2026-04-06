@@ -3,7 +3,6 @@ package com.stripe.android.crypto.onramp
 import android.app.Application
 import android.content.Context
 import android.os.Parcelable
-import androidx.annotation.RestrictTo
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.utils.flatMapCatching
@@ -968,12 +967,10 @@ internal sealed interface SelectedPaymentSource {
     }
 }
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal sealed interface OnrampStartKycVerificationResult {
     /**
      * Starting KYC verification completed successfully.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Completed internal constructor(
         val response: KycRetrieveResponse,
         val appearance: LinkAppearance?
@@ -983,13 +980,11 @@ internal sealed interface OnrampStartKycVerificationResult {
      * Starting KYC verification failed due to an error.
      * @param error The error that caused the failure.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Failed internal constructor(
         val error: Throwable
     ) : OnrampStartKycVerificationResult
 }
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal fun LinkController.PaymentMethodType.toDisplayType(): PaymentMethodDisplayData.Type {
     return when (this) {
         LinkController.PaymentMethodType.Card ->

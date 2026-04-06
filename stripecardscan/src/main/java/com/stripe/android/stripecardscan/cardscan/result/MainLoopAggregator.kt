@@ -16,7 +16,8 @@ import kotlin.time.TimeSource
  * [MainLoopState].
  */
 internal class MainLoopAggregator(
-    listener: AggregateResultListener<InterimResult, FinalResult>
+    listener: AggregateResultListener<InterimResult, FinalResult>,
+    enableExpiryWait: Boolean = false,
 ) : ResultAggregator<
     CardOcr.Input,
     MainLoopState,
@@ -25,11 +26,13 @@ internal class MainLoopAggregator(
     FinalResult
     >(
     listener = listener,
-    initialState = MainLoopState.Initial(TimeSource.Monotonic)
+    initialState = MainLoopState.Initial(TimeSource.Monotonic, enableExpiryWait)
 ) {
 
     internal data class FinalResult(
-        val pan: String
+        val pan: String,
+        val expiryMonth: Int? = null,
+        val expiryYear: Int? = null,
     )
 
     internal data class InterimResult(
@@ -54,7 +57,11 @@ internal class MainLoopAggregator(
         )
 
         return if (currentState is MainLoopState.Finished) {
-            interimResult to FinalResult(currentState.pan)
+            interimResult to FinalResult(
+                pan = currentState.pan,
+                expiryMonth = currentState.expiryMonth,
+                expiryYear = currentState.expiryYear,
+            )
         } else {
             interimResult to null
         }

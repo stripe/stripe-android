@@ -1,27 +1,27 @@
 package com.stripe.android.crypto.onramp.model
 
-import androidx.annotation.RestrictTo
+import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 
 /**
  * Result of a checkout operation.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@ExperimentalCryptoOnramp
 sealed interface OnrampCheckoutResult {
     /**
      * Checkout completed successfully.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @ExperimentalCryptoOnramp
     class Completed internal constructor() : OnrampCheckoutResult
 
     /**
      * Checkout was canceled by the user.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @ExperimentalCryptoOnramp
     class Canceled internal constructor() : OnrampCheckoutResult
 
     /**
      * Checkout failed with an error.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @ExperimentalCryptoOnramp
     class Failed internal constructor(val error: Throwable) : OnrampCheckoutResult
 }

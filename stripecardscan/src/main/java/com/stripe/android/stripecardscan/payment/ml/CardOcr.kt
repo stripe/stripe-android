@@ -18,7 +18,28 @@ internal object CardOcr {
 
     data class Input(val ssdOcrImage: MLImage, val cardBitmap: Bitmap)
 
-    data class Prediction(val pan: String?) {
+    /**
+     * A recognized card expiration date with named month and year fields.
+     * [year] is always a full 4-digit value (e.g. 2028, not 28) — two-digit years
+     * are automatically normalized by adding 2000.
+     */
+    data class Expiry private constructor(val month: Int, val year: Int) {
+        override fun toString(): String = "Expiry"
+
+        companion object {
+            @Suppress("MagicNumber")
+            operator fun invoke(month: Int, year: Int): Expiry {
+                val normalizedYear = if (year < 100) year + 2000 else year
+                return Expiry(month = month, year = normalizedYear)
+            }
+        }
+    }
+
+    data class Prediction(
+        val pan: String?,
+        val expiryMonth: Int? = null,
+        val expiryYear: Int? = null,
+    ) {
 
         /**
          * Force a generic toString method to prevent leaking information about this class'

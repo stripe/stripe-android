@@ -12,6 +12,8 @@ import com.stripe.android.uicore.utils.AnimationConstants
 @Composable
 internal fun rememberCardScanLauncher(
     isStripeCardScanAllowed: Boolean = false,
+    enableMlKitCardScan: Boolean = false,
+    disableSsdOcrCardScan: Boolean = false,
     onResult: (CardScanResult) -> Unit,
     isStripeCardScanAvailable: IsStripeCardScanAvailable = DefaultIsStripeCardScanAvailable(),
 ): CardScanLauncher? {
@@ -20,9 +22,12 @@ internal fun rememberCardScanLauncher(
 
     val eventsReporter = LocalCardScanEventsReporter.current
 
-    return if (isStripeCardScanAllowed && isStripeCardScanAvailable()) {
+    val hasActiveStripeScanner = !disableSsdOcrCardScan || enableMlKitCardScan
+    return if (isStripeCardScanAllowed && isStripeCardScanAvailable() && hasActiveStripeScanner) {
         rememberCardScanStripeLauncher(
             eventsReporter = eventsReporter,
+            enableMlKitCardScan = enableMlKitCardScan,
+            disableSsdOcrCardScan = disableSsdOcrCardScan,
             onResult = onResult,
         )
     } else {

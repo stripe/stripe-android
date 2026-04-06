@@ -2,50 +2,44 @@ package com.stripe.android.common.taptoadd
 
 import android.app.Activity.RESULT_OK
 import android.app.Application
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.test.assertHasClickAction
-import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
-import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.utils.FeatureFlags
-import com.stripe.android.isInstanceOf
+import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.TestFactory
+import com.stripe.android.link.ui.inline.LinkSignupMode
+import com.stripe.android.link.ui.inline.SignUpConsentAction
+import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.RequestMatchers
-import com.stripe.android.networktesting.RequestMatchers.host
-import com.stripe.android.networktesting.RequestMatchers.method
-import com.stripe.android.networktesting.RequestMatchers.path
-import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
 import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
+import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
-import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.RetryRule
 import com.stripe.android.testing.createComposeCleanupRule
+import com.stripe.android.tta.testing.TapToAddCardAddedPage
+import com.stripe.android.tta.testing.TapToAddCardCollectionTestHelper
+import com.stripe.android.tta.testing.TapToAddConfirmationPage
+import com.stripe.android.tta.testing.TapToAddConfirmationTestHelper
+import com.stripe.android.tta.testing.TapToAddErrorPage
+import com.stripe.android.tta.testing.TapToAddLinkTestHelper
+import com.stripe.android.tta.testing.TerminalTestDelegate
 import com.stripe.android.utils.PaymentElementCallbackTestRule
 import com.stripe.android.view.ActivityStarter
-import com.stripe.stripeterminal.external.models.AllowRedisplay
-import com.stripe.stripeterminal.external.models.CollectSetupIntentConfiguration
-import com.stripe.stripeterminal.external.models.ConnectionConfiguration
-import com.stripe.stripeterminal.external.models.DeviceType
-import com.stripe.stripeterminal.external.models.DiscoveryConfiguration
-import com.stripe.stripeterminal.external.models.Reader
-import com.stripe.stripeterminal.external.models.ReaderSupportResult
-import com.stripe.stripeterminal.external.models.SetupIntent
-import com.stripe.stripeterminal.external.models.TapToPayUxConfiguration
-import com.stripe.stripeterminal.external.models.TapUseCase
+import com.stripe.stripeterminal.external.models.TerminalErrorCode
+import com.stripe.stripeterminal.external.models.TerminalException
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.rules.RuleChain
@@ -62,6 +56,7 @@ class TapToAddActivityTest {
     private val composeCleanupRule = createComposeCleanupRule()
     private val terminalWrapperTestRule = TerminalWrapperTestRule()
     private val imageLoaderTestRule = TapToAddStripeImageLoaderTestRule()
+    private val intentsRule = IntentsRule()
     private val paymentElementCallbackTestRule = PaymentElementCallbackTestRule()
     private val networkRule = NetworkRule()
 
@@ -76,69 +71,261 @@ class TapToAddActivityTest {
         .around(imageLoaderTestRule)
         .around(PaymentConfigurationTestRule(applicationContext))
         .around(RetryRule(3))
+        .around(intentsRule)
+
+    private val linkHelper = TapToAddLinkTestHelper(composeTestRule, networkRule)
+    private val confirmationHelper = TapToAddConfirmationTestHelper(composeTestRule)
+    private val cardCollectionHelper = TapToAddCardCollectionTestHelper(networkRule) {
+        terminalWrapperTestRule.delegate
+    }
+    private val cardArtTestHelper = TapToAddCardArtTestHelper(imageLoaderTestRule)
+    private val cardAddedPage = TapToAddCardAddedPage(composeTestRule, linkHelper)
+    private val confirmationPage = TapToAddConfirmationPage(composeTestRule)
+    private val errorPage = TapToAddErrorPage(composeTestRule)
 
     @Test
     fun successInContinueMode() = runScenario(
         mode = TapToAddMode.Continue,
     ) {
-        val reader = terminalWrapperTestRule.createReader()
-        val generatedPaymentMethod = PaymentMethodFactory.card("pm_1")
-        val cardPaymentMethod = PaymentMethodFactory.card("pm_2")
-        val setupIntentClientSecret = "seti_123_secret_123"
-        val setupIntent = terminalWrapperTestRule.createSetupIntent()
-        val confirmedIntent = terminalWrapperTestRule.createSetupIntent(generatedPaymentMethod)
+        val info = cardCollectionHelper.enqueueSuccessfulTapToCollectFlow()
 
-        enqueueCallbacks(
-            createCardPresentSetupIntentCallback = {
-                CreateIntentResult.Success(setupIntentClientSecret)
-            },
-        )
-
-        terminalWrapperTestRule.enqueueScenario(
-            TerminalWrapperTestRule.Scenario(
-                isInitialized = true,
-                connectedReader = null,
-                connectReaderResult = TerminalWrapperTestRule.ConnectReaderResult.Success(reader),
-                discoveredReaders = listOf(reader),
-                readerSupportResult = ReaderSupportResult.Supported,
-                retrieveSetupIntentResult = TerminalWrapperTestRule.SetupIntentResult.Success(setupIntent),
-                collectSetupIntentPaymentMethodResult =
-                    TerminalWrapperTestRule.SetupIntentResult.Success(setupIntent),
-                confirmSetupIntentResult =
-                    TerminalWrapperTestRule.SetupIntentResult.Success(confirmedIntent),
-            )
-        )
-
-        networkRule.enqueue(
-            generatedCardToPaymentMethodRequest(
-                customerId = "cus_123",
-                pmId = generatedPaymentMethod.id,
-            )
-        ) { response ->
-            response.setBody(PaymentMethodFactory.convertCardToJson(cardPaymentMethod).toString())
-        }
+        enqueueCallbacks(CreateIntentResult.Success(info.setupIntentClientSecret))
 
         launch { activityScenario ->
-            assertCardArtAssetPreloads()
-            assertIsInitializedCall()
-            assertConnectedReaderCall()
-            assertSupportsReadersOfTypeCall()
-            assertDiscoverCall()
-            assertConnectReaderCall(reader)
-            assertSetTapToPayUxConfigurationCall()
-            assertRetrieveSetupIntentCall(setupIntentClientSecret)
-            assertCollectSetupIntentPaymentMethod(setupIntent)
-            assertConfirmSetupIntent(setupIntent)
+            cardArtTestHelper.assertCardArtAssetPreloads()
+            cardCollectionHelper.assertSuccessfulCardCollection(info)
 
             waitForIdle()
 
-            assertHasCardAddedText()
-            assertAndClickOnContinueButton()
+            cardAddedPage.assertShown(withLink = false)
+            cardAddedPage.assertContinueButton(isEnabled = true)
+            cardAddedPage.clickContinue()
 
             waitForIdle()
 
             assertTapToAddResult(
-                expectedResult = TapToAddResult.Continue(PaymentSelection.Saved(cardPaymentMethod)),
+                expectedResult = TapToAddResult.Continue(PaymentSelection.Saved(info.cardPaymentMethod)),
+                activityScenario = activityScenario,
+            )
+        }
+    }
+
+    @Test
+    fun successWithLinkInlineSignupInContinueMode() = runScenario(
+        mode = TapToAddMode.Continue,
+        metadata = PaymentMethodMetadataFactory.create(
+            isTapToAddSupported = true,
+            hasCustomerConfiguration = true,
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION.copy(
+                    customerInfo = LinkConfiguration.CustomerInfo(
+                        name = null,
+                        email = null,
+                        phone = null,
+                        billingCountryCode = null
+                    )
+                ),
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+            )
+        )
+    ) {
+        val info = cardCollectionHelper.enqueueSuccessfulTapToCollectFlow()
+
+        enqueueCallbacks(CreateIntentResult.Success(info.setupIntentClientSecret))
+        linkHelper.enqueueLookup()
+
+        launch { activityScenario ->
+            cardArtTestHelper.assertCardArtAssetPreloads()
+            cardCollectionHelper.assertSuccessfulCardCollection(info)
+
+            waitForIdle()
+
+            cardAddedPage.assertShown(withLink = true)
+            cardAddedPage.assertContinueButton(isEnabled = true)
+            cardAddedPage.clickCheckboxToSaveWithLink()
+            cardAddedPage.assertContinueButton(isEnabled = false)
+            cardAddedPage.fillLinkInput()
+            cardAddedPage.assertContinueButton(isEnabled = true)
+            cardAddedPage.clickContinue()
+
+            waitForIdle()
+
+            assertTapToAddResult(
+                expectedResult = TapToAddResult.Continue(
+                    paymentSelection = PaymentSelection.Saved(
+                        paymentMethod = info.cardPaymentMethod,
+                        linkInput = linkHelper.input().toUserInput(),
+                    ),
+                ),
+                activityScenario = activityScenario,
+            )
+        }
+    }
+
+    @Test
+    fun successInCompleteMode() = runScenario(
+        mode = TapToAddMode.Complete,
+        metadata = PaymentMethodMetadataFactory.create(
+            isTapToAddSupported = true,
+            hasCustomerConfiguration = true,
+            stripeIntent = PAYMENT_INTENT,
+        ),
+    ) {
+        val info = cardCollectionHelper.enqueueSuccessfulTapToCollectFlow()
+
+        enqueueCallbacks(CreateIntentResult.Success(info.setupIntentClientSecret))
+
+        confirmationHelper.intendingPaymentConfirmationToBeLaunched(
+            InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED)
+        )
+
+        launch { activityScenario ->
+            cardArtTestHelper.assertCardArtAssetPreloads()
+            cardCollectionHelper.assertSuccessfulCardCollection(info)
+
+            waitForIdle()
+
+            cardAddedPage.assertShown(withLink = false)
+            cardAddedPage.assertContinueButton(isEnabled = true)
+            cardAddedPage.clickContinue()
+
+            waitForIdle()
+
+            confirmationPage.assertPrimaryButton(label = "Pay $10.99", isEnabled = true)
+            confirmationPage.clickPrimaryButton(label = "Pay $10.99")
+
+            waitForIdle()
+
+            confirmationHelper.intendedPaymentConfirmationToBeLaunched()
+
+            waitForIdle()
+
+            assertTapToAddResult(
+                expectedResult = TapToAddResult.Complete,
+                activityScenario = activityScenario,
+            )
+        }
+    }
+
+    @Test
+    fun successWithLinkInlineSignupInCompleteMode() = runScenario(
+        mode = TapToAddMode.Complete,
+        metadata = PaymentMethodMetadataFactory.create(
+            isTapToAddSupported = true,
+            hasCustomerConfiguration = true,
+            stripeIntent = PAYMENT_INTENT,
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION.copy(
+                    customerInfo = LinkConfiguration.CustomerInfo(
+                        name = null,
+                        email = null,
+                        phone = null,
+                        billingCountryCode = null
+                    )
+                ),
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+            )
+        )
+    ) {
+        val info = cardCollectionHelper.enqueueSuccessfulTapToCollectFlow()
+
+        enqueueCallbacks(CreateIntentResult.Success(info.setupIntentClientSecret))
+
+        linkHelper.enqueueLookup()
+        linkHelper.enqueueSignup()
+        linkHelper.enqueueCreatePaymentDetailsFromPaymentMethod(info.cardPaymentMethod.id)
+
+        confirmationHelper.intendingPaymentConfirmationToBeLaunched(
+            InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED)
+        )
+
+        launch { activityScenario ->
+            cardArtTestHelper.assertCardArtAssetPreloads()
+            cardCollectionHelper.assertSuccessfulCardCollection(info)
+
+            waitForIdle()
+
+            cardAddedPage.assertShown(withLink = true)
+            cardAddedPage.assertContinueButton(isEnabled = true)
+            cardAddedPage.clickCheckboxToSaveWithLink()
+            cardAddedPage.assertContinueButton(isEnabled = false)
+            cardAddedPage.fillLinkInput()
+            cardAddedPage.assertContinueButton(isEnabled = true)
+            cardAddedPage.clickContinue()
+
+            waitForIdle()
+
+            confirmationPage.assertPrimaryButton(label = "Pay $10.99", isEnabled = true)
+            confirmationPage.clickPrimaryButton(label = "Pay $10.99")
+
+            waitForIdle()
+
+            confirmationHelper.intendedPaymentConfirmationToBeLaunched()
+
+            waitForIdle()
+
+            assertTapToAddResult(
+                expectedResult = TapToAddResult.Complete,
+                activityScenario = activityScenario,
+            )
+        }
+    }
+
+    @Test
+    fun userShownErrorFromCardCollection() = errorTest(
+        errorCode = TerminalErrorCode.CARD_READ_TIMED_OUT,
+        errorMessage = "Transaction timed out!",
+        expectedResult = TapToAddResult.Canceled(paymentSelection = null)
+    )
+
+    @Test
+    fun userShownUnsupportedErrorFromCardCollection() = errorTest(
+        errorCode = TerminalErrorCode.TAP_TO_PAY_UNSUPPORTED_DEVICE,
+        errorMessage = "Unsupported device!",
+        expectedResult = TapToAddResult.UnsupportedDevice
+    )
+
+    private fun errorTest(
+        errorCode: TerminalErrorCode,
+        errorMessage: String,
+        expectedResult: TapToAddResult,
+    ) = runScenario(
+        mode = TapToAddMode.Complete
+    ) {
+        terminalWrapperTestRule.delegate.setScenario(
+            TerminalTestDelegate.Scenario(
+                collectSetupIntentPaymentMethodResult = TerminalTestDelegate.SetupIntentResult.Failure(
+                    exception = TerminalException(
+                        errorCode = errorCode,
+                        errorMessage = errorMessage,
+                    )
+                )
+            )
+        )
+
+        enqueueCallbacks(CreateIntentResult.Success("seti_123_secret_123"))
+
+        launch { activityScenario ->
+            cardArtTestHelper.assertCardArtAssetPreloads()
+
+            assertThat(terminalWrapperTestRule.delegate.awaitIsInitializedCall()).isNotNull()
+            assertThat(terminalWrapperTestRule.delegate.awaitSetTapToPayUxConfigurationCall()).isNotNull()
+            assertThat(terminalWrapperTestRule.delegate.awaitConnectedReaderCall()).isNotNull()
+            assertThat(terminalWrapperTestRule.delegate.awaitRetrieveSetupIntentCall()).isNotNull()
+            assertThat(terminalWrapperTestRule.delegate.awaitCollectSetupIntentPaymentMethodCall()).isNotNull()
+            assertThat(terminalWrapperTestRule.delegate.awaitSupportsReadersOfTypeCall()).isNotNull()
+
+            waitForIdle()
+
+            errorPage.assertShown(errorMessage)
+            errorPage.clickCloseButton()
+
+            waitForIdle()
+
+            assertTapToAddResult(
+                expectedResult = expectedResult,
                 activityScenario = activityScenario,
             )
         }
@@ -178,126 +365,6 @@ class TapToAddActivityTest {
         )
     }
 
-    private fun enqueueCallbacks(
-        createCardPresentSetupIntentCallback: CreateCardPresentSetupIntentCallback,
-    ) {
-        PaymentElementCallbackReferences[PAYMENT_ELEMENT_CALLBACK_IDENTIFIER] = PaymentElementCallbacks.Builder()
-            .createCardPresentSetupIntentCallback(createCardPresentSetupIntentCallback)
-            .build()
-    }
-
-    private suspend fun assertCardArtAssetPreloads() {
-        /*
-         * These images are loaded asynchronously all together. The order itself does not matter, only that all the
-         * images were asked to be loaded.
-         */
-        val preloadingImages = setOf(
-            imageLoaderTestRule.awaitImageLoadWithUrl(),
-            imageLoaderTestRule.awaitImageLoadWithUrl(),
-            imageLoaderTestRule.awaitImageLoadWithUrl(),
-            imageLoaderTestRule.awaitImageLoadWithUrl(),
-            imageLoaderTestRule.awaitImageLoadWithUrl(),
-        )
-
-        assertThat(preloadingImages).containsExactly(
-            "https://b.stripecdn.com/ocs-mobile/assets/visa.png",
-            "https://b.stripecdn.com/ocs-mobile/assets/mastercard.png",
-            "https://b.stripecdn.com/ocs-mobile/assets/discover.webp",
-            "https://b.stripecdn.com/ocs-mobile/assets/amex.webp",
-            "https://b.stripecdn.com/ocs-mobile/assets/jcb.png"
-        )
-    }
-
-    private suspend fun assertIsInitializedCall() {
-        assertThat(terminalWrapperTestRule.awaitIsInitializedCall()).isNotNull()
-    }
-
-    private suspend fun assertConnectedReaderCall() {
-        assertThat(terminalWrapperTestRule.awaitConnectedReaderCall()).isNotNull()
-    }
-
-    private suspend fun assertDiscoverCall() {
-        val discoverReadersCall = terminalWrapperTestRule.awaitDiscoverReadersCall()
-
-        assertThat(discoverReadersCall.config)
-            .isInstanceOf<DiscoveryConfiguration.TapToPayDiscoveryConfiguration>()
-    }
-
-    private suspend fun assertSupportsReadersOfTypeCall() {
-        val supportsReadersOfTypeCall = terminalWrapperTestRule.awaitSupportsReadersOfTypeCall()
-
-        assertThat(supportsReadersOfTypeCall.deviceType).isEqualTo(DeviceType.TAP_TO_PAY_DEVICE)
-        assertThat(supportsReadersOfTypeCall.discoveryConfiguration)
-            .isInstanceOf<DiscoveryConfiguration.TapToPayDiscoveryConfiguration>()
-    }
-
-    private suspend fun assertConnectReaderCall(reader: Reader) {
-        val connectReaderCall = terminalWrapperTestRule.awaitConnectReaderCall()
-
-        assertThat(connectReaderCall.reader).isEqualTo(reader)
-        assertThat(connectReaderCall.config)
-            .isInstanceOf<ConnectionConfiguration.TapToPayConnectionConfiguration>()
-
-        val connectionConfiguration =
-            connectReaderCall.config as ConnectionConfiguration.TapToPayConnectionConfiguration
-
-        assertThat(connectionConfiguration.useCase).isInstanceOf<TapUseCase.Verify>()
-    }
-
-    private suspend fun assertSetTapToPayUxConfigurationCall() {
-        val uxConfiguration = terminalWrapperTestRule.awaitSetTapToPayUxConfigurationCall()
-
-        assertThat(uxConfiguration).isEqualTo(
-            TapToPayUxConfiguration.Builder()
-                .darkMode(darkMode = TapToPayUxConfiguration.DarkMode.SYSTEM)
-                .colors(
-                    colors = TapToPayUxConfiguration.ColorScheme.Builder()
-                        .primary(
-                            primary = TapToPayUxConfiguration.Color.Value(
-                                color = Color(0xFF007AFF).toArgb(),
-                            )
-                        )
-                        .build()
-                )
-                .build()
-        )
-    }
-
-    private suspend fun assertRetrieveSetupIntentCall(clientSecret: String) {
-        val retrieveSetupIntentCall = terminalWrapperTestRule.awaitRetrieveSetupIntentCall()
-
-        assertThat(retrieveSetupIntentCall.clientSecret).isEqualTo(clientSecret)
-    }
-
-    private suspend fun assertCollectSetupIntentPaymentMethod(intent: SetupIntent) {
-        val collectSetupIntentPaymentMethodCall = terminalWrapperTestRule.awaitCollectSetupIntentPaymentMethodCall()
-
-        assertThat(collectSetupIntentPaymentMethodCall.intent).isEqualTo(intent)
-        assertThat(collectSetupIntentPaymentMethodCall.allowRedisplay).isEqualTo(AllowRedisplay.ALWAYS)
-        assertThat(collectSetupIntentPaymentMethodCall.config).isEqualTo(
-            CollectSetupIntentConfiguration.Builder().build()
-        )
-    }
-
-    private suspend fun assertConfirmSetupIntent(intent: SetupIntent) {
-        val confirmSetupIntentCall = terminalWrapperTestRule.awaitConfirmSetupIntentCall()
-
-        assertThat(confirmSetupIntentCall.intent).isEqualTo(intent)
-    }
-
-    private fun assertHasCardAddedText() {
-        composeTestRule.waitUntil(5000L) {
-            composeTestRule.onNode(hasText("Card added")).isDisplayed()
-        }
-    }
-
-    private fun assertAndClickOnContinueButton() {
-        composeTestRule.onNode(hasText("Continue"))
-            .assertIsDisplayed()
-            .assertHasClickAction()
-            .performClick()
-    }
-
     private fun assertTapToAddResult(
         expectedResult: TapToAddResult,
         activityScenario: ActivityScenario<TapToAddActivity>
@@ -315,14 +382,26 @@ class TapToAddActivityTest {
         composeTestRule.waitForIdle()
     }
 
-    private fun generatedCardToPaymentMethodRequest(
-        customerId: String,
-        pmId: String,
-    ) = RequestMatchers.composite(
-        host("api.stripe.com"),
-        method("GET"),
-        path("/v1/elements/customers/$customerId/saved_payment_method_from_card_present_payment_method/$pmId"),
-    )
+    private fun enqueueCallbacks(
+        createCardPresentSetupIntentResult: CreateIntentResult
+    ) {
+        PaymentElementCallbackReferences[PAYMENT_ELEMENT_CALLBACK_IDENTIFIER] =
+            PaymentElementCallbacks.Builder()
+                .createCardPresentSetupIntentCallback {
+                    createCardPresentSetupIntentResult
+                }
+                .build()
+    }
+
+    private fun TapToAddLinkTestHelper.Input.toUserInput(): UserInput {
+        return UserInput.SignUp(
+            email = email,
+            phone = phone,
+            name = name,
+            country = "US",
+            consentAction = SignUpConsentAction.Checkbox,
+        )
+    }
 
     private class Scenario(
         val launch: (
@@ -332,5 +411,8 @@ class TapToAddActivityTest {
 
     private companion object {
         const val PAYMENT_ELEMENT_CALLBACK_IDENTIFIER = "mpe1"
+        val PAYMENT_INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+            amount = 1099
+        )
     }
 }

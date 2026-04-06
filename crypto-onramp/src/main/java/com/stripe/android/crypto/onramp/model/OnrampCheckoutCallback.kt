@@ -1,11 +1,11 @@
 package com.stripe.android.crypto.onramp.model
 
-import androidx.annotation.RestrictTo
+import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 
 /**
  * Callback interface for checkout operations.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@ExperimentalCryptoOnramp
 fun interface OnrampCheckoutCallback {
     /**
      * Called when a checkout operation completes.
