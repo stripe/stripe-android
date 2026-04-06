@@ -65,9 +65,7 @@ fun MockResponse.testBodyFromFile(
     val bodyString = inputStream.reader().buffered().readText()
     val json = JSONObject(bodyString)
     jsonModifier(json)
-    val modifiedBody = json.toString()
-    assertIsValidJsonString(modifiedBody, filename)
-    setBody(modifiedBody)
+    setBody(json.toString())
     return this
 }
 
