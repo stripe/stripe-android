@@ -79,7 +79,7 @@ class CheckoutTest {
         val result = checkout.applyPromotionCode("10OFF")
 
         val updated = checkoutSessionTurbine.awaitItem()
-        assertThat(result.getOrThrow()).isEqualTo(updated)
+        result.getOrThrow()
         val totalSummary = updated.totalSummary
         assertThat(totalSummary).isNotNull()
         assertThat(totalSummary!!.discountAmounts).hasSize(1)
@@ -115,7 +115,7 @@ class CheckoutTest {
         val result = checkout.applyPromotionCode("  10OFF  ")
 
         val updated = checkoutSessionTurbine.awaitItem()
-        assertThat(result.getOrThrow()).isEqualTo(updated)
+        result.getOrThrow()
         assertThat(updated.totalSummary).isNotNull()
     }
 
@@ -132,7 +132,7 @@ class CheckoutTest {
         val result = checkout.removePromotionCode()
 
         val updated = checkoutSessionTurbine.awaitItem()
-        assertThat(result.getOrThrow()).isEqualTo(updated)
+        result.getOrThrow()
         assertThat(updated.totalSummary).isNotNull()
     }
 
@@ -163,7 +163,7 @@ class CheckoutTest {
         val result = checkout.refresh()
 
         val updated = checkoutSessionTurbine.awaitItem()
-        assertThat(result.getOrThrow()).isEqualTo(updated)
+        result.getOrThrow()
         assertThat(updated.totalSummary).isNotNull()
     }
 
@@ -198,7 +198,7 @@ class CheckoutTest {
         val result = checkout.updateLineItemQuantity("li_1", 3)
 
         val updated = checkoutSessionTurbine.awaitItem()
-        assertThat(result.getOrThrow()).isEqualTo(updated)
+        result.getOrThrow()
         assertThat(updated.lineItems).hasSize(1)
         assertThat(updated.lineItems[0].id).isEqualTo("li_1")
         assertThat(updated.lineItems[0].quantity).isEqualTo(3)
@@ -234,7 +234,7 @@ class CheckoutTest {
         val result = checkout.selectShippingOption("shr_express")
 
         val updated = checkoutSessionTurbine.awaitItem()
-        assertThat(result.getOrThrow()).isEqualTo(updated)
+        result.getOrThrow()
         val totalSummary = updated.totalSummary
         assertThat(totalSummary).isNotNull()
         val shippingRate = requireNotNull(totalSummary!!.shippingRate)
@@ -274,7 +274,7 @@ class CheckoutTest {
             val result = checkout.updateShippingAddress(address = address)
 
             val updated = checkoutSessionTurbine.awaitItem()
-            assertThat(result.getOrThrow()).isEqualTo(updated)
+            result.getOrThrow()
             assertThat(updated.shippingOptions).hasSize(3)
             val totalSummary = updated.totalSummary
             assertThat(totalSummary).isNotNull()
@@ -333,9 +333,8 @@ class CheckoutTest {
             .postalCode("80202")
         val result = checkout.updateShippingAddress(address = address)
 
-        val updated = checkoutSessionTurbine.awaitItem()
-        assertThat(result.isSuccess).isTrue()
-        assertThat(result.getOrThrow()).isEqualTo(updated)
+        checkoutSessionTurbine.awaitItem()
+        result.getOrThrow()
     }
 
     @Test
@@ -365,7 +364,7 @@ class CheckoutTest {
             val result = checkout.updateBillingAddress(address = address)
 
             val updated = checkoutSessionTurbine.awaitItem()
-            assertThat(result.getOrThrow()).isEqualTo(updated)
+            result.getOrThrow()
             assertThat(updated.shippingOptions).hasSize(3)
             val totalSummary = updated.totalSummary
             assertThat(totalSummary).isNotNull()
@@ -576,9 +575,8 @@ class CheckoutTest {
             .postalCode("80202")
         val result = checkout.updateBillingAddress(address = address)
 
-        val updated = checkoutSessionTurbine.awaitItem()
-        assertThat(result.isSuccess).isTrue()
-        assertThat(result.getOrThrow()).isEqualTo(updated)
+        checkoutSessionTurbine.awaitItem()
+        result.getOrThrow()
     }
 
     @Test
@@ -596,7 +594,7 @@ class CheckoutTest {
         val result = checkout.updateTaxId("us_ein", "123456789")
 
         val updated = checkoutSessionTurbine.awaitItem()
-        assertThat(result.getOrThrow()).isEqualTo(updated)
+        result.getOrThrow()
         assertThat(updated.totalSummary).isNotNull()
     }
 
@@ -631,7 +629,7 @@ class CheckoutTest {
         val result = checkout.updateTaxId("  us_ein  ", "  123456789  ")
 
         val updated = checkoutSessionTurbine.awaitItem()
-        assertThat(result.getOrThrow()).isEqualTo(updated)
+        result.getOrThrow()
         assertThat(updated.totalSummary).isNotNull()
     }
 

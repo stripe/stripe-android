@@ -112,24 +112,24 @@ class Checkout private constructor(
 
     suspend fun applyPromotionCode(
         promotionCode: String,
-    ): Result<CheckoutSession> = withInternalState { sessionId ->
+    ): Result<Unit> = withInternalState { sessionId ->
         component.checkoutSessionRepository.applyPromotionCode(sessionId, promotionCode.trim())
     }
 
     suspend fun updateLineItemQuantity(
         lineItemId: String,
         quantity: Int,
-    ): Result<CheckoutSession> = withInternalState { sessionId ->
+    ): Result<Unit> = withInternalState { sessionId ->
         component.checkoutSessionRepository.updateLineItemQuantity(sessionId, lineItemId, quantity)
     }
 
-    suspend fun removePromotionCode(): Result<CheckoutSession> = withInternalState { sessionId ->
+    suspend fun removePromotionCode(): Result<Unit> = withInternalState { sessionId ->
         component.checkoutSessionRepository.applyPromotionCode(sessionId, "")
     }
 
     suspend fun selectShippingOption(
         id: String,
-    ): Result<CheckoutSession> = withInternalState { sessionId ->
+    ): Result<Unit> = withInternalState { sessionId ->
         component.checkoutSessionRepository.selectShippingRate(sessionId, id)
     }
 
@@ -137,7 +137,7 @@ class Checkout private constructor(
         name: String? = null,
         phoneNumber: String? = null,
         address: Address,
-    ): Result<CheckoutSession> {
+    ): Result<Unit> {
         val built = address.build()
         return withInternalState(
             additionalStateMutations = {
@@ -151,7 +151,7 @@ class Checkout private constructor(
     suspend fun updateTaxId(
         type: String,
         value: String,
-    ): Result<CheckoutSession> = withInternalState { sessionId ->
+    ): Result<Unit> = withInternalState { sessionId ->
         component.checkoutSessionRepository.updateTaxId(sessionId, type.trim(), value.trim())
     }
 
@@ -159,7 +159,7 @@ class Checkout private constructor(
         name: String? = null,
         phoneNumber: String? = null,
         address: Address,
-    ): Result<CheckoutSession> {
+    ): Result<Unit> {
         val built = address.build()
         return withInternalState(
             additionalStateMutations = {
@@ -170,7 +170,7 @@ class Checkout private constructor(
         }
     }
 
-    suspend fun refresh(): Result<CheckoutSession> = withInternalState { sessionId ->
+    suspend fun refresh(): Result<Unit> = withInternalState { sessionId ->
         component.checkoutSessionRepository.init(
             sessionId = sessionId,
             adaptivePricingAllowed = configuration.adaptivePricingAllowed
@@ -201,7 +201,7 @@ class Checkout private constructor(
     private suspend fun withInternalState(
         additionalStateMutations: InternalState.() -> InternalState = { this },
         block: suspend InternalState.(sessionId: String) -> Result<CheckoutSessionResponse>,
-    ): Result<CheckoutSession> {
+    ): Result<Unit> {
         if (internalState.integrationLaunched) {
             return Result.failure(
                 IllegalStateException(
@@ -214,9 +214,7 @@ class Checkout private constructor(
             _isLoading.value = true
             val result = internalState.block(internalState.checkoutSessionResponse.id).map { response ->
                 internalState = internalState.copy(checkoutSessionResponse = response).additionalStateMutations()
-                val checkoutSession = response.asCheckoutSession()
-                _checkoutSession.value = checkoutSession
-                checkoutSession
+                _checkoutSession.value = response.asCheckoutSession()
             }
             _isLoading.value = false
             result
