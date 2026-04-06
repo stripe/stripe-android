@@ -93,6 +93,21 @@ class TransformAddressToElementTest {
     }
 
     @Test
+    fun `Read BR schema has state dropdown`() = runBlocking {
+        val simpleTextList = AddressSchemaRegistry.get("BR")!!.transformToElementList("BR")
+
+        // BR has state dropdown
+        val stateDropdownElement = simpleTextList.filterIsInstance<AdministrativeAreaElement>().single()
+        val stateDropdownController = stateDropdownElement.controller
+        assertThat(stateDropdownController.displayItems).isEqualTo(
+            AdministrativeAreaConfig.Country.Brazil().administrativeAreas.map { it.second }
+        )
+        assertThat(stateDropdownController.label.first()).isEqualTo(
+            resolvableString(CoreR.string.stripe_address_label_state)
+        )
+    }
+
+    @Test
     fun `Make sure name schema is not found on fields not processed`() {
         AddressSchemaRegistry.all.forEach { (_, schema) ->
             val invalidNameType = schema.schemaElements().filter { addressSchema ->
