@@ -80,6 +80,9 @@ public final class com/stripe/android/crypto/onramp/model/KycInfo {
 	public static final field $stable I
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/DateOfBirth;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;)V
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAddress ()Lcom/stripe/android/paymentsheet/PaymentSheet$Address;
+	public final fun getFirstName ()Ljava/lang/String;
+	public final fun getLastName ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -225,6 +228,7 @@ public final class com/stripe/android/crypto/onramp/model/OnrampCollectPaymentMe
 public final class com/stripe/android/crypto/onramp/model/OnrampCollectPaymentMethodResult$Completed : com/stripe/android/crypto/onramp/model/OnrampCollectPaymentMethodResult {
 	public static final field $stable I
 	public final fun getDisplayData ()Lcom/stripe/android/crypto/onramp/model/PaymentMethodDisplayData;
+	public final fun getKycInfo ()Lcom/stripe/android/crypto/onramp/model/KycInfo;
 }
 
 public final class com/stripe/android/crypto/onramp/model/OnrampCollectPaymentMethodResult$Failed : com/stripe/android/crypto/onramp/model/OnrampCollectPaymentMethodResult {
