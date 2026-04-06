@@ -125,7 +125,7 @@ class Checkout private constructor(
      * A serializable snapshot of this instance's current state. Can be saved and later passed to
      * [createWithState] to restore.
      *
-     * @throws IllegalStateException if a mutation is currently in flight.
+     * @throws IllegalStateException if a mutation is in flight while trying to set the state.
      */
     var state: State
         get() = State(internalState)
