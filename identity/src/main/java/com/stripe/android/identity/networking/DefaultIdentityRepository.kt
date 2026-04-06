@@ -17,7 +17,6 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.responseJsonObject
-import com.stripe.android.core.networking.executeRequestWithStripeModelParser as executeCoreRequestWithStripeModelParser
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.ClearDataParam.Companion.createCollectedDataParamEntry
@@ -28,10 +27,11 @@ import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.utils.IdentityIO
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
+import okio.Path.Companion.toOkioPath
 import java.io.File
 import javax.inject.Inject
 import kotlin.time.TimeSource
-import okio.Path.Companion.toOkioPath
+import com.stripe.android.core.networking.executeRequestWithStripeModelParser as executeCoreRequestWithStripeModelParser
 
 internal class DefaultIdentityRepository @Inject constructor(
     private val stripeNetworkClient: StripeNetworkClient,

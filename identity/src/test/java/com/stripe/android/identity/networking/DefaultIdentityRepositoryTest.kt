@@ -29,6 +29,7 @@ import com.stripe.android.identity.utils.IdentityIO
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
+import okio.Path.Companion.toOkioPath
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.KArgumentCaptor
@@ -42,7 +43,6 @@ import java.io.File
 import java.net.HttpURLConnection.HTTP_OK
 import java.net.HttpURLConnection.HTTP_UNAUTHORIZED
 import kotlin.test.assertFailsWith
-import okio.Path.Companion.toOkioPath
 
 @RunWith(RobolectricTestRunner::class)
 class DefaultIdentityRepositoryTest {

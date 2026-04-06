@@ -109,12 +109,12 @@ import com.stripe.android.utils.mapResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.json.JSONException
 import java.io.File
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.security.Security
 import java.util.Locale
-import org.json.JSONException
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
