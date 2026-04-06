@@ -38,6 +38,17 @@ class StripeConnectionTest {
     }
 
     @Test
+    fun `Default returns null for empty responseStream`() {
+        val mockConnection = mock<HttpsURLConnection>()
+        whenever(mockConnection.responseCode).thenReturn(HttpsURLConnection.HTTP_OK)
+        whenever(mockConnection.inputStream).thenReturn(ByteArrayInputStream(byteArrayOf()))
+
+        val connection = StripeConnection.Default(mockConnection)
+
+        assertThat(connection.response.body).isNull()
+    }
+
+    @Test
     fun `FileConnection correctly reads File from responseStream`() {
         val mockConnection = mock<HttpsURLConnection>()
         whenever(mockConnection.responseCode).thenReturn(HttpsURLConnection.HTTP_OK)

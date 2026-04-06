@@ -40,6 +40,8 @@ kotlin {
             api libs.okio
             implementation libs.androidx.annotation
             implementation libs.kotlin.coroutines
+            implementation libs.kotlin.ioOkio
+            implementation libs.ktor.clientCore
             api libs.kotlin.serialization
         }
         commonTest
@@ -50,6 +52,7 @@ kotlin {
             implementation libs.kotlin.coroutines
             implementation libs.kotlin.coroutinesAndroid
             implementation libs.kotlin.serialization
+            implementation libs.ktor.clientOkhttp
             implementation libs.androidx.activity
             implementation libs.androidx.viewModel
             implementation libs.androidx.savedState

@@ -15,13 +15,13 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import java.io.File
-import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.UnknownHostException
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 import kotlin.time.Duration
+import okio.BufferedSource
 import okio.Path
 import okio.Path.Companion.toOkioPath
 
@@ -227,7 +227,7 @@ internal class DefaultStripeNetworkClientTest {
         override fun close() {
         }
 
-        override fun createBodyFromResponseStream(responseStream: InputStream?): String? = null
+        override fun createBodyFromResponseStream(responseSource: BufferedSource?): String? = null
     }
 
     private class ResponseCodeOverrideConnection(
@@ -242,7 +242,7 @@ internal class DefaultStripeNetworkClientTest {
         override fun close() {
         }
 
-        override fun createBodyFromResponseStream(responseStream: InputStream?): String? = null
+        override fun createBodyFromResponseStream(responseSource: BufferedSource?): String? = null
     }
 
     private companion object {

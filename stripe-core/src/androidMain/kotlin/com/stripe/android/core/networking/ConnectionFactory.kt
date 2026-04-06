@@ -2,17 +2,23 @@ package com.stripe.android.core.networking
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.exception.InvalidRequestException
-import java.io.IOException
-import java.net.HttpURLConnection
-import java.net.URL
-import java.util.concurrent.TimeUnit
-import javax.net.ssl.HttpsURLConnection
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.cache.HttpCache
+import io.ktor.client.request.delete
+import io.ktor.client.request.get
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
+import kotlinx.coroutines.runBlocking
+import okio.Buffer
+import okio.IOException
 import okio.Path
-import okio.buffer
-import okio.sink
+import kotlin.time.Duration.Companion.seconds
 
 /**
- * Factory to create [StripeConnection], which encapsulates an [HttpsURLConnection], triggers the
+ * Factory to create [StripeConnection], which encapsulates an [ktor client], triggers the
  * request and parses the response with different body type as [StripeResponse].
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -33,18 +39,16 @@ interface ConnectionFactory {
     fun interface ConnectionOpener {
         fun open(
             request: StripeRequest,
-            callback: HttpURLConnection.(request: StripeRequest) -> Unit
-        ): HttpsURLConnection
+            callback: HttpClient.(request: StripeRequest) -> StripeKtorConnection
+        ): StripeKtorConnection
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         object Default : ConnectionOpener {
             override fun open(
                 request: StripeRequest,
-                callback: HttpURLConnection.(request: StripeRequest) -> Unit
-            ): HttpsURLConnection {
-                return (URL(request.url).openConnection() as HttpsURLConnection).apply {
-                    callback(request)
-                }
+                callback: HttpClient.(request: StripeRequest) -> StripeKtorConnection
+            ): StripeKtorConnection {
+                return callback(createHttpClient(), request)
             }
         }
     }
@@ -57,7 +61,11 @@ interface ConnectionFactory {
         @Throws(IOException::class, InvalidRequestException::class)
         @JvmSynthetic
         override fun create(request: StripeRequest): StripeConnection<String> {
-            return StripeConnection.Default(openConnectionAndApplyFields(request))
+            return StripeConnection.Default(
+                connectionOpener.open(request) { originalRequest ->
+                    startHttpRequest(this, originalRequest)
+                }
+            )
         }
 
         override fun createForFile(
@@ -65,37 +73,78 @@ interface ConnectionFactory {
             outputFile: Path
         ): StripeConnection<Path> {
             return StripeConnection.FileConnection(
-                openConnectionAndApplyFields(request),
+                connectionOpener.open(request) { originalRequest ->
+                    startHttpRequest(this, originalRequest)
+                },
                 outputFile
             )
         }
 
-        private fun openConnectionAndApplyFields(
-            originalRequest: StripeRequest
-        ): HttpsURLConnection {
-            return connectionOpener.open(originalRequest) { request ->
-                connectTimeout = CONNECT_TIMEOUT
-                readTimeout = READ_TIMEOUT
-                useCaches = request.shouldCache
-                requestMethod = request.method.code
-
-                request.headers.forEach { (key, value) ->
-                    setRequestProperty(key, value)
-                }
-
-                if (StripeRequest.Method.POST == request.method) {
-                    doOutput = true
-                    request.postHeaders?.forEach { (key, value) ->
-                        setRequestProperty(key, value)
+        private fun startHttpRequest(
+            client: HttpClient,
+            originalRequest: StripeRequest,
+        ): StripeKtorConnection {
+            val httpResponse = runBlocking {
+                when (originalRequest.method) {
+                    StripeRequest.Method.GET -> {
+                        client.get(originalRequest.url) {
+                            originalRequest.headers.forEach { (key, value) ->
+                                headers.append(key, value)
+                            }
+                        }
                     }
-                    outputStream.sink().buffer().use { output -> request.writePostBody(output) }
+                    StripeRequest.Method.POST -> {
+                        val response = client.post(originalRequest.url) {
+                            originalRequest.headers.forEach { (key, value) ->
+                                headers.append(key, value)
+                            }
+
+                            originalRequest.postHeaders?.forEach { (key, value) ->
+                                headers.append(key, value)
+                            }
+
+                            val bodyBuffer = Buffer()
+                            originalRequest.writePostBody(bodyBuffer)
+                            setBody(bodyBuffer.readByteArray())
+                        }
+                        response
+                    }
+                    StripeRequest.Method.DELETE -> {
+                        client.delete(originalRequest.url) {
+                            originalRequest.headers.forEach { (key, value) ->
+                                headers.append(key, value)
+                            }
+                        }
+                    }
                 }
+            }
+            return StripeKtorConnection(client, httpResponse)
+        }
+
+    }
+
+    private companion object {
+        private val CONNECT_TIMEOUT = 30.seconds.inWholeMilliseconds
+        private val READ_TIMEOUT = 80.seconds.inWholeMilliseconds
+
+        private fun createHttpClient(): HttpClient {
+            return HttpClient(OkHttp) {
+
+                // Timeouts
+                install(HttpTimeout) {
+                    // No equivalent in HttpUrlConnection
+//                    requestTimeoutMillis = 15_000
+                    connectTimeoutMillis = CONNECT_TIMEOUT
+                    socketTimeoutMillis = READ_TIMEOUT
+                }
+                install(HttpCache)
             }
         }
     }
 
-    private companion object {
-        private val CONNECT_TIMEOUT = TimeUnit.SECONDS.toMillis(30).toInt()
-        private val READ_TIMEOUT = TimeUnit.SECONDS.toMillis(80).toInt()
-    }
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    class StripeKtorConnection(
+        val client: HttpClient,
+        val httpResponse: HttpResponse
+    )
 }

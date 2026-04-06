@@ -139,6 +139,8 @@ dependencies {
     implementation libs.places
     implementation libs.retrofitKotlinSerializationConverter
     implementation libs.zxing
+    implementation libs.ktor.clientCore
+    implementation libs.ktor.clientOkhttp
 
     tapToAddImplementation libs.terminal.core
     tapToAddImplementation libs.terminal.tapToPay

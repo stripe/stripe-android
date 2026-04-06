@@ -1,37 +1,35 @@
 package com.stripe.android.core.networking
 
 import androidx.annotation.RestrictTo
-import java.io.Closeable
-import java.io.IOException
-import java.io.InputStream
-import java.net.HttpURLConnection
-import java.nio.charset.StandardCharsets
-import java.util.Scanner
-import javax.net.ssl.HttpsURLConnection
+import io.ktor.client.statement.readRawBytes
+import io.ktor.util.toMap
+import kotlinx.coroutines.runBlocking
+import okio.Buffer
+import okio.BufferedSource
 import okio.FileSystem
+import okio.IOException
 import okio.Path
 import okio.buffer
-import okio.sink
-import okio.source
+import java.nio.charset.StandardCharsets
 
 /**
- * A wrapper for accessing a [HttpURLConnection]. Implements [Closeable] to simplify closing related
+ * A wrapper for accessing an http connection. Implements [AutoCloseable] to simplify closing related
  * resources.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-interface StripeConnection<ResponseBodyType> : Closeable {
+interface StripeConnection<ResponseBodyType> : AutoCloseable {
     val responseCode: Int
     val response: StripeResponse<ResponseBodyType>
-    fun createBodyFromResponseStream(responseStream: InputStream?): ResponseBodyType?
+    fun createBodyFromResponseStream(responseSource: BufferedSource?): ResponseBodyType?
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     abstract class AbstractConnection<ResponseBodyType>(
-        private val conn: HttpsURLConnection
+        private val connection: ConnectionFactory.StripeKtorConnection
     ) : StripeConnection<ResponseBodyType> {
         override val responseCode: Int
             @JvmSynthetic
             get() {
-                return conn.responseCode
+                return connection.httpResponse.status.value
             }
 
         override val response: StripeResponse<ResponseBodyType>
@@ -43,27 +41,22 @@ interface StripeConnection<ResponseBodyType> : Closeable {
                 return StripeResponse(
                     code = responseCode,
                     body = createBodyFromResponseStream(responseStream),
-                    headers = conn.headerFields
+                    headers = connection.httpResponse.headers.toMap()
                 )
             }
 
-        private val responseStream: InputStream?
+        private val responseStream: Buffer
             @Throws(IOException::class)
             get() {
-                return if (responseCode in 200..299) {
-                    conn.inputStream
-                } else {
-                    conn.errorStream
+                return Buffer().apply {
+                    runBlocking {
+                        write(connection.httpResponse.readRawBytes())
+                    }
                 }
             }
 
         override fun close() {
-            responseStream?.close()
-            conn.disconnect()
-        }
-
-        internal companion object {
-            internal val CHARSET = StandardCharsets.UTF_8.name()
+            connection.client.close()
         }
     }
 
@@ -71,26 +64,23 @@ interface StripeConnection<ResponseBodyType> : Closeable {
      * Default [StripeConnection] that converts the ResponseStream to a String.
      */
     class Default internal constructor(
-        conn: HttpsURLConnection
-    ) : AbstractConnection<String>(conn = conn) {
+        connection: ConnectionFactory.StripeKtorConnection
+    ) : AbstractConnection<String>(connection) {
 
         /**
          * Convert stream to a String
          */
         @Throws(IOException::class)
-        override fun createBodyFromResponseStream(responseStream: InputStream?): String? {
-            if (responseStream == null) {
+        override fun createBodyFromResponseStream(responseSource: BufferedSource?): String? {
+            if (responseSource == null) {
                 return null
             }
 
-            responseStream.use {
-                // \A is the beginning of the stream boundary
-                val scanner = Scanner(responseStream, CHARSET).useDelimiter("\\A")
-                return if (scanner.hasNext()) {
-                    scanner.next()
-                } else {
-                    null
+            responseSource.use { bufferedSource ->
+                if (bufferedSource.exhausted()) {
+                    return null
                 }
+                return bufferedSource.readString(StandardCharsets.UTF_8)
             }
         }
     }
@@ -99,23 +89,21 @@ interface StripeConnection<ResponseBodyType> : Closeable {
      * [StripeConnection] that writes the ResponseStream to a file [Path].
      */
     class FileConnection internal constructor(
-        conn: HttpsURLConnection,
+        connection: ConnectionFactory.StripeKtorConnection,
         private val outputFile: Path
-    ) : AbstractConnection<Path>(conn = conn) {
+    ) : AbstractConnection<Path>(connection) {
 
         /**
          * Convert stream to a file [Path].
          */
         @Throws(IOException::class)
-        override fun createBodyFromResponseStream(responseStream: InputStream?): Path? {
-            if (responseStream == null) {
+        override fun createBodyFromResponseStream(responseSource: BufferedSource?): Path? {
+            if (responseSource == null) {
                 return null
             }
-            responseStream.use { stream ->
+            responseSource.use { source ->
                 FileSystem.SYSTEM.sink(outputFile).buffer().use { fileSink ->
-                    stream.source().use { source ->
-                        fileSink.writeAll(source)
-                    }
+                    fileSink.writeAll(source)
                 }
             }
             return outputFile
