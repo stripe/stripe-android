@@ -386,71 +386,32 @@ internal class PaymentSheetCheckoutSessionTest {
      * overrides and suppresses the mandate for cashapp while card still shows it.
      */
     @Test
-    fun testMandateOnlyForCardWithMixedPmoSfu() = runPaymentSheetTest(
-        networkRule = networkRule,
-        resultCallback = ::assertCompleted,
-    ) { testContext ->
-        networkRule.checkoutInit { response ->
-            response.testBodyFromFile("checkout-session-init.json") { json ->
-                json.getJSONObject("server_built_elements_session_params")
-                    .getJSONObject("deferred_intent")
-                    .put("payment_method_options", JSONObject("""
-                        {
-                            "card": {"setup_future_usage": "off_session"},
-                            "cashapp": {"setup_future_usage": "none"}
-                        }
-                    """.trimIndent()))
-            }
-        }
-
-        testContext.presentWithCheckout(
-            configuration = defaultConfiguration.newBuilder()
-                .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
-                .build(),
-        )
-
-        page.clickOnLpm("card", forVerticalMode = true)
-        page.waitForCardForm()
-        page.assertHasMandate(CARD_SFU_MANDATE)
-
-        page.clickOnLpm("cashapp", forVerticalMode = true)
-        page.assertLpmSelected("cashapp")
-        composeTestRule.onNode(hasText(CASHAPP_SFU_MANDATE)).assertDoesNotExist()
-
-        testContext.markTestSucceeded()
+    fun testMandateOnlyForCardWithMixedPmoSfu() = runMandateTest(
+        expectCashappMandate = false,
+    ) { json ->
+        json.getJSONObject("server_built_elements_session_params")
+            .getJSONObject("deferred_intent")
+            .put("payment_method_options", JSONObject("""
+                {
+                    "card": {"setup_future_usage": "off_session"},
+                    "cashapp": {"setup_future_usage": "none"}
+                }
+            """.trimIndent()))
     }
 
     /**
      * Without any SFU configuration, no mandates should be displayed for card or cashapp.
      */
     @Test
-    fun testNoMandateWithoutSfu() = runPaymentSheetTest(
-        networkRule = networkRule,
-        resultCallback = ::assertCompleted,
-    ) { testContext ->
-        networkRule.checkoutInit { response ->
-            response.testBodyFromFile("checkout-session-init.json")
-        }
-
-        testContext.presentWithCheckout(
-            configuration = defaultConfiguration.newBuilder()
-                .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
-                .build(),
-        )
-
-        page.clickOnLpm("card", forVerticalMode = true)
-        page.waitForCardForm()
-        page.assertMandateIsMissing()
-
-        page.clickOnLpm("cashapp", forVerticalMode = true)
-        page.assertLpmSelected("cashapp")
-        composeTestRule.onNode(hasText(CASHAPP_SFU_MANDATE)).assertDoesNotExist()
-
-        testContext.markTestSucceeded()
-    }
+    fun testNoMandateWithoutSfu() = runMandateTest(
+        expectCardMandate = false,
+        expectCashappMandate = false,
+    )
 
     private fun runMandateTest(
-        jsonModifier: (JSONObject) -> Unit,
+        expectCardMandate: Boolean = true,
+        expectCashappMandate: Boolean = true,
+        jsonModifier: (JSONObject) -> Unit = {},
     ) = runPaymentSheetTest(
         networkRule = networkRule,
         resultCallback = ::assertCompleted,
@@ -459,18 +420,22 @@ internal class PaymentSheetCheckoutSessionTest {
             response.testBodyFromFile("checkout-session-init.json", jsonModifier)
         }
 
-        testContext.presentWithCheckout(
-            configuration = defaultConfiguration.newBuilder()
-                .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
-                .build(),
-        )
+        testContext.presentWithCheckout()
 
-        page.clickOnLpm("card", forVerticalMode = true)
+        page.clickOnLpm("card")
         page.waitForCardForm()
-        page.assertHasMandate(CARD_SFU_MANDATE)
+        if (expectCardMandate) {
+            page.assertHasMandate(CARD_SFU_MANDATE)
+        } else {
+            page.assertMandateIsMissing()
+        }
 
-        page.clickOnLpm("cashapp", forVerticalMode = true)
-        page.assertHasMandate(CASHAPP_SFU_MANDATE)
+        page.clickOnLpm("cashapp")
+        if (expectCashappMandate) {
+            page.assertHasMandate(CASHAPP_SFU_MANDATE)
+        } else {
+            composeTestRule.onNode(hasText(CASHAPP_SFU_MANDATE)).assertDoesNotExist()
+        }
 
         testContext.markTestSucceeded()
     }
