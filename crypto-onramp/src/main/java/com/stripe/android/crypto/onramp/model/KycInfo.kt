@@ -19,11 +19,11 @@ import kotlinx.parcelize.Parcelize
 @ExperimentalCryptoOnramp
 @Poko
 class KycInfo(
-    internal val firstName: String?,
-    internal val lastName: String?,
+    val firstName: String?,
+    val lastName: String?,
     internal val idNumber: String?,
     internal val dateOfBirth: DateOfBirth?,
-    internal val address: PaymentSheet.Address?
+    val address: PaymentSheet.Address?
 )
 
 /**

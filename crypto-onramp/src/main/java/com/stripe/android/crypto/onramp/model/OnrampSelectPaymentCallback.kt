@@ -22,7 +22,10 @@ sealed class OnrampCollectPaymentMethodResult {
      * The user has selected a payment option.
      */
     @ExperimentalCryptoOnramp
-    class Completed internal constructor(val displayData: PaymentMethodDisplayData) : OnrampCollectPaymentMethodResult()
+    class Completed internal constructor(
+        val displayData: PaymentMethodDisplayData,
+        val kycInfo: KycInfo?
+    ) : OnrampCollectPaymentMethodResult()
 
     /**
      * The user declined to select a payment option.
