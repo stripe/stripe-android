@@ -5,6 +5,7 @@ import android.app.Application
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.espresso.intent.matcher.IntentMatchers.hasExtra
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.utils.FeatureFlags
@@ -37,6 +38,7 @@ import com.stripe.android.tta.testing.TapToAddErrorPage
 import com.stripe.android.tta.testing.TapToAddLinkTestHelper
 import com.stripe.android.tta.testing.TerminalTestDelegate
 import com.stripe.android.utils.PaymentElementCallbackTestRule
+import com.stripe.android.utils.PaymentLauncherContractArgsCvcMatcher
 import com.stripe.android.view.ActivityStarter
 import com.stripe.stripeterminal.external.models.TerminalErrorCode
 import com.stripe.stripeterminal.external.models.TerminalException
@@ -263,6 +265,57 @@ class TapToAddActivityTest {
             waitForIdle()
 
             confirmationHelper.intendedPaymentConfirmationToBeLaunched()
+
+            waitForIdle()
+
+            assertTapToAddResult(
+                expectedResult = TapToAddResult.Complete,
+                activityScenario = activityScenario,
+            )
+        }
+    }
+
+    @Test
+    fun successWithCvcRecollection() = runScenario(
+        mode = TapToAddMode.Complete,
+        metadata = PaymentMethodMetadataFactory.create(
+            isTapToAddSupported = true,
+            hasCustomerConfiguration = true,
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION,
+        )
+    ) {
+        val info = cardCollectionHelper.enqueueSuccessfulTapToCollectFlow()
+
+        enqueueCallbacks(CreateIntentResult.Success(info.setupIntentClientSecret))
+
+        confirmationHelper.intendingPaymentConfirmationToBeLaunched(
+            InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED)
+        )
+
+        launch { activityScenario ->
+            cardArtTestHelper.assertCardArtAssetPreloads()
+            cardCollectionHelper.assertSuccessfulCardCollection(info)
+
+            waitForIdle()
+
+            cardAddedPage.assertShown(withLink = false)
+            cardAddedPage.clickContinue()
+
+            waitForIdle()
+
+            val payButtonLabel = "Pay $10.99"
+
+            confirmationPage.assertPrimaryButton(label = payButtonLabel, isEnabled = false)
+            confirmationPage.assertCvcRecollectionFieldShown()
+            confirmationPage.fillCvc("123")
+            confirmationPage.assertPrimaryButton(label = payButtonLabel, isEnabled = true)
+            confirmationPage.clickPrimaryButton(label = payButtonLabel)
+
+            waitForIdle()
+
+            confirmationHelper.intendedPaymentConfirmationToBeLaunched(
+                hasExtra("extra_args", PaymentLauncherContractArgsCvcMatcher("123"))
+            )
 
             waitForIdle()
 
