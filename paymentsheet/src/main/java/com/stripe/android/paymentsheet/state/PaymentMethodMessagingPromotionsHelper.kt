@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.repositories
 
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.PaymentMethodCode
@@ -11,6 +12,8 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.model.amount
 import com.stripe.android.paymentsheet.model.currency
+import dagger.Binds
+import dagger.Module
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -30,6 +33,7 @@ internal interface PaymentMethodMessagePromotionsHelper {
 internal class DefaultPaymentMethodMessagePromotionsHelper @Inject constructor(
     private val stripeRepository: StripeRepository,
     private val lazyPaymentConfig: Provider<PaymentConfiguration>,
+    @ViewModelScope private val viewModelScope: CoroutineScope,
     @IOContext private val workContext: CoroutineContext,
 ) : PaymentMethodMessagePromotionsHelper {
     private var promotionsDeferred: Deferred<Result<PaymentMethodMessagePromotionList>>? = null
@@ -38,7 +42,7 @@ internal class DefaultPaymentMethodMessagePromotionsHelper @Inject constructor(
         if (FeatureFlags.paymentMethodMessagePromotions.isEnabled) {
             promotionsDeferred?.cancel()
             promotionsDeferred = null
-            promotionsDeferred = CoroutineScope(workContext).async {
+            promotionsDeferred = viewModelScope.async(workContext) {
                 stripeRepository.retrievePaymentMethodMessagePromotionsForPaymentSheet(
                     amount = intent.amount?.toInt() ?: 0,
                     currency = intent.currency ?: "usd",
@@ -62,4 +66,28 @@ internal class DefaultPaymentMethodMessagePromotionsHelper @Inject constructor(
             null
         }
     }
+}
+
+internal class NoOpPromotionsHelper @Inject constructor() : PaymentMethodMessagePromotionsHelper {
+    override fun fetchPromotionsAsync(intent: StripeIntent) {
+        // NO-OP
+    }
+
+    override fun getPromotionIfAvailableForCode(code: PaymentMethodCode): PaymentMethodMessagePromotion? {
+        return null
+    }
+}
+
+@Module
+internal interface PaymentMethodMessagePromotionsHelperModule {
+    @Binds
+    fun bindsPromotionsHelper(
+        impl: DefaultPaymentMethodMessagePromotionsHelper
+    ): PaymentMethodMessagePromotionsHelper
+}
+
+@Module
+internal interface NoOpPaymentMethodMessagingPromotionHelperModule {
+    @Binds
+    fun bindsPromotionsHelper(impl: NoOpPromotionsHelper): PaymentMethodMessagePromotionsHelper
 }

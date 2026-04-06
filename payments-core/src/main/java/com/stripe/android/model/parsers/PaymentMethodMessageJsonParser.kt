@@ -119,7 +119,7 @@ internal class PaymentMethodMessageJsonParser : ModelJsonParser<PaymentMethodMes
         return inlinePartnerPromotion?.optString(FIELD_MESSAGE).takeIf { !it.isNullOrBlank() }
     }
 
-    internal fun getLearnMore(json: JSONObject): PaymentMethodMessageLearnMore? {
+    private fun getLearnMore(json: JSONObject): PaymentMethodMessageLearnMore? {
         val learnMore = json.optJSONObject(FIELD_LEARN_MORE) ?: return null
         val url = learnMore.optString(FIELD_URL)
         val message = learnMore.optString(FIELD_MESSAGE)

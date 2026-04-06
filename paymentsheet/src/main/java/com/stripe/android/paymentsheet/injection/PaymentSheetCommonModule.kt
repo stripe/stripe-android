@@ -48,10 +48,8 @@ import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Cvc
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.DefaultCvcRecollectionInteractor
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.paymentsheet.repositories.DefaultPaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.repositories.DefaultSavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
-import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.state.CreateLinkState
@@ -181,11 +179,6 @@ internal abstract class PaymentSheetCommonModule {
 
     @Binds
     abstract fun bindsCheckoutCurrencyUpdater(impl: DefaultCheckoutCurrencyUpdater): CheckoutCurrencyUpdater
-
-    @Binds
-    abstract fun bindsPaymentMethodMessagePromotionHelper(
-        impl: DefaultPaymentMethodMessagePromotionsHelper
-    ): PaymentMethodMessagePromotionsHelper
 
     @Suppress("TooManyFunctions")
     companion object {
