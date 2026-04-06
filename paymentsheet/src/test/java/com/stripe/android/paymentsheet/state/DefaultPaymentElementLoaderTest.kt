@@ -1861,7 +1861,7 @@ internal class DefaultPaymentElementLoaderTest {
     fun `Emits hasCardArt when loading succeeds with saved card art`() = runScenario {
         val loader = createPaymentElementLoader(
             linkSettings = createLinkSettings(passthroughModeEnabled = false),
-            customer = createCustomer(
+            customer = createElementsSessionCustomer(
                 paymentMethods = listOf(
                     PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
                         card = PaymentMethodFixtures.CARD.copy(
