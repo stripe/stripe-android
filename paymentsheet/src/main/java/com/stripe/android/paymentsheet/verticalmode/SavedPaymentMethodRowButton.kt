@@ -58,6 +58,7 @@ internal fun SavedPaymentMethodRowButton(
                 url = displayableSavedPaymentMethod.paymentMethod.card?.cardArt?.artImage?.url,
                 modifier = Modifier
                     .width(iconWidth)
+                    .height(iconHeight)
             ) {
                 PaymentMethodIconFromResource(
                     iconRes = displayableSavedPaymentMethod.paymentMethod.getSavedPaymentMethodIcon(
