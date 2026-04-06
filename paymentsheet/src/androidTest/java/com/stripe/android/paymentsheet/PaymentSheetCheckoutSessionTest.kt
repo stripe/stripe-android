@@ -248,6 +248,7 @@ internal class PaymentSheetCheckoutSessionTest {
             initFile = "checkout-session-init.json",
             initReplacements = listOf(SAVE_DISABLED_REPLACEMENT),
             confirmFile = "checkout-session-confirm.json",
+            noSaveCheckbox = true,
             expectedAllowRedisplay = "unspecified",
         )
 
@@ -274,6 +275,7 @@ internal class PaymentSheetCheckoutSessionTest {
             initFile = "checkout-session-init-setup.json",
             initReplacements = listOf(SAVE_DISABLED_REPLACEMENT),
             confirmFile = "checkout-session-confirm-setup.json",
+            noSaveCheckbox = true,
             expectedAllowRedisplay = "limited",
         )
 
@@ -290,6 +292,7 @@ internal class PaymentSheetCheckoutSessionTest {
         confirmFile: String,
         initReplacements: List<ResponseReplacement> = emptyList(),
         clickSaveCheckbox: Boolean = false,
+        noSaveCheckbox: Boolean = false,
         expectedAllowRedisplay: String,
     ) = runPaymentSheetTest(
         networkRule = networkRule,
@@ -303,7 +306,9 @@ internal class PaymentSheetCheckoutSessionTest {
 
         page.fillOutCardDetails()
 
-        if (clickSaveCheckbox) {
+        if (noSaveCheckbox) {
+            page.assertNoSaveForFutureCheckbox()
+        } else if (clickSaveCheckbox) {
             page.clickOnSaveForFutureUsage()
         }
 
