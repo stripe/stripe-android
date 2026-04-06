@@ -144,6 +144,7 @@ internal class IdentityViewModelTest {
             verificationSessionId = VERIFICATION_SESSION_ID,
             ephemeralKeySecret = EPHEMERAL_KEY,
             brandLogo = BRAND_LOGO,
+            brandColor = null,
             injectorKey = DUMMY_INJECTOR_KEY,
             presentTime = 0
         ),

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.annotation.ColorInt
 import androidx.core.os.bundleOf
 import com.stripe.android.core.injection.InjectorKey
 import kotlinx.parcelize.Parcelize
@@ -17,6 +18,7 @@ internal class IdentityVerificationSheetContract :
         val verificationSessionId: String,
         val ephemeralKeySecret: String,
         val brandLogo: Uri,
+        @ColorInt val brandColor: Int?,
         @InjectorKey val injectorKey: String,
         val presentTime: Long
     ) : Parcelable {

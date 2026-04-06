@@ -1,7 +1,9 @@
 package com.stripe.android.identity.ui
 
 import android.content.res.Resources
+import android.graphics.Color as AndroidColor
 import android.os.Build
+import androidx.annotation.ColorInt
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.Colors
 import androidx.compose.material.ContentAlpha
@@ -11,10 +13,12 @@ import androidx.compose.material.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
+import androidx.core.graphics.ColorUtils
 import com.google.accompanist.themeadapter.material.createMdcTheme
 import com.stripe.android.uicore.LocalColors
 import com.stripe.android.uicore.LocalSectionStyle
@@ -31,7 +35,10 @@ import java.lang.reflect.Method
  * CompositionLocalProviders required by StripeTheme.
  */
 @Composable
-internal fun IdentityTheme(content: @Composable () -> Unit) {
+internal fun IdentityTheme(
+    @ColorInt brandColor: Int? = null,
+    content: @Composable () -> Unit
+) {
     val context = LocalContext.current
     val key = context.theme.key ?: context.theme
 
@@ -54,7 +61,10 @@ internal fun IdentityTheme(content: @Composable () -> Unit) {
     }.getOrDefault(false)
 
     val inspectionMode = LocalInspectionMode.current || isRobolectricTest
-    val hostingAppColors = themeParams.colors ?: MaterialTheme.colors
+    val baseColors = themeParams.colors ?: MaterialTheme.colors
+    val hostingAppColors = remember(baseColors, brandColor) {
+        baseColors.withBrandColor(brandColor)
+    }
     val hostingAppTypography = themeParams.typography ?: MaterialTheme.typography
     val hostingAppShapes = themeParams.shapes ?: MaterialTheme.shapes
 
@@ -117,6 +127,32 @@ internal fun AdoptForStripeTheme(
             shapes = hostingAppShapes,
             content = content
         )
+    }
+}
+
+internal fun Colors.withBrandColor(@ColorInt brandColor: Int?): Colors {
+    if (brandColor == null) {
+        return this
+    }
+
+    val resolvedBrandColor = Color(brandColor)
+    val onBrandColor = Color(getContrastingTextColor(brandColor))
+
+    return copy(
+        primary = resolvedBrandColor,
+        onPrimary = onBrandColor,
+    )
+}
+
+@ColorInt
+private fun getContrastingTextColor(@ColorInt backgroundColor: Int): Int {
+    val whiteContrast = ColorUtils.calculateContrast(AndroidColor.WHITE, backgroundColor)
+    val blackContrast = ColorUtils.calculateContrast(AndroidColor.BLACK, backgroundColor)
+
+    return if (whiteContrast >= blackContrast) {
+        AndroidColor.WHITE
+    } else {
+        AndroidColor.BLACK
     }
 }
 
