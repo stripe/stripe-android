@@ -1,7 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="app_name">StripeCardScan Example</string>
     <string name="cardscansheet">CardScanSheet</string>
-    <string name="cardscanfragment">CardScanFragment</string>
     <string name="enable_mlkit_text_recognition">Enable ML Kit Text Recognition</string>
     <string name="disable_ssd_ocr">Disable SSD OCR</string>
 </resources>

@@ -7,13 +7,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContract
-import androidx.annotation.IdRes
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.add
-import androidx.fragment.app.commit
-import androidx.lifecycle.LifecycleOwner
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
@@ -46,8 +41,6 @@ sealed interface CardScanSheetResult : Parcelable {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Failed(val error: Throwable) : CardScanSheetResult
 }
-
-private const val CARD_SCAN_FRAGMENT_TAG = "CardScanFragmentTag"
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CardScanSheet private constructor() {
@@ -131,18 +124,6 @@ class CardScanSheet private constructor() {
                     UnknownScanException("No data in the result intent")
                 )
 
-        fun removeCardScanFragment(
-            supportFragmentManager: FragmentManager
-        ) {
-            supportFragmentManager.commit {
-                setReorderingAllowed(true)
-                val fragment = supportFragmentManager.findFragmentByTag(CARD_SCAN_FRAGMENT_TAG)
-                if (fragment != null) {
-                    remove(fragment)
-                }
-            }
-        }
-
         private val activityResultContract = object : ActivityResultContract<
             CardScanSheetParams,
             CardScanSheetResult
@@ -173,35 +154,5 @@ class CardScanSheet private constructor() {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun present(configuration: CardScanConfiguration) {
         launcher.launch(CardScanSheetParams(configuration))
-    }
-
-    /**
-     * Attach the cardscan fragment to the specified container.
-     * Results will be returned in the callback function.
-     */
-    fun attachCardScanFragment(
-        lifecycleOwner: LifecycleOwner,
-        supportFragmentManager: FragmentManager,
-        @IdRes fragmentContainer: Int,
-        onFinished: (cardScanSheetResult: CardScanSheetResult) -> Unit
-    ) {
-        supportFragmentManager.commit {
-            setReorderingAllowed(true)
-            add<CardScanFragment>(
-                fragmentContainer,
-                tag = CARD_SCAN_FRAGMENT_TAG
-            )
-        }
-
-        supportFragmentManager
-            .setFragmentResultListener(
-                CARD_SCAN_FRAGMENT_REQUEST_KEY,
-                lifecycleOwner
-            ) { _, bundle ->
-                val result: CardScanSheetResult = bundle.getParcelable(
-                    CARD_SCAN_FRAGMENT_BUNDLE_KEY
-                ) ?: CardScanSheetResult.Failed(Throwable("Card scan params not provided"))
-                onFinished(result)
-            }
     }
 }
