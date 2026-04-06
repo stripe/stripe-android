@@ -179,8 +179,8 @@ class PaymentMethodKtxTest {
 
         val kycInfo = requireNotNull(paymentMethod.googlePayKycInfo())
 
-        assertThat(kycInfo.firstName).isEqualTo("Jane")
-        assertThat(kycInfo.lastName).isEqualTo("Mary Doe")
+        assertThat(kycInfo.firstName).isEqualTo("Jane Mary")
+        assertThat(kycInfo.lastName).isEqualTo("Doe")
     }
 
     private fun createPaymentMethod(

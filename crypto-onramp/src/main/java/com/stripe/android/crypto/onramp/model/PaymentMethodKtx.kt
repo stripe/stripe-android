@@ -7,11 +7,19 @@ internal fun PaymentMethod.googlePayKycInfo(): KycInfo? {
     val address = billingDetails?.address
 
     // Google Pay on Android exposes billing name as a single free-form string.
-    // We split on whitespace as a best-effort heuristic to populate first/last name.
+    // We split on whitespace as a best-effort heuristic to populate first/last name,
+    // with the assumption that the last name will be the last word, while the first name
+    // is everything preceding it.
     val fullName = billingDetails?.name.orEmpty().trim()
     val parts = fullName.split("\\s+".toRegex())
-    val firstName = parts.firstOrNull().orEmpty()
-    val lastName = parts.drop(1).joinToString(" ")
+    val firstName = when {
+        parts.size == 1 -> parts.firstOrNull().orEmpty()
+        else -> parts.dropLast(1).joinToString(" ")
+    }
+    val lastName = when {
+        parts.size <= 1 -> ""
+        else -> parts.lastOrNull().orEmpty()
+    }
 
     val hasName = firstName.isNotEmpty() || lastName.isNotEmpty()
     val hasAddress = listOfNotNull(
