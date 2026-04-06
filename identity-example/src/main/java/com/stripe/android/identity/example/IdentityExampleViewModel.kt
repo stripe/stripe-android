@@ -42,19 +42,23 @@ internal class IdentityExampleViewModel(application: Application) : AndroidViewM
                             }
 
                             VerificationType.PHONE -> {
-                                if (submissionState.useDocumentFallback == true) {
-                                    VerificationSessionCreationRequest.Options(
-                                        document = submissionState.toDocumentOptions(),
-                                        phoneRecords = VerificationSessionCreationRequest.Options.PhoneRecords(
+                                VerificationSessionCreationRequest.Options(
+                                    document = if (submissionState.useDocumentFallback == true) {
+                                        submissionState.toDocumentOptions()
+                                    } else {
+                                        null
+                                    },
+                                    phoneOtp = VerificationSessionCreationRequest.Options.PhoneOTP(
+                                        check = submissionState.phoneOtpCheck ?: PhoneOTPCheck.None
+                                    ),
+                                    phoneRecords = if (submissionState.useDocumentFallback == true) {
+                                        VerificationSessionCreationRequest.Options.PhoneRecords(
                                             fallback = Fallback.Document
-                                        ),
-                                        phoneOtp = VerificationSessionCreationRequest.Options.PhoneOTP(
-                                            check = requireNotNull(submissionState.phoneOtpCheck)
                                         )
-                                    )
-                                } else {
-                                    VerificationSessionCreationRequest.Options()
-                                }
+                                    } else {
+                                        null
+                                    }
+                                )
                             }
 
                             VerificationType.ID_NUMBER -> {
