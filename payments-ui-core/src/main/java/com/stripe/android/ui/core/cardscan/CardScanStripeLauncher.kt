@@ -120,7 +120,9 @@ internal class CardScanStripeLauncher(
         ): CardScanStripeLauncher {
             val context = LocalContext.current.applicationContext
             val isLaunchingState = rememberSaveable { mutableStateOf(false) }
-            val launcher = remember(eventsReporter, context, enableMlKitCardScan, elementsSessionId, disableSsdOcrCardScan) {
+            val launcher = remember(
+                eventsReporter, context, enableMlKitCardScan, elementsSessionId, disableSsdOcrCardScan,
+            ) {
                 CardScanStripeLauncher(
                     context = context,
                     eventsReporter = eventsReporter,

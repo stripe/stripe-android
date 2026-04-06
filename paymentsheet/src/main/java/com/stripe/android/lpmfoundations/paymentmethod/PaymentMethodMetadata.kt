@@ -335,6 +335,7 @@ internal data class PaymentMethodMetadata(
     }
 
     internal companion object {
+        @Suppress("LongMethod")
         internal fun createForPaymentElement(
             elementsSession: ElementsSession,
             configuration: CommonConfiguration,
