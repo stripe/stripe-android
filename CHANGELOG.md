@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## XX.XX.XX - 20XX-XX-XX
+### AddressElement
+* [ADDED][12848](https://github.com/stripe/stripe-android/pull/12848) Added state dropdown support for BR.
 
 ## 23.2.0 - 2026-03-30
 
