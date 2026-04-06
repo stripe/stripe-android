@@ -12,8 +12,10 @@ import com.stripe.android.checkouttesting.createPaymentMethod
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
 import com.stripe.android.networktesting.RequestMatchers.not
+import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.utils.PaymentSheetTestRunnerContext
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.assertFailed
@@ -219,5 +221,138 @@ internal class PaymentSheetCheckoutSessionTest {
         }
 
         page.clickPrimaryButton()
+    }
+
+    // region allow_redisplay tests
+
+    @Test
+    fun allowRedisplayIsUnspecifiedWhenNotSavingWithPayment() =
+        runCheckoutSessionAllowRedisplayTest(
+            initFile = "checkout-session-init.json",
+            confirmFile = "checkout-session-confirm.json",
+            expectedAllowRedisplay = "unspecified",
+        )
+
+    @Test
+    fun allowRedisplayIsAlwaysWhenSavingWithPayment() =
+        runCheckoutSessionAllowRedisplayTest(
+            initFile = "checkout-session-init.json",
+            confirmFile = "checkout-session-confirm.json",
+            clickSaveCheckbox = true,
+            expectedAllowRedisplay = "always",
+        )
+
+    @Test
+    fun allowRedisplayIsUnspecifiedWhenSaveDisabledWithPayment() =
+        runCheckoutSessionAllowRedisplayTest(
+            initFile = "checkout-session-init.json",
+            initReplacements = listOf(SAVE_DISABLED_REPLACEMENT),
+            confirmFile = "checkout-session-confirm.json",
+            noSaveCheckbox = true,
+            expectedAllowRedisplay = "unspecified",
+        )
+
+    @Test
+    fun allowRedisplayIsLimitedWhenNotSavingWithSetup() =
+        runCheckoutSessionAllowRedisplayTest(
+            initFile = "checkout-session-init-setup.json",
+            confirmFile = "checkout-session-confirm-setup.json",
+            expectedAllowRedisplay = "limited",
+        )
+
+    @Test
+    fun allowRedisplayIsAlwaysWhenSavingWithSetup() =
+        runCheckoutSessionAllowRedisplayTest(
+            initFile = "checkout-session-init-setup.json",
+            confirmFile = "checkout-session-confirm-setup.json",
+            clickSaveCheckbox = true,
+            expectedAllowRedisplay = "always",
+        )
+
+    @Test
+    fun allowRedisplayIsLimitedWhenSaveDisabledWithSetup() =
+        runCheckoutSessionAllowRedisplayTest(
+            initFile = "checkout-session-init-setup.json",
+            initReplacements = listOf(SAVE_DISABLED_REPLACEMENT),
+            confirmFile = "checkout-session-confirm-setup.json",
+            noSaveCheckbox = true,
+            expectedAllowRedisplay = "limited",
+        )
+
+    // endregion
+
+    /**
+     * Runs a checkout session test verifying that allow_redisplay is sent with the expected
+     * value on PM creation. CUSTOMER_REPLACEMENT is always applied first to inject the customer
+     * and save offer fields; [initReplacements] (e.g. SAVE_DISABLED_REPLACEMENT) are applied
+     * after and may depend on fields injected by CUSTOMER_REPLACEMENT.
+     */
+    private fun runCheckoutSessionAllowRedisplayTest(
+        initFile: String,
+        confirmFile: String,
+        initReplacements: List<ResponseReplacement> = emptyList(),
+        clickSaveCheckbox: Boolean = false,
+        noSaveCheckbox: Boolean = false,
+        expectedAllowRedisplay: String,
+    ) = runPaymentSheetTest(
+        networkRule = networkRule,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.checkoutInit { response ->
+            response.testBodyFromFile(initFile, listOf(CUSTOMER_REPLACEMENT) + initReplacements)
+        }
+
+        testContext.presentWithCheckout()
+
+        page.fillOutCardDetails()
+
+        if (noSaveCheckbox) {
+            page.assertNoSaveForFutureCheckbox()
+        } else if (clickSaveCheckbox) {
+            page.clickOnSaveForFutureUsage()
+        }
+
+        networkRule.createPaymentMethod(
+            bodyPart("allow_redisplay", expectedAllowRedisplay),
+        )
+
+        networkRule.checkoutConfirm { response ->
+            response.testBodyFromFile(confirmFile)
+        }
+
+        page.clickPrimaryButton()
+    }
+
+    private suspend fun PaymentSheetTestRunnerContext.presentWithCheckout() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val checkout = Checkout.configure(
+            context = context,
+            checkoutSessionClientSecret = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example",
+        ).getOrThrow()
+
+        presentPaymentSheet {
+            presentWithCheckout(
+                checkout = checkout,
+                configuration = defaultConfiguration,
+            )
+        }
+    }
+
+    private companion object {
+        // Injects customer + save offer fields into base checkout-session-init fixtures.
+        // Note: testBodyFromFile concatenates lines without newlines, so all JSON ends up
+        // on one line. We anchor on the unique "ui_mode" field and append inline.
+        val CUSTOMER_REPLACEMENT = ResponseReplacement(
+            original = """"ui_mode": "custom",""",
+            new = """"ui_mode": "custom", """ +
+                """"customer": {"id": "cus_12345", "payment_methods": [], "can_detach_payment_method": true}, """ +
+                """"customer_managed_saved_payment_methods_offer_save": {"enabled": true, "status": "not_accepted"},""",
+        )
+
+        // Must be applied after CUSTOMER_REPLACEMENT, which injects the field this matches on.
+        val SAVE_DISABLED_REPLACEMENT = ResponseReplacement(
+            original = """"customer_managed_saved_payment_methods_offer_save": {"enabled": true,""",
+            new = """"customer_managed_saved_payment_methods_offer_save": {"enabled": false,""",
+        )
     }
 }

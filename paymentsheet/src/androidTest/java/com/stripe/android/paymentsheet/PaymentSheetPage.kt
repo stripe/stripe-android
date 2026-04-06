@@ -388,6 +388,11 @@ internal class PaymentSheetPage(
         }
     }
 
+    fun assertNoSaveForFutureCheckbox() {
+        composeTestRule.onNodeWithTag(SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG)
+            .assertDoesNotExist()
+    }
+
     fun assertSaveForFutureCheckboxNotChecked() {
         val testTag = SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
         composeTestRule.waitUntil(
