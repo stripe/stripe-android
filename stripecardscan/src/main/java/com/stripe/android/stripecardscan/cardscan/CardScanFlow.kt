@@ -31,6 +31,7 @@ import kotlinx.coroutines.runBlocking
 internal abstract class CardScanFlow(
     private val scanErrorListener: AnalyzerLoopErrorListener,
     private val enableMlKitTextRecognition: Boolean = false,
+    private val disableSsdOcr: Boolean = false,
 ) : ScanFlow<Unit?, CameraPreviewImage<Bitmap>>,
     AggregateResultListener<MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult> {
 
@@ -79,16 +80,18 @@ internal abstract class CardScanFlow(
             )
         }
 
-        val fetchedModel = SSDOcrModelManager.fetchModel(
-            context,
-            forImmediateUse = true,
-            isOptional = false
-        )
-        // SSD loop: uses a built-in model, runs ~3x faster than ML Kit
-        createAndRegisterLoop(
-            AnalyzerPool.of(SSDOcr.Factory(context, fetchedModel)),
-            aggregator, inputStream, coroutineScope,
-        )
+        if (!disableSsdOcr) {
+            val fetchedModel = SSDOcrModelManager.fetchModel(
+                context,
+                forImmediateUse = true,
+                isOptional = false
+            )
+            // SSD loop: uses a built-in model, runs ~3x faster than ML Kit
+            createAndRegisterLoop(
+                AnalyzerPool.of(SSDOcr.Factory(context, fetchedModel)),
+                aggregator, inputStream, coroutineScope,
+            )
+        }
 
         // ML Kit loop: Uses generic OCR, much slower (~2 fps) but potentially
         // catches more cards, can detect expiration dates

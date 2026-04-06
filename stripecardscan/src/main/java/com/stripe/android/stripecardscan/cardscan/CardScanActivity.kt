@@ -143,8 +143,11 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
      */
     private lateinit var scanFlow: CardScanFlow
 
-    private fun createScanFlow(enableMlKitTextRecognition: Boolean): CardScanFlow {
-        return object : CardScanFlow(scanErrorListener, enableMlKitTextRecognition) {
+    private fun createScanFlow(
+        enableMlKitTextRecognition: Boolean,
+        disableSsdOcr: Boolean,
+    ): CardScanFlow {
+        return object : CardScanFlow(scanErrorListener, enableMlKitTextRecognition, disableSsdOcr) {
             /**
              * A final result was received from the aggregator. Set the result from this activity.
              */
@@ -196,7 +199,10 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
         val cardScanConfiguration = cardScanSheetParams?.cardScanConfiguration
             ?: CardScanConfiguration(elementsSessionId = null)
 
-        scanFlow = createScanFlow(cardScanConfiguration.enableMlKitTextRecognition)
+        scanFlow = createScanFlow(
+            enableMlKitTextRecognition = cardScanConfiguration.enableMlKitTextRecognition,
+            disableSsdOcr = cardScanConfiguration.disableSsdOcr,
+        )
 
         DaggerCardScanComponent.factory()
             .build(
