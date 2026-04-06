@@ -2,14 +2,14 @@ package com.stripe.android.stripecardscan.cardscan
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.AnalyticsRequestFactory
-import com.stripe.android.core.utils.DefaultDurationProvider
+import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.stripecardscan.scanui.CancellationReason
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.shadows.ShadowSystemClock
-import java.util.concurrent.TimeUnit
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 @RunWith(RobolectricTestRunner::class)
 internal class DefaultCardScanEventsReporterTest {
@@ -27,9 +27,8 @@ internal class DefaultCardScanEventsReporterTest {
     }
 
     @Test
-    fun testScanSucceeded() = runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor ->
+    fun testScanSucceeded() = runScenario(duration = 15.seconds) { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor ->
         defaultCardScanEventsReporter.scanStarted()
-        ShadowSystemClock.advanceBy(15, TimeUnit.SECONDS)
 
         defaultCardScanEventsReporter.scanSucceeded()
 
@@ -43,9 +42,8 @@ internal class DefaultCardScanEventsReporterTest {
     }
 
     @Test
-    fun testScanFailed() = runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor ->
+    fun testScanFailed() = runScenario(duration = 11.seconds) { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor ->
         defaultCardScanEventsReporter.scanStarted()
-        ShadowSystemClock.advanceBy(11, TimeUnit.SECONDS)
 
         defaultCardScanEventsReporter.scanFailed(Throwable("oops"))
 
@@ -60,9 +58,8 @@ internal class DefaultCardScanEventsReporterTest {
     }
 
     @Test
-    fun testScanCancelledOnBackPressed() = runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor ->
+    fun testScanCancelledOnBackPressed() = runScenario(duration = 4.seconds) { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor ->
         defaultCardScanEventsReporter.scanStarted()
-        ShadowSystemClock.advanceBy(4, TimeUnit.SECONDS)
 
         defaultCardScanEventsReporter.scanCancelled(CancellationReason.Back)
 
@@ -109,9 +106,10 @@ internal class DefaultCardScanEventsReporterTest {
             assertThat(loggedRequests).hasSize(1)
             assertThat(loggedRequests.first().params["cancellation_reason"])
                 .isEqualTo("user_cannot_scan")
-        }
+    }
 
     private fun runScenario(
+        duration: Duration? = null,
         testBlock: (DefaultCardScanEventsReporter, FakeAnalyticsRequestExecutor) -> Unit
     ) {
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
@@ -125,11 +123,19 @@ internal class DefaultCardScanEventsReporterTest {
                 networkTypeProvider = { "" },
                 pluginTypeProvider = { null }
             ),
-            durationProvider = DefaultDurationProvider.instance,
+            durationProvider = FakeDurationProvider(duration),
             cardScanConfiguration = CardScanConfiguration(ELEMENTS_SESSION_ID)
         )
 
         testBlock(eventsReporter, analyticsRequestExecutor)
+    }
+
+    private class FakeDurationProvider(
+        private val duration: Duration?
+    ) : DurationProvider {
+        override fun start(key: DurationProvider.Key, reset: Boolean) = Unit
+
+        override fun end(key: DurationProvider.Key): Duration? = duration
     }
 
     companion object {
