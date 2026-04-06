@@ -35,7 +35,7 @@ internal class TestBoleto : BasePlaygroundTest() {
 
     private val boletoValues = FieldPopulator.Values().copy(
         zip = "76600-000",
-        state = "GO",
+        state = "Goiás",
     )
 
     @Test

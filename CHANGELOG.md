@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## XX.XX.XX - 20XX-XX-XX
+### AddressElement
+* [ADDED][12848](https://github.com/stripe/stripe-android/pull/12848) Added state dropdown support for BR.
 
 ### Connect
 * [DEPRECATED][12695](https://github.com/stripe/stripe-android/pull/12695) Deprecated `Action` and `Form` parameters in `Colors` class. Now those parameters can be initialized within its own class.
