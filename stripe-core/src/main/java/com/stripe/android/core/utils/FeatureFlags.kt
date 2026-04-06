@@ -16,6 +16,7 @@ object FeatureFlags {
     val forceLinkWebAuth = FeatureFlag("Link: Force web auth")
     val enableAttestationOnIntentConfirmation = FeatureFlag("Enable Attestation on Intent Confirmation")
     val enableTapToAdd = FeatureFlag("Enable Tap to Add")
+    val enableCardArt = FeatureFlag("Enable Card Art")
     val enableKlarnaFormRemoval = FeatureFlag("Remove forms from Klarna")
 }
 

@@ -52,7 +52,7 @@ class SSDOcrTest {
         assertNotNull(model)
 
         val prediction = model.analyze(
-            SSDOcr.cameraPreviewToInput(
+            CardOcr.cameraPreviewToInput(
                 bitmap,
                 bitmap.size().toRect(),
                 bitmap.size().toRect()
@@ -89,7 +89,7 @@ class SSDOcrTest {
         assertNotNull(model)
 
         val prediction = model.analyze(
-            SSDOcr.cameraPreviewToInput(
+            CardOcr.cameraPreviewToInput(
                 bitmap,
                 bitmap.size().toRect(),
                 bitmap.size().toRect()
@@ -126,7 +126,7 @@ class SSDOcrTest {
         assertNotNull(model)
 
         val prediction = model.analyze(
-            SSDOcr.cameraPreviewToInput(
+            CardOcr.cameraPreviewToInput(
                 bitmap,
                 bitmap.size().toRect(),
                 bitmap.size().toRect()

@@ -144,7 +144,10 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
                 networks = json.optJSONObject(FIELD_NETWORKS)?.let {
                     NetworksJsonParser().parse(it)
                 },
-                displayBrand = StripeJsonUtils.optString(json, FIELD_DISPLAY_BRAND)
+                displayBrand = StripeJsonUtils.optString(json, FIELD_DISPLAY_BRAND),
+                cardArt = json.optJSONObject(FIELD_CARD_ART)?.let {
+                    CardArtJsonParser().parse(it)
+                }
             )
         }
 
@@ -216,6 +219,7 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
             private const val FIELD_WALLET = "wallet"
             private const val FIELD_DISPLAY_BRAND = "display_brand"
             private const val FIELD_NETWORKS = "networks"
+            private const val FIELD_CARD_ART = "card_art"
         }
     }
 

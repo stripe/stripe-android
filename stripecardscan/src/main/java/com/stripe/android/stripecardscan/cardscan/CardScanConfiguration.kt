@@ -7,5 +7,6 @@ import kotlinx.parcelize.Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
 data class CardScanConfiguration(
-    val elementsSessionId: String?
+    val elementsSessionId: String?,
+    val enableMlKitTextRecognition: Boolean = false,
 ) : Parcelable

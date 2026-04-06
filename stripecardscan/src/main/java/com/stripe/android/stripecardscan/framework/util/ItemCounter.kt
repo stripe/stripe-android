@@ -5,14 +5,16 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
+internal data class CountedItem<T>(val count: Int, val item: T)
+
 /**
  * A class that counts and saves items.
  */
-internal class ItemCounter<T>(initialValue: T) {
+internal class ItemCounter<T>(initialValue: T? = null) {
     private val storageMutex = Mutex()
     private val items = mutableMapOf<T, Int>()
 
-    init { runBlocking { countItem(initialValue) } }
+    init { initialValue?.let { runBlocking { countItem(it) } } }
 
     /**
      * Increment the count for the given item. Return the new count for the given item.
@@ -22,11 +24,19 @@ internal class ItemCounter<T>(initialValue: T) {
     }
 
     /**
-     * Get the item that with the highest count.
+     * Get the item with the highest count, or null if empty.
      */
     @CheckResult
-    fun getHighestCountItem(): Pair<Int, T> =
-        items.maxByOrNull { it.value }?.let { it.value to it.key }!!
+    fun getHighestCountItemOrNull(): CountedItem<T>? =
+        items.maxByOrNull { it.value }?.let { CountedItem(it.value, it.key) }
+
+    /**
+     * Get the item with the highest count.
+     * @throws NoSuchElementException if the counter is empty.
+     */
+    @CheckResult
+    fun getHighestCountItem(): CountedItem<T> =
+        getHighestCountItemOrNull() ?: throw NoSuchElementException("ItemCounter is empty")
 
     /**
      * Reset all item counts.

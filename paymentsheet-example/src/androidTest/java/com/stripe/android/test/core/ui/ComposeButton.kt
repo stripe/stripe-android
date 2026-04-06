@@ -26,7 +26,9 @@ internal class ComposeButton(
             } else {
                 matcher.and(isEnabled())
             }
-            composeTestRule.onAllNodes(combinedMatcher).fetchSemanticsNodes().isNotEmpty()
+            composeTestRule.onAllNodes(combinedMatcher)
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isNotEmpty()
         }
         return this
     }

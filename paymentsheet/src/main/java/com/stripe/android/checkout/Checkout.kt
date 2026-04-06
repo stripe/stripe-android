@@ -103,6 +103,9 @@ class Checkout private constructor(
     private val _checkoutSession = MutableStateFlow(internalState.checkoutSessionResponse.asCheckoutSession())
     val checkoutSession: StateFlow<CheckoutSession> = _checkoutSession.asStateFlow()
 
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
     init {
         CheckoutInstances.add(internalState.key, this)
     }
@@ -208,12 +211,15 @@ class Checkout private constructor(
         }
         // Run network requests with a mutex to ensure events are processed in order.
         return mutex.withLock {
-            internalState.block(internalState.checkoutSessionResponse.id).map { response ->
+            _isLoading.value = true
+            val result = internalState.block(internalState.checkoutSessionResponse.id).map { response ->
                 internalState = internalState.copy(checkoutSessionResponse = response).additionalStateMutations()
                 val checkoutSession = response.asCheckoutSession()
                 _checkoutSession.value = checkoutSession
                 checkoutSession
             }
+            _isLoading.value = false
+            result
         }
     }
 }

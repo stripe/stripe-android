@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.asStateFlow
 internal class CardScanStripeLauncher(
     context: Context,
     private val eventsReporter: CardScanEventsReporter,
+    private val enableMlKitCardScan: Boolean,
     isLaunchingState: MutableState<Boolean>,
 ) : CardScanLauncher {
 
@@ -47,7 +48,12 @@ internal class CardScanStripeLauncher(
         _isLaunching = true
         eventsReporter.onCardScanStarted(implementation)
         activityLauncher.launch(
-            CardScanSheetParams(CardScanConfiguration(elementsSessionId = null))
+            CardScanSheetParams(
+                CardScanConfiguration(
+                    elementsSessionId = null,
+                    enableMlKitTextRecognition = enableMlKitCardScan,
+                )
+            )
         )
     }
 
@@ -61,8 +67,8 @@ internal class CardScanStripeLauncher(
                 CardScanResult.Completed(
                     ScannedCard(
                         pan = sheetResult.scannedCard.pan,
-                        expirationMonth = null,
-                        expirationYear = null,
+                        expirationMonth = sheetResult.scannedCard.expiryMonth,
+                        expirationYear = sheetResult.scannedCard.expiryYear,
                     )
                 )
             }
@@ -104,14 +110,16 @@ internal class CardScanStripeLauncher(
         @Composable
         internal fun rememberCardScanStripeLauncher(
             eventsReporter: CardScanEventsReporter,
+            enableMlKitCardScan: Boolean = false,
             onResult: (CardScanResult) -> Unit,
         ): CardScanStripeLauncher {
             val context = LocalContext.current.applicationContext
             val isLaunchingState = rememberSaveable { mutableStateOf(false) }
-            val launcher = remember(eventsReporter, context) {
+            val launcher = remember(eventsReporter, context, enableMlKitCardScan) {
                 CardScanStripeLauncher(
                     context = context,
                     eventsReporter = eventsReporter,
+                    enableMlKitCardScan = enableMlKitCardScan,
                     isLaunchingState = isLaunchingState,
                 )
             }
