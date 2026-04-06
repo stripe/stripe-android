@@ -48,8 +48,8 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.ColorUtils
 import com.stripe.android.uicore.image.LocalImageOptimizer
 import com.stripe.android.uicore.image.LocalStripeImageLoader
-import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.image.StripeCdnImageOptimizer
+import com.stripe.android.uicore.image.StripeImageLoader
 import java.lang.Float.max
 import androidx.compose.ui.unit.max as maxDp
 
