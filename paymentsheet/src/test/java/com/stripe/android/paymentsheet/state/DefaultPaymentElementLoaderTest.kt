@@ -1894,6 +1894,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         consumeLoadingEvents()
 
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         val loadSucceededCall = eventReporter.loadSucceededTurbine.awaitItem()
         assertThat(loadSucceededCall.paymentMethodMetadata.hasCardArt).isTrue()
     }
@@ -1920,6 +1921,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         consumeLoadingEvents()
 
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         val loadSucceededCall = eventReporter.loadSucceededTurbine.awaitItem()
         assertThat(loadSucceededCall.paymentMethodMetadata.hasCardArt).isFalse()
     }
