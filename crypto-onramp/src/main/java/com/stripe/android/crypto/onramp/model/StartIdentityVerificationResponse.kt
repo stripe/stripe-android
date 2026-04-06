@@ -1,6 +1,5 @@
 package com.stripe.android.crypto.onramp.model
 
-import androidx.annotation.RestrictTo
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -8,7 +7,6 @@ import kotlinx.serialization.Serializable
  * Serializable model representing a response from the `/v1/crypto/internal/start_identity_verification`.
  */
 @Serializable
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal class StartIdentityVerificationResponse(
     /**
      * The identifier for the resulting identity session

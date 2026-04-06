@@ -1,6 +1,6 @@
 package com.stripe.android.crypto.onramp.model
 
-import androidx.annotation.RestrictTo
+import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 
 /**
  * Container for all callbacks required by the Onramp coordinator.
@@ -11,7 +11,7 @@ import androidx.annotation.RestrictTo
  * Each callback represents a distinct stage in the onramp process and is
  * invoked by the coordinator at the appropriate time.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@ExperimentalCryptoOnramp
 class OnrampCallbacks {
 
     private var verifyIdentityCallback: OnrampVerifyIdentityCallback? = null

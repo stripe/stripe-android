@@ -1,6 +1,6 @@
 package com.stripe.android.crypto.onramp.exception
 
-import androidx.annotation.RestrictTo
+import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@ExperimentalCryptoOnramp
 class MissingCryptoCustomerException internal constructor() : IllegalStateException("Missing crypto customer ID")

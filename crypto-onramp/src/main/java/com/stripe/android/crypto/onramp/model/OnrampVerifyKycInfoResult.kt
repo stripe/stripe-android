@@ -1,37 +1,37 @@
 package com.stripe.android.crypto.onramp.model
 
-import androidx.annotation.RestrictTo
+import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@ExperimentalCryptoOnramp
 fun interface OnrampVerifyKycCallback {
     fun onResult(result: OnrampVerifyKycInfoResult)
 }
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@ExperimentalCryptoOnramp
 sealed interface OnrampVerifyKycInfoResult {
     /**
      * KYC verified successfully.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @ExperimentalCryptoOnramp
     class Confirmed internal constructor() : OnrampVerifyKycInfoResult
 
     /**
      * The user indicated they need to update their address.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @ExperimentalCryptoOnramp
     class UpdateAddress internal constructor() : OnrampVerifyKycInfoResult
 
     /**
      * The KYC verification was cancelled.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @ExperimentalCryptoOnramp
     class Cancelled internal constructor() : OnrampVerifyKycInfoResult
 
     /**
      * Verification failed.
      * @param error The error that caused the failure
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @ExperimentalCryptoOnramp
     class Failed internal constructor(
         val error: Throwable
     ) : OnrampVerifyKycInfoResult
