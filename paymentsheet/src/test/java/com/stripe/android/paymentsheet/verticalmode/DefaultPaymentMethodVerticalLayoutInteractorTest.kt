@@ -37,6 +37,7 @@ import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.stateFlowOf
+import com.stripe.android.utils.FakePaymentMethodMessagingPromotionsHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -1811,6 +1812,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             onCurrencySelected = { currencyOption ->
                 onCurrencySelectedTurbine.add(currencyOption)
             },
+            paymentMethodMessagingPromotionsHelper = FakePaymentMethodMessagingPromotionsHelper(),
         )
 
         TestParams(

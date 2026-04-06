@@ -12,6 +12,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.LinkInlineHandler
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagingPromotionsHelper
 import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
@@ -28,6 +29,7 @@ internal object TestUiDefinitionFactoryArgumentsFactory {
         setAsDefaultMatchesSaveForFutureUse: Boolean = false,
         automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper? = null,
         tapToAddHelper: TapToAddHelper? = null,
+        paymentMethodMessagingPromotionsHelper: PaymentMethodMessagingPromotionsHelper? = null
     ): UiDefinitionFactory.Arguments.Factory {
         val context: Context? = try {
             ApplicationProvider.getApplicationContext<Application>()
@@ -47,6 +49,7 @@ internal object TestUiDefinitionFactoryArgumentsFactory {
             linkInlineHandler = linkInlineHandler,
             automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
             tapToAddHelper = tapToAddHelper,
+            paymentMethodMessagingPromotionsHelper = paymentMethodMessagingPromotionsHelper
         )
     }
 

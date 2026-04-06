@@ -53,7 +53,7 @@ private object AffirmUiDefinitionFactory : UiDefinitionFactory.Simple() {
         )
         val header = if (message != null) {
             PaymentMethodMessageHeaderElement(
-                identifier = IdentifierSpec.Generic("affirm_header"),
+                identifier = IdentifierSpec.Generic("affirm_promotion"),
                 messagePromotion = message
             )
         } else {

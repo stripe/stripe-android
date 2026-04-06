@@ -57,6 +57,7 @@ import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.RetryRule
 import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
+import com.stripe.android.utils.FakePaymentMethodMessagingPromotionsHelper
 import com.stripe.android.utils.FakeSavedPaymentMethodRepository
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
@@ -527,6 +528,7 @@ internal class PaymentOptionsActivityTest {
                 errorReporter = FakeErrorReporter(),
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
                 customViewModelScope = CoroutineScope(Dispatchers.Unconfined),
+                paymentMethodMessagingPromotionsHelper = FakePaymentMethodMessagingPromotionsHelper(),
             )
         }
 

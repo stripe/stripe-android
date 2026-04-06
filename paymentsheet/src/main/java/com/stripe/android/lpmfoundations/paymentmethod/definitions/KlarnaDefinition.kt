@@ -115,7 +115,7 @@ private object KlarnaUiDefinitionFactory : UiDefinitionFactory.Simple() {
         )
         return if (message != null) {
             PaymentMethodMessageHeaderElement(
-                identifier = IdentifierSpec.Generic("klarna_header_text"),
+                identifier = IdentifierSpec.Generic("klarna_promotion"),
                 messagePromotion = message
             )
         } else {

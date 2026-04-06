@@ -68,7 +68,7 @@ private object AfterpayClearpayUiDefinitionFactory : UiDefinitionFactory.Simple(
 
         val header = if (promotion != null) {
             PaymentMethodMessageHeaderElement(
-                identifier = IdentifierSpec.Generic("afterpay_header"),
+                identifier = IdentifierSpec.Generic("afterpay_promotion"),
                 messagePromotion = promotion
             )
         } else {

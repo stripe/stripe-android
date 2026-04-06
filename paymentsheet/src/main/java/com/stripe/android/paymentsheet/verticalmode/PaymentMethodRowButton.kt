@@ -73,7 +73,7 @@ internal fun PaymentMethodRowButton(
     modifier: Modifier = Modifier,
     appearance: Appearance.Embedded = Appearance.Embedded(RowStyle.FloatingButton.default),
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
-    promotion: PaymentMethodMessagePromotion?
+    promotion: PaymentMethodMessagePromotion? = null,
 ) {
     val defaultPadding = if (subtitle != null) {
         8.dp
@@ -350,7 +350,7 @@ private fun RowButtonInnerContent(
     contentDescription: String? = null,
     appearance: Appearance.Embedded,
     modifier: Modifier = Modifier,
-    promotion: PaymentMethodMessagePromotion?,
+    promotion: PaymentMethodMessagePromotion? = null,
     isSelected: Boolean
 ) {
     Row(
@@ -388,7 +388,7 @@ private fun TitleContent(
     isEnabled: Boolean,
     contentDescription: String?,
     appearance: Appearance.Embedded,
-    promotion: PaymentMethodMessagePromotion?,
+    promotion: PaymentMethodMessagePromotion? = null,
     isSelected: Boolean
 ) {
     val titleColor = appearance.style.getTitleTextColor()

@@ -108,6 +108,7 @@ import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentElementLoader
+import com.stripe.android.utils.FakePaymentMethodMessagingPromotionsHelper
 import com.stripe.android.utils.FakeSavedPaymentMethodRepository
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
@@ -1338,6 +1339,7 @@ internal class PaymentSheetActivityTest {
                 mode = EventReporter.Mode.Complete,
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
                 checkoutCurrencyUpdater = FakeCheckoutCurrencyUpdater(),
+                paymentMethodMessagingPromotionsHelper = FakePaymentMethodMessagingPromotionsHelper(),
             )
         }
     }
