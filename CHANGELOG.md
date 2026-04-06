@@ -2,8 +2,6 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
-Added in types for new theming tokens in Connect Embedded Components
-
 ### Connect
 * [DEPRECATED][12695](https://github.com/stripe/stripe-android/pull/12695) Deprecated `Action` and `Form` parameters in `Colors` class. Now those parameters can be initialized within its own class.
 * [ADDED][12695](https://github.com/stripe/stripe-android/pull/12695) Added the types for new theming tokens in Connect Embedded Components and mapped them to the corresponding variable in ConnectJS
