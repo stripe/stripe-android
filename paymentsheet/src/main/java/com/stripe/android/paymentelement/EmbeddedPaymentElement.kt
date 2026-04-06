@@ -137,6 +137,12 @@ class EmbeddedPaymentElement @Inject internal constructor(
         embeddedContent?.Content()
     }
 
+    fun presentPaymentOptions() {
+        println("presentPaymentOptions")
+        // Not implemented, but image it's real, and works the same as
+        // PaymentSheet.FlowController.presentPaymentOptions.
+    }
+
     /**
      * Asynchronously confirms the currently selected payment option.
      *

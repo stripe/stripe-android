@@ -87,4 +87,8 @@
     <string name="unable_to_load_checkout_button">Try again</string>
     <string name="success">Success</string>
     <string name="finish">Finish</string>
+    <string name="flow_controller_intent_config_title">FlowController with IntentConfiguration</string>
+    <string name="flow_controller_intent_config_subtitle">FlowController using configureWithIntentConfiguration and presentPaymentOptions</string>
+    <string name="embedded_intent_config_title">EmbeddedPaymentElement with IntentConfiguration</string>
+    <string name="embedded_intent_config_subtitle">EmbeddedPaymentElement using configure with IntentConfiguration and presentPaymentOptions</string>
 </resources>

@@ -27,6 +27,12 @@
     <ID>PackageNaming:CustomFlowActivity.kt:package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.custom_flow</ID>
     <ID>PackageNaming:CustomFlowViewModel.kt:package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.custom_flow</ID>
     <ID>PackageNaming:CustomFlowViewState.kt:package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.custom_flow</ID>
+    <ID>PackageNaming:EmbeddedPaymentElementExampleActivity.kt:package com.stripe.android.paymentsheet.example.samples.ui.embedded_payment_element</ID>
+    <ID>PackageNaming:EmbeddedPaymentElementExampleViewModel.kt:package com.stripe.android.paymentsheet.example.samples.ui.embedded_payment_element</ID>
+    <ID>PackageNaming:EmbeddedPaymentElementExampleViewState.kt:package com.stripe.android.paymentsheet.example.samples.ui.embedded_payment_element</ID>
+    <ID>PackageNaming:FlowControllerIntentConfigActivity.kt:package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.flow_controller_with_intent_configuration</ID>
+    <ID>PackageNaming:FlowControllerIntentConfigViewModel.kt:package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.flow_controller_with_intent_configuration</ID>
+    <ID>PackageNaming:FlowControllerIntentConfigViewState.kt:package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.flow_controller_with_intent_configuration</ID>
     <ID>PackageNaming:ServerSideConfirmationCompleteFlowActivity.kt:package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.complete_flow</ID>
     <ID>PackageNaming:ServerSideConfirmationCompleteFlowViewModel.kt:package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.complete_flow</ID>
     <ID>PackageNaming:ServerSideConfirmationCompleteFlowViewState.kt:package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.complete_flow</ID>

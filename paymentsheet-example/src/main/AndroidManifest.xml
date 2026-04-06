@@ -54,6 +54,8 @@
         <activity android:name="com.stripe.android.paymentsheet.example.playground.activity.FawryActivity" />
         <activity android:name="com.stripe.android.paymentsheet.example.playground.activity.CustomPaymentMethodActivity" />
         <activity android:name="com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundActivity" />
+        <activity android:name="com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.flow_controller_with_intent_configuration.FlowControllerIntentConfigActivity" />
+        <activity android:name="com.stripe.android.paymentsheet.example.samples.ui.embedded_payment_element.EmbeddedPaymentElementExampleActivity" />
         <activity android:name="com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedExampleActivity" />
         <activity android:name="com.stripe.android.paymentsheet.example.playground.spt.SharedPaymentTokenPlaygroundActivity" />
         <activity android:name="com.stripe.android.paymentsheet.example.playground.LinkControllerPlaygroundActivity" />

@@ -37,8 +37,10 @@ import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedExamp
 import com.stripe.android.paymentsheet.example.samples.ui.SECTION_ALPHA
 import com.stripe.android.paymentsheet.example.samples.ui.addresselement.AddressElementExampleActivity
 import com.stripe.android.paymentsheet.example.samples.ui.customersheet.CustomerSheetExampleActivity
+import com.stripe.android.paymentsheet.example.samples.ui.embedded_payment_element.EmbeddedPaymentElementExampleActivity
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.complete_flow.CompleteFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.custom_flow.CustomFlowActivity
+import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.flow_controller_with_intent_configuration.FlowControllerIntentConfigActivity
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.complete_flow.ServerSideConfirmationCompleteFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.custom_flow.ServerSideConfirmationCustomFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
@@ -85,9 +87,21 @@ class MainActivity : AppCompatActivity() {
                 section = MenuItem.Section.CustomFlow,
             ),
             MenuItem(
+                titleResId = R.string.flow_controller_intent_config_title,
+                subtitleResId = R.string.flow_controller_intent_config_subtitle,
+                klass = FlowControllerIntentConfigActivity::class.java,
+                section = MenuItem.Section.CustomFlow,
+            ),
+            MenuItem(
                 titleResId = R.string.embedded_example_title,
                 subtitleResId = R.string.embedded_subtitle,
                 klass = EmbeddedExampleActivity::class.java,
+                section = MenuItem.Section.Embedded,
+            ),
+            MenuItem(
+                titleResId = R.string.embedded_intent_config_title,
+                subtitleResId = R.string.embedded_intent_config_subtitle,
+                klass = EmbeddedPaymentElementExampleActivity::class.java,
                 section = MenuItem.Section.Embedded,
             ),
             MenuItem(
