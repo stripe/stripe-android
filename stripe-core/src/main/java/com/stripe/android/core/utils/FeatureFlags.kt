@@ -18,6 +18,7 @@ object FeatureFlags {
     val enableTapToAdd = FeatureFlag("Enable Tap to Add")
     val enableCardArt = FeatureFlag("Enable Card Art")
     val enableKlarnaFormRemoval = FeatureFlag("Remove forms from Klarna")
+    val paymentMethodMessagePromotions = FeatureFlag("Use BNPL Promotions")
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

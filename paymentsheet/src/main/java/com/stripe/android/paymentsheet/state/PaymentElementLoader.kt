@@ -42,6 +42,7 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.model.validate
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
 import com.stripe.attestation.IntegrityRequestManager
@@ -231,6 +232,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val checkoutSessionLoader: CheckoutSessionLoader,
     private val elementsSessionLoader: ElementsSessionLoader,
     private val createCustomerMetadata: CreateCustomerMetadata,
+    private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper
 ) : PaymentElementLoader {
 
     fun interface AnalyticsMetadataFactory {
@@ -282,6 +284,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         if (elementsSession.shouldWarmUpIntegrity()) {
             launch { integrityRequestManager.prepare() }
         }
+
+        // Pre-fetch PMM Promotions for BNPLs
+        paymentMethodMessagePromotionsHelper.fetchPromotionsAsync(elementsSession.stripeIntent)
 
         val isGooglePayReady = isGooglePayReady(configuration, elementsSession, isGooglePaySupportedByConfiguration)
 
