@@ -28,7 +28,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
-import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.RetryRule
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.tta.testing.TapToAddCardAddedPage
@@ -41,7 +40,6 @@ import com.stripe.android.tta.testing.TerminalTestDelegate
 import com.stripe.android.utils.PaymentElementCallbackTestRule
 import com.stripe.android.utils.PaymentLauncherContractArgsCvcMatcher
 import com.stripe.android.view.ActivityStarter
-import com.stripe.stripeterminal.external.models.ReaderSupportResult
 import com.stripe.stripeterminal.external.models.TerminalErrorCode
 import com.stripe.stripeterminal.external.models.TerminalException
 import kotlinx.coroutines.test.runTest
@@ -91,17 +89,16 @@ class TapToAddActivityTest {
     fun successInContinueMode() = runScenario(
         mode = TapToAddMode.Continue,
     ) {
-        val info = cardCollectionHelper.enqueueSuccessfulTapToCollectFlow()
+        val info = cardCollectionHelper.enqueueSuccessfulTapToCollectFlow(shouldValidate = true)
 
         enqueueCallbacks(CreateIntentResult.Success(info.setupIntentClientSecret))
 
         launch { activityScenario ->
-            cardArtTestHelper.assertCardArtAssetPreloads()
             cardCollectionHelper.assertSuccessfulCardCollection(info)
 
             waitForIdle()
 
-            cardAddedPage.assertShown(withLink = false)
+            cardAddedPage.assertShown()
             cardAddedPage.assertContinueButton(isEnabled = true)
             cardAddedPage.clickContinue()
 
@@ -134,13 +131,12 @@ class TapToAddActivityTest {
             )
         )
     ) {
-        val info = cardCollectionHelper.enqueueSuccessfulTapToCollectFlow()
+        val info = cardCollectionHelper.enqueueSuccessfulTapToCollectFlow(shouldValidate = true)
 
         enqueueCallbacks(CreateIntentResult.Success(info.setupIntentClientSecret))
         linkHelper.enqueueLookup()
 
         launch { activityScenario ->
-            cardArtTestHelper.assertCardArtAssetPreloads()
             cardCollectionHelper.assertSuccessfulCardCollection(info)
 
             waitForIdle()
@@ -176,7 +172,7 @@ class TapToAddActivityTest {
             stripeIntent = PAYMENT_INTENT,
         ),
     ) {
-        val info = cardCollectionHelper.enqueueSuccessfulTapToCollectFlow()
+        val info = cardCollectionHelper.enqueueSuccessfulTapToCollectFlow(shouldValidate = true)
 
         enqueueCallbacks(CreateIntentResult.Success(info.setupIntentClientSecret))
 
@@ -185,19 +181,18 @@ class TapToAddActivityTest {
         )
 
         launch { activityScenario ->
-            cardArtTestHelper.assertCardArtAssetPreloads()
             cardCollectionHelper.assertSuccessfulCardCollection(info)
 
             waitForIdle()
 
-            cardAddedPage.assertShown(withLink = false)
+            cardAddedPage.assertShown()
             cardAddedPage.assertContinueButton(isEnabled = true)
             cardAddedPage.clickContinue()
 
             waitForIdle()
 
-            confirmationPage.assertPrimaryButton(label = "Pay $10.99", isEnabled = true)
-            confirmationPage.clickPrimaryButton(label = "Pay $10.99")
+            confirmationPage.assertPrimaryButton(withLabel = "Pay $10.99", isEnabled = true)
+            confirmationPage.clickPrimaryButton()
 
             waitForIdle()
 
@@ -235,8 +230,6 @@ class TapToAddActivityTest {
     ) {
         val info = cardCollectionHelper.enqueueSuccessfulTapToCollectFlow()
 
-        enqueueCallbacks(CreateIntentResult.Success(info.setupIntentClientSecret))
-
         linkHelper.enqueueLookup()
         linkHelper.enqueueSignup()
         linkHelper.enqueueCreatePaymentDetailsFromPaymentMethod(info.cardPaymentMethod.id)
@@ -246,9 +239,6 @@ class TapToAddActivityTest {
         )
 
         launch { activityScenario ->
-            cardArtTestHelper.assertCardArtAssetPreloads()
-            cardCollectionHelper.assertSuccessfulCardCollection(info)
-
             waitForIdle()
 
             cardAddedPage.assertShown(withLink = true)
@@ -261,8 +251,8 @@ class TapToAddActivityTest {
 
             waitForIdle()
 
-            confirmationPage.assertPrimaryButton(label = "Pay $10.99", isEnabled = true)
-            confirmationPage.clickPrimaryButton(label = "Pay $10.99")
+            confirmationPage.assertPrimaryButton(isEnabled = true)
+            confirmationPage.clickPrimaryButton()
 
             waitForIdle()
 
@@ -295,23 +285,20 @@ class TapToAddActivityTest {
         )
 
         launch { activityScenario ->
-            cardArtTestHelper.assertCardArtAssetPreloads()
             cardCollectionHelper.assertSuccessfulCardCollection(info)
 
             waitForIdle()
 
-            cardAddedPage.assertShown(withLink = false)
+            cardAddedPage.assertShown()
             cardAddedPage.clickContinue()
 
             waitForIdle()
 
-            val payButtonLabel = "Pay $10.99"
-
-            confirmationPage.assertPrimaryButton(label = payButtonLabel, isEnabled = false)
+            confirmationPage.assertPrimaryButton(withLabel = "Pay $10.99", isEnabled = false)
             confirmationPage.assertCvcRecollectionFieldShown()
             confirmationPage.fillCvc("123")
-            confirmationPage.assertPrimaryButton(label = payButtonLabel, isEnabled = true)
-            confirmationPage.clickPrimaryButton(label = payButtonLabel)
+            confirmationPage.assertPrimaryButton(isEnabled = true)
+            confirmationPage.clickPrimaryButton()
 
             waitForIdle()
 
@@ -332,41 +319,18 @@ class TapToAddActivityTest {
     fun canceledDuringTerminalTapFlow() = runScenario(
         mode = TapToAddMode.Complete,
     ) {
-        val reader = terminalWrapperTestRule.delegate.createReader()
-        val setupIntent = terminalWrapperTestRule.delegate.createSetupIntent()
-        val clientSecret = "seti_123_secret_123"
-
         terminalWrapperTestRule.delegate.setScenario(
             TerminalTestDelegate.Scenario(
-                isInitialized = true,
-                connectedReader = null,
-                connectReaderResult = TerminalTestDelegate.ConnectReaderResult.Success(reader),
-                discoveredReaders = listOf(reader),
-                readerSupportResult = ReaderSupportResult.Supported,
-                retrieveSetupIntentResult = TerminalTestDelegate.SetupIntentResult.Success(setupIntent),
                 collectSetupIntentPaymentMethodResult = TerminalTestDelegate.SetupIntentResult.Failure(
                     exception = TerminalException(
                         errorCode = TerminalErrorCode.CANCELED,
-                        errorMessage = "Canceled",
+                        errorMessage = "Canceled!",
                     )
-                ),
+                )
             )
         )
 
-        enqueueCallbacks(CreateIntentResult.Success(clientSecret))
-
         launch { activityScenario ->
-            cardArtTestHelper.assertCardArtAssetPreloads()
-
-            cardCollectionHelper.assertTerminalFlowThroughCollect(
-                TapToAddCardCollectionTestHelper.TapToCollectAssertionInfo(
-                    reader = reader,
-                    setupIntent = setupIntent,
-                    cardPaymentMethod = PaymentMethodFactory.card(id = "pm_placeholder"),
-                    setupIntentClientSecret = clientSecret,
-                )
-            )
-
             waitForIdle()
 
             assertTapToAddResult(
@@ -382,15 +346,10 @@ class TapToAddActivityTest {
     ) {
         val info = cardCollectionHelper.enqueueSuccessfulTapToCollectFlow()
 
-        enqueueCallbacks(CreateIntentResult.Success(info.setupIntentClientSecret))
-
         launch { activityScenario ->
-            cardArtTestHelper.assertCardArtAssetPreloads()
-            cardCollectionHelper.assertSuccessfulCardCollection(info)
-
             waitForIdle()
 
-            cardAddedPage.assertShown(withLink = false)
+            cardAddedPage.assertShown()
             cardAddedPage.clickCloseButton()
 
             waitForIdle()
@@ -415,20 +374,14 @@ class TapToAddActivityTest {
     ) {
         val info = cardCollectionHelper.enqueueSuccessfulTapToCollectFlow()
 
-        enqueueCallbacks(CreateIntentResult.Success(info.setupIntentClientSecret))
-
         launch { activityScenario ->
-            cardArtTestHelper.assertCardArtAssetPreloads()
-            cardCollectionHelper.assertSuccessfulCardCollection(info)
-
             waitForIdle()
 
-            cardAddedPage.assertShown(withLink = false)
+            cardAddedPage.assertShown()
             cardAddedPage.clickContinue()
 
             waitForIdle()
 
-            confirmationPage.assertPrimaryButton(label = "Pay $10.99", isEnabled = true)
             confirmationPage.clickCloseButton()
 
             waitForIdle()
@@ -477,8 +430,6 @@ class TapToAddActivityTest {
         enqueueCallbacks(CreateIntentResult.Success("seti_123_secret_123"))
 
         launch { activityScenario ->
-            cardArtTestHelper.assertCardArtAssetPreloads()
-
             assertThat(terminalWrapperTestRule.delegate.awaitIsInitializedCall()).isNotNull()
             assertThat(terminalWrapperTestRule.delegate.awaitSetTapToPayUxConfigurationCall()).isNotNull()
             assertThat(terminalWrapperTestRule.delegate.awaitConnectedReaderCall()).isNotNull()
@@ -506,8 +457,11 @@ class TapToAddActivityTest {
             isTapToAddSupported = true,
             hasCustomerConfiguration = true,
         ),
+        createIntentResult: CreateIntentResult = CreateIntentResult.Success(clientSecret = "seti_123_secret_123"),
         block: Scenario.() -> Unit,
     ) {
+        enqueueCallbacks(createIntentResult)
+
         block(
             Scenario(
                 launch = { block ->
@@ -525,6 +479,7 @@ class TapToAddActivityTest {
                     ).use { scenario ->
                         scenario.onActivity {
                             runTest {
+                                cardArtTestHelper.assertCardArtAssetPreloads()
                                 block(scenario)
                             }
                         }

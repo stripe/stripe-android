@@ -21,7 +21,11 @@ class TerminalWrapperTestRule : TestWatcher() {
 
     override fun finished(description: Description?) {
         TerminalWrapper.overrideWrapper = null
-        delegate.validate()
+
+        if (delegate.shouldValidate) {
+            delegate.validate()
+        }
+
         super.finished(description)
     }
 

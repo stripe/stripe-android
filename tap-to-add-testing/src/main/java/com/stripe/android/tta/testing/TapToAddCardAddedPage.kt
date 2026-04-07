@@ -2,7 +2,6 @@ package com.stripe.android.tta.testing
 
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
-import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.ComposeTestRule
@@ -13,7 +12,7 @@ class TapToAddCardAddedPage(
 ) {
     private val primaryButtonElement = TapToAddPrimaryButtonElement(composeTestRule)
 
-    fun assertShown(withLink: Boolean) {
+    fun assertShown(withLink: Boolean = false) {
         assertHasCardAddedText()
 
         if (withLink) {
@@ -34,7 +33,7 @@ class TapToAddCardAddedPage(
     }
 
     fun assertContinueButton(isEnabled: Boolean) {
-        primaryButtonElement.assert(label = "Continue").run {
+        assertHasContinueButton().run {
             if (isEnabled) {
                 assertIsEnabled()
             } else {
@@ -48,7 +47,7 @@ class TapToAddCardAddedPage(
     }
 
     fun clickCloseButton() {
-        composeTestRule.onNode(hasContentDescription("Close")).click()
+        composeTestRule.retrieveCloseButton().click()
     }
 
     private fun assertHasCardAddedText() {
@@ -57,5 +56,5 @@ class TapToAddCardAddedPage(
         }
     }
 
-    private fun assertHasContinueButton() = primaryButtonElement.assert(label = "Continue")
+    private fun assertHasContinueButton() = primaryButtonElement.assert(withLabel = "Continue")
 }

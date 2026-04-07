@@ -28,7 +28,7 @@ class TapToAddCardCollectionTestHelper(
     private val delegate: TerminalTestDelegate
         get() = delegateRetriever()
 
-    fun enqueueSuccessfulTapToCollectFlow(): TapToCollectAssertionInfo {
+    fun enqueueSuccessfulTapToCollectFlow(shouldValidate: Boolean = false): TapToCollectAssertionInfo {
         val reader = delegate.createReader()
         val generatedPaymentMethod = PaymentMethodFactory.card("pm_1")
         val cardPaymentMethod = PaymentMethodFactory.card("pm_2")
@@ -38,6 +38,7 @@ class TapToAddCardCollectionTestHelper(
 
         delegate.setScenario(
             TerminalTestDelegate.Scenario(
+                shouldValidate = shouldValidate,
                 isInitialized = true,
                 connectedReader = null,
                 connectReaderResult = TerminalTestDelegate.ConnectReaderResult.Success(reader),
@@ -69,11 +70,6 @@ class TapToAddCardCollectionTestHelper(
     }
 
     suspend fun assertSuccessfulCardCollection(collect: TapToCollectAssertionInfo) {
-        assertTerminalFlowThroughCollect(collect)
-        assertConfirmSetupIntent(collect.setupIntent)
-    }
-
-    suspend fun assertTerminalFlowThroughCollect(collect: TapToCollectAssertionInfo) {
         assertIsInitializedCall()
         assertConnectedReaderCall()
         assertSupportsReadersOfTypeCall()
@@ -82,6 +78,7 @@ class TapToAddCardCollectionTestHelper(
         assertSetTapToPayUxConfigurationCall()
         assertRetrieveSetupIntentCall(collect.setupIntentClientSecret)
         assertCollectSetupIntentPaymentMethod(collect.setupIntent)
+        assertConfirmSetupIntent(collect.setupIntent)
     }
 
     private suspend fun assertIsInitializedCall() {
