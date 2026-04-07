@@ -5,7 +5,6 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.paymentsheet.BuildConfig
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -18,6 +17,11 @@ internal interface TapToAddConnectionModule {
     fun bindsStripeTerminalSdkAvailable(
         isStripeTerminalSdkAvailable: DefaultIsStripeTerminalSdkAvailable
     ): IsStripeTerminalSdkAvailable
+
+    @Binds
+    fun bindsIsSimulatedProvider(
+        isSimulatedProvider: DefaultTapToAddIsSimulatedProvider
+    ): TapToAddIsSimulatedProvider
 
     companion object {
         @Provides
@@ -33,7 +37,8 @@ internal interface TapToAddConnectionModule {
             logger: Logger,
             applicationContext: Context,
             paymentConfiguration: Provider<PaymentConfiguration>,
-            @IOContext workContext: CoroutineContext
+            @IOContext workContext: CoroutineContext,
+            isSimulatedProvider: TapToAddIsSimulatedProvider,
         ): TapToAddConnectionManager {
             return TapToAddConnectionManager.create(
                 applicationContext = applicationContext,
@@ -41,7 +46,7 @@ internal interface TapToAddConnectionModule {
                 terminalWrapper = terminalWrapper,
                 errorReporter = errorReporter,
                 paymentConfiguration = paymentConfiguration,
-                isSimulated = BuildConfig.DEBUG,
+                isSimulatedProvider = isSimulatedProvider,
                 logger = logger,
                 workContext = workContext,
             )
