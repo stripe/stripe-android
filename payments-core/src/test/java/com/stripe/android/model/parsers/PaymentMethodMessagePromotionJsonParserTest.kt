@@ -22,7 +22,7 @@ class PaymentMethodMessagePromotionJsonParserTest {
 
         assertThat(promotions).isNotNull()
         assertThat(promotions.promotions.size).isEqualTo(1)
-        assertThat(promotions.promotions[0].paymentMethodType).isEqualTo("Klarna")
+        assertThat(promotions.promotions[0].paymentMethodType).isEqualTo("KLARNA")
         assertThat(promotions.promotions[0].message).isEqualTo("4 interest-free payments of \$25.00")
         assertThat(promotions.promotions[0].learnMore.message).isEqualTo("Learn more")
         assertThat(promotions.promotions[0].learnMore.url).isEqualTo(
