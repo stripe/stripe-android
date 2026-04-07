@@ -69,6 +69,11 @@ class TapToAddCardCollectionTestHelper(
     }
 
     suspend fun assertSuccessfulCardCollection(collect: TapToCollectAssertionInfo) {
+        assertTerminalFlowThroughCollect(collect)
+        assertConfirmSetupIntent(collect.setupIntent)
+    }
+
+    suspend fun assertTerminalFlowThroughCollect(collect: TapToCollectAssertionInfo) {
         assertIsInitializedCall()
         assertConnectedReaderCall()
         assertSupportsReadersOfTypeCall()
@@ -77,7 +82,6 @@ class TapToAddCardCollectionTestHelper(
         assertSetTapToPayUxConfigurationCall()
         assertRetrieveSetupIntentCall(collect.setupIntentClientSecret)
         assertCollectSetupIntentPaymentMethod(collect.setupIntent)
-        assertConfirmSetupIntent(collect.setupIntent)
     }
 
     private suspend fun assertIsInitializedCall() {

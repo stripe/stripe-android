@@ -2,6 +2,7 @@ package com.stripe.android.tta.testing
 
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.ComposeTestRule
@@ -44,6 +45,10 @@ class TapToAddCardAddedPage(
 
     fun clickContinue() {
         assertHasContinueButton().click()
+    }
+
+    fun clickCloseButton() {
+        composeTestRule.onNode(hasContentDescription("Close")).click()
     }
 
     private fun assertHasCardAddedText() {

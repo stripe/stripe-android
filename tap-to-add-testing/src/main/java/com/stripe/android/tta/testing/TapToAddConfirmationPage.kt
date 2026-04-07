@@ -3,6 +3,7 @@ package com.stripe.android.tta.testing
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.performTextInput
@@ -35,5 +36,9 @@ class TapToAddConfirmationPage(
 
     fun clickPrimaryButton(label: String) {
         primaryButtonElement.assert(label).click()
+    }
+
+    fun clickCloseButton() {
+        composeTestRule.onNode(hasContentDescription("Close")).click()
     }
 }
