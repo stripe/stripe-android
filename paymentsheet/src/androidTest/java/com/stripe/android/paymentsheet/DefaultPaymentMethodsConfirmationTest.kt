@@ -96,7 +96,6 @@ internal class DefaultPaymentMethodsConfirmationTest {
         paymentSheetPage.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController()
-        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -146,7 +145,6 @@ internal class DefaultPaymentMethodsConfirmationTest {
             paymentSheetPage.clickPrimaryButton()
 
             testContext.consumePaymentOptionEventForFlowController()
-            testContext.consumeNullPaymentOptionEventForFlowController()
         }
 
     @Test
@@ -197,7 +195,6 @@ internal class DefaultPaymentMethodsConfirmationTest {
             paymentSheetPage.clickPrimaryButton()
 
             testContext.consumePaymentOptionEventForFlowController()
-            testContext.consumeNullPaymentOptionEventForFlowController()
         }
 
     @Test
@@ -241,7 +238,6 @@ internal class DefaultPaymentMethodsConfirmationTest {
         paymentSheetPage.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController()
-        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -285,7 +281,6 @@ internal class DefaultPaymentMethodsConfirmationTest {
         paymentSheetPage.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController()
-        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     private fun navigateToFormForLpm() {

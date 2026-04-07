@@ -154,7 +154,6 @@ internal class GooglePayTest {
                         context.confirm()
                     }
 
-                    context.consumeNullPaymentOptionEventForFlowController()
                 }
             )
         }

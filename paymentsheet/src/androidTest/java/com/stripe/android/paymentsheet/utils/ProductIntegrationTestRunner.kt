@@ -98,8 +98,6 @@ internal sealed interface ProductIntegrationTestRunnerContext {
 
     suspend fun consumePaymentOptionEventForFlowController(paymentMethodType: String, label: String)
 
-    suspend fun consumeNullPaymentOptionEventForFlowController()
-
     class WithPaymentSheet(
         private val context: PaymentSheetTestRunnerContext
     ) : ProductIntegrationTestRunnerContext {
@@ -129,9 +127,6 @@ internal sealed interface ProductIntegrationTestRunnerContext {
         }
 
         override suspend fun consumePaymentOptionEventForFlowController(paymentMethodType: String, label: String) {
-        }
-
-        override suspend fun consumeNullPaymentOptionEventForFlowController() {
         }
     }
 
@@ -177,10 +172,6 @@ internal sealed interface ProductIntegrationTestRunnerContext {
             val paymentOption = context.configureCallbackTurbine.awaitItem()
             assertThat(paymentOption?.label).endsWith(label)
             assertThat(paymentOption?.paymentMethodType).isEqualTo(paymentMethodType)
-        }
-
-        override suspend fun consumeNullPaymentOptionEventForFlowController() {
-            assertThat(context.configureCallbackTurbine.awaitItem()).isNull()
         }
 
         fun confirm() {

@@ -174,7 +174,11 @@ internal class DefaultFlowController @Inject internal constructor(
                 when (state) {
                     is ConfirmationHandler.State.Idle,
                     is ConfirmationHandler.State.Confirming -> Unit
-                    is ConfirmationHandler.State.Complete -> onIntentResult(state.result)
+                    is ConfirmationHandler.State.Complete -> {
+                        if (viewModel.state != null) {
+                            onIntentResult(state.result)
+                        }
+                    }
                 }
             }
         }
@@ -708,7 +712,6 @@ internal class DefaultFlowController @Inject internal constructor(
             viewModel.paymentSelection = null
             viewModel.state = null
             viewModel.previousConfigureRequest = null
-            paymentOptionResultCallback.onPaymentOptionResult(PaymentOptionResult(null, false))
         }
 
         viewModelScope.launch {

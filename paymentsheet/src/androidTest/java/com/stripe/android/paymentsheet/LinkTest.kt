@@ -118,7 +118,6 @@ internal class LinkTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
-        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -223,7 +222,6 @@ internal class LinkTest {
             page.clickPrimaryButton()
 
             testContext.consumePaymentOptionEventForFlowController("card", "4242")
-            testContext.consumeNullPaymentOptionEventForFlowController()
         }
 
     @Test
@@ -305,7 +303,6 @@ internal class LinkTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "1001")
-        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -399,7 +396,6 @@ internal class LinkTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
-        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -512,7 +508,6 @@ internal class LinkTest {
             page.clickPrimaryButton()
 
             testContext.consumePaymentOptionEventForFlowController("card", "4242")
-            testContext.consumeNullPaymentOptionEventForFlowController()
         }
 
     @Test
@@ -611,7 +606,6 @@ internal class LinkTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "1001")
-        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -675,7 +669,6 @@ internal class LinkTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
-        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -739,7 +732,6 @@ internal class LinkTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
-        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -811,7 +803,6 @@ internal class LinkTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
-        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -866,7 +857,6 @@ internal class LinkTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
-        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -897,7 +887,6 @@ internal class LinkTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
-        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -966,7 +955,6 @@ internal class LinkTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
-        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -1039,7 +1027,6 @@ internal class LinkTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
-        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     @Test
@@ -1144,7 +1131,6 @@ internal class LinkTest {
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
-        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     private fun linkInformation(): RequestMatcher {
