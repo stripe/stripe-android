@@ -741,6 +741,21 @@ class PaymentSheet internal constructor(
         NEVER
     }
 
+    /**
+     * Determines the user interface style used by PaymentSheet.
+     */
+    @Parcelize
+    enum class UserInterfaceStyle : Parcelable {
+        /** (Default) PaymentSheet will automatically switch between light and dark mode based on the device setting. */
+        Automatic,
+
+        /** PaymentSheet will always use light mode colors. */
+        AlwaysLight,
+
+        /** PaymentSheet will always use dark mode colors. */
+        AlwaysDark,
+    }
+
     /** Configuration for [PaymentSheet] **/
     @Parcelize
     @Poko
@@ -806,6 +821,11 @@ class PaymentSheet internal constructor(
          * Describes the appearance of Payment Sheet.
          */
         internal val appearance: Appearance = ConfigurationDefaults.appearance,
+        /**
+         * Determines the user interface style used by PaymentSheet.
+         * Defaults to [UserInterfaceStyle.Automatic], which follows the system's dark mode setting.
+         */
+        internal val userInterfaceStyle: UserInterfaceStyle = ConfigurationDefaults.userInterfaceStyle,
         /**
          * The label to use for the primary button.
          *
@@ -969,6 +989,7 @@ class PaymentSheet internal constructor(
             private var allowsPaymentMethodsRequiringShippingAddress: Boolean =
                 ConfigurationDefaults.allowsPaymentMethodsRequiringShippingAddress
             private var appearance: Appearance = ConfigurationDefaults.appearance
+            private var userInterfaceStyle: UserInterfaceStyle = ConfigurationDefaults.userInterfaceStyle
             private var primaryButtonLabel: String? = ConfigurationDefaults.primaryButtonLabel
             private var billingDetailsCollectionConfiguration =
                 ConfigurationDefaults.billingDetailsCollectionConfiguration
@@ -1019,6 +1040,13 @@ class PaymentSheet internal constructor(
 
             fun appearance(appearance: Appearance) =
                 apply { this.appearance = appearance }
+
+            /**
+             * Determines the user interface style used by PaymentSheet.
+             * Defaults to [UserInterfaceStyle.Automatic], which follows the system's dark mode setting.
+             */
+            fun userInterfaceStyle(userInterfaceStyle: UserInterfaceStyle) =
+                apply { this.userInterfaceStyle = userInterfaceStyle }
 
             fun primaryButtonLabel(primaryButtonLabel: String) =
                 apply { this.primaryButtonLabel = primaryButtonLabel }
@@ -1181,6 +1209,7 @@ class PaymentSheet internal constructor(
                 allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
                 allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
                 appearance = appearance,
+                userInterfaceStyle = userInterfaceStyle,
                 primaryButtonLabel = primaryButtonLabel,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
                 preferredNetworks = preferredNetworks,
@@ -1223,6 +1252,7 @@ class PaymentSheet internal constructor(
             .allowsDelayedPaymentMethods(allowsDelayedPaymentMethods)
             .allowsPaymentMethodsRequiringShippingAddress(allowsPaymentMethodsRequiringShippingAddress)
             .appearance(appearance)
+            .userInterfaceStyle(userInterfaceStyle)
             .billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
             .preferredNetworks(preferredNetworks)
             .allowsRemovalOfLastSavedPaymentMethod(allowsRemovalOfLastSavedPaymentMethod)

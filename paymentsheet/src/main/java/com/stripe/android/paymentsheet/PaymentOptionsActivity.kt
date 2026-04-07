@@ -12,9 +12,9 @@ import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
+import com.stripe.android.paymentsheet.ui.PaymentElementTheme
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
 import com.stripe.android.paymentsheet.utils.applicationIsTaskOwner
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.flow.filterNotNull
@@ -57,7 +57,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionsActivity
         )
 
         setContent {
-            StripeTheme {
+            PaymentElementTheme(userInterfaceStyle = starterArgs.configuration.userInterfaceStyle) {
                 val isProcessing by viewModel.processing.collectAsState()
 
                 val bottomSheetState = rememberStripeBottomSheetState(

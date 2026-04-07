@@ -1,9 +1,6 @@
 package com.stripe.android.link.theme
 
-import android.content.Context
 import android.content.res.Configuration
-import android.content.res.Resources
-import androidx.appcompat.view.ContextThemeWrapper
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Colors
@@ -18,6 +15,7 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.ui.image.LocalStripeImageLoader
+import com.stripe.android.paymentsheet.ui.withUiMode
 import com.stripe.android.uicore.image.StripeImageLoader
 
 internal val LocalLinkAppearance = staticCompositionLocalOf<LinkAppearance.State?> { null }
@@ -107,32 +105,6 @@ internal fun isLinkDarkTheme(appearance: LinkAppearance.State?): Boolean {
         LinkAppearance.Style.ALWAYS_LIGHT -> false
         LinkAppearance.Style.ALWAYS_DARK -> true
         LinkAppearance.Style.AUTOMATIC, null -> isSystemInDarkTheme()
-    }
-}
-
-private fun Context.withUiMode(uiMode: Int, inspectionMode: Boolean): Context {
-    if (uiMode == this.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
-        return this
-    }
-    val config = Configuration(resources.configuration).apply {
-        this.uiMode = (uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or uiMode
-    }
-    return object : ContextThemeWrapper(this, theme) {
-        override fun getResources(): Resources? {
-            @Suppress("DEPRECATION")
-            if (inspectionMode) {
-                // Workaround NPE thrown in BridgeContext#createConfigurationContext() when getting resources.
-                val baseResources = this@withUiMode.resources
-                return Resources(
-                    baseResources.assets,
-                    baseResources.displayMetrics,
-                    config
-                )
-            }
-            return super.getResources()
-        }
-    }.apply {
-        applyOverrideConfiguration(config)
     }
 }
 

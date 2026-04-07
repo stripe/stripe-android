@@ -594,6 +594,7 @@ internal class PlaygroundSettings private constructor(
             AttestationOnIntentConfirmationDefinition,
             EnableTapToAddSettingsDefinition,
             CardArtSettingsDefinition,
+            UserInterfaceStyleSettingsDefinition,
             CustomStripeApiDefinition,
             CaptureMethodSettingsDefinition,
         )
