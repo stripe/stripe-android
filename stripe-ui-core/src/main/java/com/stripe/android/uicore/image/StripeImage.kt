@@ -58,60 +58,23 @@ fun StripeImage(
     errorContent: @Composable BoxWithConstraintsScope.() -> Unit = {},
     loadingContent: @Composable BoxWithConstraintsScope.() -> Unit = {}
 ) {
-    BoxWithConstraints {
-        val debugMode = LocalInspectionMode.current
-        val (width, height) = calculateBoxSize()
-        val state: MutableState<StripeImageState> = remember {
-            if (debugMode && debugPainter != null) {
-                mutableStateOf(Success(debugPainter))
-            } else {
-                mutableStateOf(Loading)
-            }
-        }
-        /*
-         * We should only run this in non-inspection mode, otherwise `StripeImageLoader` attempts a file
-         * system access which is only available in a real Android environment or Robolectric.
-         */
-        if (!debugMode) {
-            LaunchedEffect(url) {
-                imageLoader
-                    .load(url, width, height)
-                    .onSuccess {
-                        it?.let { bitmap ->
-                            state.value = Success(BitmapPainter(bitmap.asImageBitmap()))
-                        }
-                    }
-                    .onFailure {
-                        state.value = Error
-                    }
-            }
-        }
-        AnimatedContent(
-            targetState = state.value,
-            label = "loading_image_animation",
-            contentKey = { targetState ->
-                if (disableAnimations) {
-                    // Animations only occur when the content key changes, by setting the content key to a constant
-                    // value here, we can effectively disable animations.
-                    true
-                } else {
-                    targetState
-                }
-            }
-        ) {
-            when (it) {
-                Error -> errorContent()
-                Loading -> loadingContent()
-                is Success -> Image(
-                    modifier = modifier.testTag(TEST_TAG_IMAGE_FROM_URL),
-                    colorFilter = colorFilter,
-                    contentDescription = contentDescription,
-                    contentScale = contentScale,
-                    alignment = alignment,
-                    painter = it.painter
-                )
-            }
-        }
+    StripeImage(
+        url = url,
+        imageLoader = imageLoader,
+        debugPainter = debugPainter,
+        disableAnimations = disableAnimations,
+        alignment = Alignment.TopStart,
+        errorContent = errorContent,
+        loadingContent = loadingContent,
+    ) { painter ->
+        Image(
+            modifier = modifier.testTag(TEST_TAG_IMAGE_FROM_URL),
+            colorFilter = colorFilter,
+            contentDescription = contentDescription,
+            contentScale = contentScale,
+            alignment = alignment,
+            painter = painter,
+        )
     }
 }
 
