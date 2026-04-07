@@ -817,7 +817,7 @@ class PaymentSheet internal constructor(
          * Determines the user interface style used by PaymentSheet.
          * Defaults to [UserInterfaceStyle.Automatic], which follows the system's dark mode setting.
          */
-        internal val style: UserInterfaceStyle = ConfigurationDefaults.style,
+        internal val userInterfaceStyle: UserInterfaceStyle = ConfigurationDefaults.userInterfaceStyle,
         /**
          * The label to use for the primary button.
          *
@@ -981,7 +981,7 @@ class PaymentSheet internal constructor(
             private var allowsPaymentMethodsRequiringShippingAddress: Boolean =
                 ConfigurationDefaults.allowsPaymentMethodsRequiringShippingAddress
             private var appearance: Appearance = ConfigurationDefaults.appearance
-            private var style: UserInterfaceStyle = ConfigurationDefaults.style
+            private var userInterfaceStyle: UserInterfaceStyle = ConfigurationDefaults.userInterfaceStyle
             private var primaryButtonLabel: String? = ConfigurationDefaults.primaryButtonLabel
             private var billingDetailsCollectionConfiguration =
                 ConfigurationDefaults.billingDetailsCollectionConfiguration
@@ -1037,8 +1037,8 @@ class PaymentSheet internal constructor(
              * Determines the user interface style used by PaymentSheet.
              * Defaults to [UserInterfaceStyle.Automatic], which follows the system's dark mode setting.
              */
-            fun style(style: UserInterfaceStyle) =
-                apply { this.style = style }
+            fun userInterfaceStyle(userInterfaceStyle: UserInterfaceStyle) =
+                apply { this.userInterfaceStyle = userInterfaceStyle }
 
             fun primaryButtonLabel(primaryButtonLabel: String) =
                 apply { this.primaryButtonLabel = primaryButtonLabel }
@@ -1201,7 +1201,7 @@ class PaymentSheet internal constructor(
                 allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
                 allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
                 appearance = appearance,
-                style = style,
+                userInterfaceStyle = userInterfaceStyle,
                 primaryButtonLabel = primaryButtonLabel,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
                 preferredNetworks = preferredNetworks,
@@ -1244,7 +1244,7 @@ class PaymentSheet internal constructor(
             .allowsDelayedPaymentMethods(allowsDelayedPaymentMethods)
             .allowsPaymentMethodsRequiringShippingAddress(allowsPaymentMethodsRequiringShippingAddress)
             .appearance(appearance)
-            .style(style)
+            .userInterfaceStyle(userInterfaceStyle)
             .billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
             .preferredNetworks(preferredNetworks)
             .allowsRemovalOfLastSavedPaymentMethod(allowsRemovalOfLastSavedPaymentMethod)

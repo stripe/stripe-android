@@ -1257,7 +1257,7 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Configuration$Bu
 	public final fun billingDetailsCollectionConfiguration (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun build ()Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;
 	public final fun cardBrandAcceptance (Lcom/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
-	public final fun style (Lcom/stripe/android/paymentsheet/PaymentSheet$UserInterfaceStyle;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
+	public final fun userInterfaceStyle (Lcom/stripe/android/paymentsheet/PaymentSheet$UserInterfaceStyle;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun customPaymentMethods (Ljava/util/List;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun customer (Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun defaultBillingDetails (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;

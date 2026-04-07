@@ -10,7 +10,7 @@ internal object ConfigurationDefaults {
     const val allowsPaymentMethodsRequiringShippingAddress: Boolean = false
     const val allowsRemovalOfLastSavedPaymentMethod: Boolean = true
     val appearance: PaymentSheet.Appearance = PaymentSheet.Appearance()
-    val style: PaymentSheet.UserInterfaceStyle = PaymentSheet.UserInterfaceStyle.Automatic
+    val userInterfaceStyle: PaymentSheet.UserInterfaceStyle = PaymentSheet.UserInterfaceStyle.Automatic
     val billingDetails: PaymentSheet.BillingDetails = PaymentSheet.BillingDetails()
     val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
         PaymentSheet.BillingDetailsCollectionConfiguration()

@@ -57,7 +57,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionsActivity
         )
 
         setContent {
-            PaymentElementTheme(style = starterArgs.configuration.style) {
+            PaymentElementTheme(userInterfaceStyle = starterArgs.configuration.userInterfaceStyle) {
                 val isProcessing by viewModel.processing.collectAsState()
 
                 val bottomSheetState = rememberStripeBottomSheetState(

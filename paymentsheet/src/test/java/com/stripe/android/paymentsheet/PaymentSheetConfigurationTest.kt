@@ -38,7 +38,7 @@ class PaymentSheetConfigurationTest {
             appearance = PaymentSheet.Appearance(
                 colorsLight = PaymentSheet.Colors.configureDefaultLight(primary = Color.Red),
             ),
-            style = PaymentSheet.UserInterfaceStyle.AlwaysDark,
+            userInterfaceStyle = PaymentSheet.UserInterfaceStyle.AlwaysDark,
             primaryButtonLabel = "Pay",
             billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                 name = CollectionMode.Always,

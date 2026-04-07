@@ -37,7 +37,7 @@ internal object UserInterfaceStyleSettingsDefinition :
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData
     ) {
-        configurationBuilder.style(value.style)
+        configurationBuilder.userInterfaceStyle(value.style)
     }
 }
 
