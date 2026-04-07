@@ -6,6 +6,7 @@ import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagingPromotionsHelper
 import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormElement
@@ -21,6 +22,7 @@ internal fun PaymentMethodDefinition.formElements(
     autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory? = null,
     automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper? = null,
     tapToAddHelper: TapToAddHelper? = null,
+    paymentMethodMessagingPromotionsHelper: PaymentMethodMessagingPromotionsHelper? = null
 ): List<FormElement> {
     return requireNotNull(
         metadata.formElementsForCode(
@@ -35,6 +37,7 @@ internal fun PaymentMethodDefinition.formElements(
                 setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
                 automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
                 tapToAddHelper = tapToAddHelper,
+                paymentMethodMessagingPromotionsHelper = paymentMethodMessagingPromotionsHelper,
             )
         )
     )

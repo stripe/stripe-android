@@ -17,6 +17,7 @@ import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.viewmodels.FakeBaseSheetViewModel
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.uicore.utils.stateFlowOf
+import com.stripe.android.utils.FakePaymentMethodMessagingPromotionsHelper
 import org.junit.Rule
 import kotlin.test.Test
 
@@ -126,6 +127,7 @@ class VerticalModeInitialScreenFactoryTest {
             viewModel = fakeViewModel,
             paymentMethodMetadata = paymentMethodMetadata,
             customerStateHolder = customerStateHolder,
+            paymentMethodMessagingPromotionsHelper = FakePaymentMethodMessagingPromotionsHelper(),
         )
         Scenario(
             screens = screens

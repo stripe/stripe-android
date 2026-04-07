@@ -16,6 +16,7 @@ internal interface TapToAddConnectionStarter {
     fun start()
 }
 
+// copy this
 internal class DefaultTapToAddConnectionStarter @Inject constructor(
     private val tapToAddConnectionManager: TapToAddConnectionManager,
     @ViewModelScope private val viewModelScope: CoroutineScope,

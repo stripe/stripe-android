@@ -24,6 +24,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagingPromotionsHelper
 import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.DefaultWalletButtonsInteractor
@@ -85,7 +86,8 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     private val confirmationHandler: ConfirmationHandler,
     private val confirmationStateHolder: EmbeddedConfirmationStateHolder,
     private val linkPaymentLauncher: LinkPaymentLauncher,
-    private val linkAccountHolder: LinkAccountHolder
+    private val linkAccountHolder: LinkAccountHolder,
+    private val paymentMethodMessagingPromotionsHelper: PaymentMethodMessagingPromotionsHelper
 ) : EmbeddedContentHelper {
 
     private val state: StateFlow<State?> = savedStateHandle.getStateFlow(
@@ -276,6 +278,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                     isVerticalLayout = true,
                 )
             },
+            paymentMethodMessagingPromotionsHelper = paymentMethodMessagingPromotionsHelper
         )
     }
 

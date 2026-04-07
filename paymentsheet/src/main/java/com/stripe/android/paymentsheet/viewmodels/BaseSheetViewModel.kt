@@ -65,7 +65,7 @@ internal abstract class BaseSheetViewModel(
     val isCompleteFlow: Boolean,
     val mode: EventReporter.Mode,
     val customerStateHolderFactory: CustomerStateHolder.Factory,
-    val customViewModelScope: CoroutineScope,
+    val customViewModelScope: CoroutineScope
 ) : ViewModel() {
     private val autocompleteLauncher = DefaultAutocompleteLauncher(
         AutocompleteAppearanceContext.PaymentElement(config.appearance)

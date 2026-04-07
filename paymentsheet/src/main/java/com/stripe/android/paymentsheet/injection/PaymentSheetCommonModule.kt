@@ -50,6 +50,7 @@ import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.DefaultSavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagingPromotionsHelperModule
 import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.state.CreateLinkState
@@ -83,6 +84,7 @@ import javax.inject.Singleton
         PaymentsIntegrityModule::class,
         PaymentConfigurationModule::class,
         StripeNetworkClientModule::class,
+        PaymentMethodMessagingPromotionsHelperModule::class,
     ]
 )
 internal abstract class PaymentSheetCommonModule {
