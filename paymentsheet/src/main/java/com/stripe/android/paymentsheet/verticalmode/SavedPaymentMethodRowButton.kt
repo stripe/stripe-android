@@ -18,6 +18,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
+import com.stripe.android.paymentsheet.ui.CardArtImage
 import com.stripe.android.paymentsheet.ui.PaymentMethodIconFromResource
 import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
@@ -53,15 +54,24 @@ internal fun SavedPaymentMethodRowButton(
         isSelected = isSelected,
         iconContent = {
             val displayBrand = displayableSavedPaymentMethod.paymentMethod.card?.displayBrand
-            PaymentMethodIconFromResource(
-                iconRes = displayableSavedPaymentMethod.paymentMethod.getSavedPaymentMethodIcon(forVerticalMode = true),
-                colorFilter = null,
-                alignment = Alignment.Center,
+            CardArtImage(
+                url = displayableSavedPaymentMethod.paymentMethod.card?.cardArt?.artImage?.url,
                 modifier = Modifier
-                    .height(iconHeight)
                     .width(iconWidth)
-                    .testMetadata(displayBrand)
-            )
+                    .height(iconHeight)
+            ) {
+                PaymentMethodIconFromResource(
+                    iconRes = displayableSavedPaymentMethod.paymentMethod.getSavedPaymentMethodIcon(
+                        forVerticalMode = true
+                    ),
+                    colorFilter = null,
+                    alignment = Alignment.Center,
+                    modifier = Modifier
+                        .height(iconHeight)
+                        .width(iconWidth)
+                        .testMetadata(displayBrand)
+                )
+            }
         },
         title = paymentMethodTitle.resolve(),
         subtitle = displayableSavedPaymentMethod.paymentMethod.getSublabel()?.resolve(),

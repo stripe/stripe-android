@@ -58,7 +58,58 @@ fun StripeImage(
     errorContent: @Composable BoxWithConstraintsScope.() -> Unit = {},
     loadingContent: @Composable BoxWithConstraintsScope.() -> Unit = {}
 ) {
-    BoxWithConstraints {
+    StripeImage(
+        url = url,
+        imageLoader = imageLoader,
+        debugPainter = debugPainter,
+        disableAnimations = disableAnimations,
+        alignment = Alignment.TopStart,
+        errorContent = errorContent,
+        loadingContent = loadingContent,
+    ) { painter ->
+        Image(
+            modifier = modifier.testTag(TEST_TAG_IMAGE_FROM_URL),
+            colorFilter = colorFilter,
+            contentDescription = contentDescription,
+            contentScale = contentScale,
+            alignment = alignment,
+            painter = painter,
+        )
+    }
+}
+
+/**
+ * A composable that executes an image request asynchronously using the
+ * provided [StripeImageLoader] and renders the result, with custom image rendering.
+ *
+ * Delegates rendering of the loaded image to the caller via [imageContent], allowing full
+ * control over how the [Painter] is displayed (e.g. custom [ContentScale], sizing, or
+ * decoration).
+ *
+ * @param url to be requested and rendered.
+ * @param imageLoader The [StripeImageLoader] that will be used to execute the request.
+ * @param modifier Modifier used to adjust the layout algorithm or draw decoration content.
+ * @param debugPainter If provided, this painter will be rendered on Compose previews.
+ * @param disableAnimations If true, there will be no animations between icon states.
+ * @param errorContent content to render when image loading fails.
+ * @param loadingContent content to render when image loads.
+ * @param imageContent content to render when the image is successfully loaded, receiving
+ *  the loaded [Painter] as a parameter.
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Composable
+fun StripeImage(
+    url: String,
+    imageLoader: StripeImageLoader,
+    modifier: Modifier = Modifier,
+    debugPainter: Painter? = null,
+    disableAnimations: Boolean = false,
+    alignment: Alignment = Alignment.Center,
+    errorContent: @Composable BoxWithConstraintsScope.() -> Unit = {},
+    loadingContent: @Composable BoxWithConstraintsScope.() -> Unit = {},
+    imageContent: @Composable BoxWithConstraintsScope.(Painter) -> Unit
+) {
+    BoxWithConstraints(modifier) {
         val debugMode = LocalInspectionMode.current
         val (width, height) = calculateBoxSize()
         val state: MutableState<StripeImageState> = remember {
@@ -87,6 +138,7 @@ fun StripeImage(
             }
         }
         AnimatedContent(
+            modifier = Modifier.align(alignment),
             targetState = state.value,
             label = "loading_image_animation",
             contentKey = { targetState ->
@@ -102,14 +154,7 @@ fun StripeImage(
             when (it) {
                 Error -> errorContent()
                 Loading -> loadingContent()
-                is Success -> Image(
-                    modifier = modifier.testTag(TEST_TAG_IMAGE_FROM_URL),
-                    colorFilter = colorFilter,
-                    contentDescription = contentDescription,
-                    contentScale = contentScale,
-                    alignment = alignment,
-                    painter = it.painter
-                )
+                is Success -> imageContent(it.painter)
             }
         }
     }

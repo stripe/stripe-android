@@ -345,6 +345,7 @@ private fun AddCardTab(
         iconRes = iconRes,
         onItemSelectedListener = onAddCardPressed,
         description = stringResource(R.string.stripe_add_new_payment_method),
+        cardArtUrl = null,
         modifier = modifier,
     )
 }
@@ -367,6 +368,7 @@ private fun GooglePayTab(
         labelText = stringResource(StripeR.string.stripe_google_pay),
         description = stringResource(StripeR.string.stripe_google_pay),
         onItemSelectedListener = { onItemSelected(PaymentSelection.GooglePay) },
+        cardArtUrl = null,
         modifier = modifier,
     )
 }
@@ -390,6 +392,7 @@ private fun LinkTab(
         labelText = stringResource(StripeR.string.stripe_link),
         description = stringResource(StripeR.string.stripe_link),
         onItemSelectedListener = { onItemSelected(PaymentSelection.Link()) },
+        cardArtUrl = null,
         modifier = modifier,
     )
 }
@@ -429,6 +432,7 @@ private fun SavedPaymentMethodTab(
             iconRes = paymentMethod.paymentMethod.getSavedPaymentMethodIcon(
                 showNightIcon = !MaterialTheme.stripeColors.component.shouldUseDarkDynamicColor()
             ),
+            cardArtUrl = paymentMethod.paymentMethod.card?.cardArt?.artImage?.url,
             labelIcon = labelIcon,
             shouldTintLabelIcon = paymentMethod.paymentMethod.shouldTintLabelIcon,
             labelText = labelText,
