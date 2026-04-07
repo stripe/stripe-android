@@ -19,6 +19,8 @@ import java.util.Locale
 
 class DefaultPaymentMethodMessagePromotionsHelperTest {
 
+    private val testDispatcher = StandardTestDispatcher()
+
     @Test
     fun `fetchPromotionsAsync does nothing when feature flag is disabled`() = runScenario {
         helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
@@ -54,7 +56,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
             )
         ),
         block: suspend Scenario.() -> Unit,
-    ) = runTest {
+    ) = runTest(testDispatcher) {
         FeatureFlags.paymentMethodMessagePromotions.setEnabled(featureFlagEnabled)
 
         val fakeRepository = FakePromotionsStripeRepository(repositoryResult)
@@ -65,6 +67,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
             lazyPaymentConfig = {
                 PaymentConfiguration("pk_123")
             },
+            viewModelScope = this,
             workContext = testDispatcher,
         )
 
