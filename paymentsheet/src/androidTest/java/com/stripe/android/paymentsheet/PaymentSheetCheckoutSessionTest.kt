@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import androidx.compose.ui.test.hasText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
@@ -333,7 +334,9 @@ internal class PaymentSheetCheckoutSessionTest {
         page.clickPrimaryButton()
     }
 
-    private suspend fun PaymentSheetTestRunnerContext.presentWithCheckout() {
+    private suspend fun PaymentSheetTestRunnerContext.presentWithCheckout(
+        configuration: PaymentSheet.Configuration = defaultConfiguration,
+    ) {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val checkout = Checkout.configure(
             context = context,
@@ -343,9 +346,111 @@ internal class PaymentSheetCheckoutSessionTest {
         presentPaymentSheet {
             presentWithCheckout(
                 checkout = checkout,
-                configuration = defaultConfiguration,
+                configuration = configuration,
             )
         }
     }
 
+    // region SFU mandate tests
+
+    /**
+     * PMO SFU sets setup_future_usage at the payment_method_options level
+     * (e.g., card and cashapp each have setup_future_usage: "off_session")
+     * rather than at the top-level deferred intent.
+     */
+    @Test
+    fun testMandateDisplayedWithPmoSfu() = runMandateTest { json ->
+        json.getJSONObject("server_built_elements_session_params")
+            .getJSONObject("deferred_intent")
+            .put("payment_method_options", JSONObject("""
+                {
+                    "card": {"setup_future_usage": "off_session"},
+                    "cashapp": {"setup_future_usage": "off_session"}
+                }
+            """.trimIndent()))
+    }
+
+    /**
+     * Top-level SFU applies setup_future_usage: "off_session" to all payment methods
+     * at the deferred intent level.
+     */
+    @Test
+    fun testMandateDisplayedWithSfu() = runMandateTest { json ->
+        json.getJSONObject("server_built_elements_session_params")
+            .getJSONObject("deferred_intent")
+            .put("setup_future_usage", "off_session")
+    }
+
+    /**
+     * Mixed PMO SFU: card has setup_future_usage but cashapp has "none", which
+     * overrides and suppresses the mandate for cashapp while card still shows it.
+     */
+    @Test
+    fun testMandateOnlyForCardWithMixedPmoSfu() = runMandateTest(
+        expectCashappMandate = false,
+    ) { json ->
+        json.getJSONObject("server_built_elements_session_params")
+            .getJSONObject("deferred_intent")
+            .put("payment_method_options", JSONObject("""
+                {
+                    "card": {"setup_future_usage": "off_session"},
+                    "cashapp": {"setup_future_usage": "none"}
+                }
+            """.trimIndent()))
+    }
+
+    /**
+     * Without any SFU configuration, no mandates should be displayed for card or cashapp.
+     */
+    @Test
+    fun testNoMandateWithoutSfu() = runMandateTest(
+        expectCardMandate = false,
+        expectCashappMandate = false,
+    )
+
+    private fun runMandateTest(
+        expectCardMandate: Boolean = true,
+        expectCashappMandate: Boolean = true,
+        jsonModifier: (JSONObject) -> Unit = {},
+    ) = runPaymentSheetTest(
+        networkRule = networkRule,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.checkoutInit { response ->
+            response.testBodyFromFile("checkout-session-init.json", jsonModifier)
+        }
+
+        testContext.presentWithCheckout()
+
+        page.clickOnLpm("card")
+        page.waitForCardForm()
+        if (expectCardMandate) {
+            page.assertHasMandate(CARD_SFU_MANDATE)
+        } else {
+            page.assertMandateIsMissing()
+        }
+
+        page.clickOnLpm("cashapp")
+        if (expectCashappMandate) {
+            page.assertHasMandate(CASHAPP_SFU_MANDATE)
+        } else {
+            composeTestRule.onNode(hasText(CASHAPP_SFU_MANDATE)).assertDoesNotExist()
+        }
+
+        testContext.markTestSucceeded()
+    }
+
+    // endregion
+
+    private companion object {
+        const val CARD_SFU_MANDATE =
+            "By providing your card information, you allow Checkout Session Test to charge your card" +
+                " for future payments in accordance with their terms."
+
+        const val CASHAPP_SFU_MANDATE =
+            "By continuing, you authorize Checkout Session Test to debit your Cash App account" +
+                " for this payment and future payments in accordance with Checkout Session Test's" +
+                " terms, until this authorization is revoked. You can change this anytime in your" +
+                " Cash App Settings."
+    }
 }
