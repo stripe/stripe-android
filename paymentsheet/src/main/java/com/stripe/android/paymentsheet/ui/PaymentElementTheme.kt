@@ -20,13 +20,13 @@ import com.stripe.android.uicore.StripeTheme
  */
 @Composable
 internal fun PaymentElementTheme(
-    colorScheme: PaymentSheet.ColorScheme = PaymentSheet.ColorScheme.System,
+    style: PaymentSheet.UserInterfaceStyle = PaymentSheet.UserInterfaceStyle.Automatic,
     content: @Composable () -> Unit,
 ) {
-    val isDark = when (colorScheme) {
-        PaymentSheet.ColorScheme.Light -> false
-        PaymentSheet.ColorScheme.Dark -> true
-        PaymentSheet.ColorScheme.System -> isSystemInDarkTheme()
+    val isDark = when (style) {
+        PaymentSheet.UserInterfaceStyle.AlwaysLight -> false
+        PaymentSheet.UserInterfaceStyle.AlwaysDark -> true
+        PaymentSheet.UserInterfaceStyle.Automatic -> isSystemInDarkTheme()
     }
 
     val baseContext = LocalContext.current

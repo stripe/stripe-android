@@ -1156,15 +1156,15 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$CardFundingType 
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/paymentsheet/PaymentSheet$ColorScheme : java/lang/Enum, android/os/Parcelable {
+public final class com/stripe/android/paymentsheet/PaymentSheet$UserInterfaceStyle : java/lang/Enum, android/os/Parcelable {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field Dark Lcom/stripe/android/paymentsheet/PaymentSheet$ColorScheme;
-	public static final field Light Lcom/stripe/android/paymentsheet/PaymentSheet$ColorScheme;
-	public static final field System Lcom/stripe/android/paymentsheet/PaymentSheet$ColorScheme;
+	public static final field AlwaysDark Lcom/stripe/android/paymentsheet/PaymentSheet$UserInterfaceStyle;
+	public static final field AlwaysLight Lcom/stripe/android/paymentsheet/PaymentSheet$UserInterfaceStyle;
+	public static final field Automatic Lcom/stripe/android/paymentsheet/PaymentSheet$UserInterfaceStyle;
 	public final fun describeContents ()I
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$ColorScheme;
-	public static fun values ()[Lcom/stripe/android/paymentsheet/PaymentSheet$ColorScheme;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$UserInterfaceStyle;
+	public static fun values ()[Lcom/stripe/android/paymentsheet/PaymentSheet$UserInterfaceStyle;
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -1257,7 +1257,7 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Configuration$Bu
 	public final fun billingDetailsCollectionConfiguration (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun build ()Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;
 	public final fun cardBrandAcceptance (Lcom/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
-	public final fun colorScheme (Lcom/stripe/android/paymentsheet/PaymentSheet$ColorScheme;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
+	public final fun style (Lcom/stripe/android/paymentsheet/PaymentSheet$UserInterfaceStyle;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun customPaymentMethods (Ljava/util/List;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun customer (Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun defaultBillingDetails (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;

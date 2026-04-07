@@ -734,18 +734,18 @@ class PaymentSheet internal constructor(
     }
 
     /**
-     * Determines the color scheme used by PaymentSheet.
+     * Determines the user interface style used by PaymentSheet.
      */
     @Parcelize
-    enum class ColorScheme : Parcelable {
-        /** (Default) Follow the system's dark mode setting. */
-        System,
+    enum class UserInterfaceStyle : Parcelable {
+        /** (Default) PaymentSheet will automatically switch between light and dark mode based on the device setting. */
+        Automatic,
 
-        /** Always use light mode colors. */
-        Light,
+        /** PaymentSheet will always use light mode colors. */
+        AlwaysLight,
 
-        /** Always use dark mode colors. */
-        Dark,
+        /** PaymentSheet will always use dark mode colors. */
+        AlwaysDark,
     }
 
     /** Configuration for [PaymentSheet] **/
@@ -814,10 +814,10 @@ class PaymentSheet internal constructor(
          */
         internal val appearance: Appearance = ConfigurationDefaults.appearance,
         /**
-         * Determines the color scheme used by PaymentSheet.
-         * Defaults to [ColorScheme.System], which follows the system's dark mode setting.
+         * Determines the user interface style used by PaymentSheet.
+         * Defaults to [UserInterfaceStyle.Automatic], which follows the system's dark mode setting.
          */
-        internal val colorScheme: ColorScheme = ConfigurationDefaults.colorScheme,
+        internal val style: UserInterfaceStyle = ConfigurationDefaults.style,
         /**
          * The label to use for the primary button.
          *
@@ -981,7 +981,7 @@ class PaymentSheet internal constructor(
             private var allowsPaymentMethodsRequiringShippingAddress: Boolean =
                 ConfigurationDefaults.allowsPaymentMethodsRequiringShippingAddress
             private var appearance: Appearance = ConfigurationDefaults.appearance
-            private var colorScheme: ColorScheme = ConfigurationDefaults.colorScheme
+            private var style: UserInterfaceStyle = ConfigurationDefaults.style
             private var primaryButtonLabel: String? = ConfigurationDefaults.primaryButtonLabel
             private var billingDetailsCollectionConfiguration =
                 ConfigurationDefaults.billingDetailsCollectionConfiguration
@@ -1034,11 +1034,11 @@ class PaymentSheet internal constructor(
                 apply { this.appearance = appearance }
 
             /**
-             * Determines the color scheme used by PaymentSheet.
-             * Defaults to [ColorScheme.System], which follows the system's dark mode setting.
+             * Determines the user interface style used by PaymentSheet.
+             * Defaults to [UserInterfaceStyle.Automatic], which follows the system's dark mode setting.
              */
-            fun colorScheme(colorScheme: ColorScheme) =
-                apply { this.colorScheme = colorScheme }
+            fun style(style: UserInterfaceStyle) =
+                apply { this.style = style }
 
             fun primaryButtonLabel(primaryButtonLabel: String) =
                 apply { this.primaryButtonLabel = primaryButtonLabel }
@@ -1201,7 +1201,7 @@ class PaymentSheet internal constructor(
                 allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
                 allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
                 appearance = appearance,
-                colorScheme = colorScheme,
+                style = style,
                 primaryButtonLabel = primaryButtonLabel,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
                 preferredNetworks = preferredNetworks,
@@ -1244,7 +1244,7 @@ class PaymentSheet internal constructor(
             .allowsDelayedPaymentMethods(allowsDelayedPaymentMethods)
             .allowsPaymentMethodsRequiringShippingAddress(allowsPaymentMethodsRequiringShippingAddress)
             .appearance(appearance)
-            .colorScheme(colorScheme)
+            .style(style)
             .billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
             .preferredNetworks(preferredNetworks)
             .allowsRemovalOfLastSavedPaymentMethod(allowsRemovalOfLastSavedPaymentMethod)
