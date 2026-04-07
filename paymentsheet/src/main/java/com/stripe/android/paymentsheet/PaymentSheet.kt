@@ -733,6 +733,21 @@ class PaymentSheet internal constructor(
         NEVER
     }
 
+    /**
+     * Determines the color scheme used by PaymentSheet.
+     */
+    @Parcelize
+    enum class ColorScheme : Parcelable {
+        /** (Default) Follow the system's dark mode setting. */
+        System,
+
+        /** Always use light mode colors. */
+        Light,
+
+        /** Always use dark mode colors. */
+        Dark,
+    }
+
     /** Configuration for [PaymentSheet] **/
     @Parcelize
     @Poko
@@ -798,6 +813,11 @@ class PaymentSheet internal constructor(
          * Describes the appearance of Payment Sheet.
          */
         internal val appearance: Appearance = ConfigurationDefaults.appearance,
+        /**
+         * Determines the color scheme used by PaymentSheet.
+         * Defaults to [ColorScheme.System], which follows the system's dark mode setting.
+         */
+        internal val colorScheme: ColorScheme = ConfigurationDefaults.colorScheme,
         /**
          * The label to use for the primary button.
          *
@@ -961,6 +981,7 @@ class PaymentSheet internal constructor(
             private var allowsPaymentMethodsRequiringShippingAddress: Boolean =
                 ConfigurationDefaults.allowsPaymentMethodsRequiringShippingAddress
             private var appearance: Appearance = ConfigurationDefaults.appearance
+            private var colorScheme: ColorScheme = ConfigurationDefaults.colorScheme
             private var primaryButtonLabel: String? = ConfigurationDefaults.primaryButtonLabel
             private var billingDetailsCollectionConfiguration =
                 ConfigurationDefaults.billingDetailsCollectionConfiguration
@@ -1011,6 +1032,13 @@ class PaymentSheet internal constructor(
 
             fun appearance(appearance: Appearance) =
                 apply { this.appearance = appearance }
+
+            /**
+             * Determines the color scheme used by PaymentSheet.
+             * Defaults to [ColorScheme.System], which follows the system's dark mode setting.
+             */
+            fun colorScheme(colorScheme: ColorScheme) =
+                apply { this.colorScheme = colorScheme }
 
             fun primaryButtonLabel(primaryButtonLabel: String) =
                 apply { this.primaryButtonLabel = primaryButtonLabel }
@@ -1173,6 +1201,7 @@ class PaymentSheet internal constructor(
                 allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
                 allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
                 appearance = appearance,
+                colorScheme = colorScheme,
                 primaryButtonLabel = primaryButtonLabel,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
                 preferredNetworks = preferredNetworks,
@@ -1215,6 +1244,7 @@ class PaymentSheet internal constructor(
             .allowsDelayedPaymentMethods(allowsDelayedPaymentMethods)
             .allowsPaymentMethodsRequiringShippingAddress(allowsPaymentMethodsRequiringShippingAddress)
             .appearance(appearance)
+            .colorScheme(colorScheme)
             .billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
             .preferredNetworks(preferredNetworks)
             .allowsRemovalOfLastSavedPaymentMethod(allowsRemovalOfLastSavedPaymentMethod)
