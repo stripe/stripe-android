@@ -35,8 +35,7 @@ import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
-import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelperModule
-import com.stripe.android.paymentsheet.repositories.SinglePaymentMethodMessagePromotionHelper
+import com.stripe.android.paymentsheet.repositories.PrefetchedPaymentMethodMessagePromotionHelper
 import com.stripe.android.paymentsheet.verticalmode.DefaultSavedPaymentMethodConfirmInteractor
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
@@ -216,7 +215,9 @@ internal interface FormActivityViewModelModule {
         @Provides
         fun providesPaymentMethodMessagePromotionHelper(
             promotion: PaymentMethodMessagePromotion?
-        ): PaymentMethodMessagePromotionsHelper = SinglePaymentMethodMessagePromotionHelper(promotion)
+        ): PaymentMethodMessagePromotionsHelper = PrefetchedPaymentMethodMessagePromotionHelper(
+            listOfNotNull(promotion)
+        )
     }
 }
 

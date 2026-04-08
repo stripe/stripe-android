@@ -77,7 +77,7 @@ internal sealed interface UiDefinitionFactory {
                 private val automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper? =
                     null,
                 private val tapToAddHelper: TapToAddHelper? = null,
-                private val paymentMethodMessagingPromotionsHelper: PaymentMethodMessagePromotionsHelper?,
+                private val paymentMethodMessagingPromotionsHelper: PaymentMethodMessagePromotionsHelper? = null,
             ) : Factory {
                 override fun create(
                     metadata: PaymentMethodMetadata,

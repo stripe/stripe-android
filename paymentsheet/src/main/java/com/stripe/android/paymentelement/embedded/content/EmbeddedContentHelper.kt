@@ -280,7 +280,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                     isVerticalLayout = true,
                 )
             },
-            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
+            //paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
         )
     }
 

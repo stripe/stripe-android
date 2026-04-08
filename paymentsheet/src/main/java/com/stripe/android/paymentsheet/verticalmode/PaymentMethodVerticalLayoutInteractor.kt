@@ -117,7 +117,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val onCurrencySelected: (CurrencyOption) -> Unit,
     dispatcher: CoroutineContext = Dispatchers.Default,
     mainDispatcher: CoroutineContext = Dispatchers.Main.immediate,
-    private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?
 ) : PaymentMethodVerticalLayoutInteractor {
 
     companion object {
@@ -207,7 +206,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 onCurrencySelected = { currencyOption ->
                     (viewModel as? PaymentSheetViewModel)?.updateCurrency(currencyOption.code)
                 },
-                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
             ).also { interactor ->
                 viewModel.viewModelScope.launch {
                     interactor.state.mapAsStateFlow { it.mandate }.collect { mandate ->

@@ -215,6 +215,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     override val primaryButtonUiState = primaryButtonUiStateMapper.forCustomFlow()
 
     init {
+        println("YEET pay ops vm ph: $paymentMethodMessagePromotionsHelper")
         SessionSavedStateHandler.attachTo(this, savedStateHandle)
 
         linkAccountHolder.set(args.linkAccountInfo)

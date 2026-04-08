@@ -8,6 +8,8 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentif
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
+import com.stripe.android.paymentsheet.repositories.PrefetchedPaymentMethodMessagePromotionHelper
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
@@ -36,6 +38,11 @@ internal class PaymentOptionsViewModelModule {
     @Provides
     fun providePaymentMethodMetadata(args: PaymentOptionContract.Args): PaymentMethodMetadata {
         return args.state.paymentMethodMetadata
+    }
+
+    @Provides
+    fun providesPaymentMethodMessageHelper(args: PaymentOptionContract.Args): PaymentMethodMessagePromotionsHelper {
+        return PrefetchedPaymentMethodMessagePromotionHelper(args.promotions)
     }
 
     @Provides

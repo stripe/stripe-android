@@ -76,6 +76,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             statusBarColor = null,
             paymentSelection = null,
             customerState = customerState,
+            promotion = null
         )
 
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
@@ -99,6 +100,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             false,
             state,
             createCustomerState(),
+            null
         )
         val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as FormContract.Args
         assertThat(launchCall.paymentSelection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
@@ -117,6 +119,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             false,
             state,
             createCustomerState(),
+            null
         )
         val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as FormContract.Args
         assertThat(launchCall.paymentSelection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
@@ -134,6 +137,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             false,
             state,
             createCustomerState(),
+            null
         )
         val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as FormContract.Args
         assertThat(launchCall.paymentSelection).isNull()
@@ -151,6 +155,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             false,
             state,
             createCustomerState(),
+            null
         )
         val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as FormContract.Args
         assertThat(launchCall.paymentSelection).isNull()
@@ -167,6 +172,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             false,
             null,
             createCustomerState(),
+            null
         )
         val loggedErrors = errorReporter.getLoggedErrors()
         assertThat(loggedErrors.size).isEqualTo(1)
@@ -188,6 +194,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             false,
             state,
             createCustomerState(),
+            promotion = null
         )
     }
 
