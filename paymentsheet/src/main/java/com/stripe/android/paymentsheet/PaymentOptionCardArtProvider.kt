@@ -18,10 +18,14 @@ internal class DefaultPaymentOptionCardArtProvider @Inject constructor(
         val cardArtUrl = cardArt.artImage?.url ?: return null
         val pxSize = TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP,
-            40f,
+            CARD_ART_WIDTH_DP,
             context.resources.displayMetrics
         ).toInt()
         return imageOptimizer.optimize(cardArtUrl, pxSize)
+    }
+
+    companion object {
+        internal const val CARD_ART_WIDTH_DP = 40f
     }
 
 }

@@ -51,6 +51,8 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.FakeLogger
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
+import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.utils.FakeDurationProvider
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import dagger.Binds
@@ -255,6 +257,11 @@ internal interface ExtendedPaymentElementConfirmationTestModule {
             return PrefsRepository.Factory {
                 FakePrefsRepository()
             }
+        }
+
+        @Provides
+        fun provideStripeImageLoader(context: Context): StripeImageLoader {
+            return DefaultStripeImageLoader(context)
         }
     }
 }

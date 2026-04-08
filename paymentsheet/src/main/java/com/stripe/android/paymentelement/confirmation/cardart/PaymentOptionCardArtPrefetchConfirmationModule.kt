@@ -14,12 +14,12 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 
 @Module
-internal interface CardArtPrefetchConfirmationModule {
+internal interface PaymentOptionCardArtPrefetchConfirmationModule {
     @JvmSuppressWildcards
     @Binds
     @IntoSet
     fun bindsCardArtPrefetchConfirmationDefinition(
-        definition: CardArtPrefetchConfirmationDefinition
+        definition: PaymentOptionCardArtPrefetchConfirmationDefinition
     ): ConfirmationDefinition<*, *, *, *>
 
     @Binds
@@ -30,7 +30,7 @@ internal interface CardArtPrefetchConfirmationModule {
     companion object {
         @OptIn(DelicateCoroutinesApi::class)
         @Provides
-        @CardArtPrefetchScope
+        @PaymentOptionCardArtPrefetchScope
         fun providesCoroutineScope(): CoroutineScope = GlobalScope
 
 

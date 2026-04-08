@@ -4,4 +4,4 @@ import javax.inject.Qualifier
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-internal annotation class CardArtPrefetchScope
+internal annotation class PaymentOptionCardArtPrefetchScope

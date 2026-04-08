@@ -15,15 +15,15 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
-internal class CardArtPrefetchConfirmationDefinition @Inject constructor(
+internal class PaymentOptionCardArtPrefetchConfirmationDefinition @Inject constructor(
     private val imageLoader: StripeImageLoader,
-    @CardArtPrefetchScope private val coroutineScope: CoroutineScope,
+    @PaymentOptionCardArtPrefetchScope private val coroutineScope: CoroutineScope,
     private val paymentOptionCardArtProvider: PaymentOptionCardArtProvider,
     @IOContext private val workContext: CoroutineContext,
     private val errorReporter: ErrorReporter,
 ) : ConfirmationDefinition<ConfirmationHandler.Option, Unit, Nothing, Nothing> {
 
-    override val key: String = "CardArtPrefetch"
+    override val key: String = "PaymentOptionCardArtPrefetch"
 
     override fun option(confirmationOption: ConfirmationHandler.Option): ConfirmationHandler.Option? = null
 
