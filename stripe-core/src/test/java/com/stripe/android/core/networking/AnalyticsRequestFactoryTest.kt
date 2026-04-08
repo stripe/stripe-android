@@ -6,6 +6,8 @@ import android.os.Build
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.reactnative.ReactNativeAnalytics
+import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.version.StripeSdkVersion
 import junit.framework.TestCase
 import org.junit.Test
@@ -160,6 +162,33 @@ class AnalyticsRequestFactoryTest : TestCase() {
                 )
                 assertThat(request.params).containsEntry("locale", locale.toString())
             }
+        }
+    }
+
+    @Test
+    fun `react native fields are absent by default`() {
+        val factory = createFakeAnalyticsRequestFactory()
+        val params = factory.createRequest(mockEvent, emptyMap()).params
+
+        assertThat(params).doesNotContainKey(AnalyticsFields.REACT_NATIVE_IS_NEW_ARCHITECTURE)
+        assertThat(params).doesNotContainKey(AnalyticsFields.REACT_NATIVE_VERSION)
+    }
+
+    @OptIn(ReactNativeSdkInternal::class)
+    @Test
+    fun `react native fields are included when set`() {
+        ReactNativeAnalytics.isNewArchitecture = false
+        ReactNativeAnalytics.reactNativeVersion = "0.75.3"
+
+        try {
+            val factory = createFakeAnalyticsRequestFactory()
+            val params = factory.createRequest(mockEvent, emptyMap()).params
+
+            assertThat(params[AnalyticsFields.REACT_NATIVE_IS_NEW_ARCHITECTURE]).isEqualTo(false)
+            assertThat(params[AnalyticsFields.REACT_NATIVE_VERSION]).isEqualTo("0.75.3")
+        } finally {
+            ReactNativeAnalytics.isNewArchitecture = null
+            ReactNativeAnalytics.reactNativeVersion = null
         }
     }
 
