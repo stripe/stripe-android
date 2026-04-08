@@ -556,6 +556,7 @@ internal class DefaultPaymentElementLoaderTest {
                     isGooglePayReady = true,
                     customerRepo = FakeCustomerRepository(paymentMethods = emptyList()),
                     tapToAddConnectionStarter = connectionStarter,
+                    tapToAddAvailabilityFactory = FakeTapToAddAvailabilityFactory(isAvailableResult = true),
                 )
 
                 val result = loader.load(
@@ -597,6 +598,7 @@ internal class DefaultPaymentElementLoaderTest {
                     isGooglePayReady = true,
                     customerRepo = FakeCustomerRepository(paymentMethods = emptyList()),
                     tapToAddConnectionStarter = connectionStarter,
+                    tapToAddAvailabilityFactory = FakeTapToAddAvailabilityFactory(isAvailableResult = false),
                     elementsSessionRepository = elementsSessionRepository,
                 )
 
@@ -4165,6 +4167,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
         assertThat(createCall.elementsSession).isNotNull()
         assertThat(createCall.linkStateResult).isNotNull()
+        assertThat(createCall.isTapToAddAvailable).isFalse()
         analyticsMetadataFactory.validate()
 
         consumeLoadingEvents()
@@ -4223,6 +4226,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
         assertThat(createCall.elementsSession).isNotNull()
         assertThat(createCall.linkStateResult).isNotNull()
+        assertThat(createCall.isTapToAddAvailable).isFalse()
         analyticsMetadataFactory.validate()
 
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
@@ -4519,6 +4523,8 @@ internal class DefaultPaymentElementLoaderTest {
         integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),
         tapToAddConnectionStarter: TapToAddConnectionStarter =
             FakeTapToAddConnectionStarter.create(isSupported = false),
+        tapToAddAvailabilityFactory: TapToAddAvailabilityFactory =
+            FakeTapToAddAvailabilityFactory(isAvailableResult = false),
         isLiveMode: Boolean = false,
         analyticsMetadataFactory: DefaultPaymentElementLoader.AnalyticsMetadataFactory =
             FakeDefaultPaymentElementLoaderAnalyticsMetadataFactory {
@@ -4571,7 +4577,8 @@ internal class DefaultPaymentElementLoaderTest {
                 elementsSessionRepository = elementsSessionRepository,
             ),
             createCustomerMetadata = CreateCustomerMetadata(errorReporter),
-            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
+            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+            tapToAddAvailabilityFactory = tapToAddAvailabilityFactory,
         )
     }
 

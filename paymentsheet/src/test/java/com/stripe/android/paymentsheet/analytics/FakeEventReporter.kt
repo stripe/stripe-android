@@ -67,6 +67,9 @@ internal class FakeEventReporter : EventReporter {
     val usBankAccountFormEventCalls: ReceiveTurbine<USBankAccountFormViewModel.AnalyticsEvent> =
         _usBankAccountFormEventCalls
 
+    private val _tapToAddButtonShownCalls = Turbine<Unit>()
+    val tapToAddButtonShownCalls: ReceiveTurbine<Unit> = _tapToAddButtonShownCalls
+
     private val _tapToAddStartedCalls = Turbine<Unit>()
     val tapToAddStartedCalls: ReceiveTurbine<Unit> = _tapToAddStartedCalls
 
@@ -107,6 +110,7 @@ internal class FakeEventReporter : EventReporter {
         _formCompletedCalls.ensureAllEventsConsumed()
         _pressConfirmButtonCalls.ensureAllEventsConsumed()
         _usBankAccountFormEventCalls.ensureAllEventsConsumed()
+        _tapToAddButtonShownCalls.ensureAllEventsConsumed()
         _tapToAddStartedCalls.ensureAllEventsConsumed()
         _tapToAddCardAddedCalls.ensureAllEventsConsumed()
         _tapToAddCanceledCalls.ensureAllEventsConsumed()
@@ -290,6 +294,10 @@ internal class FakeEventReporter : EventReporter {
         walletsState: WalletsState?,
         isVerticalLayout: Boolean
     ) {
+    }
+
+    override fun onTapToAddButtonShown() {
+        _tapToAddButtonShownCalls.add(Unit)
     }
 
     override fun onTapToAddStarted() {

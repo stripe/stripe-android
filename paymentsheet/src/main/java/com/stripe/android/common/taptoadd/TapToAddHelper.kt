@@ -33,6 +33,8 @@ internal interface TapToAddHelper {
         lifecycleOwner: LifecycleOwner
     )
 
+    fun reportButtonShown()
+
     /**
      * Begins collection of payment method from the Tap to Add flow. Calling this method should show a screen that
      * indicates where to tap your card on your device.
@@ -57,6 +59,7 @@ internal class DefaultTapToAddHelper(
     private val paymentElementCallbackIdentifier: String,
     private val tapToAddMode: TapToAddMode,
     private val eventMode: EventReporter.Mode,
+    private val eventReporter: EventReporter,
     private val savedStateHandle: SavedStateHandle,
     private val updateSelection: (PaymentSelection.Saved) -> Unit,
     private val customerStateHolder: CustomerStateHolder,
@@ -64,6 +67,12 @@ internal class DefaultTapToAddHelper(
 ) : TapToAddHelper {
     override val isTapToAddEnabled: StateFlow<Boolean> =
         savedStateHandle.getStateFlow(IS_TAP_TO_ADD_ENABLED_KEY, true)
+
+    private var hasReportedButtonShown: Boolean
+        get() = savedStateHandle.get<Boolean>(HAS_REPORTED_TAP_TO_ADD_BUTTON_SHOWN_KEY) == true
+        set(value) {
+            savedStateHandle[HAS_REPORTED_TAP_TO_ADD_BUTTON_SHOWN_KEY] = value
+        }
 
     private var collecting: Boolean
         get() = savedStateHandle.get<Boolean>(CURRENTLY_COLLECTING_WITH_TAP_TO_ADD_KEY) == true
@@ -126,6 +135,13 @@ internal class DefaultTapToAddHelper(
         return linkSignupMode.value != null
     }
 
+    override fun reportButtonShown() {
+        if (!hasReportedButtonShown) {
+            eventReporter.onTapToAddButtonShown()
+            hasReportedButtonShown = true
+        }
+    }
+
     override fun startPaymentMethodCollection(paymentMethodMetadata: PaymentMethodMetadata) {
         if (collecting) {
             return
@@ -155,6 +171,7 @@ internal class DefaultTapToAddHelper(
         private val context: Context,
         @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
         @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
+        private val eventReporter: EventReporter,
         private val savedStateHandle: SavedStateHandle,
         private val eventMode: EventReporter.Mode,
     ) : TapToAddHelper.Factory {
@@ -174,6 +191,7 @@ internal class DefaultTapToAddHelper(
                 eventMode = eventMode,
                 savedStateHandle = savedStateHandle,
                 updateSelection = updateSelection,
+                eventReporter = eventReporter,
                 customerStateHolder = customerStateHolder,
                 linkSignupMode = linkSignupMode,
             )
@@ -183,5 +201,6 @@ internal class DefaultTapToAddHelper(
     private companion object {
         const val CURRENTLY_COLLECTING_WITH_TAP_TO_ADD_KEY = "CURRENTLY_COLLECTING_WITH_TAP_TO_ADD"
         const val IS_TAP_TO_ADD_ENABLED_KEY = "IS_TAP_TO_ADD_ENABLED"
+        const val HAS_REPORTED_TAP_TO_ADD_BUTTON_SHOWN_KEY = "HAS_REPORTED_TAP_TO_ADD_BUTTON_SHOWN"
     }
 }

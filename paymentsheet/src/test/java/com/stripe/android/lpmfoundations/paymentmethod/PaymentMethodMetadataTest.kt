@@ -1152,7 +1152,7 @@ internal class PaymentMethodMetadataTest {
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
-            isTapToAddSupported = false
+            isTapToAddAvailable = false
         )
 
         val expectedMetadata = PaymentMethodMetadata(
@@ -1281,7 +1281,7 @@ internal class PaymentMethodMetadataTest {
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
-            isTapToAddSupported = false,
+            isTapToAddAvailable = false,
         )
 
         // When flag is false, should use default funding types, not the configured ones
@@ -2107,7 +2107,7 @@ internal class PaymentMethodMetadataTest {
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
-            isTapToAddSupported = false,
+            isTapToAddAvailable = false,
         )
 
         assertThat(metadata.availableWallets)
@@ -2159,7 +2159,7 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `createForPaymentElement sets isTapToAddSupported to true is parameter is true & has customer`() {
+    fun `createForPaymentElement maps isTapToAddAvailable to isTapToAddSupported when customer present`() {
         val elementsSession = createElementsSession(
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         )
@@ -2176,14 +2176,14 @@ internal class PaymentMethodMetadataTest {
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
-            isTapToAddSupported = true,
+            isTapToAddAvailable = true,
         )
 
         assertThat(metadata.isTapToAddSupported).isTrue()
     }
 
     @Test
-    fun `createForPaymentElement sets isTapToAddSupported to false is parameter is true & no customer`() {
+    fun `createForPaymentElement maps isTapToAddAvailable to isTapToAddSupported when customerMetadata is null`() {
         val elementsSession = createElementsSession(
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         )
@@ -2200,14 +2200,14 @@ internal class PaymentMethodMetadataTest {
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
-            isTapToAddSupported = true,
+            isTapToAddAvailable = true,
         )
 
-        assertThat(metadata.isTapToAddSupported).isFalse()
+        assertThat(metadata.isTapToAddSupported).isTrue()
     }
 
     @Test
-    fun `createForPaymentElement sets isTapToAddSupported to false when elements session flag is false`() {
+    fun `createForPaymentElement maps isTapToAddAvailable false to isTapToAddSupported false`() {
         val elementsSession = createElementsSession(
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             flags = mapOf(
@@ -2228,7 +2228,7 @@ internal class PaymentMethodMetadataTest {
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
-            isTapToAddSupported = true,
+            isTapToAddAvailable = false,
         )
 
         assertThat(metadata.isTapToAddSupported).isFalse()
@@ -2265,7 +2265,7 @@ internal class PaymentMethodMetadataTest {
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
-            isTapToAddSupported = false,
+            isTapToAddAvailable = false,
         )
     }
 

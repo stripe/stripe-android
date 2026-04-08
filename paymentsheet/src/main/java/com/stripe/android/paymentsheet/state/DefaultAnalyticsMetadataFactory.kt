@@ -42,6 +42,7 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
         configuration: PaymentElementLoader.Configuration,
         customerMetadata: CustomerMetadata?,
         linkStateResult: LinkStateResult?,
+        isTapToAddAvailable: Boolean,
     ): AnalyticsMetadata = buildMap<String, AnalyticsMetadata.Value> {
         putAll(
             initialization(
@@ -69,6 +70,8 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
         )
 
         put("google_pay_enabled", SimpleBoolean(isGooglePaySupported))
+
+        put("tap_to_add_available", SimpleBoolean(isTapToAddAvailable))
 
         put("mpe_config", Nested(configuration.analyticsMap()))
     }.let { AnalyticsMetadata(it) }
