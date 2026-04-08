@@ -410,6 +410,10 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
+    override fun onTapToAddButtonShown() {
+        fireEvent(PaymentSheetEvent.TapToAdd.ButtonShown(mode))
+    }
+
     override fun onTapToAddStarted() {
         durationProvider.start(DurationProvider.Key.TapToAdd)
         fireEvent(PaymentSheetEvent.TapToAdd.Started(mode))

@@ -229,6 +229,8 @@ internal interface EventReporter : CardScanEventsReporter {
         isVerticalLayout: Boolean,
     )
 
+    fun onTapToAddButtonShown()
+
     fun onTapToAddStarted()
 
     fun onCardAddedWithTapToAdd()

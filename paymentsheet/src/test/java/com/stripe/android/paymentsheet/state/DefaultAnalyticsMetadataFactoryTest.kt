@@ -60,6 +60,8 @@ class DefaultAnalyticsMetadataFactoryTest {
 
         assertThat(resultMap["google_pay_enabled"]).isEqualTo(false)
 
+        assertThat(resultMap["tap_to_add_available"]).isEqualTo(false)
+
         assertThat(resultMap["link_enabled"]).isEqualTo(false)
 
         assertThat(resultMap["set_as_default_enabled"]).isEqualTo(false)
@@ -562,6 +564,13 @@ class DefaultAnalyticsMetadataFactoryTest {
     }
 
     @Test
+    fun `create returns true for tap_to_add_available when isTapToAddAvailable is true`() = runScenario {
+        val isTapToAddAvailableMetadata = createAnalyticsMetadata(isTapToAddAvailable = true)["tap_to_add_available"]
+
+        assertThat(isTapToAddAvailableMetadata).isEqualTo(true)
+    }
+
+    @Test
     fun `create returns false for card_funding_acceptance when using default all types`() = cardFundingAcceptanceTest(
         expectedAnswer = false
     )
@@ -772,6 +781,7 @@ class DefaultAnalyticsMetadataFactoryTest {
         customerMetadata: CustomerMetadata? = null,
         linkStateResult: LinkStateResult? = null,
         linkGateFactory: FakeLinkGate.Factory = FakeLinkGate.Factory(),
+        isTapToAddAvailable: Boolean = false,
     ): Map<String, Any?> {
         val factory = createFactory(linkGateFactory = linkGateFactory)
         return factory.create(
@@ -782,6 +792,7 @@ class DefaultAnalyticsMetadataFactoryTest {
             configuration = configuration,
             customerMetadata = customerMetadata,
             linkStateResult = linkStateResult,
+            isTapToAddAvailable = isTapToAddAvailable,
         ).paramsMap
     }
 

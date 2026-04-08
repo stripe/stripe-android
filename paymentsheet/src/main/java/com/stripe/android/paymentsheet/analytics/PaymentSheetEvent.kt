@@ -410,6 +410,12 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     sealed class TapToAdd : PaymentSheetEvent() {
         abstract val mode: EventReporter.Mode
 
+        class ButtonShown(
+            override val mode: EventReporter.Mode,
+        ) : TapToAdd() {
+            override val eventName: String = formatEventName(mode, "tap_to_add_button_shown")
+        }
+
         class Started(
             override val mode: EventReporter.Mode,
         ) : TapToAdd() {
