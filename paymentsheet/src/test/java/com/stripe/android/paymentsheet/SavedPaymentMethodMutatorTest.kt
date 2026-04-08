@@ -58,7 +58,6 @@ class SavedPaymentMethodMutatorTest {
             removePaymentMethod = PaymentMethodRemovePermission.Full,
             saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
             canRemoveLastPaymentMethod = true,
-            canUpdateFullPaymentMethodDetails = false,
         )
     ) {
         savedPaymentMethodMutator.canEdit.test {
@@ -80,7 +79,6 @@ class SavedPaymentMethodMutatorTest {
             removePaymentMethod = PaymentMethodRemovePermission.Full,
             saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
             canRemoveLastPaymentMethod = false,
-            canUpdateFullPaymentMethodDetails = false,
         )
     ) {
         savedPaymentMethodMutator.canEdit.test {
@@ -237,7 +235,6 @@ class SavedPaymentMethodMutatorTest {
             removePaymentMethod = PaymentMethodRemovePermission.Full,
             saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
             canRemoveLastPaymentMethod = true,
-            canUpdateFullPaymentMethodDetails = false,
         )
     ) {
         val customerPaymentMethods = PaymentMethodFixtures.createCards(1)
@@ -267,7 +264,7 @@ class SavedPaymentMethodMutatorTest {
             removePaymentMethod = PaymentMethodRemovePermission.Full,
             saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
             canRemoveLastPaymentMethod = true,
-            canUpdateFullPaymentMethodDetails = true,
+            customerSessionClientSecret = "css_123",
         )
     ) {
         val cards = PaymentMethodFixtures.createCards(3)
@@ -293,7 +290,7 @@ class SavedPaymentMethodMutatorTest {
             removePaymentMethod = PaymentMethodRemovePermission.Full,
             saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
             canRemoveLastPaymentMethod = false,
-            canUpdateFullPaymentMethodDetails = true,
+            customerSessionClientSecret = "css_123",
         )
     ) {
         val cards = PaymentMethodFixtures.createCards(1)

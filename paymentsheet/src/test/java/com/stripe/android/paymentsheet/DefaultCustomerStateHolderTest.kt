@@ -6,7 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.CUSTOMER_SESSIONS_CUSTOMER_METADATA
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -390,12 +390,16 @@ internal class DefaultCustomerStateHolderTest {
         block: suspend Scenario.() -> Unit
     ) {
         val customerMetadata: StateFlow<CustomerMetadata?> = stateFlowOf(
-            DEFAULT_CUSTOMER_METADATA.copy(
-                removePaymentMethod = paymentMethodRemovePermission,
-                saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
-                canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
-                canUpdateFullPaymentMethodDetails = false,
-            )
+            if (paymentMethodRemovePermission != PaymentMethodRemovePermission.Full) {
+                CUSTOMER_SESSIONS_CUSTOMER_METADATA.copy(
+                    removePaymentMethod = paymentMethodRemovePermission,
+                    canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
+                )
+            } else {
+                DEFAULT_CUSTOMER_METADATA.copy(
+                    canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
+                )
+            }
         )
 
         val customerStateHolder = DefaultCustomerStateHolder(

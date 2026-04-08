@@ -57,7 +57,6 @@ internal object PaymentMethodMetadataFactory {
         saveConsent: PaymentMethodSaveConsentBehavior =
             PaymentMethodSaveConsentBehavior.Legacy,
         canRemoveLastPaymentMethod: Boolean = true,
-        canUpdateFullPaymentMethodDetails: Boolean = false,
         customerSessionClientSecret: String? = null,
         termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay> = emptyMap(),
         forceSetupFutureUseBehaviorAndNewMandate: Boolean = false,
@@ -90,26 +89,27 @@ internal object PaymentMethodMetadataFactory {
             defaultBillingDetails = defaultBillingDetails,
             shippingDetails = shippingDetails,
             customerMetadata = if (hasCustomerConfiguration) {
-                if (customerSessionClientSecret != null) {
+                // Use CustomerSession when caller provides non-default saveConsent/removePaymentMethod,
+                // since LegacyEphemeralKey hardcodes these values.
+                val needsCustomerSession = customerSessionClientSecret != null ||
+                    saveConsent != PaymentMethodSaveConsentBehavior.Legacy ||
+                    removePaymentMethod != PaymentMethodRemovePermission.Full
+                if (needsCustomerSession) {
                     CustomerMetadata.CustomerSession(
                         id = "cus_123",
                         ephemeralKeySecret = "ek_123",
-                        customerSessionClientSecret = customerSessionClientSecret,
+                        customerSessionClientSecret = customerSessionClientSecret ?: "cuss_123",
                         isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
                         removePaymentMethod = removePaymentMethod,
                         saveConsent = saveConsent,
                         canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
-                        canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
                     )
                 } else {
                     CustomerMetadata.LegacyEphemeralKey(
                         id = "cus_123",
                         ephemeralKeySecret = "ek_123",
                         isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
-                        removePaymentMethod = removePaymentMethod,
-                        saveConsent = saveConsent,
                         canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
-                        canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
                     )
                 }
             } else {

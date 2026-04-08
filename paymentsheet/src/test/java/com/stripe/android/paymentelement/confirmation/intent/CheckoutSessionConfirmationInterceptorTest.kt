@@ -530,12 +530,12 @@ class CheckoutSessionConfirmationInterceptorTest {
             optionsParams = null,
         )
 
-        val SAVE_ENABLED_CUSTOMER_METADATA = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.copy(
+        val SAVE_ENABLED_CUSTOMER_METADATA = PaymentMethodMetadataFixtures.CUSTOMER_SESSIONS_CUSTOMER_METADATA.copy(
             saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
         )
 
-        val SAVE_DISABLED_CUSTOMER_METADATA = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.copy(
-            saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
+        val SAVE_DISABLED_CUSTOMER_METADATA = PaymentMethodMetadataFixtures.CUSTOMER_SESSIONS_CUSTOMER_METADATA.copy(
+            saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
         )
     }
 }

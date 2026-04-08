@@ -153,7 +153,6 @@ internal class DefaultPaymentElementLoaderTest {
                     removePaymentMethod = PaymentMethodRemovePermission.Full,
                     saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
                     canRemoveLastPaymentMethod = true,
-                    canUpdateFullPaymentMethodDetails = false,
                     clientAttributionMetadata = ClientAttributionMetadata(
                         elementsSessionConfigId = DEFAULT_ELEMENTS_SESSION_CONFIG_ID,
                         paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,

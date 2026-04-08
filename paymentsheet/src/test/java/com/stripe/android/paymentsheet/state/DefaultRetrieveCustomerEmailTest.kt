@@ -129,17 +129,13 @@ internal class DefaultRetrieveCustomerEmailTest {
             removePaymentMethod = PaymentMethodRemovePermission.None,
             saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
             canRemoveLastPaymentMethod = false,
-            canUpdateFullPaymentMethodDetails = false,
         )
 
         val LEGACY_EK_METADATA = CustomerMetadata.LegacyEphemeralKey(
             id = "cus_123",
             ephemeralKeySecret = PaymentSheetFixtures.DEFAULT_EPHEMERAL_KEY,
             isPaymentMethodSetAsDefaultEnabled = false,
-            removePaymentMethod = PaymentMethodRemovePermission.Full,
-            saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
             canRemoveLastPaymentMethod = true,
-            canUpdateFullPaymentMethodDetails = false,
         )
 
         val CHECKOUT_SESSION_METADATA = CustomerMetadata.CheckoutSession(

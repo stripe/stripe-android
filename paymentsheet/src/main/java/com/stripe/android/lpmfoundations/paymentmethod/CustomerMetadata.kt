@@ -24,11 +24,18 @@ internal sealed class CustomerMetadata : Parcelable {
         val id: String,
         val ephemeralKeySecret: String,
         override val isPaymentMethodSetAsDefaultEnabled: Boolean,
-        override val removePaymentMethod: PaymentMethodRemovePermission,
-        override val saveConsent: PaymentMethodSaveConsentBehavior,
         override val canRemoveLastPaymentMethod: Boolean,
-        override val canUpdateFullPaymentMethodDetails: Boolean,
-    ) : CustomerMetadata()
+    ) : CustomerMetadata() {
+        // Un-scoped legacy ephemeral keys have full permissions to remove/save/modify.
+        override val removePaymentMethod: PaymentMethodRemovePermission get() = PaymentMethodRemovePermission.Full
+
+        // Legacy ephemeral keys don't have server-side save consent configuration, so we use
+        // the legacy behavior which shows the save checkbox based on the setup intent usage.
+        override val saveConsent: PaymentMethodSaveConsentBehavior get() = PaymentMethodSaveConsentBehavior.Legacy
+
+        // Legacy ephemeral keys don't support updating full payment method details.
+        override val canUpdateFullPaymentMethodDetails: Boolean get() = false
+    }
 
     @Parcelize
     data class CustomerSession(
@@ -39,8 +46,10 @@ internal sealed class CustomerMetadata : Parcelable {
         override val removePaymentMethod: PaymentMethodRemovePermission,
         override val saveConsent: PaymentMethodSaveConsentBehavior,
         override val canRemoveLastPaymentMethod: Boolean,
-        override val canUpdateFullPaymentMethodDetails: Boolean,
-    ) : CustomerMetadata()
+    ) : CustomerMetadata() {
+        // Should always be enabled when using customer_session.
+        override val canUpdateFullPaymentMethodDetails: Boolean get() = true
+    }
 
     @Parcelize
     data class CheckoutSession(
@@ -111,8 +120,6 @@ internal sealed class CustomerMetadata : Parcelable {
                 removePaymentMethod = removePaymentMethod,
                 saveConsent = saveConsent,
                 canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
-                // Should always be enabled when using `customer_session`
-                canUpdateFullPaymentMethodDetails = true,
             )
         }
 
@@ -127,23 +134,12 @@ internal sealed class CustomerMetadata : Parcelable {
                 ephemeralKeySecret = ephemeralKeySecret,
                 isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
                 /*
-                 * Un-scoped legacy ephemeral keys have full permissions to remove/save/modify. This should
-                 * always be set to true.
-                 */
-                removePaymentMethod = PaymentMethodRemovePermission.Full,
-                /*
-                 * Legacy ephemeral keys don't have server-side save consent configuration, so we use
-                 * the legacy behavior which shows the save checkbox based on the setup intent usage.
-                 */
-                saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
-                /*
                  * Un-scoped legacy ephemeral keys normally have full permissions to remove the last payment
                  * method, however we do have client-side configuration option to configure this ability. This
                  * should eventually be removed in favor of the server-side option available with customer
                  * sessions.
                  */
                 canRemoveLastPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod,
-                canUpdateFullPaymentMethodDetails = false,
             )
         }
 
@@ -158,8 +154,6 @@ internal sealed class CustomerMetadata : Parcelable {
             val removePaymentMethod = customerSheetSession.permissions.removePaymentMethod
             val saveConsent = customerSheetSession.paymentMethodSaveConsentBehavior
             val canRemoveLastPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod
-            val canUpdateFullPaymentMethodDetails =
-                customerSheetSession.permissions.canUpdateFullPaymentMethodDetails
 
             return if (customerSessionClientSecret != null) {
                 CustomerSession(
@@ -170,17 +164,13 @@ internal sealed class CustomerMetadata : Parcelable {
                     removePaymentMethod = removePaymentMethod,
                     saveConsent = saveConsent,
                     canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
-                    canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
                 )
             } else {
                 LegacyEphemeralKey(
                     id = id,
                     ephemeralKeySecret = ephemeralKeySecret,
                     isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
-                    removePaymentMethod = removePaymentMethod,
-                    saveConsent = saveConsent,
                     canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
-                    canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
                 )
             }
         }
