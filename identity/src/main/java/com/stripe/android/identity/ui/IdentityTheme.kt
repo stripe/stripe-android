@@ -1,7 +1,6 @@
 package com.stripe.android.identity.ui
 
 import android.content.res.Resources
-import android.graphics.Color as AndroidColor
 import android.os.Build
 import androidx.annotation.ColorInt
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -29,6 +28,7 @@ import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.StripeTypography
 import com.stripe.android.uicore.toComposeTypography
 import java.lang.reflect.Method
+import android.graphics.Color as AndroidColor
 
 /**
  * IdentityTheme tries to read theme values from hosting app's context. Then adapt the values with
