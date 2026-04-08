@@ -9,6 +9,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import com.stripe.android.ui.core.R
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.text.EmbeddableImage
 import com.stripe.android.uicore.text.Html
@@ -19,7 +20,7 @@ class StripeImageActivity : AppCompatActivity() {
     }
 
     private val imageLoader by lazy {
-        StripeImageLoader(
+        DefaultStripeImageLoader(
             context = this,
             memoryCache = null,
             diskCache = null

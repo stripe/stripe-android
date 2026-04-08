@@ -16,8 +16,8 @@ import com.stripe.android.link.ui.LocalLinkContentScrollHandler
 import com.stripe.android.link.ui.verification.VerificationDialog
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetState
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.LocalStripeImageLoader
-import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.navigation.NavBackStackEntryUpdate
 import com.stripe.android.uicore.navigation.NavigationIntent
 import com.stripe.android.uicore.utils.collectAsState
@@ -39,7 +39,7 @@ internal fun LinkScreenContent(
 
     CompositionLocalProvider(
         LocalLinkContentScrollHandler provides linkContentScrollHandler,
-        LocalStripeImageLoader provides StripeImageLoader(LocalContext.current),
+        LocalStripeImageLoader provides DefaultStripeImageLoader(LocalContext.current),
         LocalLinkAppearance provides linkAppearance,
     ) {
         LinkScreenContentBody(
