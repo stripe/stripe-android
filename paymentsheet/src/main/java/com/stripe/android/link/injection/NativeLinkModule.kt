@@ -59,6 +59,7 @@ import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.repository.ConsumersApiService
 import com.stripe.android.repository.ConsumersApiServiceImpl
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.navigation.NavigationManager
 import com.stripe.android.uicore.navigation.NavigationManagerImpl
@@ -253,7 +254,7 @@ internal interface NativeLinkModule {
         @Provides
         @NativeLinkScope
         fun provideStripeImageLoader(context: Context): StripeImageLoader {
-            return StripeImageLoader(context)
+            return DefaultStripeImageLoader(context)
         }
     }
 }

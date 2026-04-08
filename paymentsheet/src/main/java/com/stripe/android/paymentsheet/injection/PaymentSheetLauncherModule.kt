@@ -9,6 +9,7 @@ import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 import dagger.Binds
 import dagger.Module
@@ -50,7 +51,7 @@ internal abstract class PaymentSheetLauncherModule {
         @Provides
         @Singleton
         fun provideStripeImageLoader(context: Context): StripeImageLoader {
-            return StripeImageLoader(context)
+            return DefaultStripeImageLoader(context)
         }
     }
 }

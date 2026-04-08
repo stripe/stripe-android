@@ -34,6 +34,7 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 import dagger.Binds
 import dagger.Module
@@ -147,7 +148,7 @@ internal interface CustomerSheetViewModelModule {
 
         @Provides
         fun provideStripeImageLoader(context: Context): StripeImageLoader {
-            return StripeImageLoader(context)
+            return DefaultStripeImageLoader(context)
         }
 
         private val savedPaymentSelection: PaymentSelection? = null

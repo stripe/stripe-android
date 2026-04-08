@@ -20,6 +20,7 @@ import com.stripe.android.paymentsheet.injection.PaymentSheetCommonModule
 import com.stripe.android.paymentsheet.repositories.NoOpPaymentMethodMessagingPromotionHelperModule
 import com.stripe.android.paymentsheet.state.NoOpTapToAddConnectionStarterModule
 import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 import dagger.Binds
 import dagger.Module
@@ -77,7 +78,7 @@ internal interface LinkControllerModule {
         @Provides
         @Singleton
         fun provideStripeImageLoader(context: Context): StripeImageLoader {
-            return StripeImageLoader(context)
+            return DefaultStripeImageLoader(context)
         }
     }
 }
