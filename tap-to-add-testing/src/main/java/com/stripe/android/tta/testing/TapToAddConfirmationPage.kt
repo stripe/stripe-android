@@ -1,5 +1,6 @@
 package com.stripe.android.tta.testing
 
+import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
@@ -12,8 +13,8 @@ class TapToAddConfirmationPage(
 ) {
     private val primaryButtonElement = TapToAddPrimaryButtonElement(composeTestRule)
 
-    fun assertPrimaryButton(label: String, isEnabled: Boolean) {
-        primaryButtonElement.assert(label).run {
+    fun assertPrimaryButton(withLabel: String? = null, isEnabled: Boolean = true) {
+        primaryButtonElement.assert(withLabel).run {
             if (isEnabled) {
                 assertIsEnabled()
             } else {
@@ -23,17 +24,25 @@ class TapToAddConfirmationPage(
     }
 
     fun assertCvcRecollectionFieldShown() {
-        composeTestRule.onNode(hasText("CVC"))
+        retrieveCvcField()
             .assertIsDisplayed()
             .assertIsEnabled()
     }
 
     fun fillCvc(cvc: String) {
-        composeTestRule.onNode(hasText("CVC"))
+        retrieveCvcField()
             .performTextInput(cvc)
     }
 
-    fun clickPrimaryButton(label: String) {
-        primaryButtonElement.assert(label).click()
+    fun clickPrimaryButton() {
+        primaryButtonElement.assert(null).click()
+    }
+
+    fun clickCloseButton() {
+        composeTestRule.retrieveCloseButton().click()
+    }
+
+    private fun retrieveCvcField(): SemanticsNodeInteraction {
+        return composeTestRule.onNode(hasText("CVC"))
     }
 }

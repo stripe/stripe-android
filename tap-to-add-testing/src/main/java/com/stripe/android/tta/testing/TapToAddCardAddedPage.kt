@@ -12,7 +12,7 @@ class TapToAddCardAddedPage(
 ) {
     private val primaryButtonElement = TapToAddPrimaryButtonElement(composeTestRule)
 
-    fun assertShown(withLink: Boolean) {
+    fun assertShown(withLink: Boolean = false) {
         assertHasCardAddedText()
 
         if (withLink) {
@@ -33,7 +33,7 @@ class TapToAddCardAddedPage(
     }
 
     fun assertContinueButton(isEnabled: Boolean) {
-        primaryButtonElement.assert(label = "Continue").run {
+        assertHasContinueButton().run {
             if (isEnabled) {
                 assertIsEnabled()
             } else {
@@ -46,11 +46,15 @@ class TapToAddCardAddedPage(
         assertHasContinueButton().click()
     }
 
+    fun clickCloseButton() {
+        composeTestRule.retrieveCloseButton().click()
+    }
+
     private fun assertHasCardAddedText() {
         composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT) {
             composeTestRule.onNode(hasText("Card added")).isDisplayed()
         }
     }
 
-    private fun assertHasContinueButton() = primaryButtonElement.assert(label = "Continue")
+    private fun assertHasContinueButton() = primaryButtonElement.assert(withLabel = "Continue")
 }
