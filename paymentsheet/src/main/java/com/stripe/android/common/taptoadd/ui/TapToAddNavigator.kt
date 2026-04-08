@@ -9,6 +9,8 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.uicore.utils.collectAsState
+import com.stripe.android.uicore.utils.mapAsStateFlow
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -94,7 +96,7 @@ internal class TapToAddNavigator(
     }
 
     sealed class Screen : Closeable {
-        abstract val cancelButton: CancelButton
+        abstract val cancelButton: StateFlow<CancelButton>
 
         @Composable
         protected abstract fun ColumnScope.Content()
@@ -111,7 +113,7 @@ internal class TapToAddNavigator(
         data class Collecting(
             val interactor: TapToAddCollectingInteractor,
         ) : Screen() {
-            override val cancelButton: CancelButton = CancelButton.None
+            override val cancelButton: StateFlow<CancelButton> = stateFlowOf(CancelButton.None)
 
             @Composable
             override fun ColumnScope.Content() {
@@ -126,10 +128,12 @@ internal class TapToAddNavigator(
         data class CardAdded(
             val interactor: TapToAddCardAddedInteractor,
         ) : Screen() {
-            override val cancelButton: CancelButton = CancelButton.Available(
-                action = Action.Close {
-                    interactor.performAction(TapToAddCardAddedInteractor.Action.CancelPressed)
-                }
+            override val cancelButton: StateFlow<CancelButton> = stateFlowOf(
+                CancelButton.Available(
+                    action = Action.Close {
+                        interactor.performAction(TapToAddCardAddedInteractor.Action.CancelPressed)
+                    }
+                )
             )
 
             @Composable
@@ -152,8 +156,10 @@ internal class TapToAddNavigator(
         data class Delay(
             val interactor: TapToAddDelayInteractor,
         ) : Screen() {
-            override val cancelButton: CancelButton = CancelButton.Available(
-                action = Action.Close()
+            override val cancelButton: StateFlow<CancelButton> = stateFlowOf(
+                CancelButton.Available(
+                    action = Action.Close()
+                )
             )
 
             @Composable
@@ -172,11 +178,21 @@ internal class TapToAddNavigator(
         data class Confirmation(
             val interactor: TapToAddConfirmationInteractor,
         ) : Screen() {
-            override val cancelButton: CancelButton = CancelButton.Available(
-                action = Action.Close {
-                    interactor.performAction(TapToAddConfirmationInteractor.Action.CancelPressed)
+            override val cancelButton: StateFlow<CancelButton> = interactor.state.mapAsStateFlow { state ->
+                when (state.primaryButton.state) {
+                    TapToAddConfirmationInteractor.State.PrimaryButton.State.Idle -> {
+                        CancelButton.Available(
+                            action = Action.Close {
+                                interactor.performAction(TapToAddConfirmationInteractor.Action.CancelPressed)
+                            }
+                        )
+                    }
+                    TapToAddConfirmationInteractor.State.PrimaryButton.State.Processing,
+                    TapToAddConfirmationInteractor.State.PrimaryButton.State.Success -> {
+                        CancelButton.Invisible
+                    }
                 }
-            )
+            }
 
             @Composable
             override fun ColumnScope.Content() {
@@ -201,8 +217,10 @@ internal class TapToAddNavigator(
         data class Error(
             val message: ResolvableString,
         ) : Screen() {
-            override val cancelButton: CancelButton = CancelButton.Available(
-                action = Action.Close()
+            override val cancelButton: StateFlow<CancelButton> = stateFlowOf(
+                CancelButton.Available(
+                    action = Action.Close()
+                )
             )
 
             @Composable
@@ -212,8 +230,10 @@ internal class TapToAddNavigator(
         }
 
         data object NotSupportedError : Screen() {
-            override val cancelButton: CancelButton = CancelButton.Available(
-                action = Action.CloseWithUnsupportedDevice
+            override val cancelButton: StateFlow<CancelButton> = stateFlowOf(
+                CancelButton.Available(
+                    action = Action.CloseWithUnsupportedDevice
+                )
             )
 
             @Composable
@@ -227,6 +247,7 @@ internal class TapToAddNavigator(
 
     sealed interface CancelButton {
         data object None : CancelButton
+        data object Invisible : CancelButton
         class Available(val action: Action) : CancelButton
     }
 
