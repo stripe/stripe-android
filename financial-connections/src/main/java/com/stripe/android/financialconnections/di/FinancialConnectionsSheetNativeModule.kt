@@ -34,6 +34,7 @@ import com.stripe.android.financialconnections.repository.api.ProvideApiRequestO
 import com.stripe.android.financialconnections.repository.api.RealProvideApiRequestOptions
 import com.stripe.android.repository.ConsumersApiService
 import com.stripe.android.repository.ConsumersApiServiceImpl
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.navigation.NavigationManager
 import com.stripe.android.uicore.navigation.NavigationManagerImpl
@@ -92,7 +93,7 @@ internal interface FinancialConnectionsSheetNativeModule {
         @Provides
         fun providesImageLoader(
             context: Application
-        ) = StripeImageLoader(
+        ): StripeImageLoader = DefaultStripeImageLoader(
             context = context,
             diskCache = null,
         )

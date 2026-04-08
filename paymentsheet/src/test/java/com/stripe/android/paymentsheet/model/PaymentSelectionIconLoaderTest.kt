@@ -10,15 +10,12 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.testing.FakeStripeImageLoader
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.mock
-import org.mockito.kotlin.eq
-import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
@@ -79,11 +76,12 @@ internal class PaymentSelectionIconLoaderTest {
     ) = runTest(testDispatcher) {
         val drawable = PaymentSelection.IconLoader(
             resources = ApplicationProvider.getApplicationContext<Context>().resources,
-            imageLoader = mock<StripeImageLoader>().also {
-                whenever(it.load(eq(workingUrl))).thenReturn(Result.success(simpleBitmap))
-            }.also {
-                whenever(it.load(eq(brokenUrl))).thenReturn(Result.failure(Throwable()))
-            },
+            imageLoader = FakeStripeImageLoader(
+                loadResultByUrl = mapOf(
+                    workingUrl to Result.success(simpleBitmap),
+                    brokenUrl to Result.failure(Throwable()),
+                ),
+            ),
         ).load(
             drawableResourceId = iconRes ?: 0,
             drawableResourceIdNight = null,

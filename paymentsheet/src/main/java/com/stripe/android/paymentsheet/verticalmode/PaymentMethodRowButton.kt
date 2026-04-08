@@ -48,7 +48,7 @@ import com.stripe.android.paymentsheet.ui.PromoBadge
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconWidth
 import com.stripe.android.uicore.DefaultStripeTheme
 import com.stripe.android.uicore.getBorderStroke
-import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.R as StripeUiCoreR
 
@@ -420,7 +420,7 @@ private fun ButtonPreview() {
                     PaymentMethodIcon(
                         iconRes = com.stripe.android.ui.core.R.drawable.stripe_ic_paymentsheet_pm_card,
                         iconUrl = null,
-                        imageLoader = StripeImageLoader(LocalContext.current.applicationContext),
+                        imageLoader = DefaultStripeImageLoader(LocalContext.current.applicationContext),
                         iconRequiresTinting = true,
                         modifier = Modifier
                             .height(22.dp)
@@ -445,7 +445,7 @@ private fun ButtonPreview() {
                     PaymentMethodIcon(
                         iconRes = com.stripe.android.ui.core.R.drawable.stripe_ic_paymentsheet_pm_card,
                         iconUrl = null,
-                        imageLoader = StripeImageLoader(LocalContext.current.applicationContext),
+                        imageLoader = DefaultStripeImageLoader(LocalContext.current.applicationContext),
                         iconRequiresTinting = true,
                         modifier = Modifier
                             .height(22.dp)
