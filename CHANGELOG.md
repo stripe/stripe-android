@@ -2,6 +2,14 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 23.3.0 - 2026-04-06
+### AddressElement
+* [ADDED][12848](https://github.com/stripe/stripe-android/pull/12848) Added state dropdown support for BR.
+
+### Connect
+* [DEPRECATED][12695](https://github.com/stripe/stripe-android/pull/12695) Deprecated `Action` and `Form` parameters in `Colors` class. Now those parameters can be initialized within its own class.
+* [ADDED][12695](https://github.com/stripe/stripe-android/pull/12695) Added the types for new theming tokens in Connect Embedded Components and mapped them to the corresponding variable in ConnectJS
+
 ## 23.2.0 - 2026-03-30
 
 Dependencies updated in [12785](https://github.com/stripe/stripe-android/pull/12785) and [12786](https://github.com/stripe/stripe-android/pull/12786):

@@ -11,7 +11,6 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.checkout.Address
 import com.stripe.android.checkout.Checkout
-import com.stripe.android.checkout.CheckoutSession
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -56,7 +55,7 @@ internal class CheckoutPlaygroundViewModel(
 
     fun updateShippingAddress(addressDetails: AddressDetails) = performWhileLoading {
         val country = addressDetails.address?.country
-            ?: return@performWhileLoading Result.failure(IllegalStateException("Country is required"))
+            ?: return@performWhileLoading Result.failure<Unit>(IllegalStateException("Country is required"))
         val address = Address()
             .city(addressDetails.address?.city)
             .country(country)
@@ -71,7 +70,7 @@ internal class CheckoutPlaygroundViewModel(
 
     fun updateBillingAddress(addressDetails: AddressDetails) = performWhileLoading {
         val country = addressDetails.address?.country
-            ?: return@performWhileLoading Result.failure(IllegalStateException("Country is required"))
+            ?: return@performWhileLoading Result.failure<Unit>(IllegalStateException("Country is required"))
         val address = Address()
             .city(addressDetails.address?.city)
             .country(country)
@@ -109,7 +108,7 @@ internal class CheckoutPlaygroundViewModel(
         checkout.refresh()
     }
 
-    private fun performWhileLoading(block: suspend () -> Result<CheckoutSession>) {
+    private fun performWhileLoading(block: suspend () -> Result<Unit>) {
         viewModelScope.launch {
             block().onSuccess {
                 savedStateHandle[CHECKOUT_STATE_KEY] = checkout.state

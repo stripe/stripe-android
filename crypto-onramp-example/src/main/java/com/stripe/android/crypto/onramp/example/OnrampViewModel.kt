@@ -43,6 +43,7 @@ import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.utils.isLinkAuthorizationError
+import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -367,6 +368,9 @@ internal class OnrampViewModel(
                     it.copy(
                         screen = Screen.AuthenticatedOperations,
                         selectedPaymentData = result.displayData,
+                        kycFirstName = result.kycInfo?.firstName ?: it.kycFirstName,
+                        kycLastName = result.kycInfo?.lastName ?: it.kycLastName,
+                        kycAddress = result.kycInfo?.address ?: it.kycAddress
                     )
                 }
             }
@@ -686,6 +690,18 @@ internal class OnrampViewModel(
         _uiState.update { it.copy(settlementSpeed = settlementSpeed) }
     }
 
+    fun updateKycFirstName(value: String) {
+        _uiState.update { it.copy(kycFirstName = value) }
+    }
+
+    fun updateKycLastName(value: String) {
+        _uiState.update { it.copy(kycLastName = value) }
+    }
+
+    fun updateKycAddress(address: PaymentSheet.Address) {
+        _uiState.update { it.copy(kycAddress = address) }
+    }
+
     fun clearCheckoutEvent() {
         _checkoutEvent.value = null
     }
@@ -807,6 +823,9 @@ data class OnrampUiState(
     val loadingMessage: String? = null,
     val settlementSpeed: SettlementSpeed = SettlementSpeed.INSTANT,
     val googlePayIsReady: Boolean = false,
+    val kycFirstName: String = "",
+    val kycLastName: String = "",
+    val kycAddress: PaymentSheet.Address = PaymentSheet.Address(),
 ) : Parcelable
 
 enum class Screen {

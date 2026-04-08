@@ -15,6 +15,7 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.PaymentConfigurationModule
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.isSystemDarkTheme
 import dagger.Binds
@@ -60,7 +61,7 @@ internal interface PaymentMethodMessagingModule {
         @Provides
         fun providesStripeImageLoader(
             application: Application
-        ): StripeImageLoader = StripeImageLoader(application)
+        ): StripeImageLoader = DefaultStripeImageLoader(application)
 
         @Provides
         fun providesIsDarkTheme(

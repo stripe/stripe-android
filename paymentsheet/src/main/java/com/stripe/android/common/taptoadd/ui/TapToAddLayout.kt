@@ -82,9 +82,7 @@ internal fun TapToAddLayout(
                         ) {
                             CancelButton(
                                 button = screen.cancelButton,
-                                onClick = {
-                                    onCancel(screen.onCancelAction)
-                                },
+                                onClick = onCancel,
                             )
 
                             screen.ScreenContent(this)
@@ -99,17 +97,13 @@ internal fun TapToAddLayout(
 @Composable
 private fun CancelButton(
     button: TapToAddNavigator.CancelButton,
-    onClick: () -> Unit,
+    onClick: (TapToAddNavigator.Action) -> Unit,
 ) {
     val sizeModifier = Modifier.size(50.dp)
 
     when (button) {
-        TapToAddNavigator.CancelButton.None -> Unit
-        TapToAddNavigator.CancelButton.Invisible -> {
-            Spacer(sizeModifier)
-            Spacer(Modifier.size(20.dp))
-        }
-        TapToAddNavigator.CancelButton.Visible -> {
+        is TapToAddNavigator.CancelButton.None -> Unit
+        is TapToAddNavigator.CancelButton.Available -> {
             val sharedElementScope = LocalSharedElementScope.current
 
             sharedElementScope?.let {
@@ -121,11 +115,14 @@ private fun CancelButton(
                                 animatedVisibilityScope = sharedElementScope.animatedVisibilityScope
                             )
                             .then(sizeModifier),
-                        onClick = onClick
-                    )
+                    ) {
+                        onClick(button.action)
+                    }
                 }
             } ?: run {
-                VisibleCancelButton(sizeModifier, onClick)
+                VisibleCancelButton(sizeModifier) {
+                    onClick(button.action)
+                }
             }
         }
     }

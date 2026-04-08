@@ -15,6 +15,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.googlepaylauncher.injection.GooglePayRepositoryFactory
@@ -72,6 +73,7 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.PaymentIntentInTerminalState
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.CustomerFactory
@@ -85,6 +87,7 @@ import com.stripe.android.utils.FakeElementsSessionRepository
 import com.stripe.android.utils.FakeElementsSessionRepository.Companion.DEFAULT_ELEMENTS_SESSION_CONFIG_ID
 import com.stripe.android.utils.FakeLinkStore
 import com.stripe.android.utils.FakePaymentMethodFilter
+import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestDispatcher
@@ -553,6 +556,7 @@ internal class DefaultPaymentElementLoaderTest {
                     isGooglePayReady = true,
                     customerRepo = FakeCustomerRepository(paymentMethods = emptyList()),
                     tapToAddConnectionStarter = connectionStarter,
+                    tapToAddAvailabilityFactory = FakeTapToAddAvailabilityFactory(isAvailableResult = true),
                 )
 
                 val result = loader.load(
@@ -594,6 +598,7 @@ internal class DefaultPaymentElementLoaderTest {
                     isGooglePayReady = true,
                     customerRepo = FakeCustomerRepository(paymentMethods = emptyList()),
                     tapToAddConnectionStarter = connectionStarter,
+                    tapToAddAvailabilityFactory = FakeTapToAddAvailabilityFactory(isAvailableResult = false),
                     elementsSessionRepository = elementsSessionRepository,
                 )
 
@@ -4162,6 +4167,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
         assertThat(createCall.elementsSession).isNotNull()
         assertThat(createCall.linkStateResult).isNotNull()
+        assertThat(createCall.isTapToAddAvailable).isFalse()
         analyticsMetadataFactory.validate()
 
         consumeLoadingEvents()
@@ -4220,8 +4226,33 @@ internal class DefaultPaymentElementLoaderTest {
         )
         assertThat(createCall.elementsSession).isNotNull()
         assertThat(createCall.linkStateResult).isNotNull()
+        assertThat(createCall.isTapToAddAvailable).isFalse()
         analyticsMetadataFactory.validate()
 
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `prefetches PMM promotions if enabled`() = runScenario {
+        FeatureFlags.paymentMethodMessagePromotions.setEnabled(true)
+        val helper = FakePaymentMethodMessagePromotionsHelper()
+        val loader = createPaymentElementLoader(
+            paymentMethodMessagePromotionsHelper = helper
+        )
+
+        loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("test_123"),
+            paymentSheetConfiguration = PaymentSheet.Configuration(
+                merchantDisplayName = "Merchant"
+            ),
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            )
+        )
+
+        assertThat(helper.calls.awaitItem()).isNotNull()
+        helper.validate()
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
@@ -4492,12 +4523,16 @@ internal class DefaultPaymentElementLoaderTest {
         integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),
         tapToAddConnectionStarter: TapToAddConnectionStarter =
             FakeTapToAddConnectionStarter.create(isSupported = false),
+        tapToAddAvailabilityFactory: TapToAddAvailabilityFactory =
+            FakeTapToAddAvailabilityFactory(isAvailableResult = false),
         isLiveMode: Boolean = false,
         analyticsMetadataFactory: DefaultPaymentElementLoader.AnalyticsMetadataFactory =
             FakeDefaultPaymentElementLoaderAnalyticsMetadataFactory {
                 AnalyticsMetadata(emptyMap())
             },
         paymentMethodFilter: PaymentMethodFilter = FakePaymentMethodFilter.noOp(),
+        paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper =
+            FakePaymentMethodMessagePromotionsHelper()
     ): PaymentElementLoader {
         val retrieveCustomerEmailImpl = DefaultRetrieveCustomerEmail(customerRepo)
         val createLinkState = DefaultCreateLinkState(
@@ -4542,6 +4577,8 @@ internal class DefaultPaymentElementLoaderTest {
                 elementsSessionRepository = elementsSessionRepository,
             ),
             createCustomerMetadata = CreateCustomerMetadata(errorReporter),
+            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+            tapToAddAvailabilityFactory = tapToAddAvailabilityFactory,
         )
     }
 

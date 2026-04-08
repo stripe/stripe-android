@@ -410,6 +410,12 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     sealed class TapToAdd : PaymentSheetEvent() {
         abstract val mode: EventReporter.Mode
 
+        class ButtonShown(
+            override val mode: EventReporter.Mode,
+        ) : TapToAdd() {
+            override val eventName: String = formatEventName(mode, "tap_to_add_button_shown")
+        }
+
         class Started(
             override val mode: EventReporter.Mode,
         ) : TapToAdd() {
@@ -452,11 +458,22 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
 
         class Canceled(
             override val mode: EventReporter.Mode,
+            val source: EventReporter.TapToAddCancelSource,
             val duration: Duration?,
         ) : TapToAdd() {
+            private val sourceAsAnalyticsValue = when (source) {
+                EventReporter.TapToAddCancelSource.CardCollection -> "card_collection"
+                EventReporter.TapToAddCancelSource.CardAdded -> "card_added"
+                EventReporter.TapToAddCancelSource.Confirmation -> "confirmation"
+            }
+
             override val eventName: String = formatEventName(mode, "tap_to_add_canceled")
 
-            override val params: Map<String, Any?> = duration.mapOfDurationInSeconds()
+            override val params: Map<String, Any?> =
+                duration.mapOfDurationInSeconds() +
+                    mapOf(
+                        FIELD_TTA_CANCEL_SOURCE to sourceAsAnalyticsValue
+                    )
         }
 
         class AttemptWithUnsupportedDevice(
@@ -551,6 +568,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_ERROR_MESSAGE = "error_message"
         const val FIELD_ERROR_CODE = "error_code"
         const val FIELD_CBC_EVENT_SOURCE = "cbc_event_source"
+        const val FIELD_TTA_CANCEL_SOURCE = "tta_cancel_source"
         const val FIELD_PAYMENT_METHOD_TYPE = "payment_method_type"
         const val FIELD_SELECTED_CARD_BRAND = "selected_card_brand"
         const val FIELD_SET_AS_DEFAULT = "set_as_default"

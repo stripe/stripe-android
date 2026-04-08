@@ -36,6 +36,7 @@ import org.mockito.kotlin.KStubbing
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.eq
@@ -191,6 +192,43 @@ class DefaultTapToAddConnectionManagerTest {
         )
 
         connectionJob.cancel()
+    }
+
+    @Test
+    fun `connect reports error when discover readers cancel fails after coroutine cancelled`() = test(
+        terminalInstance = mock {
+            mockSupportedReaderResult(ReaderSupportResult.Supported)
+            mockReaderCall()
+            mockDiscoverCall(
+                mock<Cancelable> {
+                    on { cancel(any()) } doAnswer { invocation ->
+                        val callback = invocation.getArgument<Callback>(0)
+                        callback.onFailure(
+                            TerminalException(
+                                errorCode = TerminalErrorCode.CANCEL_FAILED,
+                                errorMessage = "Failed to cancel discovery",
+                            )
+                        )
+                    }
+                }
+            )
+        }
+    ) {
+        val connectionJob = testScope.async { manager.connect() }
+
+        verify(terminalInstance).discoverReaders(
+            any<DiscoveryConfiguration.TapToPayDiscoveryConfiguration>(),
+            any<DiscoveryListener>(),
+            any<Callback>(),
+        )
+
+        connectionJob.cancel()
+
+        val reportCall = errorReporter.awaitCall()
+        assertThat(reportCall.errorEvent)
+            .isEqualTo(ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_DISCOVER_READERS_CANCEL_FAILURE)
+        assertThat(reportCall.stripeException?.cause).isInstanceOf(TerminalException::class.java)
+        assertThat(reportCall.additionalNonPiiParams).isEmpty()
     }
 
     @Test
@@ -694,7 +732,9 @@ class DefaultTapToAddConnectionManagerTest {
                         terminalWrapper = wrapper,
                         errorReporter = errorReporter,
                         logger = logger,
-                        isSimulated = isSimulated,
+                        isSimulatedProvider = object : TapToAddIsSimulatedProvider {
+                            override fun get(): Boolean = isSimulated
+                        },
                         paymentConfiguration = { PaymentConfiguration(publishableKey = "pk_test") }
                     ),
                     terminalInstance = terminalInstance,

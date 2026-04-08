@@ -54,7 +54,7 @@ internal interface TapToAddConnectionManager {
             logger: Logger,
             paymentConfiguration: Provider<PaymentConfiguration>,
             workContext: CoroutineContext,
-            isSimulated: Boolean,
+            isSimulatedProvider: TapToAddIsSimulatedProvider,
         ): TapToAddConnectionManager {
             return if (isStripeTerminalSdkAvailable()) {
                 TapToAddRetriableConnectionManager(
@@ -65,7 +65,7 @@ internal interface TapToAddConnectionManager {
                         errorReporter = errorReporter,
                         terminalWrapper = terminalWrapper,
                         logger = logger,
-                        isSimulated = isSimulated,
+                        isSimulatedProvider = isSimulatedProvider,
                     ),
                     fatalErrorChecker = DefaultTapToAddFatalErrorChecker(),
                     retryDelaySupplier = ExponentialBackoffRetryDelaySupplier(),
@@ -85,11 +85,14 @@ internal class DefaultTapToAddConnectionManager(
     private val errorReporter: ErrorReporter,
     private val terminalWrapper: TerminalWrapper,
     private val logger: Logger,
-    isSimulated: Boolean,
+    isSimulatedProvider: TapToAddIsSimulatedProvider,
 ) : TapToAddConnectionManager, TerminalListener, TapToPayReaderListener {
     private var connectionTask: CompletableDeferred<Unit>? = null
 
-    private val discoveryConfiguration = DiscoveryConfiguration.TapToPayDiscoveryConfiguration(isSimulated)
+    private val discoveryConfiguration by lazy {
+        DiscoveryConfiguration.TapToPayDiscoveryConfiguration(isSimulatedProvider.get())
+    }
+
     private val connectionTaskLock = Mutex()
 
     override val isSupported: Boolean
@@ -203,7 +206,11 @@ internal class DefaultTapToAddConnectionManager(
                         }
 
                         override fun onFailure(e: TerminalException) {
-                            // No-op
+                            reportError(
+                                error = e,
+                                errorEvent =
+                                    ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_DISCOVER_READERS_CANCEL_FAILURE,
+                            )
                         }
                     }
                 )

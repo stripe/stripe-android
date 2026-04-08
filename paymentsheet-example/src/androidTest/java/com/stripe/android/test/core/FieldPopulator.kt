@@ -159,7 +159,7 @@ internal class FieldPopulator(
         get() = testParameters.playgroundSettingsSnapshot[MerchantSettingsDefinition].countryCode
 
     private fun usesStateDropdown(): Boolean {
-        return merchantCountryCode in setOf("US", "GB")
+        return merchantCountryCode in setOf("BR", "US", "GB")
     }
 
     private fun usesZip(): Boolean {

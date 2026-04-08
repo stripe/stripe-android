@@ -123,5 +123,39 @@ class AdministrativeAreaConfig(
                 Pair("WY", "Wyoming")
             )
         ) : Country(label, administrativeAreas)
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data class Brazil(
+            override val label: Int = CoreR.string.stripe_address_label_state,
+            override val administrativeAreas: List<Pair<String, String>> = listOf(
+                Pair("AC", "Acre"),
+                Pair("AL", "Alagoas"),
+                Pair("AP", "Amapá"),
+                Pair("AM", "Amazonas"),
+                Pair("BA", "Bahia"),
+                Pair("CE", "Ceará"),
+                Pair("DF", "Distrito Federal"),
+                Pair("ES", "Espírito Santo"),
+                Pair("GO", "Goiás"),
+                Pair("MA", "Maranhão"),
+                Pair("MT", "Mato Grosso"),
+                Pair("MS", "Mato Grosso do Sul"),
+                Pair("MG", "Minas Gerais"),
+                Pair("PA", "Pará"),
+                Pair("PB", "Paraíba"),
+                Pair("PR", "Paraná"),
+                Pair("PE", "Pernambuco"),
+                Pair("PI", "Piauí"),
+                Pair("RJ", "Rio de Janeiro"),
+                Pair("RN", "Rio Grande do Norte"),
+                Pair("RS", "Rio Grande do Sul"),
+                Pair("RO", "Rondônia"),
+                Pair("RR", "Roraima"),
+                Pair("SC", "Santa Catarina"),
+                Pair("SP", "São Paulo"),
+                Pair("SE", "Sergipe"),
+                Pair("TO", "Tocantins"),
+            )
+        ) : Country(label, administrativeAreas)
     }
 }

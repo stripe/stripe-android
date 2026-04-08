@@ -11,6 +11,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.testing.PaymentMethodFactory
@@ -94,7 +95,8 @@ internal class DefaultTapToAddCollectingInteractorTest {
         ) {
             assertThat(collectionHandlerScenario.collectCalls.awaitItem()).isNotNull()
             assertThat(fakeEventReporter.tapToAddStartedCalls.awaitItem()).isNotNull()
-            assertThat(fakeEventReporter.tapToAddCanceledCalls.awaitItem()).isNotNull()
+            assertThat(fakeEventReporter.tapToAddCanceledCalls.awaitItem())
+                .isEqualTo(EventReporter.TapToAddCancelSource.CardCollection)
             assertThat(onCanceled.awaitItem()).isNotNull()
         }
     }

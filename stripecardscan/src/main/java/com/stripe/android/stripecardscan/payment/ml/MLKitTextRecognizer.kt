@@ -11,12 +11,24 @@ import com.stripe.android.camera.framework.AnalyzerFactory
 import com.stripe.android.stripecardscan.payment.card.isValidPan
 import kotlinx.coroutines.tasks.await
 import java.io.Closeable
+import java.util.Calendar
 
 /**
  * Regex matching 15-16 contiguous digits (after stripping spaces/dashes).
  */
 private val PAN_REGEX = Regex("\\d{15,16}")
 private val SEPARATOR_REGEX = Regex("[\\s\\-]")
+
+/**
+ * Regex matching slash-separated expiration dates in OCR text, e.g. "01/25" or "01/2025".
+ */
+private val EXPIRY_SLASH_REGEX = Regex("""\b(\d{1,2})/(\d{2,4})\b""")
+
+/**
+ * Fallback regex matching expiration dates with non-slash separators, e.g. "01-25" or "01 25".
+ * Anchored for matching individual OCR elements.
+ */
+private val EXPIRY_SEPARATOR_REGEX = Regex("""^(\d{2})\D{1,3}(\d{2,4})$""")
 
 /**
  * An [Analyzer] that uses Google ML Kit Text Recognition to process card images.
@@ -34,7 +46,13 @@ internal class MLKitTextRecognizer internal constructor(
         return try {
             val inputImage = InputImage.fromBitmap(data.cardBitmap, 0)
             val text = textRecognizer.process(inputImage).await()
-            CardOcr.Prediction(pan = extractPan(text))
+            val pan = extractPan(text)
+            val expiry = extractExpiry(text)
+            CardOcr.Prediction(
+                pan = pan,
+                expiryMonth = expiry?.month,
+                expiryYear = expiry?.year,
+            )
         } catch (e: Exception) {
             CardOcr.Prediction(pan = null)
         }
@@ -129,6 +147,79 @@ internal class MLKitTextRecognizer internal constructor(
             }
 
             return null
+        }
+
+        /**
+         * Extract a valid expiration date from ML Kit [Text] output.
+         *
+         * Looks for slash-separated dates (e.g. "01/25") at the line level first,
+         * then falls back to element-level matching with other separators (e.g. "01-25").
+         * Validates that the date is not expired and not more than 10 years in the future.
+         *
+         * @return a [CardOcr.Expiry], or null if no valid expiry is found.
+         */
+        @VisibleForTesting
+        internal fun extractExpiry(text: Text): CardOcr.Expiry? {
+            for (block in text.textBlocks) {
+                for (line in block.lines) {
+                    // Try slash format on the full line text (handles "VALID THRU 01/25")
+                    val lineExpiry = parseExpiry(line.text, EXPIRY_SLASH_REGEX)
+                    if (lineExpiry != null && isValidExpiry(lineExpiry)) {
+                        return lineExpiry
+                    }
+                    // Fall back to element-level matching with either regex
+                    for (element in line.elements) {
+                        val elementExpiry = parseExpiry(element.text, EXPIRY_SLASH_REGEX)
+                            ?: parseExpiry(element.text, EXPIRY_SEPARATOR_REGEX)
+                        if (elementExpiry != null && isValidExpiry(elementExpiry)) {
+                            return elementExpiry
+                        }
+                    }
+                }
+            }
+            return null
+        }
+
+        /**
+         * Parse a month and year from the given [text] using the provided [regex].
+         *
+         * @return a [CardOcr.Expiry], or null if parsing fails.
+         */
+        @VisibleForTesting
+        internal fun parseExpiry(text: String, regex: Regex): CardOcr.Expiry? {
+            val match = regex.find(text) ?: return null
+            val month = match.groupValues[1].toIntOrNull() ?: return null
+            val year = match.groupValues[2].toIntOrNull() ?: return null
+            return CardOcr.Expiry(month = month, year = year)
+        }
+
+        // Calendar.getInstance() is expensive, so we cache it for the duration of the scan.
+        private val cachedCalendar = Calendar.getInstance()
+        private val cachedCurrentMonth: Int = cachedCalendar.get(Calendar.MONTH) + 1
+        private val cachedCurrentYear: Int = cachedCalendar.get(Calendar.YEAR)
+
+        /**
+         * Check whether the given expiration date is valid for OCR purposes.
+         *
+         * A valid expiry must:
+         * - Have a month in 1..12
+         * - Not be expired (month/year >= current month/year)
+         * - Not be more than 10 years in the future (prevents OCR misreads)
+         *
+         * [CardOcr.Expiry.year] is always a full 4-digit year (auto-normalized by [CardOcr.Expiry]).
+         * Parameters [currentMonth] and [currentYear] are injectable for testing.
+         */
+        @Suppress("MagicNumber")
+        @VisibleForTesting
+        internal fun isValidExpiry(
+            expiry: CardOcr.Expiry,
+            currentMonth: Int = cachedCurrentMonth,
+            currentYear: Int = cachedCurrentYear,
+        ): Boolean {
+            if (expiry.month !in 1..12) return false
+            if (expiry.year < currentYear || (expiry.year == currentYear && expiry.month < currentMonth)) return false
+            if (expiry.year > currentYear + 10) return false
+            return true
         }
     }
 }

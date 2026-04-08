@@ -109,6 +109,7 @@ apiValidation {
     ignoredPackages += ["com.stripe.android.databinding", "com.stripe.android.stripecardscan.databinding"]
     ignoredProjects += [
             "checkout-testing",
+            "tap-to-add-testing",
             "example",
             "financial-connections-example",
             "identity-example",

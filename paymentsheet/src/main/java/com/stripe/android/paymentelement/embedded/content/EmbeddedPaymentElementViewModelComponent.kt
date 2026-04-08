@@ -29,6 +29,7 @@ import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelperModule
 import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
 import com.stripe.android.paymentsheet.state.CreateLinkState
 import com.stripe.android.paymentsheet.state.DefaultAnalyticsMetadataFactory
@@ -37,11 +38,14 @@ import com.stripe.android.paymentsheet.state.DefaultLinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.DefaultPaymentElementLoader
 import com.stripe.android.paymentsheet.state.DefaultPaymentMethodFilter
 import com.stripe.android.paymentsheet.state.DefaultRetrieveCustomerEmail
+import com.stripe.android.paymentsheet.state.DefaultTapToAddAvailabilityFactory
 import com.stripe.android.paymentsheet.state.LinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentMethodFilter
 import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
+import com.stripe.android.paymentsheet.state.TapToAddAvailabilityFactory
 import com.stripe.android.paymentsheet.state.TapToAddConnectionStarterModule
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import dagger.Binds
@@ -68,6 +72,7 @@ import javax.inject.Singleton
         EmbeddedLinkExtrasModule::class,
         PaymentsIntegrityModule::class,
         LinkHoldbackExposureModule::class,
+        PaymentMethodMessagePromotionsHelperModule::class,
     ],
 )
 internal interface EmbeddedPaymentElementViewModelComponent {
@@ -129,6 +134,11 @@ internal interface EmbeddedPaymentElementViewModelModule {
 
     @Binds
     fun bindPaymentElementLoader(loader: DefaultPaymentElementLoader): PaymentElementLoader
+
+    @Binds
+    fun bindsTapToAddAvailabilityFactory(
+        impl: DefaultTapToAddAvailabilityFactory
+    ): TapToAddAvailabilityFactory
 
     @Binds
     fun bindsPaymentMethodFilter(impl: DefaultPaymentMethodFilter): PaymentMethodFilter
@@ -200,7 +210,7 @@ internal interface EmbeddedPaymentElementViewModelModule {
         @Provides
         @Singleton
         fun provideStripeImageLoader(context: Context): StripeImageLoader {
-            return StripeImageLoader(context)
+            return DefaultStripeImageLoader(context)
         }
 
         @Provides

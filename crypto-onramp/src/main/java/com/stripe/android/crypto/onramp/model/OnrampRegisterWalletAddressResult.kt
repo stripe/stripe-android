@@ -1,23 +1,23 @@
 package com.stripe.android.crypto.onramp.model
 
-import androidx.annotation.RestrictTo
+import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 
 /**
  * Result of registering a wallet address in Onramp.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@ExperimentalCryptoOnramp
 sealed interface OnrampRegisterWalletAddressResult {
     /**
      * Wallet address was registered successfully.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @ExperimentalCryptoOnramp
     class Completed internal constructor() : OnrampRegisterWalletAddressResult
 
     /**
      * Registering wallet address failed (invalid format, etc).
      * @param error The error that caused the failure
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @ExperimentalCryptoOnramp
     class Failed internal constructor(
         val error: Throwable
     ) : OnrampRegisterWalletAddressResult

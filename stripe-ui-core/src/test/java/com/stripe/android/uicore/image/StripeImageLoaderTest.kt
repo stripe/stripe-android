@@ -31,7 +31,7 @@ class StripeImageLoaderTest {
         contentType = LoadedImage.ContentType.Known.Png,
     )
 
-    private val imageLoader = StripeImageLoader(
+    private val imageLoader = DefaultStripeImageLoader(
         context,
         logger,
         memoryCache,

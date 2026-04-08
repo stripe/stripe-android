@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -11,11 +12,18 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
+import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import org.junit.Rule
 import kotlin.test.Test
 
 internal class SavedPaymentMethodRowButtonScreenshotTest {
+
+    @get:Rule
+    val cardArtFeatureFlagRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.enableCardArt,
+        isEnabled = false
+    )
 
     @get:Rule
     val paparazziRule = PaparazziRule(
@@ -111,5 +119,58 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
                 isSelected = false,
             )
         }
+    }
+
+    @Test
+    fun testSavedVisa_withCardArt() {
+        cardArtFeatureFlagRule.setEnabled(true)
+
+        paparazziRule.snapshot {
+            SavedPaymentMethodRowButton(
+                displayableSavedPaymentMethod = savedVisaWithCardArt,
+                isEnabled = true,
+                isSelected = false,
+            )
+        }
+    }
+
+    @Test
+    fun testSavedVisa_withCardArt_selected() {
+        cardArtFeatureFlagRule.setEnabled(true)
+
+        paparazziRule.snapshot {
+            SavedPaymentMethodRowButton(
+                displayableSavedPaymentMethod = savedVisaWithCardArt,
+                isEnabled = true,
+                isSelected = true,
+            )
+        }
+    }
+
+    private companion object {
+        const val SAMPLE_CARD_ART_URL =
+            "https://b.stripecdn.com/cardart/assets/pfE0FkDGaiFhdoOj9to8po-ZLiJhetgfdKELIZCj3xA"
+
+        val savedVisaWithCardArt = DisplayableSavedPaymentMethod.create(
+            displayName = "···· 4242".resolvableString,
+            paymentMethod = PaymentMethod(
+                id = "001",
+                created = null,
+                liveMode = false,
+                code = PaymentMethod.Type.Card.code,
+                type = PaymentMethod.Type.Card,
+                card = PaymentMethod.Card(
+                    brand = CardBrand.Visa,
+                    last4 = "4242",
+                    cardArt = PaymentMethod.Card.CardArt(
+                        artImage = PaymentMethod.Card.CardArt.ArtImage(
+                            format = "image/png",
+                            url = SAMPLE_CARD_ART_URL
+                        ),
+                        programName = "Test Program"
+                    )
+                )
+            )
+        )
     }
 }

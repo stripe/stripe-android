@@ -707,7 +707,26 @@ class DefaultEventReporterTest {
     }
 
     @Test
-    fun `onTapToAddCanceled ends duration and fires event`() = runScenario {
+    fun `onTapToAddCanceled with CardCollection ends duration and fires event with card_collection source`() =
+        runScenario {
+            paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
+            durationProvider.endCalls.push(
+                FakeDurationProvider.EndCall(
+                    key = DurationProvider.Key.TapToAdd,
+                    duration = 1.seconds,
+                )
+            )
+
+            eventReporter.onTapToAddCanceled(EventReporter.TapToAddCancelSource.CardCollection)
+
+            val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+            assertThat(request.params).containsEntry("event", "mc_complete_tap_to_add_canceled")
+            assertThat(request.params).containsEntry("duration", 1.0f)
+            assertThat(request.params).containsEntry("tta_cancel_source", "card_collection")
+        }
+
+    @Test
+    fun `onTapToAddCanceled with CardAdded ends duration and fires event with card_added source`() = runScenario {
         paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
         durationProvider.endCalls.push(
             FakeDurationProvider.EndCall(
@@ -716,12 +735,32 @@ class DefaultEventReporterTest {
             )
         )
 
-        eventReporter.onTapToAddCanceled()
+        eventReporter.onTapToAddCanceled(EventReporter.TapToAddCancelSource.CardAdded)
 
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params).containsEntry("event", "mc_complete_tap_to_add_canceled")
         assertThat(request.params).containsEntry("duration", 1.0f)
+        assertThat(request.params).containsEntry("tta_cancel_source", "card_added")
     }
+
+    @Test
+    fun `onTapToAddCanceled with Confirmation ends duration and fires event with confirmation source`() =
+        runScenario {
+            paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
+            durationProvider.endCalls.push(
+                FakeDurationProvider.EndCall(
+                    key = DurationProvider.Key.TapToAdd,
+                    duration = 1.seconds,
+                )
+            )
+
+            eventReporter.onTapToAddCanceled(EventReporter.TapToAddCancelSource.Confirmation)
+
+            val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+            assertThat(request.params).containsEntry("event", "mc_complete_tap_to_add_canceled")
+            assertThat(request.params).containsEntry("duration", 1.0f)
+            assertThat(request.params).containsEntry("tta_cancel_source", "confirmation")
+        }
 
     @Test
     fun `onTapToAddContinueAfterCardAdded fires event`() = runScenario {

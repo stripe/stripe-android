@@ -1,7 +1,7 @@
 package com.stripe.android.crypto.onramp.model
 
 import android.os.Parcelable
-import androidx.annotation.RestrictTo
+import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 import com.stripe.android.model.DateOfBirth
 import com.stripe.android.paymentsheet.PaymentSheet
 import dev.drewhamilton.poko.Poko
@@ -16,14 +16,14 @@ import kotlinx.parcelize.Parcelize
  * @property dateOfBirth The user’s date of birth.
  * @property address The user’s billing address.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@ExperimentalCryptoOnramp
 @Poko
 class KycInfo(
-    internal val firstName: String?,
-    internal val lastName: String?,
+    val firstName: String?,
+    val lastName: String?,
     internal val idNumber: String?,
     internal val dateOfBirth: DateOfBirth?,
-    internal val address: PaymentSheet.Address?
+    val address: PaymentSheet.Address?
 )
 
 /**
@@ -38,7 +38,6 @@ class KycInfo(
  * @property dateOfBirth The user’s date of birth.
  * @property address The user’s billing address.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
 @Poko
 internal class RefreshKycInfo(

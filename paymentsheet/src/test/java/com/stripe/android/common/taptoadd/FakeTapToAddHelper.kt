@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 internal class FakeTapToAddHelper : TapToAddHelper {
     val registerCalls = Turbine<RegisterCall>()
     val collectCalls = Turbine<PaymentMethodMetadata>()
+    val reportButtonShownCalls = Turbine<Unit>()
 
     private val _nextStep = MutableSharedFlow<TapToAddNextStep>()
     override val nextStep: SharedFlow<TapToAddNextStep> = _nextStep.asSharedFlow()
@@ -35,6 +36,10 @@ internal class FakeTapToAddHelper : TapToAddHelper {
         registerCalls.add(RegisterCall(activityResultCaller, lifecycleOwner))
     }
 
+    override fun reportButtonShown() {
+        reportButtonShownCalls.add(Unit)
+    }
+
     override fun startPaymentMethodCollection(paymentMethodMetadata: PaymentMethodMetadata) {
         collectCalls.add(paymentMethodMetadata)
     }
@@ -42,6 +47,7 @@ internal class FakeTapToAddHelper : TapToAddHelper {
     fun validate() {
         registerCalls.ensureAllEventsConsumed()
         collectCalls.ensureAllEventsConsumed()
+        reportButtonShownCalls.ensureAllEventsConsumed()
     }
 
     class RegisterCall(

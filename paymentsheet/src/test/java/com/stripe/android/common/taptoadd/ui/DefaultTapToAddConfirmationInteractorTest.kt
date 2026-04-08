@@ -20,6 +20,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationOption
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -35,6 +36,16 @@ import org.junit.Test
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
 internal class DefaultTapToAddConfirmationInteractorTest {
+    @Test
+    fun `CancelPressed reports tap to add canceled with confirmation source`() = runScenario(
+        paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
+    ) {
+        interactor.performAction(TapToAddConfirmationInteractor.Action.CancelPressed)
+
+        assertThat(eventReporter.tapToAddCanceledCalls.awaitItem())
+            .isEqualTo(EventReporter.TapToAddCancelSource.Confirmation)
+    }
+
     @Test
     fun `state has card brand and last4 from payment method`() = runScenario(
         paymentMethod = PaymentMethodFactory.card().update(

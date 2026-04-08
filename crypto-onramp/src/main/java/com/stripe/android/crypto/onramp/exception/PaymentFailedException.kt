@@ -1,6 +1,6 @@
 package com.stripe.android.crypto.onramp.exception
 
-import androidx.annotation.RestrictTo
+import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@ExperimentalCryptoOnramp
 class PaymentFailedException internal constructor() : IllegalStateException("Payment failed")

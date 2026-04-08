@@ -3,9 +3,9 @@ package com.stripe.android.crypto.onramp
 import android.app.Application
 import android.content.Context
 import android.os.Parcelable
-import androidx.annotation.RestrictTo
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.R
 import com.stripe.android.core.utils.flatMapCatching
 import com.stripe.android.crypto.onramp.CheckoutState.Status
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsEvent
@@ -37,6 +37,7 @@ import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
+import com.stripe.android.crypto.onramp.model.googlePayKycInfo
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.crypto.onramp.ui.KycRefreshScreenAction
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
@@ -570,7 +571,8 @@ internal class OnrampInteractor @Inject constructor(
                         label = it.label,
                         sublabel = it.sublabel,
                         type = it.type.toDisplayType()
-                    )
+                    ),
+                        kycInfo = null
                 )
             } ?: run {
                 OnrampCollectPaymentMethodResult.Failed(MissingPaymentMethodException())
@@ -593,33 +595,11 @@ internal class OnrampInteractor @Inject constructor(
         result: GooglePayPaymentMethodLauncher.Result
     ): OnrampCollectPaymentMethodResult = when (result) {
         is GooglePayPaymentMethodLauncher.Result.Completed -> {
-            analyticsService?.track(
-                OnrampAnalyticsEvent.CollectPaymentMethodCompleted(
-                    paymentMethodType = PaymentMethodType.GooglePay
-                )
-            )
+            val kycInfo = result.paymentMethod.googlePayKycInfo()
 
-            _state.update { state ->
-                state.copy(
-                    selectedPaymentSource = SelectedPaymentSource.GooglePay(
-                        result.paymentMethod.id
-                    )
-                )
+            handleGooglePayPaymentMethod(result.paymentMethod) { displayData ->
+                OnrampCollectPaymentMethodResult.Completed(displayData, kycInfo)
             }
-
-            OnrampCollectPaymentMethodResult.Completed(
-                displayData = PaymentMethodDisplayData(
-                    imageLoader = {
-                        ContextCompat.getDrawable(
-                            application,
-                            com.stripe.android.R.drawable.stripe_google_pay_mark
-                        )!!
-                    },
-                    label = "Google Pay",
-                    sublabel = result.paymentMethod.card?.last4,
-                    type = PaymentMethodDisplayData.Type.GooglePay
-                )
-            )
         }
         is GooglePayPaymentMethodLauncher.Result.Failed -> {
             analyticsService?.track(
@@ -632,6 +612,41 @@ internal class OnrampInteractor @Inject constructor(
         }
         is GooglePayPaymentMethodLauncher.Result.Canceled ->
             OnrampCollectPaymentMethodResult.Cancelled()
+    }
+
+    private fun handleGooglePayPaymentMethod(
+        paymentMethod: PaymentMethod,
+        buildResult: (PaymentMethodDisplayData) -> OnrampCollectPaymentMethodResult,
+    ): OnrampCollectPaymentMethodResult {
+        analyticsService?.track(
+            OnrampAnalyticsEvent.CollectPaymentMethodCompleted(
+                paymentMethodType = PaymentMethodType.GooglePay
+            )
+        )
+
+        _state.update { state ->
+            state.copy(
+                selectedPaymentSource = SelectedPaymentSource.GooglePay(
+                    paymentMethod.id
+                )
+            )
+        }
+
+        return buildResult(googlePayDisplayData(paymentMethod))
+    }
+
+    private fun googlePayDisplayData(paymentMethod: PaymentMethod): PaymentMethodDisplayData {
+        return PaymentMethodDisplayData(
+            imageLoader = {
+                ContextCompat.getDrawable(
+                    application,
+                    R.drawable.stripe_google_pay_mark
+                )!!
+            },
+            label = "Google Pay",
+            sublabel = paymentMethod.card?.last4,
+            type = PaymentMethodDisplayData.Type.GooglePay
+        )
     }
 
     suspend fun handleVerifyKycResult(
@@ -968,12 +983,10 @@ internal sealed interface SelectedPaymentSource {
     }
 }
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal sealed interface OnrampStartKycVerificationResult {
     /**
      * Starting KYC verification completed successfully.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Completed internal constructor(
         val response: KycRetrieveResponse,
         val appearance: LinkAppearance?
@@ -983,13 +996,11 @@ internal sealed interface OnrampStartKycVerificationResult {
      * Starting KYC verification failed due to an error.
      * @param error The error that caused the failure.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Failed internal constructor(
         val error: Throwable
     ) : OnrampStartKycVerificationResult
 }
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal fun LinkController.PaymentMethodType.toDisplayType(): PaymentMethodDisplayData.Type {
     return when (this) {
         LinkController.PaymentMethodType.Card ->

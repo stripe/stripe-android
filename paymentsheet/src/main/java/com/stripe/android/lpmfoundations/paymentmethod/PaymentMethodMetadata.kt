@@ -88,6 +88,8 @@ internal data class PaymentMethodMetadata(
     val experimentsData: ElementsSession.ExperimentsData?,
     val isTapToAddSupported: Boolean,
     val isStripeCardScanAllowed: Boolean,
+    val enableMlKitCardScan: Boolean,
+    val disableSsdOcrCardScan: Boolean,
 ) : Parcelable {
 
     @IgnoredOnParcel
@@ -344,7 +346,7 @@ internal data class PaymentMethodMetadata(
             clientAttributionMetadata: ClientAttributionMetadata,
             integrationMetadata: IntegrationMetadata,
             analyticsMetadata: AnalyticsMetadata,
-            isTapToAddSupported: Boolean,
+            isTapToAddAvailable: Boolean,
         ): PaymentMethodMetadata {
             val linkSettings = elementsSession.linkSettings
             return PaymentMethodMetadata(
@@ -397,10 +399,10 @@ internal data class PaymentMethodMetadata(
                 integrationMetadata = integrationMetadata,
                 analyticsMetadata = analyticsMetadata,
                 experimentsData = elementsSession.experimentsData,
-                isTapToAddSupported = isTapToAddSupported &&
-                    elementsSession.isTapToAddEnabled &&
-                    customerMetadata != null,
+                isTapToAddSupported = isTapToAddAvailable,
                 isStripeCardScanAllowed = elementsSession.isStripeCardScanAllowed,
+                enableMlKitCardScan = elementsSession.enableMlKitCardScan,
+                disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
             )
         }
 
@@ -466,6 +468,8 @@ internal data class PaymentMethodMetadata(
                 isTapToAddSupported = false, // This is unused in customer sheet.
                 experimentsData = elementsSession.experimentsData,
                 isStripeCardScanAllowed = elementsSession.isStripeCardScanAllowed,
+                enableMlKitCardScan = elementsSession.enableMlKitCardScan,
+                disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
             )
         }
     }

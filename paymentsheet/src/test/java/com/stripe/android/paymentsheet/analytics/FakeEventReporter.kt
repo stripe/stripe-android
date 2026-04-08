@@ -67,14 +67,18 @@ internal class FakeEventReporter : EventReporter {
     val usBankAccountFormEventCalls: ReceiveTurbine<USBankAccountFormViewModel.AnalyticsEvent> =
         _usBankAccountFormEventCalls
 
+    private val _tapToAddButtonShownCalls = Turbine<Unit>()
+    val tapToAddButtonShownCalls: ReceiveTurbine<Unit> = _tapToAddButtonShownCalls
+
     private val _tapToAddStartedCalls = Turbine<Unit>()
     val tapToAddStartedCalls: ReceiveTurbine<Unit> = _tapToAddStartedCalls
 
     private val _tapToAddCardAddedCalls = Turbine<Unit>()
     val tapToAddCardAddedCalls: ReceiveTurbine<Unit> = _tapToAddCardAddedCalls
 
-    private val _tapToAddCanceledCalls = Turbine<Unit>()
-    val tapToAddCanceledCalls: ReceiveTurbine<Unit> = _tapToAddCanceledCalls
+    private val _tapToAddCanceledCalls = Turbine<EventReporter.TapToAddCancelSource>()
+    val tapToAddCanceledCalls: ReceiveTurbine<EventReporter.TapToAddCancelSource> =
+        _tapToAddCanceledCalls
 
     private val _tapToAddContinueAfterCardAddedCalls = Turbine<Unit>()
     val tapToAddContinueAfterCardAddedCalls: ReceiveTurbine<Unit> = _tapToAddContinueAfterCardAddedCalls
@@ -106,6 +110,7 @@ internal class FakeEventReporter : EventReporter {
         _formCompletedCalls.ensureAllEventsConsumed()
         _pressConfirmButtonCalls.ensureAllEventsConsumed()
         _usBankAccountFormEventCalls.ensureAllEventsConsumed()
+        _tapToAddButtonShownCalls.ensureAllEventsConsumed()
         _tapToAddStartedCalls.ensureAllEventsConsumed()
         _tapToAddCardAddedCalls.ensureAllEventsConsumed()
         _tapToAddCanceledCalls.ensureAllEventsConsumed()
@@ -291,6 +296,10 @@ internal class FakeEventReporter : EventReporter {
     ) {
     }
 
+    override fun onTapToAddButtonShown() {
+        _tapToAddButtonShownCalls.add(Unit)
+    }
+
     override fun onTapToAddStarted() {
         _tapToAddStartedCalls.add(Unit)
     }
@@ -299,8 +308,8 @@ internal class FakeEventReporter : EventReporter {
         _tapToAddCardAddedCalls.add(Unit)
     }
 
-    override fun onTapToAddCanceled() {
-        _tapToAddCanceledCalls.add(Unit)
+    override fun onTapToAddCanceled(source: EventReporter.TapToAddCancelSource) {
+        _tapToAddCanceledCalls.add(source)
     }
 
     override fun onTapToAddContinueAfterCardAdded() {

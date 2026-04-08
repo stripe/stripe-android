@@ -26,6 +26,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodMessage
+import com.stripe.android.model.PaymentMethodMessagePromotionList
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.RadarSessionWithHCaptcha
 import com.stripe.android.model.SetupIntent
@@ -445,6 +446,16 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         locale: String,
         requestOptions: ApiRequest.Options
     ): Result<PaymentMethodMessage> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun retrievePaymentMethodMessagePromotionsForPaymentSheet(
+        amount: Int,
+        currency: String,
+        country: String?,
+        locale: String,
+        requestOptions: ApiRequest.Options
+    ): Result<PaymentMethodMessagePromotionList> {
         TODO("Not yet implemented")
     }
 

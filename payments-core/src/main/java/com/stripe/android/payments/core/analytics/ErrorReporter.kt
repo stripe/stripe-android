@@ -313,6 +313,15 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         TAP_TO_ADD_LOCATION_PERMISSIONS_FAILURE(
             partialEventName = "elements.tap_to_add.location_permission_required_unexpectedly"
         ),
+        TAP_TO_ADD_DISCOVER_READERS_CANCEL_FAILURE(
+            partialEventName = "elements.tap_to_add.failure_to_cancel_discover_readers_call"
+        ),
+        TAP_TO_ADD_COLLECT_SETUP_INTENT_CANCEL_FAILURE(
+            partialEventName = "elements.tap_to_add.failure_to_cancel_collect_setup_intent_call"
+        ),
+        TAP_TO_ADD_CONFIRM_SETUP_INTENT_CANCEL_FAILURE(
+            partialEventName = "elements.tap_to_add.failure_to_cancel_confirm_setup_intent_call"
+        ),
         TAP_TO_ADD_NO_READER_FOUND(
             partialEventName = "elements.tap_to_add.no_reader_found"
         ),

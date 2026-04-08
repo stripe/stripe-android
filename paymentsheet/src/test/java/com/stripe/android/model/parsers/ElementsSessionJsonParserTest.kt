@@ -39,6 +39,12 @@ class ElementsSessionJsonParserTest {
         isEnabled = true
     )
 
+    @get:Rule
+    val enableCardArtRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.enableCardArt,
+        isEnabled = false,
+    )
+
     @Test
     fun parsePaymentIntent_shouldCreateObjectWithOrderedPaymentMethods() {
         val elementsSession = ElementsSessionJsonParser(
@@ -1788,7 +1794,262 @@ class ElementsSessionJsonParserTest {
             .isEqualTo(enabled)
     }
 
+    // region Card Art Merging
+
+    @Test
+    fun `Card art merges into matching payment method`() {
+        enableCardArtRule.setEnabled(true)
+
+        val json = createElementsSessionWithCardArt(
+            cardArt = """
+                [
+                    {
+                        "payment_method": "pm_123",
+                        "art_image": { "url": "https://example.com/art.png", "format": "image/png" },
+                        "program_name": "Test Program"
+                    }
+                ]
+            """
+        )
+
+        val session = parseElementsSession(json)
+        val cardArt = session?.customer?.paymentMethods?.first()?.card?.cardArt
+
+        assertThat(cardArt).isNotNull()
+        assertThat(cardArt?.artImage?.url).isEqualTo("https://example.com/art.png")
+        assertThat(cardArt?.artImage?.format).isEqualTo("image/png")
+        assertThat(cardArt?.programName).isEqualTo("Test Program")
+    }
+
+    @Test
+    fun `Card art with non-matching ID leaves cardArt null`() {
+        enableCardArtRule.setEnabled(true)
+
+        val json = createElementsSessionWithCardArt(
+            cardArt = """
+                [
+                    {
+                        "payment_method": "pm_nonexistent",
+                        "art_image": { "url": "https://example.com/art.png", "format": "image/png" },
+                        "program_name": "Test Program"
+                    }
+                ]
+            """
+        )
+
+        val session = parseElementsSession(json)
+
+        assertThat(session?.customer?.paymentMethods?.first()?.card?.cardArt).isNull()
+    }
+
+    @Test
+    fun `No card_art key leaves cardArt null`() {
+        enableCardArtRule.setEnabled(true)
+
+        val json = createElementsSessionWithCardArt(cardArt = null)
+        val session = parseElementsSession(json)
+
+        assertThat(session?.customer?.paymentMethods?.first()?.card?.cardArt).isNull()
+    }
+
+    @Test
+    fun `Empty card_art array leaves cardArt null`() {
+        enableCardArtRule.setEnabled(true)
+
+        val json = createElementsSessionWithCardArt(cardArt = "[]")
+        val session = parseElementsSession(json)
+
+        assertThat(session?.customer?.paymentMethods?.first()?.card?.cardArt).isNull()
+    }
+
+    @Test
+    fun `Card art not parsed when feature flag is disabled`() {
+        enableCardArtRule.setEnabled(false)
+
+        val json = createElementsSessionWithCardArt(
+            cardArt = """
+                [
+                    {
+                        "payment_method": "pm_123",
+                        "art_image": { "url": "https://example.com/art.png", "format": "image/png" },
+                        "program_name": "Test Program"
+                    }
+                ]
+            """
+        )
+
+        val session = parseElementsSession(json)
+
+        assertThat(session?.customer?.paymentMethods?.first()?.card?.cardArt).isNull()
+    }
+
+    @Test
+    fun `Card art partial match only sets art on matching payment method`() {
+        enableCardArtRule.setEnabled(true)
+
+        val json = createElementsSessionWithCardArt(
+            extraPaymentMethod = """
+                ,{
+                    "id": "pm_456",
+                    "created": 1550757934255,
+                    "customer": "cus_1",
+                    "livemode": false,
+                    "type": "card",
+                    "card": {
+                        "brand": "amex",
+                        "last4": "0005",
+                        "exp_month": 12,
+                        "exp_year": 2030,
+                        "funding": "credit"
+                    }
+                }
+            """,
+            cardArt = """
+                [
+                    {
+                        "payment_method": "pm_123",
+                        "art_image": { "url": "https://example.com/visa.png", "format": "image/png" },
+                        "program_name": "Visa Program"
+                    }
+                ]
+            """
+        )
+
+        val session = parseElementsSession(json)
+        val pms = session?.customer?.paymentMethods
+
+        assertThat(pms).hasSize(2)
+        assertThat(pms?.get(0)?.card?.cardArt).isNotNull()
+        assertThat(pms?.get(0)?.card?.cardArt?.artImage?.url).isEqualTo("https://example.com/visa.png")
+        assertThat(pms?.get(1)?.card?.cardArt).isNull()
+    }
+
+    @Test
+    fun `Multiple payment methods each get their card art`() {
+        enableCardArtRule.setEnabled(true)
+
+        val json = createElementsSessionWithCardArt(
+            extraPaymentMethod = """
+                ,{
+                    "id": "pm_456",
+                    "created": 1550757934255,
+                    "customer": "cus_1",
+                    "livemode": false,
+                    "type": "card",
+                    "card": {
+                        "brand": "amex",
+                        "last4": "0005",
+                        "exp_month": 12,
+                        "exp_year": 2030,
+                        "funding": "credit"
+                    }
+                }
+            """,
+            cardArt = """
+                [
+                    {
+                        "payment_method": "pm_123",
+                        "art_image": { "url": "https://example.com/visa.png", "format": "image/png" },
+                        "program_name": "Visa Program"
+                    },
+                    {
+                        "payment_method": "pm_456",
+                        "art_image": { "url": "https://example.com/amex.png", "format": "image/png" },
+                        "program_name": "Amex Program"
+                    }
+                ]
+            """
+        )
+
+        val session = parseElementsSession(json)
+        val pms = session?.customer?.paymentMethods
+
+        assertThat(pms).hasSize(2)
+        assertThat(pms?.get(0)?.card?.cardArt?.artImage?.url).isEqualTo("https://example.com/visa.png")
+        assertThat(pms?.get(1)?.card?.cardArt?.artImage?.url).isEqualTo("https://example.com/amex.png")
+    }
+
+    private fun parseElementsSession(json: JSONObject): ElementsSession? {
+        return ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                customerSessionClientSecret = "customer_session_client_secret",
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                appId = APP_ID
+            ),
+            isLiveMode = false,
+        ).parse(json)
+    }
+
+    private fun createElementsSessionWithCardArt(
+        cardArt: String? = null,
+        extraPaymentMethod: String = "",
+    ): JSONObject {
+        val cardArtField = if (cardArt != null) "\"card_art\": $cardArt," else ""
+        return JSONObject(
+            """
+            {
+              "payment_method_preference": $PAYMENT_METHOD_PREFERENCE_JSON,
+              "customer": {
+                $cardArtField
+                "customer_session": $CUSTOMER_SESSION_JSON,
+                "default_payment_method": "pm_123",
+                "payment_methods": [$CARD_PM_JSON $extraPaymentMethod]
+              }
+            }
+            """.trimIndent()
+        )
+    }
+
+    // endregion
+
     companion object {
         private const val APP_ID = "com.app.id"
+
+        private val PAYMENT_METHOD_PREFERENCE_JSON = """
+            {
+              "object": "payment_method_preference",
+              "country_code": "US",
+              "ordered_payment_method_types": ["card"],
+              "payment_intent": {
+                "id": "pi_123", "object": "payment_intent", "amount": 973,
+                "client_secret": "pi_1234567", "confirmation_method": "automatic",
+                "created": 1630103948, "currency": "eur", "livemode": false,
+                "status": "requires_payment_method"
+              },
+              "type": "payment_intent"
+            }
+        """.trimIndent()
+
+        private val CUSTOMER_SESSION_JSON = """
+            {
+              "id": "cuss_123", "api_key": "ek_test_1234", "api_key_expiry": 1713890664,
+              "components": {
+                "mobile_payment_element": {
+                  "enabled": true,
+                  "features": { "payment_method_remove": "enabled", "payment_method_save": "disabled", "payment_method_remove_last": "enabled" }
+                },
+                "customer_sheet": {
+                  "enabled": true,
+                  "features": { "payment_method_remove": "enabled", "payment_method_remove_last": "enabled" }
+                }
+              },
+              "customer": "cus_1", "livemode": false
+            }
+        """.trimIndent()
+
+        private val CARD_PM_JSON = """
+            {
+              "id": "pm_123", "created": 1550757934255, "customer": "cus_1",
+              "livemode": false, "type": "card",
+              "card": {
+                "brand": "visa", "last4": "4242", "exp_month": 8, "exp_year": 2032,
+                "country": "US", "funding": "credit", "fingerprint": "fingerprint123",
+                "checks": { "address_line1_check": "unchecked", "cvc_check": "unchecked" },
+                "three_d_secure_usage": { "supported": true }
+              }
+            }
+        """.trimIndent()
     }
 }

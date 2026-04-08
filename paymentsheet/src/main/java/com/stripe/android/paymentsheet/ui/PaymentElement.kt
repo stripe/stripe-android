@@ -34,7 +34,7 @@ import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormHeaderUI
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.getOuterFormInsets
-import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import java.util.UUID
 
 @Composable
@@ -54,7 +54,7 @@ internal fun PaymentElement(
 ) {
     val context = LocalContext.current
     val imageLoader = remember {
-        StripeImageLoader(context.applicationContext)
+        DefaultStripeImageLoader(context.applicationContext)
     }
 
     val horizontalPadding = StripeTheme.getOuterFormInsets()
