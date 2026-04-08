@@ -50,7 +50,6 @@ import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.LocalImageOptimizer
 import com.stripe.android.uicore.image.LocalStripeImageLoader
 import com.stripe.android.uicore.image.StripeCdnImageOptimizer
-import com.stripe.android.uicore.image.StripeImageLoader
 import java.lang.Float.max
 import androidx.compose.ui.unit.max as maxDp
 
