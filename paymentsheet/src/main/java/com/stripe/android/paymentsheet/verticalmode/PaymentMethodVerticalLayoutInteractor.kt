@@ -22,6 +22,7 @@ import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.mandateTextFromPaymentMethodMetadata
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.state.WalletLocation
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.ViewAction
@@ -116,6 +117,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val onCurrencySelected: (CurrencyOption) -> Unit,
     dispatcher: CoroutineContext = Dispatchers.Default,
     mainDispatcher: CoroutineContext = Dispatchers.Main.immediate,
+    private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?
 ) : PaymentMethodVerticalLayoutInteractor {
 
     companion object {
@@ -124,8 +126,13 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             paymentMethodMetadata: PaymentMethodMetadata,
             customerStateHolder: CustomerStateHolder,
             bankFormInteractor: BankFormInteractor,
+            paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?
         ): PaymentMethodVerticalLayoutInteractor {
-            val formHelper = DefaultFormHelper.create(viewModel, paymentMethodMetadata)
+            val formHelper = DefaultFormHelper.create(
+                viewModel = viewModel,
+                paymentMethodMetadata = paymentMethodMetadata,
+                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
+            )
             val isCurrentScreen = viewModel.navigationHandler.currentScreen.mapAsStateFlow {
                 it is PaymentSheetScreen.VerticalMode
             }
@@ -161,6 +168,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                         paymentMethodMetadata = paymentMethodMetadata,
                         customerStateHolder = customerStateHolder,
                         bankFormInteractor = bankFormInteractor,
+                        paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
                     )
                     val screen = PaymentSheetScreen.VerticalModeForm(interactor = interactor)
                     viewModel.navigationHandler.transitionToWithDelay(screen)
@@ -199,6 +207,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 onCurrencySelected = { currencyOption ->
                     (viewModel as? PaymentSheetViewModel)?.updateCurrency(currencyOption.code)
                 },
+                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
             ).also { interactor ->
                 viewModel.viewModelScope.launch {
                     interactor.state.mapAsStateFlow { it.mandate }.collect { mandate ->

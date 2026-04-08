@@ -18,6 +18,7 @@ import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -46,6 +47,7 @@ internal class DefaultFormHelper(
     private val isLinkUI: Boolean = false,
     private val automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper?,
     private val tapToAddHelper: TapToAddHelper?,
+    private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?
 ) : FormHelper {
     companion object {
         internal const val PREVIOUSLY_COMPLETED_PAYMENT_FORM = "previously_completed_payment_form"
@@ -54,6 +56,7 @@ internal class DefaultFormHelper(
             paymentMethodMetadata: PaymentMethodMetadata,
             linkInlineHandler: LinkInlineHandler = LinkInlineHandler.create(),
             shouldCreateAutomaticallyLaunchedCardScanFormDataHelper: Boolean = false,
+            paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?
         ): FormHelper {
             return DefaultFormHelper(
                 coroutineScope = viewModel.viewModelScope,
@@ -86,6 +89,7 @@ internal class DefaultFormHelper(
                     null
                 },
                 tapToAddHelper = viewModel.tapToAddHelper,
+                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
             )
         }
 
@@ -113,6 +117,7 @@ internal class DefaultFormHelper(
                 isLinkUI = isLinkUI,
                 automaticallyLaunchedCardScanFormDataHelper = null,
                 tapToAddHelper = null,
+                paymentMethodMessagePromotionsHelper = null
             )
         }
     }
@@ -242,6 +247,7 @@ internal class DefaultFormHelper(
             isLinkUI = isLinkUI,
             automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
             tapToAddHelper = tapToAddHelper,
+            paymentMethodMessagingPromotionsHelper = paymentMethodMessagePromotionsHelper
         )
     }
 }

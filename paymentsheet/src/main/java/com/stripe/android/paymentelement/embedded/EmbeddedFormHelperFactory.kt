@@ -12,6 +12,7 @@ import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.NewPaymentOptionSelection
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
@@ -29,6 +30,7 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
         paymentMethodMetadata: PaymentMethodMetadata,
         eventReporter: EventReporter,
         tapToAddHelper: TapToAddHelper? = null,
+        paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?,
         selectionUpdater: (PaymentSelection?) -> Unit,
     ): FormHelper {
         val automaticallyLaunchedCardScanFormDataHelper = if (selectedPaymentMethodCode.isNotBlank()) {
@@ -71,6 +73,7 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
             autocompleteAddressInteractorFactory = null,
             automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
             tapToAddHelper = tapToAddHelper,
+            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
         )
     }
 }

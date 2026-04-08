@@ -9,6 +9,7 @@ import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.utils.combineAsStateFlow
@@ -129,12 +130,14 @@ internal class DefaultVerticalModeFormInteractor(
             bankFormInteractor: BankFormInteractor,
             currencySelectorOptions: CurrencySelectorOptions? = null,
             onCurrencySelected: (CurrencyOption) -> Unit = {},
+            paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?
         ): VerticalModeFormInteractor {
             val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
             val formHelper = DefaultFormHelper.create(
                 viewModel = viewModel,
                 paymentMethodMetadata = paymentMethodMetadata,
                 shouldCreateAutomaticallyLaunchedCardScanFormDataHelper = true,
+                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
             )
             return DefaultVerticalModeFormInteractor(
                 selectedPaymentMethodCode = selectedPaymentMethodCode,

@@ -474,7 +474,8 @@ internal class CustomerSheetViewModel(
                             )
                         },
                         autocompleteAddressInteractorFactory = null,
-                        automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper
+                        automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
+                        paymentMethodMessagingPromotionsHelper = null
                     ),
                 ) ?: listOf(),
                 primaryButtonLabel = if (
@@ -820,6 +821,7 @@ internal class CustomerSheetViewModel(
                 },
                 autocompleteAddressInteractorFactory = null,
                 automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
+                paymentMethodMessagingPromotionsHelper = null
             )
         ) ?: emptyList()
 
