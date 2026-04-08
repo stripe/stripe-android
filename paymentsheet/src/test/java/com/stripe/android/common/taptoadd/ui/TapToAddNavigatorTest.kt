@@ -36,7 +36,7 @@ internal class TapToAddNavigatorTest {
             )
 
             navigator.result.test {
-                navigator.performAction(TapToAddNavigator.Action.Close)
+                navigator.performAction(TapToAddNavigator.Action.Close())
                 assertThat(awaitItem()).isEqualTo(TapToAddResult.Canceled(paymentSelection = null))
             }
         }
@@ -55,7 +55,7 @@ internal class TapToAddNavigatorTest {
             )
 
             navigator.result.test {
-                navigator.performAction(TapToAddNavigator.Action.Close)
+                navigator.performAction(TapToAddNavigator.Action.Close())
                 val result = awaitItem() as TapToAddResult.Canceled
                 assertThat(result.paymentSelection).isEqualTo(PaymentSelection.Saved(paymentMethod))
             }
@@ -85,7 +85,7 @@ internal class TapToAddNavigatorTest {
             )
 
             navigator.result.test {
-                navigator.performAction(TapToAddNavigator.Action.Close)
+                navigator.performAction(TapToAddNavigator.Action.Close())
                 val result = awaitItem() as TapToAddResult.Canceled
                 assertThat(result.paymentSelection).isEqualTo(
                     PaymentSelection.Saved(
@@ -120,7 +120,7 @@ internal class TapToAddNavigatorTest {
             initialScreen = TapToAddNavigator.Screen.Collecting(interactor),
         )
 
-        navigator.performAction(TapToAddNavigator.Action.Close)
+        navigator.performAction(TapToAddNavigator.Action.Close())
 
         interactor.onClose.awaitItem()
         interactor.validate()
@@ -135,7 +135,7 @@ internal class TapToAddNavigatorTest {
             initialScreen = TapToAddNavigator.Screen.CardAdded(interactor),
         )
 
-        navigator.performAction(TapToAddNavigator.Action.Close)
+        navigator.performAction(TapToAddNavigator.Action.Close())
 
         interactor.onClose.awaitItem()
         interactor.validate()
@@ -150,7 +150,7 @@ internal class TapToAddNavigatorTest {
             initialScreen = TapToAddNavigator.Screen.Delay(interactor),
         )
 
-        navigator.performAction(TapToAddNavigator.Action.Close)
+        navigator.performAction(TapToAddNavigator.Action.Close())
 
         interactor.onClose.awaitItem()
         interactor.ensureAllEventsConsumed()
@@ -165,9 +165,51 @@ internal class TapToAddNavigatorTest {
             initialScreen = TapToAddNavigator.Screen.Confirmation(interactor),
         )
 
-        navigator.performAction(TapToAddNavigator.Action.Close)
+        navigator.performAction(TapToAddNavigator.Action.Close())
 
         interactor.onClose.awaitItem()
+        interactor.validate()
+    }
+
+    @Test
+    fun `Close from CardAdded screen cancel button invokes CancelPressed after close`() = runTest {
+        val interactor = FakeTapToAddCardAddedInteractor()
+        val screen = TapToAddNavigator.Screen.CardAdded(interactor)
+        val closeAction = (screen.cancelButton as TapToAddNavigator.CancelButton.Available).action
+        val navigator = TapToAddNavigator(
+            coroutineScope = this,
+            stateHolder = FakeStateHolder(state = null),
+            initialScreen = screen,
+        )
+
+        navigator.result.test {
+            navigator.performAction(closeAction)
+            interactor.onClose.awaitItem()
+            assertThat(interactor.performActionCalls.awaitItem())
+                .isEqualTo(TapToAddCardAddedInteractor.Action.CancelPressed)
+            assertThat(awaitItem()).isEqualTo(TapToAddResult.Canceled(paymentSelection = null))
+        }
+        interactor.validate()
+    }
+
+    @Test
+    fun `Close from Confirmation screen cancel button invokes CancelPressed after close`() = runTest {
+        val interactor = FakeTapToAddConfirmationInteractor()
+        val screen = TapToAddNavigator.Screen.Confirmation(interactor)
+        val closeAction = (screen.cancelButton as TapToAddNavigator.CancelButton.Available).action
+        val navigator = TapToAddNavigator(
+            coroutineScope = this,
+            stateHolder = FakeStateHolder(state = null),
+            initialScreen = screen,
+        )
+
+        navigator.result.test {
+            navigator.performAction(closeAction)
+            interactor.onClose.awaitItem()
+            assertThat(interactor.performActionCalls.awaitItem())
+                .isEqualTo(TapToAddConfirmationInteractor.Action.CancelPressed)
+            assertThat(awaitItem()).isEqualTo(TapToAddResult.Canceled(paymentSelection = null))
+        }
         interactor.validate()
     }
 

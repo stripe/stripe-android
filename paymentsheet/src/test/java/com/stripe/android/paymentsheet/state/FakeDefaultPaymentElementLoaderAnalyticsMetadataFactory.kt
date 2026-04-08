@@ -24,7 +24,8 @@ internal class FakeDefaultPaymentElementLoaderAnalyticsMetadataFactory(
         isGooglePaySupported: Boolean,
         configuration: PaymentElementLoader.Configuration,
         customerMetadata: CustomerMetadata?,
-        linkStateResult: LinkStateResult?
+        linkStateResult: LinkStateResult?,
+        isTapToAddAvailable: Boolean,
     ): AnalyticsMetadata {
         _createCall.add(
             CreateCall(
@@ -35,6 +36,7 @@ internal class FakeDefaultPaymentElementLoaderAnalyticsMetadataFactory(
                 configuration = configuration,
                 customerMetadata = customerMetadata,
                 linkStateResult = linkStateResult,
+                isTapToAddAvailable = isTapToAddAvailable,
             )
         )
         return createResultFactory()
@@ -47,6 +49,7 @@ internal class FakeDefaultPaymentElementLoaderAnalyticsMetadataFactory(
         val isGooglePaySupported: Boolean,
         val configuration: PaymentElementLoader.Configuration,
         val customerMetadata: CustomerMetadata?,
-        val linkStateResult: LinkStateResult?
+        val linkStateResult: LinkStateResult?,
+        val isTapToAddAvailable: Boolean,
     )
 }

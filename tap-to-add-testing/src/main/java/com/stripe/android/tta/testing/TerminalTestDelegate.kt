@@ -28,7 +28,7 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 
 class TerminalTestDelegate {
-    private lateinit var scenario: Scenario
+    private var scenario: Scenario = Scenario()
 
     private val terminalInstance = createMockedTerminalInstance()
 
@@ -42,6 +42,9 @@ class TerminalTestDelegate {
     private val retrieveSetupIntentCalls = Turbine<RetrieveSetupIntentCall>()
     private val collectSetupIntentPaymentMethodCalls = Turbine<CollectSetupIntentPaymentMethodCall>()
     private val confirmSetupIntentCalls = Turbine<ConfirmSetupIntentCall>()
+
+    val shouldValidate: Boolean
+        get() = scenario.shouldValidate
 
     fun isInitialized(): Boolean {
         isInitializedCalls.add(Unit)
@@ -132,6 +135,7 @@ class TerminalTestDelegate {
     }
 
     class Scenario(
+        val shouldValidate: Boolean = false,
         val isInitialized: Boolean = true,
         val connectedReader: Reader? = DEFAULT_READER,
         val discoveredReaders: List<Reader> = listOf(DEFAULT_READER),

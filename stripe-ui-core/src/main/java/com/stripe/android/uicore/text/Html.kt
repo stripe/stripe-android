@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.core.text.HtmlCompat
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.image.isSupportedImageUrl
@@ -289,7 +290,7 @@ fun HtmlWithCustomOnClick(
     val annotatedText = annotatedStringResource(html, imageLoader, urlSpanStyle)
     val remoteImagesLoaded = remember { mutableStateOf(false) }
     val stripeImageLoader = remember {
-        StripeImageLoader(
+        DefaultStripeImageLoader(
             context = context,
             diskCache = null
         )

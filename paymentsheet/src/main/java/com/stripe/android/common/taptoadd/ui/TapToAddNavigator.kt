@@ -49,6 +49,8 @@ internal class TapToAddNavigator(
 
         when (action) {
             is Action.Close -> {
+                action.preCloseAction()
+
                 coroutineScope.launch {
                     val paymentSelection = when (val state = stateHolder.state) {
                         is TapToAddStateHolder.State.CardAdded -> {
@@ -93,7 +95,6 @@ internal class TapToAddNavigator(
 
     sealed class Screen : Closeable {
         abstract val cancelButton: CancelButton
-        abstract val onCancelAction: Action
 
         @Composable
         protected abstract fun ColumnScope.Content()
@@ -111,7 +112,6 @@ internal class TapToAddNavigator(
             val interactor: TapToAddCollectingInteractor,
         ) : Screen() {
             override val cancelButton: CancelButton = CancelButton.None
-            override val onCancelAction: Action = Action.Close
 
             @Composable
             override fun ColumnScope.Content() {
@@ -126,8 +126,11 @@ internal class TapToAddNavigator(
         data class CardAdded(
             val interactor: TapToAddCardAddedInteractor,
         ) : Screen() {
-            override val cancelButton: CancelButton = CancelButton.Visible
-            override val onCancelAction: Action = Action.Close
+            override val cancelButton: CancelButton = CancelButton.Available(
+                action = Action.Close {
+                    interactor.performAction(TapToAddCardAddedInteractor.Action.CancelPressed)
+                }
+            )
 
             @Composable
             override fun ColumnScope.Content() {
@@ -149,8 +152,9 @@ internal class TapToAddNavigator(
         data class Delay(
             val interactor: TapToAddDelayInteractor,
         ) : Screen() {
-            override val cancelButton: CancelButton = CancelButton.Visible
-            override val onCancelAction: Action = Action.Close
+            override val cancelButton: CancelButton = CancelButton.Available(
+                action = Action.Close()
+            )
 
             @Composable
             override fun ColumnScope.Content() {
@@ -168,8 +172,11 @@ internal class TapToAddNavigator(
         data class Confirmation(
             val interactor: TapToAddConfirmationInteractor,
         ) : Screen() {
-            override val cancelButton: CancelButton = CancelButton.Visible
-            override val onCancelAction: Action = Action.Close
+            override val cancelButton: CancelButton = CancelButton.Available(
+                action = Action.Close {
+                    interactor.performAction(TapToAddConfirmationInteractor.Action.CancelPressed)
+                }
+            )
 
             @Composable
             override fun ColumnScope.Content() {
@@ -194,8 +201,9 @@ internal class TapToAddNavigator(
         data class Error(
             val message: ResolvableString,
         ) : Screen() {
-            override val cancelButton: CancelButton = CancelButton.Visible
-            override val onCancelAction: Action = Action.Close
+            override val cancelButton: CancelButton = CancelButton.Available(
+                action = Action.Close()
+            )
 
             @Composable
             override fun ColumnScope.Content() {
@@ -204,8 +212,9 @@ internal class TapToAddNavigator(
         }
 
         data object NotSupportedError : Screen() {
-            override val cancelButton: CancelButton = CancelButton.Visible
-            override val onCancelAction: Action = Action.CloseWithUnsupportedDevice
+            override val cancelButton: CancelButton = CancelButton.Available(
+                action = Action.CloseWithUnsupportedDevice
+            )
 
             @Composable
             override fun ColumnScope.Content() {
@@ -216,20 +225,14 @@ internal class TapToAddNavigator(
         }
     }
 
-    enum class CancelButton {
-        // Button is not rendered
-        None,
-
-        // Space for button is rendered but not visible
-        Invisible,
-
-        // Button is visible
-        Visible
+    sealed interface CancelButton {
+        data object None : CancelButton
+        class Available(val action: Action) : CancelButton
     }
 
     sealed interface Action {
         class NavigateTo(val screen: Screen) : Action
-        data object Close : Action
+        class Close(val preCloseAction: () -> Unit = {}) : Action
         data object CloseWithUnsupportedDevice : Action
         data object Complete : Action
         data class Continue(val paymentSelection: PaymentSelection.Saved) : Action

@@ -12,6 +12,7 @@ import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.PaymentMethodFactory
@@ -68,6 +69,14 @@ internal class DefaultTapToAddCardAddedInteractorTest {
             fakeLinkFormHelper.updateState(SavedPaymentMethodLinkFormHelper.State.Unused)
             assertThat(awaitItem().primaryButton.enabled).isTrue()
         }
+    }
+
+    @Test
+    fun `CancelPressed reports tap to add canceled with card added source`() = runScenario {
+        interactor.performAction(TapToAddCardAddedInteractor.Action.CancelPressed)
+
+        assertThat(fakeEventReporter.tapToAddCanceledCalls.awaitItem())
+            .isEqualTo(EventReporter.TapToAddCancelSource.CardAdded)
     }
 
     @Test

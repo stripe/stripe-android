@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import androidx.compose.ui.test.hasText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
@@ -12,7 +13,6 @@ import com.stripe.android.checkouttesting.createPaymentMethod
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
 import com.stripe.android.networktesting.RequestMatchers.not
-import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.utils.PaymentSheetTestRunnerContext
@@ -23,6 +23,7 @@ import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
 import com.stripe.paymentelementtestpages.CurrencySelector
 import com.stripe.paymentelementtestpages.FormPage
 import com.stripe.paymentelementtestpages.VerticalModePage
+import org.json.JSONObject
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -246,7 +247,7 @@ internal class PaymentSheetCheckoutSessionTest {
     fun allowRedisplayIsUnspecifiedWhenSaveDisabledWithPayment() =
         runCheckoutSessionAllowRedisplayTest(
             initFile = "checkout-session-init.json",
-            initReplacements = listOf(SAVE_DISABLED_REPLACEMENT),
+            saveEnabled = false,
             confirmFile = "checkout-session-confirm.json",
             noSaveCheckbox = true,
             expectedAllowRedisplay = "unspecified",
@@ -273,7 +274,7 @@ internal class PaymentSheetCheckoutSessionTest {
     fun allowRedisplayIsLimitedWhenSaveDisabledWithSetup() =
         runCheckoutSessionAllowRedisplayTest(
             initFile = "checkout-session-init-setup.json",
-            initReplacements = listOf(SAVE_DISABLED_REPLACEMENT),
+            saveEnabled = false,
             confirmFile = "checkout-session-confirm-setup.json",
             noSaveCheckbox = true,
             expectedAllowRedisplay = "limited",
@@ -283,14 +284,13 @@ internal class PaymentSheetCheckoutSessionTest {
 
     /**
      * Runs a checkout session test verifying that allow_redisplay is sent with the expected
-     * value on PM creation. CUSTOMER_REPLACEMENT is always applied first to inject the customer
-     * and save offer fields; [initReplacements] (e.g. SAVE_DISABLED_REPLACEMENT) are applied
-     * after and may depend on fields injected by CUSTOMER_REPLACEMENT.
+     * value on PM creation. Injects customer and save offer fields into the init fixture
+     * using JSON modification.
      */
     private fun runCheckoutSessionAllowRedisplayTest(
         initFile: String,
         confirmFile: String,
-        initReplacements: List<ResponseReplacement> = emptyList(),
+        saveEnabled: Boolean = true,
         clickSaveCheckbox: Boolean = false,
         noSaveCheckbox: Boolean = false,
         expectedAllowRedisplay: String,
@@ -299,7 +299,18 @@ internal class PaymentSheetCheckoutSessionTest {
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.checkoutInit { response ->
-            response.testBodyFromFile(initFile, listOf(CUSTOMER_REPLACEMENT) + initReplacements)
+            response.testBodyFromFile(initFile) { json ->
+                json.put("customer", JSONObject("""
+                    {
+                        "id": "cus_12345",
+                        "payment_methods": [],
+                        "can_detach_payment_method": true
+                    }
+                """.trimIndent()))
+                json.put("customer_managed_saved_payment_methods_offer_save", JSONObject("""
+                    {"enabled": $saveEnabled, "status": "not_accepted"}
+                """.trimIndent()))
+            }
         }
 
         testContext.presentWithCheckout()
@@ -323,7 +334,9 @@ internal class PaymentSheetCheckoutSessionTest {
         page.clickPrimaryButton()
     }
 
-    private suspend fun PaymentSheetTestRunnerContext.presentWithCheckout() {
+    private suspend fun PaymentSheetTestRunnerContext.presentWithCheckout(
+        configuration: PaymentSheet.Configuration = defaultConfiguration,
+    ) {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val checkout = Checkout.configure(
             context = context,
@@ -333,26 +346,111 @@ internal class PaymentSheetCheckoutSessionTest {
         presentPaymentSheet {
             presentWithCheckout(
                 checkout = checkout,
-                configuration = defaultConfiguration,
+                configuration = configuration,
             )
         }
     }
 
-    private companion object {
-        // Injects customer + save offer fields into base checkout-session-init fixtures.
-        // Note: testBodyFromFile concatenates lines without newlines, so all JSON ends up
-        // on one line. We anchor on the unique "ui_mode" field and append inline.
-        val CUSTOMER_REPLACEMENT = ResponseReplacement(
-            original = """"ui_mode": "custom",""",
-            new = """"ui_mode": "custom", """ +
-                """"customer": {"id": "cus_12345", "payment_methods": [], "can_detach_payment_method": true}, """ +
-                """"customer_managed_saved_payment_methods_offer_save": {"enabled": true, "status": "not_accepted"},""",
-        )
+    // region SFU mandate tests
 
-        // Must be applied after CUSTOMER_REPLACEMENT, which injects the field this matches on.
-        val SAVE_DISABLED_REPLACEMENT = ResponseReplacement(
-            original = """"customer_managed_saved_payment_methods_offer_save": {"enabled": true,""",
-            new = """"customer_managed_saved_payment_methods_offer_save": {"enabled": false,""",
-        )
+    /**
+     * PMO SFU sets setup_future_usage at the payment_method_options level
+     * (e.g., card and cashapp each have setup_future_usage: "off_session")
+     * rather than at the top-level deferred intent.
+     */
+    @Test
+    fun testMandateDisplayedWithPmoSfu() = runMandateTest { json ->
+        json.getJSONObject("server_built_elements_session_params")
+            .getJSONObject("deferred_intent")
+            .put("payment_method_options", JSONObject("""
+                {
+                    "card": {"setup_future_usage": "off_session"},
+                    "cashapp": {"setup_future_usage": "off_session"}
+                }
+            """.trimIndent()))
+    }
+
+    /**
+     * Top-level SFU applies setup_future_usage: "off_session" to all payment methods
+     * at the deferred intent level.
+     */
+    @Test
+    fun testMandateDisplayedWithSfu() = runMandateTest { json ->
+        json.getJSONObject("server_built_elements_session_params")
+            .getJSONObject("deferred_intent")
+            .put("setup_future_usage", "off_session")
+    }
+
+    /**
+     * Mixed PMO SFU: card has setup_future_usage but cashapp has "none", which
+     * overrides and suppresses the mandate for cashapp while card still shows it.
+     */
+    @Test
+    fun testMandateOnlyForCardWithMixedPmoSfu() = runMandateTest(
+        expectCashappMandate = false,
+    ) { json ->
+        json.getJSONObject("server_built_elements_session_params")
+            .getJSONObject("deferred_intent")
+            .put("payment_method_options", JSONObject("""
+                {
+                    "card": {"setup_future_usage": "off_session"},
+                    "cashapp": {"setup_future_usage": "none"}
+                }
+            """.trimIndent()))
+    }
+
+    /**
+     * Without any SFU configuration, no mandates should be displayed for card or cashapp.
+     */
+    @Test
+    fun testNoMandateWithoutSfu() = runMandateTest(
+        expectCardMandate = false,
+        expectCashappMandate = false,
+    )
+
+    private fun runMandateTest(
+        expectCardMandate: Boolean = true,
+        expectCashappMandate: Boolean = true,
+        jsonModifier: (JSONObject) -> Unit = {},
+    ) = runPaymentSheetTest(
+        networkRule = networkRule,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.checkoutInit { response ->
+            response.testBodyFromFile("checkout-session-init.json", jsonModifier)
+        }
+
+        testContext.presentWithCheckout()
+
+        page.clickOnLpm("card")
+        page.waitForCardForm()
+        if (expectCardMandate) {
+            page.assertHasMandate(CARD_SFU_MANDATE)
+        } else {
+            page.assertMandateIsMissing()
+        }
+
+        page.clickOnLpm("cashapp")
+        if (expectCashappMandate) {
+            page.assertHasMandate(CASHAPP_SFU_MANDATE)
+        } else {
+            composeTestRule.onNode(hasText(CASHAPP_SFU_MANDATE)).assertDoesNotExist()
+        }
+
+        testContext.markTestSucceeded()
+    }
+
+    // endregion
+
+    private companion object {
+        const val CARD_SFU_MANDATE =
+            "By providing your card information, you allow Checkout Session Test to charge your card" +
+                " for future payments in accordance with their terms."
+
+        const val CASHAPP_SFU_MANDATE =
+            "By continuing, you authorize Checkout Session Test to debit your Cash App account" +
+                " for this payment and future payments in accordance with Checkout Session Test's" +
+                " terms, until this authorization is revoked. You can change this anytime in your" +
+                " Cash App Settings."
     }
 }

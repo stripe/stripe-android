@@ -95,7 +95,7 @@ import com.stripe.android.paymentsheet.ui.SepaMandateContract
 import com.stripe.android.paymentsheet.ui.SepaMandateResult
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
-import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.PaymentElementCallbackTestRule
 import com.stripe.android.utils.RelayingPaymentElementLoader
@@ -2471,7 +2471,7 @@ internal class DefaultFlowControllerTest {
             paymentOptionFactory = PaymentOptionFactory(
                 iconLoader = PaymentSelection.IconLoader(
                     resources = context.resources,
-                    imageLoader = StripeImageLoader(context),
+                    imageLoader = DefaultStripeImageLoader(context),
                 ),
                 context = context,
             ),

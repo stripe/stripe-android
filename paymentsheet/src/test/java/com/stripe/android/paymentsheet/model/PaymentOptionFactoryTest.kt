@@ -13,7 +13,7 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -25,7 +25,7 @@ class PaymentOptionFactoryTest {
     private val factory = PaymentOptionFactory(
         iconLoader = PaymentSelection.IconLoader(
             resources = ApplicationProvider.getApplicationContext<Context>().resources,
-            imageLoader = StripeImageLoader(ApplicationProvider.getApplicationContext()),
+            imageLoader = DefaultStripeImageLoader(ApplicationProvider.getApplicationContext()),
         ),
         context = ApplicationProvider.getApplicationContext(),
     )

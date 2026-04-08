@@ -476,10 +476,18 @@ class PaymentSheet internal constructor(
     }
 
     /**
-     * Present [PaymentSheet] with a Checkout Session.
+     * Presents [PaymentSheet] using a [Checkout] session.
+     *
+     * While PaymentSheet is presented, [Checkout] mutation methods will return [Result.failure].
+     * Mutations are re-enabled once PaymentSheet is dismissed.
+     *
+     * [Checkout.checkoutSession] may be updated during the flow — for example, when adaptive
+     * pricing converts amounts to the customer's local currency. On successful confirmation, it
+     * is updated with the confirmed session state.
      *
      * @param checkout The configured checkout.
-     * @param configuration An optional [PaymentSheet] configuration.
+     * @param configuration The [PaymentSheet] configuration.
+     * @throws IllegalStateException if a [Checkout] mutation is currently in flight.
      */
     @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

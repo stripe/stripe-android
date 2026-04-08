@@ -176,12 +176,13 @@ internal class PaymentMethodMessageJsonParser : ModelJsonParser<PaymentMethodMes
     private fun getImage(imageList: List<PaymentMethodMessageImage>?): PaymentMethodMessageImage? =
         if (imageList.isNullOrEmpty()) null else imageList[0]
 
-    private companion object {
+    companion object {
         const val FIELD_IMAGES = "images"
         const val FIELD_DARK_THEME_PNG = "dark_theme_png"
         const val FIELD_FLAT_THEME_PNG = "flat_theme_png"
         const val FIELD_LIGHT_THEME_PNG = "light_theme_png"
         const val FIELD_PAYMENT_METHOD_TYPE = "payment_method_type"
+        const val FIELD_TYPE = "type"
         const val FIELD_PAYMENT_METHODS = "payment_methods"
         const val FIELD_ROLE = "role"
         const val FIELD_TEXT = "text"
