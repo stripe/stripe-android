@@ -33,7 +33,6 @@ internal interface PaymentOptionCardArtPrefetchConfirmationModule {
         @PaymentOptionCardArtPrefetchScope
         fun providesCoroutineScope(): CoroutineScope = GlobalScope
 
-
         @Provides
         fun providesImageOptimizer(): ImageOptimizer {
             return StripeCdnImageOptimizer

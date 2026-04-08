@@ -27,5 +27,4 @@ internal class DefaultPaymentOptionCardArtProvider @Inject constructor(
     companion object {
         internal const val CARD_ART_WIDTH_DP = 40f
     }
-
 }
