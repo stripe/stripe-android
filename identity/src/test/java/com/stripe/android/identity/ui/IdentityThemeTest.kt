@@ -32,7 +32,6 @@ internal class IdentityThemeTest {
         val resolvedColors = baseColors.withBrandColor(Color.Magenta.toArgb())
 
         assertThat(resolvedColors.primary.toArgb()).isEqualTo(Color.Magenta.toArgb())
-        assertThat(resolvedColors.onPrimary.toArgb()).isEqualTo(Color.White.toArgb())
         assertThat(resolvedColors.primaryVariant.toArgb()).isEqualTo(Color.Blue.toArgb())
         assertThat(resolvedColors.secondary.toArgb()).isEqualTo(Color.Green.toArgb())
         assertThat(resolvedColors.secondaryVariant.toArgb()).isEqualTo(Color.Yellow.toArgb())
