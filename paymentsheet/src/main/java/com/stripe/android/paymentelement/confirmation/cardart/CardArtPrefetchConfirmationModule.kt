@@ -1,8 +1,10 @@
 package com.stripe.android.paymentelement.confirmation.cardart
 
-import android.content.Context
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
-import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.paymentsheet.DefaultPaymentOptionCardArtProvider
+import com.stripe.android.paymentsheet.PaymentOptionCardArtProvider
+import com.stripe.android.uicore.image.ImageOptimizer
+import com.stripe.android.uicore.image.StripeCdnImageOptimizer
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -20,16 +22,21 @@ internal interface CardArtPrefetchConfirmationModule {
         definition: CardArtPrefetchConfirmationDefinition
     ): ConfirmationDefinition<*, *, *, *>
 
+    @Binds
+    fun bindsPaymentOptionCardArtProvider(
+        impl: DefaultPaymentOptionCardArtProvider
+    ): PaymentOptionCardArtProvider
+
     companion object {
         @OptIn(DelicateCoroutinesApi::class)
         @Provides
         @CardArtPrefetchScope
         fun providesCoroutineScope(): CoroutineScope = GlobalScope
 
+
         @Provides
-        @CardArtPrefetchScope
-        fun providesStripeImageLoader(context: Context): StripeImageLoader {
-            return StripeImageLoader(context)
+        fun providesImageOptimizer(): ImageOptimizer {
+            return StripeCdnImageOptimizer
         }
     }
 }

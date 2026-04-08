@@ -8,7 +8,6 @@ import dagger.Module
 @Module(
     includes = [
         AttestationConfirmationModule::class,
-        CardArtPrefetchConfirmationModule::class,
         PassiveChallengeConfirmationModule::class,
         ConfirmationHandlerModule::class,
     ]

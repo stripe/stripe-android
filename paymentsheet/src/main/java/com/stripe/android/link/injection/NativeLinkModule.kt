@@ -59,6 +59,7 @@ import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.repository.ConsumersApiService
 import com.stripe.android.repository.ConsumersApiServiceImpl
+import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.navigation.NavigationManager
 import com.stripe.android.uicore.navigation.NavigationManagerImpl
 import dagger.Binds
@@ -248,5 +249,11 @@ internal interface NativeLinkModule {
         fun provideAutocompleteLauncher() = DefaultAutocompleteLauncher(
             appearanceContext = AutocompleteAppearanceContext.Link,
         )
+
+        @Provides
+        @NativeLinkScope
+        fun provideStripeImageLoader(context: Context): StripeImageLoader {
+            return StripeImageLoader(context)
+        }
     }
 }

@@ -34,6 +34,7 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
+import com.stripe.android.uicore.image.StripeImageLoader
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -142,6 +143,11 @@ internal interface CustomerSheetViewModelModule {
         @Provides
         fun provideDurationProvider(): DurationProvider {
             return DefaultDurationProvider.instance
+        }
+
+        @Provides
+        fun provideStripeImageLoader(context: Context): StripeImageLoader {
+            return StripeImageLoader(context)
         }
 
         private val savedPaymentSelection: PaymentSelection? = null
