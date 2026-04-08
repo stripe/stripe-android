@@ -123,7 +123,9 @@ public final class com/stripe/android/uicore/elements/bottomsheet/StripeBottomSh
 public final class com/stripe/android/uicore/image/ComposableSingletons$StripeImageKt {
 	public static final field INSTANCE Lcom/stripe/android/uicore/image/ComposableSingletons$StripeImageKt;
 	public fun <init> ()V
+	public final fun getLambda$-1538042251$stripe_ui_core_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda$-621553741$stripe_ui_core_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$1324557993$stripe_ui_core_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda$1996028391$stripe_ui_core_release ()Lkotlin/jvm/functions/Function3;
 }
 

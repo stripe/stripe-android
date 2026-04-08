@@ -229,11 +229,13 @@ internal interface EventReporter : CardScanEventsReporter {
         isVerticalLayout: Boolean,
     )
 
+    fun onTapToAddButtonShown()
+
     fun onTapToAddStarted()
 
     fun onCardAddedWithTapToAdd()
 
-    fun onTapToAddCanceled()
+    fun onTapToAddCanceled(source: TapToAddCancelSource)
 
     fun onTapToAddContinueAfterCardAdded()
 
@@ -271,5 +273,9 @@ internal interface EventReporter : CardScanEventsReporter {
 
     enum class CardBrandChoiceEventSource {
         Edit, Add
+    }
+
+    enum class TapToAddCancelSource {
+        CardCollection, CardAdded, Confirmation
     }
 }

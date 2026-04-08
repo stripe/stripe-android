@@ -24,8 +24,20 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/launchScanButton"
+            app:layout_constraintBottom_toTopOf="@id/disableSsdOcrCheckbox"
             app:layout_constraintVertical_chainStyle="packed" />
+
+        <CheckBox
+            android:id="@+id/disableSsdOcrCheckbox"
+            android:text="@string/disable_ssd_ocr"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/enableMlKitCheckbox"
+            app:layout_constraintBottom_toTopOf="@id/launchScanButton" />
 
         <Button
             android:id="@+id/launchScanButton"
@@ -37,7 +49,7 @@
             app:layout_constraintBottom_toTopOf="@id/scanResultScroll"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/enableMlKitCheckbox" />
+            app:layout_constraintTop_toBottomOf="@id/disableSsdOcrCheckbox" />
 
         <ScrollView
             android:id="@+id/scanResultScroll"

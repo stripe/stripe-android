@@ -2,7 +2,6 @@ package com.stripe.android.crypto.onramp
 
 import android.app.Application
 import androidx.activity.ComponentActivity
-import androidx.annotation.RestrictTo
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.crypto.onramp.di.OnrampComponentHolder
 import com.stripe.android.crypto.onramp.di.OnrampPresenterComponent
@@ -31,7 +30,7 @@ import javax.inject.Inject
  * @param interactor The interactor that persists configuration state across process restarts.
  * @param presenterComponentFactory Factory for creating presenter components.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@ExperimentalCryptoOnramp
 class OnrampCoordinator @Inject internal constructor(
     private val interactor: OnrampInteractor,
     private val presenterComponentFactory: OnrampPresenterComponent.Factory,
@@ -152,7 +151,7 @@ class OnrampCoordinator @Inject internal constructor(
     /**
      * Presenter for handling Link UI interactions without requiring direct activity references.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @ExperimentalCryptoOnramp
     class Presenter @Inject internal constructor(
         private val coordinator: OnrampPresenterCoordinator,
     ) {
@@ -211,7 +210,7 @@ class OnrampCoordinator @Inject internal constructor(
     /**
      * A Builder utility type to create an [OnrampCoordinator] with appropriate parameters.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @ExperimentalCryptoOnramp
     class Builder {
         /**
          * Constructs an [OnrampCoordinator] for the given parameters.

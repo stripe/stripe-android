@@ -8,6 +8,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -493,6 +494,12 @@ internal fun OnrampScreen(
                     selectedSettlementSpeed = uiState.settlementSpeed,
                     selectedPaymentData = uiState.selectedPaymentData,
                     googlePayIsReady = uiState.googlePayIsReady,
+                    kycFirstName = uiState.kycFirstName,
+                    onKycFirstNameChange = viewModel::updateKycFirstName,
+                    kycLastName = uiState.kycLastName,
+                    onKycLastNameChange = viewModel::updateKycLastName,
+                    kycAddress = uiState.kycAddress,
+                    onKycAddressChange = viewModel::updateKycAddress,
                     onAuthenticate = onAuthenticateUser,
                     onRegisterWalletAddress = onRegisterWalletAddress,
                     onCollectKYC = { kycInfo -> viewModel.collectKycInfo(kycInfo) },
@@ -718,6 +725,12 @@ private fun AuthenticatedOperationsScreen(
     selectedPaymentData: PaymentMethodDisplayData?,
     selectedSettlementSpeed: SettlementSpeed?,
     googlePayIsReady: Boolean,
+    kycFirstName: String,
+    onKycFirstNameChange: (String) -> Unit,
+    kycLastName: String,
+    onKycLastNameChange: (String) -> Unit,
+    kycAddress: PaymentSheet.Address,
+    onKycAddressChange: (PaymentSheet.Address) -> Unit,
     onAuthenticate: (oauthScopes: String) -> Unit,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onCollectKYC: (KycInfo) -> Unit,
@@ -921,15 +934,44 @@ private fun AuthenticatedOperationsScreen(
             Text("Register Wallet Address")
         }
 
-        KYCScreen(onCollectKYC = onCollectKYC)
+        var kycExpanded by remember { mutableStateOf(false) }
 
-        Button(
-            onClick = { onVerifyKyc() },
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 8.dp)
+                .clickable { kycExpanded = !kycExpanded }
+                .padding(vertical = 20.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Verify KYC Info")
+            Text(
+                text = "KYC Info",
+                fontWeight = FontWeight.Bold,
+            )
+            Text(text = if (kycExpanded) "▲" else "▼")
+        }
+
+        AnimatedVisibility(visible = kycExpanded) {
+            Column {
+                KYCScreen(
+                    firstName = kycFirstName,
+                    onFirstNameChange = onKycFirstNameChange,
+                    lastName = kycLastName,
+                    onLastNameChange = onKycLastNameChange,
+                    address = kycAddress,
+                    onAddressChange = onKycAddressChange,
+                    onCollectKYC = onCollectKYC,
+                )
+
+                Button(
+                    onClick = { onVerifyKyc() },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
+                ) {
+                    Text("Verify KYC Info")
+                }
+            }
         }
 
         StartVerificationScreen {
@@ -1046,10 +1088,14 @@ private fun AuthenticatedOperationsScreen(
 
 @Composable
 private fun KYCScreen(
+    firstName: String,
+    onFirstNameChange: (String) -> Unit,
+    lastName: String,
+    onLastNameChange: (String) -> Unit,
+    address: PaymentSheet.Address,
+    onAddressChange: (PaymentSheet.Address) -> Unit,
     onCollectKYC: (KycInfo) -> Unit
 ) {
-    var firstName by remember { mutableStateOf("") }
-    var lastName by remember { mutableStateOf("") }
     var ssn by remember { mutableStateOf("000000000") }
     var dobDay by remember { mutableStateOf("1") }
     var dobMonth by remember { mutableStateOf("1") }
@@ -1062,14 +1108,29 @@ private fun KYCScreen(
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        KYCTextField(firstName, "First Name") { firstName = it }
-        KYCTextField(lastName, "Last Name") { lastName = it }
+        KYCTextField(firstName, "First Name", onChange = onFirstNameChange)
+        KYCTextField(lastName, "Last Name", onChange = onLastNameChange)
         KYCTextField(ssn, "SSN") { ssn = it }
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             KYCTextField(dobMonth, "Month", Modifier.weight(1f), KeyboardType.Number) { dobMonth = it }
             KYCTextField(dobDay, "Day", Modifier.weight(1f), KeyboardType.Number) { dobDay = it }
             KYCTextField(dobYear, "Year", Modifier.weight(2f), KeyboardType.Number) { dobYear = it }
+        }
+
+        Text(
+            text = "Address",
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(bottom = 8.dp, top = 8.dp)
+        )
+
+        KYCTextField(address.line1.orEmpty(), "Address Line 1") { onAddressChange(address.replacing(line1 = it)) }
+        KYCTextField(address.line2.orEmpty(), "Address Line 2") { onAddressChange(address.replacing(line2 = it)) }
+        KYCTextField(address.city.orEmpty(), "City") { onAddressChange(address.replacing(city = it)) }
+        KYCTextField(address.state.orEmpty(), "State") { onAddressChange(address.replacing(state = it)) }
+        KYCTextField(address.country.orEmpty(), "Country") { onAddressChange(address.replacing(country = it)) }
+        KYCTextField(address.postalCode.orEmpty(), "Postal Code") {
+            onAddressChange(address.replacing(postalCode = it))
         }
 
         Button(
@@ -1088,13 +1149,7 @@ private fun KYCScreen(
                         lastName = lastName,
                         idNumber = ssn,
                         dateOfBirth = dateOfBirth,
-                        address = PaymentSheet.Address(
-                            city = "New York",
-                            country = "US",
-                            line1 = "1234 Fake Street",
-                            postalCode = "10108",
-                            state = "NY"
-                        )
+                        address = address
                     )
                 )
             },
@@ -1234,6 +1289,22 @@ fun GooglePayButton(
         }
     }
 }
+
+private fun PaymentSheet.Address.replacing(
+    line1: String? = this.line1,
+    line2: String? = this.line2,
+    city: String? = this.city,
+    state: String? = this.state,
+    country: String? = this.country,
+    postalCode: String? = this.postalCode,
+) = PaymentSheet.Address(
+    city = city,
+    country = country,
+    line1 = line1,
+    line2 = line2,
+    postalCode = postalCode,
+    state = state,
+)
 
 internal const val LOGIN_EMAIL_TAG = "LoginEmailTag"
 internal const val LOGIN_PASSWORD_TAG = "LoginPasswordTag"

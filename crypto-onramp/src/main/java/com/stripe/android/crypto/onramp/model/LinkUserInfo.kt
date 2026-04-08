@@ -1,7 +1,7 @@
 package com.stripe.android.crypto.onramp.model
 
 import android.os.Parcelable
-import androidx.annotation.RestrictTo
+import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
@@ -17,7 +17,7 @@ import kotlinx.parcelize.Parcelize
  */
 @Parcelize
 @Poko
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@ExperimentalCryptoOnramp
 class LinkUserInfo(
     val email: String,
     val fullName: String?,

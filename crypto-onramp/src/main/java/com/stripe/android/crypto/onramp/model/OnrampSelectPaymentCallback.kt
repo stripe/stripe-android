@@ -1,14 +1,14 @@
 package com.stripe.android.crypto.onramp.model
 
 import android.graphics.drawable.Drawable
-import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import com.stripe.android.common.ui.DelegateDrawable
+import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 import com.stripe.android.uicore.image.rememberDrawablePainter
 import dev.drewhamilton.poko.Poko
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@ExperimentalCryptoOnramp
 fun interface OnrampCollectPaymentMethodCallback {
     fun onResult(result: OnrampCollectPaymentMethodResult)
 }
@@ -16,32 +16,34 @@ fun interface OnrampCollectPaymentMethodCallback {
 /**
  * Result of selecting a payment type in Onramp.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@ExperimentalCryptoOnramp
 sealed class OnrampCollectPaymentMethodResult {
     /**
      * The user has selected a payment option.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    class Completed internal constructor(val displayData: PaymentMethodDisplayData) : OnrampCollectPaymentMethodResult()
+    @ExperimentalCryptoOnramp
+    class Completed internal constructor(
+        val displayData: PaymentMethodDisplayData,
+        val kycInfo: KycInfo?
+    ) : OnrampCollectPaymentMethodResult()
 
     /**
      * The user declined to select a payment option.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @ExperimentalCryptoOnramp
     class Cancelled internal constructor() : OnrampCollectPaymentMethodResult()
 
     /**
      * Selecting a payment option failed due to an error.
      * @param error The error that caused the failure.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @ExperimentalCryptoOnramp
     class Failed internal constructor(val error: Throwable) : OnrampCollectPaymentMethodResult()
 }
 
 @Poko
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@ExperimentalCryptoOnramp
 class PaymentMethodDisplayData internal constructor(
-    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     val imageLoader: suspend () -> Drawable,
     /**
      * User facing strings representing payment method information
@@ -53,7 +55,7 @@ class PaymentMethodDisplayData internal constructor(
      */
     val type: Type
 ) {
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @ExperimentalCryptoOnramp
     enum class Type {
         Card,
         BankAccount,

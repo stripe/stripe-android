@@ -42,8 +42,8 @@ import com.stripe.android.model.PaymentMethodMessageImage
 import com.stripe.android.model.PaymentMethodMessageLegalDisclosure
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImage
-import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.navigation.rememberKeyboardController
 import kotlinx.coroutines.launch
 
@@ -192,7 +192,7 @@ private fun Images(
 ) {
     val context = LocalContext.current
     val imageLoader = remember {
-        StripeImageLoader(context.applicationContext)
+        DefaultStripeImageLoader(context.applicationContext)
     }
     if (imageList.isNotEmpty()) {
         Row(Modifier.height(getIconHeight(appearance).dp)) {
@@ -236,7 +236,7 @@ private fun TextWithLogo(
 ) {
     val context = LocalContext.current
     val imageLoader = remember {
-        StripeImageLoader(context.applicationContext)
+        DefaultStripeImageLoader(context.applicationContext)
     }
     val style = appearance.font?.toTextStyle()
         ?: MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Normal)

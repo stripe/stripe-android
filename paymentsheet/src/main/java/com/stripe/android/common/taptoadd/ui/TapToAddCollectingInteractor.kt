@@ -75,7 +75,7 @@ internal class DefaultTapToAddCollectingInteractor(
                 onTapToAddNotSupported()
             }
             is TapToAddCollectionHandler.CollectionState.Canceled -> {
-                eventReporter.onTapToAddCanceled()
+                eventReporter.onTapToAddCanceled(EventReporter.TapToAddCancelSource.CardCollection)
                 onCanceled()
             }
         }
@@ -125,7 +125,7 @@ internal class DefaultTapToAddCollectingInteractor(
                 },
                 onCanceled = {
                     navigator.get().performAction(
-                        action = TapToAddNavigator.Action.Close,
+                        action = TapToAddNavigator.Action.Close(),
                     )
                 },
                 eventReporter = eventReporter,

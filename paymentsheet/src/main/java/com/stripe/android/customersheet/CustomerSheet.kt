@@ -20,7 +20,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.CardBrandAcceptance
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.utils.AnimationConstants
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.async
@@ -587,7 +587,7 @@ class CustomerSheet internal constructor(
                 paymentOptionFactory = PaymentOptionFactory(
                     iconLoader = PaymentSelection.IconLoader(
                         resources = application.resources,
-                        imageLoader = StripeImageLoader(application),
+                        imageLoader = DefaultStripeImageLoader(application),
                     ),
                     context = application,
                 ),

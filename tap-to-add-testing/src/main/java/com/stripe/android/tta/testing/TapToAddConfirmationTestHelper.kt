@@ -9,6 +9,8 @@ import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.Intents.intending
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
+import org.hamcrest.Matcher
+import org.hamcrest.Matchers.allOf
 
 class TapToAddConfirmationTestHelper(
     private val composeTestRule: ComposeTestRule,
@@ -22,10 +24,15 @@ class TapToAddConfirmationTestHelper(
         )
     }
 
-    fun intendedPaymentConfirmationToBeLaunched() {
+    fun intendedPaymentConfirmationToBeLaunched(vararg matchers: Matcher<Intent>) {
         composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT) {
             runCatching {
-                intended(hasComponent(PAYMENT_CONFIRMATION_LAUNCHER_ACTIVITY_NAME))
+                intended(
+                    allOf(
+                        hasComponent(PAYMENT_CONFIRMATION_LAUNCHER_ACTIVITY_NAME),
+                        *matchers,
+                    )
+                )
             }.fold(
                 onSuccess = { true },
                 onFailure = { false }

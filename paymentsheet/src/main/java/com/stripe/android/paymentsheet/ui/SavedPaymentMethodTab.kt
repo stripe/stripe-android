@@ -76,6 +76,7 @@ internal fun SavedPaymentMethodTab(
     isClickable: Boolean = isEnabled,
     iconRes: Int,
     iconTint: Color? = null,
+    cardArtUrl: String?,
     @DrawableRes labelIcon: Int? = null,
     shouldTintLabelIcon: Boolean = true,
     labelText: String = "",
@@ -115,6 +116,7 @@ internal fun SavedPaymentMethodTab(
                     isSelected = isSelected,
                     iconRes = iconRes,
                     iconTint = iconTint,
+                    cardArtUrl = cardArtUrl
                 )
 
                 LpmSelectorText(
@@ -170,6 +172,7 @@ private fun SavedPaymentMethodCard(
     isSelected: Boolean,
     iconRes: Int,
     iconTint: Color?,
+    cardArtUrl: String?,
     modifier: Modifier = Modifier,
 ) {
     SectionCard(
@@ -185,14 +188,21 @@ private fun SavedPaymentMethodCard(
             modifier = Modifier
                 .fillMaxSize()
         ) {
-            Image(
-                painter = painterResource(iconRes),
-                contentDescription = null,
-                colorFilter = iconTint?.let { ColorFilter.tint(it) },
+            CardArtImage(
+                url = cardArtUrl,
                 modifier = Modifier
                     .height(40.dp)
-                    .width(56.dp)
-            )
+                    .width(56.dp),
+            ) {
+                Image(
+                    painter = painterResource(iconRes),
+                    contentDescription = null,
+                    colorFilter = iconTint?.let { ColorFilter.tint(it) },
+                    modifier = Modifier
+                        .height(40.dp)
+                        .width(56.dp)
+                )
+            }
         }
     }
 }
@@ -250,6 +260,7 @@ private fun SavedPaymentMethodTabUISelected() {
             iconRes = R.drawable.stripe_ic_paymentsheet_card_visa_ref,
             labelText = "MasterCard",
             description = "MasterCard",
+            cardArtUrl = null,
             onItemSelectedListener = {},
         )
     }
@@ -268,6 +279,7 @@ private fun SavedPaymentMethodTabUIModifiable() {
             iconRes = R.drawable.stripe_ic_paymentsheet_card_visa_ref,
             labelText = "MasterCard",
             description = "MasterCard",
+            cardArtUrl = null,
             onItemSelectedListener = {},
         )
     }
@@ -286,6 +298,7 @@ private fun DefaultSavedPaymentMethodTabUIModifiable() {
             iconRes = R.drawable.stripe_ic_paymentsheet_card_visa_ref,
             labelText = "MasterCard",
             description = "MasterCard",
+            cardArtUrl = null,
             onItemSelectedListener = {},
         )
     }

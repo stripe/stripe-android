@@ -2,6 +2,7 @@ package com.stripe.android.common.taptoadd
 
 import android.content.Context
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 
 internal object TapToAddStripeImageLoaderFactory {
@@ -10,6 +11,6 @@ internal object TapToAddStripeImageLoaderFactory {
     var override: StripeImageLoader? = null
 
     fun create(context: Context): StripeImageLoader {
-        return override ?: StripeImageLoader(context)
+        return override ?: DefaultStripeImageLoader(context)
     }
 }

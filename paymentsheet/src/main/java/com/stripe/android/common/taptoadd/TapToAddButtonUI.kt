@@ -15,10 +15,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.R
+
+internal const val TAP_TO_BUTTON_UI_TEST_TAG = "tap_to_button_ui"
 
 @Composable
 internal fun TapToButtonUI(
@@ -33,12 +36,14 @@ internal fun TapToButtonUI(
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.clickable(
-            interactionSource = remember { MutableInteractionSource() },
-            indication = null,
-            enabled = enabled,
-            onClick = onClick,
-        ),
+        modifier = Modifier
+            .testTag(TAP_TO_BUTTON_UI_TEST_TAG)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                enabled = enabled,
+                onClick = onClick,
+            ),
     ) {
         Image(
             painter = painterResource(R.drawable.stripe_ic_nfc_tap),

@@ -732,7 +732,9 @@ class DefaultTapToAddConnectionManagerTest {
                         terminalWrapper = wrapper,
                         errorReporter = errorReporter,
                         logger = logger,
-                        isSimulated = isSimulated,
+                        isSimulatedProvider = object : TapToAddIsSimulatedProvider {
+                            override fun get(): Boolean = isSimulated
+                        },
                         paymentConfiguration = { PaymentConfiguration(publishableKey = "pk_test") }
                     ),
                     terminalInstance = terminalInstance,

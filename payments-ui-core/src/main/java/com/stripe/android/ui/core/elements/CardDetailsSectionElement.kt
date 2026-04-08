@@ -25,6 +25,7 @@ class CardDetailsSectionElement(
     private val cardDetailsAction: CardDetailsAction? = null,
     private val isStripeCardScanAllowed: Boolean = false,
     private val enableMlKitCardScan: Boolean = false,
+    private val disableSsdOcrCardScan: Boolean = false,
     override val controller: CardDetailsSectionController = CardDetailsSectionController(
         cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
         initialValues = initialValues,
@@ -36,6 +37,7 @@ class CardDetailsSectionElement(
         automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
         isStripeCardScanAllowed = isStripeCardScanAllowed,
         enableMlKitCardScan = enableMlKitCardScan,
+        disableSsdOcrCardScan = disableSsdOcrCardScan,
     )
 ) : FormElement {
     override val allowsUserInteraction: Boolean = true

@@ -14,16 +14,20 @@ import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 class TapToAddPrimaryButtonElement(
     private val composeTestRule: ComposeTestRule
 ) {
-    fun assert(label: String): SemanticsNodeInteraction {
+    fun assert(withLabel: String?): SemanticsNodeInteraction {
         val matcher = hasTestTag(PRIMARY_BUTTON_TEST_TAG)
-            .and(hasText(label))
             .and(hasClickAction())
+            .run {
+                withLabel?.let {
+                    and(hasText(withLabel))
+                } ?: this
+            }
 
         composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT) {
             composeTestRule
                 .onAllNodes(matcher)
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isNotEmpty()
+                .size == 1
         }
 
         return composeTestRule.onNode(matcher)

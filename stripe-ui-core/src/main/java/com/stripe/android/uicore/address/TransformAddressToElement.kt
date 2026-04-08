@@ -279,11 +279,13 @@ private fun FieldType.toElement(
     return when (this) {
         FieldType.AdministrativeArea -> {
             val supportsAdministrativeAreaDropdown = listOf(
+                "BR",
                 "CA",
                 "US"
             ).contains(countryCode)
             if (supportsAdministrativeAreaDropdown) {
                 val country = when (countryCode) {
+                    "BR" -> AdministrativeAreaConfig.Country.Brazil()
                     "CA" -> AdministrativeAreaConfig.Country.Canada()
                     "US" -> AdministrativeAreaConfig.Country.US()
                     else -> throw IllegalArgumentException()

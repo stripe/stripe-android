@@ -31,8 +31,8 @@ import androidx.compose.ui.unit.sp
 import com.stripe.android.identity.R
 import com.stripe.android.identity.utils.isRemote
 import com.stripe.android.identity.utils.urlWithoutQuery
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImage
-import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.image.getDrawableFromUri
 import com.stripe.android.uicore.image.rememberDrawablePainter
 
@@ -55,7 +55,7 @@ internal fun ConsentWelcomeHeader(
             if (merchantLogoUri.isRemote()) {
                 val localContext = LocalContext.current
                 val imageLoader = remember(merchantLogoUri) {
-                    StripeImageLoader(localContext)
+                    DefaultStripeImageLoader(localContext)
                 }
                 StripeImage(
                     url = merchantLogoUri.urlWithoutQuery(),
