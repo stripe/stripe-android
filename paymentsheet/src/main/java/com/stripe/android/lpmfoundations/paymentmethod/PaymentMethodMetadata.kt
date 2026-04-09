@@ -90,7 +90,7 @@ internal data class PaymentMethodMetadata(
     val isStripeCardScanAllowed: Boolean,
     val enableMlKitCardScan: Boolean,
     val disableSsdOcrCardScan: Boolean,
-    val cardArts: List<PaymentMethod.Card.CardArt> = emptyList(),
+    val cardArts: List<PaymentMethod.Card.CardArt>,
 ) : Parcelable {
 
     @IgnoredOnParcel
