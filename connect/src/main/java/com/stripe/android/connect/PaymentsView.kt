@@ -220,7 +220,6 @@ class PaymentsProps(
         THREE_D_SECURE_2("three_d_secure_2"),
         THREE_D_SECURE_2_EAP("three_d_secure_2_eap"),
         TWINT("twint"),
-        UPI("upi"),
         US_BANK_ACCOUNT("us_bank_account"),
         VISA_CHECKOUT("visa_checkout"),
         WECHAT("wechat"),

@@ -159,15 +159,6 @@ internal class PaymentMethodEndToEndTest {
             .isEqualTo("Missing required param: billing_details[name].")
     }
 
-    @Test
-    fun createPaymentMethod_withUpi_shouldCreateObject() {
-        val params = PaymentMethodCreateParamsFixtures.UPI
-        val paymentMethod =
-            Stripe(context, ApiKeyFixtures.UPI_PUBLISHABLE_KEY)
-                .createPaymentMethodSynchronous(params)
-        assertThat(paymentMethod.type)
-            .isEqualTo(PaymentMethod.Type.Upi)
-    }
 
     @Test
     fun createPaymentMethod_withOxxo_shouldCreatePaymentMethodWithOxxoType() {

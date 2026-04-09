@@ -90,8 +90,6 @@ data class IdentifierSpec(
             destination = ParameterDestination.Local.Extras
         )
 
-        val Upi = IdentifierSpec("upi")
-        val Vpa = IdentifierSpec("upi[vpa]")
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         val Blik = IdentifierSpec("blik", destination = ParameterDestination.Api.Options)

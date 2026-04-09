@@ -98,7 +98,6 @@ sealed interface StripeIntent : StripeModel {
         BlikAuthorize("blik_authorize"),
         WeChatPayRedirect("wechat_pay_redirect_to_android_app"),
         VerifyWithMicrodeposits("verify_with_microdeposits"),
-        UpiAwaitNotification("upi_await_notification"),
         CashAppRedirect("cashapp_handle_redirect_or_display_qr_code"),
         DisplayBoletoDetails("boleto_display_details"),
         DisplayKonbiniDetails("konbini_display_details"),
@@ -355,9 +354,6 @@ sealed interface StripeIntent : StripeModel {
             val hostedVerificationUrl: String,
             val microdepositType: MicrodepositType
         ) : NextActionData()
-
-        @Parcelize
-        data object UpiAwaitNotification : NextActionData()
 
         /**
          * Contains the authentication URL for redirecting your customer to Cash App.

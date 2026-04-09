@@ -116,7 +116,6 @@ constructor(
      * [bacs_debit](https://stripe.com/docs/api/payment_methods/object#payment_method_object-bacs_debit)
      */
     @JvmField val bacsDebit: BacsDebit? = null,
-    @JvmField val upi: Upi? = null,
     @JvmField val netbanking: Netbanking? = null,
     /**
      * If this is an `us_bank_account` PaymentMethod, this hash contains details about the bank account.
@@ -231,15 +230,6 @@ constructor(
             requiresMandate = true,
             requiresMandateForPaymentIntent = true,
             hasDelayedSettlement = true,
-        ),
-        Upi(
-            "upi",
-            isReusable = false,
-            isVoucher = false,
-            requiresMandate = false,
-            requiresMandateForPaymentIntent = false,
-            hasDelayedSettlement = false,
-            afterRedirectAction = AfterRedirectAction.Refresh,
         ),
         P24(
             "p24",
@@ -602,8 +592,6 @@ constructor(
         private var bacsDebit: BacsDebit? = null
         private var netbanking: Netbanking? = null
         private var usBankAccount: USBankAccount? = null
-        private var upi: Upi? = null
-
         fun setId(id: String?): Builder = apply {
             this.id = id
         }
@@ -670,10 +658,6 @@ constructor(
 
         fun setUSBankAccount(usBankAccount: USBankAccount?): Builder = apply {
             this.usBankAccount = usBankAccount
-        }
-
-        fun setUpi(upi: Upi?): Builder = apply {
-            this.upi = upi
         }
 
         fun setCode(code: String?): Builder = apply {
@@ -1220,14 +1204,6 @@ constructor(
 
     @Parcelize
     @Poko
-    class Upi internal constructor(
-        @JvmField val vpa: String?
-    ) : TypeData() {
-        override val type: Type get() = Type.Upi
-    }
-
-    @Parcelize
-    @Poko
     class Netbanking internal constructor(
         /**
          * The customer’s bank.
@@ -1365,7 +1341,6 @@ constructor(
         sepaDebit: SepaDebit? = this.sepaDebit,
         auBecsDebit: AuBecsDebit? = this.auBecsDebit,
         bacsDebit: BacsDebit? = this.bacsDebit,
-        upi: Upi? = this.upi,
         netbanking: Netbanking? = this.netbanking,
         usBankAccount: USBankAccount? = this.usBankAccount,
         linkPaymentDetails: LinkPaymentDetails? = this.linkPaymentDetails,
@@ -1387,7 +1362,6 @@ constructor(
             sepaDebit = sepaDebit,
             auBecsDebit = auBecsDebit,
             bacsDebit = bacsDebit,
-            upi = upi,
             netbanking = netbanking,
             usBankAccount = usBankAccount,
             linkPaymentDetails = linkPaymentDetails,

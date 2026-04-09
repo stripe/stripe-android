@@ -274,7 +274,6 @@ to be saved and used in future checkout sessions. -->
   <!-- Text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_header">Hyväksy maksu</string>
   <!-- Countdown timer text on a screen asking the user to approve a payment -->
-  <string name="stripe_upi_polling_message">Avaa UPI-sovellus ja hyväksy maksu kohteessa %s</string>
   <!-- Text on a screen that indicates a payment has failed informing the user we are asking the user to try a different payment method -->
   <string name="stripe_upi_polling_payment_failed_message">Palaa takaisin ja valitse toinen maksutapa</string>
   <!-- Text on a screen that indicates a payment has failed -->
