@@ -56,7 +56,7 @@ internal class DefaultFormHelper(
             paymentMethodMetadata: PaymentMethodMetadata,
             linkInlineHandler: LinkInlineHandler = LinkInlineHandler.create(),
             shouldCreateAutomaticallyLaunchedCardScanFormDataHelper: Boolean = false,
-            paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?
+            paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper? = null
         ): FormHelper {
             return DefaultFormHelper(
                 coroutineScope = viewModel.viewModelScope,

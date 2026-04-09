@@ -202,7 +202,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             },
             // Not important for determining formType so set to default value
             setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
-            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
+//            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
         )
         val savedPaymentMethodMutator = createSavedPaymentMethodMutator(
             coroutineScope = coroutineScope,
@@ -241,7 +241,6 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                     },
                     embeddedConfirmationState = confirmationStateHolder.state,
                     customerState = customerStateHolder.customer.value,
-                    promotion = paymentMethodMessagePromotionsHelper.getPromotionIfAvailableForCode(code)
                 )
             },
             paymentMethods = customerStateHolder.paymentMethods,

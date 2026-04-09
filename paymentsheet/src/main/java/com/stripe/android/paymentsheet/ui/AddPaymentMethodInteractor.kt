@@ -89,7 +89,7 @@ internal class DefaultAddPaymentMethodInteractor(
         fun create(
             viewModel: BaseSheetViewModel,
             paymentMethodMetadata: PaymentMethodMetadata,
-            paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?
+            paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper? = null
         ): AddPaymentMethodInteractor {
             val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
             val formHelper = DefaultFormHelper.create(

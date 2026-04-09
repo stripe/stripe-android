@@ -31,7 +31,6 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
     private val formActivityStateHelper: FormActivityStateHelper,
     private val tapToAddHelper: TapToAddHelper,
     private val eventReporter: EventReporter,
-    private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper
 ) {
     fun create(): DefaultVerticalModeFormInteractor {
         val formHelper = embeddedFormHelperFactory.create(
@@ -42,7 +41,6 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             tapToAddHelper = tapToAddHelper,
             // If no saved payment methods, then first saved payment method is automatically set as default
             setAsDefaultMatchesSaveForFutureUse = !hasSavedPaymentMethods,
-            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
         )
 
         val usBankAccountFormArguments = USBankAccountFormArguments.createForEmbedded(

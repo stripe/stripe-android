@@ -7,11 +7,10 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withLink
 
 @Composable
-internal fun PaymentMethodMessageHeaderUI(paymentMethodMessage: PaymentMethodMessageHeaderElement) {
-    val promotion = paymentMethodMessage.promotion
+internal fun PaymentMethodMessageHeaderUI(element: PaymentMethodMessageHeaderElement) {
+    val promotion = element.promotion
     val message = buildAnnotatedString {
-        append(promotion.message)
-        append(". ")
+        append(promotion.message.maybeAddPeriod())
         withLink(
             LinkAnnotation.Url(
                 url = promotion.learnMore.url
@@ -23,4 +22,8 @@ internal fun PaymentMethodMessageHeaderUI(paymentMethodMessage: PaymentMethodMes
     Text(
         text = message
     )
+}
+
+private fun String.maybeAddPeriod(): String {
+    return if (endsWith('.')) this else "$this. "
 }

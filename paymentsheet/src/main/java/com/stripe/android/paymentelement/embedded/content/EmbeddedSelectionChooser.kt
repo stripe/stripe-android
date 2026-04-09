@@ -158,7 +158,6 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
             eventReporter = eventReporter,
             // Not important for determining formType so use default value
             setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
-            paymentMethodMessagePromotionsHelper = null
         ) {}
         val newFormType = newFormHelper.formTypeForCode(previousSelection.paymentMethodType)
         if (newFormType != FormHelper.FormType.UserInteractionRequired) {
@@ -171,7 +170,6 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
                 eventReporter = eventReporter,
                 // Not important for determining formType so use default value
                 setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
-                paymentMethodMessagePromotionsHelper = null
             ) {}
             val previousFormElements = previousFormHelper.formElementsForCode(previousSelection.paymentMethodType)
             val newFormElements = newFormHelper.formElementsForCode(previousSelection.paymentMethodType)

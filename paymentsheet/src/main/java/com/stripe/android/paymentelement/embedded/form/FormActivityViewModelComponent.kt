@@ -34,9 +34,6 @@ import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
-import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
-import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelperModule
-import com.stripe.android.paymentsheet.repositories.SinglePaymentMethodMessagePromotionHelper
 import com.stripe.android.paymentsheet.verticalmode.DefaultSavedPaymentMethodConfirmInteractor
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
@@ -84,8 +81,7 @@ internal interface FormActivityViewModelComponent {
             @PaymentElementCallbackIdentifier
             paymentElementCallbackIdentifier: String,
             @BindsInstance application: Application,
-            @BindsInstance savedStateHandle: SavedStateHandle,
-            @BindsInstance paymentMethodMessagePromotion: PaymentMethodMessagePromotion?
+            @BindsInstance savedStateHandle: SavedStateHandle
         ): FormActivityViewModelComponent
     }
 }
@@ -212,11 +208,6 @@ internal interface FormActivityViewModelModule {
                 coroutineScope = coroutineScope,
             )
         }
-
-        @Provides
-        fun providesPaymentMethodMessagePromotionHelper(
-            promotion: PaymentMethodMessagePromotion?
-        ): PaymentMethodMessagePromotionsHelper = SinglePaymentMethodMessagePromotionHelper(promotion)
     }
 }
 

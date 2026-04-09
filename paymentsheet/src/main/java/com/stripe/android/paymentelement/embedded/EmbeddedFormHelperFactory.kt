@@ -30,7 +30,6 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
         paymentMethodMetadata: PaymentMethodMetadata,
         eventReporter: EventReporter,
         tapToAddHelper: TapToAddHelper? = null,
-        paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?,
         selectionUpdater: (PaymentSelection?) -> Unit,
     ): FormHelper {
         val automaticallyLaunchedCardScanFormDataHelper = if (selectedPaymentMethodCode.isNotBlank()) {
@@ -73,7 +72,7 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
             autocompleteAddressInteractorFactory = null,
             automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
             tapToAddHelper = tapToAddHelper,
-            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
+            paymentMethodMessagePromotionsHelper = null
         )
     }
 }

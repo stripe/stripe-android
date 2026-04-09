@@ -68,18 +68,6 @@ internal class DefaultPaymentMethodMessagePromotionsHelper @Inject constructor(
     }
 }
 
-internal class SinglePaymentMethodMessagePromotionHelper(
-    private val promotion: PaymentMethodMessagePromotion?
-) : PaymentMethodMessagePromotionsHelper {
-    override fun fetchPromotionsAsync(intent: StripeIntent) {
-        // NO-OP
-    }
-
-    override fun getPromotionIfAvailableForCode(code: PaymentMethodCode): PaymentMethodMessagePromotion? {
-        return promotion.takeIf { it?.paymentMethodType?.lowercase() == code }
-    }
-}
-
 internal class NoOpPromotionsHelper @Inject constructor() : PaymentMethodMessagePromotionsHelper {
     override fun fetchPromotionsAsync(intent: StripeIntent) {
         // NO-OP
