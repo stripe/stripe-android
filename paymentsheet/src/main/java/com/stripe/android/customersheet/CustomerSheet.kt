@@ -18,9 +18,12 @@ import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.CardBrandAcceptance
+import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.paymentsheet.DefaultPaymentOptionCardArtProvider
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
+import com.stripe.android.uicore.image.StripeCdnImageOptimizer
 import com.stripe.android.uicore.utils.AnimationConstants
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.async
@@ -589,6 +592,12 @@ class CustomerSheet internal constructor(
                         resources = application.resources,
                         imageLoader = DefaultStripeImageLoader(application),
                     ),
+                    paymentOptionCardArtProvider = DefaultPaymentOptionCardArtProvider(
+                        context = application,
+                        imageOptimizer = StripeCdnImageOptimizer,
+                    ),
+                    imageLoader = DefaultStripeImageLoader(application),
+                    errorReporter = ErrorReporter.createFallbackInstance(application),
                     context = application,
                 ),
                 callback = callback,
