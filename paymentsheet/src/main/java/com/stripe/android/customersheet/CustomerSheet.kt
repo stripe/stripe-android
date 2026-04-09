@@ -16,10 +16,11 @@ import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.model.CardBrand
+import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.paymentsheet.DefaultPaymentOptionCardArtDrawableLoader
+import com.stripe.android.paymentsheet.DefaultPaymentOptionCardArtProvider
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.CardBrandAcceptance
-import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.paymentsheet.DefaultPaymentOptionCardArtProvider
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
@@ -592,12 +593,17 @@ class CustomerSheet internal constructor(
                         resources = application.resources,
                         imageLoader = DefaultStripeImageLoader(application),
                     ),
-                    paymentOptionCardArtProvider = DefaultPaymentOptionCardArtProvider(
+                    cardArtDrawableLoader = DefaultPaymentOptionCardArtDrawableLoader(
+                        paymentOptionCardArtProvider = DefaultPaymentOptionCardArtProvider(
+                            imageOptimizer = StripeCdnImageOptimizer,
+                        ),
+                        imageLoader = DefaultStripeImageLoader(application),
+                        errorReporter = ErrorReporter.createFallbackInstance(
+                            context = application,
+                            productUsage = setOf("CustomerSheet"),
+                        ),
                         context = application,
-                        imageOptimizer = StripeCdnImageOptimizer,
                     ),
-                    imageLoader = DefaultStripeImageLoader(application),
-                    errorReporter = ErrorReporter.createFallbackInstance(application),
                     context = application,
                 ),
                 callback = callback,

@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.compose.ui.text.AnnotatedString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentsheet.PaymentOptionCardArtDrawableLoader
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.billingDetails
 import com.stripe.android.paymentsheet.model.darkThemeIconUrl
@@ -19,6 +20,7 @@ import javax.inject.Inject
 
 internal class PaymentOptionDisplayDataFactory @Inject constructor(
     private val iconLoader: PaymentSelection.IconLoader,
+    private val cardArtDrawableLoader: PaymentOptionCardArtDrawableLoader,
     private val context: Context,
 ) {
     fun create(
@@ -47,7 +49,7 @@ internal class PaymentOptionDisplayDataFactory @Inject constructor(
         return EmbeddedPaymentElement.PaymentOptionDisplayData(
             label = selection.label.resolve(context),
             imageLoader = {
-                iconLoader.load(
+                cardArtDrawableLoader.load(selection) ?: iconLoader.load(
                     drawableResourceId = selection.drawableResourceId,
                     drawableResourceIdNight = selection.drawableResourceIdNight,
                     lightThemeIconUrl = selection.lightThemeIconUrl,

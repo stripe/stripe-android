@@ -17,6 +17,8 @@ import java.util.concurrent.ConcurrentHashMap
 interface StripeImageLoader {
     suspend fun load(url: String, width: Int, height: Int): Result<Bitmap?>
     suspend fun load(url: String): Result<Bitmap?>
+
+    suspend fun get(url: String): Result<Bitmap?>
 }
 
 /**
@@ -65,6 +67,14 @@ class DefaultStripeImageLoader(
         withMutexByUrlLock(url) {
             loadFromMemory(url) ?: loadFromDisk(url) ?: loadFromNetwork(url)
         }
+    }
+
+    override suspend fun get(
+        url: String
+    ): Result<Bitmap?> = withContext(Dispatchers.IO) {
+        withMutexByUrlLock(url) {
+            loadFromMemory(url) ?: loadFromDisk(url)
+        } ?: Result.success(null)
     }
 
     private fun loadFromMemory(url: String): Result<Bitmap>? {

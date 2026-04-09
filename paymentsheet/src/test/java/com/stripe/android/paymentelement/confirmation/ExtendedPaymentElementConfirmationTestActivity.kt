@@ -51,6 +51,7 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.FakeLogger
+import com.stripe.android.paymentsheet.PaymentOptionCardArtModule
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.utils.FakeDurationProvider
@@ -131,6 +132,7 @@ internal class ExtendedPaymentElementConfirmationTestActivity : AppCompatActivit
         ExtendedPaymentElementConfirmationModule::class,
         ExtendedPaymentElementConfirmationTestModule::class,
         GooglePayLauncherModule::class,
+        PaymentOptionCardArtModule::class,
     ]
 )
 @Singleton

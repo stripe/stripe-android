@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.uicore.image.ImageOptimizer
@@ -25,7 +24,8 @@ internal class DefaultPaymentOptionCardArtProviderTest {
 
         val result = provider(cardArt)
 
-        assertThat(result).isEqualTo("https://example.com/card_art.png?w=40")
+        assertThat(result)
+            .isEqualTo("https://example.com/card_art.png?w=${DefaultPaymentOptionCardArtProvider.CARD_ART_WIDTH_PX}")
     }
 
     @Test
@@ -44,7 +44,6 @@ internal class DefaultPaymentOptionCardArtProviderTest {
 
     private fun createProvider(): DefaultPaymentOptionCardArtProvider {
         return DefaultPaymentOptionCardArtProvider(
-            context = ApplicationProvider.getApplicationContext(),
             imageOptimizer = FakeImageOptimizer(),
         )
     }

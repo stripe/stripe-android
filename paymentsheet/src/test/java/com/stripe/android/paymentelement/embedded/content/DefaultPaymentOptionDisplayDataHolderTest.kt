@@ -43,6 +43,7 @@ internal class DefaultPaymentOptionDisplayDataHolderTest {
     ) = runTest {
         val paymentOptionDisplayDataFactory = PaymentOptionDisplayDataFactory(
             iconLoader = mock(),
+            cardArtDrawableLoader = { null },
             context = ApplicationProvider.getApplicationContext(),
         )
         val selectionHolder = EmbeddedSelectionHolder(savedStateHandle = SavedStateHandle())

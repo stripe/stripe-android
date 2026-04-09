@@ -14,6 +14,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentelement.ShippingDetailsInPaymentOptionPreview
+import com.stripe.android.paymentsheet.PaymentOptionCardArtProvider
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -28,6 +29,7 @@ internal class PaymentOptionDisplayDataFactoryTest {
 
     private val displayDataFactory = PaymentOptionDisplayDataFactory(
         iconLoader = mock(),
+        cardArtDrawableLoader = { null },
         context = ApplicationProvider.getApplicationContext(),
     )
 

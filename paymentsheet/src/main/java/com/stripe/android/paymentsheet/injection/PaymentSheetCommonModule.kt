@@ -38,6 +38,7 @@ import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
+import com.stripe.android.paymentsheet.PaymentOptionCardArtModule
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -85,6 +86,7 @@ import javax.inject.Singleton
         PaymentsIntegrityModule::class,
         PaymentConfigurationModule::class,
         StripeNetworkClientModule::class,
+        PaymentOptionCardArtModule::class,
     ]
 )
 internal abstract class PaymentSheetCommonModule {

@@ -18,7 +18,7 @@ internal class PaymentOptionCardArtPrefetchConfirmationDefinitionTest {
 
     @Test
     fun `key is CardArtPrefetch`() = runScenario {
-        assertThat(definition.key).isEqualTo("CardArtPrefetch")
+        assertThat(definition.key).isEqualTo("PaymentOptionCardArtPrefetch")
     }
 
     @Test
@@ -96,12 +96,10 @@ internal class PaymentOptionCardArtPrefetchConfirmationDefinitionTest {
         val testDispatcher = UnconfinedTestDispatcher(testScheduler)
         val fakeErrorReporter = FakeErrorReporter()
         val fakeImageLoader = FakeStripeImageLoader()
-        val fakeCardArtProvider = FakePaymentOptionCardArtProvider(cardArtProviderResult)
-
         val definition = PaymentOptionCardArtPrefetchConfirmationDefinition(
             imageLoader = fakeImageLoader,
             coroutineScope = this,
-            paymentOptionCardArtProvider = fakeCardArtProvider,
+            paymentOptionCardArtProvider = { cardArtProviderResult },
             workContext = testDispatcher,
             errorReporter = fakeErrorReporter,
         )
@@ -126,12 +124,6 @@ internal class PaymentOptionCardArtPrefetchConfirmationDefinitionTest {
         val fakeImageLoader: FakeStripeImageLoader,
         val confirmationArgs: ConfirmationHandler.Args,
     )
-
-    private class FakePaymentOptionCardArtProvider(
-        private val result: String?,
-    ) : PaymentOptionCardArtProvider {
-        override fun invoke(cardArt: PaymentMethod.Card.CardArt): String? = result
-    }
 
     private companion object {
         const val OPTIMIZED_URL = "https://example.com/optimized.png"
