@@ -299,7 +299,7 @@ internal class DefaultVerticalModeFormInteractorTest {
             viewModelScope = TestScope(UnconfinedTestDispatcher()),
             formActivityStateHelper = stateHolder,
             tapToAddHelper = FakeTapToAddHelper.noOp(),
-            eventReporter = eventReporter,
+            eventReporter = eventReporter
         ).create()
 
         val formElements = setAsDefaultInteractor.state.value.formUiElements
@@ -349,7 +349,7 @@ internal class DefaultVerticalModeFormInteractorTest {
             viewModelScope = TestScope(UnconfinedTestDispatcher()),
             formActivityStateHelper = stateHolder,
             tapToAddHelper = FakeTapToAddHelper.noOp(),
-            eventReporter = eventReporter,
+            eventReporter = eventReporter
         ).create()
         block(setAsDefaultInteractor.state.value.formUiElements)
     }
