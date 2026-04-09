@@ -9,6 +9,7 @@ import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfi
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.isLink
+import com.stripe.android.paymentsheet.model.isSaved
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel.AnalyticsEvent.Finished
 import com.stripe.android.paymentsheet.state.asPaymentSheetLoadingException
 import com.stripe.android.paymentsheet.utils.getSetAsDefaultPaymentMethodFromPaymentSelection
@@ -211,6 +212,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                 }
             }
             put(FIELD_SELECTED_LPM, paymentSelection.code())
+            put(FIELD_IS_SAVED_PAYMENT_METHOD, paymentSelection.isSaved)
             paymentSelection.linkContext()?.let { linkContext ->
                 put(FIELD_LINK_CONTEXT, linkContext)
             }
@@ -565,6 +567,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_DEFERRED_INTENT_CONFIRMATION_TYPE = "deferred_intent_confirmation_type"
         const val FIELD_DURATION = "duration"
         const val FIELD_SELECTED_LPM = "selected_lpm"
+        const val FIELD_IS_SAVED_PAYMENT_METHOD = "is_saved_payment_method"
         const val FIELD_ERROR_MESSAGE = "error_message"
         const val FIELD_ERROR_CODE = "error_code"
         const val FIELD_CBC_EVENT_SOURCE = "cbc_event_source"
