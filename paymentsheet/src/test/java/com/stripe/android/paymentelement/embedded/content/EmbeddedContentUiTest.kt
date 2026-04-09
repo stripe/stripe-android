@@ -184,6 +184,7 @@ internal class EmbeddedContentUiTest {
                 linkPaymentLauncher = RecordingLinkPaymentLauncher.noOp(),
                 analyticsCallbackProvider = { AnalyticEventCallbackRule() },
                 linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
+                paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper()
             )
         Scenario(
             embeddedContentHelper = embeddedContentHelper,

@@ -42,7 +42,7 @@ class AfterpayClearpayDefinitionTest {
 
         val element = formElements[0]
         assertThat(element.identifier.v1).isEqualTo("afterpay_promotion")
-        assertThat(element).isInstanceOf< PaymentMethodMessageHeaderElement>()
+        assertThat(element).isInstanceOf<PaymentMethodMessageHeaderElement>()
         val headerElement = element as PaymentMethodMessageHeaderElement
         assertThat(headerElement.promotion.message).isEqualTo("This is a promotion")
         assertThat(headerElement.promotion.paymentMethodType).isEqualTo("Afterpay_Clearpay")

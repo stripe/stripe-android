@@ -166,7 +166,6 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                 errorReporter = FakeErrorReporter(),
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
                 customViewModelScope = CoroutineScope(Dispatchers.Unconfined),
-                paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
             )
         }
     }

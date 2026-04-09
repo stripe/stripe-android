@@ -70,7 +70,6 @@ import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
-import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -1451,7 +1450,6 @@ internal class PaymentOptionsViewModelTest {
                 }
             },
             customViewModelScope = CoroutineScope(Dispatchers.Unconfined),
-            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper()
         )
     }
 

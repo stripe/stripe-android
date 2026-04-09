@@ -15,7 +15,6 @@ import com.stripe.android.lpmfoundations.luxe.TransformSpecToElements
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
-import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.setupFutureUsage
 import com.stripe.android.paymentsheet.LinkInlineHandler

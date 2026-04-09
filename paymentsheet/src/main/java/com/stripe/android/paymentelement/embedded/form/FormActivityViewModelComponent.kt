@@ -22,7 +22,6 @@ import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -81,7 +80,7 @@ internal interface FormActivityViewModelComponent {
             @PaymentElementCallbackIdentifier
             paymentElementCallbackIdentifier: String,
             @BindsInstance application: Application,
-            @BindsInstance savedStateHandle: SavedStateHandle
+            @BindsInstance savedStateHandle: SavedStateHandle,
         ): FormActivityViewModelComponent
     }
 }

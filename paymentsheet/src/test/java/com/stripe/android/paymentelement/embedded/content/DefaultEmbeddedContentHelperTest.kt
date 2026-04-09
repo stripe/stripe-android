@@ -21,6 +21,7 @@ import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.AnalyticEventCallbackRule
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
+import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import com.stripe.android.utils.FakeSavedPaymentMethodRepository
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import com.stripe.android.utils.RecordingLinkPaymentLauncher
@@ -187,6 +188,7 @@ internal class DefaultEmbeddedContentHelperTest {
             linkPaymentLauncher = RecordingLinkPaymentLauncher.noOp(),
             analyticsCallbackProvider = { AnalyticEventCallbackRule() },
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
+            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper()
         )
         Scenario(
             embeddedContentHelper = embeddedContentHelper,

@@ -688,10 +688,10 @@ internal class FormHelperTest {
         linkInlineHandler: LinkInlineHandler = LinkInlineHandler.create(),
         eventReporter: FakeEventReporter = FakeEventReporter(),
         tapToAddHelper: TapToAddHelper? = null,
+        paymentMethodMessagePromotionsHelper: FakePaymentMethodMessagePromotionsHelper =
+            FakePaymentMethodMessagePromotionsHelper(),
         newPaymentSelectionProvider: () -> NewPaymentOptionSelection? = { throw AssertionError("Not implemented") },
         selectionUpdater: (PaymentSelection?) -> Unit = { throw AssertionError("Not implemented") },
-        paymentMethodMessagePromotionsHelper: FakePaymentMethodMessagePromotionsHelper =
-            FakePaymentMethodMessagePromotionsHelper()
     ): FormHelper {
         return DefaultFormHelper(
             coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
