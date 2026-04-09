@@ -126,7 +126,7 @@ internal class CardDetailsController(
                 )
             ) {
                 @Suppress("MagicNumber")
-                "${scannedCard.expirationMonth}/${scannedCard.expirationYear % 100}"
+                "%02d%02d".format(scannedCard.expirationMonth, scannedCard.expirationYear % 100)
             } else {
                 ""
             }
