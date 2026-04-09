@@ -23,6 +23,10 @@ class TapToAddConfirmationPage(
         }
     }
 
+    fun assertErrorMessageShown(message: String) {
+        composeTestRule.onNode(hasText(message)).assertIsDisplayed()
+    }
+
     fun assertCvcRecollectionFieldShown() {
         retrieveCvcField()
             .assertIsDisplayed()

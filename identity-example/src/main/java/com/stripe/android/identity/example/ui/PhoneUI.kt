@@ -15,6 +15,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,48 +36,50 @@ internal fun PhoneUI(
     submissionState: IdentitySubmissionState,
     onSubmissionStateChanged: (IdentitySubmissionState) -> Unit
 ) {
-    var useDocumentFallback by remember {
-        mutableStateOf(false)
-    }
-    var optCheck by remember {
-        mutableStateOf(PhoneOTPCheck.Attempt)
+    val useDocumentFallback = submissionState.useDocumentFallback ?: false
+
+    LaunchedEffect(submissionState.phoneOtpCheck) {
+        if (submissionState.phoneOtpCheck == null) {
+            onSubmissionStateChanged(
+                submissionState.copy(
+                    phoneOtpCheck = PhoneOTPCheck.None
+                )
+            )
+        }
     }
     Row(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Checkbox(checked = useDocumentFallback, onCheckedChange = {
-            useDocumentFallback = it
             onSubmissionStateChanged(
                 submissionState.copy(
-                    useDocumentFallback = useDocumentFallback
+                    useDocumentFallback = it
                 )
             )
         })
         StyledClickableText(
             text = AnnotatedString(stringResource(id = R.string.document_fallback)),
             onClick = {
-                useDocumentFallback = !useDocumentFallback
                 onSubmissionStateChanged(
                     submissionState.copy(
-                        useDocumentFallback = useDocumentFallback
+                        useDocumentFallback = !useDocumentFallback
                     )
                 )
             }
         )
     }
-
-    if (useDocumentFallback) {
-        if (submissionState.phoneOtpCheck == null) {
-            onSubmissionStateChanged(submissionState.copy(phoneOtpCheck = PhoneOTPCheck.Attempt))
-        }
-        OtpCheckSelectUI(selectedCheckType = optCheck, onNewCheckTypeSelected = {
-            optCheck = it
+    OtpCheckSelectUI(
+        selectedCheckType = submissionState.phoneOtpCheck ?: PhoneOTPCheck.None,
+        onNewCheckTypeSelected = { otpCheck ->
             onSubmissionStateChanged(
                 submissionState.copy(
-                    phoneOtpCheck = optCheck
+                    phoneOtpCheck = otpCheck
                 )
             )
-        })
+        }
+    )
+
+    if (useDocumentFallback) {
         Divider()
         DocumentUI(
             submissionState = submissionState,

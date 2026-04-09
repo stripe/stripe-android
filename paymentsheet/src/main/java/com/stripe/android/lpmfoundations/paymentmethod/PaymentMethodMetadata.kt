@@ -91,7 +91,8 @@ internal data class PaymentMethodMetadata(
     val isStripeCardScanAllowed: Boolean,
     val enableMlKitCardScan: Boolean,
     val disableSsdOcrCardScan: Boolean,
-    val promotions: List<PaymentMethodMessagePromotion>?
+    val cardArts: List<PaymentMethod.Card.CardArt>,
+    val promotions: List<PaymentMethodMessagePromotion>?,
 ) : Parcelable {
 
     @IgnoredOnParcel
@@ -410,6 +411,7 @@ internal data class PaymentMethodMetadata(
                 isStripeCardScanAllowed = elementsSession.isStripeCardScanAllowed,
                 enableMlKitCardScan = elementsSession.enableMlKitCardScan,
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
+                cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty(),
                 promotions = promotions
             )
         }
@@ -478,6 +480,7 @@ internal data class PaymentMethodMetadata(
                 isStripeCardScanAllowed = elementsSession.isStripeCardScanAllowed,
                 enableMlKitCardScan = elementsSession.enableMlKitCardScan,
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
+                cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty(),
                 promotions = null
             )
         }

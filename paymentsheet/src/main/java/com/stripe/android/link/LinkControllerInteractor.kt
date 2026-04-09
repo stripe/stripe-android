@@ -39,7 +39,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.transformBankIc
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.getCardBrandIconForVerticalMode
 import com.stripe.android.paymentsheet.ui.getLinkIcon
-import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.isSystemDarkTheme
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -104,7 +104,7 @@ internal class LinkControllerInteractor @Inject constructor(
         get() = _state.value.paymentMethodMetadata
 
     fun state(context: Context): StateFlow<LinkController.State> {
-        val imageLoader = StripeImageLoader(context)
+        val imageLoader = DefaultStripeImageLoader(context)
         val iconLoader = PaymentSelection.IconLoader(context.resources, imageLoader)
 
         return combineAsStateFlow(_internalLinkAccount, _state) { account, state ->

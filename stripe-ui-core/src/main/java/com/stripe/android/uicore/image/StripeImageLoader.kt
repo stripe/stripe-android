@@ -13,18 +13,26 @@ import kotlinx.coroutines.withContext
 import java.net.URL
 import java.util.concurrent.ConcurrentHashMap
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface StripeImageLoader {
+    suspend fun load(url: String, width: Int, height: Int): Result<Bitmap?>
+    suspend fun load(url: String): Result<Bitmap?>
+
+    suspend fun get(url: String): Result<Bitmap?>
+}
+
 /**
  * Image loader that fetches images from memory, disk or network and runs
  * cache policy accordingly.
  *
- * [StripeImageLoader] is stateful as it holds the memoryCache instance. For
+ * [DefaultStripeImageLoader] is stateful as it holds the memoryCache instance. For
  * memory cache to work the image loader instance needs to be shared.
  *
  * @param memoryCache, memory cache to be used, or null if no memory cache is desired.
  * @param diskCache, memory cache to be used, or null if no memory cache is desired.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class StripeImageLoader(
+class DefaultStripeImageLoader(
     context: Context,
     private val logger: Logger = Logger.getInstance(context.isDebuggable()),
     private val memoryCache: ImageLruMemoryCache? = ImageLruMemoryCache(),
@@ -33,7 +41,7 @@ class StripeImageLoader(
         context = context,
         cacheFolder = "stripe_image_cache"
     ),
-) {
+) : StripeImageLoader {
 
     private val imageLoadMutexes = ConcurrentHashMap<String, Mutex>()
 
@@ -43,7 +51,7 @@ class StripeImageLoader(
      * If the same [url] is being loaded concurrently, function will be suspended until
      * the original load completes.
      */
-    suspend fun load(
+    override suspend fun load(
         url: String,
         width: Int,
         height: Int
@@ -53,12 +61,20 @@ class StripeImageLoader(
         }
     }
 
-    suspend fun load(
+    override suspend fun load(
         url: String
     ): Result<Bitmap?> = withContext(Dispatchers.IO) {
         withMutexByUrlLock(url) {
             loadFromMemory(url) ?: loadFromDisk(url) ?: loadFromNetwork(url)
         }
+    }
+
+    override suspend fun get(
+        url: String
+    ): Result<Bitmap?> = withContext(Dispatchers.IO) {
+        withMutexByUrlLock(url) {
+            loadFromMemory(url) ?: loadFromDisk(url)
+        } ?: Result.success(null)
     }
 
     private fun loadFromMemory(url: String): Result<Bitmap>? {

@@ -17,7 +17,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.rememberDrawablePainter
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.flow.StateFlow
@@ -802,7 +802,7 @@ class LinkController @Inject internal constructor(
                 context: Context,
                 details: PaymentMethodPreviewDetails
             ): PaymentMethodPreview {
-                val imageLoader = StripeImageLoader(context)
+                val imageLoader = DefaultStripeImageLoader(context)
                 val iconLoader = PaymentSelection.IconLoader(context.resources, imageLoader)
 
                 return details.toPreview(context = context, iconLoader = iconLoader)

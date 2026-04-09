@@ -1224,7 +1224,8 @@ internal class PaymentMethodMetadataTest {
             isStripeCardScanAllowed = false,
             enableMlKitCardScan = false,
             disableSsdOcrCardScan = false,
-            promotions = null
+            cardArts = emptyList(),
+            promotions = null,
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1378,7 +1379,8 @@ internal class PaymentMethodMetadataTest {
             isStripeCardScanAllowed = false,
             enableMlKitCardScan = false,
             disableSsdOcrCardScan = false,
-            promotions = null
+            cardArts = emptyList(),
+            promotions = null,
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
@@ -2247,11 +2249,7 @@ internal class PaymentMethodMetadataTest {
     @Test
     fun `getPromotionForCode returns promotion if available`() {
         val elementsSession = createElementsSession(
-            intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            flags = mapOf(
-                ElementsSession.Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA to true,
-                ElementsSession.Flag.ELEMENTS_MOBILE_ANDROID_TAP_TO_ADD_ENABLED to false,
-            ),
+            intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
         )
 
         val promotion = PaymentMethodMessagePromotion(

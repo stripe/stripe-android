@@ -35,6 +35,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.Mandate
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
@@ -54,7 +55,7 @@ internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
 ) {
     val context = LocalContext.current
     val imageLoader = remember {
-        StripeImageLoader(context.applicationContext)
+        DefaultStripeImageLoader(context.applicationContext)
     }
 
     val state by interactor.state.collectAsState()

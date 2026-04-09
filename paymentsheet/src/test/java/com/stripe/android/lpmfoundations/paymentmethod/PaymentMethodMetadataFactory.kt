@@ -76,6 +76,7 @@ internal object PaymentMethodMetadataFactory {
         isStripeCardScanAllowed: Boolean = false,
         enableMlKitCardScan: Boolean = false,
         disableSsdOcrCardScan: Boolean = false,
+        cardArts: List<PaymentMethod.Card.CardArt> = emptyList(),
         promotions: List<PaymentMethodMessagePromotion>? = null
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
@@ -144,6 +145,7 @@ internal object PaymentMethodMetadataFactory {
             isStripeCardScanAllowed = isStripeCardScanAllowed,
             enableMlKitCardScan = enableMlKitCardScan,
             disableSsdOcrCardScan = disableSsdOcrCardScan,
+            cardArts = cardArts,
             promotions = promotions
         )
     }
