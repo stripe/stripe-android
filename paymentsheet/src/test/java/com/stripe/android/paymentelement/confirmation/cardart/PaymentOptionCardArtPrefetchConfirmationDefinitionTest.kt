@@ -7,7 +7,6 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter.UnexpectedErrorEvent
-import com.stripe.android.paymentsheet.PaymentOptionCardArtProvider
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.FakeStripeImageLoader
 import kotlinx.coroutines.test.UnconfinedTestDispatcher

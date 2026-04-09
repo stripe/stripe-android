@@ -1,8 +1,7 @@
 package com.stripe.android.paymentsheet.model
 
 import android.content.Context
-import android.graphics.Bitmap
-import androidx.core.graphics.drawable.toDrawable
+import android.graphics.drawable.ShapeDrawable
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
@@ -16,14 +15,9 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentOptionCardArtDrawableLoader
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
-import org.junit.Before
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -32,17 +26,8 @@ import kotlin.test.Test
 @RunWith(RobolectricTestRunner::class)
 class PaymentOptionFactoryTest {
 
-    private val testDispatcher = UnconfinedTestDispatcher()
-
-    @Before
-    fun setUp() {
-        Dispatchers.setMain(testDispatcher)
-    }
-
-    @After
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule()
 
     @Test
     fun `create() with GooglePay should return expected object`() {
@@ -249,49 +234,28 @@ class PaymentOptionFactoryTest {
     }
 
     @Test
-    fun `imageLoader uses card art drawable when loader returns one`() = runTest {
-        val testBitmap = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
-        val cardArtDrawable = testBitmap.toDrawable(
-            ApplicationProvider.getApplicationContext<Context>().resources
-        )
+    fun `icon() returns card art drawable when loader provides one`() {
+        val cardArtDrawable = ShapeDrawable()
         val factory = createFactory(
             cardArtDrawableLoader = { cardArtDrawable },
         )
 
-        factory.create(savedCardWithCardArt()).icon()
-        // DelegateDrawable triggers imageLoader on init via Dispatchers.Main.immediate
+        val option = factory.create(PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
+        val icon = option.icon()
+
+        assertThat(icon.current).isEqualTo(cardArtDrawable)
     }
 
     @Test
-    fun `imageLoader falls back to icon when card art loader returns null`() = runTest {
+    fun `icon() falls back to icon loader when card art loader returns null`() {
         val factory = createFactory(
             cardArtDrawableLoader = { null },
         )
 
-        factory.create(savedCardWithCardArt()).icon()
-    }
+        val option = factory.create(PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
+        val icon = option.icon()
 
-    private fun savedCardWithCardArt(): PaymentSelection.Saved {
-        val paymentMethod = PaymentMethod.Builder()
-            .setId("pm_1")
-            .setCode("card")
-            .setType(PaymentMethod.Type.Card)
-            .setCard(
-                PaymentMethod.Card(
-                    last4 = "4242",
-                    brand = CardBrand.Visa,
-                    displayBrand = "visa",
-                    cardArt = PaymentMethod.Card.CardArt(
-                        artImage = PaymentMethod.Card.CardArt.ArtImage(
-                            format = "image/png",
-                            url = "https://example.com/card_art.png",
-                        ),
-                        programName = null,
-                    ),
-                )
-            )
-            .build()
-        return PaymentSelection.Saved(paymentMethod)
+        assertThat(icon.current).isNotInstanceOf(ShapeDrawable::class.java)
     }
 
     private fun createFactory(
@@ -309,8 +273,6 @@ class PaymentOptionFactoryTest {
     }
 
     private companion object {
-        const val CARD_ART_URL = "https://example.com/optimized.png"
-
         val PAYMENT_METHOD_BILLING_DETAILS = PaymentMethod.BillingDetails(
             address = Address(
                 city = "San Francisco",
