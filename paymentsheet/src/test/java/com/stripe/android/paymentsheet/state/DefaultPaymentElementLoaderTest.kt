@@ -160,6 +160,7 @@ internal class DefaultPaymentElementLoaderTest {
                         paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
                     ),
                     integrationMetadata = IntegrationMetadata.IntentFirst("pi_1234_secret_1234"),
+                    elementsSessionId = "session_1234",
                 ),
             )
         )

@@ -364,7 +364,10 @@ private fun PaymentSheetContent(
         }
 
         Column(modifier = Modifier.fillMaxWidth()) {
-            EventReporterProvider(viewModel.eventReporter) {
+            EventReporterProvider(
+                eventReporter = viewModel.eventReporter,
+                elementsSessionId = viewModel.paymentMethodMetadata.value?.elementsSessionId,
+            ) {
                 currentScreen.Content(
                     modifier = Modifier.padding(bottom = 8.dp),
                 )

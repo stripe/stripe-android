@@ -1220,6 +1220,7 @@ internal class PaymentMethodMetadataTest {
             experimentsData = null,
             isStripeCardScanAllowed = false,
             enableMlKitCardScan = false,
+            elementsSessionId = "session_1234",
             disableSsdOcrCardScan = false,
             cardArts = emptyList(),
         )
@@ -1373,6 +1374,7 @@ internal class PaymentMethodMetadataTest {
             experimentsData = null,
             isStripeCardScanAllowed = false,
             enableMlKitCardScan = false,
+            elementsSessionId = "session_1234",
             disableSsdOcrCardScan = false,
             cardArts = emptyList(),
         )
