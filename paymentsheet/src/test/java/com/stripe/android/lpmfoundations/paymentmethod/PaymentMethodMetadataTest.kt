@@ -25,6 +25,8 @@ import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodMessageLearnMore
+import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
@@ -1152,7 +1154,8 @@ internal class PaymentMethodMetadataTest {
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
-            isTapToAddAvailable = false
+            isTapToAddAvailable = false,
+            promotions = null
         )
 
         val expectedMetadata = PaymentMethodMetadata(
@@ -1221,6 +1224,7 @@ internal class PaymentMethodMetadataTest {
             isStripeCardScanAllowed = false,
             enableMlKitCardScan = false,
             disableSsdOcrCardScan = false,
+            promotions = null
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1282,6 +1286,7 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
+            promotions = null
         )
 
         // When flag is false, should use default funding types, not the configured ones
@@ -1373,6 +1378,7 @@ internal class PaymentMethodMetadataTest {
             isStripeCardScanAllowed = false,
             enableMlKitCardScan = false,
             disableSsdOcrCardScan = false,
+            promotions = null
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
@@ -2108,6 +2114,7 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
+            promotions = null
         )
 
         assertThat(metadata.availableWallets)
@@ -2177,6 +2184,7 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = true,
+            promotions = null
         )
 
         assertThat(metadata.isTapToAddSupported).isTrue()
@@ -2201,6 +2209,7 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = true,
+            promotions = null
         )
 
         assertThat(metadata.isTapToAddSupported).isTrue()
@@ -2229,9 +2238,48 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
+            promotions = null
         )
 
         assertThat(metadata.isTapToAddSupported).isFalse()
+    }
+
+    @Test
+    fun `getPromotionForCode returns promotion if available`() {
+        val elementsSession = createElementsSession(
+            intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            flags = mapOf(
+                ElementsSession.Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA to true,
+                ElementsSession.Flag.ELEMENTS_MOBILE_ANDROID_TAP_TO_ADD_ENABLED to false,
+            ),
+        )
+
+        val promotion = PaymentMethodMessagePromotion(
+            paymentMethodType = "Afterpay_Clearpay",
+            message = "This is a promotion",
+            learnMore = PaymentMethodMessageLearnMore(
+                url = "https://test.com",
+                message = "Click me."
+            )
+        )
+
+        val metadata = PaymentMethodMetadata.createForPaymentElement(
+            elementsSession = elementsSession,
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+            sharedDataSpecs = emptyList(),
+            externalPaymentMethodSpecs = emptyList(),
+            isGooglePayReady = false,
+            linkStateResult = null,
+            customerMetadata = DEFAULT_CUSTOMER_METADATA,
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
+            clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
+            analyticsMetadata = AnalyticsMetadata(emptyMap()),
+            isTapToAddAvailable = false,
+            promotions = listOf(promotion)
+        )
+
+        assertThat(metadata.getPromotionForCode(PaymentMethod.Type.AfterpayClearpay.code)).isEqualTo(promotion)
     }
 
     private fun createPaymentElementMetadata(
@@ -2266,6 +2314,7 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
+            promotions = null
         )
     }
 

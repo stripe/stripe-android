@@ -12,6 +12,7 @@ import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
@@ -75,6 +76,7 @@ internal object PaymentMethodMetadataFactory {
         isStripeCardScanAllowed: Boolean = false,
         enableMlKitCardScan: Boolean = false,
         disableSsdOcrCardScan: Boolean = false,
+        promotions: List<PaymentMethodMessagePromotion>? = null
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -142,6 +144,7 @@ internal object PaymentMethodMetadataFactory {
             isStripeCardScanAllowed = isStripeCardScanAllowed,
             enableMlKitCardScan = enableMlKitCardScan,
             disableSsdOcrCardScan = disableSsdOcrCardScan,
+            promotions = promotions
         )
     }
 

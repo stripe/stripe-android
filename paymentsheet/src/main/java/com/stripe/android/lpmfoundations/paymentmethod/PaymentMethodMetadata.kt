@@ -21,6 +21,7 @@ import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.utils.sellerBusinessName
@@ -90,6 +91,7 @@ internal data class PaymentMethodMetadata(
     val isStripeCardScanAllowed: Boolean,
     val enableMlKitCardScan: Boolean,
     val disableSsdOcrCardScan: Boolean,
+    val promotions: List<PaymentMethodMessagePromotion>?
 ) : Parcelable {
 
     @IgnoredOnParcel
@@ -333,6 +335,10 @@ internal data class PaymentMethodMetadata(
         ) ?: PaymentMethod.AllowRedisplay.UNSPECIFIED
     }
 
+    fun getPromotionForCode(code: PaymentMethodCode): PaymentMethodMessagePromotion? {
+        return promotions?.find { it.paymentMethodType.lowercase() == code }
+    }
+
     internal companion object {
         internal fun createForPaymentElement(
             elementsSession: ElementsSession,
@@ -347,6 +353,7 @@ internal data class PaymentMethodMetadata(
             integrationMetadata: IntegrationMetadata,
             analyticsMetadata: AnalyticsMetadata,
             isTapToAddAvailable: Boolean,
+            promotions: List<PaymentMethodMessagePromotion>?
         ): PaymentMethodMetadata {
             val linkSettings = elementsSession.linkSettings
             return PaymentMethodMetadata(
@@ -403,6 +410,7 @@ internal data class PaymentMethodMetadata(
                 isStripeCardScanAllowed = elementsSession.isStripeCardScanAllowed,
                 enableMlKitCardScan = elementsSession.enableMlKitCardScan,
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
+                promotions = promotions
             )
         }
 
@@ -470,6 +478,7 @@ internal data class PaymentMethodMetadata(
                 isStripeCardScanAllowed = elementsSession.isStripeCardScanAllowed,
                 enableMlKitCardScan = elementsSession.enableMlKitCardScan,
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
+                promotions = null
             )
         }
     }

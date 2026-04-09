@@ -26,7 +26,7 @@ import kotlin.coroutines.CoroutineContext
 internal interface PaymentMethodMessagePromotionsHelper {
     fun fetchPromotionsAsync(intent: StripeIntent)
 
-    fun getPromotionIfAvailableForCode(code: PaymentMethodCode): PaymentMethodMessagePromotion?
+    fun getPromotions(): List<PaymentMethodMessagePromotion>?
 }
 
 @Singleton
@@ -57,11 +57,9 @@ internal class DefaultPaymentMethodMessagePromotionsHelper @Inject constructor(
         }
     }
 
-    override fun getPromotionIfAvailableForCode(code: PaymentMethodCode): PaymentMethodMessagePromotion? {
+    override fun getPromotions(): List<PaymentMethodMessagePromotion>? {
         return if (FeatureFlags.paymentMethodMessagePromotions.isEnabled) {
-            promotionsDeferred?.takeIf { it.isCompleted }?.getCompleted()?.getOrNull()?.promotions?.find {
-                it.paymentMethodType.lowercase() == code
-            }
+            promotionsDeferred?.takeIf { it.isCompleted }?.getCompleted()?.getOrNull()?.promotions
         } else {
             null
         }
@@ -73,9 +71,7 @@ internal class NoOpPromotionsHelper @Inject constructor() : PaymentMethodMessage
         // NO-OP
     }
 
-    override fun getPromotionIfAvailableForCode(code: PaymentMethodCode): PaymentMethodMessagePromotion? {
-        return null
-    }
+    override fun getPromotions(): List<PaymentMethodMessagePromotion>? = null
 }
 
 @Module

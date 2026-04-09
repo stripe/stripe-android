@@ -44,16 +44,14 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
         featureFlagEnabled = true
     ) {
         helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
-        val result = helper.getPromotionIfAvailableForCode("afterpay_clearpay")
+        val result = helper.getPromotions()
         assertThat(result).isNull()
     }
 
     private fun runScenario(
         featureFlagEnabled: Boolean = false,
         repositoryResult: Result<PaymentMethodMessagePromotionList> = Result.success(
-            PaymentMethodMessagePromotionList(
-            listOf(AFTERPAY_PROMOTION)
-            )
+            PaymentMethodMessagePromotionList(listOf(AFTERPAY_PROMOTION))
         ),
         block: suspend Scenario.() -> Unit,
     ) = runTest(testDispatcher) {

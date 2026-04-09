@@ -494,6 +494,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             integrationMetadata = integrationMetadata,
             analyticsMetadata = analyticsMetadata,
             isTapToAddAvailable = isTapToAddAvailable,
+            promotions = paymentMethodMessagePromotionsHelper.getPromotions()
         )
     }
 
