@@ -36,6 +36,8 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.verticalmode.DefaultSavedPaymentMethodConfirmInteractor
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
+import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.utils.stateFlowOf
 import dagger.Binds
 import dagger.BindsInstance
@@ -181,6 +183,12 @@ internal interface FormActivityViewModelModule {
             tapToAddHelper: TapToAddHelper,
         ): FormActivityRegistrar {
             return DefaultFormActivityRegistrar(confirmationHandler, tapToAddHelper)
+        }
+
+        @Provides
+        @Singleton
+        fun provideStripeImageLoader(context: Context): StripeImageLoader {
+            return DefaultStripeImageLoader(context)
         }
 
         @Provides

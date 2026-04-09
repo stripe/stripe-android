@@ -14,6 +14,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentelement.ShippingDetailsInPaymentOptionPreview
+import com.stripe.android.paymentsheet.PaymentOptionCardArtDrawableLoader
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -26,10 +27,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentOptionDisplayDataFactoryTest {
 
-    private val displayDataFactory = PaymentOptionDisplayDataFactory(
-        iconLoader = mock(),
-        context = ApplicationProvider.getApplicationContext(),
-    )
+    private val displayDataFactory = createFactory()
 
     @Test
     fun `create attaches PaymentMethod BillingDetails as PaymentSheet BillingDetails `() {
@@ -167,6 +165,14 @@ internal class PaymentOptionDisplayDataFactoryTest {
     }
 
     companion object {
+        private fun createFactory(
+            cardArtDrawableLoader: PaymentOptionCardArtDrawableLoader = PaymentOptionCardArtDrawableLoader { null },
+        ) = PaymentOptionDisplayDataFactory(
+            iconLoader = mock(),
+            cardArtDrawableLoader = cardArtDrawableLoader,
+            context = ApplicationProvider.getApplicationContext(),
+        )
+
         private val paymentSheetBillingDetails = PaymentSheet.BillingDetails(
             name = "Jenny Rosen",
             email = "foo@bar.com",

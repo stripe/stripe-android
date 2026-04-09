@@ -103,6 +103,42 @@ class StripeImageLoaderTest {
             verify(memoryCache).put(keyNoSize, imageNoSize)
         }
 
+    @Test
+    fun `get - returns image from memory cache without hitting network`() =
+        runTest {
+            memoryCacheReturns(key, image)
+
+            val bitmap = imageLoader.get(key)
+
+            assertThat(bitmap.getOrThrow()).isEqualTo(image.bitmap)
+            verifyNoInteractions(networkImageDecoder)
+        }
+
+    @Test
+    fun `get - returns image from disk cache without hitting network`() =
+        runTest {
+            memoryCacheReturns(key, null)
+            diskCacheReturns(key, image)
+
+            val bitmap = imageLoader.get(key)
+
+            assertThat(bitmap.getOrThrow()).isEqualTo(image.bitmap)
+            verify(memoryCache).put(key, image)
+            verifyNoInteractions(networkImageDecoder)
+        }
+
+    @Test
+    fun `get - returns null when not in memory or disk cache`() =
+        runTest {
+            memoryCacheReturns(key, null)
+            diskCacheReturns(key, null)
+
+            val bitmap = imageLoader.get(key)
+
+            assertThat(bitmap.getOrThrow()).isNull()
+            verifyNoInteractions(networkImageDecoder)
+        }
+
     private fun memoryCacheReturns(key: String, image: LoadedImage?) {
         whenever(memoryCache.get(key)).thenReturn(image)
     }

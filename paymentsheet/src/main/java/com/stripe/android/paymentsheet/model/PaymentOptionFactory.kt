@@ -1,12 +1,14 @@
 package com.stripe.android.paymentsheet.model
 
 import android.content.Context
+import com.stripe.android.paymentsheet.PaymentOptionCardArtDrawableLoader
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import javax.inject.Inject
 
 internal class PaymentOptionFactory @Inject constructor(
     private val iconLoader: PaymentSelection.IconLoader,
+    private val cardArtDrawableLoader: PaymentOptionCardArtDrawableLoader,
     private val context: Context,
 ) {
     fun create(selection: PaymentSelection): PaymentOption {
@@ -22,7 +24,7 @@ internal class PaymentOptionFactory @Inject constructor(
             billingDetails = selection.billingDetails?.toPaymentSheetBillingDetails(),
             _shippingDetails = selection.shippingDetails,
             imageLoader = {
-                iconLoader.load(
+                cardArtDrawableLoader.load(selection) ?: iconLoader.load(
                     drawableResourceId = drawableResourceId,
                     drawableResourceIdNight = drawableResourceId,
                     lightThemeIconUrl = lightThemeIconUrl,

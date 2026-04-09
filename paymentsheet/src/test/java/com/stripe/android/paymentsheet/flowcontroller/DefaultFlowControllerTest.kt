@@ -2473,6 +2473,7 @@ internal class DefaultFlowControllerTest {
                     resources = context.resources,
                     imageLoader = DefaultStripeImageLoader(context),
                 ),
+                cardArtDrawableLoader = { null },
                 context = context,
             ),
             paymentOptionResultCallback = paymentOptionResultCallback,

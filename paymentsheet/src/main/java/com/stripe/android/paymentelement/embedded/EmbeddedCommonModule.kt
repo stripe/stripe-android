@@ -27,6 +27,7 @@ import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
+import com.stripe.android.paymentsheet.PaymentOptionCardArtModule
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.LoadingEventReporter
@@ -53,6 +54,7 @@ import kotlin.coroutines.CoroutineContext
         PaymentElementRequestSurfaceModule::class,
         PaymentConfigurationModule::class,
         StripeNetworkClientModule::class,
+        PaymentOptionCardArtModule::class,
     ],
 )
 internal interface EmbeddedCommonModule {
