@@ -408,18 +408,10 @@ internal data class PaymentMethodMetadata(
                 enableMlKitCardScan = elementsSession.enableMlKitCardScan,
                 elementsSessionId = elementsSession.elementsSessionId,
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
-                cardArtMetadata = if (cardArtEnabled) {
-                    CardArtMetadata(
-                        cardArts = elementsSession.customer?.paymentMethods
-                            ?.mapNotNull { it.card?.cardArt }.orEmpty()
-                    )
-                } else {
-                    null
-                },
+                cardArtMetadata = buildCardArtMetadata(cardArtEnabled, elementsSession),
             )
         }
 
-        @Suppress("LongMethod")
         internal fun createForCustomerSheet(
             elementsSession: ElementsSession,
             configuration: CustomerSheet.Configuration,
@@ -486,14 +478,18 @@ internal data class PaymentMethodMetadata(
                 enableMlKitCardScan = elementsSession.enableMlKitCardScan,
                 elementsSessionId = elementsSession.elementsSessionId,
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
-                cardArtMetadata = if (cardArtEnabled) {
-                    CardArtMetadata(
-                        cardArts = elementsSession.customer?.paymentMethods
-                            ?.mapNotNull { it.card?.cardArt }.orEmpty()
-                    )
-                } else {
-                    null
-                },
+                cardArtMetadata = buildCardArtMetadata(cardArtEnabled, elementsSession),
+            )
+        }
+
+        private fun buildCardArtMetadata(
+            cardArtEnabled: Boolean,
+            elementsSession: ElementsSession,
+        ): CardArtMetadata? {
+            if (!cardArtEnabled) return null
+            return CardArtMetadata(
+                cardArts = elementsSession.customer?.paymentMethods
+                    ?.mapNotNull { it.card?.cardArt }.orEmpty()
             )
         }
     }
