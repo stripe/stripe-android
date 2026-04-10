@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation.cardart
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.lpmfoundations.paymentmethod.CardArtMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
@@ -52,17 +53,19 @@ internal class PaymentOptionCardArtPrefetchConfirmationDefinitionTest {
     }
 
     @Test
-    fun `bootstrap does nothing when cardArts is empty`() = runScenario {
-        val metadata = PaymentMethodMetadataFactory.create(cardArts = emptyList())
+    fun `bootstrap does nothing when cardArtMetadata is null`() = runScenario {
+        val metadata = PaymentMethodMetadataFactory.create(cardArtMetadata = null)
         definition.bootstrap(metadata)
     }
 
     @Test
     fun `bootstrap loads images for each card art`() = runScenario {
         val metadata = PaymentMethodMetadataFactory.create(
-            cardArts = listOf(
-                cardArt(url = "https://example.com/art1.png"),
-                cardArt(url = "https://example.com/art2.png"),
+            cardArtMetadata = CardArtMetadata(
+                cardArts = listOf(
+                    cardArt(url = "https://example.com/art1.png"),
+                    cardArt(url = "https://example.com/art2.png"),
+                ),
             ),
         )
 
@@ -77,7 +80,9 @@ internal class PaymentOptionCardArtPrefetchConfirmationDefinitionTest {
         cardArtProviderResult = null,
     ) {
         val metadata = PaymentMethodMetadataFactory.create(
-            cardArts = listOf(cardArt(url = "https://example.com/art1.png")),
+            cardArtMetadata = CardArtMetadata(
+                cardArts = listOf(cardArt(url = "https://example.com/art1.png")),
+            ),
         )
 
         definition.bootstrap(metadata)

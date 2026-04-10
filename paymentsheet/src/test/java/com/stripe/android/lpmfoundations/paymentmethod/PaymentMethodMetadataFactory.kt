@@ -76,7 +76,7 @@ internal object PaymentMethodMetadataFactory {
         enableMlKitCardScan: Boolean = false,
         elementsSessionId: String? = null,
         disableSsdOcrCardScan: Boolean = false,
-        cardArts: List<PaymentMethod.Card.CardArt> = emptyList(),
+        cardArtMetadata: CardArtMetadata? = null,
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -145,7 +145,7 @@ internal object PaymentMethodMetadataFactory {
             enableMlKitCardScan = enableMlKitCardScan,
             elementsSessionId = elementsSessionId,
             disableSsdOcrCardScan = disableSsdOcrCardScan,
-            cardArts = cardArts,
+            cardArtMetadata = cardArtMetadata,
         )
     }
 

@@ -73,8 +73,8 @@ internal class PaymentOptionCardArtPrefetchConfirmationDefinition @Inject constr
     }
 
     override fun bootstrap(paymentMethodMetadata: PaymentMethodMetadata) {
-        val cardArts = paymentMethodMetadata.cardArts
-        if (cardArts.isEmpty()) return
+        val cardArts = paymentMethodMetadata.cardArtMetadata?.cardArts
+        if (cardArts.isNullOrEmpty()) return
 
         for (cardArt in cardArts) {
             val paymentOptionImageUrl = paymentOptionCardArtProvider(cardArt) ?: continue

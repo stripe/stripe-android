@@ -91,7 +91,7 @@ internal data class PaymentMethodMetadata(
     val enableMlKitCardScan: Boolean,
     val elementsSessionId: String? = null,
     val disableSsdOcrCardScan: Boolean,
-    val cardArts: List<PaymentMethod.Card.CardArt>,
+    val cardArtMetadata: CardArtMetadata?,
 ) : Parcelable {
 
     @IgnoredOnParcel
@@ -350,6 +350,7 @@ internal data class PaymentMethodMetadata(
             integrationMetadata: IntegrationMetadata,
             analyticsMetadata: AnalyticsMetadata,
             isTapToAddAvailable: Boolean,
+            cardArtEnabled: Boolean,
         ): PaymentMethodMetadata {
             val linkSettings = elementsSession.linkSettings
             return PaymentMethodMetadata(
@@ -407,7 +408,14 @@ internal data class PaymentMethodMetadata(
                 enableMlKitCardScan = elementsSession.enableMlKitCardScan,
                 elementsSessionId = elementsSession.elementsSessionId,
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
-                cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty()
+                cardArtMetadata = if (cardArtEnabled) {
+                    CardArtMetadata(
+                        cardArts = elementsSession.customer?.paymentMethods
+                            ?.mapNotNull { it.card?.cardArt }.orEmpty()
+                    )
+                } else {
+                    null
+                },
             )
         }
 
@@ -418,6 +426,7 @@ internal data class PaymentMethodMetadata(
             isGooglePayReady: Boolean,
             customerMetadata: CustomerMetadata,
             integrationMetadata: IntegrationMetadata.CustomerSheet,
+            cardArtEnabled: Boolean,
         ): PaymentMethodMetadata {
             return PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
@@ -476,7 +485,14 @@ internal data class PaymentMethodMetadata(
                 enableMlKitCardScan = elementsSession.enableMlKitCardScan,
                 elementsSessionId = elementsSession.elementsSessionId,
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
-                cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty()
+                cardArtMetadata = if (cardArtEnabled) {
+                    CardArtMetadata(
+                        cardArts = elementsSession.customer?.paymentMethods
+                            ?.mapNotNull { it.card?.cardArt }.orEmpty()
+                    )
+                } else {
+                    null
+                },
             )
         }
     }

@@ -6,6 +6,7 @@ import com.stripe.android.common.coroutines.awaitWithTimeout
 import com.stripe.android.common.validation.isSupportedWithBillingConfig
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.data.CustomerSheetInitializationDataSource
 import com.stripe.android.customersheet.data.CustomerSheetIntentDataSource
@@ -178,6 +179,7 @@ internal class DefaultCustomerSheetLoader(
                     IntegrationMetadata.CustomerSheet.AttachmentStyle.CreateAttach
                 }
             ),
+            cardArtEnabled = FeatureFlags.enableCardArt.isEnabled,
         )
     }
 
