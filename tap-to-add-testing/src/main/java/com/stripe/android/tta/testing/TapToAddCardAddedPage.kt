@@ -50,10 +50,20 @@ class TapToAddCardAddedPage(
         composeTestRule.retrieveCloseButton().click()
     }
 
+    fun waitUntilMissing() {
+        composeTestRule.waitUntilLayoutWithPrimaryButtonMissing()
+    }
+
     private fun assertHasCardAddedText() {
+        val matcher = hasText("Card added")
+
         composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT) {
-            composeTestRule.onNode(hasText("Card added")).isDisplayed()
+            composeTestRule.onAllNodes(matcher)
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .size == 1
         }
+
+        composeTestRule.onNode(matcher).isDisplayed()
     }
 
     private fun assertHasContinueButton() = primaryButtonElement.assert(withLabel = "Continue")
