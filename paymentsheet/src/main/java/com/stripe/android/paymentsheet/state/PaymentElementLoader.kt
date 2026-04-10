@@ -133,6 +133,7 @@ internal interface PaymentElementLoader {
             val intentConfiguration: IntentConfiguration,
         ) : InitializationMode() {
 
+            @OptIn(SharedPaymentTokenSessionPreview::class)
             override fun validate() {
                 (intentConfiguration.mode as? IntentConfiguration.Mode.Payment)?.let {
                     if (it.amount <= 0) {
@@ -140,6 +141,15 @@ internal interface PaymentElementLoader {
                             "Payment IntentConfiguration requires a positive amount."
                         )
                     }
+                }
+
+                val hasSellerDetails = (intentConfiguration.intentBehavior as?
+                    IntentConfiguration.IntentBehavior.SharedPaymentToken)?.sellerDetails != null
+                if (hasSellerDetails && intentConfiguration.paymentMethodConfigurationId != null) {
+                    throw IllegalArgumentException(
+                        "paymentMethodConfigurationId and sellerDetails are mutually exclusive. " +
+                            "Please provide only one."
+                    )
                 }
             }
 

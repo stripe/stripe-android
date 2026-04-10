@@ -7,6 +7,7 @@ import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.Stripe
 import com.stripe.android.common.di.APPLICATION_ID
 import com.stripe.android.common.di.MOBILE_SESSION_ID
+import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
@@ -135,10 +136,12 @@ internal class RealElementsSessionRepository @Inject constructor(
             mapOf("expand" to it)
         }.orEmpty()
 
+        val requestFactory = apiRequestFactoryForParams(params)
+
         return executeRequestWithResultParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
             stripeNetworkClient = stripeNetworkClient,
-            request = apiRequestFactory.createGet(
+            request = requestFactory.createGet(
                 url = ELEMENTS_SESSIONS_URL,
                 options = options,
                 params = requestParams + expandParam,
@@ -181,6 +184,19 @@ internal class RealElementsSessionRepository @Inject constructor(
         }
     }
 
+    private fun apiRequestFactoryForParams(params: ElementsSessionParams): ApiRequest.Factory {
+        if (params.sellerDetails?.networkBusinessProfile != null) {
+            return ApiRequest.Factory(
+                appInfo = Stripe.appInfo,
+                apiVersion = ApiVersion(
+                    betas = setOf(SELLER_PAYMENT_METHODS_BETA)
+                ).code,
+                sdkVersion = StripeSdkVersion.VERSION,
+            )
+        }
+        return apiRequestFactory
+    }
+
     private fun shouldFallback(elementsSession: Result<ElementsSession>): Boolean {
         return (elementsSession.exceptionOrNull() as? StripeException)?.let {
             it.statusCode >= HTTP_INTERNAL_SERVER_ERROR
@@ -189,6 +205,7 @@ internal class RealElementsSessionRepository @Inject constructor(
 
     private companion object {
         private val ELEMENTS_SESSIONS_URL = "${ApiRequest.API_HOST}/v1/elements/sessions"
+        private const val SELLER_PAYMENT_METHODS_BETA = "payment_element_seller_payment_methods_beta_1=v1"
     }
 }
 
@@ -303,8 +320,10 @@ private fun PaymentSheet.IntentConfiguration.toSellerDetails(): ElementsSessionP
     return when (intentBehavior) {
         is PaymentSheet.IntentConfiguration.IntentBehavior.SharedPaymentToken -> intentBehavior.sellerDetails?.run {
             ElementsSessionParams.SellerDetails(
-                externalId = externalId,
                 networkId = networkId,
+                externalId = externalId,
+                businessName = businessName,
+                networkBusinessProfile = networkBusinessProfile,
             )
         }
         is PaymentSheet.IntentConfiguration.IntentBehavior.Default -> null

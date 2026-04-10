@@ -692,11 +692,46 @@ class PaymentSheet internal constructor(
         @SharedPaymentTokenSessionPreview
         @Parcelize
         @Poko
-        class SellerDetails(
-            val businessName: String,
-            val networkId: String,
-            val externalId: String,
-        ) : Parcelable
+        class SellerDetails internal constructor(
+            val businessName: String?,
+            val networkId: String?,
+            val externalId: String?,
+            val networkBusinessProfile: String?,
+        ) : Parcelable {
+            /**
+             * Creates a [SellerDetails] with the given required fields.
+             * Use the secondary constructor with named parameters for optional fields.
+             */
+            constructor(
+                businessName: String,
+                networkId: String,
+                externalId: String,
+            ) : this(
+                businessName = businessName,
+                networkId = networkId,
+                externalId = externalId,
+                networkBusinessProfile = null,
+            )
+
+            companion object {
+                /**
+                 * Creates a [SellerDetails] with all optional fields.
+                 */
+                @JvmStatic
+                @JvmOverloads
+                fun create(
+                    networkId: String? = null,
+                    externalId: String? = null,
+                    businessName: String? = null,
+                    networkBusinessProfile: String? = null,
+                ): SellerDetails = SellerDetails(
+                    businessName = businessName,
+                    networkId = networkId,
+                    externalId = externalId,
+                    networkBusinessProfile = networkBusinessProfile,
+                )
+            }
+        }
 
         @OptIn(SharedPaymentTokenSessionPreview::class)
         internal sealed interface IntentBehavior : Parcelable {

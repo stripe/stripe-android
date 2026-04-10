@@ -99,14 +99,18 @@ internal sealed interface ElementsSessionParams : Parcelable {
 
     @Parcelize
     data class SellerDetails(
-        val networkId: String,
-        val externalId: String,
+        val networkId: String? = null,
+        val externalId: String? = null,
+        val businessName: String? = null,
+        val networkBusinessProfile: String? = null,
     ) : Parcelable {
         fun toQueryParams(): Map<String, Any?> {
-            return mapOf(
-                "seller_details[network_id]" to networkId,
-                "seller_details[external_id]" to externalId,
-            )
+            return buildMap {
+                networkId?.let { put("seller_details[network_id]", it) }
+                externalId?.let { put("seller_details[external_id]", it) }
+                businessName?.let { put("seller_details[business_name]", it) }
+                networkBusinessProfile?.let { put("seller_details[network_business_profile]", it) }
+            }
         }
     }
 
