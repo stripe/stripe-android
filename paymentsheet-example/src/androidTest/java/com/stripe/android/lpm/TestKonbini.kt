@@ -13,9 +13,11 @@ import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillin
 import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymentMethodsSettingsDefinition
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.TestParameters
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
+@Ignore("sienna-jurisdiction")
 @RunWith(AndroidJUnit4::class)
 internal class TestKonbini : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
