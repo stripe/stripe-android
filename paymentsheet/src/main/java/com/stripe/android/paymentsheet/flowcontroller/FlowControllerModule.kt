@@ -18,6 +18,7 @@ import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController.Comp
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController.Companion.WALLETS_BUTTON_LINK_LAUNCHER
 import com.stripe.android.paymentsheet.ui.DefaultWalletButtonsInteractor
 import com.stripe.android.paymentsheet.ui.WalletButtonsContent
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 import dagger.Binds
 import dagger.Module
@@ -112,7 +113,7 @@ internal object FlowControllerModule {
     @Provides
     @Singleton
     fun provideStripeImageLoader(context: Context): StripeImageLoader {
-        return StripeImageLoader(context)
+        return DefaultStripeImageLoader(context)
     }
 
     @Provides

@@ -974,6 +974,55 @@ class DefaultEventReporterTest {
     }
 
     @Test
+    fun `onPaymentSuccess sends is_saved_payment_method true for saved payment method`() = runScenario {
+        val paymentSelection = PaymentSelection.Saved(
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        )
+        val expectedIsSavedPaymentMethodValue = true
+        testIsSavedPaymentMethodParam(paymentSelection, expectedIsSavedPaymentMethodValue)
+    }
+
+    @Test
+    fun `onPaymentSuccess sends is_saved_payment_method false for new payment method`() = runScenario {
+        val paymentSelection = PaymentSelection.New.Card(
+            PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            CardBrand.Visa,
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+        )
+        val expectedIsSavedPaymentMethodValue = false
+        testIsSavedPaymentMethodParam(paymentSelection, expectedIsSavedPaymentMethodValue)
+    }
+
+    private suspend fun Scenario.testIsSavedPaymentMethodParam(
+        paymentSelection: PaymentSelection,
+        expectedIsSavedPaymentMethodValue: Boolean
+    ) {
+        val expectedEventName = if (expectedIsSavedPaymentMethodValue) {
+            "mc_complete_payment_savedpm_success"
+        } else {
+            "mc_complete_payment_newpm_success"
+        }
+
+        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
+        durationProvider.endCalls.push(
+            FakeDurationProvider.EndCall(
+                key = DurationProvider.Key.Checkout,
+                duration = 5.seconds,
+            )
+        )
+
+        eventReporter.onPaymentSuccess(
+            paymentSelection = paymentSelection,
+            deferredIntentConfirmationType = null,
+            intentId = null,
+        )
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", expectedEventName)
+        assertThat(request.params).containsEntry("is_saved_payment_method", expectedIsSavedPaymentMethodValue)
+    }
+
+    @Test
     fun `onSelectPaymentOption fires event with saved payment method`() = runScenario {
         paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
 

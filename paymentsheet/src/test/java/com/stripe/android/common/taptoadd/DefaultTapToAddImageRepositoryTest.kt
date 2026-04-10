@@ -4,7 +4,7 @@ import android.graphics.Bitmap
 import androidx.compose.ui.graphics.Color
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardBrand
-import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.testing.FakeStripeImageLoader
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -12,11 +12,6 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.times
-import org.mockito.kotlin.any
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
@@ -39,7 +34,9 @@ internal class DefaultTapToAddImageRepositoryTest {
     @Test
     fun `load for unknown card brand does not call imageLoader`() = runScenario {
         repository.load(CardBrand.Unknown).await()
-        verify(imageLoader, times(5)).load(any())
+        // Only the 5 preload calls should have happened, no extra call for Unknown
+        repeat(5) { imageLoader.awaitLoadCall() }
+        imageLoader.ensureAllEventsConsumed()
     }
 
     @Test
@@ -97,14 +94,16 @@ internal class DefaultTapToAddImageRepositoryTest {
     @Test
     fun `load when already cached returns same art without calling imageLoader again`() = runScenario(
         imageResult = Result.success(testBitmap),
-      ) {
+    ) {
         val first = repository.load(CardBrand.Visa).await()
         val second = repository.load(CardBrand.Visa).await()
         assertThat(first).isNotNull()
         assertThat(second).isEqualTo(first)
         assertThat(repository.get(CardBrand.Visa)).isEqualTo(first)
-        verify(imageLoader, times(5)).load(any())
-      }
+        // Only the 5 preload calls should have happened
+        repeat(5) { imageLoader.awaitLoadCall() }
+        imageLoader.ensureAllEventsConsumed()
+    }
 
     @Test
     fun `concurrent load for same brand returns same result`() = runScenario(
@@ -122,9 +121,7 @@ internal class DefaultTapToAddImageRepositoryTest {
 
     @Test
     fun `get returns null for brand before load is invoked`() = runTest(testDispatcher) {
-        val imageLoader = mock<StripeImageLoader>().apply {
-            whenever(load(any())).thenReturn(Result.success(testBitmap))
-        }
+        val imageLoader = FakeStripeImageLoader(loadResult = Result.success(testBitmap))
         val repository = DefaultTapToAddImageRepository(
             coroutineContext = testDispatcher,
             viewModelScope = this,
@@ -139,9 +136,7 @@ internal class DefaultTapToAddImageRepositoryTest {
         imageResult: Result<Bitmap?> = Result.success(testBitmap),
         block: suspend Scenario.() -> Unit = {},
     ) = runTest(testDispatcher) {
-        val imageLoader = mock<StripeImageLoader>().apply {
-            whenever(load(any())).thenReturn(imageResult)
-        }
+        val imageLoader = FakeStripeImageLoader(loadResult = imageResult)
 
         val repository = DefaultTapToAddImageRepository(
             coroutineContext = testDispatcher,
@@ -156,6 +151,6 @@ internal class DefaultTapToAddImageRepositoryTest {
 
     private class Scenario(
         val repository: TapToAddImageRepository,
-        val imageLoader: StripeImageLoader,
+        val imageLoader: FakeStripeImageLoader,
     )
 }
