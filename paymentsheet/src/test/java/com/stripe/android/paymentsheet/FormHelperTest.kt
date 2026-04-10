@@ -632,6 +632,11 @@ internal class FormHelperTest {
     @Test
     fun `formElementsForCode returns PMM promotion header if available`() = runTest {
         val formHelper = createFormHelper(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "afterpay_clearpay"),
+                )
+            ),
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(
                 promotions = listOf(
                     PaymentMethodMessagePromotion(
@@ -643,7 +648,8 @@ internal class FormHelperTest {
                         )
                     )
                 )
-            )
+            ),
+            newPaymentSelectionProvider = { null }
         )
 
         val elements = formHelper.formElementsForCode(PaymentMethod.Type.AfterpayClearpay.code)
