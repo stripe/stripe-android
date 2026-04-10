@@ -419,6 +419,7 @@ internal data class PaymentMethodMetadata(
             )
         }
 
+        @Suppress("LongMethod")
         internal fun createForCustomerSheet(
             elementsSession: ElementsSession,
             configuration: CustomerSheet.Configuration,

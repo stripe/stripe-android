@@ -23,5 +23,7 @@ internal fun paymentMethodIconWidth(cardArtEnabled: Boolean): Dp {
 }
 
 private fun paymentMethodIconHeight(cardArtEnabled: Boolean): Dp {
-    return paymentMethodIconWidth(cardArtEnabled) * 5 / 6f
+    return paymentMethodIconWidth(cardArtEnabled) * ICON_HEIGHT_TO_WIDTH_RATIO
 }
+
+private const val ICON_HEIGHT_TO_WIDTH_RATIO = 5f / 6f
