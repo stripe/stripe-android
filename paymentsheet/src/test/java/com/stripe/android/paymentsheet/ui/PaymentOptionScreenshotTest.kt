@@ -113,6 +113,42 @@ class PaymentOptionScreenshotTest {
         )
     }
 
+    @Test
+    fun testEnabledWithCardArtEnabled() {
+        cardArtFeatureFlagRule.setEnabled(true)
+
+        createSavedPaymentMethodTabScreenshot(
+            isSelected = false,
+            shouldShowModifyBadge = false,
+            shouldShowDefaultBadge = false,
+            isEnabled = true,
+        )
+    }
+
+    @Test
+    fun testDisabledWithCardArtEnabled() {
+        cardArtFeatureFlagRule.setEnabled(true)
+
+        createSavedPaymentMethodTabScreenshot(
+            isSelected = false,
+            shouldShowModifyBadge = false,
+            shouldShowDefaultBadge = false,
+            isEnabled = false,
+        )
+    }
+
+    @Test
+    fun testSelectedWithCardArtEnabled() {
+        cardArtFeatureFlagRule.setEnabled(true)
+
+        createSavedPaymentMethodTabScreenshot(
+            isSelected = true,
+            shouldShowModifyBadge = false,
+            shouldShowDefaultBadge = false,
+            isEnabled = true,
+        )
+    }
+
     private fun createSavedPaymentMethodTabScreenshot(
         isSelected: Boolean,
         shouldShowModifyBadge: Boolean,
