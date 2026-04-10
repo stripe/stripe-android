@@ -50,6 +50,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Arg
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcCompletionState
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
@@ -100,6 +101,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     customerStateHolderFactory: CustomerStateHolder.Factory,
     @ViewModelScope customViewModelScope: CoroutineScope,
     private val checkoutCurrencyUpdater: CheckoutCurrencyUpdater,
+    private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper
 ) : BaseSheetViewModel(
     config = args.config,
     eventReporter = eventReporter,
@@ -739,6 +741,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 viewModel = this,
                 paymentMethodMetadata = paymentMethodMetadata,
                 customerStateHolder = customerStateHolder,
+                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
             )
         }
         val hasPaymentMethods = customerStateHolder.paymentMethods.value.isNotEmpty()
@@ -757,6 +760,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             val interactor = DefaultAddPaymentMethodInteractor.create(
                 viewModel = this,
                 paymentMethodMetadata = paymentMethodMetadata,
+                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
             )
             PaymentSheetScreen.AddFirstPaymentMethod(interactor = interactor)
         }

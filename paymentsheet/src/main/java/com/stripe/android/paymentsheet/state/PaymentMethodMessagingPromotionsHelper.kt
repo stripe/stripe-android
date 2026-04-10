@@ -27,6 +27,8 @@ internal interface PaymentMethodMessagePromotionsHelper {
     fun fetchPromotionsAsync(intent: StripeIntent)
 
     fun getPromotionIfAvailableForCode(code: PaymentMethodCode): PaymentMethodMessagePromotion?
+
+    fun getPromotions(): List<PaymentMethodMessagePromotion>?
 }
 
 @Singleton
@@ -39,6 +41,7 @@ internal class DefaultPaymentMethodMessagePromotionsHelper @Inject constructor(
     private var promotionsDeferred: Deferred<Result<PaymentMethodMessagePromotionList>>? = null
 
     override fun fetchPromotionsAsync(intent: StripeIntent) {
+        println("YEET ph fetching: $this")
         if (FeatureFlags.paymentMethodMessagePromotions.isEnabled) {
             promotionsDeferred?.cancel()
             promotionsDeferred = null
@@ -66,6 +69,38 @@ internal class DefaultPaymentMethodMessagePromotionsHelper @Inject constructor(
             null
         }
     }
+
+    override fun getPromotions(): List<PaymentMethodMessagePromotion>? {
+        return if (FeatureFlags.paymentMethodMessagePromotions.isEnabled) {
+            promotionsDeferred?.takeIf { it.isCompleted }?.getCompleted()?.getOrNull()?.promotions
+        } else {
+            null
+        }
+    }
+}
+
+internal class PrefetchedPaymentMethodMessagePromotionHelper(
+    private val promotions: List<PaymentMethodMessagePromotion>?
+) : PaymentMethodMessagePromotionsHelper {
+    override fun fetchPromotionsAsync(intent: StripeIntent) {
+        // NO-OP
+    }
+
+    override fun getPromotionIfAvailableForCode(code: PaymentMethodCode): PaymentMethodMessagePromotion? {
+        return if (FeatureFlags.paymentMethodMessagePromotions.isEnabled) {
+            return promotions?.find { it.paymentMethodType.lowercase() == code }
+        } else {
+            null
+        }
+    }
+
+    override fun getPromotions(): List<PaymentMethodMessagePromotion>? {
+        return if (FeatureFlags.paymentMethodMessagePromotions.isEnabled) {
+            return promotions
+        } else {
+            null
+        }
+    }
 }
 
 internal class NoOpPromotionsHelper @Inject constructor() : PaymentMethodMessagePromotionsHelper {
@@ -74,6 +109,10 @@ internal class NoOpPromotionsHelper @Inject constructor() : PaymentMethodMessage
     }
 
     override fun getPromotionIfAvailableForCode(code: PaymentMethodCode): PaymentMethodMessagePromotion? {
+        return null
+    }
+
+    override fun getPromotions(): List<PaymentMethodMessagePromotion>? {
         return null
     }
 }

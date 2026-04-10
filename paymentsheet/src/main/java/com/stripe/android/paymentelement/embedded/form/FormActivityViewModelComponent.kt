@@ -22,6 +22,7 @@ import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -33,6 +34,8 @@ import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
+import com.stripe.android.paymentsheet.repositories.PrefetchedPaymentMethodMessagePromotionHelper
 import com.stripe.android.paymentsheet.verticalmode.DefaultSavedPaymentMethodConfirmInteractor
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
@@ -83,6 +86,7 @@ internal interface FormActivityViewModelComponent {
             paymentElementCallbackIdentifier: String,
             @BindsInstance application: Application,
             @BindsInstance savedStateHandle: SavedStateHandle,
+            @BindsInstance paymentMethodMessagePromotion: PaymentMethodMessagePromotion?
         ): FormActivityViewModelComponent
     }
 }
@@ -215,6 +219,13 @@ internal interface FormActivityViewModelModule {
                 coroutineScope = coroutineScope,
             )
         }
+
+        @Provides
+        fun providesPaymentMethodMessagePromotionHelper(
+            promotion: PaymentMethodMessagePromotion?
+        ): PaymentMethodMessagePromotionsHelper = PrefetchedPaymentMethodMessagePromotionHelper(
+            listOfNotNull(promotion)
+        )
     }
 }
 

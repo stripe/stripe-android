@@ -10,6 +10,7 @@ import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.verticalmode.BankFormInteractor
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.elements.FormElement
@@ -88,12 +89,14 @@ internal class DefaultAddPaymentMethodInteractor(
         fun create(
             viewModel: BaseSheetViewModel,
             paymentMethodMetadata: PaymentMethodMetadata,
+            paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper? = null
         ): AddPaymentMethodInteractor {
             val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
             val formHelper = DefaultFormHelper.create(
                 viewModel = viewModel,
                 paymentMethodMetadata = paymentMethodMetadata,
                 shouldCreateAutomaticallyLaunchedCardScanFormDataHelper = true,
+                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
             )
             val bankFormInteractor = BankFormInteractor.create(viewModel)
 

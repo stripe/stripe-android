@@ -22,6 +22,7 @@ import com.stripe.android.paymentsheet.utils.ViewModelStoreOwnerContext
 import com.stripe.android.paymentsheet.verticalmode.FakeSavedPaymentMethodConfirmInteractor
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
+import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import kotlinx.coroutines.test.TestScope
@@ -139,7 +140,8 @@ internal class FormActivityScreenShotTest {
             viewModelScope = TestScope(UnconfinedTestDispatcher()),
             formActivityStateHelper = stateHolder,
             tapToAddHelper = FakeTapToAddHelper.noOp(),
-            eventReporter = eventReporter
+            eventReporter = eventReporter,
+            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper()
         ).create()
 
         stateHolder.updateConfirmationState(confirmationState)

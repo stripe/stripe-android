@@ -87,7 +87,6 @@ import com.stripe.android.utils.FakeElementsSessionRepository
 import com.stripe.android.utils.FakeElementsSessionRepository.Companion.DEFAULT_ELEMENTS_SESSION_CONFIG_ID
 import com.stripe.android.utils.FakeLinkStore
 import com.stripe.android.utils.FakePaymentMethodFilter
-import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestDispatcher

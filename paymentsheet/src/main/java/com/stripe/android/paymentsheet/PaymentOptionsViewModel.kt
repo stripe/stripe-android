@@ -40,6 +40,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection.Link
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
@@ -78,6 +79,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     mode: EventReporter.Mode,
     customerStateHolderFactory: CustomerStateHolder.Factory,
     @ViewModelScope customViewModelScope: CoroutineScope,
+    private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper
 ) : BaseSheetViewModel(
     config = args.configuration,
     eventReporter = eventReporter,
@@ -213,6 +215,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     override val primaryButtonUiState = primaryButtonUiStateMapper.forCustomFlow()
 
     init {
+        println("YEET pay ops vm ph: $paymentMethodMessagePromotionsHelper")
         SessionSavedStateHandler.attachTo(this, savedStateHandle)
 
         linkAccountHolder.set(args.linkAccountInfo)
@@ -437,6 +440,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 viewModel = this,
                 paymentMethodMetadata = paymentMethodMetadata,
                 customerStateHolder = customerStateHolder,
+                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
             )
         }
         val target = if (args.state.showSavedPaymentMethods) {
@@ -451,6 +455,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             val interactor = DefaultAddPaymentMethodInteractor.create(
                 viewModel = this,
                 paymentMethodMetadata = paymentMethodMetadata,
+                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
             )
             AddFirstPaymentMethod(interactor = interactor)
         }
@@ -465,6 +470,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 val interactor = DefaultAddPaymentMethodInteractor.create(
                     viewModel = this@PaymentOptionsViewModel,
                     paymentMethodMetadata = paymentMethodMetadata,
+                    paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
                 )
                 add(
                     PaymentSheetScreen.AddAnotherPaymentMethod(interactor = interactor)

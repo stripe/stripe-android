@@ -24,6 +24,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.DefaultWalletButtonsInteractor
@@ -85,7 +86,8 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     private val confirmationHandler: ConfirmationHandler,
     private val confirmationStateHolder: EmbeddedConfirmationStateHolder,
     private val linkPaymentLauncher: LinkPaymentLauncher,
-    private val linkAccountHolder: LinkAccountHolder
+    private val linkAccountHolder: LinkAccountHolder,
+    private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper
 ) : EmbeddedContentHelper {
 
     private val state: StateFlow<State?> = savedStateHandle.getStateFlow(
@@ -200,6 +202,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             },
             // Not important for determining formType so set to default value
             setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
+            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
         )
         val savedPaymentMethodMutator = createSavedPaymentMethodMutator(
             coroutineScope = coroutineScope,
@@ -238,6 +241,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                     },
                     embeddedConfirmationState = confirmationStateHolder.state,
                     customerState = customerStateHolder.customer.value,
+                    promotion = paymentMethodMessagePromotionsHelper.getPromotionIfAvailableForCode(code)
                 )
             },
             paymentMethods = customerStateHolder.paymentMethods,
@@ -276,6 +280,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                     isVerticalLayout = true,
                 )
             },
+            //paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
         )
     }
 
