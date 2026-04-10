@@ -23,6 +23,8 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParams.Companion.getNameFromParams
 import com.stripe.android.model.PaymentMethodExtraParams
+import com.stripe.android.model.PaymentMethodMessageLearnMore
+import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
@@ -33,9 +35,11 @@ import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.elements.PaymentMethodMessageHeaderElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
+import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -625,6 +629,35 @@ internal class FormHelperTest {
         assertThat(formHelper.formTypeForCode("link")).isEqualTo(FormHelper.FormType.UserInteractionRequired)
     }
 
+    @Test
+    fun `formElementsForCode returns PMM promotion header if available`() = runTest {
+        val formHelper = createFormHelper(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "afterpay_clearpay"),
+                )
+            ),
+            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(
+                promotions = listOf(
+                    PaymentMethodMessagePromotion(
+                        paymentMethodType = "AFTERPAY_CLEARPAY",
+                        message = "This is a message",
+                        learnMore = PaymentMethodMessageLearnMore(
+                            message = "Click me",
+                            url = "https://test.com"
+                        )
+                    )
+                )
+            ),
+            newPaymentSelectionProvider = { null }
+        )
+
+        val elements = formHelper.formElementsForCode(PaymentMethod.Type.AfterpayClearpay.code)
+        val header = elements[0] as PaymentMethodMessageHeaderElement
+        assertThat(header).isInstanceOf<PaymentMethodMessageHeaderElement>()
+        assertThat(header.promotion).isNotNull()
+    }
+
     private fun runLinkInlineTest(
         formFieldValues: FormFieldValues,
         inlineSignupViewState: InlineSignupViewState?,
@@ -661,6 +694,8 @@ internal class FormHelperTest {
         linkInlineHandler: LinkInlineHandler = LinkInlineHandler.create(),
         eventReporter: FakeEventReporter = FakeEventReporter(),
         tapToAddHelper: TapToAddHelper? = null,
+        paymentMethodMessagePromotionsHelper: FakePaymentMethodMessagePromotionsHelper =
+            FakePaymentMethodMessagePromotionsHelper(),
         newPaymentSelectionProvider: () -> NewPaymentOptionSelection? = { throw AssertionError("Not implemented") },
         selectionUpdater: (PaymentSelection?) -> Unit = { throw AssertionError("Not implemented") },
     ): FormHelper {
@@ -678,6 +713,7 @@ internal class FormHelperTest {
             autocompleteAddressInteractorFactory = null,
             automaticallyLaunchedCardScanFormDataHelper = null,
             tapToAddHelper = tapToAddHelper,
+            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
         )
     }
 

@@ -110,7 +110,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         paymentMethodMetadata: PaymentMethodMetadata,
         hasSavedPaymentMethods: Boolean,
         embeddedConfirmationState: EmbeddedConfirmationStateHolder.State?,
-        customerState: CustomerState?,
+        customerState: CustomerState?
     ) {
         val checkoutSession = paymentMethodMetadata.integrationMetadata as? IntegrationMetadata.CheckoutSession
         if (checkoutSession != null) {

@@ -23,6 +23,8 @@ import com.stripe.android.ui.core.elements.CardDetailsSectionElementUI
 import com.stripe.android.ui.core.elements.EmptyFormElement
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.MandateTextUI
+import com.stripe.android.ui.core.elements.PaymentMethodMessageHeaderElement
+import com.stripe.android.ui.core.elements.PaymentMethodMessageHeaderUI
 import com.stripe.android.ui.core.elements.RenderableFormElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElementUI
@@ -239,6 +241,7 @@ private fun FormUIElement(
         )
         is OTPElement -> OTPElementUI(enabled, element)
         is RenderableFormElement -> element.ComposeUI(enabled, hiddenIdentifiers, lastTextFieldIdentifier)
+        is PaymentMethodMessageHeaderElement -> PaymentMethodMessageHeaderUI(element)
     }
 }
 

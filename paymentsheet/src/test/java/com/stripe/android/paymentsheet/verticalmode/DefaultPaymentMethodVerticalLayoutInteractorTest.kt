@@ -1811,6 +1811,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             onCurrencySelected = { currencyOption ->
                 onCurrencySelectedTurbine.add(currencyOption)
             },
+            paymentMethodMessagePromotionsHelper = null
         )
 
         TestParams(

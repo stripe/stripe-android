@@ -437,6 +437,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 viewModel = this,
                 paymentMethodMetadata = paymentMethodMetadata,
                 customerStateHolder = customerStateHolder,
+                paymentMethodMessagePromotionsHelper = null
             )
         }
         val target = if (args.state.showSavedPaymentMethods) {
@@ -451,6 +452,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             val interactor = DefaultAddPaymentMethodInteractor.create(
                 viewModel = this,
                 paymentMethodMetadata = paymentMethodMetadata,
+                paymentMethodMessagePromotionsHelper = null
             )
             AddFirstPaymentMethod(interactor = interactor)
         }
@@ -465,6 +467,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 val interactor = DefaultAddPaymentMethodInteractor.create(
                     viewModel = this@PaymentOptionsViewModel,
                     paymentMethodMetadata = paymentMethodMetadata,
+                    paymentMethodMessagePromotionsHelper = null
                 )
                 add(
                     PaymentSheetScreen.AddAnotherPaymentMethod(interactor = interactor)

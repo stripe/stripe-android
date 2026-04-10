@@ -1351,6 +1351,7 @@ internal class PaymentOptionsViewModelTest {
             viewModel = viewModel,
             paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
             linkInlineHandler = linkInlineHandler,
+            paymentMethodMessagePromotionsHelper = null
         )
 
         viewModel.selection.test {

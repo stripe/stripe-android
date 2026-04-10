@@ -15,6 +15,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.MandateTextElement
+import com.stripe.android.ui.core.elements.PaymentMethodMessageHeaderElement
 import com.stripe.android.ui.core.elements.StaticTextElement
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.CountryElement
@@ -60,12 +61,7 @@ private object KlarnaUiDefinitionFactory : UiDefinitionFactory.Simple() {
         builder: FormElementsBuilder,
     ) {
         builder
-            .header(
-                formElement = StaticTextElement(
-                    identifier = IdentifierSpec.Generic("klarna_header_text"),
-                    stringResId = R.string.stripe_klarna_buy_now_pay_later
-                )
-            )
+            .header(formElement = getKlarnaHeader(arguments))
             .overrideContactInformationPosition(ContactInformationCollectionMode.Name)
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Email)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Email)
@@ -111,6 +107,23 @@ private object KlarnaUiDefinitionFactory : UiDefinitionFactory.Simple() {
                     )
                 }
             }
+    }
+
+    private fun getKlarnaHeader(arguments: UiDefinitionFactory.Arguments): FormElement {
+        val message = arguments.paymentMethodMessagingPromotionsHelper?.getPromotionIfAvailableForCode(
+            PaymentMethod.Type.Klarna.code
+        )
+        return if (message != null) {
+            PaymentMethodMessageHeaderElement(
+                identifier = IdentifierSpec.Generic("klarna_promotion"),
+                promotion = message
+            )
+        } else {
+            StaticTextElement(
+                identifier = IdentifierSpec.Generic("klarna_header_text"),
+                stringResId = R.string.stripe_klarna_buy_now_pay_later
+            )
+        }
     }
 }
 

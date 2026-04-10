@@ -71,6 +71,7 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
             autocompleteAddressInteractorFactory = null,
             automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
             tapToAddHelper = tapToAddHelper,
+            paymentMethodMessagePromotionsHelper = null
         )
     }
 }

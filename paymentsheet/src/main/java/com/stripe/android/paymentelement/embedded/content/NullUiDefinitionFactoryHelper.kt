@@ -17,6 +17,7 @@ internal object NullUiDefinitionFactoryHelper {
         onLinkInlineSignupStateChanged = {
             throw IllegalStateException("Not possible.")
         },
+        paymentMethodMessagingPromotionsHelper = null
     )
 }
 

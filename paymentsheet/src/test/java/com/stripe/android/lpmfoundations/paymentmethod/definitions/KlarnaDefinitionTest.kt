@@ -7,15 +7,19 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodMessageLearnMore
+import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.SetupIntentFactory
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.MandateTextElement
+import com.stripe.android.ui.core.elements.PaymentMethodMessageHeaderElement
 import com.stripe.android.ui.core.elements.StaticTextElement
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.SectionElement
+import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -176,6 +180,44 @@ class KlarnaDefinitionTest {
         checkCountryField(formElements, 4)
         checkBillingField(formElements, 5)
         checkMandateField(formElements, metadata, 6)
+    }
+
+    @Test
+    fun `createFormElements includes promotion if available`() {
+        val formElements = KlarnaDefinition.formElements(
+            metadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFactory.create(
+                    paymentMethodTypes = listOf("klarna")
+                ),
+            ),
+            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(
+                promotions = listOf(
+                    PaymentMethodMessagePromotion(
+                        paymentMethodType = "Klarna",
+                        message = "This is a promotion",
+                        learnMore = PaymentMethodMessageLearnMore(
+                            url = "https://test.com",
+                            message = "Click me."
+                        )
+                    )
+                )
+            )
+        )
+
+        assertThat(formElements).hasSize(3)
+
+        val element = formElements[0]
+        assertThat(element.identifier.v1).isEqualTo("klarna_promotion")
+        assertThat(element).isInstanceOf<PaymentMethodMessageHeaderElement>()
+        val headerElement = element as PaymentMethodMessageHeaderElement
+        assertThat(headerElement.promotion.message).isEqualTo("This is a promotion")
+        assertThat(headerElement.promotion.paymentMethodType).isEqualTo("Klarna")
+        assertThat(headerElement.promotion.learnMore).isEqualTo(
+            PaymentMethodMessageLearnMore(
+                url = "https://test.com",
+                message = "Click me."
+            )
+        )
     }
 
     private fun checkKlarnaHeaderText(
