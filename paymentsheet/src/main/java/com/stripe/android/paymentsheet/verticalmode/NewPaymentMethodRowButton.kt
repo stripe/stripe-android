@@ -2,16 +2,12 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
-import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconHeight
-import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconWidth
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.strings.resolve
 
@@ -44,6 +40,7 @@ internal fun NewPaymentMethodRowButton(
         modifier = modifier.testTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_${displayablePaymentMethod.code}"),
         appearance = appearance,
         trailingContent = trailingContent,
+        cardArtEnabled = displayablePaymentMethod.cardArtEnabled,
     )
 }
 
@@ -61,19 +58,21 @@ internal fun NewPaymentMethodRowButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
-    appearance: Embedded = Embedded(Embedded.RowStyle.FloatingButton.default)
+    appearance: Embedded = Embedded(Embedded.RowStyle.FloatingButton.default),
+    cardArtEnabled: Boolean,
 ) {
     PaymentMethodRowButton(
         isEnabled = isEnabled,
         isSelected = isSelected,
         shouldShowDefaultBadge = false,
+        cardArtEnabled = cardArtEnabled,
         iconContent = {
             PaymentMethodIcon(
                 iconRes = iconRes,
                 iconUrl = iconUrl,
                 imageLoader = imageLoader,
                 iconRequiresTinting = iconRequiresTinting,
-                modifier = Modifier.height(iconHeight).width(iconWidth),
+                modifier = Modifier.paymentMethodIconSize(cardArtEnabled),
                 contentAlignment = Alignment.Center,
             )
         },

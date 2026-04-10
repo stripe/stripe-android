@@ -19,6 +19,7 @@ internal data class DisplayablePaymentMethod(
     val promoBadge: String? = null,
     val onClick: () -> Unit,
     @DrawableRes private val outlinedIconResource: Int? = null,
+    val cardArtEnabled: Boolean,
 ) {
     @Composable
     @DrawableRes

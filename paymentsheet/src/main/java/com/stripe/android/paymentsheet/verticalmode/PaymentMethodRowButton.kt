@@ -45,7 +45,6 @@ import com.stripe.android.paymentsheet.toTextStyle
 import com.stripe.android.paymentsheet.ui.DefaultPaymentMethodLabel
 import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
 import com.stripe.android.paymentsheet.ui.PromoBadge
-import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconWidth
 import com.stripe.android.uicore.DefaultStripeTheme
 import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
@@ -67,6 +66,7 @@ internal fun PaymentMethodRowButton(
     modifier: Modifier = Modifier,
     appearance: Appearance.Embedded = Appearance.Embedded(RowStyle.FloatingButton.default),
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
+    cardArtEnabled: Boolean,
 ) {
     val defaultPadding = if (subtitle != null) {
         8.dp
@@ -90,7 +90,8 @@ internal fun PaymentMethodRowButton(
                 onClick = onClick
             ),
         trailingContent = trailingContent,
-        onClick = onClick
+        onClick = onClick,
+        cardArtEnabled = cardArtEnabled,
     ) { displayTrailingContent ->
         Row(
             horizontalArrangement = Arrangement.spacedBy(ROW_CONTENT_HORIZONTAL_SPACING.dp),
@@ -131,6 +132,7 @@ private fun RowButtonOuterContent(
     modifier: Modifier,
     trailingContent: @Composable (RowScope.() -> Unit)?,
     onClick: () -> Unit,
+    cardArtEnabled: Boolean = false,
     rowContent: @Composable (displayTrailingContent: Boolean) -> Unit
 ) {
     when (appearance.style) {
@@ -150,7 +152,8 @@ private fun RowButtonOuterContent(
                 contentPaddingValues = contentPaddingValues,
                 trailingContent = trailingContent,
                 style = appearance.style,
-                modifier = modifier
+                modifier = modifier,
+                cardArtEnabled = cardArtEnabled,
             ) {
                 rowContent(false)
             }
@@ -160,7 +163,8 @@ private fun RowButtonOuterContent(
                 contentPaddingValues = contentPaddingValues,
                 trailingContent = trailingContent,
                 style = appearance.style,
-                modifier = modifier
+                modifier = modifier,
+                cardArtEnabled = cardArtEnabled,
             ) {
                 rowContent(false)
             }
@@ -252,12 +256,14 @@ private fun RowButtonCheckmarkOuterContent(
     trailingContent: (@Composable RowScope.() -> Unit)?,
     modifier: Modifier,
     style: RowStyle.FlatWithCheckmark,
+    cardArtEnabled: Boolean = false,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     RowButtonWithEndIconOuterContent(
         contentPaddingValues = contentPaddingValues,
         trailingContent = trailingContent,
         modifier = modifier,
+        cardArtEnabled = cardArtEnabled,
         iconContent = {
             if (isSelected) {
                 Icon(
@@ -281,12 +287,14 @@ private fun RowButtonDisclosureOuterContent(
     trailingContent: (@Composable RowScope.() -> Unit)?,
     modifier: Modifier,
     style: RowStyle.FlatWithDisclosure,
+    cardArtEnabled: Boolean = false,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     RowButtonWithEndIconOuterContent(
         contentPaddingValues = contentPaddingValues,
         trailingContent = trailingContent,
         modifier = modifier,
+        cardArtEnabled = cardArtEnabled,
         iconContent = {
             Icon(
                 painter = painterResource(style.disclosureIconRes),
@@ -306,6 +314,7 @@ private fun RowButtonWithEndIconOuterContent(
     trailingContent: (@Composable RowScope.() -> Unit)?,
     modifier: Modifier,
     iconContent: @Composable RowScope.() -> Unit,
+    cardArtEnabled: Boolean = false,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Row(
@@ -318,7 +327,7 @@ private fun RowButtonWithEndIconOuterContent(
             content()
             Row {
                 if (trailingContent != null) {
-                    Spacer(Modifier.width(iconWidth + ROW_CONTENT_HORIZONTAL_SPACING.dp))
+                    Spacer(Modifier.width(paymentMethodIconWidth(cardArtEnabled) + ROW_CONTENT_HORIZONTAL_SPACING.dp))
                     trailingContent()
                 }
             }
@@ -433,6 +442,7 @@ private fun ButtonPreview() {
                 promoText = null,
                 onClick = {},
                 appearance = Appearance.Embedded.default,
+                cardArtEnabled = false,
                 trailingContent = {
                     Text("Edit")
                 }
@@ -458,6 +468,7 @@ private fun ButtonPreview() {
                 promoText = null,
                 onClick = {},
                 appearance = Appearance.Embedded.default,
+                cardArtEnabled = false,
                 trailingContent = {
                     Text("Edit")
                 }

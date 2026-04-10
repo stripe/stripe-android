@@ -5,8 +5,6 @@ import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,8 +23,6 @@ import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
 import com.stripe.android.paymentsheet.ui.getSublabel
 import com.stripe.android.paymentsheet.ui.readNumbersAsIndividualDigits
 import com.stripe.android.paymentsheet.utils.testMetadata
-import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconHeight
-import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconWidth
 import com.stripe.android.uicore.DefaultStripeTheme
 import com.stripe.android.uicore.strings.resolve
 
@@ -49,16 +45,17 @@ internal fun SavedPaymentMethodRowButton(
             ?: displayableSavedPaymentMethod.displayName
 
     val paymentMethodId = displayableSavedPaymentMethod.paymentMethod.id
+    val cardArtEnabled = displayableSavedPaymentMethod.cardArtEnabled
     PaymentMethodRowButton(
         isEnabled = isEnabled,
         isSelected = isSelected,
+        cardArtEnabled = cardArtEnabled,
         iconContent = {
             val displayBrand = displayableSavedPaymentMethod.paymentMethod.card?.displayBrand
             CardArtImage(
                 url = displayableSavedPaymentMethod.paymentMethod.card?.cardArt?.artImage?.url,
                 modifier = Modifier
-                    .width(iconWidth)
-                    .height(iconHeight)
+                    .paymentMethodIconSize(cardArtEnabled)
             ) {
                 PaymentMethodIconFromResource(
                     iconRes = displayableSavedPaymentMethod.paymentMethod.getSavedPaymentMethodIcon(
@@ -67,8 +64,7 @@ internal fun SavedPaymentMethodRowButton(
                     colorFilter = null,
                     alignment = Alignment.Center,
                     modifier = Modifier
-                        .height(iconHeight)
-                        .width(iconWidth)
+                        .paymentMethodIconSize(cardArtEnabled)
                         .testMetadata(displayBrand)
                 )
             }

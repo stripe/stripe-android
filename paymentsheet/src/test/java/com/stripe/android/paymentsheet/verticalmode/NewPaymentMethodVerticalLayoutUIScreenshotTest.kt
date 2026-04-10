@@ -21,6 +21,7 @@ internal class NewPaymentMethodVerticalLayoutUIScreenshotTest {
                 customerSavedPaymentMethods = emptyList(),
                 incentive = null,
                 onClick = {},
+                cardArtEnabled = false,
             )
         }
     }
@@ -48,6 +49,7 @@ internal class NewPaymentMethodVerticalLayoutUIScreenshotTest {
             customerSavedPaymentMethods = emptyList(),
             incentive = null,
             onClick = {},
+            cardArtEnabled = false,
         )
 
         val paymentMethods = paymentMethods.toMutableList()
@@ -84,6 +86,7 @@ internal class NewPaymentMethodVerticalLayoutUIScreenshotTest {
                 customerSavedPaymentMethods = emptyList(),
                 incentive = null,
                 onClick = {},
+                cardArtEnabled = false,
             )
         ).plus(paymentMethods)
         paparazziRule.snapshot {
@@ -108,6 +111,7 @@ internal class NewPaymentMethodVerticalLayoutUIScreenshotTest {
                 darkThemeIconUrl = null,
                 iconRequiresTinting = false,
                 onClick = {},
+                cardArtEnabled = false,
             )
         ).plus(paymentMethods)
         paparazziRule.snapshot {

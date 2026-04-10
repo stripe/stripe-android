@@ -363,9 +363,12 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     ): List<DisplayablePaymentMethod> {
         val lpms = supportedPaymentMethods.map { supportedPaymentMethod ->
             val paymentMethodIncentive = incentive?.takeIfMatches(supportedPaymentMethod.code)
-            supportedPaymentMethod.asDisplayablePaymentMethod(paymentMethods, paymentMethodIncentive) {
-                handleViewAction(ViewAction.PaymentMethodSelected(supportedPaymentMethod.code))
-            }
+            supportedPaymentMethod.asDisplayablePaymentMethod(
+                customerSavedPaymentMethods = paymentMethods,
+                incentive = paymentMethodIncentive,
+                onClick = { handleViewAction(ViewAction.PaymentMethodSelected(supportedPaymentMethod.code)) },
+                cardArtEnabled = paymentMethodMetadata.cardArtMetadata != null,
+            )
         }
 
         val wallets = getInlineWalletDisplayablePaymentMethods(walletsState)
@@ -400,6 +403,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 updateSelection(PaymentSelection.GooglePay, false)
                 invokeRowSelectionCallback?.invoke()
             },
+            cardArtEnabled = false,
         )
     }
 
@@ -423,6 +427,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 updateSelection(PaymentSelection.Link(), false)
                 invokeRowSelectionCallback?.invoke()
             },
+            cardArtEnabled = false,
         )
     }
 
@@ -440,6 +445,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 updateSelection(PaymentSelection.ShopPay, false)
                 invokeRowSelectionCallback?.invoke()
             },
+            cardArtEnabled = false,
         )
     }
 

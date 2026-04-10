@@ -101,6 +101,7 @@ internal class PaymentMethodLayoutUITest(
                             customerSavedPaymentMethods = emptyList(),
                             incentive = null,
                             onClick = { onClickCalled = true },
+                            cardArtEnabled = false,
                         ),
                 ),
                 displayedSavedPaymentMethod = null,
@@ -147,6 +148,7 @@ internal class PaymentMethodLayoutUITest(
                     customerSavedPaymentMethods = emptyList(),
                     incentive = null,
                     onClick = {},
+                    cardArtEnabled = false,
                 )
             },
         )
@@ -177,6 +179,7 @@ internal class PaymentMethodLayoutUITest(
                     customerSavedPaymentMethods = emptyList(),
                     incentive = null,
                     onClick = {},
+                    cardArtEnabled = false,
                 )
             },
             selection = Selection.Saved,
@@ -214,6 +217,7 @@ internal class PaymentMethodLayoutUITest(
                         customerSavedPaymentMethods = emptyList(),
                         incentive = null,
                         onClick = {},
+                        cardArtEnabled = false,
                     )
                 },
                 selection = selection,

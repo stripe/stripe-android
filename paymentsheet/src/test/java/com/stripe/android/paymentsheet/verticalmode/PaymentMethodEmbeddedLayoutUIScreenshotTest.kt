@@ -33,6 +33,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
                 customerSavedPaymentMethods = emptyList(),
                 incentive = null,
                 onClick = {},
+                cardArtEnabled = false,
             )
         }
     }

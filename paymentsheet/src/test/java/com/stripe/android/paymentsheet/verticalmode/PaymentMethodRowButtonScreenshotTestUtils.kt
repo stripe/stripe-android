@@ -1,15 +1,11 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.ui.PaymentMethodIconFromResource
-import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconHeight
-import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconWidth
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.ui.core.R
 
@@ -22,8 +18,7 @@ internal fun DefaultPaymentMethodRowIcon(
         colorFilter = null,
         alignment = Alignment.Center,
         modifier = Modifier
-            .height(iconHeight)
-            .width(iconWidth)
+            .paymentMethodIconSize(false)
     )
 }
 
@@ -50,7 +45,8 @@ internal fun testPaymentMethodRowButton(
             onClick = {},
             trailingContent = trailingContent,
             shouldShowDefaultBadge = shouldShowDefaultBadge,
-            appearance = appearance
+            appearance = appearance,
+            cardArtEnabled = false,
         )
     }
 }

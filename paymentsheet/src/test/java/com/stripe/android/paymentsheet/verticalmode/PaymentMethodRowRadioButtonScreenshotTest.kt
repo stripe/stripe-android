@@ -2,11 +2,8 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -20,8 +17,6 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio
-import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconHeight
-import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconWidth
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -198,8 +193,7 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
                 contentDescription = null,
                 tint = MaterialTheme.colors.primary,
                 modifier = Modifier.padding(start = 4.dp, top = 2.dp)
-                    .height(iconHeight).width(iconWidth)
-                    .defaultMinSize(minWidth = iconWidth, minHeight = iconHeight)
+                    .paymentMethodIconSize(false)
             )
         }
     }

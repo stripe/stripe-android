@@ -104,6 +104,7 @@ internal data class SupportedPaymentMethod(
         customerSavedPaymentMethods: List<PaymentMethod>,
         incentive: PaymentMethodIncentive?,
         onClick: () -> Unit,
+        cardArtEnabled: Boolean,
     ): DisplayablePaymentMethod {
         fun isTypeAndHasCustomerSavedPaymentMethodsOfType(type: PaymentMethod.Type): Boolean {
             return customerSavedPaymentMethods.any { it.type == type } && code == type.code
@@ -128,6 +129,7 @@ internal data class SupportedPaymentMethod(
             subtitle = subtitle,
             promoBadge = incentive?.displayText,
             onClick = onClick,
+            cardArtEnabled = cardArtEnabled,
         )
     }
 

@@ -38,6 +38,7 @@ internal class NewPaymentMethodRowButtonScreenshotTest {
                 iconRequiresTinting = true,
                 onClick = {},
                 modifier = Modifier,
+                cardArtEnabled = false,
             )
         }
     }
@@ -57,6 +58,7 @@ internal class NewPaymentMethodRowButtonScreenshotTest {
                 iconRequiresTinting = true,
                 onClick = {},
                 modifier = Modifier,
+                cardArtEnabled = false,
             )
         }
     }
@@ -76,6 +78,7 @@ internal class NewPaymentMethodRowButtonScreenshotTest {
                 iconRequiresTinting = true,
                 onClick = {},
                 modifier = Modifier,
+                cardArtEnabled = false,
             )
         }
     }
@@ -95,6 +98,7 @@ internal class NewPaymentMethodRowButtonScreenshotTest {
                 iconRequiresTinting = true,
                 onClick = {},
                 modifier = Modifier,
+                cardArtEnabled = false,
             )
         }
     }
@@ -114,6 +118,7 @@ internal class NewPaymentMethodRowButtonScreenshotTest {
                 iconRequiresTinting = false,
                 onClick = {},
                 modifier = Modifier,
+                cardArtEnabled = false,
             )
         }
     }
@@ -134,6 +139,7 @@ internal class NewPaymentMethodRowButtonScreenshotTest {
                 promoText = null,
                 onClick = {},
                 modifier = Modifier,
+                cardArtEnabled = false,
             )
         }
     }
@@ -154,6 +160,7 @@ internal class NewPaymentMethodRowButtonScreenshotTest {
                 onClick = {},
                 modifier = Modifier,
                 appearance = Embedded(Embedded.RowStyle.FlatWithRadio.default),
+                cardArtEnabled = false,
                 trailingContent = {
                     EmbeddedNewPaymentMethodTrailingContent(
                         showChevron = true

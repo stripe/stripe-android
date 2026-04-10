@@ -28,6 +28,7 @@ internal class FakePaymentMethodVerticalLayoutInteractor(
                         customerSavedPaymentMethods = emptyList(),
                         incentive = null,
                         onClick = { throw AssertionError("Not expected.") },
+                        cardArtEnabled = false,
                     )
                 }
             val initialState = PaymentMethodVerticalLayoutInteractor.State(

@@ -22,6 +22,7 @@ internal class PaymentMethodVerticalLayoutUIScreenshotTest {
                 customerSavedPaymentMethods = emptyList(),
                 incentive = null,
                 onClick = {},
+                cardArtEnabled = false,
             )
         }
     }
