@@ -198,16 +198,40 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
         }
     }
 
+    @Test
+    fun testSelectedState_cardArtEnabled() {
+        testPaymentMethodRowButton_RadioButton(
+            isSelected = true,
+            cardArtEnabled = true,
+        )
+    }
+
+    @Test
+    fun testUnselectedState_cardArtEnabled() {
+        testPaymentMethodRowButton_RadioButton(
+            cardArtEnabled = true,
+        )
+    }
+
+    @Test
+    fun testDisabledState_cardArtEnabled() {
+        testPaymentMethodRowButton_RadioButton(
+            isEnabled = false,
+            cardArtEnabled = true,
+        )
+    }
+
     private fun testPaymentMethodRowButton_RadioButton(
         isEnabled: Boolean = true,
         isSelected: Boolean = false,
-        iconContent: @Composable RowScope.() -> Unit = { DefaultPaymentMethodRowIcon() },
         appearance: PaymentSheet.Appearance.Embedded = PaymentSheet.Appearance.Embedded(FlatWithRadio.default),
         trailingContent: @Composable RowScope.() -> Unit = {},
         title: String = "**** 4242",
         subtitle: String? = null,
         promoText: String? = null,
         shouldShowDefaultBadge: Boolean = false,
+        cardArtEnabled: Boolean = false,
+        iconContent: @Composable RowScope.() -> Unit = { DefaultPaymentMethodRowIcon(cardArtEnabled = cardArtEnabled) },
     ) {
         testPaymentMethodRowButton(
             isEnabled = isEnabled,
@@ -220,6 +244,7 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
             shouldShowDefaultBadge = shouldShowDefaultBadge,
             appearance = appearance,
             paparazziRule = paparazziRule,
+            cardArtEnabled = cardArtEnabled,
         )
     }
 }

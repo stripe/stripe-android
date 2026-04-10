@@ -132,7 +132,7 @@ private fun RowButtonOuterContent(
     modifier: Modifier,
     trailingContent: @Composable (RowScope.() -> Unit)?,
     onClick: () -> Unit,
-    cardArtEnabled: Boolean = false,
+    cardArtEnabled: Boolean,
     rowContent: @Composable (displayTrailingContent: Boolean) -> Unit
 ) {
     when (appearance.style) {

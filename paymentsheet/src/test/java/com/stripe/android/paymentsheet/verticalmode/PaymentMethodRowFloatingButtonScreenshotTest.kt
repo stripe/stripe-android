@@ -219,16 +219,40 @@ internal class PaymentMethodRowFloatingButtonScreenshotTest {
         }
     }
 
+    @Test
+    fun testSelectedState_cardArtEnabled() {
+        testPaymentMethodRowButton_FloatingButton(
+            isSelected = true,
+            cardArtEnabled = true,
+        )
+    }
+
+    @Test
+    fun testUnselectedState_cardArtEnabled() {
+        testPaymentMethodRowButton_FloatingButton(
+            cardArtEnabled = true,
+        )
+    }
+
+    @Test
+    fun testDisabledState_cardArtEnabled() {
+        testPaymentMethodRowButton_FloatingButton(
+            isEnabled = false,
+            cardArtEnabled = true,
+        )
+    }
+
     private fun testPaymentMethodRowButton_FloatingButton(
         isEnabled: Boolean = true,
         isSelected: Boolean = false,
-        iconContent: @Composable RowScope.() -> Unit = { DefaultPaymentMethodRowIcon() },
         appearance: PaymentSheet.Appearance.Embedded = PaymentSheet.Appearance.Embedded(FloatingButton.default),
         trailingContent: @Composable RowScope.() -> Unit = {},
         title: String = "**** 4242",
         subtitle: String? = null,
         promoText: String? = null,
         shouldShowDefaultBadge: Boolean = false,
+        cardArtEnabled: Boolean = false,
+        iconContent: @Composable RowScope.() -> Unit = { DefaultPaymentMethodRowIcon(cardArtEnabled = cardArtEnabled) },
     ) {
         testPaymentMethodRowButton(
             isEnabled = isEnabled,
@@ -240,7 +264,8 @@ internal class PaymentMethodRowFloatingButtonScreenshotTest {
             trailingContent = trailingContent,
             shouldShowDefaultBadge = shouldShowDefaultBadge,
             appearance = appearance,
-            paparazziRule = paparazziRule
+            paparazziRule = paparazziRule,
+            cardArtEnabled = cardArtEnabled,
         )
     }
 }

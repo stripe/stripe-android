@@ -11,14 +11,15 @@ import com.stripe.android.ui.core.R
 
 @Composable
 internal fun DefaultPaymentMethodRowIcon(
-    iconRes: Int = R.drawable.stripe_ic_paymentsheet_pm_card
+    iconRes: Int = R.drawable.stripe_ic_paymentsheet_pm_card,
+    cardArtEnabled: Boolean = false,
 ) {
     PaymentMethodIconFromResource(
         iconRes = iconRes,
         colorFilter = null,
         alignment = Alignment.Center,
         modifier = Modifier
-            .paymentMethodIconSize(false)
+            .paymentMethodIconSize(cardArtEnabled)
     )
 }
 
@@ -33,6 +34,7 @@ internal fun testPaymentMethodRowButton(
     promoText: String?,
     shouldShowDefaultBadge: Boolean,
     paparazziRule: PaparazziRule,
+    cardArtEnabled: Boolean = false,
 ) {
     paparazziRule.snapshot {
         PaymentMethodRowButton(
@@ -46,7 +48,7 @@ internal fun testPaymentMethodRowButton(
             trailingContent = trailingContent,
             shouldShowDefaultBadge = shouldShowDefaultBadge,
             appearance = appearance,
-            cardArtEnabled = false,
+            cardArtEnabled = cardArtEnabled,
         )
     }
 }

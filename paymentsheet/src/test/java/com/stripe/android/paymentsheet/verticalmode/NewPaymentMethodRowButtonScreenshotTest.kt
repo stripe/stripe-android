@@ -145,6 +145,66 @@ internal class NewPaymentMethodRowButtonScreenshotTest {
     }
 
     @Test
+    fun testSelectedState_cardArtEnabled() {
+        paparazziRule.snapshot {
+            NewPaymentMethodRowButton(
+                isEnabled = true,
+                isSelected = true,
+                iconRes = R.drawable.stripe_ic_paymentsheet_pm_card,
+                iconUrl = null,
+                imageLoader = Mockito.mock(),
+                title = "Card",
+                subtitle = null,
+                promoText = null,
+                iconRequiresTinting = true,
+                onClick = {},
+                modifier = Modifier,
+                cardArtEnabled = true,
+            )
+        }
+    }
+
+    @Test
+    fun testUnselectedState_cardArtEnabled() {
+        paparazziRule.snapshot {
+            NewPaymentMethodRowButton(
+                isEnabled = true,
+                isSelected = false,
+                iconRes = R.drawable.stripe_ic_paymentsheet_pm_card,
+                iconUrl = null,
+                imageLoader = Mockito.mock(),
+                title = "Card",
+                subtitle = null,
+                promoText = null,
+                iconRequiresTinting = true,
+                onClick = {},
+                modifier = Modifier,
+                cardArtEnabled = true,
+            )
+        }
+    }
+
+    @Test
+    fun testDisabled_cardArtEnabled() {
+        paparazziRule.snapshot {
+            NewPaymentMethodRowButton(
+                isEnabled = false,
+                isSelected = false,
+                iconRes = R.drawable.stripe_ic_paymentsheet_pm_card,
+                iconUrl = null,
+                imageLoader = Mockito.mock(),
+                title = "Card",
+                subtitle = null,
+                promoText = null,
+                iconRequiresTinting = true,
+                onClick = {},
+                modifier = Modifier,
+                cardArtEnabled = true,
+            )
+        }
+    }
+
+    @Test
     fun testEmbeddedNewSelected() {
         paparazziRule.snapshot {
             NewPaymentMethodRowButton(
