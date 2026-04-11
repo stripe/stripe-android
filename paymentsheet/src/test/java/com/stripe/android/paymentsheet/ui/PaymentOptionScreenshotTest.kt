@@ -114,7 +114,7 @@ class PaymentOptionScreenshotTest {
     }
 
     @Test
-    fun testEnabledWithCardArtEnabled() {
+    fun testEnabledWithCardArtFlagEnabled() {
         cardArtFeatureFlagRule.setEnabled(true)
 
         createSavedPaymentMethodTabScreenshot(
@@ -126,7 +126,7 @@ class PaymentOptionScreenshotTest {
     }
 
     @Test
-    fun testDisabledWithCardArtEnabled() {
+    fun testDisabledWithCardArtFlagEnabled() {
         cardArtFeatureFlagRule.setEnabled(true)
 
         createSavedPaymentMethodTabScreenshot(
@@ -138,7 +138,7 @@ class PaymentOptionScreenshotTest {
     }
 
     @Test
-    fun testSelectedWithCardArtEnabled() {
+    fun testSelectedWithCardArtFlagEnabled() {
         cardArtFeatureFlagRule.setEnabled(true)
 
         createSavedPaymentMethodTabScreenshot(
