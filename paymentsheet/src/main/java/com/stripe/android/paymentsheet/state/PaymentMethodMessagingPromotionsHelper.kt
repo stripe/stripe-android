@@ -27,6 +27,8 @@ internal interface PaymentMethodMessagePromotionsHelper {
     fun fetchPromotionsAsync(intent: StripeIntent)
 
     fun getPromotionIfAvailableForCode(code: PaymentMethodCode): PaymentMethodMessagePromotion?
+
+    fun getPromotions(): List<PaymentMethodMessagePromotion>?
 }
 
 @Singleton
@@ -66,6 +68,40 @@ internal class DefaultPaymentMethodMessagePromotionsHelper @Inject constructor(
             null
         }
     }
+
+    override fun getPromotions(): List<PaymentMethodMessagePromotion>? {
+        return if (FeatureFlags.paymentMethodMessagePromotions.isEnabled) {
+            promotionsDeferred?.takeIf { it.isCompleted }?.getCompleted()?.getOrNull()?.promotions
+        } else {
+            null
+        }
+    }
+}
+
+internal class PrefetchedPaymentMethodMessagePromotionsHelper(
+    private val promotions: List<PaymentMethodMessagePromotion>?
+) : PaymentMethodMessagePromotionsHelper {
+    override fun fetchPromotionsAsync(intent: StripeIntent) {
+        // NO-OP
+    }
+
+    override fun getPromotionIfAvailableForCode(code: PaymentMethodCode): PaymentMethodMessagePromotion? {
+        return if (FeatureFlags.paymentMethodMessagePromotions.isEnabled) {
+            promotions?.find {
+                it.paymentMethodType.lowercase() == code
+            }
+        } else {
+            null
+        }
+    }
+
+    override fun getPromotions(): List<PaymentMethodMessagePromotion>? {
+        return if (FeatureFlags.paymentMethodMessagePromotions.isEnabled) {
+            promotions
+        } else {
+            null
+        }
+    }
 }
 
 internal class NoOpPromotionsHelper @Inject constructor() : PaymentMethodMessagePromotionsHelper {
@@ -74,6 +110,10 @@ internal class NoOpPromotionsHelper @Inject constructor() : PaymentMethodMessage
     }
 
     override fun getPromotionIfAvailableForCode(code: PaymentMethodCode): PaymentMethodMessagePromotion? {
+        return null
+    }
+
+    override fun getPromotions(): List<PaymentMethodMessagePromotion>? {
         return null
     }
 }
