@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### Identity
+* [CHANGED][12811](https://github.com/stripe/stripe-android/pull/12811) Updated the Identity example app to use the new example API endpoint.
+
 ## 23.3.0 - 2026-04-06
 ### AddressElement
 * [ADDED][12848](https://github.com/stripe/stripe-android/pull/12848) Added state dropdown support for BR.
