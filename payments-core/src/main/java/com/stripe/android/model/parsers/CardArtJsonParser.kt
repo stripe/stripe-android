@@ -18,7 +18,7 @@ class CardArtJsonParser {
 
     internal class ArtImageJsonParser {
         fun parse(json: JSONObject): PaymentMethod.Card.CardArt.ArtImage? {
-            val format = StripeJsonUtils.optString(json, FIELD_FORMAT) ?: return null
+            val format = json.optString(FIELD_FORMAT)
             val url = StripeJsonUtils.optString(json, FIELD_URL) ?: return null
             return PaymentMethod.Card.CardArt.ArtImage(
                 format = format,
