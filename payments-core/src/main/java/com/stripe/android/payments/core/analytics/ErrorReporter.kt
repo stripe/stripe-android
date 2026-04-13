@@ -214,6 +214,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         MISSING_POLLING_AUTHENTICATOR(
             partialEventName = "payments.missing_polling_authenticator"
         ),
+        POLLING_NEXT_ACTION_INVALID_NEXT_ACTION_TYPE(
+            partialEventName = "payments.polling_next_action.invalid_next_action_type"
+        ),
         LINK_INVALID_SESSION_STATE(
             partialEventName = "link.signup.failure.invalidSessionState"
         ),

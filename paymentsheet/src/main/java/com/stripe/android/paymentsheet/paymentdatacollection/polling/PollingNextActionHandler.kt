@@ -4,8 +4,8 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.app.ActivityOptionsCompat
+import android.app.Application
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -23,7 +23,9 @@ private const val PAYNOW_INITIAL_DELAY_IN_SECONDS = 5
 private const val PROMPTPAY_TIME_LIMIT_IN_SECONDS = 60 * 60
 private const val PROMPTPAY_INITIAL_DELAY_IN_SECONDS = 5
 
-internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>() {
+internal class PollingNextActionHandler(
+    private val errorReporterProvider: (Application) -> ErrorReporter = ErrorReporter::createFallbackInstance,
+) : PaymentNextActionHandler<StripeIntent>() {
 
     private var pollingLauncher: ActivityResultLauncher<PollingContract.Args>? = null
 
@@ -32,7 +34,7 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
         actionable: StripeIntent,
         requestOptions: ApiRequest.Options
     ) {
-        val args = getArgsForPaymentMethod(actionable, host, requestOptions)
+        val args = getPollingArgs(actionable, host, requestOptions) ?: return
 
         val options = ActivityOptionsCompat.makeCustomAnimation(
             host.application.applicationContext,
@@ -42,19 +44,19 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
 
         val localPollingAuthenticator = pollingLauncher
         if (localPollingAuthenticator == null) {
-            ErrorReporter.createFallbackInstance(host.application)
+            errorReporterProvider(host.application)
                 .report(ErrorReporter.UnexpectedErrorEvent.MISSING_POLLING_AUTHENTICATOR)
         } else {
             localPollingAuthenticator.launch(args, options)
         }
     }
 
-    private fun getArgsForPaymentMethod(
+    private fun getPollingArgs(
         actionable: StripeIntent,
         host: AuthActivityStarterHost,
         requestOptions: ApiRequest.Options
-    ) = when (actionable.paymentMethod?.type) {
-        PaymentMethod.Type.Upi ->
+    ): PollingContract.Args? = when (val nextAction = actionable.nextActionData) {
+        is StripeIntent.NextActionData.UpiAwaitNotification ->
             PollingContract.Args(
                 clientSecret = requireNotNull(actionable.clientSecret),
                 statusBarColor = host.statusBarColor,
@@ -64,7 +66,7 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
                 stripeAccountId = requestOptions.stripeAccount,
                 qrCodeUrl = null,
             )
-        PaymentMethod.Type.Blik ->
+        is StripeIntent.NextActionData.BlikAuthorize ->
             PollingContract.Args(
                 clientSecret = requireNotNull(actionable.clientSecret),
                 statusBarColor = host.statusBarColor,
@@ -74,7 +76,7 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
                 stripeAccountId = requestOptions.stripeAccount,
                 qrCodeUrl = null,
             )
-        PaymentMethod.Type.PayNow ->
+        is StripeIntent.NextActionData.DisplayPayNowDetails ->
             PollingContract.Args(
                 clientSecret = requireNotNull(actionable.clientSecret),
                 statusBarColor = host.statusBarColor,
@@ -82,9 +84,9 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
                 initialDelayInSeconds = PAYNOW_INITIAL_DELAY_IN_SECONDS,
                 ctaText = R.string.stripe_qrcode_lpm_confirm_payment,
                 stripeAccountId = requestOptions.stripeAccount,
-                qrCodeUrl = getQrCodeForPayNow(actionable),
+                qrCodeUrl = nextAction.qrCodeUrl,
             )
-        PaymentMethod.Type.PromptPay ->
+        is StripeIntent.NextActionData.DisplayPromptPayDetails ->
             PollingContract.Args(
                 clientSecret = requireNotNull(actionable.clientSecret),
                 statusBarColor = host.statusBarColor,
@@ -92,24 +94,21 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
                 initialDelayInSeconds = PROMPTPAY_INITIAL_DELAY_IN_SECONDS,
                 ctaText = R.string.stripe_qrcode_lpm_confirm_payment,
                 stripeAccountId = requestOptions.stripeAccount,
-                qrCodeUrl = getQrCodeForPromptPay(actionable),
+                qrCodeUrl = nextAction.qrCodeUrl,
             )
-        else ->
-            error(
-                "Received invalid payment method type " +
-                    "${actionable.paymentMethod?.type?.code} " +
-                    "in PollingAuthenticator"
-            )
-    }
-
-    private fun getQrCodeForPayNow(actionable: StripeIntent): String {
-        return requireNotNull((actionable.nextActionData as StripeIntent.NextActionData.DisplayPayNowDetails).qrCodeUrl)
-    }
-
-    private fun getQrCodeForPromptPay(actionable: StripeIntent): String {
-        return requireNotNull(
-            (actionable.nextActionData as StripeIntent.NextActionData.DisplayPromptPayDetails).qrCodeUrl
-        )
+        else -> {
+            errorReporterProvider(host.application)
+                .report(
+                    ErrorReporter.UnexpectedErrorEvent.POLLING_NEXT_ACTION_INVALID_NEXT_ACTION_TYPE,
+                    additionalNonPiiParams = mapOf(
+                        "next_action_type" to (actionable.nextActionData?.let {
+                            it::class.java.simpleName
+                        }.orEmpty()),
+                        "payment_method_type" to actionable.paymentMethod?.type?.code.orEmpty()
+                    )
+                )
+            null
+        }
     }
 
     override fun onNewActivityResultCaller(
