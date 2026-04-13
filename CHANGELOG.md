@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## XX.XX.XX - 20XX-XX-XX
+### PaymentSheet
+* [ADDED][12880](https://github.com/stripe/stripe-android/pull/12880) Added support for Pay by Bank (GA in GB, private preview in EU).
 
 ## 23.3.0 - 2026-04-06
 ### AddressElement
@@ -24,7 +26,6 @@ Dependencies updated in [12785](https://github.com/stripe/stripe-android/pull/12
 ### PaymentSheet
 * [FIXED][12653](https://github.com/stripe/stripe-android/pull/12653) Fixed a bug where `PaymentSheet.FlowController` wouldn't emit a null `PaymentOption` from `PaymentOptionCallback` after a successful confirmation.
 * [ADDED][12746](https://github.com/stripe/stripe-android/pull/12746) Added support for [payments orchestration](https://docs.stripe.com/payments/orchestration) (private preview) by allowing `processing` as a PaymentIntent state for cards.
-* [ADDED][12769](https://github.com/stripe/stripe-android/pull/12769) Added support for Pay by Bank (GA in GB, private preview in EU).
 
 ## 23.1.0 - 2026-03-23
 
