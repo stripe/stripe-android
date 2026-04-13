@@ -1,14 +1,10 @@
 {
   "business_name": "Mobile Example Account",
-  "google_pay_preference": "enabled",
   "merchant_country": "US",
   "merchant_currency": "usd",
   "merchant_id": "acct_1HvTI7Lu5o3P18Zp",
-  "meta_pay_signed_container_context": null,
-  "order": null,
   "ordered_payment_method_types_and_wallets": [
     "card",
-    "klarna",
     "cashapp"
   ],
   "flags": {
@@ -44,7 +40,6 @@
     "country_code": "US",
     "ordered_payment_method_types": [
       "card",
-      "klarna",
       "cashapp"
     ],
     "payment_intent": {
@@ -76,7 +71,6 @@
       },
       "payment_method_types": [
         "card",
-        "klarna",
         "cashapp"
       ],
       "processing": null,
@@ -102,54 +96,7 @@
         "light_theme_svg": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-cashapp-981164a833e417d28a8ac2684fda2324.svg"
       },
       "type": "cashapp"
-    },
-    {
-      "async": false,
-      "fields": [
-        {
-          "type": "klarna_header"
-        },
-        {
-          "api_path": {
-            "v1": "billing_details[email]"
-          },
-          "type": "email"
-        },
-        {
-          "api_path": {
-            "v1": "billing_details[address][country]"
-          },
-          "type": "klarna_country"
-        }
-      ],
-      "next_action_spec": {
-        "confirm_response_status_specs": {
-          "requires_action": {
-            "type": "redirect_to_url"
-          }
-        },
-        "post_confirm_handling_pi_status_specs": {
-          "requires_action": {
-            "type": "canceled"
-          },
-          "succeeded": {
-            "type": "finished"
-          }
-        }
-      },
-      "selector_icon": {
-        "light_theme_png": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-klarna@3x-d8624aa9a5662d719a44d16b9fcca0be.png",
-        "light_theme_svg": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-klarna-bb91aa8f173a3c72931696b0f752ec73.svg"
-      },
-      "type": "klarna"
     }
   ],
-  "paypal_express_config": {
-    "client_id": null,
-    "paypal_merchant_id": null
-  },
-  "shipping_address_settings": {
-    "autocomplete_allowed": true
-  },
   "unactivated_payment_method_types": []
 }

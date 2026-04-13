@@ -9,7 +9,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 @OptIn(TapToAddPreview::class)
 internal class TapToAddIntegrationBuilder {
     private var _createIntentCallback: CreateIntentCallback? = null
-    private val createIntentCallback: CreateIntentCallback
+    val createIntentCallback: CreateIntentCallback
         get() = _createIntentCallback ?: throw IllegalStateException("No create intent callback!")
 
     private var _createCardPresentSetupIntentCallback: CreateCardPresentSetupIntentCallback? = null

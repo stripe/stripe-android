@@ -24,7 +24,7 @@ import org.junit.runner.RunWith
 
 @OptIn(TapToAddPreview::class)
 @RunWith(TestParameterInjector::class)
-class TapToAddTest {
+internal class TapToAddTest {
     val terminalWrapperTestRule = TerminalWrapperTestRule(enabled = true)
 
     @get:Rule
@@ -86,7 +86,6 @@ class TapToAddTest {
         confirmationPage.waitUntilMissing()
     }
 
-    @Ignore
     @Test
     fun successWithContinueMode(
         @TestParameter(valuesProvider = TapToAddIntegrationType.Continue.Provider::class)
