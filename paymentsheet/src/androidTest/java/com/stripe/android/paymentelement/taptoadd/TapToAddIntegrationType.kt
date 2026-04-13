@@ -2,9 +2,16 @@ package com.stripe.android.paymentelement.taptoadd
 
 import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
 
-sealed interface TapToAddIntegrationType {
-    enum class Continue : TapToAddIntegrationType {
-        FlowController, Embedded;
+internal sealed interface TapToAddIntegrationType {
+    val runner: TapToAddIntegrationTestRunner
+
+    enum class Continue(override val runner: TapToAddIntegrationTestRunner) : TapToAddIntegrationType {
+        FlowController(TapToAddIntegrationTestRunner.FlowControllerRunner),
+        Embedded(
+            TapToAddIntegrationTestRunner.EmbeddedRunner(
+                TapToAddIntegrationTestRunner.EmbeddedRunner.Mode.Continue
+            )
+        );
 
         internal object Provider : TestParameterValuesProvider() {
             override fun provideValues(context: Context?): List<Continue> {
@@ -13,8 +20,13 @@ sealed interface TapToAddIntegrationType {
         }
     }
 
-    enum class Complete : TapToAddIntegrationType {
-        PaymentSheet, Embedded;
+    enum class Complete(override val runner: TapToAddIntegrationTestRunner) : TapToAddIntegrationType {
+        PaymentSheet(TapToAddIntegrationTestRunner.PaymentSheetRunner),
+        Embedded(
+            TapToAddIntegrationTestRunner.EmbeddedRunner(
+                TapToAddIntegrationTestRunner.EmbeddedRunner.Mode.Confirm
+            )
+        );
 
         internal object Provider : TestParameterValuesProvider() {
             override fun provideValues(context: Context?): List<Complete> {

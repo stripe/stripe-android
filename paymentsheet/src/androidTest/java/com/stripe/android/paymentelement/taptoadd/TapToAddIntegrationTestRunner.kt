@@ -20,85 +20,62 @@ internal fun runTapToAddIntegrationTest(
     resultCallback: TapToAddResultTestCallback,
     block: suspend TapToAddIntegrationTestRunnerContext.() -> Unit,
 ) {
-    val runner = when (integrationType) {
-        TapToAddIntegrationType.Continue.Embedded -> {
-            TapToAddIntegrationTestRunner.EmbeddedRunner(
-                networkRule = networkRule,
-                composeTestRule = composeTestRule,
-                createIntentCallback = createIntentCallback,
-                createCardPresentSetupIntentCallback = createCardPresentCallback,
-                tapToAddTestResultCallback = resultCallback,
-                mode = TapToAddIntegrationTestRunner.EmbeddedRunner.Mode.Continue,
-            )
-        }
-        TapToAddIntegrationType.Continue.FlowController -> {
-            TapToAddIntegrationTestRunner.FlowControllerRunner(
-                networkRule = networkRule,
-                composeTestRule = composeTestRule,
-                createIntentCallback = createIntentCallback,
-                createCardPresentSetupIntentCallback = createCardPresentCallback,
-                tapToAddTestResultCallback = resultCallback,
-            )
-        }
-        TapToAddIntegrationType.Complete.PaymentSheet -> {
-            TapToAddIntegrationTestRunner.PaymentSheetRunner(
-                networkRule = networkRule,
-                composeTestRule = composeTestRule,
-                createIntentCallback = createIntentCallback,
-                createCardPresentSetupIntentCallback = createCardPresentCallback,
-                tapToAddTestResultCallback = resultCallback,
-            )
-        }
-        TapToAddIntegrationType.Complete.Embedded -> {
-            TapToAddIntegrationTestRunner.EmbeddedRunner(
-                networkRule = networkRule,
-                composeTestRule = composeTestRule,
-                createIntentCallback = createIntentCallback,
-                createCardPresentSetupIntentCallback = createCardPresentCallback,
-                tapToAddTestResultCallback = resultCallback,
-                mode = TapToAddIntegrationTestRunner.EmbeddedRunner.Mode.Confirm,
-            )
-        }
-    }
-
-    runner.run(block)
+    integrationType.runner.run(
+        networkRule = networkRule,
+        composeTestRule = composeTestRule,
+        createIntentCallback = createIntentCallback,
+        createCardPresentSetupIntentCallback = createCardPresentCallback,
+        resultCallback = resultCallback,
+        block = block
+    )
 }
 
 @OptIn(TapToAddPreview::class)
-private sealed class TapToAddIntegrationTestRunner(
-    protected val networkRule: NetworkRule,
-    protected val composeTestRule: ComposeTestRule,
-    protected val createIntentCallback: CreateIntentCallback,
-    private val createCardPresentSetupIntentCallback: CreateCardPresentSetupIntentCallback,
-    protected val tapToAddTestResultCallback: TapToAddResultTestCallback,
-) {
-    protected val integrationBuilder = TapToAddIntegrationBuilder()
-        .createIntentCallback(createIntentCallback)
-        .createCardPresentSetupIntentCallback(createCardPresentSetupIntentCallback)
-
-    abstract fun run(block: suspend TapToAddIntegrationTestRunnerContext.() -> Unit)
-
-    class PaymentSheetRunner(
+internal sealed class TapToAddIntegrationTestRunner {
+    fun run(
         networkRule: NetworkRule,
         composeTestRule: ComposeTestRule,
         createIntentCallback: CreateIntentCallback,
         createCardPresentSetupIntentCallback: CreateCardPresentSetupIntentCallback,
-        tapToAddTestResultCallback: TapToAddResultTestCallback,
-    ) : TapToAddIntegrationTestRunner(
-        networkRule,
-        composeTestRule,
-        createIntentCallback,
-        createCardPresentSetupIntentCallback,
-        tapToAddTestResultCallback
+        resultCallback: TapToAddResultTestCallback,
+        block: suspend TapToAddIntegrationTestRunnerContext.() -> Unit
     ) {
-        override fun run(block: suspend TapToAddIntegrationTestRunnerContext.() -> Unit) {
+        val integrationBuilder = TapToAddIntegrationBuilder()
+            .createIntentCallback(createIntentCallback)
+            .createCardPresentSetupIntentCallback(createCardPresentSetupIntentCallback)
+
+        runTest(
+            networkRule = networkRule,
+            composeTestRule = composeTestRule,
+            integrationBuilder = integrationBuilder,
+            resultCallback = resultCallback,
+            block = block,
+        )
+    }
+
+    protected abstract fun runTest(
+        networkRule: NetworkRule,
+        composeTestRule: ComposeTestRule,
+        integrationBuilder: TapToAddIntegrationBuilder,
+        resultCallback: TapToAddResultTestCallback,
+        block: suspend TapToAddIntegrationTestRunnerContext.() -> Unit
+    )
+
+    object PaymentSheetRunner : TapToAddIntegrationTestRunner() {
+        override fun runTest(
+            networkRule: NetworkRule,
+            composeTestRule: ComposeTestRule,
+            integrationBuilder: TapToAddIntegrationBuilder,
+            resultCallback: TapToAddResultTestCallback,
+            block: suspend TapToAddIntegrationTestRunnerContext.() -> Unit
+        ) {
             runPaymentSheetTest(
                 networkRule = networkRule,
                 builder = {
                     integrationBuilder.applyToPaymentSheetBuilder(this)
                 },
                 resultCallback = { result ->
-                    tapToAddTestResultCallback.onResult(TapToAddTestResult.from(result))
+                    resultCallback.onResult(TapToAddTestResult.from(result))
                 },
             ) { context ->
                 block(TapToAddIntegrationTestRunnerContext.Sheet.PaymentSheet(composeTestRule, context))
@@ -106,20 +83,14 @@ private sealed class TapToAddIntegrationTestRunner(
         }
     }
 
-    class FlowControllerRunner(
-        networkRule: NetworkRule,
-        composeTestRule: ComposeTestRule,
-        createIntentCallback: CreateIntentCallback,
-        createCardPresentSetupIntentCallback: CreateCardPresentSetupIntentCallback,
-        tapToAddTestResultCallback: TapToAddResultTestCallback,
-    ) : TapToAddIntegrationTestRunner(
-        networkRule,
-        composeTestRule,
-        createIntentCallback,
-        createCardPresentSetupIntentCallback,
-        tapToAddTestResultCallback
-    ) {
-        override fun run(block: suspend TapToAddIntegrationTestRunnerContext.() -> Unit) {
+    object FlowControllerRunner : TapToAddIntegrationTestRunner() {
+        override fun runTest(
+            networkRule: NetworkRule,
+            composeTestRule: ComposeTestRule,
+            integrationBuilder: TapToAddIntegrationBuilder,
+            resultCallback: TapToAddResultTestCallback,
+            block: suspend TapToAddIntegrationTestRunnerContext.() -> Unit
+        ) {
             runFlowControllerTest(
                 networkRule = networkRule,
                 callConfirmOnPaymentOptionCallback = false,
@@ -127,7 +98,7 @@ private sealed class TapToAddIntegrationTestRunner(
                     integrationBuilder.applyToFlowControllerBuilder(this)
                 },
                 resultCallback = { result ->
-                    tapToAddTestResultCallback.onResult(TapToAddTestResult.from(result))
+                    resultCallback.onResult(TapToAddTestResult.from(result))
                 },
             ) { context ->
                 block(TapToAddIntegrationTestRunnerContext.Sheet.FlowController(composeTestRule, context))
@@ -136,40 +107,36 @@ private sealed class TapToAddIntegrationTestRunner(
     }
 
     class EmbeddedRunner(
-        networkRule: NetworkRule,
-        composeTestRule: ComposeTestRule,
-        createIntentCallback: CreateIntentCallback,
-        createCardPresentSetupIntentCallback: CreateCardPresentSetupIntentCallback,
-        tapToAddTestResultCallback: TapToAddResultTestCallback,
         private val mode: Mode,
-    ) : TapToAddIntegrationTestRunner(
-        networkRule,
-        composeTestRule,
-        createIntentCallback,
-        createCardPresentSetupIntentCallback,
-        tapToAddTestResultCallback
-    ) {
+    ) : TapToAddIntegrationTestRunner() {
         enum class Mode {
             Confirm,
             Continue,
         }
 
-        override fun run(block: suspend TapToAddIntegrationTestRunnerContext.() -> Unit) {
+        override fun runTest(
+            networkRule: NetworkRule,
+            composeTestRule: ComposeTestRule,
+            integrationBuilder: TapToAddIntegrationBuilder,
+            resultCallback: TapToAddResultTestCallback,
+            block: suspend TapToAddIntegrationTestRunnerContext.() -> Unit
+        ) {
             runEmbeddedPaymentElementTest(
                 networkRule = networkRule,
                 builder = {
                     integrationBuilder.applyToEmbeddedBuilder(this)
                 },
-                createIntentCallback = createIntentCallback,
+                createIntentCallback = integrationBuilder.createIntentCallback,
                 resultCallback = { result ->
-                    tapToAddTestResultCallback.onResult(TapToAddTestResult.from(result))
+                    resultCallback.onResult(TapToAddTestResult.from(result))
                 },
             ) { context ->
-                block(createTapToAddTestContext(context))
+                block(createTapToAddTestContext(composeTestRule, context))
             }
         }
 
         private fun createTapToAddTestContext(
+            composeTestRule: ComposeTestRule,
             embeddedContext: EmbeddedPaymentElementTestRunnerContext,
         ): TapToAddIntegrationTestRunnerContext.Embedded {
             return when (mode) {
