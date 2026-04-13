@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.UserInput
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.uicore.elements.FormElement
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,6 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 internal interface SavedPaymentMethodLinkFormHelper {
+    val isAvailable: Boolean
     val state: StateFlow<State>
     val formElement: FormElement?
 
@@ -25,12 +25,12 @@ internal interface SavedPaymentMethodLinkFormHelper {
 }
 
 internal class DefaultSavedPaymentMethodLinkFormHelper @Inject constructor(
-    paymentMethodMetadata: PaymentMethodMetadata,
+    linkInlineSignupAvailability: LinkInlineSignupAvailability,
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val savedStateHandle: SavedStateHandle,
     linkFormElementFactory: LinkFormElementFactory,
 ) : SavedPaymentMethodLinkFormHelper {
-    private val linkState = paymentMethodMetadata.linkState
+    private val linkAvailabilityResult = linkInlineSignupAvailability.availability()
 
     private var storedCheckboxSelection: Boolean
         get() = savedStateHandle.get<Boolean>(SPM_LINK_CHECKBOX_SELECTED_KEY) == true
@@ -44,30 +44,33 @@ internal class DefaultSavedPaymentMethodLinkFormHelper @Inject constructor(
             savedStateHandle[SPM_LINK_INPUT_KEY] = value
         }
 
+    override val isAvailable: Boolean = linkAvailabilityResult is LinkInlineSignupAvailability.Result.Available
+
     private val _state = MutableStateFlow<SavedPaymentMethodLinkFormHelper.State>(
         SavedPaymentMethodLinkFormHelper.State.Unused
     )
     override val state: StateFlow<SavedPaymentMethodLinkFormHelper.State> = _state.asStateFlow()
 
-    override val formElement: FormElement? = if (linkState?.signupMode != null) {
-        linkFormElementFactory.create(
-            signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
-            configuration = linkState.configuration,
-            linkConfigurationCoordinator = linkConfigurationCoordinator,
-            userInput = storedLinkInput,
-            onLinkInlineSignupStateChanged = { viewState ->
-                storedCheckboxSelection = viewState.isExpanded
-                storedLinkInput = viewState.userInput
+    override val formElement: FormElement? = when (val result = linkInlineSignupAvailability.availability()) {
+        is LinkInlineSignupAvailability.Result.Available -> {
+            linkFormElementFactory.create(
+                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+                configuration = result.configuration,
+                linkConfigurationCoordinator = linkConfigurationCoordinator,
+                userInput = storedLinkInput,
+                onLinkInlineSignupStateChanged = { viewState ->
+                    storedCheckboxSelection = viewState.isExpanded
+                    storedLinkInput = viewState.userInput
 
-                _state.value = createState(
-                    useLink = viewState.useLink,
-                    userInput = viewState.userInput,
-                )
-            },
-            previousLinkSignupCheckboxSelection = storedCheckboxSelection,
-        )
-    } else {
-        null
+                    _state.value = createState(
+                        useLink = viewState.useLink,
+                        userInput = viewState.userInput,
+                    )
+                },
+                previousLinkSignupCheckboxSelection = storedCheckboxSelection,
+            )
+        }
+        is LinkInlineSignupAvailability.Result.Unavailable -> null
     }
 
     private fun createState(

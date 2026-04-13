@@ -128,13 +128,17 @@ internal class TapToAddNavigator(
         data class CardAdded(
             val interactor: TapToAddCardAddedInteractor,
         ) : Screen() {
-            override val cancelButton: StateFlow<CancelButton> = stateFlowOf(
-                CancelButton.Available(
-                    action = Action.Close {
-                        interactor.performAction(TapToAddCardAddedInteractor.Action.CancelPressed)
-                    }
-                )
-            )
+            override val cancelButton: StateFlow<CancelButton> = interactor.state.mapAsStateFlow { state ->
+                state.primaryButton?.let {
+                    CancelButton.Available(
+                        action = Action.Close {
+                            interactor.performAction(TapToAddCardAddedInteractor.Action.CancelPressed)
+                        }
+                    )
+                } ?: run {
+                    CancelButton.Invisible
+                }
+            }
 
             @Composable
             override fun ColumnScope.Content() {
@@ -144,6 +148,9 @@ internal class TapToAddNavigator(
                     state = state,
                     onPrimaryButtonPress = {
                         interactor.performAction(TapToAddCardAddedInteractor.Action.PrimaryButtonPressed)
+                    },
+                    onScreenShown = {
+                        interactor.performAction(TapToAddCardAddedInteractor.Action.ScreenShown)
                     }
                 )
             }

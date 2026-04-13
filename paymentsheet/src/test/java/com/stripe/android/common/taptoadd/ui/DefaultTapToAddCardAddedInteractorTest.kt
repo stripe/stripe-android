@@ -30,44 +30,52 @@ import com.stripe.android.ui.core.R as StripeUiCoreR
 
 internal class DefaultTapToAddCardAddedInteractorTest {
     @Test
-    fun `initial state is correct`() = runScenario(
+    fun `Continue mode with Link disabled`() = runScenario(
         paymentMethod = PaymentMethodFactory.card().update(
             last4 = "1234",
             brand = CardBrand.MasterCard,
             addCbcNetworks = false,
         ),
-        initialLinkState = SavedPaymentMethodLinkFormHelper.State.Unused,
+        tapToAddMode = TapToAddMode.Continue,
+        isLinkAvailable = false,
     ) {
         val state = interactor.state.value
         assertThat(state.cardBrand).isEqualTo(CardBrand.MasterCard)
         assertThat(state.last4).isEqualTo("1234")
         assertThat(state.title).isEqualTo(R.string.stripe_tap_to_add_card_added_title.resolvableString)
-        assertThat(state.primaryButton.label)
-            .isEqualTo(StripeUiCoreR.string.stripe_continue_button_label.resolvableString)
-        assertThat(state.primaryButton.enabled).isTrue()
+        assertThat(state.primaryButton).isNull()
         assertThat(state.form.elements).containsExactly(fakeLinkFormHelper.formElement)
         assertThat(state.form.enabled).isTrue()
     }
 
     @Test
-    fun `state primary button is disabled when link helper is Incomplete`() = runScenario(
-        initialLinkState = SavedPaymentMethodLinkFormHelper.State.Complete(mockUserInput()),
+    fun `Complete mode with unused link shows primary button`() = runScenario(
+        paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
+        tapToAddMode = TapToAddMode.Complete,
+        isLinkAvailable = true,
     ) {
-        interactor.state.test {
-            assertThat(awaitItem().primaryButton.enabled).isTrue()
-            fakeLinkFormHelper.updateState(SavedPaymentMethodLinkFormHelper.State.Incomplete)
-            assertThat(awaitItem().primaryButton.enabled).isFalse()
-        }
+        val state = interactor.state.value
+        assertThat(state.primaryButton).isNotNull()
+        assertThat(state.primaryButton?.label)
+            .isEqualTo(StripeUiCoreR.string.stripe_continue_button_label.resolvableString)
+        assertThat(state.primaryButton?.enabled).isTrue()
     }
 
     @Test
-    fun `state primary button is enabled when link helper emits Unused`() = runScenario(
-        initialLinkState = SavedPaymentMethodLinkFormHelper.State.Incomplete,
+    fun `state primary button is disabled when link available and helper is Incomplete`() = runScenario(
+        initialLinkState = SavedPaymentMethodLinkFormHelper.State.Complete(mockUserInput()),
+        isLinkAvailable = true,
     ) {
         interactor.state.test {
-            assertThat(awaitItem().primaryButton.enabled).isFalse()
-            fakeLinkFormHelper.updateState(SavedPaymentMethodLinkFormHelper.State.Unused)
-            assertThat(awaitItem().primaryButton.enabled).isTrue()
+            val initialPrimaryButton = awaitItem().primaryButton
+            assertThat(initialPrimaryButton).isNotNull()
+            assertThat(initialPrimaryButton?.enabled).isTrue()
+
+            fakeLinkFormHelper.updateState(SavedPaymentMethodLinkFormHelper.State.Incomplete)
+
+            val updatedPrimaryButton = awaitItem().primaryButton
+            assertThat(updatedPrimaryButton).isNotNull()
+            assertThat(updatedPrimaryButton?.enabled).isFalse()
         }
     }
 
@@ -122,11 +130,35 @@ internal class DefaultTapToAddCardAddedInteractorTest {
         }
 
     @Test
+    fun `ScreenShown continues when primary button is hidden in Continue mode`() = runScenario(
+        tapToAddMode = TapToAddMode.Continue,
+        initialLinkState = SavedPaymentMethodLinkFormHelper.State.Unused,
+    ) {
+        interactor.performAction(TapToAddCardAddedInteractor.Action.ScreenShown)
+
+        val selection = onContinueCalls.awaitItem()
+
+        assertThat(selection.paymentMethod).isEqualTo(paymentMethod)
+        assertThat(selection.linkInput).isNull()
+    }
+
+    @Test
+    fun `ScreenShown does not continue when primary button is shown`() = runScenario(
+        tapToAddMode = TapToAddMode.Complete,
+        initialLinkState = SavedPaymentMethodLinkFormHelper.State.Unused,
+    ) {
+        interactor.performAction(TapToAddCardAddedInteractor.Action.ScreenShown)
+
+        onContinueCalls.expectNoEvents()
+        onConfirmCalls.expectNoEvents()
+    }
+
+    @Test
     fun `close should stop any more updates from link form helper from being received`() = runScenario(
         initialLinkState = SavedPaymentMethodLinkFormHelper.State.Unused,
     ) {
         interactor.state.test {
-            assertThat(awaitItem().primaryButton.enabled).isTrue()
+            assertThat(awaitItem().primaryButton).isNull()
             interactor.close()
             fakeLinkFormHelper.updateState(SavedPaymentMethodLinkFormHelper.State.Incomplete)
             expectNoEvents()
@@ -152,6 +184,7 @@ internal class DefaultTapToAddCardAddedInteractorTest {
     private fun runScenario(
         paymentMethod: PaymentMethod = PaymentMethodFactory.card(last4 = "4242"),
         tapToAddMode: TapToAddMode = TapToAddMode.Continue,
+        isLinkAvailable: Boolean = false,
         initialLinkState: SavedPaymentMethodLinkFormHelper.State = SavedPaymentMethodLinkFormHelper.State.Unused,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
@@ -160,6 +193,7 @@ internal class DefaultTapToAddCardAddedInteractorTest {
         val fakeEventReporter = FakeEventReporter()
         val fakeLinkFormHelper = FakeSavedPaymentMethodLinkFormHelper(
             initialState = initialLinkState,
+            isAvailable = isLinkAvailable,
             formElement = FakeFormElement,
         )
 
@@ -197,6 +231,7 @@ internal class DefaultTapToAddCardAddedInteractorTest {
 
     private class FakeSavedPaymentMethodLinkFormHelper(
         initialState: SavedPaymentMethodLinkFormHelper.State,
+        override val isAvailable: Boolean,
         override val formElement: FormElement,
     ) : SavedPaymentMethodLinkFormHelper {
         private val _state = MutableStateFlow(initialState)

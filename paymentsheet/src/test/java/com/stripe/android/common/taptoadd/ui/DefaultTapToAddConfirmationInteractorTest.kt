@@ -20,6 +20,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationOption
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
@@ -58,6 +59,19 @@ internal class DefaultTapToAddConfirmationInteractorTest {
             val state = awaitItem()
             assertThat(state.cardBrand).isEqualTo(CardBrand.MasterCard)
             assertThat(state.last4).isEqualTo("1234")
+            assertThat(state.title).isNull()
+        }
+    }
+
+    @Test
+    fun `state includes card added title when withTitle is true`() = runScenario(
+        paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
+        withTitle = true,
+    ) {
+        interactor.state.test {
+            val state = awaitItem()
+            assertThat(state.title)
+                .isEqualTo(R.string.stripe_tap_to_add_card_added_title.resolvableString)
         }
     }
 
@@ -422,6 +436,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
     private fun runScenario(
         paymentMethod: PaymentMethod,
         linkInput: UserInput? = null,
+        withTitle: Boolean = false,
         paymentMethodMetadata: PaymentMethodMetadata =
             PaymentMethodMetadataFactory.create(isTapToAddSupported = true),
         initialConfirmationState: ConfirmationHandler.State = ConfirmationHandler.State.Idle,
@@ -436,6 +451,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
             val onCompleteCalls = Turbine<Unit>()
 
             val interactor = DefaultTapToAddConfirmationInteractor(
+                withTitle = withTitle,
                 coroutineContext = coroutineContext,
                 paymentMethod = paymentMethod,
                 linkInput = linkInput,

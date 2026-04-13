@@ -173,6 +173,14 @@ internal class TapToAddNavigatorTest {
     }
 
     @Test
+    fun `CardAdded cancel button is invisible when primary button is absent`() = runTest {
+        val interactor = FakeTapToAddCardAddedInteractor(primaryButton = null)
+        val screen = TapToAddNavigator.Screen.CardAdded(interactor)
+
+        assertThat(screen.cancelButton.value).isEqualTo(TapToAddNavigator.CancelButton.Invisible)
+    }
+
+    @Test
     fun `Close from CardAdded screen cancel button invokes CancelPressed after close`() = runTest {
         val interactor = FakeTapToAddCardAddedInteractor()
         val screen = TapToAddNavigator.Screen.CardAdded(interactor)

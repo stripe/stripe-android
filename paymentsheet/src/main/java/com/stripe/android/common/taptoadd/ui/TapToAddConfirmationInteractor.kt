@@ -3,6 +3,7 @@ package com.stripe.android.common.taptoadd.ui
 import com.stripe.android.common.spms.CvcFormHelper
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
@@ -11,6 +12,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.utils.buyButtonLabel
@@ -36,6 +38,7 @@ internal interface TapToAddConfirmationInteractor {
     data class State(
         val cardBrand: CardBrand,
         val last4: String?,
+        val title: ResolvableString?,
         val primaryButton: PrimaryButton,
         val form: Form,
         val error: ResolvableString?,
@@ -73,11 +76,13 @@ internal interface TapToAddConfirmationInteractor {
         fun create(
             paymentMethod: PaymentMethod,
             linkInput: UserInput?,
+            withTitle: Boolean = false,
         ): TapToAddConfirmationInteractor
     }
 }
 
 internal class DefaultTapToAddConfirmationInteractor(
+    private val withTitle: Boolean,
     private val coroutineContext: CoroutineContext,
     private val paymentMethod: PaymentMethod,
     private val linkInput: UserInput?,
@@ -190,6 +195,7 @@ internal class DefaultTapToAddConfirmationInteractor(
                 enabled = true,
                 state = TapToAddConfirmationInteractor.State.PrimaryButton.State.Idle,
             ),
+            title = R.string.stripe_tap_to_add_card_added_title.resolvableString.takeIf { withTitle },
             form = TapToAddConfirmationInteractor.State.Form(
                 elements = cvcFormHelper.formElement?.let { listOf(it) } ?: emptyList(),
                 enabled = true,
@@ -276,8 +282,10 @@ internal class DefaultTapToAddConfirmationInteractor(
         override fun create(
             paymentMethod: PaymentMethod,
             linkInput: UserInput?,
+            withTitle: Boolean,
         ): TapToAddConfirmationInteractor {
             return DefaultTapToAddConfirmationInteractor(
+                withTitle = withTitle,
                 paymentMethodMetadata = paymentMethodMetadata,
                 paymentMethod = paymentMethod,
                 linkInput = linkInput,

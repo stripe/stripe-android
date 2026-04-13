@@ -35,6 +35,7 @@ import com.stripe.android.tta.testing.TapToAddCardAddedPage
 import com.stripe.android.tta.testing.TapToAddCardCollectionTestHelper
 import com.stripe.android.tta.testing.TapToAddConfirmationPage
 import com.stripe.android.tta.testing.TapToAddConfirmationTestHelper
+import com.stripe.android.tta.testing.TapToAddDelayPage
 import com.stripe.android.tta.testing.TapToAddErrorPage
 import com.stripe.android.tta.testing.TapToAddLinkTestHelper
 import com.stripe.android.tta.testing.TerminalTestDelegate
@@ -84,6 +85,7 @@ class TapToAddActivityTest {
     private val cardArtTestHelper = TapToAddCardArtTestHelper(imageLoaderTestRule)
     private val cardAddedPage = TapToAddCardAddedPage(composeTestRule, linkHelper)
     private val confirmationPage = TapToAddConfirmationPage(composeTestRule)
+    private val delayPage = TapToAddDelayPage(composeTestRule)
     private val errorPage = TapToAddErrorPage(composeTestRule)
 
     @Test
@@ -100,8 +102,7 @@ class TapToAddActivityTest {
             waitForIdle()
 
             cardAddedPage.assertShown()
-            cardAddedPage.assertContinueButton(isEnabled = true)
-            cardAddedPage.clickContinue()
+            cardAddedPage.advancePastScreen()
 
             waitForIdle()
 
@@ -186,12 +187,6 @@ class TapToAddActivityTest {
 
             waitForIdle()
 
-            cardAddedPage.assertShown()
-            cardAddedPage.assertContinueButton(isEnabled = true)
-            cardAddedPage.clickContinue()
-
-            waitForIdle()
-
             confirmationPage.assertPrimaryButton(withLabel = "Pay $10.99", isEnabled = true)
             confirmationPage.clickPrimaryButton()
 
@@ -231,12 +226,6 @@ class TapToAddActivityTest {
         )
 
         launch {
-            waitForIdle()
-
-            cardAddedPage.assertShown()
-            cardAddedPage.assertContinueButton(isEnabled = true)
-            cardAddedPage.clickContinue()
-
             waitForIdle()
 
             confirmationPage.assertPrimaryButton(withLabel = "Pay $10.99", isEnabled = true)
@@ -297,6 +286,10 @@ class TapToAddActivityTest {
 
             waitForIdle()
 
+            delayPage.advancePastScreen()
+
+            waitForIdle()
+
             confirmationPage.assertPrimaryButton(isEnabled = true)
             confirmationPage.clickPrimaryButton()
 
@@ -332,11 +325,6 @@ class TapToAddActivityTest {
 
         launch { activityScenario ->
             cardCollectionHelper.assertSuccessfulCardCollection(info)
-
-            waitForIdle()
-
-            cardAddedPage.assertShown()
-            cardAddedPage.clickContinue()
 
             waitForIdle()
 
@@ -389,13 +377,29 @@ class TapToAddActivityTest {
     @Test
     fun canceledFromCardAddedScreen() = runScenario(
         mode = TapToAddMode.Continue,
+        metadata = PaymentMethodMetadataFactory.create(
+            isTapToAddSupported = true,
+            hasCustomerConfiguration = true,
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION.copy(
+                    customerInfo = LinkConfiguration.CustomerInfo(
+                        name = null,
+                        email = null,
+                        phone = null,
+                        billingCountryCode = null
+                    )
+                ),
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+            )
+        )
     ) {
         val info = cardCollectionHelper.enqueueSuccessfulTapToCollectFlow()
 
         launch { activityScenario ->
             waitForIdle()
 
-            cardAddedPage.assertShown()
+            cardAddedPage.assertShown(withLink = true)
             cardAddedPage.clickCloseButton()
 
             waitForIdle()
@@ -423,11 +427,7 @@ class TapToAddActivityTest {
         launch { activityScenario ->
             waitForIdle()
 
-            cardAddedPage.assertShown()
-            cardAddedPage.clickContinue()
-
-            waitForIdle()
-
+            confirmationPage.assertPrimaryButton(isEnabled = true)
             confirmationPage.clickCloseButton()
 
             waitForIdle()

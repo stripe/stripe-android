@@ -9,8 +9,10 @@ import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.common.spms.CvcFormHelper
 import com.stripe.android.common.spms.DefaultCvcFormHelper
 import com.stripe.android.common.spms.DefaultLinkFormElementFactory
+import com.stripe.android.common.spms.DefaultLinkInlineSignupAvailability
 import com.stripe.android.common.spms.DefaultSavedPaymentMethodLinkFormHelper
 import com.stripe.android.common.spms.LinkFormElementFactory
+import com.stripe.android.common.spms.LinkInlineSignupAvailability
 import com.stripe.android.common.spms.SavedPaymentMethodLinkFormHelper
 import com.stripe.android.common.taptoadd.ui.DefaultTapToAddCardAddedInteractor
 import com.stripe.android.common.taptoadd.ui.DefaultTapToAddCollectingInteractor
@@ -279,6 +281,11 @@ internal interface TapToAddLinkModule {
     fun bindsLinkFormHelper(
         linkFormHelper: DefaultSavedPaymentMethodLinkFormHelper
     ): SavedPaymentMethodLinkFormHelper
+
+    @Binds
+    fun bindsLinkInlineSignupAvailability(
+        impl: DefaultLinkInlineSignupAvailability,
+    ): LinkInlineSignupAvailability
 
     @Binds
     fun bindsCvcFormHelperFactory(

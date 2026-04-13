@@ -33,6 +33,11 @@ class TapToAddPrimaryButtonElement(
         return composeTestRule.onNode(matcher)
             .assertExists()
     }
+
+    fun assertNotShown() {
+        composeTestRule.onNode(hasTestTag(PRIMARY_BUTTON_TEST_TAG))
+            .assertDoesNotExist()
+    }
 }
 
 internal fun SemanticsNodeInteraction.click() {

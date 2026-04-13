@@ -12,14 +12,20 @@ class TapToAddCardAddedPage(
 ) {
     private val primaryButtonElement = TapToAddPrimaryButtonElement(composeTestRule)
 
-    fun assertShown(withLink: Boolean = false) {
+    fun assertShown(
+        withLink: Boolean = false,
+    ) {
         assertHasCardAddedText()
 
         if (withLink) {
             linkHelper.checkbox().assertExists()
         }
 
-        assertHasContinueButton()
+        if (withLink) {
+            assertHasContinueButton()
+        } else {
+            primaryButtonElement.assertNotShown()
+        }
     }
 
     fun clickCheckboxToSaveWithLink() {
@@ -50,6 +56,10 @@ class TapToAddCardAddedPage(
         composeTestRule.retrieveCloseButton().click()
     }
 
+    fun advancePastScreen() {
+        composeTestRule.mainClock.advanceTimeBy(CARD_ADDED_SHOWN_DELAY)
+    }
+
     fun waitUntilMissing() {
         composeTestRule.waitUntilLayoutWithPrimaryButtonMissing()
     }
@@ -67,4 +77,8 @@ class TapToAddCardAddedPage(
     }
 
     private fun assertHasContinueButton() = primaryButtonElement.assert(withLabel = "Continue")
+
+    private companion object {
+        const val CARD_ADDED_SHOWN_DELAY = 2500L
+    }
 }
