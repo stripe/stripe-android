@@ -358,7 +358,7 @@ internal data class PaymentMethodMetadata(
                 isGooglePayReady = isGooglePayReady,
                 linkStateResult = linkStateResult,
                 customerMetadata = customerMetadata,
-                isTapToAddSupported = isTapToAddSupported,
+                isTapToAddSupported = isTapToAddAvailable,
             )
             return PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
@@ -421,7 +421,6 @@ internal data class PaymentMethodMetadata(
             customerMetadata: CustomerMetadata,
             integrationMetadata: IntegrationMetadata.CustomerSheet,
         ): PaymentMethodMetadata {
-            val savedPaymentMethods = elementsSession.customer?.paymentMethods.orEmpty()
             return PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
@@ -512,7 +511,6 @@ internal data class PaymentMethodMetadata(
             customerMetadata: CustomerMetadata?,
             isTapToAddSupported: Boolean,
         ): PaymentElementData {
-            val savedPaymentMethods = savedPaymentMethods(elementsSession, initializationMode)
             val linkSettings = elementsSession.linkSettings
             return PaymentElementData(
                 linkSettings = linkSettings,
@@ -527,7 +525,6 @@ internal data class PaymentMethodMetadata(
                 isTapToAddSupported = isTapToAddSupported &&
                     elementsSession.isTapToAddEnabled &&
                     customerMetadata != null,
-                hasCardArt = hasCardArt(savedPaymentMethods),
             )
         }
 
@@ -537,7 +534,6 @@ internal data class PaymentMethodMetadata(
             val paymentMethodIncentive: PaymentMethodIncentive?,
             val allowsShipping: Boolean,
             val isTapToAddSupported: Boolean,
-            val hasCardArt: Boolean,
         )
     }
 }
