@@ -5,9 +5,10 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
@@ -84,6 +85,59 @@ internal class DefaultCustomerStateHolderTest {
             assertThat(updatedCustomerPaymentMethods).contains(newPaymentMethod)
         }
     }
+
+    @Test
+    fun `addPaymentMethod with LegacyEphemeralKey appends when new card shares fingerprint`() = addPaymentMethodTest(
+        original = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+        replacement = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_same_fp"),
+        customerMetadata = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA,
+    ) {
+        assertThat(paymentMethods).hasSize(2)
+        assertThat(paymentMethods).containsExactly(original, replacement)
+    }
+
+    @Test
+    fun `addPaymentMethod with CustomerSession replaces existing card with matching fingerprint`() =
+        addPaymentMethodTest(
+            original = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            replacement = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
+                id = "pm_replacement",
+                card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.card?.copy(brand = CardBrand.MasterCard),
+            ),
+            customerMetadata = PaymentMethodMetadataFixtures.CUSTOMER_SESSIONS_CUSTOMER_METADATA,
+        ) {
+            assertThat(paymentMethods).containsExactly(replacement)
+        }
+
+    @Test
+    fun `addPaymentMethod with CustomerSession appends when fingerprint does not match`() = addPaymentMethodTest(
+        original = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+        replacement = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
+            id = "pm_replacement",
+            card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.card?.copy(fingerprint = "other_fp"),
+        ),
+        customerMetadata = PaymentMethodMetadataFixtures.CUSTOMER_SESSIONS_CUSTOMER_METADATA,
+    ) {
+        assertThat(paymentMethods).containsExactly(original, replacement)
+    }
+
+    @Test
+    fun `addPaymentMethod with CheckoutSession replaces existing card with matching fingerprint`() =
+        addPaymentMethodTest(
+            original = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            replacement = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
+                id = "pm_replacement",
+                card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.card?.copy(brand = CardBrand.MasterCard),
+            ),
+            customerMetadata = CustomerMetadata.CheckoutSession(
+                sessionId = "cs_123",
+                customerId = "cus_123",
+                removePaymentMethod = PaymentMethodRemovePermission.Full,
+                saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
+            ),
+        ) {
+            assertThat(paymentMethods).containsExactly(replacement)
+        }
 
     @Test
     fun `MostRecentlySelectedSavedPaymentMethod is restored from savedStateHandle`() {
@@ -382,15 +436,44 @@ internal class DefaultCustomerStateHolderTest {
             }
         }
 
+    private fun addPaymentMethodTest(
+        original: PaymentMethod,
+        replacement: PaymentMethod,
+        customerMetadata: CustomerMetadata,
+        block: suspend AddPaymentMethodTestScenario.() -> Unit,
+    ) {
+        runScenario(
+            customerMetadataFlow = stateFlowOf(customerMetadata),
+        ) {
+            customerStateHolder.setCustomerState(
+                CustomerState(
+                    paymentMethods = listOf(original),
+                    defaultPaymentMethodId = null,
+                )
+            )
+
+            customerStateHolder.addPaymentMethod(replacement)
+
+            block(
+                AddPaymentMethodTestScenario(
+                    paymentMethods = customerStateHolder.paymentMethods.value,
+                    original = original,
+                    replacement = replacement,
+                )
+            )
+        }
+    }
+
     private fun runScenario(
         paymentMethodRemovePermission: PaymentMethodRemovePermission = PaymentMethodRemovePermission.Full,
         canRemoveLastPaymentMethod: Boolean = true,
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
         selection: StateFlow<PaymentSelection?> = stateFlowOf(null),
+        customerMetadataFlow: StateFlow<CustomerMetadata?>? = null,
         block: suspend Scenario.() -> Unit
     ) {
-        val customerMetadata: StateFlow<CustomerMetadata?> = stateFlowOf(
-            DEFAULT_CUSTOMER_METADATA.copy(
+        val customerMetadata: StateFlow<CustomerMetadata?> = customerMetadataFlow ?: stateFlowOf(
+            PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.copy(
                 removePaymentMethod = paymentMethodRemovePermission,
                 saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
                 canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
@@ -412,5 +495,11 @@ internal class DefaultCustomerStateHolderTest {
 
     private data class Scenario(
         val customerStateHolder: CustomerStateHolder,
+    )
+
+    private data class AddPaymentMethodTestScenario(
+        val paymentMethods: List<PaymentMethod>,
+        val original: PaymentMethod,
+        val replacement: PaymentMethod,
     )
 }
