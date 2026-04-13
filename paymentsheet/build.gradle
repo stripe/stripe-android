@@ -103,6 +103,8 @@ dependencies {
     androidTestImplementation project(':payment-element-test-pages')
 
     androidTestImplementation libs.places
+    androidTestImplementation libs.terminal.core
+    androidTestImplementation libs.terminal.tapToPay
     androidTestImplementation testLibs.androidx.composeUi
     androidTestImplementation testLibs.androidx.coreKtx
     androidTestImplementation testLibs.androidx.junit
@@ -116,8 +118,8 @@ dependencies {
         exclude group: 'org.checkerframework', module: 'checker'
     }
     androidTestImplementation testLibs.mockito.core
-    androidTestImplementation testLibs.mockito.inline
     androidTestImplementation testLibs.mockito.kotlin
+    androidTestImplementation testLibs.linkedin.dexmaker
     androidTestImplementation testLibs.espresso.intents
     androidTestImplementation libs.leakCanary
     androidTestImplementation testLibs.leakCanaryInstrumentation
@@ -125,6 +127,7 @@ dependencies {
     androidTestImplementation testLibs.truth
     androidTestImplementation testLibs.turbine
     androidTestImplementation project(':financial-connections')
+    androidTestImplementation project(':tap-to-add-testing')
 
     androidTestUtil testLibs.testOrchestrator
 }

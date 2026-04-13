@@ -42,6 +42,10 @@ class TapToAddConfirmationPage(
         primaryButtonElement.assert(null).click()
     }
 
+    fun waitUntilMissing() {
+        composeTestRule.waitUntilLayoutWithPrimaryButtonMissing()
+    }
+
     fun clickCloseButton() {
         composeTestRule.retrieveCloseButton().click()
     }
