@@ -23,6 +23,10 @@ class CustomerEphemeralKeyRequest private constructor(
     val paymentMethodRedisplayFilters: List<AllowRedisplayFilter>?,
     @SerialName("customer_session_payment_method_sync_default")
     val paymentMethodSyncDefaultFeature: FeatureState?,
+    @SerialName("custom_secret_key")
+    val customSecretKey: String?,
+    @SerialName("custom_publishable_key")
+    val customPublishableKey: String?,
 ) {
     @Serializable
     enum class CustomerKeyType {
@@ -45,6 +49,8 @@ class CustomerEphemeralKeyRequest private constructor(
             AllowRedisplayFilter.Limited,
             AllowRedisplayFilter.Always,
         )
+        private var customSecretKey: String? = null
+        private var customPublishableKey: String? = null
 
         fun customerType(customerType: String) = apply {
             this.customerType = customerType
@@ -74,6 +80,14 @@ class CustomerEphemeralKeyRequest private constructor(
             this.merchantCountryCode = merchantCountryCode
         }
 
+        fun customSecretKey(customSecretKey: String?) = apply {
+            this.customSecretKey = customSecretKey
+        }
+
+        fun customPublishableKey(customPublishableKey: String?) = apply {
+            this.customPublishableKey = customPublishableKey
+        }
+
         fun build(): CustomerEphemeralKeyRequest {
             return CustomerEphemeralKeyRequest(
                 customerType = customerType,
@@ -85,6 +99,8 @@ class CustomerEphemeralKeyRequest private constructor(
                 paymentMethodSyncDefaultFeature = paymentMethodSyncDefaultFeature,
                 paymentMethodRedisplayFeature = FeatureState.Enabled,
                 paymentMethodRedisplayFilters = paymentMethodRedisplayFilters,
+                customSecretKey = customSecretKey,
+                customPublishableKey = customPublishableKey,
             )
         }
     }

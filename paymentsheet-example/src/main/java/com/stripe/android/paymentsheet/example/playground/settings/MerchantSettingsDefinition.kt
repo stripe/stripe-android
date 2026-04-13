@@ -57,7 +57,7 @@ internal object MerchantSettingsDefinition :
         value: Merchant,
         customerEphemeralKeyRequestBuilder: CustomerEphemeralKeyRequest.Builder
     ) {
-        customerEphemeralKeyRequestBuilder.merchantCountryCode(value.countryCode)
+        customerEphemeralKeyRequestBuilder.merchantCountryCode(value.value)
     }
 
     override fun valueUpdated(value: Merchant, playgroundSettings: PlaygroundSettings) {

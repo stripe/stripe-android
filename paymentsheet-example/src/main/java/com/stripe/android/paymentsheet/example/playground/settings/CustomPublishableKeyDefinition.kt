@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
+import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
 
 internal object CustomPublishableKeyDefinition :
     PlaygroundSettingDefinition<String>,
@@ -27,6 +28,12 @@ internal object CustomPublishableKeyDefinition :
     override fun configure(value: String, checkoutRequestBuilder: CheckoutRequest.Builder) {
         if (value.isNotEmpty()) {
             checkoutRequestBuilder.customPublishableKey(value)
+        }
+    }
+
+    override fun configure(value: String, customerEphemeralKeyRequestBuilder: CustomerEphemeralKeyRequest.Builder) {
+        if (value.isNotEmpty()) {
+            customerEphemeralKeyRequestBuilder.customPublishableKey(value)
         }
     }
 

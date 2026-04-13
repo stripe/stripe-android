@@ -319,7 +319,9 @@ internal class PlaygroundSettings private constructor(
             }.onEach { (settingDefinition, value) ->
                 settingDefinition.configure(builder, value)
             }
-            return builder.build()
+            val body = builder.build()
+            Log.d("TOLUWANI", Json.encodeToString(body))
+            return body
         }
 
         private fun <T> PlaygroundSettingDefinition<T>.configure(
