@@ -36,5 +36,9 @@ internal object CustomSecretKeyDefinition :
         if (playgroundSettings[CustomerSettingsDefinition].value is CustomerType.Existing) {
             playgroundSettings[CustomerSettingsDefinition] = CustomerType.NEW
         }
+        // Auto-enable manual capture when a live secret key is detected to prevent accidental charges.
+        if (value.startsWith("sk_live")) {
+            playgroundSettings[CaptureMethodSettingsDefinition] = true
+        }
     }
 }
