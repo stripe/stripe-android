@@ -73,18 +73,19 @@ internal class FakeEventReporter : EventReporter {
     private val _tapToAddStartedCalls = Turbine<Unit>()
     val tapToAddStartedCalls: ReceiveTurbine<Unit> = _tapToAddStartedCalls
 
-    private val _tapToAddCardAddedCalls = Turbine<Unit>()
-    val tapToAddCardAddedCalls: ReceiveTurbine<Unit> = _tapToAddCardAddedCalls
+    private val _tapToAddCardAddedCalls = Turbine<Boolean>()
+    val tapToAddCardAddedCalls: ReceiveTurbine<Boolean> = _tapToAddCardAddedCalls
 
     private val _tapToAddCanceledCalls = Turbine<EventReporter.TapToAddCancelSource>()
     val tapToAddCanceledCalls: ReceiveTurbine<EventReporter.TapToAddCancelSource> =
         _tapToAddCanceledCalls
 
-    private val _tapToAddContinueAfterCardAddedCalls = Turbine<Unit>()
-    val tapToAddContinueAfterCardAddedCalls: ReceiveTurbine<Unit> = _tapToAddContinueAfterCardAddedCalls
+    private val _tapToAddContinueAfterCardAddedCalls = Turbine<Boolean?>()
+    val tapToAddContinueAfterCardAddedCalls: ReceiveTurbine<Boolean?> =
+        _tapToAddContinueAfterCardAddedCalls
 
-    private val _tapToAddConfirmCalls = Turbine<Unit>()
-    val tapToAddConfirmCalls: ReceiveTurbine<Unit> = _tapToAddConfirmCalls
+    private val _tapToAddConfirmCalls = Turbine<Boolean>()
+    val tapToAddConfirmCalls: ReceiveTurbine<Boolean> = _tapToAddConfirmCalls
 
     private val _failedToAddCardWithTapToAddCalls = Turbine<String>()
     val failedToAddCardWithTapToAddCalls: ReceiveTurbine<String> = _failedToAddCardWithTapToAddCalls
@@ -304,20 +305,20 @@ internal class FakeEventReporter : EventReporter {
         _tapToAddStartedCalls.add(Unit)
     }
 
-    override fun onCardAddedWithTapToAdd() {
-        _tapToAddCardAddedCalls.add(Unit)
+    override fun onCardAddedWithTapToAdd(canCollectLinkInput: Boolean) {
+        _tapToAddCardAddedCalls.add(canCollectLinkInput)
     }
 
     override fun onTapToAddCanceled(source: EventReporter.TapToAddCancelSource) {
         _tapToAddCanceledCalls.add(source)
     }
 
-    override fun onTapToAddContinueAfterCardAdded() {
-        _tapToAddContinueAfterCardAddedCalls.add(Unit)
+    override fun onTapToAddContinueAfterCardAdded(completedLinkInput: Boolean?) {
+        _tapToAddContinueAfterCardAddedCalls.add(completedLinkInput)
     }
 
-    override fun onTapToAddConfirm() {
-        _tapToAddConfirmCalls.add(Unit)
+    override fun onTapToAddConfirm(recollectedCvc: Boolean) {
+        _tapToAddConfirmCalls.add(recollectedCvc)
     }
 
     override fun onFailedToAddCardWithTapToAdd(message: String) {

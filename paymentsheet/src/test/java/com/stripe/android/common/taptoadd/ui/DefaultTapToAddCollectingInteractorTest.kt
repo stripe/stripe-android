@@ -4,10 +4,13 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.common.spms.FakeLinkInlineSignupAvailability
+import com.stripe.android.common.spms.LinkInlineSignupAvailability
 import com.stripe.android.common.taptoadd.FakeTapToAddCollectionHandler
 import com.stripe.android.common.taptoadd.TapToAddCollectionHandler
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.TestFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethod
@@ -32,7 +35,7 @@ internal class DefaultTapToAddCollectingInteractorTest {
         ) {
             assertThat(collectionHandlerScenario.collectCalls.awaitItem()).isEqualTo(metadata)
             assertThat(fakeEventReporter.tapToAddStartedCalls.awaitItem()).isNotNull()
-            assertThat(fakeEventReporter.tapToAddCardAddedCalls.awaitItem()).isNotNull()
+            assertThat(fakeEventReporter.tapToAddCardAddedCalls.awaitItem()).isFalse()
         }
     }
 
@@ -45,8 +48,24 @@ internal class DefaultTapToAddCollectingInteractorTest {
         ) {
             assertThat(collectionHandlerScenario.collectCalls.awaitItem()).isNotNull()
             assertThat(fakeEventReporter.tapToAddStartedCalls.awaitItem()).isNotNull()
-            assertThat(fakeEventReporter.tapToAddCardAddedCalls.awaitItem()).isNotNull()
+            assertThat(fakeEventReporter.tapToAddCardAddedCalls.awaitItem()).isFalse()
             assertThat(onCollected.awaitItem()).isEqualTo(paymentMethod)
+        }
+    }
+
+    @Test
+    fun `onCardAdded reports canCollectLinkInput when inline link signup is available`() {
+        runScenario(
+            collectResult = TapToAddCollectionHandler.CollectionState.Collected(
+                PaymentMethodFactory.card(last4 = "4242")
+            ),
+            linkSignupAvailability = LinkInlineSignupAvailability.Result.Available(
+                TestFactory.LINK_CONFIGURATION,
+            ),
+        ) {
+            assertThat(collectionHandlerScenario.collectCalls.awaitItem()).isNotNull()
+            assertThat(fakeEventReporter.tapToAddStartedCalls.awaitItem()).isNotNull()
+            assertThat(fakeEventReporter.tapToAddCardAddedCalls.awaitItem()).isTrue()
         }
     }
 
@@ -147,6 +166,8 @@ internal class DefaultTapToAddCollectingInteractorTest {
         collectResult: TapToAddCollectionHandler.CollectionState =
             TapToAddCollectionHandler.CollectionState.Collected(PaymentMethodFactory.card(last4 = "4242")),
         continueController: Deferred<Unit> = CompletableDeferred(Unit),
+        linkSignupAvailability: LinkInlineSignupAvailability.Result =
+            LinkInlineSignupAvailability.Result.Unavailable,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val onCollected = Turbine<PaymentMethod>()
@@ -162,6 +183,7 @@ internal class DefaultTapToAddCollectingInteractorTest {
                     uiContext = coroutineContext,
                     ioContext = coroutineContext,
                     tapToAddCollectionHandler = handler,
+                    linkInlineSignupAvailability = FakeLinkInlineSignupAvailability(linkSignupAvailability),
                     eventReporter = fakeEventReporter,
                     onCollected = { onCollected.add(it) },
                     onFailedCollection = { onFailedCollection.add(it) },
