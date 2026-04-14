@@ -86,7 +86,7 @@ internal class DefaultTapToAddCollectingInteractor(
         private val tapToAddCollectionHandler: TapToAddCollectionHandler,
         private val eventReporter: EventReporter,
         private val stateHolder: TapToAddStateHolder,
-        private val tapToAddCardAddedInteractorFactory: TapToAddCardAddedInteractor.Factory,
+        private val tapToAddCardCollectedScreenFactory: TapToAddCardCollectedScreenFactory,
         private val navigator: Provider<TapToAddNavigator>,
         @UIContext private val uiContext: CoroutineContext,
         @IOContext private val ioContext: CoroutineContext,
@@ -103,9 +103,7 @@ internal class DefaultTapToAddCollectingInteractor(
 
                     navigator.get().performAction(
                         action = TapToAddNavigator.Action.NavigateTo(
-                            screen = TapToAddNavigator.Screen.CardAdded(
-                                interactor = tapToAddCardAddedInteractorFactory.create(paymentMethod),
-                            ),
+                            screen = tapToAddCardCollectedScreenFactory.create(paymentMethod),
                         )
                     )
                 },

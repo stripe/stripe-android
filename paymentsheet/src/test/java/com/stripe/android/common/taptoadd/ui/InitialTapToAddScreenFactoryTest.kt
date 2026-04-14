@@ -37,11 +37,11 @@ internal class InitialTapToAddScreenFactoryTest {
         ) {
             val screen = screenFactory.createInitialScreen()
 
-            val (paymentMethodPassedToFactory, linkInputPassedToFactory) =
-                confirmationInteractorFactory.createCalls.awaitItem()
+            val createCall = confirmationInteractorFactory.createCalls.awaitItem()
 
-            assertThat(paymentMethodPassedToFactory).isEqualTo(paymentMethod)
-            assertThat(linkInputPassedToFactory).isNull()
+            assertThat(createCall.paymentMethod).isEqualTo(paymentMethod)
+            assertThat(createCall.linkInput).isNull()
+            assertThat(createCall.withTitle).isFalse()
             assertThat(screen).isInstanceOf<TapToAddNavigator.Screen.Confirmation>()
 
             val confirmationScreen = screen as TapToAddNavigator.Screen.Confirmation

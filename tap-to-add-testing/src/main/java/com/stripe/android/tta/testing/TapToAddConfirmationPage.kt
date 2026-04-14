@@ -6,6 +6,7 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeTestRule
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 
 class TapToAddConfirmationPage(
@@ -29,12 +30,13 @@ class TapToAddConfirmationPage(
 
     fun assertCvcRecollectionFieldShown() {
         retrieveCvcField()
-            .assertIsDisplayed()
+            .assertExists()
             .assertIsEnabled()
     }
 
     fun fillCvc(cvc: String) {
         retrieveCvcField()
+            .performScrollTo()
             .performTextInput(cvc)
     }
 

@@ -36,7 +36,7 @@ internal fun ColumnScope.TapToAddConfirmationScreen(
     TapToAddCardLayout(
         cardBrand = state.cardBrand,
         last4 = state.last4,
-        title = null,
+        title = state.title?.resolve(),
     ) {
         with(state.form) {
             if (elements.isNotEmpty()) {

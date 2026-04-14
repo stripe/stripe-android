@@ -33,7 +33,7 @@ internal interface TapToAddCardAddedInteractor {
         val cardBrand: CardBrand,
         val last4: String?,
         val title: ResolvableString,
-        val primaryButton: PrimaryButton,
+        val primaryButton: PrimaryButton?,
         val form: Form,
     ) {
         data class PrimaryButton(
@@ -52,6 +52,7 @@ internal interface TapToAddCardAddedInteractor {
     fun close()
 
     sealed interface Action {
+        data object ScreenShown : Action
         data object PrimaryButtonPressed : Action
         data object CancelPressed : Action
     }
@@ -80,7 +81,9 @@ internal class DefaultTapToAddCardAddedInteractor(
             primaryButton = TapToAddCardAddedInteractor.State.PrimaryButton(
                 label = StripeUiCoreR.string.stripe_continue_button_label.resolvableString,
                 enabled = true,
-            ),
+            ).takeIf {
+                tapToAddMode == TapToAddMode.Complete || savedPaymentMethodLinkFormHelper.formElement != null
+            },
             form = TapToAddCardAddedInteractor.State.Form(
                 elements = savedPaymentMethodLinkFormHelper.formElement?.let {
                     listOf(it)
@@ -104,6 +107,9 @@ internal class DefaultTapToAddCardAddedInteractor(
 
     override fun performAction(action: TapToAddCardAddedInteractor.Action) {
         when (action) {
+            TapToAddCardAddedInteractor.Action.ScreenShown -> {
+                onScreenShown()
+            }
             TapToAddCardAddedInteractor.Action.PrimaryButtonPressed -> {
                 eventReporter.onTapToAddContinueAfterCardAdded()
                 onPrimaryButtonPressed()
@@ -118,21 +124,37 @@ internal class DefaultTapToAddCardAddedInteractor(
         coroutineScope.cancel()
     }
 
+    private fun onScreenShown() {
+        val currentState = state.value
+
+        if (currentState.primaryButton != null) {
+            return
+        }
+
+        onContinue()
+    }
+
     private fun onPrimaryButtonPressed() {
-        val linkInput = when (val state = savedPaymentMethodLinkFormHelper.state.value) {
+        when (tapToAddMode) {
+            TapToAddMode.Continue -> onContinue()
+            TapToAddMode.Complete -> onConfirm(paymentMethod, getLinkInput())
+        }
+    }
+
+    private fun onContinue() {
+        onContinue(
+            PaymentSelection.Saved(
+                paymentMethod = paymentMethod,
+                linkInput = getLinkInput(),
+            )
+        )
+    }
+
+    private fun getLinkInput(): UserInput? {
+        return when (val state = savedPaymentMethodLinkFormHelper.state.value) {
             is SavedPaymentMethodLinkFormHelper.State.Unused,
             is SavedPaymentMethodLinkFormHelper.State.Incomplete -> null
             is SavedPaymentMethodLinkFormHelper.State.Complete -> state.userInput
-        }
-
-        when (tapToAddMode) {
-            TapToAddMode.Continue -> onContinue(
-                PaymentSelection.Saved(
-                    paymentMethod = paymentMethod,
-                    linkInput = linkInput,
-                )
-            )
-            TapToAddMode.Complete -> onConfirm(paymentMethod, linkInput)
         }
     }
 
@@ -140,9 +162,9 @@ internal class DefaultTapToAddCardAddedInteractor(
         linkState: SavedPaymentMethodLinkFormHelper.State,
     ): TapToAddCardAddedInteractor.State {
         return copy(
-            primaryButton = primaryButton.copy(
+            primaryButton = primaryButton?.copy(
                 enabled = linkState !is SavedPaymentMethodLinkFormHelper.State.Incomplete,
-            ),
+            )
         )
     }
 

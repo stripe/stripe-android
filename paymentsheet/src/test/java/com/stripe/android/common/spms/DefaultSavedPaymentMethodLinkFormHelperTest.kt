@@ -14,9 +14,6 @@ import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.uicore.elements.Controller
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -28,12 +25,8 @@ import org.junit.Test
 
 internal class DefaultSavedPaymentMethodLinkFormHelperTest {
     @Test
-    fun `link form is unavailable when signup mode is not defined`() = runScenario(
-        linkState = LinkState(
-            configuration = TestFactory.LINK_CONFIGURATION,
-            loginState = LinkState.LoginState.LoggedOut,
-            signupMode = null,
-        ),
+    fun `link form is unavailable when availability result is unavailable`() = runScenario(
+        linkAvailabilityResult = LinkInlineSignupAvailability.Result.Unavailable,
     ) {
         helper.state.test {
             Truth.assertThat(awaitItem()).isEqualTo(SavedPaymentMethodLinkFormHelper.State.Unused)
@@ -45,16 +38,12 @@ internal class DefaultSavedPaymentMethodLinkFormHelperTest {
     }
 
     @Test
-    fun `link form element is available when signup mode is defined`() {
+    fun `link form element is available when availability result is available`() {
         val coordinator = FakeLinkConfigurationCoordinator()
 
         runScenario(
             linkConfigurationCoordinator = coordinator,
-            linkState = LinkState(
-                configuration = TestFactory.LINK_CONFIGURATION,
-                loginState = LinkState.LoginState.LoggedOut,
-                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
-            ),
+            linkAvailabilityResult = LinkInlineSignupAvailability.Result.Available(TestFactory.LINK_CONFIGURATION),
         ) {
             helper.state.test {
                 Truth.assertThat(awaitItem()).isEqualTo(SavedPaymentMethodLinkFormHelper.State.Unused)
@@ -77,27 +66,6 @@ internal class DefaultSavedPaymentMethodLinkFormHelperTest {
     }
 
     @Test
-    fun `link form element always uses InsteadOfSaveForFutureUse irregardless of signup mode`() {
-        val coordinator = FakeLinkConfigurationCoordinator()
-
-        runScenario(
-            linkConfigurationCoordinator = coordinator,
-            linkState = LinkState(
-                configuration = TestFactory.LINK_CONFIGURATION,
-                loginState = LinkState.LoginState.LoggedOut,
-                signupMode = LinkSignupMode.AlongsideSaveForFutureUse,
-            ),
-        ) {
-            Truth.assertThat(helper.formElement).isNotNull()
-
-            val factoryCreateCall = formElementFactoryCreateCalls.awaitItem()
-
-            Truth.assertThat(factoryCreateCall.signupMode)
-                .isEqualTo(LinkSignupMode.InsteadOfSaveForFutureUse)
-        }
-    }
-
-    @Test
     fun `factory is called with input when handle has stored link input`() {
         val userInput = UserInput.SignUp(
             name = "John Doe",
@@ -108,11 +76,7 @@ internal class DefaultSavedPaymentMethodLinkFormHelperTest {
         )
 
         runScenario(
-            linkState = LinkState(
-                configuration = TestFactory.LINK_CONFIGURATION,
-                loginState = LinkState.LoginState.LoggedOut,
-                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
-            ),
+            linkAvailabilityResult = LinkInlineSignupAvailability.Result.Available(TestFactory.LINK_CONFIGURATION),
             handle = SavedStateHandle(
                 initialState = mapOf(
                     SPM_LINK_INPUT_KEY to userInput,
@@ -128,11 +92,7 @@ internal class DefaultSavedPaymentMethodLinkFormHelperTest {
     @Test
     fun `factory is called with previousLinkSignupCheckboxSelection true when handle has checkbox selected`() =
         runScenario(
-            linkState = LinkState(
-                configuration = TestFactory.LINK_CONFIGURATION,
-                loginState = LinkState.LoginState.LoggedOut,
-                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
-            ),
+            linkAvailabilityResult = LinkInlineSignupAvailability.Result.Available(TestFactory.LINK_CONFIGURATION),
             handle = SavedStateHandle(
                 initialState = mapOf(
                     SPM_LINK_CHECKBOX_SELECTED_KEY to true,
@@ -146,11 +106,7 @@ internal class DefaultSavedPaymentMethodLinkFormHelperTest {
     @Test
     fun `onLinkInlineSignupStateChanged updates state to Unused when when link is not used`() =
         runScenario(
-            linkState = LinkState(
-                configuration = TestFactory.LINK_CONFIGURATION,
-                loginState = LinkState.LoginState.LoggedOut,
-                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
-            ),
+            linkAvailabilityResult = LinkInlineSignupAvailability.Result.Available(TestFactory.LINK_CONFIGURATION),
         ) {
             val call = formElementFactoryCreateCalls.awaitItem()
 
@@ -178,11 +134,7 @@ internal class DefaultSavedPaymentMethodLinkFormHelperTest {
     @Test
     fun `onLinkInlineSignupStateChanged updates state to Incomplete when link is used but incomplete input`() =
         runScenario(
-            linkState = LinkState(
-                configuration = TestFactory.LINK_CONFIGURATION,
-                loginState = LinkState.LoginState.LoggedOut,
-                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
-            ),
+            linkAvailabilityResult = LinkInlineSignupAvailability.Result.Available(TestFactory.LINK_CONFIGURATION),
         ) {
             val call = formElementFactoryCreateCalls.awaitItem()
 
@@ -210,11 +162,7 @@ internal class DefaultSavedPaymentMethodLinkFormHelperTest {
     @Test
     fun `onLinkInlineSignupStateChanged updates state to Complete when user input is present`() =
         runScenario(
-            linkState = LinkState(
-                configuration = TestFactory.LINK_CONFIGURATION,
-                loginState = LinkState.LoginState.LoggedOut,
-                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
-            ),
+            linkAvailabilityResult = LinkInlineSignupAvailability.Result.Available(TestFactory.LINK_CONFIGURATION),
         ) {
             val call = formElementFactoryCreateCalls.awaitItem()
 
@@ -254,10 +202,7 @@ internal class DefaultSavedPaymentMethodLinkFormHelperTest {
         }
 
     private fun runScenario(
-        linkState: LinkState? = null,
-        paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
-            linkState = linkState,
-        ),
+        linkAvailabilityResult: LinkInlineSignupAvailability.Result = LinkInlineSignupAvailability.Result.Unavailable,
         handle: SavedStateHandle = SavedStateHandle(),
         linkConfigurationCoordinator: LinkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
         block: suspend Scenario.() -> Unit,
@@ -265,7 +210,7 @@ internal class DefaultSavedPaymentMethodLinkFormHelperTest {
         val factory = FakeLinkFormElementFactory()
 
         val helper = DefaultSavedPaymentMethodLinkFormHelper(
-            paymentMethodMetadata = paymentMethodMetadata,
+            linkInlineSignupAvailability = FakeLinkInlineSignupAvailability(linkAvailabilityResult),
             linkConfigurationCoordinator = linkConfigurationCoordinator,
             savedStateHandle = handle,
             linkFormElementFactory = factory,

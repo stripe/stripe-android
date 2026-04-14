@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.UserInput
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.uicore.elements.FormElement
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,13 +24,11 @@ internal interface SavedPaymentMethodLinkFormHelper {
 }
 
 internal class DefaultSavedPaymentMethodLinkFormHelper @Inject constructor(
-    paymentMethodMetadata: PaymentMethodMetadata,
+    linkInlineSignupAvailability: LinkInlineSignupAvailability,
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val savedStateHandle: SavedStateHandle,
     linkFormElementFactory: LinkFormElementFactory,
 ) : SavedPaymentMethodLinkFormHelper {
-    private val linkState = paymentMethodMetadata.linkState
-
     private var storedCheckboxSelection: Boolean
         get() = savedStateHandle.get<Boolean>(SPM_LINK_CHECKBOX_SELECTED_KEY) == true
         set(value) {
@@ -49,25 +46,26 @@ internal class DefaultSavedPaymentMethodLinkFormHelper @Inject constructor(
     )
     override val state: StateFlow<SavedPaymentMethodLinkFormHelper.State> = _state.asStateFlow()
 
-    override val formElement: FormElement? = if (linkState?.signupMode != null) {
-        linkFormElementFactory.create(
-            signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
-            configuration = linkState.configuration,
-            linkConfigurationCoordinator = linkConfigurationCoordinator,
-            userInput = storedLinkInput,
-            onLinkInlineSignupStateChanged = { viewState ->
-                storedCheckboxSelection = viewState.isExpanded
-                storedLinkInput = viewState.userInput
+    override val formElement: FormElement? = when (val result = linkInlineSignupAvailability.availability()) {
+        is LinkInlineSignupAvailability.Result.Available -> {
+            linkFormElementFactory.create(
+                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+                configuration = result.configuration,
+                linkConfigurationCoordinator = linkConfigurationCoordinator,
+                userInput = storedLinkInput,
+                onLinkInlineSignupStateChanged = { viewState ->
+                    storedCheckboxSelection = viewState.isExpanded
+                    storedLinkInput = viewState.userInput
 
-                _state.value = createState(
-                    useLink = viewState.useLink,
-                    userInput = viewState.userInput,
-                )
-            },
-            previousLinkSignupCheckboxSelection = storedCheckboxSelection,
-        )
-    } else {
-        null
+                    _state.value = createState(
+                        useLink = viewState.useLink,
+                        userInput = viewState.userInput,
+                    )
+                },
+                previousLinkSignupCheckboxSelection = storedCheckboxSelection,
+            )
+        }
+        is LinkInlineSignupAvailability.Result.Unavailable -> null
     }
 
     private fun createState(

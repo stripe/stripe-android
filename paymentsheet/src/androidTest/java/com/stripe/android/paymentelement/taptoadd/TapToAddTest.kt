@@ -17,7 +17,6 @@ import com.stripe.android.tta.testing.TapToAddCardAddedPage
 import com.stripe.android.tta.testing.TapToAddCardCollectionTestHelper
 import com.stripe.android.tta.testing.TapToAddConfirmationPage
 import com.stripe.android.tta.testing.TapToAddLinkTestHelper
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -75,9 +74,6 @@ internal class TapToAddTest {
 
         tapToAddCardFormPage.clickOnTapToAdd()
 
-        cardAddedPage.assertShown()
-        cardAddedPage.clickContinue()
-
         confirmationPage.assertPrimaryButton(isEnabled = true)
 
         enqueueConfirmRequests()
@@ -115,11 +111,10 @@ internal class TapToAddTest {
 
         tapToAddCardFormPage.clickOnTapToAdd()
 
-        cardAddedPage.assertShown()
-
         enqueueConfirmRequests()
 
-        cardAddedPage.clickContinue()
+        cardAddedPage.assertShown()
+        cardAddedPage.advancePastScreen()
         cardAddedPage.waitUntilMissing()
 
         confirm()
