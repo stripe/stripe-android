@@ -37,14 +37,14 @@ internal class DefaultTapToAddCardAddedInteractorTest {
             addCbcNetworks = false,
         ),
         tapToAddMode = TapToAddMode.Continue,
-        isLinkAvailable = false,
+        linkElement = null,
     ) {
         val state = interactor.state.value
         assertThat(state.cardBrand).isEqualTo(CardBrand.MasterCard)
         assertThat(state.last4).isEqualTo("1234")
         assertThat(state.title).isEqualTo(R.string.stripe_tap_to_add_card_added_title.resolvableString)
         assertThat(state.primaryButton).isNull()
-        assertThat(state.form.elements).containsExactly(fakeLinkFormHelper.formElement)
+        assertThat(state.form.elements).isEmpty()
         assertThat(state.form.enabled).isTrue()
     }
 
@@ -52,7 +52,6 @@ internal class DefaultTapToAddCardAddedInteractorTest {
     fun `Complete mode with unused link shows primary button`() = runScenario(
         paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
         tapToAddMode = TapToAddMode.Complete,
-        isLinkAvailable = true,
     ) {
         val state = interactor.state.value
         assertThat(state.primaryButton).isNotNull()
@@ -63,8 +62,8 @@ internal class DefaultTapToAddCardAddedInteractorTest {
 
     @Test
     fun `state primary button is disabled when link available and helper is Incomplete`() = runScenario(
+        tapToAddMode = TapToAddMode.Complete,
         initialLinkState = SavedPaymentMethodLinkFormHelper.State.Complete(mockUserInput()),
-        isLinkAvailable = true,
     ) {
         interactor.state.test {
             val initialPrimaryButton = awaitItem().primaryButton
@@ -130,9 +129,9 @@ internal class DefaultTapToAddCardAddedInteractorTest {
         }
 
     @Test
-    fun `ScreenShown continues when primary button is hidden in Continue mode`() = runScenario(
+    fun `ScreenShown continues when primary button is hidden in Continue mode & no link elements`() = runScenario(
         tapToAddMode = TapToAddMode.Continue,
-        initialLinkState = SavedPaymentMethodLinkFormHelper.State.Unused,
+        linkElement = null,
     ) {
         interactor.performAction(TapToAddCardAddedInteractor.Action.ScreenShown)
 
@@ -158,7 +157,7 @@ internal class DefaultTapToAddCardAddedInteractorTest {
         initialLinkState = SavedPaymentMethodLinkFormHelper.State.Unused,
     ) {
         interactor.state.test {
-            assertThat(awaitItem().primaryButton).isNull()
+            assertThat(awaitItem().primaryButton).isNotNull()
             interactor.close()
             fakeLinkFormHelper.updateState(SavedPaymentMethodLinkFormHelper.State.Incomplete)
             expectNoEvents()
@@ -184,8 +183,8 @@ internal class DefaultTapToAddCardAddedInteractorTest {
     private fun runScenario(
         paymentMethod: PaymentMethod = PaymentMethodFactory.card(last4 = "4242"),
         tapToAddMode: TapToAddMode = TapToAddMode.Continue,
-        isLinkAvailable: Boolean = false,
         initialLinkState: SavedPaymentMethodLinkFormHelper.State = SavedPaymentMethodLinkFormHelper.State.Unused,
+        linkElement: FormElement? = FakeFormElement,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val onContinueCalls = Turbine<PaymentSelection.Saved>()
@@ -193,8 +192,7 @@ internal class DefaultTapToAddCardAddedInteractorTest {
         val fakeEventReporter = FakeEventReporter()
         val fakeLinkFormHelper = FakeSavedPaymentMethodLinkFormHelper(
             initialState = initialLinkState,
-            isAvailable = isLinkAvailable,
-            formElement = FakeFormElement,
+            formElement = linkElement,
         )
 
         val scenario = Scenario(
@@ -231,8 +229,7 @@ internal class DefaultTapToAddCardAddedInteractorTest {
 
     private class FakeSavedPaymentMethodLinkFormHelper(
         initialState: SavedPaymentMethodLinkFormHelper.State,
-        override val isAvailable: Boolean,
-        override val formElement: FormElement,
+        override val formElement: FormElement?,
     ) : SavedPaymentMethodLinkFormHelper {
         private val _state = MutableStateFlow(initialState)
 

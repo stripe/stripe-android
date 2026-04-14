@@ -1,5 +1,6 @@
 package com.stripe.android.common.taptoadd.ui
 
+import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
@@ -12,7 +13,6 @@ import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import com.stripe.android.ui.core.FormUI
 import com.stripe.android.uicore.strings.resolve
 import kotlinx.coroutines.delay
-import kotlin.time.Duration.Companion.seconds
 
 @Composable
 internal fun ColumnScope.TapToAddCardAddedScreen(
@@ -21,7 +21,7 @@ internal fun ColumnScope.TapToAddCardAddedScreen(
     onScreenShown: () -> Unit,
 ) {
     LaunchedEffect(Unit) {
-        delay(2.5.seconds)
+        delay(TAP_TO_ADD_CARD_ADDED_SHOWN_DELAY)
         onScreenShown()
     }
 
@@ -57,3 +57,6 @@ internal fun ColumnScope.TapToAddCardAddedScreen(
         Spacer(Modifier.size(10.dp))
     }
 }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val TAP_TO_ADD_CARD_ADDED_SHOWN_DELAY = 2500L

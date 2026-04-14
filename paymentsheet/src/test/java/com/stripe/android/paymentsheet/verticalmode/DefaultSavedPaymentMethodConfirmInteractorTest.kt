@@ -65,7 +65,6 @@ class DefaultSavedPaymentMethodConfirmInteractorTest {
 
     private class FakeSavedPaymentMethodLinkFormHelper(
         initialState: SavedPaymentMethodLinkFormHelper.State = SavedPaymentMethodLinkFormHelper.State.Unused,
-        override val isAvailable: Boolean = false,
         override val formElement: FormElement? = null,
     ) : SavedPaymentMethodLinkFormHelper {
         private val _state = MutableStateFlow(initialState)

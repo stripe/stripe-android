@@ -1,5 +1,6 @@
 package com.stripe.android.common.taptoadd.ui
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -38,7 +39,7 @@ internal class DefaultTapToAddDelayInteractor(
 
     init {
         coroutineScope.launch {
-            delay(SHOWN_SCREEN_DELAY)
+            delay(TAP_TO_ADD_SHOWN_SCREEN_DELAY)
             onShown()
         }
     }
@@ -66,8 +67,7 @@ internal class DefaultTapToAddDelayInteractor(
             )
         }
     }
-
-    private companion object {
-        const val SHOWN_SCREEN_DELAY = 1000L
-    }
 }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val TAP_TO_ADD_SHOWN_SCREEN_DELAY = 1000L

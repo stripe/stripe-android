@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 internal interface SavedPaymentMethodLinkFormHelper {
-    val isAvailable: Boolean
     val state: StateFlow<State>
     val formElement: FormElement?
 
@@ -30,8 +29,6 @@ internal class DefaultSavedPaymentMethodLinkFormHelper @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     linkFormElementFactory: LinkFormElementFactory,
 ) : SavedPaymentMethodLinkFormHelper {
-    private val linkAvailabilityResult = linkInlineSignupAvailability.availability()
-
     private var storedCheckboxSelection: Boolean
         get() = savedStateHandle.get<Boolean>(SPM_LINK_CHECKBOX_SELECTED_KEY) == true
         set(value) {
@@ -43,8 +40,6 @@ internal class DefaultSavedPaymentMethodLinkFormHelper @Inject constructor(
         set(value) {
             savedStateHandle[SPM_LINK_INPUT_KEY] = value
         }
-
-    override val isAvailable: Boolean = linkAvailabilityResult is LinkInlineSignupAvailability.Result.Available
 
     private val _state = MutableStateFlow<SavedPaymentMethodLinkFormHelper.State>(
         SavedPaymentMethodLinkFormHelper.State.Unused

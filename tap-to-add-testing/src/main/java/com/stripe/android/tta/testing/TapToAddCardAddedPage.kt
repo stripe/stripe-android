@@ -5,6 +5,7 @@ import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.ComposeTestRule
+import com.stripe.android.common.taptoadd.ui.TAP_TO_ADD_CARD_ADDED_SHOWN_DELAY
 
 class TapToAddCardAddedPage(
     private val composeTestRule: ComposeTestRule,
@@ -57,7 +58,7 @@ class TapToAddCardAddedPage(
     }
 
     fun advancePastScreen() {
-        composeTestRule.mainClock.advanceTimeBy(CARD_ADDED_SHOWN_DELAY)
+        composeTestRule.mainClock.advanceTimeBy(TAP_TO_ADD_CARD_ADDED_SHOWN_DELAY)
     }
 
     fun waitUntilMissing() {
@@ -77,8 +78,4 @@ class TapToAddCardAddedPage(
     }
 
     private fun assertHasContinueButton() = primaryButtonElement.assert(withLabel = "Continue")
-
-    private companion object {
-        const val CARD_ADDED_SHOWN_DELAY = 2500L
-    }
 }

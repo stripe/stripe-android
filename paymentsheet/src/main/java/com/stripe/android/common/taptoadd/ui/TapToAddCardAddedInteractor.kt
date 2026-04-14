@@ -81,7 +81,9 @@ internal class DefaultTapToAddCardAddedInteractor(
             primaryButton = TapToAddCardAddedInteractor.State.PrimaryButton(
                 label = StripeUiCoreR.string.stripe_continue_button_label.resolvableString,
                 enabled = true,
-            ),
+            ).takeIf {
+                tapToAddMode == TapToAddMode.Complete || savedPaymentMethodLinkFormHelper.formElement != null
+            },
             form = TapToAddCardAddedInteractor.State.Form(
                 elements = savedPaymentMethodLinkFormHelper.formElement?.let {
                     listOf(it)
@@ -162,9 +164,7 @@ internal class DefaultTapToAddCardAddedInteractor(
         return copy(
             primaryButton = primaryButton?.copy(
                 enabled = linkState !is SavedPaymentMethodLinkFormHelper.State.Incomplete,
-            ).takeIf {
-                tapToAddMode == TapToAddMode.Complete || savedPaymentMethodLinkFormHelper.isAvailable
-            },
+            )
         )
     }
 
