@@ -1405,9 +1405,9 @@
 |    \--- io.sentry:sentry-android-replay:8.33.0
 |         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.24 (*)
 |         \--- io.sentry:sentry:8.33.0
-+--- com.stripe:stripeterminal-core:5.4.0
++--- com.stripe:stripeterminal-core:5.4.1
 |    +--- androidx.annotation:annotation:1.9.1 (*)
-|    +--- com.stripe:stripeterminal-external:5.4.0
+|    +--- com.stripe:stripeterminal-external:5.4.1
 |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.9.25 -> 2.2.21 (*)
 |    |    +--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.9.25 -> 2.2.21 (*)
 |    |    +--- androidx.annotation:annotation:1.9.1 (*)
@@ -1416,7 +1416,7 @@
 |    |         \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.21 -> 1.9.24 (*)
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.9.25 -> 2.2.21 (*)
 |    +--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.9.25 -> 2.2.21 (*)
-|    \--- com.stripe:stripeterminal-internal-common:5.4.0
+|    \--- com.stripe:stripeterminal-internal-common:5.4.1
 |         +--- org.jetbrains.kotlin:kotlin-stdlib:1.9.25 -> 2.2.21 (*)
 |         +--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.9.25 -> 2.2.21 (*)
 |         +--- androidx.annotation:annotation:1.9.1 (*)
@@ -1631,10 +1631,10 @@
 |         |    +--- com.squareup.moshi:moshi:1.15.0 -> 1.15.2 (*)
 |         |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.10 -> 1.9.24 (*)
 |         +--- com.squareup.wire:wire-runtime:4.9.11 (*)
-|         +--- com.stripe:stripeterminal-external:5.4.0 (*)
+|         +--- com.stripe:stripeterminal-external:5.4.1 (*)
 |         +--- androidx.sqlite:sqlite:2.4.0 (*)
 |         \--- androidx.sqlite:sqlite-framework:2.4.0 (*)
-\--- com.stripe:stripeterminal-taptopay:5.4.0
+\--- com.stripe:stripeterminal-taptopay:5.4.1
      +--- androidx.databinding:viewbinding:8.8.2 -> 8.13.2 (*)
      +--- org.jetbrains.kotlin:kotlin-stdlib:1.9.25 -> 2.2.21 (*)
      +--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.9.25 -> 2.2.21 (*)
@@ -1661,8 +1661,8 @@
      +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1 -> 1.10.2 (*)
      +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1 -> 1.10.2 (*)
      +--- com.squareup.wire:wire-moshi-adapter:4.9.11 (*)
-     +--- com.stripe:stripeterminal-external:5.4.0 (*)
-     +--- com.stripe:stripeterminal-internal-common:5.4.0 (*)
+     +--- com.stripe:stripeterminal-external:5.4.1 (*)
+     +--- com.stripe:stripeterminal-internal-common:5.4.1 (*)
      +--- com.fasterxml.jackson.core:jackson-databind:2.16.1
      |    +--- com.fasterxml.jackson.core:jackson-annotations:2.16.1
      |    |    \--- com.fasterxml.jackson:jackson-bom:2.16.1
