@@ -29,26 +29,22 @@ internal class DefaultIsStripeTerminalSdkAvailable @Inject constructor(
 
 internal class DefaultStripeTerminalVersionValidator @Inject constructor() : StripeTerminalVersionValidator {
     override operator fun invoke(versionName: String): Boolean {
-        val versionNumbers = versionName.split(".")
+        val segments = versionName.split(".")
 
-        if (versionNumbers.size == VERSION_SIZE) {
-            val majorVersion = versionNumbers[0].toIntOrNull() ?: 0
-
-            if (majorVersion < MIN_MAJOR_VERSION) {
-                return false
-            }
-
-            val minorVersion = versionNumbers[1].toIntOrNull() ?: 0
-
-            if (minorVersion < MIN_MINOR_VERSION) {
-                return false
-            }
-
-            val patchVersion = versionNumbers[2].toIntOrNull() ?: 0
-
-            return patchVersion >= PATCH_VERSION || minorVersion >= MIN_MINOR_VERSION + 1
-        } else {
+        if (segments.size != VERSION_SIZE) {
             return false
+        }
+
+        val major = segments[0].toIntOrNull() ?: return false
+        val minor = segments[1].toIntOrNull() ?: return false
+        val patch = segments[2].toIntOrNull() ?: return false
+
+        return when {
+            major > MIN_MAJOR_VERSION -> true
+            major < MIN_MAJOR_VERSION -> false
+            minor > MIN_MINOR_VERSION -> true
+            minor < MIN_MINOR_VERSION -> false
+            else -> patch >= MIN_PATCH_VERSION
         }
     }
 
@@ -56,6 +52,6 @@ internal class DefaultStripeTerminalVersionValidator @Inject constructor() : Str
         const val VERSION_SIZE = 3
         const val MIN_MAJOR_VERSION = 5
         const val MIN_MINOR_VERSION = 4
-        const val PATCH_VERSION = 1
+        const val MIN_PATCH_VERSION = 1
     }
 }

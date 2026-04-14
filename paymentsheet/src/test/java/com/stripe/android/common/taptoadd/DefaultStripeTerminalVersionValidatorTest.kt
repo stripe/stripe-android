@@ -39,6 +39,14 @@ class DefaultStripeTerminalVersionValidatorTest {
     }
 
     @Test
+    fun `returns true when major version is above 5`() {
+        assertThat(validator("6.0.0")).isTrue()
+        assertThat(validator("7.1.0")).isTrue()
+        assertThat(validator("8.2.0")).isTrue()
+        assertThat(validator("9.3.0")).isTrue()
+    }
+
+    @Test
     fun `returns false when version does not have three segments`() {
         assertThat(validator("5.4")).isFalse()
         assertThat(validator("5")).isFalse()
