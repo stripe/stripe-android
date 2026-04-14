@@ -21,8 +21,8 @@ import kotlinx.parcelize.Parcelize
 class KycInfo(
     val firstName: String?,
     val lastName: String?,
-    internal val idNumber: String?,
-    internal val dateOfBirth: DateOfBirth?,
+    val idNumber: String?,
+    val dateOfBirth: DateOfBirth?,
     val address: PaymentSheet.Address?
 )
 
