@@ -123,7 +123,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
         ) {
             interactor.performAction(TapToAddConfirmationInteractor.Action.PrimaryButtonPressed)
 
-            assertThat(eventReporter.tapToAddConfirmCalls.awaitItem()).isNotNull()
+            assertThat(eventReporter.tapToAddConfirmCalls.awaitItem()).isFalse()
             val args = confirmationHandlerScenario.startTurbine.awaitItem()
 
             assertThat(args.confirmationOption).isInstanceOf<LinkInlineSignupConfirmationOption.Saved>()
@@ -140,7 +140,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
     ) {
         interactor.performAction(TapToAddConfirmationInteractor.Action.PrimaryButtonPressed)
 
-        assertThat(eventReporter.tapToAddConfirmCalls.awaitItem()).isNotNull()
+        assertThat(eventReporter.tapToAddConfirmCalls.awaitItem()).isFalse()
         val args = confirmationHandlerScenario.startTurbine.awaitItem()
 
         assertThat(args.confirmationOption).isInstanceOf<PaymentMethodConfirmationOption.Saved>()
@@ -167,6 +167,28 @@ internal class DefaultTapToAddConfirmationInteractorTest {
             interactor.performAction(TapToAddConfirmationInteractor.Action.PrimaryButtonPressed)
             confirmationHandlerScenario.startTurbine.expectNoEvents()
         }
+    }
+
+    @Test
+    fun `PrimaryButtonPressed calls confirmationHandler start and proper event with CVC`() = runScenario(
+        paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(isTapToAddSupported = true),
+        initialCvcState = CvcFormHelper.State.Complete(cvc = "123")
+    ) {
+        interactor.performAction(TapToAddConfirmationInteractor.Action.PrimaryButtonPressed)
+
+        assertThat(eventReporter.tapToAddConfirmCalls.awaitItem()).isTrue()
+        val args = confirmationHandlerScenario.startTurbine.awaitItem()
+
+        assertThat(args.confirmationOption).isInstanceOf<PaymentMethodConfirmationOption.Saved>()
+
+        val confirmationOption = args.confirmationOption as PaymentMethodConfirmationOption.Saved
+
+        assertThat(confirmationOption.paymentMethod).isEqualTo(paymentMethod)
+        assertThat(confirmationOption.optionsParams).isEqualTo(
+            PaymentMethodOptionsParams.Card(cvc = "123")
+        )
+        assertThat(args.paymentMethodMetadata).isEqualTo(paymentMethodMetadata)
     }
 
     @Test
@@ -212,6 +234,36 @@ internal class DefaultTapToAddConfirmationInteractorTest {
                 .isEqualTo(
                     PaymentSelection.Saved(
                         paymentMethod = paymentMethod,
+                    )
+                )
+            assertThat(paymentSuccessEventCall.intentId).isEqualTo(intent.id)
+        }
+    }
+
+    @Test
+    fun `state calls complete when confirmation succeeds with CVC`() = runScenario(
+        paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
+        initialCvcState = CvcFormHelper.State.Complete(cvc = "123")
+    ) {
+        interactor.state.test {
+            assertThat(awaitItem().primaryButton.state)
+                .isEqualTo(TapToAddConfirmationInteractor.State.PrimaryButton.State.Idle)
+
+            val intent = PaymentIntentFixtures.PI_SUCCEEDED
+
+            confirmationHandlerScenario.confirmationState.value = ConfirmationHandler.State.Complete(
+                ConfirmationHandler.Result.Succeeded(intent),
+            )
+
+            assertThat(awaitItem().primaryButton.state)
+                .isEqualTo(TapToAddConfirmationInteractor.State.PrimaryButton.State.Success)
+
+            val paymentSuccessEventCall = eventReporter.paymentSuccessCalls.awaitItem()
+
+            assertThat(paymentSuccessEventCall.paymentSelection)
+                .isEqualTo(
+                    PaymentSelection.Saved(
+                        paymentMethod = paymentMethod,
                         paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(cvc = "123"),
                     )
                 )
@@ -222,6 +274,44 @@ internal class DefaultTapToAddConfirmationInteractorTest {
     @Test
     fun `state updates to Idle with error when confirmations fails`() = runScenario(
         paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
+    ) {
+        val errorMessage = "Payment failed".resolvableString
+        interactor.state.test {
+            assertThat(awaitItem().primaryButton.state)
+                .isEqualTo(TapToAddConfirmationInteractor.State.PrimaryButton.State.Idle)
+
+            val exception = Exception("Payment failed")
+
+            confirmationHandlerScenario.confirmationState.value = ConfirmationHandler.State.Complete(
+                ConfirmationHandler.Result.Failed(
+                    cause = exception,
+                    message = errorMessage,
+                    type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                ),
+            )
+
+            val state = awaitItem()
+            assertThat(state.primaryButton.state)
+                .isEqualTo(TapToAddConfirmationInteractor.State.PrimaryButton.State.Idle)
+            assertThat(state.error).isEqualTo(errorMessage)
+
+            val paymentFailureEventCall = eventReporter.paymentFailureCalls.awaitItem()
+
+            assertThat(paymentFailureEventCall.paymentSelection)
+                .isEqualTo(
+                    PaymentSelection.Saved(
+                        paymentMethod = paymentMethod,
+                    )
+                )
+            assertThat(paymentFailureEventCall.error)
+                .isEqualTo(PaymentSheetConfirmationError.Stripe(exception))
+        }
+    }
+
+    @Test
+    fun `state updates to Idle with error when confirmations fails with CVC`() = runScenario(
+        paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
+        initialCvcState = CvcFormHelper.State.Complete(cvc = "123")
     ) {
         val errorMessage = "Payment failed".resolvableString
         interactor.state.test {
@@ -299,7 +389,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
         ) {
             interactor.performAction(TapToAddConfirmationInteractor.Action.PrimaryButtonPressed)
 
-            assertThat(eventReporter.tapToAddConfirmCalls.awaitItem()).isNotNull()
+            assertThat(eventReporter.tapToAddConfirmCalls.awaitItem()).isTrue()
             val args = confirmationHandlerScenario.startTurbine.awaitItem()
 
             assertThat(args.confirmationOption).isInstanceOf<PaymentMethodConfirmationOption.Saved>()
@@ -440,7 +530,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
         paymentMethodMetadata: PaymentMethodMetadata =
             PaymentMethodMetadataFactory.create(isTapToAddSupported = true),
         initialConfirmationState: ConfirmationHandler.State = ConfirmationHandler.State.Idle,
-        initialCvcState: CvcFormHelper.State = CvcFormHelper.State.Complete("123"),
+        initialCvcState: CvcFormHelper.State = CvcFormHelper.State.NotRequired,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val eventReporter = FakeEventReporter()

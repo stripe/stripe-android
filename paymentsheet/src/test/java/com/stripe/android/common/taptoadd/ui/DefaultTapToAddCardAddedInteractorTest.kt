@@ -87,14 +87,26 @@ internal class DefaultTapToAddCardAddedInteractorTest {
     }
 
     @Test
-    fun `PrimaryButtonPressed in Continue mode calls onContinue with payment method`() =
+    fun `PrimaryButtonPressed reports completed link input false when link form is available but unused`() =
         runScenario(
-            tapToAddMode = TapToAddMode.Continue,
-            initialLinkState = SavedPaymentMethodLinkFormHelper.State.Unused,
+            tapToAddMode = TapToAddMode.Complete,
+            initialLinkState = SavedPaymentMethodLinkFormHelper.State.Unused
         ) {
             interactor.performAction(TapToAddCardAddedInteractor.Action.PrimaryButtonPressed)
 
-            assertThat(fakeEventReporter.tapToAddContinueAfterCardAddedCalls.awaitItem()).isNotNull()
+            assertThat(fakeEventReporter.tapToAddContinueAfterCardAddedCalls.awaitItem()).isFalse()
+            onConfirmCalls.awaitItem()
+        }
+
+    @Test
+    fun `PrimaryButtonPressed in Continue mode calls onContinue with payment method`() =
+        runScenario(
+            tapToAddMode = TapToAddMode.Continue,
+            linkElement = null,
+        ) {
+            interactor.performAction(TapToAddCardAddedInteractor.Action.PrimaryButtonPressed)
+
+            assertThat(fakeEventReporter.tapToAddContinueAfterCardAddedCalls.awaitItem()).isNull()
             val selection = onContinueCalls.awaitItem()
             assertThat(selection.paymentMethod).isEqualTo(paymentMethod)
             assertThat(selection.linkInput).isNull()
@@ -108,7 +120,7 @@ internal class DefaultTapToAddCardAddedInteractorTest {
         ) {
             interactor.performAction(TapToAddCardAddedInteractor.Action.PrimaryButtonPressed)
 
-            assertThat(fakeEventReporter.tapToAddContinueAfterCardAddedCalls.awaitItem()).isNotNull()
+            assertThat(fakeEventReporter.tapToAddContinueAfterCardAddedCalls.awaitItem()).isTrue()
             val selection = onContinueCalls.awaitItem()
             assertThat(selection.paymentMethod).isEqualTo(paymentMethod)
             assertThat(selection.linkInput).isEqualTo(mockUserInput())
@@ -118,11 +130,11 @@ internal class DefaultTapToAddCardAddedInteractorTest {
     fun `PrimaryButtonPressed in Complete mode calls onConfirm with payment method`() =
         runScenario(
             tapToAddMode = TapToAddMode.Complete,
-            initialLinkState = SavedPaymentMethodLinkFormHelper.State.Unused,
+            linkElement = null,
         ) {
             interactor.performAction(TapToAddCardAddedInteractor.Action.PrimaryButtonPressed)
 
-            assertThat(fakeEventReporter.tapToAddContinueAfterCardAddedCalls.awaitItem()).isNotNull()
+            assertThat(fakeEventReporter.tapToAddContinueAfterCardAddedCalls.awaitItem()).isNull()
             val (confirmedPm, linkInput) = onConfirmCalls.awaitItem()
             assertThat(confirmedPm).isEqualTo(paymentMethod)
             assertThat(linkInput).isNull()
@@ -172,7 +184,7 @@ internal class DefaultTapToAddCardAddedInteractorTest {
         ) {
             interactor.performAction(TapToAddCardAddedInteractor.Action.PrimaryButtonPressed)
 
-            assertThat(fakeEventReporter.tapToAddContinueAfterCardAddedCalls.awaitItem()).isNotNull()
+            assertThat(fakeEventReporter.tapToAddContinueAfterCardAddedCalls.awaitItem()).isTrue()
             val (confirmedPaymentMethod, confirmedLinkInput) = onConfirmCalls.awaitItem()
             assertThat(confirmedPaymentMethod).isEqualTo(paymentMethod)
             assertThat(confirmedLinkInput).isEqualTo(mockUserInput())

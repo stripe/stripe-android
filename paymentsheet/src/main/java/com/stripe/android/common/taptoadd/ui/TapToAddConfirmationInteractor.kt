@@ -162,7 +162,9 @@ internal class DefaultTapToAddConfirmationInteractor(
             return
         }
 
-        eventReporter.onTapToAddConfirm()
+        eventReporter.onTapToAddConfirm(
+            recollectedCvc = cvcFormHelper.state.value is CvcFormHelper.State.Complete,
+        )
 
         val confirmationOption = selection.value.toConfirmationOption(
             linkConfiguration = paymentMethodMetadata.linkState?.configuration,

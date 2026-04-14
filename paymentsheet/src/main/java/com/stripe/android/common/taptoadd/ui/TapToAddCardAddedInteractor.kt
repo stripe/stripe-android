@@ -111,7 +111,6 @@ internal class DefaultTapToAddCardAddedInteractor(
                 onScreenShown()
             }
             TapToAddCardAddedInteractor.Action.PrimaryButtonPressed -> {
-                eventReporter.onTapToAddContinueAfterCardAdded()
                 onPrimaryButtonPressed()
             }
             TapToAddCardAddedInteractor.Action.CancelPressed -> {
@@ -135,6 +134,15 @@ internal class DefaultTapToAddCardAddedInteractor(
     }
 
     private fun onPrimaryButtonPressed() {
+        val currentLinkState = savedPaymentMethodLinkFormHelper.state.value
+        val completedLinkInput = currentLinkState is SavedPaymentMethodLinkFormHelper.State.Complete
+
+        eventReporter.onTapToAddContinueAfterCardAdded(
+            completedLinkInput = completedLinkInput.takeIf {
+                savedPaymentMethodLinkFormHelper.formElement != null
+            }
+        )
+
         when (tapToAddMode) {
             TapToAddMode.Continue -> onContinue()
             TapToAddMode.Complete -> onConfirm(paymentMethod, getLinkInput())
