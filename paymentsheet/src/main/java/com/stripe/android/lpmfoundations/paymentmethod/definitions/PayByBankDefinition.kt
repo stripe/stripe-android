@@ -31,6 +31,6 @@ private object PayByBankUiDefinitionFactory : UiDefinitionFactory.Simple() {
         paymentMethodDefinition = PayByBankDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_pay_by_bank,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_pay_by_bank,
-        iconResourceNight = null,
+        iconResourceNight = R.drawable.stripe_ic_paymentsheet_pm_pay_by_bank_night,
     )
 }
