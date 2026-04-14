@@ -7,6 +7,7 @@ import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.embedded.EmbeddedResultCallbackHelper
@@ -32,6 +33,7 @@ internal interface EmbeddedSheetLauncher {
         hasSavedPaymentMethods: Boolean,
         embeddedConfirmationState: EmbeddedConfirmationStateHolder.State?,
         customerState: CustomerState?,
+        promotion: PaymentMethodMessagePromotion?,
     )
 
     fun launchManage(
@@ -110,7 +112,8 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         paymentMethodMetadata: PaymentMethodMetadata,
         hasSavedPaymentMethods: Boolean,
         embeddedConfirmationState: EmbeddedConfirmationStateHolder.State?,
-        customerState: CustomerState?
+        customerState: CustomerState?,
+        promotion: PaymentMethodMessagePromotion?,
     ) {
         val checkoutSession = paymentMethodMetadata.integrationMetadata as? IntegrationMetadata.CheckoutSession
         if (checkoutSession != null) {
@@ -138,6 +141,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             statusBarColor = statusBarColor,
             paymentSelection = currentSelection,
             customerState = customerState,
+            promotion = promotion
         )
         formActivityLauncher.launch(args)
     }
