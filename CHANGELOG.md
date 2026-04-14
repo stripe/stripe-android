@@ -3,6 +3,8 @@
 ## XX.XX.XX - 20XX-XX-XX
 
 ## 23.4.0 - 2026-04-14
+### Crypto Onramp (Private Preview)
+* [ADDED][12740](https://github.com/stripe/stripe-android/pull/12740) Ability to Receive L0 KYC Info From Google Pay
 
 ## 23.3.0 - 2026-04-06
 ### AddressElement
