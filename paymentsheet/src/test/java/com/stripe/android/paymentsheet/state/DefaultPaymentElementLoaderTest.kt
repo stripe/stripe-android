@@ -1686,6 +1686,58 @@ internal class DefaultPaymentElementLoaderTest {
         }
     }
 
+    @OptIn(SharedPaymentTokenSessionPreview::class)
+    @Test
+    fun `Returns failure if both sellerDetails and paymentMethodConfigurationId are provided`() = runScenario {
+        assertFailsWith<IllegalArgumentException>(
+            "paymentMethodConfigurationId and sellerDetails are mutually exclusive."
+        ) {
+            PaymentElementLoader.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 1000,
+                        currency = "usd",
+                    ),
+                    sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                        networkBusinessProfile = "bnp_abc123",
+                    ),
+                    paymentMethodConfigurationId = "pmc_123",
+                ),
+            ).validate()
+        }
+    }
+
+    @OptIn(SharedPaymentTokenSessionPreview::class)
+    @Test
+    fun `Validates successfully when only sellerDetails is provided`() = runScenario {
+        PaymentElementLoader.InitializationMode.DeferredIntent(
+            intentConfiguration = PaymentSheet.IntentConfiguration(
+                sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    amount = 1000,
+                    currency = "usd",
+                ),
+                sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                    networkBusinessProfile = "bnp_abc123",
+                ),
+            ),
+        ).validate()
+    }
+
+    @OptIn(SharedPaymentTokenSessionPreview::class)
+    @Test
+    fun `Validates successfully when only paymentMethodConfigurationId is provided with sellerDetails`() = runScenario {
+        PaymentElementLoader.InitializationMode.DeferredIntent(
+            intentConfiguration = PaymentSheet.IntentConfiguration(
+                sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    amount = 1000,
+                    currency = "usd",
+                ),
+                sellerDetails = null,
+                paymentMethodConfigurationId = "pmc_123",
+            ),
+        ).validate()
+    }
+
     @Test
     fun `CheckoutSession validate is a no-op`() = runScenario {
         PaymentElementLoader.InitializationMode.CheckoutSession(
