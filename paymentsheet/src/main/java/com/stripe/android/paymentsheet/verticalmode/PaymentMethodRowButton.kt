@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import android.content.res.Configuration
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -33,11 +34,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle
@@ -66,6 +72,7 @@ internal fun PaymentMethodRowButton(
     contentDescription: String? = null,
     modifier: Modifier = Modifier,
     appearance: Appearance.Embedded = Appearance.Embedded(RowStyle.FloatingButton.default),
+    promotionProvider: (() -> PaymentMethodMessagePromotion?)?,
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
 ) {
     val defaultPadding = if (subtitle != null) {
@@ -102,6 +109,8 @@ internal fun PaymentMethodRowButton(
                 iconContent = iconContent,
                 title = title,
                 subtitle = subtitle,
+                promotionProvider = promotionProvider,
+                isSelected = isSelected,
                 contentDescription = contentDescription,
                 appearance = appearance,
                 modifier = if (appearance.style.shouldAddModifierWeight()) {
@@ -338,6 +347,8 @@ private fun RowButtonInnerContent(
     iconContent: @Composable RowScope.() -> Unit,
     title: String,
     subtitle: String?,
+    promotionProvider: (() -> PaymentMethodMessagePromotion?)?,
+    isSelected: Boolean,
     contentDescription: String? = null,
     appearance: Appearance.Embedded,
     modifier: Modifier = Modifier
@@ -353,7 +364,9 @@ private fun RowButtonInnerContent(
         TitleContent(
             title = title,
             subtitle = subtitle,
+            promotionSupplier = promotionProvider,
             isEnabled = isEnabled,
+            isSelected = isSelected,
             contentDescription = contentDescription,
             appearance = appearance
         )
@@ -372,12 +385,14 @@ private fun RowButtonInnerContent(
 private fun TitleContent(
     title: String,
     subtitle: String?,
+    promotionSupplier: (() -> PaymentMethodMessagePromotion?)?,
     isEnabled: Boolean,
+    isSelected: Boolean,
     contentDescription: String?,
     appearance: Appearance.Embedded,
 ) {
     val titleColor = appearance.style.getTitleTextColor()
-    Column {
+    Column(Modifier.animateContentSize()) {
         Text(
             text = title,
             style = appearance.titleFont?.toTextStyle()
@@ -392,14 +407,60 @@ private fun TitleContent(
             }
         )
 
-        if (subtitle != null) {
-            val subtitleTextColor = appearance.style.getSubtitleTextColor()
-            Text(
-                text = subtitle,
-                style = appearance.subtitleFont?.toTextStyle()
-                    ?: MaterialTheme.typography.caption.copy(fontWeight = FontWeight.Normal),
-                color = if (isEnabled) subtitleTextColor else subtitleTextColor.copy(alpha = 0.6f),
+        if (promotionSupplier == null) {
+            if (subtitle != null) {
+                Subtitle(
+                    appearance = appearance,
+                    subtitle = subtitle,
+                    isEnabled = isEnabled
+                )
+            }
+        } else {
+            val promotion = promotionSupplier()
+            if (isSelected) {
+                if (promotion != null) {
+                    Text(buildPaymentMethodMessage(promotion))
+                } else if (subtitle != null) {
+                    // Fallback to subtitle on click if promotion wasn't fetched successfully
+                    Subtitle(
+                        appearance = appearance,
+                        subtitle = subtitle,
+                        isEnabled = isEnabled
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(AppearanceAPIAdditionsPreview::class)
+@Composable
+private fun Subtitle(
+    appearance: Appearance.Embedded,
+    subtitle: String?,
+    isEnabled: Boolean
+) {
+    if (subtitle != null) {
+        val subtitleTextColor = appearance.style.getSubtitleTextColor()
+        Text(
+            text = subtitle,
+            style = appearance.subtitleFont?.toTextStyle()
+                ?: MaterialTheme.typography.caption.copy(fontWeight = FontWeight.Normal),
+            color = if (isEnabled) subtitleTextColor else subtitleTextColor.copy(alpha = 0.6f),
+        )
+    }
+}
+
+private fun buildPaymentMethodMessage(promotion: PaymentMethodMessagePromotion): AnnotatedString {
+    return buildAnnotatedString {
+        append(promotion.message)
+        append(". ")
+        withLink(
+            LinkAnnotation.Url(
+                url = promotion.learnMore.url
             )
+        ) {
+            append(promotion.learnMore.message)
         }
     }
 }
@@ -433,6 +494,7 @@ private fun ButtonPreview() {
                 promoText = null,
                 onClick = {},
                 appearance = Appearance.Embedded.default,
+                promotionProvider = { null },
                 trailingContent = {
                     Text("Edit")
                 }
@@ -458,6 +520,7 @@ private fun ButtonPreview() {
                 promoText = null,
                 onClick = {},
                 appearance = Appearance.Embedded.default,
+                promotionProvider = { null },
                 trailingContent = {
                     Text("Edit")
                 }
