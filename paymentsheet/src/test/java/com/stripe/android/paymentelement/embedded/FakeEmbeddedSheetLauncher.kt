@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.embedded
 
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetLauncher
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -13,6 +14,7 @@ internal class FakeEmbeddedSheetLauncher : EmbeddedSheetLauncher {
         hasSavedPaymentMethods: Boolean,
         embeddedConfirmationState: EmbeddedConfirmationStateHolder.State?,
         customerState: CustomerState?,
+        promotion: PaymentMethodMessagePromotion?,
     ) {
         error("Not expected.")
     }
