@@ -98,7 +98,31 @@ class DefaultEventReporterTest {
         assertThat(request.params).containsEntry("duration", 1.0f)
         assertThat(request.params).containsEntry("selected_lpm", "google_pay")
         assertThat(request.params).containsEntry("ordered_lpms", "card")
+        assertThat(request.params).containsEntry("has_card_art", false)
         assertThat(request.params).containsEntry("example_from_test", true)
+    }
+
+    @Test
+    fun `onLoadSucceeded includes has card art when true`() = runScenario {
+        durationProvider.startCalls.push(
+            FakeDurationProvider.StartCall(
+                key = DurationProvider.Key.Checkout,
+                reset = true,
+            )
+        )
+        durationProvider.endCalls.push(
+            FakeDurationProvider.EndCall(
+                key = DurationProvider.Key.Loading,
+                duration = 1.seconds,
+            )
+        )
+        eventReporter.onLoadSucceeded(
+            paymentSelection = PaymentSelection.GooglePay,
+            paymentMethodMetadata = paymentMethodMetadataWithTestAnalyticsMetadata.copy(hasCardArt = true),
+        )
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("has_card_art", true)
     }
 
     @Test

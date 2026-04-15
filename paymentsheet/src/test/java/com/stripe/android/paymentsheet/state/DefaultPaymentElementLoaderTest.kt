@@ -1858,6 +1858,75 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
+    fun `Emits hasCardArt when loading succeeds with saved card art`() = runScenario {
+        val loader = createPaymentElementLoader(
+            linkSettings = createLinkSettings(passthroughModeEnabled = false),
+            customer = createElementsSessionCustomer(
+                paymentMethods = listOf(
+                    PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
+                        card = PaymentMethodFixtures.CARD.copy(
+                            cardArt = PaymentMethod.Card.CardArt(
+                                artImage = PaymentMethod.Card.CardArt.ArtImage(
+                                    format = "image/png",
+                                    url = "https://example.com/art.png",
+                                ),
+                                programName = "Test Program",
+                            )
+                        )
+                    )
+                )
+            ),
+        )
+
+        loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = PaymentSheet.Configuration(
+                merchantDisplayName = "Some Name",
+                customer = PaymentSheet.CustomerConfiguration(
+                    id = "cus_123",
+                    ephemeralKeySecret = "ek_123",
+                ),
+            ),
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
+        )
+
+        consumeLoadingEvents()
+
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        val loadSucceededCall = eventReporter.loadSucceededTurbine.awaitItem()
+        assertThat(loadSucceededCall.paymentMethodMetadata.hasCardArt).isTrue()
+    }
+
+    @Test
+    fun `Emits hasCardArt false when loading succeeds without saved card art`() = runScenario {
+        val loader = createPaymentElementLoader(
+            linkSettings = createLinkSettings(passthroughModeEnabled = false),
+        )
+
+        loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = PaymentSheet.Configuration(
+                merchantDisplayName = "Some Name",
+                customer = PaymentSheet.CustomerConfiguration(
+                    id = "cus_123",
+                    ephemeralKeySecret = "ek_123",
+                ),
+            ),
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
+        )
+
+        consumeLoadingEvents()
+
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        val loadSucceededCall = eventReporter.loadSucceededTurbine.awaitItem()
+        assertThat(loadSucceededCall.paymentMethodMetadata.hasCardArt).isFalse()
+    }
+
+    @Test
     fun `Emits correct events when loading succeeds with saved LPM selection`() = runScenario {
         testSuccessfulLoadSendsEventsCorrectly(
             paymentSelection = PaymentSelection.Saved(
