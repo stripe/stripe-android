@@ -34,12 +34,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.LinkAnnotation
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withLink
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -52,6 +48,7 @@ import com.stripe.android.paymentsheet.ui.DefaultPaymentMethodLabel
 import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
 import com.stripe.android.paymentsheet.ui.PromoBadge
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconWidth
+import com.stripe.android.ui.core.elements.PaymentMethodMessagePromotionText
 import com.stripe.android.uicore.DefaultStripeTheme
 import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
@@ -364,7 +361,7 @@ private fun RowButtonInnerContent(
         TitleContent(
             title = title,
             subtitle = subtitle,
-            promotionSupplier = promotionProvider,
+            promotionProvider = promotionProvider,
             isEnabled = isEnabled,
             isSelected = isSelected,
             contentDescription = contentDescription,
@@ -385,7 +382,7 @@ private fun RowButtonInnerContent(
 private fun TitleContent(
     title: String,
     subtitle: String?,
-    promotionSupplier: (() -> PaymentMethodMessagePromotion?)?,
+    promotionProvider: (() -> PaymentMethodMessagePromotion?)?,
     isEnabled: Boolean,
     isSelected: Boolean,
     contentDescription: String?,
@@ -407,7 +404,7 @@ private fun TitleContent(
             }
         )
 
-        if (promotionSupplier == null) {
+        if (promotionProvider == null) {
             if (subtitle != null) {
                 Subtitle(
                     appearance = appearance,
@@ -416,10 +413,10 @@ private fun TitleContent(
                 )
             }
         } else {
-            val promotion = promotionSupplier()
+            val promotion = promotionProvider()
             if (isSelected) {
                 if (promotion != null) {
-                    Text(buildPaymentMethodMessage(promotion))
+                    PaymentMethodMessagePromotionText(promotion)
                 } else if (subtitle != null) {
                     // Fallback to subtitle on click if promotion wasn't fetched successfully
                     Subtitle(
@@ -448,20 +445,6 @@ private fun Subtitle(
                 ?: MaterialTheme.typography.caption.copy(fontWeight = FontWeight.Normal),
             color = if (isEnabled) subtitleTextColor else subtitleTextColor.copy(alpha = 0.6f),
         )
-    }
-}
-
-private fun buildPaymentMethodMessage(promotion: PaymentMethodMessagePromotion): AnnotatedString {
-    return buildAnnotatedString {
-        append(promotion.message)
-        append(". ")
-        withLink(
-            LinkAnnotation.Url(
-                url = promotion.learnMore.url
-            )
-        ) {
-            append(promotion.learnMore.message)
-        }
     }
 }
 
