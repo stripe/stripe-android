@@ -1,16 +1,22 @@
 package com.stripe.android.paymentelement.taptoadd
 
 import androidx.compose.ui.test.junit4.ComposeTestRule
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.EmbeddedFormPage
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.EmbeddedPaymentElementTestRunnerContext
+import com.stripe.android.paymentelement.embedded.form.EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet as StripePaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetPage
 import com.stripe.android.paymentsheet.utils.FlowControllerTestRunnerContext
 import com.stripe.android.paymentsheet.utils.PaymentSheetTestRunnerContext
+import com.stripe.paymentelementtestpages.DEFAULT_PE_PAGE_UI_TIMEOUT
 
 internal sealed class TapToAddIntegrationTestRunnerContext(
     protected val composeTestRule: ComposeTestRule,
@@ -33,6 +39,10 @@ internal sealed class TapToAddIntegrationTestRunnerContext(
 
     abstract suspend fun confirm()
 
+    abstract fun clickPrimaryButton()
+
+    abstract fun markTestSucceeded()
+
     sealed class Sheet(
         composeTestRule: ComposeTestRule,
     ) : TapToAddIntegrationTestRunnerContext(composeTestRule) {
@@ -47,6 +57,10 @@ internal sealed class TapToAddIntegrationTestRunnerContext(
         final override fun openCardForm() {
             paymentSheetPage.clickOnLpm(code = "card", forVerticalMode = true)
             paymentSheetPage.waitForCardForm()
+        }
+
+        final override fun clickPrimaryButton() {
+            paymentSheetPage.clickPrimaryButton()
         }
 
         class PaymentSheet(
@@ -64,6 +78,10 @@ internal sealed class TapToAddIntegrationTestRunnerContext(
 
             override suspend fun confirm() {
                 throw IllegalStateException("Should confirm from Tap to Add flow!")
+            }
+
+            override fun markTestSucceeded() {
+                context.markTestSucceeded()
             }
         }
 
@@ -93,6 +111,10 @@ internal sealed class TapToAddIntegrationTestRunnerContext(
 
                 context.flowController.confirm()
             }
+
+            override fun markTestSucceeded() {
+                context.markTestSucceeded()
+            }
         }
     }
 
@@ -120,9 +142,36 @@ internal sealed class TapToAddIntegrationTestRunnerContext(
             )
         }
 
+        override fun clickPrimaryButton() {
+            composeTestRule.onNodeWithTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON)
+                .performScrollTo()
+                .performClick()
+
+            composeTestRule.waitUntil(DEFAULT_PE_PAGE_UI_TIMEOUT) {
+                !hasPrimaryButton()
+            }
+
+            composeTestRule.waitForIdle()
+        }
+
         final override fun openCardForm() {
             embeddedContentPage.clickOnLpm("card")
             embeddedFormPage.waitUntilVisible()
+        }
+
+        override suspend fun confirm() {
+            val paymentOption = context.paymentOptionTurbine.awaitItem()
+
+            assertThat(paymentOption?.label).isEqualTo("···· 4242")
+            assertThat(paymentOption?.paymentMethodType).isEqualTo("card")
+
+            context.confirm()
+        }
+
+        protected fun hasPrimaryButton(): Boolean {
+            return composeTestRule.onAllNodesWithTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON)
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isNotEmpty()
         }
 
         class Continue(
@@ -131,13 +180,8 @@ internal sealed class TapToAddIntegrationTestRunnerContext(
         ) : Embedded(composeTestRule, context) {
             override val formSheetAction = EmbeddedPaymentElement.FormSheetAction.Continue
 
-            override suspend fun confirm() {
-                val paymentOption = context.paymentOptionTurbine.awaitItem()
-
-                assertThat(paymentOption?.label).isEqualTo("···· 4242")
-                assertThat(paymentOption?.paymentMethodType).isEqualTo("card")
-
-                context.confirm()
+            override fun markTestSucceeded() {
+                context.markTestSucceeded()
             }
         }
 
@@ -147,8 +191,8 @@ internal sealed class TapToAddIntegrationTestRunnerContext(
         ) : Embedded(composeTestRule, context)  {
             override val formSheetAction = EmbeddedPaymentElement.FormSheetAction.Confirm
 
-            override suspend fun confirm() {
-                throw IllegalStateException("Should confirm from Tap to Add flow!")
+            override fun markTestSucceeded() {
+                context.markTestSucceeded()
             }
         }
     }

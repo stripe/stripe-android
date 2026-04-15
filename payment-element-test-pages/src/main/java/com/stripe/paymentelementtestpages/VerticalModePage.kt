@@ -40,6 +40,15 @@ class VerticalModePage(
         }
     }
 
+    fun waitUntilMissing() {
+        composeTestRule.waitUntil(DEFAULT_PE_PAGE_UI_TIMEOUT) {
+            composeTestRule
+                .onAllNodes(hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT))
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isEmpty()
+        }
+    }
+
     fun clickOnNewLpm(paymentMethodCode: PaymentMethodCode) {
         composeTestRule.onNode(hasTestTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodCode"))
             .performScrollTo()
@@ -130,7 +139,7 @@ class VerticalModePage(
     }
 
     fun clickNewPaymentMethodButton(paymentMethodCode: PaymentMethodCode) {
-        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_PE_PAGE_UI_TIMEOUT) {
             composeTestRule
                 .onAllNodes(hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT))
                 .fetchSemanticsNodes()

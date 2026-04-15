@@ -5,6 +5,7 @@ import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.ComposeTestRule
+import com.stripe.android.common.taptoadd.ui.TAP_TO_ADD_CARD_ADDED_PRIMARY_BUTTON
 import com.stripe.android.common.taptoadd.ui.TAP_TO_ADD_CARD_ADDED_SHOWN_DELAY
 
 class TapToAddCardAddedPage(
@@ -62,7 +63,7 @@ class TapToAddCardAddedPage(
     }
 
     fun waitUntilMissing() {
-        composeTestRule.waitUntilLayoutWithPrimaryButtonMissing()
+        composeTestRule.waitUntilLayoutWithPrimaryButtonMissing(TAP_TO_ADD_CARD_ADDED_PRIMARY_BUTTON)
     }
 
     private fun assertHasCardAddedText() {

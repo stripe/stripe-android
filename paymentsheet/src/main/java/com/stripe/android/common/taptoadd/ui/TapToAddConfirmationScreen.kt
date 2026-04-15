@@ -1,5 +1,6 @@
 package com.stripe.android.common.taptoadd.ui
 
+import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
@@ -10,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -62,6 +64,7 @@ internal fun ColumnScope.TapToAddConfirmationScreen(
 
         with(state.primaryButton) {
             PrimaryButton(
+                modifier = Modifier.testTag(TAP_TO_ADD_CONFIRMATION_PRIMARY_BUTTON),
                 label = label.resolve(),
                 locked = locked,
                 enabled = enabled,
@@ -81,3 +84,6 @@ internal fun ColumnScope.TapToAddConfirmationScreen(
         Spacer(Modifier.size(10.dp))
     }
 }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val TAP_TO_ADD_CONFIRMATION_PRIMARY_BUTTON = "TAP_TO_ADD_CONFIRMATION_PRIMARY_BUTTON"
