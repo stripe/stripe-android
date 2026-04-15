@@ -64,7 +64,7 @@ internal fun NewPaymentMethodRowButton(
     modifier: Modifier = Modifier,
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
     appearance: Embedded = Embedded(Embedded.RowStyle.FloatingButton.default),
-    promotionProvider: (() -> PaymentMethodMessagePromotion?)?
+    promotionProvider: (() -> PaymentMethodMessagePromotion?)? = null
 ) {
     PaymentMethodRowButton(
         isEnabled = isEnabled,

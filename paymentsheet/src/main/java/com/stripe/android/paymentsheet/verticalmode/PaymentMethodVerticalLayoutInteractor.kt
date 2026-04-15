@@ -25,6 +25,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.mandateTextFromPaymentMethodMetadata
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
+import com.stripe.android.paymentsheet.repositories.PromotionSupportedPaymentMethods
 import com.stripe.android.paymentsheet.state.WalletLocation
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.ViewAction
@@ -660,7 +661,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     }
 
     private fun getPromotionProvider(code: PaymentMethodCode): (() -> PaymentMethodMessagePromotion?)? {
-        return if (FeatureFlags.paymentMethodMessagePromotions.isEnabled) {
+        return if (FeatureFlags.paymentMethodMessagePromotions.isEnabled &&
+            PromotionSupportedPaymentMethods.supportedPaymentMethods.contains(code)
+        ) {
             { paymentMethodMessagePromotionsHelper?.getPromotionIfAvailableForCode(code) }
         } else {
             null

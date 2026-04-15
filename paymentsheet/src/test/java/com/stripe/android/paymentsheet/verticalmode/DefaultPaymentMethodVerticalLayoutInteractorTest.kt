@@ -8,6 +8,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.R
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -27,6 +28,7 @@ import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.verticalmode.CurrencyOption
@@ -37,6 +39,7 @@ import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.stateFlowOf
+import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -1682,6 +1685,50 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         }
     }
 
+    @Test
+    fun `Passes promotion provider to supported bnpls`() {
+        FeatureFlags.paymentMethodMessagePromotions.setEnabled(true)
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna")
+            )
+        )
+        runScenario(
+            promotionsHelper = FakePaymentMethodMessagePromotionsHelper.Factory.create(),
+            paymentMethodMetadata = metadata
+        ) {
+            interactor.state.test {
+                val paymentMethods = awaitItem().displayablePaymentMethods
+                val promotionProvider = paymentMethods.first { it.code == "klarna" }.promotionProvider
+                assertThat(promotionProvider).isNotNull()
+                assertThat(promotionProvider?.invoke()).isEqualTo(
+                    FakePaymentMethodMessagePromotionsHelper.klarnaPromotion
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `Does not pass promotion provider to unsupported PMs`() {
+        FeatureFlags.paymentMethodMessagePromotions.setEnabled(true)
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna")
+            )
+        )
+        runScenario(
+            promotionsHelper = FakePaymentMethodMessagePromotionsHelper.Factory.create(),
+            paymentMethodMetadata = metadata
+        ) {
+            interactor.state.test {
+                val paymentMethods = awaitItem().displayablePaymentMethods
+                val paymentMethod = paymentMethods.first { it.code == "card" }
+                assertThat(paymentMethod).isNotNull()
+                assertThat(paymentMethod.promotionProvider).isNull()
+            }
+        }
+    }
+
     private val notImplemented: () -> Nothing = { throw AssertionError("Not implemented") }
 
     private val linkAndGooglePayWalletState = WalletsState(
@@ -1739,6 +1786,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         initialWalletsState: WalletsState? = null,
         displaysMandatesInFormScreen: Boolean = false,
         initialCurrencySelectorOptions: CurrencySelectorOptions? = null,
+        promotionsHelper: PaymentMethodMessagePromotionsHelper? = null,
         testBlock: suspend TestParams.() -> Unit
     ) {
         val processing: MutableStateFlow<Boolean> = MutableStateFlow(initialProcessing)
@@ -1811,7 +1859,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             onCurrencySelected = { currencyOption ->
                 onCurrencySelectedTurbine.add(currencyOption)
             },
-            paymentMethodMessagePromotionsHelper = null
+            paymentMethodMessagePromotionsHelper = promotionsHelper
         )
 
         TestParams(
