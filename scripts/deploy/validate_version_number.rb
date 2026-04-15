@@ -51,8 +51,60 @@ def validate_target_version_is_newer(target_version)
     end
 end
 
+def read_changelog_bump_type()
+  changelog_path = File.join(File.dirname(__FILE__), '..', '..', 'CHANGELOG.md')
+  content = File.read(changelog_path)
+
+  match = content.match(/^NEXT_VERSION_BUMP:\s*(PATCH|MINOR|MAJOR)\s*$/i)
+  if match
+    match[1].upcase
+  else
+    "PATCH"
+  end
+end
+
+def compute_next_version(current_version, bump_type)
+  # current_version starts with "v", e.g. "v23.4.0"
+  major, minor, patch = current_version[1..].split('.').map(&:to_i)
+
+  case bump_type
+  when "MAJOR"
+    "#{major + 1}.0.0"
+  when "MINOR"
+    "#{major}.#{minor + 1}.0"
+  when "PATCH"
+    "#{major}.#{minor}.#{patch + 1}"
+  else
+    abort("Unknown bump type: #{bump_type}")
+  end
+end
+
+def infer_version_from_changelog()
+  bump_type = read_changelog_bump_type()
+  current_version = get_current_version()
+  next_version = compute_next_version(current_version, bump_type)
+  rputs "Inferred next version: #{next_version} (#{bump_type} bump from #{current_version})"
+  next_version
+end
+
+def validate_version_matches_changelog(version)
+  bump_type = read_changelog_bump_type()
+  current_version = get_current_version()
+  expected_version = compute_next_version(current_version, bump_type)
+
+  if version != expected_version
+    rputs "Warning: CHANGELOG.md specifies a #{bump_type} bump (expected #{expected_version}), but you specified #{version}."
+    rputs "Do you want to proceed with #{version} anyway? (y/n)"
+    response = STDIN.gets.strip.downcase
+    unless response == 'y' || response == 'yes'
+      abort("Aborting. Update CHANGELOG.md's NEXT_VERSION_BUMP or use --version #{expected_version}.")
+    end
+  end
+end
+
 def validate_version_number()
     validate_version_number_format(@version)
+    validate_version_matches_changelog(@version)
     if (!@is_older_version)
         validate_target_version_is_newer(@version)
     end
