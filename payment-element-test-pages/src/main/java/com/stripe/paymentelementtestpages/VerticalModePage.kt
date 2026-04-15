@@ -41,7 +41,7 @@ class VerticalModePage(
     }
 
     fun waitUntilMissing() {
-        composeTestRule.waitUntil(UI_TIMEOUT) {
+        composeTestRule.waitUntil(DEFAULT_PE_PAGE_UI_TIMEOUT) {
             composeTestRule
                 .onAllNodes(hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT))
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
@@ -139,7 +139,7 @@ class VerticalModePage(
     }
 
     fun clickNewPaymentMethodButton(paymentMethodCode: PaymentMethodCode) {
-        composeTestRule.waitUntil(timeoutMillis = UI_TIMEOUT) {
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_PE_PAGE_UI_TIMEOUT) {
             composeTestRule
                 .onAllNodes(hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT))
                 .fetchSemanticsNodes()
@@ -159,9 +159,5 @@ class VerticalModePage(
 
         composeTestRule.onNode(hasTestTag(testTag))
             .performClick()
-    }
-
-    private companion object {
-        const val UI_TIMEOUT = 5000L
     }
 }

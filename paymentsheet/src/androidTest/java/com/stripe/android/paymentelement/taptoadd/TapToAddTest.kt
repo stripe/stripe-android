@@ -217,11 +217,12 @@ internal class TapToAddTest {
 
         verticalModePage.assertHasSelectedSavedPaymentMethod(paymentMethodId = "pm_2")
 
-        clickPrimaryButton()
+        when (integrationType) {
+            TapToAddIntegrationType.Complete.PaymentSheet -> clickPrimaryButton()
+            TapToAddIntegrationType.Complete.Embedded -> confirm()
+        }
 
         verticalModePage.waitUntilMissing()
-
-        confirm()
     }
 
     @Test
@@ -272,7 +273,9 @@ internal class TapToAddTest {
         clickPrimaryButton()
         savedPaymentMethodPage.waitUntilMissing()
 
-        confirm()
+        if (integrationType !is TapToAddIntegrationType.Complete) {
+            confirm()
+        }
     }
 
     private fun enqueueRetrieveCustomerRequest() {

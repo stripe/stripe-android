@@ -16,6 +16,7 @@ import com.stripe.android.paymentsheet.PaymentSheet as StripePaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetPage
 import com.stripe.android.paymentsheet.utils.FlowControllerTestRunnerContext
 import com.stripe.android.paymentsheet.utils.PaymentSheetTestRunnerContext
+import com.stripe.paymentelementtestpages.DEFAULT_PE_PAGE_UI_TIMEOUT
 
 internal sealed class TapToAddIntegrationTestRunnerContext(
     protected val composeTestRule: ComposeTestRule,
@@ -76,7 +77,7 @@ internal sealed class TapToAddIntegrationTestRunnerContext(
             }
 
             override suspend fun confirm() {
-                // No-op
+                throw IllegalStateException("Should confirm from Tap to Add flow!")
             }
 
             override fun markTestSucceeded() {
@@ -146,7 +147,7 @@ internal sealed class TapToAddIntegrationTestRunnerContext(
                 .performScrollTo()
                 .performClick()
 
-            composeTestRule.waitUntil(5_000) {
+            composeTestRule.waitUntil(DEFAULT_PE_PAGE_UI_TIMEOUT) {
                 !hasPrimaryButton()
             }
 
@@ -188,22 +189,7 @@ internal sealed class TapToAddIntegrationTestRunnerContext(
             composeTestRule: ComposeTestRule,
             context: EmbeddedPaymentElementTestRunnerContext
         ) : Embedded(composeTestRule, context)  {
-            private var confirmingFromForm: Boolean = false
-
             override val formSheetAction = EmbeddedPaymentElement.FormSheetAction.Confirm
-
-            override fun clickPrimaryButton() {
-                if (hasPrimaryButton()) {
-                    confirmingFromForm = true
-                    super.clickPrimaryButton()
-                }
-            }
-
-            override suspend fun confirm() {
-                if (!confirmingFromForm) {
-                    super.confirm()
-                }
-            }
 
             override fun markTestSucceeded() {
                 context.markTestSucceeded()
