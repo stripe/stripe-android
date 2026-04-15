@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import android.content.res.Configuration
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -389,7 +389,7 @@ private fun TitleContent(
     appearance: Appearance.Embedded,
 ) {
     val titleColor = appearance.style.getTitleTextColor()
-    Column(Modifier.animateContentSize()) {
+    Column {
         Text(
             text = title,
             style = appearance.titleFont?.toTextStyle()
@@ -414,7 +414,7 @@ private fun TitleContent(
             }
         } else {
             val promotion = promotionProvider()
-            if (isSelected) {
+            AnimatedVisibility(isSelected) {
                 if (promotion != null) {
                     PaymentMethodMessagePromotionText(promotion)
                 } else if (subtitle != null) {
