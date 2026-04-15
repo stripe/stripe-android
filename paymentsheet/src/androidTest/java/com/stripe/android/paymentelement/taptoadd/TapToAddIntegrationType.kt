@@ -34,4 +34,10 @@ internal sealed interface TapToAddIntegrationType {
             }
         }
     }
+
+    object Provider : TestParameterValuesProvider() {
+        override fun provideValues(context: Context?): List<TapToAddIntegrationType> {
+            return Complete.entries + Continue.entries
+        }
+    }
 }

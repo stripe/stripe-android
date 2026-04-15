@@ -3,12 +3,13 @@
   "merchant_country": "US",
   "merchant_currency": "usd",
   "merchant_id": "acct_1HvTI7Lu5o3P18Zp",
-  "ordered_payment_method_types_and_wallets": [
-    "card",
-    "cashapp"
-  ],
+  "ordered_payment_method_types_and_wallets": [PAYMENT_METHOD_TYPES],
   "flags": {
     "elements_mobile_android_tap_to_add_enabled": true
+  },
+  "link_settings": {
+    "link_funding_sources": ["CARD"],
+    "link_mobile_disable_default_opt_in": true
   },
   "customer": {
     "payment_methods": [],
@@ -38,10 +39,7 @@
   "payment_method_preference": {
     "object": "payment_method_preference",
     "country_code": "US",
-    "ordered_payment_method_types": [
-      "card",
-      "cashapp"
-    ],
+    "ordered_payment_method_types": [PAYMENT_METHOD_TYPES],
     "payment_intent": {
       "id": "pi_example",
       "object": "payment_intent",
@@ -69,10 +67,7 @@
           "verification_method": "automatic"
         }
       },
-      "payment_method_types": [
-        "card",
-        "cashapp"
-      ],
+      "payment_method_types": [PAYMENT_METHOD_TYPES],
       "processing": null,
       "receipt_email": null,
       "setup_future_usage": null,
