@@ -6,6 +6,8 @@ import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.BundleCompat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.PaymentMethodMessagePromotion
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.view.ActivityStarter
@@ -58,6 +60,11 @@ internal object ManageContract : ActivityResultContract<ManageContract.Args, Man
         val customerState: CustomerState,
         val selection: PaymentSelection?,
         val paymentElementCallbackIdentifier: String,
+        val selectedPaymentMethodCode: String,
+        val hasSavedPaymentMethods: Boolean,
+        val statusBarColor: Int?,
+        val configuration: EmbeddedPaymentElement.Configuration,
+        val promotion: PaymentMethodMessagePromotion?,
     ) : Parcelable {
         companion object {
             fun fromIntent(intent: Intent): Args? {

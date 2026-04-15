@@ -354,14 +354,20 @@ internal class DefaultEmbeddedSheetLauncherTest {
     fun `launchManage launches activity with correct parameters`() = testScenario {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
+        val state = EmbeddedConfirmationStateFixtures.defaultState()
         val expectedArgs = ManageContract.Args(
-            paymentMethodMetadata,
-            customerState,
-            PaymentSelection.GooglePay,
-            "EmbeddedFormTestIdentifier"
+            paymentMethodMetadata = paymentMethodMetadata,
+            customerState = customerState,
+            selection = PaymentSelection.GooglePay,
+            paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
+            selectedPaymentMethodCode = "google_pay",
+            hasSavedPaymentMethods = customerState.paymentMethods.isNotEmpty(),
+            statusBarColor = null,
+            configuration = state.configuration,
+            promotion = null,
         )
 
-        sheetLauncher.launchManage(paymentMethodMetadata, customerState, PaymentSelection.GooglePay)
+        sheetLauncher.launchManage(paymentMethodMetadata, customerState, PaymentSelection.GooglePay, state)
         val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall()
 
         assertThat(launchCall).isEqualTo(expectedArgs)
@@ -372,8 +378,9 @@ internal class DefaultEmbeddedSheetLauncherTest {
     fun `launchManage is not launched again when the sheet is already open`() = testScenario {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
+        val state = EmbeddedConfirmationStateFixtures.defaultState()
         sheetStateHolder.sheetIsOpen = true
-        sheetLauncher.launchManage(paymentMethodMetadata, customerState, PaymentSelection.GooglePay)
+        sheetLauncher.launchManage(paymentMethodMetadata, customerState, PaymentSelection.GooglePay, state)
     }
 
     @Test
@@ -505,8 +512,9 @@ internal class DefaultEmbeddedSheetLauncherTest {
             ),
         )
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
+        val state = EmbeddedConfirmationStateFixtures.defaultState(paymentMethodMetadata)
         val error = runCatching {
-            sheetLauncher.launchManage(paymentMethodMetadata, customerState, PaymentSelection.GooglePay)
+            sheetLauncher.launchManage(paymentMethodMetadata, customerState, PaymentSelection.GooglePay, state)
         }.exceptionOrNull()
         assertThat(error).isInstanceOf(IllegalStateException::class.java)
         assertThat(error).hasMessageThat()
