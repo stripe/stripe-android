@@ -2314,10 +2314,10 @@ public final class com/stripe/android/paymentsheet/verticalmode/ComposableSingle
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/verticalmode/ComposableSingletons$PaymentMethodRowButtonKt;
 	public fun <init> ()V
 	public final fun getLambda$-1179981339$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda$-1423392141$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda$-228724754$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-775164684$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda$1616606426$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda$1795895082$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$1972223339$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 }
 
 public final class com/stripe/android/paymentsheet/verticalmode/ComposableSingletons$SavedPaymentMethodConfirmUIKt {
