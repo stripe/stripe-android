@@ -15,12 +15,5 @@ internal object UIConstants {
             }
         }
 
-    val iconHeight: Dp
-        get() {
-            return if (FeatureFlags.enableCardArt.isEnabled) {
-                25.dp
-            } else {
-                20.dp
-            }
-        }
+    val iconHeight = 20.dp
 }
