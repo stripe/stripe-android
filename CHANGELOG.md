@@ -1,8 +1,9 @@
 # CHANGELOG
 
 NEXT_VERSION_BUMP: PATCH
-
 ## XX.XX.XX - 20XX-XX-XX
+
+## 24.0.0 - 2026-04-15
 
 ## 23.4.0 - 2026-04-14
 ### Crypto Onramp (Private Preview)
