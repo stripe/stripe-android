@@ -20,6 +20,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -98,6 +99,48 @@ class DefaultEventReporterTest {
         assertThat(request.params).containsEntry("duration", 1.0f)
         assertThat(request.params).containsEntry("selected_lpm", "google_pay")
         assertThat(request.params).containsEntry("ordered_lpms", "card")
+        assertThat(request.params).containsEntry("has_card_art", false)
+        assertThat(request.params).containsEntry("example_from_test", true)
+    }
+
+    @Test
+    fun `onLoadSucceeded fires event with card art`() = runScenario {
+        durationProvider.startCalls.push(
+            FakeDurationProvider.StartCall(
+                key = DurationProvider.Key.Checkout,
+                reset = true,
+            )
+        )
+        durationProvider.endCalls.push(
+            FakeDurationProvider.EndCall(
+                key = DurationProvider.Key.Loading,
+                duration = 1.seconds,
+            )
+        )
+        val metadataWithCardArt = PaymentMethodMetadataFactory.create(
+            analyticsMetadata = AnalyticsMetadata(
+                mapOf(
+                    "example_from_test" to AnalyticsMetadata.Value.SimpleBoolean(true)
+                )
+            ),
+            cardArts = listOf(
+                PaymentMethod.Card.CardArt(
+                    artImage = PaymentMethod.Card.CardArt.ArtImage(
+                        format = "image/png",
+                        url = "https://example.com/art.png"
+                    ),
+                    programName = null,
+                ),
+            ),
+        )
+        eventReporter.onLoadSucceeded(
+            paymentSelection = PaymentSelection.GooglePay,
+            paymentMethodMetadata = metadataWithCardArt,
+        )
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "mc_load_succeeded")
+        assertThat(request.params).containsEntry("has_card_art", true)
         assertThat(request.params).containsEntry("example_from_test", true)
     }
 
