@@ -4,11 +4,13 @@ import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
@@ -23,6 +25,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.mandateTextFromPaymentMethodMetadata
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
+import com.stripe.android.paymentsheet.repositories.PromotionSupportedPaymentMethods
 import com.stripe.android.paymentsheet.state.WalletLocation
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.ViewAction
@@ -372,7 +375,11 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     ): List<DisplayablePaymentMethod> {
         val lpms = supportedPaymentMethods.map { supportedPaymentMethod ->
             val paymentMethodIncentive = incentive?.takeIfMatches(supportedPaymentMethod.code)
-            supportedPaymentMethod.asDisplayablePaymentMethod(paymentMethods, paymentMethodIncentive) {
+            supportedPaymentMethod.asDisplayablePaymentMethod(
+                customerSavedPaymentMethods = paymentMethods,
+                incentive = paymentMethodIncentive,
+                promotionProvider = getPromotionProvider(supportedPaymentMethod.code)
+            ) {
                 handleViewAction(ViewAction.PaymentMethodSelected(supportedPaymentMethod.code))
             }
         }
@@ -651,5 +658,15 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         }
         is PaymentSelection.New.USBankAccount -> label
         else -> null
+    }
+
+    private fun getPromotionProvider(code: PaymentMethodCode): (() -> PaymentMethodMessagePromotion?)? {
+        return if (FeatureFlags.paymentMethodMessagePromotions.isEnabled &&
+            PromotionSupportedPaymentMethods.supportedPaymentMethods.contains(code)
+        ) {
+            { paymentMethodMessagePromotionsHelper?.getPromotionIfAvailableForCode(code) }
+        } else {
+            null
+        }
     }
 }

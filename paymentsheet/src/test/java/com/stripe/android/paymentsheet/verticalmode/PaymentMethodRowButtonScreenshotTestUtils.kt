@@ -50,7 +50,8 @@ internal fun testPaymentMethodRowButton(
             onClick = {},
             trailingContent = trailingContent,
             shouldShowDefaultBadge = shouldShowDefaultBadge,
-            appearance = appearance
+            appearance = appearance,
+            promotionProvider = null
         )
     }
 }
