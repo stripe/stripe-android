@@ -48,6 +48,7 @@ internal interface CustomerSheetEventReporter {
     fun onConfirmPaymentMethodSucceeded(
         type: String,
         syncDefaultEnabled: Boolean?,
+        hasCardArt: Boolean,
     )
 
     /**
@@ -56,6 +57,7 @@ internal interface CustomerSheetEventReporter {
     fun onConfirmPaymentMethodFailed(
         type: String,
         syncDefaultEnabled: Boolean?,
+        hasCardArt: Boolean,
     )
 
     /**

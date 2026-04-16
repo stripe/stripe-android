@@ -353,6 +353,7 @@ class DefaultEventReporterTest {
         assertThat(request.params).containsEntry("event", "mc_confirm_button_tapped")
         assertThat(request.params).containsEntry("duration", 3.0f)
         assertThat(request.params).containsEntry("selected_lpm", "google_pay")
+        assertThat(request.params).containsEntry("has_card_art", false)
         assertThat(request.params).containsEntry("example_from_test", true)
     }
 
@@ -1030,6 +1031,7 @@ class DefaultEventReporterTest {
         assertThat(request.params).containsEntry("event", "mc_complete_payment_googlepay_success")
         assertThat(request.params).containsEntry("duration", 10.0f)
         assertThat(request.params).doesNotContainKey("deferred_intent_confirmation_type")
+        assertThat(request.params).containsEntry("has_card_art", false)
         assertThat(request.params).containsEntry("example_from_test", true)
     }
 
@@ -1053,6 +1055,7 @@ class DefaultEventReporterTest {
         assertThat(request.params).containsEntry("event", "mc_complete_payment_googlepay_success")
         assertThat(request.params).containsEntry("duration", 8.0f)
         assertThat(request.params).containsEntry("deferred_intent_confirmation_type", "client")
+        assertThat(request.params).containsEntry("has_card_art", false)
         assertThat(request.params).containsEntry("example_from_test", true)
     }
 
@@ -1120,6 +1123,7 @@ class DefaultEventReporterTest {
 
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params).containsEntry("event", "mc_complete_paymentoption_savedpm_select")
+        assertThat(request.params).containsEntry("has_card_art", false)
         assertThat(request.params).containsEntry("example_from_test", true)
     }
 
@@ -1139,6 +1143,7 @@ class DefaultEventReporterTest {
 
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params).containsEntry("event", "mc_complete_paymentoption_link_select")
+        assertThat(request.params).containsEntry("has_card_art", false)
         assertThat(request.params).containsEntry("example_from_test", true)
     }
 
@@ -1156,7 +1161,36 @@ class DefaultEventReporterTest {
 
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params).containsEntry("event", "mc_complete_paymentoption_newpm_select")
+        assertThat(request.params).containsEntry("has_card_art", false)
         assertThat(request.params).containsEntry("example_from_test", true)
+    }
+
+    @Test
+    fun `onSelectPaymentOption fires event with card art`() = runScenario {
+        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
+
+        val savedWithCardArt = PaymentSelection.Saved(
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
+                card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.card?.copy(
+                    cardArt = PaymentMethod.Card.CardArt(
+                        artImage = PaymentMethod.Card.CardArt.ArtImage(
+                            format = "png",
+                            url = "https://example.com/card-art.png",
+                        ),
+                        programName = "Test Program",
+                    ),
+                ),
+            )
+        )
+
+        eventReporter.onSelectPaymentOption(savedWithCardArt)
+
+        val analyticEvent = analyticsEventTurbine.awaitItem()
+        assertThat(analyticEvent).isEqualTo(AnalyticEvent.SelectedSavedPaymentMethod("card"))
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "mc_complete_paymentoption_savedpm_select")
+        assertThat(request.params).containsEntry("has_card_art", true)
     }
 
     @Test
@@ -1183,6 +1217,7 @@ class DefaultEventReporterTest {
         assertThat(request.params).containsEntry("duration", 6.0f)
         assertThat(request.params).containsEntry("error_message", "java.lang.RuntimeException")
         assertThat(request.params).containsEntry("selected_lpm", "google_pay")
+        assertThat(request.params).containsEntry("has_card_art", false)
         assertThat(request.params).containsEntry("example_from_test", true)
     }
 
