@@ -90,7 +90,6 @@ data class IdentifierSpec(
             destination = ParameterDestination.Local.Extras
         )
 
-
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         val Blik = IdentifierSpec("blik", destination = ParameterDestination.Api.Options)
 

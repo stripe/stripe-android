@@ -159,7 +159,6 @@ internal class PaymentMethodEndToEndTest {
             .isEqualTo("Missing required param: billing_details[name].")
     }
 
-
     @Test
     fun createPaymentMethod_withOxxo_shouldCreatePaymentMethodWithOxxoType() {
         val params = PaymentMethodCreateParams.createOxxo(

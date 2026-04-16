@@ -78,7 +78,6 @@ internal object PaymentMethodCreateParamsFixtures {
         billingDetails = BILLING_DETAILS
     )
 
-
     internal val US_BANK_ACCOUNT = PaymentMethodCreateParams.create(
         usBankAccount = PaymentMethodCreateParams.USBankAccount(
             accountNumber = "000123456789",

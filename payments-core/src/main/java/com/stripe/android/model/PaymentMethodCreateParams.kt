@@ -136,7 +136,6 @@ constructor(
         sepaDebit,
         auBecsDebit,
         bacsDebit,
-        upi,
         netbanking,
         usBankAccount,
         link,
