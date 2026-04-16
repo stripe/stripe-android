@@ -49,6 +49,7 @@ import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInter
 import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import dagger.Binds
 import dagger.Module
@@ -215,11 +216,15 @@ internal interface EmbeddedActivityModule {
         fun provideSavedPaymentMethodConfirmInteractorFactory(
             @ViewModelScope coroutineScope: CoroutineScope,
             paymentMethodMetadata: PaymentMethodMetadata,
+            formActivityStateHelper: FormActivityStateHelper,
             savedPaymentMethodLinkFormHelper: SavedPaymentMethodLinkFormHelper,
         ): SavedPaymentMethodConfirmInteractor.Factory {
             return DefaultSavedPaymentMethodConfirmInteractor.Factory(
                 paymentMethodMetadata = paymentMethodMetadata,
                 savedPaymentMethodLinkFormHelper = savedPaymentMethodLinkFormHelper,
+                processing = formActivityStateHelper.state.mapAsStateFlow {
+                    it.isProcessing
+                },
                 coroutineScope = coroutineScope,
             )
         }

@@ -16,14 +16,23 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal interface SavedPaymentMethodConfirmInteractor {
-    val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod
+    val state: StateFlow<State>
 
-    val formElement: FormElement?
+    data class State(
+        val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
+        val form: Form,
+    ) {
+        data class Form(
+            val elements: List<FormElement>,
+            val enabled: Boolean,
+        )
+    }
 
     interface Factory {
         fun create(
@@ -37,16 +46,24 @@ internal class DefaultSavedPaymentMethodConfirmInteractor(
     val initialSelection: PaymentSelection.Saved,
     val displayName: ResolvableString,
     val savedPaymentMethodLinkFormHelper: SavedPaymentMethodLinkFormHelper,
+    val processing: StateFlow<Boolean>,
     val updateSelection: (PaymentSelection.Saved) -> Unit,
     val coroutineScope: CoroutineScope,
 ) : SavedPaymentMethodConfirmInteractor {
-
-    override val formElement = savedPaymentMethodLinkFormHelper.formElement
-
-    override val displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
+    private val displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
         displayName = displayName,
         paymentMethod = initialSelection.paymentMethod,
     )
+
+    override val state = processing.mapAsStateFlow { isProcessing ->
+        SavedPaymentMethodConfirmInteractor.State(
+            displayableSavedPaymentMethod = displayableSavedPaymentMethod,
+            form = SavedPaymentMethodConfirmInteractor.State.Form(
+                elements = savedPaymentMethodLinkFormHelper.formElement?.let { listOf(it) } ?: emptyList(),
+                enabled = !isProcessing,
+            )
+        )
+    }
 
     private val selection = savedPaymentMethodLinkFormHelper.state.mapAsStateFlow {
         initialSelection.withLinkState(it)
@@ -77,6 +94,7 @@ internal class DefaultSavedPaymentMethodConfirmInteractor(
                     savedStateHandle = viewModel.savedStateHandle,
                     linkFormElementFactory = DefaultLinkFormElementFactory,
                 ),
+                processing = viewModel.processing,
                 updateSelection = viewModel::updateSelection,
                 coroutineScope = viewModel.viewModelScope,
             )
@@ -86,6 +104,7 @@ internal class DefaultSavedPaymentMethodConfirmInteractor(
     class Factory @Inject constructor(
         private val paymentMethodMetadata: PaymentMethodMetadata,
         private val savedPaymentMethodLinkFormHelper: SavedPaymentMethodLinkFormHelper,
+        private val processing: StateFlow<Boolean>,
         private val coroutineScope: CoroutineScope,
     ) : SavedPaymentMethodConfirmInteractor.Factory {
         override fun create(
@@ -97,6 +116,7 @@ internal class DefaultSavedPaymentMethodConfirmInteractor(
                 displayName = paymentMethodMetadata.supportedPaymentMethodForCode(
                     PaymentMethod.Type.Card.code
                 )?.displayName.orEmpty(),
+                processing = processing,
                 savedPaymentMethodLinkFormHelper = savedPaymentMethodLinkFormHelper,
                 updateSelection = updateSelection,
                 coroutineScope = coroutineScope,
