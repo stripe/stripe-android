@@ -261,7 +261,6 @@ public final class com/stripe/android/connect/PaymentsProps$PaymentMethod : java
 	public static final field THREE_D_SECURE_2 Lcom/stripe/android/connect/PaymentsProps$PaymentMethod;
 	public static final field THREE_D_SECURE_2_EAP Lcom/stripe/android/connect/PaymentsProps$PaymentMethod;
 	public static final field TWINT Lcom/stripe/android/connect/PaymentsProps$PaymentMethod;
-	public static final field UPI Lcom/stripe/android/connect/PaymentsProps$PaymentMethod;
 	public static final field US_BANK_ACCOUNT Lcom/stripe/android/connect/PaymentsProps$PaymentMethod;
 	public static final field VIPPS Lcom/stripe/android/connect/PaymentsProps$PaymentMethod;
 	public static final field VISA_CHECKOUT Lcom/stripe/android/connect/PaymentsProps$PaymentMethod;
