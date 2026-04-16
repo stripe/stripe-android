@@ -1,6 +1,7 @@
 package com.stripe.android.common.taptoadd.ui
 
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.common.spms.LinkInlineSignupAvailability
 import com.stripe.android.common.taptoadd.TapToAddCollectionHandler
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -34,6 +35,7 @@ internal class DefaultTapToAddCollectingInteractor(
     ioContext: CoroutineContext,
     private val tapToAddCollectionHandler: TapToAddCollectionHandler,
     private val eventReporter: EventReporter,
+    private val linkInlineSignupAvailability: LinkInlineSignupAvailability,
     private val onCollected: (paymentMethod: PaymentMethod) -> Unit,
     private val onFailedCollection: (message: ResolvableString) -> Unit,
     private val onTapToAddNotSupported: () -> Unit,
@@ -61,7 +63,11 @@ internal class DefaultTapToAddCollectingInteractor(
     private fun handleCollectionState(collectionState: TapToAddCollectionHandler.CollectionState) {
         when (collectionState) {
             is TapToAddCollectionHandler.CollectionState.Collected -> {
-                eventReporter.onCardAddedWithTapToAdd()
+                eventReporter.onCardAddedWithTapToAdd(
+                    canCollectLinkInput =
+                        linkInlineSignupAvailability.availability() is LinkInlineSignupAvailability.Result.Available
+                )
+
                 onCollected(collectionState.paymentMethod)
             }
             is TapToAddCollectionHandler.CollectionState.FailedCollection -> {
@@ -86,7 +92,8 @@ internal class DefaultTapToAddCollectingInteractor(
         private val tapToAddCollectionHandler: TapToAddCollectionHandler,
         private val eventReporter: EventReporter,
         private val stateHolder: TapToAddStateHolder,
-        private val tapToAddCardAddedInteractorFactory: TapToAddCardAddedInteractor.Factory,
+        private val tapToAddCardCollectedScreenFactory: TapToAddCardCollectedScreenFactory,
+        private val linkInlineSignupAvailability: LinkInlineSignupAvailability,
         private val navigator: Provider<TapToAddNavigator>,
         @UIContext private val uiContext: CoroutineContext,
         @IOContext private val ioContext: CoroutineContext,
@@ -98,14 +105,13 @@ internal class DefaultTapToAddCollectingInteractor(
                 uiContext = uiContext,
                 ioContext = ioContext,
                 tapToAddCollectionHandler = tapToAddCollectionHandler,
+                linkInlineSignupAvailability = linkInlineSignupAvailability,
                 onCollected = { paymentMethod ->
                     stateHolder.setState(TapToAddStateHolder.State.CardAdded(paymentMethod))
 
                     navigator.get().performAction(
                         action = TapToAddNavigator.Action.NavigateTo(
-                            screen = TapToAddNavigator.Screen.CardAdded(
-                                interactor = tapToAddCardAddedInteractorFactory.create(paymentMethod),
-                            ),
+                            screen = tapToAddCardCollectedScreenFactory.create(paymentMethod),
                         )
                     )
                 },

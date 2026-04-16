@@ -23,6 +23,7 @@ internal class FakeTapToAddConfirmationInteractor(
     cvcInitialValue: String? = null,
     cardBrand: CardBrand = CardBrand.Visa,
     last4: String? = "4242",
+    title: ResolvableString? = null,
     locked: Boolean = true,
     primaryButtonState: TapToAddConfirmationInteractor.State.PrimaryButton.State =
         TapToAddConfirmationInteractor.State.PrimaryButton.State.Idle,
@@ -32,6 +33,7 @@ internal class FakeTapToAddConfirmationInteractor(
         TapToAddConfirmationInteractor.State(
             cardBrand = cardBrand,
             last4 = last4,
+            title = title,
             primaryButton = TapToAddConfirmationInteractor.State.PrimaryButton(
                 label = "Pay".resolvableString,
                 locked = locked,
@@ -96,17 +98,30 @@ internal class FakeTapToAddConfirmationInteractor(
     class Factory(
         val interactor: FakeTapToAddConfirmationInteractor = FakeTapToAddConfirmationInteractor()
     ) : TapToAddConfirmationInteractor.Factory {
-        private val _createCalls = Turbine<Pair<PaymentMethod, UserInput?>>()
-        val createCalls: ReceiveTurbine<Pair<PaymentMethod, UserInput?>> = _createCalls
+        private val _createCalls = Turbine<CreateCall>()
+        val createCalls: ReceiveTurbine<CreateCall> = _createCalls
 
         override fun create(
             paymentMethod: PaymentMethod,
             linkInput: UserInput?,
+            withTitle: Boolean,
         ): TapToAddConfirmationInteractor {
-            _createCalls.add(paymentMethod to linkInput)
+            _createCalls.add(
+                CreateCall(
+                    paymentMethod = paymentMethod,
+                    linkInput = linkInput,
+                    withTitle = withTitle,
+                )
+            )
 
             return interactor
         }
+
+        data class CreateCall(
+            val paymentMethod: PaymentMethod,
+            val linkInput: UserInput?,
+            val withTitle: Boolean,
+        )
 
         fun validate() {
             _createCalls.ensureAllEventsConsumed()

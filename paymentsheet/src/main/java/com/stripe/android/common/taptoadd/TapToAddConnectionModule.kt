@@ -19,6 +19,11 @@ internal interface TapToAddConnectionModule {
     ): IsStripeTerminalSdkAvailable
 
     @Binds
+    fun bindsStripeTerminalVersionValidator(
+        stripeTerminalVersionValidator: DefaultStripeTerminalVersionValidator
+    ): StripeTerminalVersionValidator
+
+    @Binds
     fun bindsIsSimulatedProvider(
         isSimulatedProvider: DefaultTapToAddIsSimulatedProvider
     ): TapToAddIsSimulatedProvider

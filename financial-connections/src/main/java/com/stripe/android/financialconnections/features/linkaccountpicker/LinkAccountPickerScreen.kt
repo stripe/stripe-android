@@ -35,6 +35,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextAlign
@@ -286,7 +287,7 @@ private fun SelectNewAccount(
                 color = colors.borderNeutral,
                 shape = shape
             )
-            .clickableSingle { onClick() }
+            .clickableSingle(role = Role.Button) { onClick() }
             .padding(16.dp)
     ) {
         Row(

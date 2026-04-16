@@ -10,7 +10,6 @@ dependencies {
     implementation testLibs.espresso.intents
     implementation testLibs.androidx.composeUi
     implementation testLibs.mockito.core
-    implementation testLibs.mockito.inline
     implementation testLibs.mockito.kotlin
     implementation testLibs.turbine
     implementation testLibs.truth

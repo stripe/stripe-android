@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import app.cash.turbine.Turbine
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.tta.testing.TerminalTestDelegate.SetupIntentResult
 import com.stripe.stripeterminal.Terminal
 import com.stripe.stripeterminal.external.callable.Callback
 import com.stripe.stripeterminal.external.callable.ConnectionTokenProvider
@@ -20,6 +21,7 @@ import com.stripe.stripeterminal.external.models.Reader
 import com.stripe.stripeterminal.external.models.ReaderSupportResult
 import com.stripe.stripeterminal.external.models.SetupIntent
 import com.stripe.stripeterminal.external.models.TapToPayUxConfiguration
+import com.stripe.stripeterminal.external.models.TerminalErrorCode
 import com.stripe.stripeterminal.external.models.TerminalException
 import org.mockito.kotlin.KStubbing
 import org.mockito.kotlin.any
@@ -27,10 +29,12 @@ import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 
-class TerminalTestDelegate {
+class TerminalTestDelegate(
     private var scenario: Scenario = Scenario()
-
-    private val terminalInstance = createMockedTerminalInstance()
+) {
+    private val terminalInstance by lazy {
+        createMockedTerminalInstance()
+    }
 
     private val isInitializedCalls = Turbine<Unit>()
     private val initTerminalCalls = Turbine<InitTerminalCall>()
@@ -145,7 +149,15 @@ class TerminalTestDelegate {
         val collectSetupIntentPaymentMethodResult: SetupIntentResult =
             SetupIntentResult.Success(mock()),
         val confirmSetupIntentResult: SetupIntentResult = SetupIntentResult.Success(mock()),
-    )
+    ) {
+        companion object {
+            fun withoutMocks() = Scenario(
+                retrieveSetupIntentResult = SetupIntentResult.Failure(DEFAULT_ERROR),
+                collectSetupIntentPaymentMethodResult = SetupIntentResult.Failure(DEFAULT_ERROR),
+                confirmSetupIntentResult = SetupIntentResult.Failure(DEFAULT_ERROR),
+            )
+        }
+    }
 
     class InitTerminalCall(
         val context: Context,
@@ -349,6 +361,11 @@ class TerminalTestDelegate {
     private companion object {
         val DEFAULT_READER = Reader(
             deviceType = DeviceType.TAP_TO_PAY_DEVICE,
+        )
+
+        val DEFAULT_ERROR = TerminalException(
+            errorCode = TerminalErrorCode.UNEXPECTED_SDK_ERROR,
+            errorMessage = "Unexpected usage of collect flow during testing!"
         )
     }
 }

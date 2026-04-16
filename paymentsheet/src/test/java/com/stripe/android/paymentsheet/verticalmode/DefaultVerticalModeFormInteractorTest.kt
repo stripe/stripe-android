@@ -39,6 +39,7 @@ import com.stripe.android.uicore.elements.SimpleTextFieldConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
+import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -299,7 +300,8 @@ internal class DefaultVerticalModeFormInteractorTest {
             viewModelScope = TestScope(UnconfinedTestDispatcher()),
             formActivityStateHelper = stateHolder,
             tapToAddHelper = FakeTapToAddHelper.noOp(),
-            eventReporter = eventReporter
+            eventReporter = eventReporter,
+            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper()
         ).create()
 
         val formElements = setAsDefaultInteractor.state.value.formUiElements
@@ -349,7 +351,8 @@ internal class DefaultVerticalModeFormInteractorTest {
             viewModelScope = TestScope(UnconfinedTestDispatcher()),
             formActivityStateHelper = stateHolder,
             tapToAddHelper = FakeTapToAddHelper.noOp(),
-            eventReporter = eventReporter
+            eventReporter = eventReporter,
+            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper()
         ).create()
         block(setAsDefaultInteractor.state.value.formUiElements)
     }

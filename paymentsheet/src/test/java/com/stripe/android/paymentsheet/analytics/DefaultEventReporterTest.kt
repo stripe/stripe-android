@@ -699,11 +699,29 @@ class DefaultEventReporterTest {
             )
         )
 
-        eventReporter.onCardAddedWithTapToAdd()
+        eventReporter.onCardAddedWithTapToAdd(canCollectLinkInput = false)
 
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params).containsEntry("event", "mc_complete_tap_to_add_card_added")
         assertThat(request.params).containsEntry("duration", 4.0f)
+        assertThat(request.params).containsEntry("can_collect_link_signup_input", false)
+    }
+
+    @Test
+    fun `onCardAddedWithTapToAdd includes can_collect_link_signup_input when true`() = runScenario {
+        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
+        durationProvider.endCalls.push(
+            FakeDurationProvider.EndCall(
+                key = DurationProvider.Key.TapToAdd,
+                duration = 4.seconds,
+            )
+        )
+
+        eventReporter.onCardAddedWithTapToAdd(canCollectLinkInput = true)
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "mc_complete_tap_to_add_card_added")
+        assertThat(request.params).containsEntry("can_collect_link_signup_input", true)
     }
 
     @Test
@@ -763,21 +781,43 @@ class DefaultEventReporterTest {
         }
 
     @Test
-    fun `onTapToAddContinueAfterCardAdded fires event`() = runScenario {
+    fun `onTapToAddContinueAfterCardAdded fires event with completed link input`() = runScenario {
         paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
-        eventReporter.onTapToAddContinueAfterCardAdded()
+        eventReporter.onTapToAddContinueAfterCardAdded(completedLinkInput = true)
 
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params).containsEntry("event", "mc_complete_tap_to_add_continue_after_card_added")
+        assertThat(request.params).containsEntry("completed_link_signup_input", true)
     }
 
     @Test
-    fun `onTapToAddConfirm fires event`() = runScenario {
+    fun `onTapToAddContinueAfterCardAdded fires event with null completed link input`() = runScenario {
         paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
-        eventReporter.onTapToAddConfirm()
+        eventReporter.onTapToAddContinueAfterCardAdded(completedLinkInput = null)
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "mc_complete_tap_to_add_continue_after_card_added")
+        assertThat(request.params["completed_link_signup_input"]).isNull()
+    }
+
+    @Test
+    fun `onTapToAddConfirm fires event with recollected cvc`() = runScenario {
+        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
+        eventReporter.onTapToAddConfirm(recollectedCvc = true)
 
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params).containsEntry("event", "mc_complete_tap_to_add_confirm")
+        assertThat(request.params).containsEntry("recollected_cvc", true)
+    }
+
+    @Test
+    fun `onTapToAddConfirm fires event when recollected cvc is false`() = runScenario {
+        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
+        eventReporter.onTapToAddConfirm(recollectedCvc = false)
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "mc_complete_tap_to_add_confirm")
+        assertThat(request.params).containsEntry("recollected_cvc", false)
     }
 
     @Test

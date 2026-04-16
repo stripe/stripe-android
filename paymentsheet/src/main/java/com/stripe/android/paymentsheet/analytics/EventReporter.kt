@@ -233,13 +233,19 @@ internal interface EventReporter : CardScanEventsReporter {
 
     fun onTapToAddStarted()
 
-    fun onCardAddedWithTapToAdd()
+    fun onCardAddedWithTapToAdd(
+        canCollectLinkInput: Boolean,
+    )
 
     fun onTapToAddCanceled(source: TapToAddCancelSource)
 
-    fun onTapToAddContinueAfterCardAdded()
+    fun onTapToAddContinueAfterCardAdded(
+        completedLinkInput: Boolean?,
+    )
 
-    fun onTapToAddConfirm()
+    fun onTapToAddConfirm(
+        recollectedCvc: Boolean,
+    )
 
     fun onFailedToAddCardWithTapToAdd(
         message: String

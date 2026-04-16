@@ -59,7 +59,7 @@ class FormPage(
         composeTestRule.waitUntil {
             composeTestRule
                 .onAllNodes(hasTestTag(FORM_ELEMENT_TEST_TAG))
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
     }

@@ -3,9 +3,10 @@ package com.stripe.android.paymentsheet.ui
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -37,14 +38,15 @@ internal fun CardArtImage(
                 imageContent = {
                     Image(
                         modifier = Modifier
-                            .fillMaxWidth()
+                            .widthIn(max = maxWidth)
+                            .heightIn(max = maxHeight)
                             .clip(RoundedCornerShape(3.dp))
                             .border(
                                 width = 1.dp,
                                 color = Color.Black.copy(alpha = .2f),
                                 shape = RoundedCornerShape(3.dp),
                             ),
-                        contentScale = ContentScale.FillWidth,
+                        contentScale = ContentScale.Fit,
                         contentDescription = null,
                         painter = it
                     )

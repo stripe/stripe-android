@@ -52,12 +52,16 @@ internal class EmbeddedFormPage(
         return composeTestRule.onNode(hasText(label))
     }
 
+    fun isVisible(): Boolean {
+        return composeTestRule
+            .onAllNodes(hasTestTag(FORM_ELEMENT_TEST_TAG))
+            .fetchSemanticsNodes(atLeastOneRootRequired = false)
+            .isNotEmpty()
+    }
+
     fun waitUntilVisible() {
         composeTestRule.waitUntil {
-            composeTestRule
-                .onAllNodes(hasTestTag(FORM_ELEMENT_TEST_TAG))
-                .fetchSemanticsNodes(atLeastOneRootRequired = false)
-                .isNotEmpty()
+            isVisible()
         }
     }
 
