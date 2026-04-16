@@ -23,8 +23,10 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.RetryRule
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -253,6 +255,12 @@ internal class ManageActivityTest {
                     ),
                     selection = selection,
                     paymentElementCallbackIdentifier = "ManageActivityTestCallbackIdentifier",
+                    selectedPaymentMethodCode = selection?.paymentMethodType ?: "",
+                    hasSavedPaymentMethods = paymentMethods.isNotEmpty(),
+                    statusBarColor = null,
+                    configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
+                        .build(),
+                    promotion = null,
                 ),
             )
         ).use { scenario ->

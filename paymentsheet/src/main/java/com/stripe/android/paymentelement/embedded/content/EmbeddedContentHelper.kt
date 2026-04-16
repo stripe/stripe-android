@@ -230,6 +230,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                     paymentMethodMetadata = paymentMethodMetadata,
                     customerState = requireNotNull(customerStateHolder.customer.value),
                     selection = selectionHolder.selection.value,
+                    embeddedConfirmationState = confirmationStateHolder.state,
                 )
             },
             transitionToFormScreen = { code ->
@@ -306,6 +307,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                     paymentMethodMetadata = paymentMethodMetadata,
                     customerState = requireNotNull(customerStateHolder.customer.value),
                     selection = selectionHolder.selection.value,
+                    embeddedConfirmationState = confirmationStateHolder.state,
                 )
             },
             isLinkEnabled = stateFlowOf(paymentMethodMetadata.linkState != null),

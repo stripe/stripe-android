@@ -40,6 +40,7 @@ internal interface EmbeddedSheetLauncher {
         paymentMethodMetadata: PaymentMethodMetadata,
         customerState: CustomerState,
         selection: PaymentSelection?,
+        embeddedConfirmationState: EmbeddedConfirmationStateHolder.State?,
     )
 }
 
@@ -150,11 +151,18 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         paymentMethodMetadata: PaymentMethodMetadata,
         customerState: CustomerState,
         selection: PaymentSelection?,
+        embeddedConfirmationState: EmbeddedConfirmationStateHolder.State?,
     ) {
         val checkoutSession = paymentMethodMetadata.integrationMetadata as? IntegrationMetadata.CheckoutSession
         if (checkoutSession != null) {
             CheckoutInstances.ensureNoMutationInFlight(checkoutSession.instancesKey)
             CheckoutInstances.markIntegrationLaunched(checkoutSession.instancesKey)
+        }
+        if (embeddedConfirmationState == null) {
+            errorReporter.report(
+                ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL
+            )
+            return
         }
         if (sheetStateHolder.sheetIsOpen) return
         sheetStateHolder.sheetIsOpen = true
@@ -163,6 +171,11 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             customerState = customerState,
             selection = selection,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
+            selectedPaymentMethodCode = selection?.paymentMethodType ?: "",
+            hasSavedPaymentMethods = customerState.paymentMethods.isNotEmpty(),
+            statusBarColor = statusBarColor,
+            configuration = embeddedConfirmationState.configuration,
+            promotion = null,
         )
         manageActivityLauncher.launch(args)
     }
