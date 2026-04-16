@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import app.cash.turbine.Turbine
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.spms.SavedPaymentMethodLinkFormHelper
 import com.stripe.android.core.strings.resolvableString
@@ -12,12 +13,32 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 
 class DefaultSavedPaymentMethodConfirmInteractorTest {
+    @Test
+    fun `form updates enabled state based on processing state`() = runTest {
+        val processing = MutableStateFlow(false)
+        val interactor = getDefaultSavedPaymentMethodConfirmInteractor(
+            processing = processing,
+            coroutineScope = backgroundScope,
+        )
+
+        advanceUntilIdle()
+
+        interactor.state.test {
+            assertThat(awaitItem().form.enabled).isTrue()
+            processing.value = true
+            advanceUntilIdle()
+            assertThat(awaitItem().form.enabled).isFalse()
+            processing.value = false
+            advanceUntilIdle()
+            assertThat(awaitItem().form.enabled).isTrue()
+            ensureAllEventsConsumed()
+        }
+    }
 
     @Test
     fun `when link form helper state is updated, selection is updated`() = runTest {
@@ -25,12 +46,12 @@ class DefaultSavedPaymentMethodConfirmInteractorTest {
             initialState = SavedPaymentMethodLinkFormHelper.State.Unused
         )
         val updateSelectionCalls = Turbine<PaymentSelection.Saved>()
-        val testScope = TestScope()
 
         getDefaultSavedPaymentMethodConfirmInteractor(
             linkFormHelper = linkFormHelper,
+            processing = MutableStateFlow(false),
             updateSelection = { updateSelectionCalls.add(it) },
-            coroutineScope = testScope,
+            coroutineScope = backgroundScope,
         )
 
         val userInput = UserInput.SignIn(email = "test@example.com")
@@ -40,7 +61,7 @@ class DefaultSavedPaymentMethodConfirmInteractorTest {
             )
         )
 
-        testScope.advanceUntilIdle()
+        advanceUntilIdle()
 
         val updatedSelection = updateSelectionCalls.awaitItem()
         assertThat(updatedSelection.linkInput).isEqualTo(userInput)
@@ -50,6 +71,7 @@ class DefaultSavedPaymentMethodConfirmInteractorTest {
 
     private fun getDefaultSavedPaymentMethodConfirmInteractor(
         linkFormHelper: SavedPaymentMethodLinkFormHelper = FakeSavedPaymentMethodLinkFormHelper(),
+        processing: StateFlow<Boolean> = MutableStateFlow(false),
         updateSelection: (PaymentSelection.Saved) -> Unit = {},
         coroutineScope: CoroutineScope,
     ): DefaultSavedPaymentMethodConfirmInteractor {
@@ -58,6 +80,7 @@ class DefaultSavedPaymentMethodConfirmInteractorTest {
             initialSelection = PaymentSelection.Saved(paymentMethod),
             displayName = "Card".resolvableString,
             savedPaymentMethodLinkFormHelper = linkFormHelper,
+            processing = processing,
             updateSelection = updateSelection,
             coroutineScope = coroutineScope,
         )
