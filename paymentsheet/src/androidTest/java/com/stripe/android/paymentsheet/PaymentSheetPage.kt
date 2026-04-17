@@ -424,6 +424,15 @@ internal class PaymentSheetPage(
         }
     }
 
+    fun waitUntilMissing() {
+        composeTestRule.waitUntil(5000) {
+            composeTestRule
+                .onAllNodes(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isEmpty()
+        }
+    }
+
     fun clickOnLpm(code: String, forVerticalMode: Boolean = false) {
         composeTestRule.waitForIdle()
         waitUntilVisible()

@@ -83,7 +83,8 @@ internal class DefaultEventReporter @Inject internal constructor(
             event = PaymentSheetEvent.LoadSucceeded(
                 paymentSelection = paymentSelection,
                 duration = duration,
-                orderedLpms = paymentMethodMetadata.sortedSupportedPaymentMethods().map { it.code }
+                orderedLpms = paymentMethodMetadata.sortedSupportedPaymentMethods().map { it.code },
+                hasCardArt = paymentMethodMetadata.cardArts.isNotEmpty()
             ),
             paymentMethodMetadata = paymentMethodMetadata,
         )
@@ -231,6 +232,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 duration = duration,
                 selectedLpm = paymentSelection.code(),
                 linkContext = paymentSelection.linkContext(),
+                hasCardArt = paymentSelection.hasCardArt(),
             )
         )
     }
@@ -419,9 +421,9 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireEvent(PaymentSheetEvent.TapToAdd.Started(mode))
     }
 
-    override fun onCardAddedWithTapToAdd() {
+    override fun onCardAddedWithTapToAdd(canCollectLinkInput: Boolean) {
         val duration = durationProvider.end(DurationProvider.Key.TapToAdd)
-        fireEvent(PaymentSheetEvent.TapToAdd.CardAdded(mode, duration))
+        fireEvent(PaymentSheetEvent.TapToAdd.CardAdded(mode, duration, canCollectLinkInput))
     }
 
     override fun onTapToAddCanceled(source: EventReporter.TapToAddCancelSource) {
@@ -429,12 +431,12 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireEvent(PaymentSheetEvent.TapToAdd.Canceled(mode, source, duration))
     }
 
-    override fun onTapToAddContinueAfterCardAdded() {
-        fireEvent(PaymentSheetEvent.TapToAdd.ContinueAfterCardAdded(mode))
+    override fun onTapToAddContinueAfterCardAdded(completedLinkInput: Boolean?) {
+        fireEvent(PaymentSheetEvent.TapToAdd.ContinueAfterCardAdded(mode, completedLinkInput))
     }
 
-    override fun onTapToAddConfirm() {
-        fireEvent(PaymentSheetEvent.TapToAdd.Confirm(mode))
+    override fun onTapToAddConfirm(recollectedCvc: Boolean) {
+        fireEvent(PaymentSheetEvent.TapToAdd.Confirm(mode, recollectedCvc))
     }
 
     override fun onFailedToAddCardWithTapToAdd(message: String) {

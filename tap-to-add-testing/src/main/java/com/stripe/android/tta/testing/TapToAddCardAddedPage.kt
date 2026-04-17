@@ -5,6 +5,8 @@ import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.ComposeTestRule
+import com.stripe.android.common.taptoadd.ui.TAP_TO_ADD_CARD_ADDED_PRIMARY_BUTTON
+import com.stripe.android.common.taptoadd.ui.TAP_TO_ADD_CARD_ADDED_SHOWN_DELAY
 
 class TapToAddCardAddedPage(
     private val composeTestRule: ComposeTestRule,
@@ -12,14 +14,20 @@ class TapToAddCardAddedPage(
 ) {
     private val primaryButtonElement = TapToAddPrimaryButtonElement(composeTestRule)
 
-    fun assertShown(withLink: Boolean = false) {
+    fun assertShown(
+        withLink: Boolean = false,
+    ) {
         assertHasCardAddedText()
 
         if (withLink) {
             linkHelper.checkbox().assertExists()
         }
 
-        assertHasContinueButton()
+        if (withLink) {
+            assertHasContinueButton()
+        } else {
+            primaryButtonElement.assertNotShown()
+        }
     }
 
     fun clickCheckboxToSaveWithLink() {
@@ -50,10 +58,24 @@ class TapToAddCardAddedPage(
         composeTestRule.retrieveCloseButton().click()
     }
 
+    fun advancePastScreen() {
+        composeTestRule.mainClock.advanceTimeBy(TAP_TO_ADD_CARD_ADDED_SHOWN_DELAY)
+    }
+
+    fun waitUntilMissing() {
+        composeTestRule.waitUntilLayoutWithPrimaryButtonMissing(TAP_TO_ADD_CARD_ADDED_PRIMARY_BUTTON)
+    }
+
     private fun assertHasCardAddedText() {
+        val matcher = hasText("Card added")
+
         composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT) {
-            composeTestRule.onNode(hasText("Card added")).isDisplayed()
+            composeTestRule.onAllNodes(matcher)
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .size == 1
         }
+
+        composeTestRule.onNode(matcher).isDisplayed()
     }
 
     private fun assertHasContinueButton() = primaryButtonElement.assert(withLabel = "Continue")

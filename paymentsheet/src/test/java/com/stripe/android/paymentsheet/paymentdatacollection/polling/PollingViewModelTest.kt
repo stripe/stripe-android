@@ -289,7 +289,7 @@ private fun createPollingViewModel(
             clientSecret = "secret",
             timeLimit = timeLimit,
             initialDelay = initialDelay,
-            ctaText = R.string.stripe_upi_polling_message,
+            ctaText = R.string.stripe_blik_confirm_payment,
             stripeAccountId = null,
             qrCodeUrl = qrCodeUrl,
         ),

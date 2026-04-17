@@ -17,6 +17,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
@@ -56,6 +60,7 @@ internal fun AnnotatedText(
             }
         }
     )
+    val standaloneClickableAnnotation = remember(resource) { resource.standaloneClickableAnnotation() }
     var layoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
     val pressIndicator = Modifier.pointerInput(onClickableTextClick) {
         detectTapGestures(
@@ -76,7 +81,21 @@ internal fun AnnotatedText(
     }
     BasicText(
         text = resource,
-        modifier = modifier.then(pressIndicator),
+        modifier = modifier
+            .then(
+                if (standaloneClickableAnnotation != null) {
+                    Modifier.semantics {
+                        role = Role.Button
+                        onClick {
+                            onClickableTextClick(standaloneClickableAnnotation.item)
+                            true
+                        }
+                    }
+                } else {
+                    Modifier
+                }
+            )
+            .then(pressIndicator),
         style = defaultStyle,
         softWrap = true,
         overflow = overflow,
@@ -86,6 +105,13 @@ internal fun AnnotatedText(
         }
     )
 }
+
+private fun AnnotatedString.standaloneClickableAnnotation(): AnnotatedString.Range<String>? =
+    getStringAnnotations(
+        tag = StringAnnotation.CLICKABLE.value,
+        start = 0,
+        end = length
+    ).singleOrNull { it.start == 0 && it.end == length }
 
 private fun TextLayoutResult.clickedAnnotation(
     offset: Offset,

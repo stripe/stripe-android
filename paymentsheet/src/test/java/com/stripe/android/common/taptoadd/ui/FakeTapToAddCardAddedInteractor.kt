@@ -12,16 +12,17 @@ internal class FakeTapToAddCardAddedInteractor(
     cardBrand: CardBrand = CardBrand.Visa,
     last4: String? = "4242",
     primaryButtonEnabled: Boolean = false,
+    primaryButton: TapToAddCardAddedInteractor.State.PrimaryButton? = TapToAddCardAddedInteractor.State.PrimaryButton(
+        label = "Continue".resolvableString,
+        enabled = primaryButtonEnabled,
+    ),
 ) : TapToAddCardAddedInteractor {
     override val state: StateFlow<TapToAddCardAddedInteractor.State> = MutableStateFlow(
         TapToAddCardAddedInteractor.State(
             cardBrand = cardBrand,
             last4 = last4,
             title = "Card added".resolvableString,
-            primaryButton = TapToAddCardAddedInteractor.State.PrimaryButton(
-                label = "Continue".resolvableString,
-                enabled = primaryButtonEnabled,
-            ),
+            primaryButton = primaryButton,
             form = TapToAddCardAddedInteractor.State.Form(
                 elements = emptyList(),
                 enabled = true,

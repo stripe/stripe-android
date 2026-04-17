@@ -73,12 +73,6 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
                         BacsDebitJsonParser().parse(it)
                     }
                 )
-            PaymentMethod.Type.Upi ->
-                builder.setUpi(
-                    json.optJSONObject(type.code)?.let {
-                        UpiJsonParser().parse(it)
-                    }
-                )
             PaymentMethod.Type.Netbanking ->
                 builder.setNetbanking(
                     json.optJSONObject(type.code)?.let {
@@ -353,18 +347,6 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
             private const val FIELD_FINGERPRINT = "fingerprint"
             private const val FIELD_LAST4 = "last4"
             private const val FIELD_SORT_CODE = "sort_code"
-        }
-    }
-
-    internal class UpiJsonParser : ModelJsonParser<PaymentMethod.Upi> {
-        override fun parse(json: JSONObject): PaymentMethod.Upi {
-            return PaymentMethod.Upi(
-                vpa = StripeJsonUtils.optString(json, FIELD_VPA)
-            )
-        }
-
-        private companion object {
-            private const val FIELD_VPA = "vpa"
         }
     }
 

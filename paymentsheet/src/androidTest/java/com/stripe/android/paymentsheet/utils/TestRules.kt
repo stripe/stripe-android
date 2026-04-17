@@ -28,6 +28,7 @@ class TestRules private constructor(
         fun create(
             composeTestRule: ComposeTestRule = createEmptyComposeRule(),
             networkRule: NetworkRule = NetworkRule(),
+            terminalTestRule: TerminalWrapperTestRule = TerminalWrapperTestRule(enabled = false),
             block: RuleChain.() -> RuleChain = { this }
         ): TestRules {
             val chain = RuleChain.emptyRuleChain()
@@ -36,6 +37,7 @@ class TestRules private constructor(
                 .around(composeTestRule)
                 .around(RetryRule(5))
                 .around(networkRule)
+                .around(terminalTestRule)
                 .block()
             return TestRules(chain, composeTestRule, networkRule)
         }

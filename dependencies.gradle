@@ -69,8 +69,9 @@ ext.versions = [
         sentryGradlePlugin          : '6.1.0',
         showkase                    : '1.0.0-beta18',
         litert                      : '1.4.1',
+        linkedinDexmaker            : '2.28.1',
         testParameterInjector       : '1.20',
-        terminal                    : '5.4.0',
+        terminal                    : '5.4.1',
         truth                       : '1.4.5',
         turbine                     : '1.2.1',
         uiAutomator                 : '2.3.0',
@@ -246,6 +247,9 @@ ext.testLibs = [
                 core   : "org.mockito:mockito-core:${versions.mockito}",
                 inline : "org.mockito:mockito-inline:${versions.mockitoInline}",
                 kotlin : "org.mockito.kotlin:mockito-kotlin:${versions.mockitoKotlin}",
+        ],
+        linkedin            : [
+                dexmaker: "com.linkedin.dexmaker:dexmaker-mockito-inline:${versions.linkedinDexmaker}"
         ],
         lint                 : "com.android.tools.lint:lint-tests:${versions.lint}",
         okhttpMockWebServer  : "com.squareup.okhttp3:mockwebserver:${versions.okhttp}",

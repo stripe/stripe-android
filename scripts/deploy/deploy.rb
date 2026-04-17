@@ -63,6 +63,10 @@ OptionParser.new do |opts|
 
 end.parse!
 
+if @version.nil?
+  @version = infer_version_from_changelog()
+end
+
 steps = [
     # Prep for making changes
     method(:check_permissions),

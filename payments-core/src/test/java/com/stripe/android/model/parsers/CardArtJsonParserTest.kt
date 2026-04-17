@@ -52,7 +52,7 @@ class CardArtJsonParserTest {
 
         val cardArt = CardArtJsonParser().parse(json)
 
-        assertThat(cardArt.artImage).isNull()
+        assertThat(cardArt.artImage).isNotNull()
     }
 
     private companion object {

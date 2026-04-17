@@ -51,6 +51,8 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodMessageLearnMore
+import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networktesting.NetworkRule
@@ -97,6 +99,7 @@ import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.utils.FakePaymentElementLoader
+import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import com.stripe.android.utils.PaymentElementCallbackTestRule
 import com.stripe.android.utils.RelayingPaymentElementLoader
 import kotlinx.coroutines.async
@@ -485,6 +488,7 @@ internal class DefaultFlowControllerTest {
             linkAccountInfo = LinkAccountUpdate.Value(null),
             paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
             walletButtonsRendered = false,
+            promotions = listOf(KLARNA_PROMOTION)
         )
 
         verify(paymentOptionActivityLauncher).launch(eq(expectedArgs), anyOrNull())
@@ -2499,7 +2503,10 @@ internal class DefaultFlowControllerTest {
             walletsButtonLinkLauncher = walletsButtonLinkPaymentLauncher,
             activityResultRegistryOwner = mock(),
             linkGateFactory = FakeLinkGate.Factory(linkGate),
-            confirmationHandler = confirmationHandler ?: FakeFlowControllerConfirmationHandler()
+            confirmationHandler = confirmationHandler ?: FakeFlowControllerConfirmationHandler(),
+            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(
+                listOf(KLARNA_PROMOTION)
+            )
         )
     }
 
@@ -2573,6 +2580,15 @@ internal class DefaultFlowControllerTest {
             paymentSelection = null,
             validationError = null,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        )
+
+        private val KLARNA_PROMOTION = PaymentMethodMessagePromotion(
+            paymentMethodType = "KLARNA",
+            message = "This is a message",
+            learnMore = PaymentMethodMessageLearnMore(
+                message = "Click me",
+                url = "https://www.test.com"
+            )
         )
 
         private const val ENABLE_LOGGING = false

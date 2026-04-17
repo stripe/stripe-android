@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.confirmation.injection
 
+import com.stripe.android.paymentelement.confirmation.cardart.PaymentOptionCardArtPrefetchConfirmationModule
 import com.stripe.android.paymentelement.confirmation.intent.CustomerSheetIntentConfirmationModule
 import dagger.Module
 
@@ -7,6 +8,7 @@ import dagger.Module
     includes = [
         DefaultConfirmationModule::class,
         CustomerSheetIntentConfirmationModule::class,
+        PaymentOptionCardArtPrefetchConfirmationModule::class,
     ]
 )
 internal interface CustomerSheetConfirmationModule

@@ -1,5 +1,6 @@
 package com.stripe.android.common.taptoadd.ui
 
+import androidx.annotation.RestrictTo
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
@@ -34,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -53,6 +55,7 @@ internal fun TapToAddLayout(
     ) {
         SharedTransitionLayout {
             AnimatedContent(
+                modifier = Modifier.testTag(TAP_TO_ADD_LAYOUT_TEST_TAG),
                 targetState = screen,
                 transitionSpec = {
                     fadeIn(animationSpec = tween(ANIMATION_DURATION))
@@ -163,6 +166,9 @@ private fun VisibleCancelButton(
         )
     }
 }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val TAP_TO_ADD_LAYOUT_TEST_TAG = "TAP_TO_ADD_LAYOUT"
 
 internal val LocalTapToAddMaxContentHeight = staticCompositionLocalOf { 0.dp }
 

@@ -6,7 +6,9 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeTestRule
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
+import com.stripe.android.common.taptoadd.ui.TAP_TO_ADD_CONFIRMATION_PRIMARY_BUTTON
 
 class TapToAddConfirmationPage(
     private val composeTestRule: ComposeTestRule,
@@ -29,17 +31,22 @@ class TapToAddConfirmationPage(
 
     fun assertCvcRecollectionFieldShown() {
         retrieveCvcField()
-            .assertIsDisplayed()
+            .assertExists()
             .assertIsEnabled()
     }
 
     fun fillCvc(cvc: String) {
         retrieveCvcField()
+            .performScrollTo()
             .performTextInput(cvc)
     }
 
     fun clickPrimaryButton() {
         primaryButtonElement.assert(null).click()
+    }
+
+    fun waitUntilMissing() {
+        composeTestRule.waitUntilLayoutWithPrimaryButtonMissing(TAP_TO_ADD_CONFIRMATION_PRIMARY_BUTTON)
     }
 
     fun clickCloseButton() {

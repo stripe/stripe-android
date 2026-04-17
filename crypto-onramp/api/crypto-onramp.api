@@ -81,7 +81,9 @@ public final class com/stripe/android/crypto/onramp/model/KycInfo {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/DateOfBirth;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;)V
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAddress ()Lcom/stripe/android/paymentsheet/PaymentSheet$Address;
+	public final fun getDateOfBirth ()Lcom/stripe/android/model/DateOfBirth;
 	public final fun getFirstName ()Ljava/lang/String;
+	public final fun getIdNumber ()Ljava/lang/String;
 	public final fun getLastName ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
