@@ -5,6 +5,9 @@ NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
 * [REMOVED][12871](https://github.com/stripe/stripe-android/pull/12871) Removed UPI support across the SDK.
 
+### PaymentSheet
+* [CHANGED] `PaymentSheet.PaymentMethodLayout.Automatic` now uses a client-side threshold, choosing horizontal for 1-2 supported payment method types and vertical for 3 or more
+
 ## 23.4.0 - 2026-04-14
 ### Crypto Onramp (Private Preview)
 * [ADDED][12740](https://github.com/stripe/stripe-android/pull/12740) Ability to Receive L0 KYC Info From Google Pay

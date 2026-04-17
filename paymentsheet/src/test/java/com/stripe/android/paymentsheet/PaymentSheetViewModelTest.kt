@@ -12,7 +12,6 @@ import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardFundingFilter
-import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddMode
@@ -1536,6 +1535,19 @@ internal class PaymentSheetViewModelTest {
                 config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
                     .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Automatic)
                     .build()
+            ),
+        )
+        viewModel.navigationHandler.currentScreen.test {
+            assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
+        }
+    }
+
+    @Test
+    fun `launched with correct screen when automatic mode has 3 or more payment methods`() = runTest {
+        val viewModel = createViewModel(
+            args = ARGS_WITH_AUTOMATIC_LAYOUT,
+            stripeIntent = PAYMENT_INTENT.copy(
+                paymentMethodTypes = listOf("card", "cashapp", "klarna")
             ),
         )
         viewModel.navigationHandler.currentScreen.test {
@@ -3074,12 +3086,12 @@ internal class PaymentSheetViewModelTest {
         val savedSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
 
         cvcRecollectionHandler.requiresCVCRecollection = true
-        assertThat(viewModel.shouldLaunchCvcRecollectionScreen(savedSelection)).isTrue()
-        assertThat(viewModel.shouldAttachCvc(savedSelection)).isFalse()
+        assertThat(viewModel.shouldLaunchCvcRecollectionScreen(savedSelection)).isFalse()
+        assertThat(viewModel.shouldAttachCvc(savedSelection)).isTrue()
 
         viewModel.checkout()
         assertThat(viewModel.shouldLaunchCvcRecollectionScreen(savedSelection)).isFalse()
-        assertThat(viewModel.shouldAttachCvc(savedSelection)).isFalse()
+        assertThat(viewModel.shouldAttachCvc(savedSelection)).isTrue()
 
         cvcRecollectionHandler.requiresCVCRecollection = false
         assertThat(viewModel.shouldAttachCvc(savedSelection)).isFalse()
@@ -3117,12 +3129,11 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `CvcRecollection screen should be displayed on checkout when required in automatic mode`() = runTest {
+    fun `CvcRecollection screen should be displayed on checkout when automatic mode resolves to vertical`() = runTest {
         val viewModel = createViewModel(
-            args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Automatic)
-                    .build()
+            args = ARGS_WITH_AUTOMATIC_LAYOUT,
+            stripeIntent = PAYMENT_INTENT.copy(
+                paymentMethodTypes = listOf("card", "cashapp", "klarna")
             ),
         )
 
@@ -3215,7 +3226,7 @@ internal class PaymentSheetViewModelTest {
 
         viewModel.navigationHandler.currentScreen.test {
             val screen = awaitItem()
-            assertThat(screen).isInstanceOf<PaymentSheetScreen.VerticalMode>()
+            assertThat(screen).isInstanceOf<SelectSavedPaymentMethods>()
         }
     }
 
@@ -3273,53 +3284,39 @@ internal class PaymentSheetViewModelTest {
         }
 
     @Test
-    fun `getPaymentMethodLayout() logs experiment exposure when in horizontal mode experiment`() {
-        createViewModel(
-            experimentsData = ElementsSession.ExperimentsData(
-                arbId = "232dd033-0b45-4456-b834-ecdcb02ab1fb",
-                experimentAssignments = mapOf(
-                    ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_AA to "control"
-                )
+    fun `getPaymentMethodLayout() returns horizontal when automatic mode has 2 or fewer payment methods`() {
+        val viewModel = createViewModel(
+            stripeIntent = PAYMENT_INTENT.copy(
+                paymentMethodTypes = listOf("card", "cashapp")
             ),
             args = ARGS_WITH_AUTOMATIC_LAYOUT,
         )
 
-        verify(eventReporter).onExperimentExposure(
-            any<LoggableExperiment.OcsMobileHorizontalMode>()
-        )
+        assertThat(viewModel.getPaymentMethodLayout()).isEqualTo(PaymentSheet.PaymentMethodLayout.Horizontal)
     }
 
     @Test
-    fun `getPaymentMethodLayout() does not log experiment exposure when not in horizontal mode experiment`() {
+    fun `getPaymentMethodLayout() returns vertical when automatic mode has 3 or more payment methods`() {
         val viewModel = createViewModel(
-            experimentsData = null,
-            args = ARGS_WITH_AUTOMATIC_LAYOUT
-        )
-
-        viewModel.getPaymentMethodLayout()
-
-        verify(eventReporter, never()).onExperimentExposure(
-            any<LoggableExperiment.OcsMobileHorizontalMode>()
-        )
-    }
-
-    @Test
-    fun `getPaymentMethodLayout() does not log experiment exposure when payment method layout is not automatic`() {
-        val viewModel = createViewModel(
-            experimentsData = ElementsSession.ExperimentsData(
-                arbId = "232dd033-0b45-4456-b834-ecdcb02ab1fb",
-                experimentAssignments = mapOf(
-                    ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_AA to "control"
-                )
+            stripeIntent = PAYMENT_INTENT.copy(
+                paymentMethodTypes = listOf("card", "cashapp", "klarna")
             ),
+            args = ARGS_WITH_AUTOMATIC_LAYOUT,
+        )
+
+        assertThat(viewModel.getPaymentMethodLayout()).isEqualTo(PaymentSheet.PaymentMethodLayout.Vertical)
+    }
+
+    @Test
+    fun `getPaymentMethodLayout() returns configured layout when payment method layout is not automatic`() {
+        val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
+            stripeIntent = PAYMENT_INTENT.copy(
+                paymentMethodTypes = listOf("card", "cashapp", "klarna")
+            ),
         )
 
-        viewModel.getPaymentMethodLayout()
-
-        verify(eventReporter, never()).onExperimentExposure(
-            any<LoggableExperiment.OcsMobileHorizontalMode>()
-        )
+        assertThat(viewModel.getPaymentMethodLayout()).isEqualTo(PaymentSheet.PaymentMethodLayout.Horizontal)
     }
 
     @Test

@@ -6,12 +6,10 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.cards.CardAccountRangeRepository
-import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -233,56 +231,18 @@ internal abstract class BaseSheetViewModel(
     fun getPaymentMethodLayout(): PaymentSheet.PaymentMethodLayout {
         val paymentMethodLayout = config.paymentMethodLayout
         val paymentMethodMetadata = paymentMethodMetadata.value
-        val experimentsData = paymentMethodMetadata?.experimentsData
 
         if (
             paymentMethodMetadata == null ||
-            experimentsData == null ||
             paymentMethodLayout != PaymentSheet.PaymentMethodLayout.Automatic
         ) {
             return paymentMethodLayout
         }
 
-        logHorizontalModeExperimentExposures(
-            experimentsData = experimentsData,
-            paymentMethodMetadata = paymentMethodMetadata,
-        )
-
-        experimentsData.experimentAssignments[
-            ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE
-        ]?.let { variant ->
-            if (variant == "control") {
-                return PaymentSheet.PaymentMethodLayout.Vertical
-            } else if (variant == "treatment") {
-                return PaymentSheet.PaymentMethodLayout.Horizontal
-            }
-        }
-
-        return paymentMethodLayout
-    }
-
-    private fun logHorizontalModeExperimentExposures(
-        experimentsData: ElementsSession.ExperimentsData,
-        paymentMethodMetadata: PaymentMethodMetadata,
-    ) {
-        listOf(
-            ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_AA,
-            ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE,
-        ).forEach { experimentAssignment ->
-            experimentsData.experimentAssignments[
-                experimentAssignment,
-            ]?.let { variant ->
-                eventReporter.onExperimentExposure(
-                    LoggableExperiment.OcsMobileHorizontalMode(
-                        experimentsData = experimentsData,
-                        experiment = experimentAssignment,
-                        group = variant,
-                        paymentMethodMetadata = paymentMethodMetadata,
-                        hasSavedPaymentMethod = customerStateHolder.paymentMethods.value.isNotEmpty(),
-                        mode = mode,
-                    )
-                )
-            }
+        return if (paymentMethodMetadata.supportedPaymentMethodTypes().size >= 3) {
+            PaymentSheet.PaymentMethodLayout.Vertical
+        } else {
+            PaymentSheet.PaymentMethodLayout.Horizontal
         }
     }
 

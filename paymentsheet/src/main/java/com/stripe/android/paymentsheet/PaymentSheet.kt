@@ -1071,7 +1071,8 @@ class PaymentSheet internal constructor(
             }
 
             /**
-             * The layout of payment methods in PaymentSheet. Defaults to [PaymentSheet.PaymentMethodLayout.Horizontal].
+             * The layout of payment methods in PaymentSheet. Defaults to
+             * [PaymentSheet.PaymentMethodLayout.Automatic].
              * @see [PaymentSheet.PaymentMethodLayout] for the list of available layouts.
              */
             fun paymentMethodLayout(paymentMethodLayout: PaymentMethodLayout): Builder = apply {
@@ -1261,7 +1262,8 @@ class PaymentSheet internal constructor(
         Vertical,
 
         /**
-         * This lets Stripe choose the best layout for payment methods in the sheet.
+         * Resolves to [Horizontal] when there are 1-2 supported payment method types and to
+         * [Vertical] when there are 3 or more.
          */
         Automatic
     }
