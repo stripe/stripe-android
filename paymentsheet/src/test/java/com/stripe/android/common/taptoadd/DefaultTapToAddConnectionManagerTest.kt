@@ -62,6 +62,9 @@ class DefaultTapToAddConnectionManagerTest {
     private val testDispatcher = UnconfinedTestDispatcher()
     private val lifecycleOwner = TestLifecycleOwner()
 
+    private val testConnectionConfig =
+        TapToAddConnectionManager.ConnectionConfig(merchantDisplayName = "Test Merchant")
+
     @Test
     fun `init initializes terminal when not already initialized`() = test(
         isInitialized = false,
@@ -157,7 +160,7 @@ class DefaultTapToAddConnectionManagerTest {
         }
     ) {
         assertFailsWith<IllegalStateException> {
-            manager.connect()
+            manager.connect(testConnectionConfig)
         }
 
         verify(terminalInstance, never()).discoverReaders(any(), any(), any())
@@ -170,7 +173,7 @@ class DefaultTapToAddConnectionManagerTest {
             mockReaderCall(Reader())
         }
     ) {
-        manager.connect()
+        manager.connect(testConnectionConfig)
 
         verify(terminalInstance, never()).discoverReaders(any(), any(), any())
     }
@@ -183,7 +186,7 @@ class DefaultTapToAddConnectionManagerTest {
             mockDiscoverCall()
         }
     ) {
-        val connectionJob = testScope.async { manager.connect() }
+        val connectionJob = testScope.async { manager.connect(testConnectionConfig) }
 
         verify(terminalInstance).discoverReaders(
             any<DiscoveryConfiguration.TapToPayDiscoveryConfiguration>(),
@@ -214,7 +217,7 @@ class DefaultTapToAddConnectionManagerTest {
             )
         }
     ) {
-        val connectionJob = testScope.async { manager.connect() }
+        val connectionJob = testScope.async { manager.connect(testConnectionConfig) }
 
         verify(terminalInstance).discoverReaders(
             any<DiscoveryConfiguration.TapToPayDiscoveryConfiguration>(),
@@ -240,10 +243,10 @@ class DefaultTapToAddConnectionManagerTest {
         }
     ) {
         val jobs = arrayOf(
-            testScope.async { manager.connect() },
-            testScope.async { manager.connect() },
-            testScope.async { manager.connect() },
-            testScope.async { manager.connect() }
+            testScope.async { manager.connect(testConnectionConfig) },
+            testScope.async { manager.connect(testConnectionConfig) },
+            testScope.async { manager.connect(testConnectionConfig) },
+            testScope.async { manager.connect(testConnectionConfig) }
         )
 
         verify(terminalInstance, times(1)).discoverReaders(
@@ -269,7 +272,7 @@ class DefaultTapToAddConnectionManagerTest {
             }
         ) {
             assertFailsWith<SecurityException> {
-                manager.connect()
+                manager.connect(testConnectionConfig)
             }
 
             verify(terminalInstance).discoverReaders(
@@ -301,7 +304,7 @@ class DefaultTapToAddConnectionManagerTest {
                 )
             }
         ) {
-            val connectionJob = testScope.async { manager.connect() }
+            val connectionJob = testScope.async { manager.connect(testConnectionConfig) }
 
             val listenerCaptor = argumentCaptor<DiscoveryListener>()
 
@@ -320,7 +323,8 @@ class DefaultTapToAddConnectionManagerTest {
                 argWhere { config ->
                     config is ConnectionConfiguration.TapToPayConnectionConfiguration &&
                         config.autoReconnectOnUnexpectedDisconnect &&
-                        config.tapToPayReaderListener == manager
+                        config.tapToPayReaderListener == manager &&
+                        config.merchantDisplayName == testConnectionConfig.merchantDisplayName
                 },
                 any<ReaderCallback>(),
             )
@@ -343,7 +347,7 @@ class DefaultTapToAddConnectionManagerTest {
     ) {
        val connectionResult = testScope.async {
             assertFailsWith<IllegalStateException> {
-                manager.connect()
+                manager.connect(testConnectionConfig)
             }
         }
 
@@ -380,7 +384,7 @@ class DefaultTapToAddConnectionManagerTest {
             )
         }
     ) {
-        val connectionJob = testScope.async { manager.connect() }
+        val connectionJob = testScope.async { manager.connect(testConnectionConfig) }
 
         val callbackCaptor = argumentCaptor<Callback>()
 
@@ -413,7 +417,7 @@ class DefaultTapToAddConnectionManagerTest {
         }
     ) {
         val connectionResult = testScope.async {
-            assertFailsWith<TerminalException> { manager.connect() }
+            assertFailsWith<TerminalException> { manager.connect(testConnectionConfig) }
         }
 
         val callbackCaptor = argumentCaptor<Callback>()
@@ -454,7 +458,7 @@ class DefaultTapToAddConnectionManagerTest {
                 )
             }
         ) {
-            val connectionResult = testScope.async { manager.connect() }
+            val connectionResult = testScope.async { manager.connect(testConnectionConfig) }
 
             val reader = Reader()
 
@@ -484,7 +488,7 @@ class DefaultTapToAddConnectionManagerTest {
             }
         ) {
             val connectionResult = testScope.async {
-                assertFailsWith<TerminalException> { manager.connect() }
+                assertFailsWith<TerminalException> { manager.connect(testConnectionConfig) }
             }
 
             val reader = Reader()
@@ -523,7 +527,7 @@ class DefaultTapToAddConnectionManagerTest {
                 mockDiscoverCall()
             }
         ) {
-            val connectionResult = testScope.async { manager.connect() }
+            val connectionResult = testScope.async { manager.connect(testConnectionConfig) }
 
             whenever(terminalInstance.connectedReader).thenReturn(connectedReader)
 
@@ -557,7 +561,7 @@ class DefaultTapToAddConnectionManagerTest {
                 )
             }
         ) {
-            val job = testScope.async { manager.connect() }
+            val job = testScope.async { manager.connect(testConnectionConfig) }
 
             whenever(terminalInstance.connectedReader).thenReturn(connectedReader)
 
@@ -586,7 +590,7 @@ class DefaultTapToAddConnectionManagerTest {
                 )
             }
         ) {
-            val job = testScope.async { manager.connect() }
+            val job = testScope.async { manager.connect(testConnectionConfig) }
 
             val reader = Reader()
 
@@ -614,7 +618,7 @@ class DefaultTapToAddConnectionManagerTest {
         ) {
             val job = testScope.async {
                 assertFailsWith<TerminalException> {
-                    manager.connect()
+                    manager.connect(testConnectionConfig)
                 }
             }
 
