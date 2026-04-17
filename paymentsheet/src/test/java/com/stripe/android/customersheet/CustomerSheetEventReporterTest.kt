@@ -33,6 +33,7 @@ import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.C
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_UPDATE_PAYMENT_METHOD
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_UPDATE_PAYMENT_METHOD_FAILED
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.FIELD_ERROR_MESSAGE
+import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.FIELD_HAS_CARD_ART
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.FIELD_HAS_DEFAULT_PAYMENT_METHOD
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.FIELD_PAYMENT_METHOD_TYPE
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.FIELD_SELECTED_LPM
@@ -200,12 +201,14 @@ class CustomerSheetEventReporterTest {
     fun `onConfirmPaymentMethodSucceeded should fire analytics request with expected event value`() {
         eventReporter.onConfirmPaymentMethodSucceeded(
             type = PaymentMethod.Type.Card.code,
-            syncDefaultEnabled = null
+            syncDefaultEnabled = null,
+            hasCardArt = false,
         )
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == CS_SELECT_PAYMENT_METHOD_CONFIRMED_SAVED_PM_SUCCEEDED &&
-                    req.params[FIELD_PAYMENT_METHOD_TYPE] == PaymentMethod.Type.Card.code
+                    req.params[FIELD_PAYMENT_METHOD_TYPE] == PaymentMethod.Type.Card.code &&
+                    req.params[FIELD_HAS_CARD_ART] == false
             }
         )
     }
@@ -214,7 +217,8 @@ class CustomerSheetEventReporterTest {
     fun `onConfirmPaymentMethodSucceeded with syncDefaultEnabled should fire analytics request with expected value`() {
         eventReporter.onConfirmPaymentMethodSucceeded(
             type = PaymentMethod.Type.Card.code,
-            syncDefaultEnabled = true
+            syncDefaultEnabled = true,
+            hasCardArt = false,
         )
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
@@ -226,15 +230,33 @@ class CustomerSheetEventReporterTest {
     }
 
     @Test
+    fun `onConfirmPaymentMethodSucceeded with card art should fire analytics request with has_card_art true`() {
+        eventReporter.onConfirmPaymentMethodSucceeded(
+            type = PaymentMethod.Type.Card.code,
+            syncDefaultEnabled = null,
+            hasCardArt = true,
+        )
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == CS_SELECT_PAYMENT_METHOD_CONFIRMED_SAVED_PM_SUCCEEDED &&
+                    req.params[FIELD_PAYMENT_METHOD_TYPE] == PaymentMethod.Type.Card.code &&
+                    req.params[FIELD_HAS_CARD_ART] == true
+            }
+        )
+    }
+
+    @Test
     fun `onConfirmPaymentMethodFailed should fire analytics request with expected event value`() {
         eventReporter.onConfirmPaymentMethodFailed(
             type = PaymentMethod.Type.Card.code,
-            syncDefaultEnabled = null
+            syncDefaultEnabled = null,
+            hasCardArt = false,
         )
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == CS_SELECT_PAYMENT_METHOD_CONFIRMED_SAVED_PM_FAILED &&
-                    req.params[FIELD_PAYMENT_METHOD_TYPE] == PaymentMethod.Type.Card.code
+                    req.params[FIELD_PAYMENT_METHOD_TYPE] == PaymentMethod.Type.Card.code &&
+                    req.params[FIELD_HAS_CARD_ART] == false
             }
         )
     }
@@ -243,13 +265,30 @@ class CustomerSheetEventReporterTest {
     fun `onConfirmPaymentMethodFailed with syncDefaultEnabled should fire analytics request with expected value`() {
         eventReporter.onConfirmPaymentMethodFailed(
             type = PaymentMethod.Type.Card.code,
-            syncDefaultEnabled = true
+            syncDefaultEnabled = true,
+            hasCardArt = false,
         )
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == CS_SELECT_PAYMENT_METHOD_CONFIRMED_SAVED_PM_FAILED &&
                     req.params[FIELD_PAYMENT_METHOD_TYPE] == PaymentMethod.Type.Card.code &&
                     req.params[FIELD_SYNC_DEFAULT_ENABLED] == true
+            }
+        )
+    }
+
+    @Test
+    fun `onConfirmPaymentMethodFailed with card art should fire analytics request with has_card_art true`() {
+        eventReporter.onConfirmPaymentMethodFailed(
+            type = PaymentMethod.Type.Card.code,
+            syncDefaultEnabled = null,
+            hasCardArt = true,
+        )
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == CS_SELECT_PAYMENT_METHOD_CONFIRMED_SAVED_PM_FAILED &&
+                    req.params[FIELD_PAYMENT_METHOD_TYPE] == PaymentMethod.Type.Card.code &&
+                    req.params[FIELD_HAS_CARD_ART] == true
             }
         )
     }

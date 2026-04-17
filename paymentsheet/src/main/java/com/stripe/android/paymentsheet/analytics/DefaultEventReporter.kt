@@ -232,6 +232,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 duration = duration,
                 selectedLpm = paymentSelection.code(),
                 linkContext = paymentSelection.linkContext(),
+                hasCardArt = paymentSelection.hasCardArt(),
             )
         )
     }

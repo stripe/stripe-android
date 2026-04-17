@@ -57,6 +57,7 @@ import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.analytics.hasCardArt
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -1168,7 +1169,8 @@ internal class CustomerSheetViewModel(
         type?.let {
             eventReporter.onConfirmPaymentMethodSucceeded(
                 type = type,
-                syncDefaultEnabled = syncDefaultEnabled
+                syncDefaultEnabled = syncDefaultEnabled,
+                hasCardArt = paymentSelection.hasCardArt(),
             )
         }
         _result.tryEmit(
@@ -1188,7 +1190,8 @@ internal class CustomerSheetViewModel(
         type?.let {
             eventReporter.onConfirmPaymentMethodFailed(
                 type = type,
-                syncDefaultEnabled = syncDefaultEnabled
+                syncDefaultEnabled = syncDefaultEnabled,
+                hasCardArt = paymentSelection.hasCardArt(),
             )
         }
         logger.error(

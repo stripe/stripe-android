@@ -924,11 +924,13 @@ private class FakeCustomerSheetEventReporter : CustomerSheetEventReporter {
     override fun onConfirmPaymentMethodSucceeded(
         type: String,
         syncDefaultEnabled: Boolean?,
+        hasCardArt: Boolean,
     ) = Unit
 
     override fun onConfirmPaymentMethodFailed(
         type: String,
         syncDefaultEnabled: Boolean?,
+        hasCardArt: Boolean,
     ) = Unit
 
     override fun onEditTapped() = Unit
