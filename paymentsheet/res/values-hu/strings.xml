@@ -274,7 +274,6 @@ to be saved and used in future checkout sessions. -->
   <!-- Text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_header">Fizetés jóváhagyása</string>
   <!-- Countdown timer text on a screen asking the user to approve a payment -->
-  <string name="stripe_upi_polling_message">Nyissa meg az UPI-alkalmazását a fizetés jóváhagyásához %s belül</string>
   <!-- Text on a screen that indicates a payment has failed informing the user we are asking the user to try a different payment method -->
   <string name="stripe_upi_polling_payment_failed_message">Lépjen vissza, és válasszon másik fizetési módot</string>
   <!-- Text on a screen that indicates a payment has failed -->

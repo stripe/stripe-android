@@ -276,7 +276,6 @@ to be saved and used in future checkout sessions. -->
   <!-- Text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_header">Approva l-pagament</string>
   <!-- Countdown timer text on a screen asking the user to approve a payment -->
-  <string name="stripe_upi_polling_message">Iftaħ l-app ta\' UPI biex tapprova l-pagamenti tiegħek fi żmien %s</string>
   <!-- Text on a screen that indicates a payment has failed informing the user we are asking the user to try a different payment method -->
   <string name="stripe_upi_polling_payment_failed_message">Jekk jogħġbok mur lura u agħżel metodu tal-pagament ieħor</string>
   <!-- Text on a screen that indicates a payment has failed -->

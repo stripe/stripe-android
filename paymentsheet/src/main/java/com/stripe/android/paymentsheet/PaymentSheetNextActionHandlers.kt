@@ -12,7 +12,6 @@ import com.stripe.android.paymentsheet.paymentdatacollection.polling.PollingNext
 object PaymentSheetNextActionHandlers {
     fun get(): Map<Class<out StripeIntent.NextActionData>, PaymentNextActionHandler<StripeIntent>> {
         return mapOf(
-            StripeIntent.NextActionData.UpiAwaitNotification::class.java to PollingNextActionHandler(),
             StripeIntent.NextActionData.BlikAuthorize::class.java to PollingNextActionHandler(),
             StripeIntent.NextActionData.DisplayPayNowDetails::class.java to PollingNextActionHandler(),
             StripeIntent.NextActionData.DisplayPromptPayDetails::class.java to PollingNextActionHandler(),

@@ -3,6 +3,7 @@
 NEXT_VERSION_BUMP: PATCH
 
 ## XX.XX.XX - 20XX-XX-XX
+* [REMOVED][12871](https://github.com/stripe/stripe-android/pull/12871) Removed UPI support across the SDK.
 
 ## 23.4.0 - 2026-04-14
 ### Crypto Onramp (Private Preview)

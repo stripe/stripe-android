@@ -238,7 +238,7 @@ private fun ActivePollingScreenPreview() {
             PollingScreen(
                 uiState = PollingUiState(
                     durationRemaining = 83.seconds,
-                    ctaText = R.string.stripe_upi_polling_message,
+                    ctaText = R.string.stripe_blik_confirm_payment,
                     pollingState = PollingState.Active,
                     shouldShowQrCode = false,
                 ),
@@ -256,7 +256,7 @@ private fun FailedPollingScreenPreview() {
             PollingScreen(
                 uiState = PollingUiState(
                     durationRemaining = 83.seconds,
-                    ctaText = R.string.stripe_upi_polling_message,
+                    ctaText = R.string.stripe_blik_confirm_payment,
                     pollingState = PollingState.Failed,
                     shouldShowQrCode = false,
                 ),
