@@ -64,7 +64,11 @@
   <string name="stripe_email">Email</string>
   <!-- Error message when email is invalid -->
   <string name="stripe_email_is_invalid">Your email is invalid.</string>
-  <!-- String to describe an complete expiration date text field. Formatted as 'Expiration date. [month] [year] -->
+  <!-- String to describe an empty card number text field with no supported card brands. -->
+  <string name="stripe_card_number_empty_content_description">Card number</string>
+  <!-- String to describe an empty card number text field with no supported card brands. Includes a list of supported card brands, such as Visa, Mastercard. -->
+  <string name="stripe_card_number_with_brands_content_description">Card number. Supported cards include %s</string>
+  <!-- String to describe a complete expiration date text field. Formatted as 'Expiration date. [month] [year] -->
   <string name="stripe_expiration_date_content_description" formatted="false">Expiration date. %s %s</string>
   <!-- String to describe an empty expiration date text field. -->
   <string name="stripe_expiration_date_empty_content_description">Expiration date. Two digit month and two digit year, empty</string>

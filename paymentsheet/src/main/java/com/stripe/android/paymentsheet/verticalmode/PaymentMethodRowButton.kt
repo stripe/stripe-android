@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
@@ -32,7 +33,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -88,11 +91,18 @@ internal fun PaymentMethodRowButton(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 52.dp)
-            .selectable(
-                selected = isSelected,
-                enabled = isClickable,
-                onClick = onClick
-            ),
+            .then(when (appearance.style) {
+                is RowStyle.FlatWithRadio, is RowStyle.FlatWithCheckmark -> Modifier.selectable(
+                    selected = isSelected,
+                    onClick = onClick,
+                )
+                is RowStyle.FlatWithDisclosure, is RowStyle.FloatingButton -> Modifier.clickable(
+                    enabled = isClickable,
+                    onClick = onClick
+                ).semantics {
+                    role = Role.Button
+                }
+            }),
         trailingContent = trailingContent,
         onClick = onClick
     ) { displayTrailingContent ->
