@@ -8,6 +8,7 @@ import com.stripe.android.link.LinkController
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -58,6 +59,7 @@ internal data class CommonConfiguration(
         checkoutSessionValidate(initializationMode)
         externalPaymentMethodsValidate(isLiveMode)
         confirmationTokenValidate(isLiveMode, callbackIdentifier)
+        tapToAddValidate(callbackIdentifier)
 
         customer?.accessType?.let { customerAccessType ->
             customerAccessTypeValidate(customerAccessType)
@@ -137,6 +139,21 @@ internal data class CommonConfiguration(
         ) {
             throw IllegalArgumentException(
                 "createIntentWithConfirmationTokenCallback must be used with CustomerSession."
+            )
+        }
+    }
+
+    // These exception messages are not localized as they are not intended to be displayed to a user.
+    @OptIn(TapToAddPreview::class)
+    private fun tapToAddValidate(
+        @PaymentElementCallbackIdentifier callbackIdentifier: String
+    ) {
+        if (
+            PaymentElementCallbackReferences[callbackIdentifier]?.createCardPresentSetupIntentCallback != null &&
+            billingDetailsCollectionConfiguration.collectsAnything
+        ) {
+            throw IllegalArgumentException(
+                "Tap to Add does not support collecting any billing details!"
             )
         }
     }

@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -494,6 +495,60 @@ class PaymentSheetConfigurationKtxTest {
                 callbackIdentifier = ""
             )
         }
+    }
+
+    @OptIn(TapToAddPreview::class)
+    @Test
+    fun `'validate' should fail when Tap to Add callback is set and billing details collection collects anything`() {
+        val callbackIdentifier = "tap_to_add_common_configuration_test"
+
+        PaymentElementCallbackReferences[callbackIdentifier] = PaymentElementCallbacks.Builder()
+            .createCardPresentSetupIntentCallback {
+                error("Should not be called")
+            }
+            .build()
+
+        val configCollectingBilling = configuration.newBuilder()
+            .billingDetailsCollectionConfiguration(
+                PaymentSheet.BillingDetailsCollectionConfiguration(
+                    name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                )
+            )
+            .build()
+            .asCommonConfiguration()
+
+        assertFailsWith<IllegalArgumentException>(
+            "Tap to Add does not support collecting any billing details!",
+        ) {
+            configCollectingBilling.validate(
+                initializationMode = DEFAULT_INITIALIZATION_MODE,
+                isLiveMode = false,
+                callbackIdentifier = callbackIdentifier,
+            )
+        }
+    }
+
+    @OptIn(TapToAddPreview::class)
+    @Test
+    fun `'validate' should succeed when Tap to Add callback is set and billing details collection collects nothing`() {
+        val callbackIdentifier = "tap_to_add_common_configuration_test"
+
+        PaymentElementCallbackReferences[callbackIdentifier] = PaymentElementCallbacks.Builder()
+            .createCardPresentSetupIntentCallback {
+                error("Should not be called")
+            }
+            .build()
+
+        val configNotCollectingBilling = configuration.newBuilder()
+            .billingDetailsCollectionConfiguration(PaymentSheet.BillingDetailsCollectionConfiguration())
+            .build()
+            .asCommonConfiguration()
+
+        configNotCollectingBilling.validate(
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            isLiveMode = false,
+            callbackIdentifier = callbackIdentifier,
+        )
     }
 
     private companion object {

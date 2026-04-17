@@ -53,6 +53,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.ConfirmationT
 import com.stripe.android.paymentsheet.example.playground.settings.DropdownSetting
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedRowSelectionBehaviorSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedViewDisplaysMandateSettingDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.EnableTapToAddSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
@@ -115,7 +116,11 @@ internal class EmbeddedPlaygroundActivity :
             .confirmCustomPaymentMethodCallback(this)
             .externalPaymentMethodConfirmHandler(this)
             .analyticEventCallback(this)
-            .createCardPresentSetupIntentCallback(this)
+            .also {
+                if (playgroundState.snapshot[EnableTapToAddSettingsDefinition]) {
+                    it.createCardPresentSetupIntentCallback(this)
+                }
+            }
             .rowSelectionBehavior(
                 playgroundSettings[EmbeddedRowSelectionBehaviorSettingsDefinition].value.rowSelectionBehavior
             )
