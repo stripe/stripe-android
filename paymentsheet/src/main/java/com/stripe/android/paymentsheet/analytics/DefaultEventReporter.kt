@@ -538,6 +538,20 @@ internal class DefaultEventReporter @Inject internal constructor(
         }
     }
 
+    override fun onPaymentMethodMessagePromotionsFetched() {
+        durationProvider.start(DurationProvider.Key.PaymentMethodMessaging)
+        fireEvent(
+            PaymentSheetEvent.PaymentMethodMessaging.Fetched()
+        )
+    }
+
+    override fun onPaymentMethodMessagePromotionsIncomplete() {
+        val duration = durationProvider.end(DurationProvider.Key.PaymentMethodMessaging)
+        fireEvent(
+            PaymentSheetEvent.PaymentMethodMessaging.Incomplete(duration)
+        )
+    }
+
     private fun defaultParams(paymentMethodMetadata: PaymentMethodMetadata?): Map<String, Any> {
         return paymentMethodMetadata?.analyticsMetadata?.paramsMap ?: emptyMap()
     }

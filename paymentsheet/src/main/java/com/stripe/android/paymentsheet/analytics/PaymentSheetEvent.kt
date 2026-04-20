@@ -552,6 +552,18 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         }
     }
 
+    sealed class PaymentMethodMessaging : PaymentSheetEvent() {
+
+        class Fetched : PaymentMethodMessaging() {
+            override val eventName: String = "payment_method_messaging_fetched"
+        }
+
+        class Incomplete(val duration: Duration?) : PaymentMethodMessaging() {
+            override val eventName: String = "payment_method_messaging_incomplete"
+            override val params: Map<String, Any?> = duration.mapOfDurationInSeconds()
+        }
+    }
+
     internal companion object {
         private fun analyticsValue(
             paymentSelection: PaymentSelection?
