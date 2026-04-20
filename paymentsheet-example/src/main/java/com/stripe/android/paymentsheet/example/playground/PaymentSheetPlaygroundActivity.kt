@@ -80,6 +80,7 @@ import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlayg
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.ConfirmationTokenSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedTwoStepSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.EnableTapToAddSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
@@ -179,8 +180,11 @@ internal class PaymentSheetPlaygroundActivity :
                     .externalPaymentMethodConfirmHandler(this)
                     .confirmCustomPaymentMethodCallback(this)
                     .analyticEventCallback(viewModel::analyticCallback)
-                    .createCardPresentSetupIntentCallback(viewModel::createCardPresentSetupIntent)
                     .also {
+                        if (playgroundState?.snapshot[EnableTapToAddSettingsDefinition] == true) {
+                            it.createCardPresentSetupIntentCallback(viewModel::createCardPresentSetupIntent)
+                        }
+
                         if (playgroundState?.snapshot[ConfirmationTokenSettingsDefinition] == true) {
                             it.createIntentCallback(viewModel::createIntentWithConfirmationTokenCallback)
                         } else {
