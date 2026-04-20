@@ -39,7 +39,6 @@ import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.elements.TextFieldState
 import com.stripe.android.uicore.elements.TextFieldStateConstants
 import com.stripe.android.uicore.forms.FormFieldEntry
-import com.stripe.android.uicore.utils.asIndividualDigits
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -121,7 +120,7 @@ internal class DefaultCardNumberController(
 
     // This makes the screen reader read out numbers digit by digit
     override val contentDescription: StateFlow<ResolvableString> = _fieldValue.mapAsStateFlow {
-        it.asIndividualDigits().resolvableString
+        formatCardNumberInputForAccessibility(it, suggestedCardBrands(null))
     }
 
     private val isEligibleForCardBrandChoice = cardBrandChoiceConfig is CardBrandChoiceConfig.Eligible
@@ -541,8 +540,12 @@ internal class DefaultCardNumberController(
         )
     }
 
+    private fun suggestedCardBrands(cardNumber: String?): List<CardBrand> {
+        return CardBrand.getCardBrands(cardNumber).filter { cardBrandFilter.isAccepted(it) }
+    }
+
     private fun createMultiTrailingIcon(number: String): TextFieldIcon.MultiTrailing {
-        val cardBrands = CardBrand.getCardBrands(number).filter { cardBrandFilter.isAccepted(it) }
+        val cardBrands = suggestedCardBrands(number)
 
         val staticIcons = cardBrands.map { cardBrand ->
             TextFieldIcon.Trailing(cardBrand.icon, isTintable = false)

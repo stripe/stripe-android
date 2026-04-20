@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -32,7 +33,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -55,6 +59,7 @@ import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.R as StripeUiCoreR
 
+@Suppress("LongMethod")
 @Composable
 internal fun PaymentMethodRowButton(
     isEnabled: Boolean,
@@ -88,10 +93,23 @@ internal fun PaymentMethodRowButton(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 52.dp)
-            .selectable(
-                selected = isSelected,
-                enabled = isClickable,
-                onClick = onClick
+            .then(
+                when (appearance.style) {
+                    is RowStyle.FlatWithRadio, is RowStyle.FlatWithCheckmark -> Modifier.selectable(
+                        selected = isSelected,
+                        enabled = isClickable,
+                        onClick = onClick,
+                    )
+                    is RowStyle.FlatWithDisclosure, is RowStyle.FloatingButton -> Modifier.clickable(
+                        enabled = isClickable,
+                        onClick = onClick
+                    ).semantics {
+                        role = Role.Button
+                        if (isSelected) {
+                            selected = true
+                        }
+                    }
+                }
             ),
         trailingContent = trailingContent,
         onClick = onClick
