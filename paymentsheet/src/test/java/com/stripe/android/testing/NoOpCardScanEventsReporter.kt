@@ -13,4 +13,5 @@ internal object NoOpCardScanEventsReporter : CardScanEventsReporter {
     override fun onCardScanStarted(implementation: String) = Unit
     override fun onCardScanApiCheckSucceeded(implementation: String) = Unit
     override fun onCardScanApiCheckFailed(implementation: String, error: Throwable?) = Unit
+    override fun onCardScanButtonShown() = Unit
 }
