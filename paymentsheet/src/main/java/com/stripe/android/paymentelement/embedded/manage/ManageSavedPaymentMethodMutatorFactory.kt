@@ -25,7 +25,7 @@ internal class ManageSavedPaymentMethodMutatorFactory @Inject constructor(
     private val savedPaymentMethodRepository: SavedPaymentMethodRepository,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val customerStateHolder: CustomerStateHolder,
-    private val manageNavigatorProvider: Provider<ManageNavigator>,
+    private val embeddedNavigatorProvider: Provider<EmbeddedNavigator>,
     private val paymentMethodMetadata: PaymentMethodMetadata,
     @IOContext private val workContext: CoroutineContext,
     @UIContext private val uiContext: CoroutineContext,
@@ -45,7 +45,7 @@ internal class ManageSavedPaymentMethodMutatorFactory @Inject constructor(
             customerStateHolder = customerStateHolder,
             prePaymentMethodRemoveActions = {
                 if (customerStateHolder.paymentMethods.value.size > 1) {
-                    manageNavigatorProvider.get().performAction(ManageNavigator.Action.Back)
+                    embeddedNavigatorProvider.get().performAction(EmbeddedNavigator.Action.Back)
                     withContext(workContext) {
                         delay(PaymentMethodRemovalDelayMillis)
                     }
@@ -63,7 +63,7 @@ internal class ManageSavedPaymentMethodMutatorFactory @Inject constructor(
     private fun onPaymentMethodRemoved() {
         val shouldCloseSheet = customerStateHolder.paymentMethods.value.isEmpty()
         if (shouldCloseSheet) {
-            manageNavigatorProvider.get().performAction(ManageNavigator.Action.Close())
+            embeddedNavigatorProvider.get().performAction(EmbeddedNavigator.Action.Close())
         }
     }
 
@@ -71,9 +71,9 @@ internal class ManageSavedPaymentMethodMutatorFactory @Inject constructor(
         displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
     ) {
         if (displayableSavedPaymentMethod.savedPaymentMethod != SavedPaymentMethod.Unexpected) {
-            manageNavigatorProvider.get().performAction(
-                ManageNavigator.Action.GoToScreen(
-                    screen = ManageNavigator.Screen.Update(
+            embeddedNavigatorProvider.get().performAction(
+                EmbeddedNavigator.Action.GoToScreen(
+                    screen = EmbeddedNavigator.Screen.Update(
                         interactor = updateScreenInteractorFactoryProvider.get().createUpdateScreenInteractor(
                             displayableSavedPaymentMethod
                         )
