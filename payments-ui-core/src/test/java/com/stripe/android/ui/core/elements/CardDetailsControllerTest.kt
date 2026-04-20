@@ -131,7 +131,7 @@ class CardDetailsControllerTest {
         assertThat(cardController.numberElement.controller.rawFieldValue.value)
             .isEqualTo("5555555555554444")
         assertThat(cardController.expirationDateElement.controller.rawFieldValue.value)
-            .isEqualTo("444")
+            .isEqualTo("0444")
         assertThat(cardController.cvcElement.controller.rawFieldValue.value)
             .isEqualTo("")
     }
@@ -169,7 +169,7 @@ class CardDetailsControllerTest {
         assertThat(cardController.numberElement.controller.rawFieldValue.value)
             .isEqualTo("5555555555554444")
         assertThat(cardController.expirationDateElement.controller.rawFieldValue.value)
-            .isEqualTo("444")
+            .isEqualTo("0444")
         assertThat(cardController.cvcElement.controller.rawFieldValue.value)
             .isEqualTo("")
     }
@@ -208,6 +208,27 @@ class CardDetailsControllerTest {
             .isEqualTo("5555555555554444")
         assertThat(cardController.expirationDateElement.controller.rawFieldValue.value)
             .isEqualTo("")
+    }
+
+    @Test
+    fun `When new card scanned with single digit month, date is correctly formatted`() = runTest {
+        val cardController = cardDetailsController()
+
+        val scannedCard = ScannedCard(
+            pan = "5555555555554444",
+            expirationYear = 2029,
+            expirationMonth = 1,
+        )
+
+        val cardScanResult = CardScanResult.Completed(
+            scannedCard = scannedCard
+        )
+        idleLooper()
+
+        cardController.onCardScanResult.invoke(cardScanResult)
+
+        assertThat(cardController.expirationDateElement.controller.rawFieldValue.value)
+            .isEqualTo("0129")
     }
 
     @Test

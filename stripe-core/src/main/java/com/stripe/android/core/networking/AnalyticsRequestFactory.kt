@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.BuildConfig
+import com.stripe.android.core.reactnative.ReactNativeAnalytics
 import com.stripe.android.core.utils.PluginDetector
 import com.stripe.android.core.version.StripeSdkVersion
 import java.util.Locale
@@ -67,7 +68,7 @@ open class AnalyticsRequestFactory(
         AnalyticsFields.SESSION_ID to sessionId,
         AnalyticsFields.TIMESTAMP to System.currentTimeMillis() / MILLIS_TO_SECONDS,
         AnalyticsFields.LOCALE to Locale.getDefault().toString(),
-    ) + networkType() + pluginType()
+    ) + networkType() + pluginType() + reactNativeParams()
 
     private fun networkType(): Map<String, String> {
         val networkType = networkTypeProvider.get() ?: return emptyMap()
@@ -78,6 +79,17 @@ open class AnalyticsRequestFactory(
         return pluginTypeProvider.get()?.let { pluginType ->
             mapOf(AnalyticsFields.PLUGIN_TYPE to pluginType)
         } ?: emptyMap()
+    }
+
+    private fun reactNativeParams(): Map<String, Any> {
+        val params = mutableMapOf<String, Any>()
+        ReactNativeAnalytics.isNewArchitecture?.let {
+            params[AnalyticsFields.REACT_NATIVE_IS_NEW_ARCHITECTURE] = it
+        }
+        ReactNativeAnalytics.reactNativeVersion?.let {
+            params[AnalyticsFields.REACT_NATIVE_VERSION] = it
+        }
+        return params
     }
 
     internal fun appDataParams(): Map<String, Any> {

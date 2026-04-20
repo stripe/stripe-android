@@ -72,9 +72,37 @@ internal class DefaultCustomerStateHolder(
 
     override fun addPaymentMethod(paymentMethod: PaymentMethod) {
         val currentCustomer = customer.value ?: return
-        val newCustomer = currentCustomer.copy(paymentMethods = currentCustomer.paymentMethods + paymentMethod)
+        val currentMetadata = customerMetadata.value ?: return
+
+        val newCustomer = when (currentMetadata) {
+            is CustomerMetadata.LegacyEphemeralKey -> {
+                currentCustomer.copy(paymentMethods = currentCustomer.paymentMethods + paymentMethod)
+            }
+            is CustomerMetadata.CustomerSession,
+            is CustomerMetadata.CheckoutSession -> {
+                val currentCustomerPaymentMethods = currentCustomer.paymentMethods
+
+                val samePaymentMethodIndex = currentCustomerPaymentMethods.indexOfFirst { customerPaymentMethod ->
+                    customerPaymentMethod.fingerprint() == paymentMethod.fingerprint()
+                }
+
+                if (samePaymentMethodIndex == -1) {
+                    currentCustomer.copy(paymentMethods = currentCustomerPaymentMethods + paymentMethod)
+                } else {
+                    val mutablePaymentMethods = currentCustomerPaymentMethods.toMutableList()
+                    mutablePaymentMethods[samePaymentMethodIndex] = paymentMethod
+                    currentCustomer.copy(paymentMethods = mutablePaymentMethods)
+                }
+            }
+        }
 
         savedStateHandle[SAVED_CUSTOMER] = newCustomer
+    }
+
+    private fun PaymentMethod.fingerprint(): String? {
+        return card?.fingerprint
+            ?: usBankAccount?.fingerprint
+            ?: sepaDebit?.fingerprint
     }
 
     companion object {

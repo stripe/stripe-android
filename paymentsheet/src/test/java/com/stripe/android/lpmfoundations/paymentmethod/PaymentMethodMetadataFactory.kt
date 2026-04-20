@@ -74,7 +74,9 @@ internal object PaymentMethodMetadataFactory {
         experimentsData: ElementsSession.ExperimentsData? = null,
         isStripeCardScanAllowed: Boolean = false,
         enableMlKitCardScan: Boolean = false,
+        elementsSessionId: String? = null,
         disableSsdOcrCardScan: Boolean = false,
+        cardArts: List<PaymentMethod.Card.CardArt> = emptyList(),
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -141,7 +143,9 @@ internal object PaymentMethodMetadataFactory {
             experimentsData = experimentsData,
             isStripeCardScanAllowed = isStripeCardScanAllowed,
             enableMlKitCardScan = enableMlKitCardScan,
+            elementsSessionId = elementsSessionId,
             disableSsdOcrCardScan = disableSsdOcrCardScan,
+            cardArts = cardArts,
         )
     }
 

@@ -89,7 +89,9 @@ internal data class PaymentMethodMetadata(
     val isTapToAddSupported: Boolean,
     val isStripeCardScanAllowed: Boolean,
     val enableMlKitCardScan: Boolean,
+    val elementsSessionId: String? = null,
     val disableSsdOcrCardScan: Boolean,
+    val cardArts: List<PaymentMethod.Card.CardArt>,
 ) : Parcelable {
 
     @IgnoredOnParcel
@@ -334,6 +336,7 @@ internal data class PaymentMethodMetadata(
     }
 
     internal companion object {
+        @Suppress("LongMethod")
         internal fun createForPaymentElement(
             elementsSession: ElementsSession,
             configuration: CommonConfiguration,
@@ -402,7 +405,9 @@ internal data class PaymentMethodMetadata(
                 isTapToAddSupported = isTapToAddAvailable,
                 isStripeCardScanAllowed = elementsSession.isStripeCardScanAllowed,
                 enableMlKitCardScan = elementsSession.enableMlKitCardScan,
+                elementsSessionId = elementsSession.elementsSessionId,
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
+                cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty()
             )
         }
 
@@ -469,7 +474,9 @@ internal data class PaymentMethodMetadata(
                 experimentsData = elementsSession.experimentsData,
                 isStripeCardScanAllowed = elementsSession.isStripeCardScanAllowed,
                 enableMlKitCardScan = elementsSession.enableMlKitCardScan,
+                elementsSessionId = elementsSession.elementsSessionId,
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
+                cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty()
             )
         }
     }

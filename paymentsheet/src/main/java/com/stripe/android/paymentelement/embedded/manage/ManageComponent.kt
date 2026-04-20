@@ -1,32 +1,34 @@
 package com.stripe.android.paymentelement.embedded.manage
 
-import android.content.Context
+import android.app.Application
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.core.injection.ViewModelScope
-import com.stripe.android.core.utils.RealUserFacingLogger
-import com.stripe.android.core.utils.UserFacingLogger
+import com.stripe.android.common.di.ApplicationIdModule
+import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.model.PaymentMethodMessagePromotion
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityModule
 import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
+import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.CustomerStateHolder
-import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
-import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.uicore.utils.stateFlowOf
-import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
-import dagger.Module
-import dagger.Provides
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.StateFlow
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Component(
     modules = [
-        ManageModule::class,
+        EmbeddedActivityModule::class,
         EmbeddedCommonModule::class,
+        ApplicationIdModule::class,
+        ExtendedPaymentElementConfirmationModule::class,
+        GooglePayLauncherModule::class,
+        EmbeddedLinkExtrasModule::class,
     ],
 )
 @Singleton
@@ -41,65 +43,16 @@ internal interface ManageComponent {
         fun build(
             @BindsInstance savedStateHandle: SavedStateHandle,
             @BindsInstance paymentMethodMetadata: PaymentMethodMetadata,
-            @BindsInstance context: Context,
+            @BindsInstance application: Application,
             @BindsInstance @PaymentElementCallbackIdentifier
             paymentElementCallbackIdentifier: String,
+            @BindsInstance selectedPaymentMethodCode: PaymentMethodCode,
+            @BindsInstance hasSavedPaymentMethods: Boolean,
+            @BindsInstance
+            @Named(STATUS_BAR_COLOR)
+            statusBarColor: Int?,
+            @BindsInstance configuration: EmbeddedPaymentElement.Configuration,
+            @BindsInstance promotion: PaymentMethodMessagePromotion?,
         ): ManageComponent
-    }
-}
-
-@Module
-internal interface ManageModule {
-    @Binds
-    fun bindsEmbeddedManageScreenInteractorFactory(
-        factory: DefaultEmbeddedManageScreenInteractorFactory
-    ): EmbeddedManageScreenInteractorFactory
-
-    @Binds
-    fun bindsEmbeddedUpdateScreenInteractorFactory(
-        factory: DefaultEmbeddedUpdateScreenInteractorFactory
-    ): EmbeddedUpdateScreenInteractorFactory
-
-    @Binds
-    fun bindsUserFacingLogger(impl: RealUserFacingLogger): UserFacingLogger
-
-    companion object {
-        @Provides
-        @Singleton
-        fun provideManageNavigator(
-            initialManageScreenFactory: InitialManageScreenFactory,
-            @ViewModelScope viewModelScope: CoroutineScope,
-            eventReporter: EventReporter,
-        ): ManageNavigator {
-            return ManageNavigator(
-                coroutineScope = viewModelScope,
-                eventReporter = eventReporter,
-                initialScreen = initialManageScreenFactory.createInitialScreen(),
-            )
-        }
-
-        @Provides
-        @Singleton
-        fun provideSavedPaymentMethodMutator(
-            factory: ManageSavedPaymentMethodMutatorFactory
-        ): SavedPaymentMethodMutator {
-            return factory.createSavedPaymentMethodMutator()
-        }
-
-        @Provides
-        fun providePaymentMethodMetadata(
-            paymentMethodMetadata: PaymentMethodMetadata
-        ): StateFlow<PaymentMethodMetadata> {
-            return stateFlowOf(
-                paymentMethodMetadata
-            )
-        }
-
-        @Provides
-        @Singleton
-        @ViewModelScope
-        fun provideViewModelScope(): CoroutineScope {
-            return CoroutineScope(Dispatchers.Main)
-        }
     }
 }

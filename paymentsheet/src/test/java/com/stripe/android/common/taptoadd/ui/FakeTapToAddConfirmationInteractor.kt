@@ -15,21 +15,25 @@ import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 internal class FakeTapToAddConfirmationInteractor(
     showCvcElement: Boolean = false,
     cvcInitialValue: String? = null,
     cardBrand: CardBrand = CardBrand.Visa,
     last4: String? = "4242",
+    title: ResolvableString? = null,
     locked: Boolean = true,
     primaryButtonState: TapToAddConfirmationInteractor.State.PrimaryButton.State =
         TapToAddConfirmationInteractor.State.PrimaryButton.State.Idle,
     error: ResolvableString? = null,
 ) : TapToAddConfirmationInteractor {
-    override val state: StateFlow<TapToAddConfirmationInteractor.State> = MutableStateFlow(
+    private val _state = MutableStateFlow(
         TapToAddConfirmationInteractor.State(
             cardBrand = cardBrand,
             last4 = last4,
+            title = title,
             primaryButton = TapToAddConfirmationInteractor.State.PrimaryButton(
                 label = "Pay".resolvableString,
                 locked = locked,
@@ -45,6 +49,13 @@ internal class FakeTapToAddConfirmationInteractor(
             error = error,
         )
     )
+    override val state: StateFlow<TapToAddConfirmationInteractor.State> = _state.asStateFlow()
+
+    fun setPrimaryButtonState(buttonState: TapToAddConfirmationInteractor.State.PrimaryButton.State) {
+        _state.update { current ->
+            current.copy(primaryButton = current.primaryButton.copy(state = buttonState))
+        }
+    }
 
     private val _onClose = Turbine<Unit>()
     val onClose: ReceiveTurbine<Unit> = _onClose
@@ -87,17 +98,30 @@ internal class FakeTapToAddConfirmationInteractor(
     class Factory(
         val interactor: FakeTapToAddConfirmationInteractor = FakeTapToAddConfirmationInteractor()
     ) : TapToAddConfirmationInteractor.Factory {
-        private val _createCalls = Turbine<Pair<PaymentMethod, UserInput?>>()
-        val createCalls: ReceiveTurbine<Pair<PaymentMethod, UserInput?>> = _createCalls
+        private val _createCalls = Turbine<CreateCall>()
+        val createCalls: ReceiveTurbine<CreateCall> = _createCalls
 
         override fun create(
             paymentMethod: PaymentMethod,
             linkInput: UserInput?,
+            withTitle: Boolean,
         ): TapToAddConfirmationInteractor {
-            _createCalls.add(paymentMethod to linkInput)
+            _createCalls.add(
+                CreateCall(
+                    paymentMethod = paymentMethod,
+                    linkInput = linkInput,
+                    withTitle = withTitle,
+                )
+            )
 
             return interactor
         }
+
+        data class CreateCall(
+            val paymentMethod: PaymentMethod,
+            val linkInput: UserInput?,
+            val withTitle: Boolean,
+        )
 
         fun validate() {
             _createCalls.ensureAllEventsConsumed()

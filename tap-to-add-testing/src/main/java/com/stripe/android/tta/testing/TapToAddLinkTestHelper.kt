@@ -28,13 +28,17 @@ class TapToAddLinkTestHelper(
         }
     }
 
-    fun enqueueSignup() {
+    fun enqueueSignup(withName: Boolean = true) {
+        val nameMatchers = arrayOf(bodyPart("legal_name", urlEncode(NAME))).takeIf {
+            withName
+        } ?: emptyArray()
+
         networkRule.enqueue(
             method("POST"),
             path("/v1/consumers/accounts/sign_up"),
             bodyPart("email_address", urlEncode(EMAIL)),
             bodyPart("phone_number", urlEncode(PHONE)),
-            bodyPart("legal_name", urlEncode(NAME)),
+            *nameMatchers,
         ) { response ->
             response.testBodyFromFile("consumer-accounts-signup-success.json")
         }

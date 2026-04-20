@@ -1,62 +1,39 @@
 package com.stripe.android.paymentelement.embedded.form
 
 import android.app.Application
-import android.content.Context
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.cards.CardAccountRangeRepository
-import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.common.di.ApplicationIdModule
-import com.stripe.android.common.spms.DefaultLinkFormElementFactory
-import com.stripe.android.common.spms.DefaultSavedPaymentMethodLinkFormHelper
-import com.stripe.android.common.spms.LinkFormElementFactory
-import com.stripe.android.common.spms.SavedPaymentMethodLinkFormHelper
-import com.stripe.android.common.taptoadd.DefaultTapToAddHelper
-import com.stripe.android.common.taptoadd.TapToAddHelper
-import com.stripe.android.common.taptoadd.TapToAddMode
-import com.stripe.android.core.injection.ViewModelScope
-import com.stripe.android.core.utils.RealUserFacingLogger
-import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
-import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
-import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityModule
 import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
 import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.CustomerStateHolder
-import com.stripe.android.paymentsheet.DefaultPrefsRepository
-import com.stripe.android.paymentsheet.PrefsRepository
-import com.stripe.android.paymentsheet.verticalmode.DefaultSavedPaymentMethodConfirmInteractor
-import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
-import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
-import com.stripe.android.uicore.utils.stateFlowOf
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
 import dagger.Module
-import dagger.Provides
 import dagger.Subcomponent
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Named
 import javax.inject.Singleton
 
 @Component(
     modules = [
-        ApplicationIdModule::class,
+        EmbeddedActivityModule::class,
         EmbeddedCommonModule::class,
-        FormActivityViewModelModule::class,
+        ApplicationIdModule::class,
         ExtendedPaymentElementConfirmationModule::class,
         GooglePayLauncherModule::class,
-        EmbeddedLinkExtrasModule::class
+        EmbeddedLinkExtrasModule::class,
     ]
 )
 @Singleton
@@ -81,132 +58,8 @@ internal interface FormActivityViewModelComponent {
             paymentElementCallbackIdentifier: String,
             @BindsInstance application: Application,
             @BindsInstance savedStateHandle: SavedStateHandle,
+            @BindsInstance promotion: PaymentMethodMessagePromotion?,
         ): FormActivityViewModelComponent
-    }
-}
-
-@Module(
-    subcomponents = [
-        FormActivitySubcomponent::class
-    ]
-)
-internal interface FormActivityViewModelModule {
-    @Binds
-    fun bindsCardAccountRangeRepositoryFactory(
-        defaultCardAccountRangeRepositoryFactory: DefaultCardAccountRangeRepositoryFactory
-    ): CardAccountRangeRepository.Factory
-
-    @Binds
-    fun bindsUserFacingLogger(impl: RealUserFacingLogger): UserFacingLogger
-
-    @Binds
-    fun bindsFormActivityStateHelper(helper: DefaultFormActivityStateHelper): FormActivityStateHelper
-
-    @Binds
-    fun bindsPrefsRepositoryFactory(factory: DefaultPrefsRepository.Factory): PrefsRepository.Factory
-
-    @Binds
-    fun bindsTapToAddHelperFactory(factory: DefaultTapToAddHelper.Factory): TapToAddHelper.Factory
-
-    @Binds
-    fun bindsSavedPaymentMethodLinkFormHelper(
-        helper: DefaultSavedPaymentMethodLinkFormHelper
-    ): SavedPaymentMethodLinkFormHelper
-
-    @Suppress("TooManyFunctions")
-    companion object {
-        @Provides
-        fun providesContext(application: Application): Context {
-            return application
-        }
-
-        @Provides
-        @Singleton
-        fun providesLinkAccountHolder(savedStateHandle: SavedStateHandle): LinkAccountHolder {
-            return LinkAccountHolder(savedStateHandle)
-        }
-
-        @Provides
-        @Singleton
-        @ViewModelScope
-        fun provideViewModelScope(): CoroutineScope {
-            return CoroutineScope(Dispatchers.Main)
-        }
-
-        @Provides
-        @Singleton
-        fun provideFormInteractor(
-            interactorFactory: EmbeddedFormInteractorFactory
-        ): DefaultVerticalModeFormInteractor = interactorFactory.create()
-
-        @Provides
-        @Singleton
-        fun provideConfirmationHandler(
-            confirmationHandlerFactory: ConfirmationHandler.Factory,
-            @ViewModelScope coroutineScope: CoroutineScope,
-        ): ConfirmationHandler {
-            return confirmationHandlerFactory.create(coroutineScope)
-        }
-
-        @Provides
-        @Singleton
-        fun providesTapToAddHelper(
-            @ViewModelScope coroutineScope: CoroutineScope,
-            configuration: EmbeddedPaymentElement.Configuration,
-            tapToAddHelperFactory: TapToAddHelper.Factory,
-            embeddedSelectionHolder: EmbeddedSelectionHolder,
-            customerStateHolder: CustomerStateHolder,
-            paymentMethodMetadata: PaymentMethodMetadata,
-        ): TapToAddHelper {
-            return tapToAddHelperFactory.create(
-                coroutineScope = coroutineScope,
-                tapToAddMode = when (configuration.formSheetAction) {
-                    EmbeddedPaymentElement.FormSheetAction.Continue -> TapToAddMode.Continue
-                    EmbeddedPaymentElement.FormSheetAction.Confirm -> TapToAddMode.Complete
-                },
-                updateSelection = embeddedSelectionHolder::set,
-                customerStateHolder = customerStateHolder,
-                linkSignupMode = stateFlowOf(paymentMethodMetadata.linkState?.signupMode),
-            )
-        }
-
-        @Provides
-        @Singleton
-        fun provideOnClickOverrideDelegate(): OnClickOverrideDelegate = OnClickDelegateOverrideImpl()
-
-        @Provides
-        @Singleton
-        fun providesFormActivityConfirmationHandlerRegistrar(
-            confirmationHandler: ConfirmationHandler,
-            tapToAddHelper: TapToAddHelper,
-        ): FormActivityRegistrar {
-            return DefaultFormActivityRegistrar(confirmationHandler, tapToAddHelper)
-        }
-
-        @Provides
-        fun providePaymentMethodMetadataFlow(
-            paymentMethodMetadata: PaymentMethodMetadata
-        ): StateFlow<PaymentMethodMetadata?> {
-            return stateFlowOf(paymentMethodMetadata)
-        }
-
-        @Provides
-        fun providesTapToAddLinkFormElementFactory(): LinkFormElementFactory {
-            return DefaultLinkFormElementFactory
-        }
-
-        @Provides
-        fun provideSavedPaymentMethodConfirmInteractorFactory(
-            @ViewModelScope coroutineScope: CoroutineScope,
-            paymentMethodMetadata: PaymentMethodMetadata,
-            savedPaymentMethodLinkFormHelper: SavedPaymentMethodLinkFormHelper,
-        ): SavedPaymentMethodConfirmInteractor.Factory {
-            return DefaultSavedPaymentMethodConfirmInteractor.Factory(
-                paymentMethodMetadata = paymentMethodMetadata,
-                savedPaymentMethodLinkFormHelper = savedPaymentMethodLinkFormHelper,
-                coroutineScope = coroutineScope,
-            )
-        }
     }
 }
 

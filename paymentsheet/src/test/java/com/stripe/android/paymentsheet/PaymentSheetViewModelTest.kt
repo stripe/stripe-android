@@ -130,6 +130,7 @@ import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.BankFormScreenStateFactory
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentElementLoader
+import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import com.stripe.android.utils.FakeSavedPaymentMethodRepository
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import com.stripe.android.utils.PaymentElementCallbackTestRule
@@ -3715,6 +3716,7 @@ internal class PaymentSheetViewModelTest {
                 },
                 customViewModelScope = CoroutineScope(Dispatchers.Unconfined),
                 checkoutCurrencyUpdater = checkoutCurrencyUpdater,
+                paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper()
             )
         }
     }

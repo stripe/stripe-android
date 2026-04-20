@@ -7,6 +7,7 @@ import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 
 internal object VerticalModeInitialScreenFactory {
@@ -14,6 +15,7 @@ internal object VerticalModeInitialScreenFactory {
         viewModel: BaseSheetViewModel,
         paymentMethodMetadata: PaymentMethodMetadata,
         customerStateHolder: CustomerStateHolder,
+        paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?
     ): List<PaymentSheetScreen> {
         val supportedPaymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes()
         val bankFormInteractor = BankFormInteractor.create(viewModel)
@@ -35,6 +37,7 @@ internal object VerticalModeInitialScreenFactory {
                         onCurrencySelected = { currencyOption ->
                             (viewModel as? PaymentSheetViewModel)?.updateCurrency(currencyOption.code)
                         },
+                        paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
                     ),
                     showsWalletHeader = paymentMethodMetadata.availableWallets.isNotEmpty(),
                 )
@@ -47,6 +50,7 @@ internal object VerticalModeInitialScreenFactory {
                 paymentMethodMetadata = paymentMethodMetadata,
                 customerStateHolder = customerStateHolder,
                 bankFormInteractor = bankFormInteractor,
+                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
             )
             val verticalModeScreen = PaymentSheetScreen.VerticalMode(interactor = interactor)
             add(verticalModeScreen)
@@ -65,6 +69,7 @@ internal object VerticalModeInitialScreenFactory {
                                 paymentMethodMetadata = paymentMethodMetadata,
                                 customerStateHolder = customerStateHolder,
                                 bankFormInteractor = bankFormInteractor,
+                                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
                             ),
                         )
                     )

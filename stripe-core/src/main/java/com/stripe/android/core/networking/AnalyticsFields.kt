@@ -28,4 +28,6 @@ object AnalyticsFields {
     const val TIMESTAMP = "timestamp"
     const val NETWORK_TYPE = "network_type"
     const val LOCALE = "locale"
+    const val REACT_NATIVE_IS_NEW_ARCHITECTURE = "react_native_is_new_architecture"
+    const val REACT_NATIVE_VERSION = "react_native_version"
 }

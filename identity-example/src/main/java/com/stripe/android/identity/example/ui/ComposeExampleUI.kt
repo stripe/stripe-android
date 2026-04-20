@@ -140,7 +140,13 @@ internal fun ExampleScreen(
             ) { newVerificationType ->
                 onSubmissionStateChanged(
                     submissionState.copy(
-                        verificationType = newVerificationType
+                        verificationType = newVerificationType,
+                        useDocumentFallback = false,
+                        phoneOtpCheck = if (newVerificationType == VerificationType.PHONE) {
+                            PhoneOTPCheck.None
+                        } else {
+                            null
+                        }
                     )
                 )
                 onLoadingStateChanged(LoadingState.Idle)

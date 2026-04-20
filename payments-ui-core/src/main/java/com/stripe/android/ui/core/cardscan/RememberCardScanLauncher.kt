@@ -21,12 +21,14 @@ internal fun rememberCardScanLauncher(
     LocalActivityResultRegistryOwner.current ?: return null
 
     val eventsReporter = LocalCardScanEventsReporter.current
+    val elementsSessionId = LocalElementsSessionId.current
 
     val hasActiveStripeScanner = !disableSsdOcrCardScan || enableMlKitCardScan
     return if (isStripeCardScanAllowed && isStripeCardScanAvailable() && hasActiveStripeScanner) {
         rememberCardScanStripeLauncher(
             eventsReporter = eventsReporter,
             enableMlKitCardScan = enableMlKitCardScan,
+            elementsSessionId = elementsSessionId,
             disableSsdOcrCardScan = disableSsdOcrCardScan,
             onResult = onResult,
         )

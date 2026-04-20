@@ -11,6 +11,7 @@ import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher.Compan
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
@@ -30,6 +31,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
     private val formActivityStateHelper: FormActivityStateHelper,
     private val tapToAddHelper: TapToAddHelper,
     private val eventReporter: EventReporter,
+    private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper
 ) {
     fun create(): DefaultVerticalModeFormInteractor {
         val formHelper = embeddedFormHelperFactory.create(
@@ -40,6 +42,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             tapToAddHelper = tapToAddHelper,
             // If no saved payment methods, then first saved payment method is automatically set as default
             setAsDefaultMatchesSaveForFutureUse = !hasSavedPaymentMethods,
+            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
         )
 
         val usBankAccountFormArguments = USBankAccountFormArguments.createForEmbedded(

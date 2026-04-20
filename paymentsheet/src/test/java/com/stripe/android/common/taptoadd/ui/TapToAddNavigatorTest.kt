@@ -3,6 +3,7 @@ package com.stripe.android.common.taptoadd.ui
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.taptoadd.TapToAddResult
+import com.stripe.android.isInstanceOf
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.PaymentMethodFixtures
@@ -172,10 +173,24 @@ internal class TapToAddNavigatorTest {
     }
 
     @Test
+    fun `CardAdded cancel button is invisible when primary button is absent`() = runTest {
+        val interactor = FakeTapToAddCardAddedInteractor(primaryButton = null)
+        val screen = TapToAddNavigator.Screen.CardAdded(interactor)
+
+        assertThat(screen.cancelButton.value).isEqualTo(TapToAddNavigator.CancelButton.Invisible)
+    }
+
+    @Test
     fun `Close from CardAdded screen cancel button invokes CancelPressed after close`() = runTest {
         val interactor = FakeTapToAddCardAddedInteractor()
         val screen = TapToAddNavigator.Screen.CardAdded(interactor)
-        val closeAction = (screen.cancelButton as TapToAddNavigator.CancelButton.Available).action
+
+        val currentCloseButton = screen.cancelButton.value
+
+        assertThat(currentCloseButton).isInstanceOf<TapToAddNavigator.CancelButton.Available>()
+
+        val availableButton = currentCloseButton as TapToAddNavigator.CancelButton.Available
+
         val navigator = TapToAddNavigator(
             coroutineScope = this,
             stateHolder = FakeStateHolder(state = null),
@@ -183,7 +198,7 @@ internal class TapToAddNavigatorTest {
         )
 
         navigator.result.test {
-            navigator.performAction(closeAction)
+            navigator.performAction(availableButton.action)
             interactor.onClose.awaitItem()
             assertThat(interactor.performActionCalls.awaitItem())
                 .isEqualTo(TapToAddCardAddedInteractor.Action.CancelPressed)
@@ -196,7 +211,13 @@ internal class TapToAddNavigatorTest {
     fun `Close from Confirmation screen cancel button invokes CancelPressed after close`() = runTest {
         val interactor = FakeTapToAddConfirmationInteractor()
         val screen = TapToAddNavigator.Screen.Confirmation(interactor)
-        val closeAction = (screen.cancelButton as TapToAddNavigator.CancelButton.Available).action
+
+        val currentCloseButton = screen.cancelButton.value
+
+        assertThat(currentCloseButton).isInstanceOf<TapToAddNavigator.CancelButton.Available>()
+
+        val availableButton = currentCloseButton as TapToAddNavigator.CancelButton.Available
+
         val navigator = TapToAddNavigator(
             coroutineScope = this,
             stateHolder = FakeStateHolder(state = null),
@@ -204,13 +225,33 @@ internal class TapToAddNavigatorTest {
         )
 
         navigator.result.test {
-            navigator.performAction(closeAction)
+            navigator.performAction(availableButton.action)
             interactor.onClose.awaitItem()
             assertThat(interactor.performActionCalls.awaitItem())
                 .isEqualTo(TapToAddConfirmationInteractor.Action.CancelPressed)
             assertThat(awaitItem()).isEqualTo(TapToAddResult.Canceled(paymentSelection = null))
         }
         interactor.validate()
+    }
+
+    @Test
+    fun `Cancel button for Confirmation screen is invisible when primary button is processing`() = runTest {
+        val interactor = FakeTapToAddConfirmationInteractor(
+            primaryButtonState = TapToAddConfirmationInteractor.State.PrimaryButton.State.Processing,
+        )
+        val screen = TapToAddNavigator.Screen.Confirmation(interactor)
+
+        assertThat(screen.cancelButton.value).isEqualTo(TapToAddNavigator.CancelButton.Invisible)
+    }
+
+    @Test
+    fun `Cancel button for Confirmation screen is invisible when primary button is success`() = runTest {
+        val interactor = FakeTapToAddConfirmationInteractor(
+            primaryButtonState = TapToAddConfirmationInteractor.State.PrimaryButton.State.Success,
+        )
+        val screen = TapToAddNavigator.Screen.Confirmation(interactor)
+
+        assertThat(screen.cancelButton.value).isEqualTo(TapToAddNavigator.CancelButton.Invisible)
     }
 
     @Test

@@ -328,6 +328,7 @@ internal class SavedPaymentMethodMutator(
                         val interactor = DefaultAddPaymentMethodInteractor.create(
                             viewModel = viewModel,
                             paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
+                            paymentMethodMessagePromotionsHelper = null
                         )
                         val screen = PaymentSheetScreen.AddFirstPaymentMethod(interactor)
                         viewModel.navigationHandler.resetTo(listOf(screen))

@@ -1,5 +1,6 @@
 package com.stripe.android.common.taptoadd.ui
 
+import androidx.annotation.RestrictTo
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
@@ -29,15 +30,19 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.uicore.utils.collectAsState
+import kotlinx.coroutines.flow.StateFlow
 
 @OptIn(ExperimentalSharedTransitionApi::class, ExperimentalLayoutApi::class)
 @Composable
@@ -50,6 +55,7 @@ internal fun TapToAddLayout(
     ) {
         SharedTransitionLayout {
             AnimatedContent(
+                modifier = Modifier.testTag(TAP_TO_ADD_LAYOUT_TEST_TAG),
                 targetState = screen,
                 transitionSpec = {
                     fadeIn(animationSpec = tween(ANIMATION_DURATION))
@@ -81,7 +87,7 @@ internal fun TapToAddLayout(
                             horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
                             CancelButton(
-                                button = screen.cancelButton,
+                                buttonFlow = screen.cancelButton,
                                 onClick = onCancel,
                             )
 
@@ -96,13 +102,19 @@ internal fun TapToAddLayout(
 
 @Composable
 private fun CancelButton(
-    button: TapToAddNavigator.CancelButton,
+    buttonFlow: StateFlow<TapToAddNavigator.CancelButton>,
     onClick: (TapToAddNavigator.Action) -> Unit,
 ) {
+    val button by buttonFlow.collectAsState()
+
     val sizeModifier = Modifier.size(50.dp)
 
-    when (button) {
+    when (val currentButtonState = button) {
         is TapToAddNavigator.CancelButton.None -> Unit
+        is TapToAddNavigator.CancelButton.Invisible -> {
+            Spacer(sizeModifier)
+            Spacer(Modifier.size(20.dp))
+        }
         is TapToAddNavigator.CancelButton.Available -> {
             val sharedElementScope = LocalSharedElementScope.current
 
@@ -116,14 +128,16 @@ private fun CancelButton(
                             )
                             .then(sizeModifier),
                     ) {
-                        onClick(button.action)
+                        onClick(currentButtonState.action)
                     }
                 }
             } ?: run {
                 VisibleCancelButton(sizeModifier) {
-                    onClick(button.action)
+                    onClick(currentButtonState.action)
                 }
             }
+
+            Spacer(Modifier.size(20.dp))
         }
     }
 }
@@ -151,9 +165,10 @@ private fun VisibleCancelButton(
                 )
         )
     }
-
-    Spacer(Modifier.size(20.dp))
 }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val TAP_TO_ADD_LAYOUT_TEST_TAG = "TAP_TO_ADD_LAYOUT"
 
 internal val LocalTapToAddMaxContentHeight = staticCompositionLocalOf { 0.dp }
 

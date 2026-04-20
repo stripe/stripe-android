@@ -36,6 +36,7 @@ import com.stripe.android.ui.core.elements.CardDetailsSectionController
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentElementLoader
+import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import com.stripe.android.utils.FakeSavedPaymentMethodRepository
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.CoroutineScope
@@ -165,6 +166,7 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                 errorReporter = FakeErrorReporter(),
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
                 customViewModelScope = CoroutineScope(Dispatchers.Unconfined),
+                paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
             )
         }
     }
@@ -217,6 +219,7 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
                 customViewModelScope = CoroutineScope(Dispatchers.Unconfined),
                 checkoutCurrencyUpdater = FakeCheckoutCurrencyUpdater(),
+                paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper()
             )
         }
     }
@@ -241,5 +244,6 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
             lastUpdateReason = null
         ),
         walletButtonsRendered = false,
+        promotions = null,
     )
 }

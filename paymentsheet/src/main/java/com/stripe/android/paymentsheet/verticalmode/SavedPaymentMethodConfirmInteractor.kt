@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.common.spms.DefaultLinkFormElementFactory
+import com.stripe.android.common.spms.DefaultLinkInlineSignupAvailability
 import com.stripe.android.common.spms.DefaultSavedPaymentMethodLinkFormHelper
 import com.stripe.android.common.spms.SavedPaymentMethodLinkFormHelper
 import com.stripe.android.common.spms.withLinkState
@@ -71,7 +72,7 @@ internal class DefaultSavedPaymentMethodConfirmInteractor(
                     PaymentMethod.Type.Card.code
                 )?.displayName.orEmpty(),
                 savedPaymentMethodLinkFormHelper = DefaultSavedPaymentMethodLinkFormHelper(
-                    paymentMethodMetadata = paymentMethodMetadata,
+                    linkInlineSignupAvailability = DefaultLinkInlineSignupAvailability(paymentMethodMetadata),
                     linkConfigurationCoordinator = viewModel.linkHandler.linkConfigurationCoordinator,
                     savedStateHandle = viewModel.savedStateHandle,
                     linkFormElementFactory = DefaultLinkFormElementFactory,

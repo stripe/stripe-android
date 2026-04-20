@@ -23,6 +23,10 @@ class FakePaymentMethodMessagePromotionsHelper(
         }
     }
 
+    override fun getPromotions(): List<PaymentMethodMessagePromotion>? {
+        return promotions
+    }
+
     fun validate() {
         calls.ensureAllEventsConsumed()
     }

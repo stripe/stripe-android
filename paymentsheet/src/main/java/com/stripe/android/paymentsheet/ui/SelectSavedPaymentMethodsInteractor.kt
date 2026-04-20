@@ -254,6 +254,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
                     val interactor = DefaultAddPaymentMethodInteractor.create(
                         viewModel = viewModel,
                         paymentMethodMetadata = paymentMethodMetadata,
+                        paymentMethodMessagePromotionsHelper = null
                     )
                     viewModel.navigationHandler.transitionTo(
                         AddAnotherPaymentMethod(interactor = interactor)

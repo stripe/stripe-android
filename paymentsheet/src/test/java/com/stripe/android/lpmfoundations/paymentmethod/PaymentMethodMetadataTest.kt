@@ -1220,7 +1220,9 @@ internal class PaymentMethodMetadataTest {
             experimentsData = null,
             isStripeCardScanAllowed = false,
             enableMlKitCardScan = false,
+            elementsSessionId = "session_1234",
             disableSsdOcrCardScan = false,
+            cardArts = emptyList(),
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1372,7 +1374,9 @@ internal class PaymentMethodMetadataTest {
             experimentsData = null,
             isStripeCardScanAllowed = false,
             enableMlKitCardScan = false,
+            elementsSessionId = "session_1234",
             disableSsdOcrCardScan = false,
+            cardArts = emptyList(),
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
