@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_download_complete">Kumpleto na ang download</string>
+  <string name="stripe_downloading_file">Dina-download ang file</string>
+  <string name="stripe_failed_to_open_url">Nabigong buksan ang URL: %s</string>
+  <string name="stripe_not_yet_built">Hindi pa nagawa…</string>
+  <string name="stripe_unable_to_download_file">Hindi ma-download ang file</string>
+</resources>

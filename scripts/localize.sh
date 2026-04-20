@@ -64,7 +64,8 @@ do
                   --export-sort "a_z" \
                   --directory-prefix . \
                   --original-filenames=false \
-                  --bundle-structure "android/$MODULE/values-%LANG_ISO%/strings.xml"
+                  --bundle-structure "android/$MODULE/values-%LANG_ISO%/strings.xml" \
+                  --async
     fi
 
     # Need to download english separately because their strings are not marked final (this is what we uploaded)
@@ -78,7 +79,8 @@ do
           --export-sort "a_z" \
           --directory-prefix . \
           --original-filenames=false \
-          --bundle-structure "android/$MODULE/values-%LANG_ISO%/strings.xml"
+          --bundle-structure "android/$MODULE/values-%LANG_ISO%/strings.xml" \
+          --async
 
     #There is a command line switch that might be better than this, see: --language-mapping
     if [ "$FETCH_ALL_LANGUAGES" = true ]; then

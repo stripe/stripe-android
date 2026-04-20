@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_download_complete">Letöltés kész</string>
+  <string name="stripe_downloading_file">Fájl letöltése</string>
+  <string name="stripe_failed_to_open_url">Nem sikerült megnyitni ezt az URL-t: %s</string>
+  <string name="stripe_not_yet_built">Még nincs kész</string>
+  <string name="stripe_unable_to_download_file">Nem sikerült letölteni a fájlt</string>
+</resources>
