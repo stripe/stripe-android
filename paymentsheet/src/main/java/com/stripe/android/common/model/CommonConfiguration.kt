@@ -153,7 +153,9 @@ internal data class CommonConfiguration(
             billingDetailsCollectionConfiguration.collectsAnything
         ) {
             throw IllegalArgumentException(
-                "Tap to Add does not support collecting any billing details!"
+                "Tap to Add does not supporting collecting billing fields with " +
+                    "BillingDetailsCollectionConfiguration. To use Tap to Add, set all " +
+                    "BillingDetailsCollectionConfiguration config options to 'Automatic'."
             )
         }
     }

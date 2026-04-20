@@ -518,7 +518,9 @@ class PaymentSheetConfigurationKtxTest {
             .asCommonConfiguration()
 
         assertFailsWith<IllegalArgumentException>(
-            "Tap to Add does not support collecting any billing details!",
+            "Tap to Add does not supporting collecting billing fields with " +
+                "BillingDetailsCollectionConfiguration. To use Tap to Add, set all " +
+                "BillingDetailsCollectionConfiguration config options to 'Automatic'."
         ) {
             configCollectingBilling.validate(
                 initializationMode = DEFAULT_INITIALIZATION_MODE,
