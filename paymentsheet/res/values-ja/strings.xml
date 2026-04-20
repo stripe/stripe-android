@@ -275,7 +275,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_upi_polling_cancel">キャンセルして別の方法で支払う</string>
   <!-- Text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_header">支払いを承認する</string>
-  <!-- Countdown timer text on a screen asking the user to approve a payment -->
   <!-- Text on a screen that indicates a payment has failed informing the user we are asking the user to try a different payment method -->
   <string name="stripe_upi_polling_payment_failed_message">前に戻って別の決済手段を選択してください</string>
   <!-- Text on a screen that indicates a payment has failed -->

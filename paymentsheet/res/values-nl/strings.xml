@@ -273,7 +273,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_upi_polling_cancel">Annuleren en op een andere manier betalen</string>
   <!-- Text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_header">Betaling goedkeuren</string>
-  <!-- Countdown timer text on a screen asking the user to approve a payment -->
   <!-- Text on a screen that indicates a payment has failed informing the user we are asking the user to try a different payment method -->
   <string name="stripe_upi_polling_payment_failed_message">Ga terug en selecteer een andere betaalmethode.</string>
   <!-- Text on a screen that indicates a payment has failed -->

@@ -273,7 +273,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_upi_polling_cancel">취소 및 다른 방법으로 결제</string>
   <!-- Text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_header">결제 승인</string>
-  <!-- Countdown timer text on a screen asking the user to approve a payment -->
   <!-- Text on a screen that indicates a payment has failed informing the user we are asking the user to try a different payment method -->
   <string name="stripe_upi_polling_payment_failed_message">뒤로 돌아가서 다른 결제 방식을 선택해 주십시오.</string>
   <!-- Text on a screen that indicates a payment has failed -->

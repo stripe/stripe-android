@@ -85,7 +85,6 @@
   <string name="stripe_paymentsheet_add_payment_method_card_information">ข้อมูลบัตร</string>
   <!-- Title shown above a view allowing the customer to save a US bank account. -->
   <string name="stripe_paymentsheet_add_us_bank_account">เพิ่มบัญชีธนาคารในสหรัฐอเมริกา</string>
-  <!-- Header text shown above a UPI ID text field -->
   <!-- Payment Method type brand name. -->
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">การหักบัญชีอัตโนมัติแบบ BECS ในออสเตรเลีย</string>
   <!-- Payment Method type brand name -->
