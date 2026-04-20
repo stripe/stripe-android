@@ -11,6 +11,7 @@ import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.model.PaymentMethodMessagePromotionList
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.amount
 import com.stripe.android.paymentsheet.model.currency
 import dagger.Binds
@@ -38,11 +39,13 @@ internal class DefaultPaymentMethodMessagePromotionsHelper @Inject constructor(
     private val lazyPaymentConfig: Provider<PaymentConfiguration>,
     @ViewModelScope private val viewModelScope: CoroutineScope,
     @IOContext private val workContext: CoroutineContext,
+    private val eventReporter: EventReporter
 ) : PaymentMethodMessagePromotionsHelper {
     private var promotionsDeferred: Deferred<Result<PaymentMethodMessagePromotionList>>? = null
 
     override fun fetchPromotionsAsync(intent: StripeIntent) {
         if (FeatureFlags.paymentMethodMessagePromotions.isEnabled) {
+            eventReporter.onPaymentMethodMessagePromotionsFetched()
             promotionsDeferred?.cancel()
             promotionsDeferred = null
             promotionsDeferred = viewModelScope.async(workContext) {
@@ -62,8 +65,13 @@ internal class DefaultPaymentMethodMessagePromotionsHelper @Inject constructor(
 
     override fun getPromotionIfAvailableForCode(code: PaymentMethodCode): PaymentMethodMessagePromotion? {
         return if (FeatureFlags.paymentMethodMessagePromotions.isEnabled) {
-            promotionsDeferred?.takeIf { it.isCompleted }?.getCompleted()?.getOrNull()?.promotions?.find {
-                it.paymentMethodType.lowercase() == code
+            if (promotionsDeferred?.isCompleted == true) {
+                promotionsDeferred?.getCompleted()?.getOrNull()?.promotions?.find {
+                    it.paymentMethodType.lowercase() == code
+                }
+            } else {
+                eventReporter.onPaymentMethodMessagePromotionsIncomplete()
+                null
             }
         } else {
             null
@@ -72,7 +80,12 @@ internal class DefaultPaymentMethodMessagePromotionsHelper @Inject constructor(
 
     override fun getPromotions(): List<PaymentMethodMessagePromotion>? {
         return if (FeatureFlags.paymentMethodMessagePromotions.isEnabled) {
-            promotionsDeferred?.takeIf { it.isCompleted }?.getCompleted()?.getOrNull()?.promotions
+            if (promotionsDeferred?.isCompleted == true) {
+                promotionsDeferred?.getCompleted()?.getOrNull()?.promotions
+            } else {
+                eventReporter.onPaymentMethodMessagePromotionsIncomplete()
+                null
+            }
         } else {
             null
         }

@@ -268,6 +268,16 @@ internal interface EventReporter : CardScanEventsReporter {
      */
     fun onShopPayWebViewCancelled(didReceiveECEClick: Boolean)
 
+    /**
+     * Promotions fetched from PMM API.
+     */
+    fun onPaymentMethodMessagePromotionsFetched()
+
+    /**
+     * Promotions request is not completed when attempting to display promotions.
+     */
+    fun onPaymentMethodMessagePromotionsIncomplete()
+
     enum class Mode(val code: String) {
         Complete("complete"),
         Custom("custom"),
