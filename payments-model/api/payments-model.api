@@ -331,6 +331,10 @@ public final class com/stripe/android/model/LinkAuthIntent$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
+public final class com/stripe/android/model/LinkBrand$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
 public final synthetic class com/stripe/android/model/MobileFallbackWebviewParams$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lcom/stripe/android/model/MobileFallbackWebviewParams$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
