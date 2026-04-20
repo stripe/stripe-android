@@ -264,8 +264,7 @@ private fun SelfieCaptureScreen(
                     allowImageCollectionHtml = successSelfieCapturePage.consentText,
                     isSubmittingSelfie = isSubmittingSelfie,
                     allowImageCollection = allowImageCollection,
-                    navController = navController,
-                    onHtmlError = { identityViewModel.errorCause.postValue(it) }
+                    navController = navController
                 ) {
                     allowImageCollection = it
                 }
@@ -316,7 +315,6 @@ private fun ResultView(
     isSubmittingSelfie: Boolean,
     allowImageCollection: Boolean,
     navController: NavController,
-    onHtmlError: (Throwable) -> Unit,
     onAllowImageCollectionChanged: (Boolean) -> Unit
 ) {
     LazyRow(
@@ -393,8 +391,7 @@ private fun ResultView(
             urlSpanStyle = SpanStyle(
                 textDecoration = TextDecoration.Underline,
                 color = MaterialTheme.colors.secondary
-            ),
-            onError = onHtmlError
+            )
         )
     }
 }

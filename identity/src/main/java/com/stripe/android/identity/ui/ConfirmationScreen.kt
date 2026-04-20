@@ -122,8 +122,7 @@ internal fun ConfirmationScreen(
                     urlSpanStyle = SpanStyle(
                         textDecoration = TextDecoration.Underline,
                         color = MaterialTheme.colors.secondary
-                    ),
-                    onError = { identityViewModel.errorCause.postValue(it) }
+                    )
                 )
             }
             Button(

@@ -38,9 +38,7 @@ import com.stripe.android.uicore.utils.collectAsState
 import java.util.regex.Pattern
 
 @Composable
-internal fun BottomSheet(
-    onHtmlError: (Throwable) -> Unit = {}
-) {
+internal fun BottomSheet() {
     val viewModel = viewModel<BottomSheetViewModel>()
     val state by viewModel.bottomSheetState.collectAsState()
     state.content?.let { bottomSheetContent ->
@@ -74,8 +72,7 @@ internal fun BottomSheet(
                 ) {
                     for (line in bottomSheetContent.lines) {
                         BottomSheetLine(
-                            line = line,
-                            onHtmlError = onHtmlError
+                            line = line
                         )
                     }
                 }
@@ -97,8 +94,7 @@ internal fun BottomSheet(
 
 @Composable
 private fun BottomSheetLine(
-    line: VerificationPageStaticContentBottomSheetLineContent,
-    onHtmlError: (Throwable) -> Unit
+    line: VerificationPageStaticContentBottomSheetLineContent
 ) {
     Row(
         modifier = Modifier
@@ -150,8 +146,7 @@ private fun BottomSheetLine(
                     urlSpanStyle = SpanStyle(
                         textDecoration = TextDecoration.Underline,
                         color = MaterialTheme.colors.onSurface
-                    ),
-                    onError = onHtmlError
+                    )
                 )
             }
         }

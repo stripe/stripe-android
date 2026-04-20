@@ -56,7 +56,6 @@ internal fun IndividualWelcomeScreen(
             merchantLogoUri = merchantLogoUri,
             welcomePage = individualWelcomePage,
             bottomSheets = verificationPage.bottomSheet,
-            onHtmlError = { identityViewModel.errorCause.postValue(it) },
             identityViewModel = identityViewModel,
             navController = navController
         )
@@ -70,7 +69,6 @@ private fun SuccessUI(
     merchantLogoUri: Uri,
     welcomePage: VerificationPageStaticContentIndividualWelcomePage,
     bottomSheets: Map<String, VerificationPageStaticContentBottomSheetContent>?,
-    onHtmlError: (Throwable) -> Unit,
     identityViewModel: IdentityViewModel,
     navController: NavController,
 ) {
@@ -100,8 +98,7 @@ private fun SuccessUI(
             )
             ConsentLines(
                 lines = welcomePage.lines,
-                bottomSheets = bottomSheets,
-                onHtmlError = onHtmlError
+                bottomSheets = bottomSheets
             )
         }
 
@@ -125,8 +122,7 @@ private fun SuccessUI(
             urlSpanStyle = SpanStyle(
                 textDecoration = TextDecoration.Underline,
                 color = MaterialTheme.colors.secondary
-            ),
-            onError = onHtmlError
+            )
         )
 
         var acceptState by remember { mutableStateOf(LoadingButtonState.Idle) }

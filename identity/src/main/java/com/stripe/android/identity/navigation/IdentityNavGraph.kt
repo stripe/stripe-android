@@ -382,11 +382,7 @@ private fun NavGraphBuilder.screen(
 
         ModalBottomSheetLayout(
             sheetContent = {
-                BottomSheet(
-                    onHtmlError = {
-                        identityViewModel.errorCause.postValue(it)
-                    }
-                )
+                BottomSheet()
             },
             sheetState = modalSheetState,
             sheetGesturesEnabled = true,

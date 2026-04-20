@@ -90,7 +90,6 @@ internal fun ConsentScreen(
             verificationPage.bottomSheet,
             visitedIndividualWelcomePage,
             showStripeLogo = !verificationPage.isStripe,
-            onHtmlError = { identityViewModel.errorCause.postValue(it) },
             onConsentAgreed = {
                 coroutineScope.launch {
                     identityViewModel.postVerificationPageDataAndMaybeNavigate(
@@ -126,7 +125,6 @@ private fun SuccessUI(
     bottomSheets: Map<String, VerificationPageStaticContentBottomSheetContent>?,
     visitedIndividualWelcomePage: Boolean,
     showStripeLogo: Boolean = true,
-    onHtmlError: (Throwable) -> Unit,
     onConsentAgreed: () -> Unit,
     onConsentDeclined: () -> Unit
 ) {
@@ -159,8 +157,7 @@ private fun SuccessUI(
             )
             ConsentLines(
                 lines = consentPage.lines,
-                bottomSheets = bottomSheets,
-                onHtmlError = onHtmlError
+                bottomSheets = bottomSheets
             )
 
             Box(
@@ -180,8 +177,7 @@ private fun SuccessUI(
                     urlSpanStyle = SpanStyle(
                         textDecoration = TextDecoration.Underline,
                         color = colorResource(id = R.color.stripe_html_line)
-                    ),
-                    onError = onHtmlError
+                    )
                 )
             }
         }
@@ -268,7 +264,6 @@ internal fun ConsentPreview() {
             ),
             visitedIndividualWelcomePage = false,
             bottomSheets = mapOf(),
-            onHtmlError = {},
             onConsentAgreed = {},
             onConsentDeclined = {}
         )

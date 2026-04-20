@@ -30,8 +30,7 @@ import com.stripe.android.identity.networking.models.getResourceId
 @Composable
 internal fun ConsentLines(
     lines: List<VerificationPageStaticConsentLineContent>,
-    bottomSheets: Map<String, VerificationPageStaticContentBottomSheetContent>?,
-    onHtmlError: (Throwable) -> Unit = {}
+    bottomSheets: Map<String, VerificationPageStaticContentBottomSheetContent>?
 ) {
     for (line in lines) {
         Row(
@@ -58,8 +57,7 @@ internal fun ConsentLines(
                 urlSpanStyle = SpanStyle(
                     textDecoration = TextDecoration.Underline,
                     color = colorResource(id = R.color.stripe_html_line)
-                ),
-                onError = onHtmlError
+                )
             )
         }
     }
