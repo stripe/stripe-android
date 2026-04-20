@@ -15,6 +15,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
 import com.stripe.android.lpmfoundations.paymentmethod.toPaymentSheetSaveConsentBehavior
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT
@@ -286,7 +287,11 @@ internal class DefaultCreateLinkState @Inject constructor(
         linkSupportedPaymentMethodsOnboardingEnabled =
         elementsSession.linkSettings?.linkSupportedPaymentMethodsOnboardingEnabled.orEmpty(),
         clientAttributionMetadata = clientAttributionMetadata,
-        linkBrand = elementsSession.linkSettings?.linkBrand ?: LinkBrand.Link,
+        linkBrand = if (FeatureFlags.forceNotlink.isEnabled) {
+            LinkBrand.Notlink
+        } else {
+            elementsSession.linkSettings?.linkBrand ?: LinkBrand.Link
+        },
     )
 
     private fun getCardBrandChoice(elementsSession: ElementsSession): LinkConfiguration.CardBrandChoice? {

@@ -19,6 +19,7 @@ object FeatureFlags {
     val enableCardArt = FeatureFlag("Enable Card Art")
     val enableKlarnaFormRemoval = FeatureFlag("Remove forms from Klarna")
     val paymentMethodMessagePromotions = FeatureFlag("Use BNPL Promotions")
+    val forceNotlink = FeatureFlag("Force Notlink")
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
