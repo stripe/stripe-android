@@ -112,7 +112,8 @@ internal class DefaultCardScanEventsReporterTest {
         }
 
     @Test
-    fun testMlKitFoundPanSentOncePerSession() = runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor ->
+    fun testMlKitFoundPanSentOncePerSession() =
+        runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor ->
         defaultCardScanEventsReporter.scanStarted()
         ShadowSystemClock.advanceBy(2, TimeUnit.SECONDS)
 
@@ -129,7 +130,8 @@ internal class DefaultCardScanEventsReporterTest {
     }
 
     @Test
-    fun testMlKitFoundExpSentOncePerSession() = runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor ->
+    fun testMlKitFoundExpSentOncePerSession() =
+        runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor ->
         defaultCardScanEventsReporter.scanStarted()
         ShadowSystemClock.advanceBy(3, TimeUnit.SECONDS)
 
@@ -146,7 +148,8 @@ internal class DefaultCardScanEventsReporterTest {
     }
 
     @Test
-    fun testDarkniteFoundPanSentOncePerSession() = runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor ->
+    fun testDarkniteFoundPanSentOncePerSession() =
+        runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor ->
         defaultCardScanEventsReporter.scanStarted()
         ShadowSystemClock.advanceBy(4, TimeUnit.SECONDS)
 
@@ -163,7 +166,8 @@ internal class DefaultCardScanEventsReporterTest {
     }
 
     @Test
-    fun testModelsDisagreeSentOncePerSession() = runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor ->
+    fun testModelsDisagreeSentOncePerSession() =
+        runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor ->
         defaultCardScanEventsReporter.scanStarted()
         ShadowSystemClock.advanceBy(5, TimeUnit.SECONDS)
 
@@ -180,7 +184,8 @@ internal class DefaultCardScanEventsReporterTest {
     }
 
     @Test
-    fun testMilestonesDoNotEmitWithoutActiveSession() = runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor ->
+    fun testMilestonesDoNotEmitWithoutActiveSession() =
+        runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor ->
         defaultCardScanEventsReporter.scanMlKitFoundPan()
         defaultCardScanEventsReporter.scanMlKitFoundExp()
         defaultCardScanEventsReporter.scanDarkniteFoundPan()

@@ -9,8 +9,8 @@ import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.stripecardscan.scanui.CancellationReason
 import javax.inject.Inject
 import kotlin.time.Duration
-import kotlin.time.DurationUnit
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.DurationUnit
 
 internal class DefaultCardScanEventsReporter @Inject constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,

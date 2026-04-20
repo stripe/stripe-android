@@ -24,11 +24,11 @@ import com.stripe.android.stripecardscan.R
 import com.stripe.android.stripecardscan.camera.getScanCameraAdapter
 import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopAggregator
-import com.stripe.android.stripecardscan.payment.ml.CardOcr
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopState
 import com.stripe.android.stripecardscan.databinding.StripeActivityCardscanBinding
 import com.stripe.android.stripecardscan.di.DaggerCardScanComponent
 import com.stripe.android.stripecardscan.payment.card.ScannedCard
+import com.stripe.android.stripecardscan.payment.ml.CardOcr
 import com.stripe.android.stripecardscan.scanui.CancellationReason
 import com.stripe.android.stripecardscan.scanui.ScanActivity
 import com.stripe.android.stripecardscan.scanui.ScanResultListener
