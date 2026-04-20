@@ -83,7 +83,8 @@ internal class DefaultEventReporter @Inject internal constructor(
             event = PaymentSheetEvent.LoadSucceeded(
                 paymentSelection = paymentSelection,
                 duration = duration,
-                orderedLpms = paymentMethodMetadata.sortedSupportedPaymentMethods().map { it.code }
+                orderedLpms = paymentMethodMetadata.sortedSupportedPaymentMethods().map { it.code },
+                hasCardArt = paymentMethodMetadata.cardArts.isNotEmpty()
             ),
             paymentMethodMetadata = paymentMethodMetadata,
         )
@@ -231,6 +232,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 duration = duration,
                 selectedLpm = paymentSelection.code(),
                 linkContext = paymentSelection.linkContext(),
+                hasCardArt = paymentSelection.hasCardArt(),
             )
         )
     }

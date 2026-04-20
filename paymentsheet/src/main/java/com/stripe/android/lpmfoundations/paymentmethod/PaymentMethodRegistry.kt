@@ -25,6 +25,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.MobilePayDefi
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.MultibancoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.OxxoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.P24Definition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.PayByBankDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.PayNowDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.PayPalDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.PayPayDefinition
@@ -35,7 +36,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.SepaDebitDefi
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SunbitDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SwishDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.TwintDefinition
-import com.stripe.android.lpmfoundations.paymentmethod.definitions.UpiDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.UsBankAccountDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.WeChatPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.WeroDefinition
@@ -69,6 +69,7 @@ internal object PaymentMethodRegistry {
         MultibancoDefinition,
         OxxoDefinition,
         P24Definition,
+        PayByBankDefinition,
         PayNowDefinition,
         PayPalDefinition,
         PayPayDefinition,
@@ -79,7 +80,6 @@ internal object PaymentMethodRegistry {
         SunbitDefinition,
         SwishDefinition,
         TwintDefinition,
-        UpiDefinition,
         UsBankAccountDefinition,
         WeChatPayDefinition,
         WeroDefinition,

@@ -560,17 +560,21 @@ internal class DefaultPaymentElementLoaderTest {
                     tapToAddAvailabilityFactory = FakeTapToAddAvailabilityFactory(isAvailableResult = true),
                 )
 
+                val config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+
                 val result = loader.load(
                     initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(
                         clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value
                     ),
-                    paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+                    paymentSheetConfiguration = config,
                     metadata = PaymentElementLoader.Metadata(
                         initializedViaCompose = false,
                     ),
                 ).getOrThrow()
 
-                assertThat(startCalls.awaitItem()).isNotNull()
+                assertThat(startCalls.awaitItem()).isEqualTo(
+                    FakeTapToAddConnectionStarter.StartCall(config = config.asCommonConfiguration())
+                )
 
                 assertThat(result.paymentMethodMetadata.isTapToAddSupported).isTrue()
 
@@ -603,17 +607,21 @@ internal class DefaultPaymentElementLoaderTest {
                     elementsSessionRepository = elementsSessionRepository,
                 )
 
+                val config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+
                 val result = loader.load(
                     initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(
                         clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value
                     ),
-                    paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+                    paymentSheetConfiguration = config,
                     metadata = PaymentElementLoader.Metadata(
                         initializedViaCompose = false,
                     ),
                 ).getOrThrow()
 
-                assertThat(startCalls.awaitItem()).isNotNull()
+                assertThat(startCalls.awaitItem()).isEqualTo(
+                    FakeTapToAddConnectionStarter.StartCall(config = config.asCommonConfiguration())
+                )
 
                 assertThat(result.paymentMethodMetadata.isTapToAddSupported).isFalse()
 

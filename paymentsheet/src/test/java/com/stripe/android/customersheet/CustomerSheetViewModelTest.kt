@@ -1374,7 +1374,7 @@ class CustomerSheetViewModelTest {
         viewModel.viewState.test {
             viewModel.handleViewAction(CustomerSheetViewAction.OnItemSelected(PaymentSelection.GooglePay))
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
-            verify(eventReporter).onConfirmPaymentMethodSucceeded(eq("google_pay"), eq(false))
+            verify(eventReporter).onConfirmPaymentMethodSucceeded(eq("google_pay"), eq(false), eq(false))
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -1400,7 +1400,7 @@ class CustomerSheetViewModelTest {
         viewModel.viewState.test {
             viewModel.handleViewAction(CustomerSheetViewAction.OnItemSelected(PaymentSelection.GooglePay))
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
-            verify(eventReporter).onConfirmPaymentMethodFailed(eq("google_pay"), eq(false))
+            verify(eventReporter).onConfirmPaymentMethodFailed(eq("google_pay"), eq(false), eq(false))
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -1423,7 +1423,7 @@ class CustomerSheetViewModelTest {
                 )
             )
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
-            verify(eventReporter).onConfirmPaymentMethodSucceeded(eq("card"), eq(false))
+            verify(eventReporter).onConfirmPaymentMethodSucceeded(eq("card"), eq(false), eq(false))
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -1450,7 +1450,7 @@ class CustomerSheetViewModelTest {
                 )
             )
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
-            verify(eventReporter).onConfirmPaymentMethodSucceeded(eq("card"), eq(true))
+            verify(eventReporter).onConfirmPaymentMethodSucceeded(eq("card"), eq(true), eq(false))
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -1486,7 +1486,7 @@ class CustomerSheetViewModelTest {
                 )
             )
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
-            verify(eventReporter).onConfirmPaymentMethodFailed(eq("card"), eq(true))
+            verify(eventReporter).onConfirmPaymentMethodFailed(eq("card"), eq(true), eq(false))
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -1517,7 +1517,7 @@ class CustomerSheetViewModelTest {
                 )
             )
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
-            verify(eventReporter).onConfirmPaymentMethodFailed(eq("card"), eq(false))
+            verify(eventReporter).onConfirmPaymentMethodFailed(eq("card"), eq(false), eq(false))
             cancelAndIgnoreRemainingEvents()
         }
     }

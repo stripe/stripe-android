@@ -86,6 +86,37 @@ internal class PaymentSheetTest {
     }
 
     @Test
+    fun testSuccessfulPayByBankPayment() = runPaymentSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.elementsSession { response ->
+            response.testBodyFromFile("elements-sessions-pay_by_bank.json")
+        }
+
+        testContext.presentPaymentSheet {
+            presentWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = defaultConfiguration,
+            )
+        }
+
+        page.clickOnLpm("pay_by_bank")
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            clientAttributionMetadataParamsInPaymentMethodData(),
+            topLevelClientAttributionMetadataParams(),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        page.clickPrimaryButton()
+    }
+
+    @Test
     fun testSuccessfulLpmPayment() = runPaymentSheetTest(
         networkRule = networkRule,
         integrationType = integrationType,

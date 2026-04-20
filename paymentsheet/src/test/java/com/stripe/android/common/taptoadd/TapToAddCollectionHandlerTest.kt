@@ -24,6 +24,7 @@ import com.stripe.android.paymentelement.confirmation.intent.CallbackNotFoundExc
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeErrorReporter
@@ -800,7 +801,10 @@ class TapToAddCollectionHandlerTest {
             }
 
             if (hasConnectCall) {
-                assertThat(managerScenario.connectCalls.awaitItem()).isNotNull()
+                val connectCall = managerScenario.connectCalls.awaitItem()
+
+                assertThat(connectCall.config.merchantDisplayName)
+                    .isEqualTo(PaymentSheetFixtures.MERCHANT_DISPLAY_NAME)
             }
         }
 

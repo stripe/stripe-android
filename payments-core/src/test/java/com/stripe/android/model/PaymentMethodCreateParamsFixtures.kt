@@ -78,13 +78,6 @@ internal object PaymentMethodCreateParamsFixtures {
         billingDetails = BILLING_DETAILS
     )
 
-    internal val UPI = PaymentMethodCreateParams.create(
-        upi = PaymentMethodCreateParams.Upi(
-            vpa = "vpa@hdfcbank"
-        ),
-        billingDetails = BILLING_DETAILS
-    )
-
     internal val US_BANK_ACCOUNT = PaymentMethodCreateParams.create(
         usBankAccount = PaymentMethodCreateParams.USBankAccount(
             accountNumber = "000123456789",
@@ -140,6 +133,10 @@ internal object PaymentMethodCreateParamsFixtures {
     )
 
     internal val CRYPTO = PaymentMethodCreateParams.createCrypto(
+        billingDetails = BILLING_DETAILS
+    )
+
+    internal val PAY_BY_BANK = PaymentMethodCreateParams.createPayByBank(
         billingDetails = BILLING_DETAILS
     )
 

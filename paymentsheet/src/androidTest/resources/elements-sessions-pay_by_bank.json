@@ -1,0 +1,69 @@
+{
+  "apple_pay_preference": "enabled",
+  "business_name": "Mobile Example Account",
+  "google_pay_preference": "enabled",
+  "link_consumer_info": null,
+  "merchant_country": "US",
+  "merchant_currency": "usd",
+  "merchant_id": "acct_1HvTI7Lu5o3P18Zp",
+  "meta_pay_signed_container_context": null,
+  "order": null,
+  "ordered_payment_method_types_and_wallets": [
+    "card",
+    "link",
+    "apple_pay",
+    "google_pay",
+    "pay_by_bank"
+  ],
+  "payment_method_preference": {
+    "object": "payment_method_preference",
+    "country_code": "US",
+    "ordered_payment_method_types": [
+      "card",
+      "link",
+      "pay_by_bank"
+    ],
+    "payment_intent": {
+      "id": "pi_example",
+      "object": "payment_intent",
+      "amount": 5099,
+      "amount_details": {
+        "tip": {}
+      },
+      "automatic_payment_methods": {
+        "enabled": true
+      },
+      "canceled_at": null,
+      "cancellation_reason": null,
+      "capture_method": "automatic",
+      "client_secret": "pi_example_secret_example",
+      "confirmation_method": "automatic",
+      "created": 1674750417,
+      "currency": "usd",
+      "description": null,
+      "last_payment_error": null,
+      "livemode": false,
+      "next_action": null,
+      "payment_method": null,
+      "payment_method_options": {},
+      "payment_method_types": [
+        "card",
+        "link",
+        "pay_by_bank"
+      ],
+      "processing": null,
+      "receipt_email": null,
+      "setup_future_usage": null,
+      "shipping": null,
+      "source": null,
+      "status": "requires_payment_method"
+    },
+    "type": "payment_intent"
+  },
+  "shipping_address_settings": {
+    "autocomplete_allowed": true
+  },
+  "unactivated_payment_method_types": [],
+  "session_id": "elements_session_123",
+  "config_id": "e961790f-43ed-4fcc-a534-74eeca28d042"
+}

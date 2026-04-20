@@ -265,7 +265,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         )
 
         eventReporter.onLoadStarted(metadata.initializedViaCompose)
-        tapToAddConnectionStarter.start()
+        tapToAddConnectionStarter.start(configuration)
 
         val isGooglePaySupportedOnDevice = async {
             isGooglePaySupportedOnDevice()

@@ -2,23 +2,28 @@ package com.stripe.android.paymentsheet.state
 
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
+import com.stripe.android.common.model.CommonConfiguration
 
 internal class FakeTapToAddConnectionStarter private constructor(
     override val isSupported: Boolean = false,
-    val startCalls: Turbine<Unit> = Turbine(),
 ) : TapToAddConnectionStarter {
+    private val startCalls: Turbine<StartCall> = Turbine()
 
-    override fun start() {
-        startCalls.add(Unit)
+    override fun start(config: CommonConfiguration) {
+        startCalls.add(StartCall(config))
     }
 
     fun ensureAllEventsConsumed() {
         startCalls.ensureAllEventsConsumed()
     }
 
+    data class StartCall(
+        val config: CommonConfiguration
+    )
+
     class Scenario(
         val connectionStarter: TapToAddConnectionStarter,
-        val startCalls: ReceiveTurbine<Unit>,
+        val startCalls: ReceiveTurbine<StartCall>,
     )
 
     companion object {

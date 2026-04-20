@@ -276,7 +276,6 @@ to be saved and used in future checkout sessions. -->
   <!-- Text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_header">Patvirtinti mokėjimą</string>
   <!-- Countdown timer text on a screen asking the user to approve a payment -->
-  <string name="stripe_upi_polling_message">Atidarykite savo UPI programą mokėjimui patvirtinti per %s</string>
   <!-- Text on a screen that indicates a payment has failed informing the user we are asking the user to try a different payment method -->
   <string name="stripe_upi_polling_payment_failed_message">Grįžkite atgal ir pasirinkite kitą mokėjimo būdą</string>
   <!-- Text on a screen that indicates a payment has failed -->

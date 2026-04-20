@@ -5,6 +5,7 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.model.PaymentMethodMessagePromotionList
@@ -116,6 +117,14 @@ internal class NoOpPromotionsHelper @Inject constructor() : PaymentMethodMessage
     override fun getPromotions(): List<PaymentMethodMessagePromotion>? {
         return null
     }
+}
+
+internal object PromotionSupportedPaymentMethods {
+    val supportedPaymentMethods = setOf(
+        PaymentMethod.Type.Klarna.code,
+        PaymentMethod.Type.Affirm.code,
+        PaymentMethod.Type.AfterpayClearpay.code
+    )
 }
 
 @Module

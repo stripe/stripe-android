@@ -14,8 +14,6 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.utils.AnimationConstants
 import com.stripe.android.view.AuthActivityStarterHost
 
-private const val UPI_TIME_LIMIT_IN_SECONDS = 5 * 60
-private const val UPI_INITIAL_DELAY_IN_SECONDS = 5
 private const val BLIK_TIME_LIMIT_IN_SECONDS = 60
 private const val BLIK_INITIAL_DELAY_IN_SECONDS = 5
 private const val PAYNOW_TIME_LIMIT_IN_SECONDS = 60 * 60
@@ -54,16 +52,6 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
         host: AuthActivityStarterHost,
         requestOptions: ApiRequest.Options
     ) = when (actionable.paymentMethod?.type) {
-        PaymentMethod.Type.Upi ->
-            PollingContract.Args(
-                clientSecret = requireNotNull(actionable.clientSecret),
-                statusBarColor = host.statusBarColor,
-                timeLimitInSeconds = UPI_TIME_LIMIT_IN_SECONDS,
-                initialDelayInSeconds = UPI_INITIAL_DELAY_IN_SECONDS,
-                ctaText = R.string.stripe_upi_polling_message,
-                stripeAccountId = requestOptions.stripeAccount,
-                qrCodeUrl = null,
-            )
         PaymentMethod.Type.Blik ->
             PollingContract.Args(
                 clientSecret = requireNotNull(actionable.clientSecret),
