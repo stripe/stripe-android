@@ -1175,6 +1175,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkSignUpOptInFeatureEnabled = false,
                 linkSignUpOptInInitialValue = false,
                 linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
+                linkBrand = null,
             )
         )
 
@@ -1219,6 +1220,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkSignUpOptInFeatureEnabled = false,
                 linkSignUpOptInInitialValue = false,
                 linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
+                linkBrand = null,
             )
         )
 
@@ -1317,6 +1319,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkSignUpOptInFeatureEnabled = false,
                 linkSignUpOptInInitialValue = false,
                 linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
+                linkBrand = null,
             ),
             linkStore = FakeLinkStore(hasUsedLink = true),
         )
@@ -1353,6 +1356,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkSignUpOptInFeatureEnabled = false,
                 linkSignUpOptInInitialValue = false,
                 linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
+                linkBrand = null,
             )
         )
 
@@ -2116,6 +2120,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkSignUpOptInFeatureEnabled = false,
                 linkSignUpOptInInitialValue = false,
                 linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
+                linkBrand = null,
             ),
             linkStore = FakeLinkStore(hasUsedLink = false),
         )
@@ -4352,6 +4357,7 @@ internal class DefaultPaymentElementLoaderTest {
             linkSignUpOptInFeatureEnabled = linkSignUpOptInFeatureEnabled,
             linkSignUpOptInInitialValue = false,
             linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD", "INSTANT_DEBITS"),
+            linkBrand = null,
         )
     }
 

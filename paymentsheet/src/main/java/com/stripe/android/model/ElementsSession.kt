@@ -117,6 +117,7 @@ internal data class ElementsSession(
         val linkSignUpOptInFeatureEnabled: Boolean,
         val linkSignUpOptInInitialValue: Boolean,
         val linkSupportedPaymentMethodsOnboardingEnabled: List<String>,
+        val linkBrand: LinkBrand?,
     ) : StripeModel
 
     @Parcelize
