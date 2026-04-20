@@ -14,16 +14,13 @@ def create_github_release
     execute_or_fail("git checkout #{@deploy_branch}")
     execute_or_fail("git pull")
 
-    release_body = release_description
-    tag_pushed = false
-
     begin
         tag_pushed = tag_release
         release_response = octokit_client.create_release(
           "stripe/stripe-android",
           "v#{@version}",
           name: "stripe-android v#{@version}",
-          body: release_body,
+          body: release_description,
           draft: @is_dry_run
         )
 
@@ -39,7 +36,7 @@ def create_github_release
         end
     rescue StandardError => e
         rputs "Failed to create GitHub release for #{tag_name}: #{e.class}: #{e.message}"
-        cleanup_failed_release_tag(tag_pushed: tag_pushed)
+        delete_release_tag
         raise
     end
 end
@@ -76,18 +73,6 @@ end
 
 private def delete_release_tag
     execute("git tag -d #{tag_name}")
-end
-
-private def cleanup_failed_release_tag(tag_pushed:)
-    delete_release_tag
-
-    return unless tag_pushed
-
-    begin
-        execute_or_fail("git push origin --delete #{tag_name}")
-    rescue StandardError => cleanup_error
-        rputs "Failed to delete remote tag #{tag_name} after release failure: #{cleanup_error.class}: #{cleanup_error.message}"
-    end
 end
 
 private def release_description
