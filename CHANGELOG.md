@@ -1,8 +1,9 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: MINOR
-
+NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
+
+## 23.5.0 - 2026-04-20
 * [REMOVED][12871](https://github.com/stripe/stripe-android/pull/12871) Removed UPI support across the SDK.
 
 ### PaymentSheet
