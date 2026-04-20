@@ -13,11 +13,8 @@ enum class LinkBrand(val value: String) {
     Link("link"),
 
     @SerialName("notlink")
-    Notlink("notlink"),
-
-    @SerialName("unknown")
-    Unknown("unknown");
+    Notlink("notlink");
 
     internal object Serializer :
-        EnumIgnoreUnknownSerializer<LinkBrand>(entries.toTypedArray(), Unknown)
+        EnumIgnoreUnknownSerializer<LinkBrand>(entries.toTypedArray(), Link)
 }

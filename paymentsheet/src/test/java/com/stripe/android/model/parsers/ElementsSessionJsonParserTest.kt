@@ -196,9 +196,9 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
-    fun `unknown link_brand is parsed as Unknown`() {
+    fun `unknown link_brand defaults to Link`() {
         val elementsSession = parseElementsSession(createElementsSessionWithLinkBrand("some_future_brand"))
-        assertThat(elementsSession?.linkSettings?.linkBrand).isEqualTo(LinkBrand.Unknown)
+        assertThat(elementsSession?.linkSettings?.linkBrand).isEqualTo(LinkBrand.Link)
     }
 
     @Test

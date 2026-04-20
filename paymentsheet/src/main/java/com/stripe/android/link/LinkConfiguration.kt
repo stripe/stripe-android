@@ -5,6 +5,7 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.ClientAttributionMetadata
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
@@ -48,6 +49,7 @@ internal data class LinkConfiguration(
     val forceSetupFutureUseBehaviorAndNewMandate: Boolean,
     val linkSupportedPaymentMethodsOnboardingEnabled: List<String>,
     val clientAttributionMetadata: ClientAttributionMetadata,
+    val linkBrand: LinkBrand,
 ) : Parcelable {
 
     val customerIdForEceDefaultValues: String?

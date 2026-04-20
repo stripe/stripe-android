@@ -17,6 +17,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.Flag
 import com.stripe.android.model.LinkDisabledReason
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.LinkSignupDisabledReason
 import com.stripe.android.model.PaymentIntent
@@ -940,6 +941,7 @@ class DefaultAnalyticsMetadataFactoryTest {
                 linkSupportedPaymentMethodsOnboardingEnabled = emptyList(),
                 clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
                 cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
+                linkBrand = LinkBrand.Link,
             ),
             loginState = LinkState.LoginState.LoggedOut,
             signupModeResult = signupModeResult,

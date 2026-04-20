@@ -30,7 +30,7 @@ class ConsumerSessionLookupJsonParser : ModelJsonParser<ConsumerSessionLookup> {
             ?.let { format.decodeFromString<ConsentUi>(it) }
         val suggestedEmail = optString(json, FIELD_SUGGESTED_EMAIL)
         val linkBrand = optString(json, FIELD_LINK_BRAND)?.let { brand ->
-            LinkBrand.entries.firstOrNull { it.value == brand } ?: LinkBrand.Unknown
+            LinkBrand.entries.firstOrNull { it.value == brand } ?: LinkBrand.Link
         }
         return ConsumerSessionLookup(
             exists = exists,

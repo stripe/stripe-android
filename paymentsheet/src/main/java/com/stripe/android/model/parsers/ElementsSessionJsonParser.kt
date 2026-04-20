@@ -207,7 +207,7 @@ internal class ElementsSessionJsonParser(
         }
 
         val linkBrand = json?.optString(FIELD_LINK_BRAND)?.takeIf { it.isNotEmpty() }?.let { brand ->
-            LinkBrand.entries.firstOrNull { it.value == brand } ?: LinkBrand.Unknown
+            LinkBrand.entries.firstOrNull { it.value == brand } ?: LinkBrand.Link
         }
 
         val linkFlags = json?.let { linkSettingsJson ->
