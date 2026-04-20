@@ -105,6 +105,10 @@ data class ApiRequest internal constructor(
         val idempotencyKey: String? = null
     ) : Parcelable {
 
+        override fun toString(): String {
+            return "Options(apiKey=***)"
+        }
+
         val apiKeyIsUserKey: Boolean
             get() = apiKey.startsWith("uk_")
 
