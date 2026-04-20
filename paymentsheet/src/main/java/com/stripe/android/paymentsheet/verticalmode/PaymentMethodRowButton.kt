@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,7 +18,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
@@ -59,6 +59,7 @@ import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.R as StripeUiCoreR
 
+@Suppress("LongMethod")
 @Composable
 internal fun PaymentMethodRowButton(
     isEnabled: Boolean,
@@ -92,21 +93,23 @@ internal fun PaymentMethodRowButton(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 52.dp)
-            .then(when (appearance.style) {
-                is RowStyle.FlatWithRadio, is RowStyle.FlatWithCheckmark -> Modifier.selectable(
-                    selected = isSelected,
-                    onClick = onClick,
-                )
-                is RowStyle.FlatWithDisclosure, is RowStyle.FloatingButton -> Modifier.clickable(
-                    enabled = isClickable,
-                    onClick = onClick
-                ).semantics {
-                    role = Role.Button
-                    if (isSelected) {
-                        selected = true
+            .then(
+                when (appearance.style) {
+                    is RowStyle.FlatWithRadio, is RowStyle.FlatWithCheckmark -> Modifier.selectable(
+                        selected = isSelected,
+                        onClick = onClick,
+                    )
+                    is RowStyle.FlatWithDisclosure, is RowStyle.FloatingButton -> Modifier.clickable(
+                        enabled = isClickable,
+                        onClick = onClick
+                    ).semantics {
+                        role = Role.Button
+                        if (isSelected) {
+                            selected = true
+                        }
                     }
                 }
-            }),
+            ),
         trailingContent = trailingContent,
         onClick = onClick
     ) { displayTrailingContent ->
