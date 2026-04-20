@@ -241,7 +241,17 @@ private fun FormUIElement(
         )
         is OTPElement -> OTPElementUI(enabled, element)
         is RenderableFormElement -> element.ComposeUI(enabled, hiddenIdentifiers, lastTextFieldIdentifier)
-        is PaymentMethodMessageHeaderElement -> PaymentMethodMessageHeaderUI(element)
+        is PaymentMethodMessageHeaderElement -> PaymentMethodMessageHeaderUI(
+            element = element,
+            modifier = Modifier.formVerticalPadding(
+                hasVerticalCustomSpacing = hasVerticalCustomSpacing,
+                maxIndex = maxIndex,
+                index = index,
+                top = 8.dp,
+                bottom = 8.dp,
+                start = 2.dp
+            ),
+        )
     }
 }
 
