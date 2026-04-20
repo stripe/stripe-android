@@ -52,7 +52,7 @@ internal class ManageActivity : AppCompatActivity() {
     lateinit var customerStateHolder: CustomerStateHolder
 
     @Inject
-    lateinit var manageNavigator: ManageNavigator
+    lateinit var manageNavigator: EmbeddedNavigator
 
     @Inject
     lateinit var selectionHolder: EmbeddedSelectionHolder
@@ -75,7 +75,7 @@ internal class ManageActivity : AppCompatActivity() {
 
         onBackPressedDispatcher.addCallback {
             if (!manageNavigator.screen.value.isPerformingNetworkOperation()) {
-                manageNavigator.performAction(ManageNavigator.Action.Back)
+                manageNavigator.performAction(EmbeddedNavigator.Action.Back)
             }
         }
 
@@ -112,8 +112,8 @@ internal class ManageActivity : AppCompatActivity() {
 
     @Composable
     private fun ScreenContent(
-        navigator: ManageNavigator,
-        screen: ManageNavigator.Screen
+        navigator: EmbeddedNavigator,
+        screen: EmbeddedNavigator.Screen
     ) {
         val density = LocalDensity.current
         var contentHeight by remember { mutableStateOf(0.dp) }
@@ -127,7 +127,7 @@ internal class ManageActivity : AppCompatActivity() {
                     state = topBarState,
                     canNavigateBack = navigator.canGoBack,
                     isEnabled = true,
-                    handleBackPressed = { manageNavigator.performAction(ManageNavigator.Action.Back) },
+                    handleBackPressed = { manageNavigator.performAction(EmbeddedNavigator.Action.Back) },
                 )
             },
             content = {

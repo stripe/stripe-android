@@ -26,7 +26,7 @@ internal class InitialManageScreenFactoryTest {
                 paymentMethods = PaymentMethodFixtures.createCards(2)
             )
         )
-        assertThat(factory.createInitialScreen()).isInstanceOf<ManageNavigator.Screen.All>()
+        assertThat(factory.createInitialScreen()).isInstanceOf<EmbeddedNavigator.Screen.All>()
     }
 
     @Test
@@ -36,7 +36,7 @@ internal class InitialManageScreenFactoryTest {
                 paymentMethods = PaymentMethodFixtures.createCards(1)
             )
         )
-        assertThat(factory.createInitialScreen()).isInstanceOf<ManageNavigator.Screen.Update>()
+        assertThat(factory.createInitialScreen()).isInstanceOf<EmbeddedNavigator.Screen.Update>()
     }
 
     private fun testScenario(

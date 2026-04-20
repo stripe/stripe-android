@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import java.io.Closeable
 
-internal class ManageNavigator private constructor(
+internal class EmbeddedNavigator private constructor(
     private val eventReporter: EventReporter,
     private val navigationHandler: NavigationHandler<Screen>
 ) {

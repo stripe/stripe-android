@@ -8,7 +8,7 @@ import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 
-internal class ManageNavigatorTest {
+internal class EmbeddedNavigatorTest {
 
     @Test
     fun `initial state is correct`() = testScenario {
@@ -25,8 +25,8 @@ internal class ManageNavigatorTest {
             assertThat(awaitItem()).isEqualTo(initialScreen)
             assertThat(navigator.canGoBack).isFalse()
 
-            val newScreen = ManageNavigator.Screen.Update(FakeUpdatePaymentMethodInteractor())
-            navigator.performAction(ManageNavigator.Action.GoToScreen(newScreen))
+            val newScreen = EmbeddedNavigator.Screen.Update(FakeUpdatePaymentMethodInteractor())
+            navigator.performAction(EmbeddedNavigator.Action.GoToScreen(newScreen))
             assertThat(awaitItem()).isEqualTo(newScreen)
             assertThat(navigator.canGoBack).isTrue()
         }
@@ -38,7 +38,7 @@ internal class ManageNavigatorTest {
 
     @Test
     fun `navigating back with one screen emits result`() = testScenario {
-        navigator.performAction(ManageNavigator.Action.Back)
+        navigator.performAction(EmbeddedNavigator.Action.Back)
         navigator.result.test {
             assertThat(awaitItem()).isNull()
         }
@@ -49,12 +49,12 @@ internal class ManageNavigatorTest {
         navigator.screen.test {
             assertThat(awaitItem()).isEqualTo(initialScreen)
 
-            val newScreen = ManageNavigator.Screen.Update(FakeUpdatePaymentMethodInteractor())
-            navigator.performAction(ManageNavigator.Action.GoToScreen(newScreen))
+            val newScreen = EmbeddedNavigator.Screen.Update(FakeUpdatePaymentMethodInteractor())
+            navigator.performAction(EmbeddedNavigator.Action.GoToScreen(newScreen))
             assertThat(awaitItem()).isEqualTo(newScreen)
             assertThat(eventReporter.showEditablePaymentOptionCalls.awaitItem()).isEqualTo(Unit)
 
-            navigator.performAction(ManageNavigator.Action.Back)
+            navigator.performAction(EmbeddedNavigator.Action.Back)
             assertThat(awaitItem()).isEqualTo(initialScreen)
             assertThat(eventReporter.hideEditablePaymentOptionCalls.awaitItem()).isEqualTo(Unit)
         }
@@ -66,7 +66,7 @@ internal class ManageNavigatorTest {
 
     @Test
     fun `performing close action emits result`() = testScenario {
-        navigator.performAction(ManageNavigator.Action.Close())
+        navigator.performAction(EmbeddedNavigator.Action.Close())
         navigator.result.test {
             assertThat(awaitItem()).isNotNull()
         }
@@ -75,7 +75,7 @@ internal class ManageNavigatorTest {
     @Test
     fun `performing close action with shouldInvokeRowSelection true emits true`() = testScenario {
         navigator.performAction(
-            ManageNavigator.Action.Close(
+            EmbeddedNavigator.Action.Close(
                 shouldInvokeRowSelectionCallback = true
             )
         )
@@ -89,7 +89,7 @@ internal class ManageNavigatorTest {
     @Test
     fun `performing close action with shouldInvokeRowSelection false emits false`() = testScenario {
         navigator.performAction(
-            ManageNavigator.Action.Close(
+            EmbeddedNavigator.Action.Close(
                 shouldInvokeRowSelectionCallback = false
             )
         )
@@ -103,10 +103,10 @@ internal class ManageNavigatorTest {
     private fun testScenario(
         block: suspend Scenario.() -> Unit
     ) = runTest {
-        lateinit var navigator: ManageNavigator
-        val initialScreen = ManageNavigator.Screen.All(FakeManageScreenInteractor())
+        lateinit var navigator: EmbeddedNavigator
+        val initialScreen = EmbeddedNavigator.Screen.All(FakeManageScreenInteractor())
         val eventReporter = FakeEventReporter()
-        navigator = ManageNavigator(
+        navigator = EmbeddedNavigator(
             coroutineScope = this,
             eventReporter = eventReporter,
             initialScreen = initialScreen,
@@ -124,8 +124,8 @@ internal class ManageNavigatorTest {
     }
 
     private class Scenario(
-        val navigator: ManageNavigator,
-        val initialScreen: ManageNavigator.Screen,
+        val navigator: EmbeddedNavigator,
+        val initialScreen: EmbeddedNavigator.Screen,
         val eventReporter: FakeEventReporter,
     )
 }

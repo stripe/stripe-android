@@ -33,9 +33,9 @@ import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
 import com.stripe.android.paymentelement.embedded.manage.DefaultEmbeddedManageScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.DefaultEmbeddedUpdateScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedManageScreenInteractorFactory
+import com.stripe.android.paymentelement.embedded.manage.EmbeddedNavigator
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.InitialManageScreenFactory
-import com.stripe.android.paymentelement.embedded.manage.ManageNavigator
 import com.stripe.android.paymentelement.embedded.manage.ManageSavedPaymentMethodMutatorFactory
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
@@ -118,12 +118,12 @@ internal interface EmbeddedActivityModule {
 
         @Provides
         @Singleton
-        fun provideManageNavigator(
+        fun provideEmbeddedNavigator(
             initialManageScreenFactory: InitialManageScreenFactory,
             @ViewModelScope viewModelScope: CoroutineScope,
             eventReporter: EventReporter,
-        ): ManageNavigator {
-            return ManageNavigator(
+        ): EmbeddedNavigator {
+            return EmbeddedNavigator(
                 coroutineScope = viewModelScope,
                 eventReporter = eventReporter,
                 initialScreen = initialManageScreenFactory.createInitialScreen(),

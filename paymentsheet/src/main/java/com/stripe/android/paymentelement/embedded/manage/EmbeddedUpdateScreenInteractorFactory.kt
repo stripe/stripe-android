@@ -24,7 +24,7 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
     private val customerStateHolder: CustomerStateHolder,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val eventReporter: EventReporter,
-    private val manageNavigatorProvider: Provider<ManageNavigator>,
+    private val embeddedNavigatorProvider: Provider<EmbeddedNavigator>,
 ) : EmbeddedUpdateScreenInteractorFactory {
     override fun createUpdateScreenInteractor(
         displayableSavedPaymentMethod: DisplayableSavedPaymentMethod
@@ -80,7 +80,7 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
             removeMessage = paymentMethodMetadata.customerMetadata?.removePaymentMethod
                 ?.removeMessage(paymentMethodMetadata.merchantName),
             onUpdateSuccess = {
-                manageNavigatorProvider.get().performAction(ManageNavigator.Action.Back)
+                embeddedNavigatorProvider.get().performAction(EmbeddedNavigator.Action.Back)
             },
         )
     }
