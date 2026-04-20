@@ -14,8 +14,9 @@ def create_github_release
     execute_or_fail("git checkout #{@deploy_branch}")
     execute_or_fail("git pull")
 
+    tag_release
+
     begin
-        tag_pushed = tag_release
         release_response = octokit_client.create_release(
           "stripe/stripe-android",
           "v#{@version}",
@@ -65,10 +66,7 @@ private def tag_release
     # There's no way to create a "draft" tag, so we skip pushing tags if this is a dry run.
     if(!@is_dry_run)
         execute_or_fail("git push origin #{tag_name}")
-        return true
     end
-
-    false
 end
 
 private def delete_release_tag
