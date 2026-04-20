@@ -39,6 +39,7 @@ import com.stripe.android.financialconnections.presentation.FinancialConnections
 import com.stripe.android.financialconnections.ui.theme.Theme
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.financialconnections.utils.UriUtils
+import com.stripe.android.model.LinkBrand
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -317,6 +318,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             completed = false,
             initialPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
             theme = Theme.LinkLight,
+            linkBrand = LinkBrand.Link,
             isLinkWithStripe = true,
             manualEntryUsesMicrodeposits = false,
             elementsSessionContext = null,
@@ -375,6 +377,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             completed = false,
             initialPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
             theme = Theme.LinkLight,
+            linkBrand = LinkBrand.Link,
             isLinkWithStripe = true,
             manualEntryUsesMicrodeposits = false,
             elementsSessionContext = null,
@@ -430,6 +433,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             completed = false,
             initialPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
             theme = Theme.LinkLight,
+            linkBrand = LinkBrand.Link,
             isLinkWithStripe = true,
             manualEntryUsesMicrodeposits = false,
             elementsSessionContext = null,
@@ -477,6 +481,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             completed = false,
             initialPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
             theme = Theme.DefaultLight,
+            linkBrand = LinkBrand.Link,
             isLinkWithStripe = false,
             manualEntryUsesMicrodeposits = false,
             elementsSessionContext = null,
