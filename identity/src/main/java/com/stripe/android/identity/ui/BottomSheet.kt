@@ -35,10 +35,12 @@ import com.stripe.android.identity.networking.models.VerificationPageStaticConte
 import com.stripe.android.identity.networking.models.getContentDescriptionId
 import com.stripe.android.identity.networking.models.getResourceId
 import com.stripe.android.identity.viewmodel.BottomSheetViewModel
+import com.stripe.android.uicore.text.Html
 import com.stripe.android.uicore.utils.collectAsState
 import java.util.regex.Pattern
 
 @Composable
+@ExperimentalMaterialApi
 internal fun BottomSheet() {
     val viewModel = viewModel<BottomSheetViewModel>()
     val state by viewModel.bottomSheetState.collectAsState()
@@ -94,7 +96,6 @@ internal fun BottomSheet() {
 }
 
 @Composable
-@OptIn(ExperimentalMaterialApi::class)
 private fun BottomSheetLine(
     line: VerificationPageStaticContentBottomSheetLineContent
 ) {
@@ -138,9 +139,8 @@ private fun BottomSheetLine(
                     )
                 }
             } ?: run {
-                BottomSheetHTML(
+                Html(
                     html = line.content,
-                    bottomSheets = null,
                     color = MaterialTheme.colors.onSurface,
                     style = LocalTextStyle.current.merge(
                         lineHeight = 20.sp
@@ -177,6 +177,7 @@ private fun String.tryParseUl(): List<String>? {
 
 @Preview
 @Composable
+@ExperimentalMaterialApi
 internal fun ButtonSheetPreview() {
     IdentityPreview {
         val mockViewModel = viewModel<BottomSheetViewModel>()
