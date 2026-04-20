@@ -551,12 +551,6 @@ internal class DefaultEventReporter @Inject internal constructor(
             PaymentSheetEvent.PaymentMethodMessaging.Incomplete(duration)
         )
     }
-//
-//    override fun onPaymentMethodMessageLearnMoreClicked(paymentMethod: PaymentMethodCode) {
-//        fireEvent(
-//            PaymentSheetEvent.PaymentMethodMessaging.LearnMoreClicked(paymentMethod)
-//        )
-//    }
 
     private fun defaultParams(paymentMethodMetadata: PaymentMethodMetadata?): Map<String, Any> {
         return paymentMethodMetadata?.analyticsMetadata?.paramsMap ?: emptyMap()
