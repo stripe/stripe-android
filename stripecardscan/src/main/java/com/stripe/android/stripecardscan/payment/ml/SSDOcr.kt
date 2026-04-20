@@ -133,9 +133,15 @@ internal class SSDOcr private constructor(interpreter: InterpreterWrapper) :
 
         val predictedNumber = detectedBoxes.map { it.label }.joinToString("")
         return if (isValidPan(predictedNumber)) {
-            CardOcr.Prediction(predictedNumber)
+            CardOcr.Prediction(
+                pan = predictedNumber,
+                source = CardOcr.Source.Darknite,
+            )
         } else {
-            CardOcr.Prediction(null)
+            CardOcr.Prediction(
+                pan = null,
+                source = CardOcr.Source.Darknite,
+            )
         }
     }
 

@@ -52,9 +52,10 @@ internal class MLKitTextRecognizer internal constructor(
                 pan = pan,
                 expiryMonth = expiry?.month,
                 expiryYear = expiry?.year,
+                source = CardOcr.Source.MlKit,
             )
         } catch (e: Exception) {
-            CardOcr.Prediction(pan = null)
+            CardOcr.Prediction(pan = null, source = CardOcr.Source.MlKit)
         }
     }
 

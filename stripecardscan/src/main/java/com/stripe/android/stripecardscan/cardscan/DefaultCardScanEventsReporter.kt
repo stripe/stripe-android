@@ -1,5 +1,6 @@
 package com.stripe.android.stripecardscan.cardscan
 
+import android.os.SystemClock
 import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -9,6 +10,7 @@ import com.stripe.android.stripecardscan.scanui.CancellationReason
 import javax.inject.Inject
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
+import kotlin.time.Duration.Companion.milliseconds
 
 internal class DefaultCardScanEventsReporter @Inject constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
@@ -16,7 +18,17 @@ internal class DefaultCardScanEventsReporter @Inject constructor(
     private val durationProvider: DurationProvider,
     private val cardScanConfiguration: CardScanConfiguration
 ) : CardScanEventsReporter {
+    // Tracked separately from DurationProvider because milestone events need elapsed time
+    // mid-scan, but DurationProvider only returns duration on end().
+    private var scanStartedAtMillis: Long? = null
+    private var hasLoggedMlKitFoundPan = false
+    private var hasLoggedMlKitFoundExp = false
+    private var hasLoggedDarkniteFoundPan = false
+    private var hasLoggedModelsDisagree = false
+
     override fun scanStarted() {
+        clearSessionState()
+        scanStartedAtMillis = SystemClock.uptimeMillis()
         durationProvider.start(DurationProvider.Key.CardScan)
         fireEvent(
             eventName = "cardscan_scan_started"
@@ -29,6 +41,7 @@ internal class DefaultCardScanEventsReporter @Inject constructor(
             eventName = "cardscan_success",
             additionalParams = durationInSecondsFromStart(duration)
         )
+        clearSessionState()
     }
 
     override fun scanFailed(error: Throwable?) {
@@ -40,6 +53,7 @@ internal class DefaultCardScanEventsReporter @Inject constructor(
             eventName = "cardscan_failed",
             additionalParams = durationInSecondsFromStart(duration) + params
         )
+        clearSessionState()
     }
 
     override fun scanCancelled(reason: CancellationReason) {
@@ -50,6 +64,43 @@ internal class DefaultCardScanEventsReporter @Inject constructor(
                 "cancellation_reason" to reason.analyticsReason()
             )
         )
+        clearSessionState()
+    }
+
+    override fun scanMlKitFoundPan() {
+        fireMilestoneEvent(
+            shouldLog = !hasLoggedMlKitFoundPan,
+            eventName = "cardscan_mlkit_found_pan",
+        ) {
+            hasLoggedMlKitFoundPan = true
+        }
+    }
+
+    override fun scanMlKitFoundExp() {
+        fireMilestoneEvent(
+            shouldLog = !hasLoggedMlKitFoundExp,
+            eventName = "cardscan_mlkit_found_exp",
+        ) {
+            hasLoggedMlKitFoundExp = true
+        }
+    }
+
+    override fun scanDarkniteFoundPan() {
+        fireMilestoneEvent(
+            shouldLog = !hasLoggedDarkniteFoundPan,
+            eventName = "cardscan_darknite_found_pan",
+        ) {
+            hasLoggedDarkniteFoundPan = true
+        }
+    }
+
+    override fun scanModelsDisagree() {
+        fireMilestoneEvent(
+            shouldLog = !hasLoggedModelsDisagree,
+            eventName = "cardscan_models_disagree",
+        ) {
+            hasLoggedModelsDisagree = true
+        }
     }
 
     private fun fireEvent(
@@ -70,6 +121,35 @@ internal class DefaultCardScanEventsReporter @Inject constructor(
                 additionalParams = additionalParams + baseParams
             )
         )
+    }
+
+    private fun fireMilestoneEvent(
+        shouldLog: Boolean,
+        eventName: String,
+        onLogged: () -> Unit,
+    ) {
+        if (!shouldLog || scanStartedAtMillis == null) {
+            return
+        }
+
+        onLogged()
+        fireEvent(
+            eventName = eventName,
+            additionalParams = durationInSecondsFromStart(elapsedDurationFromStart())
+        )
+    }
+
+    private fun clearSessionState() {
+        scanStartedAtMillis = null
+        hasLoggedMlKitFoundPan = false
+        hasLoggedMlKitFoundExp = false
+        hasLoggedDarkniteFoundPan = false
+        hasLoggedModelsDisagree = false
+    }
+
+    private fun elapsedDurationFromStart(): Duration? {
+        val startTime = scanStartedAtMillis ?: return null
+        return (SystemClock.uptimeMillis() - startTime).milliseconds
     }
 
     private fun durationInSecondsFromStart(duration: Duration?): Map<String, Float> {

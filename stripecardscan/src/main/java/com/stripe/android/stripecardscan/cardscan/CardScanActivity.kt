@@ -24,6 +24,7 @@ import com.stripe.android.stripecardscan.R
 import com.stripe.android.stripecardscan.camera.getScanCameraAdapter
 import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopAggregator
+import com.stripe.android.stripecardscan.payment.ml.CardOcr
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopState
 import com.stripe.android.stripecardscan.databinding.StripeActivityCardscanBinding
 import com.stripe.android.stripecardscan.di.DaggerCardScanComponent
@@ -174,6 +175,29 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
             override suspend fun onInterimResult(
                 result: MainLoopAggregator.InterimResult
             ) = launch(Dispatchers.Main) {
+                // Milestone events are called on every matching frame; the reporter
+                // handles deduplication so each event is only emitted once per session.
+                when (result.analyzerResult.source) {
+                    CardOcr.Source.MlKit -> {
+                        if (result.analyzerResult.pan != null) {
+                            cardScanEventsReporter.scanMlKitFoundPan()
+                        }
+                        if (result.analyzerResult.expiryMonth != null && result.analyzerResult.expiryYear != null) {
+                            cardScanEventsReporter.scanMlKitFoundExp()
+                        }
+                    }
+                    CardOcr.Source.Darknite -> {
+                        if (result.analyzerResult.pan != null) {
+                            cardScanEventsReporter.scanDarkniteFoundPan()
+                        }
+                    }
+                    CardOcr.Source.Unknown -> Unit
+                }
+
+                if (result.state.hasModelDisagreement) {
+                    cardScanEventsReporter.scanModelsDisagree()
+                }
+
                 when (result.state) {
                     is MainLoopState.Initial -> changeScanState(CardScanState.NotFound)
                     is MainLoopState.OcrFound,

@@ -15,6 +15,11 @@ private const val IMAGE_STD = 128.5f
  * Shared input/output types and preprocessing for card OCR analyzers.
  */
 internal object CardOcr {
+    enum class Source {
+        Unknown,
+        MlKit,
+        Darknite
+    }
 
     data class Input(val ssdOcrImage: MLImage, val cardBitmap: Bitmap)
 
@@ -39,6 +44,7 @@ internal object CardOcr {
         val pan: String?,
         val expiryMonth: Int? = null,
         val expiryYear: Int? = null,
+        val source: Source = Source.Unknown,
     ) {
 
         /**
