@@ -1,4 +1,4 @@
-package com.stripe.android.paymentelement.embedded.manage
+package com.stripe.android.paymentelement.embedded.sheet
 
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
@@ -29,30 +29,32 @@ import javax.inject.Singleton
         ExtendedPaymentElementConfirmationModule::class,
         GooglePayLauncherModule::class,
         EmbeddedLinkExtrasModule::class,
-    ],
+    ]
 )
 @Singleton
-internal interface ManageComponent {
-    val viewModel: ManageViewModel
-    val customerStateHolder: CustomerStateHolder
+internal interface EmbeddedSheetComponent {
+    val viewModel: EmbeddedSheetViewModel
     val selectionHolder: EmbeddedSelectionHolder
-    fun inject(activity: ManageActivity)
+    val customerStateHolder: CustomerStateHolder
+
+    fun inject(activity: EmbeddedSheetActivity)
 
     @Component.Factory
     interface Factory {
         fun build(
-            @BindsInstance savedStateHandle: SavedStateHandle,
             @BindsInstance paymentMethodMetadata: PaymentMethodMetadata,
-            @BindsInstance application: Application,
-            @BindsInstance @PaymentElementCallbackIdentifier
-            paymentElementCallbackIdentifier: String,
             @BindsInstance selectedPaymentMethodCode: PaymentMethodCode,
             @BindsInstance hasSavedPaymentMethods: Boolean,
             @BindsInstance
             @Named(STATUS_BAR_COLOR)
             statusBarColor: Int?,
             @BindsInstance configuration: EmbeddedPaymentElement.Configuration,
+            @BindsInstance
+            @PaymentElementCallbackIdentifier
+            paymentElementCallbackIdentifier: String,
+            @BindsInstance application: Application,
+            @BindsInstance savedStateHandle: SavedStateHandle,
             @BindsInstance promotion: PaymentMethodMessagePromotion?,
-        ): ManageComponent
+        ): EmbeddedSheetComponent
     }
 }
