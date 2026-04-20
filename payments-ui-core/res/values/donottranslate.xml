@@ -36,6 +36,7 @@
     <string name="stripe_paymentsheet_payment_method_wechat">WeChat Pay</string>
     <string name="stripe_paymentsheet_payment_method_multibanco">Multibanco</string>
     <string name="stripe_paymentsheet_payment_method_wero">Wero</string>
+    <string name="stripe_paymentsheet_payment_method_pay_by_bank">Pay by Bank</string>
     <!--    <string name="paymentsheet_payment_method_item_card_number">····%1$s</string>-->
 
     <!--    &lt;!&ndash; Label indicating the payment intent is in testmode &ndash;&gt;-->
