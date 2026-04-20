@@ -275,7 +275,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_upi_polling_cancel">取消并用另一方式支付</string>
   <!-- Text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_header">批准付款</string>
-  <!-- Countdown timer text on a screen asking the user to approve a payment -->
   <!-- Text on a screen that indicates a payment has failed informing the user we are asking the user to try a different payment method -->
   <string name="stripe_upi_polling_payment_failed_message">请返回并选择另一个支付方式。</string>
   <!-- Text on a screen that indicates a payment has failed -->
