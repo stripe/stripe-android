@@ -42,6 +42,7 @@ internal interface EmbeddedSheetComponent {
     @Component.Factory
     interface Factory {
         fun build(
+            @BindsInstance mode: EmbeddedSheetContract.Mode,
             @BindsInstance paymentMethodMetadata: PaymentMethodMetadata,
             @BindsInstance selectedPaymentMethodCode: PaymentMethodCode,
             @BindsInstance hasSavedPaymentMethods: Boolean,

@@ -25,6 +25,7 @@ internal class EmbeddedSheetViewModel @Inject constructor(
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             val args = argsSupplier()
             val component = DaggerEmbeddedSheetComponent.factory().build(
+                mode = args.mode,
                 paymentMethodMetadata = args.paymentMethodMetadata,
                 selectedPaymentMethodCode = args.selectedPaymentMethodCode,
                 hasSavedPaymentMethods = args.hasSavedPaymentMethods,

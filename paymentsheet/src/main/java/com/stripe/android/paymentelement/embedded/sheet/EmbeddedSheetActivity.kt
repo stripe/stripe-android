@@ -21,13 +21,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.form.FormResult
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedNavigator
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
 import com.stripe.android.ui.core.elements.H4Text
@@ -39,7 +42,7 @@ import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.fadeOut
 import javax.inject.Inject
 
-internal class EmbeddedSheetActivity : AppCompatActivity() {
+internal class EmbeddedSheetActivity : AppCompatActivity(), EmbeddedNavigator.ScreenResultHandler {
     private val args: EmbeddedSheetContract.Args? by lazy {
         EmbeddedSheetContract.Args.fromIntent(intent)
     }
@@ -74,46 +77,80 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
 
         renderEdgeToEdge()
         viewModel.component.inject(this)
-
-        onBackPressedDispatcher.addCallback {
-            if (!embeddedNavigator.screen.value.isPerformingNetworkOperation()) {
-                embeddedNavigator.performAction(EmbeddedNavigator.Action.Back)
-            }
-        }
+        bindNavigator()
+        setupBackPressHandler()
 
         setContent {
             StripeTheme {
-                SheetContent()
+                SheetContent(args.mode)
+            }
+        }
+    }
+
+    private fun bindNavigator() {
+        embeddedNavigator.bindToActivity(
+            EmbeddedNavigator.ScreenActivityContext(
+                activityResultCaller = this,
+                lifecycleOwner = this,
+                coroutineScope = lifecycleScope,
+                resultHandler = this,
+            )
+        )
+    }
+
+    private fun setupBackPressHandler() {
+        onBackPressedDispatcher.addCallback {
+            if (!embeddedNavigator.screen.value.isPerformingNetworkOperation()) {
+                embeddedNavigator.performAction(EmbeddedNavigator.Action.Back)
             }
         }
     }
 
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
-    private fun SheetContent() {
+    private fun SheetContent(mode: EmbeddedSheetContract.Mode) {
         val screen by embeddedNavigator.screen.collectAsState()
         val bottomSheetState = rememberStripeBottomSheetState(
             confirmValueChange = { !screen.isPerformingNetworkOperation() }
         )
         ElementsBottomSheetLayout(
             state = bottomSheetState,
-            onDismissed = {
-                setManageResult(shouldInvokeSelectionCallback = false)
-                finish()
-            }
+            onDismissed = { handleDismiss(mode) }
         ) {
             var hasResult by remember { mutableStateOf(false) }
             if (!hasResult) {
-                Box(modifier = Modifier.padding(bottom = 20.dp)) {
-                    ManageScreenContent(embeddedNavigator, screen)
+                when (screen) {
+                    is EmbeddedNavigator.Screen.Form -> screen.Content()
+                    else -> {
+                        Box(modifier = Modifier.padding(bottom = 20.dp)) {
+                            ManageScreenContent(embeddedNavigator, screen)
+                        }
+                    }
                 }
                 LaunchedEffect(Unit) {
                     embeddedNavigator.result.collect { result ->
                         hasResult = true
-                        setManageResult(shouldInvokeSelectionCallback = result == true)
-                        finish()
+                        when (mode) {
+                            EmbeddedSheetContract.Mode.Form -> {
+                                setCancelAndFinish()
+                            }
+                            EmbeddedSheetContract.Mode.Manage -> {
+                                setManageResult(shouldInvokeSelectionCallback = result == true)
+                                finish()
+                            }
+                        }
                     }
                 }
+            }
+        }
+    }
+
+    private fun handleDismiss(mode: EmbeddedSheetContract.Mode) {
+        when (mode) {
+            EmbeddedSheetContract.Mode.Form -> setCancelAndFinish()
+            EmbeddedSheetContract.Mode.Manage -> {
+                setManageResult(shouldInvokeSelectionCallback = false)
+                finish()
             }
         }
     }
@@ -163,6 +200,51 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
         )
     }
 
+    override fun onProcessingCompleted() = setCompletedResultAndDismiss()
+
+    override fun onDismissed() = setCancelAndFinish()
+
+    override fun onFormResult(result: FormResult) {
+        setFormResult(result)
+        finish()
+    }
+
+    private fun setCompletedResultAndDismiss() {
+        setSheetResult(
+            EmbeddedSheetResult.Complete(
+                selection = null,
+                hasBeenConfirmed = true,
+                customerState = getCustomerState(),
+                shouldInvokeSelectionCallback = false,
+            )
+        )
+        finish()
+    }
+
+    private fun setCancelAndFinish() {
+        setSheetResult(
+            EmbeddedSheetResult.Cancelled(
+                customerState = getCustomerState(),
+            )
+        )
+        finish()
+    }
+
+    private fun setFormResult(result: FormResult) {
+        val sheetResult = when (result) {
+            is FormResult.Complete -> EmbeddedSheetResult.Complete(
+                selection = result.selection,
+                hasBeenConfirmed = result.hasBeenConfirmed,
+                customerState = result.customerState,
+                shouldInvokeSelectionCallback = false,
+            )
+            is FormResult.Cancelled -> EmbeddedSheetResult.Cancelled(
+                customerState = result.customerState,
+            )
+        }
+        setSheetResult(sheetResult)
+    }
+
     private fun setManageResult(shouldInvokeSelectionCallback: Boolean) {
         setSheetResult(
             EmbeddedSheetResult.Complete(
@@ -172,6 +254,14 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
                 shouldInvokeSelectionCallback = shouldInvokeSelectionCallback,
             )
         )
+    }
+
+    private fun getCustomerState(): CustomerState? {
+        return if (::customerStateHolder.isInitialized) {
+            customerStateHolder.customer.value
+        } else {
+            null
+        }
     }
 
     override fun finish() {
