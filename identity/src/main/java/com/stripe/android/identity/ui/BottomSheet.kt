@@ -74,9 +74,7 @@ internal fun BottomSheet() {
                         .verticalScroll(rememberScrollState())
                 ) {
                     for (line in bottomSheetContent.lines) {
-                        BottomSheetLine(
-                            line = line
-                        )
+                        BottomSheetLine(line)
                     }
                 }
             }
@@ -96,9 +94,7 @@ internal fun BottomSheet() {
 }
 
 @Composable
-private fun BottomSheetLine(
-    line: VerificationPageStaticContentBottomSheetLineContent
-) {
+private fun BottomSheetLine(line: VerificationPageStaticContentBottomSheetLineContent) {
     Row(
         modifier = Modifier
             .testTag(BOTTOM_SHEET_LINE_TAG)
