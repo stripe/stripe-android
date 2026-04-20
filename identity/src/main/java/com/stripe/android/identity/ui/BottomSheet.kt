@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -93,6 +94,7 @@ internal fun BottomSheet() {
 }
 
 @Composable
+@OptIn(ExperimentalMaterialApi::class)
 private fun BottomSheetLine(
     line: VerificationPageStaticContentBottomSheetLineContent
 ) {
