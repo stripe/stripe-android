@@ -97,6 +97,7 @@ internal fun PaymentMethodRowButton(
                 when (appearance.style) {
                     is RowStyle.FlatWithRadio, is RowStyle.FlatWithCheckmark -> Modifier.selectable(
                         selected = isSelected,
+                        enabled = isClickable,
                         onClick = onClick,
                     )
                     is RowStyle.FlatWithDisclosure, is RowStyle.FloatingButton -> Modifier.clickable(
