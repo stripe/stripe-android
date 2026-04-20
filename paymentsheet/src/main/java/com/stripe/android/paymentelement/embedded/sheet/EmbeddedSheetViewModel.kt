@@ -1,4 +1,4 @@
-package com.stripe.android.paymentelement.embedded.manage
+package com.stripe.android.paymentelement.embedded.sheet
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -10,8 +10,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import javax.inject.Inject
 
-internal class ManageViewModel @Inject constructor(
-    val component: ManageComponent,
+internal class EmbeddedSheetViewModel @Inject constructor(
+    val component: EmbeddedSheetComponent,
     @ViewModelScope private val customViewModelScope: CoroutineScope,
 ) : ViewModel() {
     override fun onCleared() {
@@ -19,28 +19,26 @@ internal class ManageViewModel @Inject constructor(
     }
 
     class Factory(
-        private val argsSupplier: () -> ManageContract.Args,
+        private val argsSupplier: () -> EmbeddedSheetContract.Args,
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            val savedStateHandle = extras.createSavedStateHandle()
-
             val args = argsSupplier()
-
-            val component = DaggerManageComponent.factory().build(
-                savedStateHandle = savedStateHandle,
-                paymentElementCallbackIdentifier = args.paymentElementCallbackIdentifier,
+            val component = DaggerEmbeddedSheetComponent.factory().build(
+                mode = args.mode,
                 paymentMethodMetadata = args.paymentMethodMetadata,
-                application = extras.requireApplication(),
                 selectedPaymentMethodCode = args.selectedPaymentMethodCode,
                 hasSavedPaymentMethods = args.hasSavedPaymentMethods,
                 statusBarColor = args.statusBarColor,
                 configuration = args.configuration,
+                paymentElementCallbackIdentifier = args.paymentElementCallbackIdentifier,
+                application = extras.requireApplication(),
+                savedStateHandle = extras.createSavedStateHandle(),
                 promotion = args.promotion,
             )
 
-            component.customerStateHolder.setCustomerState(args.customerState)
             component.selectionHolder.set(args.selection)
+            component.customerStateHolder.setCustomerState(args.customerState)
 
             return component.viewModel as T
         }

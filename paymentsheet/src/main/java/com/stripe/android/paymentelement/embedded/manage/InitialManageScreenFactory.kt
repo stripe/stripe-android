@@ -13,7 +13,7 @@ internal class InitialManageScreenFactory @Inject constructor(
     private val updateScreenInteractorFactory: EmbeddedUpdateScreenInteractorFactory,
     private val manageInteractorFactory: EmbeddedManageScreenInteractorFactory,
 ) {
-    fun createInitialScreen(): ManageNavigator.Screen {
+    fun createInitialScreen(): EmbeddedNavigator.Screen {
         val paymentMethods = customerStateHolder.customer.value?.paymentMethods
         return if (paymentMethods?.size == 1) {
             val paymentMethod = paymentMethods.first()
@@ -25,13 +25,13 @@ internal class InitialManageScreenFactory @Inject constructor(
                 paymentMethod = paymentMethod,
                 isCbcEligible = paymentMethodMetadata.cbcEligibility is CardBrandChoiceEligibility.Eligible,
             )
-            ManageNavigator.Screen.Update(
+            EmbeddedNavigator.Screen.Update(
                 interactor = updateScreenInteractorFactory.createUpdateScreenInteractor(
                     displayableSavedPaymentMethod = displayableSavedPaymentMethod
                 )
             )
         } else {
-            ManageNavigator.Screen.All(interactor = manageInteractorFactory.createManageScreenInteractor())
+            EmbeddedNavigator.Screen.All(interactor = manageInteractorFactory.createManageScreenInteractor())
         }
     }
 }

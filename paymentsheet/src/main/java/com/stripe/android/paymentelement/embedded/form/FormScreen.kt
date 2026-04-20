@@ -32,18 +32,27 @@ internal class FormScreen @Inject constructor(
             state = bottomSheetState,
             onDismissed = onDismissed,
         ) {
-            FormActivityUI(
-                interactor = formInteractor,
-                eventReporter = eventReporter,
-                onClick = {
-                    confirmationHelper.confirm()
-                },
+            ContentWithoutBottomSheet(
                 onProcessingCompleted = onProcessingCompleted,
-                state = state,
                 onDismissed = onDismissed,
-                updateSelection = embeddedSelectionHolder::set,
-                savedPaymentMethodConfirmInteractorFactory = savedPaymentMethodConfirmInteractorFactory,
             )
         }
+    }
+
+    @Composable
+    fun ContentWithoutBottomSheet(onProcessingCompleted: () -> Unit, onDismissed: () -> Unit) {
+        val state by formActivityStateHelper.state.collectAsState()
+        FormActivityUI(
+            interactor = formInteractor,
+            eventReporter = eventReporter,
+            onClick = {
+                confirmationHelper.confirm()
+            },
+            onProcessingCompleted = onProcessingCompleted,
+            state = state,
+            onDismissed = onDismissed,
+            updateSelection = embeddedSelectionHolder::set,
+            savedPaymentMethodConfirmInteractorFactory = savedPaymentMethodConfirmInteractorFactory,
+        )
     }
 }

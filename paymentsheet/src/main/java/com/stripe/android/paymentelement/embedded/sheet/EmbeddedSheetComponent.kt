@@ -1,8 +1,6 @@
-package com.stripe.android.paymentelement.embedded.form
+package com.stripe.android.paymentelement.embedded.sheet
 
 import android.app.Application
-import androidx.activity.result.ActivityResultCaller
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
@@ -18,11 +16,8 @@ import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.CustomerStateHolder
-import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
-import dagger.Module
-import dagger.Subcomponent
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -37,15 +32,17 @@ import javax.inject.Singleton
     ]
 )
 @Singleton
-internal interface FormActivityViewModelComponent {
-    val viewModel: FormActivityViewModel
+internal interface EmbeddedSheetComponent {
+    val viewModel: EmbeddedSheetViewModel
     val selectionHolder: EmbeddedSelectionHolder
     val customerStateHolder: CustomerStateHolder
-    val subcomponentFactory: FormActivitySubcomponent.Factory
+
+    fun inject(activity: EmbeddedSheetActivity)
 
     @Component.Factory
     interface Factory {
         fun build(
+            @BindsInstance mode: EmbeddedSheetContract.Mode,
             @BindsInstance paymentMethodMetadata: PaymentMethodMetadata,
             @BindsInstance selectedPaymentMethodCode: PaymentMethodCode,
             @BindsInstance hasSavedPaymentMethods: Boolean,
@@ -59,32 +56,6 @@ internal interface FormActivityViewModelComponent {
             @BindsInstance application: Application,
             @BindsInstance savedStateHandle: SavedStateHandle,
             @BindsInstance promotion: PaymentMethodMessagePromotion?,
-        ): FormActivityViewModelComponent
+        ): EmbeddedSheetComponent
     }
-}
-
-@Subcomponent(
-    modules = [
-        FormActivityModule::class,
-    ]
-)
-@FormActivityScope
-internal interface FormActivitySubcomponent {
-    fun inject(activity: FormActivity)
-
-    @Subcomponent.Factory
-    interface Factory {
-        fun build(
-            @BindsInstance activityResultCaller: ActivityResultCaller,
-            @BindsInstance lifecycleOwner: LifecycleOwner,
-        ): FormActivitySubcomponent
-    }
-}
-
-@Module
-internal interface FormActivityModule {
-    @Binds
-    fun bindsFormConfirmationHelper(
-        confirmationHandler: DefaultFormActivityConfirmationHelper
-    ): FormActivityConfirmationHelper
 }

@@ -33,10 +33,11 @@ import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
 import com.stripe.android.paymentelement.embedded.manage.DefaultEmbeddedManageScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.DefaultEmbeddedUpdateScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedManageScreenInteractorFactory
+import com.stripe.android.paymentelement.embedded.manage.EmbeddedNavigator
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.InitialManageScreenFactory
-import com.stripe.android.paymentelement.embedded.manage.ManageNavigator
 import com.stripe.android.paymentelement.embedded.manage.ManageSavedPaymentMethodMutatorFactory
+import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetContract
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
@@ -118,15 +119,25 @@ internal interface EmbeddedActivityModule {
 
         @Provides
         @Singleton
-        fun provideManageNavigator(
+        fun provideEmbeddedNavigator(
+            mode: EmbeddedSheetContract.Mode,
             initialManageScreenFactory: InitialManageScreenFactory,
+            formActivityStateHelper: FormActivityStateHelper,
+            subcomponentFactory: FormActivitySubcomponent.Factory,
             @ViewModelScope viewModelScope: CoroutineScope,
             eventReporter: EventReporter,
-        ): ManageNavigator {
-            return ManageNavigator(
+        ): EmbeddedNavigator {
+            val initialScreen = when (mode) {
+                EmbeddedSheetContract.Mode.Form -> EmbeddedNavigator.Screen.Form(
+                    formActivityStateHelper,
+                    subcomponentFactory,
+                )
+                EmbeddedSheetContract.Mode.Manage -> initialManageScreenFactory.createInitialScreen()
+            }
+            return EmbeddedNavigator(
                 coroutineScope = viewModelScope,
                 eventReporter = eventReporter,
-                initialScreen = initialManageScreenFactory.createInitialScreen(),
+                initialScreen = initialScreen,
             )
         }
 

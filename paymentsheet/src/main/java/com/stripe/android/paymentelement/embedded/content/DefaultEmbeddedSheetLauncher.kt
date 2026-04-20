@@ -13,10 +13,8 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentif
 import com.stripe.android.paymentelement.embedded.EmbeddedResultCallbackHelper
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
-import com.stripe.android.paymentelement.embedded.form.FormContract
-import com.stripe.android.paymentelement.embedded.form.FormResult
-import com.stripe.android.paymentelement.embedded.manage.ManageContract
-import com.stripe.android.paymentelement.embedded.manage.ManageResult
+import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetContract
+import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetResult
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -62,49 +60,52 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
-                    formActivityLauncher.unregister()
-                    manageActivityLauncher.unregister()
+                    activityLauncher.unregister()
                     super.onDestroy(owner)
                 }
             }
         )
     }
 
-    private val formActivityLauncher: ActivityResultLauncher<FormContract.Args> =
-        activityResultCaller.registerForActivityResult(FormContract) { result ->
+    private var currentMode: EmbeddedSheetContract.Mode? = null
+
+    private val activityLauncher: ActivityResultLauncher<EmbeddedSheetContract.Args> =
+        activityResultCaller.registerForActivityResult(EmbeddedSheetContract) { result ->
             sheetStateHolder.sheetIsOpen = false
-            selectionHolder.setTemporary(null)
+            val mode = currentMode
+            currentMode = null
 
-            result.customerState?.let { customerStateHolder.setCustomerState(it) }
-
-            if (result is FormResult.Complete) {
-                selectionHolder.set(result.selection)
-                if (result.hasBeenConfirmed) {
-                    embeddedResultCallbackHelper.setResult(
-                        EmbeddedPaymentElement.Result.Completed()
-                    )
-                } else {
-                    result.selection?.let { rowSelectionImmediateActionHandler.invoke() }
-                }
-            } else if (result is FormResult.Cancelled) {
-                embeddedResultCallbackHelper.setResult(
-                    EmbeddedPaymentElement.Result.Canceled()
-                )
+            if (mode == EmbeddedSheetContract.Mode.Form) {
+                selectionHolder.setTemporary(null)
             }
-        }
 
-    private val manageActivityLauncher: ActivityResultLauncher<ManageContract.Args> =
-        activityResultCaller.registerForActivityResult(ManageContract) { result ->
-            sheetStateHolder.sheetIsOpen = false
             when (result) {
-                is ManageResult.Error -> Unit
-                is ManageResult.Complete -> {
-                    customerStateHolder.setCustomerState(result.customerState)
+                is EmbeddedSheetResult.Complete -> {
+                    result.customerState?.let { customerStateHolder.setCustomerState(it) }
                     selectionHolder.set(result.selection)
-                    if (result.shouldInvokeSelectionCallback && result.selection is PaymentSelection.Saved) {
-                        rowSelectionImmediateActionHandler.invoke()
+
+                    when {
+                        result.hasBeenConfirmed -> {
+                            embeddedResultCallbackHelper.setResult(
+                                EmbeddedPaymentElement.Result.Completed()
+                            )
+                        }
+                        result.shouldInvokeSelectionCallback &&
+                            result.selection is PaymentSelection.Saved -> {
+                            rowSelectionImmediateActionHandler.invoke()
+                        }
+                        mode == EmbeddedSheetContract.Mode.Form && result.selection != null -> {
+                            rowSelectionImmediateActionHandler.invoke()
+                        }
                     }
                 }
+                is EmbeddedSheetResult.Cancelled -> {
+                    result.customerState?.let { customerStateHolder.setCustomerState(it) }
+                    embeddedResultCallbackHelper.setResult(
+                        EmbeddedPaymentElement.Result.Canceled()
+                    )
+                }
+                is EmbeddedSheetResult.Error -> Unit
             }
         }
 
@@ -133,18 +134,20 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         val currentSelection = (selectionHolder.selection.value as? PaymentSelection.New?)
             .takeIf { it?.paymentMethodType == code }
             ?: selectionHolder.getPreviousNewSelection(code)
-        val args = FormContract.Args(
+        currentMode = EmbeddedSheetContract.Mode.Form
+        val args = EmbeddedSheetContract.Args(
+            mode = EmbeddedSheetContract.Mode.Form,
             selectedPaymentMethodCode = code,
             paymentMethodMetadata = paymentMethodMetadata,
             hasSavedPaymentMethods = hasSavedPaymentMethods,
             configuration = embeddedConfirmationState.configuration,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             statusBarColor = statusBarColor,
-            paymentSelection = currentSelection,
+            selection = currentSelection,
             customerState = customerState,
-            promotion = promotion
+            promotion = promotion,
         )
-        formActivityLauncher.launch(args)
+        activityLauncher.launch(args)
     }
 
     override fun launchManage(
@@ -166,17 +169,19 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         }
         if (sheetStateHolder.sheetIsOpen) return
         sheetStateHolder.sheetIsOpen = true
-        val args = ManageContract.Args(
-            paymentMethodMetadata = paymentMethodMetadata,
-            customerState = customerState,
-            selection = selection,
-            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
+        currentMode = EmbeddedSheetContract.Mode.Manage
+        val args = EmbeddedSheetContract.Args(
+            mode = EmbeddedSheetContract.Mode.Manage,
             selectedPaymentMethodCode = selection?.paymentMethodType ?: "",
+            paymentMethodMetadata = paymentMethodMetadata,
             hasSavedPaymentMethods = customerState.paymentMethods.isNotEmpty(),
-            statusBarColor = statusBarColor,
             configuration = embeddedConfirmationState.configuration,
+            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
+            statusBarColor = statusBarColor,
+            selection = selection,
+            customerState = customerState,
             promotion = null,
         )
-        manageActivityLauncher.launch(args)
+        activityLauncher.launch(args)
     }
 }
