@@ -3,6 +3,7 @@ package com.stripe.android.stripecardscan.cardscan
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DefaultDurationProvider
+import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.stripecardscan.scanui.CancellationReason
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import org.junit.Test
@@ -198,6 +199,9 @@ internal class DefaultCardScanEventsReporterTest {
         testBlock: (DefaultCardScanEventsReporter, FakeAnalyticsRequestExecutor) -> Unit
     ) {
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
+        val durationProvider = DefaultDurationProvider.instance
+        // Clear any leftover state from prior tests sharing the singleton.
+        durationProvider.end(DurationProvider.Key.CardScan)
         val eventsReporter = DefaultCardScanEventsReporter(
             analyticsRequestExecutor = analyticsRequestExecutor,
             analyticsRequestFactory = AnalyticsRequestFactory(
@@ -208,7 +212,7 @@ internal class DefaultCardScanEventsReporterTest {
                 networkTypeProvider = { "" },
                 pluginTypeProvider = { null }
             ),
-            durationProvider = DefaultDurationProvider.instance,
+            durationProvider = durationProvider,
             cardScanConfiguration = CardScanConfiguration(ELEMENTS_SESSION_ID)
         )
 

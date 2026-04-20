@@ -1,6 +1,5 @@
 package com.stripe.android.stripecardscan.cardscan
 
-import android.os.SystemClock
 import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -9,7 +8,6 @@ import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.stripecardscan.scanui.CancellationReason
 import javax.inject.Inject
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.DurationUnit
 
 internal class DefaultCardScanEventsReporter @Inject constructor(
@@ -18,9 +16,6 @@ internal class DefaultCardScanEventsReporter @Inject constructor(
     private val durationProvider: DurationProvider,
     private val cardScanConfiguration: CardScanConfiguration
 ) : CardScanEventsReporter {
-    // Tracked separately from DurationProvider because milestone events need elapsed time
-    // mid-scan, but DurationProvider only returns duration on end().
-    private var scanStartedAtMillis: Long? = null
     private var hasLoggedMlKitFoundPan = false
     private var hasLoggedMlKitFoundExp = false
     private var hasLoggedDarkniteFoundPan = false
@@ -28,7 +23,6 @@ internal class DefaultCardScanEventsReporter @Inject constructor(
 
     override fun scanStarted() {
         clearSessionState()
-        scanStartedAtMillis = SystemClock.uptimeMillis()
         durationProvider.start(DurationProvider.Key.CardScan)
         fireEvent(
             eventName = "cardscan_scan_started"
@@ -128,28 +122,23 @@ internal class DefaultCardScanEventsReporter @Inject constructor(
         eventName: String,
         onLogged: () -> Unit,
     ) {
-        if (!shouldLog || scanStartedAtMillis == null) {
+        val elapsed = durationProvider.elapsed(DurationProvider.Key.CardScan)
+        if (!shouldLog || elapsed == null) {
             return
         }
 
         onLogged()
         fireEvent(
             eventName = eventName,
-            additionalParams = durationInSecondsFromStart(elapsedDurationFromStart())
+            additionalParams = durationInSecondsFromStart(elapsed)
         )
     }
 
     private fun clearSessionState() {
-        scanStartedAtMillis = null
         hasLoggedMlKitFoundPan = false
         hasLoggedMlKitFoundExp = false
         hasLoggedDarkniteFoundPan = false
         hasLoggedModelsDisagree = false
-    }
-
-    private fun elapsedDurationFromStart(): Duration? {
-        val startTime = scanStartedAtMillis ?: return null
-        return (SystemClock.uptimeMillis() - startTime).milliseconds
     }
 
     private fun durationInSecondsFromStart(duration: Duration?): Map<String, Float> {
