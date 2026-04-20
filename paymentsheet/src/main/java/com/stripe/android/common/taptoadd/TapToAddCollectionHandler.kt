@@ -108,7 +108,11 @@ internal class DefaultTapToAddCollectionHandler(
             )
         }
 
-        connectionManager.connect()
+        connectionManager.connect(
+            config = TapToAddConnectionManager.ConnectionConfig(
+                merchantDisplayName = metadata.merchantName,
+            ),
+        )
 
         val callback = try {
             createCardPresentSetupIntentCallbackRetriever.waitForCallback()

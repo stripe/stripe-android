@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.state
 
+import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.taptoadd.TapToAddConnectionManager
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.ViewModelScope
@@ -13,7 +14,7 @@ import kotlin.coroutines.CoroutineContext
 internal interface TapToAddConnectionStarter {
     val isSupported: Boolean
 
-    fun start()
+    fun start(config: CommonConfiguration)
 }
 
 internal class DefaultTapToAddConnectionStarter @Inject constructor(
@@ -24,10 +25,14 @@ internal class DefaultTapToAddConnectionStarter @Inject constructor(
     override val isSupported: Boolean
         get() = tapToAddConnectionManager.isSupported
 
-    override fun start() {
+    override fun start(config: CommonConfiguration) {
         viewModelScope.launch(coroutineContext) {
             runCatching {
-                tapToAddConnectionManager.connect()
+                tapToAddConnectionManager.connect(
+                    config = TapToAddConnectionManager.ConnectionConfig(
+                        merchantDisplayName = config.merchantDisplayName,
+                    )
+                )
             }
         }
     }
@@ -36,7 +41,8 @@ internal class DefaultTapToAddConnectionStarter @Inject constructor(
 internal class NoOpTapToAddConnectionStarter @Inject constructor() : TapToAddConnectionStarter {
     override val isSupported: Boolean = false
 
-    override fun start() {
+    @Suppress("UNUSED_PARAMETER")
+    override fun start(config: CommonConfiguration) {
         // No-op
     }
 }

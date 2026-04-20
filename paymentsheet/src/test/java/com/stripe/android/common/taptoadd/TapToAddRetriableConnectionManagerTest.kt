@@ -10,6 +10,9 @@ import kotlin.test.assertFailsWith
 import kotlin.time.Duration
 
 internal class TapToAddRetriableConnectionManagerTest {
+    private val testConnectionConfig =
+        TapToAddConnectionManager.ConnectionConfig(merchantDisplayName = "Test Merchant")
+
     @Test
     fun `isSupported is true when inner manager's isSupported is true`() = runScenario(isSupported = true) {
         assertThat(retryConnectionManager.isSupported).isTrue()
@@ -24,9 +27,9 @@ internal class TapToAddRetriableConnectionManagerTest {
     fun `connect succeeds on first try and calls delegate once`() = runScenario(
         queuedConnectResults = listOf(Result.success(Unit))
     ) {
-        retryConnectionManager.connect()
+        retryConnectionManager.connect(testConnectionConfig)
 
-        assertThat(innerManagerConnectCalls.awaitItem()).isNotNull()
+        assertThat(innerManagerConnectCalls.awaitItem().config).isEqualTo(testConnectionConfig)
     }
 
     @Test
@@ -36,16 +39,16 @@ internal class TapToAddRetriableConnectionManagerTest {
             Result.success(Unit)
         )
     ) {
-        retryConnectionManager.connect()
+        retryConnectionManager.connect(testConnectionConfig)
 
-        assertThat(innerManagerConnectCalls.awaitItem()).isNotNull()
+        assertThat(innerManagerConnectCalls.awaitItem().config).isEqualTo(testConnectionConfig)
 
         val delayCall = getRetryDelayCalls.awaitItem()
 
         assertThat(delayCall.maxRetries).isEqualTo(3)
         assertThat(delayCall.remainingRetries).isEqualTo(3)
 
-        assertThat(innerManagerConnectCalls.awaitItem()).isNotNull()
+        assertThat(innerManagerConnectCalls.awaitItem().config).isEqualTo(testConnectionConfig)
     }
 
     @Test
@@ -56,11 +59,11 @@ internal class TapToAddRetriableConnectionManagerTest {
         fatalErrorChecker = FakeTapToAddFatalErrorChecker(isFatal = true),
     ) {
         val error = assertFailsWith<IllegalStateException> {
-            retryConnectionManager.connect()
+            retryConnectionManager.connect(testConnectionConfig)
         }
 
         assertThat(error.message).isEqualTo("Fatal!")
-        assertThat(innerManagerConnectCalls.awaitItem()).isNotNull()
+        assertThat(innerManagerConnectCalls.awaitItem().config).isEqualTo(testConnectionConfig)
         getRetryDelayCalls.expectNoEvents()
     }
 
@@ -73,10 +76,10 @@ internal class TapToAddRetriableConnectionManagerTest {
         ),
         fatalErrorChecker = FakeTapToAddFatalErrorChecker(isFatal = false),
     ) {
-        assertThat(retryConnectionManager.connect()).isNotNull()
+        retryConnectionManager.connect(testConnectionConfig)
 
         repeat(3) {
-            assertThat(innerManagerConnectCalls.awaitItem()).isNotNull()
+            assertThat(innerManagerConnectCalls.awaitItem().config).isEqualTo(testConnectionConfig)
         }
 
         repeat(2) {
@@ -94,33 +97,33 @@ internal class TapToAddRetriableConnectionManagerTest {
         )
     ) {
         val error = assertFailsWith<IllegalStateException> {
-            retryConnectionManager.connect()
+            retryConnectionManager.connect(testConnectionConfig)
         }
 
         assertThat(error.message).isEqualTo("Failed!")
 
-        assertThat(innerManagerConnectCalls.awaitItem()).isNotNull()
+        assertThat(innerManagerConnectCalls.awaitItem().config).isEqualTo(testConnectionConfig)
 
         val firstDelayCall = getRetryDelayCalls.awaitItem()
 
         assertThat(firstDelayCall.maxRetries).isEqualTo(3)
         assertThat(firstDelayCall.remainingRetries).isEqualTo(3)
 
-        assertThat(innerManagerConnectCalls.awaitItem()).isNotNull()
+        assertThat(innerManagerConnectCalls.awaitItem().config).isNotNull()
 
         val secondDelayCall = getRetryDelayCalls.awaitItem()
 
         assertThat(secondDelayCall.maxRetries).isEqualTo(3)
         assertThat(secondDelayCall.remainingRetries).isEqualTo(2)
 
-        assertThat(innerManagerConnectCalls.awaitItem()).isNotNull()
+        assertThat(innerManagerConnectCalls.awaitItem().config).isNotNull()
 
         val thirdDelayCall = getRetryDelayCalls.awaitItem()
 
         assertThat(thirdDelayCall.maxRetries).isEqualTo(3)
         assertThat(thirdDelayCall.remainingRetries).isEqualTo(1)
 
-        assertThat(innerManagerConnectCalls.awaitItem()).isNotNull()
+        assertThat(innerManagerConnectCalls.awaitItem().config).isNotNull()
     }
 
     private fun runScenario(
@@ -153,7 +156,7 @@ internal class TapToAddRetriableConnectionManagerTest {
 
     private class Scenario(
         val retryConnectionManager: TapToAddConnectionManager,
-        val innerManagerConnectCalls: ReceiveTurbine<Unit>,
+        val innerManagerConnectCalls: ReceiveTurbine<FakeTapToAddConnectionManager.ConnectCall>,
         val getRetryDelayCalls: ReceiveTurbine<FakeRetryDelaySupplier.GetDelayCall>,
     )
 
