@@ -218,37 +218,6 @@ internal class DefaultVerticalModeFormInteractorTest {
     }
 
     @Test
-    fun `state includes currencySelectorOptions when provided`() {
-        val options = CurrencySelectorOptions(
-            first = CurrencyOption(code = "USD", displayableText = "$10.00"),
-            second = CurrencyOption(code = "EUR", displayableText = "€9.00"),
-            selectedCode = "USD",
-        )
-        runScenario(
-            selectedPaymentMethodCode = "card",
-            currencySelectorOptions = options,
-        ) {
-            assertThat(interactor.state.value.currencySelectorOptions).isEqualTo(options)
-        }
-    }
-
-    @Test
-    fun `state has null currencySelectorOptions by default`() {
-        runScenario(selectedPaymentMethodCode = "card") {
-            assertThat(interactor.state.value.currencySelectorOptions).isNull()
-        }
-    }
-
-    @Test
-    fun `handleViewAction CurrencySelected calls onCurrencySelected`() {
-        val option = CurrencyOption(code = "EUR", displayableText = "€9.00")
-        runScenario(selectedPaymentMethodCode = "card") {
-            interactor.handleViewAction(ViewAction.CurrencySelected(option))
-            assertThat(onCurrencySelectedTurbine.awaitItem()).isEqualTo(option)
-        }
-    }
-
-    @Test
     fun `do not automaticallyLaunchCardScan when card form and with paymentSelection`() {
         testAutomaticallyLaunchCardScan(
             selectedPaymentMethodCode = "card",
@@ -360,7 +329,6 @@ internal class DefaultVerticalModeFormInteractorTest {
     private fun runScenario(
         selectedPaymentMethodCode: String,
         formElements: List<FormElement> = emptyList(),
-        currencySelectorOptions: CurrencySelectorOptions? = null,
         testBlock: suspend TestParams.() -> Unit,
     ) {
         val formArguments = mock<FormArguments>()
@@ -370,7 +338,6 @@ internal class DefaultVerticalModeFormInteractorTest {
 
         val onFormFieldValuesChangedTurbine = Turbine<Pair<FormFieldValues?, String>>()
         val reportFieldInteractionTurbine = Turbine<String>()
-        val onCurrencySelectedTurbine = Turbine<CurrencyOption>()
 
         val interactor = DefaultVerticalModeFormInteractor(
             selectedPaymentMethodCode = selectedPaymentMethodCode,
@@ -390,8 +357,6 @@ internal class DefaultVerticalModeFormInteractorTest {
             coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
             paymentMethodIncentive = stateFlowOf(null),
             uiContext = UnconfinedTestDispatcher(),
-            currencySelectorOptions = currencySelectorOptions,
-            onCurrencySelected = { onCurrencySelectedTurbine.add(it) },
         )
 
         TestParams(
@@ -400,7 +365,6 @@ internal class DefaultVerticalModeFormInteractorTest {
             validationRequestedSource = validationRequested,
             onFormFieldValuesChangedTurbine = onFormFieldValuesChangedTurbine,
             reportFieldInteractionTurbine = reportFieldInteractionTurbine,
-            onCurrencySelectedTurbine = onCurrencySelectedTurbine,
         ).apply {
             runTest {
                 testBlock()
@@ -410,7 +374,6 @@ internal class DefaultVerticalModeFormInteractorTest {
         verifyNoMoreInteractions(formArguments, usBankAccountArguments)
         onFormFieldValuesChangedTurbine.ensureAllEventsConsumed()
         reportFieldInteractionTurbine.ensureAllEventsConsumed()
-        onCurrencySelectedTurbine.ensureAllEventsConsumed()
     }
 
     private class TestParams(
@@ -419,6 +382,5 @@ internal class DefaultVerticalModeFormInteractorTest {
         val validationRequestedSource: MutableSharedFlow<Unit>,
         val onFormFieldValuesChangedTurbine: ReceiveTurbine<Pair<FormFieldValues?, String>>,
         val reportFieldInteractionTurbine: ReceiveTurbine<String>,
-        val onCurrencySelectedTurbine: ReceiveTurbine<CurrencyOption>,
     )
 }

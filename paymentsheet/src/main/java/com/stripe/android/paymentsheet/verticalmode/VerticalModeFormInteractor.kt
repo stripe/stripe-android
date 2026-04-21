@@ -41,7 +41,6 @@ internal interface VerticalModeFormInteractor {
         val formArguments: FormArguments,
         private val formElements: List<FormElement>,
         val headerInformation: FormHeaderInformation?,
-        val currencySelectorOptions: CurrencySelectorOptions? = null,
     ) {
         val formUiElements = formElements.onEach { element ->
             element.onValidationStateChanged(isValidating)
@@ -51,7 +50,6 @@ internal interface VerticalModeFormInteractor {
     sealed interface ViewAction {
         data object FieldInteraction : ViewAction
         data class FormFieldValuesChanged(val formValues: FormFieldValues?) : ViewAction
-        data class CurrencySelected(val currencyOption: CurrencyOption) : ViewAction
     }
 }
 
@@ -69,8 +67,6 @@ internal class DefaultVerticalModeFormInteractor(
     paymentMethodIncentive: StateFlow<PaymentMethodIncentive?>,
     private val coroutineScope: CoroutineScope,
     private val uiContext: CoroutineContext,
-    private val currencySelectorOptions: CurrencySelectorOptions? = null,
-    private val onCurrencySelected: (CurrencyOption) -> Unit = {},
 ) : VerticalModeFormInteractor {
     private val isValidating = MutableStateFlow(false)
 
@@ -89,7 +85,6 @@ internal class DefaultVerticalModeFormInteractor(
             headerInformation = headerInformation?.copy(
                 promoBadge = paymentMethodIncentive?.takeIfMatches(selectedPaymentMethodCode)?.displayText,
             ),
-            currencySelectorOptions = currencySelectorOptions,
         )
     }
 
@@ -111,9 +106,6 @@ internal class DefaultVerticalModeFormInteractor(
             is VerticalModeFormInteractor.ViewAction.FormFieldValuesChanged -> {
                 onFormFieldValuesChanged(viewAction.formValues, selectedPaymentMethodCode)
             }
-            is VerticalModeFormInteractor.ViewAction.CurrencySelected -> {
-                onCurrencySelected(viewAction.currencyOption)
-            }
         }
     }
 
@@ -128,8 +120,6 @@ internal class DefaultVerticalModeFormInteractor(
             paymentMethodMetadata: PaymentMethodMetadata,
             customerStateHolder: CustomerStateHolder,
             bankFormInteractor: BankFormInteractor,
-            currencySelectorOptions: CurrencySelectorOptions? = null,
-            onCurrencySelected: (CurrencyOption) -> Unit = {},
             paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?
         ): VerticalModeFormInteractor {
             val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
@@ -164,8 +154,6 @@ internal class DefaultVerticalModeFormInteractor(
                 validationRequested = viewModel.validationRequested,
                 coroutineScope = coroutineScope,
                 uiContext = Dispatchers.Main,
-                currencySelectorOptions = currencySelectorOptions,
-                onCurrencySelected = onCurrencySelected,
             )
         }
     }
