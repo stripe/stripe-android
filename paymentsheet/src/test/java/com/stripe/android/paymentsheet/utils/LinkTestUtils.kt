@@ -77,6 +77,7 @@ internal object LinkTestUtils {
     fun createLinkConfiguration(
         cardBrandChoice: LinkConfiguration.CardBrandChoice? = null,
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+        linkBrand: LinkBrand = LinkBrand.Link,
     ): LinkConfiguration {
         return LinkConfiguration(
             stripeIntent = mock {
@@ -116,7 +117,7 @@ internal object LinkTestUtils {
             linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
-            linkBrand = LinkBrand.Link,
+            linkBrand = linkBrand,
         )
     }
 }

@@ -5,6 +5,7 @@ import androidx.compose.runtime.Immutable
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.link.ui.wallet.DefaultPaymentUI
 import com.stripe.android.model.ConsentUi
+import com.stripe.android.model.LinkBrand
 import kotlinx.parcelize.Parcelize
 
 @Immutable
@@ -22,4 +23,5 @@ internal data class VerificationViewState(
     val defaultPayment: DefaultPaymentUI?,
     val consentSection: ConsentUi.ConsentSection? = null,
     val isProcessingWebAuth: Boolean = false,
+    val linkBrand: LinkBrand = LinkBrand.Link,
 ) : Parcelable

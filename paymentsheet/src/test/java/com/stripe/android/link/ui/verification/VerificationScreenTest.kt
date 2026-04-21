@@ -7,6 +7,7 @@ import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertContentDescriptionContains
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -25,6 +26,7 @@ import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.uicore.utils.collectAsState
@@ -226,6 +228,32 @@ internal class VerificationScreenTest {
     }
 
     @Test
+    fun `header image content description uses dynamic brand name`() = runTest(dispatcher) {
+        val viewModel = createViewModel(
+            isDialog = true,
+            linkBrand = LinkBrand.Notlink,
+        )
+        composeTestRule.setContent {
+            DefaultLinkTheme {
+                val state by viewModel.viewState.collectAsState()
+                VerificationDialogBody(
+                    modifier = Modifier,
+                    state = state,
+                    otpElement = viewModel.otpElement,
+                    onBack = viewModel::onBack,
+                    onChangeEmailClick = viewModel::onChangeEmailButtonClicked,
+                    onResendCodeClick = viewModel::resendCode,
+                    onConsentShown = viewModel::onConsentShown,
+                    onFocusRequested = viewModel::onFocusRequested,
+                    didShowCodeSentNotification = viewModel::didShowCodeSentNotification,
+                )
+            }
+        }
+
+        onVerificationHeaderImageTag().assertContentDescriptionContains("Notlink")
+    }
+
+    @Test
     fun `close button should dismiss verification dialog`() = runTest(dispatcher) {
         var dismissClicked = false
         val viewModel = createViewModel(
@@ -264,6 +292,7 @@ internal class VerificationScreenTest {
         isDialog: Boolean = false,
         onDismissClicked: () -> Unit = {},
         linkLaunchMode: LinkLaunchMode = LinkLaunchMode.PaymentMethodSelection(null),
+        linkBrand: LinkBrand = LinkBrand.Link,
         dismissWithResult: (LinkActivityResult) -> Unit = {}
     ): VerificationViewModel {
         return VerificationViewModel(
@@ -275,6 +304,7 @@ internal class VerificationScreenTest {
             linkLaunchMode = linkLaunchMode,
             webLinkAuthChannel = WebLinkAuthChannel(),
             isDialog = isDialog,
+            linkBrand = linkBrand,
             onVerificationSucceeded = { _ -> },
             onChangeEmailRequested = {},
             onDismissClicked = onDismissClicked,

@@ -76,6 +76,7 @@ internal fun VerificationBody(
     if (state.isProcessingWebAuth) {
         VerificationBodyContainer(
             isDialog = state.isDialog,
+            linkBrand = state.linkBrand,
             onBackClicked = onBack
         ) {
             LinkLoadingScreen()
@@ -100,6 +101,7 @@ internal fun VerificationBody(
 
     VerificationBodyContainer(
         isDialog = state.isDialog,
+        linkBrand = state.linkBrand,
         onBackClicked = {
             focusManager.clearFocus()
             onBack()
@@ -227,6 +229,7 @@ private fun LaunchedEffects(
 @Composable
 private fun VerificationBodyContainer(
     isDialog: Boolean,
+    linkBrand: com.stripe.android.model.LinkBrand,
     onBackClicked: () -> Unit,
     content: @Composable ColumnScope.() -> Unit
 ) {
@@ -242,7 +245,7 @@ private fun VerificationBodyContainer(
                     modifier = Modifier
                         .testTag(VERIFICATION_HEADER_IMAGE_TAG),
                     painter = painterResource(R.drawable.stripe_link_logo),
-                    contentDescription = stringResource(com.stripe.android.R.string.stripe_link),
+                    contentDescription = linkBrand.brandName(),
                 )
 
                 Spacer(modifier = Modifier.weight(1f))

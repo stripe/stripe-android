@@ -107,7 +107,7 @@ private fun LinkHeaderSection(
                 .width(48.dp)
                 .testTag(VERIFICATION_HEADER_IMAGE_TAG),
             painter = painterResource(R.drawable.stripe_link_logo),
-            contentDescription = stringResource(com.stripe.android.R.string.stripe_link),
+            contentDescription = verificationState.linkBrand.brandName(),
         )
 
         verificationState.defaultPayment?.let { paymentUI ->
