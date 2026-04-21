@@ -92,6 +92,7 @@ internal data class PaymentMethodMetadata(
     val elementsSessionId: String? = null,
     val disableSsdOcrCardScan: Boolean,
     val cardArts: List<PaymentMethod.Card.CardArt>,
+    val isCardArtEnabled: Boolean = false,
 ) : Parcelable {
 
     @IgnoredOnParcel

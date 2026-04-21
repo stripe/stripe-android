@@ -51,7 +51,6 @@ import com.stripe.android.paymentsheet.toTextStyle
 import com.stripe.android.paymentsheet.ui.DefaultPaymentMethodLabel
 import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
 import com.stripe.android.paymentsheet.ui.PromoBadge
-import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconWidth
 import com.stripe.android.ui.core.elements.PaymentMethodMessagePromotionText
 import com.stripe.android.uicore.DefaultStripeTheme
 import com.stripe.android.uicore.getBorderStroke
@@ -342,7 +341,10 @@ private fun RowButtonWithEndIconOuterContent(
             content()
             Row {
                 if (trailingContent != null) {
-                    Spacer(Modifier.width(iconWidth + ROW_CONTENT_HORIZONTAL_SPACING.dp))
+                    Spacer(
+                        modifier = Modifier
+                            .width(UIConstants.iconWidth(isCardArtEnabled = false) + ROW_CONTENT_HORIZONTAL_SPACING.dp)
+                    )
                     trailingContent()
                 }
             }

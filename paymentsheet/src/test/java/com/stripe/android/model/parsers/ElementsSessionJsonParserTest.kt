@@ -1817,8 +1817,6 @@ class ElementsSessionJsonParserTest {
 
     @Test
     fun `Card art merges into matching payment method`() {
-        enableCardArtRule.setEnabled(true)
-
         val json = createElementsSessionWithCardArt(
             cardArt = """
                 [
@@ -1842,8 +1840,6 @@ class ElementsSessionJsonParserTest {
 
     @Test
     fun `Card art with non-matching ID leaves cardArt null`() {
-        enableCardArtRule.setEnabled(true)
-
         val json = createElementsSessionWithCardArt(
             cardArt = """
                 [
@@ -1863,8 +1859,6 @@ class ElementsSessionJsonParserTest {
 
     @Test
     fun `No card_art key leaves cardArt null`() {
-        enableCardArtRule.setEnabled(true)
-
         val json = createElementsSessionWithCardArt(cardArt = null)
         val session = parseElementsSession(json)
 
@@ -1873,8 +1867,6 @@ class ElementsSessionJsonParserTest {
 
     @Test
     fun `Empty card_art array leaves cardArt null`() {
-        enableCardArtRule.setEnabled(true)
-
         val json = createElementsSessionWithCardArt(cardArt = "[]")
         val session = parseElementsSession(json)
 
@@ -1882,7 +1874,7 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
-    fun `Card art not parsed when feature flag is disabled`() {
+    fun `Card art always parsed regardless of feature flag`() {
         enableCardArtRule.setEnabled(false)
 
         val json = createElementsSessionWithCardArt(
@@ -1899,13 +1891,13 @@ class ElementsSessionJsonParserTest {
 
         val session = parseElementsSession(json)
 
-        assertThat(session?.customer?.paymentMethods?.first()?.card?.cardArt).isNull()
+        // Card art is always merged at parse time; display gating is handled downstream
+        // by PaymentMethodMetadata.isCardArtEnabled.
+        assertThat(session?.customer?.paymentMethods?.first()?.card?.cardArt).isNotNull()
     }
 
     @Test
     fun `Card art partial match only sets art on matching payment method`() {
-        enableCardArtRule.setEnabled(true)
-
         val json = createElementsSessionWithCardArt(
             extraPaymentMethod = """
                 ,{
@@ -1945,8 +1937,6 @@ class ElementsSessionJsonParserTest {
 
     @Test
     fun `Multiple payment methods each get their card art`() {
-        enableCardArtRule.setEnabled(true)
-
         val json = createElementsSessionWithCardArt(
             extraPaymentMethod = """
                 ,{

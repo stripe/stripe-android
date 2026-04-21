@@ -12,7 +12,6 @@ import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconHeight
-import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconWidth
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.strings.resolve
 
@@ -76,7 +75,7 @@ internal fun NewPaymentMethodRowButton(
                 iconUrl = iconUrl,
                 imageLoader = imageLoader,
                 iconRequiresTinting = iconRequiresTinting,
-                modifier = Modifier.height(iconHeight).width(iconWidth),
+                modifier = Modifier.height(iconHeight).width(UIConstants.iconWidth(isCardArtEnabled = false)),
                 contentAlignment = Alignment.Center,
             )
         },

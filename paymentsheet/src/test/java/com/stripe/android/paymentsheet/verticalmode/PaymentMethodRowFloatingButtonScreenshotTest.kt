@@ -21,7 +21,6 @@ import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconHeight
-import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconWidth
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -219,8 +218,8 @@ internal class PaymentMethodRowFloatingButtonScreenshotTest {
                 contentDescription = null,
                 tint = MaterialTheme.colors.primary,
                 modifier = Modifier.padding(start = 4.dp, top = 2.dp)
-                    .height(iconHeight).width(iconWidth)
-                    .defaultMinSize(minWidth = iconWidth, minHeight = iconHeight)
+                    .height(iconHeight).width(UIConstants.iconWidth(isCardArtEnabled = false))
+                    .defaultMinSize(minWidth = UIConstants.iconWidth(isCardArtEnabled = false), minHeight = iconHeight)
             )
         }
     }

@@ -506,9 +506,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             isTapToAddAvailable = isTapToAddAvailable,
         )
 
-        logCardArtExperiment(elementsSession, paymentMethodMetadata)
+        val isCardArtEnabled = logCardArtExperiment(elementsSession, paymentMethodMetadata)
 
-        return paymentMethodMetadata
+        return paymentMethodMetadata.copy(isCardArtEnabled = isCardArtEnabled)
     }
 
     private suspend fun isGooglePayReady(

@@ -163,6 +163,7 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
 
         val savedVisaWithCardArt = DisplayableSavedPaymentMethod.create(
             displayName = "···· 4242".resolvableString,
+            cardArtEnabled = true,
             paymentMethod = PaymentMethod(
                 id = "001",
                 created = null,
