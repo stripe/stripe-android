@@ -121,7 +121,7 @@ internal class VerificationViewModelTest {
     }
 
     @Test
-    fun `onChangeEmailClicked triggers logout`() = runTest(dispatcher) {
+    fun `onChangeEmailClicked delegates to onChangeEmailRequested without logging out`() = runTest(dispatcher) {
         val linkAccountManager = object : FakeLinkAccountManager() {
             var callCount = 0
             override suspend fun logOut(): Result<ConsumerSession> {
@@ -140,7 +140,7 @@ internal class VerificationViewModelTest {
             onChangeEmailRequested = ::onChangeEmailRequested,
         ).onChangeEmailButtonClicked()
 
-        assertThat(linkAccountManager.callCount).isEqualTo(1)
+        assertThat(linkAccountManager.callCount).isEqualTo(0)
         assertThat(onChangeEmailRequestedCalls).containsExactly(Unit)
     }
 

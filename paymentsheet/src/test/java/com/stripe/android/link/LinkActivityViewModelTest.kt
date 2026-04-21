@@ -721,18 +721,58 @@ internal class LinkActivityViewModelTest {
     }
 
     @Test
-    fun `change email should navigate to email route and update savedStateHandle`() {
-        val navigationManager = TestNavigationManager()
+    fun `change email from verification dialog should log out and transition to full screen SignUp`() = runTest {
+        val linkAccountManager = FakeLinkAccountManager()
+        val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
         val savedStateHandle = SavedStateHandle()
+        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
+
         val viewModel = createViewModel(
-            navigationManager = navigationManager,
-            savedStateHandle = savedStateHandle
+            linkAccountManager = linkAccountManager,
+            linkAccountHolder = linkAccountHolder,
+            savedStateHandle = savedStateHandle,
+            linkExpressMode = LinkExpressMode.ENABLED,
+        )
+        linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification())
+        viewModel.onCreate(mock())
+        advanceUntilIdle()
+
+        assertThat(viewModel.linkScreenState.value).isEqualTo(
+            ScreenState.VerificationDialog(TestFactory.LINK_ACCOUNT)
         )
 
         viewModel.changeEmail()
 
+        linkAccountManager.awaitLogoutCall()
         assertThat(savedStateHandle.get<Boolean>(SignUpViewModel.USE_LINK_CONFIGURATION_CUSTOMER_INFO)).isFalse()
+        assertThat(linkAccountHolder.linkAccountInfo.value).isEqualTo(
+            LinkAccountUpdate.Value(null, LoggedOut)
+        )
+        assertThat(viewModel.linkScreenState.value).isEqualTo(
+            ScreenState.FullScreen(initialDestination = LinkScreen.SignUp)
+        )
+    }
 
+    @Test
+    fun `change email from full screen should log out and navigate to SignUp`() = runTest {
+        val navigationManager = TestNavigationManager()
+        val linkAccountManager = FakeLinkAccountManager()
+        val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
+        val savedStateHandle = SavedStateHandle()
+        val viewModel = createViewModel(
+            navigationManager = navigationManager,
+            linkAccountManager = linkAccountManager,
+            linkAccountHolder = linkAccountHolder,
+            savedStateHandle = savedStateHandle,
+        )
+
+        viewModel.changeEmail()
+
+        linkAccountManager.awaitLogoutCall()
+        assertThat(savedStateHandle.get<Boolean>(SignUpViewModel.USE_LINK_CONFIGURATION_CUSTOMER_INFO)).isFalse()
+        assertThat(linkAccountHolder.linkAccountInfo.value).isEqualTo(
+            LinkAccountUpdate.Value(null, LoggedOut)
+        )
         navigationManager.assertNavigatedTo(
             route = LinkScreen.SignUp.route,
             popUpTo = PopUpToBehavior.Start
