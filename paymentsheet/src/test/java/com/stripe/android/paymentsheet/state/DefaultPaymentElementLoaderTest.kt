@@ -4122,6 +4122,31 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
+    fun `Card art experiment exposure is logged when loading`() = runScenario {
+        val logCardArtExperiment = FakeLogCardArtExperiment()
+
+        val loader = createPaymentElementLoader(
+            logCardArtExperiment = logCardArtExperiment,
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
+        ).getOrThrow()
+
+        val call = logCardArtExperiment.calls.awaitItem()
+        assertThat(call.elementsSession.stripeIntent).isEqualTo(result.paymentMethodMetadata.stripeIntent)
+        assertThat(call.paymentMethodMetadata).isEqualTo(result.paymentMethodMetadata)
+        logCardArtExperiment.calls.ensureAllEventsConsumed()
+
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
     fun `Loads successfully for cryptoOnramp`() = runScenario {
         val loader = createPaymentElementLoader(
             linkSettings = createLinkSettings(passthroughModeEnabled = false),
