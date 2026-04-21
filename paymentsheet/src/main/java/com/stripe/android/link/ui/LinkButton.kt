@@ -298,7 +298,8 @@ private fun SignedInButtonContent(
     }
 
     val color = theme.textColor.copy(alpha = LocalContentAlpha.current)
-    val payWithLinkText = resolvableString(R.string.stripe_pay_with_link).resolve(LocalContext.current)
+    val payWithLinkText =
+        resolvableString(R.string.stripe_pay_with_link_format, linkBrand.brandName()).resolve(LocalContext.current)
 
     Row(
         modifier = Modifier.semantics(
@@ -324,7 +325,8 @@ private fun SignedInButtonContent(
 @Suppress("UnusedReceiverParameter")
 @Composable
 private fun RowScope.SignedOutButtonContent(theme: LinkButtonTheme, linkBrand: LinkBrand) {
-    val text = stringResource(id = R.string.stripe_pay_with_link)
+    val text = stringResource(R.string.stripe_pay_with_link)
+    val contentDescription = stringResource(R.string.stripe_pay_with_link_format, linkBrand.brandName())
 
     val iconizedText = buildAnnotatedString {
         append(text.substringBefore(LINK_BRAND_NAME))
@@ -345,7 +347,7 @@ private fun RowScope.SignedOutButtonContent(theme: LinkButtonTheme, linkBrand: L
             .padding(start = 6.dp)
             .fillMaxWidth()
             .semantics {
-                this.contentDescription = text
+                this.contentDescription = contentDescription
             },
         color = theme.textColor.copy(alpha = LocalContentAlpha.current),
         style = LinkTheme.typography.bodyEmphasized,

@@ -92,6 +92,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_or_enter_manually">or enter manually</string>
   <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
   <string name="stripe_pay_with_link">Pay with Link</string>
+  <!-- Accessibility label for the 'Pay with Link' button. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_pay_with_link_format">Pay with %s</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[By continuing, you agree to authorize payments pursuant to <terms>these terms</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
