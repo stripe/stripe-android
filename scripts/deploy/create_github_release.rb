@@ -35,8 +35,10 @@ def create_github_release
             rputs "Since this is a dry run, you should see the release as a draft. It will be missing a tag + source code attachments."
             wait_for_user
         end
-    rescue
+    rescue StandardError => e
+        rputs "Failed to create GitHub release for #{tag_name}: #{e.class}: #{e.message}"
         delete_release_tag
+        raise
     end
 end
 
