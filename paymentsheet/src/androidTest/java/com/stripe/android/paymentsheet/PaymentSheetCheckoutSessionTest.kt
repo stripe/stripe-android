@@ -1,14 +1,13 @@
 package com.stripe.android.paymentsheet
 
 import android.content.Context
-import androidx.test.core.app.ApplicationProvider
 import androidx.compose.ui.test.hasText
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutInit
-import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.checkouttesting.createPaymentMethod
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
@@ -175,53 +174,6 @@ internal class PaymentSheetCheckoutSessionTest {
                 configuration = defaultConfiguration,
             )
         }
-    }
-
-    @Test
-    fun testAdaptivePricingShowsCorrectPageBasedOnNumberOfLPMsAvailable() = runPaymentSheetTest(
-        networkRule = networkRule,
-        resultCallback = ::assertCompleted,
-    ) { testContext ->
-        networkRule.checkoutInit { response ->
-            response.testBodyFromFile("checkout-session-adaptive-pricing-default.json")
-        }
-
-        val context = ApplicationProvider.getApplicationContext<Context>()
-        val checkout = Checkout.configure(
-            context = context,
-            checkoutSessionClientSecret = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example",
-        ).getOrThrow()
-
-        testContext.presentPaymentSheet {
-            presentWithCheckout(
-                checkout = checkout,
-                configuration = defaultConfiguration.newBuilder()
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
-                    .build(),
-            )
-        }
-
-        verticalModePage.waitUntilVisible()
-
-        networkRule.checkoutUpdate { response ->
-            response.testBodyFromFile("checkout-session-adaptive-pricing-integration-currency.json")
-        }
-        currencySelector.assertCurrencyOptionIsSelected("EUR")
-        currencySelector.clickCurrencyOption("USD")
-
-        formPage.waitUntilVisible()
-        currencySelector.assertCurrencyOptionIsSelected("USD")
-        formPage.fillOutCardDetails()
-
-        networkRule.createPaymentMethod()
-
-        networkRule.checkoutConfirm(
-            bodyPart("expected_amount", "5099"),
-        ) { response ->
-            response.testBodyFromFile("checkout-session-confirm.json")
-        }
-
-        page.clickPrimaryButton()
     }
 
     // region allow_redisplay tests

@@ -6,7 +6,6 @@ import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
 import com.google.common.truth.Truth.assertThat
@@ -128,37 +127,9 @@ internal class VerticalModeFormUITest {
     }
 
     @Test
-    fun `currencySelector visible when options provided`() {
-        val options = CurrencySelectorOptions(
-            first = CurrencyOption(code = "USD", displayableText = "$10.00"),
-            second = CurrencyOption(code = "EUR", displayableText = "€9.00"),
-            selectedCode = "USD",
-        )
-        runScenario(createCardState(customerHasSavedPaymentMethods = false).copy(currencySelectorOptions = options)) {
-            composeRule.onNodeWithTag(TEST_TAG_CURRENCY_SELECTOR).assertExists()
-        }
-    }
-
-    @Test
     fun `currencySelector not visible when options null`() {
         runScenario(createCardState(customerHasSavedPaymentMethods = false)) {
             composeRule.onNodeWithTag(TEST_TAG_CURRENCY_SELECTOR).assertDoesNotExist()
-        }
-    }
-
-    @Test
-    fun `clicking currency option dispatches CurrencySelected`() {
-        val eurOption = CurrencyOption(code = "EUR", displayableText = "€9.00")
-        val options = CurrencySelectorOptions(
-            first = CurrencyOption(code = "USD", displayableText = "$10.00"),
-            second = eurOption,
-            selectedCode = "USD",
-        )
-        runScenario(createCardState(customerHasSavedPaymentMethods = false).copy(currencySelectorOptions = options)) {
-            viewActionRecorder.consume(VerticalModeFormInteractor.ViewAction.FormFieldValuesChanged(null))
-            composeRule.onNodeWithTag("$TEST_TAG_CURRENCY_OPTION_PREFIX${eurOption.code}").performClick()
-            viewActionRecorder.consume(VerticalModeFormInteractor.ViewAction.CurrencySelected(eurOption))
-            assertThat(viewActionRecorder.viewActions).isEmpty()
         }
     }
 

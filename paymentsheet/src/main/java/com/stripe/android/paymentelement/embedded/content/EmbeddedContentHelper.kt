@@ -270,9 +270,6 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             },
             invokeRowSelectionCallback = ::invokeRowSelectionCallback,
             displaysMandatesInFormScreen = isImmediateAction && embeddedViewDisplaysMandateText,
-            onCurrencySelected = {
-                throw IllegalStateException("onCurrencySelected not supported.")
-            },
             onInitiallyDisplayedPaymentMethodVisibilitySnapshot = { visiblePaymentMethods, hiddenPaymentMethods ->
                 eventReporter.onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
                     visiblePaymentMethods = visiblePaymentMethods,

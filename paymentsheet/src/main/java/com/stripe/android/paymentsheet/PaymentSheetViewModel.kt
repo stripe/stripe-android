@@ -50,7 +50,6 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Args
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcCompletionState
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -61,7 +60,6 @@ import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultSelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.utils.asGooglePayButtonType
 import com.stripe.android.paymentsheet.utils.toConfirmationError
-import com.stripe.android.paymentsheet.verticalmode.CheckoutCurrencyUpdater
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
@@ -101,7 +99,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     mode: EventReporter.Mode,
     customerStateHolderFactory: CustomerStateHolder.Factory,
     @ViewModelScope customViewModelScope: CoroutineScope,
-    private val checkoutCurrencyUpdater: CheckoutCurrencyUpdater,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper
 ) : BaseSheetViewModel(
     config = args.config,
@@ -116,15 +113,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     customerStateHolderFactory = customerStateHolderFactory,
     customViewModelScope = customViewModelScope,
 ) {
-
-    internal var latestCheckoutSessionResponse: CheckoutSessionResponse?
-        get() = savedStateHandle[LATEST_CHECKOUT_SESSION_RESPONSE]
-            ?: (args.initializationMode as? PaymentElementLoader.InitializationMode.CheckoutSession)
-                ?.checkoutSessionResponse
-        set(value) {
-            savedStateHandle[LATEST_CHECKOUT_SESSION_RESPONSE] = value
-        }
-
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
         config = config,
         currentScreenFlow = navigationHandler.currentScreen,
@@ -392,36 +380,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         viewState.value =
             PaymentSheetViewState.Reset(userErrorMessage?.let { PaymentSheetViewState.UserErrorMessage(it) })
         savedStateHandle[SAVE_PROCESSING] = false
-    }
-
-    internal fun updateCurrency(currencyCode: String) {
-        val checkoutSession = args.initializationMode as? PaymentElementLoader.InitializationMode.CheckoutSession
-            ?: return
-
-        savedStateHandle[SAVE_PROCESSING] = true
-
-        viewModelScope.launch {
-            checkoutCurrencyUpdater.updateCurrency(
-                instancesKey = checkoutSession.instancesKey,
-                sessionId = checkoutSession.checkoutSessionResponse.id,
-                currencyCode = currencyCode,
-                config = args.config,
-                initializedViaCompose = args.initializedViaCompose,
-            ).fold(
-                onSuccess = { currencyUpdateResult ->
-                    latestCheckoutSessionResponse = currencyUpdateResult.checkoutSessionResponse
-
-                    customerStateHolder.setCustomerState(currencyUpdateResult.loaderState.customer)
-                    updateSelection(currencyUpdateResult.loaderState.paymentSelection)
-                    setPaymentMethodMetadata(currencyUpdateResult.loaderState.paymentMethodMetadata)
-                    navigateToInitialScreens(currencyUpdateResult.loaderState.paymentMethodMetadata)
-                    resetViewState()
-                },
-                onFailure = { error ->
-                    resetViewState(error.stripeErrorMessage())
-                },
-            )
-        }
     }
 
     private fun initializeNavigationStateIfNeeded(
@@ -825,7 +783,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private companion object {
         const val IN_PROGRESS_SELECTION = "IN_PROGRESS_PAYMENT_SELECTION"
-        const val LATEST_CHECKOUT_SESSION_RESPONSE = "latest_checkout_session_response"
     }
 }
 
