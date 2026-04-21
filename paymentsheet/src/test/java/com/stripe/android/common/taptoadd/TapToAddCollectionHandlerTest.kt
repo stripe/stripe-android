@@ -18,6 +18,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentB
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
 import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.confirmation.intent.CallbackNotFoundException
@@ -26,9 +27,11 @@ import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.asAddressModel
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.testing.PaymentMethodFactory.update
 import com.stripe.stripeterminal.Terminal
 import com.stripe.stripeterminal.external.callable.Callback
 import com.stripe.stripeterminal.external.callable.Cancelable
@@ -249,6 +252,113 @@ class TapToAddCollectionHandlerTest {
                 expectedErrorMessage = "Checkout sessions do not support retrieving individual payment methods!",
                 expectedErrorCodeValue = "unknown",
                 expectedDisplayMessage = R.string.stripe_something_went_wrong.resolvableString,
+            )
+        }
+    }
+
+    @Test
+    fun `handler returns Collected with updated payment method when attachDefaultsToPaymentMethod is true`() {
+        val paymentMethod = PaymentMethodFactory.card(id = "pm_4563").update(
+            last4 = "7294",
+            brand = CardBrand.MasterCard,
+            addCbcNetworks = false,
+        )
+
+        runScenario(
+            retrievePaymentMethodResult = Result.success(paymentMethod),
+            updatePaymentMethodResult = Result.success(
+                paymentMethod.copy(
+                    billingDetails = DEFAULT_PAYMENT_METHOD_BILLING_DETAILS,
+                )
+            ),
+        ) {
+            val metadata = PaymentMethodMetadataFactory.create(
+                isTapToAddSupported = true,
+                hasCustomerConfiguration = true,
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    attachDefaultsToPaymentMethod = true,
+                ),
+                defaultBillingDetails = DEFAULT_BILLING_DETAILS,
+            )
+
+            val result = testScope.backgroundScope.async {
+                handler.collect(metadata)
+            }
+
+            assertThat(retrieverScenario.waitForCallbackCalls.awaitItem()).isNotNull()
+            assertThat(terminalScenario.setTapToPayUxConfigurationCalls.awaitItem())
+                .isEqualTo(tapToPayUxConfiguration)
+
+            val retrievedSetupIntent = checkRetrieveSetupIntent("si_123_secret")
+            val collectedIntent = checkCollectCall(retrievedSetupIntent)
+            val paymentMethod = createTerminalPaymentMethod(id = "pm_4563", last4 = "7294", brand = "mastercard")
+            checkConfirmCall(
+                collectedSetupIntent = collectedIntent,
+                paymentMethod = paymentMethod,
+            )
+
+            val updateCall = stripeRepository.updatePaymentMethodCalls.awaitItem()
+            assertThat(updateCall.paymentMethodId).isEqualTo("pm_4563")
+            assertThat(updateCall.paymentMethodUpdateParams).isEqualTo(
+                PaymentMethodUpdateParams.createCard(
+                    billingDetails = DEFAULT_PAYMENT_METHOD_BILLING_DETAILS,
+                )
+            )
+            assertThat(updateCall.options).isEqualTo(
+                ApiRequest.Options(
+                    apiKey = "ek_123",
+                    stripeAccount = TEST_PAYMENT_CONFIGURATION.stripeAccountId,
+                )
+            )
+
+            val collectionResult = result.await()
+            assertThat(collectionResult)
+                .isInstanceOf(TapToAddCollectionHandler.CollectionState.Collected::class.java)
+            val collected = collectionResult as TapToAddCollectionHandler.CollectionState.Collected
+            assertThat(collected.paymentMethod.billingDetails)
+                .isEqualTo(DEFAULT_PAYMENT_METHOD_BILLING_DETAILS)
+            assertThat(collected.paymentMethod.id).isEqualTo("pm_4563")
+        }
+    }
+
+    @Test
+    fun `handler returns FailedCollection when updatePaymentMethod fails after attachDefaultsToPaymentMethod`() {
+        val updateFailure = IllegalStateException("Update failed")
+        runScenario(
+            retrievePaymentMethodResult = Result.success(PaymentMethodFactory.card(id = "pm_4563")),
+            updatePaymentMethodResult = Result.failure(updateFailure),
+        ) {
+            val metadata = PaymentMethodMetadataFactory.create(
+                isTapToAddSupported = true,
+                hasCustomerConfiguration = true,
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    attachDefaultsToPaymentMethod = true,
+                ),
+                defaultBillingDetails = PaymentSheet.BillingDetails(name = "Jane"),
+            )
+
+            val result = testScope.backgroundScope.async {
+                handler.collect(metadata)
+            }
+
+            assertThat(retrieverScenario.waitForCallbackCalls.awaitItem()).isNotNull()
+            assertThat(terminalScenario.setTapToPayUxConfigurationCalls.awaitItem()).isNotNull()
+
+            val retrievedSetupIntent = checkRetrieveSetupIntent("si_123_secret")
+            val collectedIntent = checkCollectCall(retrievedSetupIntent)
+            val paymentMethod = createTerminalPaymentMethod(id = "pm_4563")
+            checkConfirmCall(
+                collectedSetupIntent = collectedIntent,
+                paymentMethod = paymentMethod,
+            )
+
+            assertThat(stripeRepository.updatePaymentMethodCalls.awaitItem()).isNotNull()
+
+            assertFailedCollection(
+                result = result.await(),
+                expectedError = updateFailure,
+                expectedErrorCodeValue = "unknown",
+                expectedDisplayMessage = updateFailure.stripeErrorMessage(),
             )
         }
     }
@@ -763,13 +873,19 @@ class TapToAddCollectionHandlerTest {
             Result.success(DEFAULT_CALLBACK),
         retrievePaymentMethodResult: Result<PaymentMethod> =
             Result.success(PaymentMethodFactory.card()),
+        updatePaymentMethodResult: Result<PaymentMethod> = Result.failure(
+            IllegalStateException("updatePaymentMethod was not expected"),
+        ),
         coroutineContext: CoroutineContext = EmptyCoroutineContext,
         block: suspend Scenario.() -> Unit,
     ) = runTest(coroutineContext) {
         val terminalScenario = createTerminalScenario()
         val terminalWrapper = TestTerminalWrapper.noOp(terminalScenario.terminalInstance)
         val errorReporter = FakeErrorReporter()
-        val stripeRepository = FakeTapToAddStripeRepository(retrievePaymentMethodResult)
+        val stripeRepository = FakeTapToAddStripeRepository(
+            retrieveSavedPaymentMethodFromCardPresentPaymentMethodResult = retrievePaymentMethodResult,
+            updatePaymentMethodResult = updatePaymentMethodResult,
+        )
         FakeTapToAddConnectionManager.test(
             isSupported = true,
             connectResult = connectResult,
@@ -795,6 +911,7 @@ class TapToAddCollectionHandlerTest {
                         retrieverScenario = retrieverScenario,
                         terminalScenario = terminalScenario,
                         errorReporter = errorReporter,
+                        stripeRepository = stripeRepository,
                         testScope = this@runTest,
                     )
                 )
@@ -812,6 +929,7 @@ class TapToAddCollectionHandlerTest {
         terminalScenario.confirmSetupIntentCalls.ensureAllEventsConsumed()
         terminalScenario.retrieveSetupIntentCalls.ensureAllEventsConsumed()
         terminalScenario.collectPaymentMethodCalls.ensureAllEventsConsumed()
+        stripeRepository.updatePaymentMethodCalls.ensureAllEventsConsumed()
         errorReporter.ensureAllEventsConsumed()
     }
 
@@ -1005,6 +1123,7 @@ class TapToAddCollectionHandlerTest {
         val retrieverScenario: FakeCreateCardPresentSetupIntentCallbackRetriever.Scenario,
         val terminalScenario: TerminalScenario,
         val errorReporter: FakeErrorReporter,
+        val stripeRepository: FakeTapToAddStripeRepository,
     )
 
     private class TerminalScenario(
@@ -1082,17 +1201,61 @@ class TapToAddCollectionHandlerTest {
             CreateIntentResult.Success("si_123_secret")
         }
         val TEST_PAYMENT_CONFIGURATION = PaymentConfiguration(publishableKey = "pk_test")
+        val DEFAULT_BILLING_DETAILS = PaymentSheet.BillingDetails(
+            name = "Jane Doe",
+            email = "jane@example.com",
+            phone = "+15551234567",
+            address = PaymentSheet.Address(
+                line1 = "123 Main St",
+                city = "San Francisco",
+                state = "CA",
+                country = "US",
+                postalCode = "94103",
+            ),
+        )
+        val DEFAULT_PAYMENT_METHOD_BILLING_DETAILS = PaymentMethod.BillingDetails(
+            name = DEFAULT_BILLING_DETAILS.name,
+            phone = DEFAULT_BILLING_DETAILS.phone,
+            email = DEFAULT_BILLING_DETAILS.email,
+            address = DEFAULT_BILLING_DETAILS.address?.asAddressModel(),
+        )
     }
 }
 
 private class FakeTapToAddStripeRepository(
     private val retrieveSavedPaymentMethodFromCardPresentPaymentMethodResult: Result<PaymentMethod> =
         Result.failure(IllegalStateException("Failed!")),
+    private val updatePaymentMethodResult: Result<PaymentMethod> = Result.failure(
+        IllegalStateException("updatePaymentMethod was not expected"),
+    ),
 ) : AbsFakeStripeRepository() {
+
+    val updatePaymentMethodCalls = Turbine<UpdatePaymentMethodCall>()
+
+    data class UpdatePaymentMethodCall(
+        val paymentMethodId: String,
+        val paymentMethodUpdateParams: PaymentMethodUpdateParams,
+        val options: ApiRequest.Options,
+    )
 
     override suspend fun retrieveSavedPaymentMethodFromCardPresentPaymentMethod(
         cardPresentPaymentMethodId: String,
         customerId: String,
         options: ApiRequest.Options
     ): Result<PaymentMethod> = retrieveSavedPaymentMethodFromCardPresentPaymentMethodResult
+
+    override suspend fun updatePaymentMethod(
+        paymentMethodId: String,
+        paymentMethodUpdateParams: PaymentMethodUpdateParams,
+        options: ApiRequest.Options
+    ): Result<PaymentMethod> {
+        updatePaymentMethodCalls.add(
+            UpdatePaymentMethodCall(
+                paymentMethodId = paymentMethodId,
+                paymentMethodUpdateParams = paymentMethodUpdateParams,
+                options = options,
+            )
+        )
+        return updatePaymentMethodResult
+    }
 }

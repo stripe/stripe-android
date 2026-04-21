@@ -11,11 +11,13 @@ import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.confirmation.intent.CallbackNotFoundException
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CreateIntentResult
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.asAddressModel
 import com.stripe.stripeterminal.external.callable.Callback
 import com.stripe.stripeterminal.external.callable.Cancelable
 import com.stripe.stripeterminal.external.callable.SetupIntentCallback
@@ -170,8 +172,9 @@ internal class DefaultTapToAddCollectionHandler(
         val setupIntentWithAttachedPaymentMethod = collectPaymentMethod(setupIntent)
         val confirmedIntent = confirmSetupIntent(setupIntentWithAttachedPaymentMethod)
         val paymentMethod = fetchPaymentMethod(confirmedIntent, customerMetadata)
+        val updatedPaymentMethod = updatePaymentMethod(paymentMethod, customerMetadata, metadata)
 
-        return validatePaymentMethod(paymentMethod, metadata)
+        return validatePaymentMethod(updatedPaymentMethod, metadata)
     }
 
     private fun setUxConfiguration() {
@@ -199,6 +202,29 @@ internal class DefaultTapToAddCollectionHandler(
             cancelable = cancellable,
             errorEvent = ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_COLLECT_SETUP_INTENT_CANCEL_FAILURE,
         )
+    }
+
+    private suspend fun updatePaymentMethod(
+        paymentMethod: PaymentMethod,
+        customerMetadata: CustomerMetadata,
+        metadata: PaymentMethodMetadata,
+    ): PaymentMethod {
+        return metadata.defaultBillingDetails?.takeIf {
+            metadata.billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod
+        }?.let { billingDetails ->
+            stripeRepository.updatePaymentMethod(
+                paymentMethodId = paymentMethod.id,
+                paymentMethodUpdateParams = PaymentMethodUpdateParams.createCard(
+                    billingDetails = PaymentMethod.BillingDetails(
+                        name = billingDetails.name,
+                        email = billingDetails.email,
+                        phone = billingDetails.phone,
+                        address = billingDetails.address?.asAddressModel()
+                    )
+                ),
+                options = getApiOptions(customerMetadata),
+            ).getOrThrow()
+        } ?: paymentMethod
     }
 
     private fun validatePaymentMethod(
@@ -287,7 +313,7 @@ internal class DefaultTapToAddCollectionHandler(
                 )
             }
 
-        val (customerId, ephemeralKeySecret) = when (customerMetadata) {
+        val (customerId) = when (customerMetadata) {
             is CustomerMetadata.CustomerSession -> customerMetadata.id to customerMetadata.ephemeralKeySecret
             is CustomerMetadata.LegacyEphemeralKey -> customerMetadata.id to customerMetadata.ephemeralKeySecret
             is CustomerMetadata.CheckoutSession -> {
@@ -298,11 +324,23 @@ internal class DefaultTapToAddCollectionHandler(
         return stripeRepository.retrieveSavedPaymentMethodFromCardPresentPaymentMethod(
             cardPresentPaymentMethodId = paymentMethodId,
             customerId = customerId,
-            options = ApiRequest.Options(
-                apiKey = ephemeralKeySecret,
-                stripeAccount = paymentConfiguration.stripeAccountId,
-            )
+            options = getApiOptions(customerMetadata)
         ).getOrThrow()
+    }
+
+    private fun getApiOptions(customerMetadata: CustomerMetadata): ApiRequest.Options {
+        val ephemeralKeySecret = when (customerMetadata) {
+            is CustomerMetadata.CustomerSession -> customerMetadata.ephemeralKeySecret
+            is CustomerMetadata.LegacyEphemeralKey -> customerMetadata.ephemeralKeySecret
+            is CustomerMetadata.CheckoutSession -> {
+                throw NotImplementedError("Checkout sessions does not support Tap to Add!")
+            }
+        }
+
+        return ApiRequest.Options(
+            apiKey = ephemeralKeySecret,
+            stripeAccount = paymentConfiguration.stripeAccountId,
+        )
     }
 
     private fun terminal() = terminalWrapper.getInstance()
