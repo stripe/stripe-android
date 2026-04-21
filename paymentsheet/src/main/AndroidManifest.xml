@@ -49,7 +49,7 @@
             android:name="com.stripe.android.paymentelement.embedded.form.FormActivity"
             android:theme="@style/StripePaymentSheetDefaultTheme" />
         <activity
-            android:name="com.stripe.android.paymentelement.embedded.manage.ManageActivity"
+            android:name="com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetActivity"
             android:theme="@style/StripePaymentSheetDefaultTheme" />
         <activity
             android:name="com.stripe.android.common.taptoadd.TapToAddActivity"

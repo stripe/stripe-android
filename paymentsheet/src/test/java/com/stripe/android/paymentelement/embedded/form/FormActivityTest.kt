@@ -28,7 +28,7 @@ import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.embedded.manage.ManageActivity
+import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetActivity
 import com.stripe.android.paymentsheet.createCustomerState
 import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.testing.PaymentConfigurationTestRule
@@ -44,7 +44,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 internal class FormActivityTest {
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
-    private val composeTestRule = createAndroidComposeRule<ManageActivity>()
+    private val composeTestRule = createAndroidComposeRule<EmbeddedSheetActivity>()
     private val networkRule = NetworkRule()
 
     private val formPage = FormPage(composeTestRule)

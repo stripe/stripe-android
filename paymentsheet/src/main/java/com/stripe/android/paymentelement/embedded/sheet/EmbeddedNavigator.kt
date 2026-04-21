@@ -1,4 +1,4 @@
-package com.stripe.android.paymentelement.embedded.manage
+package com.stripe.android.paymentelement.embedded.sheet
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
@@ -145,7 +145,7 @@ internal class EmbeddedNavigator private constructor(
             @Composable
             override fun Content() {
                 Column {
-                    UpdatePaymentMethodUI(interactor = interactor, modifier = Modifier)
+                    UpdatePaymentMethodUI(interactor = interactor, modifier = Modifier.Companion)
                     PaymentSheetContentPadding(subtractingExtraPadding = 16.dp)
                 }
             }
