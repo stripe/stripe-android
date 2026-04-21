@@ -29,6 +29,7 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -225,7 +226,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             isSetupIntent = paymentMethodMetadata?.stripeIntent is SetupIntent,
             walletsAllowedInHeader = WalletType.entries, // PaymentSheet: all wallets in header
             cardFundingFilter = paymentMethodMetadata?.cardFundingFilter ?: DefaultCardFundingFilter,
-            cardBrandFilter = paymentMethodMetadata?.cardBrandFilter ?: DefaultCardBrandFilter
+            cardBrandFilter = paymentMethodMetadata?.cardBrandFilter ?: DefaultCardBrandFilter,
+            linkBrand = paymentMethodMetadata?.linkState?.configuration?.linkBrand ?: LinkBrand.Link,
         )
     }
 

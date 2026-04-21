@@ -13,6 +13,7 @@ import com.stripe.android.model.ElementsSessionFixtures.PAYMENT_METHODS_WITH_LIN
 import com.stripe.android.model.ElementsSessionFixtures.createPaymentIntentWithCustomerSession
 import com.stripe.android.model.ElementsSessionFixtures.createWithCustomPaymentMethods
 import com.stripe.android.model.ElementsSessionParams
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkConsumerIncentive
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentIntent
@@ -180,6 +181,30 @@ class ElementsSessionJsonParserTest {
         )!!
 
         assertThat(elementsSession.linkSettings?.disableLinkSignup).isFalse()
+    }
+
+    @Test
+    fun `link_brand is parsed as Link`() {
+        val elementsSession = parseElementsSession(createElementsSessionWithLinkBrand("link"))
+        assertThat(elementsSession?.linkSettings?.linkBrand).isEqualTo(LinkBrand.Link)
+    }
+
+    @Test
+    fun `link_brand is parsed as Notlink`() {
+        val elementsSession = parseElementsSession(createElementsSessionWithLinkBrand("notlink"))
+        assertThat(elementsSession?.linkSettings?.linkBrand).isEqualTo(LinkBrand.Notlink)
+    }
+
+    @Test
+    fun `unknown link_brand defaults to Link`() {
+        val elementsSession = parseElementsSession(createElementsSessionWithLinkBrand("some_future_brand"))
+        assertThat(elementsSession?.linkSettings?.linkBrand).isEqualTo(LinkBrand.Link)
+    }
+
+    @Test
+    fun `missing link_brand is parsed as null`() {
+        val elementsSession = parseElementsSession(createElementsSessionWithLinkBrand(linkBrand = null))
+        assertThat(elementsSession?.linkSettings?.linkBrand).isNull()
     }
 
     @Test
@@ -1980,6 +2005,22 @@ class ElementsSessionJsonParserTest {
             ),
             isLiveMode = false,
         ).parse(json)
+    }
+
+    private fun createElementsSessionWithLinkBrand(linkBrand: String?): JSONObject {
+        val linkBrandField = if (linkBrand != null) """"link_brand": "$linkBrand",""" else ""
+        return JSONObject(
+            """
+            {
+              "link_settings": {
+                $linkBrandField
+                "link_bank_enabled": false,
+                "link_bank_onboarding_enabled": false
+              },
+              "payment_method_preference": $PAYMENT_METHOD_PREFERENCE_JSON
+            }
+            """.trimIndent()
+        )
     }
 
     private fun createElementsSessionWithCardArt(

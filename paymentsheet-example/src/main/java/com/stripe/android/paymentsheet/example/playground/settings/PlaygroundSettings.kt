@@ -523,6 +523,7 @@ internal class PlaygroundSettings private constructor(
             UserCountryOverrideSettingsDefinition,
             LinkSettingsDefinition,
             LinkTypeSettingsDefinition,
+            FeatureFlagSettingsDefinition(FeatureFlags.forceNotlink),
             MerchantSettingsDefinition,
             CustomSecretKeyDefinition,
             CustomPublishableKeyDefinition,

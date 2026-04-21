@@ -5,6 +5,7 @@ package com.stripe.android.financialconnections.model
 import android.os.Parcelable
 import com.stripe.android.core.model.serializers.EnumIgnoreUnknownSerializer
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount.SupportedPaymentMethodTypes
+import com.stripe.android.model.LinkBrand
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -140,6 +141,8 @@ internal data class FinancialConnectionsSessionManifest(
     val skipSuccessPane: Boolean? = null,
     @SerialName("theme")
     val theme: Theme? = null,
+    @SerialName("link_brand")
+    val linkBrand: LinkBrand? = null,
 ) : Parcelable {
 
     val consentAcquired: Boolean

@@ -35,6 +35,7 @@ import com.stripe.android.financialconnections.ui.components.pluralStringResourc
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
+import com.stripe.android.model.LinkBrand
 import java.text.SimpleDateFormat
 
 @Composable
@@ -332,7 +333,7 @@ internal fun NoAccountsAvailableErrorContentPreview() {
         FinancialConnectionsScaffold(
             topBar = {
                 FinancialConnectionsTopAppBar(
-                    state = TopAppBarState(hideStripeLogo = false),
+                    state = TopAppBarState(hideStripeLogo = false, linkBrand = LinkBrand.Link),
                     onCloseClick = {},
                 )
             }

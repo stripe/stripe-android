@@ -8,6 +8,7 @@ import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.ExperimentAssignment
 import com.stripe.android.model.ElementsSessionParams
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -205,6 +206,12 @@ internal class ElementsSessionJsonParser(
             LinkMode.entries.firstOrNull { it.value == mode }
         }
 
+        val linkBrand = json?.optString(FIELD_LINK_BRAND)
+            ?.takeIf { it.isNotEmpty() }
+            ?.let { brand ->
+                LinkBrand.entries.firstOrNull { it.value == brand } ?: LinkBrand.Link
+            }
+
         val linkFlags = json?.let { linkSettingsJson ->
             parseLinkFlags(linkSettingsJson)
         } ?: emptyMap()
@@ -234,6 +241,7 @@ internal class ElementsSessionJsonParser(
             linkSignUpOptInFeatureEnabled = linkSignUpOptInFeatureEnabled,
             linkSignUpOptInInitialValue = linkSignUpOptInInitialValue,
             linkSupportedPaymentMethodsOnboardingEnabled = linkSupportedPaymentMethodsOnboardingEnabled,
+            linkBrand = linkBrand,
         )
     }
 
@@ -541,6 +549,7 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_LINK_FUNDING_SOURCES = "link_funding_sources"
         private const val FIELD_FLAGS = "flags"
         private const val FIELD_LINK_PASSTHROUGH_MODE_ENABLED = "link_passthrough_mode_enabled"
+        private const val FIELD_LINK_BRAND = "link_brand"
         private const val FIELD_LINK_MODE = "link_mode"
         private const val FIELD_DISABLE_LINK_SIGNUP = "link_mobile_disable_signup"
         private const val FIELD_USE_LINK_ATTESTATION_ENDPOINTS = "link_mobile_use_attestation_endpoints"
