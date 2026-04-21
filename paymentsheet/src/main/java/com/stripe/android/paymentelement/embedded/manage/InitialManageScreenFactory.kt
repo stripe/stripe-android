@@ -26,13 +26,13 @@ internal class InitialManageScreenFactory @Inject constructor(
                 paymentMethod = paymentMethod,
                 isCbcEligible = paymentMethodMetadata.cbcEligibility is CardBrandChoiceEligibility.Eligible,
             )
-            EmbeddedNavigator.Screen.Update(
+            EmbeddedNavigator.Screen.ManageUpdate(
                 interactor = updateScreenInteractorFactory.createUpdateScreenInteractor(
                     displayableSavedPaymentMethod = displayableSavedPaymentMethod
                 )
             )
         } else {
-            EmbeddedNavigator.Screen.All(interactor = manageInteractorFactory.createManageScreenInteractor())
+            EmbeddedNavigator.Screen.ManageAll(interactor = manageInteractorFactory.createManageScreenInteractor())
         }
     }
 }

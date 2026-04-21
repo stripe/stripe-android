@@ -2,19 +2,30 @@ package com.stripe.android.paymentelement.embedded.sheet
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.form.FormActivityConfirmationHelper
+import com.stripe.android.paymentelement.embedded.form.FormActivityStateHelper
+import com.stripe.android.paymentelement.embedded.form.FormScreenContent
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.navigation.NavigationHandler
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodUI
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
+import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenUI
+import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
+import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -75,15 +86,17 @@ internal class EmbeddedNavigator private constructor(
 
     private fun onScreenShown(screen: Screen) {
         when (screen) {
-            is Screen.All -> eventReporter.onShowManageSavedPaymentMethods()
-            is Screen.Update -> eventReporter.onShowEditablePaymentOption()
+            is Screen.ManageAll -> eventReporter.onShowManageSavedPaymentMethods()
+            is Screen.ManageUpdate -> eventReporter.onShowEditablePaymentOption()
+            is Screen.Form -> Unit
         }
     }
 
     private fun onScreenHidden(screen: Screen) {
         when (screen) {
-            is Screen.All -> Unit
-            is Screen.Update -> eventReporter.onHideEditablePaymentOption()
+            is Screen.ManageAll -> Unit
+            is Screen.ManageUpdate -> eventReporter.onHideEditablePaymentOption()
+            is Screen.Form -> Unit
         }
     }
 
@@ -97,7 +110,7 @@ internal class EmbeddedNavigator private constructor(
 
         abstract fun isPerformingNetworkOperation(): Boolean
 
-        class All(
+        class ManageAll(
             private val interactor: ManageScreenInteractor,
         ) : Screen(), Closeable {
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
@@ -129,7 +142,7 @@ internal class EmbeddedNavigator private constructor(
             }
         }
 
-        class Update(
+        class ManageUpdate(
             private val interactor: UpdatePaymentMethodInteractor,
         ) : Screen() {
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(interactor.topBarState)
@@ -148,6 +161,45 @@ internal class EmbeddedNavigator private constructor(
                     UpdatePaymentMethodUI(interactor = interactor, modifier = Modifier.Companion)
                     PaymentSheetContentPadding(subtractingExtraPadding = 16.dp)
                 }
+            }
+        }
+
+        class Form @AssistedInject constructor(
+            private val formInteractor: DefaultVerticalModeFormInteractor,
+            private val eventReporter: EventReporter,
+            private val formActivityStateHelper: FormActivityStateHelper,
+            private val confirmationHelper: FormActivityConfirmationHelper,
+            private val embeddedSelectionHolder: EmbeddedSelectionHolder,
+            private val savedPaymentMethodConfirmInteractorFactory: SavedPaymentMethodConfirmInteractor.Factory,
+            @Assisted private val onProcessingCompleted: () -> Unit,
+        ) : Screen() {
+            @AssistedFactory
+            interface Factory {
+                fun create(onProcessingCompleted: () -> Unit): Form
+            }
+
+            override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(null)
+
+            override fun title(): StateFlow<ResolvableString?> = stateFlowOf(null)
+
+            override fun isPerformingNetworkOperation(): Boolean {
+                return formActivityStateHelper.state.value.isProcessing
+            }
+
+            @Composable
+            override fun Content() {
+                val state by formActivityStateHelper.state.collectAsState()
+                FormScreenContent(
+                    interactor = formInteractor,
+                    eventReporter = eventReporter,
+                    onClick = {
+                        confirmationHelper.confirm()
+                    },
+                    onProcessingCompleted = onProcessingCompleted,
+                    state = state,
+                    updateSelection = embeddedSelectionHolder::set,
+                    savedPaymentMethodConfirmInteractorFactory = savedPaymentMethodConfirmInteractorFactory,
+                )
             }
         }
     }

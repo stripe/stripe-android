@@ -26,7 +26,7 @@ internal class EmbeddedNavigatorTest {
             assertThat(awaitItem()).isEqualTo(initialScreen)
             assertThat(navigator.canGoBack).isFalse()
 
-            val newScreen = EmbeddedNavigator.Screen.Update(FakeUpdatePaymentMethodInteractor())
+            val newScreen = EmbeddedNavigator.Screen.ManageUpdate(FakeUpdatePaymentMethodInteractor())
             navigator.performAction(EmbeddedNavigator.Action.GoToScreen(newScreen))
             assertThat(awaitItem()).isEqualTo(newScreen)
             assertThat(navigator.canGoBack).isTrue()
@@ -50,7 +50,7 @@ internal class EmbeddedNavigatorTest {
         navigator.screen.test {
             assertThat(awaitItem()).isEqualTo(initialScreen)
 
-            val newScreen = EmbeddedNavigator.Screen.Update(FakeUpdatePaymentMethodInteractor())
+            val newScreen = EmbeddedNavigator.Screen.ManageUpdate(FakeUpdatePaymentMethodInteractor())
             navigator.performAction(EmbeddedNavigator.Action.GoToScreen(newScreen))
             assertThat(awaitItem()).isEqualTo(newScreen)
             assertThat(eventReporter.showEditablePaymentOptionCalls.awaitItem()).isEqualTo(Unit)
@@ -105,7 +105,7 @@ internal class EmbeddedNavigatorTest {
         block: suspend Scenario.() -> Unit
     ) = runTest {
         lateinit var navigator: EmbeddedNavigator
-        val initialScreen = EmbeddedNavigator.Screen.All(FakeManageScreenInteractor())
+        val initialScreen = EmbeddedNavigator.Screen.ManageAll(FakeManageScreenInteractor())
         val eventReporter = FakeEventReporter()
         navigator = EmbeddedNavigator(
             coroutineScope = this,

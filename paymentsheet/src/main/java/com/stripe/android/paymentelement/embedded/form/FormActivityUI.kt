@@ -51,44 +51,65 @@ internal fun FormActivityUI(
     savedPaymentMethodConfirmInteractorFactory: SavedPaymentMethodConfirmInteractor.Factory,
 ) {
     val scrollState = rememberScrollState()
+    BottomSheetScaffold(
+        topBar = {
+            FormActivityTopBar(
+                isLiveMode = interactor.isLiveMode,
+                onDismissed = onDismissed
+            )
+        },
+        content = {
+            FormScreenContent(
+                interactor = interactor,
+                eventReporter = eventReporter,
+                onClick = onClick,
+                onProcessingCompleted = onProcessingCompleted,
+                state = state,
+                updateSelection = updateSelection,
+                savedPaymentMethodConfirmInteractorFactory = savedPaymentMethodConfirmInteractorFactory,
+            )
+        },
+        scrollState = scrollState
+    )
+}
+
+@Composable
+internal fun FormScreenContent(
+    interactor: DefaultVerticalModeFormInteractor,
+    eventReporter: EventReporter,
+    onClick: () -> Unit,
+    onProcessingCompleted: () -> Unit,
+    state: FormActivityStateHelper.State,
+    updateSelection: (PaymentSelection.Saved) -> Unit,
+    savedPaymentMethodConfirmInteractorFactory: SavedPaymentMethodConfirmInteractor.Factory,
+) {
     val interactorState by interactor.state.collectAsState()
 
     DismissKeyboardOnProcessing(interactorState.isProcessing)
 
     EventReporterProvider(eventReporter) {
-        BottomSheetScaffold(
-            topBar = {
-                FormActivityTopBar(
-                    isLiveMode = interactor.isLiveMode,
-                    onDismissed = onDismissed
-                )
-            },
-            content = {
-                if (state.savedPaymentSelectionToConfirm == null) {
-                    VerticalModeFormUI(
-                        interactor = interactor,
-                        showsWalletHeader = false
-                    )
-                } else {
-                    SavedPaymentMethodConfirmUI(
-                        savedPaymentMethodConfirmInteractor = savedPaymentMethodConfirmInteractorFactory.create(
-                            initialSelection = state.savedPaymentSelectionToConfirm,
-                            updateSelection = updateSelection,
-                        ),
-                    )
-                }
-                USBankAccountMandate(state)
-                FormActivityError(state)
-                Spacer(Modifier.height(40.dp))
-                FormActivityPrimaryButton(
-                    state = state,
-                    onClick = onClick,
-                    onProcessingCompleted = onProcessingCompleted,
-                )
-                PaymentSheetContentPadding()
-            },
-            scrollState = scrollState
+        if (state.savedPaymentSelectionToConfirm == null) {
+            VerticalModeFormUI(
+                interactor = interactor,
+                showsWalletHeader = false
+            )
+        } else {
+            SavedPaymentMethodConfirmUI(
+                savedPaymentMethodConfirmInteractor = savedPaymentMethodConfirmInteractorFactory.create(
+                    initialSelection = state.savedPaymentSelectionToConfirm,
+                    updateSelection = updateSelection,
+                ),
+            )
+        }
+        USBankAccountMandate(state)
+        FormActivityError(state)
+        Spacer(Modifier.height(40.dp))
+        FormActivityPrimaryButton(
+            state = state,
+            onClick = onClick,
+            onProcessingCompleted = onProcessingCompleted,
         )
+        PaymentSheetContentPadding()
     }
 }
 
