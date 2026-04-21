@@ -40,6 +40,7 @@ import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.LinkTerms
 import com.stripe.android.link.ui.LinkTermsType
 import com.stripe.android.link.ui.signup.SignUpState
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.CircularProgressIndicator
 import com.stripe.android.uicore.elements.EmailConfig
@@ -87,6 +88,7 @@ internal fun LinkOptionalInlineSignup(
         isShowingPhoneFirst = viewState.isShowingPhoneFirst,
         enabled = enabled,
         requiresNameCollection = viewModel.requiresNameCollection,
+        linkBrand = viewState.linkBrand,
         errorMessage = errorMessage?.resolve(),
         modifier = modifier
     )
@@ -103,6 +105,7 @@ internal fun LinkOptionalInlineSignup(
     signUpState: SignUpState,
     enabled: Boolean,
     requiresNameCollection: Boolean,
+    linkBrand: LinkBrand = LinkBrand.Link,
     errorMessage: String?,
     modifier: Modifier = Modifier
 ) {
@@ -144,6 +147,7 @@ internal fun LinkOptionalInlineSignup(
             isShowingPhoneFirst = isShowingPhoneFirst,
             requiresNameCollection = requiresNameCollection,
             allowsDefaultOptIn = false,
+            linkBrand = linkBrand,
             errorMessage = errorMessage,
             emailFocusRequester = emailFocusRequester,
             phoneFocusRequester = phoneFocusRequester,
@@ -217,6 +221,7 @@ internal fun EmailCollection(
 @Composable
 internal fun LinkLogo(
     modifier: Modifier = Modifier,
+    linkBrand: LinkBrand = LinkBrand.Link,
 ) {
     Icon(
         painter = painterResource(
@@ -226,7 +231,7 @@ internal fun LinkLogo(
                 R.drawable.stripe_link_logo_knockout_white
             }
         ),
-        contentDescription = stringResource(id = com.stripe.android.R.string.stripe_link),
+        contentDescription = linkBrand.brandName(),
         modifier = modifier.semantics {
             testTag = "LinkLogoIcon"
         },

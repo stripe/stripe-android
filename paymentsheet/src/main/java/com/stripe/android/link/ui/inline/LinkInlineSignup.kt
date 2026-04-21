@@ -62,6 +62,7 @@ import com.stripe.android.link.ui.LinkTerms
 import com.stripe.android.link.ui.LinkTermsType
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.link.ui.signup.SignUpState.InputtingRemainingFields
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
@@ -117,6 +118,7 @@ internal fun LinkInlineSignup(
         requiresNameCollection = viewModel.requiresNameCollection,
         allowsDefaultOptIn = viewState.allowsDefaultOptIn,
         linkSignUpOptInFeatureEnabled = viewState.linkSignUpOptInFeatureEnabled,
+        linkBrand = viewState.linkBrand,
         didAskToChangeSignupDetails = viewState.didAskToChangeSignupDetails,
         errorMessage = errorMessage?.resolve(),
         toggleExpanded = viewModel::toggleExpanded,
@@ -139,6 +141,7 @@ internal fun LinkInlineSignup(
     requiresNameCollection: Boolean,
     allowsDefaultOptIn: Boolean,
     linkSignUpOptInFeatureEnabled: Boolean,
+    linkBrand: LinkBrand = LinkBrand.Link,
     didAskToChangeSignupDetails: Boolean,
     errorMessage: String?,
     toggleExpanded: () -> Unit,
@@ -183,6 +186,7 @@ internal fun LinkInlineSignup(
                 enabled = enabled,
                 contentAlpha = contentAlpha,
                 simplifiedCheckbox = simplifiedCheckbox,
+                linkBrand = linkBrand,
                 useLinkLogoInCheckboxText = linkSignUpOptInFeatureEnabled,
                 toggleExpanded = toggleExpanded
             )
@@ -194,6 +198,7 @@ internal fun LinkInlineSignup(
                     signUpState = signUpState,
                     requiresNameCollection = requiresNameCollection,
                     allowsDefaultOptIn = allowsDefaultOptIn,
+                    linkBrand = linkBrand,
                     didAskToChangeSignupDetails = didAskToChangeSignupDetails,
                     errorMessage = errorMessage,
                     sectionController = sectionController,
@@ -240,6 +245,7 @@ private fun LinkCheckbox(
     enabled: Boolean,
     contentAlpha: Float,
     simplifiedCheckbox: Boolean,
+    linkBrand: LinkBrand,
     toggleExpanded: () -> Unit,
     useLinkLogoInCheckboxText: Boolean,
 ) {
@@ -268,6 +274,7 @@ private fun LinkCheckbox(
                 TextWithLinkLogo(
                     style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Medium),
                     color = MaterialTheme.colors.onSurface.copy(alpha = contentAlpha),
+                    linkBrand = linkBrand,
                 )
             } else {
                 Text(
@@ -294,6 +301,7 @@ private fun LinkCheckbox(
 private fun TextWithLinkLogo(
     style: TextStyle,
     color: Color,
+    linkBrand: LinkBrand,
 ) {
     val label = stringResource(R.string.stripe_inline_sign_up_toggle)
     val painter = painterResource(R.drawable.stripe_link_logo_knockout)
@@ -314,7 +322,7 @@ private fun TextWithLinkLogo(
             ) {
                 Image(
                     painter = painter,
-                    contentDescription = stringResource(com.stripe.android.R.string.stripe_link),
+                    contentDescription = linkBrand.brandName(),
                     colorFilter = ColorFilter.tint(color, BlendMode.SrcIn),
                     modifier = Modifier.fillMaxSize()
                 )
@@ -387,6 +395,7 @@ internal fun LinkFields(
     signUpState: SignUpState,
     requiresNameCollection: Boolean,
     allowsDefaultOptIn: Boolean,
+    linkBrand: LinkBrand = LinkBrand.Link,
     didAskToChangeSignupDetails: Boolean,
     errorMessage: String?,
     sectionController: SectionController,
@@ -437,6 +446,7 @@ internal fun LinkFields(
                     emailFocusRequester = emailFocusRequester,
                     requiresNameCollection = requiresNameCollection,
                     allowsDefaultOptIn = allowsDefaultOptIn,
+                    linkBrand = linkBrand,
                     errorMessage = errorMessage,
                     didShowAllFields = didShowAllFields,
                     onShowingAllFields = { didShowAllFields = true },

@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.signup.SignUpState
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.HyperlinkedText
 import com.stripe.android.uicore.elements.EmailConfig
@@ -53,6 +54,7 @@ internal fun LinkInlineSignupFields(
     isShowingPhoneFirst: Boolean,
     requiresNameCollection: Boolean,
     allowsDefaultOptIn: Boolean,
+    linkBrand: LinkBrand = LinkBrand.Link,
     errorMessage: String?,
     didShowAllFields: Boolean,
     onShowingAllFields: () -> Unit,
@@ -79,7 +81,10 @@ internal fun LinkInlineSignupFields(
                 focusRequester = phoneFocusRequester,
                 trailingIcon = if (!allowsDefaultOptIn) {
                     {
-                        LinkLogo(LinkLogoModifier)
+                        LinkLogo(
+                            modifier = LinkLogoModifier,
+                            linkBrand = linkBrand,
+                        )
                     }
                 } else {
                     null
@@ -98,7 +103,10 @@ internal fun LinkInlineSignupFields(
                 focusRequester = emailFocusRequester,
                 trailingIcon = if (!allowsDefaultOptIn) {
                     {
-                        LinkLogo(LinkLogoModifier)
+                        LinkLogo(
+                            modifier = LinkLogoModifier,
+                            linkBrand = linkBrand,
+                        )
                     }
                 } else {
                     null

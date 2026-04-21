@@ -1,13 +1,16 @@
 package com.stripe.android.link.ui.inline
 
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertContentDescriptionContains
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.signup.SignUpState
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
@@ -120,6 +123,29 @@ internal class LinkInlineSignupViewTest {
         onInlineLinkLogo().assertDoesNotExist()
     }
 
+    @Test
+    fun inline_logo_content_description_uses_dynamic_brand_name() {
+        setContent(
+            expanded = true,
+            linkBrand = LinkBrand.Notlink,
+        )
+
+        onInlineLinkLogo().assertContentDescriptionContains("Notlink")
+    }
+
+    @Test
+    fun checkbox_text_logo_content_description_uses_dynamic_brand_name() {
+        setContent(
+            expanded = false,
+            linkSignUpOptInFeatureEnabled = true,
+            linkBrand = LinkBrand.Notlink,
+        )
+
+        composeTestRule
+            .onNodeWithContentDescription("Notlink", useUnmergedTree = true)
+            .assertExists()
+    }
+
     private fun setContent(
         merchantName: String = "Example, Inc.",
         emailController: SimpleTextFieldController = EmailConfig.createController("email@me.co"),
@@ -130,6 +156,8 @@ internal class LinkInlineSignupViewTest {
         expanded: Boolean = true,
         requiresNameCollection: Boolean = false,
         allowsDefaultOptIn: Boolean = false,
+        linkSignUpOptInFeatureEnabled: Boolean = false,
+        linkBrand: LinkBrand = LinkBrand.Link,
         didAskToChangeSignupDetails: Boolean = false,
         errorMessage: String? = null,
         toggleExpanded: () -> Unit = {},
@@ -156,7 +184,8 @@ internal class LinkInlineSignupViewTest {
                     expanded,
                     requiresNameCollection,
                     allowsDefaultOptIn,
-                    linkSignUpOptInFeatureEnabled = false,
+                    linkSignUpOptInFeatureEnabled = linkSignUpOptInFeatureEnabled,
+                    linkBrand = linkBrand,
                     didAskToChangeSignupDetails,
                     errorMessage,
                     toggleExpanded,
