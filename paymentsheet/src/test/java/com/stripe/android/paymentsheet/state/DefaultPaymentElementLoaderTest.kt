@@ -7,6 +7,7 @@ import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
+import com.stripe.android.common.analytics.experiment.LogCardArtExperiment
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.PaymentMethodRemovePermission
@@ -65,6 +66,7 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.MERCHANT_DISPLAY_NAME
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.FakeLoadingEventReporter
+import com.stripe.android.paymentsheet.analytics.FakeLogCardArtExperiment
 import com.stripe.android.paymentsheet.analytics.FakeLogLinkHoldbackExperiment
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
@@ -4125,6 +4127,31 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
+    fun `Card art experiment exposure is logged when loading`() = runScenario {
+        val logCardArtExperiment = FakeLogCardArtExperiment()
+
+        val loader = createPaymentElementLoader(
+            logCardArtExperiment = logCardArtExperiment,
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
+        ).getOrThrow()
+
+        val call = logCardArtExperiment.calls.awaitItem()
+        assertThat(call.elementsSession.stripeIntent).isEqualTo(result.paymentMethodMetadata.stripeIntent)
+        assertThat(call.paymentMethodMetadata).isEqualTo(result.paymentMethodMetadata)
+        logCardArtExperiment.calls.ensureAllEventsConsumed()
+
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
     fun `Loads successfully for cryptoOnramp`() = runScenario {
         val loader = createPaymentElementLoader(
             linkSettings = createLinkSettings(passthroughModeEnabled = false),
@@ -4521,6 +4548,7 @@ internal class DefaultPaymentElementLoaderTest {
         customer: ElementsSession.Customer? = null,
         externalPaymentMethodData: String? = null,
         logLinkHoldbackExperiment: LogLinkHoldbackExperiment = FakeLogLinkHoldbackExperiment(),
+        logCardArtExperiment: LogCardArtExperiment = FakeLogCardArtExperiment(),
         errorReporter: ErrorReporter = FakeErrorReporter(),
         customPaymentMethods: List<ElementsSession.CustomPaymentMethod> = emptyList(),
         elementsSessionRepository: ElementsSessionRepository = FakeElementsSessionRepository(
@@ -4576,6 +4604,7 @@ internal class DefaultPaymentElementLoaderTest {
             workContext = testDispatcher,
             createLinkState = createLinkState,
             logLinkHoldbackExperiment = logLinkHoldbackExperiment,
+            logCardArtExperiment = logCardArtExperiment,
             externalPaymentMethodsRepository = ExternalPaymentMethodsRepository(errorReporter = FakeErrorReporter()),
             userFacingLogger = userFacingLogger,
             integrityRequestManager = integrityRequestManager,
