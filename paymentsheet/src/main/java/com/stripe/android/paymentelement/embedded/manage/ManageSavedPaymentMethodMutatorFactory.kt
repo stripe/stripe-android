@@ -74,7 +74,7 @@ internal class ManageSavedPaymentMethodMutatorFactory @Inject constructor(
         if (displayableSavedPaymentMethod.savedPaymentMethod != SavedPaymentMethod.Unexpected) {
             embeddedNavigatorProvider.get().performAction(
                 EmbeddedNavigator.Action.GoToScreen(
-                    screen = EmbeddedNavigator.Screen.Update(
+                    screen = EmbeddedNavigator.Screen.ManageUpdate(
                         interactor = updateScreenInteractorFactoryProvider.get().createUpdateScreenInteractor(
                             displayableSavedPaymentMethod
                         )

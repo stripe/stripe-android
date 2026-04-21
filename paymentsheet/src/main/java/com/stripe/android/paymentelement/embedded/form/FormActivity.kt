@@ -5,13 +5,23 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.checkout.CheckoutInstances
+import com.stripe.android.common.ui.BottomSheetScaffold
+import com.stripe.android.common.ui.ElementsBottomSheetLayout
+import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
+import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
+import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.fadeOut
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -28,7 +38,10 @@ internal class FormActivity : AppCompatActivity() {
     }
 
     @Inject
-    lateinit var formScreen: FormScreen
+    lateinit var formScreenFactory: EmbeddedNavigator.Screen.Form.Factory
+
+    @Inject
+    lateinit var formInteractor: DefaultVerticalModeFormInteractor
 
     @Inject
     lateinit var eventReporter: EventReporter
@@ -54,6 +67,10 @@ internal class FormActivity : AppCompatActivity() {
             lifecycleOwner = this,
         ).inject(this)
 
+        val formScreen = formScreenFactory.create(
+            onProcessingCompleted = ::setCompletedResultAndDismiss,
+        )
+
         lifecycleScope.launch {
             formActivityStateHelper.result.collect {
                 setFormResult(it)
@@ -63,11 +80,37 @@ internal class FormActivity : AppCompatActivity() {
 
         setContent {
             StripeTheme {
-                formScreen.Content(
-                    onProcessingCompleted = ::setCompletedResultAndDismiss,
-                    onDismissed = ::setCancelAndFinish,
+                FormSheetContent(
+                    formScreen = formScreen,
                 )
             }
+        }
+    }
+
+    @OptIn(ExperimentalMaterialApi::class)
+    @Composable
+    private fun FormSheetContent(formScreen: EmbeddedNavigator.Screen.Form) {
+        val state by formActivityStateHelper.state.collectAsState()
+        val bottomSheetState = rememberStripeBottomSheetState(
+            confirmValueChange = { !state.isProcessing }
+        )
+        ElementsBottomSheetLayout(
+            state = bottomSheetState,
+            onDismissed = ::setCancelAndFinish,
+        ) {
+            val scrollState = rememberScrollState()
+            BottomSheetScaffold(
+                topBar = {
+                    FormActivityTopBar(
+                        isLiveMode = formInteractor.isLiveMode,
+                        onDismissed = ::setCancelAndFinish,
+                    )
+                },
+                content = {
+                    formScreen.Content()
+                },
+                scrollState = scrollState,
+            )
         }
     }
 
