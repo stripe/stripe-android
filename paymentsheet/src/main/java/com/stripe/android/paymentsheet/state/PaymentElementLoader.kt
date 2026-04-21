@@ -506,6 +506,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             isTapToAddAvailable = isTapToAddAvailable,
         )
 
+        logCardArtExperiment(elementsSession, paymentMethodMetadata)
+
         return paymentMethodMetadata
     }
 

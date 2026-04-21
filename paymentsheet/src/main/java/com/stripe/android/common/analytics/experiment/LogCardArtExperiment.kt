@@ -1,24 +1,24 @@
 package com.stripe.android.common.analytics.experiment
 
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.ExperimentAssignment
-import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.paymentMethodType
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import javax.inject.Inject
 
 internal interface LogCardArtExperiment {
+    /**
+     * Logs the card art experiment exposure and returns whether card art should be enabled.
+     *
+     * Card art is enabled when:
+     * - The experiment variant is "treatment", OR
+     * - The local feature flag is enabled (debug-only fallback for testing)
+     */
     operator fun invoke(
         elementsSession: ElementsSession,
         paymentMethodMetadata: PaymentMethodMetadata,
-        savedPaymentMethods: List<PaymentMethod>,
-        integrationConfiguration: PaymentElementLoader.Configuration,
-        defaultPaymentSelection: PaymentSelection?,
-    )
+    ): Boolean
 }
 
 internal class DefaultLogCardArtExperiment @Inject constructor(
@@ -29,50 +29,27 @@ internal class DefaultLogCardArtExperiment @Inject constructor(
     override fun invoke(
         elementsSession: ElementsSession,
         paymentMethodMetadata: PaymentMethodMetadata,
-        savedPaymentMethods: List<PaymentMethod>,
-        integrationConfiguration: PaymentElementLoader.Configuration,
-        defaultPaymentSelection: PaymentSelection?,
-    ) {
-        val experimentsData = elementsSession.experimentsData ?: return
+    ): Boolean {
+        val experimentsData = elementsSession.experimentsData
+            ?: return FeatureFlags.enableCardArt.isEnabled
 
-        val savedCardPaymentMethods = savedPaymentMethods.filter { it.type == PaymentMethod.Type.Card }
+        val variant = experimentsData.experimentAssignments[ExperimentAssignment.OCS_MOBILE_CARD_ART]
+            ?: return FeatureFlags.enableCardArt.isEnabled
 
-        val selectedPaymentMethodHasCardArt = (defaultPaymentSelection as? PaymentSelection.Saved)
-            ?.paymentMethod
-            ?.card
-            ?.cardArt
-            ?.artImage != null
-
-        experimentsData.experimentAssignments[
-            ExperimentAssignment.OCS_MOBILE_CARD_ART,
-        ]?.let { variant ->
-            eventReporter.onExperimentExposure(
-                LoggableExperiment.OcsMobileCardArt(
-                    experimentsData = experimentsData,
-                    experiment = ExperimentAssignment.OCS_MOBILE_CARD_ART,
-                    group = variant,
-                    paymentMethodMetadata = paymentMethodMetadata,
-                    mode = mode,
-                    layout = integrationConfiguration.layoutDimensionValue(),
-                    savedPaymentMethodCount = savedPaymentMethods.size,
-                    savedCardPaymentMethodCount = savedCardPaymentMethods.size,
-                    savedCardPaymentMethodWithCardArtCount = savedCardPaymentMethods.count { it.card?.cardArt != null },
-                    selectedPaymentMethodType = defaultPaymentSelection?.paymentMethodType,
-                    selectedPaymentMethodHasCardArt = selectedPaymentMethodHasCardArt,
-                )
+        eventReporter.onExperimentExposure(
+            LoggableExperiment.OcsMobileCardArt(
+                experimentsData = experimentsData,
+                experiment = ExperimentAssignment.OCS_MOBILE_CARD_ART,
+                group = variant,
+                paymentMethodMetadata = paymentMethodMetadata,
+                mode = mode,
             )
-        }
-    }
-}
+        )
 
-private fun PaymentElementLoader.Configuration.layoutDimensionValue(): String {
-    return when (this) {
-        is PaymentElementLoader.Configuration.PaymentSheet -> when (configuration.paymentMethodLayout) {
-            PaymentSheet.PaymentMethodLayout.Horizontal -> "horizontal"
-            PaymentSheet.PaymentMethodLayout.Vertical -> "vertical"
-            PaymentSheet.PaymentMethodLayout.Automatic -> "horizontal"
-        }
-        is PaymentElementLoader.Configuration.Embedded -> "vertical"
-        is PaymentElementLoader.Configuration.CryptoOnramp -> "vertical"
+        return variant == TREATMENT || FeatureFlags.enableCardArt.isEnabled
+    }
+
+    private companion object {
+        const val TREATMENT = "treatment"
     }
 }
