@@ -248,6 +248,7 @@ internal data class ElementsSession(
         LINK_AB_TEST("link_ab_test"),
         OCS_MOBILE_HORIZONTAL_MODE_AA("ocs_mobile_horizontal_mode_aa"),
         OCS_MOBILE_HORIZONTAL_MODE("ocs_mobile_horizontal_mode"),
+        OCS_MOBILE_CARD_ART("ocs_mobile_card_art"),
     }
 
     companion object {

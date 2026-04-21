@@ -31,6 +31,20 @@ internal sealed class LoggableExperiment(
             mapOf("has_saved_payment_method" to hasSavedPaymentMethod.toString()),
     )
 
+    class OcsMobileCardArt(
+        val experimentsData: ElementsSession.ExperimentsData,
+        experiment: ExperimentAssignment,
+        group: String,
+        paymentMethodMetadata: PaymentMethodMetadata,
+        mode: EventReporter.Mode,
+    ) : LoggableExperiment(
+        arbId = experimentsData.arbId,
+        experiment = experiment,
+        group = group,
+        dimensions = CommonElementsDimensions.getDimensions(paymentMethodMetadata, mode) +
+            mapOf("has_card_art" to paymentMethodMetadata.cardArts.isNotEmpty().toString()),
+    )
+
     data class LinkHoldback(
         override val arbId: String,
         override val group: String,
