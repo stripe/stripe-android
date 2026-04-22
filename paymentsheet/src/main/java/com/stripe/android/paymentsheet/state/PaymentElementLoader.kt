@@ -380,24 +380,30 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             paymentMethodMetadata = pmMetadata,
         )
 
-        logCardArtExperiment(
+        val isCardArtEnabled = logCardArtExperiment(
             elementsSession = elementsSession,
             paymentMethodMetadata = pmMetadata,
+            savedPaymentMethods = elementsSession.customer?.paymentMethods.orEmpty(),
+            integrationConfiguration = integrationConfiguration,
+            defaultPaymentSelection = state.paymentSelection,
         )
+
+        val finalPmMetadata = pmMetadata.copy(isCardArtEnabled = isCardArtEnabled)
+        val finalState = state.copy(paymentMethodMetadata = finalPmMetadata)
 
         logLinkExperimentExposures(
             elementsSession = elementsSession,
-            state = state
+            state = finalState
         )
 
         reportSuccessfulLoad(
             elementsSession = elementsSession,
-            state = state,
+            state = finalState,
             isReloadingAfterProcessDeath = metadata.isReloadingAfterProcessDeath,
-            paymentMethodMetadata = pmMetadata,
+            paymentMethodMetadata = finalPmMetadata,
         )
 
-        return@runCatching state
+        return@runCatching finalState
     }
 
     private suspend fun loadSession(
@@ -503,9 +509,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             isTapToAddAvailable = isTapToAddAvailable,
         )
 
-        val isCardArtEnabled = logCardArtExperiment(elementsSession, paymentMethodMetadata)
-
-        return paymentMethodMetadata.copy(isCardArtEnabled = isCardArtEnabled)
+        return paymentMethodMetadata
     }
 
     private suspend fun isGooglePayReady(

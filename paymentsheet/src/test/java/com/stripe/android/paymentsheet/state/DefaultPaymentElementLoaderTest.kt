@@ -4143,7 +4143,14 @@ internal class DefaultPaymentElementLoaderTest {
             ),
         ).getOrThrow()
 
-        assertThat(result.paymentMethodMetadata).isNotNull()
+        val call = logCardArtExperiment.calls.awaitItem()
+        assertThat(call.elementsSession.stripeIntent).isEqualTo(result.paymentMethodMetadata.stripeIntent)
+        assertThat(call.paymentMethodMetadata).isNotNull()
+        assertThat(call.integrationConfiguration).isEqualTo(
+            PaymentElementLoader.Configuration.PaymentSheet(paymentSheetConfiguration)
+        )
+        assertThat(call.defaultPaymentSelection).isEqualTo(result.paymentSelection)
+        logCardArtExperiment.calls.ensureAllEventsConsumed()
 
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
