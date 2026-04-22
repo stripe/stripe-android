@@ -163,13 +163,80 @@ internal fun LinkInlineSignup(
     val shape = boxShape(simplifiedCheckbox)
     val boxModifier = modifier.applyBorders(simplifiedCheckbox, shape)
 
+    LinkInlineSignupContent(
+        boxModifier = boxModifier,
+        bringFullSignUpIntoViewRequester = bringFullSignUpIntoViewRequester,
+        expanded = expanded,
+        onExpandedFocus = {
+            scope.launch {
+                bringFullSignUpIntoViewRequester.bringIntoView()
+            }
+        },
+        shape = shape,
+        contentAlpha = contentAlpha,
+        merchantName = merchantName,
+        enabled = enabled,
+        simplifiedCheckbox = simplifiedCheckbox,
+        linkBrand = linkBrand,
+        linkSignUpOptInFeatureEnabled = linkSignUpOptInFeatureEnabled,
+        toggleExpanded = toggleExpanded,
+        signUpState = signUpState,
+        requiresNameCollection = requiresNameCollection,
+        allowsDefaultOptIn = allowsDefaultOptIn,
+        didAskToChangeSignupDetails = didAskToChangeSignupDetails,
+        errorMessage = errorMessage,
+        sectionController = sectionController,
+        emailController = emailController,
+        phoneNumberController = phoneNumberController,
+        nameController = nameController,
+        emailFocusRequester = emailFocusRequester, changeSignupDetails = changeSignupDetails,
+    )
+}
+
+@Composable
+private fun RequestEmailFocusWhenExpanded(
+    expanded: Boolean,
+    simplifiedCheckbox: Boolean,
+    emailFocusRequester: FocusRequester,
+) {
+    LaunchedEffect(expanded, simplifiedCheckbox) {
+        if (expanded && !simplifiedCheckbox) {
+            emailFocusRequester.requestFocus()
+        }
+    }
+}
+
+@Composable
+private fun LinkInlineSignupContent(
+    boxModifier: Modifier,
+    bringFullSignUpIntoViewRequester: BringIntoViewRequester,
+    expanded: Boolean,
+    onExpandedFocus: () -> Unit,
+    shape: Shape,
+    contentAlpha: Float,
+    merchantName: String,
+    enabled: Boolean,
+    simplifiedCheckbox: Boolean,
+    linkBrand: LinkBrand,
+    linkSignUpOptInFeatureEnabled: Boolean,
+    toggleExpanded: () -> Unit,
+    signUpState: SignUpState,
+    requiresNameCollection: Boolean,
+    allowsDefaultOptIn: Boolean,
+    didAskToChangeSignupDetails: Boolean,
+    errorMessage: String?,
+    sectionController: SectionController,
+    emailController: TextFieldController,
+    phoneNumberController: PhoneNumberController,
+    nameController: TextFieldController,
+    emailFocusRequester: FocusRequester,
+    changeSignupDetails: () -> Unit,
+) {
     Box(
         modifier = boxModifier
             .onFocusEvent { state ->
                 if (state.hasFocus && expanded) {
-                    scope.launch {
-                        bringFullSignUpIntoViewRequester.bringIntoView()
-                    }
+                    onExpandedFocus()
                 }
             }
             .bringIntoViewRequester(bringFullSignUpIntoViewRequester),
@@ -188,41 +255,65 @@ internal fun LinkInlineSignup(
                 simplifiedCheckbox = simplifiedCheckbox,
                 linkBrand = linkBrand,
                 useLinkLogoInCheckboxText = linkSignUpOptInFeatureEnabled,
-                toggleExpanded = toggleExpanded
+                toggleExpanded = toggleExpanded,
             )
 
-            if (linkSignUpOptInFeatureEnabled.not()) {
-                LinkFields(
-                    expanded = expanded,
-                    enabled = enabled,
-                    signUpState = signUpState,
-                    requiresNameCollection = requiresNameCollection,
-                    allowsDefaultOptIn = allowsDefaultOptIn,
-                    linkBrand = linkBrand,
-                    didAskToChangeSignupDetails = didAskToChangeSignupDetails,
-                    errorMessage = errorMessage,
-                    sectionController = sectionController,
-                    emailController = emailController,
-                    phoneNumberController = phoneNumberController,
-                    nameController = nameController,
-                    emailFocusRequester = emailFocusRequester,
-                    changeSignupDetails = changeSignupDetails,
-                )
-            }
+            LinkInlineSignupFieldsContent(
+                linkSignUpOptInFeatureEnabled = linkSignUpOptInFeatureEnabled,
+                expanded = expanded,
+                enabled = enabled,
+                signUpState = signUpState,
+                requiresNameCollection = requiresNameCollection,
+                allowsDefaultOptIn = allowsDefaultOptIn,
+                linkBrand = linkBrand,
+                didAskToChangeSignupDetails = didAskToChangeSignupDetails,
+                errorMessage = errorMessage,
+                sectionController = sectionController,
+                emailController = emailController,
+                phoneNumberController = phoneNumberController,
+                nameController = nameController,
+                emailFocusRequester = emailFocusRequester,
+                changeSignupDetails = changeSignupDetails,
+            )
         }
     }
 }
 
 @Composable
-private fun RequestEmailFocusWhenExpanded(
+private fun LinkInlineSignupFieldsContent(
+    linkSignUpOptInFeatureEnabled: Boolean,
     expanded: Boolean,
-    simplifiedCheckbox: Boolean,
+    enabled: Boolean,
+    signUpState: SignUpState,
+    requiresNameCollection: Boolean,
+    allowsDefaultOptIn: Boolean,
+    linkBrand: LinkBrand,
+    didAskToChangeSignupDetails: Boolean,
+    errorMessage: String?,
+    sectionController: SectionController,
+    emailController: TextFieldController,
+    phoneNumberController: PhoneNumberController,
+    nameController: TextFieldController,
     emailFocusRequester: FocusRequester,
+    changeSignupDetails: () -> Unit,
 ) {
-    LaunchedEffect(expanded, simplifiedCheckbox) {
-        if (expanded && !simplifiedCheckbox) {
-            emailFocusRequester.requestFocus()
-        }
+    if (linkSignUpOptInFeatureEnabled.not()) {
+        LinkFields(
+            expanded = expanded,
+            enabled = enabled,
+            signUpState = signUpState,
+            requiresNameCollection = requiresNameCollection,
+            allowsDefaultOptIn = allowsDefaultOptIn,
+            linkBrand = linkBrand,
+            didAskToChangeSignupDetails = didAskToChangeSignupDetails,
+            errorMessage = errorMessage,
+            sectionController = sectionController,
+            emailController = emailController,
+            phoneNumberController = phoneNumberController,
+            nameController = nameController,
+            emailFocusRequester = emailFocusRequester,
+            changeSignupDetails = changeSignupDetails,
+        )
     }
 }
 
