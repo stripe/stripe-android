@@ -35,12 +35,6 @@ class ElementsSessionJsonParserTest {
     )
 
     @get:Rule
-    val enableAttestationOnIntentConfirmationRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.enableAttestationOnIntentConfirmation,
-        isEnabled = true
-    )
-
-    @get:Rule
     val enableCardArtRule = FeatureFlagTestRule(
         featureFlag = FeatureFlags.enableCardArt,
         isEnabled = false,

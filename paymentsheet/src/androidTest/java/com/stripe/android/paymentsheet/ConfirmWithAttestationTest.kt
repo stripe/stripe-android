@@ -8,7 +8,7 @@ import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.stripe.android.attestation.AttestationActivityContract
 import com.stripe.android.attestation.AttestationActivityResult
-import com.stripe.android.core.utils.FeatureFlags
+
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -23,22 +23,17 @@ import com.stripe.android.paymentsheet.utils.ProductIntegrationType
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runProductIntegrationTest
-import com.stripe.android.testing.FeatureFlagTestRule
+
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
 
 internal class ConfirmWithAttestationTest {
     private val testRules: TestRules = TestRules.create()
-    private val featureFlagTestRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.enableAttestationOnIntentConfirmation,
-        isEnabled = true
-    )
 
     @get:Rule
     val rules: RuleChain = RuleChain.emptyRuleChain()
         .around(IntentsRule())
-        .around(featureFlagTestRule)
         .around(testRules)
 
     private val networkRule = testRules.networkRule
