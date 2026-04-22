@@ -1144,7 +1144,8 @@ internal class PaymentMethodMetadataTest {
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
-            isTapToAddAvailable = false
+            isTapToAddAvailable = false,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Automatic,
         )
 
         val expectedMetadata = PaymentMethodMetadata(
@@ -1215,6 +1216,7 @@ internal class PaymentMethodMetadataTest {
             elementsSessionId = "session_1234",
             disableSsdOcrCardScan = false,
             cardArts = emptyList(),
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Automatic,
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1276,6 +1278,7 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Automatic,
         )
 
         // When flag is false, should use default funding types, not the configured ones
@@ -1369,6 +1372,7 @@ internal class PaymentMethodMetadataTest {
             elementsSessionId = "session_1234",
             disableSsdOcrCardScan = false,
             cardArts = emptyList(),
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
@@ -2104,6 +2108,7 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Automatic,
         )
 
         assertThat(metadata.availableWallets)
@@ -2173,6 +2178,7 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = true,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Automatic,
         )
 
         assertThat(metadata.isTapToAddSupported).isTrue()
@@ -2197,6 +2203,7 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = true,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Automatic,
         )
 
         assertThat(metadata.isTapToAddSupported).isTrue()
@@ -2225,9 +2232,50 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Automatic,
         )
 
         assertThat(metadata.isTapToAddSupported).isFalse()
+    }
+
+    @Test
+    fun `paymentMethodOrientation returns Horizontal when config is Horizontal`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+        )
+        assertThat(metadata.paymentMethodOrientation()).isEqualTo(PaymentMethodOrientation.Horizontal)
+    }
+
+    @Test
+    fun `paymentMethodOrientation returns Vertical when config is Vertical`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+        )
+        assertThat(metadata.paymentMethodOrientation()).isEqualTo(PaymentMethodOrientation.Vertical)
+    }
+
+    @Test
+    fun `paymentMethodOrientation returns Horizontal when Automatic and 2 or fewer supported PMs`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "link"),
+            ),
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Automatic,
+        )
+        assertThat(metadata.supportedPaymentMethodTypes().size).isAtMost(2)
+        assertThat(metadata.paymentMethodOrientation()).isEqualTo(PaymentMethodOrientation.Horizontal)
+    }
+
+    @Test
+    fun `paymentMethodOrientation returns Vertical when Automatic and more than 2 supported PMs`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "ideal", "bancontact"),
+            ),
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Automatic,
+        )
+        assertThat(metadata.supportedPaymentMethodTypes().size).isGreaterThan(2)
+        assertThat(metadata.paymentMethodOrientation()).isEqualTo(PaymentMethodOrientation.Vertical)
     }
 
     private fun createPaymentElementMetadata(
@@ -2262,6 +2310,7 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Automatic,
         )
     }
 

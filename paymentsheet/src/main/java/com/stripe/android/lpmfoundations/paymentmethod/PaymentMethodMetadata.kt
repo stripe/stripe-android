@@ -92,6 +92,7 @@ internal data class PaymentMethodMetadata(
     val elementsSessionId: String? = null,
     val disableSsdOcrCardScan: Boolean,
     val cardArts: List<PaymentMethod.Card.CardArt>,
+    private val paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
 ) : Parcelable {
 
     @IgnoredOnParcel
@@ -100,6 +101,18 @@ internal data class PaymentMethodMetadata(
             is LinkState -> result
             is LinkDisabledState, null -> null
         }
+
+    fun paymentMethodOrientation(): PaymentMethodOrientation = when (paymentMethodLayout) {
+        PaymentSheet.PaymentMethodLayout.Horizontal -> PaymentMethodOrientation.Horizontal
+        PaymentSheet.PaymentMethodLayout.Vertical -> PaymentMethodOrientation.Vertical
+        PaymentSheet.PaymentMethodLayout.Automatic -> {
+            if (supportedPaymentMethodTypes().size <= 2) {
+                PaymentMethodOrientation.Horizontal
+            } else {
+                PaymentMethodOrientation.Vertical
+            }
+        }
+    }
 
     fun hasIntentToSetup(code: PaymentMethodCode): Boolean {
         return when (stripeIntent) {
@@ -350,6 +363,7 @@ internal data class PaymentMethodMetadata(
             integrationMetadata: IntegrationMetadata,
             analyticsMetadata: AnalyticsMetadata,
             isTapToAddAvailable: Boolean,
+            paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
         ): PaymentMethodMetadata {
             val linkSettings = elementsSession.linkSettings
             return PaymentMethodMetadata(
@@ -407,7 +421,8 @@ internal data class PaymentMethodMetadata(
                 enableMlKitCardScan = elementsSession.enableMlKitCardScan,
                 elementsSessionId = elementsSession.elementsSessionId,
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
-                cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty()
+                cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty(),
+                paymentMethodLayout = paymentMethodLayout,
             )
         }
 
@@ -476,7 +491,8 @@ internal data class PaymentMethodMetadata(
                 enableMlKitCardScan = elementsSession.enableMlKitCardScan,
                 elementsSessionId = elementsSession.elementsSessionId,
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
-                cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty()
+                cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty(),
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             )
         }
     }

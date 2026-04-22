@@ -77,6 +77,7 @@ internal object PaymentMethodMetadataFactory {
         elementsSessionId: String? = null,
         disableSsdOcrCardScan: Boolean = false,
         cardArts: List<PaymentMethod.Card.CardArt> = emptyList(),
+        paymentMethodLayout: PaymentSheet.PaymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -146,6 +147,7 @@ internal object PaymentMethodMetadataFactory {
             elementsSessionId = elementsSessionId,
             disableSsdOcrCardScan = disableSsdOcrCardScan,
             cardArts = cardArts,
+            paymentMethodLayout = paymentMethodLayout,
         )
     }
 

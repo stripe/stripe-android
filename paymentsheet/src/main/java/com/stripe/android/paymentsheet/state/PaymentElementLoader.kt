@@ -483,6 +483,13 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             isTapToAddAvailable = isTapToAddAvailable,
         )
 
+        val paymentMethodLayout = when (integrationConfiguration) {
+            is PaymentElementLoader.Configuration.PaymentSheet ->
+                integrationConfiguration.configuration.paymentMethodLayout
+            else ->
+                PaymentSheet.PaymentMethodLayout.Automatic
+        }
+
         val paymentMethodMetadata = PaymentMethodMetadata.createForPaymentElement(
             elementsSession = elementsSession,
             configuration = configuration,
@@ -496,6 +503,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             integrationMetadata = integrationMetadata,
             analyticsMetadata = analyticsMetadata,
             isTapToAddAvailable = isTapToAddAvailable,
+            paymentMethodLayout = paymentMethodLayout,
         )
 
         logCardArtExperiment(elementsSession, paymentMethodMetadata)

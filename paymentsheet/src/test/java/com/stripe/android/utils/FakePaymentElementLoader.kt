@@ -10,6 +10,7 @@ import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
@@ -48,7 +49,9 @@ internal class FakePaymentElementLoader(
 
     private fun createPaymentMethodMetadata(
         configuration: CommonConfiguration,
+        paymentMethodLayout: PaymentSheet.PaymentMethodLayout = PaymentSheet.PaymentMethodLayout.Automatic,
     ) = PaymentMethodMetadataFactory.create(
+        paymentMethodLayout = paymentMethodLayout,
         hasCustomerConfiguration = customer != null,
         stripeIntent = stripeIntent,
         billingDetailsCollectionConfiguration = configuration
@@ -78,13 +81,22 @@ internal class FakePaymentElementLoader(
             Result.failure(IllegalStateException("oh no"))
         } else {
             val configuration = integrationConfiguration.commonConfiguration
+            val paymentMethodLayout = when (integrationConfiguration) {
+                is PaymentElementLoader.Configuration.PaymentSheet ->
+                    integrationConfiguration.configuration.paymentMethodLayout
+                else ->
+                    PaymentSheet.PaymentMethodLayout.Vertical
+            }
             Result.success(
                 PaymentElementLoader.State(
                     config = configuration,
                     customer = customer,
                     paymentSelection = paymentSelection,
                     validationError = validationError,
-                    paymentMethodMetadata = createPaymentMethodMetadata(configuration).let { metadata ->
+                    paymentMethodMetadata = createPaymentMethodMetadata(
+                        configuration = configuration,
+                        paymentMethodLayout = paymentMethodLayout,
+                    ).let { metadata ->
                         if (integrationMetadata != null) {
                             metadata.copy(integrationMetadata = integrationMetadata)
                         } else {
