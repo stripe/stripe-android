@@ -68,7 +68,6 @@ internal class DefaultLogCardArtExperiment @Inject constructor(
                 savedCardPaymentMethodWithCardArtCount = savedCardPaymentMethods.count { it.card?.cardArt != null },
                 selectedPaymentMethodType = defaultPaymentSelection?.paymentMethodType,
                 selectedPaymentMethodHasCardArt = selectedPaymentMethodHasCardArt,
-                hasCardArt = paymentMethodMetadata.cardArts.isNotEmpty(),
             )
         )
 

@@ -28,7 +28,6 @@ internal sealed class LoggableExperiment(
         savedCardPaymentMethodWithCardArtCount: Int,
         selectedPaymentMethodType: String?,
         selectedPaymentMethodHasCardArt: Boolean,
-        hasCardArt: Boolean,
     ) : LoggableExperiment(
         arbId = experimentsData.arbId,
         experiment = experiment,
@@ -41,7 +40,6 @@ internal sealed class LoggableExperiment(
                 "saved_card_payment_method_with_card_art_count" to savedCardPaymentMethodWithCardArtCount.toString(),
                 "selected_payment_method_type" to (selectedPaymentMethodType ?: "null"),
                 "selected_payment_method_has_card_art" to selectedPaymentMethodHasCardArt.toString(),
-                "has_card_art" to hasCardArt.toString(),
             ),
     )
 

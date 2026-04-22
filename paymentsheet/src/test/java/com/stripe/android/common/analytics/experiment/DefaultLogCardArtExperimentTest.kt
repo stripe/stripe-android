@@ -267,39 +267,6 @@ class DefaultLogCardArtExperimentTest {
         assertThat(experiment.dimensions).containsEntry("saved_card_payment_method_with_card_art_count", "0")
     }
 
-    @Test
-    fun `has_card_art dimension is true when card arts present`() = runScenario {
-        val result = invoke(
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                cardArts = listOf(
-                    PaymentMethod.Card.CardArt(
-                        artImage = PaymentMethod.Card.CardArt.ArtImage(
-                            format = "png",
-                            url = "https://example.com/art.png",
-                        ),
-                        programName = "Test Program",
-                    ),
-                ),
-            ),
-        )
-
-        val experiment = awaitExperiment()
-        assertThat(experiment.dimensions).containsEntry("has_card_art", "true")
-        assertThat(result).isTrue()
-    }
-
-    @Test
-    fun `has_card_art dimension is false when no card arts`() = runScenario {
-        invoke(
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                cardArts = emptyList(),
-            ),
-        )
-
-        val experiment = awaitExperiment()
-        assertThat(experiment.dimensions).containsEntry("has_card_art", "false")
-    }
-
     private fun runScenario(
         block: suspend Scenario.() -> Unit,
     ) = runTest {
