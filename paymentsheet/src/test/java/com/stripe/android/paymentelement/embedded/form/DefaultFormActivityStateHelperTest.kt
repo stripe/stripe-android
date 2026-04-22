@@ -277,6 +277,62 @@ class DefaultFormActivityStateHelperTest {
     }
 
     @Test
+    fun `setting selection to null disables button`() = testScenario {
+        stateHolder.state.test {
+            awaitAndVerifyInitialState()
+
+            selectionHolder.set(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+            assertThat(awaitItem().isEnabled).isTrue()
+
+            selectionHolder.set(null)
+            assertThat(awaitItem().isEnabled).isFalse()
+        }
+    }
+
+    @Test
+    fun `setting selection while processing keeps button disabled`() = testScenario {
+        stateHolder.state.test {
+            awaitAndVerifyInitialState()
+
+            confirmationHandler.state.value =
+                confirmationStateConfirming(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+            val processingState = awaitItem()
+            assertThat(processingState.isProcessing).isTrue()
+            assertThat(processingState.isEnabled).isFalse()
+
+            selectionHolder.set(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `TapToAddResult ShowSavedPaymentMethods sets state helper result as expected`() {
+        val tapToAddHelper = FakeTapToAddHelper()
+        val customerStateHolder = FakeCustomerStateHolder()
+        val expectedSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
+        testScenario(
+            tapToAddHelper = tapToAddHelper,
+            customerStateHolder = customerStateHolder,
+        ) {
+            stateHolder.result.test {
+                tapToAddHelper.emitNextStep(
+                    TapToAddNextStep.ShowSavedPaymentMethods(
+                        paymentSelection = expectedSelection,
+                    )
+                )
+
+                assertThat(awaitItem()).isEqualTo(
+                    FormResult.Complete(
+                        selection = expectedSelection,
+                        hasBeenConfirmed = false,
+                        customerState = customerStateHolder.customer.value,
+                    )
+                )
+            }
+        }
+    }
+
+    @Test
     fun `TapToAddResult Complete sets state helper result as expected`() {
         val tapToAddHelper = FakeTapToAddHelper()
         val customerStateHolder = FakeCustomerStateHolder()
