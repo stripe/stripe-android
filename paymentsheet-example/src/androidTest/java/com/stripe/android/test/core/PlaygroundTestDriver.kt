@@ -1161,7 +1161,7 @@ internal class PlaygroundTestDriver(
         composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
             composeTestRule
                 .onAllNodes(hasTestTag(TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT))
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
 
