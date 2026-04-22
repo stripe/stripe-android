@@ -1,7 +1,6 @@
 package com.stripe.android.model
 
 import com.stripe.android.core.model.StripeModel
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.PaymentMethod.Type.Link
 import kotlinx.parcelize.Parcelize
 import java.util.UUID
@@ -79,10 +78,7 @@ internal data class ElementsSession(
         get() = linkSettings?.linkSignUpOptInInitialValue ?: false
 
     val enableAttestationOnIntentConfirmation: Boolean
-        get() {
-            return flags[Flag.ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION] == true &&
-                FeatureFlags.enableAttestationOnIntentConfirmation.isEnabled
-        }
+        get() = flags[Flag.ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION] == true
 
     val enableCardFundFiltering: Boolean
         get() = flags[Flag.ELEMENTS_MOBILE_CARD_FUND_FILTERING] == true

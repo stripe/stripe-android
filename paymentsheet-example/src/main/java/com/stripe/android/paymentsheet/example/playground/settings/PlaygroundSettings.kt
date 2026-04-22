@@ -592,7 +592,6 @@ internal class PlaygroundSettings private constructor(
                 listOf(PlaygroundConfigurationData.IntegrationType.LinkController)
             ),
             TermsDisplaySettingsDefinition,
-            AttestationOnIntentConfirmationDefinition,
             EnableTapToAddSettingsDefinition,
             CardArtSettingsDefinition,
             CustomStripeApiDefinition,

@@ -1,18 +1,9 @@
 package com.stripe.android.model
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.utils.FeatureFlags
-import com.stripe.android.testing.FeatureFlagTestRule
-import org.junit.Rule
 import org.junit.Test
 
 class ElementsSessionTest {
-
-    @get:Rule
-    val enableAttestationOnIntentConfirmationRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.enableAttestationOnIntentConfirmation,
-        isEnabled = true
-    )
 
     @Test
     fun `passiveCaptchaParams returns passiveCaptcha when flag is enabled`() {
@@ -109,17 +100,6 @@ class ElementsSessionTest {
         val session = createElementsSession(
             passiveCaptcha = null,
             flags = emptyMap()
-        )
-
-        assertThat(session.enableAttestationOnIntentConfirmation).isFalse()
-    }
-
-    @Test
-    fun `enableAttestationOnIntentConfirmation returns false when feature flag is disabled`() {
-        enableAttestationOnIntentConfirmationRule.setEnabled(false)
-        val session = createElementsSession(
-            passiveCaptcha = null,
-            flags = mapOf(ElementsSession.Flag.ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION to true)
         )
 
         assertThat(session.enableAttestationOnIntentConfirmation).isFalse()
