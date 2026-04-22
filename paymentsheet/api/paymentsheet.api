@@ -283,13 +283,6 @@ public final class com/stripe/android/link/ui/ComposableSingletons$SecondaryButt
 	public final fun getLambda$1093093247$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
-public final class com/stripe/android/link/ui/inline/ComposableSingletons$LinkInlineSignupFieldsKt {
-	public static final field INSTANCE Lcom/stripe/android/link/ui/inline/ComposableSingletons$LinkInlineSignupFieldsKt;
-	public fun <init> ()V
-	public final fun getLambda$1314356750$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda$1639009544$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-}
-
 public final class com/stripe/android/link/ui/inline/ComposableSingletons$LinkInlineSignupKt {
 	public static final field INSTANCE Lcom/stripe/android/link/ui/inline/ComposableSingletons$LinkInlineSignupKt;
 	public fun <init> ()V
@@ -336,10 +329,10 @@ public final class com/stripe/android/link/ui/verification/ComposableSingletons$
 	public static final field INSTANCE Lcom/stripe/android/link/ui/verification/ComposableSingletons$VerificationBodyKt;
 	public fun <init> ()V
 	public final fun getLambda$-391428647$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda$-690017062$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda$1556541497$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda$1594811933$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda$1814127193$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$211050873$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 }
 
 public final class com/stripe/android/link/ui/verification/ComposableSingletons$VerificationDialogKt {
