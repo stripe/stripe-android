@@ -9,6 +9,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.common.ui.BottomSheetScaffold
@@ -17,6 +18,7 @@ import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.state.CustomerState
+import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.uicore.StripeTheme
@@ -102,9 +104,14 @@ internal class FormActivity : AppCompatActivity() {
             val scrollState = rememberScrollState()
             BottomSheetScaffold(
                 topBar = {
-                    FormActivityTopBar(
-                        isLiveMode = formInteractor.isLiveMode,
-                        onDismissed = ::setCancelAndFinish,
+                    val topBarState by remember(formScreen) {
+                        formScreen.topBarState()
+                    }.collectAsState()
+                    PaymentSheetTopBar(
+                        state = topBarState,
+                        canNavigateBack = false,
+                        isEnabled = true,
+                        handleBackPressed = ::setCancelAndFinish,
                     )
                 },
                 content = {
