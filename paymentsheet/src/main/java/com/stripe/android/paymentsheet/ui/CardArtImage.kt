@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.ui
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -58,13 +59,15 @@ internal fun CardArtImage(
                 loadingContent = {
                     ShimmerEffect(
                         modifier = Modifier
-                            .width(maxWidth)
-                            .height(maxHeight)
+                            .heightIn(max = maxHeight)
+                            .widthIn(max = maxWidth)
+                            .aspectRatio(CBC_ICON_ASPECT_RATIO)
                             .clip(RoundedCornerShape(3.dp)),
                     ) {
                         Image(
                             painter = painterResource(R.drawable.stripe_ic_cbc),
                             contentDescription = null,
+                            contentScale = ContentScale.FillBounds,
                             modifier = Modifier.fillMaxSize(),
                         )
                     }
@@ -76,4 +79,5 @@ internal fun CardArtImage(
     }
 }
 
+private const val CBC_ICON_ASPECT_RATIO = 3f / 2f
 private val DebugCardArtPainter = ColorPainter(Color(0xFF635BFF))
