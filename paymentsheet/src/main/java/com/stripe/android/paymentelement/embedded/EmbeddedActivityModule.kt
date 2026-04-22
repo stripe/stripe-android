@@ -27,7 +27,6 @@ import com.stripe.android.paymentelement.embedded.form.DefaultFormActivityStateH
 import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFactory
 import com.stripe.android.paymentelement.embedded.form.FormActivityRegistrar
 import com.stripe.android.paymentelement.embedded.form.FormActivityStateHelper
-import com.stripe.android.paymentelement.embedded.form.FormActivitySubcomponent
 import com.stripe.android.paymentelement.embedded.form.OnClickDelegateOverrideImpl
 import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
 import com.stripe.android.paymentelement.embedded.manage.DefaultEmbeddedManageScreenInteractorFactory
@@ -59,11 +58,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Singleton
 
-@Module(
-    subcomponents = [
-        FormActivitySubcomponent::class,
-    ]
-)
+@Module
 internal interface EmbeddedActivityModule {
     @Binds
     fun bindsEmbeddedManageScreenInteractorFactory(
@@ -101,6 +96,11 @@ internal interface EmbeddedActivityModule {
     fun bindsLinkInlineSignupAvailability(
         impl: DefaultLinkInlineSignupAvailability,
     ): LinkInlineSignupAvailability
+
+    @Binds
+    fun providesFormActivityConfirmationHandlerRegistrar(
+        implementation: DefaultFormActivityRegistrar
+    ): FormActivityRegistrar
 
     @Suppress("TooManyFunctions")
     companion object {
@@ -184,15 +184,6 @@ internal interface EmbeddedActivityModule {
         @Provides
         @Singleton
         fun provideOnClickOverrideDelegate(): OnClickOverrideDelegate = OnClickDelegateOverrideImpl()
-
-        @Provides
-        @Singleton
-        fun providesFormActivityConfirmationHandlerRegistrar(
-            confirmationHandler: ConfirmationHandler,
-            tapToAddHelper: TapToAddHelper,
-        ): FormActivityRegistrar {
-            return DefaultFormActivityRegistrar(confirmationHandler, tapToAddHelper)
-        }
 
         @Provides
         @Singleton

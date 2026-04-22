@@ -38,7 +38,7 @@ internal class FormActivity : AppCompatActivity() {
     }
 
     @Inject
-    lateinit var formScreenFactory: EmbeddedNavigator.Screen.Form.Factory
+    lateinit var formScreen: EmbeddedNavigator.Screen.Form
 
     @Inject
     lateinit var formInteractor: DefaultVerticalModeFormInteractor
@@ -52,6 +52,9 @@ internal class FormActivity : AppCompatActivity() {
     @Inject
     lateinit var customerStateHolder: CustomerStateHolder
 
+    @Inject
+    lateinit var formActivityRegistrar: FormActivityRegistrar
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -62,13 +65,11 @@ internal class FormActivity : AppCompatActivity() {
 
         renderEdgeToEdge()
 
-        viewModel.component.subcomponentFactory.build(
+        viewModel.component.inject(this)
+
+        formActivityRegistrar.registerAndBootstrap(
             activityResultCaller = this,
             lifecycleOwner = this,
-        ).inject(this)
-
-        val formScreen = formScreenFactory.create(
-            onProcessingCompleted = ::setCompletedResultAndDismiss,
         )
 
         lifecycleScope.launch {
@@ -112,17 +113,6 @@ internal class FormActivity : AppCompatActivity() {
                 scrollState = scrollState,
             )
         }
-    }
-
-    private fun setCompletedResultAndDismiss() {
-        setFormResult(
-            FormResult.Complete(
-                selection = null,
-                hasBeenConfirmed = true,
-                customerState = getCustomerState(),
-            )
-        )
-        finish()
     }
 
     private fun setCancelAndFinish() {

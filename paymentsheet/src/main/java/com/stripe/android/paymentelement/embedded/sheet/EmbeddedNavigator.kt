@@ -9,7 +9,9 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.FormActivityConfirmationHelper
 import com.stripe.android.paymentelement.embedded.form.FormActivityStateHelper
+import com.stripe.android.paymentelement.embedded.form.FormResult
 import com.stripe.android.paymentelement.embedded.form.FormScreenContent
+import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.navigation.NavigationHandler
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
@@ -23,15 +25,13 @@ import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInt
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import java.io.Closeable
+import javax.inject.Inject
 
 internal class EmbeddedNavigator private constructor(
     private val eventReporter: EventReporter,
@@ -164,20 +164,15 @@ internal class EmbeddedNavigator private constructor(
             }
         }
 
-        class Form @AssistedInject constructor(
+        class Form @Inject constructor(
             private val formInteractor: DefaultVerticalModeFormInteractor,
             private val eventReporter: EventReporter,
             private val formActivityStateHelper: FormActivityStateHelper,
             private val confirmationHelper: FormActivityConfirmationHelper,
             private val embeddedSelectionHolder: EmbeddedSelectionHolder,
             private val savedPaymentMethodConfirmInteractorFactory: SavedPaymentMethodConfirmInteractor.Factory,
-            @Assisted private val onProcessingCompleted: () -> Unit,
+            private val customerStateHolder: CustomerStateHolder,
         ) : Screen() {
-            @AssistedFactory
-            interface Factory {
-                fun create(onProcessingCompleted: () -> Unit): Form
-            }
-
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(null)
 
             override fun title(): StateFlow<ResolvableString?> = stateFlowOf(null)
@@ -195,7 +190,15 @@ internal class EmbeddedNavigator private constructor(
                     onClick = {
                         confirmationHelper.confirm()
                     },
-                    onProcessingCompleted = onProcessingCompleted,
+                    onProcessingCompleted = {
+                        formActivityStateHelper.setResult(
+                            FormResult.Complete(
+                                selection = null,
+                                hasBeenConfirmed = true,
+                                customerState = customerStateHolder.customer.value,
+                            )
+                        )
+                    },
                     state = state,
                     updateSelection = embeddedSelectionHolder::set,
                     savedPaymentMethodConfirmInteractorFactory = savedPaymentMethodConfirmInteractorFactory,
