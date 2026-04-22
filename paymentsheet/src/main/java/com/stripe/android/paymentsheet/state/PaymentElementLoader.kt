@@ -380,6 +380,14 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             paymentMethodMetadata = pmMetadata,
         )
 
+        logCardArtExperiment(
+            elementsSession = elementsSession,
+            paymentMethodMetadata = pmMetadata,
+            savedPaymentMethods = elementsSession.customer?.paymentMethods.orEmpty(),
+            integrationConfiguration = integrationConfiguration,
+            defaultPaymentSelection = state.paymentSelection,
+        )
+
         logLinkExperimentExposures(
             elementsSession = elementsSession,
             state = state
@@ -497,8 +505,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             analyticsMetadata = analyticsMetadata,
             isTapToAddAvailable = isTapToAddAvailable,
         )
-
-        logCardArtExperiment(elementsSession, paymentMethodMetadata)
 
         return paymentMethodMetadata
     }
