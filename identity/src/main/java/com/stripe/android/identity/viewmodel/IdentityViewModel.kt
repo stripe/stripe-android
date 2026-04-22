@@ -1726,7 +1726,7 @@ internal class IdentityViewModel(
     suspend fun collectDataForSelfieScreen(
         navController: NavController,
         faceDetectorTransitioner: FaceDetectorTransitioner,
-        allowImageCollection: Boolean
+        trainingConsent: Boolean
     ) {
         selfieUploadState.collectLatest {
             when {
@@ -1748,7 +1748,7 @@ internal class IdentityViewModel(
                                 lastLowResResult = requireNotNull(it.lastLowResResult.data),
                                 bestHighResResult = requireNotNull(it.bestHighResResult.data),
                                 bestLowResResult = requireNotNull(it.bestLowResResult.data),
-                                trainingConsent = allowImageCollection,
+                                trainingConsent = trainingConsent,
                                 faceScoreVariance = faceDetectorTransitioner.scoreVariance,
                                 bestFaceScore = faceDetectorTransitioner.bestFaceScore,
                                 numFrames = faceDetectorTransitioner.numFrames,

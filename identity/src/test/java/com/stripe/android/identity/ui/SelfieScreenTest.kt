@@ -3,15 +3,12 @@ package com.stripe.android.identity.ui
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.Build
-import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
-import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performClick
 import androidx.lifecycle.MediatorLiveData
 import androidx.navigation.NavController
 import androidx.test.core.app.ApplicationProvider
@@ -63,7 +60,7 @@ class SelfieScreenTest {
     private val feedbackStateFlow = MutableStateFlow<Int?>(null)
 
     private val selfieCapturePage = mock<VerificationPageStaticContentSelfieCapturePage> {
-        on { consentText } doReturn SELFIE_CONSENT_TEXT
+        on { trainingConsentText } doReturn SELFIE_CONSENT_TEXT
     }
     private val verificationPage = mock<VerificationPage> {
         on { it.selfieCapture } doReturn selfieCapturePage
@@ -103,7 +100,6 @@ class SelfieScreenTest {
 
             onNodeWithTag(SCAN_VIEW_TAG).assertExists()
             onNodeWithTag(RESULT_VIEW_TAG).assertDoesNotExist()
-            onNodeWithTag(RETAKE_SELFIE_BUTTON_TAG).assertDoesNotExist()
 
             onNodeWithTag(SELFIE_SCAN_CONTINUE_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
         }
@@ -120,7 +116,6 @@ class SelfieScreenTest {
 
             onNodeWithTag(SCAN_VIEW_TAG).assertExists()
             onNodeWithTag(RESULT_VIEW_TAG).assertDoesNotExist()
-            onNodeWithTag(RETAKE_SELFIE_BUTTON_TAG).assertDoesNotExist()
 
             onNodeWithTag(SELFIE_SCAN_CONTINUE_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
         }
@@ -137,7 +132,6 @@ class SelfieScreenTest {
 
             onNodeWithTag(SCAN_VIEW_TAG).assertExists()
             onNodeWithTag(RESULT_VIEW_TAG).assertDoesNotExist()
-            onNodeWithTag(RETAKE_SELFIE_BUTTON_TAG).assertDoesNotExist()
 
             onNodeWithTag(SELFIE_SCAN_CONTINUE_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
         }
@@ -157,14 +151,13 @@ class SelfieScreenTest {
 
             onNodeWithTag(SCAN_VIEW_TAG).assertExists()
             onNodeWithTag(RESULT_VIEW_TAG).assertDoesNotExist()
-            onNodeWithTag(RETAKE_SELFIE_BUTTON_TAG).assertDoesNotExist()
 
             onNodeWithTag(SELFIE_SCAN_CONTINUE_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
         }
     }
 
     @Test
-    fun verifyScannedState() {
+    fun verifyScannedStateAutoSubmits() {
         val mockFilteredFrames = listOf(
             mockFilteredFramePair,
             mockFilteredFramePair,
@@ -195,20 +188,14 @@ class SelfieScreenTest {
                 .assertTextEquals(context.getString(R.string.stripe_selfie_capture_complete))
 
             onNodeWithTag(RESULT_VIEW_TAG).assertExists()
-            onNodeWithTag(RETAKE_SELFIE_BUTTON_TAG).assertExists()
-            onNodeWithTag(CONSENT_CHECKBOX_TAG).assertIsOff()
             onNodeWithTag(SCAN_VIEW_TAG).assertDoesNotExist()
-
-            onNodeWithTag(SELFIE_SCAN_CONTINUE_BUTTON_TAG).onChildAt(0).assertIsEnabled()
-
-            onNodeWithTag(SELFIE_SCAN_CONTINUE_BUTTON_TAG).performClick()
             onNodeWithTag(SELFIE_SCAN_CONTINUE_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
 
             runBlocking {
                 verify(mockIdentityViewModel).collectDataForSelfieScreen(
                     same(mockNavController),
                     same(faceDetectorTransitioner),
-                    eq(false)
+                    eq(true)
                 )
             }
         }
@@ -227,7 +214,8 @@ class SelfieScreenTest {
             SelfieScanScreen(
                 navController = mockNavController,
                 identityViewModel = mockIdentityViewModel,
-                selfieScanViewModel = mockSelfieScanViewModel
+                selfieScanViewModel = mockSelfieScanViewModel,
+                trainingConsent = true
             )
         }
         with(composeTestRule, testBlock)

@@ -39,5 +39,5 @@ internal data class VerificationPageStaticContentSelfieCapturePage(
     @SerialName("high_res_image_crop_padding")
     val highResImageCropPadding: Float,
     @SerialName("training_consent_text")
-    val consentText: String
+    val trainingConsentText: String
 ) : Parcelable

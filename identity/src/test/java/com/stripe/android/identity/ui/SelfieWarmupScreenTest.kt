@@ -5,18 +5,11 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import androidx.navigation.NavController
-import androidx.navigation.NavOptionsBuilder
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.identity.TestApplication
-import com.stripe.android.identity.navigation.SelfieDestination
-import com.stripe.android.identity.viewmodel.IdentityViewModel
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.any
-import org.mockito.kotlin.eq
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
@@ -26,26 +19,52 @@ class SelfieWarmupScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private val mockNavController = mock<NavController>()
-    private val mockIdentityViewModel = mock<IdentityViewModel>()
-
     @Test
-    fun verifyContentVisibleAndButtonClick() {
+    fun verifyContentVisibleAndContinueClickWithoutTrainingConsent() {
+        var trainingConsent: Boolean? = true
         composeTestRule.setContent {
-            SelfieWarmupScreen(
-                navController = mockNavController,
-                identityViewModel = mockIdentityViewModel,
-            )
+            SelfieWarmupView(trainingConsentText = null) {
+                trainingConsent = it
+            }
         }
 
         with(composeTestRule) {
             onNodeWithTag(SELFIE_WARMUP_CONTENT_TAG).assertExists()
 
             onNodeWithTag(SELFIE_CONTINUE_BUTTON_TAG).onChildAt(0).performClick()
-            verify(mockNavController).navigate(
-                eq(SelfieDestination.routeWithArgs),
-                any<NavOptionsBuilder.() -> Unit>()
-            )
+            assertThat(trainingConsent).isNull()
+        }
+    }
+
+    @Test
+    fun verifyAllowClickWithTrainingConsent() {
+        var trainingConsent: Boolean? = null
+        composeTestRule.setContent {
+            SelfieWarmupView(trainingConsentText = "<a href=\"https://stripe.com\">consent</a>") {
+                trainingConsent = it
+            }
+        }
+
+        with(composeTestRule) {
+            onNodeWithTag(SELFIE_TRAINING_CONSENT_TAG).assertExists()
+            onNodeWithTag(SELFIE_ALLOW_BUTTON_TAG).onChildAt(0).performClick()
+            assertThat(trainingConsent).isTrue()
+        }
+    }
+
+    @Test
+    fun verifyDeclineClickWithTrainingConsent() {
+        var trainingConsent: Boolean? = null
+        composeTestRule.setContent {
+            SelfieWarmupView(trainingConsentText = "<a href=\"https://stripe.com\">consent</a>") {
+                trainingConsent = it
+            }
+        }
+
+        with(composeTestRule) {
+            onNodeWithTag(SELFIE_TRAINING_CONSENT_TAG).assertExists()
+            onNodeWithTag(SELFIE_DECLINE_BUTTON_TAG).onChildAt(0).performClick()
+            assertThat(trainingConsent).isFalse()
         }
     }
 }

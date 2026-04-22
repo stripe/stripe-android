@@ -11,6 +11,7 @@ import com.stripe.android.identity.navigation.IndividualDestination
 import com.stripe.android.identity.navigation.IndividualWelcomeDestination
 import com.stripe.android.identity.navigation.OTPDestination
 import com.stripe.android.identity.navigation.SelfieDestination
+import com.stripe.android.identity.navigation.SelfieWarmupDestination
 import com.stripe.android.identity.navigation.finalErrorDestination
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -111,7 +112,7 @@ internal enum class Requirement {
                 }
 
                 contains(FACE) -> {
-                    SelfieDestination
+                    SelfieWarmupDestination
                 }
                 // NAME and DOB is present when type is not DOCUMENT
                 intersect(listOf(NAME, DOB)).isNotEmpty() -> {

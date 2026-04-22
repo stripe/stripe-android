@@ -154,7 +154,8 @@ internal fun IdentityNavGraph(
                 SelfieScanScreen(
                     navController = navController,
                     identityViewModel = identityViewModel,
-                    selfieScanViewModel = selfieScanViewModel
+                    selfieScanViewModel = selfieScanViewModel,
+                    trainingConsent = SelfieDestination.trainingConsent(it)
                 )
             }
             screen(DocumentUploadDestination.ROUTE) {
@@ -268,7 +269,7 @@ internal fun IdentityNavGraph(
                         )
                         navController.navigateTo(
                             if (fromSelfie) {
-                                SelfieDestination
+                                SelfieWarmupDestination
                             } else {
                                 DocumentScanDestination
                             }

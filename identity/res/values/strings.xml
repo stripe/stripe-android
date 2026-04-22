@@ -223,9 +223,15 @@
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">Your selfie images have not been saved. Do you want to leave?</string>
   <!-- Body for selfie warmup page -->
-  <string name="stripe_selfie_warmup_body">A few photos will be taken automatically on the next step to verify it\'s you</string>
+  <string name="stripe_selfie_warmup_body">Follow the instructions to take selfies to compare against the image on your photo ID.</string>
   <!-- Title for selfie warmup page -->
   <string name="stripe_selfie_warmup_title">Get ready to take a selfie</string>
+  <!-- Title for the optional training consent section on the selfie warmup page -->
+  <string name="stripe_selfie_warmup_training_consent_title">Help us improve verifications</string>
+  <!-- Button text to allow the optional training consent choice -->
+  <string name="stripe_allow">Allow</string>
+  <!-- Button text to decline the optional training consent choice -->
+  <string name="stripe_decline">Decline</string>
   <!-- When selected in an action sheet, opens the device's camera interface -->
   <string name="stripe_take_photo">Take Photo</string>
   <!-- Description for test mode -->

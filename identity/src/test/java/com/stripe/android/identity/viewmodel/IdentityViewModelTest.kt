@@ -1180,7 +1180,7 @@ internal class IdentityViewModelTest {
                 highResImageMaxDimension = HIGH_RES_IMAGE_MAX_DIMENSION,
                 highResImageCompressionQuality = HIGH_RES_COMPRESSION_QUALITY,
                 highResImageCropPadding = 0.5f,
-                consentText = "consent"
+                trainingConsentText = "consent"
             )
 
         val REQUIREMENTS_NO_MISSING = VerificationPageRequirements(missing = listOf())

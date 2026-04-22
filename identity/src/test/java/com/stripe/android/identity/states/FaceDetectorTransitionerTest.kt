@@ -413,7 +413,7 @@ internal class FaceDetectorTransitionerTest {
             highResImageMaxDimension = 1440,
             highResImageCompressionQuality = 0.92f,
             highResImageCropPadding = 0.5f,
-            consentText = "consent"
+            trainingConsentText = "consent"
         )
 
         val VALID_OUTPUT = FaceDetectorOutput(
