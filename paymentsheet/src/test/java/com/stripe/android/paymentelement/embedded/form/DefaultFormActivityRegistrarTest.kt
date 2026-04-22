@@ -25,7 +25,6 @@ internal class DefaultFormActivityRegistrarTest {
         registrar.registerAndBootstrap(
             activityResultCaller = activityResultCaller,
             lifecycleOwner = lifecycleOwner,
-            paymentMethodMetadata = paymentMethodMetadata
         )
 
         with(confirmationHandler.registerTurbine.awaitItem()) {
@@ -45,12 +44,10 @@ internal class DefaultFormActivityRegistrarTest {
         registrar.registerAndBootstrap(
             activityResultCaller = activityResultCaller,
             lifecycleOwner = lifecycleOwner,
-            paymentMethodMetadata = paymentMethodMetadata
         )
         registrar.registerAndBootstrap(
             activityResultCaller = activityResultCaller,
             lifecycleOwner = lifecycleOwner,
-            paymentMethodMetadata = paymentMethodMetadata
         )
 
         assertThat(confirmationHandler.registerTurbine.awaitItem()).isNotNull()
@@ -73,6 +70,7 @@ internal class DefaultFormActivityRegistrarTest {
         val registrar = DefaultFormActivityRegistrar(
             confirmationHandler = confirmationHandler,
             tapToAddHelper = tapToAddHelper,
+            paymentMethodMetadata = paymentMethodMetadata,
         )
 
         val scenario = Scenario(

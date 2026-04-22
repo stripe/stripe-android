@@ -4,17 +4,23 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.taptoadd.FakeTapToAddHelper
+import com.stripe.android.common.taptoadd.TapToAddNextStep
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateFixtures
+import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import com.stripe.android.ui.core.R
@@ -114,7 +120,7 @@ class DefaultFormActivityStateHelperTest {
             assertThat(enabledState.isProcessing).isFalse()
             assertThat(enabledState.isEnabled).isTrue()
 
-            stateHolder.updateConfirmationState(confirmationStateConfirming(selection))
+            confirmationHandler.state.value = confirmationStateConfirming(selection)
             val processingState = awaitItem()
             assertThat(processingState.isEnabled).isFalse()
             assertThat(processingState.processingState).isEqualTo(PrimaryButtonProcessingState.Processing)
@@ -126,7 +132,7 @@ class DefaultFormActivityStateHelperTest {
     fun `state updates when confirmation is successful`() = testScenario {
         stateHolder.state.test {
             awaitAndVerifyInitialState()
-            stateHolder.updateConfirmationState(confirmationStateComplete(true))
+            confirmationHandler.state.value = confirmationStateComplete(true)
 
             val completedState = awaitItem()
             assertThat(completedState.processingState).isEqualTo(PrimaryButtonProcessingState.Completed)
@@ -144,13 +150,13 @@ class DefaultFormActivityStateHelperTest {
             // State emitted from setting selection
             assertThat(awaitItem().isEnabled).isTrue()
 
-            stateHolder.updateConfirmationState(confirmationStateConfirming(selection))
+            confirmationHandler.state.value = confirmationStateConfirming(selection)
             val processingState = awaitItem()
             assertThat(processingState.isProcessing).isTrue()
             assertThat(processingState.isEnabled).isFalse()
             assertThat(processingState.processingState).isEqualTo(PrimaryButtonProcessingState.Processing)
 
-            stateHolder.updateConfirmationState(confirmationStateComplete(false))
+            confirmationHandler.state.value = confirmationStateComplete(false)
             val failedState = awaitItem()
             assertThat(failedState.isEnabled).isTrue()
             assertThat(failedState.isProcessing).isFalse()
@@ -164,13 +170,12 @@ class DefaultFormActivityStateHelperTest {
         stateHolder.state.test {
             awaitAndVerifyInitialState()
 
-            stateHolder.updateConfirmationState(confirmationStateComplete(false))
+            confirmationHandler.state.value = confirmationStateComplete(false)
             val failedState = awaitItem()
             assertThat(failedState.error).isEqualTo("Something went wrong".resolvableString)
 
-            stateHolder.updateConfirmationState(
+            confirmationHandler.state.value =
                 confirmationStateConfirming(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
-            )
             val confirmingState = awaitItem()
             assertThat(confirmingState.error).isNull()
         }
@@ -181,14 +186,12 @@ class DefaultFormActivityStateHelperTest {
         stateHolder.state.test {
             awaitAndVerifyInitialState()
 
-            stateHolder.updateConfirmationState(confirmationStateComplete(false))
+            confirmationHandler.state.value = confirmationStateComplete(false)
             assertThat(awaitItem().error).isEqualTo("Something went wrong".resolvableString)
 
-            stateHolder.updateConfirmationState(
-                ConfirmationHandler.State.Complete(
-                    result = ConfirmationHandler.Result.Canceled(
-                        action = ConfirmationHandler.Result.Canceled.Action.None
-                    )
+            confirmationHandler.state.value = ConfirmationHandler.State.Complete(
+                result = ConfirmationHandler.Result.Canceled(
+                    action = ConfirmationHandler.Result.Canceled.Action.None
                 )
             )
             val canceledState = awaitItem()
@@ -214,19 +217,6 @@ class DefaultFormActivityStateHelperTest {
 
             stateHolder.updateMandate("Some new mandate".resolvableString)
             assertThat(awaitItem().mandateText).isEqualTo("Some new mandate".resolvableString)
-        }
-    }
-
-    @Test
-    fun `updateEnabled updates isEnabled state`() = testScenario {
-        stateHolder.state.test {
-            awaitAndVerifyInitialState()
-
-            stateHolder.updateEnabled(true)
-            assertThat(awaitItem().isEnabled).isTrue()
-
-            stateHolder.updateEnabled(false)
-            assertThat(awaitItem().isEnabled).isFalse()
         }
     }
 
@@ -286,20 +276,102 @@ class DefaultFormActivityStateHelperTest {
         }
     }
 
+    @Test
+    fun `TapToAddResult Complete sets state helper result as expected`() {
+        val tapToAddHelper = FakeTapToAddHelper()
+        val customerStateHolder = FakeCustomerStateHolder()
+        testScenario(
+            tapToAddHelper = tapToAddHelper,
+            customerStateHolder = customerStateHolder,
+        ) {
+            stateHolder.result.test {
+                tapToAddHelper.emitNextStep(TapToAddNextStep.Complete)
+
+                assertThat(awaitItem()).isEqualTo(
+                    FormResult.Complete(
+                        selection = null,
+                        hasBeenConfirmed = true,
+                        customerState = customerStateHolder.customer.value,
+                    )
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `TapToAddResult Continue sets state helper result as expected`() {
+        val tapToAddHelper = FakeTapToAddHelper()
+        val customerStateHolder = FakeCustomerStateHolder()
+        testScenario(
+            tapToAddHelper = tapToAddHelper,
+            customerStateHolder = customerStateHolder,
+        ) {
+            val expectedSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
+
+            stateHolder.result.test {
+                tapToAddHelper.emitNextStep(
+                    TapToAddNextStep.Continue(
+                        paymentSelection = expectedSelection,
+                    )
+                )
+
+                assertThat(awaitItem()).isEqualTo(
+                    FormResult.Complete(
+                        selection = expectedSelection,
+                        hasBeenConfirmed = false,
+                        customerState = customerStateHolder.customer.value,
+                    )
+                )
+            }
+            assertThat(customerStateHolder.addPaymentMethodTurbine.awaitItem()).isEqualTo(
+                expectedSelection.paymentMethod
+            )
+        }
+    }
+
+    @Test
+    fun `TapToAddResult confirm saved payment method sets saved payment method confirm selection`() {
+        val tapToAddHelper = FakeTapToAddHelper()
+        val customerStateHolder = FakeCustomerStateHolder()
+        val expectedSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
+        testScenario(
+            tapToAddHelper = tapToAddHelper,
+            customerStateHolder = customerStateHolder,
+        ) {
+            stateHolder.state.test {
+                awaitAndVerifyInitialState()
+
+                tapToAddHelper.emitNextStep(
+                    TapToAddNextStep.ConfirmSavedPaymentMethod(
+                        paymentSelection = expectedSelection,
+                    )
+                )
+
+                assertThat(awaitItem().savedPaymentSelectionToConfirm).isEqualTo(
+                    expectedSelection,
+                )
+            }
+        }
+    }
+
     private class Scenario(
         val selectionHolder: EmbeddedSelectionHolder,
-        val stateHolder: FormActivityStateHelper,
+        val stateHolder: DefaultFormActivityStateHelper,
+        val confirmationHandler: FakeConfirmationHandler,
         val onClickOverrideDelegate: OnClickOverrideDelegate,
     )
 
     private fun testScenario(
         stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         config: EmbeddedPaymentElement.Configuration = EmbeddedConfirmationStateFixtures.defaultState().configuration,
+        tapToAddHelper: FakeTapToAddHelper = FakeTapToAddHelper.noOp(),
+        customerStateHolder: FakeCustomerStateHolder = FakeCustomerStateHolder(),
         block: suspend Scenario.() -> Unit
     ) = runTest {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(stripeIntent = stripeIntent)
         val selectionHolder = EmbeddedSelectionHolder(SavedStateHandle())
         val onClickOverrideDelegate = OnClickDelegateOverrideImpl()
+        val confirmationHandler = FakeConfirmationHandler()
         val stateHolder = DefaultFormActivityStateHelper(
             paymentMethodMetadata = paymentMethodMetadata,
             selectionHolder = selectionHolder,
@@ -307,11 +379,15 @@ class DefaultFormActivityStateHelperTest {
             coroutineScope = TestScope(UnconfinedTestDispatcher()),
             onClickDelegate = onClickOverrideDelegate,
             eventReporter = FakeEventReporter(),
+            confirmationHandler = confirmationHandler,
+            tapToAddHelper = tapToAddHelper,
+            customerStateHolder = customerStateHolder,
         )
 
         Scenario(
             selectionHolder = selectionHolder,
             stateHolder = stateHolder,
+            confirmationHandler = confirmationHandler,
             onClickOverrideDelegate = onClickOverrideDelegate,
         ).block()
     }
