@@ -48,6 +48,7 @@ import com.stripe.android.link.ui.LinkSpinner
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
 import com.stripe.android.model.ConsentUi
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.SectionStyle
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -229,7 +230,7 @@ private fun LaunchedEffects(
 @Composable
 private fun VerificationBodyContainer(
     isDialog: Boolean,
-    linkBrand: com.stripe.android.model.LinkBrand,
+    linkBrand: LinkBrand,
     onBackClicked: () -> Unit,
     content: @Composable ColumnScope.() -> Unit
 ) {
