@@ -192,6 +192,7 @@ internal object PaymentSheetFixtures {
                     stripeIntent = stripeIntent,
                     isGooglePayReady = isGooglePayReady,
                     linkState = linkState,
+                    paymentMethodLayout = config.paymentMethodLayout,
                 ),
             ),
             configuration = config,
