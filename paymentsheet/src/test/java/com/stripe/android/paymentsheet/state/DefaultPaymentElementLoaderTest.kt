@@ -4129,6 +4129,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `Card art experiment exposure is logged when loading`() = runScenario {
         val logCardArtExperiment = FakeLogCardArtExperiment()
+        val paymentSheetConfiguration = PaymentSheet.Configuration("Some Name")
 
         val loader = createPaymentElementLoader(
             logCardArtExperiment = logCardArtExperiment,
@@ -4136,7 +4137,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            paymentSheetConfiguration = paymentSheetConfiguration,
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = false,
             ),
@@ -4145,6 +4146,10 @@ internal class DefaultPaymentElementLoaderTest {
         val call = logCardArtExperiment.calls.awaitItem()
         assertThat(call.elementsSession.stripeIntent).isEqualTo(result.paymentMethodMetadata.stripeIntent)
         assertThat(call.paymentMethodMetadata).isEqualTo(result.paymentMethodMetadata)
+        assertThat(call.integrationConfiguration).isEqualTo(
+            PaymentElementLoader.Configuration.PaymentSheet(paymentSheetConfiguration)
+        )
+        assertThat(call.defaultPaymentSelection).isEqualTo(result.paymentSelection)
         logCardArtExperiment.calls.ensureAllEventsConsumed()
 
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()

@@ -3,13 +3,21 @@ package com.stripe.android.common.analytics.experiment
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.ExperimentAssignment
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.paymentMethodType
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import javax.inject.Inject
 
 internal interface LogCardArtExperiment {
     operator fun invoke(
         elementsSession: ElementsSession,
         paymentMethodMetadata: PaymentMethodMetadata,
+        savedPaymentMethods: List<PaymentMethod>,
+        integrationConfiguration: PaymentElementLoader.Configuration,
+        defaultPaymentSelection: PaymentSelection?,
     )
 }
 
@@ -21,8 +29,19 @@ internal class DefaultLogCardArtExperiment @Inject constructor(
     override fun invoke(
         elementsSession: ElementsSession,
         paymentMethodMetadata: PaymentMethodMetadata,
+        savedPaymentMethods: List<PaymentMethod>,
+        integrationConfiguration: PaymentElementLoader.Configuration,
+        defaultPaymentSelection: PaymentSelection?,
     ) {
         val experimentsData = elementsSession.experimentsData ?: return
+
+        val savedCardPaymentMethods = savedPaymentMethods.filter { it.type == PaymentMethod.Type.Card }
+
+        val selectedPaymentMethodHasCardArt = (defaultPaymentSelection as? PaymentSelection.Saved)
+            ?.paymentMethod
+            ?.card
+            ?.cardArt
+            ?.artImage != null
 
         experimentsData.experimentAssignments[
             ExperimentAssignment.OCS_MOBILE_CARD_ART,
@@ -34,8 +53,26 @@ internal class DefaultLogCardArtExperiment @Inject constructor(
                     group = variant,
                     paymentMethodMetadata = paymentMethodMetadata,
                     mode = mode,
+                    layout = integrationConfiguration.layoutDimensionValue(),
+                    savedPaymentMethodCount = savedPaymentMethods.size,
+                    savedCardPaymentMethodCount = savedCardPaymentMethods.size,
+                    savedCardPaymentMethodWithCardArtCount = savedCardPaymentMethods.count { it.card?.cardArt != null },
+                    selectedPaymentMethodType = defaultPaymentSelection?.paymentMethodType,
+                    selectedPaymentMethodHasCardArt = selectedPaymentMethodHasCardArt,
                 )
             )
         }
+    }
+}
+
+private fun PaymentElementLoader.Configuration.layoutDimensionValue(): String {
+    return when (this) {
+        is PaymentElementLoader.Configuration.PaymentSheet -> when (configuration.paymentMethodLayout) {
+            PaymentSheet.PaymentMethodLayout.Horizontal -> "horizontal"
+            PaymentSheet.PaymentMethodLayout.Vertical -> "vertical"
+            PaymentSheet.PaymentMethodLayout.Automatic -> "horizontal"
+        }
+        is PaymentElementLoader.Configuration.Embedded -> "vertical"
+        is PaymentElementLoader.Configuration.CryptoOnramp -> "vertical"
     }
 }

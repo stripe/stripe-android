@@ -37,12 +37,25 @@ internal sealed class LoggableExperiment(
         group: String,
         paymentMethodMetadata: PaymentMethodMetadata,
         mode: EventReporter.Mode,
+        layout: String,
+        savedPaymentMethodCount: Int,
+        savedCardPaymentMethodCount: Int,
+        savedCardPaymentMethodWithCardArtCount: Int,
+        selectedPaymentMethodType: String?,
+        selectedPaymentMethodHasCardArt: Boolean,
     ) : LoggableExperiment(
         arbId = experimentsData.arbId,
         experiment = experiment,
         group = group,
         dimensions = CommonElementsDimensions.getDimensions(paymentMethodMetadata, mode) +
-            mapOf("has_card_art" to paymentMethodMetadata.cardArts.isNotEmpty().toString()),
+            mapOf(
+                "in_app_elements_layout" to layout,
+                "saved_payment_method_count" to savedPaymentMethodCount.toString(),
+                "saved_card_payment_method_count" to savedCardPaymentMethodCount.toString(),
+                "saved_card_payment_method_with_card_art_count" to savedCardPaymentMethodWithCardArtCount.toString(),
+                "selected_payment_method_type" to (selectedPaymentMethodType ?: "null"),
+                "selected_payment_method_has_card_art" to selectedPaymentMethodHasCardArt.toString(),
+            ),
     )
 
     data class LinkHoldback(

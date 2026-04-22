@@ -5,6 +5,9 @@ import app.cash.turbine.Turbine
 import com.stripe.android.common.analytics.experiment.LogCardArtExperiment
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 
 internal class FakeLogCardArtExperiment : LogCardArtExperiment {
 
@@ -14,11 +17,17 @@ internal class FakeLogCardArtExperiment : LogCardArtExperiment {
     override fun invoke(
         elementsSession: ElementsSession,
         paymentMethodMetadata: PaymentMethodMetadata,
+        savedPaymentMethods: List<PaymentMethod>,
+        integrationConfiguration: PaymentElementLoader.Configuration,
+        defaultPaymentSelection: PaymentSelection?,
     ) {
         _calls.add(
             Call(
                 elementsSession = elementsSession,
                 paymentMethodMetadata = paymentMethodMetadata,
+                savedPaymentMethods = savedPaymentMethods,
+                integrationConfiguration = integrationConfiguration,
+                defaultPaymentSelection = defaultPaymentSelection,
             )
         )
     }
@@ -26,5 +35,8 @@ internal class FakeLogCardArtExperiment : LogCardArtExperiment {
     data class Call(
         val elementsSession: ElementsSession,
         val paymentMethodMetadata: PaymentMethodMetadata,
+        val savedPaymentMethods: List<PaymentMethod>,
+        val integrationConfiguration: PaymentElementLoader.Configuration,
+        val defaultPaymentSelection: PaymentSelection?,
     )
 }
