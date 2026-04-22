@@ -42,7 +42,7 @@ internal sealed class LoggableExperiment(
         savedCardPaymentMethodCount: Int,
         savedCardPaymentMethodWithCardArtCount: Int,
         selectedPaymentMethodType: String?,
-        selectedPaymentMethodHasCardArt: Boolean?,
+        selectedPaymentMethodHasCardArt: Boolean,
     ) : LoggableExperiment(
         arbId = experimentsData.arbId,
         experiment = experiment,
@@ -53,9 +53,9 @@ internal sealed class LoggableExperiment(
                 "saved_payment_method_count" to savedPaymentMethodCount.toString(),
                 "saved_card_payment_method_count" to savedCardPaymentMethodCount.toString(),
                 "saved_card_payment_method_with_card_art_count" to savedCardPaymentMethodWithCardArtCount.toString(),
-                "selected_payment_method_type" to selectedPaymentMethodType,
-                "selected_payment_method_has_card_art" to selectedPaymentMethodHasCardArt?.toString(),
-            ).filterNotNullValues(),
+                "selected_payment_method_type" to (selectedPaymentMethodType ?: "null"),
+                "selected_payment_method_has_card_art" to selectedPaymentMethodHasCardArt.toString(),
+            ),
     )
 
     data class LinkHoldback(

@@ -69,7 +69,7 @@ class DefaultLogCardArtExperimentTest {
         )
 
         val experiment = awaitExperiment()
-        assertThat(experiment.dimensions["in_app_elements_layout"]).isEqualTo("horizontal")
+        assertThat(experiment.dimensions).containsEntry("in_app_elements_layout", "horizontal")
     }
 
     @Test
@@ -81,7 +81,7 @@ class DefaultLogCardArtExperimentTest {
         )
 
         val experiment = awaitExperiment()
-        assertThat(experiment.dimensions["in_app_elements_layout"]).isEqualTo("vertical")
+        assertThat(experiment.dimensions).containsEntry("in_app_elements_layout", "vertical")
     }
 
     @Test
@@ -93,7 +93,7 @@ class DefaultLogCardArtExperimentTest {
         )
 
         val experiment = awaitExperiment()
-        assertThat(experiment.dimensions["in_app_elements_layout"]).isEqualTo("horizontal")
+        assertThat(experiment.dimensions).containsEntry("in_app_elements_layout", "horizontal")
     }
 
     @Test
@@ -107,7 +107,7 @@ class DefaultLogCardArtExperimentTest {
         )
 
         val experiment = awaitExperiment()
-        assertThat(experiment.dimensions["saved_payment_method_count"]).isEqualTo("3")
+        assertThat(experiment.dimensions).containsEntry("saved_payment_method_count", "3")
     }
 
     @Test
@@ -121,7 +121,7 @@ class DefaultLogCardArtExperimentTest {
         )
 
         val experiment = awaitExperiment()
-        assertThat(experiment.dimensions["saved_card_payment_method_count"]).isEqualTo("2")
+        assertThat(experiment.dimensions).containsEntry("saved_card_payment_method_count", "2")
     }
 
     @Test
@@ -135,7 +135,7 @@ class DefaultLogCardArtExperimentTest {
         )
 
         val experiment = awaitExperiment()
-        assertThat(experiment.dimensions["saved_card_payment_method_with_card_art_count"]).isEqualTo("2")
+        assertThat(experiment.dimensions).containsEntry("saved_card_payment_method_with_card_art_count", "2")
     }
 
     @Test
@@ -148,7 +148,7 @@ class DefaultLogCardArtExperimentTest {
         )
 
         val experiment = awaitExperiment()
-        assertThat(experiment.dimensions["selected_payment_method_type"]).isEqualTo("card")
+        assertThat(experiment.dimensions).containsEntry("selected_payment_method_type", "card")
     }
 
     @Test
@@ -158,17 +158,17 @@ class DefaultLogCardArtExperimentTest {
         )
 
         val experiment = awaitExperiment()
-        assertThat(experiment.dimensions["selected_payment_method_type"]).isEqualTo("google_pay")
+        assertThat(experiment.dimensions).containsEntry("selected_payment_method_type", "google_pay")
     }
 
     @Test
-    fun `selected_payment_method_type is absent when no selection`() = runScenario {
+    fun `selected_payment_method_type is null when no selection`() = runScenario {
         invoke(
             defaultPaymentSelection = null,
         )
 
         val experiment = awaitExperiment()
-        assertThat(experiment.dimensions).doesNotContainKey("selected_payment_method_type")
+        assertThat(experiment.dimensions).containsEntry("selected_payment_method_type", "null")
     }
 
     @Test
@@ -181,11 +181,11 @@ class DefaultLogCardArtExperimentTest {
         )
 
         val experiment = awaitExperiment()
-        assertThat(experiment.dimensions["selected_payment_method_has_card_art"]).isEqualTo("true")
+        assertThat(experiment.dimensions).containsEntry("selected_payment_method_has_card_art", "true")
     }
 
     @Test
-    fun `selected_payment_method_has_card_art is absent when saved card has no art`() = runScenario {
+    fun `selected_payment_method_has_card_art is false when saved card has no art`() = runScenario {
         val savedPm = createCardPaymentMethod(id = "pm_1", hasCardArt = false)
 
         invoke(
@@ -194,17 +194,17 @@ class DefaultLogCardArtExperimentTest {
         )
 
         val experiment = awaitExperiment()
-        assertThat(experiment.dimensions).doesNotContainKey("selected_payment_method_has_card_art")
+        assertThat(experiment.dimensions).containsEntry("selected_payment_method_has_card_art", "false")
     }
 
     @Test
-    fun `selected_payment_method_has_card_art is absent for non-saved selection`() = runScenario {
+    fun `selected_payment_method_has_card_art is false for non-saved selection`() = runScenario {
         invoke(
             defaultPaymentSelection = PaymentSelection.GooglePay,
         )
 
         val experiment = awaitExperiment()
-        assertThat(experiment.dimensions).doesNotContainKey("selected_payment_method_has_card_art")
+        assertThat(experiment.dimensions).containsEntry("selected_payment_method_has_card_art", "false")
     }
 
     @Test
@@ -214,9 +214,9 @@ class DefaultLogCardArtExperimentTest {
         )
 
         val experiment = awaitExperiment()
-        assertThat(experiment.dimensions["saved_payment_method_count"]).isEqualTo("0")
-        assertThat(experiment.dimensions["saved_card_payment_method_count"]).isEqualTo("0")
-        assertThat(experiment.dimensions["saved_card_payment_method_with_card_art_count"]).isEqualTo("0")
+        assertThat(experiment.dimensions).containsEntry("saved_payment_method_count", "0")
+        assertThat(experiment.dimensions).containsEntry("saved_card_payment_method_count", "0")
+        assertThat(experiment.dimensions).containsEntry("saved_card_payment_method_with_card_art_count", "0")
     }
 
     private fun runScenario(

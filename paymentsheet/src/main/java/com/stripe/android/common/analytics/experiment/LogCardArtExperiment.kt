@@ -41,8 +41,7 @@ internal class DefaultLogCardArtExperiment @Inject constructor(
             ?.paymentMethod
             ?.card
             ?.cardArt
-            ?.artImage
-            ?.let { true }
+            ?.artImage != null
 
         experimentsData.experimentAssignments[
             ExperimentAssignment.OCS_MOBILE_CARD_ART,
