@@ -35,6 +35,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.IntentConfiguration
+import com.stripe.android.paymentsheet.PaymentSheet.PaymentMethodLayout
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.LoadingEventReporter
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
@@ -486,8 +487,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val paymentMethodLayout = when (integrationConfiguration) {
             is PaymentElementLoader.Configuration.PaymentSheet ->
                 integrationConfiguration.configuration.paymentMethodLayout
-            else ->
-                PaymentSheet.PaymentMethodLayout.Automatic
+            is PaymentElementLoader.Configuration.CryptoOnramp,
+            is PaymentElementLoader.Configuration.Embedded -> PaymentMethodLayout.Vertical
         }
 
         val paymentMethodMetadata = PaymentMethodMetadata.createForPaymentElement(
