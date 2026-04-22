@@ -23,7 +23,6 @@ import com.stripe.android.paymentsheet.utils.ProductIntegrationType
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runProductIntegrationTest
-
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
