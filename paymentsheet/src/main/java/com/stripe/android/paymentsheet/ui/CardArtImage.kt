@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.ui
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.width
@@ -14,7 +15,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.image.LocalStripeImageLoader
 import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.rememberOptimizedImage
@@ -52,7 +55,20 @@ internal fun CardArtImage(
                     )
                 },
                 errorContent = { fallbackContent() },
-                loadingContent = {}
+                loadingContent = {
+                    ShimmerEffect(
+                        modifier = Modifier
+                            .width(maxWidth)
+                            .height(maxHeight)
+                            .clip(RoundedCornerShape(3.dp)),
+                    ) {
+                        Image(
+                            painter = painterResource(R.drawable.stripe_ic_cbc),
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                    }
+                }
             )
         } else {
             fallbackContent()
