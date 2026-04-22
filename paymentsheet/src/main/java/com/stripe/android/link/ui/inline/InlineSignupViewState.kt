@@ -25,7 +25,7 @@ constructor(
     val prefillEligibleFields: Set<LinkSignupField>,
     val allowsDefaultOptIn: Boolean,
     val linkSignUpOptInFeatureEnabled: Boolean,
-    val linkBrand: LinkBrand = LinkBrand.Link,
+    val linkBrand: LinkBrand,
     val didAskToChangeSignupDetails: Boolean = false,
     internal val isExpanded: Boolean = false,
     internal val apiFailed: Boolean = false,

@@ -23,5 +23,5 @@ internal data class VerificationViewState(
     val defaultPayment: DefaultPaymentUI?,
     val consentSection: ConsentUi.ConsentSection? = null,
     val isProcessingWebAuth: Boolean = false,
-    val linkBrand: LinkBrand = LinkBrand.Link,
+    val linkBrand: LinkBrand,
 ) : Parcelable

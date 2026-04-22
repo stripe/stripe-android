@@ -413,6 +413,7 @@ private fun Preview() {
                         defaultPayment = null,
                         isDialog = true,
                         allowLogout = false,
+                        linkBrand = LinkBrand.Link,
                         consentSection = ConsentUi.ConsentSection(
                             disclaimer = "By continuing you’ll share your name, email, and phone with [Merchant]"
                         )

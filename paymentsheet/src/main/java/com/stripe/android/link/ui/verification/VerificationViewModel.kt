@@ -20,8 +20,8 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.ConsentPresentation
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.utils.errorMessage
-import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.ConsumerSessionRefresh
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.ui.core.elements.OTPSpec
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

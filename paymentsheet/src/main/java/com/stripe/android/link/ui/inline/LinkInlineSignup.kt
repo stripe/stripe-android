@@ -141,7 +141,7 @@ internal fun LinkInlineSignup(
     requiresNameCollection: Boolean,
     allowsDefaultOptIn: Boolean,
     linkSignUpOptInFeatureEnabled: Boolean,
-    linkBrand: LinkBrand = LinkBrand.Link,
+    linkBrand: LinkBrand,
     didAskToChangeSignupDetails: Boolean,
     errorMessage: String?,
     toggleExpanded: () -> Unit,
@@ -153,11 +153,11 @@ internal fun LinkInlineSignup(
     val bringFullSignUpIntoViewRequester = remember { BringIntoViewRequester() }
     val simplifiedCheckbox = linkSignUpOptInFeatureEnabled || allowsDefaultOptIn
 
-    LaunchedEffect(expanded) {
-        if (expanded && !simplifiedCheckbox) {
-            emailFocusRequester.requestFocus()
-        }
-    }
+    RequestEmailFocusWhenExpanded(
+        expanded = expanded,
+        simplifiedCheckbox = simplifiedCheckbox,
+        emailFocusRequester = emailFocusRequester,
+    )
 
     val contentAlpha = if (enabled) ContentAlpha.high else ContentAlpha.disabled
     val shape = boxShape(simplifiedCheckbox)
@@ -209,6 +209,19 @@ internal fun LinkInlineSignup(
                     changeSignupDetails = changeSignupDetails,
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun RequestEmailFocusWhenExpanded(
+    expanded: Boolean,
+    simplifiedCheckbox: Boolean,
+    emailFocusRequester: FocusRequester,
+) {
+    LaunchedEffect(expanded, simplifiedCheckbox) {
+        if (expanded && !simplifiedCheckbox) {
+            emailFocusRequester.requestFocus()
         }
     }
 }
@@ -395,7 +408,7 @@ internal fun LinkFields(
     signUpState: SignUpState,
     requiresNameCollection: Boolean,
     allowsDefaultOptIn: Boolean,
-    linkBrand: LinkBrand = LinkBrand.Link,
+    linkBrand: LinkBrand,
     didAskToChangeSignupDetails: Boolean,
     errorMessage: String?,
     sectionController: SectionController,
@@ -482,6 +495,7 @@ private fun Preview() {
                 requiresNameCollection = true,
                 allowsDefaultOptIn = false,
                 linkSignUpOptInFeatureEnabled = false,
+                linkBrand = LinkBrand.Link,
                 didAskToChangeSignupDetails = false,
                 errorMessage = null,
                 toggleExpanded = {},
@@ -508,6 +522,7 @@ private fun PreviewDOI() {
                 requiresNameCollection = true,
                 allowsDefaultOptIn = true,
                 linkSignUpOptInFeatureEnabled = false,
+                linkBrand = LinkBrand.Link,
                 didAskToChangeSignupDetails = false,
                 errorMessage = null,
                 toggleExpanded = {},
@@ -533,6 +548,7 @@ private fun PreviewSignInFeature() {
             requiresNameCollection = false,
             allowsDefaultOptIn = false,
             linkSignUpOptInFeatureEnabled = true,
+            linkBrand = LinkBrand.Link,
             didAskToChangeSignupDetails = false,
             errorMessage = null,
             toggleExpanded = {},
