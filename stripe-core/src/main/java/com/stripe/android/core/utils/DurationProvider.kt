@@ -9,7 +9,7 @@ import kotlin.time.DurationUnit
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface DurationProvider {
     fun start(key: Key, reset: Boolean = true)
-    fun elapsed(key: Key): Duration? = null
+    fun elapsed(key: Key): Duration?
     fun end(key: Key): Duration?
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
