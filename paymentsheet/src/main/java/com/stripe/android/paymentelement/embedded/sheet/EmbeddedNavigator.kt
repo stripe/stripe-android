@@ -173,7 +173,14 @@ internal class EmbeddedNavigator private constructor(
             private val savedPaymentMethodConfirmInteractorFactory: SavedPaymentMethodConfirmInteractor.Factory,
             private val customerStateHolder: CustomerStateHolder,
         ) : Screen() {
-            override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(null)
+            override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(
+                    PaymentSheetTopBarState(
+                    showTestModeLabel = !formInteractor.isLiveMode,
+                    showEditMenu = false,
+                    isEditing = false,
+                    onEditIconPressed = {},
+                )
+            )
 
             override fun title(): StateFlow<ResolvableString?> = stateFlowOf(null)
 
