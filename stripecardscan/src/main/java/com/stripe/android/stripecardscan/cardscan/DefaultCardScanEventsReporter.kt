@@ -1,5 +1,6 @@
 package com.stripe.android.stripecardscan.cardscan
 
+import androidx.annotation.MainThread
 import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -10,6 +11,7 @@ import javax.inject.Inject
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 
+@MainThread
 internal class DefaultCardScanEventsReporter @Inject constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
