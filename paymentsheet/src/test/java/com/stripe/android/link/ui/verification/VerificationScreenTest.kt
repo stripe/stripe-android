@@ -3,11 +3,11 @@ package com.stripe.android.link.ui.verification
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.assertContentDescriptionContains
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
-import androidx.compose.ui.test.assertContentDescriptionContains
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -49,7 +49,7 @@ internal class VerificationScreenTest {
 
     @Test
     fun `title, email and otp should be displayed on screen load`() = runTest(dispatcher) {
-        val viewModel = createViewModel()
+        val viewModel = createViewModel(linkBrand = LinkBrand.Link)
         composeTestRule.setContent {
             DefaultLinkTheme {
                 VerificationScreen(viewModel)
@@ -72,7 +72,7 @@ internal class VerificationScreenTest {
         val linkAccountManager = FakeLinkAccountManager()
         linkAccountManager.startVerificationResult = Result.failure(RuntimeException(Throwable("oops")))
 
-        val viewModel = createViewModel(linkAccountManager)
+        val viewModel = createViewModel(linkAccountManager, linkBrand = LinkBrand.Link)
 
         composeTestRule.setContent {
             DefaultLinkTheme {
@@ -99,7 +99,7 @@ internal class VerificationScreenTest {
         val linkAccountManager = FakeLinkAccountManager()
         linkAccountManager.confirmVerificationResult = Result.failure(RuntimeException(Throwable("oops")))
 
-        val viewModel = createViewModel(linkAccountManager)
+        val viewModel = createViewModel(linkAccountManager, linkBrand = LinkBrand.Link)
 
         composeTestRule.setContent {
             DefaultLinkTheme {
@@ -133,7 +133,7 @@ internal class VerificationScreenTest {
             }
         }
 
-        val viewModel = createViewModel(linkAccountManager)
+        val viewModel = createViewModel(linkAccountManager, linkBrand = LinkBrand.Link)
 
         composeTestRule.setContent {
             DefaultLinkTheme {
@@ -165,7 +165,7 @@ internal class VerificationScreenTest {
             }
         }
 
-        val viewModel = createViewModel(linkAccountManager)
+        val viewModel = createViewModel(linkAccountManager, linkBrand = LinkBrand.Link)
 
         composeTestRule.setContent {
             DefaultLinkTheme {
@@ -192,7 +192,8 @@ internal class VerificationScreenTest {
     @Test
     fun `header image and button should be displayed for dialog mode`() = runTest(dispatcher) {
         val viewModel = createViewModel(
-            isDialog = true
+            isDialog = true,
+            linkBrand = LinkBrand.Link,
         )
         composeTestRule.setContent {
             DefaultLinkTheme {
@@ -258,6 +259,7 @@ internal class VerificationScreenTest {
         var dismissClicked = false
         val viewModel = createViewModel(
             isDialog = true,
+            linkBrand = LinkBrand.Link,
             onDismissClicked = {
                 dismissClicked = true
             }
@@ -292,7 +294,7 @@ internal class VerificationScreenTest {
         isDialog: Boolean = false,
         onDismissClicked: () -> Unit = {},
         linkLaunchMode: LinkLaunchMode = LinkLaunchMode.PaymentMethodSelection(null),
-        linkBrand: LinkBrand = LinkBrand.Link,
+        linkBrand: LinkBrand,
         dismissWithResult: (LinkActivityResult) -> Unit = {}
     ): VerificationViewModel {
         return VerificationViewModel(

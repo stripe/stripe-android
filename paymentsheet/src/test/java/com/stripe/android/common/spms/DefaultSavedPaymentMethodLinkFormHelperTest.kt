@@ -14,6 +14,7 @@ import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.uicore.elements.Controller
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -118,6 +119,7 @@ internal class DefaultSavedPaymentMethodLinkFormHelperTest {
                 prefillEligibleFields = emptySet(),
                 allowsDefaultOptIn = false,
                 linkSignUpOptInFeatureEnabled = false,
+                linkBrand = LinkBrand.Link,
                 isExpanded = false,
             )
 
@@ -146,6 +148,7 @@ internal class DefaultSavedPaymentMethodLinkFormHelperTest {
                 prefillEligibleFields = emptySet(),
                 allowsDefaultOptIn = false,
                 linkSignUpOptInFeatureEnabled = false,
+                linkBrand = LinkBrand.Link,
                 isExpanded = true,
             )
 
@@ -182,6 +185,7 @@ internal class DefaultSavedPaymentMethodLinkFormHelperTest {
                 prefillEligibleFields = emptySet(),
                 allowsDefaultOptIn = false,
                 linkSignUpOptInFeatureEnabled = false,
+                linkBrand = LinkBrand.Link,
                 isExpanded = true,
             )
 

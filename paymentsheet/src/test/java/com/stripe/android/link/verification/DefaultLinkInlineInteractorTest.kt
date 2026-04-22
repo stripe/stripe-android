@@ -19,9 +19,9 @@ import com.stripe.android.link.verification.VerificationState.Loading
 import com.stripe.android.link.verification.VerificationState.Render2FA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PassiveCaptchaParamsFactory
-import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.LinkState.LoginState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils.createLinkConfiguration
@@ -272,7 +272,8 @@ class DefaultLinkInlineInteractorTest {
             allowLogout = false,
             isSendingNewCode = false,
             defaultPayment = null,
-            didSendNewCode = false
+            didSendNewCode = false,
+            linkBrand = LinkBrand.Link,
         )
 
         interactor.setup(createPaymentMethodMetadata())
@@ -316,7 +317,8 @@ class DefaultLinkInlineInteractorTest {
             allowLogout = false,
             isSendingNewCode = false,
             defaultPayment = null,
-            didSendNewCode = false
+            didSendNewCode = false,
+            linkBrand = LinkBrand.Link,
         )
 
         val verificationState = Render2FA(
@@ -364,7 +366,8 @@ class DefaultLinkInlineInteractorTest {
             allowLogout = false,
             isSendingNewCode = false,
             defaultPayment = null,
-            didSendNewCode = false
+            didSendNewCode = false,
+            linkBrand = LinkBrand.Link,
         )
 
         val verificationState = Render2FA(
@@ -422,7 +425,8 @@ class DefaultLinkInlineInteractorTest {
             allowLogout = false,
             isSendingNewCode = false,
             defaultPayment = null,
-            didSendNewCode = false
+            didSendNewCode = false,
+            linkBrand = LinkBrand.Link,
         )
 
         val verificationState = Render2FA(
@@ -469,7 +473,8 @@ class DefaultLinkInlineInteractorTest {
             allowLogout = false,
             isSendingNewCode = false,
             defaultPayment = null,
-            didSendNewCode = false
+            didSendNewCode = false,
+            linkBrand = LinkBrand.Link,
         )
 
         val verificationState = Render2FA(
@@ -547,7 +552,8 @@ class DefaultLinkInlineInteractorTest {
             allowLogout = false,
             isSendingNewCode = false,
             defaultPayment = null,
-            didSendNewCode = false
+            didSendNewCode = false,
+            linkBrand = LinkBrand.Link,
         )
 
         val verificationState = Render2FA(
