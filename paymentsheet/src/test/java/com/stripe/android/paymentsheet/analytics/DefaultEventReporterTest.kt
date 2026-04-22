@@ -1411,6 +1411,10 @@ class DefaultEventReporterTest {
             assertThat(call.reset).isEqualTo(reset)
         }
 
+        override fun elapsed(key: DurationProvider.Key): Duration? {
+            return null
+        }
+
         override fun end(key: DurationProvider.Key): Duration {
             val call = endCalls.pop()
             assertThat(call.key).isEqualTo(key)

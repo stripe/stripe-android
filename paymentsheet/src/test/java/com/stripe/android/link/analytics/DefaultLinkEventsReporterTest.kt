@@ -84,6 +84,10 @@ class DefaultLinkEventsReporterTest {
             // Do nothing.
         }
 
+        override fun elapsed(key: DurationProvider.Key): Duration? {
+            return Duration.ZERO
+        }
+
         override fun end(key: DurationProvider.Key): Duration? {
             return Duration.ZERO
         }

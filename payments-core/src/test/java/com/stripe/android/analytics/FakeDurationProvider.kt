@@ -13,6 +13,11 @@ internal class FakeDurationProvider(
         calls.add(Call.Start(key, reset))
     }
 
+    override fun elapsed(key: DurationProvider.Key): Duration {
+        calls.add(Call.Elapsed(key))
+        return duration
+    }
+
     override fun end(key: DurationProvider.Key): Duration {
         calls.add(Call.End(key))
         return duration
@@ -24,6 +29,8 @@ internal class FakeDurationProvider(
         val key: DurationProvider.Key
 
         data class Start(override val key: DurationProvider.Key, val reset: Boolean) : Call
+
+        data class Elapsed(override val key: DurationProvider.Key) : Call
 
         data class End(override val key: DurationProvider.Key) : Call
     }
