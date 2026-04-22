@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -18,7 +17,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -38,40 +36,6 @@ import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
-
-@Composable
-internal fun FormActivityUI(
-    interactor: DefaultVerticalModeFormInteractor,
-    eventReporter: EventReporter,
-    onClick: () -> Unit,
-    onProcessingCompleted: () -> Unit,
-    state: FormActivityStateHelper.State,
-    onDismissed: () -> Unit,
-    updateSelection: (PaymentSelection.Saved) -> Unit,
-    savedPaymentMethodConfirmInteractorFactory: SavedPaymentMethodConfirmInteractor.Factory,
-) {
-    val scrollState = rememberScrollState()
-    BottomSheetScaffold(
-        topBar = {
-            FormActivityTopBar(
-                isLiveMode = interactor.isLiveMode,
-                onDismissed = onDismissed
-            )
-        },
-        content = {
-            FormScreenContent(
-                interactor = interactor,
-                eventReporter = eventReporter,
-                onClick = onClick,
-                onProcessingCompleted = onProcessingCompleted,
-                state = state,
-                updateSelection = updateSelection,
-                savedPaymentMethodConfirmInteractorFactory = savedPaymentMethodConfirmInteractorFactory,
-            )
-        },
-        scrollState = scrollState
-    )
-}
 
 @Composable
 internal fun FormScreenContent(

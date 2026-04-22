@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.embedded.form
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -150,16 +151,17 @@ internal class FormActivityScreenShotTest {
         val state by stateHolder.state.collectAsState()
 
         ViewModelStoreOwnerContext {
-            FormActivityUI(
-                interactor = interactor,
-                eventReporter = eventReporter,
-                onClick = {},
-                onProcessingCompleted = {},
-                state = state.copy(isEnabled = enabled),
-                onDismissed = {},
-                updateSelection = {},
-                savedPaymentMethodConfirmInteractorFactory = FakeSavedPaymentMethodConfirmInteractor.Factory(),
-            )
+            Column {
+                FormScreenContent(
+                    interactor = interactor,
+                    eventReporter = eventReporter,
+                    onClick = {},
+                    onProcessingCompleted = {},
+                    state = state.copy(isEnabled = enabled),
+                    updateSelection = {},
+                    savedPaymentMethodConfirmInteractorFactory = FakeSavedPaymentMethodConfirmInteractor.Factory(),
+                )
+            }
         }
     }
 }
