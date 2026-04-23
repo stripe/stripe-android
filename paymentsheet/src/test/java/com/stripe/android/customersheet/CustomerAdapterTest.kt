@@ -290,25 +290,7 @@ class CustomerAdapterTest {
     }
 
     @Test
-    fun `attachPaymentMethod fails with default message when the payment method couldn't be attached`() = runTest {
-        val adapter = createAdapter(
-            customerRepository = FakeCustomerRepository(
-                onAttachPaymentMethod = {
-                    Result.failure(
-                        APIException(
-                            message = "could not attach payment method",
-                        )
-                    )
-                }
-            )
-        )
-        val result = adapter.attachPaymentMethod("pm_1234")
-        assertThat(result.failureOrNull()?.displayMessage)
-            .isEqualTo("Something went wrong")
-    }
-
-    @Test
-    fun `attachPaymentMethod fails with generic message for non-card API error`() = runTest {
+    fun `attachPaymentMethod fails with generic message when the payment method couldn't be attached`() = runTest {
         val adapter = createAdapter(
             customerRepository = FakeCustomerRepository(
                 onAttachPaymentMethod = {
@@ -342,25 +324,7 @@ class CustomerAdapterTest {
     }
 
     @Test
-    fun `detachPaymentMethod fails with default message when the payment method couldn't be detached`() = runTest {
-        val adapter = createAdapter(
-            customerRepository = FakeCustomerRepository(
-                onDetachPaymentMethod = {
-                    Result.failure(
-                        APIException(
-                            message = "could not detach payment method",
-                        )
-                    )
-                }
-            )
-        )
-        val result = adapter.detachPaymentMethod("pm_1234")
-        assertThat(result.failureOrNull()?.displayMessage)
-            .isEqualTo("Something went wrong")
-    }
-
-    @Test
-    fun `detachPaymentMethod fails with generic message for non-card API error`() = runTest {
+    fun `detachPaymentMethod fails with generic message when the payment method couldn't be detached`() = runTest {
         val adapter = createAdapter(
             customerRepository = FakeCustomerRepository(
                 onDetachPaymentMethod = {
@@ -397,28 +361,7 @@ class CustomerAdapterTest {
     }
 
     @Test
-    fun `updatePaymentMethod fails with default message when the payment method couldn't be updated`() = runTest {
-        val adapter = createAdapter(
-            customerRepository = FakeCustomerRepository(
-                onUpdatePaymentMethod = {
-                    Result.failure(
-                        APIException(
-                            message = "could not update payment method",
-                        )
-                    )
-                }
-            )
-        )
-        val result = adapter.updatePaymentMethod(
-            paymentMethodId = "pm_1234",
-            params = PaymentMethodUpdateParams.createCard()
-        )
-        assertThat(result.failureOrNull()?.displayMessage)
-            .isEqualTo("Something went wrong")
-    }
-
-    @Test
-    fun `updatePaymentMethod fails with generic message for non-card API error`() = runTest {
+    fun `updatePaymentMethod fails with generic message when the payment method couldn't be updated`() = runTest {
         val adapter = createAdapter(
             customerRepository = FakeCustomerRepository(
                 onUpdatePaymentMethod = {
