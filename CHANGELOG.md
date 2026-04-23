@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [FIXED][12950](https://github.com/stripe/stripe-android/pull/12950) Fixed an issue where raw API error messages (e.g. `invalid_request_error`) were displayed to end users instead of a generic fallback message. Only `card_error` messages are now shown directly.
+
 ## 23.5.0 - 2026-04-20
 * [REMOVED][12871](https://github.com/stripe/stripe-android/pull/12871) Removed UPI support across the SDK.
 
