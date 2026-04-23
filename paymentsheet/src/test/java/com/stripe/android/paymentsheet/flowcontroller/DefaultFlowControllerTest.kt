@@ -78,6 +78,7 @@ import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResultCallback
 import com.stripe.android.paymentsheet.PaymentOptionsActivityResult
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.PaymentMethodLayout
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER
 import com.stripe.android.paymentsheet.PaymentSheetResult
@@ -479,7 +480,8 @@ internal class DefaultFlowControllerTest {
                 validationError = null,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                     hasCustomerConfiguration = true,
-                    allowsDelayedPaymentMethods = false
+                    allowsDelayedPaymentMethods = false,
+                    paymentMethodLayout = PaymentMethodLayout.Automatic,
                 ),
             ),
             configuration = PaymentSheet.Configuration("com.stripe.android.paymentsheet.test"),

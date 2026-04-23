@@ -49,6 +49,7 @@ internal sealed class TapToAddIntegrationTestRunnerContext(
         protected val configuration = StripePaymentSheet.Configuration.Builder(
             merchantDisplayName = "Merchant, Inc.",
         )
+            .paymentMethodLayout(StripePaymentSheet.PaymentMethodLayout.Vertical)
             .customer(customerConfig)
             .build()
 
