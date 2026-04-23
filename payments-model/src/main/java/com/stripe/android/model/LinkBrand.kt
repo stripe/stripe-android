@@ -15,6 +15,11 @@ enum class LinkBrand(val value: String) {
     @SerialName("notlink")
     Notlink("notlink");
 
+    fun brandName(): String = when (this) {
+        Link -> "Link"
+        Notlink -> "Notlink"
+    }
+
     internal object Serializer :
         EnumIgnoreUnknownSerializer<LinkBrand>(entries.toTypedArray(), Link)
 }

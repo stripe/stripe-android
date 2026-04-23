@@ -28,7 +28,7 @@ class AfterpayClearpayHeaderElementTest {
 
         assertThat(
             element.getLabel(ApplicationProvider.getApplicationContext<Application>().resources)
-        ).isEqualTo("Buy Now, Pay Later with <img/> <b>ⓘ</b>")
+        ).isEqualTo("Buy now or pay later with <img/> <b>ⓘ</b>")
     }
 
     @Test

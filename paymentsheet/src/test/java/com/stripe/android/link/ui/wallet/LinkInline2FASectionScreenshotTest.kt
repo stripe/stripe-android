@@ -7,6 +7,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.verification.VerificationViewState
 import com.stripe.android.model.DisplayablePaymentDetails
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -48,6 +49,7 @@ class LinkInline2FASectionScreenshotTest {
             defaultPayment = null,
             isDialog = false,
             allowLogout = true,
+            linkBrand = LinkBrand.Link,
         )
 
         paparazziRule.snapshot {
@@ -84,7 +86,8 @@ class LinkInline2FASectionScreenshotTest {
             email = "test@stripe.com",
             isDialog = false,
             allowLogout = true,
-            defaultPayment = paymentUI
+            defaultPayment = paymentUI,
+            linkBrand = LinkBrand.Link,
         )
 
         paparazziRule.snapshot {
@@ -121,7 +124,8 @@ class LinkInline2FASectionScreenshotTest {
             email = "test@stripe.com",
             isDialog = false,
             allowLogout = true,
-            defaultPayment = paymentUI
+            defaultPayment = paymentUI,
+            linkBrand = LinkBrand.Link,
         )
 
         paparazziRule.snapshot {
@@ -160,7 +164,8 @@ class LinkInline2FASectionScreenshotTest {
             email = "payment@example.com",
             isDialog = false,
             allowLogout = true,
-            defaultPayment = paymentUI
+            defaultPayment = paymentUI,
+            linkBrand = LinkBrand.Link,
         )
 
         paparazziRule.snapshot {
@@ -192,6 +197,7 @@ class LinkInline2FASectionScreenshotTest {
             defaultPayment = null,
             isDialog = false,
             allowLogout = true,
+            linkBrand = LinkBrand.Link,
         )
 
         paparazziRule.snapshot {

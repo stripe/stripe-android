@@ -3,6 +3,7 @@ package com.stripe.android.link.ui.verification
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.LinkScreenshotSurface
 import com.stripe.android.model.ConsentUi
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.ui.core.elements.OTPSpec
 import com.stripe.android.uicore.elements.OTPElement
@@ -81,6 +82,7 @@ internal class VerificationScreenshotTest(
                             defaultPayment = null,
                             isDialog = false,
                             allowLogout = true,
+                            linkBrand = LinkBrand.Link,
                         )
                     )
                 ),
@@ -99,6 +101,7 @@ internal class VerificationScreenshotTest(
                             defaultPayment = null,
                             isDialog = false,
                             allowLogout = true,
+                            linkBrand = LinkBrand.Link,
                         )
                     )
                 ),
@@ -117,6 +120,7 @@ internal class VerificationScreenshotTest(
                             defaultPayment = null,
                             isDialog = false,
                             allowLogout = true,
+                            linkBrand = LinkBrand.Link,
                         )
                     )
                 ),
@@ -135,6 +139,7 @@ internal class VerificationScreenshotTest(
                             defaultPayment = null,
                             isDialog = false,
                             allowLogout = true,
+                            linkBrand = LinkBrand.Link,
                         )
                     )
                 ),
@@ -153,6 +158,7 @@ internal class VerificationScreenshotTest(
                             defaultPayment = null,
                             isDialog = false,
                             allowLogout = true,
+                            linkBrand = LinkBrand.Link,
                         )
                     )
                 ),
@@ -171,6 +177,7 @@ internal class VerificationScreenshotTest(
                             defaultPayment = null,
                             isDialog = true,
                             allowLogout = false,
+                            linkBrand = LinkBrand.Link,
                         )
                     )
                 ),
@@ -189,6 +196,7 @@ internal class VerificationScreenshotTest(
                             defaultPayment = null,
                             isDialog = true,
                             allowLogout = false,
+                            linkBrand = LinkBrand.Link,
                         )
                     )
                 ),
@@ -207,6 +215,7 @@ internal class VerificationScreenshotTest(
                             defaultPayment = null,
                             isDialog = true,
                             allowLogout = false,
+                            linkBrand = LinkBrand.Link,
                         )
                     )
                 ),
@@ -227,6 +236,7 @@ internal class VerificationScreenshotTest(
                             didSendNewCode = false,
                             defaultPayment = null,
                             allowLogout = true,
+                            linkBrand = LinkBrand.Link,
                         )
                     )
                 ),
@@ -247,6 +257,7 @@ internal class VerificationScreenshotTest(
                             didSendNewCode = false,
                             defaultPayment = null,
                             allowLogout = true,
+                            linkBrand = LinkBrand.Link,
                         )
                     )
                 ),

@@ -18,6 +18,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -350,6 +351,7 @@ internal class FormHelperTest {
                 userInput = userInput,
                 allowsDefaultOptIn = false,
                 linkSignUpOptInFeatureEnabled = false,
+                linkBrand = LinkBrand.Link,
             ),
         ) {
             assertThat(expectMostRecentItem()).isEqualTo(
@@ -400,6 +402,7 @@ internal class FormHelperTest {
                 isExpanded = false,
                 allowsDefaultOptIn = false,
                 linkSignUpOptInFeatureEnabled = false,
+                linkBrand = LinkBrand.Link,
             )
         ) {
             assertThat(expectMostRecentItem()).isEqualTo(
@@ -454,6 +457,7 @@ internal class FormHelperTest {
                 ),
                 allowsDefaultOptIn = false,
                 linkSignUpOptInFeatureEnabled = false,
+                linkBrand = LinkBrand.Link,
             )
         ) {
             assertThat(expectMostRecentItem()).isEqualTo(
@@ -535,6 +539,7 @@ internal class FormHelperTest {
                     isExpanded = true,
                     allowsDefaultOptIn = false,
                     linkSignUpOptInFeatureEnabled = false,
+                    linkBrand = LinkBrand.Link,
                 )
             )
 

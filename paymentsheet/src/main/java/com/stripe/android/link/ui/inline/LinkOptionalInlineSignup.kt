@@ -29,7 +29,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.input.ImeAction
@@ -40,6 +39,7 @@ import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.LinkTerms
 import com.stripe.android.link.ui.LinkTermsType
 import com.stripe.android.link.ui.signup.SignUpState
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.CircularProgressIndicator
 import com.stripe.android.uicore.elements.EmailConfig
@@ -87,6 +87,7 @@ internal fun LinkOptionalInlineSignup(
         isShowingPhoneFirst = viewState.isShowingPhoneFirst,
         enabled = enabled,
         requiresNameCollection = viewModel.requiresNameCollection,
+        linkBrand = viewState.linkBrand,
         errorMessage = errorMessage?.resolve(),
         modifier = modifier
     )
@@ -103,6 +104,7 @@ internal fun LinkOptionalInlineSignup(
     signUpState: SignUpState,
     enabled: Boolean,
     requiresNameCollection: Boolean,
+    linkBrand: LinkBrand,
     errorMessage: String?,
     modifier: Modifier = Modifier
 ) {
@@ -144,6 +146,7 @@ internal fun LinkOptionalInlineSignup(
             isShowingPhoneFirst = isShowingPhoneFirst,
             requiresNameCollection = requiresNameCollection,
             allowsDefaultOptIn = false,
+            linkBrand = linkBrand,
             errorMessage = errorMessage,
             emailFocusRequester = emailFocusRequester,
             phoneFocusRequester = phoneFocusRequester,
@@ -217,6 +220,7 @@ internal fun EmailCollection(
 @Composable
 internal fun LinkLogo(
     modifier: Modifier = Modifier,
+    linkBrand: LinkBrand,
 ) {
     Icon(
         painter = painterResource(
@@ -226,7 +230,7 @@ internal fun LinkLogo(
                 R.drawable.stripe_link_logo_knockout_white
             }
         ),
-        contentDescription = stringResource(id = com.stripe.android.R.string.stripe_link),
+        contentDescription = linkBrand.brandName(),
         modifier = modifier.semantics {
             testTag = "LinkLogoIcon"
         },
@@ -248,6 +252,7 @@ private fun PreviewInitial() {
                 enabled = true,
                 isShowingPhoneFirst = false,
                 requiresNameCollection = true,
+                linkBrand = LinkBrand.Link,
                 errorMessage = null,
                 modifier = Modifier.padding(16.dp),
             )
@@ -269,6 +274,7 @@ private fun PreviewInitialWithPhoneFirst() {
                 enabled = true,
                 isShowingPhoneFirst = true,
                 requiresNameCollection = true,
+                linkBrand = LinkBrand.Link,
                 errorMessage = null,
                 modifier = Modifier.padding(16.dp),
             )
@@ -290,6 +296,7 @@ private fun PreviewFilledOut() {
                 enabled = true,
                 isShowingPhoneFirst = false,
                 requiresNameCollection = true,
+                linkBrand = LinkBrand.Link,
                 errorMessage = null,
                 modifier = Modifier.padding(16.dp),
             )

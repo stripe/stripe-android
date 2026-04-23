@@ -48,6 +48,7 @@ import com.stripe.android.link.ui.LinkSpinner
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
 import com.stripe.android.model.ConsentUi
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.SectionStyle
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -76,6 +77,7 @@ internal fun VerificationBody(
     if (state.isProcessingWebAuth) {
         VerificationBodyContainer(
             isDialog = state.isDialog,
+            linkBrand = state.linkBrand,
             onBackClicked = onBack
         ) {
             LinkLoadingScreen()
@@ -100,6 +102,7 @@ internal fun VerificationBody(
 
     VerificationBodyContainer(
         isDialog = state.isDialog,
+        linkBrand = state.linkBrand,
         onBackClicked = {
             focusManager.clearFocus()
             onBack()
@@ -227,6 +230,7 @@ private fun LaunchedEffects(
 @Composable
 private fun VerificationBodyContainer(
     isDialog: Boolean,
+    linkBrand: LinkBrand,
     onBackClicked: () -> Unit,
     content: @Composable ColumnScope.() -> Unit
 ) {
@@ -242,7 +246,7 @@ private fun VerificationBodyContainer(
                     modifier = Modifier
                         .testTag(VERIFICATION_HEADER_IMAGE_TAG),
                     painter = painterResource(R.drawable.stripe_link_logo),
-                    contentDescription = stringResource(com.stripe.android.R.string.stripe_link),
+                    contentDescription = linkBrand.brandName(),
                 )
 
                 Spacer(modifier = Modifier.weight(1f))
@@ -409,6 +413,7 @@ private fun Preview() {
                         defaultPayment = null,
                         isDialog = true,
                         allowLogout = false,
+                        linkBrand = LinkBrand.Link,
                         consentSection = ConsentUi.ConsentSection(
                             disclaimer = "By continuing you’ll share your name, email, and phone with [Merchant]"
                         )
