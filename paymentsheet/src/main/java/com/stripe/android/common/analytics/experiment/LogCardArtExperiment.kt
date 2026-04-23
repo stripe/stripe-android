@@ -13,13 +13,6 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import javax.inject.Inject
 
 internal interface LogCardArtExperiment {
-    /**
-     * Logs the card art experiment exposure and returns whether card art should be enabled.
-     *
-     * Card art is enabled when:
-     * - The experiment variant is "treatment", OR
-     * - The local feature flag is enabled (debug-only fallback for testing)
-     */
     operator fun invoke(
         elementsSession: ElementsSession,
         paymentMethodMetadata: PaymentMethodMetadata,

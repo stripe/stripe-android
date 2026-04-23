@@ -372,38 +372,35 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             throw PaymentSheetLoadingException.NoPaymentMethodTypesAvailable(requested)
         }
 
-        val state = PaymentElementLoader.State(
-            config = configuration,
-            customer = customer.await(),
-            paymentSelection = initialPaymentSelection.await(),
-            validationError = stripeIntent.validate(),
-            paymentMethodMetadata = pmMetadata,
-        )
-
         val isCardArtEnabled = logCardArtExperiment(
             elementsSession = elementsSession,
             paymentMethodMetadata = pmMetadata,
             savedPaymentMethods = elementsSession.customer?.paymentMethods.orEmpty(),
             integrationConfiguration = integrationConfiguration,
-            defaultPaymentSelection = state.paymentSelection,
+            defaultPaymentSelection = initialPaymentSelection.await(),
         )
 
-        val finalPmMetadata = pmMetadata.copy(isCardArtEnabled = isCardArtEnabled)
-        val finalState = state.copy(paymentMethodMetadata = finalPmMetadata)
+        val state = PaymentElementLoader.State(
+            config = configuration,
+            customer = customer.await(),
+            paymentSelection = initialPaymentSelection.await(),
+            validationError = stripeIntent.validate(),
+            paymentMethodMetadata = pmMetadata.copy(isCardArtEnabled = isCardArtEnabled),
+        )
 
         logLinkExperimentExposures(
             elementsSession = elementsSession,
-            state = finalState
+            state = state
         )
 
         reportSuccessfulLoad(
             elementsSession = elementsSession,
-            state = finalState,
+            state = state,
             isReloadingAfterProcessDeath = metadata.isReloadingAfterProcessDeath,
-            paymentMethodMetadata = finalPmMetadata,
+            paymentMethodMetadata = state.paymentMethodMetadata,
         )
 
-        return@runCatching finalState
+        return@runCatching state
     }
 
     private suspend fun loadSession(
@@ -507,6 +504,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             integrationMetadata = integrationMetadata,
             analyticsMetadata = analyticsMetadata,
             isTapToAddAvailable = isTapToAddAvailable,
+            isCardArtEnabled = false
         )
 
         return paymentMethodMetadata

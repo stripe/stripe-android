@@ -32,6 +32,7 @@ internal class NewPaymentMethodVerticalLayoutUIScreenshotTest {
                 paymentMethods = paymentMethods,
                 selectedIndex = 0,
                 isEnabled = true,
+                isCardArtEnabled = false,
                 imageLoader = mock(),
             )
         }
@@ -57,6 +58,7 @@ internal class NewPaymentMethodVerticalLayoutUIScreenshotTest {
                 paymentMethods = paymentMethods,
                 selectedIndex = 0,
                 isEnabled = true,
+                isCardArtEnabled = false,
                 imageLoader = mock(),
             )
         }
@@ -70,6 +72,7 @@ internal class NewPaymentMethodVerticalLayoutUIScreenshotTest {
                 paymentMethods = paymentMethods,
                 selectedIndex = 0,
                 isEnabled = true,
+                isCardArtEnabled = false,
                 imageLoader = mock(),
             )
         }
@@ -91,6 +94,7 @@ internal class NewPaymentMethodVerticalLayoutUIScreenshotTest {
                 paymentMethods = paymentMethods,
                 selectedIndex = 0,
                 isEnabled = true,
+                isCardArtEnabled = false,
                 imageLoader = mock(),
             )
         }
@@ -115,6 +119,7 @@ internal class NewPaymentMethodVerticalLayoutUIScreenshotTest {
                 paymentMethods = paymentMethods,
                 selectedIndex = 0,
                 isEnabled = true,
+                isCardArtEnabled = false,
                 imageLoader = mock(),
             )
         }

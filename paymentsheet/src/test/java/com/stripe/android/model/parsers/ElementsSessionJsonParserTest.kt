@@ -1874,29 +1874,6 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
-    fun `Card art always parsed regardless of feature flag`() {
-        enableCardArtRule.setEnabled(false)
-
-        val json = createElementsSessionWithCardArt(
-            cardArt = """
-                [
-                    {
-                        "payment_method": "pm_123",
-                        "art_image": { "url": "https://example.com/art.png", "format": "image/png" },
-                        "program_name": "Test Program"
-                    }
-                ]
-            """
-        )
-
-        val session = parseElementsSession(json)
-
-        // Card art is always merged at parse time; display gating is handled downstream
-        // by PaymentMethodMetadata.isCardArtEnabled.
-        assertThat(session?.customer?.paymentMethods?.first()?.card?.cardArt).isNotNull()
-    }
-
-    @Test
     fun `Card art partial match only sets art on matching payment method`() {
         val json = createElementsSessionWithCardArt(
             extraPaymentMethod = """

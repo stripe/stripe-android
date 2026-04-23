@@ -158,6 +158,7 @@ internal fun PaymentMethodEmbeddedLayoutUI(
             paymentMethods = paymentMethods,
             selection = selection,
             isEnabled = isEnabled,
+            isCardArtEnabled = displayedSavedPaymentMethod?.cardArtEnabled ?: false,
             imageLoader = imageLoader,
             appearance = appearance,
             updatePaymentMethodVisibility = updatePaymentMethodVisibility
@@ -295,6 +296,7 @@ internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(
     paymentMethods: List<DisplayablePaymentMethod>,
     selection: PaymentMethodVerticalLayoutInteractor.Selection?,
     isEnabled: Boolean,
+    isCardArtEnabled: Boolean,
     imageLoader: StripeImageLoader,
     appearance: Embedded,
     updatePaymentMethodVisibility: (String, LayoutCoordinates) -> Unit = { _, _ -> },
@@ -318,6 +320,7 @@ internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(
             NewPaymentMethodRowButton(
                 isEnabled = isEnabled,
                 isSelected = true,
+                isCardArtEnabled = isCardArtEnabled,
                 displayablePaymentMethod = displayablePaymentMethod,
                 imageLoader = imageLoader,
                 appearance = appearance,
@@ -336,6 +339,7 @@ internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(
             NewPaymentMethodRowButton(
                 isEnabled = isEnabled,
                 isSelected = isSelected,
+                isCardArtEnabled = isCardArtEnabled,
                 displayablePaymentMethod = item,
                 imageLoader = imageLoader,
                 appearance = appearance,

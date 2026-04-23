@@ -18,6 +18,7 @@ internal fun NewPaymentMethodVerticalLayoutUI(
     paymentMethods: List<DisplayablePaymentMethod>,
     selectedIndex: Int,
     isEnabled: Boolean,
+    isCardArtEnabled: Boolean,
     imageLoader: StripeImageLoader,
     modifier: Modifier = Modifier,
     updatePaymentMethodVisibility: (String, LayoutCoordinates) -> Unit = { _, _ -> },
@@ -31,6 +32,7 @@ internal fun NewPaymentMethodVerticalLayoutUI(
             NewPaymentMethodRowButton(
                 isEnabled = isEnabled,
                 isSelected = index == selectedIndex,
+                isCardArtEnabled = isCardArtEnabled,
                 displayablePaymentMethod = item,
                 imageLoader = imageLoader,
                 appearance = Embedded.Builder().rowStyle(rowStyle).build(),

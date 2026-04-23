@@ -48,17 +48,16 @@ internal fun SavedPaymentMethodRowButton(
             ?: displayableSavedPaymentMethod.displayName
 
     val paymentMethodId = displayableSavedPaymentMethod.paymentMethod.id
+    val isCardArtEnabled = displayableSavedPaymentMethod.cardArtEnabled
     PaymentMethodRowButton(
         isEnabled = isEnabled,
         isSelected = isSelected,
+        isCardArtEnabled = isCardArtEnabled,
         iconContent = {
             val displayBrand = displayableSavedPaymentMethod.paymentMethod.card?.displayBrand
-            val isCardArtEnabled = displayableSavedPaymentMethod.cardArtEnabled
             CardArtImage(
-                url = if (isCardArtEnabled) {
-                    displayableSavedPaymentMethod.paymentMethod.card?.cardArt?.artImage?.url
-                } else {
-                    null
+                url = displayableSavedPaymentMethod.paymentMethod.card?.cardArt?.artImage?.url?.takeIf {
+                    isCardArtEnabled
                 },
                 modifier = Modifier
                     .width(UIConstants.iconWidth(isCardArtEnabled))

@@ -36,6 +36,7 @@ internal class NewPaymentMethodRowButtonScreenshotTest {
                 subtitle = null,
                 promoText = null,
                 iconRequiresTinting = true,
+                isCardArtEnabled = false,
                 onClick = {},
                 modifier = Modifier,
             )
@@ -55,6 +56,7 @@ internal class NewPaymentMethodRowButtonScreenshotTest {
                 subtitle = null,
                 promoText = null,
                 iconRequiresTinting = true,
+                isCardArtEnabled = false,
                 onClick = {},
                 modifier = Modifier,
             )
@@ -74,6 +76,7 @@ internal class NewPaymentMethodRowButtonScreenshotTest {
                 subtitle = null,
                 promoText = null,
                 iconRequiresTinting = true,
+                isCardArtEnabled = false,
                 onClick = {},
                 modifier = Modifier,
             )
@@ -93,6 +96,7 @@ internal class NewPaymentMethodRowButtonScreenshotTest {
                 subtitle = null,
                 promoText = null,
                 iconRequiresTinting = true,
+                isCardArtEnabled = false,
                 onClick = {},
                 modifier = Modifier,
             )
@@ -112,6 +116,7 @@ internal class NewPaymentMethodRowButtonScreenshotTest {
                 subtitle = "Buy now or pay later with Klarna.",
                 promoText = null,
                 iconRequiresTinting = false,
+                isCardArtEnabled = false,
                 onClick = {},
                 modifier = Modifier,
             )
@@ -131,6 +136,7 @@ internal class NewPaymentMethodRowButtonScreenshotTest {
                 subtitle = "A very long subtitle, that you should read all of and you should Buy now or pay later" +
                     " with Klarna.",
                 iconRequiresTinting = false,
+                isCardArtEnabled = false,
                 promoText = null,
                 onClick = {},
                 modifier = Modifier,
@@ -150,6 +156,7 @@ internal class NewPaymentMethodRowButtonScreenshotTest {
                 title = "Card",
                 subtitle = "Mastercard **** 4444",
                 iconRequiresTinting = false,
+                isCardArtEnabled = false,
                 promoText = null,
                 onClick = {},
                 modifier = Modifier,
