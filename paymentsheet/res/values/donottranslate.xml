@@ -18,5 +18,6 @@
     <string name="stripe_paymentsheet_bacs_support_default_address_line_two">207–211 Old St, London EC1V 9NR</string>
 
     <string name="stripe_paymentsheet_iban">IBAN</string>
+    <string name="stripe_notlink" translatable="false">Notlink</string>
     <string name="stripe_paymentsheet_invalid_deferred_intent_usage">The payment method on the intent doesn\'t match the one provided in the createIntentCallback. When using deferred intent creation, ensure you\'re either creating a new intent with the correct payment method or updating an existing intent with the new payment method ID.</string>
 </resources>
