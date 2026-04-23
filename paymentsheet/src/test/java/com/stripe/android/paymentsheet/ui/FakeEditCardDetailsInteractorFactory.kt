@@ -7,6 +7,9 @@ internal class FakeEditCardDetailsInteractorFactory : EditCardDetailsInteractor.
     var billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration? = null
         private set
 
+    var cardEditConfiguration: CardEditConfiguration? = null
+        private set
+
     var onCardUpdateParamsChanged: CardUpdateParamsCallback? = null
         private set
 
@@ -19,6 +22,7 @@ internal class FakeEditCardDetailsInteractorFactory : EditCardDetailsInteractor.
         onBrandChoiceChanged: CardBrandCallback,
         onCardUpdateParamsChanged: CardUpdateParamsCallback
     ): EditCardDetailsInteractor {
+        this.cardEditConfiguration = cardEditConfiguration
         this.onCardUpdateParamsChanged = onCardUpdateParamsChanged
         this.billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration
         return FakeEditCardDetailsInteractor(
