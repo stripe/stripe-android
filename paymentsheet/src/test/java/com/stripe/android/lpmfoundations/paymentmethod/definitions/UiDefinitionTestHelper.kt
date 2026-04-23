@@ -252,7 +252,7 @@ internal fun checkBillingField(
     assertThat(billingSection.fields[0]).isInstanceOf<AddressElement>()
 }
 
-private fun checkSectionField(
+internal fun checkSectionField(
     formElements: List<FormElement>,
     sectionName: String,
     position: Int,
