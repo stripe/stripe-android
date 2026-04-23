@@ -14,17 +14,22 @@ import com.stripe.android.crypto.onramp.exception.MissingConsumerSecretException
 import com.stripe.android.crypto.onramp.exception.MissingCryptoCustomerException
 import com.stripe.android.crypto.onramp.exception.MissingPaymentMethodException
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
+import com.stripe.android.crypto.onramp.model.CrsCarfDeclaration
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
+import com.stripe.android.crypto.onramp.model.EuIdentifiers
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
+import com.stripe.android.crypto.onramp.model.OnrampCollectEuIdentifiersResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
+import com.stripe.android.crypto.onramp.model.OnrampCrsCarfDeclarationResult
+import com.stripe.android.crypto.onramp.model.OnrampGetIdentifierRequirementsResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
@@ -39,6 +44,8 @@ import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.crypto.onramp.model.googlePayKycInfo
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
+import com.stripe.android.crypto.onramp.ui.CrsCarfDeclarationActivityResult
+import com.stripe.android.crypto.onramp.ui.CrsCarfDeclarationScreenAction
 import com.stripe.android.crypto.onramp.ui.KycRefreshScreenAction
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -325,6 +332,102 @@ internal class OnrampInteractor @Inject constructor(
                         )
                     )
                     OnrampAttachKycInfoResult.Failed(error)
+                }
+            )
+    }
+
+    suspend fun getIdentifierRequirements(): OnrampGetIdentifierRequirementsResult {
+        val secret = consumerSessionClientSecret()
+        if (secret == null) {
+            val error = MissingConsumerSecretException()
+            analyticsService?.track(
+                OnrampAnalyticsEvent.ErrorOccurred(
+                    operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.GetIdentifierRequirements,
+                    error = error,
+                )
+            )
+            return OnrampGetIdentifierRequirementsResult.Failed(error)
+        }
+
+        return cryptoApiRepository.getIdentifierRequirements(secret)
+            .fold(
+                onSuccess = { requirements ->
+                    analyticsService?.track(OnrampAnalyticsEvent.IdentifierRequirementsRetrieved)
+                    OnrampGetIdentifierRequirementsResult.Completed(requirements)
+                },
+                onFailure = { error ->
+                    analyticsService?.track(
+                        OnrampAnalyticsEvent.ErrorOccurred(
+                            operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.GetIdentifierRequirements,
+                            error = error,
+                        )
+                    )
+                    OnrampGetIdentifierRequirementsResult.Failed(error)
+                }
+            )
+    }
+
+    suspend fun collectEuIdentifiers(identifiers: EuIdentifiers): OnrampCollectEuIdentifiersResult {
+        val secret = consumerSessionClientSecret()
+        if (secret == null) {
+            val error = MissingConsumerSecretException()
+            analyticsService?.track(
+                OnrampAnalyticsEvent.ErrorOccurred(
+                    operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.CollectEuIdentifiers,
+                    error = error,
+                )
+            )
+            return OnrampCollectEuIdentifiersResult.Failed(error)
+        }
+
+        return cryptoApiRepository.collectEuIdentifiers(identifiers, secret)
+            .fold(
+                onSuccess = { result ->
+                    analyticsService?.track(OnrampAnalyticsEvent.EuIdentifiersSubmitted)
+                    OnrampCollectEuIdentifiersResult.Completed(result)
+                },
+                onFailure = { error ->
+                    analyticsService?.track(
+                        OnrampAnalyticsEvent.ErrorOccurred(
+                            operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.CollectEuIdentifiers,
+                            error = error,
+                        )
+                    )
+                    OnrampCollectEuIdentifiersResult.Failed(error)
+                }
+            )
+    }
+
+    suspend fun startCrsCarfDeclaration(): OnrampStartCrsCarfDeclarationResult {
+        val secret = consumerSessionClientSecret()
+        if (secret == null) {
+            val error = MissingConsumerSecretException()
+            analyticsService?.track(
+                OnrampAnalyticsEvent.ErrorOccurred(
+                    operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.ConfirmCrsCarfDeclaration,
+                    error = error,
+                )
+            )
+            return OnrampStartCrsCarfDeclarationResult.Failed(error)
+        }
+
+        return cryptoApiRepository.retrieveCrsCarfDeclaration(secret)
+            .fold(
+                onSuccess = { declaration ->
+                    analyticsService?.track(OnrampAnalyticsEvent.CrsCarfDeclarationStarted)
+                    OnrampStartCrsCarfDeclarationResult.Completed(
+                        declaration = declaration,
+                        appearance = state.value.configurationState?.appearance
+                    )
+                },
+                onFailure = { error ->
+                    analyticsService?.track(
+                        OnrampAnalyticsEvent.ErrorOccurred(
+                            operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.ConfirmCrsCarfDeclaration,
+                            error = error,
+                        )
+                    )
+                    OnrampStartCrsCarfDeclarationResult.Failed(error)
                 }
             )
     }
@@ -693,6 +796,49 @@ internal class OnrampInteractor @Inject constructor(
         }
     }
 
+    suspend fun handleCrsCarfDeclarationResult(
+        result: CrsCarfDeclarationActivityResult,
+    ): OnrampCrsCarfDeclarationResult = when (result.action) {
+        is CrsCarfDeclarationScreenAction.Cancelled -> {
+            OnrampCrsCarfDeclarationResult.Cancelled()
+        }
+        is CrsCarfDeclarationScreenAction.Confirm -> {
+            val secret = consumerSessionClientSecret()
+
+            if (secret != null) {
+                val confirmResult = cryptoApiRepository.confirmCrsCarfDeclaration(secret)
+
+                confirmResult.fold(
+                    onSuccess = {
+                        analyticsService?.track(OnrampAnalyticsEvent.CrsCarfDeclarationConfirmed)
+
+                        OnrampCrsCarfDeclarationResult.Confirmed()
+                    },
+                    onFailure = { error ->
+                        analyticsService?.track(
+                            OnrampAnalyticsEvent.ErrorOccurred(
+                                operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.ConfirmCrsCarfDeclaration,
+                                error = error,
+                            )
+                        )
+
+                        OnrampCrsCarfDeclarationResult.Failed(error)
+                    }
+                )
+            } else {
+                val error = MissingConsumerSecretException()
+                analyticsService?.track(
+                    OnrampAnalyticsEvent.ErrorOccurred(
+                        operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.ConfirmCrsCarfDeclaration,
+                        error = error,
+                    )
+                )
+
+                OnrampCrsCarfDeclarationResult.Failed(error)
+            }
+        }
+    }
+
     private fun consumerSessionClientSecret(): String? =
         _state.value.linkControllerState?.internalLinkAccount?.consumerSessionClientSecret
             ?: linkController.state(application).value.internalLinkAccount?.consumerSessionClientSecret
@@ -999,6 +1145,23 @@ internal sealed interface OnrampStartKycVerificationResult {
     class Failed internal constructor(
         val error: Throwable
     ) : OnrampStartKycVerificationResult
+}
+
+internal sealed interface OnrampStartCrsCarfDeclarationResult {
+    /**
+     * Starting CRS/CARF declaration presentation completed successfully.
+     */
+    class Completed internal constructor(
+        val declaration: CrsCarfDeclaration,
+        val appearance: LinkAppearance?
+    ) : OnrampStartCrsCarfDeclarationResult
+
+    /**
+     * Starting CRS/CARF declaration presentation failed.
+     */
+    class Failed internal constructor(
+        val error: Throwable
+    ) : OnrampStartCrsCarfDeclarationResult
 }
 
 internal fun LinkController.PaymentMethodType.toDisplayType(): PaymentMethodDisplayData.Type {

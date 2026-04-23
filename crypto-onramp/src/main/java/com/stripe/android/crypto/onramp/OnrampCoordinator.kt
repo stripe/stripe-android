@@ -6,13 +6,16 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.crypto.onramp.di.OnrampComponentHolder
 import com.stripe.android.crypto.onramp.di.OnrampPresenterComponent
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
+import com.stripe.android.crypto.onramp.model.EuIdentifiers
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
+import com.stripe.android.crypto.onramp.model.OnrampCollectEuIdentifiersResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
+import com.stripe.android.crypto.onramp.model.OnrampGetIdentifierRequirementsResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
@@ -31,6 +34,7 @@ import javax.inject.Inject
  * @param presenterComponentFactory Factory for creating presenter components.
  */
 @ExperimentalCryptoOnramp
+@Suppress("TooManyFunctions")
 class OnrampCoordinator @Inject internal constructor(
     private val interactor: OnrampInteractor,
     private val presenterComponentFactory: OnrampPresenterComponent.Factory,
@@ -109,6 +113,26 @@ class OnrampCoordinator @Inject internal constructor(
      */
     suspend fun attachKycInfo(info: KycInfo): OnrampAttachKycInfoResult {
         return interactor.attachKycInfo(info)
+    }
+
+    /**
+     * Retrieves identifier requirements for the current Link user.
+     * Requires an authenticated Link user.
+     */
+    suspend fun getIdentifierRequirements(): OnrampGetIdentifierRequirementsResult {
+        return interactor.getIdentifierRequirements()
+    }
+
+    /**
+     * Submits EU identifiers for the current Link user.
+     * Requires an authenticated Link user.
+     *
+     * @param identifiers The EU identifier payload to submit.
+     */
+    suspend fun collectEuIdentifiers(
+        identifiers: EuIdentifiers
+    ): OnrampCollectEuIdentifiersResult {
+        return interactor.collectEuIdentifiers(identifiers)
     }
 
     /**
@@ -204,6 +228,14 @@ class OnrampCoordinator @Inject internal constructor(
             onrampSessionId: String,
         ) {
             coordinator.performCheckout(onrampSessionId = onrampSessionId)
+        }
+
+        /**
+         * Presents the CRS/CARF declaration screen and records acceptance when the user confirms.
+         * The result will be delivered through the CRS/CARF declaration callback provided in OnrampCallbacks.
+         */
+        fun presentCrsCarfDeclaration() {
+            coordinator.presentCrsCarfDeclaration()
         }
     }
 

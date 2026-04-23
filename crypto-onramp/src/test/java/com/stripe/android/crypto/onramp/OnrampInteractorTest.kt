@@ -4,23 +4,32 @@ import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.model.CountryCode
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsEvent
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsService
 import com.stripe.android.crypto.onramp.exception.MissingConsumerSecretException
 import com.stripe.android.crypto.onramp.exception.MissingCryptoCustomerException
 import com.stripe.android.crypto.onramp.model.CreatePaymentTokenResponse
+import com.stripe.android.crypto.onramp.model.CrsCarfDeclaration
 import com.stripe.android.crypto.onramp.model.CryptoCustomerResponse
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
+import com.stripe.android.crypto.onramp.model.EuIdentifier
+import com.stripe.android.crypto.onramp.model.EuIdentifiers
 import com.stripe.android.crypto.onramp.model.GetPlatformSettingsResponse
+import com.stripe.android.crypto.onramp.model.IdentifierRequirements
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
+import com.stripe.android.crypto.onramp.model.MissingEuIdentifiers
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
+import com.stripe.android.crypto.onramp.model.OnrampCollectEuIdentifiersResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
+import com.stripe.android.crypto.onramp.model.OnrampCrsCarfDeclarationResult
+import com.stripe.android.crypto.onramp.model.OnrampGetIdentifierRequirementsResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
@@ -32,7 +41,10 @@ import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationResponse
+import com.stripe.android.crypto.onramp.model.SubmitEuIdentifiersResult
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
+import com.stripe.android.crypto.onramp.ui.CrsCarfDeclarationActivityResult
+import com.stripe.android.crypto.onramp.ui.CrsCarfDeclarationScreenAction
 import com.stripe.android.crypto.onramp.ui.KycRefreshScreenAction
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -183,9 +195,82 @@ class OnrampInteractorTest {
             address = PaymentSheet.Address(city = "Orlando", state = "FL")
         )
         val result = interactor.attachKycInfo(kycInfo)
-        assert(result is OnrampAttachKycInfoResult.Completed)
+        assertThat(result).isInstanceOf(OnrampAttachKycInfoResult.Completed::class.java)
 
         testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.KycInfoSubmitted)
+    }
+
+    @Test
+    fun testGetIdentifierRequirementsIsSuccessful() = runTest {
+        whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
+        val requirements = IdentifierRequirements(
+            missingIdentifiersMica = listOf("tax_id"),
+            missingIdentifiersCarf = listOf("nationalities")
+        )
+        whenever(cryptoApiRepository.getIdentifierRequirements(any()))
+            .thenReturn(Result.success(requirements))
+
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
+        val result = interactor.getIdentifierRequirements()
+
+        assertThat(result).isInstanceOf(OnrampGetIdentifierRequirementsResult.Completed::class.java)
+        val completed = result as OnrampGetIdentifierRequirementsResult.Completed
+        assertThat(completed.requirements).isEqualTo(requirements)
+        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.IdentifierRequirementsRetrieved)
+    }
+
+    @Test
+    fun testCollectEuIdentifiersIsSuccessful() = runTest {
+        whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
+        val submissionResult = SubmitEuIdentifiersResult(
+            valid = false,
+            missingIdentifiers = MissingEuIdentifiers(
+                missingIdentifiersMica = emptyList(),
+                missingIdentifiersCarf = listOf("nationalities")
+            ),
+            errors = listOf("FR")
+        )
+        whenever(cryptoApiRepository.collectEuIdentifiers(any(), any()))
+            .thenReturn(Result.success(submissionResult))
+
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
+        val result = interactor.collectEuIdentifiers(
+            EuIdentifiers()
+                .identifiersMica(
+                    listOf(
+                        EuIdentifier()
+                            .country(CountryCode.create("IE"))
+                            .identifier("mica_123")
+                    )
+                )
+        )
+
+        assertThat(result).isInstanceOf(OnrampCollectEuIdentifiersResult.Completed::class.java)
+        val completed = result as OnrampCollectEuIdentifiersResult.Completed
+        assertThat(completed.result).isEqualTo(submissionResult)
+        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.EuIdentifiersSubmitted)
+    }
+
+    @Test
+    fun testStartCrsCarfDeclarationIsSuccessful() = runTest {
+        whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
+        val declaration = CrsCarfDeclaration(
+            text = "I confirm this declaration.",
+            version = "2026-04-23"
+        )
+        whenever(cryptoApiRepository.retrieveCrsCarfDeclaration(any()))
+            .thenReturn(Result.success(declaration))
+
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
+        val result = interactor.startCrsCarfDeclaration()
+
+        assertThat(result).isInstanceOf(OnrampStartCrsCarfDeclarationResult.Completed::class.java)
+        val completed = result as OnrampStartCrsCarfDeclarationResult.Completed
+        assertThat(completed.declaration).isEqualTo(declaration)
+        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.CrsCarfDeclarationStarted)
     }
 
     @Test
@@ -541,6 +626,33 @@ class OnrampInteractorTest {
         assertThat(result).isInstanceOf(OnrampVerifyKycInfoResult.Failed::class.java)
         val failed = result as OnrampVerifyKycInfoResult.Failed
         assertThat(failed.error).isInstanceOf(MissingConsumerSecretException::class.java)
+    }
+
+    @Test
+    fun testHandleCrsCarfDeclarationResultConfirmedSuccess() = runTest {
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+        whenever(cryptoApiRepository.confirmCrsCarfDeclaration(any()))
+            .thenReturn(Result.success(Unit))
+
+        val result = interactor.handleCrsCarfDeclarationResult(
+            CrsCarfDeclarationActivityResult(
+                CrsCarfDeclarationScreenAction.Confirm
+            )
+        )
+
+        assertThat(result).isInstanceOf(OnrampCrsCarfDeclarationResult.Confirmed::class.java)
+        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.CrsCarfDeclarationConfirmed)
+    }
+
+    @Test
+    fun testHandleCrsCarfDeclarationResultCancelled() = runTest {
+        val result = interactor.handleCrsCarfDeclarationResult(
+            CrsCarfDeclarationActivityResult(
+                CrsCarfDeclarationScreenAction.Cancelled
+            )
+        )
+
+        assertThat(result).isInstanceOf(OnrampCrsCarfDeclarationResult.Cancelled::class.java)
     }
 
     @Test

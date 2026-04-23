@@ -73,6 +73,22 @@ internal sealed class OnrampAnalyticsEvent(
         name = "kyc_info_verification_completed"
     )
 
+    data object IdentifierRequirementsRetrieved : OnrampAnalyticsEvent(
+        name = "identifier_requirements_retrieved"
+    )
+
+    data object EuIdentifiersSubmitted : OnrampAnalyticsEvent(
+        name = "eu_identifiers_submitted"
+    )
+
+    data object CrsCarfDeclarationStarted : OnrampAnalyticsEvent(
+        name = "crs_carf_declaration_started"
+    )
+
+    data object CrsCarfDeclarationConfirmed : OnrampAnalyticsEvent(
+        name = "crs_carf_declaration_confirmed"
+    )
+
     class WalletRegistered(
         network: CryptoNetwork
     ) : OnrampAnalyticsEvent(
@@ -161,7 +177,10 @@ internal sealed class OnrampAnalyticsEvent(
             CreateCryptoPaymentToken("create_crypto_payment_token"),
             PerformCheckout("perform_checkout"),
             LogOut("log_out"),
-            VerifyKyc("verify_kyc_info")
+            VerifyKyc("verify_kyc_info"),
+            GetIdentifierRequirements("get_identifier_requirements"),
+            CollectEuIdentifiers("collect_eu_identifiers"),
+            ConfirmCrsCarfDeclaration("confirm_crs_carf_declaration")
         }
     }
 

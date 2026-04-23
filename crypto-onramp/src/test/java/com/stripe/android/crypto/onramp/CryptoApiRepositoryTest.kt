@@ -2,13 +2,17 @@ package com.stripe.android.crypto.onramp
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.ApiVersion
+import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
+import com.stripe.android.crypto.onramp.model.EuIdentifier
+import com.stripe.android.crypto.onramp.model.EuIdentifiers
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
+import com.stripe.android.crypto.onramp.model.SubmitEuIdentifiersResult
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.link.LinkController
 import com.stripe.android.model.DateOfBirth
@@ -125,8 +129,40 @@ class CryptoApiRepositoryTest {
                     lastName = "User",
                     idNumber = "999-88-7777",
                     dateOfBirth = DateOfBirth(day = 1, month = 3, year = 1975),
-                    address = PaymentSheet.Address(city = "Orlando", state = "FL")
+                    address = PaymentSheet.Address(city = "Orlando", state = "FL"),
+                    birthCountry = CountryCode.create("IE"),
+                    birthCity = "Dublin",
+                    nationalities = listOf(CountryCode.create("IE"), CountryCode.create("FR"))
                 ),
+                consumerSessionClientSecret = "test-secret"
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+
+            assertThat(result.isSuccess)
+                .isEqualTo(true)
+            assertKycCollectionRequest(apiRequestArgumentCaptor.firstValue)
+        }
+    }
+
+    @Test
+    fun testGetIdentifierRequirementsSucceeds() {
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                """
+                    {
+                        "missing_identifiers_mica": ["tax_id"],
+                        "missing_identifiers_carf": ["nationalities"]
+                    }
+                    """,
+                emptyMap()
+            )
+
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val result = cryptoApiRepository.getIdentifierRequirements(
                 consumerSessionClientSecret = "test-secret"
             )
 
@@ -134,33 +170,124 @@ class CryptoApiRepositoryTest {
             val apiRequest = apiRequestArgumentCaptor.firstValue
 
             assertThat(apiRequest.baseUrl)
-                .isEqualTo("https://api.stripe.com/v1/crypto/internal/kyc_data_collection")
+                .isEqualTo("https://api.stripe.com/v1/crypto/internal/identifier_requirements")
+            assertThat(apiRequest.params)
+                .isEqualTo(mapOf("credentials" to mapOf("consumer_session_client_secret" to "test-secret")))
 
-            val params = apiRequest.params!!
-            val dobValue = params["dob"] as Map<*, *>
-            assertThat(params["first_name"]).isEqualTo("Test")
-            assertThat(params["last_name"]).isEqualTo("User")
-            assertThat(params["id_number"]).isEqualTo("999-88-7777")
-            assertThat(params["id_type"]).isEqualTo("social_security_number") // Hardcoded to match iOS
-            assertThat(dobValue["day"]).isEqualTo("1")
-            assertThat(dobValue["month"]).isEqualTo("3")
-            assertThat(dobValue["year"]).isEqualTo("1975")
-            assertThat(params["nationalities"]).isNull()
-            assertThat(params["birth_country"]).isNull()
-            assertThat(params["birth_city"]).isNull()
-            assertThat(params["city"]).isEqualTo("Orlando")
-            assertThat(params["state"]).isEqualTo("FL")
-            assertThat(params["country"]).isNull()
-            assertThat(params["line1"]).isNull()
-            assertThat(params["line2"]).isNull()
-            assertThat(params["zip"]).isNull()
+            assertThat(result.isSuccess).isTrue()
+            assertThat(result.getOrThrow().missingIdentifiersMica)
+                .isEqualTo(listOf("tax_id"))
+            assertThat(result.getOrThrow().missingIdentifiersCarf)
+                .isEqualTo(listOf("nationalities"))
+        }
+    }
 
-            assertThat(params["credentials"]).isEqualTo(
-                mapOf("consumer_session_client_secret" to "test-secret")
+    @Test
+    fun testCollectEuIdentifiersSucceeds() {
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                """
+                    {
+                        "valid": false,
+                        "missing_identifiers": {
+                            "missing_identifiers_mica": ["tax_id"],
+                            "missing_identifiers_carf": ["nationalities"]
+                        },
+                        "errors": ["FR"]
+                    }
+                    """,
+                emptyMap()
             )
 
-            assertThat(result.isSuccess)
-                .isEqualTo(true)
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val result = cryptoApiRepository.collectEuIdentifiers(
+                identifiers = EuIdentifiers()
+                    .identifiersMica(
+                        listOf(
+                            EuIdentifier()
+                                .country(CountryCode.create("IE"))
+                                .identifier("mica_123")
+                        )
+                    )
+                    .identifiersCarf(
+                        listOf(
+                            EuIdentifier()
+                                .country(CountryCode.create("FR"))
+                                .identifier("carf_456")
+                        )
+                    ),
+                consumerSessionClientSecret = "test-secret"
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            assertEuIdentifiersRequest(apiRequestArgumentCaptor.firstValue)
+            assertThat(result.isSuccess).isTrue()
+            assertSubmitEuIdentifiersResult(result.getOrThrow())
+        }
+    }
+
+    @Test
+    fun testRetrieveCrsCarfDeclarationSucceeds() {
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                """
+                    {
+                        "text": "I confirm this declaration.",
+                        "version": "2026-04-23"
+                    }
+                    """,
+                emptyMap()
+            )
+
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val result = cryptoApiRepository.retrieveCrsCarfDeclaration(
+                consumerSessionClientSecret = "test-secret"
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val apiRequest = apiRequestArgumentCaptor.firstValue
+
+            assertThat(apiRequest.baseUrl)
+                .isEqualTo("https://api.stripe.com/v1/crypto/internal/crs_carf_declaration")
+            assertThat(apiRequest.params)
+                .isEqualTo(mapOf("credentials" to mapOf("consumer_session_client_secret" to "test-secret")))
+            assertThat(result.getOrThrow().text)
+                .isEqualTo("I confirm this declaration.")
+            assertThat(result.getOrThrow().version)
+                .isEqualTo("2026-04-23")
+        }
+    }
+
+    @Test
+    fun testConfirmCrsCarfDeclarationSucceeds() {
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                "{}",
+                emptyMap()
+            )
+
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val result = cryptoApiRepository.confirmCrsCarfDeclaration(
+                consumerSessionClientSecret = "test-secret"
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val apiRequest = apiRequestArgumentCaptor.firstValue
+
+            assertThat(apiRequest.baseUrl)
+                .isEqualTo("https://api.stripe.com/v1/crypto/internal/crs_carf_declaration")
+            assertThat(apiRequest.params)
+                .isEqualTo(mapOf("credentials" to mapOf("consumer_session_client_secret" to "test-secret")))
+            assertThat(result.isSuccess).isTrue()
         }
     }
 
@@ -490,5 +617,65 @@ class CryptoApiRepositoryTest {
             assertThat(result.isFailure)
                 .isEqualTo(true)
         }
+    }
+
+    private fun assertKycCollectionRequest(apiRequest: ApiRequest) {
+        assertThat(apiRequest.baseUrl)
+            .isEqualTo("https://api.stripe.com/v1/crypto/internal/kyc_data_collection")
+
+        val params = apiRequest.params!!
+        val dobValue = params["dob"] as Map<*, *>
+        assertThat(params["first_name"]).isEqualTo("Test")
+        assertThat(params["last_name"]).isEqualTo("User")
+        assertThat(params["id_number"]).isEqualTo("999-88-7777")
+        assertThat(params["id_type"]).isEqualTo("social_security_number") // Hardcoded to match iOS
+        assertThat(dobValue["day"]).isEqualTo("1")
+        assertThat(dobValue["month"]).isEqualTo("3")
+        assertThat(dobValue["year"]).isEqualTo("1975")
+        assertThat(params["nationalities"]).isEqualTo(listOf("IE", "FR"))
+        assertThat(params["birth_country"]).isEqualTo("IE")
+        assertThat(params["birth_city"]).isEqualTo("Dublin")
+        assertThat(params["city"]).isEqualTo("Orlando")
+        assertThat(params["state"]).isEqualTo("FL")
+        assertThat(params["country"]).isNull()
+        assertThat(params["line1"]).isNull()
+        assertThat(params["line2"]).isNull()
+        assertThat(params["zip"]).isNull()
+        assertThat(params["credentials"]).isEqualTo(
+            mapOf("consumer_session_client_secret" to "test-secret")
+        )
+    }
+
+    private fun assertEuIdentifiersRequest(apiRequest: ApiRequest) {
+        assertThat(apiRequest.baseUrl)
+            .isEqualTo("https://api.stripe.com/v1/crypto/internal/eu_identifiers")
+        assertThat(apiRequest.params)
+            .isEqualTo(
+                mapOf(
+                    "credentials" to mapOf("consumer_session_client_secret" to "test-secret"),
+                    "identifiers_mica" to listOf(
+                        mapOf(
+                            "country" to "IE",
+                            "identifier" to "mica_123"
+                        )
+                    ),
+                    "identifiers_carf" to listOf(
+                        mapOf(
+                            "country" to "FR",
+                            "identifier" to "carf_456"
+                        )
+                    )
+                )
+            )
+    }
+
+    private fun assertSubmitEuIdentifiersResult(result: SubmitEuIdentifiersResult) {
+        assertThat(result.valid).isFalse()
+        assertThat(result.missingIdentifiers?.missingIdentifiersMica)
+            .isEqualTo(listOf("tax_id"))
+        assertThat(result.missingIdentifiers?.missingIdentifiersCarf)
+            .isEqualTo(listOf("nationalities"))
+        assertThat(result.errors)
+            .isEqualTo(listOf("FR"))
     }
 }

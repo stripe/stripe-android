@@ -21,6 +21,12 @@ internal data class KycCollectionRequest(
     @SerialName("dob")
     @Serializable(with = DateOfBirthSerializer::class)
     val dateOfBirth: DateOfBirth?,
+    @SerialName("birth_country")
+    val birthCountry: String?,
+    @SerialName("birth_city")
+    val birthCity: String?,
+    @SerialName("nationalities")
+    val nationalities: List<String>?,
     @SerialName("city")
     val city: String?,
     @SerialName("country")
@@ -50,6 +56,9 @@ internal data class KycCollectionRequest(
                 idNumber = kycInfo.idNumber.takeIf { !it.isNullOrEmpty() },
                 idType = SOCIAL_SECURITY_NUMBER.takeIf { !kycInfo.idNumber.isNullOrEmpty() },
                 dateOfBirth = kycInfo.dateOfBirth,
+                birthCountry = kycInfo.birthCountry?.value,
+                birthCity = kycInfo.birthCity.takeIf { !it.isNullOrEmpty() },
+                nationalities = kycInfo.nationalities?.map { it.value },
                 city = kycInfo.address?.city,
                 country = kycInfo.address?.country,
                 line1 = kycInfo.address?.line1,
