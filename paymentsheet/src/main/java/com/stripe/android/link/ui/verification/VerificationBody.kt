@@ -43,9 +43,11 @@ import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.ui.AppBarIcon
 import com.stripe.android.link.ui.ErrorText
+import com.stripe.android.link.ui.LinkLogoStyle
 import com.stripe.android.link.ui.LinkLoadingScreen
 import com.stripe.android.link.ui.LinkSpinner
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
+import com.stripe.android.link.ui.logoRes
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
 import com.stripe.android.model.ConsentUi
 import com.stripe.android.model.LinkBrand
@@ -245,7 +247,7 @@ private fun VerificationBodyContainer(
                 Image(
                     modifier = Modifier
                         .testTag(VERIFICATION_HEADER_IMAGE_TAG),
-                    painter = painterResource(R.drawable.stripe_link_logo),
+                    painter = painterResource(linkBrand.logoRes(LinkLogoStyle.Primary)),
                     contentDescription = linkBrand.brandName(),
                 )
 

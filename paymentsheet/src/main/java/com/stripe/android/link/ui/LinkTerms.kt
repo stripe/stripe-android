@@ -8,6 +8,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.StripeTheme
@@ -26,6 +27,7 @@ internal enum class LinkTermsType {
 @Composable
 internal fun LinkTerms(
     type: LinkTermsType,
+    linkBrand: LinkBrand,
     modifier: Modifier = Modifier,
     textAlign: TextAlign = TextAlign.Center,
 ) {
@@ -53,11 +55,14 @@ internal fun LinkTerms(
                 "link_logo",
                 EmbeddableImage.Drawable(
                     id = if (MaterialTheme.stripeColors.component.shouldUseDarkDynamicColor()) {
-                        R.drawable.stripe_link_logo_knockout_black
+                        linkBrand.logoRes(LinkLogoStyle.TermsKnockoutBlack)
                     } else {
-                        R.drawable.stripe_link_logo_knockout_white
+                        linkBrand.logoRes(LinkLogoStyle.TermsKnockoutWhite)
                     },
-                    contentDescription = com.stripe.android.R.string.stripe_link,
+                    contentDescription = when (linkBrand) {
+                        LinkBrand.Link -> com.stripe.android.R.string.stripe_link
+                        LinkBrand.Notlink -> R.string.stripe_notlink
+                    },
                 )
             )
         }
@@ -90,6 +95,7 @@ private fun LinkTermsPreview() {
         Surface {
             LinkTerms(
                 type = LinkTermsType.InlineOptional,
+                linkBrand = LinkBrand.Link,
             )
         }
     }

@@ -28,7 +28,9 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
+import com.stripe.android.link.ui.LinkLogoStyle
 import com.stripe.android.link.ui.LinkSpinner
+import com.stripe.android.link.ui.logoRes
 import com.stripe.android.link.ui.verification.ResendCodeButton
 import com.stripe.android.link.ui.verification.VERIFICATION_HEADER_IMAGE_TAG
 import com.stripe.android.link.ui.verification.VERIFICATION_OTP_TAG
@@ -107,7 +109,7 @@ private fun LinkHeaderSection(
             modifier = Modifier
                 .width(48.dp)
                 .testTag(VERIFICATION_HEADER_IMAGE_TAG),
-            painter = painterResource(R.drawable.stripe_link_logo),
+            painter = painterResource(verificationState.linkBrand.logoRes(LinkLogoStyle.Primary)),
             contentDescription = verificationState.linkBrand.brandName(),
         )
 
