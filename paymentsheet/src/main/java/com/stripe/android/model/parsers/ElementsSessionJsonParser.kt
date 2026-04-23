@@ -275,8 +275,6 @@ internal class ElementsSessionJsonParser(
         // separate top-level array (keyed by PM ID) to bypass those gates for Elements sessions.
         // We merge it into each PaymentMethod.Card here so the rest of the SDK sees card art
         // where it belongs — on the card object — rather than leaking this elements session backend workaround.
-        // Display of card art is gated downstream by the OCS_MOBILE_CARD_ART experiment via
-        // PaymentMethodMetadata.isCardArtEnabled.
         val cardArtMap = buildCardArtLookup(json)
         val mergedPaymentMethods = mergeCardArt(paymentMethods, cardArtMap)
 

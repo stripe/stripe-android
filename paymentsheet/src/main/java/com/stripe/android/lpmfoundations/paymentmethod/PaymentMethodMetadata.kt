@@ -354,6 +354,7 @@ internal data class PaymentMethodMetadata(
             isCardArtEnabled: Boolean
         ): PaymentMethodMetadata {
             val linkSettings = elementsSession.linkSettings
+            val cardArts = resolveCardArts(elementsSession, isCardArtEnabled)
             return PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
@@ -409,7 +410,7 @@ internal data class PaymentMethodMetadata(
                 enableMlKitCardScan = elementsSession.enableMlKitCardScan,
                 elementsSessionId = elementsSession.elementsSessionId,
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
-                cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty(),
+                cardArts = cardArts,
                 isCardArtEnabled = isCardArtEnabled
             )
         }
@@ -480,9 +481,17 @@ internal data class PaymentMethodMetadata(
                 enableMlKitCardScan = elementsSession.enableMlKitCardScan,
                 elementsSessionId = elementsSession.elementsSessionId,
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
-                cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty(),
+                cardArts = resolveCardArts(elementsSession, isCardArtEnabled),
                 isCardArtEnabled = isCardArtEnabled
             )
+        }
+
+        private fun resolveCardArts(
+            elementsSession: ElementsSession,
+            isCardArtEnabled: Boolean,
+        ): List<PaymentMethod.Card.CardArt> {
+            if (!isCardArtEnabled) return emptyList()
+            return elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty()
         }
     }
 }

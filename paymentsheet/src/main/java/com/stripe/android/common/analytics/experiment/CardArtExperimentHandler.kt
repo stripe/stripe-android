@@ -12,33 +12,54 @@ import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import javax.inject.Inject
 
-internal interface LogCardArtExperiment {
-    operator fun invoke(
+internal interface CardArtExperimentHandler {
+    /**
+     * Returns whether card art should be enabled.
+     *
+     * Card art is enabled when:
+     * - The local feature flag is enabled (debug-only override), OR
+     * - The experiment variant is "treatment"
+     */
+    fun isCardArtEnabled(elementsSession: ElementsSession): Boolean
+
+    /**
+     * Logs the experiment exposure with full dimensions. Should be called after
+     * payment method metadata and default selection are resolved.
+     */
+    fun logExposure(
         elementsSession: ElementsSession,
         paymentMethodMetadata: PaymentMethodMetadata,
         savedPaymentMethods: List<PaymentMethod>,
         integrationConfiguration: PaymentElementLoader.Configuration,
         defaultPaymentSelection: PaymentSelection?,
-    ): Boolean
+    )
 }
 
-internal class DefaultLogCardArtExperiment @Inject constructor(
+internal class DefaultCardArtExperimentHandler @Inject constructor(
     private val eventReporter: EventReporter,
     private val mode: EventReporter.Mode,
-) : LogCardArtExperiment {
+) : CardArtExperimentHandler {
 
-    override fun invoke(
+    override fun isCardArtEnabled(elementsSession: ElementsSession): Boolean {
+        if (FeatureFlags.enableCardArt.isEnabled) return true
+
+        val experimentsData = elementsSession.experimentsData ?: return false
+        val variant = experimentsData.experimentAssignments[ExperimentAssignment.OCS_MOBILE_CARD_ART]
+            ?: return false
+
+        return variant == TREATMENT
+    }
+
+    override fun logExposure(
         elementsSession: ElementsSession,
         paymentMethodMetadata: PaymentMethodMetadata,
         savedPaymentMethods: List<PaymentMethod>,
         integrationConfiguration: PaymentElementLoader.Configuration,
         defaultPaymentSelection: PaymentSelection?,
-    ): Boolean {
-        val experimentsData = elementsSession.experimentsData
-            ?: return FeatureFlags.enableCardArt.isEnabled
-
+    ) {
+        val experimentsData = elementsSession.experimentsData ?: return
         val variant = experimentsData.experimentAssignments[ExperimentAssignment.OCS_MOBILE_CARD_ART]
-            ?: return FeatureFlags.enableCardArt.isEnabled
+            ?: return
 
         val savedCardPaymentMethods = savedPaymentMethods.filter { it.type == PaymentMethod.Type.Card }
 
@@ -63,8 +84,6 @@ internal class DefaultLogCardArtExperiment @Inject constructor(
                 selectedPaymentMethodHasCardArt = selectedPaymentMethodHasCardArt,
             )
         )
-
-        return variant == TREATMENT
     }
 
     private companion object {
