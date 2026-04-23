@@ -272,13 +272,13 @@ class DefaultLogCardArtExperimentTest {
     ) = runTest {
         val eventReporter = FakeEventReporter()
 
-        val sut = DefaultLogCardArtExperiment(
+        val logCardArtExperiment = DefaultLogCardArtExperiment(
             eventReporter = eventReporter,
             mode = EventReporter.Mode.Complete,
         )
 
         Scenario(
-            sut = sut,
+            logCardArtExperiment = logCardArtExperiment,
             eventReporter = eventReporter,
         ).apply { block() }
 
@@ -286,7 +286,7 @@ class DefaultLogCardArtExperimentTest {
     }
 
     private data class Scenario(
-        val sut: DefaultLogCardArtExperiment,
+        val logCardArtExperiment: DefaultLogCardArtExperiment,
         val eventReporter: FakeEventReporter,
     ) {
         private val defaultElementsSession = createElementsSession(
@@ -306,7 +306,7 @@ class DefaultLogCardArtExperimentTest {
             integrationConfiguration: PaymentElementLoader.Configuration = paymentSheetConfiguration(),
             defaultPaymentSelection: PaymentSelection? = null,
         ): Boolean {
-            return sut(
+            return logCardArtExperiment(
                 elementsSession = elementsSession,
                 paymentMethodMetadata = paymentMethodMetadata,
                 savedPaymentMethods = savedPaymentMethods,
