@@ -5,11 +5,9 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.taptoadd.ui.createTapToAddUxConfiguration
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
@@ -28,6 +26,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.asAddressModel
+import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
@@ -60,7 +59,7 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.test.fail
-import com.stripe.android.R as StripeR
+import com.stripe.android.core.R as StripeCoreR
 import com.stripe.stripeterminal.external.models.PaymentMethod as TerminalPaymentMethod
 
 @OptIn(TapToAddPreview::class)
@@ -75,6 +74,7 @@ class TapToAddCollectionHandlerTest {
             paymentConfiguration = TEST_PAYMENT_CONFIGURATION,
             connectionManager = FakeTapToAddConnectionManager.noOp(isSupported = true),
             tapToPayUxConfiguration = tapToPayUxConfiguration,
+            userFacingLogger = FakeUserFacingLogger(),
             errorReporter = FakeErrorReporter(),
             createCardPresentSetupIntentCallbackRetriever = FakeCreateCardPresentSetupIntentCallbackRetriever.noOp(
                 callbackResult = Result.success(DEFAULT_CALLBACK),
@@ -93,6 +93,7 @@ class TapToAddCollectionHandlerTest {
             paymentConfiguration = TEST_PAYMENT_CONFIGURATION,
             connectionManager = FakeTapToAddConnectionManager.noOp(isSupported = true),
             tapToPayUxConfiguration = tapToPayUxConfiguration,
+            userFacingLogger = FakeUserFacingLogger(),
             errorReporter = FakeErrorReporter(),
             createCardPresentSetupIntentCallbackRetriever = FakeCreateCardPresentSetupIntentCallbackRetriever.noOp(
                 callbackResult = Result.success(DEFAULT_CALLBACK),
@@ -115,7 +116,7 @@ class TapToAddCollectionHandlerTest {
                 result = result,
                 expectedError = error,
                 expectedErrorCodeValue = "unknown",
-                expectedDisplayMessage = R.string.stripe_something_went_wrong.resolvableString,
+                expectedErrorMessage = GENERIC_USER_ERROR,
             )
         }
     }
@@ -135,6 +136,10 @@ class TapToAddCollectionHandlerTest {
             assertThat(result).isEqualTo(
                 TapToAddCollectionHandler.CollectionState.UnsupportedDevice(
                     error = error,
+                    errorMessage = TapToAddErrorMessage(
+                        title = R.string.stripe_tap_to_add_unsupported_device_error_title.resolvableString,
+                        action = R.string.stripe_tap_to_add_unsupported_device_error_action.resolvableString,
+                    ),
                 )
             )
         }
@@ -159,7 +164,7 @@ class TapToAddCollectionHandlerTest {
                 result = result,
                 expectedError = error,
                 expectedErrorCodeValue = "noCardPresentCallbackFailure",
-                expectedDisplayMessage = error.resolvableError,
+                expectedErrorMessage = GENERIC_USER_ERROR,
             )
         }
     }
@@ -183,7 +188,7 @@ class TapToAddCollectionHandlerTest {
                 result = result,
                 expectedError = cause,
                 expectedErrorCodeValue = "failureFromMerchantCardPresentCallback",
-                expectedDisplayMessage = "Something went wrong".resolvableString,
+                expectedErrorMessage = GENERIC_USER_ERROR,
             )
         }
     }
@@ -202,9 +207,9 @@ class TapToAddCollectionHandlerTest {
         assertFailedCollection(
             result = result,
             expectedErrorType = IllegalStateException::class.java,
-            expectedErrorMessage = "Attempted to collect with tap to add without a customer",
+            expectedThrowableMessage = "Internal Stripe Error: Attempted to collect with tap to add without a customer",
             expectedErrorCodeValue = "noCustomer",
-            expectedDisplayMessage = R.string.stripe_something_went_wrong.resolvableString,
+            expectedUserError = GENERIC_USER_ERROR,
         )
     }
 
@@ -249,9 +254,9 @@ class TapToAddCollectionHandlerTest {
             assertFailedCollection(
                 result = collectionResult,
                 expectedErrorType = NotImplementedError::class.java,
-                expectedErrorMessage = "Checkout sessions do not support retrieving individual payment methods!",
+                expectedThrowableMessage = "Checkout sessions do not support retrieving individual payment methods!",
                 expectedErrorCodeValue = "unknown",
-                expectedDisplayMessage = R.string.stripe_something_went_wrong.resolvableString,
+                expectedUserError = GENERIC_USER_ERROR,
             )
         }
     }
@@ -358,7 +363,7 @@ class TapToAddCollectionHandlerTest {
                 result = result.await(),
                 expectedError = updateFailure,
                 expectedErrorCodeValue = "unknown",
-                expectedDisplayMessage = updateFailure.stripeErrorMessage(),
+                expectedErrorMessage = GENERIC_USER_ERROR,
             )
         }
     }
@@ -435,9 +440,9 @@ class TapToAddCollectionHandlerTest {
             assertFailedCollection(
                 result = collectionResult,
                 expectedErrorType = IllegalStateException::class.java,
-                expectedErrorMessage = "No card payment method after collecting through tap!",
+                expectedThrowableMessage = "No card payment method after collecting through tap!",
                 expectedErrorCodeValue = "unknown",
-                expectedDisplayMessage = R.string.stripe_something_went_wrong.resolvableString,
+                expectedUserError = GENERIC_USER_ERROR,
             )
 
             val errorCall = errorReporter.awaitCall()
@@ -475,7 +480,10 @@ class TapToAddCollectionHandlerTest {
             result = result.await(),
             expectedError = terminalException,
             expectedErrorCodeValue = "error_code_unexpected_error_unexpected_sdk_error",
-            expectedDisplayMessage = "Failed to retrieve setup intent".resolvableString,
+            expectedErrorMessage = TapToAddErrorMessage(
+                title = StripeCoreR.string.stripe_error.resolvableString,
+                action = R.string.stripe_tap_to_add_card_default_error_action.resolvableString,
+            ),
         )
     }
 
@@ -509,7 +517,10 @@ class TapToAddCollectionHandlerTest {
             result = result.await(),
             expectedError = terminalException,
             expectedErrorCodeValue = "error_code_payment_error_declined_by_stripe_api",
-            expectedDisplayMessage = "Card declined".resolvableString,
+            expectedErrorMessage = TapToAddErrorMessage(
+                title = R.string.stripe_tap_to_add_card_declined_error_title.resolvableString,
+                action = R.string.stripe_tap_to_add_unusable_error_action.resolvableString,
+            ),
         )
     }
 
@@ -573,7 +584,10 @@ class TapToAddCollectionHandlerTest {
             result = result.await(),
             expectedError = terminalException,
             expectedErrorCodeValue = "error_code_payment_error_declined_by_stripe_api",
-            expectedDisplayMessage = "Setup intent confirmation failed".resolvableString,
+            expectedErrorMessage = TapToAddErrorMessage(
+                title = R.string.stripe_tap_to_add_card_declined_error_title.resolvableString,
+                action = R.string.stripe_tap_to_add_unusable_error_action.resolvableString,
+            ),
         )
     }
 
@@ -607,7 +621,7 @@ class TapToAddCollectionHandlerTest {
             assertFailedCollection(
                 result = result.await(),
                 expectedError = retrieveError,
-                expectedDisplayMessage = retrieveError.stripeErrorMessage(),
+                expectedErrorMessage = GENERIC_USER_ERROR,
                 expectedErrorCodeValue = "unknown"
             )
         }
@@ -624,12 +638,12 @@ class TapToAddCollectionHandlerTest {
         ) { result ->
             assertFailedCollection(
                 result = result,
-                expectedErrorType = IllegalStateException::class.java,
+                expectedErrorType = TapToAddCardNotSupportedException::class.java,
+                expectedThrowableMessage = "Payment method is not supported by card brand filter!",
                 expectedErrorCodeValue = "cardBrandNotSupportedByMerchant",
-                expectedErrorMessage = "Payment method is not supported by card brand filter!",
-                expectedDisplayMessage = resolvableString(
-                    StripeR.string.stripe_disallowed_card_brand,
-                    CardBrand.MasterCard,
+                expectedUserError = TapToAddErrorMessage(
+                    title = R.string.stripe_tap_to_add_card_not_supported_error_title.resolvableString,
+                    action = R.string.stripe_tap_to_add_unusable_error_action.resolvableString,
                 ),
             )
         }
@@ -800,26 +814,26 @@ class TapToAddCollectionHandlerTest {
         result: TapToAddCollectionHandler.CollectionState,
         expectedError: Throwable,
         expectedErrorCodeValue: String,
-        expectedDisplayMessage: ResolvableString?,
+        expectedErrorMessage: TapToAddErrorMessage,
     ) {
         val failed = assertFailedCollection(result)
         assertThat(failed.error).isEqualTo(expectedError)
         assertThat(failed.errorCode.value).isEqualTo(expectedErrorCodeValue)
-        assertThat(failed.displayMessage).isEqualTo(expectedDisplayMessage)
+        assertThat(failed.errorMessage).isEqualTo(expectedErrorMessage)
     }
 
     private fun assertFailedCollection(
         result: TapToAddCollectionHandler.CollectionState,
         expectedErrorType: Class<*>,
-        expectedErrorMessage: String,
+        expectedThrowableMessage: String,
         expectedErrorCodeValue: String,
-        expectedDisplayMessage: ResolvableString?,
+        expectedUserError: TapToAddErrorMessage,
     ) {
         val failed = assertFailedCollection(result)
         assertThat(failed.error).isInstanceOf(expectedErrorType)
-        assertThat(failed.error.message).isEqualTo(expectedErrorMessage)
+        assertThat(failed.error.message).isEqualTo(expectedThrowableMessage)
         assertThat(failed.errorCode.value).isEqualTo(expectedErrorCodeValue)
-        assertThat(failed.displayMessage).isEqualTo(expectedDisplayMessage)
+        assertThat(failed.errorMessage).isEqualTo(expectedUserError)
     }
 
     private fun testCardBrandChoiceFilterFlow(
@@ -903,6 +917,7 @@ class TapToAddCollectionHandlerTest {
                             paymentConfiguration = TEST_PAYMENT_CONFIGURATION,
                             connectionManager = managerScenario.tapToAddConnectionManager,
                             errorReporter = errorReporter,
+                            userFacingLogger = FakeUserFacingLogger(),
                             tapToPayUxConfiguration = tapToPayUxConfiguration,
                             createCardPresentSetupIntentCallbackRetriever = retrieverScenario.retriever,
                         ),
@@ -1192,6 +1207,11 @@ class TapToAddCollectionHandlerTest {
     }
 
     private companion object {
+        val GENERIC_USER_ERROR = TapToAddErrorMessage(
+            title = StripeCoreR.string.stripe_error.resolvableString,
+            action = StripeCoreR.string.stripe_try_again_later.resolvableString,
+        )
+
         val tapToPayUxConfiguration = createTapToAddUxConfiguration()
         val DEFAULT_METADATA = PaymentMethodMetadataFactory.create(
             isTapToAddSupported = true,

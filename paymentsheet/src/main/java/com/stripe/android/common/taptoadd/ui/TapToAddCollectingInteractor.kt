@@ -1,13 +1,12 @@
 package com.stripe.android.common.taptoadd.ui
 
-import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.spms.LinkInlineSignupAvailability
 import com.stripe.android.common.taptoadd.TapToAddCollectionHandler
+import com.stripe.android.common.taptoadd.TapToAddErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.UIContext
-import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -37,8 +36,8 @@ internal class DefaultTapToAddCollectingInteractor(
     private val eventReporter: EventReporter,
     private val linkInlineSignupAvailability: LinkInlineSignupAvailability,
     private val onCollected: (paymentMethod: PaymentMethod) -> Unit,
-    private val onFailedCollection: (message: ResolvableString) -> Unit,
-    private val onTapToAddNotSupported: () -> Unit,
+    private val onFailedCollection: (message: TapToAddErrorMessage) -> Unit,
+    private val onTapToAddNotSupported: (message: TapToAddErrorMessage) -> Unit,
     private val onCanceled: () -> Unit,
     private val logger: Logger,
 ) : TapToAddCollectingInteractor {
@@ -73,12 +72,12 @@ internal class DefaultTapToAddCollectingInteractor(
             is TapToAddCollectionHandler.CollectionState.FailedCollection -> {
                 eventReporter.onFailedToAddCardWithTapToAdd(collectionState.errorCode.value)
                 logger.debug("Tap to add collection failed with error: ${collectionState.error}")
-                onFailedCollection(collectionState.displayMessage ?: collectionState.error.stripeErrorMessage())
+                onFailedCollection(collectionState.errorMessage)
             }
             is TapToAddCollectionHandler.CollectionState.UnsupportedDevice -> {
                 eventReporter.onTapToAddAttemptWithUnsupportedDevice()
                 logger.debug("Tap to add collection is not supported on this device: ${collectionState.error}")
-                onTapToAddNotSupported()
+                onTapToAddNotSupported(collectionState.errorMessage)
             }
             is TapToAddCollectionHandler.CollectionState.Canceled -> {
                 eventReporter.onTapToAddCanceled(EventReporter.TapToAddCancelSource.CardCollection)
@@ -118,14 +117,20 @@ internal class DefaultTapToAddCollectingInteractor(
                 onFailedCollection = { message ->
                     navigator.get().performAction(
                         action = TapToAddNavigator.Action.NavigateTo(
-                            screen = TapToAddNavigator.Screen.Error(message = message),
+                            screen = TapToAddNavigator.Screen.Error(
+                                message = message,
+                                dueToUnsupportedDevice = false,
+                            ),
                         ),
                     )
                 },
-                onTapToAddNotSupported = {
+                onTapToAddNotSupported = { message ->
                     navigator.get().performAction(
                         action = TapToAddNavigator.Action.NavigateTo(
-                            screen = TapToAddNavigator.Screen.NotSupportedError,
+                            screen = TapToAddNavigator.Screen.Error(
+                                message = message,
+                                dueToUnsupportedDevice = true,
+                            ),
                         ),
                     )
                 },
