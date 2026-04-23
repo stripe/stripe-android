@@ -1,6 +1,7 @@
 package com.stripe.android.common.analytics.experiment
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.ExperimentAssignment
@@ -12,10 +13,18 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.testing.FeatureFlagTestRule
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 
 class DefaultLogCardArtExperimentTest {
+
+    @get:Rule
+    val featureFlagTestRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.enableCardArt,
+        isEnabled = false,
+    )
 
     @Test
     fun `does not log when experimentsData is null`() = runScenario {
@@ -106,6 +115,35 @@ class DefaultLogCardArtExperimentTest {
         )
 
         assertThat(result).isFalse()
+    }
+
+    @Test
+    fun `returns true when experimentsData is null but feature flag is enabled`() = runScenario {
+        featureFlagTestRule.setEnabled(true)
+
+        val result = invoke(
+            elementsSession = createElementsSession(experimentsData = null),
+        )
+
+        eventReporter.experimentExposureCalls.expectNoEvents()
+        assertThat(result).isTrue()
+    }
+
+    @Test
+    fun `returns true when experiment assignment is missing but feature flag is enabled`() = runScenario {
+        featureFlagTestRule.setEnabled(true)
+
+        val result = invoke(
+            elementsSession = createElementsSession(
+                experimentsData = ElementsSession.ExperimentsData(
+                    arbId = "arb_123",
+                    experimentAssignments = emptyMap(),
+                ),
+            ),
+        )
+
+        eventReporter.experimentExposureCalls.expectNoEvents()
+        assertThat(result).isTrue()
     }
 
     @Test

@@ -64,7 +64,7 @@ internal class DefaultLogCardArtExperiment @Inject constructor(
             )
         )
 
-        return variant == TREATMENT || FeatureFlags.enableCardArt.isEnabled
+        return variant == TREATMENT
     }
 
     private companion object {
