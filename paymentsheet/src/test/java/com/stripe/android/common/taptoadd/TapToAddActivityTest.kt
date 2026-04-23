@@ -50,6 +50,8 @@ import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
+import com.stripe.android.core.R as StripeCoreR
+import com.stripe.android.paymentsheet.R as PaymentSheetR
 
 @OptIn(TapToAddPreview::class)
 @RunWith(RobolectricTestRunner::class)
@@ -444,20 +446,31 @@ class TapToAddActivityTest {
     @Test
     fun userShownErrorFromCardCollection() = errorTest(
         errorCode = TerminalErrorCode.CARD_READ_TIMED_OUT,
-        errorMessage = "Transaction timed out!",
+        expectedTitle = applicationContext.getString(
+            StripeCoreR.string.stripe_timed_out
+        ),
+        expectedAction = applicationContext.getString(
+            PaymentSheetR.string.stripe_tap_to_add_timed_out_error_action
+        ),
         expectedResult = TapToAddResult.Canceled(paymentSelection = null)
     )
 
     @Test
     fun userShownUnsupportedErrorFromCardCollection() = errorTest(
         errorCode = TerminalErrorCode.TAP_TO_PAY_UNSUPPORTED_DEVICE,
-        errorMessage = "Unsupported device!",
+        expectedTitle = applicationContext.getString(
+            PaymentSheetR.string.stripe_tap_to_add_unsupported_device_error_title
+        ),
+        expectedAction = applicationContext.getString(
+            PaymentSheetR.string.stripe_tap_to_add_unsupported_device_error_action
+        ),
         expectedResult = TapToAddResult.UnsupportedDevice
     )
 
     private fun errorTest(
         errorCode: TerminalErrorCode,
-        errorMessage: String,
+        expectedTitle: String,
+        expectedAction: String,
         expectedResult: TapToAddResult,
     ) = runScenario(
         mode = TapToAddMode.Complete
@@ -467,7 +480,7 @@ class TapToAddActivityTest {
                 collectSetupIntentPaymentMethodResult = TerminalTestDelegate.SetupIntentResult.Failure(
                     exception = TerminalException(
                         errorCode = errorCode,
-                        errorMessage = errorMessage,
+                        errorMessage = "Error!",
                     )
                 )
             )
@@ -485,7 +498,10 @@ class TapToAddActivityTest {
 
             waitForIdle()
 
-            errorPage.assertShown(errorMessage)
+            errorPage.assertShown(
+                expectedTitle = expectedTitle,
+                expectedAction = expectedAction,
+            )
             errorPage.clickCloseButton()
 
             waitForIdle()

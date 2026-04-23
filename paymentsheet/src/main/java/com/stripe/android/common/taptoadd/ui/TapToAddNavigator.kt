@@ -3,10 +3,9 @@ package com.stripe.android.common.taptoadd.ui
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import com.stripe.android.common.taptoadd.TapToAddErrorMessage
 import com.stripe.android.common.taptoadd.TapToAddResult
 import com.stripe.android.core.injection.ViewModelScope
-import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -22,7 +21,6 @@ import kotlinx.coroutines.launch
 import java.io.Closeable
 import javax.inject.Inject
 import javax.inject.Singleton
-import com.stripe.android.paymentsheet.R as PaymentSheetR
 
 @Singleton
 internal class TapToAddNavigator(
@@ -222,31 +220,24 @@ internal class TapToAddNavigator(
         }
 
         data class Error(
-            val message: ResolvableString,
+            val message: TapToAddErrorMessage,
+            val dueToUnsupportedDevice: Boolean,
         ) : Screen() {
             override val cancelButton: StateFlow<CancelButton> = stateFlowOf(
                 CancelButton.Available(
-                    action = Action.Close()
-                )
-            )
-
-            @Composable
-            override fun ColumnScope.Content() {
-                TapToAddErrorScreen(message)
-            }
-        }
-
-        data object NotSupportedError : Screen() {
-            override val cancelButton: StateFlow<CancelButton> = stateFlowOf(
-                CancelButton.Available(
-                    action = Action.CloseWithUnsupportedDevice
+                    action = if (dueToUnsupportedDevice) {
+                        Action.CloseWithUnsupportedDevice
+                    } else {
+                        Action.Close()
+                    }
                 )
             )
 
             @Composable
             override fun ColumnScope.Content() {
                 TapToAddErrorScreen(
-                    PaymentSheetR.string.stripe_tap_to_add_unsupported_device_error.resolvableString
+                    title = message.title,
+                    action = message.action,
                 )
             }
         }

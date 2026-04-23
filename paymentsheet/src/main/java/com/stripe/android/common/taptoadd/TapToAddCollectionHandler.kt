@@ -1,15 +1,12 @@
 package com.stripe.android.common.taptoadd
 
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.networking.StripeRepository
@@ -31,7 +28,6 @@ import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.suspendCoroutine
-import com.stripe.android.R as StripeR
 
 internal interface TapToAddCollectionHandler {
     suspend fun collect(metadata: PaymentMethodMetadata): CollectionState
@@ -42,11 +38,12 @@ internal interface TapToAddCollectionHandler {
         data class FailedCollection(
             val error: Throwable,
             val errorCode: ErrorCode,
-            val displayMessage: ResolvableString?,
+            val errorMessage: TapToAddErrorMessage,
         ) : CollectionState
 
         data class UnsupportedDevice(
             val error: Throwable,
+            val errorMessage: TapToAddErrorMessage,
         ) : CollectionState
 
         data object Canceled : CollectionState
@@ -65,6 +62,7 @@ internal interface TapToAddCollectionHandler {
             paymentConfiguration: PaymentConfiguration,
             connectionManager: TapToAddConnectionManager,
             tapToPayUxConfiguration: TapToPayUxConfiguration,
+            userFacingLogger: UserFacingLogger,
             errorReporter: ErrorReporter,
             createCardPresentSetupIntentCallbackRetriever: CreateCardPresentSetupIntentCallbackRetriever,
         ): TapToAddCollectionHandler {
@@ -75,6 +73,7 @@ internal interface TapToAddCollectionHandler {
                     stripeRepository = stripeRepository,
                     paymentConfiguration = paymentConfiguration,
                     tapToPayUxConfiguration = tapToPayUxConfiguration,
+                    userFacingLogger = userFacingLogger,
                     errorReporter = errorReporter,
                     createCardPresentSetupIntentCallbackRetriever = createCardPresentSetupIntentCallbackRetriever,
                 )
@@ -92,6 +91,7 @@ internal class DefaultTapToAddCollectionHandler(
     private val paymentConfiguration: PaymentConfiguration,
     private val connectionManager: TapToAddConnectionManager,
     private val errorReporter: ErrorReporter,
+    private val userFacingLogger: UserFacingLogger,
     private val tapToPayUxConfiguration: TapToPayUxConfiguration,
     private val createCardPresentSetupIntentCallbackRetriever: CreateCardPresentSetupIntentCallbackRetriever,
 ) : TapToAddCollectionHandler {
@@ -101,12 +101,15 @@ internal class DefaultTapToAddCollectionHandler(
         val customerMetadata = metadata.customerMetadata
 
         if (customerMetadata == null) {
-            val exception = IllegalStateException("Attempted to collect with tap to add without a customer")
+            val message = "Internal Stripe Error: Attempted to collect with tap to add without a customer"
+            val exception = IllegalStateException(message)
+
+            userFacingLogger.logWarningWithoutPii(message)
 
             return@runCatching TapToAddCollectionHandler.CollectionState.FailedCollection(
                 error = exception,
                 errorCode = DefaultErrorCode.Internal.NoCustomer,
-                displayMessage = exception.stripeErrorMessage(),
+                errorMessage = TapToAddErrorMessageBuilder.build(exception),
             )
         }
 
@@ -119,10 +122,14 @@ internal class DefaultTapToAddCollectionHandler(
         val callback = try {
             createCardPresentSetupIntentCallbackRetriever.waitForCallback()
         } catch (error: CallbackNotFoundException) {
+            userFacingLogger.logWarningWithoutPii(
+                "createCardPresentSetupIntentCallback was not defined! Please provide the callback to use tap to add!"
+            )
+
             return@runCatching TapToAddCollectionHandler.CollectionState.FailedCollection(
                 error = error,
                 errorCode = DefaultErrorCode.Internal.NoCardPresentCallbackFailure,
-                displayMessage = error.resolvableError,
+                errorMessage = TapToAddErrorMessageBuilder.build(error),
             )
         }
 
@@ -132,35 +139,22 @@ internal class DefaultTapToAddCollectionHandler(
                 collectWithIntent(result.clientSecret, metadata, customerMetadata)
             }
             is CreateIntentResult.Failure -> {
+                userFacingLogger.logWarningWithoutPii(
+                    result.displayMessage
+                        ?: result.cause.message
+                        ?: "Unknown error occurred while creating card_present setup intent"
+                )
+
                 TapToAddCollectionHandler.CollectionState.FailedCollection(
                     error = result.cause,
                     errorCode = DefaultErrorCode.Internal.FailureFromMerchantCardPresentCallback,
-                    displayMessage = result.displayMessage?.resolvableString ?: result.cause.stripeErrorMessage()
+                    errorMessage = TapToAddErrorMessageBuilder.build(result.cause)
                 )
             }
         }
     }.fold(
         onSuccess = { it },
-        onFailure = { error ->
-            when (error) {
-                is TerminalException if error.errorCode == TerminalErrorCode.CANCELED -> {
-                    TapToAddCollectionHandler.CollectionState.Canceled
-                }
-                is TerminalException if unsupportedDeviceErrorCodes.contains(error.errorCode) -> {
-                    TapToAddCollectionHandler.CollectionState.UnsupportedDevice(error = error)
-                }
-                else -> {
-                    TapToAddCollectionHandler.CollectionState.FailedCollection(
-                        error = error,
-                        errorCode = when (error) {
-                            is TerminalException -> DefaultErrorCode.Terminal(error)
-                            else -> DefaultErrorCode.Exception(error)
-                        },
-                        displayMessage = error.stripeErrorMessage()
-                    )
-                }
-            }
-        }
+        onFailure = ::handleFailedCollection,
     )
 
     private suspend fun collectWithIntent(
@@ -232,13 +226,12 @@ internal class DefaultTapToAddCollectionHandler(
         metadata: PaymentMethodMetadata,
     ): TapToAddCollectionHandler.CollectionState {
         if (!metadata.cardBrandFilter.isAccepted(paymentMethod)) {
+            val exception = TapToAddCardNotSupportedException()
+
             return TapToAddCollectionHandler.CollectionState.FailedCollection(
-                error = IllegalStateException("Payment method is not supported by card brand filter!"),
+                error = exception,
                 errorCode = DefaultErrorCode.Internal.CardBrandNotSupportedByMerchant,
-                displayMessage = resolvableString(
-                    StripeR.string.stripe_disallowed_card_brand,
-                    paymentMethod.card?.brand ?: CardBrand.Unknown,
-                )
+                errorMessage = TapToAddErrorMessageBuilder.build(exception),
             )
         }
 
@@ -328,6 +321,30 @@ internal class DefaultTapToAddCollectionHandler(
         ).getOrThrow()
     }
 
+    private fun handleFailedCollection(error: Throwable): TapToAddCollectionHandler.CollectionState {
+        return when (error) {
+            is TerminalException if error.errorCode == TerminalErrorCode.CANCELED -> {
+                TapToAddCollectionHandler.CollectionState.Canceled
+            }
+            is TerminalException if unsupportedDeviceErrorCodes.contains(error.errorCode) -> {
+                TapToAddCollectionHandler.CollectionState.UnsupportedDevice(
+                    error = error,
+                    errorMessage = TapToAddErrorMessageBuilder.build(error),
+                )
+            }
+            else -> {
+                TapToAddCollectionHandler.CollectionState.FailedCollection(
+                    error = error,
+                    errorCode = when (error) {
+                        is TerminalException -> DefaultErrorCode.Terminal(error)
+                        else -> DefaultErrorCode.Exception(error)
+                    },
+                    errorMessage = TapToAddErrorMessageBuilder.build(error)
+                )
+            }
+        }
+    }
+
     private fun getApiOptions(customerMetadata: CustomerMetadata): ApiRequest.Options {
         val ephemeralKeySecret = when (customerMetadata) {
             is CustomerMetadata.CustomerSession -> customerMetadata.ephemeralKeySecret
@@ -365,10 +382,12 @@ internal class DefaultTapToAddCollectionHandler(
 
 internal class UnsupportedTapToAddCollectionHandler : TapToAddCollectionHandler {
     override suspend fun collect(metadata: PaymentMethodMetadata): TapToAddCollectionHandler.CollectionState {
+        val exception = IllegalStateException("Not handled!")
+
         return TapToAddCollectionHandler.CollectionState.FailedCollection(
-            error = IllegalStateException("Not handled!"),
+            error = exception,
             errorCode = UnsupportedErrorCode,
-            displayMessage = null,
+            errorMessage = TapToAddErrorMessageBuilder.build(exception),
         )
     }
 

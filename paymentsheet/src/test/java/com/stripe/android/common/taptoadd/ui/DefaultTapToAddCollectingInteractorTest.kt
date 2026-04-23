@@ -3,12 +3,11 @@ package com.stripe.android.common.taptoadd.ui
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.spms.FakeLinkInlineSignupAvailability
 import com.stripe.android.common.spms.LinkInlineSignupAvailability
 import com.stripe.android.common.taptoadd.FakeTapToAddCollectionHandler
 import com.stripe.android.common.taptoadd.TapToAddCollectionHandler
-import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.common.taptoadd.TapToAddErrorMessage
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.TestFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -70,40 +69,24 @@ internal class DefaultTapToAddCollectingInteractorTest {
     }
 
     @Test
-    fun `onFailedCollection is invoked with displayMessage when collection fails with display message`() {
-        val errorMessage = "Connection failed".resolvableString
-
+    fun `onFailedCollection is invoked with errorMessage when collection fails`() {
+        val underlying = RuntimeException("underlying")
+        val userError = TapToAddErrorMessage(
+            title = "Connection failed".resolvableString,
+            action = "Try again".resolvableString,
+        )
         runScenario(
             collectResult = TapToAddCollectionHandler.CollectionState.FailedCollection(
-                error = RuntimeException("underlying"),
+                error = underlying,
                 errorCode = TEST_ERROR_CODE,
-                displayMessage = errorMessage,
+                errorMessage = userError,
             ),
         ) {
             assertThat(collectionHandlerScenario.collectCalls.awaitItem()).isNotNull()
             assertThat(fakeEventReporter.tapToAddStartedCalls.awaitItem()).isNotNull()
             assertThat(fakeEventReporter.failedToAddCardWithTapToAddCalls.awaitItem())
                 .isEqualTo(TEST_ERROR_CODE.value)
-            assertThat(onFailedCollection.awaitItem()).isEqualTo(errorMessage)
-        }
-    }
-
-    @Test
-    fun `onFailedCollection is invoked with stripe error message when collection fails without display message`() {
-        val exception = RuntimeException("underlying")
-
-        runScenario(
-            collectResult = TapToAddCollectionHandler.CollectionState.FailedCollection(
-                error = exception,
-                errorCode = TEST_ERROR_CODE,
-                displayMessage = null,
-            ),
-        ) {
-            assertThat(collectionHandlerScenario.collectCalls.awaitItem()).isNotNull()
-            assertThat(fakeEventReporter.tapToAddStartedCalls.awaitItem()).isNotNull()
-            assertThat(fakeEventReporter.failedToAddCardWithTapToAddCalls.awaitItem())
-                .isEqualTo(TEST_ERROR_CODE.value)
-            assertThat(onFailedCollection.awaitItem()).isEqualTo(exception.stripeErrorMessage())
+            assertThat(onFailedCollection.awaitItem()).isEqualTo(userError)
         }
     }
 
@@ -121,18 +104,22 @@ internal class DefaultTapToAddCollectingInteractorTest {
     }
 
     @Test
-    fun `onTapToAddNotSupported is invoked when collection fails because device is unsupported`() {
+    fun `onTapToAddNotSupported is invoked with errorMessage when device is unsupported`() {
         val exception = IllegalStateException("unsupported")
-
+        val userError = TapToAddErrorMessage(
+            title = "Unsupported device".resolvableString,
+            action = "Try another device".resolvableString,
+        )
         runScenario(
             collectResult = TapToAddCollectionHandler.CollectionState.UnsupportedDevice(
                 error = exception,
+                errorMessage = userError,
             ),
         ) {
             assertThat(collectionHandlerScenario.collectCalls.awaitItem()).isNotNull()
             assertThat(fakeEventReporter.tapToAddStartedCalls.awaitItem()).isNotNull()
             assertThat(fakeEventReporter.tapToAddAttemptWithUnsupportedDeviceCalls.awaitItem()).isNotNull()
-            assertThat(onTapToAddNotSupported.awaitItem()).isNotNull()
+            assertThat(onTapToAddNotSupported.awaitItem()).isEqualTo(userError)
         }
     }
 
@@ -171,8 +158,8 @@ internal class DefaultTapToAddCollectingInteractorTest {
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val onCollected = Turbine<PaymentMethod>()
-        val onFailedCollection = Turbine<ResolvableString>()
-        val onTapToAddNotSupported = Turbine<Unit>()
+        val onFailedCollection = Turbine<TapToAddErrorMessage>()
+        val onTapToAddNotSupported = Turbine<TapToAddErrorMessage>()
         val onCanceled = Turbine<Unit>()
         val fakeEventReporter = FakeEventReporter()
 
@@ -187,7 +174,7 @@ internal class DefaultTapToAddCollectingInteractorTest {
                     eventReporter = fakeEventReporter,
                     onCollected = { onCollected.add(it) },
                     onFailedCollection = { onFailedCollection.add(it) },
-                    onTapToAddNotSupported = { onTapToAddNotSupported.add(Unit) },
+                    onTapToAddNotSupported = { onTapToAddNotSupported.add(it) },
                     onCanceled = { onCanceled.add(Unit) },
                     logger = FakeLogger(),
                 ),
@@ -206,8 +193,8 @@ internal class DefaultTapToAddCollectingInteractorTest {
     private class Scenario(
         val interactor: TapToAddCollectingInteractor,
         val onCollected: ReceiveTurbine<PaymentMethod>,
-        val onFailedCollection: ReceiveTurbine<ResolvableString>,
-        val onTapToAddNotSupported: ReceiveTurbine<Unit>,
+        val onFailedCollection: ReceiveTurbine<TapToAddErrorMessage>,
+        val onTapToAddNotSupported: ReceiveTurbine<TapToAddErrorMessage>,
         val onCanceled: ReceiveTurbine<Unit>,
         val collectionHandlerScenario: FakeTapToAddCollectionHandler.Scenario,
         val fakeEventReporter: FakeEventReporter,
