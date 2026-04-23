@@ -23,7 +23,7 @@ class DefaultCardArtExperimentHandlerTest {
     @get:Rule
     val featureFlagTestRule = FeatureFlagTestRule(
         featureFlag = FeatureFlags.enableCardArt,
-        isEnabled = false,
+        isEnabled = true,
     )
 
     @Test
@@ -73,14 +73,12 @@ class DefaultCardArtExperimentHandlerTest {
     }
 
     @Test
-    fun `returns true when feature flag is enabled regardless of experiment`() = runScenario {
-        featureFlagTestRule.setEnabled(true)
+    fun `returns false when feature flag is disabled even with treatment`() = runScenario {
+        featureFlagTestRule.setEnabled(false)
 
-        val result = getAssignment(
-            elementsSession = createElementsSession(experimentsData = null),
-        )
+        val result = getAssignment()
 
-        assertThat(result).isTrue()
+        assertThat(result).isFalse()
     }
 
     @Test

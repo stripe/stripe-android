@@ -41,7 +41,7 @@ internal class DefaultCardArtExperimentHandler @Inject constructor(
 ) : CardArtExperimentHandler {
 
     override fun isCardArtEnabled(elementsSession: ElementsSession): Boolean {
-        if (FeatureFlags.enableCardArt.isEnabled) return true
+        if (FeatureFlags.enableCardArt.isEnabled.not()) return false
 
         val experimentsData = elementsSession.experimentsData ?: return false
         val variant = experimentsData.experimentAssignments[ExperimentAssignment.OCS_MOBILE_CARD_ART]
