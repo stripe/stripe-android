@@ -79,7 +79,7 @@ internal class PaymentSheetScreenManageSavedPaymentMethodsTest {
             paymentMethods = paymentMethods.map { paymentMethod ->
                 DisplayableSavedPaymentMethod.create(
                     displayName = paymentMethod.id.resolvableString,
-                    paymentMethod = paymentMethod
+                    paymentMethod = paymentMethod,
                 )
             },
             currentSelection = null,

@@ -37,7 +37,7 @@ class ElementsSessionJsonParserTest {
     @get:Rule
     val enableCardArtRule = FeatureFlagTestRule(
         featureFlag = FeatureFlags.enableCardArt,
-        isEnabled = false,
+        isEnabled = true,
     )
 
     @Test
@@ -1818,7 +1818,6 @@ class ElementsSessionJsonParserTest {
     @Test
     fun `Card art merges into matching payment method`() {
         enableCardArtRule.setEnabled(true)
-
         val json = createElementsSessionWithCardArt(
             cardArt = """
                 [
@@ -1843,7 +1842,6 @@ class ElementsSessionJsonParserTest {
     @Test
     fun `Card art with non-matching ID leaves cardArt null`() {
         enableCardArtRule.setEnabled(true)
-
         val json = createElementsSessionWithCardArt(
             cardArt = """
                 [
@@ -1864,7 +1862,6 @@ class ElementsSessionJsonParserTest {
     @Test
     fun `No card_art key leaves cardArt null`() {
         enableCardArtRule.setEnabled(true)
-
         val json = createElementsSessionWithCardArt(cardArt = null)
         val session = parseElementsSession(json)
 
@@ -1874,29 +1871,7 @@ class ElementsSessionJsonParserTest {
     @Test
     fun `Empty card_art array leaves cardArt null`() {
         enableCardArtRule.setEnabled(true)
-
         val json = createElementsSessionWithCardArt(cardArt = "[]")
-        val session = parseElementsSession(json)
-
-        assertThat(session?.customer?.paymentMethods?.first()?.card?.cardArt).isNull()
-    }
-
-    @Test
-    fun `Card art not parsed when feature flag is disabled`() {
-        enableCardArtRule.setEnabled(false)
-
-        val json = createElementsSessionWithCardArt(
-            cardArt = """
-                [
-                    {
-                        "payment_method": "pm_123",
-                        "art_image": { "url": "https://example.com/art.png", "format": "image/png" },
-                        "program_name": "Test Program"
-                    }
-                ]
-            """
-        )
-
         val session = parseElementsSession(json)
 
         assertThat(session?.customer?.paymentMethods?.first()?.card?.cardArt).isNull()
@@ -1905,7 +1880,6 @@ class ElementsSessionJsonParserTest {
     @Test
     fun `Card art partial match only sets art on matching payment method`() {
         enableCardArtRule.setEnabled(true)
-
         val json = createElementsSessionWithCardArt(
             extraPaymentMethod = """
                 ,{
@@ -1946,7 +1920,6 @@ class ElementsSessionJsonParserTest {
     @Test
     fun `Multiple payment methods each get their card art`() {
         enableCardArtRule.setEnabled(true)
-
         val json = createElementsSessionWithCardArt(
             extraPaymentMethod = """
                 ,{
@@ -2026,6 +1999,12 @@ class ElementsSessionJsonParserTest {
             """
             {
               "payment_method_preference": $PAYMENT_METHOD_PREFERENCE_JSON,
+              "experiments_data": {
+                "arb_id": "arb_123",
+                "experiment_assignments": {
+                  "ocs_mobile_card_art": "treatment"
+                }
+              },
               "customer": {
                 $cardArtField
                 "customer_session": $CUSTOMER_SESSION_JSON,
