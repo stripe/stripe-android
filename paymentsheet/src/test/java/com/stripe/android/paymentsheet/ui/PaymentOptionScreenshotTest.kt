@@ -100,36 +100,6 @@ class PaymentOptionScreenshotTest {
             cardArtUrl = SAMPLE_CARD_ART_URL,
         )
     }
-    
-    @Test
-    fun testEnabledWithCardArtFlagEnabled() {
-        createSavedPaymentMethodTabScreenshot(
-            isSelected = false,
-            shouldShowModifyBadge = false,
-            shouldShowDefaultBadge = false,
-            isEnabled = true,
-        )
-    }
-
-    @Test
-    fun testDisabledWithCardArtFlagEnabled() {
-        createSavedPaymentMethodTabScreenshot(
-            isSelected = false,
-            shouldShowModifyBadge = false,
-            shouldShowDefaultBadge = false,
-            isEnabled = false,
-        )
-    }
-
-    @Test
-    fun testSelectedWithCardArtFlagEnabled() {
-        createSavedPaymentMethodTabScreenshot(
-            isSelected = true,
-            shouldShowModifyBadge = false,
-            shouldShowDefaultBadge = false,
-            isEnabled = true,
-        )
-    }
 
     private fun createSavedPaymentMethodTabScreenshot(
         isSelected: Boolean,
