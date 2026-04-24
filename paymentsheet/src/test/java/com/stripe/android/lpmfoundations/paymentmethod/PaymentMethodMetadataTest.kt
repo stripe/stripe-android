@@ -1144,7 +1144,8 @@ internal class PaymentMethodMetadataTest {
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
-            isTapToAddAvailable = false
+            isTapToAddAvailable = false,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
 
         val expectedMetadata = PaymentMethodMetadata(
@@ -1194,10 +1195,10 @@ internal class PaymentMethodMetadataTest {
                 configuration = createLinkConfiguration(),
                 loginState = LinkState.LoginState.LoggedOut,
             ),
-            cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
-            cardFundingFilter = PaymentSheetCardFundingFilter(allowedCardFundingTypes),
             paymentMethodIncentive = null,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
+            cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
+            cardFundingFilter = PaymentSheetCardFundingFilter(allowedCardFundingTypes),
             termsDisplay = emptyMap(),
             forceSetupFutureUseBehaviorAndNewMandate = false,
             passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
@@ -1215,6 +1216,7 @@ internal class PaymentMethodMetadataTest {
             elementsSessionId = "session_1234",
             disableSsdOcrCardScan = false,
             cardArts = emptyList(),
+            paymentMethodOrientation = PaymentMethodOrientation.Horizontal,
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1276,6 +1278,7 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
 
         // When flag is false, should use default funding types, not the configured ones
@@ -1369,6 +1372,7 @@ internal class PaymentMethodMetadataTest {
             elementsSessionId = "session_1234",
             disableSsdOcrCardScan = false,
             cardArts = emptyList(),
+            paymentMethodOrientation = PaymentMethodOrientation.Horizontal,
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
@@ -2104,6 +2108,7 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
 
         assertThat(metadata.availableWallets)
@@ -2173,6 +2178,7 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = true,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
 
         assertThat(metadata.isTapToAddSupported).isTrue()
@@ -2197,6 +2203,7 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = true,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
 
         assertThat(metadata.isTapToAddSupported).isTrue()
@@ -2225,6 +2232,7 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
 
         assertThat(metadata.isTapToAddSupported).isFalse()
@@ -2262,6 +2270,7 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
     }
 

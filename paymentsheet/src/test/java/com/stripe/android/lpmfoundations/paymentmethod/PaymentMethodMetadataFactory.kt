@@ -146,6 +146,7 @@ internal object PaymentMethodMetadataFactory {
             elementsSessionId = elementsSessionId,
             disableSsdOcrCardScan = disableSsdOcrCardScan,
             cardArts = cardArts,
+            paymentMethodOrientation = PaymentMethodOrientation.Horizontal,
         )
     }
 
