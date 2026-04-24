@@ -36,7 +36,7 @@ internal class PaymentSheetScreenManageSavedPaymentMethodsScreenshotTest {
             DisplayableSavedPaymentMethod.create(
                 displayName = it.second.resolvableString,
                 paymentMethod = it.first,
-                isCbcEligible = true
+                isCbcEligible = true,
             )
         }
 
@@ -48,7 +48,7 @@ internal class PaymentSheetScreenManageSavedPaymentMethodsScreenshotTest {
             DisplayableSavedPaymentMethod.create(
                 displayName = it.second.resolvableString,
                 paymentMethod = it.first,
-                isCbcEligible = true
+                isCbcEligible = true,
             )
         }
 

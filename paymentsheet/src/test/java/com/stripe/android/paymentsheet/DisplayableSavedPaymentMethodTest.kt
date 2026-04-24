@@ -23,7 +23,7 @@ class DisplayableSavedPaymentMethodTest {
         val visaCardUsingCartesBancaires = PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
         val displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
             displayName = "unused".resolvableString,
-            paymentMethod = visaCardUsingCartesBancaires
+            paymentMethod = visaCardUsingCartesBancaires,
         )
 
         val description = displayableSavedPaymentMethod.getDescription().resolve(context)
@@ -38,7 +38,7 @@ class DisplayableSavedPaymentMethodTest {
         )
         val displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
             displayName = "unused".resolvableString,
-            paymentMethod = cardWithoutDisplayBrand
+            paymentMethod = cardWithoutDisplayBrand,
         )
 
         val description = displayableSavedPaymentMethod.getDescription().resolve(context)
