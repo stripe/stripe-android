@@ -4,6 +4,7 @@ NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
 ### PaymentSheet
 * [ADDED] Stripe card scanning is back in public preview. [Add `stripecardscan` to the `dependencies` block of your build.gradle](https://docs.stripe.com/payments/accept-a-payment?payment-ui=mobile&platform=android#android-card-scanning) to enable the Stripe card scanner.
+* [ADDED] Tap to add your card is in private preview. See documentation for [EmbeddedPaymentElement](https://docs.corp.stripe.com/payments/mobile/embedded-tap-to-add) and [PaymentSheet](https://docs.corp.stripe.com/payments/mobile/tap-to-add) for integration guide and to sign up for access.
 
 ## 23.5.0 - 2026-04-20
 * [REMOVED][12871](https://github.com/stripe/stripe-android/pull/12871) Removed UPI support across the SDK.
