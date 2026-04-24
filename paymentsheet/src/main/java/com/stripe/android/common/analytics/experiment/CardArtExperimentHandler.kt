@@ -1,6 +1,5 @@
 package com.stripe.android.common.analytics.experiment
 
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.ExperimentAssignment
@@ -13,15 +12,6 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import javax.inject.Inject
 
 internal interface CardArtExperimentHandler {
-    /**
-     * Returns whether card art should be enabled.
-     *
-     * Card art is enabled when:
-     * - The local feature flag is enabled (debug-only override), OR
-     * - The experiment variant is "treatment"
-     */
-    fun isCardArtEnabled(elementsSession: ElementsSession): Boolean
-
     /**
      * Logs the experiment exposure with full dimensions. Should be called after
      * payment method metadata and default selection are resolved.
@@ -39,16 +29,6 @@ internal class DefaultCardArtExperimentHandler @Inject constructor(
     private val eventReporter: EventReporter,
     private val mode: EventReporter.Mode,
 ) : CardArtExperimentHandler {
-
-    override fun isCardArtEnabled(elementsSession: ElementsSession): Boolean {
-        if (FeatureFlags.enableCardArt.isEnabled.not()) return false
-
-        val experimentsData = elementsSession.experimentsData ?: return false
-        val variant = experimentsData.experimentAssignments[ExperimentAssignment.OCS_MOBILE_CARD_ART]
-            ?: return false
-
-        return variant == TREATMENT
-    }
 
     override fun logExposure(
         elementsSession: ElementsSession,
@@ -86,9 +66,6 @@ internal class DefaultCardArtExperimentHandler @Inject constructor(
         )
     }
 
-    private companion object {
-        const val TREATMENT = "treatment"
-    }
 }
 
 private fun PaymentElementLoader.Configuration.layoutDimensionValue(): String {

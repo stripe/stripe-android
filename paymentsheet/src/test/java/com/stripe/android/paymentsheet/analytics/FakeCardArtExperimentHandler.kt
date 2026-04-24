@@ -9,14 +9,10 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 
-internal class FakeCardArtExperimentHandler(
-    private val isEnabled: Boolean = false,
-) : CardArtExperimentHandler {
+internal class FakeCardArtExperimentHandler : CardArtExperimentHandler {
 
     private val _logExposureCalls = Turbine<LogExposureCall>()
     val logExposureCalls: ReceiveTurbine<LogExposureCall> = _logExposureCalls
-
-    override fun isCardArtEnabled(elementsSession: ElementsSession): Boolean = isEnabled
 
     override fun logExposure(
         elementsSession: ElementsSession,

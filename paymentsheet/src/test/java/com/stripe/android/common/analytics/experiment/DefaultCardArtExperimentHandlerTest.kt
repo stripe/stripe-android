@@ -1,7 +1,6 @@
 package com.stripe.android.common.analytics.experiment
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.ExperimentAssignment
@@ -13,25 +12,10 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import com.stripe.android.testing.FeatureFlagTestRule
 import kotlinx.coroutines.test.runTest
-import org.junit.Rule
 import org.junit.Test
 
 class DefaultCardArtExperimentHandlerTest {
-
-    @get:Rule
-    val featureFlagTestRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.enableCardArt,
-        isEnabled = true,
-    )
-
-    @Test
-    fun `returns true when variant is treatment`() = runScenario {
-        val result = getAssignment()
-
-        assertThat(result).isTrue()
-    }
 
     @Test
     fun `does not log when experimentsData is null`() = runScenario {
@@ -256,12 +240,6 @@ class DefaultCardArtExperimentHandlerTest {
                 ),
             ),
         )
-
-        fun getAssignment(
-            elementsSession: ElementsSession = defaultElementsSession,
-        ): Boolean {
-            return cardArtExperimentHandler.isCardArtEnabled(elementsSession)
-        }
 
         fun logExposure(
             elementsSession: ElementsSession = defaultElementsSession,
