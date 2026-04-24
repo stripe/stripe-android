@@ -17,7 +17,7 @@ internal class CurrencySelectorToggleScreenshotTest {
         SystemAppearance.entries,
         PaymentSheetAppearance.entries,
         FontSize.entries,
-        boxModifier = Modifier.padding(horizontal = 16.dp),
+        boxModifier = Modifier.padding(vertical = 16.dp, horizontal = 16.dp),
     )
 
     private val options = CurrencySelectorOptions(
