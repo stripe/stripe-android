@@ -72,7 +72,6 @@ internal fun PaymentMethodRowButton(
     onClick: () -> Unit,
     contentDescription: String? = null,
     modifier: Modifier = Modifier,
-    isCardArtEnabled: Boolean,
     appearance: Appearance.Embedded = Appearance.Embedded(RowStyle.FloatingButton.default),
     promotionProvider: (() -> PaymentMethodMessagePromotion?)?,
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
@@ -89,7 +88,6 @@ internal fun PaymentMethodRowButton(
         appearance = appearance,
         isEnabled = isEnabled,
         isSelected = isSelected,
-        isCardArtEnabled = isCardArtEnabled,
         contentPaddingValues = contentPaddingValues,
         modifier = modifier
             .fillMaxWidth()
@@ -152,7 +150,6 @@ private fun RowButtonOuterContent(
     appearance: Appearance.Embedded,
     isEnabled: Boolean,
     isSelected: Boolean,
-    isCardArtEnabled: Boolean,
     contentPaddingValues: PaddingValues,
     modifier: Modifier,
     trailingContent: @Composable (RowScope.() -> Unit)?,
@@ -173,7 +170,6 @@ private fun RowButtonOuterContent(
         is RowStyle.FlatWithCheckmark -> {
             RowButtonCheckmarkOuterContent(
                 isSelected = isSelected,
-                isCardArtEnabled = isCardArtEnabled,
                 contentPaddingValues = contentPaddingValues,
                 trailingContent = trailingContent,
                 style = appearance.style,
@@ -184,7 +180,6 @@ private fun RowButtonOuterContent(
         }
         is RowStyle.FlatWithDisclosure -> {
             RowButtonDisclosureOuterContent(
-                isCardArtEnabled = isCardArtEnabled,
                 contentPaddingValues = contentPaddingValues,
                 trailingContent = trailingContent,
                 style = appearance.style,
@@ -276,7 +271,6 @@ private fun RowButtonRadioOuterContent(
 @Composable
 private fun RowButtonCheckmarkOuterContent(
     isSelected: Boolean,
-    isCardArtEnabled: Boolean,
     contentPaddingValues: PaddingValues,
     trailingContent: (@Composable RowScope.() -> Unit)?,
     modifier: Modifier,
@@ -284,7 +278,6 @@ private fun RowButtonCheckmarkOuterContent(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     RowButtonWithEndIconOuterContent(
-        isCardArtEnabled = isCardArtEnabled,
         contentPaddingValues = contentPaddingValues,
         trailingContent = trailingContent,
         modifier = modifier,
@@ -307,7 +300,6 @@ private fun RowButtonCheckmarkOuterContent(
 
 @Composable
 private fun RowButtonDisclosureOuterContent(
-    isCardArtEnabled: Boolean,
     contentPaddingValues: PaddingValues,
     trailingContent: (@Composable RowScope.() -> Unit)?,
     modifier: Modifier,
@@ -315,7 +307,6 @@ private fun RowButtonDisclosureOuterContent(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     RowButtonWithEndIconOuterContent(
-        isCardArtEnabled = isCardArtEnabled,
         contentPaddingValues = contentPaddingValues,
         trailingContent = trailingContent,
         modifier = modifier,
@@ -334,7 +325,6 @@ private fun RowButtonDisclosureOuterContent(
 
 @Composable
 private fun RowButtonWithEndIconOuterContent(
-    isCardArtEnabled: Boolean,
     contentPaddingValues: PaddingValues,
     trailingContent: (@Composable RowScope.() -> Unit)?,
     modifier: Modifier,
@@ -351,7 +341,7 @@ private fun RowButtonWithEndIconOuterContent(
             content()
             Row {
                 if (trailingContent != null) {
-                    val width = UIConstants.iconWidth(isCardArtEnabled) + ROW_CONTENT_HORIZONTAL_SPACING.dp
+                    val width = UIConstants.iconWidth + ROW_CONTENT_HORIZONTAL_SPACING.dp
                     Spacer(
                         modifier = Modifier
                             .width(width)
@@ -488,7 +478,6 @@ private fun ButtonPreview() {
             PaymentMethodRowButton(
                 isEnabled = true,
                 isSelected = true,
-                isCardArtEnabled = false,
                 shouldShowDefaultBadge = true,
                 iconContent = {
                     PaymentMethodIcon(
@@ -511,7 +500,6 @@ private fun ButtonPreview() {
             PaymentMethodRowButton(
                 isEnabled = false,
                 isSelected = false,
-                isCardArtEnabled = false,
                 shouldShowDefaultBadge = false,
                 iconContent = {
                     PaymentMethodIcon(

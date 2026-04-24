@@ -92,7 +92,6 @@ internal data class PaymentMethodMetadata(
     val elementsSessionId: String? = null,
     val disableSsdOcrCardScan: Boolean,
     val cardArts: List<PaymentMethod.Card.CardArt>,
-    val isCardArtEnabled: Boolean,
 ) : Parcelable {
 
     @IgnoredOnParcel
@@ -351,10 +350,9 @@ internal data class PaymentMethodMetadata(
             integrationMetadata: IntegrationMetadata,
             analyticsMetadata: AnalyticsMetadata,
             isTapToAddAvailable: Boolean,
-            isCardArtEnabled: Boolean
         ): PaymentMethodMetadata {
             val linkSettings = elementsSession.linkSettings
-            val cardArts = resolveCardArts(elementsSession, isCardArtEnabled)
+            val cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty()
             return PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
@@ -411,7 +409,6 @@ internal data class PaymentMethodMetadata(
                 elementsSessionId = elementsSession.elementsSessionId,
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
                 cardArts = cardArts,
-                isCardArtEnabled = isCardArtEnabled
             )
         }
 
@@ -422,8 +419,8 @@ internal data class PaymentMethodMetadata(
             isGooglePayReady: Boolean,
             customerMetadata: CustomerMetadata,
             integrationMetadata: IntegrationMetadata.CustomerSheet,
-            isCardArtEnabled: Boolean
         ): PaymentMethodMetadata {
+            val cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty()
             return PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
@@ -481,17 +478,8 @@ internal data class PaymentMethodMetadata(
                 enableMlKitCardScan = elementsSession.enableMlKitCardScan,
                 elementsSessionId = elementsSession.elementsSessionId,
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
-                cardArts = resolveCardArts(elementsSession, isCardArtEnabled),
-                isCardArtEnabled = isCardArtEnabled
+                cardArts = cardArts,
             )
-        }
-
-        private fun resolveCardArts(
-            elementsSession: ElementsSession,
-            isCardArtEnabled: Boolean,
-        ): List<PaymentMethod.Card.CardArt> {
-            if (!isCardArtEnabled) return emptyList()
-            return elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty()
         }
     }
 }

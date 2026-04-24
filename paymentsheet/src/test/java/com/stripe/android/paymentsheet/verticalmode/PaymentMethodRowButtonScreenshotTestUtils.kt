@@ -22,7 +22,7 @@ internal fun DefaultPaymentMethodRowIcon(
         alignment = Alignment.Center,
         modifier = Modifier
             .height(iconHeight)
-            .width(UIConstants.iconWidth(isCardArtEnabled = false))
+            .width(UIConstants.iconWidth)
     )
 }
 
@@ -48,7 +48,6 @@ internal fun testPaymentMethodRowButton(
             promoText = promoText,
             onClick = {},
             trailingContent = trailingContent,
-            isCardArtEnabled = false,
             shouldShowDefaultBadge = shouldShowDefaultBadge,
             appearance = appearance,
             promotionProvider = null

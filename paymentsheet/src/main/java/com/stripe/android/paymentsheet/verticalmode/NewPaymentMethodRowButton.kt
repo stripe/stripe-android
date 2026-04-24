@@ -22,7 +22,6 @@ const val TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON = "TEST_TAG_NEW_PAYMENT_METHOD_
 internal fun NewPaymentMethodRowButton(
     isEnabled: Boolean,
     isSelected: Boolean,
-    isCardArtEnabled: Boolean,
     displayablePaymentMethod: DisplayablePaymentMethod,
     imageLoader: StripeImageLoader,
     modifier: Modifier = Modifier,
@@ -32,7 +31,6 @@ internal fun NewPaymentMethodRowButton(
     NewPaymentMethodRowButton(
         isEnabled = isEnabled,
         isSelected = isSelected,
-        isCardArtEnabled = isCardArtEnabled,
         iconRes = displayablePaymentMethod.icon(),
         iconUrl = displayablePaymentMethod.iconUrl(),
         imageLoader = imageLoader,
@@ -54,7 +52,6 @@ internal fun NewPaymentMethodRowButton(
 internal fun NewPaymentMethodRowButton(
     isEnabled: Boolean,
     isSelected: Boolean,
-    isCardArtEnabled: Boolean,
     iconRes: Int,
     iconUrl: String?,
     imageLoader: StripeImageLoader,
@@ -71,7 +68,6 @@ internal fun NewPaymentMethodRowButton(
     PaymentMethodRowButton(
         isEnabled = isEnabled,
         isSelected = isSelected,
-        isCardArtEnabled = isCardArtEnabled,
         shouldShowDefaultBadge = false,
         iconContent = {
             PaymentMethodIcon(
@@ -81,7 +77,7 @@ internal fun NewPaymentMethodRowButton(
                 iconRequiresTinting = iconRequiresTinting,
                 modifier = Modifier
                     .height(iconHeight)
-                    .width(UIConstants.iconWidth(isCardArtEnabled)),
+                    .width(UIConstants.iconWidth),
                 contentAlignment = Alignment.Center,
             )
         },

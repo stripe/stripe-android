@@ -194,7 +194,7 @@ private val PREVIEW_PAYMENT_OPTION_ITEMS = listOf(
                     last4 = "4242",
                 )
             ),
-            shouldShowDefaultBadge = true
+            shouldShowDefaultBadge = true,
         ),
     ),
     PaymentOptionsItem.SavedPaymentMethod(
@@ -206,7 +206,7 @@ private val PREVIEW_PAYMENT_OPTION_ITEMS = listOf(
                 liveMode = false,
                 code = PaymentMethod.Type.SepaDebit.code,
                 type = PaymentMethod.Type.SepaDebit,
-            )
+            ),
         ),
     ),
     PaymentOptionsItem.SavedPaymentMethod(
@@ -222,7 +222,7 @@ private val PREVIEW_PAYMENT_OPTION_ITEMS = listOf(
                     brand = CardBrand.MasterCard,
                     last4 = "4242",
                 )
-            )
+            ),
         ),
     ),
 )
@@ -432,11 +432,7 @@ private fun SavedPaymentMethodTab(
             iconRes = paymentMethod.paymentMethod.getSavedPaymentMethodIcon(
                 showNightIcon = !MaterialTheme.stripeColors.component.shouldUseDarkDynamicColor()
             ),
-            cardArtUrl = if (paymentMethod.displayableSavedPaymentMethod.cardArtEnabled) {
-                paymentMethod.paymentMethod.card?.cardArt?.artImage?.url
-            } else {
-                null
-            },
+            cardArtUrl = paymentMethod.paymentMethod.card?.cardArt?.artImage?.url,
             labelIcon = labelIcon,
             shouldTintLabelIcon = paymentMethod.paymentMethod.shouldTintLabelIcon,
             labelText = labelText,

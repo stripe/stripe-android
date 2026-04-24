@@ -699,7 +699,7 @@ internal object PaymentMethodFixtures {
             displayName = displayName,
             paymentMethod = this,
             isCbcEligible = true,
-            shouldShowDefaultBadge = shouldShowDefaultBadge
+            shouldShowDefaultBadge = shouldShowDefaultBadge,
         )
     }
 

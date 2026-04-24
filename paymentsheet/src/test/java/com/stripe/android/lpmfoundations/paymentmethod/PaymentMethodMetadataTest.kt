@@ -1145,7 +1145,6 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
-            isCardArtEnabled = false,
         )
 
         val expectedMetadata = PaymentMethodMetadata(
@@ -1216,7 +1215,6 @@ internal class PaymentMethodMetadataTest {
             elementsSessionId = "session_1234",
             disableSsdOcrCardScan = false,
             cardArts = emptyList(),
-            isCardArtEnabled = false,
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1278,7 +1276,6 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
-            isCardArtEnabled = false,
         )
 
         // When flag is false, should use default funding types, not the configured ones
@@ -1318,7 +1315,6 @@ internal class PaymentMethodMetadataTest {
             isGooglePayReady = true,
             customerMetadata = DEFAULT_CUSTOMER_METADATA,
             integrationMetadata = DEFAULT_CUSTOMER_INTEGRATION_METADATA,
-            isCardArtEnabled = false,
         )
 
         val expectedMetadata = PaymentMethodMetadata(
@@ -1373,7 +1369,6 @@ internal class PaymentMethodMetadataTest {
             elementsSessionId = "session_1234",
             disableSsdOcrCardScan = false,
             cardArts = emptyList(),
-            isCardArtEnabled = false,
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
@@ -2109,7 +2104,6 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
-            isCardArtEnabled = false,
         )
 
         assertThat(metadata.availableWallets)
@@ -2179,7 +2173,6 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = true,
-            isCardArtEnabled = false,
         )
 
         assertThat(metadata.isTapToAddSupported).isTrue()
@@ -2204,7 +2197,6 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = true,
-            isCardArtEnabled = false,
         )
 
         assertThat(metadata.isTapToAddSupported).isTrue()
@@ -2233,7 +2225,6 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
-            isCardArtEnabled = false,
         )
 
         assertThat(metadata.isTapToAddSupported).isFalse()
@@ -2271,7 +2262,6 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
-            isCardArtEnabled = false,
         )
     }
 
@@ -2297,7 +2287,6 @@ internal class PaymentMethodMetadataTest {
             isGooglePayReady = false,
             customerMetadata = DEFAULT_CUSTOMER_METADATA,
             integrationMetadata = DEFAULT_CUSTOMER_INTEGRATION_METADATA,
-            isCardArtEnabled = false,
         )
     }
 

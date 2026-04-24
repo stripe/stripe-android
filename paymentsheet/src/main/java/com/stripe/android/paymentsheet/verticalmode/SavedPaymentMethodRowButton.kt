@@ -48,19 +48,15 @@ internal fun SavedPaymentMethodRowButton(
             ?: displayableSavedPaymentMethod.displayName
 
     val paymentMethodId = displayableSavedPaymentMethod.paymentMethod.id
-    val isCardArtEnabled = displayableSavedPaymentMethod.cardArtEnabled
     PaymentMethodRowButton(
         isEnabled = isEnabled,
         isSelected = isSelected,
-        isCardArtEnabled = isCardArtEnabled,
         iconContent = {
             val displayBrand = displayableSavedPaymentMethod.paymentMethod.card?.displayBrand
             CardArtImage(
-                url = displayableSavedPaymentMethod.paymentMethod.card?.cardArt?.artImage?.url?.takeIf {
-                    isCardArtEnabled
-                },
+                url = displayableSavedPaymentMethod.paymentMethod.card?.cardArt?.artImage?.url,
                 modifier = Modifier
-                    .width(UIConstants.iconWidth(isCardArtEnabled))
+                    .width(UIConstants.iconWidth)
                     .height(iconHeight)
             ) {
                 PaymentMethodIconFromResource(
@@ -71,7 +67,7 @@ internal fun SavedPaymentMethodRowButton(
                     alignment = Alignment.Center,
                     modifier = Modifier
                         .height(iconHeight)
-                        .width(UIConstants.iconWidth(isCardArtEnabled))
+                        .width(UIConstants.iconWidth)
                         .testMetadata(displayBrand)
                 )
             }
@@ -108,7 +104,7 @@ internal fun PreviewCardSavedPaymentMethodRowButton() {
                 brand = CardBrand.Visa,
                 last4 = "4242",
             )
-        )
+        ),
     )
 
     DefaultStripeTheme {
@@ -146,7 +142,7 @@ internal fun PreviewCardDefaultSavedPaymentMethodRowButton() {
                 brand = CardBrand.AmericanExpress,
                 last4 = "4444",
             )
-        )
+        ),
     )
 
     DefaultStripeTheme {

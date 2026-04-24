@@ -38,7 +38,7 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
                 brand = CardBrand.Visa,
                 last4 = "4242",
             )
-        )
+        ),
     )
 
     @Test
@@ -163,7 +163,6 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
 
         val savedVisaWithCardArt = DisplayableSavedPaymentMethod.create(
             displayName = "···· 4242".resolvableString,
-            cardArtEnabled = true,
             paymentMethod = PaymentMethod(
                 id = "001",
                 created = null,
@@ -181,7 +180,7 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
                         programName = "Test Program"
                     )
                 )
+            ),
             )
-        )
     }
 }

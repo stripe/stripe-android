@@ -504,7 +504,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             integrationMetadata = integrationMetadata,
             analyticsMetadata = analyticsMetadata,
             isTapToAddAvailable = isTapToAddAvailable,
-            isCardArtEnabled = cardArtExperimentHandler.isCardArtEnabled(elementsSession),
         )
 
         return paymentMethodMetadata

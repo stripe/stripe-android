@@ -177,7 +177,6 @@ internal fun PaymentMethodVerticalLayoutUI(
             paymentMethods = paymentMethods,
             selectedIndex = selectedIndex,
             isEnabled = isEnabled,
-            isCardArtEnabled = displayedSavedPaymentMethod?.cardArtEnabled ?: false,
             imageLoader = imageLoader,
             rowStyle = rowStyle,
             updatePaymentMethodVisibility = updatePaymentMethodVisibility,

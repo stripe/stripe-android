@@ -34,54 +34,6 @@ class DefaultCardArtExperimentHandlerTest {
     }
 
     @Test
-    fun `returns false when variant is control`() = runScenario {
-        val result = getAssignment(
-            elementsSession = createElementsSession(
-                experimentsData = ElementsSession.ExperimentsData(
-                    arbId = "arb_123",
-                    experimentAssignments = mapOf(
-                        ExperimentAssignment.OCS_MOBILE_CARD_ART to "control",
-                    ),
-                ),
-            ),
-        )
-
-        assertThat(result).isFalse()
-    }
-
-    @Test
-    fun `returns false when experimentsData is null`() = runScenario {
-        val result = getAssignment(
-            elementsSession = createElementsSession(experimentsData = null),
-        )
-
-        assertThat(result).isFalse()
-    }
-
-    @Test
-    fun `returns false when experiment assignment is missing`() = runScenario {
-        val result = getAssignment(
-            elementsSession = createElementsSession(
-                experimentsData = ElementsSession.ExperimentsData(
-                    arbId = "arb_123",
-                    experimentAssignments = emptyMap(),
-                ),
-            ),
-        )
-
-        assertThat(result).isFalse()
-    }
-
-    @Test
-    fun `returns false when feature flag is disabled even with treatment`() = runScenario {
-        featureFlagTestRule.setEnabled(false)
-
-        val result = getAssignment()
-
-        assertThat(result).isFalse()
-    }
-
-    @Test
     fun `does not log when experimentsData is null`() = runScenario {
         logExposure(
             elementsSession = createElementsSession(experimentsData = null),

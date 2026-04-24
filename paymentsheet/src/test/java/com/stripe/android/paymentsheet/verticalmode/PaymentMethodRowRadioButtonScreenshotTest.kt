@@ -197,8 +197,8 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
                 contentDescription = null,
                 tint = MaterialTheme.colors.primary,
                 modifier = Modifier.padding(start = 4.dp, top = 2.dp)
-                    .height(iconHeight).width(UIConstants.iconWidth(isCardArtEnabled = false))
-                    .defaultMinSize(minWidth = UIConstants.iconWidth(isCardArtEnabled = false), minHeight = iconHeight)
+                    .height(iconHeight).width(UIConstants.iconWidth)
+                    .defaultMinSize(minWidth = UIConstants.iconWidth, minHeight = iconHeight)
             )
         }
     }
