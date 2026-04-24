@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -12,18 +11,11 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import org.junit.Rule
 import kotlin.test.Test
 
 internal class SavedPaymentMethodRowButtonScreenshotTest {
-
-    @get:Rule
-    val cardArtFeatureFlagRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.enableCardArt,
-        isEnabled = false
-    )
 
     @get:Rule
     val paparazziRule = PaparazziRule(
@@ -123,8 +115,6 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
 
     @Test
     fun testSavedVisa_withCardArt() {
-        cardArtFeatureFlagRule.setEnabled(true)
-
         paparazziRule.snapshot {
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = savedVisaWithCardArt,
@@ -136,8 +126,6 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
 
     @Test
     fun testSavedVisa_withCardArt_selected() {
-        cardArtFeatureFlagRule.setEnabled(true)
-
         paparazziRule.snapshot {
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = savedVisaWithCardArt,
@@ -149,8 +137,6 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
 
     @Test
     fun testSavedVisa_noCardArt_cardArtFlagEnabled() {
-        cardArtFeatureFlagRule.setEnabled(true)
-
         paparazziRule.snapshot {
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = savedVisaWithCardArt,
@@ -162,8 +148,6 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
 
     @Test
     fun testSavedVisa_noCardArt_cardArtFlagEnabled_selected() {
-        cardArtFeatureFlagRule.setEnabled(true)
-
         paparazziRule.snapshot {
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = savedVisaWithCardArt,
