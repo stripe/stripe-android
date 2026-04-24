@@ -6,13 +6,11 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.FakeLogger
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.stripeterminal.Terminal
 import com.stripe.stripeterminal.external.callable.Callback
 import com.stripe.stripeterminal.external.callable.Cancelable
@@ -29,7 +27,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.KStubbing
@@ -51,13 +48,6 @@ import kotlin.test.assertFailsWith
 @OptIn(TapToAddPreview::class)
 @RunWith(RobolectricTestRunner::class)
 class DefaultTapToAddConnectionManagerTest {
-
-    @get:Rule
-    val featureFlagRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.enableTapToAdd,
-        isEnabled = true,
-    )
-
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val testDispatcher = UnconfinedTestDispatcher()
     private val lifecycleOwner = TestLifecycleOwner()
@@ -94,23 +84,6 @@ class DefaultTapToAddConnectionManagerTest {
         }
     ) {
         assertThat(manager.isSupported).isTrue()
-    }
-
-    @Test
-    fun `isSupported calls returns false is feature flag is disabled`() = test(
-        isSimulated = true,
-        terminalInstance = mock {
-            mockSupportedReaderResult(ReaderSupportResult.Supported)
-        }
-    ) {
-        featureFlagRule.setEnabled(false)
-
-        assertThat(manager.isSupported).isFalse()
-
-        verify(terminalInstance, never()).supportsReadersOfType(
-            deviceType = any(),
-            discoveryConfiguration = any(),
-        )
     }
 
     @Test
