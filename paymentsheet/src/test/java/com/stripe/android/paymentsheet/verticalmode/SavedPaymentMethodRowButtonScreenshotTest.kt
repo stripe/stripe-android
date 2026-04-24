@@ -135,28 +135,6 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
         }
     }
 
-    @Test
-    fun testSavedVisa_noCardArt_cardArtFlagEnabled() {
-        paparazziRule.snapshot {
-            SavedPaymentMethodRowButton(
-                displayableSavedPaymentMethod = savedVisaWithCardArt,
-                isEnabled = true,
-                isSelected = false,
-            )
-        }
-    }
-
-    @Test
-    fun testSavedVisa_noCardArt_cardArtFlagEnabled_selected() {
-        paparazziRule.snapshot {
-            SavedPaymentMethodRowButton(
-                displayableSavedPaymentMethod = savedVisaWithCardArt,
-                isEnabled = true,
-                isSelected = true,
-            )
-        }
-    }
-
     private companion object {
         const val SAMPLE_CARD_ART_URL =
             "https://b.stripecdn.com/cardart/assets/pfE0FkDGaiFhdoOj9to8po-ZLiJhetgfdKELIZCj3xA"
