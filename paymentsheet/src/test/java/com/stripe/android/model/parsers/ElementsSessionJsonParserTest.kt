@@ -37,7 +37,7 @@ class ElementsSessionJsonParserTest {
     @get:Rule
     val enableCardArtRule = FeatureFlagTestRule(
         featureFlag = FeatureFlags.enableCardArt,
-        isEnabled = false,
+        isEnabled = true,
     )
 
     @Test
@@ -1999,6 +1999,12 @@ class ElementsSessionJsonParserTest {
             """
             {
               "payment_method_preference": $PAYMENT_METHOD_PREFERENCE_JSON,
+              "experiments_data": {
+                "arb_id": "arb_123",
+                "experiment_assignments": {
+                  "ocs_mobile_card_art": "treatment"
+                }
+              },
               "customer": {
                 $cardArtField
                 "customer_session": $CUSTOMER_SESSION_JSON,
