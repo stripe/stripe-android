@@ -65,7 +65,10 @@ internal interface FinancialConnectionsAccountsRepository {
         consentAcquired: Boolean?
     ): ShareNetworkedAccountsResponse
 
-    suspend fun pollAccountNumbers(linkedAccounts: Set<String>)
+    suspend fun pollAccountNumbers(
+        clientSecret: String,
+        linkedAccounts: Set<String>,
+    )
 
     companion object {
         operator fun invoke(
@@ -213,7 +216,10 @@ private class FinancialConnectionsAccountsRepositoryImpl(
         }
     }
 
-    override suspend fun pollAccountNumbers(linkedAccounts: Set<String>) {
+    override suspend fun pollAccountNumbers(
+        clientSecret: String,
+        linkedAccounts: Set<String>,
+    ) {
         val accounts = linkedAccounts.mapIndexed { index, account ->
             "${NetworkConstants.PARAM_LINKED_ACCOUNTS}[$index]" to account
         }.toMap()
@@ -221,7 +227,7 @@ private class FinancialConnectionsAccountsRepositoryImpl(
         val request = apiRequestFactory.createGet(
             url = pollAccountsNumbersUrl,
             options = provideApiRequestOptions(useConsumerPublishableKey = false),
-            params = accounts,
+            params = accounts + (PARAMS_CLIENT_SECRET to clientSecret),
         )
 
         requestExecutor.execute(request)
