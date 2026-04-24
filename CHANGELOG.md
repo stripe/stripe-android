@@ -7,6 +7,7 @@ NEXT_VERSION_BUMP: MINOR
 * [ADDED] Tap to add your card is in private preview. See documentation for [EmbeddedPaymentElement](https://docs.corp.stripe.com/payments/mobile/embedded-tap-to-add) and [PaymentSheet](https://docs.corp.stripe.com/payments/mobile/tap-to-add) for integration guide and to sign up for access.
 
 ### PaymentSheet
+* [CHANGED] `PaymentOption.icon()` and `PaymentOption.iconPainter` may return card art instead of a network logo for card payment methods.
 * [FIXED][12950](https://github.com/stripe/stripe-android/pull/12950) Fixed an issue where raw API error messages (e.g. `invalid_request_error`) were displayed to end users instead of a generic fallback message. Only `card_error` messages are now shown directly.
 
 ## 23.5.0 - 2026-04-20
