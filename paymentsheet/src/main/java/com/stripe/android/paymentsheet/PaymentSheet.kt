@@ -364,7 +364,6 @@ class PaymentSheet internal constructor(
         /**
          * @param callback called when the customer attempts to save their card by tapping it on their device.
          */
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @TapToAddPreview
         fun createCardPresentSetupIntentCallback(
             callback: CreateCardPresentSetupIntentCallback,
@@ -4152,7 +4151,6 @@ class PaymentSheet internal constructor(
             /**
              * @param callback called when the customer attempts to save their card by tapping it on their device.
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @TapToAddPreview
             fun createCardPresentSetupIntentCallback(
                 callback: CreateCardPresentSetupIntentCallback,
