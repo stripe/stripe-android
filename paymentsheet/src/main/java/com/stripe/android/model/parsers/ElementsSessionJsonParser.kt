@@ -541,7 +541,6 @@ internal class ElementsSessionJsonParser(
     }
 
     private fun isCardArtEnabled(experimentsData: ElementsSession.ExperimentsData?): Boolean {
-        if (FeatureFlags.enableCardArt.isEnabled.not()) return false
         val variant = experimentsData?.experimentAssignments?.get(ExperimentAssignment.OCS_MOBILE_CARD_ART)
         return variant == TREATMENT
     }
