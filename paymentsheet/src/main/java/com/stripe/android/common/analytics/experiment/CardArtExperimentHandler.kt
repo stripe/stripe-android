@@ -65,7 +65,6 @@ internal class DefaultCardArtExperimentHandler @Inject constructor(
             )
         )
     }
-
 }
 
 private fun PaymentElementLoader.Configuration.layoutDimensionValue(): String {
