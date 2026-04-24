@@ -16,21 +16,6 @@ internal sealed class LoggableExperiment(
     open val dimensions: Map<String, String>
 ) {
 
-    class OcsMobileHorizontalMode(
-        val experimentsData: ElementsSession.ExperimentsData,
-        experiment: ExperimentAssignment,
-        group: String,
-        paymentMethodMetadata: PaymentMethodMetadata,
-        hasSavedPaymentMethod: Boolean,
-        mode: EventReporter.Mode,
-    ) : LoggableExperiment(
-        arbId = experimentsData.arbId,
-        experiment = experiment,
-        group = group,
-        dimensions = CommonElementsDimensions.getDimensions(paymentMethodMetadata, mode) +
-            mapOf("has_saved_payment_method" to hasSavedPaymentMethod.toString()),
-    )
-
     class OcsMobileCardArt(
         val experimentsData: ElementsSession.ExperimentsData,
         experiment: ExperimentAssignment,
