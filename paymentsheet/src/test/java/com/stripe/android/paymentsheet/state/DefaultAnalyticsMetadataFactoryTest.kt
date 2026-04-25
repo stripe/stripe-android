@@ -897,7 +897,8 @@ class DefaultAnalyticsMetadataFactoryTest {
 
     private fun createLinkState(
         signupModeResult: LinkSignupModeResult = LinkSignupModeResult.Enabled(
-            LinkSignupMode.InsteadOfSaveForFutureUse
+            LinkSignupMode.InsteadOfSaveForFutureUse,
+            availableForSavedPaymentMethods = true,
         )
     ): LinkState {
         return LinkState(

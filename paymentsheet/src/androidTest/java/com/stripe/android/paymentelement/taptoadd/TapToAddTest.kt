@@ -324,7 +324,11 @@ internal class TapToAddTest {
                 ResponseReplacement(
                     original = "PAYMENT_METHOD_TYPES",
                     new = "\"card\", \"cashapp\""
-                )
+                ),
+                ResponseReplacement(
+                    original = "LINK_ENABLED_STATE",
+                    new = "false"
+                ),
             )
         )
     }
@@ -336,7 +340,11 @@ internal class TapToAddTest {
                 ResponseReplacement(
                     original = "PAYMENT_METHOD_TYPES",
                     new = "\"card\", \"cashapp\", \"link\""
-                )
+                ),
+                ResponseReplacement(
+                    original = "LINK_ENABLED_STATE",
+                    new = "true"
+                ),
             )
         )
     }
