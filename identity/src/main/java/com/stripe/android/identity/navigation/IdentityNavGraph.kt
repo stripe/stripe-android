@@ -91,7 +91,7 @@ internal fun IdentityNavGraph(
             modifier = Modifier.padding(contentPadding),
             startDestination = InitialLoadingDestination.destinationRoute.route
         ) {
-            screen(DebugDestination.ROUTE, identityViewModel) {
+            screen(DebugDestination.ROUTE) {
                 DebugScreen(
                     navController = navController,
                     identityViewModel = identityViewModel,
@@ -99,33 +99,33 @@ internal fun IdentityNavGraph(
                 )
             }
 
-            screen(InitialLoadingDestination.ROUTE, identityViewModel) {
+            screen(InitialLoadingDestination.ROUTE) {
                 InitialLoadingScreen(
                     navController = navController,
                     identityViewModel = identityViewModel,
                     fallbackUrlLauncher = fallbackUrlLauncher
                 )
             }
-            screen(IndividualWelcomeDestination.ROUTE, identityViewModel) {
+            screen(IndividualWelcomeDestination.ROUTE) {
                 IndividualWelcomeScreen(
                     navController = navController,
                     identityViewModel = identityViewModel
                 )
             }
-            screen(ConsentDestination.ROUTE, identityViewModel) {
+            screen(ConsentDestination.ROUTE) {
                 ConsentScreen(
                     navController = navController,
                     identityViewModel = identityViewModel
                 )
             }
-            screen(DocWarmupDestination.ROUTE, identityViewModel) {
+            screen(DocWarmupDestination.ROUTE) {
                 DocWarmupScreen(
                     navController = navController,
                     identityViewModel = identityViewModel,
                     cameraPermissionEnsureable = cameraPermissionEnsureable
                 )
             }
-            screen(DocumentScanDestination.ROUTE, identityViewModel) {
+            screen(DocumentScanDestination.ROUTE) {
                 val documentScanViewModel: DocumentScanViewModel =
                     viewModel(factory = documentScanViewModelFactory)
                 ScanDestinationEffect(
@@ -138,13 +138,13 @@ internal fun IdentityNavGraph(
                     documentScanViewModel = documentScanViewModel,
                 )
             }
-            screen(SelfieWarmupDestination.ROUTE, identityViewModel) {
+            screen(SelfieWarmupDestination.ROUTE) {
                 SelfieWarmupScreen(
                     navController = navController,
                     identityViewModel = identityViewModel
                 )
             }
-            screen(SelfieDestination.ROUTE, identityViewModel) {
+            screen(SelfieDestination.ROUTE) {
                 val selfieScanViewModel: SelfieScanViewModel =
                     viewModel(factory = selfieScanViewModelFactory)
 
@@ -158,26 +158,26 @@ internal fun IdentityNavGraph(
                     selfieScanViewModel = selfieScanViewModel
                 )
             }
-            screen(DocumentUploadDestination.ROUTE, identityViewModel) {
+            screen(DocumentUploadDestination.ROUTE) {
                 UploadScreen(
                     navController = navController,
                     identityViewModel = identityViewModel,
                 )
             }
-            screen(IndividualDestination.ROUTE, identityViewModel) {
+            screen(IndividualDestination.ROUTE) {
                 IndividualScreen(
                     navController = navController,
                     identityViewModel = identityViewModel
                 )
             }
-            screen(ConfirmationDestination.ROUTE, identityViewModel) {
+            screen(ConfirmationDestination.ROUTE) {
                 ConfirmationScreen(
                     navController = navController,
                     identityViewModel = identityViewModel,
                     verificationFlowFinishable = verificationFlowFinishable
                 )
             }
-            screen(CountryNotListedDestination.ROUTE, identityViewModel) {
+            screen(CountryNotListedDestination.ROUTE) {
                 CountryNotListedScreen(
                     isMissingID = CountryNotListedDestination.isMissingId(it),
                     navController = navController,
@@ -185,10 +185,10 @@ internal fun IdentityNavGraph(
                     verificationFlowFinishable = verificationFlowFinishable
                 )
             }
-            screen(OTPDestination.ROUTE, identityViewModel) {
+            screen(OTPDestination.ROUTE) {
                 OTPScreen(navController = navController, identityViewModel = identityViewModel)
             }
-            screen(CameraPermissionDeniedDestination.ROUTE, identityViewModel) {
+            screen(CameraPermissionDeniedDestination.ROUTE) {
                 val requireLiveCapture =
                     identityViewModel.verificationPage.value?.data?.documentCapture?.requireLiveCapture ?: false
 
@@ -235,7 +235,7 @@ internal fun IdentityNavGraph(
                     }
                 )
             }
-            screen(CouldNotCaptureDestination.ROUTE, identityViewModel) {
+            screen(CouldNotCaptureDestination.ROUTE) {
                 val fromSelfie = CouldNotCaptureDestination.fromSelfie(it)
                 val requireLiveCapture =
                     identityViewModel.verificationPage.value?.data?.documentCapture?.requireLiveCapture ?: false
@@ -282,7 +282,7 @@ internal fun IdentityNavGraph(
                     }
                 )
             }
-            screen(ErrorDestination.ROUTE, identityViewModel) {
+            screen(ErrorDestination.ROUTE) {
                 Log.d(
                     ErrorDestination.TAG,
                     "About to show error screen with error caused by ${identityViewModel.errorCause.value?.cause}"
@@ -351,7 +351,6 @@ internal fun IdentityNavGraph(
  */
 private fun NavGraphBuilder.screen(
     route: IdentityTopLevelDestination.DestinationRoute,
-    identityViewModel: IdentityViewModel,
     content: @Composable (NavBackStackEntry) -> Unit
 ) {
     composable(
