@@ -36,6 +36,7 @@ import com.stripe.android.link.theme.AppBarHeight
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.appBarTitle
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.ui.core.R as StripeUiCoreR
@@ -73,6 +74,7 @@ internal fun LinkAppBar(
             } else {
                 LinkAppBarLogo(
                     showHeader = state.showHeader,
+                    linkBrand = state.linkBrand,
                 )
             }
 
@@ -133,6 +135,7 @@ internal fun AppBarIcon(
 @Composable
 private fun LinkAppBarLogo(
     showHeader: Boolean,
+    linkBrand: LinkBrand,
     modifier: Modifier = Modifier,
 ) {
     val contentAlpha by animateFloatAsState(
@@ -144,8 +147,8 @@ private fun LinkAppBarLogo(
         contentAlignment = Alignment.Center,
     ) {
         Image(
-            painter = painterResource(R.drawable.stripe_link_logo),
-            contentDescription = stringResource(com.stripe.android.R.string.stripe_link),
+            painter = painterResource(linkBrand.logoRes(LinkLogoStyle.Primary)),
+            contentDescription = linkBrand.brandName(),
         )
     }
 }
@@ -166,6 +169,7 @@ private fun LinkAppBarPreview() {
                         canNavigateBack = false,
                         title = null,
                         isElevated = true,
+                        linkBrand = LinkBrand.Link,
                     ),
                     onBackPressed = {},
                 )
@@ -187,6 +191,7 @@ private fun LinkAppBarChildScreen() {
                     canNavigateBack = true,
                     title = "Add a payment method".resolvableString,
                     isElevated = false,
+                    linkBrand = LinkBrand.Link,
                 ),
                 onBackPressed = {},
             )
