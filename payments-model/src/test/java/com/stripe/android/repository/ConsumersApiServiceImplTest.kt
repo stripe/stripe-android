@@ -396,6 +396,7 @@ class ConsumersApiServiceImplTest {
         val clientSecret = "secret"
         val paymentMethodId = "pm_123"
         val requestSurface = "android_payment_element"
+        val ephemeralKey = "ek_test_abc"
 
         networkRule.enqueue(
             method("POST"),
@@ -404,6 +405,7 @@ class ConsumersApiServiceImplTest {
             header("User-Agent", "Stripe/v1 ${StripeSdkVersion.VERSION}"),
             bodyPart("request_surface", requestSurface),
             bodyPart("payment_method_id", paymentMethodId),
+            bodyPart("customer_ephemeral_key_secret", ephemeralKey),
             bodyPart(urlEncode("credentials[consumer_session_client_secret]"), clientSecret),
         ) { response ->
             response.setBody(ConsumerFixtures.CONSUMER_SINGLE_CARD_PAYMENT_DETAILS_JSON.toString())
@@ -414,6 +416,7 @@ class ConsumersApiServiceImplTest {
             paymentMethodId = paymentMethodId,
             requestSurface = requestSurface,
             requestOptions = DEFAULT_OPTIONS,
+            customerEphemeralKey = ephemeralKey,
         ).getOrThrow()
 
         val cardDetails = paymentDetails.paymentDetails.first() as ConsumerPaymentDetails.Card

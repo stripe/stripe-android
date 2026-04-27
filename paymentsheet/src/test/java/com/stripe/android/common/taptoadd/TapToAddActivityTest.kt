@@ -272,7 +272,10 @@ class TapToAddActivityTest {
 
         linkHelper.enqueueLookup()
         linkHelper.enqueueSignup()
-        linkHelper.enqueueCreatePaymentDetailsFromPaymentMethod(info.cardPaymentMethod.id)
+        linkHelper.enqueueCreatePaymentDetailsFromPaymentMethod(
+            paymentMethodId = info.cardPaymentMethod.id,
+            ephemeralKey = "ek_123",
+        )
 
         confirmationHelper.intendingPaymentConfirmationToBeLaunched(
             InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED)

@@ -262,7 +262,10 @@ internal class TapToAddTest {
         savedPaymentMethodPage.fillLink()
 
         linkHelper.enqueueSignup(withName = false)
-        linkHelper.enqueueCreatePaymentDetailsFromPaymentMethod(info.cardPaymentMethod.id)
+        linkHelper.enqueueCreatePaymentDetailsFromPaymentMethod(
+            paymentMethodId = info.cardPaymentMethod.id,
+            ephemeralKey = "ek_12345",
+        )
         enqueueConfirmRequests()
         enqueueLinkLogout(integrationType)
 
