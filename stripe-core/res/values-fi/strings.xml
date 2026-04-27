@@ -26,6 +26,12 @@
   <string name="stripe_address_label_zip_code">Postinumero</string>
   <!-- Text for error labels -->
   <string name="stripe_error">Virhe</string>
+  <!-- Text for error labels indicating a network error -->
+  <string name="stripe_network_error">Verkkoyhteysvirhe</string>
+  <!-- Error message shown when a transaction has timed out -->
+  <string name="stripe_timed_out">Aikakatkaistu</string>
+  <!-- Text for error labels indicating to take an action at a late undetermined time -->
+  <string name="stripe_try_again_later">Yritä myöhemmin uudelleen</string>
   <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
   <string name="stripe_unexpected_error_try_again">Odottamaton virhe – kokeile uudelleen muutaman sekunnin kuluttua</string>
 </resources>

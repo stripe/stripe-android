@@ -58,6 +58,10 @@
   <string name="stripe_billing_same_as_shipping">Naslov za obračunavanje je isti kot dostavni naslov</string>
   <!-- Used when a required field is blank and submit is clicked. -->
   <string name="stripe_blank_and_required">To polje ne sme biti prazno.</string>
+  <!-- String to describe an empty card number text field with no supported card brands. -->
+  <string name="stripe_card_number_empty_content_description">Številka kartice</string>
+  <!-- String to describe an empty card number text field with no supported card brands. Includes a list of supported card brands, such as Visa, Mastercard. -->
+  <string name="stripe_card_number_with_brands_content_description">Številka kartice. Podprte kartice vključujejo %s</string>
   <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->
   <string name="stripe_change">Spremeni</string>
   <!-- Caption for Email field on address form -->

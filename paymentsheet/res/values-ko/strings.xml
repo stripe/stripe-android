@@ -90,6 +90,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_or_enter_manually">또는 수동으로 입력</string>
   <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
   <string name="stripe_pay_with_link">Link로 결제</string>
+  <!-- Accessibility label for the 'Pay with Link' button. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_pay_with_link_format">%s으로 지불</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[계속하면 <terms>해당 약관</terms>에 따라 결제를 승인하는 데 동의하는 것입니다.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -265,10 +267,28 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_tap_to_add_card_added_title">카드 추가됨</string>
   <!-- Button label for a button that launches a flow for tapping a card on the device -->
   <string name="stripe_tap_to_add_card_button_label">탭하여 카드 추가</string>
+  <!-- Error message shown in Tap to Add when the card the user tapped was declined. -->
+  <string name="stripe_tap_to_add_card_declined_error_title">카드 거부됨</string>
+  <!-- Error message shown to the user to try tapping their card again as their next action. -->
+  <string name="stripe_tap_to_add_card_default_error_action">카드를 다시 한 번 탭해 보십시오</string>
+  <!-- Error message shown in Tap to Add when the card the user tapped is not supported by Tap to Add or by the merchant. -->
+  <string name="stripe_tap_to_add_card_not_supported_error_title">지원되지 않는 카드</string>
+  <!-- Error message shown to the user when Android developer options are enabled and need to be turned off as a next action. -->
+  <string name="stripe_tap_to_add_developer_options_error_action">개발자 옵션을 끄고 다시 시도해 보십시오</string>
+  <!-- Error message shown to the user when a network error occurs to switch networks and try again as a next action. -->
+  <string name="stripe_tap_to_add_network_error_action">다른 네트워크를 선택하고 다시 탭하십시오</string>
   <!-- Title for screen indicating to the user that they have completed a payment of a specified amount -->
   <string name="stripe_tap_to_add_paid_label">%s 지불됨</string>
+  <!-- Error message shown to the user after the tap flow has timed out to try again as a next action. -->
+  <string name="stripe_tap_to_add_timed_out_error_action">뒤로 돌아가서 카드를 다시 탭하십시오</string>
   <!-- Error message shown when Tap to Add is not supported by the current device. -->
   <string name="stripe_tap_to_add_unsupported_device_error">사용 중인 장치에서는 탭하여 추가 기능을 지원하지 않습니다</string>
+  <!-- Error message shown to the user to try using a different device in order to use Tap to Add. -->
+  <string name="stripe_tap_to_add_unsupported_device_error_action">다른 장치를 사용해 보십시오</string>
+  <!-- Error message shown when Tap to Add is not supported by the current device. -->
+  <string name="stripe_tap_to_add_unsupported_device_error_title">지원되지 않는 장치</string>
+  <!-- Error message shown to the user to try tapping their different card as their next action. -->
+  <string name="stripe_tap_to_add_unusable_error_action">다른 카드 사용해 보십시오</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">취소 및 다른 방법으로 결제</string>
   <!-- Text on a screen asking the user to approve a payment -->

@@ -26,6 +26,12 @@
   <string name="stripe_address_label_zip_code">우편번호</string>
   <!-- Text for error labels -->
   <string name="stripe_error">오류</string>
+  <!-- Text for error labels indicating a network error -->
+  <string name="stripe_network_error">네트워크 오류</string>
+  <!-- Error message shown when a transaction has timed out -->
+  <string name="stripe_timed_out">시간 초과</string>
+  <!-- Text for error labels indicating to take an action at a late undetermined time -->
+  <string name="stripe_try_again_later">나중에 다시 시도해 주십시오</string>
   <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
   <string name="stripe_unexpected_error_try_again">예기치 않은 오류가 발생했습니다. 몇 초 후에 다시 시도하십시오.</string>
 </resources>
