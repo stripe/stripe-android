@@ -61,7 +61,7 @@ internal fun LinkTerms(
                     },
                     contentDescription = when (linkBrand) {
                         LinkBrand.Link -> com.stripe.android.R.string.stripe_link
-                        LinkBrand.Notlink -> R.string.stripe_notlink
+                        LinkBrand.Notlink -> com.stripe.android.R.string.stripe_notlink
                     },
                 )
             )
