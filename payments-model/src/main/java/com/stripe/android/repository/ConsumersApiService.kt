@@ -127,6 +127,7 @@ interface ConsumersApiService {
         paymentMethodId: String,
         requestSurface: String,
         requestOptions: ApiRequest.Options,
+        customerEphemeralKey: String
     ): Result<ConsumerPaymentDetails>
 
     suspend fun sharePaymentDetails(
@@ -455,7 +456,8 @@ class ConsumersApiServiceImpl(
         consumerSessionClientSecret: String,
         paymentMethodId: String,
         requestSurface: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        customerEphemeralKey: String,
     ): Result<ConsumerPaymentDetails> {
         return executeRequestWithResultParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
@@ -469,7 +471,11 @@ class ConsumersApiServiceImpl(
                     "credentials" to mapOf(
                         "consumer_session_client_secret" to consumerSessionClientSecret
                     ),
-                )
+                ) + if (customerEphemeralKey.isNotEmpty()) {
+                    mapOf("customer_ephemeral_key" to customerEphemeralKey)
+                } else {
+                    emptyMap()
+                }
             ),
             responseJsonParser = ConsumerPaymentDetailsJsonParser,
         )

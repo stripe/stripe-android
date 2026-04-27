@@ -232,7 +232,8 @@ class LinkFormElementTest {
 
         override suspend fun attachExistingCardToAccount(
             configuration: LinkConfiguration,
-            paymentMethod: PaymentMethod
+            customerEphemeralKey: String,
+            paymentMethod: PaymentMethod,
         ): Result<LinkPaymentDetails.Saved> {
             error("Not implemented!")
         }
