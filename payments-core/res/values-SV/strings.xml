@@ -185,7 +185,7 @@
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="stripe_removed">%s har tagits bort</string>
   <!-- A request error from Stripe has occurred due to a valid issue or merchant integration problem that has a request ID -->
-  <string name="stripe_request_error">Något gick fel. Förfråge-id: 1 %</string>
+    <string name="stripe_request_error">Något gick fel. Förfråge-id: %1$s</string>
   <string name="stripe_secure_checkout">Säker betalning</string>
   <string name="stripe_title_add_a_card">Lägg till kort</string>
   <!-- Screen title telling users they should add an address -->
