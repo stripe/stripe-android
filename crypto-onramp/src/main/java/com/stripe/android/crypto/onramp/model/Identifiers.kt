@@ -5,11 +5,6 @@ import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 import dev.drewhamilton.poko.Poko
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.booleanOrNull
-import kotlinx.serialization.json.contentOrNull
 
 /**
  * Identifier payload submitted to the Crypto Onramp API.
@@ -168,9 +163,9 @@ internal data class IdentifierRequirementsResponse(
 @Serializable
 internal data class UpdateKycInfoResponse(
     @SerialName("valid")
-    val valid: Boolean = false,
+    val valid: Boolean = true,
     @SerialName("missing_identifiers")
-    val missingIdentifiers: JsonObject? = null,
+    val missingIdentifiers: MissingIdentifiersResponse? = null,
     @SerialName("errors")
     val errors: List<String>? = null,
 ) {
@@ -179,6 +174,21 @@ internal data class UpdateKycInfoResponse(
             valid = valid,
             missingIdentifiers = missingIdentifiers?.toMissingIdentifiers(),
             errors = errors
+        )
+    }
+}
+
+@Serializable
+internal data class MissingIdentifiersResponse(
+    @SerialName("missing_identifiers_mica")
+    val missingIdentifiersMica: List<String> = emptyList(),
+    @SerialName("missing_identifiers_carf")
+    val missingIdentifiersCarf: List<String> = emptyList(),
+) {
+    fun toMissingIdentifiers(): MissingIdentifiers {
+        return MissingIdentifiers(
+            missingIdentifiersMica = missingIdentifiersMica,
+            missingIdentifiersCarf = missingIdentifiersCarf
         )
     }
 }
@@ -200,37 +210,4 @@ private fun Identifier.State.toRequest(): IdentifierRequest {
         country = country.value,
         identifier = identifier
     )
-}
-
-private fun JsonObject.toMissingIdentifiers(): MissingIdentifiers {
-    val missingIdentifiersMica = readStringList(
-        "missing_identifiers_mica",
-        "identifiers_mica",
-        "mica",
-    )
-    val missingIdentifiersCarf = readStringList(
-        "missing_identifiers_carf",
-        "identifiers_carf",
-        "carf",
-    )
-    val fallbackIdentifiers = if (missingIdentifiersMica == null && missingIdentifiersCarf == null) {
-        entries.mapNotNull { (key, value) ->
-            ((value as? JsonPrimitive)?.booleanOrNull == true).takeIf { it }?.let { key }
-        }
-    } else {
-        emptyList()
-    }
-
-    return MissingIdentifiers(
-        missingIdentifiersMica = missingIdentifiersMica ?: emptyList(),
-        missingIdentifiersCarf = missingIdentifiersCarf ?: fallbackIdentifiers
-    )
-}
-
-private fun JsonObject.readStringList(vararg keys: String): List<String>? {
-    return keys.firstNotNullOfOrNull { key ->
-        (this[key] as? JsonArray)?.mapNotNull { element ->
-            (element as? JsonPrimitive)?.contentOrNull
-        }
-    }
 }
