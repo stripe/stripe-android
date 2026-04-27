@@ -30,6 +30,7 @@ import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 @OptIn(CheckoutSessionPreview::class)
@@ -766,8 +767,9 @@ class CheckoutTest {
     fun `ensureNoMutationInFlight throws when mutex is locked`() = runCreateWithStateScenario(
         shouldValidateEvents = false,
     ) {
+        val latch = CountDownLatch(1)
         networkRule.checkoutUpdate { response ->
-            response.setBodyDelay(5, TimeUnit.SECONDS)
+            latch.await()
             response.testBodyFromFile("checkout-session-apply-discount.json")
         }
 
@@ -782,6 +784,7 @@ class CheckoutTest {
         assertThat(error).hasMessageThat()
             .isEqualTo("Cannot launch while a checkout session mutation is in flight.")
 
+        latch.countDown()
         deferred.cancel()
     }
 
@@ -789,8 +792,9 @@ class CheckoutTest {
     fun `setting state throws when mutex is locked`() = runCreateWithStateScenario(
         shouldValidateEvents = false,
     ) {
+        val latch = CountDownLatch(1)
         networkRule.checkoutUpdate { response ->
-            response.setBodyDelay(5, TimeUnit.SECONDS)
+            latch.await()
             response.testBodyFromFile("checkout-session-apply-discount.json")
         }
 
@@ -805,6 +809,7 @@ class CheckoutTest {
         assertThat(error).hasMessageThat()
             .isEqualTo("Cannot launch while a checkout session mutation is in flight.")
 
+        latch.countDown()
         deferred.cancel()
     }
 
