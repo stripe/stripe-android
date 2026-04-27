@@ -76,6 +76,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.crypto.onramp.OnrampCoordinator
 import com.stripe.android.crypto.onramp.example.network.OnrampSessionResponse
@@ -502,6 +503,12 @@ internal fun OnrampScreen(
                     onKycFirstNameChange = viewModel::updateKycFirstName,
                     kycLastName = uiState.kycLastName,
                     onKycLastNameChange = viewModel::updateKycLastName,
+                    kycBirthCountry = uiState.kycBirthCountry,
+                    onKycBirthCountryChange = viewModel::updateKycBirthCountry,
+                    kycBirthCity = uiState.kycBirthCity,
+                    onKycBirthCityChange = viewModel::updateKycBirthCity,
+                    kycNationalities = uiState.kycNationalities,
+                    onKycNationalitiesChange = viewModel::updateKycNationalities,
                     kycAddress = uiState.kycAddress,
                     onKycAddressChange = viewModel::updateKycAddress,
                     onAuthenticate = onAuthenticateUser,
@@ -734,6 +741,12 @@ private fun AuthenticatedOperationsScreen(
     onKycFirstNameChange: (String) -> Unit,
     kycLastName: String,
     onKycLastNameChange: (String) -> Unit,
+    kycBirthCountry: String,
+    onKycBirthCountryChange: (String) -> Unit,
+    kycBirthCity: String,
+    onKycBirthCityChange: (String) -> Unit,
+    kycNationalities: String,
+    onKycNationalitiesChange: (String) -> Unit,
     kycAddress: PaymentSheet.Address,
     onKycAddressChange: (PaymentSheet.Address) -> Unit,
     onAuthenticate: (oauthScopes: String) -> Unit,
@@ -964,6 +977,12 @@ private fun AuthenticatedOperationsScreen(
                     onFirstNameChange = onKycFirstNameChange,
                     lastName = kycLastName,
                     onLastNameChange = onKycLastNameChange,
+                    birthCountry = kycBirthCountry,
+                    onBirthCountryChange = onKycBirthCountryChange,
+                    birthCity = kycBirthCity,
+                    onBirthCityChange = onKycBirthCityChange,
+                    nationalities = kycNationalities,
+                    onNationalitiesChange = onKycNationalitiesChange,
                     address = kycAddress,
                     onAddressChange = onKycAddressChange,
                     onCollectKYC = onCollectKYC,
@@ -1103,6 +1122,12 @@ private fun KYCScreen(
     onFirstNameChange: (String) -> Unit,
     lastName: String,
     onLastNameChange: (String) -> Unit,
+    birthCountry: String,
+    onBirthCountryChange: (String) -> Unit,
+    birthCity: String,
+    onBirthCityChange: (String) -> Unit,
+    nationalities: String,
+    onNationalitiesChange: (String) -> Unit,
     address: PaymentSheet.Address,
     onAddressChange: (PaymentSheet.Address) -> Unit,
     onCollectKYC: (KycInfo) -> Unit
@@ -1127,6 +1152,18 @@ private fun KYCScreen(
             KYCTextField(dobMonth, "Month", Modifier.weight(1f), KeyboardType.Number) { dobMonth = it }
             KYCTextField(dobDay, "Day", Modifier.weight(1f), KeyboardType.Number) { dobDay = it }
             KYCTextField(dobYear, "Year", Modifier.weight(2f), KeyboardType.Number) { dobYear = it }
+        }
+
+        Text(
+            text = "Birth Details",
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(bottom = 8.dp, top = 8.dp)
+        )
+
+        KYCTextField(birthCountry, "Birth Country (ISO)") { onBirthCountryChange(it) }
+        KYCTextField(birthCity, "Birth City") { onBirthCityChange(it) }
+        KYCTextField(nationalities, "Nationalities (ISO, comma-separated)") {
+            onNationalitiesChange(it)
         }
 
         Text(
@@ -1160,7 +1197,10 @@ private fun KYCScreen(
                         lastName = lastName,
                         idNumber = ssn,
                         dateOfBirth = dateOfBirth,
-                        address = address
+                        address = address,
+                        birthCountry = birthCountry.toCountryCodeOrNull(),
+                        birthCity = birthCity.trim().takeIf { it.isNotEmpty() },
+                        nationalities = nationalities.toCountryCodesOrNull()
                     )
                 )
             },
@@ -1190,6 +1230,18 @@ private fun KYCTextField(
         enabled = true,
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next, keyboardType = keyboardType)
     )
+}
+
+private fun String.toCountryCodeOrNull(): CountryCode? {
+    return trim()
+        .takeIf { it.isNotEmpty() }
+        ?.let(CountryCode::create)
+}
+
+private fun String.toCountryCodesOrNull(): List<CountryCode>? {
+    return split(",")
+        .mapNotNull { it.toCountryCodeOrNull() }
+        .takeIf { it.isNotEmpty() }
 }
 
 @Composable

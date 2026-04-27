@@ -386,6 +386,12 @@ internal class OnrampViewModel(
                         selectedPaymentData = result.displayData,
                         kycFirstName = result.kycInfo?.firstName ?: it.kycFirstName,
                         kycLastName = result.kycInfo?.lastName ?: it.kycLastName,
+                        kycBirthCountry = result.kycInfo?.birthCountry?.value ?: it.kycBirthCountry,
+                        kycBirthCity = result.kycInfo?.birthCity ?: it.kycBirthCity,
+                        kycNationalities = result.kycInfo?.nationalities
+                            ?.takeIf { nationalities -> nationalities.isNotEmpty() }
+                            ?.joinToString(", ") { nationality -> nationality.value }
+                            ?: it.kycNationalities,
                         kycAddress = result.kycInfo?.address ?: it.kycAddress
                     )
                 }
@@ -714,6 +720,18 @@ internal class OnrampViewModel(
         _uiState.update { it.copy(kycLastName = value) }
     }
 
+    fun updateKycBirthCountry(value: String) {
+        _uiState.update { it.copy(kycBirthCountry = value) }
+    }
+
+    fun updateKycBirthCity(value: String) {
+        _uiState.update { it.copy(kycBirthCity = value) }
+    }
+
+    fun updateKycNationalities(value: String) {
+        _uiState.update { it.copy(kycNationalities = value) }
+    }
+
     fun updateKycAddress(address: PaymentSheet.Address) {
         _uiState.update { it.copy(kycAddress = address) }
     }
@@ -841,6 +859,9 @@ data class OnrampUiState(
     val googlePayIsReady: Boolean = false,
     val kycFirstName: String = "",
     val kycLastName: String = "",
+    val kycBirthCountry: String = "",
+    val kycBirthCity: String = "",
+    val kycNationalities: String = "",
     val kycAddress: PaymentSheet.Address = PaymentSheet.Address(),
 ) : Parcelable
 
