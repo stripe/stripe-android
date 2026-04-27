@@ -457,6 +457,44 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
+    fun `getPaymentOption() returns null when setupFutureUsage is added via reconfiguration`() = runTest {
+        val intentWithoutSFU = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+
+        val cardSelection = PaymentSelection.New.Card(
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            brand = CardBrand.Visa,
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+        )
+
+        val paymentSheetLoader = FakePaymentElementLoader(
+            stripeIntent = intentWithoutSFU,
+            paymentSelection = cardSelection,
+        )
+
+        val flowController = createFlowController(
+            paymentElementLoader = paymentSheetLoader,
+            paymentSelectionUpdater = DefaultPaymentSelectionUpdater(),
+        )
+
+        // First configure: no setupFutureUsage — card selection is preserved
+        flowController.configureExpectingSuccess()
+        assertThat(flowController.getPaymentOption()).isNotNull()
+
+        // Merchant reconfigures with setupFutureUsage = OffSession
+        val intentWithSFU = intentWithoutSFU.copy(
+            setupFutureUsage = StripeIntent.Usage.OffSession,
+        )
+        paymentSheetLoader.updateStripeIntent(intentWithSFU)
+
+        flowController.configureExpectingSuccess(
+            clientSecret = PaymentSheetFixtures.DIFFERENT_CLIENT_SECRET,
+        )
+
+        // Card selection should be invalidated — user must re-open payment sheet to see mandate
+        assertThat(flowController.getPaymentOption()).isNull()
+    }
+
+    @Test
     fun `init with failure should return expected value`() = runTest {
         createFlowController(
             paymentElementLoader = FakePaymentElementLoader(shouldFail = true)
@@ -2467,6 +2505,9 @@ internal class DefaultFlowControllerTest {
         eventReporter: EventReporter = this.eventReporter,
         confirmationHandler: FlowControllerConfirmationHandler? = null,
         linkHandler: LinkHandler? = null,
+        paymentSelectionUpdater: PaymentSelectionUpdater = PaymentSelectionUpdater { _, _, newState, _, _ ->
+            newState.paymentSelection
+        },
     ): DefaultFlowController {
         return DefaultFlowController(
             viewModelScope = testScope,
@@ -2491,7 +2532,7 @@ internal class DefaultFlowControllerTest {
                 paymentElementLoader = paymentElementLoader,
                 uiContext = testDispatcher,
                 viewModel = viewModel,
-                paymentSelectionUpdater = { _, _, newState, _, _ -> newState.paymentSelection },
+                paymentSelectionUpdater = paymentSelectionUpdater,
                 confirmationHandler = confirmationHandler ?: FakeFlowControllerConfirmationHandler(),
             ),
             errorReporter = errorReporter,
