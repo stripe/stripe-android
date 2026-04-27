@@ -271,28 +271,28 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_tap_to_add_card_added_title">Card added</string>
   <!-- Button label for a button that launches a flow for tapping a card on the device -->
   <string name="stripe_tap_to_add_card_button_label">Tap to add</string>
-  <!-- Title for screen indicating to the user that they have completed a payment of a specified amount -->
-  <string name="stripe_tap_to_add_paid_label">Paid %s</string>
-  <!-- Error message shown to the user to try tapping their card again as their next action. -->
-  <string name="stripe_tap_to_add_card_default_error_action">Try tapping your card again</string>
   <!-- Error message shown in Tap to Add when the card the user tapped was declined. -->
   <string name="stripe_tap_to_add_card_declined_error_title">Card declined</string>
+  <!-- Error message shown to the user to try tapping their card again as their next action. -->
+  <string name="stripe_tap_to_add_card_default_error_action">Try tapping your card again</string>
   <!-- Error message shown in Tap to Add when the card the user tapped is not supported by Tap to Add or by the merchant. -->
   <string name="stripe_tap_to_add_card_not_supported_error_title">Card not supported</string>
-  <!-- Error message shown to the user to try tapping their different card as their next action. -->
-  <string name="stripe_tap_to_add_unusable_error_action">Try another card</string>
-  <!-- Error message shown when Tap to Add is not supported by the current device. -->
-  <string name="stripe_tap_to_add_unsupported_device_error_title">Device not supported</string>
-  <!-- Error message shown to the user to try using a different device in order to use Tap to Add. -->
-  <string name="stripe_tap_to_add_unsupported_device_error_action">Try another device</string>
-  <!-- Error message shown to the user after the tap flow has timed out to try again as a next action. -->
-  <string name="stripe_tap_to_add_timed_out_error_action">Go back and tap your card again</string>
-  <!-- Error message shown to the user when a network error occurs to switch networks and try again as a next action. -->
-  <string name="stripe_tap_to_add_network_error_action">Try another network and tap again</string>
   <!-- Error message shown to the user when Android developer options are enabled and need to be turned off as a next action. -->
   <string name="stripe_tap_to_add_developer_options_error_action">Turn developer options off and try again</string>
+  <!-- Error message shown to the user when a network error occurs to switch networks and try again as a next action. -->
+  <string name="stripe_tap_to_add_network_error_action">Try another network and tap again</string>
+  <!-- Title for screen indicating to the user that they have completed a payment of a specified amount -->
+  <string name="stripe_tap_to_add_paid_label">Paid %s</string>
+  <!-- Error message shown to the user after the tap flow has timed out to try again as a next action. -->
+  <string name="stripe_tap_to_add_timed_out_error_action">Go back and tap your card again</string>
   <!-- Error message shown when Tap to Add is not supported by the current device. -->
   <string name="stripe_tap_to_add_unsupported_device_error">Tap to add is not supported by your device</string>
+  <!-- Error message shown to the user to try using a different device in order to use Tap to Add. -->
+  <string name="stripe_tap_to_add_unsupported_device_error_action">Try another device</string>
+  <!-- Error message shown when Tap to Add is not supported by the current device. -->
+  <string name="stripe_tap_to_add_unsupported_device_error_title">Device not supported</string>
+  <!-- Error message shown to the user to try tapping their different card as their next action. -->
+  <string name="stripe_tap_to_add_unusable_error_action">Try another card</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">Cancel and pay another way</string>
   <!-- Text on a screen asking the user to approve a payment -->

@@ -58,6 +58,10 @@
   <string name="stripe_billing_same_as_shipping">Faktureringsadress är samma som leveransadress</string>
   <!-- Used when a required field is blank and submit is clicked. -->
   <string name="stripe_blank_and_required">Detta fält kan inte vara tomt.</string>
+  <!-- String to describe an empty card number text field with no supported card brands. -->
+  <string name="stripe_card_number_empty_content_description">Kortnummer</string>
+  <!-- String to describe an empty card number text field with no supported card brands. Includes a list of supported card brands, such as Visa, Mastercard. -->
+  <string name="stripe_card_number_with_brands_content_description">Kortnummer. Kort som stöds inkluderar %s</string>
   <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->
   <string name="stripe_change">Ändra</string>
   <!-- Caption for Email field on address form -->
