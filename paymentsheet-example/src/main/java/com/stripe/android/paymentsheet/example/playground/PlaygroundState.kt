@@ -14,6 +14,11 @@ import com.stripe.android.paymentsheet.example.playground.model.CheckoutResponse
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
 import com.stripe.android.paymentsheet.example.playground.settings.AutomaticPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CollectAddressSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CollectEmailSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CollectNameSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CollectPhoneSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CollectionModeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomEndpointDefinition
@@ -84,6 +89,9 @@ internal sealed interface PlaygroundState : Parcelable {
             get() = snapshot[CustomerSessionOnBehalfOfSettingsDefinition]
                 .value.takeIf { it.isNotBlank() }
 
+        val canUseTapToAdd: Boolean
+            get() = !isCollectBillingInfo()
+
         override val endpoint: String
             get() = snapshot[CustomEndpointDefinition] ?: defaultEndpoint
 
@@ -123,6 +131,22 @@ internal sealed interface PlaygroundState : Parcelable {
                 PlaygroundConfigurationData.IntegrationType.PaymentSheet,
                 PlaygroundConfigurationData.IntegrationType.FlowController,
             )
+        }
+
+        private fun isCollectBillingInfo(): Boolean {
+            return isCollectingContactInfo(CollectNameSettingsDefinition) ||
+                isCollectingContactInfo(CollectPhoneSettingsDefinition) ||
+                isCollectingContactInfo(CollectEmailSettingsDefinition) ||
+                isCollectingFullAddress()
+        }
+
+        private fun isCollectingContactInfo(definition: CollectionModeSettingsDefinition): Boolean {
+            return snapshot[definition] == PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+        }
+
+        private fun isCollectingFullAddress(): Boolean {
+            return snapshot[CollectAddressSettingsDefinition] ==
+                PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
         }
     }
 

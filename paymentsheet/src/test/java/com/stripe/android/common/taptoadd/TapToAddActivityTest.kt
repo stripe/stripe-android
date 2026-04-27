@@ -9,7 +9,6 @@ import androidx.test.espresso.intent.matcher.IntentMatchers.hasExtra
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.LocalStripeException
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.ui.inline.LinkSignupMode
@@ -27,7 +26,6 @@ import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.RetryRule
 import com.stripe.android.testing.createComposeCleanupRule
@@ -58,7 +56,6 @@ import com.stripe.android.paymentsheet.R as PaymentSheetR
 class TapToAddActivityTest {
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
     private val composeTestRule = createEmptyComposeRule()
-    private val featureFlagTestRule = FeatureFlagTestRule(FeatureFlags.enableTapToAdd, true)
     private val composeCleanupRule = createComposeCleanupRule()
     private val terminalWrapperTestRule = TerminalWrapperTestRule()
     private val imageLoaderTestRule = TapToAddStripeImageLoaderTestRule()
@@ -72,7 +69,6 @@ class TapToAddActivityTest {
         .around(composeTestRule)
         .around(networkRule)
         .around(terminalWrapperTestRule)
-        .around(featureFlagTestRule)
         .around(paymentElementCallbackTestRule)
         .around(imageLoaderTestRule)
         .around(PaymentConfigurationTestRule(applicationContext))
