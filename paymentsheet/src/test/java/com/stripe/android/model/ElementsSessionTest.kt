@@ -196,6 +196,40 @@ class ElementsSessionTest {
     }
 
     @Test
+    fun `isLinkInlineSignupWithSavedPaymentMethodsEnabled returns true when flag is enabled`() {
+        val session = createElementsSession(
+            passiveCaptcha = null,
+            flags = mapOf(
+                ElementsSession.Flag.ELEMENTS_MOBILE_LINK_INLINE_SIGNUP_WITH_SAVED_PM_ENABLED to true
+            )
+        )
+
+        assertThat(session.isLinkInlineSignupWithSavedPaymentMethodsEnabled).isTrue()
+    }
+
+    @Test
+    fun `isLinkInlineSignupWithSavedPaymentMethodsEnabled returns false when flag is disabled`() {
+        val session = createElementsSession(
+            passiveCaptcha = null,
+            flags = mapOf(
+                ElementsSession.Flag.ELEMENTS_MOBILE_LINK_INLINE_SIGNUP_WITH_SAVED_PM_ENABLED to false
+            )
+        )
+
+        assertThat(session.isLinkInlineSignupWithSavedPaymentMethodsEnabled).isFalse()
+    }
+
+    @Test
+    fun `isLinkInlineSignupWithSavedPaymentMethodsEnabled returns false when flag is missing`() {
+        val session = createElementsSession(
+            passiveCaptcha = null,
+            flags = emptyMap()
+        )
+
+        assertThat(session.isLinkInlineSignupWithSavedPaymentMethodsEnabled).isFalse()
+    }
+
+    @Test
     fun `ELEMENTS_MOBILE_ALLOW_STRIPECARDSCAN flag has correct value`() {
         assertThat(ElementsSession.Flag.ELEMENTS_MOBILE_ALLOW_STRIPECARDSCAN.flagValue)
             .isEqualTo("elements_mobile_allow_stripecardscan")

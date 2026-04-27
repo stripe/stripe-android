@@ -25,6 +25,7 @@ import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.LinkSignupModeResult
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.RetryRule
@@ -127,7 +128,10 @@ class TapToAddActivityTest {
                     )
                 ),
                 loginState = LinkState.LoginState.LoggedOut,
-                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+                signupModeResult = LinkSignupModeResult.Enabled(
+                    mode = LinkSignupMode.InsteadOfSaveForFutureUse,
+                    availableForSavedPaymentMethods = true,
+                ),
             )
         )
     ) {
@@ -257,7 +261,10 @@ class TapToAddActivityTest {
                     )
                 ),
                 loginState = LinkState.LoginState.LoggedOut,
-                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+                signupModeResult = LinkSignupModeResult.Enabled(
+                    mode = LinkSignupMode.InsteadOfSaveForFutureUse,
+                    availableForSavedPaymentMethods = true,
+                ),
             )
         )
     ) {
@@ -388,7 +395,10 @@ class TapToAddActivityTest {
                     )
                 ),
                 loginState = LinkState.LoginState.LoggedOut,
-                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+                signupModeResult = LinkSignupModeResult.Enabled(
+                    mode = LinkSignupMode.InsteadOfSaveForFutureUse,
+                    availableForSavedPaymentMethods = true,
+                ),
             )
         )
     ) {
