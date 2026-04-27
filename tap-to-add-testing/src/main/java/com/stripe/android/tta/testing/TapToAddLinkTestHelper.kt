@@ -52,7 +52,7 @@ class TapToAddLinkTestHelper(
             method("POST"),
             path("/v1/consumers/payment_details/from_payment_method"),
             bodyPart("payment_method_id", urlEncode(paymentMethodId)),
-            bodyPart("customer_ephemeral_key", urlEncode(ephemeralKey)),
+            bodyPart("customer_ephemeral_key_secret", urlEncode(ephemeralKey)),
         ) { response ->
             response.testBodyFromFile("consumer-payment-details-success.json")
         }

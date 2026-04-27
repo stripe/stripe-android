@@ -471,11 +471,8 @@ class ConsumersApiServiceImpl(
                     "credentials" to mapOf(
                         "consumer_session_client_secret" to consumerSessionClientSecret
                     ),
-                ) + if (customerEphemeralKey.isNotEmpty()) {
-                    mapOf("customer_ephemeral_key" to customerEphemeralKey)
-                } else {
-                    emptyMap()
-                }
+                    "customer_ephemeral_key_secret" to customerEphemeralKey
+                )
             ),
             responseJsonParser = ConsumerPaymentDetailsJsonParser,
         )

@@ -405,7 +405,7 @@ class ConsumersApiServiceImplTest {
             header("User-Agent", "Stripe/v1 ${StripeSdkVersion.VERSION}"),
             bodyPart("request_surface", requestSurface),
             bodyPart("payment_method_id", paymentMethodId),
-            bodyPart("customer_ephemeral_key", ephemeralKey),
+            bodyPart("customer_ephemeral_key_secret", ephemeralKey),
             bodyPart(urlEncode("credentials[consumer_session_client_secret]"), clientSecret),
         ) { response ->
             response.setBody(ConsumerFixtures.CONSUMER_SINGLE_CARD_PAYMENT_DETAILS_JSON.toString())
