@@ -414,7 +414,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         )
     }
 
-    override suspend fun listPaymentDetails(paymentMethodTypes: Set<String>): Result<ConsumerPaymentDetails> {
+    override suspend fun listPaymentDetails(paymentMethodTypes: Set<String>?): Result<ConsumerPaymentDetails> {
         val linkAccount = linkAccountHolder.linkAccountInfo.value.account
             ?: return Result.failure(NoLinkAccountFoundException())
         return linkRepository.listPaymentDetails(

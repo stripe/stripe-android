@@ -479,7 +479,7 @@ abstract class AbsFakeStripeRepository : StripeRepository {
 
     override suspend fun listPaymentDetails(
         clientSecret: String,
-        paymentMethodTypes: Set<String>,
+        paymentMethodTypes: Set<String>?,
         requestOptions: ApiRequest.Options
     ): Result<ConsumerPaymentDetails> {
         TODO("Not yet implemented")

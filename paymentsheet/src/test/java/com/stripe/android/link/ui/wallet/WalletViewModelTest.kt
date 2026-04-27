@@ -1211,8 +1211,8 @@ private open class WalletLinkAccountManager : FakeLinkAccountManager() {
     val updatePaymentDetailsCalls = arrayListOf<ConsumerPaymentDetailsUpdateParams>()
     val deletePaymentDetailsCalls = arrayListOf<String>()
 
-    override suspend fun listPaymentDetails(paymentMethodTypes: Set<String>): Result<ConsumerPaymentDetails> {
-        listPaymentDetailsCalls.add(paymentMethodTypes)
+    override suspend fun listPaymentDetails(paymentMethodTypes: Set<String>?): Result<ConsumerPaymentDetails> {
+        listPaymentDetailsCalls.add(paymentMethodTypes ?: emptySet())
         return super.listPaymentDetails(paymentMethodTypes)
     }
 

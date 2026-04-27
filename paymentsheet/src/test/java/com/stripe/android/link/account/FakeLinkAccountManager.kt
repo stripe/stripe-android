@@ -270,7 +270,7 @@ internal open class FakeLinkAccountManager(
         return postConsentUpdateResult
     }
 
-    override suspend fun listPaymentDetails(paymentMethodTypes: Set<String>): Result<ConsumerPaymentDetails> {
+    override suspend fun listPaymentDetails(paymentMethodTypes: Set<String>?): Result<ConsumerPaymentDetails> {
         return listPaymentDetailsResult
     }
 

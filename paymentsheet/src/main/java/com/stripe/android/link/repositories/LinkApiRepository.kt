@@ -462,7 +462,7 @@ internal class LinkApiRepository @Inject constructor(
     }
 
     override suspend fun listPaymentDetails(
-        paymentMethodTypes: Set<String>,
+        paymentMethodTypes: Set<String>?,
         consumerSessionClientSecret: String,
     ): Result<ConsumerPaymentDetails> {
         return stripeRepository.listPaymentDetails(

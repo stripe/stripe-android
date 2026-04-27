@@ -157,7 +157,7 @@ internal interface LinkAccountManager {
     /**
      * Fetch all saved payment methods for the signed in consumer.
      */
-    suspend fun listPaymentDetails(paymentMethodTypes: Set<String>): Result<ConsumerPaymentDetails>
+    suspend fun listPaymentDetails(paymentMethodTypes: Set<String>?): Result<ConsumerPaymentDetails>
 
     /**
      * Fetch all shipping addresses for the signed in consumer.

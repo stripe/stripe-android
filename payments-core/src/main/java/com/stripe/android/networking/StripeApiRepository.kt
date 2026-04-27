@@ -115,6 +115,7 @@ import java.security.Security
 import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Named
+import kotlin.collections.buildMap
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -1650,20 +1651,21 @@ class StripeApiRepository @JvmOverloads internal constructor(
 
     override suspend fun listPaymentDetails(
         clientSecret: String,
-        paymentMethodTypes: Set<String>,
+        paymentMethodTypes: Set<String>?,
         requestOptions: ApiRequest.Options
     ): Result<ConsumerPaymentDetails> {
         return fetchStripeModelResult(
             apiRequestFactory.createPost(
                 listConsumerPaymentDetailsUrl,
                 requestOptions,
-                mapOf(
-                    "request_surface" to requestSurface.value,
-                    "credentials" to mapOf(
-                        "consumer_session_client_secret" to clientSecret
-                    ),
-                    "types" to paymentMethodTypes.toList()
-                )
+                buildMap {
+                    put("request_surface", requestSurface.value)
+                    put(
+                        "credentials",
+                        mapOf("consumer_session_client_secret" to clientSecret)
+                    )
+                    paymentMethodTypes?.let { put("types", paymentMethodTypes.toList()) }
+                }
             ),
             ConsumerPaymentDetailsJsonParser
         )

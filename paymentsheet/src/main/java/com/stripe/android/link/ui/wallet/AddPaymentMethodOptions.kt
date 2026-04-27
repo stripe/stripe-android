@@ -25,12 +25,12 @@ internal class AddPaymentMethodOptions @AssistedInject constructor(
             if (
                 linkAccount.consumerPublishableKey != null &&
                 configuration.financialConnectionsAvailability != null &&
-                supportedPaymentMethodTypes.contains(ConsumerPaymentDetails.BankAccount.TYPE) &&
+                supportedPaymentMethodTypes?.contains(ConsumerPaymentDetails.BankAccount.TYPE) == true &&
                 (paymentMethodFilter == null || paymentMethodFilter == LinkPaymentMethodFilter.BankAccount)
             ) {
                 add(AddPaymentMethodOption.Bank(configuration.financialConnectionsAvailability))
             }
-            if (supportedPaymentMethodTypes.contains(ConsumerPaymentDetails.Card.TYPE) &&
+            if (supportedPaymentMethodTypes?.contains(ConsumerPaymentDetails.Card.TYPE) == true &&
                 (paymentMethodFilter == null || paymentMethodFilter == LinkPaymentMethodFilter.Card)
             ) {
                 add(AddPaymentMethodOption.Card)

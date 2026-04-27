@@ -229,7 +229,7 @@ internal open class FakeLinkRepository : LinkRepository {
     ): Result<Unit> = postConsentUpdateResult
 
     override suspend fun listPaymentDetails(
-        paymentMethodTypes: Set<String>,
+        paymentMethodTypes: Set<String>?,
         consumerSessionClientSecret: String,
     ): Result<ConsumerPaymentDetails> = listPaymentDetailsResult
 

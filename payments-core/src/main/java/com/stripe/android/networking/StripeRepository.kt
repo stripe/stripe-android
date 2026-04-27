@@ -438,7 +438,7 @@ interface StripeRepository {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun listPaymentDetails(
         clientSecret: String,
-        paymentMethodTypes: Set<String>,
+        paymentMethodTypes: Set<String>?,
         requestOptions: ApiRequest.Options
     ): Result<ConsumerPaymentDetails>
 

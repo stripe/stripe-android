@@ -719,7 +719,7 @@ class DefaultLinkAccountManagerTest {
         val linkRepository = object : FakeLinkRepository() {
             var paymentMethodTypes: Set<String>? = null
             override suspend fun listPaymentDetails(
-                paymentMethodTypes: Set<String>,
+                paymentMethodTypes: Set<String>?,
                 consumerSessionClientSecret: String,
             ): Result<ConsumerPaymentDetails> {
                 this.paymentMethodTypes = paymentMethodTypes
@@ -741,7 +741,7 @@ class DefaultLinkAccountManagerTest {
         val linkRepository = object : FakeLinkRepository() {
             var paymentMethodTypes: Set<String>? = null
             override suspend fun listPaymentDetails(
-                paymentMethodTypes: Set<String>,
+                paymentMethodTypes: Set<String>?,
                 consumerSessionClientSecret: String,
             ): Result<ConsumerPaymentDetails> {
                 this.paymentMethodTypes = paymentMethodTypes
