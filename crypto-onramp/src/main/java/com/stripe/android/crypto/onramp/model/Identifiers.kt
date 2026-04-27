@@ -12,33 +12,33 @@ import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.contentOrNull
 
 /**
- * EU identifier payload submitted to the Crypto Onramp API.
+ * Identifier payload submitted to the Crypto Onramp API.
  *
  * @property identifiersMica MiCA identifiers for the consumer.
  * @property identifiersCarf CARF identifiers for the consumer.
  */
 @ExperimentalCryptoOnramp
-class EuIdentifiers {
-    private var identifiersMica: List<EuIdentifier>? = null
-    private var identifiersCarf: List<EuIdentifier>? = null
+class Identifiers {
+    private var identifiersMica: List<Identifier>? = null
+    private var identifiersCarf: List<Identifier>? = null
 
     /**
      * Sets MiCA identifiers for the consumer.
      */
-    fun identifiersMica(identifiersMica: List<EuIdentifier>?) = apply {
+    fun identifiersMica(identifiersMica: List<Identifier>?) = apply {
         this.identifiersMica = identifiersMica
     }
 
     /**
      * Sets CARF identifiers for the consumer.
      */
-    fun identifiersCarf(identifiersCarf: List<EuIdentifier>?) = apply {
+    fun identifiersCarf(identifiersCarf: List<Identifier>?) = apply {
         this.identifiersCarf = identifiersCarf
     }
 
     internal class State(
-        val identifiersMica: List<EuIdentifier.State>?,
-        val identifiersCarf: List<EuIdentifier.State>?
+        val identifiersMica: List<Identifier.State>?,
+        val identifiersCarf: List<Identifier.State>?
     )
 
     internal fun build(): State {
@@ -50,13 +50,13 @@ class EuIdentifiers {
 }
 
 /**
- * A country-scoped EU identifier.
+ * A country-scoped identifier entry.
  *
  * @property country ISO 3166-1 alpha-2 country code associated with the identifier.
  * @property identifier The identifier value.
  */
 @ExperimentalCryptoOnramp
-class EuIdentifier {
+class Identifier {
     private var country: CountryCode? = null
     private var identifier: String? = null
 
@@ -105,20 +105,20 @@ class IdentifierRequirements internal constructor(
 )
 
 /**
- * Missing EU identifiers returned by the submit EU identifiers API.
+ * Missing identifiers returned by the KYC info update API.
  *
  * @property missingIdentifiersMica Missing MiCA identifier field names.
  * @property missingIdentifiersCarf Missing CARF identifier field names.
  */
 @ExperimentalCryptoOnramp
 @Poko
-class MissingEuIdentifiers internal constructor(
+class MissingIdentifiers internal constructor(
     val missingIdentifiersMica: List<String>,
     val missingIdentifiersCarf: List<String>
 )
 
 /**
- * Validation result returned after submitting EU identifiers.
+ * Validation result returned after updating KYC info.
  *
  * @property valid Whether the submitted identifiers were accepted.
  * @property missingIdentifiers Missing identifiers, if more are required.
@@ -126,24 +126,24 @@ class MissingEuIdentifiers internal constructor(
  */
 @ExperimentalCryptoOnramp
 @Poko
-class SubmitEuIdentifiersResult internal constructor(
+class UpdateKycInfoResult internal constructor(
     val valid: Boolean,
-    val missingIdentifiers: MissingEuIdentifiers?,
+    val missingIdentifiers: MissingIdentifiers?,
     val errors: List<String>?
 )
 
 @Serializable
-internal data class EuIdentifiersRequest(
+internal data class IdentifiersRequest(
     @SerialName("credentials")
     val credentials: CryptoCustomerRequestParams.Credentials,
     @SerialName("identifiers_mica")
-    val identifiersMica: List<EuIdentifierRequest>? = null,
+    val identifiersMica: List<IdentifierRequest>? = null,
     @SerialName("identifiers_carf")
-    val identifiersCarf: List<EuIdentifierRequest>? = null
+    val identifiersCarf: List<IdentifierRequest>? = null
 )
 
 @Serializable
-internal data class EuIdentifierRequest(
+internal data class IdentifierRequest(
     @SerialName("country")
     val country: String,
     @SerialName("identifier")
@@ -166,7 +166,7 @@ internal data class IdentifierRequirementsResponse(
 }
 
 @Serializable
-internal data class SubmitEuIdentifiersResponse(
+internal data class UpdateKycInfoResponse(
     @SerialName("valid")
     val valid: Boolean = false,
     @SerialName("missing_identifiers")
@@ -174,35 +174,35 @@ internal data class SubmitEuIdentifiersResponse(
     @SerialName("errors")
     val errors: List<String>? = null,
 ) {
-    fun toSubmitEuIdentifiersResult(): SubmitEuIdentifiersResult {
-        return SubmitEuIdentifiersResult(
+    fun toUpdateKycInfoResult(): UpdateKycInfoResult {
+        return UpdateKycInfoResult(
             valid = valid,
-            missingIdentifiers = missingIdentifiers?.toMissingEuIdentifiers(),
+            missingIdentifiers = missingIdentifiers?.toMissingIdentifiers(),
             errors = errors
         )
     }
 }
 
-internal fun EuIdentifiers.toRequest(
+internal fun Identifiers.toRequest(
     credentials: CryptoCustomerRequestParams.Credentials
-): EuIdentifiersRequest {
+): IdentifiersRequest {
     val state = build()
 
-    return EuIdentifiersRequest(
+    return IdentifiersRequest(
         credentials = credentials,
         identifiersMica = state.identifiersMica?.map { it.toRequest() },
         identifiersCarf = state.identifiersCarf?.map { it.toRequest() }
     )
 }
 
-private fun EuIdentifier.State.toRequest(): EuIdentifierRequest {
-    return EuIdentifierRequest(
+private fun Identifier.State.toRequest(): IdentifierRequest {
+    return IdentifierRequest(
         country = country.value,
         identifier = identifier
     )
 }
 
-private fun JsonObject.toMissingEuIdentifiers(): MissingEuIdentifiers {
+private fun JsonObject.toMissingIdentifiers(): MissingIdentifiers {
     val missingIdentifiersMica = readStringList(
         "missing_identifiers_mica",
         "identifiers_mica",
@@ -221,7 +221,7 @@ private fun JsonObject.toMissingEuIdentifiers(): MissingEuIdentifiers {
         emptyList()
     }
 
-    return MissingEuIdentifiers(
+    return MissingIdentifiers(
         missingIdentifiersMica = missingIdentifiersMica ?: emptyList(),
         missingIdentifiersCarf = missingIdentifiersCarf ?: fallbackIdentifiers
     )

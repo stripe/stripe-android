@@ -3,23 +3,23 @@ package com.stripe.android.crypto.onramp.model
 import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 
 /**
- * Result of submitting EU identifiers.
+ * Result of updating KYC info.
  */
 @ExperimentalCryptoOnramp
-sealed interface OnrampCollectEuIdentifiersResult {
+sealed interface OnrampUpdateKycInfoResult {
     /**
-     * EU identifier submission completed and returned a validation result.
+     * KYC info update completed and returned a validation result.
      */
     @ExperimentalCryptoOnramp
     class Completed internal constructor(
-        val result: SubmitEuIdentifiersResult
-    ) : OnrampCollectEuIdentifiersResult
+        val result: UpdateKycInfoResult
+    ) : OnrampUpdateKycInfoResult
 
     /**
-     * EU identifier submission failed.
+     * KYC info update failed.
      */
     @ExperimentalCryptoOnramp
     class Failed internal constructor(
         val error: Throwable
-    ) : OnrampCollectEuIdentifiersResult
+    ) : OnrampUpdateKycInfoResult
 }

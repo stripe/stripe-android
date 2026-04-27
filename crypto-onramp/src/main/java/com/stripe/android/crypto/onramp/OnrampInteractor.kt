@@ -16,14 +16,13 @@ import com.stripe.android.crypto.onramp.exception.MissingPaymentMethodException
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
 import com.stripe.android.crypto.onramp.model.CrsCarfDeclaration
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
-import com.stripe.android.crypto.onramp.model.EuIdentifiers
+import com.stripe.android.crypto.onramp.model.Identifiers
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
-import com.stripe.android.crypto.onramp.model.OnrampCollectEuIdentifiersResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
@@ -37,6 +36,7 @@ import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampSessionClientSecretProvider
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampTokenAuthenticationResult
+import com.stripe.android.crypto.onramp.model.OnrampUpdateKycInfoResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
@@ -367,7 +367,7 @@ internal class OnrampInteractor @Inject constructor(
             )
     }
 
-    suspend fun collectEuIdentifiers(identifiers: EuIdentifiers): OnrampCollectEuIdentifiersResult {
+    suspend fun updateKycInfo(identifiers: Identifiers): OnrampUpdateKycInfoResult {
         val secret = consumerSessionClientSecret()
         if (secret == null) {
             val error = MissingConsumerSecretException()
@@ -377,14 +377,14 @@ internal class OnrampInteractor @Inject constructor(
                     error = error,
                 )
             )
-            return OnrampCollectEuIdentifiersResult.Failed(error)
+            return OnrampUpdateKycInfoResult.Failed(error)
         }
 
-        return cryptoApiRepository.collectEuIdentifiers(identifiers, secret)
+        return cryptoApiRepository.updateKycInfo(identifiers, secret)
             .fold(
                 onSuccess = { result ->
                     analyticsService?.track(OnrampAnalyticsEvent.EuIdentifiersSubmitted)
-                    OnrampCollectEuIdentifiersResult.Completed(result)
+                    OnrampUpdateKycInfoResult.Completed(result)
                 },
                 onFailure = { error ->
                     analyticsService?.track(
@@ -393,7 +393,7 @@ internal class OnrampInteractor @Inject constructor(
                             error = error,
                         )
                     )
-                    OnrampCollectEuIdentifiersResult.Failed(error)
+                    OnrampUpdateKycInfoResult.Failed(error)
                 }
             )
     }

@@ -8,11 +8,11 @@ import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
-import com.stripe.android.crypto.onramp.model.EuIdentifier
-import com.stripe.android.crypto.onramp.model.EuIdentifiers
+import com.stripe.android.crypto.onramp.model.Identifier
+import com.stripe.android.crypto.onramp.model.Identifiers
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
-import com.stripe.android.crypto.onramp.model.SubmitEuIdentifiersResult
+import com.stripe.android.crypto.onramp.model.UpdateKycInfoResult
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.link.LinkController
 import com.stripe.android.model.DateOfBirth
@@ -183,7 +183,7 @@ class CryptoApiRepositoryTest {
     }
 
     @Test
-    fun testCollectEuIdentifiersSucceeds() {
+    fun testUpdateKycInfoSucceeds() {
         runTest {
             val stripeResponse = StripeResponse(
                 200,
@@ -203,18 +203,18 @@ class CryptoApiRepositoryTest {
             whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
                 .thenReturn(stripeResponse)
 
-            val result = cryptoApiRepository.collectEuIdentifiers(
-                identifiers = EuIdentifiers()
+            val result = cryptoApiRepository.updateKycInfo(
+                identifiers = Identifiers()
                     .identifiersMica(
                         listOf(
-                            EuIdentifier()
+                            Identifier()
                                 .country(CountryCode.create("IE"))
                                 .identifier("mica_123")
                         )
                     )
                     .identifiersCarf(
                         listOf(
-                            EuIdentifier()
+                            Identifier()
                                 .country(CountryCode.create("FR"))
                                 .identifier("carf_456")
                         )
@@ -223,9 +223,9 @@ class CryptoApiRepositoryTest {
             )
 
             verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-            assertEuIdentifiersRequest(apiRequestArgumentCaptor.firstValue)
+            assertIdentifiersRequest(apiRequestArgumentCaptor.firstValue)
             assertThat(result.isSuccess).isTrue()
-            assertSubmitEuIdentifiersResult(result.getOrThrow())
+            assertUpdateKycInfoResult(result.getOrThrow())
         }
     }
 
@@ -646,7 +646,7 @@ class CryptoApiRepositoryTest {
         )
     }
 
-    private fun assertEuIdentifiersRequest(apiRequest: ApiRequest) {
+    private fun assertIdentifiersRequest(apiRequest: ApiRequest) {
         assertThat(apiRequest.baseUrl)
             .isEqualTo("https://api.stripe.com/v1/crypto/internal/eu_identifiers")
         assertThat(apiRequest.params)
@@ -669,7 +669,7 @@ class CryptoApiRepositoryTest {
             )
     }
 
-    private fun assertSubmitEuIdentifiersResult(result: SubmitEuIdentifiersResult) {
+    private fun assertUpdateKycInfoResult(result: UpdateKycInfoResult) {
         assertThat(result.valid).isFalse()
         assertThat(result.missingIdentifiers?.missingIdentifiersMica)
             .isEqualTo(listOf("tax_id"))

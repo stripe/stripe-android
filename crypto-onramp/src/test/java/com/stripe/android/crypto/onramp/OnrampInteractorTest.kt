@@ -13,17 +13,16 @@ import com.stripe.android.crypto.onramp.model.CreatePaymentTokenResponse
 import com.stripe.android.crypto.onramp.model.CrsCarfDeclaration
 import com.stripe.android.crypto.onramp.model.CryptoCustomerResponse
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
-import com.stripe.android.crypto.onramp.model.EuIdentifier
-import com.stripe.android.crypto.onramp.model.EuIdentifiers
+import com.stripe.android.crypto.onramp.model.Identifier
+import com.stripe.android.crypto.onramp.model.Identifiers
 import com.stripe.android.crypto.onramp.model.GetPlatformSettingsResponse
 import com.stripe.android.crypto.onramp.model.IdentifierRequirements
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
-import com.stripe.android.crypto.onramp.model.MissingEuIdentifiers
+import com.stripe.android.crypto.onramp.model.MissingIdentifiers
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
-import com.stripe.android.crypto.onramp.model.OnrampCollectEuIdentifiersResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
@@ -36,12 +35,13 @@ import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampSessionClientSecretProvider
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
+import com.stripe.android.crypto.onramp.model.OnrampUpdateKycInfoResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationResponse
-import com.stripe.android.crypto.onramp.model.SubmitEuIdentifiersResult
+import com.stripe.android.crypto.onramp.model.UpdateKycInfoResult
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.crypto.onramp.ui.CrsCarfDeclarationActivityResult
 import com.stripe.android.crypto.onramp.ui.CrsCarfDeclarationScreenAction
@@ -221,34 +221,34 @@ class OnrampInteractorTest {
     }
 
     @Test
-    fun testCollectEuIdentifiersIsSuccessful() = runTest {
+    fun testUpdateKycInfoIsSuccessful() = runTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
-        val submissionResult = SubmitEuIdentifiersResult(
+        val submissionResult = UpdateKycInfoResult(
             valid = false,
-            missingIdentifiers = MissingEuIdentifiers(
+            missingIdentifiers = MissingIdentifiers(
                 missingIdentifiersMica = emptyList(),
                 missingIdentifiersCarf = listOf("nationalities")
             ),
             errors = listOf("FR")
         )
-        whenever(cryptoApiRepository.collectEuIdentifiers(any(), any()))
+        whenever(cryptoApiRepository.updateKycInfo(any(), any()))
             .thenReturn(Result.success(submissionResult))
 
         interactor.onLinkControllerState(mockLinkStateWithAccount())
 
-        val result = interactor.collectEuIdentifiers(
-            EuIdentifiers()
+        val result = interactor.updateKycInfo(
+            Identifiers()
                 .identifiersMica(
                     listOf(
-                        EuIdentifier()
+                        Identifier()
                             .country(CountryCode.create("IE"))
                             .identifier("mica_123")
                     )
                 )
         )
 
-        assertThat(result).isInstanceOf(OnrampCollectEuIdentifiersResult.Completed::class.java)
-        val completed = result as OnrampCollectEuIdentifiersResult.Completed
+        assertThat(result).isInstanceOf(OnrampUpdateKycInfoResult.Completed::class.java)
+        val completed = result as OnrampUpdateKycInfoResult.Completed
         assertThat(completed.result).isEqualTo(submissionResult)
         testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.EuIdentifiersSubmitted)
     }

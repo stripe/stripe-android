@@ -20,9 +20,9 @@ import com.stripe.android.crypto.onramp.model.CryptoCustomerRequestParams
 import com.stripe.android.crypto.onramp.model.CryptoCustomerResponse
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.CryptoWalletRequestParams
-import com.stripe.android.crypto.onramp.model.EuIdentifiers
 import com.stripe.android.crypto.onramp.model.GetOnrampSessionResponse
 import com.stripe.android.crypto.onramp.model.GetPlatformSettingsResponse
+import com.stripe.android.crypto.onramp.model.Identifiers
 import com.stripe.android.crypto.onramp.model.IdentifierRequirements
 import com.stripe.android.crypto.onramp.model.IdentifierRequirementsResponse
 import com.stripe.android.crypto.onramp.model.KycCollectionRequest
@@ -32,8 +32,8 @@ import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationRequest
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationResponse
-import com.stripe.android.crypto.onramp.model.SubmitEuIdentifiersResponse
-import com.stripe.android.crypto.onramp.model.SubmitEuIdentifiersResult
+import com.stripe.android.crypto.onramp.model.UpdateKycInfoResponse
+import com.stripe.android.crypto.onramp.model.UpdateKycInfoResult
 import com.stripe.android.crypto.onramp.model.toRequest
 import com.stripe.android.link.LinkController
 import com.stripe.android.link.utils.isLinkAuthorizationError
@@ -143,12 +143,12 @@ internal class CryptoApiRepository @Inject constructor(
         ).map { it.toIdentifierRequirements() }
     }
 
-    suspend fun collectEuIdentifiers(
-        identifiers: EuIdentifiers,
+    suspend fun updateKycInfo(
+        identifiers: Identifiers,
         consumerSessionClientSecret: String
-    ): Result<SubmitEuIdentifiersResult> {
+    ): Result<UpdateKycInfoResult> {
         return executePost(
-            euIdentifiersUrl,
+            updateKycInfoUrl,
             JsonObject(
                 Json.encodeToJsonElement(
                     identifiers.toRequest(
@@ -156,8 +156,8 @@ internal class CryptoApiRepository @Inject constructor(
                     )
                 ).jsonObject.filterValues { it != JsonNull }
             ),
-            SubmitEuIdentifiersResponse.serializer()
-        ).map { it.toSubmitEuIdentifiersResult() }
+            UpdateKycInfoResponse.serializer()
+        ).map { it.toUpdateKycInfoResult() }
     }
 
     suspend fun retrieveCrsCarfDeclaration(
@@ -399,7 +399,7 @@ internal class CryptoApiRepository @Inject constructor(
         /**
          * @return `https://api.stripe.com/v1/crypto/internal/eu_identifiers`
          */
-        internal val euIdentifiersUrl: String
+        internal val updateKycInfoUrl: String
             get() = getApiUrl("crypto/internal/eu_identifiers")
 
         /**

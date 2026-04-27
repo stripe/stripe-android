@@ -6,12 +6,11 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.crypto.onramp.di.OnrampComponentHolder
 import com.stripe.android.crypto.onramp.di.OnrampPresenterComponent
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
-import com.stripe.android.crypto.onramp.model.EuIdentifiers
+import com.stripe.android.crypto.onramp.model.Identifiers
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
-import com.stripe.android.crypto.onramp.model.OnrampCollectEuIdentifiersResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
@@ -21,6 +20,7 @@ import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampTokenAuthenticationResult
+import com.stripe.android.crypto.onramp.model.OnrampUpdateKycInfoResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodSelection
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -124,15 +124,15 @@ class OnrampCoordinator @Inject internal constructor(
     }
 
     /**
-     * Submits EU identifiers for the current Link user.
+     * Updates KYC info for the current Link user.
      * Requires an authenticated Link user.
      *
-     * @param identifiers The EU identifier payload to submit.
+     * @param identifiers The identifier payload to submit.
      */
-    suspend fun collectEuIdentifiers(
-        identifiers: EuIdentifiers
-    ): OnrampCollectEuIdentifiersResult {
-        return interactor.collectEuIdentifiers(identifiers)
+    suspend fun updateKycInfo(
+        identifiers: Identifiers
+    ): OnrampUpdateKycInfoResult {
+        return interactor.updateKycInfo(identifiers)
     }
 
     /**
