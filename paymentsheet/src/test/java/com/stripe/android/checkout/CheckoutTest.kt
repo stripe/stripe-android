@@ -854,6 +854,40 @@ class CheckoutTest {
     }
 
     @Test
+    fun `updateCurrency updates checkoutSession on success`() = runCreateWithStateScenario {
+        networkRule.checkoutUpdate(
+            bodyPart("updated_currency", "eur"),
+            bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-apply-discount.json")
+        }
+
+        assertThat(checkoutSessionTurbine.awaitItem().totalSummary).isNull()
+
+        val result = checkout.updateCurrency("eur")
+
+        val updated = checkoutSessionTurbine.awaitItem()
+        result.getOrThrow()
+        assertThat(updated.totalSummary).isNotNull()
+    }
+
+    @Test
+    fun `updateCurrency returns failure on error response`() = runCreateWithStateScenario {
+        networkRule.checkoutUpdate { response ->
+            response.setResponseCode(400)
+            response.setBody("""{"error": {"message": "Invalid currency"}}""")
+        }
+
+        val initial = checkoutSessionTurbine.awaitItem()
+
+        val result = checkout.updateCurrency("invalid")
+        assertThat(result.isFailure).isTrue()
+
+        checkoutSessionTurbine.expectNoEvents()
+        assertThat(checkout.checkoutSession.value).isEqualTo(initial)
+    }
+
+    @Test
     fun `configure sends adaptive_pricing allowed false by default`() = runConfigureScenario(
         clientSecret = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example",
         networkSetup = {
